@@ -358,14 +358,17 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Actualiza esta sección al inicio de cada sesión en el Project.
-
-```
 Fase actual: 2 — Solver MVP: problema mínimo
 Última fase completada: 1 — Modelo de datos validado en papel
-Última sesión registrada: 8 — Validación contra 1ºESO A del PDF y
-                              cierre del modelo
-```
+Última sesión registrada: 9 — Fase 2 Bloques 1 y 2 completados
+
+### Bloques de Fase 2
+- [x] Bloque 1 — Setup del repositorio
+- [x] Bloque 2 — POJOs del dominio
+- [ ] Bloque 3 — Schema JSON + DTOs + mapper
+- [ ] Bloque 4 — Construcción del modelo CP-SAT
+- [ ] Bloque 5 — Output a consola
+- [ ] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
 
 ### Fases completadas
 
