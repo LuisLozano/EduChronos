@@ -1,0 +1,29 @@
+# Maven
+target/
+*.versionsBackup
+dependency-reduced-pom.xml
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentacion extra
+docs_extra
