@@ -111,7 +111,7 @@ Programa ejecutable por consola que:
 ### Señal de que está mal
 El solver tarda más de 5 minutos o viola restricciones duras en la solución final.
 
-### Decisiones tácticas (Sesión 6, actualizadas en Sesión 7)
+### Decisiones tácticas
 
 Decisiones de alcance local a esta fase. Se levantan o promocionan a permanentes
 en fases posteriores según el plan:
@@ -141,6 +141,34 @@ en fases posteriores según el plan:
   (6) dataset real 1ºESO ordinarias + co-docencia LCL + verificación
   contra los PDFs.
 
+- **POJOs del dominio — identidad:** el módulo `solver` no usa `id`
+  sintético. Cada entidad tiene un campo `String codigo` como clave
+  natural (ej. "MAT8", "A12In", "1ºA"). Sin `long id`, sin `UUID`.
+
+- **POJOs del dominio — inmutabilidad:** entidades de configuración
+  (Profesor, Aula, GrupoAdministrativo, Asignatura, Tramo, Subgrupo,
+  Plaza, Actividad) se implementan como `record`. Las estructuras que
+  portan variables CP-SAT (ActividadInstancia, PlazaAsignacion) se
+  implementan como clases normales con constructor explícito.
+
+- **POJOs del dominio — grafo de referencias:** referencias directas
+  entre objetos. La resolución de códigos ocurre una sola vez en el
+  mapper (Bloque 3). El modelo CP-SAT trabaja con referencias Java,
+  no con códigos String.
+
+- **POJOs del dominio — enums vs Strings:** enums donde el solver
+  hace comparaciones o switch (PatronTemporal, EstadoHorario). String
+  donde el valor solo se imprime (nombres legibles, etiquetas UI).
+
+- **POJOs del dominio — agregado raíz:** no existe `Centro` en el
+  módulo `solver`. El solver recibe un `ProblemaHorario` (colecciones
+  de entrada) y devuelve un `SolucionHorario`. La entidad `Centro`
+  aparecerá en la capa JPA del módulo `app` en Fase 6.
+
+- **POJOs del dominio — paquetes:** `domain/` (POJOs puros),
+  `cpsat/` (modelo CP-SAT), `io/` (DTOs + mapper), `cli/` (entrada).
+  Dependencias unidireccionales: cpsat e io dependen de domain;
+  domain no importa nada de cpsat ni de io.
 ---
 
 ## FASE 3 — Solver: desdobles y agrupamientos
