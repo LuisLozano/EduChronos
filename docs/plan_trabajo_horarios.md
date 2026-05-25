@@ -365,7 +365,7 @@ Fase actual: 2 — Solver MVP: problema mínimo
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
 - [x] Bloque 2 — POJOs del dominio
-- [ ] Bloque 3 — Schema JSON + DTOs + mapper
+- [x] Bloque 3 — Schema JSON + DTOs + mapper
 - [ ] Bloque 4 — Construcción del modelo CP-SAT
 - [ ] Bloque 5 — Output a consola
 - [ ] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
@@ -501,6 +501,10 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 | Distancia entre aulas | Fórmula sobre (edificio, planta, sector) + excepciones |
 | Distribución temporal | Campo `patron_temporal` en Actividad (DISTRIBUIDA/AGRUPADA/NEUTRA) |
 
+- Separación loader/mapper: Jackson queda aislado en ProblemaHorarioJsonLoader; el ProblemaHorarioMapper es puro y testeable sin I/O.
+- Reparto de validación en la carga: los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas y los rangos. El mapper posee en exclusiva: integridad referencial por código, códigos duplicados, I2 y la política "aulasCandidatas rechazado hasta Fase 3".
+- I1, I3 e I6 no se validan en la carga del JSON del solver (el JSON no transporta particiones). Se validan en la capa de configuración (Fase 6/8). Corrige el alcance de la decisión de Sesión 6, que las incluía antes de existir el dominio reducido.
+
 ### Deuda consciente registrada en Fase 1
 
 Las siguientes simplificaciones de Fase 1 se aceptan conscientemente y pueden
@@ -541,6 +545,18 @@ descripción completa.
   plaza, varios profesores, un aula, mismos subgrupos), y
   desdoble/agrupamiento (varias plazas, profesores y aulas distintos,
   subgrupos disjuntos). No afecta al modelo de datos
+- **D11. Restricciones y preferencias horarias del profesorado: fase de
+  implementación no asignada.**
+  El modelo de Fase 1 prevé `ProfesorRestriccionHoraria` (tipo DURA/BLANDA
+  \+ peso) y decidió no modelar preferencias positivas en Fase 1. El roadmap
+  de fases del solver (2-5) no asigna explícitamente cuándo el solver
+  empieza a consumir estas restricciones. Asignación tentativa: Fase 5
+  (instituto completo), porque es la primera fase con claustro real y por
+  tanto con indisponibilidades reales que validar. Antes de Fase 5 los
+  datasets son subconjuntos de prueba sin indisponibilidades. Confirmar
+  esta asignación al planificar Fase 5 en detalle.
+- **Frontera Fase 2→3 en Subgrupo:** el dominio reducido modela Subgrupo con un único grupo. La Fase 3 (agrupamientos transversales inter-grupo, Tipo 3) exigirá Subgrupo multi-grupo, alineándose con el SubgrupoGrupo del modelo completo. No es deuda nueva: es la capa que la Fase 3 añade por diseño.
+
 
 ### Notas técnicas validadas en Fase 0
 
@@ -587,6 +603,11 @@ sido analizados. Hallazgos relevantes para el modelo de datos:
   poblaciones distintas. Discriminador operativo: número de aulas
   listadas en la celda del horario. Una sola aula con varios profesores
   ⇒ co-docencia; varias aulas ⇒ desdoble/agrupamiento (Hallazgo J)
+
+### Sesión 10 — Fase 2, Bloque 3 completado.
+
+Carga del ProblemaHorario desde JSON. Entregado: schema JSON de contrato (problema-horario.schema.json, draft 2020-12, no validado en runtime), 9 DTOs en es.yaroki.educhronos.solver.io, ProblemaInvalidoException, ProblemaHorarioMapper (DTO→dominio, dos pasadas, resolución de referencias por código de negocio, verificado contra los 13 POJOs reales), ProblemaHorarioJsonLoader (única clase con dependencia Jackson), fixture problema-minimo.json (3 ordinarias + 1 co-docencia LCL) y ProblemaHorarioJsonLoaderTest (1 caso válido + 5 negativos). Dependencia añadida: Jackson 2.21.3 en el módulo solver. Integrados SonarQube (sonar-maven-plugin 5.6.0.6792) y JaCoCo (0.8.14) en el parent pom.
+
 
 ---
 
