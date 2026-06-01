@@ -10,6 +10,7 @@ import com.google.ortools.util.Domain;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.Aula;
+import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
@@ -68,6 +69,7 @@ final class ModeloCpSat {
         restriccionNoSolapeProfesor();
         restriccionNoSolapeAula();
         restriccionNoSolapeSubgrupo();
+        restriccionNoSolapeGrupo(); // Fase 3
         restriccionDistribucionPorDia();
         return this;
     }
@@ -133,6 +135,55 @@ final class ModeloCpSat {
                 model.addNoOverlap(intervalos.toArray(new IntervalVar[0]));
             }
         }
+    }
+
+    /**
+     * Traslada la invariante I1 al solver: dos sesiones que toquen al mismo
+     * {@link GrupoAdministrativo} no pueden caer en el mismo tramo. El JSON del
+     * solver no transporta particiones, asi que I1 no se puede validar en la
+     * carga; se impone aqui, sobre el grupo de cada subgrupo.
+     *
+     * <p>Igual que las otras tres, el intervalo de la instancia se anade una
+     * sola vez por grupo: una actividad cuyas plazas cubren los cuatro grupos
+     * de 1ESO (bloque CyR/OyD/RefMt) aporta UN intervalo a la lista de cada uno
+     * de los cuatro grupos, sin pedir que se no-solape consigo misma. Lo que
+     * queda prohibido es que OTRA actividad que toque ese grupo caiga en el
+     * mismo tramo.
+     *
+     * <p>Es CIEGA al {@code grupoPadre}: agrupa por la identidad del grupo del
+     * subgrupo, no por su padre. En Fase 4, un PDC (3ºADi) y su grupo padre
+     * (3ºA) son grupos independientes para esta restriccion; sus sesiones
+     * compartidas se modelan con una plaza que lista subgrupos de ambos, y sus
+     * sesiones propias quedan libres.
+     */
+    private void restriccionNoSolapeGrupo() {
+        for (GrupoAdministrativo grupo : problema.grupos()) {
+            List<IntervalVar> intervalos = new ArrayList<>();
+            for (InstanciaProgramada ip : instancias) {
+                if (tocaGrupo(ip, grupo)) {
+                    intervalos.add(ip.intervalo());
+                }
+            }
+            if (intervalos.size() >= 2) {
+                model.addNoOverlap(intervalos.toArray(new IntervalVar[0]));
+            }
+        }
+    }
+
+    /**
+     * Una instancia "toca" un grupo si alguna plaza de su actividad tiene un
+     * subgrupo cuyo grupo es ese (por identidad, no por padre). El intervalo se
+     * cuenta una sola vez por grupo aunque varias plazas o subgrupos coincidan.
+     */
+    private boolean tocaGrupo(InstanciaProgramada ip, GrupoAdministrativo grupo) {
+        for (Plaza plaza : ip.instancia().actividad().plazas()) {
+            for (Subgrupo sg : plaza.subgrupos()) {
+                if (sg.grupo().equals(grupo)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
