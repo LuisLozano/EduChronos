@@ -96,14 +96,14 @@ Programa ejecutable por consola que:
 4. Imprime las restricciones violadas (debe ser 0 duras)
 
 ### Criterios de verificación
-- [ ] Ningún profesor aparece en dos sitios a la vez
-- [ ] Ninguna aula tiene dos sesiones simultáneas
-- [ ] Ningún grupo tiene dos sesiones en el mismo tramo
-- [ ] El recreo (11:00-11:30) está vacío
-- [ ] El solver termina en menos de 2 minutos
-- [ ] Las sesiones de cada asignatura están distribuidas a lo largo 
+- [x] Ningún profesor aparece en dos sitios a la vez
+- [x] Ninguna aula tiene dos sesiones simultáneas
+- [x] Ningún grupo tiene dos sesiones en el mismo tramo
+- [x] El recreo (11:00-11:30) está vacío
+- [x] El solver termina en menos de 2 minutos
+- [x] Las sesiones de cada asignatura están distribuidas a lo largo
       de la semana (no dos Matemáticas el mismo día)
-- [ ] En las sesiones de LCL de 1ºESO, ambos profesores de la plaza
+- [x] En las sesiones de LCL de 1ºESO, ambos profesores de la plaza
       aparecen en sus respectivos horarios por profesor en el mismo
       tramo, y ninguno tiene conflicto con otra sesión en ese tramo
       (validación del soporte de co-docencia desde el MVP)
@@ -147,9 +147,15 @@ en fases posteriores según el plan:
 
 - **POJOs del dominio — inmutabilidad:** entidades de configuración
   (Profesor, Aula, GrupoAdministrativo, Asignatura, Tramo, Subgrupo,
-  Plaza, Actividad) se implementan como `record`. Las estructuras que
-  portan variables CP-SAT (ActividadInstancia, PlazaAsignacion) se
-  implementan como clases normales con constructor explícito.
+  Plaza, Actividad) se implementan como `record`. ActividadInstancia
+  también es un `record` puro de domain: solo (Actividad, indice), sin
+  variables CP-SAT. Las variables CP-SAT (IntVar de tramo, IntervalVar)
+  NO viven en domain: las porta una clase propia del paquete `cpsat`
+  que envuelve una ActividadInstancia. Así domain permanece libre de
+  OR-Tools (decisión permanente). Corregido en Sesión 11: la redacción
+  anterior atribuía variables CP-SAT a ActividadInstancia (y mencionaba
+  una clase PlazaAsignacion sin correlato en los POJOs reales), lo que
+  contradecía la decisión de aislar OR-Tools en `cpsat`.
 
 - **POJOs del dominio — grafo de referencias:** referencias directas
   entre objetos. La resolución de códigos ocurre una sola vez en el
@@ -169,6 +175,56 @@ en fases posteriores según el plan:
   `cpsat/` (modelo CP-SAT), `io/` (DTOs + mapper), `cli/` (entrada).
   Dependencias unidireccionales: cpsat e io dependen de domain;
   domain no importa nada de cpsat ni de io.
+
+- **Distribución temporal en Fase 2 (restricción dura, no blanda):** el
+  criterio de verificación "sesiones de una asignatura distribuidas a lo
+  largo de la semana" se modela como restricción DURA (AllDifferent sobre
+  el día de las ActividadInstancia de la misma Actividad), aplicada solo a
+  actividades con patronTemporal=DISTRIBUIDA y con guarda
+  repeticionesPorSemana ≤ nº de días distintos. En el enunciado original
+  es blanda; se promueve a dura en Fase 2 para mantener factibilidad pura
+  sin función objetivo. Decidido en Sesión 11.
+
+### Criterios de verificación por bloque
+
+Criterios operativos de cierre de cada bloque interno de Fase 2.
+Complementan, no sustituyen, los criterios de verificación de la fase.
+Los Bloques 1-3 se cerraron antes de existir este apartado.
+
+**Bloque 4 — Construcción del modelo CP-SAT**
+- [x] El modelo CP-SAT se construye desde un ProblemaHorario sin excepción
+- [x] El paquete `domain` no importa nada de OR-Tools; el acoplamiento a
+      CP-SAT está aislado en el paquete `cpsat`
+- [x] El test carga problema-solver-minimo.json, resuelve y obtiene estado
+      FEASIBLE u OPTIMAL
+- [x] La verificación independiente de la solución (VerificadorSolucion)
+      confirma 0 solapes de profesor, 0 de aula y 0 de subgrupo
+- [x] Toda ActividadInstancia queda colocada en exactamente un Tramo
+- [x] En la co-docencia LCL, ambos profesores de la plaza aparecen
+      ocupados en el mismo tramo (el no-solape de profesor cuenta a
+      TODOS los profesores de la plaza, no solo a uno)
+
+**Bloque 5 — Output a consola**
+- [x] El programa imprime el horario resuelto de forma legible
+- [x] Imprime el recuento de restricciones duras violadas, que debe ser 0
+- [x] La comprobación de violaciones reutiliza VerificadorSolucion (misma
+      lógica que el test del Bloque 4, no una segunda implementación)
+
+**Bloque 6 — Dataset real 1ºESO + verificación contra los PDFs**
+- [x] El dataset de 1ºESO transcribe fielmente los hechos ESTRUCTURALES
+      del PDF: qué actividades, co-docencias, profesores, aulas y
+      repeticiones por semana
+- [x] La SALIDA del solver se verifica contra las restricciones duras del
+      checklist de Fase 2, NO contra la colocación celda a celda del PDF
+- [x] Se cumplen todos los criterios de verificación de Fase 2
+
+Nota sobre el Bloque 6: el solver de Fase 2 es de factibilidad pura, sin
+función objetivo. Devuelve UNA de las muchas soluciones factibles. El
+horario del PDF es un punto concreto que un humano eligió equilibrando
+preferencias blandas implícitas; no es la salida esperada del solver.
+Exigir reproducción celda a celda sería un malentendido del alcance.
+El PDF es la fuente del dataset de entrada y de la verdad estructural,
+no la salida de referencia. Decidido en Sesión 11.
 ---
 
 ## FASE 3 — Solver: desdobles y agrupamientos
@@ -358,17 +414,17 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 2 — Solver MVP: problema mínimo
-Última fase completada: 1 — Modelo de datos validado en papel
-Última sesión registrada: 9 — Fase 2 Bloques 1 y 2 completados
+Fase actual: 3 — Solver: desdobles y agrupamientos
+Última fase completada: 2 — Solver MVP: problema mínimo
+Última sesión registrada: Sesión 13 — Fase 2 cerrada (Bloque 6 completado).
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
 - [x] Bloque 2 — POJOs del dominio
 - [x] Bloque 3 — Schema JSON + DTOs + mapper
-- [ ] Bloque 4 — Construcción del modelo CP-SAT
-- [ ] Bloque 5 — Output a consola
-- [ ] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
+- [x] Bloque 4 — Construcción del modelo CP-SAT
+- [x] Bloque 5 — Output a consola
+- [x] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
 
 ### Fases completadas
 
@@ -424,6 +480,23 @@ Hallazgos posteriores al cierre inicial, registrados en el modelo:
   había tal partición; el grupo no se divide). LCL en 1ºA queda en
   4 sesiones de co-docencia, total semanal sigue siendo 30. Nueva
   deuda D10 (UX Fase 8).
+
+**Fase 2 — Solver MVP: problema mínimo** (cerrada en Sesión 13).
+Solver CP-SAT en producción para 4 grupos de 1ºESO con sesiones
+ordinarias + co-docencia LCL. Los 7 criterios de verificación se cumplen
+mecánicamente sobre el dataset real, comprobados por
+`SolverHorario1EsoOrdinariasTest` (factibilidad + 0 violaciones de
+restricciones duras) y `Main1EsoOrdinariasTest` (end-to-end con código
+OK). Co-docencia (M:N `Plaza↔Profesor`) soportada desde el MVP, no
+añadida después. Distribución temporal modelada como restricción dura
+(`AllDifferent` por día sobre actividades DISTRIBUIDA), promovida de
+blanda a dura para mantener factibilidad pura sin función objetivo.
+`VerificadorSolucion` es la fuente única de verdad para violaciones,
+reutilizado por tests del solver y por el `Main`. Estructura:
+módulo `solver/` con paquetes `domain` (records puros, sin OR-Tools),
+`cpsat` (OR-Tools aislado), `io` (loader Jackson + mapper) y `cli`
+(`Main`). Sesiones: 6–8 (replanteo del dominio y Hallazgo J), 9
+(sub-plan táctico de la fase), 10–13 (Bloques 3–6, uno por sesión).
 
 ### Cierre del modelo — Sesión 8
 
@@ -523,18 +596,33 @@ descripción completa.
 - **D7**: UX de subgrupos compartidos entre particiones → Fase 6 (persistencia)
   y Fase 8 (UI). El modelo permite que un subgrupo aparezca en varias
   particiones; la capa de aplicación debe gestionar la edición coherente
-- **D8**: Aulas implícitas e inconsistencias entre horarios de origen → 
-  Fase 6 / utilidad de importación. Tres problemas operativos: (1) el 
-  importador no puede asumir que el horario por grupo contenga el aula 
-  en todas las celdas (se omite cuando el profesor es titular del 
-  grupo); (2) el horario por aula no contiene los talleres físicos de 
-  FPB; (3) detectado en Sesión 8: inconsistencia profesor↔plaza entre 
-  los dos PDFs — EF mié 9:00 aparece como EFI2 en el horario del 
-  grupo 1ºA y como EFI3 en el horario del aula Gim. El importador 
-  debe cruzar los dos listados y reportar inconsistencias al usuario 
-  para conciliación manual. Tampoco puede confiar en la tipificación 
-  declarada (TALL3 figura como "Taller FPB" pero su uso real es aula 
-  teórica de CS). Carga manual de revisión obligatoria
+- **D8**: Aulas implícitas e inconsistencias entre horarios de origen →
+  Fase 6 / utilidad de importación. Cuatro problemas operativos:
+  (1) el importador no puede asumir que el horario por grupo contenga
+  el aula en todas las celdas (se omite cuando el profesor es titular
+  del grupo);
+  (2) el horario por aula no contiene los talleres físicos de FPB;
+  (3) el horario por aula omite sistemáticamente al segundo (y
+  sucesivos) profesores en celdas de co-docencia intra-aula —
+  verificado en Sesión 13 sobre las 16 celdas de LCL de 1ºESO: el
+  horario por grupos lista la pareja LEN2+LEN8 / LEN3+LEN9 / LEN6+LEN9
+  / LEN3+LEN6 en cada celda, mientras que el horario por aulas
+  A5/A11/A3/A14 lista solo el primer profesor; es patrón de
+  presentación del PDF por aulas, no dato erróneo, pero el importador
+  debe conciliarlo porque la información completa de profesores por
+  celda solo está en el horario por grupos;
+  (4) inconsistencias profesor↔plaza entre los dos PDFs: en Sesión 8
+  se registró que EF mié 9:00 aparecía como EFI2 en el horario del
+  grupo 1ºA y como EFI3 en el horario del aula Gim; la verificación
+  de Sesión 13 sobre los PDFs actuales del proyecto NO reproduce esa
+  inconsistencia concreta (las 12 sesiones de EF de 1ºESO salen EFI2
+  en ambos listados). La política de cruce sigue siendo necesaria
+  porque este tipo de error es posible y no detectable sin información
+  del centro. El importador debe cruzar los dos listados y reportar
+  inconsistencias al usuario para conciliación manual. Tampoco puede
+  confiar en la tipificación declarada (TALL3 figura como "Taller
+  FPB" pero su uso real es aula teórica de CS). Carga manual de
+  revisión obligatoria
 - **D9**: Pares de sesiones cruzando el recreo → Fase 5 (instituto completo).
   Si el solver no reproduce naturalmente el patrón (CS de 1ºFPB en
   10–11 + 11:30–12:30), se evaluará restricción blanda "simetría
@@ -556,7 +644,15 @@ descripción completa.
   datasets son subconjuntos de prueba sin indisponibilidades. Confirmar
   esta asignación al planificar Fase 5 en detalle.
 - **Frontera Fase 2→3 en Subgrupo:** el dominio reducido modela Subgrupo con un único grupo. La Fase 3 (agrupamientos transversales inter-grupo, Tipo 3) exigirá Subgrupo multi-grupo, alineándose con el SubgrupoGrupo del modelo completo. No es deuda nueva: es la capa que la Fase 3 añade por diseño.
-
+- **D12**: AllDifferent de distribución por día es infactible si una
+  actividad tiene repeticionesPorSemana > nº de días (palomar). En Fase 2
+  ninguna asignatura de 1ºESO llega a 6, y la restricción lleva guarda.
+  Fase 5 (FPB, frecuencias altas): revisar si procede relajar a blanda.
+- **D13**: el IntVar de tramo usa índice plano [0, |tramos|). Con
+  duracionTramos > 1, un IntervalVar podría cruzar la frontera entre el
+  último tramo de un día y el primero del siguiente. En Fase 2 toda
+  duración es 1, no aplica. Fase 5 (bloques de 2-3 tramos de FPB): el
+  modelo de intervalos debe impedir el cruce de día.
 
 ### Notas técnicas validadas en Fase 0
 
@@ -608,6 +704,109 @@ sido analizados. Hallazgos relevantes para el modelo de datos:
 
 Carga del ProblemaHorario desde JSON. Entregado: schema JSON de contrato (problema-horario.schema.json, draft 2020-12, no validado en runtime), 9 DTOs en es.yaroki.educhronos.solver.io, ProblemaInvalidoException, ProblemaHorarioMapper (DTO→dominio, dos pasadas, resolución de referencias por código de negocio, verificado contra los 13 POJOs reales), ProblemaHorarioJsonLoader (única clase con dependencia Jackson), fixture problema-minimo.json (3 ordinarias + 1 co-docencia LCL) y ProblemaHorarioJsonLoaderTest (1 caso válido + 5 negativos). Dependencia añadida: Jackson 2.21.3 en el módulo solver. Integrados SonarQube (sonar-maven-plugin 5.6.0.6792) y JaCoCo (0.8.14) en el parent pom.
 
+### Sesión 11 — Fase 2, Bloque 4 completado.
+
+Construcción del modelo CP-SAT. Entregado el paquete es.yaroki.educhronos.solver.cpsat: InstanciaProgramada (envuelve ActividadInstancia + IntVar de tramo + IntervalVar), Expansion (Actividad→instancias, compartida por modelo y verificador), ModeloCpSat, SolverHorario (fachada pública, carga de nativos en bloque estático), HorarioInfactibleException, ResultadoVerificacion, VerificadorSolucion y SolverHorarioTest (4 tests, JUnit5+AssertJ). Restricciones duras de Fase 2 implementadas: tres addNoOverlap (profesor, aula, subgrupo) y distribución por día para actividades DISTRIBUIDA. La distribución se modela SIN addElement: un BoolVar enDia por (instancia, día) reificado iff con addLinearExpressionInDomain sobre Domain.fromValues, más addAtMostOne por (actividad, día) — elegido por robustez frente a la versión de OR-Tools. VerificadorSolucion es verificación independiente del solver, sin dependencia de OR-Tools, reutilizable en el Bloque 5. Fixture de resolución problema-solver-minimo.json: sintético, 12 tramos / 3 días, 2 subgrupos, diseñado para ejercitar las cuatro restricciones de forma independiente (MAT8 y A5 compartidos entre dos subgrupos; LEN2 compartido entre la co-docencia LCL-1A y Ref-1B). El fixture del Bloque 3 (problema-minimo.json) es infactible como entrada de solver y se conserva solo para el test del loader. Dependencias añadidas al módulo solver: ortools-java 9.11.4210 y assertj-core. Notas técnicas: confirmada la firma newFixedSizeIntervalVar(LinearArgument, long, String) en ortools-java 9.11.4210 (resuelve una incertidumbre que se había flagueado). VerificadorSolucion vive en el paquete cpsat por simplicidad; candidato a paquete propio verificacion en Fase 5, ya que no arrastra dependencias de OR-Tools.
+
+### Sesión 12 — Fase 2, Bloque 5 completado.
+
+Output a consola. Entregado el paquete es.yaroki.educhronos.solver.cli:
+Main (entrada con args[]→ejecutar(args,out,err) para testabilidad), CodigoSalida
+(enum OK=0, INFACTIBLE=1, ENTRADA_INVALIDA=2, VIOLACIONES_DURAS=3),
+SesionMaterializada (record interno de presentación: tramo + instancia + plaza),
+Materializador (aplanado SolucionHorario → List<SesionMaterializada>,
+N-correcto sobre plazas por actividad desde Fase 2 aunque solo se ejercite N=1),
+VistaHorario<K> (interfaz genérica de vista), VistaPorGrupo, VistaPorProfesor,
+FormatoCelda ("Asignatura·Profesores·Aula" con '+' separando profesores en
+co-docencia), HorarioPrinter (plantilla genérica sub-tabla 6×5 con anchos
+dinámicos), VerificacionPrinter (contador + lista plana de violaciones),
+y MainTest (6 tests JUnit5+AssertJ: args inválidos, fichero inexistente,
+fixture mínimo end-to-end, presencia de cabeceras y códigos clave).
+
+Decisiones del bloque:
+- Output siempre con dos vistas (grupo + profesor). Vista por aula descartada
+  para el MVP; la plantilla VistaHorario<K> la soporta sin cambios cuando entre.
+- Vista por grupo agrupada por GrupoAdministrativo (no por Subgrupo).
+- Argumento posicional único: `java -jar solver.jar <ruta-al-problema.json>`.
+  Sin librería CLI (picocli, etc.) hasta que haya 3-4 flags reales.
+- Códigos de salida 0/1/2/3 con semántica fija. 3 es defensivo: solver
+  FEASIBLE + violaciones del verificador = bug del modelo CP-SAT.
+- Recreo no se imprime: Tramo solo lleva ordenEnDia 1..6 sin hora real;
+  insertar columna "RECREO" entre T3 y T4 sería conocimiento del centro de
+  referencia. La cabecera muestra T1..T6 y el usuario reconoce la jornada.
+- Formato de celda con '·' (U+00B7) y PrintStream UTF-8 explícito.
+- Separadores de tabla en ASCII puro ('|', '-', '+') para portabilidad.
+- No fat-jar en Fase 2: ejecución vía `mvn exec:java` o classpath manual.
+  El maven-shade-plugin entrará en Fase 11 (empaquetado Windows).
+
+API del loader confirmada en esta sesión: ProblemaHorarioJsonLoader.cargar(InputStream),
+no Path. Main abre el InputStream con try-with-resources sobre Files.newInputStream.
+
+Tres warnings de build del Bloque 4 limpiados de paso: assertj-core duplicado
+en el pom del módulo solver y maven-jar-plugin sin versión.
+
+### Sesión 13 — Fase 2 cerrada. Bloque 6 completado.
+
+Cierre del Bloque 6 con el dataset real de 1ºESO ordinarias + co-docencia
+LCL de los 4 grupos (A, B, C, D). Con esto se cierran los 7 criterios de
+verificación de Fase 2 y los 3 criterios del Bloque 6.
+
+Entregado:
+
+- `solver/src/test/resources/fixtures/problema-1eso-ordinarias.json`:
+  fixture conforme al schema (validado), 4 grupos, 4 subgrupos
+  `*-Completo`, 16 profesores, 5 aulas, 9 asignaturas, 30 tramos,
+  36 actividades, 100 actividad-instancias semanales. Holgura por grupo:
+  5 huecos. Profesor más cargado: MAT8 con 17.
+- `SolverHorario1EsoOrdinariasTest` (paquete `cpsat`): carga el fixture,
+  resuelve y reutiliza `VerificadorSolucion` para afirmar 0 violaciones
+  de las cuatro restricciones duras. `@Timeout(60 s)`; pasa muy por
+  debajo del límite.
+- `Main1EsoOrdinariasTest` (paquete `cli`): ejecuta `Main.ejecutar`
+  end-to-end y verifica código de salida OK=0, marcador "Violaciones"
+  en stdout y stderr vacío. `@Timeout(60 s)`.
+
+Diseño del dataset:
+
+- Regla de filtrado aplicada: una sola aula por celda del horario del
+  grupo y todos los profesores cubriendo el grupo completo (Hallazgo J).
+  Quedan fuera desdobles (CyR), agrupamientos transversales
+  (RefMt, Fr2/ALCT, OyD) y Religión multi-grupo + ATED.
+- Inventario revisado en sesión cruzada de Claude Opus 4.7 sin contexto
+  previo para neutralizar el sesgo de continuación. Veredicto "apto con
+  correcciones puntuales" aplicado: `duracionTramos=1` explícito en las
+  36 actividades; `requiereTutor` no se emite (no existe en el schema
+  actual; la intención queda registrada en el modelo de datos).
+
+Cambios documentales aplicados antes de la transcripción del dataset:
+
+- `plan_trabajo_horarios.md`: D8 ampliada con cuatro puntos operativos,
+  añadiendo la omisión sistemática de co-profesores en el horario por
+  aulas (verificado en 16 celdas de LCL de 1ºESO) y la reverificación
+  de la inconsistencia EFI2/EFI3 (no se reproduce en los PDFs actuales
+  del proyecto; las 12 sesiones de EF de 1ºESO salen EFI2 en ambos
+  listados).
+- `modelo_datos_fase1.md` §8: D8 sincronizada con la versión del plan.
+- `modelo_datos_fase1.md` §2: nuevo Hallazgo K — bloques de asignaturas
+  alternativas intra-grupo no son siempre transversales. Tres patrones
+  conviven en 1ºESO: CyR/OyD/RefMt transversal sobre N grupos,
+  Religión/ATED transversal por parejas, Fr2/ALCT per-grupo.
+- `modelo_datos_fase1.md` §6.1: reescritura del bloque Fr2/ALCT como
+  cuatro actividades independientes per-grupo con sus cuatro particiones
+  correspondientes.
+
+Trabajo lateral identificado, sin impacto en Fase 2 y pendiente para Fase 3:
+
+- Modelo §6.1 Religión/ATED de 1ºA está descrito como per-grupo, pero los
+  PDFs muestran transversalidad por parejas con Religión multi-grupo
+  (A+B en A5 jueves 12:30; C+D en A3 martes 13:30). Corrección pendiente
+  cuando se aborde Religión multi-grupo en Fase 3.
+
+Aclaración documental aplicada en línea: el schema
+`problema-horario.schema.json` sí estaba en el repo desde Sesión 10
+(entrega correcta del Bloque 3). El intercambio inicial de esta sesión
+dio lugar a una propuesta errónea de retirar la mención en el plan; se
+retractó al confirmar la existencia del fichero.
 
 ---
 

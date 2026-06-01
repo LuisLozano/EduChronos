@@ -224,6 +224,43 @@ con `repeticiones=4`, una sola plaza con `profesores={LEN2, LEN8}`,
 no se divide). El total semanal de 1ºA sigue siendo 30 sesiones.
 Se registra deuda **D10** para la UX de configuración en Fase 8.
 
+### Hallazgo K — Bloques de asignaturas alternativas intra-grupo no siempre son transversales
+
+Validación contra los horarios de 1ºESO A/B/C/D del PDF (Sesión 13).
+La versión inicial de §6.1 presentaba el bloque Fr2/ALCT como una única
+actividad transversal con dos plazas cubriendo a los cuatro grupos
+mediante subgrupos cruzados, paralela al bloque CyR/OyD/RefMt. La
+verificación contra los datos reales muestra que **no es ese el patrón
+en el centro de referencia**: Fr2/ALCT se organiza como cuatro
+actividades independientes, una por grupo, con dos repeticiones
+semanales cada una, en tramos que no coinciden entre grupos. El
+profesor de Fr2 (FRA1) es común a las cuatro actividades e imparte
+8 sesiones a la semana en total; el profesor de ALCT cambia por grupo
+(LEN2, LEN9, LEN9, LEN5); el aula de Fr2 es la del grupo (A5, A11, A3,
+A14); el aula de ALCT es A17 mayoritariamente, con una excepción en
+1ºD que va a A10 en una de las dos celdas.
+
+Es decir, **el solo hecho de que varios grupos tengan asignaturas
+alternativas con la misma etiqueta no implica que las impartan en un
+bloque coordinado**. Hay tres patrones distintos conviviendo en 1ºESO
+del centro de referencia, y solo se distinguen inspeccionando los
+tramos y aulas reales:
+
+- *Transversal sobre N grupos:* CyR/OyD/RefMt — una sola actividad con
+  K plazas que se imparte en el mismo tramo a los cuatro grupos.
+- *Transversal por parejas:* Religión/ATED — Religión es multi-grupo
+  (REL1 reúne A+B en A5 en un tramo y C+D en A3 en otro), ATED es
+  per-grupo en el mismo tramo que su pareja de Religión.
+- *Per-grupo sin coordinación intergrupos:* Fr2/ALCT — cuatro
+  actividades independientes con tramos no coincidentes.
+
+Implicación: el modelo de Fase 1 cubre los tres patrones sin cambios
+estructurales (la estructura unificada Actividad → Plaza → Subgrupo es
+expresiva en todos los casos). El ejemplo de §6.1 ha sido corregido
+para reflejar la estructura real de Fr2/ALCT. No es regresión del
+modelo: es enseñanza operativa sobre el importador y sobre los
+criterios de validación.
+
 ---
 
 ## 3. Principios del diseño
@@ -692,10 +729,21 @@ Particion "Bloque-CyR_OyD_RefMt-1ESO" (UNIFICADA; cubre los 4 grupos):
   Subgrupo "1ºA-RefMt-MAT4" → {1ºA}
   (idem 6 subgrupos por cada uno de 1ºB, 1ºC, 1ºD → 24 subgrupos en total)
 
-Particion "Bloque-Fr2_ALCT-1ESO":
+Particion "Fr2_ALCT-1ºA":
   Subgrupo "1ºA-Fr2"  → {1ºA}
   Subgrupo "1ºA-ALCT" → {1ºA}
-  (idem para 1ºB, 1ºC, 1ºD)
+
+Particion "Fr2_ALCT-1ºB":
+  Subgrupo "1ºB-Fr2"  → {1ºB}
+  Subgrupo "1ºB-ALCT" → {1ºB}
+
+Particion "Fr2_ALCT-1ºC":
+  Subgrupo "1ºC-Fr2"  → {1ºC}
+  Subgrupo "1ºC-ALCT" → {1ºC}
+
+Particion "Fr2_ALCT-1ºD":
+  Subgrupo "1ºD-Fr2"  → {1ºD}
+  Subgrupo "1ºD-ALCT" → {1ºD}
 
 Particion "Bloque-Relig_ATED-1ºA":
   Subgrupo "1ºA-Relig" → {1ºA}
@@ -803,16 +851,49 @@ Actividad "Bloque-CyR_OyD_RefMt-1ESO" (asignatura=NULL, repeticiones=2, NEUTRA):
 
 ✅ Criterio cubierto.
 
-#### Actividad coordinada del nivel — bloque Fr2 / ALCT
+#### Actividad por grupo — bloque Fr2 / ALCT
 
-```
-Actividad "Bloque-Fr2_ALCT-1ESO" (asignatura=NULL, repeticiones=2, DISTRIBUIDA):
-  Plaza Fr2,  FRA1, A5,  subgrupos=(1ºA-Fr2,  1ºB-Fr2,  1ºC-Fr2,  1ºD-Fr2)
-  Plaza ALCT, LEN2, A17, subgrupos=(1ºA-ALCT, 1ºB-ALCT, 1ºC-ALCT, 1ºD-ALCT)
-```
+A diferencia del bloque CyR/OyD/RefMt, que es genuinamente transversal
+a los cuatro grupos (las seis plazas se imparten en el mismo tramo a
+todos), el bloque Fr2/ALCT del centro de referencia se organiza como
+**cuatro actividades independientes**, una por grupo. Cada una tiene
+dos plazas con poblaciones disjuntas (Fr2 y ALCT cubren al grupo
+completo entre los dos) y dos repeticiones por semana. Los tramos no
+coinciden entre grupos. Ver Hallazgo K en §2.
 
-Mismo patrón estructural: una partición unificada por grupo, una actividad
-con dos plazas cruzando los cuatro grupos. ✅
+Actividad "Bloque-Fr2_ALCT-1ºA" (asignatura=NULL, repeticiones=2, DISTRIBUIDA):
+  Plaza Fr2,  FRA1, A5,  subgrupos=(1ºA-Fr2)
+  Plaza ALCT, LEN2, A17, subgrupos=(1ºA-ALCT)
+
+Actividad "Bloque-Fr2_ALCT-1ºB" (asignatura=NULL, repeticiones=2, DISTRIBUIDA):
+  Plaza Fr2,  FRA1, A11, subgrupos=(1ºB-Fr2)
+  Plaza ALCT, LEN9, A17, subgrupos=(1ºB-ALCT)
+
+Actividad "Bloque-Fr2_ALCT-1ºC" (asignatura=NULL, repeticiones=2, DISTRIBUIDA):
+  Plaza Fr2,  FRA1, A3,  subgrupos=(1ºC-Fr2)
+  Plaza ALCT, LEN9, A17, subgrupos=(1ºC-ALCT)
+
+Actividad "Bloque-Fr2_ALCT-1ºD" (asignatura=NULL, repeticiones=2, DISTRIBUIDA):
+  Plaza Fr2,  FRA1, A14,                  subgrupos=(1ºD-Fr2)
+  Plaza ALCT, LEN5, candidatas={A17, A10}, subgrupos=(1ºD-ALCT)
+
+Verificación:
+
+- *Subgrupos cubren el grupo entero (I1):* en cada partición Fr2_ALCT-1ºX,
+  los dos subgrupos cubren entre ambos el grupo 1ºX. ✅
+- *Subgrupos disjuntos dentro de una actividad (I2):* cada actividad
+  tiene dos plazas con subgrupos disjuntos del mismo grupo. ✅
+- *Mismo tramo para las dos plazas de cada actividad:* garantizado por
+  construcción al pertenecer a la misma `Actividad`. ✅
+- *FRA1 sin colisión consigo mismo (S1):* las cuatro actividades
+  Fr2_ALCT-1ºX tienen plazas que incluyen a FRA1. El solver no puede
+  colocarlas dos en el mismo tramo. ✅
+- *LEN9 sin colisión consigo mismo (S1):* las actividades Fr2_ALCT-1ºB
+  y Fr2_ALCT-1ºC incluyen a LEN9 en su plaza de ALCT. Distintos tramos
+  garantizados por S1. ✅
+- *Aula A17 sin colisión (S2):* las cuatro plazas de ALCT comparten
+  A17 mayoritariamente (excepto la que toque en 1ºD a A10). El solver
+  las separa en tramos distintos. ✅
 
 #### Actividad coordinada — Religión / Atención Educativa de 1ºA
 
@@ -1292,8 +1373,9 @@ de capa de aplicación.
 
 **D8. Aulas implícitas e inconsistencias entre horarios de origen.**
 Origen: Hallazgo H (Sesión 5), ampliada en la validación de 1ºESO A
-contra el PDF (Sesión actual). Tres problemas operativos del importador
-que el modelo de datos absorbe sin cambios estructurales:
+contra el PDF (Sesión 8) y reverificada con los cuatro grupos de 1ºESO
+en Sesión 13. Cuatro problemas operativos del importador que el
+modelo de datos absorbe sin cambios estructurales:
 
 1. **Omisión de aula en celdas del horario por grupo.** Los PDFs del
    centro de referencia omiten el aula en celdas cuyo profesor es titular
@@ -1305,13 +1387,33 @@ que el modelo de datos absorbe sin cambios estructurales:
    existen.
 
 3. **Inconsistencias profesor↔plaza entre horario por grupo y horario
-   por aula.** Detectado en la validación de 1ºESO A: la sesión de EF del
-   miércoles 9:00–10:00 aparece como **EFI2** en el horario del grupo y
-   como **EFI3** en el horario del aula Gim. Una de las dos versiones del
-   dato es errónea, y no es decidible sin información adicional del centro.
-   El importador debe (a) cruzar los dos listados por grupo y por aula,
-   (b) detectar y reportar las inconsistencias al usuario, (c) ofrecer un
-   mecanismo de conciliación manual antes de persistir.
+   por aula.** El importador debe (a) cruzar los dos listados por grupo
+   y por aula, (b) detectar y reportar las inconsistencias al usuario,
+   (c) ofrecer un mecanismo de conciliación manual antes de persistir.
+
+   *Nota de Sesión 8:* se registró que la sesión de EF del miércoles
+   9:00–10:00 aparecía como EFI2 en el horario del grupo 1ºA y como
+   EFI3 en el horario del aula Gim.
+
+   *Nota de Sesión 13:* la verificación sobre los PDFs actuales del
+   proyecto NO reproduce esa inconsistencia concreta: las 12 sesiones
+   de EF de 1ºESO (3 por grupo × 4 grupos) salen EFI2 en ambos
+   listados, y las celdas EFI3 del horario de Gim corresponden a
+   3ºB, 4ºC y 1ºBach. La política de cruce sigue siendo necesaria:
+   este tipo de error es posible y no detectable sin información del
+   centro.
+
+4. **Omisión de co-profesores en horario por aula en celdas de
+   co-docencia intra-aula.** Detectado en Sesión 13: las 16 celdas
+   de LCL de 1ºESO (4 grupos × 4 repeticiones semanales) listan los
+   dos profesores de la co-docencia en el horario por grupos
+   (LEN2+LEN8 para 1ºA, LEN3+LEN9 para 1ºB, LEN6+LEN9 para 1ºC,
+   LEN3+LEN6 para 1ºD) pero solo el primero en el horario por aulas
+   (A5, A11, A3, A14 respectivamente). Es patrón de presentación del
+   PDF por aulas, no dato erróneo. Implicación para el importador: la
+   información completa de profesores por celda solo está en el
+   horario por grupos; el horario por aulas sirve para confirmar
+   ubicación, no para inventariar profesorado.
 
 Adicionalmente, la tipificación de aulas en los datos de referencia puede
 ser engañosa: TALL3 figura como "Taller FPB" en el system prompt original,
