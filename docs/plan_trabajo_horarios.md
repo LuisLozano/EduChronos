@@ -414,9 +414,9 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 3 — Solver: desdobles y agrupamientos
+Fase actual: 3 — Solver: desdobles y agrupamientos (en curso)
 Última fase completada: 2 — Solver MVP: problema mínimo
-Última sesión registrada: Sesión 13 — Fase 2 cerrada (Bloque 6 completado).
+Última sesión registrada: Sesión 14 — Fase 3, commit 1 (no-solape por grupo) cerrado.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -643,7 +643,20 @@ descripción completa.
   tanto con indisponibilidades reales que validar. Antes de Fase 5 los
   datasets son subconjuntos de prueba sin indisponibilidades. Confirmar
   esta asignación al planificar Fase 5 en detalle.
-- **Frontera Fase 2→3 en Subgrupo:** el dominio reducido modela Subgrupo con un único grupo. La Fase 3 (agrupamientos transversales inter-grupo, Tipo 3) exigirá Subgrupo multi-grupo, alineándose con el SubgrupoGrupo del modelo completo. No es deuda nueva: es la capa que la Fase 3 añade por diseño.
+- **Frontera Fase 2→3 en Subgrupo (corregido en Sesión 14):** el supuesto
+   original era que Fase 3 exigiría Subgrupo multi-grupo. Es incorrecto. El
+   dataset de Fase 3 (desdoble CyR, agrupamiento RefMt, OyD de 1ºESO) se
+   modela íntegramente como plazas que listan VARIOS subgrupos, cada subgrupo
+   perteneciente a UN solo grupo (ver §6.1 del modelo: los 24 subgrupos del
+   bloque CyR/OyD/RefMt son mono-grupo). El schema actual ya soporta
+   plaza-con-N-subgrupos (`plaza.subgrupos` con `minItems:1` sin techo) y el
+   modelo CP-SAT ya lo trata correctamente (las restricciones recorren todas
+   las plazas de la actividad). Lo que Fase 3 SÍ añade no es subgrupo
+   multi-grupo, sino: (1) el no-solape por grupo S9 —necesario porque al
+   partir el grupo en subgrupos, S3 deja de cubrir I1—, y (2) la rama de
+   `aulasCandidatas`. El Subgrupo cuya población son alumnos de varios grupos
+   (`SubgrupoGrupo` N:M; caso TICO de Bachillerato) se aplaza a Fase 5, que es
+   su sitio natural.
 - **D12**: AllDifferent de distribución por día es infactible si una
   actividad tiene repeticionesPorSemana > nº de días (palomar). En Fase 2
   ninguna asignatura de 1ºESO llega a 6, y la restricción lleva guarda.
@@ -653,6 +666,14 @@ descripción completa.
   último tramo de un día y el primero del siguiente. En Fase 2 toda
   duración es 1, no aplica. Fase 5 (bloques de 2-3 tramos de FPB): el
   modelo de intervalos debe impedir el cruce de día.
+- **D14**: `VerificadorSolucion` no comprueba el no-solape por grupo (S9). En
+  Fase 2 no importaba (sin subgrupos partidos, solape de grupo ⟺ solape de
+  subgrupo, que sí verifica). Desde Fase 3 son distintos: el verificador es
+  ciego a una restricción dura que el solver sí impone, así que un bug del
+  modelo CP-SAT que solapara grupos pasaría desapercibido por la red de
+  seguridad independiente. Se tapa en Sesión 15 (commit intermedio de Fase 3),
+  ANTES de meter la complejidad del aula variable. Deuda de vida corta: nace y
+  muere dentro de Fase 3.
 
 ### Notas técnicas validadas en Fase 0
 
@@ -807,6 +828,100 @@ Aclaración documental aplicada en línea: el schema
 (entrega correcta del Bloque 3). El intercambio inicial de esta sesión
 dio lugar a una propuesta errónea de retirar la mención en el plan; se
 retractó al confirmar la existencia del fichero.
+
+### Sesión 14 — Fase 3, commit 1 completado (no-solape por grupo).
+
+Apertura de Fase 3. Antes de tocar código se discutió el diseño con el código
+real delante (no solo la documentación), y eso corrigió dos supuestos.
+
+Corrección de alcance (la decisión de diseño de la sesión):
+
+- El supuesto de que Fase 3 necesita "Subgrupo multi-grupo" era erróneo. Se
+  separó en dos lecturas: (A) una plaza lista subgrupos de varios grupos
+  —transversalidad—, y (B) un subgrupo cuya población son alumnos de varios
+  grupos. El dataset de Fase 3 (CyR/RefMt/OyD de 1ºESO) es todo Lectura A, con
+  subgrupos mono-grupo, y el schema + el modelo CP-SAT ya la soportan. La
+  Lectura B (subgrupo multi-grupo, `SubgrupoGrupo` N:M) es Fase 5 (optativas de
+  Bachillerato). Frontera Fase 2→3 corregida en la deuda.
+
+Hallazgo del código (lo que Fase 3 SÍ añade y no estaba en el plan):
+
+- Al partir un grupo en varios subgrupos, el no-solape por subgrupo (S3) deja
+  de garantizar I1: el solver no sabe que `1ºA-Completo` y `1ºA-CyR-Tec` son el
+  mismo grupo, porque las particiones no viajan en el JSON del solver. Hace
+  falta una restricción dura nueva, no prevista en el plan: no-solape por
+  grupo (S9). El bloqueo de los 4 grupos por el bloque CyR/OyD/RefMt depende de
+  ella; con solo S3 no ocurre.
+
+Confirmado leyendo el código real (no inferido de la documentación):
+
+- La variable de tramo es por `ActividadInstancia` (un `IntVar` + un
+  `IntervalVar` en `InstanciaProgramada`), no por plaza. Las plazas cuelgan
+  del dominio. Consecuencia: la simultaneidad de las N plazas de una actividad
+  (los desdobles/agrupamientos) es ESTRUCTURAL y gratis —comparten el mismo
+  intervalo, el solver no puede separarlas—. El criterio de fallo de Fase 3
+  ("el solver mete las sesiones en tramos distintos para evitar el conflicto")
+  es imposible por construcción. Justifica CP-SAT sobre Timefold en la práctica.
+- `cubreSubgrupo`/`usaProfesor`/`usaAula` ya recorren TODAS las plazas de la
+  actividad y añaden el intervalo una sola vez. La transversalidad
+  (plaza con N subgrupos) no requirió tocar las restricciones existentes.
+- `Subgrupo` del dominio tiene referencia directa a `GrupoAdministrativo`
+  (no por código); S9 puede leer `subgrupo.grupo()` sin tocar dominio ni mapper.
+- El mapper NO valida cobertura (I1) ni disjunción de subgrupos a nivel de
+  grupo; I2 se valida solo POR ACTIVIDAD. Por eso el fixture infactible (dos
+  subgrupos solapados del mismo grupo en actividades distintas) carga sin error
+  y la infactibilidad emerge en el solver, no en la carga.
+- `ProblemaHorarioJsonLoader` activa `FAIL_ON_UNKNOWN_PROPERTIES`. Los fixtures
+  NO pueden llevar claves extra (un campo `_comentario` rompería la carga).
+
+Entregado:
+
+- `ModeloCpSat`: restricción dura `restriccionNoSolapeGrupo()` + helper
+  `tocaGrupo()`, gemela del no-solape por subgrupo, agrupa por
+  `subgrupo.grupo()`, ciega al `grupoPadre`. Import nuevo de
+  `GrupoAdministrativo`. No se elimina ninguna restricción; coexiste con el
+  no-solape por subgrupo (que sigue siendo necesario para subgrupos en varias
+  particiones / subgrupo multi-grupo futuro).
+- Fixtures sintéticos en `solver/src/test/resources/fixtures/`:
+  `problema-noSolapeGrupo-factible.json` (2 tramos, dos actividades que tocan
+  1A por subgrupos distintos con profesores y aulas fijas distintas → solo S9
+  puede separarlas) y `problema-noSolapeGrupo-infactible.json` (idéntico con un
+  único tramo → S9 lo vuelve infactible).
+- `RestriccionNoSolapeGrupoTest` (paquete `cpsat`): caso factible (0
+  violaciones del verificador + aserción explícita de tramos distintos) y
+  contra-test infactible (espera `HorarioInfactibleException`).
+- Suite completa del módulo en verde (20 tests). `SolverHorario1EsoOrdinariasTest`
+  sigue pasando: la restricción nueva no rompe el dataset real de Fase 2
+  (todo `*-Completo`, donde grupo ⟺ subgrupo).
+
+Comprobación de oro realizada: comentando la llamada a
+`restriccionNoSolapeGrupo()`, AMBOS tests fallan (el infactible deja de lanzar
+la excepción; el factible coloca las dos actividades en el mismo tramo). Esto
+demuestra que S9 es la causa del comportamiento correcto y que los fixtures la
+aíslan. Detalle revelador: el `VerificadorSolucion` NO protestó en el caso
+degradado —no comprueba solape de grupo—; solo la aserción explícita de tramos
+distintos lo detectó. De ahí la deuda D14.
+
+Estado de los 5 criterios de verificación de Fase 3: ninguno cerrado todavía.
+El mecanismo del bloqueo simultáneo de los 4 grupos (criterios 2 y 3) ya está
+en su sitio (S9 + variable de tramo por instancia), pero se valida con el
+fixture real de CyR/RefMt en el cierre de fase, no con los sintéticos del
+commit 1.
+
+Pendiente para las siguientes sesiones de Fase 3, en orden:
+
+1. Commit intermedio (Sesión 15): tapar el agujero del `VerificadorSolucion`
+   (deuda D14). Añadir verificación independiente de solape de grupo, gemela
+   de la de subgrupo. Lógica pura sin OR-Tools.
+2. Commit 2: `aulasCandidatas` con intervalos opcionales (el grueso de la
+   fase). Toca `mapearPlaza` (dejar de rechazar candidatas), `ModeloCpSat`
+   (`newOptionalIntervalVar` + `addExactlyOne` + bifurcación de `usaAula`) y
+   posiblemente la estructura de `InstanciaProgramada`.
+3. Cierre de fase: fixture real con el desdoble de CyR y el agrupamiento de
+   RefMt de 1ºESO; valida commit 1 + commit 2 juntos y los 5 criterios.
+4. Antes de modelar Religión multi-grupo: corregir §6.1 (Religión/ATED de 1ºA
+   descrito como per-grupo; los PDFs muestran transversalidad por parejas).
+   Trabajo lateral heredado de Sesión 13.
 
 ---
 

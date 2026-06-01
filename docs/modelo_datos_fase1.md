@@ -673,6 +673,40 @@ reside en el flag de la actividad, no en el catálogo de asignaturas
 profesores de la plaza sea tutor del grupo cubierto: la invariante no
 exige que todos los profesores lo sean.
 
+**S9. Sin colisión de grupo.**
+Para dos `Sesion`s con el mismo `tramo_inicio_id`, ningún `GrupoAdministrativo`
+es tocado por ambas. Un grupo es "tocado" por una sesión si algún `Subgrupo`
+de alguna `PlazaSubgrupo` de la sesión pertenece a ese grupo (vía
+`SubgrupoGrupo`). Es la contraparte en el solver de la invariante de
+configuración I1: cuando un grupo se reparte en varios subgrupos (desdobles,
+agrupamientos, bloques de optativas), I1 no se transporta en el JSON del solver
+(no hay particiones), de modo que el no-solape por subgrupo (S3) deja de
+garantizar que el grupo no esté en dos sitios a la vez. S9 lo impone
+directamente sobre el grupo.
+
+S9 es **ciega al `grupo_padre`**: agrupa por la identidad del grupo del
+subgrupo, nunca por su padre. Un grupo PDC (p.ej. `3ºADi`) y su grupo padre
+(`3ºA`) son grupos independientes para S9. Sus sesiones compartidas (EF, EPVA)
+se modelan con una plaza que lista subgrupos de ambos grupos —y entonces S9 las
+trata como una sola sesión que toca a los dos, sin pedir que se no-solape
+consigo misma—; sus sesiones propias quedan libres. Fundir PDC con su padre en
+S9 sería incorrecto: forzaría a que `3ºA` y `3ºADi` nunca pudieran estar en
+tramos distintos, lo cual contradice los datos reales (ver §6.2).
+
+Como S1, S2 y S3, S9 cuenta el intervalo de cada `ActividadInstancia` una sola
+vez por grupo: una actividad cuyas plazas cubren los cuatro grupos de 1ºESO
+(bloque CyR/OyD/RefMt) aporta un único intervalo a cada uno de los cuatro
+grupos. Lo que queda prohibido es que **otra** actividad que toque ese grupo
+caiga en el mismo tramo. Es el mecanismo por el que las seis plazas
+simultáneas del bloque bloquean los cuatro grupos completos en ese tramo
+(ver §6.1).
+
+En el dominio reducido del solver (Fases 2–5, sin particiones) todo `Subgrupo`
+pertenece a un único grupo, así que "el grupo del subgrupo" es directo. Cuando
+en Fase 5 aparezca un subgrupo cuya población son alumnos de varios grupos
+(optativas de Bachillerato sobre `SubgrupoGrupo` N:M), S9 lo tratará como
+tocando a todos esos grupos sin cambio estructural.
+
 ---
 
 ## 6. Validación contra los criterios de Fase 1
@@ -1312,6 +1346,7 @@ justificación de peso (cambio de requisito, hallazgo nuevo, etc.).
 | Modelo de Religión/PTVE | Configurable: transversal (una actividad multi-grupo) o per-grupo (una actividad por grupo) | Los datos muestran ambas formas en el mismo centro según el nivel (Hallazgo F). El modelo soporta ambas sin cambios |
 | Plaza ↔ Profesor | M:N simétrica vía `PlazaProfesor` (sin rol titular/apoyo). Una plaza tiene 1..N profesores. Co-docencia intra-aula = `\|PlazaProfesor\| ≥ 2` | Validación contra 1ºESO A (Hallazgo J): LCL es co-docencia intra-aula con LEN2+LEN8 en A5. No es desdoble. Pluralizar Plaza↔Profesor evita una migración futura del schema |
 | Campo `Actividad.tipo` | **Eliminado.** La naturaleza estructural (ordinaria, co-docencia, desdoble, agrupamiento, bloque de optativas, PDC transversal) es inferible del contenido (número de plazas, profesores por plaza, subgrupos cubiertos) | Validación contra 1ºESO A (Sesión actual): mantener una etiqueta redundante introduce riesgo de desincronización con el contenido real, y la UI puede calcular la etiqueta legible a partir del contenido en la capa de presentación |
+| No-solape por grupo en el solver (S9) | Restricción dura propia, gemela del no-solape por subgrupo, ciega al `grupo_padre` | Al partir un grupo en subgrupos (Fase 3), S3 deja de garantizar I1; el JSON del solver no transporta particiones, así que la cobertura del grupo no es deducible y debe imponerse como restricción explícita sobre el grupo. Decidido y validado en Sesión 14 (Fase 3, commit 1) |
 
 ---
 
