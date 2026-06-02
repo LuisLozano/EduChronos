@@ -3,6 +3,7 @@ package es.yaroki.educhronos.solver.cpsat;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.Aula;
+import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 
 /**
  * Verifica, de forma <b>independiente del solver</b>, que una
- * {@link SolucionHorario} cumple las restricciones duras de Fase 2.
+ * {@link SolucionHorario} cumple las restricciones duras del modelo.
  *
  * <p>No depende de OR-Tools: recorre la solución y comprueba propiedades sobre
  * el dominio. Esa independencia es deliberada — si la verificación reutilizara
@@ -30,8 +31,10 @@ import java.util.function.Function;
  * test del Bloque 4 y la salida a consola del Bloque 5.
  *
  * <p>Comprobaciones: todas las instancias colocadas; no-solape de profesor,
- * aula y subgrupo; distribución por día de las actividades {@code DISTRIBUIDA}
- * (con la misma guarda anti-palomar D12 que el modelo).
+ * aula, subgrupo y grupo (S9, espejo de la quinta restricción dura del solver;
+ * agrupa por subgrupo.grupo() directo, ciega al grupoPadre); distribución por
+ * día de las actividades {@code DISTRIBUIDA} (con la misma guarda anti-palomar
+ * D12 que el modelo).
  */
 public final class VerificadorSolucion {
 
@@ -71,6 +74,7 @@ public final class VerificadorSolucion {
             Map<Profesor, Integer> profesores = new HashMap<>();
             Map<Aula, Integer> aulas = new HashMap<>();
             Map<Subgrupo, Integer> subgrupos = new HashMap<>();
+            Map<GrupoAdministrativo, Integer> grupos = new HashMap<>();
 
             for (ActividadInstancia inst : entrada.getValue()) {
                 // Set por instancia: si dos plazas listan el mismo recurso, la
@@ -83,14 +87,24 @@ public final class VerificadorSolucion {
                     plaza.aulaFija().ifPresent(as::add);
                     ss.addAll(plaza.subgrupos());
                 }
+                // Grupo derivado de los subgrupos de la instancia. Como ss ya es
+                // un Set por instancia, varios subgrupos del mismo grupo en la
+                // misma actividad (desdoble) colapsan a un único grupo: la
+                // instancia ocupa el grupo una vez. Espejo de S9 en el solver,
+                // ciega al grupoPadre (agrupa por subgrupo.grupo() directo).
+                Set<GrupoAdministrativo> gs = new HashSet<>();
+                ss.forEach(s -> gs.add(s.grupo()));
+
                 ps.forEach(p -> profesores.merge(p, 1, Integer::sum));
                 as.forEach(a -> aulas.merge(a, 1, Integer::sum));
                 ss.forEach(s -> subgrupos.merge(s, 1, Integer::sum));
+                gs.forEach(g -> grupos.merge(g, 1, Integer::sum));
             }
 
             reportarColisiones("Profesor", tramo, profesores, Profesor::codigo, violaciones);
             reportarColisiones("Aula", tramo, aulas, Aula::codigo, violaciones);
             reportarColisiones("Subgrupo", tramo, subgrupos, Subgrupo::codigo, violaciones);
+            reportarColisiones("Grupo", tramo, grupos, GrupoAdministrativo::codigo, violaciones);
         }
     }
 
