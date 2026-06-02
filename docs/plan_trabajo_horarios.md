@@ -416,7 +416,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 Fase actual: 3 — Solver: desdobles y agrupamientos (en curso)
 Última fase completada: 2 — Solver MVP: problema mínimo
-Última sesión registrada: Sesión 14 — Fase 3, commit 1 (no-solape por grupo) cerrado.
+Última sesión registrada: Sesión 15 — Fase 3, commit intermedio (verificador de no-solape por grupo) cerrado. Deuda D14 cerrada.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -666,14 +666,18 @@ descripción completa.
   último tramo de un día y el primero del siguiente. En Fase 2 toda
   duración es 1, no aplica. Fase 5 (bloques de 2-3 tramos de FPB): el
   modelo de intervalos debe impedir el cruce de día.
-- **D14**: `VerificadorSolucion` no comprueba el no-solape por grupo (S9). En
-  Fase 2 no importaba (sin subgrupos partidos, solape de grupo ⟺ solape de
-  subgrupo, que sí verifica). Desde Fase 3 son distintos: el verificador es
-  ciego a una restricción dura que el solver sí impone, así que un bug del
-  modelo CP-SAT que solapara grupos pasaría desapercibido por la red de
-  seguridad independiente. Se tapa en Sesión 15 (commit intermedio de Fase 3),
-  ANTES de meter la complejidad del aula variable. Deuda de vida corta: nace y
-  muere dentro de Fase 3.
+- **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
+  no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
+  solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
+  distintos: el verificador era ciego a una restricción dura que el solver sí
+  impone, así que un bug del modelo CP-SAT que solapara grupos pasaría
+  desapercibido por la red de seguridad independiente. Cerrada en Sesión 15
+  (commit intermedio de Fase 3), ANTES de meter la complejidad del aula
+  variable: `VerificadorSolucion.verificarNoSolapes` añade un cuarto conteo
+  por `GrupoAdministrativo` (derivado del Set de subgrupos por instancia, de
+  modo que un desdoble cuenta el grupo una sola vez), gemelo de los de
+  profesor/aula/subgrupo y ciego al `grupoPadre`. Deuda de vida corta: nació y
+  murió dentro de Fase 3.
 
 ### Notas técnicas validadas en Fase 0
 
@@ -922,6 +926,67 @@ Pendiente para las siguientes sesiones de Fase 3, en orden:
 4. Antes de modelar Religión multi-grupo: corregir §6.1 (Religión/ATED de 1ºA
    descrito como per-grupo; los PDFs muestran transversalidad por parejas).
    Trabajo lateral heredado de Sesión 13.
+
+### Sesión 15 — Fase 3, commit intermedio: verificador de no-solape por grupo (cierra D14).
+
+Commit acotado, sin cambios de firma pública. Antes de tocar código se leyó el
+código real del verificador y de los records que consume (no la documentación),
+y eso corrigió un supuesto del diseño del test.
+
+Decisión de diseño (verificación):
+
+- La comprobación de grupo encaja como cuarto `Map<GrupoAdministrativo, Integer>`
+  dentro de `verificarNoSolapes`, reutilizando `reportarColisiones`, no como
+  método aparte. Es el gemelo estructural de los conteos de profesor/aula/
+  subgrupo, fiel a cómo S9 modela el solver: agrupa por `subgrupo.grupo()`,
+  ciego al `grupoPadre`.
+- El conteo de grupo se deriva de un `Set<GrupoAdministrativo>` construido a
+  partir del `Set` de subgrupos POR INSTANCIA. Consecuencia: un desdoble (una
+  sola actividad con N plazas, N subgrupos del mismo grupo) colapsa a un único
+  grupo en el conteo de esa instancia → cuenta 1 → no se reporta. El colapso es
+  gratis, por la misma mecánica que protege a los otros tres recursos.
+
+Corrección de un supuesto inicial (registrada porque cambió el test):
+
+- El primer diseño de test factible ("un desdoble no debe reportarse") no
+  protegía nada: el colapso por Set-por-instancia hace que ese caso pase
+  SIEMPRE, verifique o no el grupo correctamente. El solape de grupo que S9
+  detecta —y que el verificador debe detectar— es el de DOS actividades-
+  instancia distintas que tocan el mismo grupo en el mismo tramo. El test
+  infactible se rehízo sobre ese caso.
+
+Entregado:
+
+- `VerificadorSolucion.verificarNoSolapes`: cuarto conteo por grupo +
+  `reportarColisiones("Grupo", …)`. Import de `GrupoAdministrativo`. Javadoc de
+  clase actualizado: deja de decir "restricciones duras de Fase 2" y enumera
+  "profesor, aula, subgrupo y grupo", con nota de ceguera al `grupoPadre`.
+  Sin cambios de firma.
+- `VerificadorSolucionGrupoTest` (paquete `cpsat`), clase nueva, 3 tests sobre
+  `SolucionHorario` fabricada a mano (sin pasar por el solver): solape real
+  entre actividades distintas (reporta), tramos distintos (no reporta), desdoble
+  como regresión del colapso por instancia (no reporta). Separada de
+  `RestriccionNoSolapeGrupoTest` a propósito: aquélla prueba el solver, ésta el
+  verificador.
+- Corregido de paso un desfase preexistente en `referencia-codigo-solver.md`
+  (flujo principal): `ModeloCpSat.construir()` aplica cinco restricciones duras
+  (la quinta, no-solape por grupo, entró en Sesión 14), no cuatro. El índice
+  arrastraba el conteo antiguo.
+
+Comprobación de oro realizada: comentando el conteo de grupo en el verificador,
+el test `reportaSolapeDeGrupoEntreActividadesDistintas` falla (la lista de
+violaciones queda vacía) y los otros dos siguen en verde. Demuestra que el test
+depende de la lógica que protege.
+
+Suite completa del módulo en verde (23 tests; 20 previos + 3 nuevos).
+`RestriccionNoSolapeGrupoTest` sigue pasando: el fixture factible de S9 no
+escondía ningún solape de grupo latente que el verificador, ahora más estricto,
+pudiera destapar.
+
+Estado de los 5 criterios de verificación de Fase 3: sin cambios respecto a
+Sesión 14 (ninguno cerrado todavía; se cierran con el fixture real de CyR/RefMt
+al final de la fase). Este commit no toca criterios: completa la red de
+seguridad independiente antes del commit 2 (aula variable).
 
 ---
 

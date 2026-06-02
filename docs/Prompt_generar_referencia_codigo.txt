@@ -1,0 +1,18 @@
+Genera un documento de referencia conceptual del módulo solver/ para usarlo como índice de navegación de código (no como documentación de comportamiento). El objetivo es que, leyéndolo, alguien sepa qué clases y métodos existen, sus firmas y su responsabilidad en una frase, para poder pedir el fichero exacto que necesita.
+Alcance: solo solver/src/main/java. Ignora los tests, los fixtures y target/.
+Para cada paquete (domain, cpsat, io, cli), y dentro de cada uno para cada clase:
+
+Nombre de la clase y si es record, final class, enum, interfaz, fachada pública o clase package-private.
+Una sola frase de responsabilidad. No describas cómo lo hace por dentro.
+Lista de métodos públicos y package-private (omite privados): firma completa con tipos de parámetros y tipo de retorno, y una frase de qué hace cada uno. Para records, lista los componentes (campos) con su tipo.
+Si la clase lanza excepciones propias del dominio, menciónalas.
+
+Al final, una sección "Flujo principal" de 5–10 líneas: cómo se encadenan loader → mapper → modelo → solver → verificador en una ejecución típica, nombrando las clases.
+Y una sección "Fuera de alcance actual": funcionalidad que el código todavía NO implementa y que está marcada con comentarios tipo "Fase 3"/"Fase 5" o que se rechaza explícitamente (por ejemplo, si algún punto rechaza una opción de entrada por política). Recórrelo buscando esos marcadores y lístalos con el número de fase.
+Restricciones de estilo:
+
+No incluyas cuerpos de métodos, ni pseudocódigo, ni descripciones paso a paso de la lógica interna. Si te ves describiendo un bucle o un condicional, has bajado demasiado de nivel.
+No inventes: si una responsabilidad no está clara por el nombre, la firma y el Javadoc, di "responsabilidad no evidente" en vez de adivinar.
+Markdown, organizado por paquete. Encabezado con la fecha de generación y el commit hash (git rev-parse --short HEAD) para saber a qué estado del código corresponde.
+
+Guárdalo en docs/referencia-codigo-solver.md.
