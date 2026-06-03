@@ -416,7 +416,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 Fase actual: 3 — Solver: desdobles y agrupamientos (en curso)
 Última fase completada: 2 — Solver MVP: problema mínimo
-Última sesión registrada: Sesión 15 — Fase 3, commit intermedio (verificador de no-solape por grupo) cerrado. Deuda D14 cerrada.
+Última sesión registrada: Sesión 16 — Fase 3, commit 2 (aulasCandidatas con intervalos opcionales) cerrado. Deudas D15 y D16 abiertas.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -678,6 +678,27 @@ descripción completa.
   modo que un desdoble cuenta el grupo una sola vez), gemelo de los de
   profesor/aula/subgrupo y ciego al `grupoPadre`. Deuda de vida corta: nació y
   murió dentro de Fase 3.
+- **D15**: `VerificadorSolucion` cuenta el aula con un `Set` POR INSTANCIA, lo
+  que enmascara una violación de S2: dos plazas de la misma instancia que
+  eligen (o fijan) la misma aula en el mismo tramo colapsan a un único aula en
+  el conteo → cuenta 1 → no se reporta. Por S2 + glosario del modelo, esas dos
+  plazas son una colisión (el uso compartido de aula es UNA plaza con varios
+  profesores, no varias plazas con un aula), así que el verificador debería
+  detectarlo y no lo hace. Matices: (1) es debilidad PREEXISTENTE en `aulaFija`,
+  no la introduce el aula variable de la Sesión 16; (2) el solver SÍ la previene
+  vía `addNoOverlap` (dos intervalos —fijos u opcionales— sobre la misma aula en
+  el mismo tramo se solapan), así que en la práctica no se cuela una solución
+  mala; el hueco es solo en la red de seguridad independiente. Reforzar a conteo
+  de aula POR PLAZA (solo aula; profesor/subgrupo/grupo siguen por instancia,
+  donde el colapso es correcto por S1) queda como ítem propio. Documentada
+  también en el comentario del propio `verificarNoSolapes`.
+- **D16**: el CLI (`Materializador`, `FormatoCelda`) no pinta el aula ELEGIDA de
+  las plazas con aula variable: `FormatoCelda` muestra `?` cuando no hay
+  `aulaFija`. La Sesión 16 dejó el CLI fuera a propósito (el commit ya era ancho
+  y estructural; pintar el aula es otra preocupación). `SolucionHorario` ya
+  expone `aulaElegida(inst, plaza)`, así que el cambio es acotado: el
+  materializador debe leer de ahí en vez de `plaza.aulaFija()`. Pendiente de
+  commit posterior dentro de Fase 3 o al cierre de fase.
 
 ### Notas técnicas validadas en Fase 0
 
@@ -987,6 +1008,103 @@ Estado de los 5 criterios de verificación de Fase 3: sin cambios respecto a
 Sesión 14 (ninguno cerrado todavía; se cierran con el fixture real de CyR/RefMt
 al final de la fase). Este commit no toca criterios: completa la red de
 seguridad independiente antes del commit 2 (aula variable).
+
+### Sesión 16 — Fase 3, commit 2: aulasCandidatas con intervalos opcionales.
+
+El grueso de la fase. Hasta aquí toda `Plaza` usaba `aulaFija` y el cargador
+RECHAZABA cualquier dataset con `aulasCandidatas` no vacío. Este commit levanta
+esa restricción y enseña al solver a ELEGIR aula entre varias candidatas,
+garantizando no-solape sobre el aula efectivamente elegida (S2). Commit único,
+estructural (firmas nuevas/cambiadas). Antes de tocar código se leyó el código
+real de cada fichero y se verificaron las firmas de OR-Tools 9.11 contra el
+Javadoc, no de memoria.
+
+Decisiones de diseño (con el código delante):
+
+- El intervalo opcional de aula NO lleva variable de tramo propia: su `start`
+  es el mismo `IntVar tramoIndex` de la instancia (CP-SAT admite reutilizar un
+  `IntVar` como `start` de varios intervalos). El aula es lo único que varía por
+  candidata; el tramo ya está fijado por la instancia y compartido por las N
+  plazas del desdoble. Atarlo así evita el problema de "soluciones duplicadas"
+  de los intervalos opcionales con start libre (issue google/or-tools#3605).
+- `addExactlyOne` es POR PLAZA, no por actividad: cada plaza con candidatas
+  elige su aula independientemente. En un desdoble con dos plazas variables,
+  cada una resuelve su propio `addExactlyOne`, ambas en el mismo tramo.
+- Dónde viven los intervalos opcionales: ampliando `InstanciaProgramada` con un
+  `Map<Plaza, List<AulaOpcion>>` (opción A sobre estructura aparte), con un
+  `record AulaOpcion(Aula, BoolVar presencia, IntervalVar)` paquete-privado.
+  `extraerSolucion` y `restriccionNoSolapeAula` leen las opciones del mismo
+  objeto que ya recorren.
+- `SolucionHorario` transporta el aula elegida en un segundo mapa
+  `Map<ActividadInstancia, Map<Plaza, Aula>>`, retrocompatible: el constructor
+  de un argumento se mantiene (delega con mapa vacío), así los tests que
+  fabrican soluciones a mano no se tocan. Accessor unificado
+  `aulaElegida(inst, plaza)`: devuelve la elegida si la plaza es variable, o su
+  `aulaFija` si es fija. Punto único de verdad para verificador y (futuro)
+  materializador.
+- `restriccionNoSolapeAula` mezcla, por aula, los intervalos fijos (como antes)
+  y los intervalos opcionales cuyas candidatas apuntan a esa aula (Forma 1:
+  bucle externo por aula, simétrico a los otros tres no-solapes). `addNoOverlap`
+  admite la lista mezclada; los opcionales no presentes no restringen.
+
+Confirmado leyendo el modelo autoritativo (resolvió una pregunta de diseño):
+
+- Pregunta: ¿dos plazas de la misma actividad pueden compartir aula
+  legítimamente? Respuesta inequívoca por S2 + glosario de
+  `modelo_datos_fase1.md`: NO. El uso compartido de aula (Tipo 4, Religión
+  multi-grupo) se modela como UNA plaza con varios profesores/subgrupos, no como
+  varias plazas con un aula. Cuando una actividad tiene varias plazas son
+  sesiones físicas distintas con aulas distintas (desdoble). Por tanto, dos
+  plazas de la misma instancia con la misma aula en el mismo tramo es colisión
+  (viola S2), no uso compartido. Origen de la deuda D15.
+
+Entregado:
+
+- `AulaOpcion` (nuevo, `cpsat`): `record` con aula + literal de presencia +
+  intervalo opcional.
+- `InstanciaProgramada`: campo `Map<Plaza, List<AulaOpcion>> opcionesDeAula`
+  (solo plazas con candidatas; vacío si ninguna), copia defensiva anidada,
+  constructor de 4 argumentos. Cambio de firma.
+- `ModeloCpSat`: helper `crearOpcionesDeAula` (intervalos opcionales +
+  `addExactlyOne` por plaza), `restriccionNoSolapeAula` mezcla fijos+opcionales
+  con helper `intervalosOpcionalesEn`, `extraerSolucion` lee el aula elegida vía
+  `solver.booleanValue(presencia)` y la pasa al constructor de 2 args de
+  `SolucionHorario`. Javadoc de la rama de aula y comentario de `usaAula`
+  actualizados.
+- `SolucionHorario`: segundo constructor + accessor `aulaElegida`. Constructor
+  de 1 arg retrocompatible. Cambio de API pública (ampliación, no ruptura).
+- `VerificadorSolucion.verificarNoSolapes`: lee `solucion.aulaElegida(inst,
+  plaza)` en vez de `plaza.aulaFija()`. Comentario del Set-por-instancia
+  ampliado para documentar la debilidad de aula (D15) en el propio código.
+- `ProblemaHorarioMapper.mapearPlaza`: elimina el rechazo de `aulasCandidatas`;
+  las resuelve a `Set<Aula>` con `LinkedHashSet` (dedupe en silencio, como
+  profesores/subgrupos). El XOR lo sigue validando el constructor de `Plaza`.
+  Javadoc de clase actualizado.
+- `SolverHorarioAulaCandidataTest` (nuevo, `cpsat`): tres tests — candidatas con
+  aula fija rival (elige la libre, A6), desdoble mixto fija+candidatas en el
+  mismo tramo (la variable elige A6; ejercita la rama de no-solape que mezcla
+  intervalo fijo y opcional), e infactible por candidata única compartida. Los
+  dos factibles afirman el aula elegida explícitamente, no solo 0 violaciones.
+- `ProblemaHorarioJsonLoaderTest`: el test `rechazaAulasCandidatasHastaFase3`
+  (obsoleto: verificaba la restricción que este commit elimina) reemplazado por
+  `cargaAulasCandidatasResueltas`, que verifica que el mapper carga y resuelve
+  las candidatas a entidades de dominio. Lo cazó la suite, no el análisis previo:
+  al eliminar una validación hay que buscar el test que la afirmaba.
+- Tres fixtures `problema-aulaCandidata-{factible,mixta,infactible}.json`.
+
+Schema y DTO NO requirieron cambios: `problema-horario.schema.json` ya declara
+`aulasCandidatas` como propiedad válida y `PlazaDto` ya la expone (se leía para
+rechazarla). El schema no valida el XOR; lo valida `Plaza` en runtime.
+
+Suite completa del módulo en verde (26 tests; 23 previos + 3 nuevos; un test
+del loader reemplazado, no sumado).
+
+Estado de los 5 criterios de verificación de Fase 3: ninguno cerrado todavía. El
+solver ya elige aula entre candidatas (mecanismo del commit 2 en su sitio), pero
+los criterios se cierran con el fixture real de CyR/RefMt al final de la fase.
+Pendiente, en orden: cierre de fase (fixture real, valida commit 1 + commit 2 +
+los 5 criterios), y antes de Religión multi-grupo, corregir §6.1 (Religión/ATED
+descrito como per-grupo; los PDFs muestran transversalidad por parejas).
 
 ---
 

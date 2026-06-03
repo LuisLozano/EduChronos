@@ -35,13 +35,15 @@ import java.util.TreeMap;
  * <p>Junto con {@link SolverHorario} es la única zona del módulo acoplada a
  * OR-Tools. Paquete-privada: el punto de entrada público es {@link SolverHorario}.
  *
- * <p><b>Alcance del solver mínimo (Fase 2, Bloque 4):</b> factibilidad pura,
- * sin función objetivo. Restricciones duras:
+ * <p><b>Alcance:</b> factibilidad pura, sin función objetivo. Restricciones
+ * duras, en el orden en que las aplica {@code construir()}:
  * <ol>
  *   <li>No-solape de profesor (cuenta a TODOS los profesores de cada plaza).</li>
  *   <li>No-solape de aula (rama {@code aulaFija} e intervalos opcionales de
  *       {@code aulasCandidatas}, sobre el aula efectivamente elegida).</li>
  *   <li>No-solape de subgrupo.</li>
+ *   <li>No-solape de grupo (S9, ciega al {@code grupoPadre}; impone I1 en el
+ *       solver porque las particiones no viajan en el JSON). Añadida en Fase 3.</li>
  *   <li>Distribución por día para actividades {@code DISTRIBUIDA}: a lo sumo
  *       una sesión de la actividad por día.</li>
  * </ol>

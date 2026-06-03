@@ -639,7 +639,16 @@ no en plazas de actividades distintas en el mismo tramo).
 
 **S2. Sin colisión de aula.**
 Para dos `Sesion`s con el mismo `tramo_inicio_id`, las aulas usadas no se
-solapan.
+solapan. El aula "usada" por una plaza es su `aula_fija` si está fijada, o el
+aula que el solver elige entre `aulas_candidatas` si es variable. El no-solape
+se impone sobre el aula efectivamente ocupada, no solo sobre la fija
+(implementado en Sesión 16, Fase 3 commit 2: intervalos opcionales por
+candidata que entran en el `addNoOverlap` del aula cuando su literal de
+presencia es verdadero). Corolario por el glosario: como el uso compartido de
+un aula por varios grupos se modela como UNA plaza (co-docencia / multi-grupo,
+no varias plazas con la misma aula), dos plazas distintas de la misma
+actividad que ocupen la misma aula en el mismo tramo son una colisión de S2,
+no un uso compartido.
 
 **S3. Sin colisión de subgrupo.**
 Para dos `Sesion`s con el mismo `tramo_inicio_id`, ningún `Subgrupo` está
@@ -1329,7 +1338,7 @@ justificación de peso (cambio de requisito, hallazgo nuevo, etc.).
 |---|---|---|
 | Unidad atómica del solver | Subgrupo, no alumno ni grupo | Los datos muestran que los subgrupos persistentes son la granularidad operativa real |
 | Asignación profesor↔plaza | Configuración humana, no del solver | La asignación profesor-grupo-asignatura es decisión del equipo directivo, no algorítmica |
-| Asignación aula↔plaza | Fija por defecto + candidatas opcionales | Reduce drásticamente el espacio de búsqueda; refleja la práctica real |
+| Asignación aula↔plaza | Fija por defecto + candidatas opcionales | Reduce drásticamente el espacio de búsqueda; refleja la práctica real. Implementada en el solver en Sesión 16 (Fase 3, commit 2): cada plaza con `aulas_candidatas` aporta un intervalo opcional por candidata, con `addExactlyOne` sobre sus literales de presencia (el solver elige exactamente una); el no-solape de aula (S2) se impone sobre el aula efectivamente elegida. Las plazas con `aula_fija` no cambian |
 | Multi-centro | Fuera de scope | Una base de datos = un centro. Cambio de curso = duplicación de BD |
 | PDC | GrupoAdministrativo virtual con grupo padre | Permite imprimir horario de PDC como entidad propia y asignar tutor distinto |
 | Restricciones horarias del profesorado | Tabla única con campo tipo (DURA/BLANDA) y peso numérico | Separa lo violable de lo no violable sin proliferar tablas |
