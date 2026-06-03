@@ -78,13 +78,21 @@ public final class VerificadorSolucion {
 
             for (ActividadInstancia inst : entrada.getValue()) {
                 // Set por instancia: si dos plazas listan el mismo recurso, la
-                // instancia lo ocupa una vez, no dos.
+                // instancia lo ocupa una vez, no dos. Correcto para profesor y
+                // subgrupo (S1 permite un profesor en varias plazas de la misma
+                // actividad). Para AULA es una debilidad conocida: por S2 dos
+                // plazas de la misma instancia con la misma aula son colisión, no
+                // uso compartido (el uso compartido legítimo es UNA plaza con
+                // varios profesores, no varias plazas con un aula). El Set la
+                // enmascara. Debilidad preexistente en aulaFija, no introducida
+                // por el aula variable; el solver sí la previene vía addNoOverlap.
+                // Reforzar el verificador (conteo de aula por plaza) queda pendiente.
                 Set<Profesor> ps = new HashSet<>();
                 Set<Aula> as = new HashSet<>();
                 Set<Subgrupo> ss = new HashSet<>();
                 for (Plaza plaza : inst.actividad().plazas()) {
                     ps.addAll(plaza.profesores());
-                    plaza.aulaFija().ifPresent(as::add);
+                    solucion.aulaElegida(inst, plaza).ifPresent(as::add);
                     ss.addAll(plaza.subgrupos());
                 }
                 // Grupo derivado de los subgrupos de la instancia. Como ss ya es

@@ -28,8 +28,9 @@ import java.util.function.Supplier;
  *
  * Reparto de validaciones:
  *  - El mapper valida: secciones obligatorias presentes, codigos no duplicados,
- *    integridad referencial por codigo, I2 (subgrupos disjuntos por actividad),
- *    y la politica de cargador "aulasCandidatas no soportado hasta Fase 3".
+ *    integridad referencial por codigo (incluida la resolucion de
+ *    aulasCandidatas a entidades de dominio, Fase 3), e I2 (subgrupos
+ *    disjuntos por actividad).
  *  - Los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas
  *    y los rangos (diaSemana, ordenEnDia, repeticiones, duracion). El mapper
  *    solo envuelve esas excepciones en ProblemaInvalidoException con contexto.
@@ -172,9 +173,9 @@ public final class ProblemaHorarioMapper {
         }
 
         List<String> candCodes = pl.aulasCandidatas() == null ? List.of() : pl.aulasCandidatas();
-        if (!candCodes.isEmpty()) {
-            throw new ProblemaInvalidoException(
-                    ctx + ": 'aulasCandidatas' no esta soportado hasta Fase 3; use 'aulaFija'");
+        Set<Aula> aulasCandidatas = new LinkedHashSet<>();
+        for (String ac : candCodes) {
+            aulasCandidatas.add(resolver(aulas, ac, "aula", ctx));
         }
         Optional<Aula> aulaFija = pl.aulaFija() == null
                 ? Optional.empty()
@@ -189,7 +190,7 @@ public final class ProblemaHorarioMapper {
             subs.add(resolver(subgrupos, sc, "subgrupo", ctx));
         }
 
-        return construir(() -> new Plaza(cod, asig, profs, aulaFija, Set.of(), subs), ctx);
+        return construir(() -> new Plaza(cod, asig, profs, aulaFija, aulasCandidatas, subs), ctx);
     }
 
     /** I2: dentro de una actividad, ningun subgrupo aparece en dos plazas. */

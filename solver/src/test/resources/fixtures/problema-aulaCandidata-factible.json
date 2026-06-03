@@ -1,0 +1,43 @@
+{
+  "tramos": [
+    {"codigo": "D1-1", "diaSemana": 1, "ordenEnDia": 1}
+  ],
+  "aulas": [
+    {"codigo": "A5", "nombre": "Aula 5"},
+    {"codigo": "A6", "nombre": "Aula 6"}
+  ],
+  "asignaturas": [
+    {"codigo": "Mat", "nombre": "Matematicas"},
+    {"codigo": "LCL", "nombre": "Lengua Castellana y Literatura"}
+  ],
+  "profesores": [
+    {"codigo": "P1", "nombre": "Profesor 1"},
+    {"codigo": "P2", "nombre": "Profesor 2"}
+  ],
+  "grupos": [
+    {"codigo": "1A", "tipo": "ORDINARIO", "grupoPadre": null},
+    {"codigo": "1B", "tipo": "ORDINARIO", "grupoPadre": null}
+  ],
+  "subgrupos": [
+    {"codigo": "1A-Completo", "grupo": "1A"},
+    {"codigo": "1B-Completo", "grupo": "1B"}
+  ],
+  "actividades": [
+    {
+      "codigo": "Act-Fija", "asignatura": "Mat",
+      "repeticionesPorSemana": 1, "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        {"codigo": "Act-Fija-P1", "asignatura": "Mat", "profesores": ["P1"],
+         "aulaFija": "A5", "subgrupos": ["1A-Completo"]}
+      ]
+    },
+    {
+      "codigo": "Act-Cand", "asignatura": "LCL",
+      "repeticionesPorSemana": 1, "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        {"codigo": "Act-Cand-P1", "asignatura": "LCL", "profesores": ["P2"],
+         "aulasCandidatas": ["A5", "A6"], "subgrupos": ["1B-Completo"]}
+      ]
+    }
+  ]
+}

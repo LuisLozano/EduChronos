@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.solver.io;
 
 import es.yaroki.educhronos.solver.domain.Actividad;
+import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
@@ -78,9 +79,9 @@ class ProblemaHorarioJsonLoaderTest {
     }
 
     @Test
-    void rechazaAulasCandidatasHastaFase3() {
+    void cargaAulasCandidatasResueltas() throws Exception {
         String json = """
-            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"},{"codigo":"A6","nombre":"Aula 6"}],
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"}],
               "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
@@ -88,11 +89,15 @@ class ProblemaHorarioJsonLoaderTest {
               "actividades": [{"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P1","asignatura":"Mat","profesores":["MAT8"],
-                 "aulasCandidatas":["A5"],"subgrupos":["1A-Completo"]}]}] }
+                 "aulasCandidatas":["A5","A6"],"subgrupos":["1A-Completo"]}]}] }
             """;
-        assertThatThrownBy(() -> loader.cargar(stream(json)))
-                .isInstanceOf(ProblemaInvalidoException.class)
-                .hasMessageContaining("Fase 3");
+        ProblemaHorario problema = loader.cargar(stream(json));
+
+        Plaza plaza = problema.actividades().get(0).plazas().get(0);
+        assertThat(plaza.aulaFija()).isEmpty();
+        assertThat(plaza.aulasCandidatas())
+                .extracting(Aula::codigo)
+                .containsExactlyInAnyOrder("A5", "A6");
     }
 
     @Test

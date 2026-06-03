@@ -1,18 +1,31 @@
-Genera un documento de referencia conceptual del módulo solver/ para usarlo como índice de navegación de código (no como documentación de comportamiento). El objetivo es que, leyéndolo, alguien sepa qué clases y métodos existen, sus firmas y su responsabilidad en una frase, para poder pedir el fichero exacto que necesita.
-Alcance: solo solver/src/main/java. Ignora los tests, los fixtures y target/.
-Para cada paquete (domain, cpsat, io, cli), y dentro de cada uno para cada clase:
+Genera un fichero referencia-codigo-solver.md: un índice de API PURO del
+módulo solver/, construido EXCLUSIVAMENTE a partir del código fuente actual.
+Si ya existe un fichero con ese nombre, IGNORA su contenido y sobrescríbelo;
+no tomes nada de él.
 
-Nombre de la clase y si es record, final class, enum, interfaz, fachada pública o clase package-private.
-Una sola frase de responsabilidad. No describas cómo lo hace por dentro.
-Lista de métodos públicos y package-private (omite privados): firma completa con tipos de parámetros y tipo de retorno, y una frase de qué hace cada uno. Para records, lista los componentes (campos) con su tipo.
-Si la clase lanza excepciones propias del dominio, menciónalas.
+NO describas comportamiento, flujo de ejecución, responsabilidades, ni en qué
+fase del proyecto entra cada cosa. NO interpretes el código. Describe solo la
+superficie pública/package-private, leída directamente de las firmas.
 
-Al final, una sección "Flujo principal" de 5–10 líneas: cómo se encadenan loader → mapper → modelo → solver → verificador en una ejecución típica, nombrando las clases.
-Y una sección "Fuera de alcance actual": funcionalidad que el código todavía NO implementa y que está marcada con comentarios tipo "Fase 3"/"Fase 5" o que se rechaza explícitamente (por ejemplo, si algún punto rechaza una opción de entrada por política). Recórrelo buscando esos marcadores y lístalos con el número de fase.
-Restricciones de estilo:
+Recorre todos los ficheros .java de solver/src/main/java y solver/src/test/java.
+Ordena por paquete (domain, cpsat, io, cli) y, dentro de cada paquete,
+alfabéticamente. Para cada tipo:
 
-No incluyas cuerpos de métodos, ni pseudocódigo, ni descripciones paso a paso de la lógica interna. Si te ves describiendo un bucle o un condicional, has bajado demasiado de nivel.
-No inventes: si una responsabilidad no está clara por el nombre, la firma y el Javadoc, di "responsabilidad no evidente" en vez de adivinar.
-Markdown, organizado por paquete. Encabezado con la fecha de generación y el commit hash (git rev-parse --short HEAD) para saber a qué estado del código corresponde.
+- Nombre, visibilidad (public / package-private), y clase de tipo
+  (class, record, enum, interface; marca final si lo es).
+- Paquete.
+- Records: lista de componentes con su tipo.
+- Enums: lista de constantes.
+- Clases/interfaces: firmas EXACTAS de constructores y métodos (públicos y
+  package-private), con tipos de parámetro y de retorno tal cual aparecen en
+  el código. No expliques qué hacen.
+- "Consume:" una línea por tipo, listando los demás tipos del módulo
+  (es.yaroki.educhronos.solver.*) que aparecen en sus firmas o imports.
+
+Encabezado: fecha actual y la salida de `git rev-parse --short HEAD`.
+
+EXCLUYE: sección de flujo principal, sección de "fuera de alcance",
+prosa descriptiva, conteos de restricciones, referencias a fases del roadmap.
+Si un método tiene Javadoc, ignóralo: solo la firma cuenta.
 
 Guárdalo en docs/referencia-codigo-solver.md.

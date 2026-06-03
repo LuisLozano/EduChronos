@@ -39,8 +39,8 @@ import java.util.TreeMap;
  * sin función objetivo. Restricciones duras:
  * <ol>
  *   <li>No-solape de profesor (cuenta a TODOS los profesores de cada plaza).</li>
- *   <li>No-solape de aula (solo rama {@code aulaFija}; {@code aulasCandidatas}
- *       entra en Fase 3).</li>
+ *   <li>No-solape de aula (rama {@code aulaFija} e intervalos opcionales de
+ *       {@code aulasCandidatas}, sobre el aula efectivamente elegida).</li>
  *   <li>No-solape de subgrupo.</li>
  *   <li>Distribución por día para actividades {@code DISTRIBUIDA}: a lo sumo
  *       una sesión de la actividad por día.</li>
@@ -89,8 +89,41 @@ final class ModeloCpSat {
             // a los bloques multi-tramo de Fase 5 (tamaño conocido, inicio variable).
             IntervalVar intervalo =
                     model.newFixedSizeIntervalVar(tramoIndex, duracion, "intv_" + nombre);
-            instancias.add(new InstanciaProgramada(inst, tramoIndex, intervalo));
+            Map<Plaza, List<AulaOpcion>> opciones =
+                    crearOpcionesDeAula(inst, tramoIndex, duracion, nombre);
+            instancias.add(new InstanciaProgramada(inst, tramoIndex, intervalo, opciones));
         }
+    }
+
+    /**
+     * Por cada plaza de la instancia con {@code aulasCandidatas}, crea una
+     * {@link AulaOpcion} por candidata (intervalo OPCIONAL atado al
+     * {@code tramoIndex} compartido) y un {@code addExactlyOne} sobre sus
+     * literales de presencia: el solver elige exactamente una aula por plaza.
+     * Las plazas con {@code aulaFija} no entran (su aula no es variable).
+     */
+    private Map<Plaza, List<AulaOpcion>> crearOpcionesDeAula(
+            ActividadInstancia inst, IntVar tramoIndex, long duracion, String nombre) {
+        Map<Plaza, List<AulaOpcion>> porPlaza = new LinkedHashMap<>();
+        for (Plaza plaza : inst.actividad().plazas()) {
+            if (plaza.aulasCandidatas().isEmpty()) {
+                continue; // plaza con aulaFija: aula no variable
+            }
+            List<AulaOpcion> opciones = new ArrayList<>();
+            List<Literal> presencias = new ArrayList<>();
+            for (Aula aula : plaza.aulasCandidatas()) {
+                BoolVar presencia = model.newBoolVar(
+                        "aula_" + nombre + "_" + plaza.codigo() + "_" + aula.codigo());
+                IntervalVar opcional = model.newOptionalFixedSizeIntervalVar(
+                        tramoIndex, duracion, presencia,
+                        "intvAula_" + nombre + "_" + plaza.codigo() + "_" + aula.codigo());
+                opciones.add(new AulaOpcion(aula, presencia, opcional));
+                presencias.add(presencia);
+            }
+            model.addExactlyOne(presencias.toArray(new Literal[0]));
+            porPlaza.put(plaza, opciones);
+        }
+        return porPlaza;
     }
 
     // -------------------------------------------------------------- no-solapes
@@ -114,13 +147,27 @@ final class ModeloCpSat {
             List<IntervalVar> intervalos = new ArrayList<>();
             for (InstanciaProgramada ip : instancias) {
                 if (usaAula(ip, aula)) {
-                    intervalos.add(ip.intervalo());
+                    intervalos.add(ip.intervalo());        // rama aulaFija (como en Fase 2)
                 }
+                intervalos.addAll(intervalosOpcionalesEn(ip, aula)); // rama aulasCandidatas
             }
             if (intervalos.size() >= 2) {
                 model.addNoOverlap(intervalos.toArray(new IntervalVar[0]));
             }
         }
+    }
+
+    /** Intervalos opcionales de la instancia cuyas opciones apuntan a este aula. */
+    private List<IntervalVar> intervalosOpcionalesEn(InstanciaProgramada ip, Aula aula) {
+        List<IntervalVar> out = new ArrayList<>();
+        for (List<AulaOpcion> opciones : ip.opcionesDeAula().values()) {
+            for (AulaOpcion opcion : opciones) {
+                if (opcion.aula().equals(aula)) {
+                    out.add(opcion.intervalo());
+                }
+            }
+        }
+        return out;
     }
 
     private void restriccionNoSolapeSubgrupo() {
@@ -203,7 +250,8 @@ final class ModeloCpSat {
 
     private boolean usaAula(InstanciaProgramada ip, Aula aula) {
         for (Plaza plaza : ip.instancia().actividad().plazas()) {
-            // Solo aulaFija en Fase 2. aulasCandidatas: Fase 3 (decisión táctica del plan).
+            // Solo rama aulaFija. Las aulasCandidatas las aporta a la lista de
+            // no-solape el helper intervalosOpcionalesEn (intervalos opcionales).
             if (plaza.aulaFija().isPresent() && plaza.aulaFija().get().equals(aula)) {
                 return true;
             }
@@ -313,10 +361,24 @@ final class ModeloCpSat {
     /** Lee los valores de las variables resueltas y construye la SolucionHorario. */
     SolucionHorario extraerSolucion(CpSolver solver) {
         Map<ActividadInstancia, Tramo> asignaciones = new LinkedHashMap<>();
+        Map<ActividadInstancia, Map<Plaza, Aula>> aulasElegidas = new LinkedHashMap<>();
         for (InstanciaProgramada ip : instancias) {
             int idx = (int) solver.value(ip.tramoIndex());
             asignaciones.put(ip.instancia(), problema.tramos().get(idx));
+
+            Map<Plaza, Aula> porPlaza = new LinkedHashMap<>();
+            for (Map.Entry<Plaza, List<AulaOpcion>> e : ip.opcionesDeAula().entrySet()) {
+                for (AulaOpcion opcion : e.getValue()) {
+                    if (solver.booleanValue(opcion.presencia())) {
+                        porPlaza.put(e.getKey(), opcion.aula());
+                        break; // addExactlyOne garantiza una sola presente
+                    }
+                }
+            }
+            if (!porPlaza.isEmpty()) {
+                aulasElegidas.put(ip.instancia(), porPlaza);
+            }
         }
-        return new SolucionHorario(asignaciones);
+        return new SolucionHorario(asignaciones, aulasElegidas);
     }
 }
