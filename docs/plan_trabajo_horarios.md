@@ -236,13 +236,18 @@ no la salida de referencia. Decidido en Sesión 11.
 - Agrupamiento de OyD/VEtic (multi-grupo, un profesor, una aula)
 
 ### Criterios de verificación
-- [ ] Las dos sesiones del desdoble de CyR aparecen en el mismo tramo
-- [ ] Ninguno de los 4 grupos tiene otra sesión en el tramo de RefMt
-- [ ] Los 3 profesores del RefMt están libres en ese tramo (no aparecen 
+- [x] Las dos sesiones del desdoble de CyR aparecen en el mismo tramo
+- [x] Ninguno de los 4 grupos tiene otra sesión en el tramo de RefMt
+- [x] Los 3 profesores del RefMt están libres en ese tramo (no aparecen
       en otras sesiones)
-- [ ] Las aulas del desdoble/agrupamiento son distintas y correctas 
+- [x] Las aulas del desdoble/agrupamiento son distintas y correctas
       (A12In para INF1, A5 para TEC3, etc.)
 - [ ] Puedes bloquear manualmente un tramo y el solver lo respeta
+      — DIFERIDO: no existe mecanismo de bloqueo manual de tramo en el
+      modelo actual. Requiere trabajo estructural propio (DTO + schema +
+      dominio + restricción de pin/prohibición de tramo). Movido a Fase 4
+      o commit estructural intercalado. No es validación de lo construido
+      en Fase 3, sino funcionalidad nueva.
 
 ### Señal de que está mal
 El solver "resuelve" el problema metiendo las sesiones en tramos distintos 
@@ -414,9 +419,12 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 3 — Solver: desdobles y agrupamientos (en curso)
-Última fase completada: 2 — Solver MVP: problema mínimo
-Última sesión registrada: Sesión 16 — Fase 3, commit 2 (aulasCandidatas con intervalos opcionales) cerrado. Deudas D15 y D16 abiertas.
+Fase actual: 4 — Solver: grupos PDC/Diversificación (sin iniciar)
+Última fase completada: 3 — Solver: desdobles y agrupamientos
+  (criterios 1-4; C5 diferido)
+Última sesión registrada: Sesión 17 — Fase 3 cerrada con fixture real
+  CyR/RefMt. Criterios 1-4 validados. C5 (bloqueo de tramo) diferido.
+  D15 y D16 abiertas.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -497,6 +505,36 @@ módulo `solver/` con paquetes `domain` (records puros, sin OR-Tools),
 `cpsat` (OR-Tools aislado), `io` (loader Jackson + mapper) y `cli`
 (`Main`). Sesiones: 6–8 (replanteo del dominio y Hallazgo J), 9
 (sub-plan táctico de la fase), 10–13 (Bloques 3–6, uno por sesión).
+
+**Fase 3 — Solver: desdobles y agrupamientos** (cerrada en Sesión 17,
+con una salvedad). Criterios 1-4 validados sobre dataset REAL: bloque
+coordinado CyR/OyD/RefMt de 1ºESO (§6.1 del modelo), una actividad de 6
+plazas (repeticiones=2, NEUTRA) cuyos 24 subgrupos transversales cubren
+los 4 grupos, más 4 actividades Mat testigo (una por grupo) para que S9
+tenga algo que expulsar. Ejercita commit 1 (no-solape por grupo, S9) y
+commit 2 (elección de aula entre candidatas) juntos.
+
+Evidencia por criterio:
+- C1 (mismo tramo desdoble CyR): cubierto POR CONSTRUCCIÓN — las 6 plazas
+  son una sola Actividad, un IntVar de tramo por instancia. El test
+  documenta colocación de las 2 instancias y su separación en tramos
+  distintos (forzada por S1/S2/S3/S9 sobre recursos compartidos, no por
+  distribución por día).
+- C2 (ningún grupo con otra sesión en el tramo del bloque): ninguna Mat
+  testigo de los 4 grupos cae en los tramos del bloque (S9).
+- C3 (3 profes RefMt libres): MAT6/MAT7/MAT4 solo en el bloque + 0
+  colisiones de profesor del verificador independiente.
+- C4 (aulas distintas y correctas): A12In fija para INF1, TEC3 en
+  candidata válida {A5,B07}, 3 aulas RefMt distintas, 6 aulas del bloque
+  distintas — afirmado por instancia. Cubre D15 explícitamente para este
+  fixture (el verificador no lo haría: cuenta aula por instancia con Set).
+
+Salvedad: C5 (bloqueo manual de tramo) DIFERIDO — sin mecanismo en el
+modelo. No marcar la fase como cerrada al 100% sin esta nota.
+
+Entregado: fixture problema-3-cierre-cyr-refmt.json (validado contra
+schema) + SolverHorarioCierreFase3Test. Suite: 27 tests en verde. Sin
+cambios de API (no se regenera el índice de código).
 
 ### Cierre del modelo — Sesión 8
 
@@ -1105,6 +1143,57 @@ los criterios se cierran con el fixture real de CyR/RefMt al final de la fase.
 Pendiente, en orden: cierre de fase (fixture real, valida commit 1 + commit 2 +
 los 5 criterios), y antes de Religión multi-grupo, corregir §6.1 (Religión/ATED
 descrito como per-grupo; los PDFs muestran transversalidad por parejas).
+
+### Sesión 17 — Fase 3 cerrada. Fixture real CyR/OyD/RefMt + criterios 1-4.
+
+Cierre de fase, no commit estructural. Antes de diseñar nada se leyó el
+código real (VerificadorSolucion, ModeloCpSat, los tests de S16 y Fase 2,
+el loader) y el schema; eso fijó tres decisiones y descubrió un matiz.
+
+Decisiones de diseño (con el código delante):
+- Alcance: cierre de 4 criterios + C5 diferido. C5 (bloqueo manual de
+  tramo) no tiene mecanismo en el modelo; implementarlo es trabajo
+  estructural, no validación de Fase 3. Decidido con el usuario.
+- Fixture nuevo e independiente (no se acopla al de Fase 2). Bloque de 6
+  plazas literal de §6.1 + 4 Mat testigo. Aulas de los testigos aisladas
+  (A1,A2,A4,A7) de las candidatas del bloque: el único acoplamiento
+  testigo↔bloque es por grupo (S9), para aislar la causa del C2.
+- Holgura amplia a propósito (testigos de 3 reps): el cierre valida el
+  resultado, no estresa S9 (su estrés ya está en RestriccionNoSolapeGrupoTest,
+  S14). Decidido con el usuario.
+
+Matiz descubierto leyendo el código (no la doc):
+- C1 es estructuralmente trivial: las 6 plazas comparten tramo por ser una
+  Actividad (tramo por instancia, no por plaza). No se puede "leer el tramo
+  de CyR-TEC3 vs CyR-INF1" por separado. La evidencia honesta es "por
+  construcción", y así se registra. La señal de alarma del plan (el solver
+  separa en tramos distintos para evitar el conflicto) NO puede ocurrir
+  intra-actividad.
+- Confirmado en ModeloCpSat: las 4 restricciones de no-solape iteran sobre
+  TODAS las instancias sin excluir las de la misma actividad, luego las 2
+  instancias del bloque (que comparten INF1, A12In, subgrupos) se separan
+  por S1/S2/S3/S9. Esto valida usar NEUTRA en el bloque.
+
+Sobre D15: el fixture la toca de lleno (3 plazas RefMt de la misma
+instancia con candidatas solapadas). El verificador no detectaría una
+colisión de aula intra-instancia. Se tapó con aserción explícita de aulas
+distintas en el test; D15 NO se cierra en código (sigue abierta). D16 no
+se tocó.
+
+Entregado:
+- solver/src/test/resources/fixtures/problema-3-cierre-cyr-refmt.json:
+  4 grupos, 28 subgrupos (4 Completo + 24 transversales), 10 profesores,
+  11 aulas, 4 asignaturas, 30 tramos, 5 actividades (bloque de 6 plazas +
+  4 Mat testigo). Validado contra schema, XOR, I2 e integridad referencial.
+- SolverHorarioCierreFase3Test (cpsat): un test con sanity check del
+  dataset + 0 violaciones del verificador + aserciones de C1-C4. @Timeout 120s,
+  resuelve en ~30ms.
+- Suite: 27 tests en verde (26 + 1). Sin cambios de src/main: el índice de
+  código NO se regenera.
+
+Trabajo lateral heredado (Religión/ATED §6.1 per-grupo vs transversal por
+parejas): NO tocado. Pertenece a antes de Fase 4 (Religión multi-grupo,
+Tipo 4). Sigue pendiente.
 
 ---
 
