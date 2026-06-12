@@ -1,0 +1,144 @@
+{
+  "tramos": [
+    { "codigo": "L1", "diaSemana": 1, "ordenEnDia": 1 },
+    { "codigo": "L2", "diaSemana": 1, "ordenEnDia": 2 },
+    { "codigo": "L3", "diaSemana": 1, "ordenEnDia": 3 },
+    { "codigo": "L4", "diaSemana": 1, "ordenEnDia": 4 },
+    { "codigo": "L5", "diaSemana": 1, "ordenEnDia": 5 },
+    { "codigo": "L6", "diaSemana": 1, "ordenEnDia": 6 },
+    { "codigo": "M1", "diaSemana": 2, "ordenEnDia": 1 },
+    { "codigo": "M2", "diaSemana": 2, "ordenEnDia": 2 },
+    { "codigo": "M3", "diaSemana": 2, "ordenEnDia": 3 },
+    { "codigo": "M4", "diaSemana": 2, "ordenEnDia": 4 },
+    { "codigo": "M5", "diaSemana": 2, "ordenEnDia": 5 },
+    { "codigo": "M6", "diaSemana": 2, "ordenEnDia": 6 }
+  ],
+  "aulas": [
+    { "codigo": "A8",    "nombre": "Aula 8 (Diversificacion)" },
+    { "codigo": "B01",   "nombre": "Aula B01" },
+    { "codigo": "B07",   "nombre": "Taller de Tecnologia" },
+    { "codigo": "Pista", "nombre": "Pista polideportiva" }
+  ],
+  "asignaturas": [
+    { "codigo": "EF",    "nombre": "Educacion Fisica" },
+    { "codigo": "Tec",   "nombre": "Tecnologia y Digitalizacion" },
+    { "codigo": "AmbSL", "nombre": "Ambito Sociolinguistico" },
+    { "codigo": "AmbCM", "nombre": "Ambito Cientifico-Matematico" },
+    { "codigo": "FQ",    "nombre": "Fisica y Quimica" },
+    { "codigo": "Mat",   "nombre": "Matematicas" }
+  ],
+  "profesores": [
+    { "codigo": "EFI3", "nombre": "Perez Reyes, Ramon" },
+    { "codigo": "TEC3", "nombre": "Baena Martin, Jose Maria" },
+    { "codigo": "LEN2", "nombre": "Garcia Gomez, Ana Belen" },
+    { "codigo": "MAT4", "nombre": "Fernandez Garcia, Felipe" },
+    { "codigo": "FIS2", "nombre": "Dominguez Gonzalez, Maria" },
+    { "codigo": "MAT6", "nombre": "Gutierrez Sanchez, Carlos Alberto" }
+  ],
+  "grupos": [
+    { "codigo": "3ºA",   "tipo": "ORDINARIO",           "grupoPadre": null },
+    { "codigo": "3ºADi", "tipo": "DIVERSIFICACION_PDC", "grupoPadre": "3ºA" }
+  ],
+  "subgrupos": [
+    { "codigo": "3ºA-Completo",   "grupo": "3ºA" },
+    { "codigo": "3ºADi-Completo", "grupo": "3ºADi" }
+  ],
+  "actividades": [
+    {
+      "codigo": "EF-3ºA-y-Di",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-P1",
+          "asignatura": "EF",
+          "profesores": ["EFI3"],
+          "aulaFija": "Pista",
+          "subgrupos": ["3ºA-Completo", "3ºADi-Completo"]
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-3ºA-y-Di",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Tec-P1",
+          "asignatura": "Tec",
+          "profesores": ["TEC3"],
+          "aulaFija": "B07",
+          "subgrupos": ["3ºA-Completo", "3ºADi-Completo"]
+        }
+      ]
+    },
+    {
+      "codigo": "AmbSL-3ºADi",
+      "asignatura": "AmbSL",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "AmbSL-P1",
+          "asignatura": "AmbSL",
+          "profesores": ["LEN2"],
+          "aulaFija": "A8",
+          "subgrupos": ["3ºADi-Completo"]
+        }
+      ]
+    },
+    {
+      "codigo": "AmbCM-3ºADi",
+      "asignatura": "AmbCM",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "AmbCM-P1",
+          "asignatura": "AmbCM",
+          "profesores": ["MAT4"],
+          "aulaFija": "A8",
+          "subgrupos": ["3ºADi-Completo"]
+        }
+      ]
+    },
+    {
+      "codigo": "FQ-3ºA",
+      "asignatura": "FQ",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FQ-P1",
+          "asignatura": "FQ",
+          "profesores": ["FIS2"],
+          "aulaFija": "B01",
+          "subgrupos": ["3ºA-Completo"]
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-3ºA",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-P1",
+          "asignatura": "Mat",
+          "profesores": ["MAT6"],
+          "aulaFija": "B01",
+          "subgrupos": ["3ºA-Completo"]
+        }
+      ]
+    }
+  ]
+}

@@ -77,23 +77,27 @@ public final class VerificadorSolucion {
             Map<GrupoAdministrativo, Integer> grupos = new HashMap<>();
 
             for (ActividadInstancia inst : entrada.getValue()) {
-                // Set por instancia: si dos plazas listan el mismo recurso, la
-                // instancia lo ocupa una vez, no dos. Correcto para profesor y
-                // subgrupo (S1 permite un profesor en varias plazas de la misma
-                // actividad). Para AULA es una debilidad conocida: por S2 dos
-                // plazas de la misma instancia con la misma aula son colisión, no
-                // uso compartido (el uso compartido legítimo es UNA plaza con
-                // varios profesores, no varias plazas con un aula). El Set la
-                // enmascara. Debilidad preexistente en aulaFija, no introducida
-                // por el aula variable; el solver sí la previene vía addNoOverlap.
-                // Reforzar el verificador (conteo de aula por plaza) queda pendiente.
+                // Set por instancia para profesor y subgrupo: si dos plazas de la
+                // misma actividad listan el mismo recurso, la instancia lo ocupa
+                // una vez, no dos. Correcto: S1 permite un profesor en varias
+                // plazas de la misma actividad (co-docencia es varios profesores
+                // en UNA plaza); idem subgrupo.
+                //
+                // El AULA, en cambio, se cuenta POR PLAZA (D15): por S2, dos
+                // plazas de la misma instancia con la misma aula son colision, no
+                // uso compartido. El uso compartido legitimo de un aula es UNA
+                // plaza con varios profesores, nunca dos plazas. Contar por
+                // instancia (Set) enmascararia esa colision; contar por plaza la
+                // detecta. La cara de configuracion (dos aulaFija iguales en una
+                // actividad) la rechaza el mapper antes del solver; aqui se cubre
+                // tambien el caso de dos candidatas que resuelvan al mismo aula.
                 Set<Profesor> ps = new HashSet<>();
-                Set<Aula> as = new HashSet<>();
                 Set<Subgrupo> ss = new HashSet<>();
                 for (Plaza plaza : inst.actividad().plazas()) {
                     ps.addAll(plaza.profesores());
-                    solucion.aulaElegida(inst, plaza).ifPresent(as::add);
                     ss.addAll(plaza.subgrupos());
+                    solucion.aulaElegida(inst, plaza)
+                            .ifPresent(a -> aulas.merge(a, 1, Integer::sum));
                 }
                 // Grupo derivado de los subgrupos de la instancia. Como ss ya es
                 // un Set por instancia, varios subgrupos del mismo grupo en la
@@ -104,7 +108,6 @@ public final class VerificadorSolucion {
                 ss.forEach(s -> gs.add(s.grupo()));
 
                 ps.forEach(p -> profesores.merge(p, 1, Integer::sum));
-                as.forEach(a -> aulas.merge(a, 1, Integer::sum));
                 ss.forEach(s -> subgrupos.merge(s, 1, Integer::sum));
                 gs.forEach(g -> grupos.merge(g, 1, Integer::sum));
             }

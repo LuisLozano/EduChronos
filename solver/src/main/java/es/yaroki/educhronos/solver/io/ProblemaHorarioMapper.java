@@ -131,6 +131,7 @@ public final class ProblemaHorarioMapper {
                 plazas.add(mapearPlaza(pl, ctx, asignaturas, profesores, aulas, subgrupos));
             }
             verificarI2(plazas, ctx);
+            verificarAulasFijasDisjuntas(plazas, ctx);
 
             actividades.add(construir(
                     () -> new Actividad(cod, asigAct, rep, dur, pat, plazas), ctx));
@@ -201,6 +202,27 @@ public final class ProblemaHorarioMapper {
                 if (!vistos.add(s)) {
                     throw new ProblemaInvalidoException(ctx + ": el subgrupo '" + s.codigo()
                             + "' aparece en mas de una plaza de la misma actividad (I2)");
+                }
+            }
+        }
+    }
+
+    /**
+     * Dentro de una actividad, dos plazas no pueden compartir la misma aulaFija:
+     * sus plazas son simultaneas (comparten tramo) y una misma aula no puede
+     * acoger dos plazas a la vez (S2). El solver no puede "elegir otra" porque
+     * el aula esta fijada, asi que el conflicto se rechaza en configuracion.
+     * No aplica a aulasCandidatas: dos plazas con candidatas solapadas las
+     * resuelve el solver eligiendo aulas distintas (addExactlyOne + no-solape).
+     */
+    private static void verificarAulasFijasDisjuntas(List<Plaza> plazas, String ctx) {
+        Set<Aula> vistas = new LinkedHashSet<>();
+        for (Plaza p : plazas) {
+            if (p.aulaFija().isPresent()) {
+                Aula a = p.aulaFija().get();
+                if (!vistas.add(a)) {
+                    throw new ProblemaInvalidoException(ctx + ": el aula fija '" + a.codigo()
+                            + "' esta asignada a mas de una plaza de la misma actividad (S2)");
                 }
             }
         }
