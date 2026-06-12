@@ -263,12 +263,12 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
   (ÁmbSL, ÁmbCM, IngDi) y las sesiones compartidas con 3ºA (EF, EPVA, Tec)
 
 ### Criterios de verificación
-- [ ] El subgrupo 3ºADi no tiene sesiones solapadas con su grupo ordinario 3ºA
-- [ ] Las sesiones compartidas (EF, EPVA, Tec) aparecen en el mismo tramo 
-      para 3ºA y 3ºADi
-- [ ] LEN2 (profesor de ÁmbSL) no aparece en otro sitio cuando está con 3ºADi
-- [ ] El horario impreso de 3ºA muestra correctamente qué alumnos están 
-      en diversificación en cada tramo
+- [x] El subgrupo 3ºADi no tiene sesiones solapadas con su grupo ordinario 3ºA. 0 violaciones de grupo del VerificadorSolucion (S9 prohíbe dos instancias distintas tocando el mismo grupo en un tramo).
+- [x] Las sesiones compartidas (EF, EPVA, Tec) aparecen en el mismo tramo
+      para 3ºA y 3ºADi → aserción de que cada instancia compartida toca a la vez 3ºA y 3ºADi.
+- [x] LEN2 (profesor de ÁmbSL) no aparece en otro sitio cuando está con 3ºADi → LEN2 exclusivo de AmbSL-3ºADi + 0 colisiones de profesor.
+- [x] El horario impreso de 3ºA muestra correctamente qué alumnos están
+      en diversificación en cada tramo → validado por aserción programática (tramos compartidos ≥1 y divergentes ≥1; ningún grupo tocado por dos instancias distintas en un tramo).
 
 ---
 
@@ -419,12 +419,12 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 4 — Solver: grupos PDC/Diversificación (sin iniciar)
-Última fase completada: 3 — Solver: desdobles y agrupamientos
-  (criterios 1-4; C5 diferido)
-Última sesión registrada: Sesión 17 — Fase 3 cerrada con fixture real
-  CyR/RefMt. Criterios 1-4 validados. C5 (bloqueo de tramo) diferido.
-  D15 y D16 abiertas.
+Fase actual: 5 — Solver: instituto completo (sin iniciar)
+Última fase completada: 4 — Solver: grupos PDC/Diversificación
+  (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
+Última sesión registrada: Sesión 18 — Fase 4 cerrada. Fixture real
+  PDC 3ºA/3ºADi. Criterios 1-4 validados por aserción programática.
+  D15 cerrada en código (doble cara). C5 de Fase 3 sigue diferido.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -535,6 +535,8 @@ modelo. No marcar la fase como cerrada al 100% sin esta nota.
 Entregado: fixture problema-3-cierre-cyr-refmt.json (validado contra
 schema) + SolverHorarioCierreFase3Test. Suite: 27 tests en verde. Sin
 cambios de API (no se regenera el índice de código).
+
+**Fase 4 completada.
 
 ### Cierre del modelo — Sesión 8
 
@@ -716,20 +718,26 @@ descripción completa.
   modo que un desdoble cuenta el grupo una sola vez), gemelo de los de
   profesor/aula/subgrupo y ciego al `grupoPadre`. Deuda de vida corta: nació y
   murió dentro de Fase 3.
-- **D15**: `VerificadorSolucion` cuenta el aula con un `Set` POR INSTANCIA, lo
-  que enmascara una violación de S2: dos plazas de la misma instancia que
-  eligen (o fijan) la misma aula en el mismo tramo colapsan a un único aula en
-  el conteo → cuenta 1 → no se reporta. Por S2 + glosario del modelo, esas dos
-  plazas son una colisión (el uso compartido de aula es UNA plaza con varios
-  profesores, no varias plazas con un aula), así que el verificador debería
-  detectarlo y no lo hace. Matices: (1) es debilidad PREEXISTENTE en `aulaFija`,
-  no la introduce el aula variable de la Sesión 16; (2) el solver SÍ la previene
-  vía `addNoOverlap` (dos intervalos —fijos u opcionales— sobre la misma aula en
-  el mismo tramo se solapan), así que en la práctica no se cuela una solución
-  mala; el hueco es solo en la red de seguridad independiente. Reforzar a conteo
-  de aula POR PLAZA (solo aula; profesor/subgrupo/grupo siguen por instancia,
-  donde el colapso es correcto por S1) queda como ítem propio. Documentada
-  también en el comentario del propio `verificarNoSolapes`.
+- **D15 (CERRADA en Sesión 18)**: era de DOBLE cara; la nota original solo veía
+  la del verificador y afirmaba erróneamente que el solver prevenía la otra.
+  Cara A — verificador: `VerificadorSolucion` contaba el aula con un `Set` POR
+  INSTANCIA, lo que enmascaraba una violación de S2 (dos plazas de la misma
+  instancia con la misma aula colapsan a un conteo de 1 → no se reporta). Por S2
+  + glosario del modelo esas dos plazas son colisión, no uso compartido (el uso
+  compartido legítimo es UNA plaza con varios profesores, no varias plazas con
+  un aula). CERRADA: el aula se cuenta POR PLAZA; profesor y subgrupo siguen por
+  instancia, donde el colapso es correcto por S1.
+  Cara B — configuración: la afirmación original "el solver SÍ la previene vía
+  `addNoOverlap`" era cierta SOLO para la rama de candidatas. Para dos `aulaFija`
+  IGUALES en una misma instancia, la rama `aulaFija` de `restriccionNoSolapeAula`
+  añade el intervalo POR INSTANCIA (no por plaza), de modo que el `addNoOverlap`
+  ve un único intervalo y tampoco la previene: doble fallo silencioso (ni solver
+  ni verificador). CERRADA por vía A (decidida con el usuario): validación de
+  configuración `verificarAulasFijasDisjuntas` en `ProblemaHorarioMapper`, junto
+  a `verificarI2`, que rechaza dos plazas de la misma actividad con la misma
+  `aulaFija` ANTES del solver. No toca el modelo CP-SAT. No aplica a
+  `aulasCandidatas` (el solver elige aulas distintas vía `addExactlyOne` +
+  no-solape). El comentario de `verificarNoSolapes` se actualizó en consecuencia.
 - **D16**: el CLI (`Materializador`, `FormatoCelda`) no pinta el aula ELEGIDA de
   las plazas con aula variable: `FormatoCelda` muestra `?` cuando no hay
   `aulaFija`. La Sesión 16 dejó el CLI fuera a propósito (el commit ya era ancho
@@ -1194,6 +1202,70 @@ Entregado:
 Trabajo lateral heredado (Religión/ATED §6.1 per-grupo vs transversal por
 parejas): NO tocado. Pertenece a antes de Fase 4 (Religión multi-grupo,
 Tipo 4). Sigue pendiente.
+
+### Sesión 18 — Fase 4 cerrada. Fixture real PDC 3ºA/3ºADi + criterios 1-4. D15 cerrada.
+
+Cierre de fase con un commit estructural intercalado (D15), decidido con el
+usuario antes de tocar nada. Antes de diseñar se leyó el código real
+(ModeloCpSat S2/S9, VerificadorSolucion, ProblemaHorarioMapper, Plaza, Aula,
+GrupoAdministrativo) y el schema; el cruce de los PDFs de 3ºA ordinario
+(pág. 8) y 3ºA PDC (pág. 9) fijó qué sesiones son compartidas y cuáles propias.
+
+Decisiones de alcance (con el usuario):
+- Orden de la sesión: candidato 1 (PDC/3ºADi), por ser el objetivo de la fase
+  y por ejercitar por primera vez con dataset real la ceguera de S9 al
+  grupoPadre. Candidatos 2 (C5 bloqueo de tramo) y 3 (§6.1 Religión/ATED
+  transversal) NO abordados; siguen pendientes.
+- D15 cerrada en código en esta fase (no diferida). Vía A para la cara de
+  configuración: validación en el mapper, sin tocar el modelo CP-SAT.
+- Fixture recortado a 3ºA + 3ºADi. Rel/ATED dejado FUERA de Fase 4 (no aporta
+  nada que EF/Tec no validen ya sobre la ceguera de S9); su transversalidad
+  por parejas (A+B) se valida en Fase 5.
+- Criterio 4 validado por ASERCIÓN PROGRAMÁTICA sobre la solución, no por
+  inspección del CLI. La impresión del horario con marca de diversificación
+  sigue sin construirse: es D16, fuera de Fase 4.
+
+Hallazgo del cruce de PDFs (corrige el modelo, ver más abajo):
+- Las sesiones compartidas reales de 3ºA/3ºADi son TUT3, EF, EPVA, Tec y el
+  bloque Rel/ATED. El modelo §6.2 listaba solo "EF, EPVA, Tec": incompleto.
+- Rel/ATED de 3ºA y de 3ºADi son el MISMO bloque (V 10-11, idéntico en ambos
+  PDFs: REL1 B01 + FIL1 B05 + ING3 A7), no dos sesiones distintas.
+
+D15 reformulada y cerrada (era de DOBLE cara, no solo verificador):
+- Cara verificador: VerificadorSolucion contaba el aula por instancia (Set),
+  enmascarando dos plazas de la misma instancia con la misma aula. Cerrada:
+  el aula se cuenta por plaza. Profesor y subgrupo siguen por instancia
+  (correcto: S1 permite un profesor en varias plazas; co-docencia es varios
+  profesores en UNA plaza).
+- Cara solver/config (NO documentada en la nota original de D15): la rama
+  aulaFija de restriccionNoSolapeAula cuenta el intervalo por instancia, así
+  que dos aulaFija idénticas en una instancia tampoco las prevenía el
+  addNoOverlap. Cerrada por vía A: nueva validación de configuración
+  verificarAulasFijasDisjuntas en ProblemaHorarioMapper (rechaza dos plazas
+  de la misma actividad con la misma aulaFija antes del solver). No toca el
+  modelo CP-SAT. No aplica a aulasCandidatas (el solver elige aulas distintas).
+
+Entregables (commiteados):
+- src/main: ProblemaHorarioMapper (método verificarAulasFijasDisjuntas + su
+  llamada tras verificarI2) y VerificadorSolucion (aula por plaza).
+- Fixture problema-4-pdc-3a-3adi.json (src/test/resources/fixtures): par
+  3ºA/3ºADi, 2 días/12 tramos, 6 actividades, 14 instancias. Compartidas
+  EF/Tec como una plaza con subgrupos de ambos grupos; propias Di (AmbSL/LEN2,
+  AmbCM/MAT4 en A8); propias ordinarias (FQ, Mat en B01).
+- SolverHorarioCierreFase4Test (paquete cpsat): criterios 1-4.
+
+Validación del fixture en diseño (antes de enseñarlo, como en S17): valida
+contra el schema; cumple invariantes de carga; factible (OPTIMAL); fuerza
+≥1 tramo donde 3ºA y 3ºADi divergen en instancias distintas. PRUEBA NEGATIVA:
+con S9 fundida al grupoPadre el problema es INFEASIBLE — el fixture discrimina
+la ceguera, no solo la "pasa".
+
+Suite: 28 tests verdes (los previos + SolverHorarioCierreFase4Test). Build
+recompila 44 clases sin romper ninguno previo (incluido VerificadorSolucionGrupoTest,
+que el cambio de conteo de aula podría haber afectado y no afectó).
+
+Índice de código (referencia-codigo-solver.md): REGENERADO. Esta sesión cambia
+src/main (mapper gana método privado nuevo; verificador cambia cuerpo, no firma).
 
 ---
 

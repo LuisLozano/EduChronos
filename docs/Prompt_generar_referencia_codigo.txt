@@ -28,4 +28,4 @@ EXCLUYE: sección de flujo principal, sección de "fuera de alcance",
 prosa descriptiva, conteos de restricciones, referencias a fases del roadmap.
 Si un método tiene Javadoc, ignóralo: solo la firma cuenta.
 
-Guárdalo en docs/referencia-codigo-solver.md.
+Guárdalo en docs/referencia-codigo-solver.md. Si ya hay una copia en esa ubicación, crea un backup y elimina el antiguo.

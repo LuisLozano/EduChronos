@@ -45,7 +45,7 @@ Los subgrupos de Diversificación (3ºADi, 3ºBDi, 3ºCDi) **no son entidades
 aisladas de su grupo de origen**. Para todas las sesiones de currículo
 alternativo (ÁmbSL, ÁmbCM, IngDi, OyD, RefMt, TPMAR), los tres subgrupos Di
 se agrupan en una única sesión en A8 con un único profesor. Solo para
-algunas materias compartidas (EPVA, EF) cada Di vuelve a su grupo de origen.
+algunas materias compartidas (p.ej. EPVA, EF; lista completa en §6.2) cada Di vuelve a su grupo de origen.
 
 Implicación: el modelo trata 3ºADi como `GrupoAdministrativo` virtual con
 identidad propia, pero los subgrupos que define se enlazan en `SubgrupoGrupo`
@@ -695,7 +695,7 @@ directamente sobre el grupo.
 
 S9 es **ciega al `grupo_padre`**: agrupa por la identidad del grupo del
 subgrupo, nunca por su padre. Un grupo PDC (p.ej. `3ºADi`) y su grupo padre
-(`3ºA`) son grupos independientes para S9. Sus sesiones compartidas (EF, EPVA)
+(`3ºA`) son grupos independientes para S9. Sus sesiones compartidas (p.ej. EF, EPVA; lista completa en §6.2)
 se modelan con una plaza que lista subgrupos de ambos grupos —y entonces S9 las
 trata como una sola sesión que toca a los dos, sin pedir que se no-solape
 consigo misma—; sus sesiones propias quedan libres. Fundir PDC con su padre en
@@ -996,11 +996,10 @@ Particiones:
         Subgrupo "3ºCDi"    → {3ºC, 3ºCDi}
 ```
 
-Nota sobre la composición de subgrupos: el subgrupo `3ºA-Completo` enlaza
-tanto a `3ºA` como a `3ºADi` porque cuando la actividad es compartida
-(EPVA, EF, Tec), todos los alumnos del grupo asisten juntos. Cuando es
-específica de la mitad Di, se usa `3ºADi`; cuando es de la mitad ordinaria,
-`3ºA-NoDi`.
+Nota sobre la composición de subgrupos: el subgrupo `3ºA-Completo` enlaza tanto a `3ºA` como a `3ºADi`
+porque cuando la actividad es compartida, todos los alumnos del grupo asisten juntos.
+Las sesiones compartidas reales de `3ºA/3ºADi`, verificadas cruzando el horario de `3ºA` ordinario (PDF pág. 8)
+con el de `3ºA PDC` (pág. 9), son: TUT3 (tutoría), EF, EPVA, Tec y el bloque Rel/ATED. Cuando es específica de la mitad Di, se usa `3ºADi`; cuando es de la mitad ordinaria, `3ºA-NoDi`.
 
 **Sesiones.**
 
@@ -1029,6 +1028,8 @@ específica de la mitad Di, se usa `3ºADi`; cuando es de la mitad ordinaria,
   son disjuntos (Di vs No-Di de 3ºB).
 
 ✅ Criterio cubierto.
+
+Nota (Sesión 18) — Rel/ATED es un único bloque para 3ºA y 3ºADi. El cruce de PDFs muestra que el viernes 10-11 el bloque Rel/ATED de 3ºA (REL1 B01 + FIL1 B05 + ING3 A7) es idéntico al de 3ºADi: es la misma actividad, que toca a ambos grupos, no dos sesiones distintas. Se modela como una actividad multi-plaza cuyos subgrupos cubren ambos grupos (mecanismo de §6.4). La transversalidad ampliada por parejas (3ºA+3ºB+3ºADi+3ºBDi, §6.4) se validará con dataset real en Fase 5; el fixture de cierre de Fase 4 recortó Rel/ATED a 3ºA+3ºADi por no aportar nada que EF/Tec no validen ya sobre la ceguera de S9.
 
 ### 6.3 Criterio: TICO de 1ºBach (4 grupos comparten aula y profesor)
 
