@@ -275,6 +275,13 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
+> **Estado (S19):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
+> Bloque 1 CERRADO — Tipo 4 (Religión multi-grupo por parejas) validado en el
+> solver con 1ºESO real; ver "### Bloques de Fase 5" y el registro de Sesión 19.
+> Ninguno de los criterios de verificación de abajo está cerrado: todos exigen el
+> instituto completo, que aún no se ha abordado. El Bloque 1 es prerrequisito
+> (tipología completa), no cierre de criterios.
+
 ### Lo que se añade
 - Todos los grupos restantes: 2ºESO, 3ºESO, 4ºESO, 1ºBach, 2ºBach, FPB
 - Bachillerato con optativas compartidas entre grupos
@@ -419,12 +426,14 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 5 — Solver: instituto completo (sin iniciar)
+Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
+  Bloque 1 cerrado)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 18 — Fase 4 cerrada. Fixture real
-  PDC 3ºA/3ºADi. Criterios 1-4 validados por aserción programática.
-  D15 cerrada en código (doble cara). C5 de Fase 3 sigue diferido.
+Última sesión registrada: Sesión 19 — Fase 5, Bloque 1 cerrado (Religión
+  multi-grupo por parejas, Tipo 4). Fixture 1ºESO real (6/6 plazas verificadas
+  contra volcado fiel) + test; suite 29 en verde. Extracción determinista de
+  PDFs a docs/horario-referencia/. §6.1 Religión/ATED cerrada.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -433,6 +442,14 @@ Fase actual: 5 — Solver: instituto completo (sin iniciar)
 - [x] Bloque 4 — Construcción del modelo CP-SAT
 - [x] Bloque 5 — Output a consola
 - [x] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
+
+### Bloques de Fase 5
+- [x] Bloque 1 — Religión multi-grupo por parejas (Tipo 4), validado con 1ºESO
+      real (S19). Fixture problema-5-religion-parejas-1eso.json +
+      SolverHorarioReligionParejasTest. Datos 6/6 verificados contra volcado fiel.
+- [ ] (pendientes de definir) Escala por niveles + medición de tiempo de solver;
+      FPB (bloques de 2-3 tramos, D12); Bachillerato (Lectura B, optativas
+      multi-grupo); EF con Gim/Pista a escala (D3/D4). Orden a decidir.
 
 ### Fases completadas
 
@@ -1266,6 +1283,70 @@ que el cambio de conteo de aula podría haber afectado y no afectó).
 
 Índice de código (referencia-codigo-solver.md): REGENERADO. Esta sesión cambia
 src/main (mapper gana método privado nuevo; verificador cambia cuerpo, no firma).
+
+### Sesión 19 — Fase 5, Bloque 1: Religión multi-grupo por parejas (Tipo 4).
+
+Fase 5 subdividida en bloques internos (como Fase 2), decidido con el usuario:
+no abordar la escala completa de golpe. Bloque 1 = validar el Tipo 4 (Religión
+multi-grupo / actividad coordinada que bloquea varios grupos completos) ANTES de
+escalar, por ser el último tipo de sesión transversal sin ejercitar en el solver.
+La medición de tiempo de solver a escala (criterio 1 de Fase 5) se difiere a un
+bloque posterior.
+
+Antes de tocar nada se leyó el código real (ModeloCpSat: tocaGrupo/cubreSubgrupo
+y las 5 restricciones; ProblemaHorarioMapper; Subgrupo y SubgrupoDto), lo que
+confirmó dos cosas: (1) Tipo 4 es Lectura A (subgrupos mono-grupo en una plaza
+que lista varios), no fuerza Lectura B; (2) un Subgrupo pertenece a UN solo grupo
+(1:1), así que la notación de §6.4 con subgrupos multi-grupo no era representable.
+
+Entregado:
+- solver/src/test/resources/fixtures/problema-5-religion-parejas-1eso.json:
+  4 grupos de 1ºESO, dos actividades NEUTRA (Relig_ATED-1AB y Relig_ATED-1CD),
+  cada una con 3 plazas (Religión multi-grupo + ATED per-grupo), subgrupos
+  mono-grupo; Mate testigo por grupo en aula aislada (A99). Fr2 de FRA1 NO
+  incluidas (pertenecen a un bloque posterior). Validado contra schema, XOR, I2,
+  integridad referencial, factibilidad y prueba de discriminación de S9.
+- SolverHorarioReligionParejasTest (paquete cpsat): 0 violaciones del verificador
+  + REL1 reparte AB/CD en tramos distintos (S1) + S9 expulsa las Mate del tramo
+  de su bloque + Tipo 4 toca ambos grupos del par.
+- Suite 28 → 29 en verde, BUILD SUCCESS (módulo y reactor). Sin cambios de
+  src/main: el índice de código NO se regenera.
+
+Validación del Tipo 4: prueba de discriminación de S9 en un escenario reducido
+— sin S9 el solape grupo-bloque es FACTIBLE; con S9 es INFACTIBLE. Confirma que
+es S9 (y solo S9) la que hace que un bloque multi-grupo bloquee los grupos
+completos del par.
+
+Procedencia de los datos (verificada, no OCR): las 6 plazas confirmadas plaza a
+plaza contra el volcado fiel de los PDF. Par A+B jueves T5 (Relig REL1/A5 —1ºA y
+1ºB comparten A5—; ATED 1ºA→ING6/A17, 1ºB→GH5/A11). Par C+D martes T6 (Relig
+REL1/A3 —aula-A3.json lista "1ºC 1ºD" juntos—; ATED 1ºC→GH2/C00, 1ºD→FRA1/A14).
+Cada grupo va a Religión en el aula del titular de su pareja.
+
+Documentación de referencia (decidido con el usuario): extracción determinista
+sin OCR de los 3 PDF a docs/horario-referencia/ (28 grupo-*.json + 43 aula-*.json
++ INFORME-RECONCILIACION.md + RESUMEN-EXTRACCION.md + README.md), versionada en
+git. Jerarquía de autoridad: PDF → volcado fiel → modelo §6.x. Los volcados NO
+están en el Project; se piden al usuario por nivel cuando se necesiten. Añadidas
+3 líneas a las instrucciones del Project para que esto se sepa entre sesiones.
+
+Correcciones de modelo aplicadas (modelo_datos_fase1.md): §6.1 (Religión/ATED de
+1ºA pasa a vista parcial con nota de multi-grupo por parejas; deuda pendiente
+desde Sesión 13, cerrada); §6.4 (notación Lectura B → Lectura A, con nota de que
+el reparto de ATED de 3ESO es ilustrativo no verificado); Hallazgo K (ATED con
+las 6 plazas verificadas de 1ºESO).
+
+Hallazgos nuevos (para Fase 5, NO Bloque 1):
+- FPB sin cobertura de aulas en el horario por aulas (65 celdas con aula omitida,
+  informe §1). Decidir aulas de FPB por otra vía al modelar ese bloque.
+- 3ºPDC ↔ 3ºCDi no mapeable de forma determinista (informe, nota de
+  normalización). Reconciliación manual al abordar 3ºESO.
+- Celda LU/LEN1 "1B-C 1B-D" en aula-A3.json: primer indicio en datos fieles de
+  Lectura B real (subgrupo multi-grupo) en optativas de 1ºBachillerato. A
+  resolver en el bloque de Bachillerato.
+
+Deudas: D12, D3, D4, C5, D16 sin tocar (siguen abiertas para bloques posteriores
+de Fase 5). §6.1 Religión/ATED per-grupo: CERRADA en esta sesión.
 
 ---
 
