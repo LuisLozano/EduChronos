@@ -1,0 +1,208 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 17,
+    "codigo_crudo": "A8",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "OyD",
+      "profesor": "FRA1",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "RefMt",
+      "profesor": "MAT7",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "IngDi",
+      "profesor": "ING2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "IngDi",
+      "profesor": "ING2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "OyD",
+      "profesor": "FRA1",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "RefMt",
+      "profesor": "MAT7",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "ÁmbCM",
+      "profesor": "MAT4",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ÁmbSL",
+      "profesor": "LEN2",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "TPMAR",
+      "profesor": "ORI1",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

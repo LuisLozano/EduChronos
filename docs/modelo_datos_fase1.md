@@ -249,8 +249,12 @@ tramos y aulas reales:
 - *Transversal sobre N grupos:* CyR/OyD/RefMt — una sola actividad con
   K plazas que se imparte en el mismo tramo a los cuatro grupos.
 - *Transversal por parejas:* Religión/ATED — Religión es multi-grupo
-  (REL1 reúne A+B en A5 en un tramo y C+D en A3 en otro), ATED es
-  per-grupo en el mismo tramo que su pareja de Religión.
+  (REL1 reúne A+B en A5 en un tramo y C+D en A3 en otro), y la Atención
+  Educativa es per-grupo, cada grupo con su propio profesor y aula, en el
+  mismo tramo que la Religión de su pareja. Verificado en 1ºESO cruzando el
+  horario por aulas (S19): A+B jue 12:30 (ATED 1ºA→ING6/A17, 1ºB→GH5/A11);
+  C+D mar 13:30 (ATED 1ºC→GH2/C00, 1ºD→FRA1/A14). Validado en el solver en
+  Fase 5 (Bloque 1).
 - *Per-grupo sin coordinación intergrupos:* Fr2/ALCT — cuatro
   actividades independientes con tramos no coincidentes.
 
@@ -791,6 +795,9 @@ Particion "Fr2_ALCT-1ºD":
 Particion "Bloque-Relig_ATED-1ºA":
   Subgrupo "1ºA-Relig" → {1ºA}
   Subgrupo "1ºA-ATED"  → {1ºA}
+  -- (1ºB-Relig pertenece a la partición de 1ºB; aparece en la plaza de
+  --  Religión de esta actividad porque el bloque es por parejas A+B, pero
+  --  su población es de 1ºB. El bloque completo se modela en §6.4.)
 ```
 
 Verificación de I1: en cada partición, la suma de subgrupos enlazados a un
@@ -940,19 +947,18 @@ Verificación:
 
 #### Actividad coordinada — Religión / Atención Educativa de 1ºA
 
-```
-Actividad "Bloque-Relig_ATED-1ºA" (asignatura=NULL, repeticiones=1, NEUTRA):
-  Plaza Relig, REL1, A5,  subgrupos=(1ºA-Relig)
-  Plaza ATED,  ING6, A17, subgrupos=(1ºA-ATED)
-```
+Esta vista es PARCIAL a propósito: §6.1 valida 1ºA como grupo individual,
+así que solo se enumeran sus subgrupos en la plaza de ATED. Pero la plaza de
+Religión NO es per-grupo: en el horario real REL1 reúne a 1ºA y 1ºB juntos en
+A5 el jueves 12:30 (verificado cruzando el horario por aulas, S19), por eso su
+plaza ya lista `1ºB-Relig` además de `1ºA-Relig`. La Religión de 1ºESO se
+organiza por PAREJAS (A+B en un tramo, C+D en otro), no por grupo; ATED es
+per-grupo en el mismo tramo que la Religión de su pareja. El bloque por parejas
+completo (las dos actividades A+B y C+D con sus cuatro ATED reales) se modela
+en §6.4 y se validó en el solver en Fase 5 (Bloque 1, fixture
+`problema-5-religion-parejas-1eso.json`). Ver Hallazgo K.
 
-Una sola repetición porque en el horario real solo aparece un tramo de este
-bloque para 1ºA (jue 12:30). Si REL1 reuniese también a alumnos de otros
-grupos en el mismo tramo (caso multi-grupo de Religión), la actividad
-incluiría subgrupos de varios grupos sin cambio estructural alguno; eso se
-validará al modelar el resto de 1ºESO.
-
-✅ Criterio cubierto.
+✅ Criterio cubierto (vista parcial de 1ºA; modelado multi-grupo en §6.4).
 
 #### Resumen de la validación de 1ºESO A
 
@@ -1064,22 +1070,37 @@ Caso real: viernes 10-11, Religión + dos plazas de Atención Educativa para
 {3ºA, 3ºB, 3ºADi, 3ºBDi}.
 
 ```
-Particion: "Religion-3ESO-AB"
-  Subgrupo "3AB-Rel"            → {3ºA, 3ºB, 3ºADi, 3ºBDi}
-  Subgrupo "3AB-ATED-Letras"    → {3ºA, 3ºB, 3ºADi, 3ºBDi}
-  Subgrupo "3AB-ATED-Ingles"    → {3ºA, 3ºB, 3ºADi, 3ºBDi}
-(la suma cubre la población total de los cuatro grupos)
+Particiones (una por grupo de origen; cada subgrupo pertenece a UN solo grupo):
 
+"Relig-3ESO-A":  Subgrupo "3ºA-Rel"  → {3ºA}    Subgrupo "3ºA-ATED"  → {3ºA}
+
+"Relig-3ESO-B":  Subgrupo "3ºB-Rel"  → {3ºB}    Subgrupo "3ºB-ATED"  → {3ºB}
+
+"Relig-3ESO-ADi": Subgrupo "3ºADi-Rel" → {3ºADi}  Subgrupo "3ºADi-ATED" → {3ºADi}
+
+"Relig-3ESO-BDi": Subgrupo "3ºBDi-Rel" → {3ºBDi}  Subgrupo "3ºBDi-ATED" → {3ºBDi}
 Actividad: asignatura=NULL
-  Plaza: Rel,  REL1, B01, subgrupos=(3AB-Rel)
-  Plaza: ATED, FIL1, B05, subgrupos=(3AB-ATED-Letras)
-  Plaza: ATED, ING3, A7,  subgrupos=(3AB-ATED-Ingles)
+
+Plaza: Rel,  REL1, B01, subgrupos=(3ºA-Rel, 3ºB-Rel, 3ºADi-Rel, 3ºBDi-Rel)
+
+Plaza: ATED, FIL1, B05, subgrupos=(3ºA-ATED, 3ºB-ATED)
+
+Plaza: ATED, ING3, A7,  subgrupos=(3ºADi-ATED, 3ºBDi-ATED)
 ```
 
-Tres plazas → mismo tramo por construcción. Suma de subgrupos cubre los
-cuatro grupos completos.
+Tres plazas → mismo tramo por construcción. Los subgrupos son MONO-GRUPO
+(cada uno pertenece a un único grupo): es la "Lectura A" (una plaza lista
+subgrupos de varios grupos). NO se usa un subgrupo cuya población sean alumnos
+de varios grupos ("Lectura B", `SubgrupoGrupo` N:M): el `Subgrupo` del dominio
+tiene un único `grupo` (1:1), y el modelo CP-SAT bloquea un grupo vía
+`tocaGrupo`, que recorre los subgrupos de cada plaza y mira `sg.grupo()`. Por
+eso, para que el bloque bloquee los cuatro grupos (S9), se necesita un subgrupo
+por grupo en las plazas, no un subgrupo multi-grupo. El reparto concreto de
+ATED entre las dos plazas (Letras/Inglés) es una de las particiones posibles
+que cubren la población de los cuatro grupos.
 
-✅ Criterio cubierto.
+✅ Criterio cubierto (Lectura A; validado en el solver en Fase 5, Bloque 1,
+con el patrón análogo de 1ºESO en `problema-5-religion-parejas-1eso.json`).
 
 ### 6.5 Criterio adicional: horario completo de 1ºBACH B (Sesión 4)
 

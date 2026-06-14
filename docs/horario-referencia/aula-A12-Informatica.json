@@ -1,0 +1,118 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 4,
+    "codigo_crudo": "A12 Informática",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "TICO",
+      "profesor": "INF1",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "CyR",
+      "profesor": "INF1",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "TICO",
+      "profesor": "INF1",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "profesor": "INF1",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "profesor": "INF1",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "profesor": "INF1",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "DIG",
+      "profesor": "INF1",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

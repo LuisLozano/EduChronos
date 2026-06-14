@@ -1,0 +1,217 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 24,
+    "codigo_crudo": "B03",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "Mat",
+      "profesor": "MAT7",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "RefMt",
+      "profesor": "MAT6",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "profesor": "LEN3",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "Rel",
+      "profesor": "REL1",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Mat",
+      "profesor": "MAT7",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Mat",
+      "profesor": "MAT7",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "Mat",
+      "profesor": "MAT7",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Geogr",
+      "profesor": "GH4",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "TUT3",
+      "profesor": "BYG3",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "Geogr",
+      "profesor": "GH4",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Geogr",
+      "profesor": "GH4",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "profesor": "BYG3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

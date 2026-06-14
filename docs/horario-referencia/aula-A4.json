@@ -1,0 +1,280 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 13,
+    "codigo_crudo": "A4",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "HESP",
+      "profesor": "GH3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "CT",
+      "profesor": "LEN3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "HESP",
+      "profesor": "GH3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Ingl",
+      "profesor": "ING6",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Ingl",
+      "profesor": "ING6",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "HFIL",
+      "profesor": "FIL2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "QUI",
+      "profesor": "FIS1",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "profesor": "MAT3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "QUI",
+      "profesor": "FIS1",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "QUI",
+      "profesor": "FIS1",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "HESP",
+      "profesor": "GH3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "QUI",
+      "profesor": "FIS1",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "BIOL",
+      "profesor": "BYG2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "HESP",
+      "profesor": "GH3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "Mate2",
+      "profesor": "MAT3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Mate2",
+      "profesor": "MAT3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "EST",
+      "profesor": "MAT5",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "EST",
+      "profesor": "MAT5",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "CT",
+      "profesor": "LEN3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Ingl",
+      "profesor": "ING6",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "BIOL",
+      "profesor": "BYG2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "BIOL",
+      "profesor": "BYG2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Mate2",
+      "profesor": "MAT3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "HFIL",
+      "profesor": "FIL2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "BIOL",
+      "profesor": "BYG2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "HFIL",
+      "profesor": "FIL2",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "profesor": "LEN3",
+      "grupos": "2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "PTEV",
+      "profesor": "FIL2",
+      "grupos": "2B-A 2B-B",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

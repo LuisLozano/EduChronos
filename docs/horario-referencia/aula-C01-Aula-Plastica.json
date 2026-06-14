@@ -1,0 +1,100 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 35,
+    "codigo_crudo": "C01 Aula Plástica",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "DA",
+      "profesor": "DIB1",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºADi 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "DA",
+      "profesor": "DIB1",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "EXPRE",
+      "profesor": "DIB2",
+      "grupos": "4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "2B-A 2B-B 2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "EXPRE",
+      "profesor": "DIB2",
+      "grupos": "4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "EXPRE",
+      "profesor": "DIB2",
+      "grupos": "4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

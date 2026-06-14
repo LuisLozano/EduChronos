@@ -1,0 +1,109 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 40,
+    "codigo_crudo": "Taller 3",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "grupos": "2FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "grupos": "2FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "grupos": "2FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "grupos": "2FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "grupos": "2FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "CS",
+      "profesor": "GH1",
+      "grupos": "1FPB",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

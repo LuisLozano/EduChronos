@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 10,
+    "codigo_crudo": "A18",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "RelEV",
+      "profesor": "REV",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

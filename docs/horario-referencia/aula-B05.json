@@ -1,0 +1,208 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 26,
+    "codigo_crudo": "B05",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "RefMt",
+      "profesor": "MAT7",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Mat",
+      "profesor": "MAT6",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "profesor": "LEN7",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Geo",
+      "profesor": "GH4",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "ATED",
+      "profesor": "FIL1",
+      "grupos": "3ºA 3ºB 3ºADi 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Geo",
+      "profesor": "GH4",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "Ingl",
+      "profesor": "ING5",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Mat",
+      "profesor": "MAT6",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "profesor": "GH4",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "profesor": "MAT6",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "profesor": "BYG2",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "profesor": "MAT6",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "TUT3",
+      "profesor": "BYG2",
+      "grupos": "3ºB 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

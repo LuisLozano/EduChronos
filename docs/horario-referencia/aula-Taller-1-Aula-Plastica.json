@@ -1,0 +1,181 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 34,
+    "codigo_crudo": "Taller 1 Aula Plástica",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºB 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºA 3ºADi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºADi 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "DTec",
+      "profesor": "DIB2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "PEPA",
+      "profesor": "DIB2",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "PEPA",
+      "profesor": "DIB2",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "DTec",
+      "profesor": "DIB2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºADi 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºB 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºA 4ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "DTec",
+      "profesor": "DIB2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "DT",
+      "profesor": "DIB1",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºA 4ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "DTec",
+      "profesor": "DIB2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "grupos": "4ºA 4ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "EPVA",
+      "profesor": "DIB2",
+      "grupos": "3ºA 3ºADi",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

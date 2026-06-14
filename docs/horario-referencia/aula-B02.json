@@ -1,0 +1,235 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 23,
+    "codigo_crudo": "B02",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "MCCSS",
+      "profesor": "MAT5",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "MCCSS",
+      "profesor": "MAT5",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "ECO",
+      "profesor": "FOL3",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "profesor": "LEN1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Ing1",
+      "profesor": "ING5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "HMC",
+      "profesor": "GH5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Ing1",
+      "profesor": "ING5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "ECO",
+      "profesor": "FOL3",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "HMC",
+      "profesor": "GH5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "Ing1",
+      "profesor": "ING5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "HMC",
+      "profesor": "GH5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "HMC",
+      "profesor": "GH5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "profesor": "LEN1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "MCCSS",
+      "profesor": "MAT5",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "ECO",
+      "profesor": "FOL3",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "MCCSS",
+      "profesor": "MAT5",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "profesor": "LEN1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "HART",
+      "profesor": "GH6",
+      "grupos": "2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Ing1",
+      "profesor": "ING5",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ECO",
+      "profesor": "FOL3",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "Relig",
+      "profesor": "REL1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

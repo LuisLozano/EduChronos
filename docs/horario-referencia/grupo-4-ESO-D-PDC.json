@@ -1,0 +1,316 @@
+{
+  "_meta": {
+    "fuente": "Horarios de grupos.pdf",
+    "pagina": 19,
+    "codigo_crudo": "4º ESO D PDC",
+    "modo": "grupos"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "FOPP",
+      "profesor": "FRA1",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "EFís",
+      "profesor": "EFI3",
+      "aula": "Pista",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "EXPRE",
+      "profesor": "DIB1",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "FOPP",
+      "profesor": "FRA1",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Rel",
+      "profesor": "REL1",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "ATEDU",
+      "profesor": "EFI1",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "ATEDU",
+      "profesor": "EFI3",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "ATEDU",
+      "profesor": "GH4",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "ATEDU",
+      "profesor": "ING3",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "FOPP",
+      "profesor": "FRA1",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "AmbCT",
+      "profesor": "FIS4",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "RefMt",
+      "profesor": "MAT5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "RefLe",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "EFís",
+      "profesor": "EFI3",
+      "aula": "Pista",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "TPMAR",
+      "profesor": "ORI1",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "AmbSL",
+      "profesor": "LEN5",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "TUT4",
+      "profesor": "EFI3",
+      "aula": "C00",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 15,
+    "codigo_crudo": "A6 Laboratorio",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS3",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS3",
+      "grupos": "1B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS4",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "FQ",
+      "profesor": "FIS4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "ANAP",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "FQ",
+      "profesor": "FIS4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "ANAP",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "BioNu",
+      "profesor": "BYG3",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "FyQ",
+      "profesor": "FIS2",
+      "grupos": "2ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Bio",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "FQ",
+      "profesor": "FIS3",
+      "grupos": "1B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "FQ",
+      "profesor": "FIS3",
+      "grupos": "1B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "FQ",
+      "profesor": "FIS2",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Bio",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Lab",
+      "profesor": "BYG2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Biol",
+      "profesor": "BYG2",
+      "grupos": "3ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "Bio",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "FyQ",
+      "profesor": "FIS2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Lab",
+      "profesor": "BYG2",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "Biol",
+      "profesor": "BYG2",
+      "grupos": "3ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "profesor": "BYG3",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "FQ",
+      "profesor": "FIS3",
+      "grupos": "1B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "FQ",
+      "profesor": "FIS4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "profesor": "BYG3",
+      "grupos": "3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Bio",
+      "profesor": "BYG3",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

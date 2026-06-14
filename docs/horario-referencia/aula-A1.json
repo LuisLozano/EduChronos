@@ -1,0 +1,253 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 1,
+    "codigo_crudo": "A1",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "profesor": "LEN9",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "FyQ",
+      "profesor": "FIS2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "TUT2",
+      "profesor": "MAT5",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Rel",
+      "profesor": "REL1",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Fr2",
+      "profesor": "FRA1",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "RefMt",
+      "profesor": "MAT5",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Fr2",
+      "profesor": "FRA1",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "Ingl",
+      "profesor": "ING1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "Mat",
+      "profesor": "MAT5",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "VEtic",
+      "profesor": "FIL1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Mat",
+      "profesor": "MAT5",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "Mús",
+      "profesor": "MUS1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "LU",
+      "profesor": "LEN1",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Mús",
+      "profesor": "MUS1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "FyQ",
+      "profesor": "FIS2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "profesor": "LEN9",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Físic",
+      "profesor": "FIS4",
+      "grupos": "2B-A 2B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Ingl",
+      "profesor": "ING1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "profesor": "LEN9",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "profesor": "MAT5",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Ingl",
+      "profesor": "ING1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "Ingl",
+      "profesor": "ING1",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "profesor": "LEN9",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "profesor": "MAT5",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

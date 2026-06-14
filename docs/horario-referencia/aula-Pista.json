@@ -1,0 +1,145 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 43,
+    "codigo_crudo": "Pista",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "EF",
+      "profesor": "EFI1",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "EdFís",
+      "profesor": "EFI1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "EdFís",
+      "profesor": "EFI3",
+      "grupos": "1B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "EFís",
+      "profesor": "EFI3",
+      "grupos": "4ºD 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "EFis",
+      "profesor": "EFI1",
+      "grupos": "4ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "EFis",
+      "profesor": "EFI1",
+      "grupos": "4ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "AFAVS",
+      "profesor": "EFI3",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "EF",
+      "profesor": "EFI3",
+      "grupos": "3ºA 3ºADi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "EF",
+      "profesor": "EFI1",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "EdFís",
+      "profesor": "EFI1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "AFAVS",
+      "profesor": "EFI3",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "EF",
+      "profesor": "EFI3",
+      "grupos": "3ºA 3ºADi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "EdFís",
+      "profesor": "EFI1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "EFís",
+      "profesor": "EFI3",
+      "grupos": "4ºD 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "EdFís",
+      "profesor": "EFI1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

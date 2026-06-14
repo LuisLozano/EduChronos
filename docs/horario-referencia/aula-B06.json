@@ -1,0 +1,208 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 27,
+    "codigo_crudo": "B06",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Ing1",
+      "profesor": "ING4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "LU",
+      "profesor": "LEN1",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Ing1",
+      "profesor": "ING4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "Matem",
+      "profesor": "MAT7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "Ing1",
+      "profesor": "ING4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "HART",
+      "profesor": "GH6",
+      "grupos": "2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "profesor": "LEN7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Filos",
+      "profesor": "FIL1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "Matem",
+      "profesor": "MAT7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Pat",
+      "profesor": "GH6",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "HART",
+      "profesor": "GH6",
+      "grupos": "2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Matem",
+      "profesor": "MAT7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Pat",
+      "profesor": "GH6",
+      "grupos": "1B-A 1B-B 1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "Matem",
+      "profesor": "MAT7",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Relig",
+      "profesor": "REL1",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Ing1",
+      "profesor": "ING4",
+      "grupos": "1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Relig",
+      "profesor": "REL1",
+      "grupos": "2B-A 2B-B",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

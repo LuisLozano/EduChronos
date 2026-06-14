@@ -1,0 +1,181 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 33,
+    "codigo_crudo": "C00",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "profesor": "LEN6",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "Gri2",
+      "profesor": "CLA1",
+      "grupos": "2B-C",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "MatAc",
+      "profesor": "MAT4",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN6",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN6",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "profesor": "LEN6",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "MatAc",
+      "profesor": "MAT4",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Ing",
+      "profesor": "ING2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "GeH",
+      "profesor": "GH2",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "ATED",
+      "profesor": "GH2",
+      "grupos": "1ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "MatAc",
+      "profesor": "MAT4",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "MatAc",
+      "profesor": "MAT4",
+      "grupos": "4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "TUT4",
+      "profesor": "EFI3",
+      "grupos": "4ºD 4ºDDi",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

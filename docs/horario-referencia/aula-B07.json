@@ -1,0 +1,244 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 28,
+    "codigo_crudo": "B07",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "3ºB 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "3ºA 3ºADi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "3ºC 3ºCDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "2ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "2B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "CyR",
+      "profesor": "TEC3",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "2B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "CyR",
+      "profesor": "TEC3",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "profesor": "TEC3",
+      "grupos": "3ºA 3ºB 3ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "2B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "TecIn",
+      "profesor": "TEC2",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "profesor": "TEC3",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "TecIn",
+      "profesor": "TEC2",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "2B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "TecIn",
+      "profesor": "TEC2",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Tec",
+      "profesor": "TEC3",
+      "grupos": "3ºB 3ºBDi",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "4ºA 4ºB 4ºC 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "TEC",
+      "profesor": "TEC2",
+      "grupos": "4ºA 4ºB 4ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Tec",
+      "profesor": "BYG3",
+      "grupos": "2ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "TecIn",
+      "profesor": "TEC2",
+      "grupos": "1B-A 1B-B",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

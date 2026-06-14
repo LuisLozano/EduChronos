@@ -1,0 +1,154 @@
+{
+  "_meta": {
+    "fuente": "Horarios de aulas.pdf",
+    "pagina": 9,
+    "codigo_crudo": "A17",
+    "modo": "aulas"
+  },
+  "celdas": [
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "Mate2",
+      "profesor": "MAT3",
+      "grupos": "2B-A",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "GRI",
+      "profesor": "CLA1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "RefMt",
+      "profesor": "MAT7",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "ALCT",
+      "profesor": "LEN9",
+      "grupos": "1ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "RefLe",
+      "profesor": "LEN2",
+      "grupos": "2ºA 2ºB 2ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "ALCT",
+      "profesor": "LEN9",
+      "grupos": "1ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "GRI",
+      "profesor": "CLA1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LU",
+      "profesor": "LEN1",
+      "grupos": "1B-C 1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "ALCT",
+      "profesor": "LEN9",
+      "grupos": "1ºC",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "ALCT",
+      "profesor": "LEN9",
+      "grupos": "1ºB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "ALCT",
+      "profesor": "LEN2",
+      "grupos": "1ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "GRI",
+      "profesor": "CLA1",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "ATED",
+      "profesor": "ING6",
+      "grupos": "1ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "ALCT",
+      "profesor": "LEN2",
+      "grupos": "1ºA",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ALCT",
+      "profesor": "LEN5",
+      "grupos": "1ºD",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "PTVE",
+      "profesor": "FIL2",
+      "grupos": "1B-D",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}
