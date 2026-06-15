@@ -427,13 +427,16 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloque 1 cerrado)
+  Bloques 1 y 2 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 19 — Fase 5, Bloque 1 cerrado (Religión
-  multi-grupo por parejas, Tipo 4). Fixture 1ºESO real (6/6 plazas verificadas
-  contra volcado fiel) + test; suite 29 en verde. Extracción determinista de
-  PDFs a docs/horario-referencia/. §6.1 Religión/ATED cerrada.
+Última sesión registrada: Sesión 20 — Fase 5, Bloque 2 cerrado (escala 1º+2º
+  ESO, 7 grupos). Fixture de escala problema-5-escala-instituto.json (linaje
+  nuevo) + SolverHorarioEscalaInstitutoTest; 1º y 2º verificados plaza a plaza
+  contra volcado fiel. Medición wall-clock: factible en 0,317 s, 0 violaciones
+  duras; suite 30 en verde. Códigos normalizados sin "º". Ningún criterio formal
+  de Fase 5 marcado (7 grupos ≠ instituto completo): criterio 1 con primer punto
+  de curva, criterio 2 con evidencia parcial.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -447,9 +450,17 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
 - [x] Bloque 1 — Religión multi-grupo por parejas (Tipo 4), validado con 1ºESO
       real (S19). Fixture problema-5-religion-parejas-1eso.json +
       SolverHorarioReligionParejasTest. Datos 6/6 verificados contra volcado fiel.
-- [ ] (pendientes de definir) Escala por niveles + medición de tiempo de solver;
-      FPB (bloques de 2-3 tramos, D12); Bachillerato (Lectura B, optativas
-      multi-grupo); EF con Gim/Pista a escala (D3/D4). Orden a decidir.
+- [x] Bloque 2 — Escala 1ºESO + 2ºESO (7 grupos: 4 de 1º + 3 de 2º), medición de
+      tiempo de solver (S20). Fixture problema-5-escala-instituto.json (linaje
+      NUEVO de fixture de escala, separado de los de discriminación; crece por
+      niveles hasta el instituto) + SolverHorarioEscalaInstitutoTest. 1º y 2º
+      verificados plaza a plaza contra volcado fiel. Medición: solución factible
+      en 0,317 s, 0 violaciones duras (suite 30 verde). Códigos de grupo
+      normalizados sin "º" (1A..2C).
+- [ ] (pendientes de definir) Más niveles de escala (3ºESO con reconciliación
+      3ºPDC↔3ºCDi; 4ºESO con PDC nuevo); FPB (bloques 2-3 tramos, D12);
+      Bachillerato (Lectura B, optativas multi-grupo); EF con Gim/Pista a escala
+      (D3/D4). Orden a decidir.
 
 ### Fases completadas
 
@@ -1347,6 +1358,73 @@ Hallazgos nuevos (para Fase 5, NO Bloque 1):
 
 Deudas: D12, D3, D4, C5, D16 sin tocar (siguen abiertas para bloques posteriores
 de Fase 5). §6.1 Religión/ATED per-grupo: CERRADA en esta sesión.
+
+Observación S20 (escala 1º+2º): Gim alcanza 18 slots como recurso compartido
+  inter-nivel (EF de 1º + 2º). Aún holgado (<30); no fuerza modelado dedicado
+  todavía. Reevaluar al añadir más niveles con EF.
+
+### Sesión 20 — Fase 5, Bloque 2: escala 1º+2º ESO (7 grupos). Medición de solver.
+
+Bloque de ESCALA, no estructural. Objetivo: atacar el riesgo no medido del
+proyecto (criterio 1 de Fase 5, <10 min) midiendo tiempo de solver sobre un
+escalón mayor que todo lo anterior. Se eligió 2ºESO como primer nivel nuevo
+(volumen, no estructura) frente a 4ºESO (que habría mezclado escala + PDC nuevo);
+1ºESO se reconstruyó completo (no existía entero en un solo fixture, solo
+troceado en fixtures de discriminación).
+
+Decisiones de diseño:
+- Linaje NUEVO de "fixture de escala" (problema-5-escala-instituto.json), distinto
+  de los fixtures de discriminación (que NO se tocan y NO crecen). El de escala
+  crece nivel a nivel hasta el instituto. Su test mide tiempo + 0 duras.
+- Códigos de grupo normalizados sin "º" (1A..2C) para alinearse con los fixtures
+  que el solver ya digirió y eliminar una variable no probada.
+- Aulas variables de ordinarias de 2º (FyQ→{aula grupo, A6 laboratorio};
+  Tec→{aula grupo, B07}) modeladas como aulasCandidatas (decisión confirmada).
+- PEPA/Fr2/CyR de 2º: dos bloques rep=1 (mié y vie), NO una actividad rep=2,
+  porque las instancias difieren en plazas (RefMt el miércoles, RefLe el viernes)
+  y Actividad exige plazas idénticas entre repeticiones. La continuidad del
+  alumno de optativa se modela con subgrupo de optativa COMPARTIDO entre ambos
+  bloques (Hallazgo D / I6) + S3. La población real de cada subgrupo de refuerzo
+  es una de las particiones posibles; a confirmar con el centro (salvedad análoga
+  a la de ATED en §6.4).
+
+Patrones nuevos de 2º respecto a 1º (todos Lectura A, sin Lectura B):
+- Religión Tipo 4 multi-grupo a 3 grupos (Rel REL1/A1 + RelEV REV/A18 comunes a
+  A/B/C; ATEDU per-grupo). En 1º era por parejas; aquí los 3 juntos.
+- Asignaturas nuevas: FyQ, GeH, Tec, VEtic, PEPA, RefLe, ATEDU, RelEV.
+- Confirmado que 2º NO necesita Lectura B (subgrupo multi-grupo); sigue siendo
+  prerrequisito solo de Bachillerato.
+
+Verificación (toda programática, contra volcado fiel docs/horario-referencia/):
+- 1º (4 grupos) y 2º (3 grupos): 30/30 slots ocupados cada grupo; demanda
+  curricular idéntica al volcado asignatura por asignatura.
+- Fixture combinado válido: schema + XOR de aula por plaza (regla confirmada
+  leyendo Plaza.java en S20: aulaFija XOR aulasCandidatas, ambas guardas) +
+  I2 + integridad referencial. Comprobación manual de 2ºC cotejada celda a celda.
+- Factibilidad necesaria (no suficiente): carga ≤30 por grupo/profesor/aula fija.
+  Recursos inter-nivel ya cargados: Gim 18 slots, profesores-puente (TEC3, EFI2,
+  MUS1, FRA1, REL1) entre 1º y 2º. Ninguno saturado de entrada.
+
+Entregado y commiteado:
+- solver/src/test/resources/fixtures/problema-5-escala-instituto.json: 7 grupos,
+  37 profesores, 16 aulas, 27 asignaturas, 77 subgrupos, 76 actividades, 101
+  plazas (10 con aulasCandidatas).
+- SolverHorarioEscalaInstitutoTest (cpsat): wall-clock alrededor de resolver()
+  con SolverHorario(600.0, 42); afirma <600 s y 0 violaciones duras. @Timeout 660 s.
+- Medición: solución factible en 0,317 s. Suite 30 en verde, BUILD SUCCESS.
+
+Lectura honesta del resultado: 0,317 s a 7 grupos descarta el escenario
+catastrófico ("ya tarda minutos a 7 grupos"), pero NO permite extrapolar al
+instituto completo (CP es no lineal; un punto no define curva). El problema actual
+está holgado (recursos lejos de saturar), lo que favorece tiempos bajos; al
+añadir niveles la holgura baja y el régimen puede cambiar. Criterio 1 de Fase 5:
+primer punto de curva, NO cerrado. Criterio 2: evidencia parcial (0 duras a 7
+grupos), NO cerrado (exige instituto completo).
+
+src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido
+sobre su commit hash. Mide factibilidad pura (SolverHorario sin objetivo): tiempo
+hasta primera solución factible, no hasta óptimo; al introducir blandas en fase
+futura el tiempo será otro.
 
 ---
 

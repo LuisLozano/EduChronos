@@ -1,0 +1,2702 @@
+{
+  "tramos": [
+    {
+      "codigo": "D1-1",
+      "diaSemana": 1,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D1-2",
+      "diaSemana": 1,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D1-3",
+      "diaSemana": 1,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D1-4",
+      "diaSemana": 1,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D1-5",
+      "diaSemana": 1,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D1-6",
+      "diaSemana": 1,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D2-1",
+      "diaSemana": 2,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D2-2",
+      "diaSemana": 2,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D2-3",
+      "diaSemana": 2,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D2-4",
+      "diaSemana": 2,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D2-5",
+      "diaSemana": 2,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D2-6",
+      "diaSemana": 2,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D3-1",
+      "diaSemana": 3,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D3-2",
+      "diaSemana": 3,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D3-3",
+      "diaSemana": 3,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D3-4",
+      "diaSemana": 3,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D3-5",
+      "diaSemana": 3,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D3-6",
+      "diaSemana": 3,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D4-1",
+      "diaSemana": 4,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D4-2",
+      "diaSemana": 4,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D4-3",
+      "diaSemana": 4,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D4-4",
+      "diaSemana": 4,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D4-5",
+      "diaSemana": 4,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D4-6",
+      "diaSemana": 4,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D5-1",
+      "diaSemana": 5,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D5-2",
+      "diaSemana": 5,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D5-3",
+      "diaSemana": 5,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D5-4",
+      "diaSemana": 5,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D5-5",
+      "diaSemana": 5,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D5-6",
+      "diaSemana": 5,
+      "ordenEnDia": 6
+    }
+  ],
+  "aulas": [
+    {
+      "codigo": "A1",
+      "nombre": "Aula 1"
+    },
+    {
+      "codigo": "A10",
+      "nombre": "Aula 10"
+    },
+    {
+      "codigo": "A11",
+      "nombre": "Aula 11"
+    },
+    {
+      "codigo": "A12In",
+      "nombre": "Aula de Informática"
+    },
+    {
+      "codigo": "A14",
+      "nombre": "Aula 14"
+    },
+    {
+      "codigo": "A17",
+      "nombre": "Aula 17"
+    },
+    {
+      "codigo": "A18",
+      "nombre": "Aula 18"
+    },
+    {
+      "codigo": "A3",
+      "nombre": "Aula 3"
+    },
+    {
+      "codigo": "A5",
+      "nombre": "Aula 5"
+    },
+    {
+      "codigo": "A6",
+      "nombre": "Laboratorio de Ciencias"
+    },
+    {
+      "codigo": "A7",
+      "nombre": "Aula 7"
+    },
+    {
+      "codigo": "A9",
+      "nombre": "Aula 9"
+    },
+    {
+      "codigo": "B07",
+      "nombre": "Taller de Tecnología"
+    },
+    {
+      "codigo": "C00",
+      "nombre": "Aula C00"
+    },
+    {
+      "codigo": "Gim",
+      "nombre": "Gimnasio"
+    },
+    {
+      "codigo": "TALL1",
+      "nombre": "Taller de Plástica"
+    }
+  ],
+  "asignaturas": [
+    {
+      "codigo": "ALCT",
+      "nombre": "Apoyo Lengua / Comprensión Textos"
+    },
+    {
+      "codigo": "ATED",
+      "nombre": "Atención Educativa"
+    },
+    {
+      "codigo": "ATEDU",
+      "nombre": "Atención Educativa"
+    },
+    {
+      "codigo": "ByG",
+      "nombre": "Biología y Geología"
+    },
+    {
+      "codigo": "CyR",
+      "nombre": "Computación y Robótica"
+    },
+    {
+      "codigo": "EF",
+      "nombre": "Educación Física"
+    },
+    {
+      "codigo": "Fr2",
+      "nombre": "Francés 2º idioma"
+    },
+    {
+      "codigo": "FyQ",
+      "nombre": "Física y Química"
+    },
+    {
+      "codigo": "GeH",
+      "nombre": "Geografía e Historia"
+    },
+    {
+      "codigo": "Geo",
+      "nombre": "Geografía e Historia"
+    },
+    {
+      "codigo": "Ing",
+      "nombre": "Inglés"
+    },
+    {
+      "codigo": "Ingl",
+      "nombre": "Inglés"
+    },
+    {
+      "codigo": "LCL",
+      "nombre": "Lengua Castellana y Literatura"
+    },
+    {
+      "codigo": "Mat",
+      "nombre": "Matemáticas"
+    },
+    {
+      "codigo": "Mús",
+      "nombre": "Música"
+    },
+    {
+      "codigo": "OyD",
+      "nombre": "Oratoria y Debate"
+    },
+    {
+      "codigo": "PEPA",
+      "nombre": "Proyecto / PEPA"
+    },
+    {
+      "codigo": "PLAS",
+      "nombre": "Plástica"
+    },
+    {
+      "codigo": "RefLe",
+      "nombre": "Refuerzo de Lengua"
+    },
+    {
+      "codigo": "RefMt",
+      "nombre": "Refuerzo de Matemáticas"
+    },
+    {
+      "codigo": "Rel",
+      "nombre": "Religión"
+    },
+    {
+      "codigo": "RelEV",
+      "nombre": "Religión (valores EV)"
+    },
+    {
+      "codigo": "Relig",
+      "nombre": "Religión"
+    },
+    {
+      "codigo": "TUT1",
+      "nombre": "Tutoría alumnos"
+    },
+    {
+      "codigo": "TUT2",
+      "nombre": "Tutoría alumnos"
+    },
+    {
+      "codigo": "Tec",
+      "nombre": "Tecnología"
+    },
+    {
+      "codigo": "VEtic",
+      "nombre": "Valores Éticos"
+    }
+  ],
+  "profesores": [
+    {
+      "codigo": "BYG1",
+      "nombre": "Macías Magro, Sonia"
+    },
+    {
+      "codigo": "BYG3",
+      "nombre": "BYG3"
+    },
+    {
+      "codigo": "DIB1",
+      "nombre": "Ruiz del Castillo, María"
+    },
+    {
+      "codigo": "DIB2",
+      "nombre": "Téllez Martínez, Olga"
+    },
+    {
+      "codigo": "EFI1",
+      "nombre": "EFI1"
+    },
+    {
+      "codigo": "EFI2",
+      "nombre": "García Granados, José Antonio"
+    },
+    {
+      "codigo": "FIL1",
+      "nombre": "FIL1"
+    },
+    {
+      "codigo": "FIL3",
+      "nombre": "FIL3"
+    },
+    {
+      "codigo": "FIS2",
+      "nombre": "FIS2"
+    },
+    {
+      "codigo": "FRA1",
+      "nombre": "FRA1"
+    },
+    {
+      "codigo": "GH2",
+      "nombre": "GH2"
+    },
+    {
+      "codigo": "GH3",
+      "nombre": "Vela Montero, José Antonio"
+    },
+    {
+      "codigo": "GH5",
+      "nombre": "GH5"
+    },
+    {
+      "codigo": "GH6",
+      "nombre": "Jiménez Montes, María de los Ángeles"
+    },
+    {
+      "codigo": "INF1",
+      "nombre": "INF1"
+    },
+    {
+      "codigo": "ING1",
+      "nombre": "ING1"
+    },
+    {
+      "codigo": "ING2",
+      "nombre": "Velázquez Barba, Trinidad"
+    },
+    {
+      "codigo": "ING3",
+      "nombre": "Painta Lesiak, Bárbara A."
+    },
+    {
+      "codigo": "ING4",
+      "nombre": "Torres Bravo, Adoración"
+    },
+    {
+      "codigo": "ING6",
+      "nombre": "ING6"
+    },
+    {
+      "codigo": "LEN1",
+      "nombre": "LEN1"
+    },
+    {
+      "codigo": "LEN2",
+      "nombre": "García Gómez, Ana Belén"
+    },
+    {
+      "codigo": "LEN3",
+      "nombre": "García Bernal, María Teresa"
+    },
+    {
+      "codigo": "LEN5",
+      "nombre": "LEN5"
+    },
+    {
+      "codigo": "LEN6",
+      "nombre": "García Rodríguez, Lina M."
+    },
+    {
+      "codigo": "LEN8",
+      "nombre": "Rodríguez Illana, Manuel"
+    },
+    {
+      "codigo": "LEN9",
+      "nombre": "García Quintana, Consuelo"
+    },
+    {
+      "codigo": "MAT1",
+      "nombre": "MAT1"
+    },
+    {
+      "codigo": "MAT4",
+      "nombre": "MAT4"
+    },
+    {
+      "codigo": "MAT5",
+      "nombre": "MAT5"
+    },
+    {
+      "codigo": "MAT6",
+      "nombre": "MAT6"
+    },
+    {
+      "codigo": "MAT7",
+      "nombre": "MAT7"
+    },
+    {
+      "codigo": "MAT8",
+      "nombre": "Campanario Canales, Fco. Javier"
+    },
+    {
+      "codigo": "MUS1",
+      "nombre": "Andrade Montesino, Juan"
+    },
+    {
+      "codigo": "REL1",
+      "nombre": "REL1"
+    },
+    {
+      "codigo": "REV",
+      "nombre": "REV"
+    },
+    {
+      "codigo": "TEC3",
+      "nombre": "TEC3"
+    }
+  ],
+  "grupos": [
+    {
+      "codigo": "1A",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "1B",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "1C",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "1D",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "2A",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "2B",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "2C",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    }
+  ],
+  "subgrupos": [
+    {
+      "codigo": "1A-Completo",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1B-Completo",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1C-Completo",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1D-Completo",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1A-CyR-Tec",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-CyR-Inf",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-OyD",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-RefMt-MAT6",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-RefMt-MAT7",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-RefMt-MAT4",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1B-CyR-Tec",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-CyR-Inf",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-OyD",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-RefMt-MAT6",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-RefMt-MAT7",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-RefMt-MAT4",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1C-CyR-Tec",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-CyR-Inf",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-OyD",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-RefMt-MAT6",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-RefMt-MAT7",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-RefMt-MAT4",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1D-CyR-Tec",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-CyR-Inf",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-OyD",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-RefMt-MAT6",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-RefMt-MAT7",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-RefMt-MAT4",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1A-Fr2",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-ALCT",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1B-Fr2",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-ALCT",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1C-Fr2",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-ALCT",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1D-Fr2",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-ALCT",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1A-Relig",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1A-ATED",
+      "grupo": "1A"
+    },
+    {
+      "codigo": "1B-Relig",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1B-ATED",
+      "grupo": "1B"
+    },
+    {
+      "codigo": "1C-Relig",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1C-ATED",
+      "grupo": "1C"
+    },
+    {
+      "codigo": "1D-Relig",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "1D-ATED",
+      "grupo": "1D"
+    },
+    {
+      "codigo": "2A-Completo",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2B-Completo",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2C-Completo",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2A-CyR",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-RefLe-LEN2",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-Rel",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-PEPA",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-RelEV",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-RefMt-MAT7",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-ATEDU",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-RefMt-MAT1",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-Fr2",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2A-RefLe-LEN1",
+      "grupo": "2A"
+    },
+    {
+      "codigo": "2B-CyR",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-RefLe-LEN2",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-Rel",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-PEPA",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-RelEV",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-RefMt-MAT7",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-ATEDU",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-RefMt-MAT1",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-Fr2",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2B-RefLe-LEN1",
+      "grupo": "2B"
+    },
+    {
+      "codigo": "2C-CyR",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-RefLe-LEN2",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-Rel",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-PEPA",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-RelEV",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-RefMt-MAT7",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-ATEDU",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-RefMt-MAT1",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-Fr2",
+      "grupo": "2C"
+    },
+    {
+      "codigo": "2C-RefLe-LEN1",
+      "grupo": "2C"
+    }
+  ],
+  "actividades": [
+    {
+      "codigo": "Mat-1A",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-1A-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT8"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-1A",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-1A-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN2",
+            "LEN8"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-1A",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-1A-P1",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING4"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "ByG-1A",
+      "asignatura": "ByG",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ByG-1A-P1",
+          "asignatura": "ByG",
+          "profesores": [
+            "BYG1"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "Geo-1A",
+      "asignatura": "Geo",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geo-1A-P1",
+          "asignatura": "Geo",
+          "profesores": [
+            "GH6"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-1A",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-1A-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-1A",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-1A-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "PLAS-1A",
+      "asignatura": "PLAS",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "PLAS-1A-P1",
+          "asignatura": "PLAS",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT1-1A",
+      "asignatura": "TUT1",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT1-1A-P1",
+          "asignatura": "TUT1",
+          "profesores": [
+            "GH6"
+          ],
+          "subgrupos": [
+            "1A-Completo"
+          ],
+          "aulaFija": "A5"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-1B",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-1B-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT8"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-1B",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-1B-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN3",
+            "LEN9"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-1B",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-1B-P1",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING3"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "ByG-1B",
+      "asignatura": "ByG",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ByG-1B-P1",
+          "asignatura": "ByG",
+          "profesores": [
+            "BYG1"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "Geo-1B",
+      "asignatura": "Geo",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geo-1B-P1",
+          "asignatura": "Geo",
+          "profesores": [
+            "GH6"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-1B",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-1B-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-1B",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-1B-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "PLAS-1B",
+      "asignatura": "PLAS",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "PLAS-1B-P1",
+          "asignatura": "PLAS",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT1-1B",
+      "asignatura": "TUT1",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT1-1B-P1",
+          "asignatura": "TUT1",
+          "profesores": [
+            "MAT8"
+          ],
+          "subgrupos": [
+            "1B-Completo"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-1C",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-1C-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT8"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-1C",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-1C-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN6",
+            "LEN9"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-1C",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-1C-P1",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING3"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "ByG-1C",
+      "asignatura": "ByG",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ByG-1C-P1",
+          "asignatura": "ByG",
+          "profesores": [
+            "BYG1"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "Geo-1C",
+      "asignatura": "Geo",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geo-1C-P1",
+          "asignatura": "Geo",
+          "profesores": [
+            "GH3"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-1C",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-1C-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-1C",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-1C-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "PLAS-1C",
+      "asignatura": "PLAS",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "PLAS-1C-P1",
+          "asignatura": "PLAS",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT1-1C",
+      "asignatura": "TUT1",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT1-1C-P1",
+          "asignatura": "TUT1",
+          "profesores": [
+            "LEN9"
+          ],
+          "subgrupos": [
+            "1C-Completo"
+          ],
+          "aulaFija": "A3"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-1D",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-1D-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT8"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-1D",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-1D-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN3",
+            "LEN6"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-1D",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-1D-P1",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING2"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "ByG-1D",
+      "asignatura": "ByG",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ByG-1D-P1",
+          "asignatura": "ByG",
+          "profesores": [
+            "BYG1"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "Geo-1D",
+      "asignatura": "Geo",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geo-1D-P1",
+          "asignatura": "Geo",
+          "profesores": [
+            "GH3"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-1D",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-1D-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-1D",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-1D-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "PLAS-1D",
+      "asignatura": "PLAS",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "PLAS-1D-P1",
+          "asignatura": "PLAS",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT1-1D",
+      "asignatura": "TUT1",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT1-1D-P1",
+          "asignatura": "TUT1",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "1D-Completo"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-CyR_OyD_RefMt-1ESO",
+      "asignatura": null,
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "CyR-bloque-CyR-Tec",
+          "asignatura": "CyR",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "1A-CyR-Tec",
+            "1B-CyR-Tec",
+            "1C-CyR-Tec",
+            "1D-CyR-Tec"
+          ],
+          "aulasCandidatas": [
+            "A5",
+            "B07"
+          ]
+        },
+        {
+          "codigo": "CyR-bloque-CyR-Inf",
+          "asignatura": "CyR",
+          "profesores": [
+            "INF1"
+          ],
+          "subgrupos": [
+            "1A-CyR-Inf",
+            "1B-CyR-Inf",
+            "1C-CyR-Inf",
+            "1D-CyR-Inf"
+          ],
+          "aulaFija": "A12In"
+        },
+        {
+          "codigo": "CyR-bloque-OyD",
+          "asignatura": "OyD",
+          "profesores": [
+            "FIL3"
+          ],
+          "subgrupos": [
+            "1A-OyD",
+            "1B-OyD",
+            "1C-OyD",
+            "1D-OyD"
+          ],
+          "aulasCandidatas": [
+            "A11",
+            "A5"
+          ]
+        },
+        {
+          "codigo": "CyR-bloque-RefMt-MAT6",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "1A-RefMt-MAT6",
+            "1B-RefMt-MAT6",
+            "1C-RefMt-MAT6",
+            "1D-RefMt-MAT6"
+          ],
+          "aulasCandidatas": [
+            "A3",
+            "A11"
+          ]
+        },
+        {
+          "codigo": "CyR-bloque-RefMt-MAT7",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "1A-RefMt-MAT7",
+            "1B-RefMt-MAT7",
+            "1C-RefMt-MAT7",
+            "1D-RefMt-MAT7"
+          ],
+          "aulasCandidatas": [
+            "A14",
+            "A3"
+          ]
+        },
+        {
+          "codigo": "CyR-bloque-RefMt-MAT4",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT4"
+          ],
+          "subgrupos": [
+            "1A-RefMt-MAT4",
+            "1B-RefMt-MAT4",
+            "1C-RefMt-MAT4",
+            "1D-RefMt-MAT4"
+          ],
+          "aulasCandidatas": [
+            "A10",
+            "A14"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Fr2_ALCT-1A",
+      "asignatura": null,
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Fr2-1A-P",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "1A-Fr2"
+          ],
+          "aulaFija": "A5"
+        },
+        {
+          "codigo": "ALCT-1A-P",
+          "asignatura": "ALCT",
+          "profesores": [
+            "LEN2"
+          ],
+          "subgrupos": [
+            "1A-ALCT"
+          ],
+          "aulaFija": "A17"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Fr2_ALCT-1B",
+      "asignatura": null,
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Fr2-1B-P",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "1B-Fr2"
+          ],
+          "aulaFija": "A11"
+        },
+        {
+          "codigo": "ALCT-1B-P",
+          "asignatura": "ALCT",
+          "profesores": [
+            "LEN9"
+          ],
+          "subgrupos": [
+            "1B-ALCT"
+          ],
+          "aulaFija": "A17"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Fr2_ALCT-1C",
+      "asignatura": null,
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Fr2-1C-P",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "1C-Fr2"
+          ],
+          "aulaFija": "A3"
+        },
+        {
+          "codigo": "ALCT-1C-P",
+          "asignatura": "ALCT",
+          "profesores": [
+            "LEN9"
+          ],
+          "subgrupos": [
+            "1C-ALCT"
+          ],
+          "aulaFija": "A17"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Fr2_ALCT-1D",
+      "asignatura": null,
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Fr2-1D-P",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "1D-Fr2"
+          ],
+          "aulaFija": "A14"
+        },
+        {
+          "codigo": "ALCT-1D-P",
+          "asignatura": "ALCT",
+          "profesores": [
+            "LEN5"
+          ],
+          "subgrupos": [
+            "1D-ALCT"
+          ],
+          "aulasCandidatas": [
+            "A10",
+            "A17"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Relig_ATED-1ESO-AB",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Relig-AB-P",
+          "asignatura": "Relig",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "1A-Relig",
+            "1B-Relig"
+          ],
+          "aulaFija": "A5"
+        },
+        {
+          "codigo": "ATED-1A-P",
+          "asignatura": "ATED",
+          "profesores": [
+            "ING6"
+          ],
+          "subgrupos": [
+            "1A-ATED"
+          ],
+          "aulaFija": "A17"
+        },
+        {
+          "codigo": "ATED-1B-P",
+          "asignatura": "ATED",
+          "profesores": [
+            "GH5"
+          ],
+          "subgrupos": [
+            "1B-ATED"
+          ],
+          "aulaFija": "A11"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Relig_ATED-1ESO-CD",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Relig-CD-P",
+          "asignatura": "Relig",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "1C-Relig",
+            "1D-Relig"
+          ],
+          "aulaFija": "A3"
+        },
+        {
+          "codigo": "ATED-1C-P",
+          "asignatura": "ATED",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "1C-ATED"
+          ],
+          "aulaFija": "C00"
+        },
+        {
+          "codigo": "ATED-1D-P",
+          "asignatura": "ATED",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "1D-ATED"
+          ],
+          "aulaFija": "A14"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-2A",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-2A-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT5"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-2A",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-2A-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN9"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-2A",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-2A-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING1"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "FyQ-2A",
+      "asignatura": "FyQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FyQ-2A-P1",
+          "asignatura": "FyQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulasCandidatas": [
+            "A1",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-2A",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-2A-P1",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-2A",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-2A-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "B07"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-2A",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-2A-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-2A",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-2A-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "VEtic-2A",
+      "asignatura": "VEtic",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "VEtic-2A-P1",
+          "asignatura": "VEtic",
+          "profesores": [
+            "FIL1"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT2-2A",
+      "asignatura": "TUT2",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT2-2A-P1",
+          "asignatura": "TUT2",
+          "profesores": [
+            "MAT5"
+          ],
+          "subgrupos": [
+            "2A-Completo"
+          ],
+          "aulaFija": "A1"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-2B",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-2B-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT1"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-2B",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-2B-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN8"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-2B",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-2B-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING1"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "FyQ-2B",
+      "asignatura": "FyQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FyQ-2B-P1",
+          "asignatura": "FyQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulasCandidatas": [
+            "A6",
+            "A7"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-2B",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-2B-P1",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-2B",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-2B-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulasCandidatas": [
+            "A7",
+            "B07"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "EF-2B",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-2B-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI2"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-2B",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-2B-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "VEtic-2B",
+      "asignatura": "VEtic",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "VEtic-2B-P1",
+          "asignatura": "VEtic",
+          "profesores": [
+            "FIL1"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT2-2B",
+      "asignatura": "TUT2",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT2-2B-P1",
+          "asignatura": "TUT2",
+          "profesores": [
+            "MAT1"
+          ],
+          "subgrupos": [
+            "2B-Completo"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-2C",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-2C-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-2C",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-2C-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN8"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-2C",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-2C-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING1"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "FyQ-2C",
+      "asignatura": "FyQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FyQ-2C-P1",
+          "asignatura": "FyQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-2C",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-2C-P1",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-2C",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-2C-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulasCandidatas": [
+            "A9",
+            "B07"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "EF-2C",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-2C-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Mús-2C",
+      "asignatura": "Mús",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mús-2C-P1",
+          "asignatura": "Mús",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "VEtic-2C",
+      "asignatura": "VEtic",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "VEtic-2C-P1",
+          "asignatura": "VEtic",
+          "profesores": [
+            "FIL1"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT2-2C",
+      "asignatura": "TUT2",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "TUT2-2C-P1",
+          "asignatura": "TUT2",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "2C-Completo"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-2ESO-MIE",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "B2-Fr2",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "2A-Fr2",
+            "2B-Fr2",
+            "2C-Fr2"
+          ],
+          "aulaFija": "A1"
+        },
+        {
+          "codigo": "B2-CyR",
+          "asignatura": "CyR",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "2A-CyR",
+            "2B-CyR",
+            "2C-CyR"
+          ],
+          "aulaFija": "B07"
+        },
+        {
+          "codigo": "B2-PEPA",
+          "asignatura": "PEPA",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "2A-PEPA",
+            "2B-PEPA",
+            "2C-PEPA"
+          ],
+          "aulaFija": "TALL1"
+        },
+        {
+          "codigo": "B2-RefMt-MAT7",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "2A-RefMt-MAT7",
+            "2B-RefMt-MAT7",
+            "2C-RefMt-MAT7"
+          ],
+          "aulaFija": "A17"
+        },
+        {
+          "codigo": "B2-RefMt-MAT1",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT1"
+          ],
+          "subgrupos": [
+            "2A-RefMt-MAT1",
+            "2B-RefMt-MAT1",
+            "2C-RefMt-MAT1"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-2ESO-VIE",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "B2-Fr2",
+          "asignatura": "Fr2",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "2A-Fr2",
+            "2B-Fr2",
+            "2C-Fr2"
+          ],
+          "aulaFija": "A1"
+        },
+        {
+          "codigo": "B2-CyR",
+          "asignatura": "CyR",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "2A-CyR",
+            "2B-CyR",
+            "2C-CyR"
+          ],
+          "aulaFija": "B07"
+        },
+        {
+          "codigo": "B2-PEPA",
+          "asignatura": "PEPA",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "2A-PEPA",
+            "2B-PEPA",
+            "2C-PEPA"
+          ],
+          "aulaFija": "TALL1"
+        },
+        {
+          "codigo": "B2-RefLe-LEN2",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN2"
+          ],
+          "subgrupos": [
+            "2A-RefLe-LEN2",
+            "2B-RefLe-LEN2",
+            "2C-RefLe-LEN2"
+          ],
+          "aulaFija": "A17"
+        },
+        {
+          "codigo": "B2-RefLe-LEN1",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN1"
+          ],
+          "subgrupos": [
+            "2A-RefLe-LEN1",
+            "2B-RefLe-LEN1",
+            "2C-RefLe-LEN1"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Relig_ATEDU-2ESO",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Rel2-P",
+          "asignatura": "Rel",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "2A-Rel",
+            "2B-Rel",
+            "2C-Rel"
+          ],
+          "aulaFija": "A1"
+        },
+        {
+          "codigo": "RelEV2-P",
+          "asignatura": "RelEV",
+          "profesores": [
+            "REV"
+          ],
+          "subgrupos": [
+            "2A-RelEV",
+            "2B-RelEV",
+            "2C-RelEV"
+          ],
+          "aulaFija": "A18"
+        },
+        {
+          "codigo": "ATEDU-2A-P",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "2A-ATEDU"
+          ],
+          "aulaFija": "A7"
+        },
+        {
+          "codigo": "ATEDU-2B-P",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "2B-ATEDU"
+          ],
+          "aulaFija": "A11"
+        },
+        {
+          "codigo": "ATEDU-2C-P",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "MUS1"
+          ],
+          "subgrupos": [
+            "2C-ATEDU"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    }
+  ]
+}
