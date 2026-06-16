@@ -215,6 +215,26 @@
     {
       "codigo": "TALL1",
       "nombre": "Taller de Plástica"
+    },
+    {
+      "codigo": "A16",
+      "nombre": "Aula 16"
+    },
+    {
+      "codigo": "B01",
+      "nombre": "Aula B01"
+    },
+    {
+      "codigo": "B03",
+      "nombre": "Aula B03"
+    },
+    {
+      "codigo": "B05",
+      "nombre": "Aula B05"
+    },
+    {
+      "codigo": "Pista",
+      "nombre": "Pista Polideportiva"
     }
   ],
   "asignaturas": [
@@ -325,6 +345,30 @@
     {
       "codigo": "VEtic",
       "nombre": "Valores Éticos"
+    },
+    {
+      "codigo": "Geogr",
+      "nombre": "Geografía e Historia"
+    },
+    {
+      "codigo": "BioNu",
+      "nombre": "Biología (Nutrición)"
+    },
+    {
+      "codigo": "Biol",
+      "nombre": "Biología y Geología"
+    },
+    {
+      "codigo": "FQ",
+      "nombre": "Física y Química"
+    },
+    {
+      "codigo": "EPVA",
+      "nombre": "Educación Plástica Visual y Audiovisual"
+    },
+    {
+      "codigo": "TUT3",
+      "nombre": "Tutoría alumnos"
     }
   ],
   "profesores": [
@@ -475,6 +519,26 @@
     {
       "codigo": "TEC3",
       "nombre": "TEC3"
+    },
+    {
+      "codigo": "BYG2",
+      "nombre": "Profesor BYG2"
+    },
+    {
+      "codigo": "EFI3",
+      "nombre": "Profesor EFI3"
+    },
+    {
+      "codigo": "GH4",
+      "nombre": "Profesor GH4"
+    },
+    {
+      "codigo": "ING5",
+      "nombre": "Profesor ING5"
+    },
+    {
+      "codigo": "LEN7",
+      "nombre": "Profesor LEN7"
     }
   ],
   "grupos": [
@@ -510,6 +574,21 @@
     },
     {
       "codigo": "2C",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "3A",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "3B",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "3C",
       "tipo": "ORDINARIO",
       "grupoPadre": null
     }
@@ -822,6 +901,158 @@
     {
       "codigo": "2C-RefLe-LEN1",
       "grupo": "2C"
+    },
+    {
+      "codigo": "3A-Completo",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-CyR-Inf",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-CyR-Tec",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-BioNu",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefLe-LEN1",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefLe-LEN3",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefLe-LEN7",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefMt-MAT5",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefMt-MAT6",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-RefMt-MAT7",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3A-Rel",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3B-Completo",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-CyR-Inf",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-CyR-Tec",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-BioNu",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefLe-LEN1",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefLe-LEN3",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefLe-LEN7",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefMt-MAT5",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefMt-MAT6",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-RefMt-MAT7",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3B-Rel",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3C-Completo",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-CyR-Inf",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-CyR-Tec",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-BioNu",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefLe-LEN1",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefLe-LEN3",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefLe-LEN7",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefMt-MAT5",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefMt-MAT6",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-RefMt-MAT7",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-Rel",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3C-ATED",
+      "grupo": "3C"
+    },
+    {
+      "codigo": "3A-ATED-FIL1",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3B-ATED-FIL1",
+      "grupo": "3B"
+    },
+    {
+      "codigo": "3A-ATED-ING3",
+      "grupo": "3A"
+    },
+    {
+      "codigo": "3B-ATED-ING3",
+      "grupo": "3B"
     }
   ],
   "actividades": [
@@ -2693,6 +2924,880 @@
           ],
           "subgrupos": [
             "2C-ATEDU"
+          ],
+          "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-3A",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-3A-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "B01"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-3A",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-3A-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN7"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "B01"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-3A",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-3A-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING1"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "B01"
+        }
+      ]
+    },
+    {
+      "codigo": "Geogr-3A",
+      "asignatura": "Geogr",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geogr-3A-P1",
+          "asignatura": "Geogr",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "B01"
+        }
+      ]
+    },
+    {
+      "codigo": "FQ-3A",
+      "asignatura": "FQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FQ-3A-P1",
+          "asignatura": "FQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulasCandidatas": [
+            "B01",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Biol-3A",
+      "asignatura": "Biol",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Biol-3A-P1",
+          "asignatura": "Biol",
+          "profesores": [
+            "BYG2"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulasCandidatas": [
+            "B01",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "EPVA-3A",
+      "asignatura": "EPVA",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EPVA-3A-P1",
+          "asignatura": "EPVA",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "TALL1"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-3A",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-3A-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-3A",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-3A-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulasCandidatas": [
+            "B01",
+            "B07"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "TUT3-3A",
+      "asignatura": "TUT3",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT3-3A-P1",
+          "asignatura": "TUT3",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "3A-Completo"
+          ],
+          "aulaFija": "B01"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-3B",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-3B-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B05"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-3B",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-3B-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN7"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B05"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-3B",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-3B-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING5"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B05"
+        }
+      ]
+    },
+    {
+      "codigo": "Geogr-3B",
+      "asignatura": "Geogr",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geogr-3B-P1",
+          "asignatura": "Geogr",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B05"
+        }
+      ]
+    },
+    {
+      "codigo": "FQ-3B",
+      "asignatura": "FQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FQ-3B-P1",
+          "asignatura": "FQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulasCandidatas": [
+            "B05",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Biol-3B",
+      "asignatura": "Biol",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Biol-3B-P1",
+          "asignatura": "Biol",
+          "profesores": [
+            "BYG2"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulasCandidatas": [
+            "B05",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "EPVA-3B",
+      "asignatura": "EPVA",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EPVA-3B-P1",
+          "asignatura": "EPVA",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "TALL1"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-3B",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-3B-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-3B",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-3B-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B07"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT3-3B",
+      "asignatura": "TUT3",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT3-3B-P1",
+          "asignatura": "TUT3",
+          "profesores": [
+            "BYG2"
+          ],
+          "subgrupos": [
+            "3B-Completo"
+          ],
+          "aulaFija": "B05"
+        }
+      ]
+    },
+    {
+      "codigo": "Mat-3C",
+      "asignatura": "Mat",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Mat-3C-P1",
+          "asignatura": "Mat",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "B03"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-3C",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-3C-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN3"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "B03"
+        }
+      ]
+    },
+    {
+      "codigo": "Ingl-3C",
+      "asignatura": "Ingl",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ingl-3C-P1",
+          "asignatura": "Ingl",
+          "profesores": [
+            "ING5"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "B03"
+        }
+      ]
+    },
+    {
+      "codigo": "Geogr-3C",
+      "asignatura": "Geogr",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Geogr-3C-P1",
+          "asignatura": "Geogr",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "B03"
+        }
+      ]
+    },
+    {
+      "codigo": "FQ-3C",
+      "asignatura": "FQ",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FQ-3C-P1",
+          "asignatura": "FQ",
+          "profesores": [
+            "FIS2"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulasCandidatas": [
+            "B03",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Biol-3C",
+      "asignatura": "Biol",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Biol-3C-P1",
+          "asignatura": "Biol",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulasCandidatas": [
+            "B03",
+            "A6"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "EPVA-3C",
+      "asignatura": "EPVA",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EPVA-3C-P1",
+          "asignatura": "EPVA",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "TALL1"
+        }
+      ]
+    },
+    {
+      "codigo": "EF-3C",
+      "asignatura": "EF",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EF-3C-P1",
+          "asignatura": "EF",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "Tec-3C",
+      "asignatura": "Tec",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Tec-3C-P1",
+          "asignatura": "Tec",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulasCandidatas": [
+            "B03",
+            "B07"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "TUT3-3C",
+      "asignatura": "TUT3",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT3-3C-P1",
+          "asignatura": "TUT3",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "3C-Completo"
+          ],
+          "aulaFija": "B03"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-3ESO-MAR",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "B3-MAR-CyR-Inf",
+          "asignatura": "CyR",
+          "profesores": [
+            "INF1"
+          ],
+          "subgrupos": [
+            "3A-CyR-Inf",
+            "3B-CyR-Inf",
+            "3C-CyR-Inf"
+          ],
+          "aulaFija": "A12In"
+        },
+        {
+          "codigo": "B3-MAR-CyR-Tec",
+          "asignatura": "CyR",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "3A-CyR-Tec",
+            "3B-CyR-Tec",
+            "3C-CyR-Tec"
+          ],
+          "aulaFija": "B07"
+        },
+        {
+          "codigo": "B3-MAR-RefLe-LEN1",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN1"
+          ],
+          "subgrupos": [
+            "3A-RefLe-LEN1",
+            "3B-RefLe-LEN1",
+            "3C-RefLe-LEN1"
+          ],
+          "aulaFija": "B01"
+        },
+        {
+          "codigo": "B3-MAR-RefLe-LEN3",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN3"
+          ],
+          "subgrupos": [
+            "3A-RefLe-LEN3",
+            "3B-RefLe-LEN3",
+            "3C-RefLe-LEN3"
+          ],
+          "aulaFija": "B03"
+        },
+        {
+          "codigo": "B3-MAR-RefLe-LEN7",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN7"
+          ],
+          "subgrupos": [
+            "3A-RefLe-LEN7",
+            "3B-RefLe-LEN7",
+            "3C-RefLe-LEN7"
+          ],
+          "aulaFija": "B05"
+        },
+        {
+          "codigo": "B3-MAR-BioNu",
+          "asignatura": "BioNu",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "3A-BioNu",
+            "3B-BioNu",
+            "3C-BioNu"
+          ],
+          "aulaFija": "A6"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-3ESO-JUE",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "B3-JUE-CyR-Inf",
+          "asignatura": "CyR",
+          "profesores": [
+            "INF1"
+          ],
+          "subgrupos": [
+            "3A-CyR-Inf",
+            "3B-CyR-Inf",
+            "3C-CyR-Inf"
+          ],
+          "aulaFija": "A12In"
+        },
+        {
+          "codigo": "B3-JUE-CyR-Tec",
+          "asignatura": "CyR",
+          "profesores": [
+            "TEC3"
+          ],
+          "subgrupos": [
+            "3A-CyR-Tec",
+            "3B-CyR-Tec",
+            "3C-CyR-Tec"
+          ],
+          "aulaFija": "B01"
+        },
+        {
+          "codigo": "B3-JUE-RefMt-MAT5",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT5"
+          ],
+          "subgrupos": [
+            "3A-RefMt-MAT5",
+            "3B-RefMt-MAT5",
+            "3C-RefMt-MAT5"
+          ],
+          "aulaFija": "A1"
+        },
+        {
+          "codigo": "B3-JUE-RefMt-MAT6",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "3A-RefMt-MAT6",
+            "3B-RefMt-MAT6",
+            "3C-RefMt-MAT6"
+          ],
+          "aulaFija": "B03"
+        },
+        {
+          "codigo": "B3-JUE-RefMt-MAT7",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "3A-RefMt-MAT7",
+            "3B-RefMt-MAT7",
+            "3C-RefMt-MAT7"
+          ],
+          "aulaFija": "B05"
+        },
+        {
+          "codigo": "B3-JUE-BioNu",
+          "asignatura": "BioNu",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "3A-BioNu",
+            "3B-BioNu",
+            "3C-BioNu"
+          ],
+          "aulaFija": "A16"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Relig_ATED-3ESO-AB",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Rel-3AB-P",
+          "asignatura": "Rel",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "3A-Rel",
+            "3B-Rel"
+          ],
+          "aulaFija": "B01"
+        },
+        {
+          "codigo": "ATED-3AB-FIL1",
+          "asignatura": "ATED",
+          "profesores": [
+            "FIL1"
+          ],
+          "subgrupos": [
+            "3A-ATED-FIL1",
+            "3B-ATED-FIL1"
+          ],
+          "aulaFija": "B05"
+        },
+        {
+          "codigo": "ATED-3AB-ING3",
+          "asignatura": "ATED",
+          "profesores": [
+            "ING3"
+          ],
+          "subgrupos": [
+            "3A-ATED-ING3",
+            "3B-ATED-ING3"
+          ],
+          "aulaFija": "A7"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Relig_ATED-3ESO-C",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Rel-3C-P",
+          "asignatura": "Rel",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "3C-Rel"
+          ],
+          "aulaFija": "B03"
+        },
+        {
+          "codigo": "ATED-3C-P",
+          "asignatura": "ATED",
+          "profesores": [
+            "ING3"
+          ],
+          "subgrupos": [
+            "3C-ATED"
           ],
           "aulaFija": "A9"
         }

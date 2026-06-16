@@ -275,12 +275,14 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
-> **Estado (S19):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
-> Bloque 1 CERRADO — Tipo 4 (Religión multi-grupo por parejas) validado en el
-> solver con 1ºESO real; ver "### Bloques de Fase 5" y el registro de Sesión 19.
-> Ninguno de los criterios de verificación de abajo está cerrado: todos exigen el
-> instituto completo, que aún no se ha abordado. El Bloque 1 es prerrequisito
-> (tipología completa), no cierre de criterios.
+> **Estado (S21):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
+> Bloques 1, 2 y 3 CERRADOS — ver "### Bloques de Fase 5" y los registros de
+> Sesiones 19, 20 y 21. Ninguno de los criterios de verificación de abajo está
+> cerrado: todos exigen el instituto completo, que aún no se ha abordado. El
+> Bloque 1 fue prerrequisito de tipología (Tipo 4); los Bloques 2 y 3 son escala
+> (no cierran criterios). Curva de escala (criterio 1, factibilidad pura): dos
+> puntos, 7 grupos → 0,317 s y 10 grupos → 0,469 s; tramo holgado, crecimiento
+> aproximadamente lineal. Criterio 2: evidencia parcial (0 duras a 10 grupos).
 
 ### Lo que se añade
 - Todos los grupos restantes: 2ºESO, 3ºESO, 4ºESO, 1ºBach, 2ºBach, FPB
@@ -430,13 +432,15 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1 y 2 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 20 — Fase 5, Bloque 2 cerrado (escala 1º+2º
-  ESO, 7 grupos). Fixture de escala problema-5-escala-instituto.json (linaje
-  nuevo) + SolverHorarioEscalaInstitutoTest; 1º y 2º verificados plaza a plaza
-  contra volcado fiel. Medición wall-clock: factible en 0,317 s, 0 violaciones
-  duras; suite 30 en verde. Códigos normalizados sin "º". Ningún criterio formal
-  de Fase 5 marcado (7 grupos ≠ instituto completo): criterio 1 con primer punto
-  de curva, criterio 2 con evidencia parcial.
+Última sesión registrada: Sesión 21 — Fase 5, Bloque 3 cerrado (escala 1º+2º+3º
+  ESO, 10 grupos). Fixture de escala problema-5-escala-instituto.json AMPLIADO
+  (no nuevo) con 3ºA–3ºC ordinario + SolverHorarioEscalaInstitutoTest mutado a 10
+  grupos; 3º verificado plaza a plaza contra volcado fiel (125/125 celdas).
+  Medición wall-clock: factible en 0,469 s, 0 violaciones duras; suite 30 en
+  verde. 3º ordinario separable del Di (verificado: sin huecos, sin A8, sin
+  ámbitos); PDC a escala diferido. Ningún criterio formal de Fase 5 marcado (10
+  grupos ≠ instituto completo): criterio 1 con segundo punto de curva (tramo
+  holgado lineal), criterio 2 con evidencia parcial.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -457,10 +461,22 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       verificados plaza a plaza contra volcado fiel. Medición: solución factible
       en 0,317 s, 0 violaciones duras (suite 30 verde). Códigos de grupo
       normalizados sin "º" (1A..2C).
-- [ ] (pendientes de definir) Más niveles de escala (3ºESO con reconciliación
-      3ºPDC↔3ºCDi; 4ºESO con PDC nuevo); FPB (bloques 2-3 tramos, D12);
-      Bachillerato (Lectura B, optativas multi-grupo); EF con Gim/Pista a escala
-      (D3/D4). Orden a decidir.
+- [x] Bloque 3 — Escala 3ºESO ordinario (3A–3C); 10 grupos totales (S21). Fixture
+      problema-5-escala-instituto.json AMPLIADO (mismo linaje, crece in situ) +
+      SolverHorarioEscalaInstitutoTest mutado a 10 grupos. 3º verificado plaza a
+      plaza contra volcado fiel (125/125). Escala pura: ningún cambio de dominio;
+      reutiliza el mecanismo multi-plaza de §6.4 (dos coordinadas de nivel rep=1,
+      K=6: CyR desdoblado + refuerzo×3 + BioNu) y el Hallazgo F (Religión partida
+      AB/C, no transversal). Sesiones compartidas ord+Di modeladas con subgrupo
+      del ordinario solo (Di excluido; verificado que 3º ordinario es separable).
+      Medición: factible en 0,469 s, 0 duras (suite 30 verde). Segundo punto de
+      la curva de escala. Geo→Geogr normalizado en 3º (ruido de extracción del
+      volcado de 3ºB). Particiones de refuerzo/ATED: plausibles, a confirmar con
+      el centro (deuda, en el Javadoc del test).
+- [ ] (pendientes de definir) Más niveles de escala (4ºESO con PDC nuevo 4ºADi/
+      4ºDDi); PDC a escala (3ºADi/3ºBDi/3ºCDi, reconciliación 3ºPDC↔3ºCDi); FPB
+      (bloques 2-3 tramos, D12); Bachillerato (Lectura B, optativas multi-grupo);
+      EF con Gim/Pista a escala (D3/D4). Orden a decidir.
 
 ### Fases completadas
 
@@ -1425,6 +1441,74 @@ src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido
 sobre su commit hash. Mide factibilidad pura (SolverHorario sin objetivo): tiempo
 hasta primera solución factible, no hasta óptimo; al introducir blandas en fase
 futura el tiempo será otro.
+
+### Sesión 21 — Fase 5, Bloque 3: escala 3ºESO ordinario (10 grupos).
+
+Bloque de ESCALA, no estructural. Tercer escalón del fixture de escala (que crece
+in situ: NO se creó fichero nuevo, se amplió problema-5-escala-instituto.json).
+Se eligió 3ºESO ordinario (3A–3C) frente a Lectura B (Bachillerato, estructural) y
+FPB (cabo de datos: aulas no cubiertas en el horario por aulas), siguiendo el
+principio de "una capa por bloque": seguir la curva de escala barata antes de
+meter estructura nueva, decidido con datos.
+
+Dictamen de separabilidad ordinario/Di (verificado contra volcado fiel ANTES de
+construir): 3ºA–3ºC ordinario es separable del subgrupo Di sin distorsionar la
+demanda. Evidencia: el horario por grupos de 3ºA/B/C tiene 30/30 tramos ocupados
+(cero huecos), cero referencias a A8 (aula PDC), cero asignaturas de ámbito
+(ÁmbSL/ÁmbCM/…). Las sesiones compartidas ord+Di (TUT3, EF, EPVA, Tec, Rel/ATED)
+las hace igualmente el grupo ordinario con mismo profesor/aula/tramo; modelarlas
+con subgrupo {3X} en vez de {3X, 3XDi} NO altera la demanda del ordinario (el Di
+es capacidad adicional del aula, no demanda). PDC a escala (3ºADi/3ºBDi/3ºCDi,
+reconciliación 3ºPDC↔3ºCDi) queda diferido a bloque posterior explícito.
+
+Decisiones de diseño:
+- Fixture de escala AMPLIADO in situ (no nuevo), conforme al linaje S20. Punto de
+  7 grupos deja de ser reproducible desde el fichero (ya tiene 10): la curva se
+  traza en ESTE registro del plan, no reejecutando datasets históricos. El test
+  se MUTA (Opción A), no se duplica; la suite sigue en 30 tests.
+- Dos coordinadas de nivel rep=1 (Bloque-3ESO-MAR/JUE), K=6 cada una (CyR×2
+  desdoblado + refuerzo×3 + BioNu). Mayor densidad de simultaneidad por tramo que
+  cualquier bloque de 1º/2º, pero mismo mecanismo de dominio (§6.4). CyR y BioNu
+  comparten subgrupo entre MAR y JUE (continuidad del alumno, Hallazgo D / I6); el
+  refuerzo rota (RefLe martes / RefMt jueves) — patrón análogo a PEPA/Fr2 de 2º.
+- Religión partida en dos actividades multi-grupo (Hallazgo F): AB (3A+3B, viernes;
+  las dos plazas ATED reparten ambos grupos, fiel al volcado) y C (3C sola, lunes).
+- Geo→Geogr normalizado en 3º (divergencia de extracción del volcado de 3ºB; misma
+  materia, 3 h/sem en los tres grupos). Catálogo de asignaturas sigue la convención
+  S20: código crudo por nivel, sin unificación semántica entre niveles.
+
+Verificación (toda programática, contra volcado fiel docs/horario-referencia/):
+- 3º (3 grupos): 125/125 celdas del volcado cubiertas por el fixture; 30/30
+  sesiones por grupo; demanda curricular idéntica en los tres (Biol 2, EF 2,
+  EPVA 2, FQ 3, Geogr 3, Ingl 4, LCL 4, Mat 4, TUT3 1, Tec 2 = 27 mono + 2 coord
+  + 1 relig). Coherencia grupos↔aulas: 123/123 celdas monogrupo cuadran.
+- Fixture combinado válido: schema (loader estricto) + XOR de aula por plaza + I2
+  (subgrupos disjuntos intra-actividad) + integridad referencial + códigos únicos.
+- Factibilidad necesaria (no suficiente): carga ≤30 por recurso. Máx profesor TEC3
+  18/30; aulas de 3º (B01/B03/B05) 19/30; Gim 20/30 (D4 sigue EN OBSERVACIÓN, no
+  fuerza modelado dedicado aún; reevaluar al añadir 4º/Bach con más EF).
+
+Entregado y commiteado:
+- solver/src/test/resources/fixtures/problema-5-escala-instituto.json AMPLIADO:
+  10 grupos, 42 profesores, 21 aulas, 33 asignaturas, 115 subgrupos, 110
+  actividades, 148 plazas (18 con aulasCandidatas).
+- SolverHorarioEscalaInstitutoTest mutado a 10 grupos (sanity checks: 10 grupos /
+  30 tramos / 110 actividades; método escala1y2y3ESO). Javadoc documenta el
+  escalón y la deuda de particiones.
+- Medición: solución factible en 0,469 s. Suite 30 en verde, BUILD SUCCESS.
+
+Lectura honesta del resultado: dos puntos de curva (7→0,317 s, 10→0,469 s) — +43%
+de tamaño, +48% de tiempo: tramo holgado, crecimiento aproximadamente lineal. NO
+extrapola al instituto completo (CP es no lineal; el salto de régimen llegará al
+saturar recursos compartidos, p. ej. Gim/Pista y profes-puente). Además, 0,3–0,5 s
+es territorio donde el ruido (JVM, carga JNI, GC) pesa; tendencia fiable, no
+precisión al ms. Criterio 1: segundo punto, NO cerrado. Criterio 2: evidencia
+parcial (0 duras a 10 grupos), NO cerrado.
+
+src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido sobre
+su commit hash. Modelo NO modificado: 3º no aportó capacidad estructural nueva
+(reutiliza §6.4 y Hallazgo F); decisión consciente de no añadir §6.x, análoga a la
+de S20 con 2º.
 
 ---
 
