@@ -40,7 +40,7 @@ final class VistaPorGrupo implements VistaHorario<GrupoAdministrativo> {
     @Override
     public Set<GrupoAdministrativo> filasDe(SesionMaterializada sesion) {
         return sesion.plaza().subgrupos().stream()
-                .map(Subgrupo::grupo)
+                .flatMap(sg -> sg.grupos().stream())
                 .collect(Collectors.toUnmodifiableSet());
     }
 

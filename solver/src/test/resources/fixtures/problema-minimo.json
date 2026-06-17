@@ -18,7 +18,7 @@
     {"codigo": "ING4", "nombre": "Profesor Ingles 4"}
   ],
   "grupos": [ {"codigo": "1A", "tipo": "ORDINARIO", "grupoPadre": null} ],
-  "subgrupos": [ {"codigo": "1A-Completo", "grupo": "1A"} ],
+  "subgrupos": [ {"codigo": "1A-Completo", "grupos": ["1A"]} ],
   "actividades": [
     {
       "codigo": "Mat-1A", "asignatura": "Mat",

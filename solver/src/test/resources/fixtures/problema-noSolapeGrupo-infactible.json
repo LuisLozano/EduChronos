@@ -46,11 +46,11 @@
   "subgrupos": [
     {
       "codigo": "1A-Completo",
-      "grupo": "1A"
+      "grupos": ["1A"]
     },
     {
       "codigo": "1A-Sub1",
-      "grupo": "1A"
+      "grupos": ["1A"]
     }
   ],
   "actividades": [

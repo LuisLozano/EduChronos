@@ -70,8 +70,8 @@ class VerificadorSolucionGrupoTest {
 
     @Test
     void reportaSolapeDeGrupoEntreActividadesDistintas() {
-        Subgrupo sgX = new Subgrupo("1A-X", G_1A);
-        Subgrupo sgY = new Subgrupo("1A-Y", G_1A); // mismo grupo, subgrupo distinto
+        Subgrupo sgX = new Subgrupo("1A-X", Set.of(G_1A));
+        Subgrupo sgY = new Subgrupo("1A-Y", Set.of(G_1A)); // mismo grupo, subgrupo distinto
 
         Actividad actX = actividad("Act-X", sgX, new Profesor("P1", "P1"), new Aula("A1", "A1"));
         Actividad actY = actividad("Act-Y", sgY, new Profesor("P2", "P2"), new Aula("A2", "A2"));
@@ -92,8 +92,8 @@ class VerificadorSolucionGrupoTest {
 
     @Test
     void noReportaGrupoEnTramosDistintos() {
-        Subgrupo sgX = new Subgrupo("1A-X", G_1A);
-        Subgrupo sgY = new Subgrupo("1A-Y", G_1A);
+        Subgrupo sgX = new Subgrupo("1A-X", Set.of(G_1A));
+        Subgrupo sgY = new Subgrupo("1A-Y", Set.of(G_1A));
 
         Actividad actX = actividad("Act-X", sgX, new Profesor("P1", "P1"), new Aula("A1", "A1"));
         Actividad actY = actividad("Act-Y", sgY, new Profesor("P2", "P2"), new Aula("A2", "A2"));
@@ -116,8 +116,8 @@ class VerificadorSolucionGrupoTest {
         // dos plazas, dos subgrupos del mismo grupo (desdoble), mismo tramo. El
         // grupo se cuenta una vez. Si una refactorizacion contara por plaza en
         // vez de por instancia, este test lo cazaria.
-        Subgrupo sg1 = new Subgrupo("1A-CyR-Tec", G_1A);
-        Subgrupo sg2 = new Subgrupo("1A-CyR-Inf", G_1A);
+        Subgrupo sg1 = new Subgrupo("1A-CyR-Tec", Set.of(G_1A));
+        Subgrupo sg2 = new Subgrupo("1A-CyR-Inf", Set.of(G_1A));
 
         Plaza p1 = new Plaza("CYR-P1", ASIG, Set.of(new Profesor("P1", "P1")),
                 Optional.of(new Aula("A1", "A1")), Set.of(), Set.of(sg1));

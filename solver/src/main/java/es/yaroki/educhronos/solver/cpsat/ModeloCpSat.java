@@ -227,7 +227,7 @@ final class ModeloCpSat {
     private boolean tocaGrupo(InstanciaProgramada ip, GrupoAdministrativo grupo) {
         for (Plaza plaza : ip.instancia().actividad().plazas()) {
             for (Subgrupo sg : plaza.subgrupos()) {
-                if (sg.grupo().equals(grupo)) {
+                if (sg.grupos().contains(grupo)) {
                     return true;
                 }
             }

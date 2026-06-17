@@ -1,0 +1,171 @@
+{
+  "tramos": [
+    {
+      "codigo": "LUN-1",
+      "diaSemana": 1,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "LUN-2",
+      "diaSemana": 1,
+      "ordenEnDia": 2
+    }
+  ],
+  "aulas": [
+    {
+      "codigo": "A12In",
+      "nombre": "Aula de Informatica"
+    },
+    {
+      "codigo": "TALL1",
+      "nombre": "Taller de Plastica 1"
+    },
+    {
+      "codigo": "C01",
+      "nombre": "Taller de Plastica C01"
+    },
+    {
+      "codigo": "COM4",
+      "nombre": "Aula COM4"
+    }
+  ],
+  "asignaturas": [
+    {
+      "codigo": "TICO",
+      "nombre": "Tecnologias de la Informacion y Comunicacion"
+    },
+    {
+      "codigo": "DTec",
+      "nombre": "Dibujo Tecnico"
+    },
+    {
+      "codigo": "DA",
+      "nombre": "Dibujo Artistico"
+    },
+    {
+      "codigo": "LCL",
+      "nombre": "Lengua Castellana y Literatura"
+    }
+  ],
+  "profesores": [
+    {
+      "codigo": "INF1",
+      "nombre": "Profesor de Informatica 1"
+    },
+    {
+      "codigo": "DIB2",
+      "nombre": "Profesor de Dibujo 2"
+    },
+    {
+      "codigo": "DIB1",
+      "nombre": "Profesor de Dibujo 1"
+    },
+    {
+      "codigo": "LEN2",
+      "nombre": "Profesor de Lengua 2"
+    }
+  ],
+  "grupos": [
+    {
+      "codigo": "1BachC",
+      "tipo": "ORDINARIO"
+    },
+    {
+      "codigo": "1BachD",
+      "tipo": "ORDINARIO"
+    }
+  ],
+  "subgrupos": [
+    {
+      "codigo": "Opt-TICO-CD",
+      "grupos": [
+        "1BachC",
+        "1BachD"
+      ]
+    },
+    {
+      "codigo": "Opt-DTec-CD",
+      "grupos": [
+        "1BachC",
+        "1BachD"
+      ]
+    },
+    {
+      "codigo": "Opt-DA-CD",
+      "grupos": [
+        "1BachC",
+        "1BachD"
+      ]
+    },
+    {
+      "codigo": "1BachC-Completo",
+      "grupos": [
+        "1BachC"
+      ]
+    }
+  ],
+  "actividades": [
+    {
+      "codigo": "Optativas-1Bach-CD",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Opt-TICO",
+          "asignatura": "TICO",
+          "profesores": [
+            "INF1"
+          ],
+          "aulaFija": "A12In",
+          "subgrupos": [
+            "Opt-TICO-CD"
+          ]
+        },
+        {
+          "codigo": "Opt-DTec",
+          "asignatura": "DTec",
+          "profesores": [
+            "DIB2"
+          ],
+          "aulaFija": "TALL1",
+          "subgrupos": [
+            "Opt-DTec-CD"
+          ]
+        },
+        {
+          "codigo": "Opt-DA",
+          "asignatura": "DA",
+          "profesores": [
+            "DIB1"
+          ],
+          "aulaFija": "C01",
+          "subgrupos": [
+            "Opt-DA-CD"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-1BachC",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "LCL-P1",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN2"
+          ],
+          "aulaFija": "COM4",
+          "subgrupos": [
+            "1BachC-Completo"
+          ]
+        }
+      ]
+    }
+  ]
+}

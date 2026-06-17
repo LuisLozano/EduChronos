@@ -17,8 +17,8 @@
     {"codigo": "1A", "tipo": "ORDINARIO", "grupoPadre": null}
   ],
   "subgrupos": [
-    {"codigo": "1A-Sub1", "grupo": "1A"},
-    {"codigo": "1A-Sub2", "grupo": "1A"}
+    {"codigo": "1A-Sub1", "grupos": ["1A"]},
+    {"codigo": "1A-Sub2", "grupos": ["1A"]}
   ],
   "actividades": [
     {

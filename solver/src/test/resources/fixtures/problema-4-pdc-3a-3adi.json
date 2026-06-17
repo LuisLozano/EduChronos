@@ -40,8 +40,8 @@
     { "codigo": "3ºADi", "tipo": "DIVERSIFICACION_PDC", "grupoPadre": "3ºA" }
   ],
   "subgrupos": [
-    { "codigo": "3ºA-Completo",   "grupo": "3ºA" },
-    { "codigo": "3ºADi-Completo", "grupo": "3ºADi" }
+    { "codigo": "3ºA-Completo",   "grupos": ["3ºA"] },
+    { "codigo": "3ºADi-Completo", "grupos": ["3ºADi"] }
   ],
   "actividades": [
     {

@@ -302,19 +302,19 @@
   "subgrupos": [
     {
       "codigo": "1ºA-Completo",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºB-Completo",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºC-Completo",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºD-Completo",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     }
   ],
   "actividades": [

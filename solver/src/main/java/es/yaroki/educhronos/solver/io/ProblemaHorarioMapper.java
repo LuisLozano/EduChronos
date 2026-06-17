@@ -102,8 +102,16 @@ public final class ProblemaHorarioMapper {
         for (SubgrupoDto s : subgsDto) {
             String cod = exigirCodigo(s.codigo(), "subgrupo");
             comprobarNoDuplicado(subgrupos, cod, "subgrupo");
-            GrupoAdministrativo g = resolver(grupos, s.grupo(), "grupo", "subgrupo '" + cod + "'");
-            subgrupos.put(cod, construir(() -> new Subgrupo(s.codigo(), g), "subgrupo '" + cod + "'"));
+            List<String> gruposCodes = s.grupos();
+            if (gruposCodes == null || gruposCodes.isEmpty()) {
+                throw new ProblemaInvalidoException(
+                        "subgrupo '" + cod + "': 'grupos' debe ser un array no vacio");
+            }
+            Set<GrupoAdministrativo> gs = new LinkedHashSet<>();
+            for (String gc : gruposCodes) {
+                gs.add(resolver(grupos, gc, "grupo", "subgrupo '" + cod + "'"));
+            }
+            subgrupos.put(cod, construir(() -> new Subgrupo(s.codigo(), gs), "subgrupo '" + cod + "'"));
         }
 
         // ---- Pasada 2: actividades ----

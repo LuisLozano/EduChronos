@@ -138,9 +138,10 @@ class SolverHorarioReligionParejasTest {
             }
             for (Plaza plaza : inst.actividad().plazas()) {
                 for (Subgrupo sg : plaza.subgrupos()) {
-                    GrupoAdministrativo g = sg.grupo();
-                    if (!grupos.contains(g.codigo())) {
-                        grupos.add(g.codigo());
+                    for (GrupoAdministrativo g : sg.grupos()) {
+                        if (!grupos.contains(g.codigo())) {
+                            grupos.add(g.codigo());
+                        }
                     }
                 }
             }

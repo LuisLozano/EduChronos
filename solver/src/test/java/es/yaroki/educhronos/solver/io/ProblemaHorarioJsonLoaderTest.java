@@ -49,7 +49,7 @@ class ProblemaHorarioJsonLoaderTest {
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"}],
               "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
-              "subgrupos": [{"codigo":"1A-Completo","grupo":"1A"}],
+              "subgrupos": [{"codigo":"1A-Completo","grupos":["1A"]}],
               "actividades": [{"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P1","asignatura":"Mat","profesores":["FANTASMA"],
@@ -67,7 +67,7 @@ class ProblemaHorarioJsonLoaderTest {
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"}],
               "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
-              "subgrupos": [{"codigo":"1A-Completo","grupo":"1A"}],
+              "subgrupos": [{"codigo":"1A-Completo","grupos":["1A"]}],
               "actividades": [{"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P1","asignatura":"Mat","profesores":[],
@@ -85,7 +85,7 @@ class ProblemaHorarioJsonLoaderTest {
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"}],
               "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
-              "subgrupos": [{"codigo":"1A-Completo","grupo":"1A"}],
+              "subgrupos": [{"codigo":"1A-Completo","grupos":["1A"]}],
               "actividades": [{"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P1","asignatura":"Mat","profesores":["MAT8"],
@@ -107,7 +107,7 @@ class ProblemaHorarioJsonLoaderTest {
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"}],
               "grupos": [{"codigo":"3ADi","tipo":"DIVERSIFICACION_PDC"}],
-              "subgrupos": [{"codigo":"S","grupo":"3ADi"}],
+              "subgrupos": [{"codigo":"S","grupos":["3ADi"]}],
               "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
@@ -125,7 +125,7 @@ class ProblemaHorarioJsonLoaderTest {
               "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
               "profesores": [{"codigo":"MAT8","nombre":"P"},{"codigo":"MAT9","nombre":"P9"}],
               "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
-              "subgrupos": [{"codigo":"S","grupo":"1A"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
               "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
                 "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
                 {"codigo":"P1","asignatura":"Mat","profesores":["MAT8"],"aulaFija":"A5","subgrupos":["S"]},

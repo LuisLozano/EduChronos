@@ -714,11 +714,17 @@ caiga en el mismo tramo. Es el mecanismo por el que las seis plazas
 simultáneas del bloque bloquean los cuatro grupos completos en ese tramo
 (ver §6.1).
 
-En el dominio reducido del solver (Fases 2–5, sin particiones) todo `Subgrupo`
-pertenece a un único grupo, así que "el grupo del subgrupo" es directo. Cuando
-en Fase 5 aparezca un subgrupo cuya población son alumnos de varios grupos
-(optativas de Bachillerato sobre `SubgrupoGrupo` N:M), S9 lo tratará como
-tocando a todos esos grupos sin cambio estructural.
+En el dominio reducido del solver (Fases 2–4) todo `Subgrupo` pertenecía a un
+único grupo, así que "el grupo del subgrupo" era directo. En Fase 5, Bloque 4
+(Sesión 22) se introdujo el subgrupo cuya población son alumnos de varios grupos
+(optativas de Bachillerato, "Lectura B"): `Subgrupo.grupos` pasó de un único
+`grupo` a `Set<GrupoAdministrativo>` (relación N:M). La lógica de S9 no cambió
+conceptualmente —sigue tratando el subgrupo como tocando a todos sus grupos—,
+pero el dominio sí: `tocaGrupo` pasó de `sg.grupo().equals(grupo)` a
+`sg.grupos().contains(grupo)`, y el verificador independiente, de `gs.add(s.grupo())`
+a `gs.addAll(s.grupos())`. Un subgrupo mono-grupo es el caso particular en que el
+conjunto tiene un solo elemento, de modo que toda la modelización anterior
+(Lecturas A) sigue siendo válida sin tocar sus fixtures.
 
 ---
 
@@ -1061,8 +1067,27 @@ La actividad ocupa dos tramos consecutivos por `duracion_tramos=2`.
 La suma de subgrupos cubre completamente los cuatro grupos de 1ºBach: en
 ese tramo ningún grupo de 1ºBach tiene actividad común.
 
-✅ Criterio cubierto, y demuestra que el modelo soporta plazas con
-asignaturas distintas dentro de la misma actividad.
+Cada subgrupo de optativa pertenece a VARIOS grupos a la vez (p. ej.
+`1Bach-Opt-TICO` → {A, B, C, D}): es "Lectura B" (un subgrupo cuya población
+mezcla alumnos de varios grupos), distinta de la "Lectura A" de §6.4. Desde
+Fase 5, Bloque 4 (Sesión 22) el dominio del solver soporta esta relación N:M
+(`Subgrupo.grupos` es `Set<GrupoAdministrativo>`); hasta entonces solo existía
+como diseño conceptual sobre `SubgrupoGrupo` y el dominio reducido del solver
+era 1:1.
+
+DEUDA (invariante de población): el volcado fiel registra las SESIONES de
+optativas (existe TICO simultánea para los cuatro grupos), no el reparto nominal
+de alumnos entre optativas. Que la partición concreta sea la real del centro no
+lo verifica ningún componente; se confirma con el centro. Es la misma deuda
+subgrupo≠alumno documentada en Fase 5, Bloque 3.
+
+✅ Criterio cubierto. Demuestra que el modelo soporta plazas con asignaturas
+distintas dentro de la misma actividad, y la relación subgrupo→varios grupos
+(Lectura B). Validado en el solver en Fase 5, Bloque 4 (Sesión 22) con un recorte
+de este mismo caso (TICO/DTec/DA sobre 1ºBach C+D) en
+`problema-5-lecturab-optativas-bach.json` (prueba positiva) y
+`problema-5-lecturab-optativas-bach-infactible.json` (prueba negativa: el
+subgrupo multi-grupo bloquea ambos grupos en su tramo).
 
 ### 6.4 Criterio: "3 sesiones simultáneas que bloquean 4 grupos"
 
@@ -1088,19 +1113,27 @@ Plaza: ATED, FIL1, B05, subgrupos=(3ºA-ATED, 3ºB-ATED)
 Plaza: ATED, ING3, A7,  subgrupos=(3ºADi-ATED, 3ºBDi-ATED)
 ```
 
-Tres plazas → mismo tramo por construcción. Los subgrupos son MONO-GRUPO
-(cada uno pertenece a un único grupo): es la "Lectura A" (una plaza lista
-subgrupos de varios grupos). NO se usa un subgrupo cuya población sean alumnos
-de varios grupos ("Lectura B", `SubgrupoGrupo` N:M): el `Subgrupo` del dominio
-tiene un único `grupo` (1:1), y el modelo CP-SAT bloquea un grupo vía
-`tocaGrupo`, que recorre los subgrupos de cada plaza y mira `sg.grupo()`. Por
-eso, para que el bloque bloquee los cuatro grupos (S9), se necesita un subgrupo
-por grupo en las plazas, no un subgrupo multi-grupo. El reparto concreto de
+Tres plazas → mismo tramo por construcción. Este caso concreto se modela con
+subgrupos MONO-GRUPO (cada uno pertenece a un único grupo): es la "Lectura A"
+(una plaza lista subgrupos de varios grupos, cada subgrupo de un solo grupo).
+Religión/ATED de 3ºESO es genuinamente Lectura A: cada grupo de origen mantiene
+su propia población, no se mezclan alumnos entre grupos.
+
+Distíngase de la "Lectura B" (un subgrupo cuya población son alumnos de varios
+grupos a la vez, p. ej. una optativa de Bachillerato elegida por alumnos de C y
+de D que forman un único grupo-clase). Desde Fase 5, Bloque 4 (Sesión 22) el
+dominio del solver soporta ambas: `Subgrupo` se relaciona con los grupos
+mediante `Set<GrupoAdministrativo> grupos` (N:M), y el modelo CP-SAT bloquea un
+grupo vía `tocaGrupo`, que recorre los subgrupos de cada plaza y comprueba
+`sg.grupos().contains(grupo)`. Un subgrupo mono-grupo (Lectura A) es el caso
+particular en que ese conjunto tiene un solo elemento. El reparto concreto de
 ATED entre las dos plazas (Letras/Inglés) es una de las particiones posibles
 que cubren la población de los cuatro grupos.
 
 ✅ Criterio cubierto (Lectura A; validado en el solver en Fase 5, Bloque 1,
 con el patrón análogo de 1ºESO en `problema-5-religion-parejas-1eso.json`).
+La capacidad Lectura B (N:M) se validó en Fase 5, Bloque 4 (Sesión 22) con
+`problema-5-lecturab-optativas-bach.json` y su contraparte infactible (ver §6.3).
 
 ### 6.5 Criterio adicional: horario completo de 1ºBACH B (Sesión 4)
 
@@ -1190,6 +1223,13 @@ Actividad "MOD-Ciencias-1Bach-AB" (rep=4, DISTRIBUIDA):
 
 **Recuento de repeticiones:** 4+4+4+4+3+2+1+2+2+4 = **30 sesiones/semana**,
 coincide con el horario real.
+
+> Nota (Fase 5, Bloque 4 / Sesión 22): este caso es diseño conceptual de la
+> Sesión 4; no se ha ejecutado completo en el solver. La capacidad que presupone
+> —subgrupos de optativa pertenecientes a varios grupos (Lectura B, N:M)— sí está
+> implementada y validada en el dominio desde el Bloque 4, con el recorte C+D /
+> TICO-DTec-DA (§6.3, `problema-5-lecturab-optativas-bach.json`). El 1ºBACH B
+> completo a escala queda pendiente.
 
 #### Verificación de invariantes
 

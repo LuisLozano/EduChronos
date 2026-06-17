@@ -472,10 +472,43 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       Medición: factible en 0,469 s, 0 duras (suite 30 verde). Segundo punto de
       la curva de escala. Geo→Geogr normalizado en 3º (ruido de extracción del
       volcado de 3ºB). Particiones de refuerzo/ATED: plausibles, a confirmar con
-      el centro (deuda, en el Javadoc del test).
+      el centro (deuda, en el Javadoc del test). Precisión (S22): el dominio
+      modela SUBGRUPOS, no ALUMNOS — no existe entidad Alumno. Que cada subgrupo
+      se corresponda con una partición real (disjunta y exhaustiva) de los
+      alumnos de su grupo NO lo verifica ningún componente del sistema: es
+      invariante de población, responsabilidad del constructor del fixture y a
+      confirmar con el centro. Confirmado leyendo VerificadorSolucion.java en
+      S21: el no-solape de GRUPO se cuenta con un Set POR INSTANCIA de actividad,
+      de modo que varios subgrupos del mismo grupo dentro de una misma actividad
+      coordinada/desdoble colapsan a "grupo contado 1 vez" (por eso las plazas de
+      las coordinadas de 3º coexisten sin violación). SÍ están verificados, en
+      cambio, la disjunción estructural intra-actividad (I2) y el no-solape de
+      grupo entre actividades distintas.
+
+- [x] Bloque 4 — Lectura B (SubgrupoGrupo N:M): subgrupo cuya población son
+      alumnos de varios grupos (S22). TRABAJO ESTRUCTURAL, no escala: el dominio
+      pasó de Subgrupo→grupo 1:1 a Subgrupo→grupos N:M (Set<GrupoAdministrativo>).
+      Desbloquea el Tipo 7 (optativas multi-grupo de Bachillerato), última
+      tipología del enunciado sin soporte de dominio. Tocó: Subgrupo (record +
+      equals/hashCode por código), SubgrupoDto, schema (grupo→grupos array),
+      mapper, ModeloCpSat.tocaGrupo (sg.grupos().contains), VerificadorSolucion
+      (gs.addAll(s.grupos())), VistaPorGrupo (flatMap). Migrados 12 fixtures +
+      JSON inline de ProblemaHorarioJsonLoaderTest + VerificadorSolucionGrupoTest.
+      Fixture de discriminación PROPIO (no toca el de escala): bloque de optativas
+      1ºBach C+D (TICO/DTec/DA), recorte fiel de §6.3, verificado cruzando
+      grupo-1BACH-C/D.json. Prueba positiva (problema-5-lecturab-optativas-bach.json:
+      factible, 0 duras, el bloque toca C y D) + prueba negativa
+      (problema-5-lecturab-optativas-bach-infactible.json: el subgrupo multi-grupo
+      bloquea ambos grupos → infactible por palomar). Suite 32 verde (30+2).
+      CORRECCIÓN de S20: "1B-C 1B-D" del volcado de aulas NO es Lectura B; es
+      notación "1ºBach C + 1ºBach D" (dos grupos enteros) y corresponde a LU =
+      Lectura A. La evidencia real de Lectura B es el bloque de optativas, no esa
+      celda. Modelo: §6.3/§6.4/§6.5 y la invariante S9 actualizadas (Lectura B
+      soportada y validada; Lectura A es el caso particular de conjunto unitario).
 - [ ] (pendientes de definir) Más niveles de escala (4ºESO con PDC nuevo 4ºADi/
       4ºDDi); PDC a escala (3ºADi/3ºBDi/3ºCDi, reconciliación 3ºPDC↔3ºCDi); FPB
-      (bloques 2-3 tramos, D12); Bachillerato (Lectura B, optativas multi-grupo);
+      (bloques 2-3 tramos, D12); Bachillerato a ESCALA (con Lectura B ya
+      soportada; falta incorporar grupos de Bach al fixture de escala);
       EF con Gim/Pista a escala (D3/D4). Orden a decidir.
 
 ### Fases completadas
@@ -1437,10 +1470,27 @@ añadir niveles la holgura baja y el régimen puede cambiar. Criterio 1 de Fase 
 primer punto de curva, NO cerrado. Criterio 2: evidencia parcial (0 duras a 7
 grupos), NO cerrado (exige instituto completo).
 
-src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido
-sobre su commit hash. Mide factibilidad pura (SolverHorario sin objetivo): tiempo
-hasta primera solución factible, no hasta óptimo; al introducir blandas en fase
-futura el tiempo será otro.
+src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido sobre
+su commit hash. Modelo NO modificado: 3º no aportó capacidad estructural nueva
+(reutiliza §6.4 y Hallazgo F); decisión consciente de no añadir §6.x, análoga a la
+de S20 con 2º.
+
+Hallazgo S21 (subgrupo ≠ alumno; precisión de deuda añadida en S22): al verificar
+"subgrupos disjuntos del nivel" hubo que leer el cuerpo de VerificadorSolucion.java
+(el índice de API y los nombres de test eran sugerentes pero contradictorios; no
+bastaban). Confirmado en código: el verificador comprueba no-solape de Profesor,
+Aula, Subgrupo y Grupo por tramo, pero el conteo de GRUPO usa un Set POR INSTANCIA
+de actividad — varios subgrupos del mismo grupo dentro de UNA misma actividad
+coordinada/desdoble colapsan a "grupo contado 1 vez", luego no hay violación (así
+coexisten legítimamente las 6 plazas de las coordinadas de 3º). Consecuencia: el
+dominio modela SUBGRUPOS, no ALUMNOS; no existe entidad Alumno. Que la unión de los
+subgrupos de un grupo sea una partición real (disjunta y exhaustiva) de sus alumnos
+NO lo verifica ningún componente — es invariante de población, responsabilidad del
+constructor del fixture y a confirmar con el centro. Lo que SÍ se verifica: la
+disjunción estructural intra-actividad (I2) y el no-solape de grupo entre
+actividades distintas.
+
+---
 
 ### Sesión 21 — Fase 5, Bloque 3: escala 3ºESO ordinario (10 grupos).
 
@@ -1509,6 +1559,86 @@ src/main NO tocado → referencia-codigo-solver.md NO regenerado; sigue válido 
 su commit hash. Modelo NO modificado: 3º no aportó capacidad estructural nueva
 (reutiliza §6.4 y Hallazgo F); decisión consciente de no añadir §6.x, análoga a la
 de S20 con 2º.
+
+---
+
+### Sesión 22 — Fase 5, Bloque 4: Lectura B (SubgrupoGrupo N:M). TRABAJO ESTRUCTURAL.
+
+Elegido el Bloque 4 entre cuatro candidatos (4ºESO, PDC a escala, Lectura B, FPB).
+Decisión: Lectura B, contra la pauta heredada de "escala barata", con tres
+argumentos: (1) único trabajo que reduce riesgo estructural real (los demás son
+escala/validación sobre mecanismos existentes); (2) el coste de cambiar el dominio
+sube con el tiempo — hacerlo con 10 grupos estables verdes de regresión es lo más
+barato; (3) es una capa limpia (estructura pura, fixture propio de discriminación).
+Desbloquea el Tipo 7, última tipología del enunciado sin soporte de dominio.
+
+Cambio de dominio: Subgrupo→grupo (1:1) pasó a Subgrupo→grupos Set<GrupoAdministrativo>
+(N:M). Decididas dos cosas de diseño con el código delante (no a ciegas): (a)
+Set<GrupoAdministrativo> en el record, NO entidad puente SubgrupoGrupo — el solver
+solo pregunta pertenencia booleana (tocaGrupo), una entidad puente no compra nada en
+el dominio en memoria; (b) Subgrupo con equals/hashCode SOLO por código (no derivado
+de todos los componentes), porque el código es la identidad real y blinda los Set del
+modelo frente a cambios de componentes. Constructor compacto rechaza grupos vacío
+(invariante nueva: un subgrupo sin grupos sería invisible a tocaGrupo) y hace
+Set.copyOf (inmutable + rechaza nulls).
+
+Inventario de ficheros tocados (verificado con el compilador, no con grep — el grep
+inicial perdió VistaPorGrupo, que usa Subgrupo::grupo como method reference y no casaba
+con "\.grupo()"): src/main → Subgrupo, SubgrupoDto, ModeloCpSat.tocaGrupo
+(sg.grupos().contains), VerificadorSolucion (gs.addAll(s.grupos())), VistaPorGrupo
+(map→flatMap; su Javadoc ya preveía N:M), ProblemaHorarioMapper, schema (grupo→grupos
+array). tests → VerificadorSolucionGrupoTest (firma Set.of(G), sin cambio de lógica),
+SolverHorarioCierreFase4Test, SolverHorarioReligionParejasTest, y JSON inline de
+ProblemaHorarioJsonLoaderTest. 12 fixtures migrados grupo→grupos con sed verificado
+contra el fixture grande antes de disparar (patrón respeta grupoPadre y la sección
+grupos top-level). Secuencia de 4 pasos con suite roja a propósito entre el cambio
+estructural y la migración, para aislar regresión de migración.
+
+Fixture de discriminación PROPIO (linaje S20: pequeño, quirúrgico, con prueba
+negativa; NO toca el de escala): bloque de optativas 1ºBach C+D, recorte fiel de §6.3
+(TICO/DTec/DA, profesor y aula distintos entre sí para que la única razón de bloqueo
+sea el subgrupo multi-grupo). Subgrupos Opt-{TICO,DTec,DA}-CD → {1BachC, 1BachD}.
+Prueba positiva (problema-5-lecturab-optativas-bach.json, 2 tramos): factible, 0
+duras, el bloque toca C y D. Prueba negativa (problema-5-lecturab-optativas-bach-
+infactible.json, 1 tramo): infactible por palomar — el bloque ocupa C vía el subgrupo
+multi-grupo y LCL-1BachC compite por el único tramo. Discriminación: con dominio 1:1
+(subgrupo solo en D) C estaría libre y sería factible; la infactibilidad depende de la
+pertenencia a C, expresable solo con N:M. Suite 32 verde (30+2), BUILD SUCCESS.
+
+CORRECCIÓN de S20 (hallazgo de esta sesión leyendo el dato fiel): "1B-C 1B-D" del
+volcado de aulas NO es Lectura B. Es notación "1ºBach C + 1ºBach D" (dos grupos
+enteros), corresponde a LU (LEN1), y es Lectura A multi-grupo — mismo patrón que la
+Religión por parejas ya modelada. La evidencia REAL de Lectura B es el bloque de
+optativas C+D (cinco materias simultáneas, cada alumno elige una; la población de cada
+optativa mezcla alumnos de C y D). Verificado cruzando grupo-1BACH-C.json y
+grupo-1BACH-D.json (bloque idéntico en ambos, día 1 t3 y día 2 t2).
+
+Deuda nueva registrada:
+- Invariante de población (heredada de Tarea 0): el volcado da las SESIONES de
+  optativas, no el reparto nominal de alumnos. La partición concreta se confirma con
+  el centro; ningún componente la verifica.
+- Fixture-inline JSON en ProblemaHorarioJsonLoaderTest (text blocks): se escapa de
+  cualquier migración sobre *.json. Si el schema vuelve a cambiar, migrarlo aparte.
+  Deuda de testing.
+- La prueba negativa de Lectura B es por palomar, no diferencial directo: demuestra
+  infactibilidad real; el argumento "con 1:1 sería factible" vive en el diseño/Javadoc,
+  no en una ejecución comparativa (imposible, porque el dominio ya no admite 1:1).
+
+Modelo modificado (a diferencia de S20/S21): Lectura B SÍ aportó capacidad estructural
+nueva. §6.4 corregida (el dominio ya soporta N:M; Lectura A es el caso de conjunto
+unitario), §6.3 marcada como validada en el solver con enlace al fixture, §6.5 anotada
+(diseño conceptual no ejecutado completo; capacidad N:M ya implementada), invariante S9
+(líneas 717-721) pasada de predicción en futuro a hecho con precisión del cambio de
+dominio.
+
+src/main SÍ tocado → referencia-codigo-solver.md DEBE regenerarse sobre el nuevo HEAD
+(cambian Subgrupo, su constructor/equals, SubgrupoDto, tocaGrupo, VistaPorGrupo,
+VerificadorSolucion, mapper). Pendiente al cierre de la sesión.
+
+Criterios de Fase 5: NINGUNO cerrado. Lectura B es estructura (desbloquea Tipo 7), no
+escala; dos grupos de Bach en un fixture de discriminación ≠ Bachillerato a escala ≠
+instituto completo. El Tipo 7 pasa de "sin soporte de dominio" a "soportado y
+demostrado con prueba de discriminación".
 
 ---
 

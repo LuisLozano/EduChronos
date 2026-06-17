@@ -237,7 +237,7 @@ class SolverHorarioCierreFase4Test {
         Set<GrupoAdministrativo> gs = new LinkedHashSet<>();
         for (Plaza p : actividad.plazas()) {
             for (Subgrupo s : p.subgrupos()) {
-                gs.add(s.grupo());
+                gs.addAll(s.grupos());
             }
         }
         return gs;

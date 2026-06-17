@@ -282,115 +282,115 @@
   "subgrupos": [
     {
       "codigo": "1ºA-Completo",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºB-Completo",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºC-Completo",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºD-Completo",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºA-CyR-Tec",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºA-CyR-Inf",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºA-OyD",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºA-RefMt-MAT6",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºA-RefMt-MAT7",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºA-RefMt-MAT4",
-      "grupo": "1ºA"
+      "grupos": ["1ºA"]
     },
     {
       "codigo": "1ºB-CyR-Tec",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºB-CyR-Inf",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºB-OyD",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºB-RefMt-MAT6",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºB-RefMt-MAT7",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºB-RefMt-MAT4",
-      "grupo": "1ºB"
+      "grupos": ["1ºB"]
     },
     {
       "codigo": "1ºC-CyR-Tec",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºC-CyR-Inf",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºC-OyD",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºC-RefMt-MAT6",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºC-RefMt-MAT7",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºC-RefMt-MAT4",
-      "grupo": "1ºC"
+      "grupos": ["1ºC"]
     },
     {
       "codigo": "1ºD-CyR-Tec",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºD-CyR-Inf",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºD-OyD",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºD-RefMt-MAT6",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºD-RefMt-MAT7",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     },
     {
       "codigo": "1ºD-RefMt-MAT4",
-      "grupo": "1ºD"
+      "grupos": ["1ºD"]
     }
   ],
   "actividades": [

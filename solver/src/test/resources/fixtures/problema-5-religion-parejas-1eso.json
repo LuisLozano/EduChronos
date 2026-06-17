@@ -60,18 +60,18 @@
     {"codigo": "1D", "tipo": "ORDINARIO", "grupoPadre": null}
   ],
   "subgrupos": [
-    {"codigo": "1A-Rel",      "grupo": "1A"},
-    {"codigo": "1A-ATED",     "grupo": "1A"},
-    {"codigo": "1A-Completo", "grupo": "1A"},
-    {"codigo": "1B-Rel",      "grupo": "1B"},
-    {"codigo": "1B-ATED",     "grupo": "1B"},
-    {"codigo": "1B-Completo", "grupo": "1B"},
-    {"codigo": "1C-Rel",      "grupo": "1C"},
-    {"codigo": "1C-ATED",     "grupo": "1C"},
-    {"codigo": "1C-Completo", "grupo": "1C"},
-    {"codigo": "1D-Rel",      "grupo": "1D"},
-    {"codigo": "1D-ATED",     "grupo": "1D"},
-    {"codigo": "1D-Completo", "grupo": "1D"}
+    {"codigo": "1A-Rel",      "grupos": ["1A"]},
+    {"codigo": "1A-ATED",     "grupos": ["1A"]},
+    {"codigo": "1A-Completo", "grupos": ["1A"]},
+    {"codigo": "1B-Rel",      "grupos": ["1B"]},
+    {"codigo": "1B-ATED",     "grupos": ["1B"]},
+    {"codigo": "1B-Completo", "grupos": ["1B"]},
+    {"codigo": "1C-Rel",      "grupos": ["1C"]},
+    {"codigo": "1C-ATED",     "grupos": ["1C"]},
+    {"codigo": "1C-Completo", "grupos": ["1C"]},
+    {"codigo": "1D-Rel",      "grupos": ["1D"]},
+    {"codigo": "1D-ATED",     "grupos": ["1D"]},
+    {"codigo": "1D-Completo", "grupos": ["1D"]}
   ],
   "actividades": [
     {

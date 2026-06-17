@@ -19,8 +19,8 @@
     {"codigo": "1B", "tipo": "ORDINARIO", "grupoPadre": null}
   ],
   "subgrupos": [
-    {"codigo": "1A-Completo", "grupo": "1A"},
-    {"codigo": "1B-Completo", "grupo": "1B"}
+    {"codigo": "1A-Completo", "grupos": ["1A"]},
+    {"codigo": "1B-Completo", "grupos": ["1B"]}
   ],
   "actividades": [
     {

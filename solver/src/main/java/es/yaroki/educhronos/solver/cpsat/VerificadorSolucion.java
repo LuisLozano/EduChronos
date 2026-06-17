@@ -105,7 +105,7 @@ public final class VerificadorSolucion {
                 // instancia ocupa el grupo una vez. Espejo de S9 en el solver,
                 // ciega al grupoPadre (agrupa por subgrupo.grupo() directo).
                 Set<GrupoAdministrativo> gs = new HashSet<>();
-                ss.forEach(s -> gs.add(s.grupo()));
+                ss.forEach(s -> gs.addAll(s.grupos()));
 
                 ps.forEach(p -> profesores.merge(p, 1, Integer::sum));
                 ss.forEach(s -> subgrupos.merge(s, 1, Integer::sum));
