@@ -47,9 +47,17 @@ alternativo (ÁmbSL, ÁmbCM, IngDi, OyD, RefMt, TPMAR), los tres subgrupos Di
 se agrupan en una única sesión en A8 con un único profesor. Solo para
 algunas materias compartidas (p.ej. EPVA, EF; lista completa en §6.2) cada Di vuelve a su grupo de origen.
 
-Implicación: el modelo trata 3ºADi como `GrupoAdministrativo` virtual con
-identidad propia, pero los subgrupos que define se enlazan en `SubgrupoGrupo`
-de forma cruzada para reflejar la agrupación transversal en A8.
+Implicación (corregida en Sesión 23 al ejecutar el PDC de 3º en el solver): el
+tronco A8 es un ÚNICO grupo de Diversificación (3PDC, tipo DIVERSIFICACION_PDC),
+no tres grupos virtuales. Su subgrupo lista SOLO su propio grupo (grupos={3PDC}),
+no los de origen: enlazar los grupos de origen en el subgrupo provoca INFEASIBLE
+(tocaGrupo los bloquea enteros, sumando las horas del Di a las del ordinario). El
+Di es un grupo independiente porque saca solo PARTE de cada grupo de origen y el
+resto sigue en clase ordinaria simultánea — a diferencia de la Lectura B de Bach,
+donde el subgrupo sí lista varios grupos porque los bloquea enteros. Detalle del
+modelo validado en la Nota (Sesión 23) de §6.2. La redacción original de esta
+implicación ("subgrupos enlazados de forma cruzada en SubgrupoGrupo") describía
+el diseño conceptual que S23 superó.
 
 ### Hallazgo B — Desdoble y agrupamiento no son tipos disjuntos
 
@@ -986,6 +994,16 @@ CyR/OyD/RefMt) + 2 (bloque Fr2/ALCT) + 1 (bloque Relig/ATED) =
 
 ### 6.2 Criterio: 3ºADi con sesiones propias y compartidas
 
+> ⚠️ **Diseño conceptual SUPERADO en Sesión 23 (no ejecutado en el solver tal
+> como se describe aquí).** El modelo de abajo asume tres grupos Di
+> (3ºADi/3ºBDi/3ºCDi, uno por ordinario) y subgrupos Di que listan sus grupos de
+> origen. El dato fiel de 3º (S23) y el solver desmienten ambas cosas: (1) hay UN
+> solo grupo Di de 3º (tronco A8 idéntico para A/B/C, sin solapamiento interno),
+> adscrito a 3C; (2) un subgrupo Di que liste {3A,3B,3C} provoca INFEASIBLE
+> (tocaGrupo bloquea cada grupo listado → 30 h ordinario + 22 h Di = 52 h en 30
+> tramos). El modelo validado y factible está en la **Nota (Sesión 23)** al final
+> de esta sección. Léela antes de usar el cuerpo de §6.2.
+
 **Configuración necesaria.**
 
 ```
@@ -1042,6 +1060,43 @@ con el de `3ºA PDC` (pág. 9), son: TUT3 (tutoría), EF, EPVA, Tec y el bloque 
 ✅ Criterio cubierto.
 
 Nota (Sesión 18) — Rel/ATED es un único bloque para 3ºA y 3ºADi. El cruce de PDFs muestra que el viernes 10-11 el bloque Rel/ATED de 3ºA (REL1 B01 + FIL1 B05 + ING3 A7) es idéntico al de 3ºADi: es la misma actividad, que toca a ambos grupos, no dos sesiones distintas. Se modela como una actividad multi-plaza cuyos subgrupos cubren ambos grupos (mecanismo de §6.4). La transversalidad ampliada por parejas (3ºA+3ºB+3ºADi+3ºBDi, §6.4) se validará con dataset real en Fase 5; el fixture de cierre de Fase 4 recortó Rel/ATED a 3ºA+3ºADi por no aportar nada que EF/Tec no validen ya sobre la ceguera de S9.
+
+Nota (Sesión 23) — Modelo del PDC de 3º validado en el solver, que SUPERA el
+diseño conceptual de arriba. Al incorporar el PDC de 3º al fixture de escala
+(problema-5-escala-instituto.json) y ejecutarlo, el diseño de §6.2 resultó
+incorrecto en dos puntos:
+
+1. **Un solo grupo Di, no tres.** Los volcados grupo-3-ESO-A-PDC / -B-PDC /
+   -PDC(sin letra) tienen un tronco A8 IDÉNTICO (22 sesiones: ÁmbCM 8, ÁmbSL 7,
+   OyD 2, RefMt 2, IngDi 2, TPMAR 1) y sin solapamiento interno (una asignatura
+   por tramo). No son tres subgrupos Di independientes: son los alumnos de
+   diversificación de 3A+3B+3C cursando juntos su tronco alternativo. Se modela
+   como UN grupo administrativo: 3PDC, tipo DIVERSIFICACION_PDC, grupoPadre 3C
+   (I5 exige padre; el dato lo da: el PDC sin letra del volcado es el Di adscrito
+   a 3C, su envoltura ordinaria —TUT3/BYG3, Religión, EF— coincide con la de 3C).
+
+2. **El subgrupo Di lista SOLO su propio grupo, no los de origen.** Subgrupo 3PDC
+   → grupos={3PDC} (mono-grupo). Listar {3A,3B,3C} (como hacían las líneas 1004 y
+   1021 de §6.2) provoca INFEASIBLE: tocaGrupo bloquea cada grupo del Set, así que
+   las 22 h del Di se suman a las 30 h ordinarias de cada grupo → 52 h en 30
+   tramos. Esto es lo que distingue el PDC de la Lectura B de Bach (§6.3/§6.4): en
+   Bach el subgrupo lista varios grupos PORQUE los bloquea enteros (todos los
+   alumnos se redistribuyen en las optativas); en PDC el Di saca solo PARTE de
+   cada grupo y el resto sigue en clase ordinaria simultánea, así que el Di NO
+   bloquea sus grupos de origen y debe ser grupo independiente.
+
+3. **Las sesiones compartidas ord+Di quedan en el ordinario (opción 2).** Las 8
+   sesiones donde el alumno Di vuelve a su grupo (EF, EPVA, Tec, Rel, ATED, TUT)
+   NO se modelan como propias del Di: el alumno es literalmente alumno de su grupo
+   en esos tramos. Añadir 3PDC como participante haría doble conteo de población
+   (3PDC ⊂ 3A∪3B∪3C) que activaría D3 al introducir capacidades reales de aula.
+   Consecuencia: el grupo Di tiene 22 de sus 30 sesiones modeladas como propias;
+   las 8 restantes se observan desde el grupo ordinario (presentación, no modelo).
+
+Resultado: factible en 0,408 s, 0 violaciones duras (10 grupos + 1 grupo Di),
+suite 32 verde. Ver registro de Sesión 23 en plan_trabajo_horarios.md. Deuda de
+población viva: el reparto nominal de alumnos 3A/3B/3C entre el Di y el ordinario
+no lo modela ni verifica ningún componente; a confirmar con el centro.
 
 ### 6.3 Criterio: TICO de 1ºBach (4 grupos comparten aula y profesor)
 

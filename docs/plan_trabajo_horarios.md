@@ -429,18 +429,22 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1 y 2 cerrados)
+  Bloques 1-5 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 21 — Fase 5, Bloque 3 cerrado (escala 1º+2º+3º
-  ESO, 10 grupos). Fixture de escala problema-5-escala-instituto.json AMPLIADO
-  (no nuevo) con 3ºA–3ºC ordinario + SolverHorarioEscalaInstitutoTest mutado a 10
-  grupos; 3º verificado plaza a plaza contra volcado fiel (125/125 celdas).
-  Medición wall-clock: factible en 0,469 s, 0 violaciones duras; suite 30 en
-  verde. 3º ordinario separable del Di (verificado: sin huecos, sin A8, sin
-  ámbitos); PDC a escala diferido. Ningún criterio formal de Fase 5 marcado (10
-  grupos ≠ instituto completo): criterio 1 con segundo punto de curva (tramo
-  holgado lineal), criterio 2 con evidencia parcial.
+Última sesión registrada: Sesión 23 — Fase 5, Bloque 5 cerrado (PDC de 3º a
+  escala). El PDC de 3º se modela como grupo DIVERSIFICACION_PDC propio (3PDC,
+  padre 3C), no como subgrupo Lectura B: el Di solo se bloquea a sí mismo
+  (subgrupo mono-grupo 3PDC→{3PDC}); tronco A8 de 22 h. Las 8 compartidas ord+Di
+  quedan en el ordinario (opción 2). Fixture de escala AMPLIADO +
+  SolverHorarioEscalaInstitutoTest mutado (grupos 11, subgrupos 116, actividades
+  116). Tercer punto de curva: 10 grupos + 1 grupo Di → 0,408 s, 0 duras, suite
+  32 verde; no dispara salto de régimen. Cierra las deudas "PDC a escala" y
+  "reconciliación 3ºPDC↔3ºCDi". Ningún criterio formal de Fase 5 marcado (sigue
+  siendo un escalón, no el instituto completo): criterio 1 con tercer punto de
+  curva (tramo holgado ~lineal), criterio 2 con evidencia parcial acumulada.
+  (Sesión 22 — Bloque 4, Lectura B N:M, trabajo estructural — registrada en el
+  cuerpo; esta cabecera se había quedado en S21 y se pone al día aquí.)
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -505,11 +509,34 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       Lectura A. La evidencia real de Lectura B es el bloque de optativas, no esa
       celda. Modelo: §6.3/§6.4/§6.5 y la invariante S9 actualizadas (Lectura B
       soportada y validada; Lectura A es el caso particular de conjunto unitario).
-- [ ] (pendientes de definir) Más niveles de escala (4ºESO con PDC nuevo 4ºADi/
-      4ºDDi); PDC a escala (3ºADi/3ºBDi/3ºCDi, reconciliación 3ºPDC↔3ºCDi); FPB
-      (bloques 2-3 tramos, D12); Bachillerato a ESCALA (con Lectura B ya
-      soportada; falta incorporar grupos de Bach al fixture de escala);
-      EF con Gim/Pista a escala (D3/D4). Orden a decidir.
+- [x] Bloque 5 — PDC de 3º a escala (S23). ESCALA con capa de modelado nueva
+      (grupo de Diversificación). El PDC de 3º se modela como UN grupo
+      administrativo propio 3PDC (tipo DIVERSIFICACION_PDC, padre 3C por I5), NO
+      como subgrupo Lectura B sobre {3A,3B,3C}: el Di saca parte de cada grupo y
+      el resto sigue en clase ordinaria simultánea, así que 3PDC solo se bloquea
+      a sí mismo (subgrupo 3PDC→{3PDC} mono-grupo). Distinción estructural frente
+      a Bach: en Bach el subgrupo lista varios grupos porque los bloquea enteros
+      (redistribución total, Lectura B); en PDC no. Tronco A8 de 22 h (ÁmbCM 8 /
+      ÁmbSL 7 / OyD 2 / RefMt 2 / IngDi 2 / TPMAR 1), 6 actividades mono-plaza
+      DISTRIBUIDA aulaFija A8, verificado sin solapamiento interno contra volcado
+      fiel (tronco idéntico en los tres PDC A/B/C). Las 8 compartidas ord+Di se
+      quedan en el ordinario (opción 2: evita doble conteo de población
+      3PDC ⊂ 3A∪3B∪3C, que activaría D3). Fixture de escala AMPLIADO (mismo
+      linaje) + SolverHorarioEscalaInstitutoTest mutado (grupos 11, subgrupos 116,
+      actividades 116). Tercer punto de curva: 10 grupos + 1 grupo Di → 0,408 s,
+      0 duras, suite 32 verde. NO dispara salto de régimen (A8 exclusiva, profes
+      ≤14/30). Coste de proceso: 3 intentos (subgrupo {3A,3B,3C}→sobrecarga 52 h;
+      grupoPadre null→viola I5; grupoPadre 3C→OK), por razonar sobre código no
+      leído antes de pedirlo. Cierra dos deudas: "PDC a escala (3ºADi/3ºBDi/3ºCDi)"
+      (resuelta distinto a lo previsto: un grupo, no tres) y "reconciliación
+      3ºPDC↔3ºCDi" (cerrada por identidad: el PDC sin letra del volcado es el Di
+      adscrito a 3C, determinable por su envoltura ordinaria).
+- [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
+      ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
+      tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
+      (Lectura B ya soportada; falta incorporar grupos de Bach al fixture);
+      EF con Gim/Pista a escala (D3/D4, donde se espera el salto de régimen).
+      Orden a decidir.
 
 ### Fases completadas
 
@@ -1639,6 +1666,78 @@ Criterios de Fase 5: NINGUNO cerrado. Lectura B es estructura (desbloquea Tipo 7
 escala; dos grupos de Bach en un fixture de discriminación ≠ Bachillerato a escala ≠
 instituto completo. El Tipo 7 pasa de "sin soporte de dominio" a "soportado y
 demostrado con prueba de discriminación".
+
+### Sesión 23 — Fase 5, Bloque 5: PDC de 3º a escala (grupo Di 3PDC).
+
+Elegido el Bloque 5 entre cuatro candidatos (Bachillerato, 4ºESO, PDC a escala,
+FPB). Decisión: PDC a escala, por ser el único candidato de "capa limpia" sobre
+lo ya construido (3º ordinario ya en el fixture y verificado), por cerrar una
+deuda diferida en S21 y S22, y por no disparar D4 (no añade EF en Gim/Pista).
+Descartados: Bachillerato (mezcla escala + optatividad densa + Lectura B real +
+modalidad, varias capas a la vez); 4ºESO (escala + PDC acoplado, mejor ensayar
+el acoplamiento ord↔Di antes sobre 3º conocido); FPB (cabo de datos abierto: el
+horario por aulas no cubre FPB).
+
+Lectura del dato fiel ANTES de construir (lección S22), con análisis mecánico:
+los seis volcados grupo-3-ESO-*.json muestran que NO hay tres subgrupos Di
+independientes. El tronco A8 (22 sesiones: ÁmbCM 8 / ÁmbSL 7 / OyD 2 / RefMt 2 /
+IngDi 2 / TPMAR 1) es IDÉNTICO en los tres PDC (A/B/C) y sin solapamiento interno
+(una asignatura por tramo) → un único grupo Di, no tres. La deuda
+"reconciliación 3ºPDC↔3ºCDi (no determinista)" queda CERRADA por identidad: el
+grupo-3-ESO-PDC.json (sin letra) es el Di adscrito a 3C, determinable porque su
+envoltura ordinaria (tutoría TUT3/BYG3, Religión, EF) coincide con la de 3C. No
+era indeterminismo: era la etiqueta del PDF.
+
+Decisión de modelado (cerrada con el usuario): el Di NO es el patrón Lectura B de
+las optativas de Bach. En Bach el subgrupo lista varios grupos porque los bloquea
+ENTEROS (todos los alumnos se redistribuyen). En PDC el Di saca solo PARTE de
+cada grupo y el resto sigue en clase ordinaria simultánea, así que el Di es un
+grupo administrativo INDEPENDIENTE que solo se bloquea a sí mismo. Modelo final:
+grupo 3PDC (tipo DIVERSIFICACION_PDC, grupoPadre 3C por I5) + subgrupo 3PDC con
+grupos={3PDC} (mono-grupo) + 6 actividades mono-plaza DISTRIBUIDA, aulaFija A8.
+Las 8 compartidas ord+Di se quedan en el ordinario (opción 2, decidida con el
+usuario): el alumno Di es literalmente alumno de su grupo en esos tramos; añadir
+3PDC como participante haría doble conteo (3PDC ⊂ 3A∪3B∪3C) que activaría D3.
+Coste: el Di tiene 22 de 30 sesiones modeladas como propias; las 8 restantes se
+observan desde el ordinario (presentación, no modelo).
+
+Coste de proceso (aprendizaje para registrar): el modelado correcto costó TRES
+intentos, los tres por razonar sobre código no leído antes de pedirlo —
+exactamente lo que el handoff advertía. (1) subgrupo 3PDC→{3A,3B,3C}: INFEASIBLE,
+porque tocaGrupo bloquea cada grupo listado en el Set → 30 h ordinario + 22 h Di
+= 52 h en 30 tramos. (2) grupo propio con grupoPadre null: viola I5 (PDC exige
+padre), descubierto al leer GrupoAdministrativo.java. (3) grupoPadre 3C: correcto,
+ya con GrupoAdministrativo y ProblemaHorarioMapper leídos (el mapper solo enlaza
+el padre y detecta ciclos; no lo propaga; ModeloCpSat es ciego a él, así que 3C
+como padre no reacopla). Lección: pedir record + mapper de toda entidad nueva
+ANTES del primer modelado, no tras cada fallo. La validación por aritmética
+(carga ≤30) detectó el fallo 1 pero no podía detectar 2 ni 3 (invariantes de
+dominio, solo visibles leyendo el código).
+
+Entregables (commit 9a74aff, sin push hasta cerrar documentación): fixture de
+escala problema-5-escala-instituto.json AMPLIADO (mismo linaje; +4 asignaturas
+ÁmbCM/ÁmbSL/IngDi/TPMAR, +1 aula A8, +1 profesor ORI1, +1 grupo 3PDC, +1 subgrupo
+3PDC, +6 actividades de tronco) + SolverHorarioEscalaInstitutoTest mutado (grupos
+11, subgrupos 116, actividades 116; Javadoc reescrito explicando grupo Di propio
+vs Lectura B). NO se regenera referencia-codigo-solver.md: la sesión solo añade
+fixture + test, no toca src/main.
+
+Medición: tercer punto de curva de escala — 10 grupos + 1 grupo Di → 0,408 s,
+0 violaciones duras (VerificadorSolucion), suite 32 verde, BUILD SUCCESS. Dentro
+del ruido de los puntos previos (0,317 s a 7 grupos; 0,469 s a 10 sin Di): NO
+dispara salto de régimen (A8 exclusiva del Di, profesores-puente ≤14/30). El
+salto por saturación de recurso compartido sigue PENDIENTE de observar en
+Bachillerato/4º (Gim/Pista, D4).
+
+Criterios de Fase 5: NINGUNO cerrado. Sigue siendo un escalón, no el instituto
+completo. Criterio 1 con tercer punto de curva (tramo holgado ~lineal), criterio
+2 con evidencia parcial acumulada.
+
+Deudas tocadas: "PDC a escala (3ºADi/3ºBDi/3ºCDi)" CERRADA (resuelta como un
+grupo, no tres). "Reconciliación 3ºPDC↔3ºCDi" CERRADA (por identidad). Invariante
+de población: sigue VIVA y más concreta — el Di adscrito a 3C tiene población
+real de 3A+3B+3C, no modelada. D3/D4: sin tocar; D4 sigue en observación, a
+reevaluar con Bachillerato/4º.
 
 ---
 
