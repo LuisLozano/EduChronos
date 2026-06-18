@@ -235,6 +235,10 @@
     {
       "codigo": "Pista",
       "nombre": "Pista Polideportiva"
+    },
+    {
+      "codigo": "A8",
+      "nombre": "Aula 8"
     }
   ],
   "asignaturas": [
@@ -369,6 +373,22 @@
     {
       "codigo": "TUT3",
       "nombre": "Tutoría alumnos"
+    },
+    {
+      "codigo": "ÁmbCM",
+      "nombre": "Ámbito Científico-Matemático"
+    },
+    {
+      "codigo": "ÁmbSL",
+      "nombre": "Ámbito Sociolingüístico"
+    },
+    {
+      "codigo": "IngDi",
+      "nombre": "Inglés (Diversificación)"
+    },
+    {
+      "codigo": "TPMAR",
+      "nombre": "Taller de Proyectos / Mejora del Aprendizaje"
     }
   ],
   "profesores": [
@@ -539,6 +559,10 @@
     {
       "codigo": "LEN7",
       "nombre": "Profesor LEN7"
+    },
+    {
+      "codigo": "ORI1",
+      "nombre": "ORI1"
     }
   ],
   "grupos": [
@@ -591,468 +615,709 @@
       "codigo": "3C",
       "tipo": "ORDINARIO",
       "grupoPadre": null
+    },
+    {
+      "codigo": "3PDC",
+      "tipo": "DIVERSIFICACION_PDC",
+      "grupoPadre": "3C"
     }
   ],
   "subgrupos": [
     {
       "codigo": "1A-Completo",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1B-Completo",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1C-Completo",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1D-Completo",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1A-CyR-Tec",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-CyR-Inf",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-OyD",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-RefMt-MAT6",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-RefMt-MAT7",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-RefMt-MAT4",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1B-CyR-Tec",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-CyR-Inf",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-OyD",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-RefMt-MAT6",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-RefMt-MAT7",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-RefMt-MAT4",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1C-CyR-Tec",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-CyR-Inf",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-OyD",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-RefMt-MAT6",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-RefMt-MAT7",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-RefMt-MAT4",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1D-CyR-Tec",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-CyR-Inf",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-OyD",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-RefMt-MAT6",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-RefMt-MAT7",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-RefMt-MAT4",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1A-Fr2",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-ALCT",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1B-Fr2",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-ALCT",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1C-Fr2",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-ALCT",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1D-Fr2",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-ALCT",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1A-Relig",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1A-ATED",
-      "grupos": ["1A"]
+      "grupos": [
+        "1A"
+      ]
     },
     {
       "codigo": "1B-Relig",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1B-ATED",
-      "grupos": ["1B"]
+      "grupos": [
+        "1B"
+      ]
     },
     {
       "codigo": "1C-Relig",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1C-ATED",
-      "grupos": ["1C"]
+      "grupos": [
+        "1C"
+      ]
     },
     {
       "codigo": "1D-Relig",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "1D-ATED",
-      "grupos": ["1D"]
+      "grupos": [
+        "1D"
+      ]
     },
     {
       "codigo": "2A-Completo",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2B-Completo",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2C-Completo",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2A-CyR",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-RefLe-LEN2",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-Rel",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-PEPA",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-RelEV",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-RefMt-MAT7",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-ATEDU",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-RefMt-MAT1",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-Fr2",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2A-RefLe-LEN1",
-      "grupos": ["2A"]
+      "grupos": [
+        "2A"
+      ]
     },
     {
       "codigo": "2B-CyR",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-RefLe-LEN2",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-Rel",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-PEPA",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-RelEV",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-RefMt-MAT7",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-ATEDU",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-RefMt-MAT1",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-Fr2",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2B-RefLe-LEN1",
-      "grupos": ["2B"]
+      "grupos": [
+        "2B"
+      ]
     },
     {
       "codigo": "2C-CyR",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-RefLe-LEN2",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-Rel",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-PEPA",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-RelEV",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-RefMt-MAT7",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-ATEDU",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-RefMt-MAT1",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-Fr2",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "2C-RefLe-LEN1",
-      "grupos": ["2C"]
+      "grupos": [
+        "2C"
+      ]
     },
     {
       "codigo": "3A-Completo",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-CyR-Inf",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-CyR-Tec",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-BioNu",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefLe-LEN1",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefLe-LEN3",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefLe-LEN7",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefMt-MAT5",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefMt-MAT6",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-RefMt-MAT7",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3A-Rel",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3B-Completo",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-CyR-Inf",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-CyR-Tec",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-BioNu",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefLe-LEN1",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefLe-LEN3",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefLe-LEN7",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefMt-MAT5",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefMt-MAT6",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-RefMt-MAT7",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3B-Rel",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3C-Completo",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-CyR-Inf",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-CyR-Tec",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-BioNu",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefLe-LEN1",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefLe-LEN3",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefLe-LEN7",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefMt-MAT5",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefMt-MAT6",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-RefMt-MAT7",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-Rel",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3C-ATED",
-      "grupos": ["3C"]
+      "grupos": [
+        "3C"
+      ]
     },
     {
       "codigo": "3A-ATED-FIL1",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3B-ATED-FIL1",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
     },
     {
       "codigo": "3A-ATED-ING3",
-      "grupos": ["3A"]
+      "grupos": [
+        "3A"
+      ]
     },
     {
       "codigo": "3B-ATED-ING3",
-      "grupos": ["3B"]
+      "grupos": [
+        "3B"
+      ]
+    },
+    {
+      "codigo": "3PDC",
+      "grupos": [
+        "3PDC"
+      ]
     }
   ],
   "actividades": [
@@ -3800,6 +4065,126 @@
             "3C-ATED"
           ],
           "aulaFija": "A9"
+        }
+      ]
+    },
+    {
+      "codigo": "ÁmbCM-3PDC",
+      "asignatura": "ÁmbCM",
+      "repeticionesPorSemana": 8,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ÁmbCM-3PDC-P1",
+          "asignatura": "ÁmbCM",
+          "profesores": [
+            "MAT4"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
+        }
+      ]
+    },
+    {
+      "codigo": "ÁmbSL-3PDC",
+      "asignatura": "ÁmbSL",
+      "repeticionesPorSemana": 7,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ÁmbSL-3PDC-P1",
+          "asignatura": "ÁmbSL",
+          "profesores": [
+            "LEN2"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
+        }
+      ]
+    },
+    {
+      "codigo": "OyD-3PDC",
+      "asignatura": "OyD",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "OyD-3PDC-P1",
+          "asignatura": "OyD",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
+        }
+      ]
+    },
+    {
+      "codigo": "RefMt-3PDC",
+      "asignatura": "RefMt",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "RefMt-3PDC-P1",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT7"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
+        }
+      ]
+    },
+    {
+      "codigo": "IngDi-3PDC",
+      "asignatura": "IngDi",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "IngDi-3PDC-P1",
+          "asignatura": "IngDi",
+          "profesores": [
+            "ING2"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
+        }
+      ]
+    },
+    {
+      "codigo": "TPMAR-3PDC",
+      "asignatura": "TPMAR",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TPMAR-3PDC-P1",
+          "asignatura": "TPMAR",
+          "profesores": [
+            "ORI1"
+          ],
+          "subgrupos": [
+            "3PDC"
+          ],
+          "aulaFija": "A8"
         }
       ]
     }
