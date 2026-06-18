@@ -275,14 +275,27 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
-> **Estado (S21):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
-> Bloques 1, 2 y 3 CERRADOS — ver "### Bloques de Fase 5" y los registros de
-> Sesiones 19, 20 y 21. Ninguno de los criterios de verificación de abajo está
-> cerrado: todos exigen el instituto completo, que aún no se ha abordado. El
-> Bloque 1 fue prerrequisito de tipología (Tipo 4); los Bloques 2 y 3 son escala
-> (no cierran criterios). Curva de escala (criterio 1, factibilidad pura): dos
-> puntos, 7 grupos → 0,317 s y 10 grupos → 0,469 s; tramo holgado, crecimiento
-> aproximadamente lineal. Criterio 2: evidencia parcial (0 duras a 10 grupos).
+> **Estado (S23):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
+> Bloques 1-5 CERRADOS — ver "### Bloques de Fase 5" y los registros de Sesiones
+> 19-23. Ninguno de los criterios de verificación de abajo está cerrado. Hay DOS
+> razones distintas, según el criterio:
+>   - Criterios 1 y 2 (tiempo < 10 min, 0 duras): faltan porque exigen el
+>     INSTITUTO COMPLETO (≈28 grupos + Bach + FPB), aún no abordado. Lo medido
+>     hasta ahora son escalones (máx. 11 grupos). Hay evidencia parcial
+>     acumulada: curva de escala (criterio 1, factibilidad pura) con TRES puntos
+>     — 7 grupos → 0,317 s, 10 grupos → 0,469 s, 10 grupos + 1 grupo Di →
+>     0,408 s; tramo holgado, crecimiento ~lineal, sin salto de régimen aún.
+>     Criterio 2: 0 duras en cada escalón (verde acumulado).
+>   - Criterios 3 y 4 (calidad comparable al real, profesor sin ventanas
+>     excesivas): faltan por una razón ADICIONAL — el solver corre en
+>     FACTIBILIDAD PURA, sin función objetivo. "Calidad" y "ventanas" son
+>     preferencias blandas/penalizaciones que aún no están implementadas. No
+>     podrán abordarse hasta introducir el objetivo de optimización (trabajo
+>     posterior dentro de Fase 5). D11 (preferencias horarias) entra aquí.
+> Naturaleza de los bloques cerrados: Bloque 1 fue prerrequisito de tipología
+> (Tipo 4); Bloque 4 fue estructural (Lectura B, Tipo 7); Bloques 2, 3 y 5 son
+> escala (no cierran criterios). El Tipo 5 (Diversificación/PDC) quedó validado a
+> ESCALA en el Bloque 5 (S23), reforzando lo cerrado en Fase 4.
 
 ### Lo que se añade
 - Todos los grupos restantes: 2ºESO, 3ºESO, 4ºESO, 1ºBach, 2ºBach, FPB
