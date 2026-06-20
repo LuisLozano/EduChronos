@@ -16,9 +16,13 @@ alfabéticamente. Para cada tipo:
 - Paquete.
 - Records: lista de componentes con su tipo.
 - Enums: lista de constantes.
-- Clases/interfaces: firmas EXACTAS de constructores y métodos (públicos y
-  package-private), con tipos de parámetro y de retorno tal cual aparecen en
+- Clases/interfaces: firmas EXACTAS de constructores y métodos públicos y
+  package-private, con tipos de parámetro y de retorno tal cual aparecen en
   el código. No expliques qué hacen.
+  EXCLUYE TODO miembro `private`: ni métodos `private` ni campos `private`
+  deben aparecer en el índice bajo ninguna circunstancia. Si un método o campo
+  lleva el modificador `private`, OMÍTELO por completo. Incluye únicamente
+  miembros con visibilidad public, protected o package-private (sin modificador).
 - "Consume:" una línea por tipo, listando los demás tipos del módulo
   (es.yaroki.educhronos.solver.*) que aparecen en sus firmas o imports.
 
@@ -28,4 +32,4 @@ EXCLUYE: sección de flujo principal, sección de "fuera de alcance",
 prosa descriptiva, conteos de restricciones, referencias a fases del roadmap.
 Si un método tiene Javadoc, ignóralo: solo la firma cuenta.
 
-Guárdalo en docs/referencia-codigo-solver.md. Si ya hay una copia en esa ubicación, crea un backup y elimina el antiguo.
+Guárdalo en docs/referencia-codigo-solver.md, sobrescribiendo la copia anterior si existe. No crees ficheros de backup: el control de versiones ya conserva el historial.
