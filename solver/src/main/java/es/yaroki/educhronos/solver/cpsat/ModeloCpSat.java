@@ -5,6 +5,8 @@ import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.CpSolver;
 import com.google.ortools.sat.IntVar;
 import com.google.ortools.sat.IntervalVar;
+import com.google.ortools.sat.LinearArgument;
+import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.Literal;
 import com.google.ortools.util.Domain;
 import es.yaroki.educhronos.solver.domain.Actividad;
@@ -53,9 +55,27 @@ import java.util.TreeMap;
  */
 final class ModeloCpSat {
 
+    /**
+     * Peso de la penalización por ventanas del profesorado (decisión 6a:
+     * constante hardcodeada; cuando concurran varios términos blandos con pesos
+     * relativos relevantes, se evaluará introducirlos por configuración —
+     * ampliando {@code ProblemaHorario}). Con un único término su valor absoluto
+     * es irrelevante: solo importa que sea positivo para que el objetivo tense
+     * las cotas (ver D17).
+     */
+    private static final long PESO_VENTANAS = 1L;
+
     private final ProblemaHorario problema;
     private final CpModel model = new CpModel();
     private final List<InstanciaProgramada> instancias = new ArrayList<>();
+
+    /**
+     * Andamiaje genérico de la función objetivo: términos blandos ya ponderados
+     * (expresión × peso). El modo con objetivo los suma y minimiza. Vacío en el
+     * modo de factibilidad pura. Bloques futuros (D11 indisponibilidades,
+     * distribución blanda, etc.) añaden sus términos aquí sin tocar el ensamblado.
+     */
+    private final List<LinearArgument> terminosObjetivo = new ArrayList<>();
 
     ModeloCpSat(ProblemaHorario problema) {
         this.problema = Objects.requireNonNull(problema, "problema no puede ser null");
@@ -74,6 +94,190 @@ final class ModeloCpSat {
         restriccionNoSolapeGrupo(); // Fase 3
         restriccionDistribucionPorDia();
         return this;
+    }
+
+    /**
+     * Construye el modelo en modo OPTIMIZACIÓN: las mismas restricciones duras
+     * que {@link #construir()} más la función objetivo de restricciones blandas.
+     * En Fase 5, Bloque 6a el único término es la penalización de ventanas del
+     * profesorado (criterio 4 de Fase 5).
+     *
+     * <p>{@link #construir()} se mantiene intacto y separado a propósito
+     * (decisión 1a): los tests de escala miden tiempo hasta primera solución
+     * factible en factibilidad pura; añadir el objetivo a ese camino los
+     * invalidaría. Aquí vive el camino de optimización; allí, el de factibilidad.
+     *
+     * @return {@code this} para encadenar.
+     */
+    ModeloCpSat construirConObjetivo() {
+        construir();
+        objetivoVentanasProfesor();
+        ensamblarObjetivo();
+        return this;
+    }
+
+    /** Suma los términos blandos ponderados y los fija como objetivo a minimizar. */
+    private void ensamblarObjetivo() {
+        if (terminosObjetivo.isEmpty()) {
+            return; // sin términos: equivalente a factibilidad pura
+        }
+        model.minimize(LinearExpr.sum(terminosObjetivo.toArray(new LinearArgument[0])));
+    }
+
+    /**
+     * Penalización por ventanas (huecos) del profesorado — Forma A, cotas
+     * tensadas. Por cada (profesor, día) con ≥1 clase, el número de huecos es
+     * {@code (ultimaPos − primeraPos + 1) − nClases}: los tramos lectivos libres
+     * intercalados entre la primera y la última clase del día. El recreo no
+     * cuenta (no es un {@link Tramo}; los tramos de un día son contiguos en
+     * {@code ordenEnDia}).
+     *
+     * <p><b>Cotas tensadas (D17):</b> {@code primero} y {@code ultimo} se acotan
+     * (primero ≤ posición de cada clase; ultimo ≥ posición de cada clase) en vez
+     * de fijarse con {@code addMinEquality}/{@code addMaxEquality}. Como el
+     * objetivo MINIMIZA los huecos con peso positivo, el solver tensa
+     * {@code primero} hacia su mayor valor admisible (= primera clase) y
+     * {@code ultimo} hacia su menor admisible (= última clase), dando el span
+     * exacto. Esto es correcto SOLO mientras el término se minimice con peso > 0;
+     * si un futuro término compitiera y dejara estas cotas flojas, habría que
+     * pasar a min/max explícito. Registrado como deuda D17.
+     *
+     * <p>El "día sin clases" se gestiona con {@code tieneClase}: si es 0, los
+     * huecos del (profesor, día) se fuerzan a 0 y no se imponen las cotas.
+     */
+    private void objetivoVentanasProfesor() {
+        List<Tramo> tramos = problema.tramos();
+        int numTramos = tramos.size();
+
+        // Índices de tramo y posiciones (ordenEnDia) agrupados por día.
+        Map<Integer, List<Integer>> indicesPorDia = new TreeMap<>();
+        for (int t = 0; t < numTramos; t++) {
+            indicesPorDia.computeIfAbsent(tramos.get(t).diaSemana(), k -> new ArrayList<>()).add(t);
+        }
+
+        for (Profesor profesor : problema.profesores()) {
+            // Instancias que usan a este profesor (una sola vez por instancia).
+            List<InstanciaProgramada> suyas = new ArrayList<>();
+            for (InstanciaProgramada ip : instancias) {
+                if (usaProfesor(ip, profesor)) {
+                    suyas.add(ip);
+                }
+            }
+            if (suyas.size() < 2) {
+                continue; // 0 ó 1 sesión en toda la semana: no puede haber ventana
+            }
+
+            for (Map.Entry<Integer, List<Integer>> e : indicesPorDia.entrySet()) {
+                int dia = e.getKey();
+                List<Integer> idxDelDia = e.getValue();           // índices planos
+                if (idxDelDia.size() < 2) {
+                    continue; // con <2 tramos en el día no cabe ninguna ventana
+                }
+
+                // ocupa[t] == 1  <=>  alguna instancia suya cae en el tramo t.
+                // posiciones (ordenEnDia) de los tramos del día, alineadas con ocupa.
+                List<BoolVar> ocupaDelDia = new ArrayList<>();
+                List<Integer> posDelDia = new ArrayList<>();
+                int minPos = Integer.MAX_VALUE;
+                int maxPos = Integer.MIN_VALUE;
+
+                for (int t : idxDelDia) {
+                    int pos = tramos.get(t).ordenEnDia();
+                    posDelDia.add(pos);
+                    minPos = Math.min(minPos, pos);
+                    maxPos = Math.max(maxPos, pos);
+
+                    BoolVar ocupa = model.newBoolVar(
+                            "ocupa_" + profesor.codigo() + "_d" + dia + "_t" + t);
+                    // Literales "instancia i cae en el tramo t".
+                    List<Literal> instEnT = new ArrayList<>();
+                    Domain soloT = Domain.fromValues(new long[] {t});
+                    for (InstanciaProgramada ip : suyas) {
+                        BoolVar enT = model.newBoolVar(
+                                "instEnT_" + profesor.codigo() + "_d" + dia
+                                        + "_t" + t + "_" + ip.instancia().actividad().codigo()
+                                        + "#" + ip.instancia().indice());
+                        model.addLinearExpressionInDomain(ip.tramoIndex(), soloT)
+                                .onlyEnforceIf(enT);
+                        Domain noT = complemento(t, numTramos);
+                        model.addLinearExpressionInDomain(ip.tramoIndex(), noT)
+                                .onlyEnforceIf(enT.not());
+                        instEnT.add(enT);
+                    }
+                    // ocupa == OR(instEnT). Por el no-solape de profesor, a lo sumo
+                    // un literal es verdadero; modelar como OR es correcto igual.
+                    model.addBoolOr(instEnT.toArray(new Literal[0])).onlyEnforceIf(ocupa);
+                    for (Literal l : instEnT) {
+                        model.addImplication(l, ocupa);
+                    }
+                    // ocupa == 0  =>  todos los instEnT == 0 (cierre del iff).
+                    Literal[] negados = new Literal[instEnT.size()];
+                    for (int k = 0; k < instEnT.size(); k++) {
+                        negados[k] = instEnT.get(k).not();
+                    }
+                    model.addBoolAnd(negados).onlyEnforceIf(ocupa.not());
+
+                    ocupaDelDia.add(ocupa);
+                }
+
+                // nClases = suma de ocupa del día.
+                LinearArgument nClases =
+                        LinearExpr.sum(ocupaDelDia.toArray(new LinearArgument[0]));
+
+                // tieneClase == OR(ocupaDelDia).
+                BoolVar tieneClase = model.newBoolVar(
+                        "tieneClase_" + profesor.codigo() + "_d" + dia);
+                model.addBoolOr(ocupaDelDia.toArray(new Literal[0])).onlyEnforceIf(tieneClase);
+                for (BoolVar oc : ocupaDelDia) {
+                    model.addImplication(oc, tieneClase);
+                }
+                Literal[] ocupaNeg = new Literal[ocupaDelDia.size()];
+                for (int k = 0; k < ocupaDelDia.size(); k++) {
+                    ocupaNeg[k] = ocupaDelDia.get(k).not();
+                }
+                model.addBoolAnd(ocupaNeg).onlyEnforceIf(tieneClase.not());
+
+                // primero/ultimo en [minPos, maxPos]; cotas tensadas por ocupa.
+                IntVar primero = model.newIntVar(minPos, maxPos,
+                        "primero_" + profesor.codigo() + "_d" + dia);
+                IntVar ultimo = model.newIntVar(minPos, maxPos,
+                        "ultimo_" + profesor.codigo() + "_d" + dia);
+                for (int k = 0; k < ocupaDelDia.size(); k++) {
+                    int pos = posDelDia.get(k);
+                    // ocupa[k] => primero <= pos  y  ultimo >= pos
+                    model.addLessOrEqual(primero, pos).onlyEnforceIf(ocupaDelDia.get(k));
+                    model.addGreaterOrEqual(ultimo, pos).onlyEnforceIf(ocupaDelDia.get(k));
+                }
+
+                // huecos >= 0; huecos == (ultimo - primero + 1) - nClases si tieneClase,
+                // huecos == 0 si !tieneClase.
+                IntVar huecos = model.newIntVar(0, maxPos - minPos,
+                        "huecos_" + profesor.codigo() + "_d" + dia);
+                // span = ultimo - primero + 1  (expresion lineal)
+                LinearArgument spanMenosClases = LinearExpr.newBuilder()
+                        .add(ultimo)
+                        .addTerm(primero, -1)
+                        .add(1)
+                        .addTerm(nClases, -1)
+                        .build();
+                model.addEquality(huecos, spanMenosClases).onlyEnforceIf(tieneClase);
+                model.addEquality(huecos, 0).onlyEnforceIf(tieneClase.not());
+
+                terminosObjetivo.add(LinearExpr.term(huecos, PESO_VENTANAS));
+            }
+        }
+    }
+
+    /** Dominio con todos los índices de tramo salvo {@code t}. Para reificar "no está en t". */
+    private Domain complemento(int t, int numTramos) {
+        long[] otros = new long[numTramos - 1];
+        int j = 0;
+        for (int x = 0; x < numTramos; x++) {
+            if (x != t) {
+                otros[j++] = x;
+            }
+        }
+        return Domain.fromValues(otros);
     }
 
     // ----------------------------------------------------------------- variables

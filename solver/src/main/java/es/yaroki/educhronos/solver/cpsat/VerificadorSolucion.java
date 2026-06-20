@@ -49,6 +49,75 @@ public final class VerificadorSolucion {
         return new ResultadoVerificacion(violaciones);
     }
 
+    /**
+     * Cuenta las "ventanas" (huecos) de cada profesor sobre una solución dada,
+     * de forma <b>independiente del solver</b> (recorre el dominio, no usa
+     * OR-Tools). Es el recomputo gemelo del término que {@code ModeloCpSat}
+     * minimiza: si el modelo CP-SAT tuviera un error en su identidad
+     * span−ocupados, este conteo —que cuenta de otra manera— lo delataría.
+     *
+     * <p>Definición de ventana: para un profesor en un día, un tramo libre
+     * situado <i>entre</i> su primera y su última clase de ese día. Los tramos
+     * antes de la primera clase o después de la última no son ventanas (entrar
+     * tarde o salir pronto no penaliza). El recreo no genera ventanas: no es un
+     * {@link Tramo}, así que los tramos lectivos de un día son contiguos en
+     * {@code ordenEnDia} y la clase de antes y la de después del recreo quedan
+     * adyacentes.
+     *
+     * <p>Identidad por (profesor, día) con ≥1 clase:
+     * {@code ventanas = (ultimaPos − primeraPos + 1) − nClases}. Con 0 ó 1
+     * clase ese día, 0 ventanas.
+     *
+     * @return mapa profesor → nº total de ventanas en la semana (suma de todos
+     *         los días). Un profesor sin ventanas no aparece o aparece con 0;
+     *         se incluyen todos los profesores del problema con valor ≥ 0.
+     */
+    public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema,
+                                                         SolucionHorario solucion) {
+        // (profesor, diaSemana) -> conjunto de ordenEnDia ocupados por ese profesor.
+        Map<Profesor, Map<Integer, Set<Integer>>> ocupacion = new HashMap<>();
+        for (Profesor p : problema.profesores()) {
+            ocupacion.put(p, new HashMap<>());
+        }
+
+        for (ActividadInstancia inst : Expansion.todas(problema)) {
+            Optional<Tramo> tramoOpt = solucion.tramoDeInstancia(inst);
+            if (tramoOpt.isEmpty()) {
+                continue; // instancia sin colocar: ya lo reporta verificar()
+            }
+            Tramo tramo = tramoOpt.get();
+            // Profesores de la instancia: unión de los de todas sus plazas, una
+            // sola vez por instancia (un profesor que aparece en dos plazas de la
+            // misma actividad ocupa el tramo una vez). Mismo criterio que el
+            // no-solape de profesor del modelo.
+            Set<Profesor> profesoresInstancia = new HashSet<>();
+            for (Plaza plaza : inst.actividad().plazas()) {
+                profesoresInstancia.addAll(plaza.profesores());
+            }
+            for (Profesor p : profesoresInstancia) {
+                ocupacion.get(p)
+                        .computeIfAbsent(tramo.diaSemana(), k -> new HashSet<>())
+                        .add(tramo.ordenEnDia());
+            }
+        }
+
+        Map<Profesor, Integer> ventanas = new HashMap<>();
+        for (Map.Entry<Profesor, Map<Integer, Set<Integer>>> ep : ocupacion.entrySet()) {
+            int total = 0;
+            for (Set<Integer> posicionesDelDia : ep.getValue().values()) {
+                if (posicionesDelDia.size() <= 1) {
+                    continue; // 0 ó 1 clase: sin ventanas
+                }
+                int min = posicionesDelDia.stream().min(Integer::compareTo).get();
+                int max = posicionesDelDia.stream().max(Integer::compareTo).get();
+                int span = max - min + 1;
+                total += span - posicionesDelDia.size();
+            }
+            ventanas.put(ep.getKey(), total);
+        }
+        return ventanas;
+    }
+
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,
                                          SolucionHorario solucion,
                                          List<String> violaciones) {
