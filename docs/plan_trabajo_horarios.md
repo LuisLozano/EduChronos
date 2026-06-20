@@ -287,11 +287,18 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 >     0,408 s; tramo holgado, crecimiento ~lineal, sin salto de régimen aún.
 >     Criterio 2: 0 duras en cada escalón (verde acumulado).
 >   - Criterios 3 y 4 (calidad comparable al real, profesor sin ventanas
->     excesivas): faltan por una razón ADICIONAL — el solver corre en
->     FACTIBILIDAD PURA, sin función objetivo. "Calidad" y "ventanas" son
->     preferencias blandas/penalizaciones que aún no están implementadas. No
->     podrán abordarse hasta introducir el objetivo de optimización (trabajo
->     posterior dentro de Fase 5). D11 (preferencias horarias) entra aquí.
+>     excesivas): el solver YA tiene régimen de optimización desde S24
+>     (Bloque 6a): `SolverHorario.resolverOptimizando` minimiza una función
+>     objetivo de penalizaciones blandas. El primer término es las ventanas
+>     (huecos) del profesorado. El MECANISMO del criterio 4 está implementado
+>     y validado en discriminación (S24), pero el criterio sigue SIN cerrar por
+>     dos razones: (a) "excesivas" exige un umbral que no se fija sin datos del
+>     centro ni del instituto completo (decisión consciente S24); (b) solo está
+>     probado en un fixture de discriminación, no a escala. El criterio 3
+>     (calidad) necesita más términos blandos (distribución, primeras/últimas
+>     horas) aún no implementados. D11 (preferencias horarias) es el Bloque 6b,
+>     donde además vivirá la comprobación de oro fuerte de las ventanas (un
+>     hueco inevitable solo es construible con indisponibilidades de profesor).
 > Naturaleza de los bloques cerrados: Bloque 1 fue prerrequisito de tipología
 > (Tipo 4); Bloque 4 fue estructural (Lectura B, Tipo 7); Bloques 2, 3 y 5 son
 > escala (no cierran criterios). El Tipo 5 (Diversificación/PDC) quedó validado a
@@ -442,22 +449,27 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1-5 cerrados)
+  Bloques 1-6a cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 23 — Fase 5, Bloque 5 cerrado (PDC de 3º a
-  escala). El PDC de 3º se modela como grupo DIVERSIFICACION_PDC propio (3PDC,
-  padre 3C), no como subgrupo Lectura B: el Di solo se bloquea a sí mismo
-  (subgrupo mono-grupo 3PDC→{3PDC}); tronco A8 de 22 h. Las 8 compartidas ord+Di
-  quedan en el ordinario (opción 2). Fixture de escala AMPLIADO +
-  SolverHorarioEscalaInstitutoTest mutado (grupos 11, subgrupos 116, actividades
-  116). Tercer punto de curva: 10 grupos + 1 grupo Di → 0,408 s, 0 duras, suite
-  32 verde; no dispara salto de régimen. Cierra las deudas "PDC a escala" y
-  "reconciliación 3ºPDC↔3ºCDi". Ningún criterio formal de Fase 5 marcado (sigue
-  siendo un escalón, no el instituto completo): criterio 1 con tercer punto de
-  curva (tramo holgado ~lineal), criterio 2 con evidencia parcial acumulada.
-  (Sesión 22 — Bloque 4, Lectura B N:M, trabajo estructural — registrada en el
-  cuerpo; esta cabecera se había quedado en S21 y se pone al día aquí.)
+Última sesión registrada: Sesión 24 — Fase 5, Bloque 6a cerrado (función
+  objetivo: ventanas del profesorado). Cambio de RÉGIMEN del solver: de
+  factibilidad pura a optimización, sin tocar el camino de factibilidad
+  (`construir()` intacto; nuevo `construirConObjetivo()` y
+  `resolverOptimizando()`). Penalización de ventanas modelada con Forma A
+  (cotas tensadas: huecos = último − primero + 1 − nClases por profesor y día;
+  el recreo no cuenta porque no es Tramo). Andamiaje genérico de términos
+  ponderados, estrenado con un único término (peso constante, decisión 6a).
+  `VerificadorSolucion.contarVentanasProfesor` recomputa el conteo de forma
+  independiente del solver. Fixture de discriminación
+  problema-6-ventanas-profesor.json (5 sesiones, 5 tramos, 1 grupo; óptimo 0
+  alcanzable, espacio con hasta 3 ventanas) + SolverHorarioVentanasProfesorTest
+  (2 casos: el optimizador elimina ventanas; el contador detecta ventanas en una
+  colocación manual con huecos conocidos — comprobación de oro Opción I). Suite
+  34 verde. Ningún criterio formal de Fase 5 marcado: el criterio 4 tiene
+  mecanismo pero falta umbral y escala. Nueva deuda D17. Hallazgo de S24: un
+  hueco inevitable (óptimo > 0) NO es construible sin indisponibilidades de
+  profesor (Bloque 6b); la comprobación de oro fuerte estilo S9 se difiere a 6b.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -544,6 +556,17 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       (resuelta distinto a lo previsto: un grupo, no tres) y "reconciliación
       3ºPDC↔3ºCDi" (cerrada por identidad: el PDC sin letra del volcado es el Di
       adscrito a 3C, determinable por su envoltura ordinaria).
+- [x] Bloque 6a — Función objetivo: ventanas del profesorado (S24). Cambio de
+      régimen: el solver pasa de factibilidad pura a optimización por una vía
+      separada (`construirConObjetivo`/`resolverOptimizando`), dejando intacto
+      el camino de factibilidad (`construir`/`resolver`) para no invalidar la
+      curva de escala. Forma A (cotas tensadas) + andamiaje genérico de términos
+      ponderados con un único término. `contarVentanasProfesor` en el verificador
+      (recomputo independiente). Fixture problema-6-ventanas-profesor.json +
+      SolverHorarioVentanasProfesorTest (2 casos). Suite 34 verde. NO cierra
+      criterios de Fase 5 (el criterio 4 tiene mecanismo, falta umbral + escala).
+      Deuda D17. Comprobación de oro fuerte diferida a 6b (un hueco inevitable
+      exige indisponibilidades). Índice de API regenerado (src/main cambió).
 - [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
       ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
       tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
@@ -862,6 +885,20 @@ descripción completa.
   expone `aulaElegida(inst, plaza)`, así que el cambio es acotado: el
   materializador debe leer de ahí en vez de `plaza.aulaFija()`. Pendiente de
   commit posterior dentro de Fase 3 o al cierre de fase.
+- **D17 (nueva en S24): el conteo de ventanas por cotas tensadas asume objetivo
+  minimizado con peso positivo.** En `ModeloCpSat.objetivoVentanasProfesor`,
+  `primero`/`ultimo` (primer y último tramo ocupado por profesor y día) se acotan
+  (primero ≤ posición de cada clase; ultimo ≥ posición de cada clase) en vez de
+  fijarse con `addMinEquality`/`addMaxEquality`. Es correcto SOLO porque el
+  objetivo MINIMIZA las ventanas con peso > 0: el solver tensa `primero` hacia
+  arriba y `ultimo` hacia abajo hasta los valores exactos (primera y última
+  clase), dando el span real. Si un futuro término blando compitiera y dejara
+  estas cotas flojas (p.ej. un término que premiara spans grandes, improbable
+  pero no imposible), `huecos` podría tomar un valor falso. Mitigación si llega
+  el caso: pasar a `addMinEquality`/`addMaxEquality` explícito, que no depende
+  del signo del objetivo. Se verá venir al introducir el segundo término (6b+).
+  No afecta al verificador independiente (`contarVentanasProfesor` cuenta sobre
+  la solución concreta, sin cotas). Revisar al añadir términos que compitan.
 
 ### Notas técnicas validadas en Fase 0
 
@@ -1751,6 +1788,82 @@ grupo, no tres). "Reconciliación 3ºPDC↔3ºCDi" CERRADA (por identidad). Inva
 de población: sigue VIVA y más concreta — el Di adscrito a 3C tiene población
 real de 3A+3B+3C, no modelada. D3/D4: sin tocar; D4 sigue en observación, a
 reevaluar con Bachillerato/4º.
+
+### Sesión 24 — Fase 5, Bloque 6a: función objetivo (ventanas del profesorado).
+
+Elegido el Bloque 6a entre cuatro candidatos (4ºESO, Bachillerato, FPB, función
+objetivo). Decisión: función objetivo, por ser el único candidato que ataca los
+criterios 3-4 de Fase 5 (bloqueados por la ausencia de objetivo, no por falta de
+escala), por introducir el régimen de optimización ANTES del salto de régimen
+esperado en Bach/4º (mejor instrumento de medición para cuando llegue), y por ser
+capa limpia que no toca I/O. Descartados: Bachillerato y FPB (mezclan varias capas
+/ cabo de datos abierto de aulas FPB), 4ºESO (escala + PDC nuevo acoplado).
+
+Descomposición acordada del Bloque 6: 6a = andamiaje de optimización + ventanas
+(sin dato nuevo); 6b = D11 indisponibilidades (dato nuevo: amplía Profesor + DTO
++ schema + mapper); 6c+ = distribución blanda, primeras/últimas horas. Una capa
+por sub-bloque.
+
+Decisiones de diseño (cerradas con el usuario antes de tocar código):
+- 1a: objetivo OPCIONAL. `construir()` se queda en factibilidad pura (no se toca);
+  nuevo `construirConObjetivo()` añade el objetivo. Razón: los tests de escala
+  miden tiempo hasta primera factible; meter el objetivo en ese camino los
+  invalidaría y cegaría la curva justo antes del salto de régimen de Bach/4º.
+- 2a: contrato de retorno sin cambios (`SolucionHorario`); el valor del objetivo
+  se recomputa en el verificador, fiel a su filosofía de independencia. (2b —
+  retorno rico con status + objetivo — diferido a cuando la UI lo pida.)
+- Forma A (cotas tensadas) para modelar huecos, sobre Forma B (un booleano por
+  tramo): menos variables, formulación estándar. Validada en dos pasos: (1)
+  simulación semántica en las 120 soluciones del fixture (óptimo del modelo ==
+  conteo del verificador, 0 discrepancias); (2) ejecución real del solver.
+- 4=peso constante (un solo término); 5a=método nuevo en el verificador sin tocar
+  ResultadoVerificacion; 6a=comprobación de oro por aserto fuerte con objetivo +
+  verificación manual sin objetivo (no aserto flaky); 7=cotas tensadas + deuda
+  D17 (en vez de addMinEquality/addMaxEquality).
+
+Método (lección S23 aplicada): se pidió y leyó el cuerpo de TODA entidad tocada
+ANTES de modelar — ModeloCpSat, SolverHorario, InstanciaProgramada,
+VerificadorSolucion, Profesor, ProblemaHorario, Actividad, Plaza, Expansion,
+ActividadInstancia y el schema real del repo. Cero intentos fallidos por razonar
+sobre código no leído (contraste con los 3 de S23). Los 5 puntos de riesgo de
+firma de OR-Tools (LinearExpr.sum, builder addTerm, LinearExpr.term,
+addLessOrEqual/addGreaterOrEqual con onlyEnforceIf, addEquality con onlyEnforceIf)
+se marcaron como tales antes de compilar; todos válidos en ortools-java 9.11.4210.
+
+Hallazgo de S24 (condiciona 6b): un hueco INEVITABLE (óptimo de ventanas > 0) no
+es construible sin prohibir tramos concretos a un profesor, y lo único que prohíbe
+tramos es una indisponibilidad horaria (ProfesorRestriccionHoraria, dato de 6b).
+Las duras actuales solo crean exclusión mutua entre sesiones, no fijan una sesión
+a un tramo; el aula compartida no clava. Por eso la comprobación de oro fuerte
+estilo S9 (aserto determinista que falla si el objetivo no actúa) pertenece a 6b.
+En 6a se cerró el riesgo realista alternativo (un `contarVentanasProfesor` roto
+que siempre devuelva 0) con la Opción I: un segundo caso de test que construye una
+colocación manual con ventanas conocidas (P1 pos {1,3,4} → 1; P2 pos {2,5} → 2;
+total 3) y verifica que el contador las detecta.
+
+Entregado (src/main): ModeloCpSat (constante PESO_VENTANAS, campo terminosObjetivo,
+construirConObjetivo, ensamblarObjetivo, objetivoVentanasProfesor, helper
+complemento; construir() intacto); SolverHorario (resolverOptimizando; resolver()
+intacto; Javadoc de clase ampliado); VerificadorSolucion (contarVentanasProfesor;
+resto intacto). Tests/fixtures: problema-6-ventanas-profesor.json (discriminación,
+linaje propio, no escala) + SolverHorarioVentanasProfesorTest (2 casos).
+
+Medición: el test con objetivo prueba optimalidad (óptimo 0) en ~0,03 s. El test
+de escala sigue en factibilidad pura (0,8 s, dentro del ruido JVM/JNI/GC; NO salto
+de régimen). Linaje de medición de optimización separado del de factibilidad
+(decisión 1a). Suite 34 verde, BUILD SUCCESS.
+
+Criterios de Fase 5: NINGUNO cerrado. El criterio 4 pasa de "inabordable (sin
+objetivo)" a "mecanismo implementado y validado en discriminación; falta umbral
+(decisión consciente: no inventar sin datos del centro) y validación a escala".
+Criterio 3 necesita más términos blandos (6c+). Criterios 1-2 sin cambios (exigen
+instituto completo).
+
+Deudas tocadas: D11 ligada a 6b (siguiente sub-bloque). Nueva D17 (cotas tensadas).
+D3/D4 sin tocar.
+
+src/main SÍ tocado → referencia-codigo-solver.md DEBE regenerarse (cambian
+ModeloCpSat, SolverHorario, VerificadorSolucion). Pendiente al cierre.
 
 ---
 
