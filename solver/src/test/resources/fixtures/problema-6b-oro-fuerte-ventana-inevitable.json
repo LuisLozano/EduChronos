@@ -1,0 +1,34 @@
+{
+  "tramos": [
+    {"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1},
+    {"codigo":"LUN-2","diaSemana":1,"ordenEnDia":2},
+    {"codigo":"LUN-3","diaSemana":1,"ordenEnDia":3},
+    {"codigo":"LUN-4","diaSemana":1,"ordenEnDia":4},
+    {"codigo":"LUN-5","diaSemana":1,"ordenEnDia":5}
+  ],
+  "aulas": [
+    {"codigo":"A1","nombre":"Aula 1"},
+    {"codigo":"A2","nombre":"Aula 2"}
+  ],
+  "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+  "profesores": [{"codigo":"MAT8","nombre":"Profe Mate"}],
+  "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+  "subgrupos": [
+    {"codigo":"1A-X","grupos":["1A"]},
+    {"codigo":"1A-Y","grupos":["1A"]}
+  ],
+  "actividades": [
+    {"codigo":"Mat-1A-X","asignatura":"Mat","repeticionesPorSemana":1,
+      "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+      {"codigo":"PX","asignatura":"Mat","profesores":["MAT8"],
+        "aulaFija":"A1","subgrupos":["1A-X"]}]},
+    {"codigo":"Mat-1A-Y","asignatura":"Mat","repeticionesPorSemana":1,
+      "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+      {"codigo":"PY","asignatura":"Mat","profesores":["MAT8"],
+        "aulaFija":"A2","subgrupos":["1A-Y"]}]}
+  ],
+  "restriccionesHorarias": [
+    {"profesor":"MAT8","tramo":"LUN-2","tipo":"DURA","motivo":"no disponible pos 2"},
+    {"profesor":"MAT8","tramo":"LUN-4","tipo":"DURA","motivo":"no disponible pos 4"}
+  ]
+}
