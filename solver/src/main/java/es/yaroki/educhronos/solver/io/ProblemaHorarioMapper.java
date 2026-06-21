@@ -8,6 +8,8 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.Tramo;
@@ -145,6 +147,27 @@ public final class ProblemaHorarioMapper {
                     () -> new Actividad(cod, asigAct, rep, dur, pat, plazas), ctx));
         }
 
+        // ---- Restricciones horarias del profesorado (Bloque 6b) ----
+        // Sección opcional: si el JSON no la trae, Jackson deja la lista null.
+        // Referencias (profesor, tramo) por código, resueltas contra los
+        // catálogos ya construidos en la pasada 1.
+        List<RestriccionHorariaDto> restrDto =
+                dto.restriccionesHorarias() == null ? List.of() : dto.restriccionesHorarias();
+        List<RestriccionHoraria> restricciones = new ArrayList<>();
+        for (RestriccionHorariaDto r : restrDto) {
+            String ctx = "restriccionHoraria";
+            Profesor prof = resolver(profesores, r.profesor(), "profesor", ctx);
+            Tramo tr      = resolver(tramos, r.tramo(), "tramo", ctx);
+            String tipoTxt = exigirTexto(r.tipo(), "tipo", ctx);
+            TipoRestriccion tipo = construir(() -> TipoRestriccion.valueOf(tipoTxt),
+                    ctx + ": tipo");
+            int peso = r.peso() == null ? 1 : r.peso();   // default 1; ignorado si DURA
+            Optional<String> motivo = Optional.ofNullable(r.motivo());
+            restricciones.add(construir(
+                    () -> new RestriccionHoraria(prof, tr, tipo, peso, motivo),
+                    ctx + " (profesor '" + r.profesor() + "', tramo '" + r.tramo() + "')"));
+        }
+
         // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia).
         // El mapper los ordena: el autor del JSON no tiene que preocuparse del orden.
         List<Tramo> tramosOrdenados = new ArrayList<>(tramos.values());
@@ -158,7 +181,8 @@ public final class ProblemaHorarioMapper {
                 new ArrayList<>(profesores.values()),
                 new ArrayList<>(grupos.values()),
                 new ArrayList<>(subgrupos.values()),
-                actividades), "problema");
+                actividades,
+                restricciones), "problema");
     }
 
     private static Plaza mapearPlaza(PlazaDto pl, String ctxActividad,

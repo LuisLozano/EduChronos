@@ -5,6 +5,8 @@ import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
+import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -134,6 +136,64 @@ class ProblemaHorarioJsonLoaderTest {
         assertThatThrownBy(() -> loader.cargar(stream(json)))
                 .isInstanceOf(ProblemaInvalidoException.class)
                 .hasMessageContaining("I2");
+    }
+
+    @Test
+    void cargaRestriccionHorariaDuraResuelta() throws Exception {
+        String json = """
+            { "tramos": [{"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "restriccionesHorarias": [
+                {"profesor":"MAT8","tramo":"LUN-1","tipo":"DURA","motivo":"reduccion"}] }
+            """;
+        ProblemaHorario problema = loader.cargar(stream(json));
+
+        assertThat(problema.restriccionesHorarias()).hasSize(1);
+        RestriccionHoraria r = problema.restriccionesHorarias().get(0);
+        assertThat(r.profesor().codigo()).isEqualTo("MAT8");
+        assertThat(r.tramo().codigo()).isEqualTo("LUN-1");
+        assertThat(r.tipo()).isEqualTo(TipoRestriccion.DURA);
+        assertThat(r.peso()).isEqualTo(1);               // default aplicado
+        assertThat(r.motivo()).contains("reduccion");
+    }
+
+    @Test
+    void cargaProblemaSinRestriccionesHorarias() throws Exception {
+        // La sección es opcional: un problema sin ella carga con lista vacía.
+        ProblemaHorario problema;
+        try (InputStream in = recurso("/fixtures/problema-minimo.json")) {
+            problema = loader.cargar(in);
+        }
+        assertThat(problema.restriccionesHorarias()).isEmpty();
+    }
+
+    @Test
+    void rechazaRestriccionHorariaConTramoInexistente() {
+        String json = """
+            { "tramos": [{"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "restriccionesHorarias": [
+                {"profesor":"MAT8","tramo":"FANTASMA","tipo":"DURA"}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("FANTASMA");
     }
 
     private InputStream recurso(String ruta) {

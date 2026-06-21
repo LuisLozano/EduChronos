@@ -57,7 +57,8 @@ class VerificadorSolucionGrupoTest {
         return new ProblemaHorario(
                 List.of(LUN_1, LUN_2),
                 List.of(), List.of(), List.of(), List.of(), List.of(),
-                actividades);
+                actividades,
+                List.of());   // restriccionesHorarias: vacío (6b: el verificador de grupo no las usa)
     }
 
     /** La (unica) instancia esperada de una actividad, segun la expansion real. */

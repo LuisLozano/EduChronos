@@ -9,4 +9,5 @@ public record ProblemaHorarioDto(
         List<ProfesorDto> profesores,
         List<GrupoDto> grupos,
         List<SubgrupoDto> subgrupos,
-        List<ActividadDto> actividades) { }
+        List<ActividadDto> actividades,
+        List<RestriccionHorariaDto> restriccionesHorarias) { }

@@ -12,7 +12,8 @@
     "profesores":  { "type": "array", "items": { "$ref": "#/$defs/profesor" } },
     "grupos":      { "type": "array", "items": { "$ref": "#/$defs/grupo" } },
     "subgrupos":   { "type": "array", "items": { "$ref": "#/$defs/subgrupo" } },
-    "actividades": { "type": "array", "items": { "$ref": "#/$defs/actividad" } }
+    "actividades": { "type": "array", "items": { "$ref": "#/$defs/actividad" } },
+    "restriccionesHorarias": { "type": "array", "items": { "$ref": "#/$defs/restriccionHoraria" } }
   },
   "$defs": {
     "tramo": {
@@ -78,6 +79,17 @@
         "aulaFija":        { "type": ["string", "null"] },
         "aulasCandidatas": { "type": "array", "items": { "type": "string" } },
         "subgrupos":       { "type": "array", "minItems": 1, "items": { "type": "string" } }
+      }
+    },
+    "restriccionHoraria": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profesor", "tramo", "tipo"],
+      "properties": {
+        "profesor": { "type": "string", "minLength": 1 },
+        "tramo":    { "type": "string", "minLength": 1 },
+        "tipo":     { "enum": ["DURA", "BLANDA"] },
+        "peso":     { "type": "integer", "minimum": 1 },
+        "motivo":   { "type": ["string", "null"] }
       }
     }
   }
