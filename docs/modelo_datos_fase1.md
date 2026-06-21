@@ -433,6 +433,31 @@ ProfesorRestriccionHoraria(
   motivo NULL       -- texto libre para auditoría
 )
 ```
+> **Estado de implementación (Sesión 25, Bloque 6b).** El solver ya consume
+> esta tabla en su variante **DURA**: una restricción DURA prohíbe al profesor
+> ocupar el tramo (veta el `tramoIndex` de toda instancia que lo liste en
+> alguna plaza). Es restricción dura del modelo CP-SAT (vive en `construir()`,
+> aplica tanto en factibilidad pura como en optimización). La variante
+> **BLANDA** se carga y valida en I/O pero el solver **aún no la consume**: su
+> régimen (término de penalización en la función objetivo, con `peso`) se
+> difiere al Bloque 6c. El campo `peso` se ignora en DURA (decisión 6b),
+> coherente con el comentario "aplica si tipo=BLANDA".
+
+> **D18 (deuda, Sesión 25). INFEASIBLE no diagnostica la causa.** Un profesor
+> con todos los tramos de sus clases vetados por restricciones DURA produce un
+> resultado INFEASIBLE genérico, indistinguible de cualquier otra causa de
+> infactibilidad (conflicto de aulas, palomar de distribución, etc.). El modelo
+> CP-SAT no detecta ni reporta cuál de sus restricciones causó la
+> infactibilidad. La aplicación debe, en la medida de lo posible, ofrecer al
+> usuario las razones que hacen inviable el horario: (a) detección temprana
+> barata en la capa de configuración (Fase 6/8) — aritmética simple del tipo
+> "el profesor P tiene N sesiones pero solo M tramos disponibles tras sus
+> indisponibilidades, con M < N" —, hermana de la validación de
+> `DemandaCurricular`; y (b) a más largo plazo, un diagnóstico general de
+> infactibilidad (aproximable con `addAssumption` +
+> `sufficientAssumptionsForInfeasibility` de CP-SAT), trabajo transversal no
+> planificado. En el Bloque 6b se deja caer deliberadamente en INFEASIBLE; el
+> solver no lo detecta.
 
 ### 4.4 Distancias entre aulas
 
