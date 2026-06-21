@@ -1,0 +1,20 @@
+{
+  "tramos": [
+    {"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1},
+    {"codigo":"LUN-2","diaSemana":1,"ordenEnDia":2}
+  ],
+  "aulas": [{"codigo":"A1","nombre":"Aula 1"}],
+  "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+  "profesores": [{"codigo":"MAT8","nombre":"Profe Mate"}],
+  "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+  "subgrupos": [{"codigo":"1A-Completo","grupos":["1A"]}],
+  "actividades": [
+    {"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
+      "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+      {"codigo":"P1","asignatura":"Mat","profesores":["MAT8"],
+        "aulaFija":"A1","subgrupos":["1A-Completo"]}]}
+  ],
+  "restriccionesHorarias": [
+    {"profesor":"MAT8","tramo":"LUN-1","tipo":"DURA","motivo":"no disponible primera hora"}
+  ]
+}

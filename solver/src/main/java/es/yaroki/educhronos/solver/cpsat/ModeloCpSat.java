@@ -17,6 +17,8 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.Tramo;
@@ -93,6 +95,7 @@ final class ModeloCpSat {
         restriccionNoSolapeSubgrupo();
         restriccionNoSolapeGrupo(); // Fase 3
         restriccionDistribucionPorDia();
+        restriccionIndisponibilidadProfesor(); // Fase 5, Bloque 6b (solo DURA)
         return this;
     }
 
@@ -274,6 +277,59 @@ final class ModeloCpSat {
         int j = 0;
         for (int x = 0; x < numTramos; x++) {
             if (x != t) {
+                otros[j++] = x;
+            }
+        }
+        return Domain.fromValues(otros);
+    }
+
+    /**
+     * Indisponibilidades horarias del profesorado (Fase 5, Bloque 6b).
+     * Por cada restricción DURA, el profesor no puede ocupar el tramo: ninguna
+     * instancia cuya actividad lo liste en alguna plaza puede caer en ese tramo.
+     * Como todas las plazas de una instancia comparten {@code tramoIndex}, la
+     * prohibición es a nivel de instancia (igual que {@code usaProfesor}).
+     *
+     * <p>Las restricciones BLANDA se ignoran aquí: en 6b se cargan y validan (I/O)
+     * pero el solver no las consume. Su régimen (término del objetivo) se difiere
+     * al Bloque 6c.
+     *
+     * <p>Es una restricción DURA: vive en {@code construir()} y por tanto aplica
+     * en ambos regímenes (factibilidad pura y optimización). Si los tramos vetados
+     * de un profesor cubren todos los tramos donde podría ir una clase suya, el
+     * dominio permitido queda vacío y el problema es INFEASIBLE — respuesta
+     * correcta; la detección temprana de esa situación es validación de
+     * configuración (deuda D18), no trabajo del modelo CP-SAT.
+     */
+    private void restriccionIndisponibilidadProfesor() {
+        int numTramos = problema.tramos().size();
+        Map<Profesor, Set<Integer>> prohibidosPorProfesor = new LinkedHashMap<>();
+        for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+            if (r.tipo() != TipoRestriccion.DURA) {
+                continue; // BLANDA: cargada y validada, no consumida en 6b
+            }
+            int idx = problema.indiceDeTramo(r.tramo());
+            prohibidosPorProfesor
+                    .computeIfAbsent(r.profesor(), k -> new HashSet<>())
+                    .add(idx);
+        }
+        for (Map.Entry<Profesor, Set<Integer>> e : prohibidosPorProfesor.entrySet()) {
+            Profesor profesor = e.getKey();
+            Domain permitido = complementoDe(e.getValue(), numTramos);
+            for (InstanciaProgramada ip : instancias) {
+                if (usaProfesor(ip, profesor)) {
+                    model.addLinearExpressionInDomain(ip.tramoIndex(), permitido);
+                }
+            }
+        }
+    }
+
+    /** Dominio con todos los índices de tramo salvo los del conjunto {@code prohibidos}. */
+    private Domain complementoDe(Set<Integer> prohibidos, int numTramos) {
+        long[] otros = new long[numTramos - prohibidos.size()];
+        int j = 0;
+        for (int x = 0; x < numTramos; x++) {
+            if (!prohibidos.contains(x)) {
                 otros[j++] = x;
             }
         }
