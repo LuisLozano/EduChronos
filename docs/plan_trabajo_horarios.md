@@ -332,7 +332,11 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
       indisponibilidad DURA), rechazando alternativas factibles más caras.
       Falta: (a) el UMBRAL de "excesivas" —decisión consciente de no inventarlo
       sin datos del centro—, y (b) validación a ESCALA (hoy solo en fixtures de
-      discriminación, no en el instituto completo).
+      discriminación, no en el instituto completo). Ampliación (S27, Bloque 6d-c):
+      el mecanismo de calidad del horario del profesor tiene ya tres términos
+      blandos —ventanas (6a), indisponibilidad blanda (6c) y consecutivas máximas
+      (6d-c)—; los dos pendientes del criterio 3 son distribución-a-blanda (6d-a,
+      toca estructura dura) y primeras/últimas horas (6d-b, reactiva D17).
 
 ### Señal de que está mal
 El solver no converge o genera soluciones con muchas restricciones duras 
@@ -477,25 +481,29 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1-6b cerrados)
+  Bloques 1-6d-c cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 26 — Fase 5, Bloque 6c cerrado
-  (indisponibilidad BLANDA del profesorado como término del objetivo) + revisión
-  de requisitos (D18 ampliada a condiciones necesarias; D19 atribución por celda;
-  D20 UI de pre-validación). El solver consume la variante BLANDA de
-  `ProfesorRestriccionHoraria` (`objetivoIndisponibilidadBlandaProfesor` en
-  `construirConObjetivo()`), segundo término del objetivo tras las ventanas (6a).
-  Recomputo gemelo `contarPenalizacionIndisponibilidadBlanda` en el verificador.
-  Dos turnos: discriminación (óptimo 0 evitable) y oro fuerte (óptimo determinista
-  1 > 0, minimización con alternativa más cara rechazada). Ambos fixtures de linaje
-  discriminación, validados por enumeración, con ventanas aisladas (=0). NO toca I/O
-  (el dato entra desde 6b). D17 RESUELTA para este término (cotas tensadas correctas;
-  el blando es separable), VIVA para términos futuros que miren posiciones. Pesos
-  hardcodeados a 1 (deuda nueva D21: parametrización/calibración). Suite 44 verde,
-  BUILD SUCCESS. Índice regenerado (src/main cambió). Criterio 3 de Fase 5 AVANZADO
-  (segundo término blando), no cerrado (faltan términos restantes + escala);
-  criterio 4 sin cambio (PARCIAL).
+Última sesión registrada: Sesión 27 — Fase 5, Bloque 6d-c cerrado
+  (sesiones consecutivas máximas del profesorado como término del objetivo). El
+  solver penaliza, vía ventanas deslizantes de `MAX_CONSECUTIVAS+1` posiciones
+  contiguas en `ordenEnDia`, cada racha de un profesor que excede N sesiones
+  seguidas en un día (`objetivoConsecutivasProfesor` en `construirConObjetivo()`),
+  tercer término del objetivo tras ventanas (6a) e indisponibilidad blanda (6c).
+  Recomputo gemelo `contarPenalizacionConsecutivasProfesor` en el verificador
+  (cuenta rachas maximales, no ventanas deslizantes; equivalencia validada por
+  enumeración exhaustiva en diseño). Dos turnos: discriminación (óptimo 0 evitable)
+  y oro fuerte (óptimo determinista 1 > 0, minimización con alternativa de coste 2
+  rechazada). Ambos fixtures de linaje discriminación, validados por enumeración,
+  con ventanas NO contaminantes (=0 en óptimo y alternativa; los días del oro
+  fuerte se saturan para que partir la racha cueste más que encadenar). NO toca I/O.
+  N=3 y peso `PESO_CONSECUTIVAS=1` hardcodeados (deuda D21 ampliada: tres pesos +
+  el parámetro N + el `n=3` duplicado en el verificador). D17 NO reactivada (el
+  término no mira primero/ultimo/span; separable como la blanda de 6c).
+  No-regresión de ventanas confirmada por ejecución. Suite 46 verde, BUILD SUCCESS.
+  Índice regenerado (src/main cambió). Criterio 3 de Fase 5 AVANZADO (tercer término
+  blando), no cerrado (faltan distribución-a-blanda, primeras-últimas horas +
+  escala); criterio 4 sin cambio (PARCIAL).
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -623,6 +631,43 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       parametrización diferida (deuda nueva de pesos blandos). Suite 44 verde,
       BUILD SUCCESS. Criterio 3 de Fase 5 AVANZADO (segundo término blando), no
       cerrado (faltan distribución-a-blanda / primeras-últimas horas + escala).
+- [x] Bloque 6d-c — Sesiones consecutivas máximas del profesorado como término del
+      objetivo (S27). El solver penaliza el exceso sobre `MAX_CONSECUTIVAS=3`
+      sesiones seguidas de un profesor en un día
+      (`objetivoConsecutivasProfesor` en `construirConObjetivo()`): por cada (prof,
+      día) y cada ventana deslizante de N+1 posiciones contiguas en `ordenEnDia`, un
+      literal `excede` reificado como "las N+1 ocupadas"; la suma penaliza
+      `Σ max(0, L−N)` por racha maximal de longitud L. Tercer término del objetivo
+      (ventanas 6a, indisponibilidad blanda 6c). NO toca I/O. Decidido al inicio con
+      el usuario entre 6d (tres términos blandos) y escala (4º/Bach/FPB): 6d-c es la
+      única capa LIMPIA que queda del criterio 3 (6d-a distribución-a-blanda toca
+      estructura dura en dos sitios; 6d-b primeras/últimas horas REACTIVA D17). Se
+      eligió cerrar la capa limpia antes de abrir escala (donde se espera el salto de
+      régimen D4), para que el criterio 3 no quede a medias si escala da problemas.
+      Troceado en dos turnos: A — el término muerde (discriminación, óptimo 0
+      evitable) + recomputo gemelo `contarPenalizacionConsecutivasProfesor` en el
+      verificador (cuenta rachas maximales; equivalencia con las ventanas deslizantes
+      del modelo validada por enumeración exhaustiva de los 256 subconjuntos de un
+      día de 8 tramos); B — oro fuerte (encadenar inevitable, óptimo determinista 1,
+      rechaza alternativa de coste 2). Fixtures: problema-6d-consecutivas-
+      discriminacion.json (4 actividades NEUTRA de P1, día de 4 tramos + día de 1 →
+      óptimo 0 repartiendo ≤3 al día1, alternativa de coste 1 con las 4 juntas; test
+      asevera coste 0 Y día1≤3) y problema-6d-consecutivas-oro-fuerte.json (7
+      actividades de P1, dos días de 4 tramos saturados → algún día fuerza 4 seguidas
+      ⇒ óptimo 1 inevitable; partir la racha cuesta ventana ⇒ coste 2, rechazado;
+      test asevera el COSTE =1, no la posición). Ventanas NO contaminan: enumeración
+      confirma que ningún óptimo de coste total ≤1 tiene consecutivas 0 (la vía-
+      ventanas a coste 1 no existe). D17 NO reactivada: el término no mira
+      primero/ultimo/span (separable como la blanda de 6c); no se migró a
+      addMinEquality/addMaxEquality. Sin APIs CP-SAT nuevas (newBoolVar, addBoolOr,
+      addBoolAnd, addImplication, addLinearExpressionInDomain, Domain.fromValues,
+      complemento, LinearExpr.term, todas desde 6a/6c); compiló a la primera.
+      No-regresión de ventanas (6a) e indisponibilidad blanda (6c) confirmada por
+      ejecución: los tres términos conviven sin interferencia. Peso
+      `PESO_CONSECUTIVAS=1` y N=3 hardcodeados (deuda D21 ampliada). Suite 46 verde,
+      BUILD SUCCESS. Índice regenerado. NO cierra criterios de Fase 5 (criterio 3
+      AVANZADO con tres términos, faltan distribución-a-blanda + primeras/últimas
+      horas + escala).
 - [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
       ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
       tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
@@ -980,16 +1025,22 @@ descripción completa.
   presentación (cómo se muestran los avisos al usuario, si bloquean o advierten,
   enlace a la entidad a corregir). Fase 6 (si se valida en importación) / Fase 8
   (UI). No afecta al modelo de datos. Ver modelo §8.
-- **D21 (nueva en S26): parametrización y calibración de pesos blandos.** Hoy
-  `PESO_VENTANAS` y `PESO_INDISP_BLANDA` son constantes hardcodeadas a 1 en
-  `ModeloCpSat`. Con dos (o más) términos blandos compitiendo, el peso relativo
-  determina qué optimiza el solver, pero NO hay datos del centro para calibrarlo
-  (gemela de la decisión de no fijar el umbral del criterio 4). Dos trabajos
-  diferidos: (a) mover los pesos a configuración —ampliando `ProblemaHorario`, que
-  hoy NO porta parámetros clave-valor; trabajo estructural de I/O—; (b) decidir los
-  valores relativos con datos reales y un fixture que ejercite VARIOS términos a la
-  vez (los fixtures de 6c aíslan un término cada uno, así que su peso relativo no
-  está validado por ningún test). El campo `peso` por-restricción de
+- **D21 (nueva en S26; ampliada en S27): parametrización y calibración de pesos
+  blandos + el parámetro N de consecutivas.** Hoy `PESO_VENTANAS`,
+  `PESO_INDISP_BLANDA` y `PESO_CONSECUTIVAS` (S27) son constantes hardcodeadas a 1
+  en `ModeloCpSat`, y `MAX_CONSECUTIVAS=3` (S27) es otra constante hardcodeada
+  (conjetura razonable por la estructura 3+3 de la jornada, NO un requisito
+  verificado con el centro). Con tres (o más) términos blandos compitiendo, el peso
+  relativo determina qué optimiza el solver, pero NO hay datos del centro para
+  calibrarlo (gemela de la decisión de no fijar el umbral del criterio 4). Tres
+  trabajos diferidos: (a) mover pesos Y `MAX_CONSECUTIVAS` a configuración
+  —ampliando `ProblemaHorario`, que hoy NO porta parámetros clave-valor; trabajo
+  estructural de I/O—; (b) decidir los valores relativos con datos reales y un
+  fixture que ejercite VARIOS términos a la vez (los fixtures de 6c y 6d-c aíslan un
+  término cada uno, así que su peso relativo no está validado por ningún test);
+  (c) cuando (a) se haga, `contarPenalizacionConsecutivasProfesor` (verificador)
+  dejará de duplicar `n=3` —hoy espejo frágil de `MAX_CONSECUTIVAS`, que es privado
+  del modelo— y ambos leerán el mismo origen. El campo `peso` por-restricción de
   `ProfesorRestriccionHoraria` (modelo §4.3) es parte de (a): hoy se ignora en el
   término blando, que usa la constante. Relacionada con el criterio 3 de Fase 5
   (calidad). Fase 5 (términos blandos restantes) o Fase 8 (UI de configuración).
@@ -2116,6 +2167,65 @@ D18 AMPLIADA, D19 y D20 NUEVAS (revisión de requisitos). DEUDA NUEVA: parametri
 y calibración de pesos blandos (ambos pesos a configuración + valores relativos con
 datos reales y un fixture multi-término; hoy ambos hardcodeados a 1). D3/D4 sin
 tocar.
+
+src/main SÍ tocado (ModeloCpSat, VerificadorSolucion) → referencia-codigo-solver.md
+regenerado al cierre.
+
+### Sesión 27 — Fase 5, Bloque 6d-c: sesiones consecutivas máximas del profesorado.
+
+Decidido al inicio con el usuario entre dos vías: 6d (tres términos blandos
+restantes del criterio 3) y escala (4º/Bach/FPB, que ataca los criterios 1-2 y donde
+se espera el salto de régimen D4). Se eligió 6d-c (consecutivas máximas) por dos
+razones: es la única capa LIMPIA que queda del criterio 3 —6d-a (distribución-a-
+blanda) toca la restricción dura que vive en dos sitios con guarda D12; 6d-b
+(primeras/últimas horas) reactiva D17 porque mira posiciones—, y cerrar la capa
+limpia antes de abrir escala deja el criterio 3 más completo si escala diera
+problemas de régimen. Tres decisiones de diseño tomadas con el usuario antes de
+codear: (A) definición = suma de excesos sobre N por racha; (1) formulación =
+ventanas deslizantes con addBoolAnd (sin APIs nuevas); (i) N hardcodeado con deuda
+(opción consciente de no inventar I/O como efecto colateral de un término blando, ni
+calibrar N sin datos del centro).
+
+Código (un commit): constantes `MAX_CONSECUTIVAS=3` y `PESO_CONSECUTIVAS=1` +
+`objetivoConsecutivasProfesor()` en `construirConObjetivo()` (tras la blanda, antes
+del ensamblado) en ModeloCpSat; recomputo gemelo `contarPenalizacionConsecutivasProfesor`
+en VerificadorSolucion. El gemelo cuenta rachas maximales; el modelo cuenta ventanas
+deslizantes de N+1: equivalencia validada por enumeración exhaustiva de los 256
+subconjuntos de un día de 8 tramos (cero discrepancias) antes de codear.
+
+Tests + fixtures (un commit): turno A discriminación (SolverHorarioConsecutivasProfesorTest:
+4 actividades NEUTRA de P1, día de 4 tramos + día de 1 → óptimo 0 repartiendo ≤3 al
+día1; asevera coste 0 Y día1≤3, la posición cierra el "0 por azar") y turno B oro
+fuerte (SolverHorarioOroFuerteConsecutivasTest: 7 actividades de P1, dos días de 4
+tramos → algún día fuerza 4 seguidas ⇒ óptimo 1 inevitable, partir cuesta ventana ⇒
+2 rechazado; asevera el COSTE =1, no la posición). Ambos fixtures validados por
+enumeración exhaustiva en diseño, con la comprobación EXPLÍCITA de no-contaminación:
+ventanas vale 0 en óptimo y alternativa, y ningún óptimo de coste total ≤1 tiene
+consecutivas 0 (la vía-ventanas a coste 1 no existe) → el aserto sobre el verificador
+de consecutivas es robusto. Se desecharon en diseño varias configuraciones de fixture
+al enumerar y ver que ventanas contaminaba (lección S26 reforzada).
+
+Método: cero intentos fallidos (como S24/S25/S26). Se pidió y leyó el cuerpo de TODA
+entidad tocada ANTES de modelar (ModeloCpSat completo —objetivoVentanasProfesor como
+plantilla del patrón de conteo por profesor-día—, VerificadorSolucion, y los fixtures
++ tests de 6c como plantilla del formato). Riesgos de firma OR-Tools: ninguno nuevo
+(addBoolOr/addBoolAnd(...).onlyEnforceIf idénticos a los de ventanas); compiló a la
+primera. No-regresión confirmada por ejecución: ventanas (6a) e indisponibilidad
+blanda (6c) verdes, los tres términos conviven sin interferencia; D17 intacta como se
+afirmó.
+
+Criterios de Fase 5: el criterio 3 (calidad comparable) AVANZA — tercer término
+blando incorporado y validado (discriminación + oro fuerte). NO cerrado: faltan
+distribución-a-blanda (6d-a, estructura dura), primeras/últimas horas (6d-b, reactiva
+D17) y validación a escala. Criterio 4 sin cambio (PARCIAL). Criterios 1-2 sin avance
+(exigen instituto completo).
+
+Deudas tocadas: D21 AMPLIADA — tres pesos hardcodeados (añadido PESO_CONSECUTIVAS) +
+el parámetro N=3 (MAX_CONSECUTIVAS) sin calibrar + micro-deuda del `n=3` duplicado en
+el verificador (espejo frágil de la constante privada, se resuelve cuando N pase a
+configuración). D17 NO reactivada (separable). D3/D4 sin tocar (siguen esperando a
+escala). El modelo NO se tocó (6d-c no añade entidad ni invariante; la constante es
+interna del solver).
 
 src/main SÍ tocado (ModeloCpSat, VerificadorSolucion) → referencia-codigo-solver.md
 regenerado al cierre.
