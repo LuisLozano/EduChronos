@@ -1,0 +1,61 @@
+{
+  "tramos": [
+    { "codigo": "L1", "diaSemana": 1, "ordenEnDia": 1 },
+    { "codigo": "L2", "diaSemana": 1, "ordenEnDia": 2 },
+    { "codigo": "L3", "diaSemana": 1, "ordenEnDia": 3 },
+    { "codigo": "L4", "diaSemana": 1, "ordenEnDia": 4 },
+    { "codigo": "M1", "diaSemana": 2, "ordenEnDia": 1 }
+  ],
+  "aulas": [
+    { "codigo": "AU1", "nombre": "Aula 1" }
+  ],
+  "asignaturas": [
+    { "codigo": "ASA", "nombre": "Asignatura A" },
+    { "codigo": "ASB", "nombre": "Asignatura B" },
+    { "codigo": "ASC", "nombre": "Asignatura C" },
+    { "codigo": "ASD", "nombre": "Asignatura D" }
+  ],
+  "profesores": [
+    { "codigo": "P1", "nombre": "Profesor Uno" }
+  ],
+  "grupos": [
+    { "codigo": "G1", "tipo": "ORDINARIO", "grupoPadre": null }
+  ],
+  "subgrupos": [
+    { "codigo": "SG1", "grupos": ["G1"] }
+  ],
+  "actividades": [
+    {
+      "codigo": "ACT-A", "asignatura": "ASA", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-A", "asignatura": "ASA", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-B", "asignatura": "ASB", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-B", "asignatura": "ASB", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-C", "asignatura": "ASC", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-C", "asignatura": "ASC", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-D", "asignatura": "ASD", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-D", "asignatura": "ASD", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    }
+  ]
+}

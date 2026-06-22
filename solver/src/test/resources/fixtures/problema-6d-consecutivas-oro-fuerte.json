@@ -1,0 +1,91 @@
+{
+  "tramos": [
+    { "codigo": "L1", "diaSemana": 1, "ordenEnDia": 1 },
+    { "codigo": "L2", "diaSemana": 1, "ordenEnDia": 2 },
+    { "codigo": "L3", "diaSemana": 1, "ordenEnDia": 3 },
+    { "codigo": "L4", "diaSemana": 1, "ordenEnDia": 4 },
+    { "codigo": "M1", "diaSemana": 2, "ordenEnDia": 1 },
+    { "codigo": "M2", "diaSemana": 2, "ordenEnDia": 2 },
+    { "codigo": "M3", "diaSemana": 2, "ordenEnDia": 3 },
+    { "codigo": "M4", "diaSemana": 2, "ordenEnDia": 4 }
+  ],
+  "aulas": [
+    { "codigo": "AU1", "nombre": "Aula 1" }
+  ],
+  "asignaturas": [
+    { "codigo": "ASA", "nombre": "Asignatura A" },
+    { "codigo": "ASB", "nombre": "Asignatura B" },
+    { "codigo": "ASC", "nombre": "Asignatura C" },
+    { "codigo": "ASD", "nombre": "Asignatura D" },
+    { "codigo": "ASE", "nombre": "Asignatura E" },
+    { "codigo": "ASF", "nombre": "Asignatura F" },
+    { "codigo": "ASG", "nombre": "Asignatura G" }
+  ],
+  "profesores": [
+    { "codigo": "P1", "nombre": "Profesor Uno" }
+  ],
+  "grupos": [
+    { "codigo": "G1", "tipo": "ORDINARIO", "grupoPadre": null }
+  ],
+  "subgrupos": [
+    { "codigo": "SG1", "grupos": ["G1"] }
+  ],
+  "actividades": [
+    {
+      "codigo": "ACT-A", "asignatura": "ASA", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-A", "asignatura": "ASA", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-B", "asignatura": "ASB", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-B", "asignatura": "ASB", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-C", "asignatura": "ASC", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-C", "asignatura": "ASC", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-D", "asignatura": "ASD", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-D", "asignatura": "ASD", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-E", "asignatura": "ASE", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-E", "asignatura": "ASE", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-F", "asignatura": "ASF", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-F", "asignatura": "ASF", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    },
+    {
+      "codigo": "ACT-G", "asignatura": "ASG", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-G", "asignatura": "ASG", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    }
+  ]
+}
