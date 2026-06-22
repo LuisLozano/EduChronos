@@ -171,6 +171,83 @@ public final class VerificadorSolucion {
         return total;
     }
 
+    /**
+     * Cuenta la penalización por exceso de sesiones CONSECUTIVAS de cada profesor
+     * sobre una solución dada, de forma <b>independiente del solver</b> (recorre el
+     * dominio, no usa OR-Tools). Recomputo gemelo del término que
+     * {@code ModeloCpSat.objetivoConsecutivasProfesor} minimiza: si el modelo
+     * CP-SAT contara mal el exceso, este conteo —que cuenta de otra manera, por
+     * rachas maximales en vez de por ventanas deslizantes— lo delataría.
+     *
+     * <p>Definición: para un profesor en un día, se ordenan las posiciones
+     * ({@code ordenEnDia}) ocupadas y se parten en rachas maximales de posiciones
+     * contiguas. Cada racha de longitud L aporta {@code max(0, L − N)} con
+     * {@code N = MAX_CONSECUTIVAS}. El recreo no rompe racha (no es un {@link Tramo};
+     * los tramos lectivos de un día son contiguos en {@code ordenEnDia}, igual
+     * criterio que {@link #contarVentanasProfesor}).
+     *
+     * <p><b>Duplicación consciente de N:</b> {@code N = 3} aquí es espejo de
+     * {@code ModeloCpSat.MAX_CONSECUTIVAS}, que es privado. El verificador es
+     * independiente del modelo CP-SAT por diseño (no puede importar su constante);
+     * la duplicación es frágil (cambiar el modelo y olvidar esto haría mentir al
+     * gemelo) y se resuelve cuando N pase a configuración (deuda D21), momento en
+     * que ambos leerán el mismo origen.
+     *
+     * @return número total de unidades de exceso de consecutivas en la solución
+     *         (suma sobre todos los profesores y días). Conteo SIN ponderar: con
+     *         {@code PESO_CONSECUTIVAS = 1} coincide con el valor del término; si el
+     *         peso dejara de ser 1, el test debe multiplicar por el peso conocido.
+     */
+    public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema,
+                                                      SolucionHorario solucion) {
+        final int n = 3; // MAX_CONSECUTIVAS (espejo de la constante privada del modelo)
+
+        // (profesor, diaSemana) -> conjunto de ordenEnDia ocupados por ese profesor.
+        Map<Profesor, Map<Integer, Set<Integer>>> ocupacion = new HashMap<>();
+        for (Profesor p : problema.profesores()) {
+            ocupacion.put(p, new HashMap<>());
+        }
+
+        for (ActividadInstancia inst : Expansion.todas(problema)) {
+            Optional<Tramo> tramoOpt = solucion.tramoDeInstancia(inst);
+            if (tramoOpt.isEmpty()) {
+                continue; // instancia sin colocar: ya lo reporta verificar()
+            }
+            Tramo tramo = tramoOpt.get();
+            Set<Profesor> profesoresInstancia = new HashSet<>();
+            for (Plaza plaza : inst.actividad().plazas()) {
+                profesoresInstancia.addAll(plaza.profesores());
+            }
+            for (Profesor p : profesoresInstancia) {
+                ocupacion.get(p)
+                        .computeIfAbsent(tramo.diaSemana(), k -> new HashSet<>())
+                        .add(tramo.ordenEnDia());
+            }
+        }
+
+        int total = 0;
+        for (Map<Integer, Set<Integer>> porDia : ocupacion.values()) {
+            for (Set<Integer> posiciones : porDia.values()) {
+                if (posiciones.size() <= n) {
+                    continue; // con ≤N clases ese día no puede haber racha de N+1
+                }
+                List<Integer> ordenadas = new ArrayList<>(posiciones);
+                ordenadas.sort(Integer::compareTo);
+                int longitudRacha = 1;
+                for (int i = 1; i < ordenadas.size(); i++) {
+                    if (ordenadas.get(i) == ordenadas.get(i - 1) + 1) {
+                        longitudRacha++;
+                    } else {
+                        total += Math.max(0, longitudRacha - n);
+                        longitudRacha = 1;
+                    }
+                }
+                total += Math.max(0, longitudRacha - n);
+            }
+        }
+        return total;
+    }
+    
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,
                                          SolucionHorario solucion,
                                          List<String> violaciones) {

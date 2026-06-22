@@ -78,6 +78,29 @@ final class ModeloCpSat {
      */
     private static final long PESO_INDISP_BLANDA = 1L;
 
+    /**
+     * Número máximo de sesiones consecutivas (sin hueco) de un profesor en un
+     * mismo día que NO se penalizan; a partir de la (N+1)-ésima consecutiva, cada
+     * sesión adicional de la racha suma una unidad al objetivo (Fase 5, Bloque
+     * 6d-c). Constante hardcodeada, igual que {@link #PESO_VENTANAS} y
+     * {@link #PESO_INDISP_BLANDA}.
+     *
+     * <p>Valor 3: la jornada real son 6 tramos lectivos partidos por el recreo en
+     * dos bloques de 3 (8-9, 9-10, 10-11 | 11:30-12:30, 12:30-13:30, 13:30-14:30),
+     * así que penalizar más de 3 seguidas encaja con esa estructura. Es una
+     * conjetura razonable, NO un requisito verificado con el centro: ningún dato
+     * confirma "los profesores no quieren más de 3 seguidas". Su parametrización y
+     * calibración se difieren (deuda D21, gemela de la decisión de no fijar el
+     * umbral del criterio 4 sin datos). Cada fixture de 6d-c usa este N=3 de
+     * producción.
+     */
+    private static final int MAX_CONSECUTIVAS = 3;
+    /**
+     * Peso de la penalización por exceso de sesiones consecutivas del profesorado
+     * (Fase 5, Bloque 6d-c). Constante hardcodeada a 1, mismo criterio que los
+     * otros pesos blandos; calibración relativa diferida (deuda D21).
+     */
+    private static final long PESO_CONSECUTIVAS = 1L;
     private final ProblemaHorario problema;
     private final CpModel model = new CpModel();
     private final List<InstanciaProgramada> instancias = new ArrayList<>();
@@ -127,6 +150,7 @@ final class ModeloCpSat {
         construir();
         objetivoVentanasProfesor();
         objetivoIndisponibilidadBlandaProfesor(); // Fase 5, Bloque 6c
+        objetivoConsecutivasProfesor(); // Fase 5, Bloque 6d-c
         ensamblarObjetivo();
         return this;
     }
@@ -409,6 +433,150 @@ final class ModeloCpSat {
                 model.addLinearExpressionInDomain(ip.tramoIndex(), noVetado)
                         .onlyEnforceIf(penaliza.not());
                 terminosObjetivo.add(LinearExpr.term(penaliza, PESO_INDISP_BLANDA));
+            }
+        }
+    }
+
+    /**
+     * Penalización por exceso de sesiones CONSECUTIVAS del profesorado — Forma de
+     * ventanas deslizantes (Fase 5, Bloque 6d-c). Por cada (profesor, día) y cada
+     * inicio de una ventana de {@code MAX_CONSECUTIVAS + 1} posiciones contiguas en
+     * {@code ordenEnDia}, un literal {@code excede} reificado como "las N+1 están
+     * todas ocupadas". La suma de esos literales, ponderada por
+     * {@link #PESO_CONSECUTIVAS}, se añade a {@link #terminosObjetivo}.
+     *
+     * <p><b>Por qué esto = "suma de excesos sobre N":</b> una racha maximal de
+     * longitud L contiene exactamente {@code max(0, L − N)} subventanas de tamaño
+     * N+1 enteramente ocupadas, así que la suma de literales {@code excede} de un
+     * día es {@code Σ_rachas max(0, L − N)}. Recomputo gemelo independiente en
+     * {@link VerificadorSolucion#contarPenalizacionConsecutivasProfesor} (cuenta
+     * rachas maximales, no ventanas deslizantes; debe coincidir).
+     *
+     * <p><b>Contigüidad sobre {@code ordenEnDia}, no sobre índice de tramo:</b> la
+     * ventana deslizante se forma sobre las posiciones consecutivas
+     * {@code pos, pos+1, …, pos+N} dentro de un día. El recreo no rompe racha (no
+     * es un {@link Tramo}; los tramos lectivos de un día son contiguos en
+     * {@code ordenEnDia}, igual que en el término de ventanas y en el verificador).
+     *
+     * <p><b>D17 (cotas tensadas de ventanas) NO se reactiva:</b> este término NO
+     * mira primero/último/span ni las {@code IntVar primero}/{@code ultimo} del
+     * término de ventanas. Solo usa literales de ocupación por posición
+     * ({@code ocupa}) reconstruidos localmente y un {@code addBoolAnd} reificado
+     * por ventana; no introduce holgura que afecte a las cotas tensadas de
+     * {@link #objetivoVentanasProfesor}. Como la indisponibilidad blanda (6c), es
+     * separable del término de ventanas. No comparte literales con él a propósito
+     * (igual decisión que 6c), para mantener cada término auditable por su lado; el
+     * coste de reconstruir {@code ocupa} es irrelevante a esta escala.
+     *
+     * <p>No usa ninguna API de CP-SAT nueva respecto a 6a/6c:
+     * {@code newBoolVar}, {@code addLinearExpressionInDomain(...).onlyEnforceIf},
+     * {@code Domain.fromValues}, {@code complemento}, {@code addBoolOr},
+     * {@code addBoolAnd}, {@code addImplication}, {@code LinearExpr.term} ya están
+     * en uso.
+     */
+    private void objetivoConsecutivasProfesor() {
+        List<Tramo> tramos = problema.tramos();
+        int numTramos = tramos.size();
+
+        // Índices de tramo agrupados por día (mismo patrón que ventanas).
+        Map<Integer, List<Integer>> indicesPorDia = new TreeMap<>();
+        for (int t = 0; t < numTramos; t++) {
+            indicesPorDia.computeIfAbsent(tramos.get(t).diaSemana(), k -> new ArrayList<>()).add(t);
+        }
+
+        for (Profesor profesor : problema.profesores()) {
+            List<InstanciaProgramada> suyas = new ArrayList<>();
+            for (InstanciaProgramada ip : instancias) {
+                if (usaProfesor(ip, profesor)) {
+                    suyas.add(ip);
+                }
+            }
+            if (suyas.size() <= MAX_CONSECUTIVAS) {
+                continue; // con ≤N sesiones en TODA la semana no puede haber racha de N+1
+            }
+
+            for (Map.Entry<Integer, List<Integer>> e : indicesPorDia.entrySet()) {
+                int dia = e.getKey();
+                List<Integer> idxDelDia = e.getValue();
+                if (idxDelDia.size() < MAX_CONSECUTIVAS + 1) {
+                    continue; // el día no tiene N+1 tramos: ninguna racha de N+1 cabe
+                }
+
+                // ocupa[t] (por índice de tramo del día) y su posición ordenEnDia.
+                // Map ordenEnDia -> BoolVar ocupa, para localizar ventanas contiguas.
+                Map<Integer, BoolVar> ocupaPorPos = new TreeMap<>();
+                for (int t : idxDelDia) {
+                    int pos = tramos.get(t).ordenEnDia();
+                    BoolVar ocupa = model.newBoolVar(
+                            "ocupaC_" + profesor.codigo() + "_d" + dia + "_t" + t);
+                    // ocupa == 1  <=>  alguna instancia suya cae en el tramo t.
+                    List<Literal> instEnT = new ArrayList<>();
+                    Domain soloT = Domain.fromValues(new long[] {t});
+                    for (InstanciaProgramada ip : suyas) {
+                        BoolVar enT = model.newBoolVar(
+                                "instEnTC_" + profesor.codigo() + "_d" + dia
+                                        + "_t" + t + "_" + ip.instancia().actividad().codigo()
+                                        + "#" + ip.instancia().indice());
+                        model.addLinearExpressionInDomain(ip.tramoIndex(), soloT)
+                                .onlyEnforceIf(enT);
+                        Domain noT = complemento(t, numTramos);
+                        model.addLinearExpressionInDomain(ip.tramoIndex(), noT)
+                                .onlyEnforceIf(enT.not());
+                        instEnT.add(enT);
+                    }
+                    // ocupa == OR(instEnT). Por el no-solape de profesor, a lo sumo
+                    // un literal es verdadero; modelar como OR es correcto igual.
+                    model.addBoolOr(instEnT.toArray(new Literal[0])).onlyEnforceIf(ocupa);
+                    for (Literal l : instEnT) {
+                        model.addImplication(l, ocupa);
+                    }
+                    Literal[] negados = new Literal[instEnT.size()];
+                    for (int k = 0; k < instEnT.size(); k++) {
+                        negados[k] = instEnT.get(k).not();
+                    }
+                    model.addBoolAnd(negados).onlyEnforceIf(ocupa.not());
+
+                    ocupaPorPos.put(pos, ocupa);
+                }
+
+                // Ventanas deslizantes de tamaño N+1 sobre posiciones CONTIGUAS.
+                // Por cada inicio 'p' tal que existen ocupa en p, p+1, ..., p+N,
+                // excede[p] == AND(esas N+1 ocupa).
+                List<Integer> posOrdenadas = new ArrayList<>(ocupaPorPos.keySet());
+                for (int posInicio : posOrdenadas) {
+                    // ¿están las N+1 posiciones contiguas presentes en el día?
+                    List<BoolVar> ventana = new ArrayList<>();
+                    boolean completa = true;
+                    for (int d = 0; d <= MAX_CONSECUTIVAS; d++) {
+                        BoolVar oc = ocupaPorPos.get(posInicio + d);
+                        if (oc == null) {
+                            completa = false;
+                            break;
+                        }
+                        ventana.add(oc);
+                    }
+                    if (!completa) {
+                        continue; // ventana de N+1 contiguos no existe desde aquí
+                    }
+                    BoolVar excede = model.newBoolVar(
+                            "excedeC_" + profesor.codigo() + "_d" + dia + "_p" + posInicio);
+                    // excede == 1  <=>  las N+1 ocupa de la ventana valen 1.
+                    // (a) excede => cada ocupa de la ventana
+                    for (BoolVar oc : ventana) {
+                        model.addImplication(excede, oc);
+                    }
+                    // (b) AND(ventana) => excede (cierre del iff): si alguna ocupa
+                    //     es 0, excede es 0; si todas 1, excede 1.
+                    model.addBoolAnd(ventana.toArray(new Literal[0])).onlyEnforceIf(excede);
+                    Literal[] negVent = new Literal[ventana.size()];
+                    for (int k = 0; k < ventana.size(); k++) {
+                        negVent[k] = ventana.get(k).not();
+                    }
+                    // excede == 0  <=>  al menos una ocupa de la ventana es 0.
+                    model.addBoolOr(negVent).onlyEnforceIf(excede.not());
+
+                    terminosObjetivo.add(LinearExpr.term(excede, PESO_CONSECUTIVAS));
+                }
             }
         }
     }
