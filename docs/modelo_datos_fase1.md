@@ -433,15 +433,18 @@ ProfesorRestriccionHoraria(
   motivo NULL       -- texto libre para auditoría
 )
 ```
-> **Estado de implementación (Sesión 25, Bloque 6b).** El solver ya consume
-> esta tabla en su variante **DURA**: una restricción DURA prohíbe al profesor
-> ocupar el tramo (veta el `tramoIndex` de toda instancia que lo liste en
-> alguna plaza). Es restricción dura del modelo CP-SAT (vive en `construir()`,
-> aplica tanto en factibilidad pura como en optimización). La variante
-> **BLANDA** se carga y valida en I/O pero el solver **aún no la consume**: su
-> régimen (término de penalización en la función objetivo, con `peso`) se
-> difiere al Bloque 6c. El campo `peso` se ignora en DURA (decisión 6b),
-> coherente con el comentario "aplica si tipo=BLANDA".
+> **Estado de implementación (Sesión 26, Bloques 6b y 6c).** El solver consume
+> esta tabla en ambas variantes. **DURA** (6b): una restricción DURA prohíbe al
+> profesor ocupar el tramo (veta el `tramoIndex` de toda instancia que lo liste
+> en alguna plaza). Es restricción dura del modelo CP-SAT (vive en `construir()`,
+> aplica tanto en factibilidad pura como en optimización). **BLANDA** (6c):
+> penaliza —no prohíbe— que una instancia que use al profesor caiga en el tramo
+> vetado-blando; es un término de la función objetivo
+> (`objetivoIndisponibilidadBlandaProfesor`, vive en `construirConObjetivo()`).
+> El campo `peso` por-restricción NO se consume todavía: el término usa una
+> constante hardcodeada (`PESO_INDISP_BLANDA=1`); la calibración por-restricción y
+> la parametrización de pesos se difieren (deuda D21). El comentario "aplica si
+> tipo=BLANDA" del campo `peso` describe la intención de diseño, aún no realizada.
 
 > **D18 (deuda, Sesión 25; ampliada en Sesión 26). INFEASIBLE no diagnostica
 > la causa → condiciones necesarias baratas de factibilidad.** Un problema

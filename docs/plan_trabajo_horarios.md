@@ -480,21 +480,22 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6b cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 25 — Fase 5, Bloque 6b cerrado
-  (indisponibilidades horarias DURA del profesorado + comprobación de oro fuerte
-  de ventanas). El solver consume `ProfesorRestriccionHoraria` en variante DURA
-  (`restriccionIndisponibilidadProfesor` en `construir()`, aplica en factibilidad
-  pura y optimización); BLANDA se carga y valida pero no se consume (difiere a 6c).
-  Cierra la oro fuerte comprometida en S24: con un hueco inevitable forzado por un
-  veto, el óptimo de ventanas es determinista y > 0 (=1), y el optimizador lo
-  alcanza rechazando una alternativa factible más cara (=3) — lo que 6a no podía
-  probar. I/O ensanchado una vez (records RestriccionHoraria + TipoRestriccion,
-  RestriccionHorariaDto, campo en ProblemaHorario, array top-level
-  `restriccionesHorarias` en el schema). 4 commits (I/O, solver, oro fuerte, docs),
-  suite 42 verde, BUILD SUCCESS. Índice regenerado (src/main cambió); modelo §4.3
-  actualizado (consumo DURA + deuda D18). Criterio 4 de Fase 5: PARCIAL —
-  mecanismo validado incluyendo oro fuerte; falta umbral (sin datos del centro) y
-  validación a escala. Nueva deuda D18 (INFEASIBLE no diagnostica la causa).
+Última sesión registrada: Sesión 26 — Fase 5, Bloque 6c cerrado
+  (indisponibilidad BLANDA del profesorado como término del objetivo) + revisión
+  de requisitos (D18 ampliada a condiciones necesarias; D19 atribución por celda;
+  D20 UI de pre-validación). El solver consume la variante BLANDA de
+  `ProfesorRestriccionHoraria` (`objetivoIndisponibilidadBlandaProfesor` en
+  `construirConObjetivo()`), segundo término del objetivo tras las ventanas (6a).
+  Recomputo gemelo `contarPenalizacionIndisponibilidadBlanda` en el verificador.
+  Dos turnos: discriminación (óptimo 0 evitable) y oro fuerte (óptimo determinista
+  1 > 0, minimización con alternativa más cara rechazada). Ambos fixtures de linaje
+  discriminación, validados por enumeración, con ventanas aisladas (=0). NO toca I/O
+  (el dato entra desde 6b). D17 RESUELTA para este término (cotas tensadas correctas;
+  el blando es separable), VIVA para términos futuros que miren posiciones. Pesos
+  hardcodeados a 1 (deuda nueva D21: parametrización/calibración). Suite 44 verde,
+  BUILD SUCCESS. Índice regenerado (src/main cambió). Criterio 3 de Fase 5 AVANZADO
+  (segundo término blando), no cerrado (faltan términos restantes + escala);
+  criterio 4 sin cambio (PARCIAL).
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -603,6 +604,25 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       array top-level `restriccionesHorarias` en el schema). 4 commits, suite 42
       verde. Índice regenerado, modelo §4.3 actualizado + D18. NO cierra criterios
       de Fase 5 (criterio 4 PARCIAL: falta umbral + escala).
+- [x] Bloque 6c — Indisponibilidad BLANDA del profesorado como término del objetivo
+      (S26). El solver consume la variante BLANDA de `ProfesorRestriccionHoraria`
+      (`objetivoIndisponibilidadBlandaProfesor` en `construirConObjetivo()`):
+      penaliza, vía un literal por (restricción blanda × instancia que usa al
+      profesor), que la instancia caiga en el tramo vetado-blando. Segundo término
+      del objetivo (el primero fue ventanas, 6a). NO toca I/O (el dato entra desde
+      6b). Troceado en dos turnos: A — el término muerde (discriminación, óptimo 0
+      evitable) + recomputo gemelo `contarPenalizacionIndisponibilidadBlanda` en el
+      verificador; B — oro fuerte (incumplir inevitable, óptimo determinista 1 > 0,
+      el optimizador rechaza la alternativa de coste 2). Ambos fixtures de linaje
+      DISCRIMINACIÓN, validados por enumeración exhaustiva en diseño, con ventanas
+      idénticamente 0 (término aislado). D17 RESUELTA para este término: las cotas
+      tensadas siguen correctas porque la blanda penaliza el `tramoIndex` y no toca
+      span/primero/ultimo/huecos (separable; analizado en el Javadoc de
+      `objetivoVentanasProfesor`). Peso `PESO_INDISP_BLANDA=1` hardcodeado (gemelo
+      de `PESO_VENTANAS`): decisión consciente de no calibrar sin datos del centro;
+      parametrización diferida (deuda nueva de pesos blandos). Suite 44 verde,
+      BUILD SUCCESS. Criterio 3 de Fase 5 AVANZADO (segundo término blando), no
+      cerrado (faltan distribución-a-blanda / primeras-últimas horas + escala).
 - [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
       ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
       tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
@@ -960,6 +980,19 @@ descripción completa.
   presentación (cómo se muestran los avisos al usuario, si bloquean o advierten,
   enlace a la entidad a corregir). Fase 6 (si se valida en importación) / Fase 8
   (UI). No afecta al modelo de datos. Ver modelo §8.
+- **D21 (nueva en S26): parametrización y calibración de pesos blandos.** Hoy
+  `PESO_VENTANAS` y `PESO_INDISP_BLANDA` son constantes hardcodeadas a 1 en
+  `ModeloCpSat`. Con dos (o más) términos blandos compitiendo, el peso relativo
+  determina qué optimiza el solver, pero NO hay datos del centro para calibrarlo
+  (gemela de la decisión de no fijar el umbral del criterio 4). Dos trabajos
+  diferidos: (a) mover los pesos a configuración —ampliando `ProblemaHorario`, que
+  hoy NO porta parámetros clave-valor; trabajo estructural de I/O—; (b) decidir los
+  valores relativos con datos reales y un fixture que ejercite VARIOS términos a la
+  vez (los fixtures de 6c aíslan un término cada uno, así que su peso relativo no
+  está validado por ningún test). El campo `peso` por-restricción de
+  `ProfesorRestriccionHoraria` (modelo §4.3) es parte de (a): hoy se ignora en el
+  término blando, que usa la constante. Relacionada con el criterio 3 de Fase 5
+  (calidad). Fase 5 (términos blandos restantes) o Fase 8 (UI de configuración).
 
 ### Notas técnicas validadas en Fase 0
 
@@ -2003,6 +2036,89 @@ añade segundo término al objetivo; las cotas tensadas siguen válidas). D18 NU
 de ProblemaHorarioJsonLoaderTest: NO reabierta (6b añadió casos nuevos al fichero,
 pero el schema cambió de forma compatible —campo opcional— y los text blocks
 previos siguen válidos sin migración).
+
+### Sesión 26 — Fase 5, Bloque 6c: indisponibilidad BLANDA + revisión de requisitos (D18/D19/D20).
+
+Dos trabajos, dos commits separados (código y documentación). Decidido al inicio
+con el usuario: (a) abordar la revisión de requisitos destapada en S25 como
+trabajo de documentación, y (b) el bloque de solver siguiente = 6c, empezando por
+la indisponibilidad BLANDA (el sub-bloque más limpio: el dato ya entra desde 6b,
+solo falta consumirlo). Se descartó conscientemente empezar por escala (4º/Bach/
+FPB), que ataca los criterios 1-2 pero arrastra D4 o el cabo de aulas FPB; 6c
+avanza el criterio 3, el eje en curso.
+
+Revisión de requisitos (commit de docs, hecho primero para no mezclar capas):
+- D18 AMPLIADA de "indisponibilidad imposible de profesor" a "condiciones
+  necesarias baratas de factibilidad" (chequeos de conteo/palomar que detectan
+  ALGUNAS infactibilidades seguras con mensaje accionable; NO un validador de
+  factibilidad — demostrarla es imposible, solo el solver la decide). Lógica en
+  capa de configuración (Fase 6/8), hermana de DemandaCurricular y D3. Modelo §4.3
+  reescrito + alta en la lista de deuda del plan (faltaba: el plan llegaba a D17,
+  D18 solo vivía en el modelo).
+- D19 NUEVA: atribución de reglas duras Y blandas por celda, sobre el horario YA
+  generado (no solo durante el drag). La maquinaria existe (VerificadorSolucion,
+  contarVentanasProfesor); ningún requisito de UI la exponía celda a celda. Fase
+  7/8. Modelo §8 + plan + criterio de Fase 8 ampliado ("qué lo causa" incluye
+  blandas).
+- D20 NUEVA (separada de D18 por decisión del usuario): UI de los avisos de
+  pre-validación (presentación de las condiciones necesarias al usuario). Fase
+  6/8. Modelo §8 + plan.
+
+Bloque 6c (commit de código, dos turnos verificables por separado):
+- Turno A — el término muerde. `objetivoIndisponibilidadBlandaProfesor()` añadido
+  a `construirConObjetivo()` entre ventanas y el ensamblado; constante
+  `PESO_INDISP_BLANDA=1`; recomputo gemelo `contarPenalizacionIndisponibilidadBlanda`
+  en el verificador (independiente de OR-Tools). Fixture
+  problema-6c-indisp-blanda-discriminacion.json (validado por enumeración: 1
+  actividad NEUTRA, día de 2 tramos, vetado-blando en L1 → óptimo 0 en L2,
+  alternativa de coste 1 en L1). Test asevera DOS cosas: penalización 0 y que la
+  instancia quedó en L2 (la posición cierra el agujero de "0 por azar"). Suite 43.
+- Turno B — oro fuerte. Sin tocar código de producción (la maquinaria del Turno A
+  basta): solo fixture + test. problema-6c-indisp-blanda-oro-fuerte.json (validado
+  por enumeración: 2 actividades NEUTRA de P1, 3 días de 1 tramo cada uno, vetado-
+  blando en L1 y L2, tramo limpio L3 → no-solape de profesor fuerza 2 de 3 tramos
+  ocupados; óptimo determinista 1, alcanzable de dos formas; alternativa factible
+  de coste 2 ocupando ambos vetados). Ventanas idénticamente 0 (1 clase por día):
+  blanda AISLADA, decisión de diseño para que el óptimo no dependa del peso
+  relativo entre términos. El test asevera el COSTE (=1), NO la posición: el óptimo
+  no es único en colocación (vaciar L1 o L2), igual que el oro fuerte de ventanas
+  asevera el conteo y no la disposición. Suite 44 verde, BUILD SUCCESS.
+
+Método: cero intentos fallidos (como S24/S25). Se pidió y leyó el cuerpo de TODA
+entidad tocada ANTES de modelar (ModeloCpSat completo, RestriccionHoraria,
+ProblemaHorario, VerificadorSolucion, SolucionHorario, y el fixture y el test de
+6a/6b como plantilla del formato). Riesgos de firma de OR-Tools: ninguno nuevo
+(se reutilizan addLinearExpressionInDomain, Domain.fromValues, complemento,
+LinearExpr.term, todos presentes desde 6a/6b); compiló a la primera. Lección de
+enumeración exhaustiva en diseño aplicada a ambos fixtures: el primer diseño del
+oro fuerte (4 tramos, 3 actividades) se desechó al enumerar y descubrir que metía
+ventanas que contaminaban la aserción; se rediseñó a 3 días de 1 tramo para
+aislar la blanda.
+
+Dictamen D17 (registrado en el Javadoc de objetivoVentanasProfesor): las cotas
+tensadas NO necesitan migrar a addMinEquality/addMaxEquality. El término blando
+es separable del de ventanas — penaliza el tramoIndex de instancias concretas, no
+toca primero/ultimo/huecos/span; no hay holgura por la que minimizar la blanda
+infle el span. La deuda D17 permanece VIVA para términos FUTUROS que sí miren
+posiciones (primeras/últimas horas).
+
+Criterios de Fase 5: el criterio 3 (calidad comparable) AVANZA — segundo término
+blando incorporado y validado (discriminación + oro fuerte). NO cerrado: faltan
+los términos restantes (distribución-a-blanda, primeras/últimas horas,
+consecutivas máximas) y la validación a escala. Criterio 4 sin cambio respecto a
+S25 (PARCIAL: falta umbral + escala). Criterios 1-2 sin avance (exigen instituto
+completo).
+
+Deudas tocadas: D11 (indisponibilidades) AVANZADA — variante BLANDA ahora
+consumida como término del objetivo; las preferencias POSITIVAS siguen sin modelar
+(decisión de Fase 1). D17 RESUELTA para el primer competidor, VIVA para futuros.
+D18 AMPLIADA, D19 y D20 NUEVAS (revisión de requisitos). DEUDA NUEVA: parametrización
+y calibración de pesos blandos (ambos pesos a configuración + valores relativos con
+datos reales y un fixture multi-término; hoy ambos hardcodeados a 1). D3/D4 sin
+tocar.
+
+src/main SÍ tocado (ModeloCpSat, VerificadorSolucion) → referencia-codigo-solver.md
+regenerado al cierre.
 
 ---
 
