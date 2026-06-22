@@ -443,21 +443,38 @@ ProfesorRestriccionHoraria(
 > difiere al Bloque 6c. El campo `peso` se ignora en DURA (decisión 6b),
 > coherente con el comentario "aplica si tipo=BLANDA".
 
-> **D18 (deuda, Sesión 25). INFEASIBLE no diagnostica la causa.** Un profesor
-> con todos los tramos de sus clases vetados por restricciones DURA produce un
-> resultado INFEASIBLE genérico, indistinguible de cualquier otra causa de
-> infactibilidad (conflicto de aulas, palomar de distribución, etc.). El modelo
-> CP-SAT no detecta ni reporta cuál de sus restricciones causó la
-> infactibilidad. La aplicación debe, en la medida de lo posible, ofrecer al
-> usuario las razones que hacen inviable el horario: (a) detección temprana
-> barata en la capa de configuración (Fase 6/8) — aritmética simple del tipo
-> "el profesor P tiene N sesiones pero solo M tramos disponibles tras sus
-> indisponibilidades, con M < N" —, hermana de la validación de
-> `DemandaCurricular`; y (b) a más largo plazo, un diagnóstico general de
-> infactibilidad (aproximable con `addAssumption` +
-> `sufficientAssumptionsForInfeasibility` de CP-SAT), trabajo transversal no
-> planificado. En el Bloque 6b se deja caer deliberadamente en INFEASIBLE; el
-> solver no lo detecta.
+> **D18 (deuda, Sesión 25; ampliada en Sesión 26). INFEASIBLE no diagnostica
+> la causa → condiciones necesarias baratas de factibilidad.** Un problema
+> infactible (un profesor con todos los tramos de sus clases vetados por
+> restricciones DURA, aulas insuficientes para la demanda simultánea de un
+> tramo, horas curriculares de un grupo > 30 por semana, una asignatura con
+> más repeticiones que días disponibles, etc.) produce un resultado INFEASIBLE
+> genérico, indistinguible de cualquier otra causa. El modelo CP-SAT no detecta
+> ni reporta cuál de sus restricciones causó la infactibilidad.
+>
+> **Salvedad de alcance (importante).** Demostrar factibilidad en general es
+> IMPOSIBLE: solo el solver la decide. Esta deuda NO es un "validador de
+> factibilidad". Lo viable y barato son **condiciones necesarias (no
+> suficientes)**: chequeos de conteo y de palomar que detectan ALGUNAS
+> infactibilidades seguras y dan un mensaje accionable en vez de un INFEASIBLE
+> opaco. Pasar todos los chequeos NO garantiza que el problema sea factible;
+> fallar uno SÍ garantiza que es infactible. Ejemplos de condiciones necesarias
+> baratas: (a) para cada profesor, nº de sesiones que debe impartir ≤ nº de
+> tramos disponibles tras sus indisponibilidades DURA; (b) en cada tramo, nº de
+> plazas que forzosamente coinciden ≤ nº de aulas compatibles disponibles
+> (palomar de aulas, hermano de D3); (c) por grupo, suma de horas curriculares
+> ≤ nº de tramos lectivos semanales (30 en el centro de referencia); (d) por
+> actividad, repeticionesPorSemana ≤ nº de días lectivos (hermano de D12).
+>
+> **Ubicación de la lógica:** capa de configuración/aplicación (Fase 6/8),
+> hermana de la validación de `DemandaCurricular`. NO toca el modelo CP-SAT ni
+> el solver. La presentación de estos avisos al usuario se separa en la deuda
+> D20.
+>
+> A más largo plazo, un diagnóstico general de infactibilidad es aproximable
+> con `addAssumption` + `sufficientAssumptionsForInfeasibility` de CP-SAT
+> (trabajo transversal no planificado, fuera del alcance de D18). En el Bloque
+> 6b se dejó caer deliberadamente en INFEASIBLE; el solver no lo detecta.
 
 ### 4.4 Distancias entre aulas
 
@@ -1644,6 +1661,32 @@ la estructura `Actividad → Plaza`:
 
 No afecta al modelo de datos: el esquema y las invariantes cubren los
 tres casos sin distinción. La distinción es puramente de presentación.
+
+**D19. Atribución de reglas (duras y blandas) por celda.**
+Origen: análisis de Sesión 26. El requisito de Fase 8 contempla solo
+"detección de conflictos en tiempo real" durante el arrastre manual y SOLO
+para reglas duras. Faltan dos cosas: (a) exponer también las restricciones
+BLANDAS por celda (por qué esta celda penaliza: ventana del profesor, última
+hora, no-distribución de la asignatura, indisponibilidad blanda); y (b)
+atribución sobre el horario YA generado, no solo durante el drag — poder
+seleccionar una celda de un horario producido por el solver y ver qué reglas
+toca y cuánto penaliza. La maquinaria de cálculo ya existe en el solver
+(`VerificadorSolucion` recorre las duras; `contarVentanasProfesor` cuenta
+ventanas), pero ningún requisito de UI la expone celda a celda. Trabajo de
+Fase 7 (visualización) / Fase 8 (ajuste manual). No afecta al modelo de datos.
+Implica ampliar el criterio de Fase 8 para que "qué lo causa" incluya las
+blandas, no solo las duras.
+
+**D20. UI de avisos de pre-validación (condiciones necesarias).**
+Origen: análisis de Sesión 26, separada de D18. D18 cubre la LÓGICA de las
+condiciones necesarias baratas (chequeos de conteo/palomar en backend). D20
+cubre su PRESENTACIÓN: dónde y cómo se muestran los avisos al usuario antes de
+lanzar el solver (lista de problemas detectados con mensaje accionable, p.ej.
+"el profesor MAT8 tiene 18 sesiones pero solo 15 tramos disponibles tras sus
+indisponibilidades"), si bloquean o solo advierten, y cómo se enlazan con la
+entidad concreta (profesor, grupo, aula) para que el usuario navegue a
+corregirla. Trabajo de Fase 6 (si se valida en importación) / Fase 8 (UI de
+configuración). No afecta al modelo de datos.
 
 ---
 

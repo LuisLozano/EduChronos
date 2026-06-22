@@ -383,10 +383,12 @@ Interfaz con las tres vistas: por grupo, por profesor, por aula.
 **Objetivo:** El usuario puede configurar el centro y ajustar el horario 
 generado manualmente.
 
-> **Antes de empezar:** revisar `modelo_datos_fase1.md` §8 (deuda consciente), 
-> especialmente **D1** (plantillas de generación de subgrupos) y **D7** (UX de 
-> subgrupos compartidos entre particiones). Ambas afectan al diseño de los 
-> formularios y al flujo de creación/edición de grupos y particiones.
+> **Antes de empezar:** revisar `modelo_datos_fase1.md` §8 (deuda consciente),
+> especialmente **D1** (plantillas de generación de subgrupos), **D7** (UX de
+> subgrupos compartidos entre particiones), **D19** (atribución de reglas duras
+> y blandas por celda) y **D20** (UI de avisos de pre-validación). D1 y D7
+> afectan al diseño de los formularios y al flujo de creación/edición; D19 y
+> D20 afectan a la vista del horario y al flujo de ajuste manual.
 
 ### Entregable
 - Formularios CRUD para todos los elementos de configuración
@@ -395,8 +397,18 @@ generado manualmente.
 - Asistentes de creación rápida de grupos y subgrupos (deuda D1 de Fase 1)
 
 ### Criterios de verificación
-- [ ] Al arrastrar una sesión a un tramo con conflicto, se muestra el conflicto 
-      claramente (qué lo causa)
+- [ ] Al arrastrar una sesión a un tramo con conflicto, se muestra el conflicto
+      claramente (qué lo causa). "Qué lo causa" incluye tanto reglas DURAS
+      (conflicto de profesor/aula/grupo, desdoble, etc.) como BLANDAS (esta
+      ubicación penaliza por ventana / última hora / no-distribución /
+      indisponibilidad blanda). Deuda D19.
+- [ ] La atribución de reglas (duras y blandas) por celda funciona también
+      sobre el horario YA generado por el solver, no solo durante el arrastre:
+      seleccionar una celda muestra qué reglas toca y cuánto penaliza. Deuda D19.
+- [ ] Antes de lanzar el solver, las condiciones necesarias baratas de
+      factibilidad (profesor sin tramos suficientes, horas curriculares > 30,
+      etc.) se muestran como avisos accionables en vez de un INFEASIBLE opaco.
+      Deudas D18 (lógica) y D20 (presentación).
 - [ ] Una sesión bloqueada no se mueve al relanzar el solver
 - [ ] Puedes configurar un nuevo centro desde cero (sin datos previos) 
       y llegar a un horario válido
@@ -923,6 +935,31 @@ descripción completa.
   del signo del objetivo. Se verá venir al introducir el segundo término (6c+).
   No afecta al verificador independiente (`contarVentanasProfesor` cuenta sobre
   la solución concreta, sin cotas). Revisar al añadir términos que compitan.
+- **D18 (nueva en S25; ampliada en S26): INFEASIBLE no diagnostica la causa →
+  condiciones necesarias baratas de factibilidad.** Registrada en S25 en el
+  modelo §4.3 pero no en esta lista hasta S26. Un problema infactible (profesor
+  con todos sus tramos vetados, aulas insuficientes en un tramo, horas
+  curriculares > 30 por grupo, repeticiones > días) da un INFEASIBLE opaco. NO
+  es un validador de factibilidad (demostrarla es imposible; solo el solver la
+  decide); son CONDICIONES NECESARIAS (no suficientes): chequeos de
+  conteo/palomar que detectan ALGUNAS infactibilidades seguras con mensaje
+  accionable. Lógica en capa de configuración (Fase 6/8), hermana de la
+  validación de DemandaCurricular y de D3 (capacidad de aulas). No toca el
+  modelo CP-SAT. La presentación al usuario se separa en D20. Ver modelo §4.3.
+- **D19 (nueva en S26): atribución de reglas duras Y blandas por celda.** Fase 8
+  contempla hoy solo conflictos en tiempo real durante el drag y solo reglas
+  duras. Faltan (a) exponer las BLANDAS por celda (ventana, última hora,
+  no-distribución, indisponibilidad blanda) y (b) atribución sobre el horario YA
+  generado, no solo durante el arrastre. La maquinaria existe en el solver
+  (VerificadorSolucion, contarVentanasProfesor); ningún requisito de UI la expone
+  celda a celda. Fase 7 (visualización) / Fase 8 (ajuste manual). Implica ampliar
+  el criterio de Fase 8 (ver más abajo). No afecta al modelo de datos. Ver
+  modelo §8.
+- **D20 (nueva en S26): UI de avisos de pre-validación (condiciones
+  necesarias).** Separada de D18. D18 = lógica (chequeos en backend); D20 =
+  presentación (cómo se muestran los avisos al usuario, si bloquean o advierten,
+  enlace a la entidad a corregir). Fase 6 (si se valida en importación) / Fase 8
+  (UI). No afecta al modelo de datos. Ver modelo §8.
 
 ### Notas técnicas validadas en Fase 0
 
