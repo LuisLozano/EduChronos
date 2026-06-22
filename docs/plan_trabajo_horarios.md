@@ -276,9 +276,9 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
 > **Estado (S23):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
-> Bloques 1-5 CERRADOS — ver "### Bloques de Fase 5" y los registros de Sesiones
-> 19-23. Ninguno de los criterios de verificación de abajo está cerrado. Hay DOS
-> razones distintas, según el criterio:
+> Bloques 1-6b CERRADOS — ver "### Bloques de Fase 5" y los registros de Sesiones
+> 19-25. Ninguno de los criterios de verificación de abajo está cerrado del todo
+> (el criterio 4 está PARCIAL desde S25). Las razones difieren según el criterio:
 >   - Criterios 1 y 2 (tiempo < 10 min, 0 duras): faltan porque exigen el
 >     INSTITUTO COMPLETO (≈28 grupos + Bach + FPB), aún no abordado. Lo medido
 >     hasta ahora son escalones (máx. 11 grupos). Hay evidencia parcial
@@ -286,23 +286,31 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 >     — 7 grupos → 0,317 s, 10 grupos → 0,469 s, 10 grupos + 1 grupo Di →
 >     0,408 s; tramo holgado, crecimiento ~lineal, sin salto de régimen aún.
 >     Criterio 2: 0 duras en cada escalón (verde acumulado).
->   - Criterios 3 y 4 (calidad comparable al real, profesor sin ventanas
->     excesivas): el solver YA tiene régimen de optimización desde S24
->     (Bloque 6a): `SolverHorario.resolverOptimizando` minimiza una función
->     objetivo de penalizaciones blandas. El primer término es las ventanas
->     (huecos) del profesorado. El MECANISMO del criterio 4 está implementado
->     y validado en discriminación (S24), pero el criterio sigue SIN cerrar por
+>   - Criterio 4 (profesor sin ventanas excesivas): el solver tiene régimen de
+>     optimización desde S24 (Bloque 6a): `SolverHorario.resolverOptimizando`
+>     minimiza una función objetivo de penalizaciones blandas; el primer término
+>     son las ventanas (huecos) del profesorado. El MECANISMO está implementado
+>     y, desde S25 (Bloque 6b), VALIDADO incluyendo la comprobación de oro
+>     fuerte: el optimizador minimiza incluso cuando el óptimo es estrictamente
+>     positivo (hueco inevitable forzado por una indisponibilidad DURA),
+>     rechazando alternativas factibles más caras. El criterio sigue PARCIAL por
 >     dos razones: (a) "excesivas" exige un umbral que no se fija sin datos del
 >     centro ni del instituto completo (decisión consciente S24); (b) solo está
->     probado en un fixture de discriminación, no a escala. El criterio 3
->     (calidad) necesita más términos blandos (distribución, primeras/últimas
->     horas) aún no implementados. D11 (preferencias horarias) es el Bloque 6b,
->     donde además vivirá la comprobación de oro fuerte de las ventanas (un
->     hueco inevitable solo es construible con indisponibilidades de profesor).
+>     probado en fixtures de discriminación, no a escala. El criterio 3 (calidad
+>     comparable) necesita más términos blandos (distribución a-blanda,
+>     primeras/últimas horas, consecutivas máximas) aún no implementados —
+>     Bloque 6c en adelante. D11 (indisponibilidades del profesorado): la
+>     variante DURA YA está consumida por el solver (Bloque 6b, S25); la variante
+>     BLANDA y las preferencias positivas quedan para 6c.
 > Naturaleza de los bloques cerrados: Bloque 1 fue prerrequisito de tipología
 > (Tipo 4); Bloque 4 fue estructural (Lectura B, Tipo 7); Bloques 2, 3 y 5 son
 > escala (no cierran criterios). El Tipo 5 (Diversificación/PDC) quedó validado a
-> ESCALA en el Bloque 5 (S23), reforzando lo cerrado en Fase 4.
+> ESCALA en el Bloque 5 (S23), reforzando lo cerrado en Fase 4. Bloques 6a (S24)
+> y 6b (S25) introdujeron el régimen de OPTIMIZACIÓN: conviven dos caminos —
+> factibilidad pura (`resolver`, mide la curva de escala) y optimización
+> (`resolverOptimizando`, minimiza penalizaciones blandas; hoy un término:
+> ventanas del profesorado). 6b añadió el consumo de indisponibilidades DURA
+> (restricción dura) y cerró la oro fuerte del criterio 4.
 
 ### Lo que se añade
 - Todos los grupos restantes: 2ºESO, 3ºESO, 4ºESO, 1ºBach, 2ºBach, FPB
@@ -315,8 +323,16 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 - [ ] Cero restricciones duras violadas
 - [ ] El horario generado es comparable en calidad al horario real de los PDFs 
       (no necesita ser idéntico, pero debe ser razonable)
-- [ ] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene 
+- [~] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
       un horario sin ventanas excesivas
+      — PARCIAL (S25, Bloque 6b): el MECANISMO está implementado (penalización
+      de ventanas en la función objetivo, Bloque 6a) y VALIDADO incluyendo la
+      comprobación de oro fuerte (S25): el optimizador minimiza incluso cuando
+      el óptimo es estrictamente positivo (hueco inevitable forzado por una
+      indisponibilidad DURA), rechazando alternativas factibles más caras.
+      Falta: (a) el UMBRAL de "excesivas" —decisión consciente de no inventarlo
+      sin datos del centro—, y (b) validación a ESCALA (hoy solo en fixtures de
+      discriminación, no en el instituto completo).
 
 ### Señal de que está mal
 El solver no converge o genera soluciones con muchas restricciones duras 
@@ -449,27 +465,24 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1-6a cerrados)
+  Bloques 1-6b cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 24 — Fase 5, Bloque 6a cerrado (función
-  objetivo: ventanas del profesorado). Cambio de RÉGIMEN del solver: de
-  factibilidad pura a optimización, sin tocar el camino de factibilidad
-  (`construir()` intacto; nuevo `construirConObjetivo()` y
-  `resolverOptimizando()`). Penalización de ventanas modelada con Forma A
-  (cotas tensadas: huecos = último − primero + 1 − nClases por profesor y día;
-  el recreo no cuenta porque no es Tramo). Andamiaje genérico de términos
-  ponderados, estrenado con un único término (peso constante, decisión 6a).
-  `VerificadorSolucion.contarVentanasProfesor` recomputa el conteo de forma
-  independiente del solver. Fixture de discriminación
-  problema-6-ventanas-profesor.json (5 sesiones, 5 tramos, 1 grupo; óptimo 0
-  alcanzable, espacio con hasta 3 ventanas) + SolverHorarioVentanasProfesorTest
-  (2 casos: el optimizador elimina ventanas; el contador detecta ventanas en una
-  colocación manual con huecos conocidos — comprobación de oro Opción I). Suite
-  34 verde. Ningún criterio formal de Fase 5 marcado: el criterio 4 tiene
-  mecanismo pero falta umbral y escala. Nueva deuda D17. Hallazgo de S24: un
-  hueco inevitable (óptimo > 0) NO es construible sin indisponibilidades de
-  profesor (Bloque 6b); la comprobación de oro fuerte estilo S9 se difiere a 6b.
+Última sesión registrada: Sesión 25 — Fase 5, Bloque 6b cerrado
+  (indisponibilidades horarias DURA del profesorado + comprobación de oro fuerte
+  de ventanas). El solver consume `ProfesorRestriccionHoraria` en variante DURA
+  (`restriccionIndisponibilidadProfesor` en `construir()`, aplica en factibilidad
+  pura y optimización); BLANDA se carga y valida pero no se consume (difiere a 6c).
+  Cierra la oro fuerte comprometida en S24: con un hueco inevitable forzado por un
+  veto, el óptimo de ventanas es determinista y > 0 (=1), y el optimizador lo
+  alcanza rechazando una alternativa factible más cara (=3) — lo que 6a no podía
+  probar. I/O ensanchado una vez (records RestriccionHoraria + TipoRestriccion,
+  RestriccionHorariaDto, campo en ProblemaHorario, array top-level
+  `restriccionesHorarias` en el schema). 4 commits (I/O, solver, oro fuerte, docs),
+  suite 42 verde, BUILD SUCCESS. Índice regenerado (src/main cambió); modelo §4.3
+  actualizado (consumo DURA + deuda D18). Criterio 4 de Fase 5: PARCIAL —
+  mecanismo validado incluyendo oro fuerte; falta umbral (sin datos del centro) y
+  validación a escala. Nueva deuda D18 (INFEASIBLE no diagnostica la causa).
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -567,6 +580,17 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       criterios de Fase 5 (el criterio 4 tiene mecanismo, falta umbral + escala).
       Deuda D17. Comprobación de oro fuerte diferida a 6b (un hueco inevitable
       exige indisponibilidades). Índice de API regenerado (src/main cambió).
+- [x] Bloque 6b — Indisponibilidades horarias DURA + oro fuerte de ventanas (S25).
+      El solver consume `ProfesorRestriccionHoraria` en su variante DURA
+      (`restriccionIndisponibilidadProfesor` en `construir()`, aplica en ambos
+      regímenes). BLANDA se carga y valida pero no se consume (difiere a 6c).
+      Cierra la comprobación de oro fuerte de ventanas comprometida en S24:
+      óptimo determinista > 0 (hueco inevitable forzado por veto), el optimizador
+      lo minimiza rechazando alternativas más caras. I/O ensanchado una vez
+      (records RestriccionHoraria + TipoRestriccion + DTO; campo en ProblemaHorario;
+      array top-level `restriccionesHorarias` en el schema). 4 commits, suite 42
+      verde. Índice regenerado, modelo §4.3 actualizado + D18. NO cierra criterios
+      de Fase 5 (criterio 4 PARCIAL: falta umbral + escala).
 - [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
       ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
       tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
@@ -896,7 +920,7 @@ descripción completa.
   estas cotas flojas (p.ej. un término que premiara spans grandes, improbable
   pero no imposible), `huecos` podría tomar un valor falso. Mitigación si llega
   el caso: pasar a `addMinEquality`/`addMaxEquality` explícito, que no depende
-  del signo del objetivo. Se verá venir al introducir el segundo término (6b+).
+  del signo del objetivo. Se verá venir al introducir el segundo término (6c+).
   No afecta al verificador independiente (`contarVentanasProfesor` cuenta sobre
   la solución concreta, sin cotas). Revisar al añadir términos que compitan.
 
@@ -1864,6 +1888,84 @@ D3/D4 sin tocar.
 
 src/main SÍ tocado → referencia-codigo-solver.md DEBE regenerarse (cambian
 ModeloCpSat, SolverHorario, VerificadorSolucion). Pendiente al cierre.
+
+### Sesión 25 — Fase 5, Bloque 6b: indisponibilidades horarias DURA + oro fuerte de ventanas.
+
+Elegido el Bloque 6b entre cinco candidatos (6c más blandas, 4ºESO, Bachillerato,
+FPB, y el propio 6b). Decisión: 6b, por ser el único candidato que cierra una
+deuda de validación concreta y comprometida en S24 (la oro fuerte de ventanas)
+añadiendo exactamente UNA capa. Descartados: 6c (desmonta la distribución dura en
+mal orden, activa D17 antes de validar el primer término); escala 4º/Bach/FPB
+(cambia de eje dejando Fase 5 a medias, con D4 o el cabo de aulas FPB sin resolver).
+
+Decomposición del trabajo en cuatro turnos verificables (disciplina S24):
+- I/O + dominio: la indisponibilidad entra como dato, se valida, el solver la
+  IGNORA. Decisiones cerradas con el usuario: (1) el solver consume solo DURA en
+  6b; BLANDA se carga y valida pero su consumo (término del objetivo) se difiere a
+  6c; (2) el loader acepta y guarda ambas con forma completa (tipo+peso+motivo),
+  ensanchando I/O una sola vez; (3) forma B en el JSON — array top-level
+  `restriccionesHorarias` — + forma 2 en el dominio — colección en
+  `ProblemaHorario`, `Profesor` queda como record puro sin arista a `Tramo`. Esta
+  última corrige la inclinación inicial (embeber en `profesor`): leído el mapper,
+  embeber costaba una arista de dominio Profesor→Tramo no deseada; la colección en
+  el agregado raíz es además la forma fiel al modelo (`ProfesorRestriccionHoraria`
+  como tabla con FK a ambos). (4) peso en DURA: ignorado, no error.
+- Consumo en el solver: `restriccionIndisponibilidadProfesor` en `construir()`
+  (es restricción DURA → aplica en ambos regímenes; al estar en `construir()`,
+  `construirConObjetivo` la hereda). Mecanismo: `addLinearExpressionInDomain` sobre
+  el `tramoIndex` de cada instancia que use al profesor, con el dominio
+  complementario de los tramos vetados — el mismo patrón ya presente en
+  `objetivoVentanasProfesor` y `restriccionDistribucionPorDia`, cero APIs nuevas de
+  OR-Tools. Helper `complementoDe(Set, numTramos)` junto al `complemento(int,...)`
+  existente. Aplicación a nivel de instancia (no plaza): todas las plazas comparten
+  `tramoIndex`. Profesor con todos los tramos vetados → dominio vacío → INFEASIBLE,
+  respuesta correcta (deuda D18). Test SolverHorarioIndisponibilidadProfesorTest:
+  redirige (1 instancia, veto → cae en el tramo libre), infactibiliza (2 instancias,
+  palomar tras veto → INFEASIBLE), discrimina (mismo problema sin veto → factible).
+- Oro fuerte de ventanas: cierra la deuda S24. Fixture validado por enumeración en
+  diseño ANTES de ejecutar: MAT8, 2 clases, día de 5 tramos, vetado en pos 2 y 4 →
+  posiciones disponibles {1,3,5} → colocaciones {1,3}=1, {3,5}=1, {1,5}=3 ventanas.
+  Óptimo determinista = 1 (estrictamente positivo), con alternativa factible más
+  cara (3): un optimizador que solo buscara factibilidad podría devolver 3;
+  minimizar obliga a 1. Es lo que 6a NO podía probar (allí el óptimo alcanzable era
+  0). Aseverado vía `contarVentanasProfesor` (recomputo independiente de OR-Tools)
+  sobre la solución devuelta — más fuerte que leer el objetivo del solver (que no
+  se expone, decisión 2a). Discriminación: sin veto, óptimo 0. Un solo término en
+  el objetivo → D17 NO se activa (cotas tensadas siguen válidas).
+  Test SolverHorarioOroFuerteVentanasTest (2 casos).
+
+Entregado (4 commits, árbol limpio):
+- I/O (fb136de): records RestriccionHoraria + enum TipoRestriccion (domain),
+  RestriccionHorariaDto (io), campo en ProblemaHorario + ProblemaHorarioDto,
+  resolución en el mapper, $def + top-level opcional en el schema, 3 tests del
+  loader. VerificadorSolucionGrupoTest ajustado (constructor de ProblemaHorario
+  gana un argumento). Suite 37 verde.
+- Solver: restriccionIndisponibilidadProfesor + complementoDe en ModeloCpSat,
+  3 fixtures + SolverHorarioIndisponibilidadProfesorTest. Suite 40 verde.
+- Oro fuerte (1685554): 2 fixtures + SolverHorarioOroFuerteVentanasTest.
+  Suite 42 verde, BUILD SUCCESS.
+- Índice de código regenerado (src/main cambió: ProblemaHorario, mapper,
+  ModeloCpSat + records/DTO nuevos). Modelo actualizado (§4.3: consumo DURA + D18).
+
+Método: cero intentos fallidos (igual que S24). Se pidió y leyó el cuerpo de TODA
+entidad tocada ANTES de modelar (Profesor, ProfesorDto, mapper, ProblemaHorario,
+Tramo, ProblemaHorarioJsonLoaderTest, VerificadorSolucionGrupoTest, ModeloCpSat,
+InstanciaProgramada, SolverHorario, SolucionHorario, VerificadorSolucion). Riesgos
+de firma de OR-Tools marcados antes de compilar: ninguno nuevo (se reutilizan APIs
+ya presentes).
+
+Criterios de Fase 5: el criterio 4 pasa de "inabordable" (pre-6a) a PARCIAL —
+mecanismo implementado y validado INCLUYENDO oro fuerte; falta umbral (sin datos
+del centro) y validación a escala. Criterios 1-2 sin avance (exigen instituto
+completo). Criterio 3 sin avance (necesita más términos blandos, 6c+).
+
+Deudas tocadas: D11 (indisponibilidades) AVANZADA — variante DURA consumida;
+BLANDA y preferencias positivas para 6c. D17 REVISADA — sigue inactiva (6b no
+añade segundo término al objetivo; las cotas tensadas siguen válidas). D18 NUEVA
+(INFEASIBLE no diagnostica la causa; ver §4.3 del modelo). Deuda de fixture-inline
+de ProblemaHorarioJsonLoaderTest: NO reabierta (6b añadió casos nuevos al fichero,
+pero el schema cambió de forma compatible —campo opcional— y los text blocks
+previos siguen válidos sin migración).
 
 ---
 
