@@ -8,8 +8,10 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
+import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,6 +118,57 @@ public final class VerificadorSolucion {
             ventanas.put(ep.getKey(), total);
         }
         return ventanas;
+    }
+
+    /**
+     * Cuenta la penalización por indisponibilidades BLANDA incumplidas sobre una
+     * solución dada, de forma <b>independiente del solver</b>. Recomputo gemelo
+     * del término que {@code ModeloCpSat.objetivoIndisponibilidadBlandaProfesor}
+     * minimiza: si el modelo CP-SAT contara mal las penalizaciones blandas, este
+     * conteo —que recorre el dominio, sin OR-Tools— lo delataría.
+     *
+     * <p>Una restricción BLANDA (profesor P, tramo T) se incumple por cada
+     * instancia que usa a P y cae en T. El conteo es a nivel de instancia (igual
+     * que el modelo): un profesor que aparece en varias plazas de la misma
+     * actividad cuenta una vez, porque la actividad ocupa el tramo una vez.
+     *
+     * @return número total de incumplimientos blandos en la solución (suma sobre
+     *         todas las restricciones BLANDA y todas las instancias). Es el conteo
+     *         SIN ponderar por peso: con {@code PESO_INDISP_BLANDA = 1} coincide
+     *         con el valor del término; si el peso dejara de ser 1, el test debe
+     *         multiplicar por el peso conocido.
+     */
+    public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema,
+                                                        SolucionHorario solucion) {
+        List<ActividadInstancia> todas = Expansion.todas(problema);
+        int total = 0;
+        for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+            if (r.tipo() != TipoRestriccion.BLANDA) {
+                continue;
+            }
+            for (ActividadInstancia inst : todas) {
+                Optional<Tramo> tramoOpt = solucion.tramoDeInstancia(inst);
+                if (tramoOpt.isEmpty()) {
+                    continue; // instancia sin colocar: ya lo reporta verificar()
+                }
+                if (!tramoOpt.get().equals(r.tramo())) {
+                    continue;
+                }
+                // ¿usa esta instancia al profesor de la restricción? Unión de los
+                // profesores de todas sus plazas, una vez por instancia.
+                boolean usaProfesor = false;
+                for (Plaza plaza : inst.actividad().plazas()) {
+                    if (plaza.profesores().contains(r.profesor())) {
+                        usaProfesor = true;
+                        break;
+                    }
+                }
+                if (usaProfesor) {
+                    total++;
+                }
+            }
+        }
+        return total;
     }
 
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,

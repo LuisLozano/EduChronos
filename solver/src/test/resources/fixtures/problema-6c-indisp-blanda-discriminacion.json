@@ -1,0 +1,34 @@
+{
+  "tramos": [
+    { "codigo": "L1", "diaSemana": 1, "ordenEnDia": 1 },
+    { "codigo": "L2", "diaSemana": 1, "ordenEnDia": 2 }
+  ],
+  "aulas": [
+    { "codigo": "AU1", "nombre": "Aula 1" }
+  ],
+  "asignaturas": [
+    { "codigo": "ASA", "nombre": "Asignatura A" }
+  ],
+  "profesores": [
+    { "codigo": "P1", "nombre": "Profesor Uno" }
+  ],
+  "grupos": [
+    { "codigo": "G1", "tipo": "ORDINARIO", "grupoPadre": null }
+  ],
+  "subgrupos": [
+    { "codigo": "SG1", "grupos": ["G1"] }
+  ],
+  "actividades": [
+    {
+      "codigo": "ACT-A", "asignatura": "ASA", "repeticionesPorSemana": 1,
+      "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [
+        { "codigo": "PL-A", "asignatura": "ASA", "profesores": ["P1"],
+          "aulaFija": "AU1", "aulasCandidatas": [], "subgrupos": ["SG1"] }
+      ]
+    }
+  ],
+  "restriccionesHorarias": [
+    { "profesor": "P1", "tramo": "L1", "tipo": "BLANDA", "peso": 1, "motivo": "preferencia: evitar primera hora" }
+  ]
+}

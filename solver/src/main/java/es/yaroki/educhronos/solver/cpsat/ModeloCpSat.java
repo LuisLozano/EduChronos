@@ -66,6 +66,17 @@ final class ModeloCpSat {
      * las cotas (ver D17).
      */
     private static final long PESO_VENTANAS = 1L;
+    /**
+     * Peso de la penalización por incumplir una indisponibilidad BLANDA del
+     * profesorado (Fase 5, Bloque 6c). Constante hardcodeada, igual que
+     * {@link #PESO_VENTANAS}. Valor 1 = mismo peso que una ventana: decisión
+     * consciente de NO calibrar el peso relativo sin datos del centro (gemela de
+     * la decisión de no fijar el umbral del criterio 4 en S25). La parametrización
+     * de ambos pesos y su calibración con un fixture multi-término se difiere
+     * (deuda de pesos blandos). Cada fixture de 6c aísla un único término, así que
+     * el peso relativo no afecta a lo que los tests demuestran.
+     */
+    private static final long PESO_INDISP_BLANDA = 1L;
 
     private final ProblemaHorario problema;
     private final CpModel model = new CpModel();
@@ -102,8 +113,8 @@ final class ModeloCpSat {
     /**
      * Construye el modelo en modo OPTIMIZACIÓN: las mismas restricciones duras
      * que {@link #construir()} más la función objetivo de restricciones blandas.
-     * En Fase 5, Bloque 6a el único término es la penalización de ventanas del
-     * profesorado (criterio 4 de Fase 5).
+     * Los términos son la penalización de ventanas del profesorado (6a) y la
+     * penalización por incumplir indisponibilidades BLANDA del profesorado (6c).
      *
      * <p>{@link #construir()} se mantiene intacto y separado a propósito
      * (decisión 1a): los tests de escala miden tiempo hasta primera solución
@@ -115,6 +126,7 @@ final class ModeloCpSat {
     ModeloCpSat construirConObjetivo() {
         construir();
         objetivoVentanasProfesor();
+        objetivoIndisponibilidadBlandaProfesor(); // Fase 5, Bloque 6c
         ensamblarObjetivo();
         return this;
     }
@@ -144,6 +156,15 @@ final class ModeloCpSat {
      * exacto. Esto es correcto SOLO mientras el término se minimice con peso > 0;
      * si un futuro término compitiera y dejara estas cotas flojas, habría que
      * pasar a min/max explícito. Registrado como deuda D17.
+     *
+     * <p><b>D17, primer competidor analizado (6c):</b> el término de
+     * indisponibilidad BLANDA ({@link #objetivoIndisponibilidadBlandaProfesor})
+     * penaliza el {@code tramoIndex} de instancias concretas y NO toca
+     * {@code primero}/{@code ultimo}/{@code huecos} ni el span. Es separable de
+     * este término: no existe holgura por la que minimizar la blanda haga
+     * preferible un span inflado. Las cotas tensadas siguen siendo correctas. La
+     * deuda permanece viva para términos FUTUROS que sí miren posiciones (p.ej.
+     * primeras/últimas horas).
      *
      * <p>El "día sin clases" se gestiona con {@code tieneClase}: si es 0, los
      * huecos del (profesor, día) se fuerzan a 0 y no se imponen las cotas.
@@ -334,6 +355,62 @@ final class ModeloCpSat {
             }
         }
         return Domain.fromValues(otros);
+    }
+
+    /**
+     * Penalización por incumplir indisponibilidades BLANDA del profesorado
+     * (Fase 5, Bloque 6c). Gemelo blando de
+     * {@link #restriccionIndisponibilidadProfesor()}: donde aquella PROHÍBE el
+     * tramo (restricción dura), esta lo PENALIZA (término del objetivo).
+     *
+     * <p>Por cada {@link RestriccionHoraria} de tipo {@code BLANDA} y cada
+     * instancia que use a ese profesor (mismo criterio {@link #usaProfesor}), se
+     * crea un literal {@code penaliza} reificado como "esta instancia cae en el
+     * tramo vetado-blando". La suma de esos literales, ponderada por
+     * {@link #PESO_INDISP_BLANDA}, se añade a {@link #terminosObjetivo}.
+     *
+     * <p>No comparte los literales de {@link #objetivoVentanasProfesor()} a
+     * propósito: aquel reifica "ocupa tramo t" solo para los tramos de cada día y
+     * solo para profesores con ≥2 sesiones; este necesita un único tramo concreto
+     * (el vetado) para cualquier profesor con restricción blanda, tenga 1 ó N
+     * sesiones. Mantenerlos separados es lo que hace que los dos términos sean
+     * independientes (ver dictamen D17).
+     *
+     * <p>Como todas las plazas de una instancia comparten {@code tramoIndex}, la
+     * penalización es a nivel de instancia, no de plaza (igual que la variante
+     * DURA). Si dos restricciones BLANDA del mismo profesor vetan tramos
+     * distintos, cada una aporta su propio literal por instancia; una instancia
+     * que caiga en uno u otro penaliza una vez por cada coincidencia, que es lo
+     * correcto (incumple dos preferencias distintas si cayera en ambas, imposible
+     * al ser una sola instancia en un solo tramo).
+     */
+    private void objetivoIndisponibilidadBlandaProfesor() {
+        int numTramos = problema.tramos().size();
+        for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+            if (r.tipo() != TipoRestriccion.BLANDA) {
+                continue; // DURA: la consume restriccionIndisponibilidadProfesor()
+            }
+            Profesor profesor = r.profesor();
+            int tramoVetado = problema.indiceDeTramo(r.tramo());
+            Domain soloVetado = Domain.fromValues(new long[] {tramoVetado});
+            Domain noVetado = complemento(tramoVetado, numTramos);
+
+            for (InstanciaProgramada ip : instancias) {
+                if (!usaProfesor(ip, profesor)) {
+                    continue;
+                }
+                BoolVar penaliza = model.newBoolVar(
+                        "penalBlanda_" + profesor.codigo() + "_t" + tramoVetado
+                                + "_" + ip.instancia().actividad().codigo()
+                                + "#" + ip.instancia().indice());
+                // penaliza == 1  <=>  la instancia cae en el tramo vetado.
+                model.addLinearExpressionInDomain(ip.tramoIndex(), soloVetado)
+                        .onlyEnforceIf(penaliza);
+                model.addLinearExpressionInDomain(ip.tramoIndex(), noVetado)
+                        .onlyEnforceIf(penaliza.not());
+                terminosObjetivo.add(LinearExpr.term(penaliza, PESO_INDISP_BLANDA));
+            }
+        }
     }
 
     // ----------------------------------------------------------------- variables
