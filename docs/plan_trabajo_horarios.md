@@ -275,8 +275,9 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
-> **Estado (S28):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
-> Bloques 1-6d-c y Bloque 7 (escala 4ºESO) CERRADOS — ver "### Bloques de Fase 5"
+> **Estado (S29):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
+> Bloques 1-6d-c, Bloque 7 (escala 4ºESO ordinario) y Bloque 8 (escala 4ºESO
+> completo, +2 PDC) CERRADOS — ver "### Bloques de Fase 5"
 > y los registros de Sesiones 19-28. Ninguno de los criterios de verificación de
 > abajo está cerrado del todo
 > (el criterio 4 está PARCIAL desde S25). Las razones difieren según el criterio:
@@ -482,29 +483,33 @@ nuevo a partir del anterior, modificando solo los cambios.
 ## Registro de progreso
 
 Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1-6d-c cerrados)
+  Bloques 1-6d-c, 7 y 8 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 27 — Fase 5, Bloque 6d-c cerrado
-  (sesiones consecutivas máximas del profesorado como término del objetivo). El
-  solver penaliza, vía ventanas deslizantes de `MAX_CONSECUTIVAS+1` posiciones
-  contiguas en `ordenEnDia`, cada racha de un profesor que excede N sesiones
-  seguidas en un día (`objetivoConsecutivasProfesor` en `construirConObjetivo()`),
-  tercer término del objetivo tras ventanas (6a) e indisponibilidad blanda (6c).
-  Recomputo gemelo `contarPenalizacionConsecutivasProfesor` en el verificador
-  (cuenta rachas maximales, no ventanas deslizantes; equivalencia validada por
-  enumeración exhaustiva en diseño). Dos turnos: discriminación (óptimo 0 evitable)
-  y oro fuerte (óptimo determinista 1 > 0, minimización con alternativa de coste 2
-  rechazada). Ambos fixtures de linaje discriminación, validados por enumeración,
-  con ventanas NO contaminantes (=0 en óptimo y alternativa; los días del oro
-  fuerte se saturan para que partir la racha cueste más que encadenar). NO toca I/O.
-  N=3 y peso `PESO_CONSECUTIVAS=1` hardcodeados (deuda D21 ampliada: tres pesos +
-  el parámetro N + el `n=3` duplicado en el verificador). D17 NO reactivada (el
-  término no mira primero/ultimo/span; separable como la blanda de 6c).
-  No-regresión de ventanas confirmada por ejecución. Suite 46 verde, BUILD SUCCESS.
-  Índice regenerado (src/main cambió). Criterio 3 de Fase 5 AVANZADO (tercer término
-  blando), no cerrado (faltan distribución-a-blanda, primeras-últimas horas +
-  escala); criterio 4 sin cambio (PARCIAL).
+Última sesión registrada: Sesión 29 — Fase 5, Bloque 8 cerrado (escala 4ºESO
+  COMPLETO: 4 ordinarios + 2 PDC en un único fixture). Se incorporan los grupos de
+  diversificación 4APDC/4DPDC (tipo DIVERSIFICACION_PDC, grupoPadre 4A/4D) al linaje
+  de escala AISLADO de 4º (ahora "4º completo"). Hallazgo de dominio validado celda
+  a celda: los dos PDC cursan los 26 ámbitos JUNTOS en B04 (idénticos tramo a tramo)
+  → ámbito = UNA actividad con subgrupo compartido {4APDC,4DPDC}; modelarlo como dos
+  linajes separados duplica B04 (47h en 30 tramos → INFEASIBLE real, observado en el
+  segundo intento). Regla S23 confirmada de la forma dura: el subgrupo de ámbito
+  lista SÓLO los Di, no los padres (listarlos sumaría 26h a las 30 de 4A/4D vía
+  tocaGrupo). EF y tutoría sí son específicas de cada Di con su grupo de origen
+  (4APDC↔4A EFI1/Gim, 4DPDC↔4D EFI3/Pista) como plaza única conjunta {4X,4XPDC}.
+  Viernes T4 (Rel+ATEDU) ampliado a los 6 grupos. Fixture problema-5-escala-4ESO-Di
+  .json (6 grupos, 30 tramos, 116 subgrupos, 39 actividades) + SolverHorarioEscala
+  4EsoDiTest, generado programáticamente y validado contra el schema real (integri-
+  dad, unicidad de códigos, I2, I7, XOR aula, aulas fijas disjuntas, cuadre 30/30,
+  carga por aula/profesor ≤30). FACTIBLE en 0,232 s, 0 duras. Suite 48 verde, BUILD
+  SUCCESS, sin regresión (escala-instituto 0,368 s; 4º ordinario 0,098 s). NO cierra
+  criterios de Fase 5 (4º completo no agrava D4 respecto a 4º ordinario: el PDC hace
+  EF reintegrado en su grupo, sin presión nueva sobre Gim/Pista; D4 sigue sin probar-
+  se hasta fusionar niveles; criterios 1-2 exigen el instituto completo). Criterio 3
+  sin cambio. Aprendizaje de método: el cuadre aritmético 30/30 es condición
+  necesaria, NO suficiente; dos INFEASIBLE (código duplicado y duplicación de B04)
+  se cazan con validación de unicidad y de carga por recurso, ahora en la batería
+  pre-entrega. src/main NO tocado → índice NO regenerado.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -696,13 +701,31 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       acople S3), a confirmar con el centro. DT/CeH/AFAVS sí reusan subgrupo entre
       M5 y J3 (misma partición demostrada). TUT4 como actividad ordinaria (el DTO
       no transporta tutor obligatorio; S8 no ejercitada).
-- [ ] (pendientes de definir) 4ºESO PDC (4ºADi/4ºDDi; leer el volcado de 4º y
-      verificar si es uno o dos grupos Di, y si el ordinario es separable del Di
-      como en 3º) — Turno 2 del trabajo de 4º; FPB (bloques 2-3 tramos, D12;
-      resolver antes el hueco de aulas FPB); Bachillerato a ESCALA (Lectura B ya
-      soportada; falta incorporar grupos de Bach al fixture); fusión de niveles
-      en un único fixture de instituto donde Gim/Pista se comparte entre cursos
-      (D3/D4, donde se espera de verdad el salto de régimen). Orden a decidir.
+- [x] Bloque 8 — Escala 4ºESO COMPLETO: ordinario (4A–4D) + 2 PDC (4APDC, 4DPDC)
+      en un único fixture (S29). Cierra 4º como linaje. Fixture problema-5-escala-
+      4ESO-Di.json (6 grupos, 30 tramos, 116 subgrupos, 39 actividades) +
+      SolverHorarioEscala4EsoDiTest. Mismo linaje AISLADO de 4º (no entra en la
+      curva de escala-instituto). DOS grupos Di (resuelto el cabo abierto: son dos,
+      no uno) NO separables del ordinario: comparten EF, tutoría y el agrupamiento
+      del V4. Modelado validado celda a celda: los 26 ámbitos son IDÉNTICOS en
+      ambos PDC → ámbito = UNA actividad con subgrupo compartido {4APDC,4DPDC}
+      (mono-Di, sin los padres: regla S23). EF/tutoría específicas de cada Di con
+      su grupo de origen, plaza única conjunta {4X,4XPDC}. EXPRE del Di con
+      aulasCandidatas [C01,TALL1]. FACTIBLE en 0,232 s, 0 duras (suite 48 verde).
+      Tipo 5 validado a escala con dos grupos Di. NO cierra criterios de Fase 5:
+      4º completo no agrava D4 (el PDC no añade presión sobre Gim/Pista; D4 sigue
+      esperando a la fusión de niveles). Escala pura: ningún cambio de dominio ni
+      de src/main. Dos INFEASIBLE durante la construcción (código de subgrupo
+      duplicado por EXPRE multi-aula; duplicación de B04 por tratar los ámbitos
+      como linajes separados) cazados y corregidos antes del cierre — aprendizaje:
+      cuadre 30/30 ≠ factibilidad; validar también unicidad y carga por recurso.
+- [ ] (pendientes de definir) FPB (bloques 2-3 tramos, D12; resolver antes el
+      hueco de aulas FPB); Bachillerato a ESCALA (Lectura B ya soportada; falta
+      incorporar grupos de Bach al fixture); fusión de niveles en un único fixture
+      de instituto donde Gim/Pista se comparte entre cursos (D3/D4, donde se espera
+      de verdad el salto de régimen). Orden a decidir. NOTA: 4ºESO PDC (Turno 2)
+      cerrado en S29 (Bloque 8); resultó ser DOS grupos Di no separables del
+      ordinario.
 
 ### Fases completadas
 
@@ -2322,6 +2345,77 @@ src/main NO tocado (escala pura; el log confirma "Nothing to compile") →
 referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md NO tocado (no
 añade entidad ni invariante; la deuda de las 6h vive en este plan). D3/D4 sin tocar
 (siguen esperando a la fusión de niveles).
+
+### Sesión 29 — Fase 5, Bloque 8: escala 4ºESO completo (4A–4D + 2 PDC).
+
+Turno 2 del trabajo de 4º: se cierra 4º como linaje incorporando los dos grupos de
+diversificación al fixture aislado de 4º. Decisión de alcance tomada con el usuario:
+4º COMPLETO en un único fixture (ordinario + PDC), no PDC aislado — el PDC aislado
+mediría factibilidad falsa porque comparte EF/tutoría/V4 con el ordinario.
+
+Trabajo previo de dominio (leyendo los seis volcados fieles grupo-4-ESO-{A,B,C,D,
+A-PDC,D-PDC}.json y cruzándolos por código antes de modelar):
+- Cabo abierto resuelto: son DOS grupos Di (4APDC pág.15, 4DPDC pág.19), adscritos a
+  4A y 4D. NO separables del ordinario.
+- Hallazgo central por enumeración: los 26 ámbitos de los dos PDC son IDÉNTICOS
+  tramo a tramo (mismo día/asignatura/profesor/aula, todos en B04). Los Di de 4A y
+  4D cursan el ámbito JUNTOS, igual que el 3PDC de S23 reunía a los Di de 3A/3B/3C
+  en A8. → ámbito = UNA actividad con subgrupo compartido {4APDC,4DPDC}.
+- EF y tutoría sí son específicas de cada Di con su grupo de origen (verificado como
+  plaza física compartida: mismo profesor/aula/tramo en la ficha del Di y la del
+  ordinario): 4APDC↔4A (EFI1/Gim), 4DPDC↔4D (EFI3/Pista). Plaza única conjunta
+  {4X,4XPDC} (decisión A del usuario). V4 (Rel+ATEDU) ampliado a los 6 grupos, el Di
+  repartido en las 5 bandas como los ordinarios (decisión B; deuda de población).
+
+Regla S23 aplicada y confirmada de la forma dura: el subgrupo de ámbito lista SÓLO
+los Di, no los padres. El segundo INFEASIBLE del bloque vino justo de violar el
+espíritu de esto por otra vía (duplicar B04), no de listar los padres; pero el
+principio es el mismo: no inflar las horas que tocaGrupo imputa.
+
+Construcción y verificación: fixture generado programáticamente desde los volcados,
+ampliando el de S28 (no reconstruido). Validado contra el schema real y las
+invariantes del mapper: integridad referencial, UNICIDAD de códigos (subgrupo,
+actividad, plaza, grupo, asignatura, profesor, aula), I2, I7, XOR de aula
+(Plaza.java), aulas fijas disjuntas por actividad, cuadre 30/30 por los 6 grupos
+vía tocaGrupo, y CARGA por aula fija y por profesor ≤30 (validación nueva). El
+loader NO se tocó (genérico). Test calca SolverHorarioEscala4EsoTest; sanity check
+propio (6 grupos, 30 tramos, 116 subgrupos, 39 actividades).
+
+Resultado: 4º completo FACTIBLE en 0,232 s, 0 violaciones duras. Suite 48 verde
+(47 previos + el nuevo), BUILD SUCCESS, sin regresión (escala-instituto 0,368 s;
+4º ordinario 0,098 s).
+
+Dos INFEASIBLE durante la construcción, ambos por error de modelado (no del
+dataset), ambos diagnosticados y corregidos antes del cierre:
+  1. Carga rechazada: código de subgrupo duplicado (4APDC-EXPRE). Causa: agrupar
+     plazas por (asignatura,profesor,aula) fragmenta EXPRE, que rota entre C01 y
+     TALL1 según el día. Corrección: agrupar por (asignatura,profesor) y usar
+     aulasCandidatas (patrón de S28). Es el aprendizaje de S28 que no se aplicó.
+  2. Solver INFEASIBLE: B04 demandaba 47h en 30 tramos. Causa: ámbitos modelados
+     como dos linajes separados (uno por PDC), duplicando el aula. Corrección:
+     ámbito compartido {4APDC,4DPDC} (el cruce ya lo indicaba desde el principio).
+
+Aprendizaje de método (registrado como deuda de proceso): el cuadre aritmético
+30/30 es condición NECESARIA pero NO suficiente de factibilidad; no detecta
+sobrecarga de aula/profesor. La batería pre-entrega de fixtures incorpora ahora:
+unicidad de códigos, carga por recurso (aula fija y profesor) ≤30, y verificación
+de que las plazas compartidas no se dupliquen.
+
+NO cierra criterios de Fase 5: 4º completo NO agrava D4 respecto a 4º ordinario (el
+PDC hace EF reintegrado en su grupo, sin presión nueva sobre Gim/Pista). D4 sigue
+sin probarse hasta la fusión de niveles. Criterios 1-2 exigen el instituto completo.
+Criterio 3 sin cambio. Lectura honesta: cierra el linaje de 4º y valida el Tipo 5 a
+escala con dos Di, pero no toca la pregunta de fondo del proyecto.
+
+Deuda nueva: invariante de población del Di en el V4 (reparto en las 5 bandas
+calcado del patrón ordinario, sin que el volcado lo demuestre; a confirmar con el
+centro). La deuda DIG/TEC/FOPP de 6h de 4º ordinario (S28) sigue viva, el PDC no la
+toca.
+
+src/main NO tocado (escala pura; "Nothing to compile") → referencia-codigo-solver.md
+NO regenerado. modelo_datos_fase1.md NO tocado (no añade entidad ni invariante; el
+Tipo 5 y la regla S23 ya están en §6.2/§6.5; las deudas nuevas viven en este plan).
+D3/D4 sin tocar (siguen esperando a la fusión de niveles).
 
 ---
 
