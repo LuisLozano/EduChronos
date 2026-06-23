@@ -275,9 +275,10 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
 
-> **Estado (S23):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
-> Bloques 1-6b CERRADOS — ver "### Bloques de Fase 5" y los registros de Sesiones
-> 19-25. Ninguno de los criterios de verificación de abajo está cerrado del todo
+> **Estado (S28):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
+> Bloques 1-6d-c y Bloque 7 (escala 4ºESO) CERRADOS — ver "### Bloques de Fase 5"
+> y los registros de Sesiones 19-28. Ninguno de los criterios de verificación de
+> abajo está cerrado del todo
 > (el criterio 4 está PARCIAL desde S25). Las razones difieren según el criterio:
 >   - Criterios 1 y 2 (tiempo < 10 min, 0 duras): faltan porque exigen el
 >     INSTITUTO COMPLETO (≈28 grupos + Bach + FPB), aún no abordado. Lo medido
@@ -668,12 +669,40 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       BUILD SUCCESS. Índice regenerado. NO cierra criterios de Fase 5 (criterio 3
       AVANZADO con tres términos, faltan distribución-a-blanda + primeras/últimas
       horas + escala).
-- [ ] (pendientes de definir) 4ºESO con PDC nuevo (4ºADi/4ºDDi; verificar si 4º
-      ordinario es separable del Di, como se hizo con 3º); FPB (bloques 2-3
-      tramos, D12; resolver antes el hueco de aulas FPB); Bachillerato a ESCALA
-      (Lectura B ya soportada; falta incorporar grupos de Bach al fixture);
-      EF con Gim/Pista a escala (D3/D4, donde se espera el salto de régimen).
-      Orden a decidir.
+- [x] Bloque 7 — Escala 4ºESO ordinario (4A–4D), sin Di (S28). Fixture PROPIO
+      problema-5-escala-4ESO.json (linaje de escala AISLADO, separado del de
+      escala-instituto: 4º introduce un salto de régimen propio —D4— que se
+      observa sin el ruido de 1º/2º/3º; la fusión al instituto es paso posterior)
+      + SolverHorarioEscala4EsoTest. 4 grupos, 30 tramos, 96 subgrupos, 31
+      actividades (7 bloques transversales NEUTRA + 24 ordinarias DISTRIBUIDA),
+      construidos desde los volcados fieles grupo-4-ESO-{A,B,C,D}.json y
+      verificados por cuadre 30/30 por grupo. Ejercita los TRES patrones de
+      agrupamiento del Hallazgo K simultáneos en un nivel: transversal sobre 4
+      grupos (DT+Ref+CeH+AFAVS en M5/J3; Rel+ATEDU en V4), sobre 3 {A,B,D}
+      (FQ+DIG; Biol+TEC+FOPP), sobre 2 {A,B} (mates partidas MatAp/MatAc); C y D
+      con itinerario propio (C letras LAT/ECO; D mixto) como ordinarias.
+      Optativas de nivel (TEC/DIG/FOPP) como plazas compartidas Tipo 7 (profesor
+      y aula únicos, no clonados; verificado celda a celda); EXPRE desdoblada por
+      taller (DIB1/TALL1 A,B; DIB2/C01 C,D) dentro de la misma actividad. D4 a
+      saturación (AFAVS Gim+Pista para los 4 grupos en M5/J3) y cuello INF1/A12In
+      (DIG 6h en aula única) NO rompen: factible en 0,126 s, 0 duras (suite 47
+      verde). Tercer-cuarto punto del seguimiento de escala, pero linaje SEPARADO
+      del de escala-instituto (no entra en su curva). Escala pura: ningún cambio
+      de dominio ni de src/main. NO cierra criterios de Fase 5 (4º AISLADO no
+      prueba D4 al fusionar niveles; criterios 1-2 exigen el instituto completo).
+      Deuda nueva: DIG/TEC/FOPP de 4º suman 6h entre dos bloques de perfil
+      distinto, lo que no encaja con la optativa única de 3h de la prematrícula;
+      modeladas como población propia por bloque (sin reuso de subgrupo, sin
+      acople S3), a confirmar con el centro. DT/CeH/AFAVS sí reusan subgrupo entre
+      M5 y J3 (misma partición demostrada). TUT4 como actividad ordinaria (el DTO
+      no transporta tutor obligatorio; S8 no ejercitada).
+- [ ] (pendientes de definir) 4ºESO PDC (4ºADi/4ºDDi; leer el volcado de 4º y
+      verificar si es uno o dos grupos Di, y si el ordinario es separable del Di
+      como en 3º) — Turno 2 del trabajo de 4º; FPB (bloques 2-3 tramos, D12;
+      resolver antes el hueco de aulas FPB); Bachillerato a ESCALA (Lectura B ya
+      soportada; falta incorporar grupos de Bach al fixture); fusión de niveles
+      en un único fixture de instituto donde Gim/Pista se comparte entre cursos
+      (D3/D4, donde se espera de verdad el salto de régimen). Orden a decidir.
 
 ### Fases completadas
 
@@ -2229,6 +2258,70 @@ interna del solver).
 
 src/main SÍ tocado (ModeloCpSat, VerificadorSolucion) → referencia-codigo-solver.md
 regenerado al cierre.
+
+### Sesión 28 — Fase 5, Bloque 7: escala 4ºESO ordinario (4A–4D, sin Di).
+
+Primer escalón de escala de 4ºESO. Linaje de escala AISLADO (fixture propio
+problema-5-escala-4ESO.json + SolverHorarioEscala4EsoTest), SEPARADO del de
+escala-instituto: 4º trae el salto de régimen de D4 y se observa sin el ruido de
+1º/2º/3º; la fusión de niveles es paso posterior. Escala pura: ningún cambio de
+dominio ni de src/main.
+
+Trabajo previo de dominio (decidido con el usuario antes de modelar, leyendo los
+volcados fieles de 4º y la prematrícula 2025/26):
+- En 4º la optatividad es el ESQUELETO del horario, no un añadido: MatAp/MatAc son
+  las dos vías troncales excluyentes (Mates A/B de la prematrícula), no optativas.
+  El troceo "ordinario sin optatividad" se desechó (irreal); se modeló 4º ordinario
+  COMPLETO con su estructura de plazas compartidas, sin Di (Turno 1).
+- Granularidad por EVIDENCIA (Hallazgo K), enumerando tramo a tramo qué grupos
+  coinciden: 3 bloques transversales sobre los 4 grupos (DT+RefMt+CeH+AFAVS en M5;
+  DT+RefLe+CeH+AFAVS en J3; Rel+ATEDU en V4), 2 sobre {A,B,D} (FQ+DIG;
+  Biol+TEC+FOPP), 1 sobre {A,B} (mates partidas), 1 sobre los 4 con EXPRE
+  desdoblada. C es grupo aparte (itinerario de letras: LAT, ECO), D híbrido (mixto).
+- Optativas de nivel = plazas compartidas Tipo 7 (lectura confirmada): un profesor
+  y un aula únicos por plaza, NO clonados; verificado físicamente celda a celda que
+  ningún (profesor, aula) compartido aparece dos veces en el mismo tramo. EXPRE se
+  desdobla por capacidad de taller dentro de la misma actividad-bloque.
+- Se modela el HORARIO REAL (volcados), no la prematrícula: el reparto de alumnos a
+  optativas es decisión humana previa al solver; la app coloca plazas predefinidas,
+  no decide la oferta. La prematrícula entró como documentación de dominio.
+- EFis canónico sin tilde (el volcado de 4ºD traía EFís; normalizado).
+- Nombrado de subgrupos: partición por profesor dentro de una actividad cuando hay
+  varias plazas de la misma asignatura (RefMt×2, AFAVS×2, MatAp×2, ATEDU×4 = pobla-
+  ciones distintas); reuso de subgrupo ENTRE actividades distintas solo en
+  DT/CeH/AFAVS (misma partición de alumnos demostrada por el volcado en M5/J3, que
+  vía S3 fuerza que esos dos bloques no coincidan); DIG/TEC/FOPP con población
+  propia por bloque (sin reuso) por la deuda de las 6h (ver abajo).
+
+Construcción y verificación: fixture generado programáticamente desde los volcados
+(no a mano), validado contra el schema real del mapper (integridad referencial,
+I2, I7, XOR de aula, aulas fijas disjuntas por actividad, patronTemporal,
+cuadre 30/30 por grupo). El loader NO se tocó (es genérico; carga cualquier fixture
+por getResourceAsStream). El test calca SolverHorarioEscalaInstitutoTest (misma red
+de 600 s, semilla 42, factibilidad pura, VerificadorSolucion como red independiente);
+sanity check propio (4 grupos, 30 tramos, 96 subgrupos, 31 actividades).
+
+Resultado: 4º ordinario FACTIBLE en 0,126 s, 0 violaciones duras. Suite 47 verde
+(46 previos + el nuevo), BUILD SUCCESS, sin regresiones (escala-instituto sigue en
+0,388 s). D4 a saturación (AFAVS Gim+Pista para los 4 grupos en M5/J3) y el cuello
+INF1/A12In (DIG 6h en aula única) NO rompen en 4º aislado. Lectura honesta: esto
+cierra UN escalón, no la pregunta de fondo —D4 al FUSIONAR niveles (Gim/Pista
+compartido entre cursos) sigue sin probarse—.
+
+NO cierra criterios de Fase 5: 4º aislado no prueba D4 fusionado; criterios 1-2
+exigen el instituto completo. Criterio 3 sin cambios (no es término del objetivo).
+
+Deuda nueva (DIG/TEC/FOPP de 4º): suman 6h entre dos bloques de perfil distinto, lo
+que no encaja con la optativa única de 3h de la prematrícula. Por precaución se
+modelan como población propia por bloque (sin reuso de subgrupo, sin acople S3):
+¿son la misma optativa de 6h o franjas distintas? Pendiente del centro. Forma parte
+de la invariante de población viva. TUT4 modelada como actividad ordinaria: el DTO
+no transporta tutor obligatorio (S8 no ejercitada en 4º).
+
+src/main NO tocado (escala pura; el log confirma "Nothing to compile") →
+referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md NO tocado (no
+añade entidad ni invariante; la deuda de las 6h vive en este plan). D3/D4 sin tocar
+(siguen esperando a la fusión de niveles).
 
 ---
 
