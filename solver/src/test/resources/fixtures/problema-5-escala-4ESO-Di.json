@@ -1,0 +1,2342 @@
+{
+  "tramos": [
+    {
+      "codigo": "D1-1",
+      "diaSemana": 1,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D1-2",
+      "diaSemana": 1,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D1-3",
+      "diaSemana": 1,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D1-4",
+      "diaSemana": 1,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D1-5",
+      "diaSemana": 1,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D1-6",
+      "diaSemana": 1,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D2-1",
+      "diaSemana": 2,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D2-2",
+      "diaSemana": 2,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D2-3",
+      "diaSemana": 2,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D2-4",
+      "diaSemana": 2,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D2-5",
+      "diaSemana": 2,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D2-6",
+      "diaSemana": 2,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D3-1",
+      "diaSemana": 3,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D3-2",
+      "diaSemana": 3,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D3-3",
+      "diaSemana": 3,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D3-4",
+      "diaSemana": 3,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D3-5",
+      "diaSemana": 3,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D3-6",
+      "diaSemana": 3,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D4-1",
+      "diaSemana": 4,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D4-2",
+      "diaSemana": 4,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D4-3",
+      "diaSemana": 4,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D4-4",
+      "diaSemana": 4,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D4-5",
+      "diaSemana": 4,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D4-6",
+      "diaSemana": 4,
+      "ordenEnDia": 6
+    },
+    {
+      "codigo": "D5-1",
+      "diaSemana": 5,
+      "ordenEnDia": 1
+    },
+    {
+      "codigo": "D5-2",
+      "diaSemana": 5,
+      "ordenEnDia": 2
+    },
+    {
+      "codigo": "D5-3",
+      "diaSemana": 5,
+      "ordenEnDia": 3
+    },
+    {
+      "codigo": "D5-4",
+      "diaSemana": 5,
+      "ordenEnDia": 4
+    },
+    {
+      "codigo": "D5-5",
+      "diaSemana": 5,
+      "ordenEnDia": 5
+    },
+    {
+      "codigo": "D5-6",
+      "diaSemana": 5,
+      "ordenEnDia": 6
+    }
+  ],
+  "aulas": [
+    {
+      "codigo": "A10",
+      "nombre": "Aula A10"
+    },
+    {
+      "codigo": "A11",
+      "nombre": "Aula A11"
+    },
+    {
+      "codigo": "A12In",
+      "nombre": "Aula de Informática"
+    },
+    {
+      "codigo": "A14",
+      "nombre": "Aula A14"
+    },
+    {
+      "codigo": "A15",
+      "nombre": "Aula A15"
+    },
+    {
+      "codigo": "A2",
+      "nombre": "Aula A2"
+    },
+    {
+      "codigo": "A5",
+      "nombre": "Aula A5"
+    },
+    {
+      "codigo": "A6",
+      "nombre": "Laboratorio de Ciencias"
+    },
+    {
+      "codigo": "A9",
+      "nombre": "Aula A9"
+    },
+    {
+      "codigo": "B04",
+      "nombre": "Aula B04"
+    },
+    {
+      "codigo": "B07",
+      "nombre": "Taller de Tecnología"
+    },
+    {
+      "codigo": "C00",
+      "nombre": "Aula C00"
+    },
+    {
+      "codigo": "C01",
+      "nombre": "Taller de Plástica C01"
+    },
+    {
+      "codigo": "Gim",
+      "nombre": "Gimnasio"
+    },
+    {
+      "codigo": "Pista",
+      "nombre": "Pista Polideportiva"
+    },
+    {
+      "codigo": "TALL1",
+      "nombre": "Taller de Plástica"
+    }
+  ],
+  "asignaturas": [
+    {
+      "codigo": "AFAVS",
+      "nombre": "Actividad Física y Hábitos de Vida Saludable"
+    },
+    {
+      "codigo": "ATEDU",
+      "nombre": "Atención Educativa"
+    },
+    {
+      "codigo": "Biol",
+      "nombre": "Biología y Geología"
+    },
+    {
+      "codigo": "CeH",
+      "nombre": "Cine e Historia"
+    },
+    {
+      "codigo": "DIG",
+      "nombre": "Digitalización"
+    },
+    {
+      "codigo": "DT",
+      "nombre": "Dibujo Técnico"
+    },
+    {
+      "codigo": "ECO",
+      "nombre": "Economía"
+    },
+    {
+      "codigo": "EFis",
+      "nombre": "Educación Física"
+    },
+    {
+      "codigo": "EXPRE",
+      "nombre": "Expresión Artística"
+    },
+    {
+      "codigo": "FOPP",
+      "nombre": "Formación y Orientación Personal y Profesional"
+    },
+    {
+      "codigo": "FQ",
+      "nombre": "Física y Química"
+    },
+    {
+      "codigo": "GeH",
+      "nombre": "Geografía e Historia"
+    },
+    {
+      "codigo": "Ing",
+      "nombre": "Inglés"
+    },
+    {
+      "codigo": "LAT",
+      "nombre": "Latín"
+    },
+    {
+      "codigo": "LCL",
+      "nombre": "Lengua Castellana y Literatura"
+    },
+    {
+      "codigo": "MatAc",
+      "nombre": "Matemáticas Académicas"
+    },
+    {
+      "codigo": "MatAp",
+      "nombre": "Matemáticas Aplicadas"
+    },
+    {
+      "codigo": "RefLe",
+      "nombre": "Refuerzo de Lengua"
+    },
+    {
+      "codigo": "RefMt",
+      "nombre": "Refuerzo de Matemáticas"
+    },
+    {
+      "codigo": "Rel",
+      "nombre": "Religión"
+    },
+    {
+      "codigo": "TEC",
+      "nombre": "Tecnología"
+    },
+    {
+      "codigo": "TUT4",
+      "nombre": "Tutoría"
+    },
+    {
+      "codigo": "AmbCT",
+      "nombre": "AmbCT"
+    },
+    {
+      "codigo": "AmbSL",
+      "nombre": "AmbSL"
+    },
+    {
+      "codigo": "TPMAR",
+      "nombre": "TPMAR"
+    }
+  ],
+  "profesores": [
+    {
+      "codigo": "BYG3",
+      "nombre": "BYG3"
+    },
+    {
+      "codigo": "DIB1",
+      "nombre": "DIB1"
+    },
+    {
+      "codigo": "DIB2",
+      "nombre": "DIB2"
+    },
+    {
+      "codigo": "ECO",
+      "nombre": "ECO"
+    },
+    {
+      "codigo": "EFI1",
+      "nombre": "EFI1"
+    },
+    {
+      "codigo": "EFI3",
+      "nombre": "EFI3"
+    },
+    {
+      "codigo": "FIS3",
+      "nombre": "FIS3"
+    },
+    {
+      "codigo": "FIS4",
+      "nombre": "FIS4"
+    },
+    {
+      "codigo": "GH1",
+      "nombre": "GH1"
+    },
+    {
+      "codigo": "GH2",
+      "nombre": "GH2"
+    },
+    {
+      "codigo": "GH4",
+      "nombre": "GH4"
+    },
+    {
+      "codigo": "INF1",
+      "nombre": "INF1"
+    },
+    {
+      "codigo": "ING2",
+      "nombre": "ING2"
+    },
+    {
+      "codigo": "ING3",
+      "nombre": "ING3"
+    },
+    {
+      "codigo": "ING6",
+      "nombre": "ING6"
+    },
+    {
+      "codigo": "LEN1",
+      "nombre": "LEN1"
+    },
+    {
+      "codigo": "LEN4",
+      "nombre": "LEN4"
+    },
+    {
+      "codigo": "LEN6",
+      "nombre": "LEN6"
+    },
+    {
+      "codigo": "LEN7",
+      "nombre": "LEN7"
+    },
+    {
+      "codigo": "MAT1",
+      "nombre": "MAT1"
+    },
+    {
+      "codigo": "MAT2",
+      "nombre": "MAT2"
+    },
+    {
+      "codigo": "MAT4",
+      "nombre": "MAT4"
+    },
+    {
+      "codigo": "MAT6",
+      "nombre": "MAT6"
+    },
+    {
+      "codigo": "REL1",
+      "nombre": "REL1"
+    },
+    {
+      "codigo": "TEC2",
+      "nombre": "TEC2"
+    },
+    {
+      "codigo": "FRA1",
+      "nombre": "FRA1"
+    },
+    {
+      "codigo": "LEN5",
+      "nombre": "LEN5"
+    },
+    {
+      "codigo": "MAT5",
+      "nombre": "MAT5"
+    },
+    {
+      "codigo": "ORI1",
+      "nombre": "ORI1"
+    }
+  ],
+  "grupos": [
+    {
+      "codigo": "4A",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "4B",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "4C",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "4D",
+      "tipo": "ORDINARIO",
+      "grupoPadre": null
+    },
+    {
+      "codigo": "4APDC",
+      "tipo": "DIVERSIFICACION_PDC",
+      "grupoPadre": "4A"
+    },
+    {
+      "codigo": "4DPDC",
+      "tipo": "DIVERSIFICACION_PDC",
+      "grupoPadre": "4D"
+    }
+  ],
+  "subgrupos": [
+    {
+      "codigo": "4A-DT",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-DT",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-DT",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-DT",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-RefMt-MAT1",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-RefMt-MAT1",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-RefMt-MAT1",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-RefMt-MAT1",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-RefMt-MAT6",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-RefMt-MAT6",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-RefMt-MAT6",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-RefMt-MAT6",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-CeH",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-CeH",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-CeH",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-CeH",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-AFAVS-EFI1",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-AFAVS-EFI1",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-AFAVS-EFI1",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-AFAVS-EFI1",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-AFAVS-EFI3",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-AFAVS-EFI3",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-AFAVS-EFI3",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-AFAVS-EFI3",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-RefLe-LEN1",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-RefLe-LEN1",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-RefLe-LEN1",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-RefLe-LEN1",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-RefLe-LEN7",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-RefLe-LEN7",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-RefLe-LEN7",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-RefLe-LEN7",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-ATEDU-EFI1",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-ATEDU-EFI1",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-ATEDU-EFI1",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-ATEDU-EFI1",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-ATEDU-EFI3",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-ATEDU-EFI3",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-ATEDU-EFI3",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-ATEDU-EFI3",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-ATEDU-GH4",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-ATEDU-GH4",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-ATEDU-GH4",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-ATEDU-GH4",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-ATEDU-ING3",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-ATEDU-ING3",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-ATEDU-ING3",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-ATEDU-ING3",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-FQ-FIS3",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-FQ-FIS3",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-FQ-FIS3",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-FQ-FIS4",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-FQ-FIS4",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-FQ-FIS4",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-DIG-Bloque-FQ_DIG",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-DIG-Bloque-FQ_DIG",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-DIG-Bloque-FQ_DIG",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-Biol-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-Biol-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-Biol-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-FOPP-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-FOPP-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-FOPP-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-TEC-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-TEC-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4D-TEC-Bloque-Biol_TEC_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-MatAp-MAT6",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-MatAp-MAT6",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4A-MatAp-MAT2",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-MatAp-MAT2",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4A-MatAc-Bloque-Mat",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-MatAc-Bloque-Mat",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4A-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-EXPRE-DIB1",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-EXPRE-DIB1",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-EXPRE-DIB2",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-EXPRE-DIB2",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "4A-Completo",
+      "grupos": [
+        "4A"
+      ]
+    },
+    {
+      "codigo": "4B-Completo",
+      "grupos": [
+        "4B"
+      ]
+    },
+    {
+      "codigo": "4C-Completo",
+      "grupos": [
+        "4C"
+      ]
+    },
+    {
+      "codigo": "4D-Completo",
+      "grupos": [
+        "4D"
+      ]
+    },
+    {
+      "codigo": "PDC4-AmbCT",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-AmbSL",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-EXPRE",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-FOPP",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-Ing",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-RefLe",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-RefMt",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "PDC4-TPMAR",
+      "grupos": [
+        "4APDC",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4A-4APDC-Conjunto",
+      "grupos": [
+        "4A",
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4D-4DPDC-Conjunto",
+      "grupos": [
+        "4D",
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4APDC-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4DPDC-Rel-Bloque-Rel_ATEDU",
+      "grupos": [
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4APDC-ATEDU-EFI1",
+      "grupos": [
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4DPDC-ATEDU-EFI1",
+      "grupos": [
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4APDC-ATEDU-EFI3",
+      "grupos": [
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4DPDC-ATEDU-EFI3",
+      "grupos": [
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4APDC-ATEDU-GH4",
+      "grupos": [
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4DPDC-ATEDU-GH4",
+      "grupos": [
+        "4DPDC"
+      ]
+    },
+    {
+      "codigo": "4APDC-ATEDU-ING3",
+      "grupos": [
+        "4APDC"
+      ]
+    },
+    {
+      "codigo": "4DPDC-ATEDU-ING3",
+      "grupos": [
+        "4DPDC"
+      ]
+    }
+  ],
+  "actividades": [
+    {
+      "codigo": "Bloque-DT_RefMt_CeH_AFAVS",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__DT-DIB1",
+          "asignatura": "DT",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "4A-DT",
+            "4B-DT",
+            "4C-DT",
+            "4D-DT"
+          ],
+          "aulaFija": "TALL1"
+        },
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__RefMt-MAT1",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT1"
+          ],
+          "subgrupos": [
+            "4A-RefMt-MAT1",
+            "4B-RefMt-MAT1",
+            "4C-RefMt-MAT1",
+            "4D-RefMt-MAT1"
+          ],
+          "aulaFija": "A15"
+        },
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__RefMt-MAT6",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "4A-RefMt-MAT6",
+            "4B-RefMt-MAT6",
+            "4C-RefMt-MAT6",
+            "4D-RefMt-MAT6"
+          ],
+          "aulaFija": "A10"
+        },
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__CeH-GH1",
+          "asignatura": "CeH",
+          "profesores": [
+            "GH1"
+          ],
+          "subgrupos": [
+            "4A-CeH",
+            "4B-CeH",
+            "4C-CeH",
+            "4D-CeH"
+          ],
+          "aulaFija": "A2"
+        },
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__AFAVS-EFI1",
+          "asignatura": "AFAVS",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "4A-AFAVS-EFI1",
+            "4B-AFAVS-EFI1",
+            "4C-AFAVS-EFI1",
+            "4D-AFAVS-EFI1"
+          ],
+          "aulaFija": "Gim"
+        },
+        {
+          "codigo": "Bloque-DT_RefMt_CeH_AFAVS__AFAVS-EFI3",
+          "asignatura": "AFAVS",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4A-AFAVS-EFI3",
+            "4B-AFAVS-EFI3",
+            "4C-AFAVS-EFI3",
+            "4D-AFAVS-EFI3"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-DT_RefLe_CeH_AFAVS",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__DT-DIB1",
+          "asignatura": "DT",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "4A-DT",
+            "4B-DT",
+            "4C-DT",
+            "4D-DT"
+          ],
+          "aulaFija": "TALL1"
+        },
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__RefLe-LEN1",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN1"
+          ],
+          "subgrupos": [
+            "4A-RefLe-LEN1",
+            "4B-RefLe-LEN1",
+            "4C-RefLe-LEN1",
+            "4D-RefLe-LEN1"
+          ],
+          "aulaFija": "A15"
+        },
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__RefLe-LEN7",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN7"
+          ],
+          "subgrupos": [
+            "4A-RefLe-LEN7",
+            "4B-RefLe-LEN7",
+            "4C-RefLe-LEN7",
+            "4D-RefLe-LEN7"
+          ],
+          "aulaFija": "A10"
+        },
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__CeH-GH1",
+          "asignatura": "CeH",
+          "profesores": [
+            "GH1"
+          ],
+          "subgrupos": [
+            "4A-CeH",
+            "4B-CeH",
+            "4C-CeH",
+            "4D-CeH"
+          ],
+          "aulaFija": "A2"
+        },
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__AFAVS-EFI1",
+          "asignatura": "AFAVS",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "4A-AFAVS-EFI1",
+            "4B-AFAVS-EFI1",
+            "4C-AFAVS-EFI1",
+            "4D-AFAVS-EFI1"
+          ],
+          "aulaFija": "Gim"
+        },
+        {
+          "codigo": "Bloque-DT_RefLe_CeH_AFAVS__AFAVS-EFI3",
+          "asignatura": "AFAVS",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4A-AFAVS-EFI3",
+            "4B-AFAVS-EFI3",
+            "4C-AFAVS-EFI3",
+            "4D-AFAVS-EFI3"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Rel_ATEDU",
+      "asignatura": null,
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-Rel_ATEDU__Rel-REL1",
+          "asignatura": "Rel",
+          "profesores": [
+            "REL1"
+          ],
+          "subgrupos": [
+            "4A-Rel-Bloque-Rel_ATEDU",
+            "4B-Rel-Bloque-Rel_ATEDU",
+            "4C-Rel-Bloque-Rel_ATEDU",
+            "4D-Rel-Bloque-Rel_ATEDU",
+            "4APDC-Rel-Bloque-Rel_ATEDU",
+            "4DPDC-Rel-Bloque-Rel_ATEDU"
+          ],
+          "aulaFija": "A15"
+        },
+        {
+          "codigo": "Bloque-Rel_ATEDU__ATEDU-EFI1",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "4A-ATEDU-EFI1",
+            "4B-ATEDU-EFI1",
+            "4C-ATEDU-EFI1",
+            "4D-ATEDU-EFI1",
+            "4APDC-ATEDU-EFI1",
+            "4DPDC-ATEDU-EFI1"
+          ],
+          "aulaFija": "A2"
+        },
+        {
+          "codigo": "Bloque-Rel_ATEDU__ATEDU-EFI3",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4A-ATEDU-EFI3",
+            "4B-ATEDU-EFI3",
+            "4C-ATEDU-EFI3",
+            "4D-ATEDU-EFI3",
+            "4APDC-ATEDU-EFI3",
+            "4DPDC-ATEDU-EFI3"
+          ],
+          "aulaFija": "A10"
+        },
+        {
+          "codigo": "Bloque-Rel_ATEDU__ATEDU-GH4",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "4A-ATEDU-GH4",
+            "4B-ATEDU-GH4",
+            "4C-ATEDU-GH4",
+            "4D-ATEDU-GH4",
+            "4APDC-ATEDU-GH4",
+            "4DPDC-ATEDU-GH4"
+          ],
+          "aulaFija": "A14"
+        },
+        {
+          "codigo": "Bloque-Rel_ATEDU__ATEDU-ING3",
+          "asignatura": "ATEDU",
+          "profesores": [
+            "ING3"
+          ],
+          "subgrupos": [
+            "4A-ATEDU-ING3",
+            "4B-ATEDU-ING3",
+            "4C-ATEDU-ING3",
+            "4D-ATEDU-ING3",
+            "4APDC-ATEDU-ING3",
+            "4DPDC-ATEDU-ING3"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-FQ_DIG",
+      "asignatura": null,
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-FQ_DIG__FQ-FIS3",
+          "asignatura": "FQ",
+          "profesores": [
+            "FIS3"
+          ],
+          "subgrupos": [
+            "4A-FQ-FIS3",
+            "4B-FQ-FIS3",
+            "4D-FQ-FIS3"
+          ],
+          "aulasCandidatas": [
+            "A6",
+            "A15"
+          ]
+        },
+        {
+          "codigo": "Bloque-FQ_DIG__FQ-FIS4",
+          "asignatura": "FQ",
+          "profesores": [
+            "FIS4"
+          ],
+          "subgrupos": [
+            "4A-FQ-FIS4",
+            "4B-FQ-FIS4",
+            "4D-FQ-FIS4"
+          ],
+          "aulasCandidatas": [
+            "A6",
+            "A15",
+            "A2"
+          ]
+        },
+        {
+          "codigo": "Bloque-FQ_DIG__DIG-INF1",
+          "asignatura": "DIG",
+          "profesores": [
+            "INF1"
+          ],
+          "subgrupos": [
+            "4A-DIG-Bloque-FQ_DIG",
+            "4B-DIG-Bloque-FQ_DIG",
+            "4D-DIG-Bloque-FQ_DIG"
+          ],
+          "aulaFija": "A12In"
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Biol_TEC_FOPP",
+      "asignatura": null,
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-Biol_TEC_FOPP__Biol-BYG3",
+          "asignatura": "Biol",
+          "profesores": [
+            "BYG3"
+          ],
+          "subgrupos": [
+            "4A-Biol-Bloque-Biol_TEC_FOPP",
+            "4B-Biol-Bloque-Biol_TEC_FOPP",
+            "4D-Biol-Bloque-Biol_TEC_FOPP"
+          ],
+          "aulasCandidatas": [
+            "A6",
+            "A15"
+          ]
+        },
+        {
+          "codigo": "Bloque-Biol_TEC_FOPP__FOPP-ECO",
+          "asignatura": "FOPP",
+          "profesores": [
+            "ECO"
+          ],
+          "subgrupos": [
+            "4A-FOPP-Bloque-Biol_TEC_FOPP",
+            "4B-FOPP-Bloque-Biol_TEC_FOPP",
+            "4D-FOPP-Bloque-Biol_TEC_FOPP"
+          ],
+          "aulasCandidatas": [
+            "A15",
+            "A2"
+          ]
+        },
+        {
+          "codigo": "Bloque-Biol_TEC_FOPP__TEC-TEC2",
+          "asignatura": "TEC",
+          "profesores": [
+            "TEC2"
+          ],
+          "subgrupos": [
+            "4A-TEC-Bloque-Biol_TEC_FOPP",
+            "4B-TEC-Bloque-Biol_TEC_FOPP",
+            "4D-TEC-Bloque-Biol_TEC_FOPP"
+          ],
+          "aulasCandidatas": [
+            "B07",
+            "C00"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-Mat",
+      "asignatura": null,
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-Mat__MatAp-MAT6",
+          "asignatura": "MatAp",
+          "profesores": [
+            "MAT6"
+          ],
+          "subgrupos": [
+            "4A-MatAp-MAT6",
+            "4B-MatAp-MAT6"
+          ],
+          "aulaFija": "A15"
+        },
+        {
+          "codigo": "Bloque-Mat__MatAp-MAT2",
+          "asignatura": "MatAp",
+          "profesores": [
+            "MAT2"
+          ],
+          "subgrupos": [
+            "4A-MatAp-MAT2",
+            "4B-MatAp-MAT2"
+          ],
+          "aulaFija": "A2"
+        },
+        {
+          "codigo": "Bloque-Mat__MatAc-MAT4",
+          "asignatura": "MatAc",
+          "profesores": [
+            "MAT4"
+          ],
+          "subgrupos": [
+            "4A-MatAc-Bloque-Mat",
+            "4B-MatAc-Bloque-Mat"
+          ],
+          "aulasCandidatas": [
+            "A11",
+            "A5",
+            "A9"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "Bloque-TEC_EXPRE_DIG_FOPP",
+      "asignatura": null,
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "Bloque-TEC_EXPRE_DIG_FOPP__TEC-TEC2",
+          "asignatura": "TEC",
+          "profesores": [
+            "TEC2"
+          ],
+          "subgrupos": [
+            "4A-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4B-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4C-TEC-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4D-TEC-Bloque-TEC_EXPRE_DIG_FOPP"
+          ],
+          "aulasCandidatas": [
+            "A15",
+            "B07"
+          ]
+        },
+        {
+          "codigo": "Bloque-TEC_EXPRE_DIG_FOPP__DIG-INF1",
+          "asignatura": "DIG",
+          "profesores": [
+            "INF1"
+          ],
+          "subgrupos": [
+            "4A-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4B-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4C-DIG-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4D-DIG-Bloque-TEC_EXPRE_DIG_FOPP"
+          ],
+          "aulaFija": "A12In"
+        },
+        {
+          "codigo": "Bloque-TEC_EXPRE_DIG_FOPP__FOPP-ECO",
+          "asignatura": "FOPP",
+          "profesores": [
+            "ECO"
+          ],
+          "subgrupos": [
+            "4A-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4B-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4C-FOPP-Bloque-TEC_EXPRE_DIG_FOPP",
+            "4D-FOPP-Bloque-TEC_EXPRE_DIG_FOPP"
+          ],
+          "aulasCandidatas": [
+            "A15",
+            "A2"
+          ]
+        },
+        {
+          "codigo": "Bloque-TEC_EXPRE_DIG_FOPP__EXPRE-DIB1",
+          "asignatura": "EXPRE",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "4A-EXPRE-DIB1",
+            "4B-EXPRE-DIB1"
+          ],
+          "aulaFija": "TALL1"
+        },
+        {
+          "codigo": "Bloque-TEC_EXPRE_DIG_FOPP__EXPRE-DIB2",
+          "asignatura": "EXPRE",
+          "profesores": [
+            "DIB2"
+          ],
+          "subgrupos": [
+            "4C-EXPRE-DIB2",
+            "4D-EXPRE-DIB2"
+          ],
+          "aulaFija": "C01"
+        }
+      ]
+    },
+    {
+      "codigo": "EFis-4A",
+      "asignatura": "EFis",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EFis-4A-P",
+          "asignatura": "EFis",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "4A-4APDC-Conjunto"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-4A",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-4A-P",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "4A-Completo"
+          ],
+          "aulaFija": "A15"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-4A",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-4A-P",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING6"
+          ],
+          "subgrupos": [
+            "4A-Completo"
+          ],
+          "aulaFija": "A15"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-4A",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-4A-P",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN4"
+          ],
+          "subgrupos": [
+            "4A-Completo"
+          ],
+          "aulaFija": "A15"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT4-4A",
+      "asignatura": "TUT4",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT4-4A-P",
+          "asignatura": "TUT4",
+          "profesores": [
+            "ING6"
+          ],
+          "subgrupos": [
+            "4A-4APDC-Conjunto"
+          ],
+          "aulaFija": "A15"
+        }
+      ]
+    },
+    {
+      "codigo": "EFis-4B",
+      "asignatura": "EFis",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EFis-4B-P",
+          "asignatura": "EFis",
+          "profesores": [
+            "EFI1"
+          ],
+          "subgrupos": [
+            "4B-Completo"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-4B",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-4B-P",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "4B-Completo"
+          ],
+          "aulaFija": "A2"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-4B",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-4B-P",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING6"
+          ],
+          "subgrupos": [
+            "4B-Completo"
+          ],
+          "aulaFija": "A2"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-4B",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-4B-P",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN4"
+          ],
+          "subgrupos": [
+            "4B-Completo"
+          ],
+          "aulaFija": "A2"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT4-4B",
+      "asignatura": "TUT4",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT4-4B-P",
+          "asignatura": "TUT4",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "4B-Completo"
+          ],
+          "aulaFija": "A2"
+        }
+      ]
+    },
+    {
+      "codigo": "ECO-4C",
+      "asignatura": "ECO",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "ECO-4C-P",
+          "asignatura": "ECO",
+          "profesores": [
+            "ECO"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "EFis-4C",
+      "asignatura": "EFis",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EFis-4C-P",
+          "asignatura": "EFis",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "Gim"
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-4C",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-4C-P",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH4"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-4C",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-4C-P",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING2"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "LAT-4C",
+      "asignatura": "LAT",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LAT-4C-P",
+          "asignatura": "LAT",
+          "profesores": [
+            "LEN4"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-4C",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-4C-P",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN6"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "MatAp-4C",
+      "asignatura": "MatAp",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "MatAp-4C-P",
+          "asignatura": "MatAp",
+          "profesores": [
+            "MAT1"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT4-4C",
+      "asignatura": "TUT4",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT4-4C-P",
+          "asignatura": "TUT4",
+          "profesores": [
+            "LEN6"
+          ],
+          "subgrupos": [
+            "4C-Completo"
+          ],
+          "aulaFija": "A10"
+        }
+      ]
+    },
+    {
+      "codigo": "EFis-4D",
+      "asignatura": "EFis",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EFis-4D-P",
+          "asignatura": "EFis",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4D-4DPDC-Conjunto"
+          ],
+          "aulaFija": "Pista"
+        }
+      ]
+    },
+    {
+      "codigo": "GeH-4D",
+      "asignatura": "GeH",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "GeH-4D-P",
+          "asignatura": "GeH",
+          "profesores": [
+            "GH2"
+          ],
+          "subgrupos": [
+            "4D-Completo"
+          ],
+          "aulaFija": "C00"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-4D",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-4D-P",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING2"
+          ],
+          "subgrupos": [
+            "4D-Completo"
+          ],
+          "aulaFija": "C00"
+        }
+      ]
+    },
+    {
+      "codigo": "LCL-4D",
+      "asignatura": "LCL",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "LCL-4D-P",
+          "asignatura": "LCL",
+          "profesores": [
+            "LEN6"
+          ],
+          "subgrupos": [
+            "4D-Completo"
+          ],
+          "aulaFija": "C00"
+        }
+      ]
+    },
+    {
+      "codigo": "MatAc-4D",
+      "asignatura": "MatAc",
+      "repeticionesPorSemana": 4,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "MatAc-4D-P",
+          "asignatura": "MatAc",
+          "profesores": [
+            "MAT4"
+          ],
+          "subgrupos": [
+            "4D-Completo"
+          ],
+          "aulaFija": "C00"
+        }
+      ]
+    },
+    {
+      "codigo": "TUT4-4D",
+      "asignatura": "TUT4",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TUT4-4D-P",
+          "asignatura": "TUT4",
+          "profesores": [
+            "EFI3"
+          ],
+          "subgrupos": [
+            "4D-4DPDC-Conjunto"
+          ],
+          "aulaFija": "C00"
+        }
+      ]
+    },
+    {
+      "codigo": "AmbCT-PDC4",
+      "asignatura": "AmbCT",
+      "repeticionesPorSemana": 8,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "AmbCT-PDC4-P",
+          "asignatura": "AmbCT",
+          "profesores": [
+            "FIS4"
+          ],
+          "subgrupos": [
+            "PDC4-AmbCT"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "AmbSL-PDC4",
+      "asignatura": "AmbSL",
+      "repeticionesPorSemana": 7,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "AmbSL-PDC4-P",
+          "asignatura": "AmbSL",
+          "profesores": [
+            "LEN5"
+          ],
+          "subgrupos": [
+            "PDC4-AmbSL"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "EXPRE-PDC4",
+      "asignatura": "EXPRE",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "EXPRE-PDC4-P",
+          "asignatura": "EXPRE",
+          "profesores": [
+            "DIB1"
+          ],
+          "subgrupos": [
+            "PDC4-EXPRE"
+          ],
+          "aulasCandidatas": [
+            "C01",
+            "TALL1"
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "FOPP-PDC4",
+      "asignatura": "FOPP",
+      "repeticionesPorSemana": 3,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "FOPP-PDC4-P",
+          "asignatura": "FOPP",
+          "profesores": [
+            "FRA1"
+          ],
+          "subgrupos": [
+            "PDC4-FOPP"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "Ing-PDC4",
+      "asignatura": "Ing",
+      "repeticionesPorSemana": 2,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "Ing-PDC4-P",
+          "asignatura": "Ing",
+          "profesores": [
+            "ING2"
+          ],
+          "subgrupos": [
+            "PDC4-Ing"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "RefLe-PDC4",
+      "asignatura": "RefLe",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "RefLe-PDC4-P",
+          "asignatura": "RefLe",
+          "profesores": [
+            "LEN5"
+          ],
+          "subgrupos": [
+            "PDC4-RefLe"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "RefMt-PDC4",
+      "asignatura": "RefMt",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "RefMt-PDC4-P",
+          "asignatura": "RefMt",
+          "profesores": [
+            "MAT5"
+          ],
+          "subgrupos": [
+            "PDC4-RefMt"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    },
+    {
+      "codigo": "TPMAR-PDC4",
+      "asignatura": "TPMAR",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 1,
+      "patronTemporal": "DISTRIBUIDA",
+      "plazas": [
+        {
+          "codigo": "TPMAR-PDC4-P",
+          "asignatura": "TPMAR",
+          "profesores": [
+            "ORI1"
+          ],
+          "subgrupos": [
+            "PDC4-TPMAR"
+          ],
+          "aulaFija": "B04"
+        }
+      ]
+    }
+  ]
+}
