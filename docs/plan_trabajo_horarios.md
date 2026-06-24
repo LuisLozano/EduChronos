@@ -486,30 +486,31 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7 y 8 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 29 — Fase 5, Bloque 8 cerrado (escala 4ºESO
-  COMPLETO: 4 ordinarios + 2 PDC en un único fixture). Se incorporan los grupos de
-  diversificación 4APDC/4DPDC (tipo DIVERSIFICACION_PDC, grupoPadre 4A/4D) al linaje
-  de escala AISLADO de 4º (ahora "4º completo"). Hallazgo de dominio validado celda
-  a celda: los dos PDC cursan los 26 ámbitos JUNTOS en B04 (idénticos tramo a tramo)
-  → ámbito = UNA actividad con subgrupo compartido {4APDC,4DPDC}; modelarlo como dos
-  linajes separados duplica B04 (47h en 30 tramos → INFEASIBLE real, observado en el
-  segundo intento). Regla S23 confirmada de la forma dura: el subgrupo de ámbito
-  lista SÓLO los Di, no los padres (listarlos sumaría 26h a las 30 de 4A/4D vía
-  tocaGrupo). EF y tutoría sí son específicas de cada Di con su grupo de origen
-  (4APDC↔4A EFI1/Gim, 4DPDC↔4D EFI3/Pista) como plaza única conjunta {4X,4XPDC}.
-  Viernes T4 (Rel+ATEDU) ampliado a los 6 grupos. Fixture problema-5-escala-4ESO-Di
-  .json (6 grupos, 30 tramos, 116 subgrupos, 39 actividades) + SolverHorarioEscala
-  4EsoDiTest, generado programáticamente y validado contra el schema real (integri-
-  dad, unicidad de códigos, I2, I7, XOR aula, aulas fijas disjuntas, cuadre 30/30,
-  carga por aula/profesor ≤30). FACTIBLE en 0,232 s, 0 duras. Suite 48 verde, BUILD
-  SUCCESS, sin regresión (escala-instituto 0,368 s; 4º ordinario 0,098 s). NO cierra
-  criterios de Fase 5 (4º completo no agrava D4 respecto a 4º ordinario: el PDC hace
-  EF reintegrado en su grupo, sin presión nueva sobre Gim/Pista; D4 sigue sin probar-
-  se hasta fusionar niveles; criterios 1-2 exigen el instituto completo). Criterio 3
-  sin cambio. Aprendizaje de método: el cuadre aritmético 30/30 es condición
-  necesaria, NO suficiente; dos INFEASIBLE (código duplicado y duplicación de B04)
-  se cazan con validación de unicidad y de carga por recurso, ahora en la batería
-  pre-entrega. src/main NO tocado → índice NO regenerado.
+Última sesión registrada: Sesión 30 — Fase 5, Bloque 9 cerrado (FUSIÓN DE NIVELES:
+  3º ESO + 4º ESO en un único fixture). Primer fixture que reúne dos linajes antes
+  independientes: 3º (3A/3B/3C + 3PDC, extraído de problema-5-escala-instituto) + 4º
+  completo (4A/4B/4C/4D + 4APDC/4DPDC, de problema-5-escala-4ESO-Di). OBJETIVO:
+  ejercitar D4 (Gim/Pista compartido entre cursos) por primera vez. Par 3º+4º elegido
+  por atribución limpia: 4º ya satura Gim+Pista en sus dos NEUTRA (AFAVS en J3/M5) y
+  3º trae EF-3A/EF-3C clavadas a Pista (aulaFija) + EF-3B en Gim. Unificación de
+  catálogos cruzada POR CÓDIGO: 16 profesores compartidos (fundidos código=persona,
+  carga tras fusión ≤17h, ninguno satura), 7 aulas compartidas (misma def. física;
+  diferencias sólo cosméticas de nombre), 0 colisiones de código grupo/subgrupo/
+  actividad, tramos idénticos. Modelado Opción B (conservador): se funde SIN relajar
+  nada (EF de 3º conserva aulaFija) para que un eventual INFEASIBLE fuera atribuible
+  a D4 puro. Fixture problema-5-fusion-3-4-eso.json (10 grupos, 30 tramos, 155
+  subgrupos = 39 de 3º + 116 de 4º, 79 actividades = 40 + 39), generado
+  programáticamente y validado contra el schema real (batería completa: integridad,
+  unicidad incl. plazas global, I2, I7, XOR aula, aulas fijas disjuntas, cuadre por
+  grupo 30 ordinarios / 22 el 3PDC por la opción 2 de S23, carga por recurso ≤30) +
+  SolverHorarioFusion34EsoTest (calca el de 4ºDi). FACTIBLE en 0,300 s, 0 duras.
+  Suite 49 verde, BUILD SUCCESS, sin regresión (escala-instituto 0,368 s; 4º completo
+  0,187 s). RESULTADO: D4 NO muerde en el par 3º+4º ni con modelado conservador
+  (Gim/Pista 8h y 10h sobre 30 caben aunque 4º los sature en J3/M5). Lectura honesta:
+  esto prueba que D4 no es un muro entre DOS niveles adyacentes; NO prueba D4 a escala
+  de instituto completo (la demanda de Pista escala con el nº de grupos). D4 baja de
+  severidad pero NO se cierra: la prueba definitiva es la fusión total, no un par.
+  src/main NO tocado → índice NO regenerado.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -719,6 +720,25 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       duplicado por EXPRE multi-aula; duplicación de B04 por tratar los ámbitos
       como linajes separados) cazados y corregidos antes del cierre — aprendizaje:
       cuadre 30/30 ≠ factibilidad; validar también unicidad y carga por recurso.
+- [x] Bloque 9 — FUSIÓN DE NIVELES 3º+4º ESO (S30). Primer fixture que reúne dos
+      linajes antes independientes: 3º (3A/3B/3C + 3PDC, extraído de escala-instituto)
+      + 4º completo (de escala-4ESO-Di). Fixture problema-5-fusion-3-4-eso.json (10
+      grupos, 30 tramos, 155 subgrupos, 79 actividades) + SolverHorarioFusion34EsoTest.
+      OBJETIVO: ejercitar D4 (Gim/Pista compartido entre cursos) por primera vez —
+      hasta S29 cada nivel tuvo Gim/Pista para sí. Par 3º+4º por atribución limpia (4º
+      satura Gim+Pista en J3/M5; 3º trae EF clavada a Pista por aulaFija). Unificación
+      de catálogos cruzada POR CÓDIGO: 16 profesores compartidos (código=persona,
+      carga ≤17h), 7 aulas compartidas (misma def. física), 0 colisiones de código,
+      tramos idénticos. Modelado Opción B (conservador, EF de 3º con aulaFija sin
+      relajar) para atribución limpia de un eventual INFEASIBLE. Validado con batería
+      completa (cuadre por grupo respeta la divergencia de estilos de PDC: 3PDC=22 por
+      opción 2 de S23, los Di de 4º=30 por plaza conjunta {4X,4XPDC} — la fusión NO
+      reconcilia los dos estilos). FACTIBLE en 0,300 s, 0 duras (suite 49 verde).
+      RESULTADO: D4 NO muerde en el par; cabe con holgura (Gim 8h, Pista 10h sobre 30).
+      Escala+estructura acoplados conscientemente (fusión no es capa limpia). NO cierra
+      criterios de Fase 5: el par no prueba D4 a escala de instituto (la demanda de
+      Pista crece con el nº de grupos). D4 baja de severidad, NO se cierra. src/main no
+      tocado.
 - [ ] (pendientes de definir) FPB (bloques 2-3 tramos, D12; resolver antes el
       hueco de aulas FPB); Bachillerato a ESCALA (Lectura B ya soportada; falta
       incorporar grupos de Bach al fixture); fusión de niveles en un único fixture
@@ -921,7 +941,12 @@ descripción completa.
 - **D2**: Versionado intra-BD de cursos académicos → Fase 10 (si se requiere)
 - **D3**: Validación de capacidad de aulas → Fase 5 (evaluar con datos reales)
 - **D4**: Modelado explícito de recursos compartidos (Gim, Pista) → Fase 5 si
-  resulta insuficiente
+  resulta insuficiente. EN OBSERVACIÓN, severidad REBAJADA (S30): probado por primera
+  vez en la fusión 3º+4º (Bloque 9) — Gim/Pista compartido entre dos niveles
+  adyacentes es FACTIBLE con holgura (8h y 10h sobre 30) sin modelado explícito, ni
+  siquiera con EF rígida (aulaFija). NO cerrada: el par no prueba la escala de
+  instituto completo, donde la demanda de Pista crece con el nº de grupos. Prueba
+  definitiva pendiente de la fusión total.
 - **D5**: Asignaturas alternativas dentro del mismo grupo (MCCSS vs Latín) → 
   Fase 5 si resulta incómodo el mini-bloque de optativas
 - **D6**: Vínculo entre actividades distintas que deban ir en el mismo tramo →
@@ -2416,6 +2441,83 @@ src/main NO tocado (escala pura; "Nothing to compile") → referencia-codigo-sol
 NO regenerado. modelo_datos_fase1.md NO tocado (no añade entidad ni invariante; el
 Tipo 5 y la regla S23 ya están en §6.2/§6.5; las deudas nuevas viven en este plan).
 D3/D4 sin tocar (siguen esperando a la fusión de niveles).
+
+### Sesión 30 — Fase 5, Bloque 9: fusión de niveles 3º+4º ESO (D4 ejercitado).
+
+Primer bloque que FUNDE dos linajes de fixture antes independientes. Decisión de
+alcance tomada con el usuario al arrancar: de los cuatro candidatos (fusión de
+niveles, Bach a escala, FPB, cerrar criterio 3), se eligió FUSIÓN porque es el único
+que ataca la pregunta de fondo —D4 (Gim/Pista compartido entre cursos)— y porque ya
+no quedan niveles sueltos baratos que la aplacen sin acoplar. Par 3º+4º elegido sobre
+fusión total para atribución limpia: 4º ya satura Gim+Pista internamente (AFAVS en
+J3/M5), así que si 3º compite por esos espacios, un INFEASIBLE sería D4 puro y no
+ruido de un fixture grande. Acoplamiento escala+estructura aceptado conscientemente
+(la fusión no es capa limpia: exige unificar catálogos antes de medir).
+
+Trabajo previo (cruce POR CÓDIGO de los dos fixtures, aplicando el aprendizaje de
+S29 "el cruce por código manda sobre la lectura a ojo"):
+- 16 profesores con código compartido entre 3º y 4º. Resueltos por convención del
+  proyecto (código = persona; los fixtures de 4º traen nombre placeholder, así que el
+  nombre no discrimina — la identidad ES el código). Carga tras fusión ≤17h (GH4);
+  ninguno satura los 30 tramos.
+- 7 aulas compartidas (A12In, A6, A9, B07, Gim, Pista, TALL1): misma definición
+  física; las únicas diferencias son cosméticas en el nombre ("Aula 10" vs "Aula
+  A10"), unificadas al nombre del linaje instituto.
+- 0 colisiones de código de grupo/subgrupo/actividad (los linajes usan prefijo de
+  nivel); tramos idénticos entre linajes.
+- Cruce físico de Gim/Pista por tramo: demanda combinada 8h (Gim) y 10h (Pista) sobre
+  30. La tensión real no es de volumen sino de coincidencia: los dos NEUTRA de 4º
+  toman Gim+Pista simultáneos en J3/M5, y 3º trae EF-3A/EF-3C clavadas a Pista
+  (aulaFija). Ahí es donde D4 mordería si no hubiera holgura.
+
+Decisión de modelado (Opción B, conservador): fundir SIN relajar nada. La EF de 3º
+conserva su aulaFija (no se convierte a aulasCandidatas [Gim,Pista]). Deliberado: un
+FACTIBLE conseguido relajando a la vez no distinguiría si la fija habría bastado; un
+INFEASIBLE con modelado conservador probaría D4 con atribución perfecta. El segundo
+turno (relajar a candidatas, Opción A) sólo se abriría si este test saliera INFEASIBLE.
+
+Construcción y verificación: fixture problema-5-fusion-3-4-eso.json generado
+programáticamente desde los dos fixtures (extracción de las 40 actividades de 3º que
+tocan {3A,3B,3C,3PDC} vía tocaGrupo + las 39 de 4º; catálogos deduplicados por
+código; nombres unificados priorizando el no-placeholder). 10 grupos, 30 tramos, 155
+subgrupos (39 de 3º + 116 de 4º, sin solape de códigos), 79 actividades (40 + 39).
+Validado contra el schema real y la batería completa: integridad referencial,
+unicidad de códigos (incl. plazas global), I2, I7, XOR de aula, aulas fijas disjuntas
+por actividad, cuadre por grupo, y carga por recurso ≤30 (máx: profesor 17, aula fija
+25 = A10). Test calca SolverHorarioEscala4EsoDiTest (getResourceAsStream, red 600 s,
+semilla 42, factibilidad pura + VerificadorSolucion); sanity check propio (10/30/155/
+79).
+
+Falso positivo cazado en la validación: el script aplicó 30/30 a TODOS los grupos y
+marcó 3PDC=22 como error. No lo es: es la opción 2 de S23 (las 8 sesiones compartidas
+ord+Di se imputan al ordinario vía tocaGrupo, no al subgrupo Di). Divergencia
+consciente con el PDC de 4º (que cuadra a 30 porque EF/tutoría son plaza conjunta
+{4X,4XPDC}): son DOS estilos de modelado de PDC distintos, ambos válidos, ambos
+fundidos tal cual. La fusión NO los reconcilia (no era su objetivo). Criterio de
+cuadre corregido (22 para 3PDC, 30 para el resto) → batería verde.
+
+Resultado: FACTIBLE en 0,300 s, 0 violaciones duras. Suite 49 verde (48 previos + el
+nuevo), BUILD SUCCESS, sin regresión (escala-instituto 0,368 s; 4º completo 0,187 s).
+El solver ni se despeina (0,300 s para 10 grupos vs 0,368 para 11), señal de que la
+fusión total podría ser computacionalmente abordable.
+
+Lectura honesta del resultado (lo más importante del bloque): D4 NO muerde en el par
+3º+4º, ni con modelado conservador. PERO precisión sobre qué se probó: SÍ se probó
+que Gim/Pista caben para dos niveles adyacentes aunque 4º los sature simultáneamente
+y 3º traiga EF rígida (la holgura existe porque 8h y 10h están lejos de 30). NO se
+probó D4 a escala de instituto: la demanda de Pista escala con el nº de grupos, y con
+toda la ESO + Bach los 30 tramos podrían dejar de bastar. El verde de hoy dice "D4 no
+es un muro entre dos niveles", no "D4 está resuelto". Por eso D4 baja de severidad
+(rebajada en su entrada de deuda) pero NO se cierra: la prueba definitiva es la fusión
+total, no un par.
+
+NO cierra criterios de Fase 5: criterios 1-2 exigen el instituto completo (el par no
+lo es); criterio 3 sin cambio (la fusión no es término del objetivo).
+
+src/main NO tocado (escala+fusión de fixtures, sin dominio nuevo; el log confirma
+"Nothing to compile") → referencia-codigo-solver.md NO regenerado. modelo_datos_
+fase1.md NO tocado (la fusión no añade entidad ni invariante; D4 vive como deuda en
+este plan). D4 ejercitado y rebajado de severidad; D3 sin tocar.
 
 ---
 
