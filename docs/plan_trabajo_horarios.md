@@ -486,37 +486,25 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 31 — Fase 5, Bloque 10 cerrado (FUSIÓN ESO COMPLETA:
-  1º+2º+3º+4º en un único fixture). Reúne los dos linajes de fusión previos: 1º-3º+3PDC
-  (problema-5-escala-instituto) + 4º completo (4A/4B/4C/4D + 4APDC/4DPDC, problema-5-
-  escala-4ESO-Di). 17 grupos, 30 tramos, 232 subgrupos (116+116), 155 actividades
-  (116+39), 217 plazas. OBJETIVO: someter D4 (Gim/Pista compartido entre cursos) a
-  competencia REAL, no la holgura del par 3º+4º de S30. Logrado: la fusión completa
-  lleva la demanda de Gim a 26h sobre 30 (EF de 1º 4×3 + 2º 3×2 + EF-3B + EFis-4A/4C +
-  AFAVS-EFI1 de los dos NEUTRA de 4º), Pista a 10h; el cuello es que Gim deja 4 tramos
-  de margen para 26 sesiones y los NEUTRA de 4º (Gim+Pista en J3/M5) compiten con EF-3A/
-  EF-3C clavadas a Pista. Unificación cruzada POR CÓDIGO: 22 profesores compartidos
-  (vs 16 en S30 al sumar 1º/2º; código=persona, nombre no-placeholder priorizado, carga
-  ≤18h, ninguno satura), 12 aulas compartidas (diferencias sólo cosméticas de nombre →
-  linaje instituto; 4 aulas sólo en 4º: A2/A15/B04/C01), 0 colisiones de código grupo/
-  subgrupo/actividad, tramos idénticos. Modelado Opción B (conservador): se funde SIN
-  relajar nada (EF de 3º conserva aulaFija) para atribución limpia de un eventual
-  INFEASIBLE. Fixture problema-5-fusion-eso-completa.json generado programáticamente y
-  validado contra el schema real + batería completa (integridad, unicidad de las 7
-  colecciones que el mapper deduplica —plaza NO: el mapper no la impone—, I2, I7, XOR
-  aula, aulas fijas disjuntas, cuadre por grupo 16×30 / 22 el 3PDC por la opción 2 de
-  S23, carga por recurso ≤30, máx Gim=26) + SolverHorarioFusionEsoCompletaTest (calca
-  el de fusión 3º+4º). FACTIBLE en 2,110 s, 0 duras. Suite 50 verde, BUILD SUCCESS, sin
-  regresión (escala-instituto 0,368 s; fusión 3º+4º 0,298 s). RESULTADO: D4 NO muerde
-  ni a escala de ESO completa con Gim 26/30 y modelado conservador; la pregunta de
-  fondo de D4 tiene respuesta (no rompe), D4 rebajada a residual. SEÑAL DE COSTE: primer
-  punto de la curva con crecimiento NO lineal (0,298 s→2,110 s = ×7 en tiempo por ×1,7
-  en grupos); muy lejos del límite (600 s) pero a vigilar al sumar Bach/FPB. Falso
-  positivo de método cazado: la batería marcaba "unicidad global de plaza"; el mapper
-  real NO deduplica plazas (escala-instituto reutiliza B2-PEPA/CyR/Fr2 entre dos
-  actividades de bloque de 2º; legítimo) — autoridad: el código, no la lectura del plan.
-  NO cierra criterios 1-2 (faltan Bach+FPB para el instituto completo literal).
-  src/main NO tocado → índice NO regenerado.
+Última sesión registrada: Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
+  COMPLETO, aislado). Fixture problema-5-escala-1bach.json: 4 grupos ordinarios
+  (1BA/1BB/1BC/1BD), 30 tramos, 65 subgrupos, 30 actividades, 16 aulas, 28
+  profesores. Primera validación a escala real de las optativas transversales
+  Tipo 7 sobre los 4 grupos (OPT1/OPT2 con DTec=4h compartida entre bloques, I6) +
+  tres bloques de modalidad sobre subconjuntos (ciencias {A,B}, humanidades {C,D}
+  con HMC de profesor distinto por grupo, ECO de dos plazas, GRI sólo en D) +
+  Rel/PTVE intra-grupo por grupo. Modelado con subgrupos mono-grupo al estilo
+  linaje instituto (no Lectura B N:M de §6.5; divergencia consciente para fusión
+  limpia). Población 1 subgrupo/opción (deuda a confirmar con el centro). Cribado
+  de aulas y cruce grupo↔aula POR CÓDIGO: 0 celdas sin aula, 0 inconsistencias
+  (Hallazgo H y D8 no muerden en Bach). Construido programáticamente desde 4
+  volcados de grupo + 11 de aula; población del listado por aula. Validado contra
+  schema real + batería completa (integridad, unicidad, I2, I7, XOR aula, aulas
+  fijas disjuntas, cuadre 30/30, carga ≤30: máx profesor 12, aula fija 24).
+  FACTIBLE, 0 duras. Suite 51 verde, BUILD SUCCESS. INFEASIBLE de método cazado
+  durante construcción (conteo de grupo por plaza vs por instancia; corregido).
+  NO cierra criterios 1-2 (faltan 2ºBach, FPB y la fusión con ESO). src/main NO
+  tocado → índice NO regenerado.
 
 ### Bloques de Fase 2
 - [x] Bloque 1 — Setup del repositorio
@@ -769,13 +757,42 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       Fr2 entre dos actividades de bloque de 2º; legítimo). NO cierra criterios 1-2
       (faltan Bach+FPB). Escala+fusión de fixtures, sin dominio nuevo: src/main no
       tocado.
-- [ ] (pendientes de definir) FPB (bloques 2-3 tramos, D12; resolver antes el
-      hueco de aulas FPB); Bachillerato a ESCALA (Lectura B ya soportada; falta
-      incorporar grupos de Bach al fixture); fusión de niveles en un único fixture
-      de instituto donde Gim/Pista se comparte entre cursos (D3/D4, donde se espera
-      de verdad el salto de régimen). Orden a decidir. NOTA: 4ºESO PDC (Turno 2)
-      cerrado en S29 (Bloque 8); resultó ser DOS grupos Di no separables del
-      ordinario.
+- [x] Bloque 11 — Escala 1ºBach completo (4 grupos ordinarios A/B/C/D), linaje
+      AISLADO (S32). Fixture problema-5-escala-1bach.json (4 grupos, 30 tramos,
+      65 subgrupos, 30 actividades, 16 aulas, 28 profesores) +
+      SolverHorarioEscala1BachTest. PRIMERA validación a escala real de los dos
+      bloques de optativas transversales Tipo 7 sobre los 4 grupos (OPT1: DTec/
+      ANAP/TEstI/TICO/DA; OPT2: DTec/TEst2/Lab/CE/Pat), con DTec=4h compartida
+      entre ambos bloques (subgrupo único, I6). Tres bloques de modalidad sobre
+      subconjuntos: ciencias {A,B} (Bio/TecIn), humanidades {C,D} (Latín/MCCSS;
+      HMC con profesor distinto por grupo GH6/GH5; LU; ECO con dos plazas
+      paralelas; GRI sólo en oferta de D). Rel/PTVE intra-grupo, un tramo por
+      grupo (tutoría implícita en PTVE, S8/Hallazgo E). Aula variable como
+      aulasCandidatas (EF de C en Gim/Pista; LU; ECO-a; GRI). Decisión de
+      modelado: subgrupos mono-grupo listados en plaza (estilo linaje instituto,
+      frontera S14), NO Lectura B N:M de §6.5 — ambas válidas, se calca el
+      instituto para fusión limpia (divergencia consciente con §6.5). Población:
+      1 subgrupo por opción (plausible), DEUDA a confirmar con el centro
+      (invariante de población). Cribado de aulas y cruce grupo↔aula POR CÓDIGO:
+      0 celdas sin aula (Hallazgo H no muerde en Bach), 0 inconsistencias
+      profesor↔plaza (D8 no muerde). Construido programáticamente desde los 4
+      volcados de grupo + 11 volcados de aula; población real tomada del listado
+      por aula (no del de grupo). Validado contra schema real + batería completa
+      (integridad, unicidad, I2, I7, XOR aula, aulas fijas disjuntas, cuadre
+      30/30 los 4 grupos, carga por recurso ≤30: máx profesor 12, aula fija 24).
+      INFEASIBLE cazado durante la construcción (verificador Python contaba grupo
+      por plaza en vez de por instancia; corregido al conteo por instancia que usa
+      VerificadorSolucion, S21/D14) — aprendizaje reconfirmado: la autoridad es el
+      modelo real, no la intuición. FACTIBLE, 0 duras (suite 51 verde). 1ºBach
+      aislado es trivial para el solver (4 grupos). Escala pura: src/main NO
+      tocado. NO cierra criterios 1-2 (faltan 2ºBach y FPB, y la fusión con ESO).
+- [ ] (pendientes de definir) 2ºBach a escala (3 grupos A/B/C, mismo patrón de
+      optativas/modalidad que 1ºBach, ya soportado); FPB (bloques 2-3 tramos, D12/
+      D13; resolver antes el hueco de aulas FPB, Hallazgo H); fusión Bach con ESO
+      completa en un único fixture (donde Gim/Pista se comparte y D4 reaparece por
+      el lado de Bach; punto siguiente de la curva de coste). Orden a decidir.
+      NOTA: 1ºBach cerrado en S32 (Bloque 11), aislado; 4ºESO PDC cerrado en S29
+      (Bloque 8).
 
 ### Fases completadas
 
