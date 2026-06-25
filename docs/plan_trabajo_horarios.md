@@ -486,7 +486,16 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
+Última sesión registrada: Sesión 33 — Fase 5, Sub-bloque A de FPB (Bloque 12):
+  D13 cerrada en src/main. Lista blanca de inicios de bloque en ModeloCpSat
+  (iniciosValidosDeBloque, no-op para duracion=1) + espejo en VerificadorSolucion
+  (tramosOcupados, verificarBloquesConsecutivos, verificarNoSolapes por tramo
+  ocupado). Decisión (b)+Vía B: D13 cubre cruce de día y de recreo; frontera de
+  recreo como constante (deuda nueva D22). SolverHorarioBloqueD13Test (3 casos de
+  discriminación). Suite 54 verde, BUILD SUCCESS, sin regresión. src/main tocado →
+  índice regenerado. Prerrequisito de FPB; la prueba a escala es el Sub-bloque B.
+
+Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
   COMPLETO, aislado). Fixture problema-5-escala-1bach.json: 4 grupos ordinarios
   (1BA/1BB/1BC/1BD), 30 tramos, 65 subgrupos, 30 actividades, 16 aulas, 28
   profesores. Primera validación a escala real de las optativas transversales
@@ -786,13 +795,27 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
       modelo real, no la intuición. FACTIBLE, 0 duras (suite 51 verde). 1ºBach
       aislado es trivial para el solver (4 grupos). Escala pura: src/main NO
       tocado. NO cierra criterios 1-2 (faltan 2ºBach y FPB, y la fusión con ESO).
-- [ ] (pendientes de definir) 2ºBach a escala (3 grupos A/B/C, mismo patrón de
-      optativas/modalidad que 1ºBach, ya soportado); FPB (bloques 2-3 tramos, D12/
-      D13; resolver antes el hueco de aulas FPB, Hallazgo H); fusión Bach con ESO
-      completa en un único fixture (donde Gim/Pista se comparte y D4 reaparece por
-      el lado de Bach; punto siguiente de la curva de coste). Orden a decidir.
-      NOTA: 1ºBach cerrado en S32 (Bloque 11), aislado; 4ºESO PDC cerrado en S29
-      (Bloque 8).
+- [x] Bloque 12 (Sub-bloque A de FPB) — D13 en src/main (S33). PRIMER bloque de
+      Fase 5 que toca src/main desde 6d-c. Prerrequisito de FPB: los bloques de 2-3
+      tramos consecutivos exigen impedir que un IntervalVar cruce la frontera de día
+      o de recreo. Cerrada D13 (ver su entrada en Deuda consciente): lista blanca de
+      inicios en ModeloCpSat (no-op para duracion=1, sin regresión en ESO/Bach) +
+      espejo en VerificadorSolucion (tramosOcupados + verificarBloquesConsecutivos)
+      + verificarNoSolapes ahora cuenta por tramo ocupado (cierra ceguera a solapes
+      en tramos interiores de bloque, gemela del patrón D14). Decisión de modelado
+      (b)+(Vía B): D13 cubre cruce de día Y de recreo, frontera de recreo como
+      constante (deuda D22). Probada por discriminación pura (SolverHorarioBloqueD13Test
+      3 casos: control FEASIBLE, desborde de día INFEASIBLE, cruce de recreo
+      INFEASIBLE). Suite 54 verde, BUILD SUCCESS, sin regresión. NO cierra criterios
+      de Fase 5 (es prerrequisito; la prueba a escala es el Sub-bloque B). Índice de
+      código regenerado (src/main cambió).
+- [ ] (pendientes de definir) FPB Sub-bloque B: fixture 1ºFPB real a escala (bloques
+      de 2 y 3 tramos + sueltas, D13 a escala; resolver antes el hueco de aulas FPB,
+      Hallazgo H/D8); 2ºFPB; 2ºBach a escala (3 grupos A/B/C, mismo patrón que 1ºBach,
+      ya soportado); fusión Bach con ESO completa en un único fixture (Gim/Pista
+      compartido, D4 reaparece por el lado de Bach; punto siguiente de la curva de
+      coste). Orden a decidir. NOTA: 1ºBach cerrado en S32 (Bloque 11), aislado; 4ºESO
+      PDC cerrado en S29 (Bloque 8); D13 cerrada en S33 (Sub-bloque A).
 
 ### Fases completadas
 
@@ -1068,11 +1091,37 @@ descripción completa.
   actividad tiene repeticionesPorSemana > nº de días (palomar). En Fase 2
   ninguna asignatura de 1ºESO llega a 6, y la restricción lleva guarda.
   Fase 5 (FPB, frecuencias altas): revisar si procede relajar a blanda.
-- **D13**: el IntVar de tramo usa índice plano [0, |tramos|). Con
-  duracionTramos > 1, un IntervalVar podría cruzar la frontera entre el
-  último tramo de un día y el primero del siguiente. En Fase 2 toda
-  duración es 1, no aplica. Fase 5 (bloques de 2-3 tramos de FPB): el
-  modelo de intervalos debe impedir el cruce de día.
+- **D13 (CERRADA en Sesión 33, Fase 5 Sub-bloque A)**: el IntVar de tramo usa
+  índice plano [0, |tramos|). Con duracionTramos > 1, un IntervalVar podía
+  cruzar la frontera entre el último tramo de un día y el primero del siguiente
+  (cruce de día) y, además —al no ser el recreo un Tramo y numerar ordenEnDia
+  1..6 sin hueco—, podía cruzar el recreo (órdenes 3 y 4 contiguos en índice).
+  La D13 registrada solo contemplaba el cruce de día; el cruce de recreo era una
+  segunda cara descubierta al leer el código real (decisión (b): D13 cubre ambos,
+  alineado con S6 del modelo §6.6 y con los datos —Hallazgo I: los pares que
+  cruzan el recreo van como dos sueltas, no como bloque). Mecanismo:
+  ModeloCpSat.iniciosValidosDeBloque restringe el dominio del inicio (lista
+  blanca) a las posiciones desde las que el bloque cabe entero en el día sin
+  cruzar el recreo (no-op para duracion=1). Espejo independiente en
+  VerificadorSolucion.tramosOcupados + verificarBloquesConsecutivos; además
+  verificarNoSolapes pasó a contar por tramo ocupado (no solo por el de inicio),
+  cerrando una ceguera del verificador a solapes en tramos interiores de un
+  bloque. Probada por discriminación (SolverHorarioBloqueD13Test: control que
+  cabe FEASIBLE; desborde de día y cruce de recreo INFEASIBLE). Pendiente de
+  prueba a escala con FPB real (Sub-bloque B): bloques de 2 y 3 tramos
+  conviviendo con sueltas, donde D13 discrimina entre inicios válidos e inválidos.
+- **D22 (Sesión 33, Fase 5 Sub-bloque A)**: la frontera del recreo está
+  hardcodeada como constante de estructura de jornada (ORDEN_TRAS_RECREO=4 en
+  ModeloCpSat y su espejo en VerificadorSolucion), asumiendo recreo tras el tercer
+  tramo. El POJO Tramo no transporta la frontera (solo diaSemana/ordenEnDia, y el
+  recreo no es un Tramo), así que no es derivable de los datos; el resto del módulo
+  ya asume esta estructura (MAX_CONSECUTIVAS, términos de ventanas). Si un centro
+  tuviera otra colocación del recreo habría que parametrizarla. Asignación: Fase 8
+  (UI de configuración de jornada). Duplicación consciente de la constante entre
+  modelo y verificador (este último es independiente del solver por diseño y no
+  puede importarla), frágil del mismo modo que N de consecutivas (D21); se resuelve
+  cuando la estructura de jornada pase a configuración, momento en que ambos leerán
+  el mismo origen. Hoy ningún dato real la contradice.
 - **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
   no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
   solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
