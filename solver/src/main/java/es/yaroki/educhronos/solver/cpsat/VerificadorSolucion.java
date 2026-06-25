@@ -45,7 +45,8 @@ public final class VerificadorSolucion {
         List<ActividadInstancia> esperadas = Expansion.todas(problema);
 
         verificarTodasColocadas(esperadas, solucion, violaciones);
-        verificarNoSolapes(esperadas, solucion, violaciones);
+        verificarBloquesConsecutivos(problema, esperadas, solucion, violaciones); // D13
+        verificarNoSolapes(problema, esperadas, solucion, violaciones);
         verificarDistribucion(problema, esperadas, solucion, violaciones);
 
         return new ResultadoVerificacion(violaciones);
@@ -247,7 +248,55 @@ public final class VerificadorSolucion {
         }
         return total;
     }
-    
+
+    /**
+     * {@code ordenEnDia} del primer tramo lectivo tras el recreo. Espejo
+     * independiente de {@code ModeloCpSat.ORDEN_TRAS_RECREO} (constante privada del
+     * modelo; el verificador no puede importarla por diseño). Misma deuda D22 de
+     * parametrización de la estructura de jornada.
+     */
+    private static final int ORDEN_TRAS_RECREO = 4;
+
+    /**
+     * Devuelve los tramos que ocupa una instancia colocada en {@code inicio} con
+     * {@code duracion} tramos, o {@code Optional.empty()} si el bloque es
+     * físicamente imposible (desborda el día o cruza el recreo): D13.
+     *
+     * <p>Recomputo gemelo, independiente del solver, de la lista blanca de inicios
+     * de {@code ModeloCpSat.iniciosValidosDeBloque}. Reconstruye los tramos por
+     * {@code (diaSemana, ordenEnDia)} a partir del de inicio; si algún tramo del
+     * bloque no existe en el día, o el bloque contiene a la vez los órdenes
+     * {@code ORDEN_TRAS_RECREO-1} y {@code ORDEN_TRAS_RECREO}, devuelve empty.
+     *
+     * <p>Para {@code duracion == 1} devuelve siempre la lista con el único tramo de
+     * inicio: comportamiento idéntico al previo a D13 (los datasets de duración 1
+     * no cambian).
+     */
+    private Optional<List<Tramo>> tramosOcupados(Tramo inicio, int duracion,
+                                                 ProblemaHorario problema) {
+        // (diaSemana, ordenEnDia) -> Tramo, para resolver sucesores en el día.
+        Map<Integer, Map<Integer, Tramo>> porDiaOrden = new HashMap<>();
+        for (Tramo tr : problema.tramos()) {
+            porDiaOrden
+                    .computeIfAbsent(tr.diaSemana(), k -> new HashMap<>())
+                    .put(tr.ordenEnDia(), tr);
+        }
+        Map<Integer, Tramo> ordenesDelDia = porDiaOrden.get(inicio.diaSemana());
+        List<Tramo> ocupados = new ArrayList<>(duracion);
+        for (int i = 0; i < duracion; i++) {
+            int orden = inicio.ordenEnDia() + i;
+            Tramo tr = ordenesDelDia == null ? null : ordenesDelDia.get(orden);
+            if (tr == null) {
+                return Optional.empty(); // desborda el día
+            }
+            if (orden == ORDEN_TRAS_RECREO && inicio.ordenEnDia() <= ORDEN_TRAS_RECREO - 1) {
+                return Optional.empty(); // cruza el recreo
+            }
+            ocupados.add(tr);
+        }
+        return Optional.of(ocupados);
+    }
+
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,
                                          SolucionHorario solucion,
                                          List<String> violaciones) {
@@ -258,13 +307,61 @@ public final class VerificadorSolucion {
         }
     }
 
-    private void verificarNoSolapes(List<ActividadInstancia> esperadas,
+    /**
+     * D13: ningún bloque de {@code duracionTramos > 1} desborda su día ni cruza el
+     * recreo. Espejo independiente de la lista blanca de inicios del solver
+     * ({@code ModeloCpSat.iniciosValidosDeBloque}): si el modelo CP-SAT dejara
+     * pasar un inicio imposible, este recomputo —que reconstruye los tramos
+     * ocupados sin OR-Tools— lo delataría.
+     *
+     * <p>Las actividades de 1 tramo no pueden violar D13 (un solo tramo nunca
+     * desborda); se omiten por la guarda {@code duracion > 1}.
+     */
+    private void verificarBloquesConsecutivos(ProblemaHorario problema,
+                                              List<ActividadInstancia> esperadas,
+                                              SolucionHorario solucion,
+                                              List<String> violaciones) {
+        for (ActividadInstancia inst : esperadas) {
+            int duracion = inst.actividad().duracionTramos();
+            if (duracion <= 1) {
+                continue;
+            }
+            Optional<Tramo> inicioOpt = solucion.tramoDeInstancia(inst);
+            if (inicioOpt.isEmpty()) {
+                continue; // ya lo reporta verificarTodasColocadas
+            }
+            if (tramosOcupados(inicioOpt.get(), duracion, problema).isEmpty()) {
+                violaciones.add("Bloque " + etiqueta(inst) + " (duracion=" + duracion
+                        + ") inicia en " + inicioOpt.get().codigo()
+                        + " y desborda el día o cruza el recreo");
+            }
+        }
+    }
+
+    private void verificarNoSolapes(ProblemaHorario problema,
+                                    List<ActividadInstancia> esperadas,
                                     SolucionHorario solucion,
                                     List<String> violaciones) {
+        // Cada instancia se explota a TODOS los tramos que ocupa (inicio +
+        // duración), no solo al de inicio: un bloque de duracion>1 ocupa también
+        // sus tramos interiores, y un solape en un tramo interior es colisión
+        // real que el agrupar-por-inicio no veía. Para duracion==1 el conjunto es
+        // {tramo de inicio}: idéntico al comportamiento previo (sin regresión en
+        // los datasets de Fase 2-4). Si un bloque es imposible (desborda/cruza
+        // recreo) ya lo reporta verificarBloquesConsecutivos; aquí se cuenta solo
+        // por los tramos que sí ocupa.
         Map<Tramo, List<ActividadInstancia>> porTramo = new LinkedHashMap<>();
         for (ActividadInstancia inst : esperadas) {
-            solucion.tramoDeInstancia(inst).ifPresent(tramo ->
-                    porTramo.computeIfAbsent(tramo, k -> new ArrayList<>()).add(inst));
+            Optional<Tramo> inicioOpt = solucion.tramoDeInstancia(inst);
+            if (inicioOpt.isEmpty()) {
+                continue; // sin colocar: lo reporta verificarTodasColocadas
+            }
+            int duracion = inst.actividad().duracionTramos();
+            List<Tramo> ocupados = tramosOcupados(inicioOpt.get(), duracion, problema)
+                    .orElse(List.of(inicioOpt.get())); // bloque imposible: cuenta solo el inicio
+            for (Tramo tramo : ocupados) {
+                porTramo.computeIfAbsent(tramo, k -> new ArrayList<>()).add(inst);
+            }
         }
 
         for (Map.Entry<Tramo, List<ActividadInstancia>> entrada : porTramo.entrySet()) {
