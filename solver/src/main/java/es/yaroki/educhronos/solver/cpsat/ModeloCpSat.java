@@ -583,6 +583,80 @@ final class ModeloCpSat {
 
     // ----------------------------------------------------------------- variables
 
+    /**
+     * {@code ordenEnDia} del primer tramo lectivo posterior al recreo. La jornada
+     * del centro son 6 tramos partidos por el recreo en dos bloques de 3
+     * (8-9, 9-10, 10-11 | 11:30-12:30, 12:30-13:30, 13:30-14:30), de modo que la
+     * frontera del recreo cae entre {@code ordenEnDia=3} y {@code ordenEnDia=4}.
+     *
+     * <p>El recreo NO es un {@link Tramo} (no consume un valor de {@code ordenEnDia}):
+     * los seis tramos lectivos numeran 1..6 sin hueco. Por eso "ordenEnDia
+     * consecutivo" NO basta para impedir que un bloque cruce el recreo (3 y 4 son
+     * consecutivos); hace falta esta frontera explícita.
+     *
+     * <p><b>Constante de estructura de jornada (deuda D22):</b> asume el recreo
+     * tras el tercer tramo. El resto del módulo ya asume esta estructura
+     * (ver {@link #MAX_CONSECUTIVAS}). Si un centro tuviera otra colocación del
+     * recreo habría que parametrizarla; es trabajo de la UI de configuración
+     * (Fase 8). Hoy ningún dato real la contradice.
+     */
+    private static final int ORDEN_TRAS_RECREO = 4;
+
+    /**
+     * Calcula los índices de tramo desde los que un bloque de {@code duracion}
+     * tramos puede arrancar sin desbordar el día ni cruzar el recreo (D13).
+     *
+     * <p>Un inicio {@code t} es válido si los {@code duracion} tramos que ocuparía
+     * existen todos en el mismo día con {@code ordenEnDia} consecutivos
+     * ({@code s, s+1, …, s+duracion-1}) y el bloque NO contiene a la vez los
+     * tramos {@code ORDEN_TRAS_RECREO-1} y {@code ORDEN_TRAS_RECREO} (no cruza el
+     * recreo). Reproduce la S6 del modelo de papel (§6.6), que prohíbe por
+     * construcción que un bloque ≥2 cruce la frontera de día o de recreo.
+     *
+     * <p>El cálculo es genérico sobre {@code diaSemana()}/{@code ordenEnDia()}: no
+     * asume un número fijo de tramos por día (salvo la frontera del recreo, ver
+     * {@link #ORDEN_TRAS_RECREO}). Para {@code duracion == 1} todo tramo es válido.
+     */
+    private Domain iniciosValidosDeBloque(long duracion) {
+        List<Tramo> tramos = problema.tramos();
+        // (diaSemana, ordenEnDia) -> índice plano, para resolver sucesores.
+        Map<Integer, Map<Integer, Integer>> porDiaOrden = new HashMap<>();
+        for (int t = 0; t < tramos.size(); t++) {
+            Tramo tr = tramos.get(t);
+            porDiaOrden
+                    .computeIfAbsent(tr.diaSemana(), k -> new HashMap<>())
+                    .put(tr.ordenEnDia(), t);
+        }
+
+        List<Long> validos = new ArrayList<>();
+        for (int t = 0; t < tramos.size(); t++) {
+            Tramo inicio = tramos.get(t);
+            Map<Integer, Integer> ordenesDelDia = porDiaOrden.get(inicio.diaSemana());
+            boolean ok = true;
+            for (int i = 0; i < duracion; i++) {
+                int orden = inicio.ordenEnDia() + i;
+                if (!ordenesDelDia.containsKey(orden)) {
+                    ok = false; // desborda el día (o hueco de orden inexistente)
+                    break;
+                }
+                // Cruce de recreo: el bloque no puede contener orden (TRAS-1) y orden TRAS.
+                if (orden == ORDEN_TRAS_RECREO
+                        && inicio.ordenEnDia() <= ORDEN_TRAS_RECREO - 1) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                validos.add((long) t);
+            }
+        }
+        long[] arr = new long[validos.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = validos.get(i);
+        }
+        return Domain.fromValues(arr);
+    }
+
     private void crearVariables() {
         int numTramos = problema.tramos().size();
         if (numTramos == 0) {
@@ -592,8 +666,18 @@ final class ModeloCpSat {
             String nombre = inst.actividad().codigo() + "#" + inst.indice();
             IntVar tramoIndex = model.newIntVar(0, numTramos - 1L, "tramo_" + nombre);
             long duracion = inst.actividad().duracionTramos();
-            // En Fase 2 duracion siempre es 1. newFixedSizeIntervalVar generaliza
-            // a los bloques multi-tramo de Fase 5 (tamaño conocido, inicio variable).
+            // D13: un bloque de duracion>1 no puede desbordar el día ni cruzar el
+            // recreo. Se restringe el dominio del inicio a los tramos desde los
+            // que el bloque cabe entero en el día sin saltar la frontera del
+            // recreo. Para duracion==1 la lista blanca es todos los tramos
+            // (no-op), así que los datasets de Fase 2-4 no cambian de dominio.
+            if (duracion > 1) {
+                model.addLinearExpressionInDomain(tramoIndex, iniciosValidosDeBloque(duracion));
+            }
+            // newFixedSizeIntervalVar generaliza a los bloques multi-tramo
+            // (tamaño conocido, inicio variable). El no-solape sobre el índice
+            // plano ya impide solapes correctos; la lista blanca de arriba impide
+            // además los inicios físicamente imposibles (D13).
             IntervalVar intervalo =
                     model.newFixedSizeIntervalVar(tramoIndex, duracion, "intv_" + nombre);
             Map<Plaza, List<AulaOpcion>> opciones =
