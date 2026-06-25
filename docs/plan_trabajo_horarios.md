@@ -486,21 +486,27 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 34 — Fase 5, Sub-bloque B de FPB: fixture 1ºFPB
-  real a escala. Primera prueba a ESCALA de D13 (cerrada en src/main en S33):
-  2 bloques de 3 tramos (PS mar T1-T3, MECSO jue T4-T6) + 5 bloques de 2 + 9
-  sueltas, sobre 30 sesiones de un grupo. Fixture problema-5-escala-1fpb.json
-  generado programáticamente desde el volcado fiel grupo-1-FPB.json (estructura)
-  y aula-Taller-3.json (cruce CS↔TALL3). Aula técnica como TALL_FPB nominal
-  (Opción 1, Hallazgo H confirmado por código: 0 técnicas de 1FPB en TALL3); CS
-  en TALL3 real. Todo NEUTRA (factibilidad pura, sin enmascarar D13). Validado
-  contra schema real + batería completa (integridad, unicidad, I2, I7, XOR aula,
-  aulas fijas disjuntas, cuadre 30/30 por instancia, carga ≤30: PAU2 17 cuello,
-  TALL_FPB 24). FACTIBLE en 0,021 s, 0 duras. Suite 55 verde, BUILD SUCCESS, sin
-  regresión. Hallazgo K: MECSO real es blk-2 + blk-3, no blk-2×2 + suelta como
-  decía §6.6 (corregido). src/main NO tocado ("Nothing to compile") → índice NO
-  regenerado. NO cierra criterios de Fase 5 (1ºFPB aislado; faltan 2ºFPB, 2ºBach,
-  fusión con ESO).
+Última sesión registrada: Sesión 35 — Fase 5, Sub-bloque C de FPB: fixture 2ºFPB
+  real a escala. CIERRA EL NIVEL FPB (junto a 1ºFPB del Sub-bloque B). D13
+  ejercitada a MÁS escala que 1ºFPB: 3 bloques de 3 tramos (MEC lun T4-T6, MEC vie
+  T4-T6, ELE mié T4-T6) + 5 bloques de 2 + 9 sueltas, sobre 30 sesiones.
+  Fixture problema-5-escala-2fpb.json generado programáticamente desde el volcado
+  fiel grupo-2-FPB.json (estructura) y aula-Taller-3.json (cruce CyS↔TALL3).
+  Aula técnica como TALL_FPB nominal (Opción 1 heredada del Sub-bloque B; Hallazgo
+  H confirmado por código: 0 técnicas de 2FPB en TALL3, 25 celdas aula=null). CyS
+  en TALL3 real (5 celdas del volcado de grupo coinciden EXACTO con las 5 de 2FPB
+  en TALL3). Tutor PAU1 (no PAU2 como en 1FPB). Troceo bloque/suelta por regla
+  determinista (validada con el usuario): secuencia contigua maximal misma
+  asig+prof sin cruzar recreo = bloque; aisladas = sueltas. El volcado da
+  posiciones, no etiqueta el troceo (a diferencia de 1FPB): riesgo Hallazgo K
+  asumido. Todo NEUTRA (factibilidad pura; neutraliza D12 —palomar MEC=11, ELE=7—
+  y deja D13 como única estructural). Validado contra schema real + batería
+  completa (integridad, unicidad de las 7 colecciones que deduplica el mapper,
+  I2, I7, XOR aula, aulas fijas disjuntas, cuadre 30/30 por instancia, carga ≤30:
+  PAU1 19 cuello, TALL_FPB 25). FACTIBLE en 0,020 s, 0 duras. Suite 56 verde,
+  BUILD SUCCESS, sin regresión. src/main NO tocado ("Nothing to compile") →
+  índice NO regenerado. NO cierra criterios de Fase 5 (falta 2ºBach y la fusión
+  con ESO); SÍ cierra el nivel FPB.
 
 Sesión 33 — Fase 5, Sub-bloque A de FPB (Bloque 12):
   D13 cerrada en src/main. Lista blanca de inicios de bloque en ModeloCpSat
@@ -831,12 +837,19 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       (MECSO blk-2 + blk-3; §6.6 corregido). src/main NO tocado. NO cierra
       criterios de Fase 5 (1ºFPB aislado). Fixture problema-5-escala-1fpb.json +
       SolverHorarioEscala1FpbTest.
-- [ ] (pendientes de definir) 2ºFPB; 2ºBach a escala (3 grupos A/B/C, mismo patrón
+- [x] Sub-bloque C de FPB (S35) — fixture 2ºFPB real a escala. CIERRA el nivel
+      FPB. D13 a más escala: 3 bloques-3 + 5 bloques-2 + 9 sueltas, FACTIBLE
+      0,020 s, 0 duras. Aula técnica TALL_FPB nominal (Opción 1, Hallazgo H);
+      CyS↔TALL3 cruzado exacto. Tutor PAU1. Troceo determinista validado;
+      Hallazgo K asumido (el volcado no etiqueta el troceo). Todo NEUTRA
+      (neutraliza D12 palomar). src/main NO tocado. NO cierra criterios de Fase 5.
+      Fixture problema-5-escala-2fpb.json + SolverHorarioEscala2FpbTest.
+- [ ] (pendientes de definir) 2ºBach a escala (3 grupos A/B/C, mismo patrón
       que 1ºBach, ya soportado); fusión Bach con ESO completa en un único fixture
       (Gim/Pista compartido, D4 reaparece por el lado de Bach; punto siguiente de la
       curva de coste). Orden a decidir. NOTA: 1ºBach cerrado en S32 (Bloque 11),
       aislado; 4ºESO PDC cerrado en S29 (Bloque 8); D13 cerrada en S33 (Sub-bloque A)
-      y ejercitada a escala en S34 (Sub-bloque B).
+      y ejercitada a escala en S34/S35 (Sub-bloques B y C). Nivel FPB CERRADO en S35.
 
 ### Fases completadas
 
