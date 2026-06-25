@@ -1374,9 +1374,16 @@ profesorado mayoritariamente compartido con el tutor, y una asignatura
 "externa" (CS · GH1) en aula separada del taller. El horario real
 contiene **30 sesiones semanales** con la siguiente estructura:
 
-- 9 bloques de 2 tramos consecutivos (CA×2, IPE×1, CS×1, MECSO×2, AMO×3)
-- 1 bloque de **3 tramos consecutivos** (PS, martes 8:00–11:00)
+- 8 bloques de 2 tramos consecutivos (CA×2, IPE×1, CS×1, MECSO×1, AMO×3)
+- 2 bloques de **3 tramos consecutivos** (PS martes 8:00–11:00; MECSO jueves 11:30–14:30)
 - 9 sesiones sueltas de 1 tramo (CS×4, PS×2, IPE×1, MECSO×1, Tut×1)
+
+> Nota (Sesión 34, Hallazgo K): la reconstrucción original en papel agrupó
+> MECSO como 2 bloques de 2 + 1 suelta. El volcado fiel (grupo-1-FPB.json)
+> muestra MECSO como 1 bloque de 2 (mar T5-T6) + 1 bloque de 3 (jue T4-T6,
+> no cruza recreo). Mismo total de 5 tramos, estructura distinta. El fixture
+> problema-5-escala-1fpb.json se construyó desde el volcado, no desde esta
+> reconstrucción. No afecta al modelo (duracion_tramos admite cualquier N).
 
 Total: 18 + 3 + 9 = 30 sesiones. ✅
 

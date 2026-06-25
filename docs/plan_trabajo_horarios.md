@@ -486,7 +486,23 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 33 — Fase 5, Sub-bloque A de FPB (Bloque 12):
+Última sesión registrada: Sesión 34 — Fase 5, Sub-bloque B de FPB: fixture 1ºFPB
+  real a escala. Primera prueba a ESCALA de D13 (cerrada en src/main en S33):
+  2 bloques de 3 tramos (PS mar T1-T3, MECSO jue T4-T6) + 5 bloques de 2 + 9
+  sueltas, sobre 30 sesiones de un grupo. Fixture problema-5-escala-1fpb.json
+  generado programáticamente desde el volcado fiel grupo-1-FPB.json (estructura)
+  y aula-Taller-3.json (cruce CS↔TALL3). Aula técnica como TALL_FPB nominal
+  (Opción 1, Hallazgo H confirmado por código: 0 técnicas de 1FPB en TALL3); CS
+  en TALL3 real. Todo NEUTRA (factibilidad pura, sin enmascarar D13). Validado
+  contra schema real + batería completa (integridad, unicidad, I2, I7, XOR aula,
+  aulas fijas disjuntas, cuadre 30/30 por instancia, carga ≤30: PAU2 17 cuello,
+  TALL_FPB 24). FACTIBLE en 0,021 s, 0 duras. Suite 55 verde, BUILD SUCCESS, sin
+  regresión. Hallazgo K: MECSO real es blk-2 + blk-3, no blk-2×2 + suelta como
+  decía §6.6 (corregido). src/main NO tocado ("Nothing to compile") → índice NO
+  regenerado. NO cierra criterios de Fase 5 (1ºFPB aislado; faltan 2ºFPB, 2ºBach,
+  fusión con ESO).
+
+Sesión 33 — Fase 5, Sub-bloque A de FPB (Bloque 12):
   D13 cerrada en src/main. Lista blanca de inicios de bloque en ModeloCpSat
   (iniciosValidosDeBloque, no-op para duracion=1) + espejo en VerificadorSolucion
   (tramosOcupados, verificarBloquesConsecutivos, verificarNoSolapes por tramo
@@ -809,13 +825,18 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       INFEASIBLE). Suite 54 verde, BUILD SUCCESS, sin regresión. NO cierra criterios
       de Fase 5 (es prerrequisito; la prueba a escala es el Sub-bloque B). Índice de
       código regenerado (src/main cambió).
-- [ ] (pendientes de definir) FPB Sub-bloque B: fixture 1ºFPB real a escala (bloques
-      de 2 y 3 tramos + sueltas, D13 a escala; resolver antes el hueco de aulas FPB,
-      Hallazgo H/D8); 2ºFPB; 2ºBach a escala (3 grupos A/B/C, mismo patrón que 1ºBach,
-      ya soportado); fusión Bach con ESO completa en un único fixture (Gim/Pista
-      compartido, D4 reaparece por el lado de Bach; punto siguiente de la curva de
-      coste). Orden a decidir. NOTA: 1ºBach cerrado en S32 (Bloque 11), aislado; 4ºESO
-      PDC cerrado en S29 (Bloque 8); D13 cerrada en S33 (Sub-bloque A).
+- [x] Sub-bloque B de FPB (S34) — fixture 1ºFPB real a escala. D13 ejercitada a
+      escala: 2 bloques-3 (PS, MECSO) + 5 bloques-2 + 9 sueltas, FACTIBLE 0,021 s,
+      0 duras. Aula técnica TALL_FPB nominal (Opción 1, Hallazgo H). Hallazgo K
+      (MECSO blk-2 + blk-3; §6.6 corregido). src/main NO tocado. NO cierra
+      criterios de Fase 5 (1ºFPB aislado). Fixture problema-5-escala-1fpb.json +
+      SolverHorarioEscala1FpbTest.
+- [ ] (pendientes de definir) 2ºFPB; 2ºBach a escala (3 grupos A/B/C, mismo patrón
+      que 1ºBach, ya soportado); fusión Bach con ESO completa en un único fixture
+      (Gim/Pista compartido, D4 reaparece por el lado de Bach; punto siguiente de la
+      curva de coste). Orden a decidir. NOTA: 1ºBach cerrado en S32 (Bloque 11),
+      aislado; 4ºESO PDC cerrado en S29 (Bloque 8); D13 cerrada en S33 (Sub-bloque A)
+      y ejercitada a escala en S34 (Sub-bloque B).
 
 ### Fases completadas
 
@@ -1107,9 +1128,10 @@ descripción completa.
   verificarNoSolapes pasó a contar por tramo ocupado (no solo por el de inicio),
   cerrando una ceguera del verificador a solapes en tramos interiores de un
   bloque. Probada por discriminación (SolverHorarioBloqueD13Test: control que
-  cabe FEASIBLE; desborde de día y cruce de recreo INFEASIBLE). Pendiente de
-  prueba a escala con FPB real (Sub-bloque B): bloques de 2 y 3 tramos
-  conviviendo con sueltas, donde D13 discrimina entre inicios válidos e inválidos.
+  cabe FEASIBLE; desborde de día y cruce de recreo INFEASIBLE). Probada a escala
+  con FPB real en S34 (Sub-bloque B): bloques de 2 y 3 tramos
+  conviviendo con sueltas en 1ºFPB completo, FACTIBLE 0 duras; D13 discrimina
+  inicios válidos de inválidos sin INFEASIBLE espurio.
 - **D22 (Sesión 33, Fase 5 Sub-bloque A)**: la frontera del recreo está
   hardcodeada como constante de estructura de jornada (ORDEN_TRAS_RECREO=4 en
   ModeloCpSat y su espejo en VerificadorSolucion), asumiendo recreo tras el tercer
