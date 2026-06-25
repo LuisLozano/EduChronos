@@ -1,0 +1,39 @@
+{
+  "tramos": [
+    { "codigo": "L3", "diaSemana": 1, "ordenEnDia": 3 },
+    { "codigo": "L4", "diaSemana": 1, "ordenEnDia": 4 }
+  ],
+  "aulas": [
+    { "codigo": "A1", "nombre": "Aula 1" }
+  ],
+  "asignaturas": [
+    { "codigo": "BLK", "nombre": "Bloque de prueba" }
+  ],
+  "profesores": [
+    { "codigo": "P1", "nombre": "Profesor 1" }
+  ],
+  "grupos": [
+    { "codigo": "G1", "tipo": "ORDINARIO", "grupoPadre": null }
+  ],
+  "subgrupos": [
+    { "codigo": "G1-Completo", "grupos": ["G1"] }
+  ],
+  "actividades": [
+    {
+      "codigo": "Bloque-dur2",
+      "asignatura": "BLK",
+      "repeticionesPorSemana": 1,
+      "duracionTramos": 2,
+      "patronTemporal": "NEUTRA",
+      "plazas": [
+        {
+          "codigo": "BLK-plaza",
+          "asignatura": "BLK",
+          "profesores": ["P1"],
+          "aulaFija": "A1",
+          "subgrupos": ["G1-Completo"]
+        }
+      ]
+    }
+  ]
+}
