@@ -321,8 +321,16 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 - Atención Educativa (ATED/ATEDU) simultánea
 
 ### Criterios de verificación
-- [ ] El solver termina en menos de 10 minutos para el instituto completo
-- [ ] Cero restricciones duras violadas
+- [x] El solver termina en menos de 10 minutos para el instituto completo
+      — CERRADO (S36, Bloque 13): instituto completo real (26 grupos, ESO +
+      1º/2ºBach + FPB) FACTIBLE en 269,4 s (4 min 29 s) en factibilidad pura, bajo
+      el límite de 10 min. MATIZ: medido en `resolver` (factibilidad pura, sin
+      objetivo). El régimen de optimización (`resolverOptimizando`, criterios 3-4)
+      parte de esos 269 s y subirá; reevaluar el criterio a escala cuando se midan
+      las blandas sobre el instituto completo. Ver deuda D23 (curva de coste).
+- [x] Cero restricciones duras violadas — CERRADO (S36, Bloque 13):
+      VerificadorSolucion verde sobre la solución del instituto completo (no-solape
+      profesor/aula/subgrupo/grupo, D13 bloques FPB, todas las instancias colocadas).
 - [ ] El horario generado es comparable en calidad al horario real de los PDFs 
       (no necesita ser idéntico, pero debe ser razonable)
 - [~] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
@@ -486,7 +494,40 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 35 — Fase 5, Sub-bloque C de FPB: fixture 2ºFPB
+Última sesión registrada: Sesión 36 — Fase 5, Bloque 13: FUSIÓN INSTITUTO
+  COMPLETO (ESO + 1º/2ºBach + FPB en un único fixture). CIERRA CRITERIOS 1-2 de
+  Fase 5. 26 grupos (23 ordinarios + 3 PDC), 30 tramos, 341 subgrupos, 229
+  actividades, 35 aulas, 59 profesores. 2ºBach plegado dentro de la fusión (no
+  bloque aislado previo; aprendizaje S31 de no trocear). Fixture
+  problema-5-fusion-instituto-completo.json generado programáticamente: 2ºBach
+  derivado de los 3 volcados grupo-2BACH-A/B/C.json (estructura por FIRMA DE
+  POSICIÓN: cada bloque NEUTRA ocupa 1 slot del grupo, cuadre 30/30 por
+  construcción), fundido con los 4 fixtures cerrados (ESO completa, 1ºBach,
+  1ºFPB, 2ºFPB) por unión de catálogos cruzada POR CÓDIGO. 2ºBach NO tiene EF
+  (no añade presión D4). Estructura nueva ejercitada: optatividad transversal
+  ABC de 4h en dos bloques NEUTRA con DT compartido (I6, como DTec de 1ºBach) +
+  modalidades transversales sobre el par B+C (Geogr/Econ/MaCSa) ENTRELAZADAS con
+  bloques internos propios de cada grupo (BIOL/Físic de B, HART/Lat2/Gri2 de C);
+  plazas de modalidad que rotaban de aula con aulasCandidatas (mecanismo S2 del
+  mapper; aulaFija compartida habría sido rechazada). Profesores fundidos por
+  código=persona (CLA1/FIL2 en 1º+2ºBach; FIS3 en ESO/Bach/2ºFPB; GH1/FOL3 cruzan
+  FPB). HALLAZGO (corrección de datos, no de modelado): TALL_FPB colapsaba los
+  talleres de 1ºFPB y 2ºFPB en un código (Hallazgo H; el PDF no detalla talleres
+  FPB). Aislados cuadran; fundidos demandan 49 tramos/30 = INFEASIBLE trivial
+  (0,1 s). El centro CONFIRMÓ talleres físicos distintos → separados en
+  TALL_FPB_1 (24) y TALL_FPB_2 (25). Segunda corrección preventiva: pool de aulas
+  de modalidad de 2ºBach ampliado a todas las comunes (holgura de 4→99 tramos)
+  para no provocar un INFEASIBLE evitable. CURVA DE COSTE NO LINEAL CONFIRMADA:
+  269,4 s (4 min 29 s) sobre los 3,46 s de la ESO completa (S31) = ×78 en tiempo
+  por ×1,53 en grupos. Bajo el límite de 10 min (criterio 1) pero con poco techo
+  para el régimen de optimización (criterios 3-4). FACTIBLE, 0 duras
+  (VerificadorSolucion verde). Suite 57 verde, BUILD SUCCESS. Validado por
+  réplica en Python contra loader/mapper/VerificadorSolucion reales ANTES de
+  ejecutar (integridad, I2, S2, XOR aula, D13, D12, cuadre 30/30, demanda aula
+  fija ≤30, carga profesor ≤23). src/main NO tocado → índice NO regenerado.
+  Fixture + SolverHorarioFusionInstitutoCompletoTest.
+
+Sesión 35 — Fase 5, Sub-bloque C de FPB: fixture 2ºFPB
   real a escala. CIERRA EL NIVEL FPB (junto a 1ºFPB del Sub-bloque B). D13
   ejercitada a MÁS escala que 1ºFPB: 3 bloques de 3 tramos (MEC lun T4-T6, MEC vie
   T4-T6, ELE mié T4-T6) + 5 bloques de 2 + 9 sueltas, sobre 30 sesiones.
@@ -844,12 +885,27 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       Hallazgo K asumido (el volcado no etiqueta el troceo). Todo NEUTRA
       (neutraliza D12 palomar). src/main NO tocado. NO cierra criterios de Fase 5.
       Fixture problema-5-escala-2fpb.json + SolverHorarioEscala2FpbTest.
-- [ ] (pendientes de definir) 2ºBach a escala (3 grupos A/B/C, mismo patrón
-      que 1ºBach, ya soportado); fusión Bach con ESO completa en un único fixture
-      (Gim/Pista compartido, D4 reaparece por el lado de Bach; punto siguiente de la
-      curva de coste). Orden a decidir. NOTA: 1ºBach cerrado en S32 (Bloque 11),
-      aislado; 4ºESO PDC cerrado en S29 (Bloque 8); D13 cerrada en S33 (Sub-bloque A)
-      y ejercitada a escala en S34/S35 (Sub-bloques B y C). Nivel FPB CERRADO en S35.
+- [x] Bloque 13 — FUSIÓN INSTITUTO COMPLETO (S36). ESO completa + 1ºBach +
+      2ºBach + 1ºFPB + 2ºFPB en un único fixture: 26 grupos, 341 subgrupos, 229
+      actividades, 35 aulas, 59 profesores. CIERRA los criterios 1-2 de Fase 5
+      (factible 269,4 s < 10 min; 0 duras). 2ºBach plegado dentro de la fusión
+      (no aislado; aprendizaje S31). 2ºBach derivado por FIRMA DE POSICIÓN de los
+      volcados grupo-2BACH-A/B/C.json (cada bloque NEUTRA = 1 slot del grupo,
+      cuadre 30/30 por construcción); optatividad transversal ABC 4h en dos NEUTRA
+      con DT compartido (I6), modalidades transversales B+C entrelazadas con
+      bloques internos, aulasCandidatas en plazas que rotan. 2ºBach SIN EF (no
+      añade D4). Fusión por unión de catálogos cruzada POR CÓDIGO (profesores
+      código=persona, máx 23/30; 0 colisiones grupo/subgrupo/actividad; prefijo
+      2BA/2BB/2BC limpio frente a 2A/2B/2C de ESO). HALLAZGO: TALL_FPB colapsaba
+      los talleres de 1ºFPB/2ºFPB → 49 tramos/30 INFEASIBLE; el centro confirmó
+      talleres distintos → TALL_FPB_1/TALL_FPB_2 (corrección de datos, no de
+      modelado). Coste no lineal confirmado (×78 en tiempo por ×1,53 en grupos):
+      deuda D23. Validado por réplica Python contra loader/mapper/Verificador
+      reales antes de ejecutar. Suite 57 verde, BUILD SUCCESS. src/main NO tocado.
+      Fixture problema-5-fusion-instituto-completo.json +
+      SolverHorarioFusionInstitutoCompletoTest. Población de subgrupos de 2ºBach
+      (qué alumnado cae en cada plaza de modalidad/optatividad): deuda a confirmar
+      con el centro, como en 1ºBach (S32).
 
 ### Fases completadas
 
@@ -1045,14 +1101,14 @@ descripción completa.
 - **D2**: Versionado intra-BD de cursos académicos → Fase 10 (si se requiere)
 - **D3**: Validación de capacidad de aulas → Fase 5 (evaluar con datos reales)
 - **D4**: Modelado explícito de recursos compartidos (Gim, Pista) → Fase 5 si
-  resulta insuficiente. RESIDUAL, en observación hasta el instituto completo (S31):
-  probada la ESO completa (Bloque 10, fusión 1º-4º, 17 grupos) con Gim a 26h sobre
-  30 —competencia REAL, no holgura— y modelado conservador (EF de 3º en aulaFija,
-  sin relajar nada): FACTIBLE en 2,1s, 0 duras. La pregunta de fondo de D4 (¿Gim/
-  Pista compiten de verdad y rompen?) tiene respuesta: NO, ni con Gim casi saturado.
-  NO cerrada del todo: el "instituto completo" literal de los criterios 1-2 incluye
-  Bach + FPB, aún no fundidos; la demanda combinada de Gim/Pista puede crecer al
-  sumarlos. Severidad muy rebajada respecto a S30 (de muro potencial a residual).
+  resulta insuficiente. CERRADA (S36): el instituto completo literal de los
+  criterios 1-2 (ESO + Bach + FPB, 26 grupos) resultó FACTIBLE con modelado
+  conservador (EF en aulaFija, sin relajar a aulasCandidatas), 0 duras. Gim a 28h
+  sobre 30 tras sumar la EF de 1ºBach (2ºBach no tiene EF); Pista a 14. La válvula
+  fue EdFís-1BC con candidatas {Gim,Pista}, que el solver desvió a Pista. La
+  pregunta de fondo de D4 (¿Gim/Pista compiten de verdad y rompen a escala total?)
+  tiene respuesta definitiva: NO. El segundo turno (relajar EF a aulasCandidatas)
+  NO fue necesario. Histórico: ESO completa (S31) ya iba a Gim 26/30 FACTIBLE.
 - **D5**: Asignaturas alternativas dentro del mismo grupo (MCCSS vs Latín) → 
   Fase 5 si resulta incómodo el mini-bloque de optativas
 - **D6**: Vínculo entre actividades distintas que deban ir en el mismo tramo →
@@ -1157,6 +1213,24 @@ descripción completa.
   puede importarla), frágil del mismo modo que N de consecutivas (D21); se resuelve
   cuando la estructura de jornada pase a configuración, momento en que ambos leerán
   el mismo origen. Hoy ningún dato real la contradice.
+- **D23 (Sesión 36, Fase 5 Bloque 13)**: curva de coste del solver NO LINEAL,
+  confirmada con el instituto completo. Puntos medidos en factibilidad pura
+  (`resolver`, sin objetivo): ESO completa 17 grupos → 3,46 s (S31); instituto
+  completo 26 grupos → 269,4 s (S36). Un factor ×1,53 en grupos produjo ×78 en
+  tiempo: salto de régimen, no crecimiento suave. Causa probable: 2ºBach añade
+  mucho acoplamiento combinatorio (modalidades transversales B+C entrelazadas con
+  bloques internos + optatividad heterogénea), y las aulasCandidatas ampliadas
+  —necesarias para evitar el INFEASIBLE de saturación— ensanchan el espacio de
+  búsqueda. IMPLICACIÓN: el criterio 1 (< 10 min) se cumple HOY en factibilidad
+  pura con margen (269 s < 600 s), pero el régimen de optimización
+  (`resolverOptimizando`, criterios 3-4) parte de esos 269 s y subirá al añadir
+  términos blandos sobre el instituto completo. Riesgo de que el criterio 1 deje
+  de cumplirse en modo optimización. Acción cuando se aborden los criterios 3-4 a
+  escala: medir el tiempo optimizando sobre el instituto completo y, si excede,
+  considerar (a) límite de tiempo con primera solución factible + mejora
+  incremental, (b) estrechar aulasCandidatas con heurística de aula preferente,
+  (c) warm-start desde la solución de factibilidad pura. Severidad: media (no
+  bloquea Fase 5 hoy; condiciona el cierre de los criterios 3-4).
 - **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
   no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
   solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
