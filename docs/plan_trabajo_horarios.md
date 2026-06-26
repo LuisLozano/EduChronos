@@ -494,7 +494,36 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 36 — Fase 5, Bloque 13: FUSIÓN INSTITUTO
+Última sesión registrada: Sesión 37 — Fase 5, Bloque 14: OPTIMIZACIÓN A ESCALA
+  sobre el instituto completo (primera medición de resolverOptimizando a 26 grupos).
+  Agota los 600 s y devuelve FEASIBLE; confirma D23. CRITERIO 3 NO cerrado. Suite 58.
+
+Última sesión registrada (previa): Sesión 37 — Fase 5, Bloque 14: OPTIMIZACIÓN A
+  ESCALA sobre el instituto completo. PRIMERA medición de resolverOptimizando a 26
+  grupos. Reutiliza el fixture del Bloque 13 sin tocarlo (mismo dato, distinto
+  régimen: objetivo vs. factibilidad pura). Alcance A1 acordado con el usuario:
+  medición pura, sin tocar src/main, sin disponibilidades reales (el fixture no trae
+  restriccionesHorarias), sin 6d-a (toca estructura dura) ni 6d-b (reactiva D17).
+  RESULTADO: el solver AGOTA los 600 s y devuelve FEASIBLE (NO prueba óptimo) en
+  600,9 s wall-clock; ventanas=178, consecutivas=37, indispBlanda=0 (sin dato).
+  Factibilidad pura del MISMO fixture en esta máquina: 282,7 s (vs 269,4 s de S36;
+  variación de hardware, no de modelo). LECTURA HONESTA: el test es verde pero verde
+  NO significa criterio 1 cumplido en optimización — el solver se cortó por TIEMPO,
+  no por convergencia; el wall-clock (600,9 s) queda en la frontera de los 600 s SOLO
+  porque ahí lo cortamos. CONFIRMA D23 como problema real, no teórico: optimizar el
+  instituto completo no converge en 10 min. Los términos (ventanas/consecutivas) son
+  el valor en una FEASIBLE cortada por timeout: cota superior pesimista, NO el óptimo;
+  no umbralizan el criterio 3 (sigue exigiendo datos del centro). El criterio 3 NO se
+  cierra; obtiene su primera medición a escala. Activa las palancas ya previstas en
+  D23 para un bloque posterior (candidato natural: warm-start desde la factibilidad
+  pura —parte de una buena factible en vez de buscarla desde cero, única palanca que
+  no degrada calidad—; alternativas: time-limit con mejora incremental, estrechar
+  aulasCandidatas). Suite 58 verde, BUILD SUCCESS, sin regresión. src/main NO tocado
+  → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
+  Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
+  resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 36 — Fase 5, Bloque 13: FUSIÓN INSTITUTO
   COMPLETO (ESO + 1º/2ºBach + FPB en un único fixture). CIERRA CRITERIOS 1-2 de
   Fase 5. 26 grupos (23 ordinarios + 3 PDC), 30 tramos, 341 subgrupos, 229
   actividades, 35 aulas, 59 profesores. 2ºBach plegado dentro de la fusión (no
