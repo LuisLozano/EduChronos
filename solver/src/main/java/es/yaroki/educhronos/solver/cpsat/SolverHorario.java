@@ -21,8 +21,11 @@ import java.util.Objects;
  * optimalidad <i>probada</i> —puede no alcanzarse dentro del límite de tiempo—
  * y {@code FEASIBLE} es la mejor solución hallada al agotar el tiempo. Ambos se
  * aceptan; solo {@code INFEASIBLE}/desconocido lanzan excepción. El valor de la
- * función objetivo no se devuelve por esta vía (decisión 2a): lo recomputa de
- * forma independiente {@link VerificadorSolucion#contarVentanasProfesor}.
+ * función objetivo no se devuelve por {@link #resolverOptimizando} (decisión
+ * 2a): lo recomputa de forma independiente
+ * {@link VerificadorSolucion#contarVentanasProfesor}. Para razonar sobre la
+ * calidad a escala (deuda D23), {@link #resolverOptimizandoConDetalle} sí
+ * devuelve estado y objetivo en un {@link ResultadoOptimizacion}.
  */
 public final class SolverHorario {
 
@@ -84,6 +87,24 @@ public final class SolverHorario {
      *         es inválido.
      */
     public SolucionHorario resolverOptimizando(ProblemaHorario problema) {
+        return resolverOptimizandoConDetalle(problema).solucion();
+    }
+
+    /**
+     * Igual que {@link #resolverOptimizando} pero devuelve un
+     * {@link ResultadoOptimizacion}: además de la solución, el estado del solver
+     * ({@code OPTIMAL} = óptimo probado; {@code FEASIBLE} = mejor solución al
+     * agotar el tiempo) y el valor del objetivo con su cota inferior.
+     *
+     * <p>Existe para razonar sobre la CALIDAD a escala (deuda D23): la vía
+     * clásica no permite distinguir una optimalidad probada de un timeout, ni
+     * medir el gap al óptimo. {@code resolverOptimizando} se mantiene intacto
+     * (mismo contrato de retorno) delegando aquí y descartando el detalle.
+     *
+     * @throws HorarioInfactibleException si no hay solución factible o el modelo
+     *         es inválido.
+     */
+    public ResultadoOptimizacion resolverOptimizandoConDetalle(ProblemaHorario problema) {
         Objects.requireNonNull(problema, "problema no puede ser null");
 
         ModeloCpSat modelo = new ModeloCpSat(problema).construirConObjetivo();
@@ -94,7 +115,11 @@ public final class SolverHorario {
 
         CpSolverStatus estado = solver.solve(modelo.model());
         if (estado == CpSolverStatus.OPTIMAL || estado == CpSolverStatus.FEASIBLE) {
-            return modelo.extraerSolucion(solver);
+            return new ResultadoOptimizacion(
+                    modelo.extraerSolucion(solver),
+                    estado,
+                    solver.objectiveValue(),
+                    solver.bestObjectiveBound());
         }
         throw new HorarioInfactibleException(
                 "El solver no encontró un horario factible (modo optimización). "
