@@ -494,7 +494,23 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 40 — Fase 5, Bloque 15b: WARM-START A ESCALA (D23, palanca c).
+Última sesión registrada: Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (D23, palanca b),
+  mecanismo + discriminación. Poda dura de aulasCandidatas activa SOLO en optimización
+  (construirConObjetivo pone podarAulas=true antes de construir; factibilidad pura intacta,
+  no se invalida la curva de escala de S36). candidatasPodadas(plaza): si poda activa y la
+  plaza supera UMBRAL_PODA_AULA=8 candidatas, conserva las MAX_AULAS_PODA=8 primeras por código
+  (orden lexicográfico, determinista). Medición previa sobre el instituto completo que justifica
+  el frente: 52/328 plazas usan candidatas; 21 de ellas (modalidades 2ºBach, el foco de D23)
+  listan 25 candidatas y concentran el 92% de las 1835 presencias de aula. Suelo de saturación
+  medido: 3 (máx. plazas de cola larga simultáneas en un tramo); K=8 mantiene margen ×2,6. Par
+  de fixtures sintéticos (linaje propio): factible (poda 12->8, sigue factible, aula elegida ∈
+  recorte) + oro de saturación (9 plazas simultáneas, 12 candidatas, 1 tramo: sin poda factible,
+  con poda 8<9 INFEASIBLE por palomar — atribución perfecta). NO mide aún el efecto sobre D23 a
+  escala (eso es el bloque siguiente, @Tag escala). NO cierra criterio 3 ni D23; construye y
+  valida la palanca (b) en discriminación. Suite rápida 61 verde, BUILD SUCCESS, 11,5 s. src/main
+  tocado (campos + método private en ModeloCpSat) -> índice regenerado (sin cambio de firmas
+  públicas/package); modelo NO tocado.
+Última sesión registrada (previa): Sesión 40 — Fase 5, Bloque 15b: WARM-START A ESCALA (D23, palanca c).
   resolverOptimizandoConSemilla(problema, semilla) siembra una factible como hint
   (CpModel.addHint sobre tramoIndex + presencia de aula) antes de optimizar; mismo canal
   ResultadoOptimizacion de S38. Test autocontenido de 3 corridas en la misma máquina/run
@@ -544,6 +560,70 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
   Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
   resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (deuda D23, palanca (b): estrechar
+  aulasCandidatas). Frente elegido con el usuario al arrancar entre las rutas vivas que dejó
+  abiertas S40: (A) palancas restantes de D23 hacia la convergencia, o (B) camino al criterio 3.
+  Se eligió A, y dentro de A la palanca (b) sobre la (a): (b) ataca la causa raíz que D23 nombra
+  (espacio de búsqueda ensanchado por candidatas), mientras (a) gestiona el síntoma. La (c)
+  warm-start ya se cerró marginal en S40. Diseño: poda DURA (recorta candidatas de verdad,
+  reduce variables), no blanda (un hint de aula preferente replicaría el resultado marginal del
+  warm-start de S40, que ya siembra esas presencias).
+
+  Medición previa (sobre problema-5-fusion-instituto-completo.json, solo lectura) que fijó el
+  alcance ANTES de codear: de 328 plazas, 276 aulaFija y 52 con candidatas (XOR respetado).
+  Distribución de tamaño de candidatas: 28 plazas con 2, 2 con 3, 1 con 4, y 21 con 25. Las 21
+  de 25 generan el 92% de las 1835 presencias de aula (BoolVar de decisión). Esas 21 son TODAS
+  bloques NEUTRA de modalidad/optatividad de 2ºBach — exactamente la estructura que D23 acusaba
+  como causa del salto de régimen. Las 25 candidatas son siempre el mismo conjunto: las 35 aulas
+  del centro menos las 10 especializadas (aulas comunes genéricas). Conclusión: la palanca (b)
+  tiene espacio real y apunta al sitio correcto.
+
+  Suelo de saturación medido (clique máxima de plazas de cola larga mutuamente compatibles, sin
+  grupo ni profesor común, que podrían coincidir en un tramo): 3. Implicación: K=8 es seguro con
+  margen ×2,6; y el modo de fallo por saturación NO se da en los datos reales del centro (haría
+  falta K<3). Por eso el fixture de oro es SINTÉTICO (laboratorio, como los de 6c/6d-c), no
+  copiado de 2ºBach: fuerza 9 plazas simultáneas para que K=8 sature.
+
+  Construido (src/main, ModeloCpSat): constantes UMBRAL_PODA_AULA=8 y MAX_AULAS_PODA=8 y campo
+  podarAulas (deuda D21 ampliada); flag puesto a true en construirConObjetivo() antes de
+  construir(); método private candidatasPodadas(Plaza) que devuelve el conjunto íntegro si poda
+  inactiva o |candidatas|<=U, o las K primeras por Comparator.comparing(Aula::codigo) si >U; el
+  for de crearOpcionesDeAula itera candidatasPodadas(plaza) en vez de plaza.aulasCandidatas().
+  La poda NO toca construir() puro: la curva de escala de factibilidad pura (criterio 1, S36) no
+  se altera.
+
+  Fixtures (linaje propio problema-poda-aula-*, padding A01..A12 para que orden lexicográfico ==
+  numérico): factible (2 actividades, plaza de 12 candidatas podada a 8, plaza rival con aulaFija
+  A01 en el único tramo -> la podada elige en A02..A08 ⊂ recorte) y oro-saturacion (9 actividades
+  de grupo/profesor distintos -> mutuamente compatibles -> simultáneas obligadas en 1 tramo; 12
+  candidatas cada una; sin poda 9<=12 factible, con poda 8<9 palomar -> infactible). Ambos
+  validados contra el schema real y la lógica por enumeración antes de ejecutar.
+
+  Test SolverHorarioPodaAulaTest (paquete cpsat, calca SolverHorarioAulaCandidataTest adaptado a
+  la vía de optimización): positivo via resolverOptimizandoConDetalle (estado OPTIMAL/FEASIBLE,
+  0 violaciones, aula elegida ∈ {A02..A08}; + resolver() sin poda también factible como
+  refuerzo); oro via contraste resolver() factible (sin poda) / resolverOptimizando() lanza
+  HorarioInfactibleException (con poda). Confirmado leyendo SolverHorario.java que ambos caminos
+  lanzan la excepción ante INFEASIBLE (no devuelven estado): el oro es correcto.
+
+  Verificación (máquina del usuario): mvn test -> 61 verde, BUILD SUCCESS, 11,5 s. Los 2 tests de
+  poda en 0,041 s (suite rápida; sin @Tag escala por ser diminutos). Sin regresión. -Pescala NO
+  ejecutado esta sesión (no aporta: los dos pesados de instituto completo no se tocaron; su
+  medición con poda es el bloque siguiente).
+
+  Lectura honesta (lo más importante): este bloque CONSTRUYE y VALIDA el mecanismo de poda y su
+  seguridad (no rompe cuando K basta — positivo; rompe cuando no basta — oro), con atribución
+  perfecta. NO prueba que la poda mueva D23: el efecto sobre la convergencia del instituto
+  completo (objetivo/tiempo vs. la línea base de S40: 215, 600 s sin converger) se mide en el
+  bloque 2 con un test @Tag escala. Interacción poda×warm-start anotada para el bloque 2: la
+  semilla de resolver() (sin poda) puede haber elegido un aula que la poda elimina; sembrarHint
+  la sembraría 0 en todas las opciones podadas (benigno, no rompe, desaprovecha hint).
+
+  src/main tocado -> referencia-codigo-solver.md regenerado (candidatasPodadas es private: el
+  índice no añade firma; regenerado por disciplina, diff solo en fecha/commit). modelo_datos_
+  fase1.md NO tocado (la poda es config del solver, no añade entidad ni invariante; mismo criterio
+  que warm-start en S40). Commits separados código/test/doc.
 
 Sesión 40 — Fase 5, Bloque 15b: WARM-START A ESCALA (deuda D23, palanca que no degrada
   calidad). Alcance acordado con el usuario: opción A (calidad a igual presupuesto de
@@ -1105,6 +1185,18 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       SolverHorarioFusionInstitutoCompletoTest. Población de subgrupos de 2ºBach
       (qué alumnado cae en cada plaza de modalidad/optatividad): deuda a confirmar
       con el centro, como en 1ºBach (S32).
+- [x] Bloque 16 — PODA DE AULA (D23 palanca b), mecanismo + discriminación (S41).
+      Poda dura de aulasCandidatas SOLO en optimización (construirConObjetivo): una
+      plaza con >UMBRAL_PODA_AULA=8 candidatas se recorta a MAX_AULAS_PODA=8 por orden
+      de código (determinista). Medición previa sobre el instituto completo: 21/52
+      plazas con candidatas (modalidades 2ºBach) listan 25 y concentran el 92% de las
+      1835 presencias de aula — el foco que D23 acusaba. Suelo de saturación medido 3;
+      K=8 con margen ×2,6. Fixtures sintéticos problema-poda-aula-factible /
+      -oro-saturacion + SolverHorarioPodaAulaTest (positivo: poda 12->8 sigue factible,
+      aula ∈ recorte; oro: 9 plazas simultáneas, sin poda factible / con poda 8<9
+      INFEASIBLE por palomar — atribución perfecta). Suite 61 verde, BUILD SUCCESS.
+      src/main tocado (ModeloCpSat: campos + método private). NO mide aún el efecto
+      sobre D23 a escala (bloque siguiente, @Tag escala). NO cierra criterio 3 ni D23.
 
 ### Fases completadas
 
@@ -1438,6 +1530,20 @@ descripción completa.
   mejora incremental y (b) estrechar aulasCandidatas siguen abiertas si se busca convergencia
   real. D23 permanece abierta (severidad media): el cierre de los criterios 3-4 a escala sigue
   condicionado por la no-convergencia, no solo por la falta de datos del centro.
+  ACTUALIZACIÓN (S41, Bloque 16): palanca (b) CONSTRUIDA y validada en discriminación
+  (aún NO medida a escala). Medición que fijó el frente: de 328 plazas, 52 usan
+  aulasCandidatas; 21 (todas modalidades NEUTRA de 2ºBach, la estructura que esta deuda
+  acusaba) listan 25 candidatas —siempre las 35 aulas menos las 10 especializadas— y
+  concentran el 92% de las 1835 presencias de aula. La poda recorta esas colas a K=8
+  (UMBRAL_PODA_AULA=8); suelo de saturación medido 3, así que K=8 es seguro con margen
+  ×2,6 y el modo de fallo por saturación NO se da en los datos reales (haría falta K<3;
+  por eso el oro es sintético). Vive solo en construirConObjetivo (no altera la curva de
+  factibilidad pura de S36). Pendiente en el bloque siguiente: medir objetivo/tiempo con
+  poda sobre el instituto completo vs. la línea base de S40 (215, 600 s sin converger) y
+  decidir si la palanca mueve el régimen o si D23 se reduce a decisión de producto
+  (aceptar objetivo relajado). Palanca (a) límite de tiempo con mejora incremental sigue
+  abierta. Interacción a vigilar: la semilla de resolver() (sin poda) puede elegir un aula
+  que la poda elimina; sembrarHint la siembra 0 en las opciones podadas (benigno).
 - **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39)**: la suite de tests se autoenvenena por
   contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
   CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
@@ -1541,7 +1647,8 @@ descripción completa.
 - **D21 (nueva en S26; ampliada en S27): parametrización y calibración de pesos
   blandos + el parámetro N de consecutivas.** Hoy `PESO_VENTANAS`,
   `PESO_INDISP_BLANDA` y `PESO_CONSECUTIVAS` (S27) son constantes hardcodeadas a 1
-  en `ModeloCpSat`, y `MAX_CONSECUTIVAS=3` (S27) es otra constante hardcodeada
+  en `ModeloCpSat`; `MAX_CONSECUTIVAS=3` (S27) y, desde S41, `UMBRAL_PODA_AULA=8` y
+  `MAX_AULAS_PODA=8` (poda de aula, D23 palanca b) son otras constantes hardcodeadas
   (conjetura razonable por la estructura 3+3 de la jornada, NO un requisito
   verificado con el centro). Con tres (o más) términos blandos compitiendo, el peso
   relativo determina qué optimiza el solver, pero NO hay datos del centro para
