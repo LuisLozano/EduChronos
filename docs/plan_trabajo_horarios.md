@@ -494,7 +494,17 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 39 — Fase 5, Bloque D24: HIGIENE DE SUITE. CIERRA D24.
+Última sesión registrada: Sesión 40 — Fase 5, Bloque 15b: WARM-START A ESCALA (D23, palanca c).
+  resolverOptimizandoConSemilla(problema, semilla) siembra una factible como hint
+  (CpModel.addHint sobre tramoIndex + presencia de aula) antes de optimizar; mismo canal
+  ResultadoOptimizacion de S38. Test autocontenido de 3 corridas en la misma máquina/run
+  (semilla factib pura + optimización fría + optimización caliente, @Tag escala). RESULTADO:
+  el hint MEJORA calidad a igual presupuesto (objetivo 215->204, -5%); ambas corridas siguen
+  FEASIBLE con cota ~1-2 (NO convergen). Cierra la palanca (c) de D23 con dato real (ayuda,
+  no resuelve la no-convergencia). NO cierra criterio 3 ni D23. Suite rápida 59 verde; perfil
+  escala 3 verde, 34:14 min. src/main tocado (2 firmas nuevas) -> índice regenerado; modelo
+  NO tocado.
+Última sesión registrada (previa): Sesión 39 — Fase 5, Bloque D24: HIGIENE DE SUITE. CIERRA D24.
   @Tag("escala") en los dos tests de instituto completo (fusión + optimización) +
   exclusión del 'mvn test' por defecto vía property (excludedGroups=escala) + perfil
   'escala' que la invierte. Restaura "suite rápida verde + BUILD SUCCESS". Verificado:
@@ -534,6 +544,61 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
   Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
   resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 40 — Fase 5, Bloque 15b: WARM-START A ESCALA (deuda D23, palanca que no degrada
+  calidad). Alcance acordado con el usuario: opción A (calidad a igual presupuesto de
+  optimización, 600 s), bloque entero (sembrado + medición juntos), test autocontenido de
+  3 corridas. Por qué A: directamente medible con el canal de S38 sin tocar el criterio de
+  parada; B (tiempo a igual calidad) exige maquinaria de parada por umbral que no existe.
+
+  Construido (src/main):
+  - ModeloCpSat.sembrarHint(SolucionHorario): inverso exacto de extraerSolucion. Recorre la
+    misma lista 'instancias' y siembra via CpModel.addHint las DOS familias de variables de
+    decisión primarias: tramoIndex (<- índice del Tramo de la semilla) y presencia de cada
+    AulaOpcion (1 en la opción cuya aula coincide con la elegida por la semilla, 0 el resto;
+    solo en plazas con aulasCandidatas). Los IntervalVar NO se siembran (anclados a tramoIndex
+    y presencia por construcción). Paquete-privado: no abre visibilidad de variables.
+  - SolverHorario.resolverOptimizandoConSemilla(problema, semilla): construirConObjetivo()
+    .sembrarHint(semilla), mismos params, devuelve ResultadoOptimizacion (estado/objetivo/
+    cotaInferior, canal de S38). resolverOptimizando/ConDetalle intactos.
+  - Test SolverHorarioWarmStartInstitutoCompletoTest (@Tag escala): mismo fixture del Bloque
+    13/14. 3 corridas en el mismo run (la semilla la genera el test vía resolver(), no el
+    solver). Aserciones: no-regresión dura sobre la solución caliente (factible + 0 violaciones,
+    red independiente) y objetivo caliente <= objetivo frío (un hint factible no debe empeorar
+    a igual presupuesto; mejorarlo es deseable pero no se exige por el no-determinismo multihilo
+    de CP-SAT).
+
+  RESULTADO (1326 s el test, dentro de @Timeout 1900):
+    semilla (factib pura) = 124,8 s
+    FRIO:     FEASIBLE  objetivo=215  cota=2  en 600,8 s
+    CALIENTE: FEASIBLE  objetivo=204  cota=1  en 600,8 s
+  El warm-start MEJORA calidad a igual presupuesto: objetivo 215->204 (-11, -5,1%). La
+  aserción <= aguantó holgada. Palanca (c) de D23 confirmada con dato real: funciona, no es
+  teórica.
+
+  LECTURA HONESTA (lo más importante del bloque): el warm-start es mejora MARGINAL de calidad,
+  NO solución a D23. (1) Ninguna corrida converge: ambas siguen FEASIBLE con cota ~1-2 frente
+  a objetivo ~204-215; gap enorme; el hint mejora la solución hallada, no acerca la
+  convergencia (la cota 2->1 es ruido multihilo, no degradación). (2) La mejora es pequeña en
+  absoluto (-11 sobre 215) y su interpretación es limitada: 215 mezcla ventanas+consecutivas
+  (indispBlanda=0, el fixture no trae restriccionesHorarias); no sabemos qué fracción es cada
+  término ni si 204 está cerca del óptimo (la cota no da suelo útil; el óptimo real es
+  desconocido y probablemente mucho menor). (3) Matiz de producto NO medido: a igual
+  presupuesto TOTAL (no de optimización), el warm-start gasta 125 s de semilla que el frío no
+  gasta; "-5% a igual presupuesto de optimización" aísla el efecto del hint, no es la decisión
+  de producto. Anotado, no concluido.
+
+  NO cierra criterio 3 (sigue exigiendo datos del centro para umbralizar "calidad comparable";
+  además ahora se sabe que ni con warm-start se converge). NO cierra D23 (la no-convergencia a
+  escala persiste; quedan las palancas: estrechar aulasCandidatas con heurística de aula
+  preferente, o aceptar objetivo de calidad relajado). SÍ cierra la palanca (c) de D23 con
+  evidencia.
+
+  Verificación (máquina del usuario): mvn test -> 59 verde, 11,4 s (suite rápida intacta).
+  mvn test -Pescala -> 3 verde, 34:14 min (fusión 124,7 s; optimización fría agota 600,9 s,
+  objetivo 215; warm-start 1326 s con las 3 corridas). src/main tocado -> referencia-codigo-
+  solver.md regenerado. modelo_datos_fase1.md NO tocado (sembrarHint es config del solver, no
+  añade entidad ni invariante). Commits separados código/doc.
 
 Sesión 39 — Fase 5, Bloque D24: higiene de suite (cierra D24).
 
@@ -1365,6 +1430,14 @@ descripción completa.
   incremental, (b) estrechar aulasCandidatas con heurística de aula preferente,
   (c) warm-start desde la solución de factibilidad pura. Severidad: media (no
   bloquea Fase 5 hoy; condiciona el cierre de los criterios 3-4).
+  ACTUALIZACIÓN (S40, Bloque 15b): palanca (c) MEDIDA a escala (opción A, igual presupuesto
+  de optimización 600 s, instituto completo). El warm-start MEJORA calidad: objetivo 215->204
+  (-5,1%) a igual tiempo. Pero NO resuelve la deuda: ambas corridas (fría y caliente) siguen
+  FEASIBLE con cota ~1-2; la optimización a escala NO converge ni con hint. Palanca (c)
+  cerrada con evidencia (ayuda marginal, no convergencia). Palancas (a) límite de tiempo con
+  mejora incremental y (b) estrechar aulasCandidatas siguen abiertas si se busca convergencia
+  real. D23 permanece abierta (severidad media): el cierre de los criterios 3-4 a escala sigue
+  condicionado por la no-convergencia, no solo por la falta de datos del centro.
 - **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39)**: la suite de tests se autoenvenena por
   contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
   CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
