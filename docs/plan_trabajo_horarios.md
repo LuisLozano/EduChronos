@@ -494,7 +494,16 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 38 — Fase 5, Bloque 15a: OBSERVABILIDAD DEL OBJETIVO.
+Última sesión registrada: Sesión 39 — Fase 5, Bloque D24: HIGIENE DE SUITE. CIERRA D24.
+  @Tag("escala") en los dos tests de instituto completo (fusión + optimización) +
+  exclusión del 'mvn test' por defecto vía property (excludedGroups=escala) + perfil
+  'escala' que la invierte. Restaura "suite rápida verde + BUILD SUCCESS". Verificado:
+  mvn test → 59 tests, 8,6 s (antes 61; bajan los 2 pesados); mvn test -Pescala → 2
+  tests, 11:37 min (fusión 93,0 s; optimización agota 601 s por diseño). Solo pom.xml
+  del módulo + 2 @Tag; src/main NO tocado → índice NO regenerado; modelo NO tocado.
+  Siguiente frente: warm-start (Bloque 15b, D23), ya sobre banco de pruebas limpio.
+
+Última sesión registrada (previa): Sesión 38 — Fase 5, Bloque 15a: OBSERVABILIDAD DEL OBJETIVO.
   resolverOptimizandoConDetalle expone estado (OPTIMAL/FEASIBLE), objetivo y cota
   inferior en un record ResultadoOptimizacion; resolverOptimizando intacto (delega).
   Prerrequisito de D23 (warm-start). Test de concordancia objetivo↔verificador verde.
@@ -525,6 +534,55 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
   Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
   resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 39 — Fase 5, Bloque D24: higiene de suite (cierra D24).
+
+  Bloque de higiene previo al warm-start (15b), acordado en S38. Un único cambio
+  atómico: etiquetado + exclusión van juntos (etiquetar sin excluir no arregla nada;
+  excluir sin etiquetar no tiene a qué apuntar; separarlos dejaría la suite en un
+  estado intermedio sin valor). NO toca src/main ni el modelo.
+
+  Diseño (Opción A de D24, parametrizada por property):
+  - @Tag("escala") a nivel de clase en SolverHorarioFusionInstitutoCompletoTest y
+    SolverHorarioOptimizacionInstitutoCompletoTest, los dos únicos de régimen ~600 s.
+    Criterio de etiquetado: límite de tiempo alto + medición a escala, NO discriminación
+    rápida. Descartados como escala los tests de varios segundos (FusionEsoCompleta
+    3,46 s; EscalaInstituto 0,76 s): no envenenan y son red de regresión barata en cada
+    mvn test; sacarlos perdería señal sin ganar tiempo.
+  - En el pom del módulo solver: properties surefire.included.groups (vacía) y
+    surefire.excluded.groups (=escala); la <configuration> base de Surefire las
+    referencia con ${...}; el perfil 'escala' las invierte (incluye escala, vacía la
+    exclusión). Mismo cambio en un único fichero (solver/pom.xml).
+
+  Iteración de diseño registrada: el PRIMER intento vaciaba <excludedGroups></excludedGroups>
+  como elemento literal dentro de la <configuration> del perfil. FALLÓ — mvn test -Pescala
+  dio Tests run: 0. Causa: el merge de un elemento <configuration> vacío sobre la base
+  heredada NO es determinista en Maven, y en el JUnit Platform provider la exclusión gana
+  a la inclusión (un test a la vez en groups y excludedGroups queda excluido). Corrección:
+  parametrizar exclusión/inclusión por property; el merge de properties entre perfil y
+  build SÍ es fiable. Aprendizaje: sobrescribir properties, no elementos de plugin.
+
+  Verificación (en la máquina del usuario):
+  - mvn test → 59 tests, BUILD SUCCESS, 8,6 s (suite 61 − 2 pesados = 59). Suite rápida
+    saneada: ya no se envenena.
+  - mvn test -Pescala → 2 tests, BUILD SUCCESS, 11:37 min. Fusión 92,97 s (sana; aislada
+    86,4 s en S38, envenenada UNKNOWN/600 s en la suite completa). El contraste confirma
+    que el veneno no eran los dos pesados entre sí (juntos dan 93 s), sino esos dos MÁS
+    los ~20 rápidos peleando por núcleos al arrancar CP-SAT multihilo. Optimización
+    601,007 s, agota el límite por diseño (S37); ventanas=197, consecutivas=29,
+    indispBlanda=0 (sin dato) — FEASIBLE por timeout, no comparable término a término
+    con los 178/37 de S37.
+
+  CI: confirmado por el usuario que NO hay workflow corriendo mvn test hoy. D24 queda
+  local; el diseño deja el gancho para Fase 12 (CI: suite rápida en cada push; perfil
+  escala en job nocturno/manual, que alimentará también la cobertura JaCoCo/Sonar de los
+  pesados).
+
+  src/main NO tocado → referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md
+  NO tocado (no añade entidad ni invariante; D24 es config de Maven/Surefire + @Tag en
+  tests). Suite rápida 59 verde, BUILD SUCCESS. Siguiente frente acordado: warm-start
+  (Bloque 15b), la palanca de D23 que no degrada calidad, ahora medible sobre un banco
+  de pruebas limpio.
 
 Sesión 38 — Fase 5, Bloque 15a: OBSERVABILIDAD DEL OBJETIVO (prerrequisito de D23,
   warm-start). Decidido con el usuario partir el frente: 15a expone estado+objetivo
@@ -1307,7 +1365,7 @@ descripción completa.
   incremental, (b) estrechar aulasCandidatas con heurística de aula preferente,
   (c) warm-start desde la solución de factibilidad pura. Severidad: media (no
   bloquea Fase 5 hoy; condiciona el cierre de los criterios 3-4).
-- **D24 (Sesión 38, Fase 5 Bloque 15a)**: la suite de tests se autoenvenena por
+- **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39)**: la suite de tests se autoenvenena por
   contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
   CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
   mvn test. En la misma máquina se quitan núcleos a CP-SAT (multihilo en factibilidad
@@ -1322,6 +1380,13 @@ descripción completa.
   los tests deterministas pero mucho más lentos y mediría un rendimiento distinto al de
   producción). Severidad: media (no es bug del solver, pero bloquea el cierre limpio de
   bloques a escala). Asignación: bloque inmediato, ANTES del warm-start (15b).
+  RESUELTA (S39): @Tag("escala") en los dos tests pesados + exclusión por defecto vía
+  property surefire.excluded.groups=escala en el pom del módulo solver + perfil 'escala'
+  que invierte las properties (incluye escala, vacía exclusión). mvn test → 59 verde en
+  8,6 s; mvn test -Pescala → solo los 2 pesados. Iteración registrada: vaciar
+  <excludedGroups> como elemento literal en el perfil daba Tests run: 0 (merge de
+  <configuration> vacío no determinista en Maven); la solución por property sí mergea
+  limpio. CI inexistente hoy (confirmado); gancho dejado para Fase 12.
 - **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
   no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
   solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
