@@ -155,6 +155,64 @@ final class ModeloCpSat {
         return this;
     }
 
+    /**
+     * Siembra una solución factible como <i>hint</i> (arranque en caliente) de
+     * CP-SAT, vía {@code CpModel#addHint} sobre las variables de decisión
+     * primarias del modelo (Fase 5, Bloque 15b, deuda D23, palanca que NO degrada
+     * calidad). Debe invocarse tras {@code construirConObjetivo()} (o
+     * {@code construir()}), con las variables ya creadas.
+     *
+     * <p><b>Qué se siembra y qué no.</b> Solo las dos familias de variables de
+     * decisión que {@link #extraerSolucion} lee al revés:
+     * <ol>
+     *   <li>{@code tramoIndex} de cada instancia ← índice del {@link Tramo} que la
+     *       semilla le asignó.</li>
+     *   <li>{@code presencia} de cada {@link AulaOpcion} ← 1 en la opción cuya aula
+     *       coincide con la elegida por la semilla para esa (instancia, plaza), 0 en
+     *       las demás. Solo existen en plazas con {@code aulasCandidatas}; las de
+     *       {@code aulaFija} no tienen variable de aula que sembrar.</li>
+     * </ol>
+     * Los {@code IntervalVar} ({@code intervalo} y los opcionales por aula) NO se
+     * siembran: están anclados a {@code tramoIndex} y a {@code presencia} por
+     * construcción ({@code newFixedSizeIntervalVar} / {@code newOptionalFixedSize…}),
+     * así que quedan determinados. Las variables auxiliares del objetivo
+     * (primero/ultimo/huecos/penaliza/excede) tampoco se siembran: CP-SAT las deriva
+     * del resto del hint durante el preprocesado.
+     *
+     * <p><b>Es un hint, no una restricción.</b> CP-SAT lo trata como sugerencia de
+     * solución inicial; si la semilla es factible (lo es: viene de {@code resolver()}
+     * sobre el mismo problema), la adopta como punto de partida en vez de buscar una
+     * factible desde cero. El presolve puede transformar variables y descartar parte
+     * del hint silenciosamente: el hint orienta, no garantiza. Una instancia ausente
+     * en la semilla (tramo sin asignar) simplemente no aporta hint para esa variable.
+     *
+     * <p><b>Inverso de {@link #extraerSolucion}.</b> Recorre la misma lista
+     * {@code instancias} y usa la misma identidad ({@code ip.instancia()}) para
+     * mapear cada variable a su valor en la semilla, garantizando que el hint cae
+     * sobre exactamente las variables que el extractor lee.
+     *
+     * @param semilla solución factible previa (típicamente de {@code resolver()}).
+     * @return {@code this} para encadenar.
+     */
+    ModeloCpSat sembrarHint(SolucionHorario semilla) {
+        Objects.requireNonNull(semilla, "semilla no puede ser null");
+        for (InstanciaProgramada ip : instancias) {
+            ActividadInstancia inst = ip.instancia();
+            semilla.tramoDeInstancia(inst).ifPresent(
+                    tramo -> model.addHint(ip.tramoIndex(), problema.indiceDeTramo(tramo)));
+            for (Map.Entry<Plaza, List<AulaOpcion>> e : ip.opcionesDeAula().entrySet()) {
+                Aula elegida = semilla.aulaElegida(inst, e.getKey()).orElse(null);
+                if (elegida == null) {
+                    continue; // sin dato de aula para esta plaza en la semilla
+                }
+                for (AulaOpcion opcion : e.getValue()) {
+                    model.addHint(opcion.presencia(), opcion.aula().equals(elegida) ? 1 : 0);
+                }
+            }
+        }
+        return this;
+    }
+
     /** Suma los términos blandos ponderados y los fija como objetivo a minimizar. */
     private void ensamblarObjetivo() {
         if (terminosObjetivo.isEmpty()) {

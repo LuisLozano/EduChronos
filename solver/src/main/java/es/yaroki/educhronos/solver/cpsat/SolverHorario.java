@@ -125,4 +125,55 @@ public final class SolverHorario {
                 "El solver no encontró un horario factible (modo optimización). "
                         + "Estado CP-SAT: " + estado);
     }
+
+    /**
+     * Igual que {@link #resolverOptimizandoConDetalle} pero arranca en CALIENTE:
+     * siembra {@code semilla} como hint de CP-SAT antes de resolver (Fase 5,
+     * Bloque 15b, deuda D23). La semilla es una solución factible previa —
+     * típicamente la de {@link #resolver} (factibilidad pura) sobre el MISMO
+     * problema— que da a CP-SAT un punto de partida en vez de buscar una factible
+     * desde cero. Es la única palanca de D23 que NO degrada calidad: no recorta el
+     * espacio de búsqueda ni el límite de tiempo; solo orienta la búsqueda inicial.
+     *
+     * <p>Contrato idéntico a {@link #resolverOptimizandoConDetalle}: mismo modelo
+     * con objetivo, mismos parámetros ({@code maxSegundos}, {@code semilla}
+     * aleatoria), mismo {@link ResultadoOptimizacion} de salida (estado, objetivo,
+     * cota inferior). La única diferencia es el {@code addHint} previo. Esto permite
+     * comparar HONESTAMENTE con/sin warm-start a igual presupuesto (opción A):
+     * mismo objetivo y misma cota ⟹ el hint no aportó; objetivo menor o cota mayor
+     * ⟹ el warm-start cerró gap (ver D23).
+     *
+     * <p>El hint es sugerencia, no garantía (ver {@link ModeloCpSat#sembrarHint}):
+     * el presolve puede descartar parte. Que la semilla sea factible no exime de
+     * que el solver pueda devolver {@code FEASIBLE} por timeout, igual que la vía
+     * sin hint.
+     *
+     * @param problema problema a resolver en modo optimización.
+     * @param semilla  solución factible previa que sembrar como hint.
+     * @throws HorarioInfactibleException si no hay solución factible o el modelo
+     *         es inválido.
+     */
+    public ResultadoOptimizacion resolverOptimizandoConSemilla(
+            ProblemaHorario problema, SolucionHorario semilla) {
+        Objects.requireNonNull(problema, "problema no puede ser null");
+        Objects.requireNonNull(semilla, "semilla no puede ser null");
+
+        ModeloCpSat modelo = new ModeloCpSat(problema).construirConObjetivo().sembrarHint(semilla);
+
+        CpSolver solver = new CpSolver();
+        solver.getParameters().setMaxTimeInSeconds(maxSegundos);
+        solver.getParameters().setRandomSeed(this.semilla);
+
+        CpSolverStatus estado = solver.solve(modelo.model());
+        if (estado == CpSolverStatus.OPTIMAL || estado == CpSolverStatus.FEASIBLE) {
+            return new ResultadoOptimizacion(
+                    modelo.extraerSolucion(solver),
+                    estado,
+                    solver.objectiveValue(),
+                    solver.bestObjectiveBound());
+        }
+        throw new HorarioInfactibleException(
+                "El solver no encontró un horario factible (modo optimización con semilla). "
+                        + "Estado CP-SAT: " + estado);
+    }
 }
