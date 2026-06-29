@@ -494,9 +494,12 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 37 — Fase 5, Bloque 14: OPTIMIZACIÓN A ESCALA
-  sobre el instituto completo (primera medición de resolverOptimizando a 26 grupos).
-  Agota los 600 s y devuelve FEASIBLE; confirma D23. CRITERIO 3 NO cerrado. Suite 58.
+Última sesión registrada: Sesión 38 — Fase 5, Bloque 15a: OBSERVABILIDAD DEL OBJETIVO.
+  resolverOptimizandoConDetalle expone estado (OPTIMAL/FEASIBLE), objetivo y cota
+  inferior en un record ResultadoOptimizacion; resolverOptimizando intacto (delega).
+  Prerrequisito de D23 (warm-start). Test de concordancia objetivo↔verificador verde.
+  HALLAZGO: la suite completa envenena por contención de CPU (dos tests de ~600 s).
+  Suite 61 (aislada verde; completa con regresión de contención, ver registro). Suite 61.
 
 Última sesión registrada (previa): Sesión 37 — Fase 5, Bloque 14: OPTIMIZACIÓN A
   ESCALA sobre el instituto completo. PRIMERA medición de resolverOptimizando a 26
@@ -522,6 +525,50 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
   Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
   resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 38 — Fase 5, Bloque 15a: OBSERVABILIDAD DEL OBJETIVO (prerrequisito de D23,
+  warm-start). Decidido con el usuario partir el frente: 15a expone estado+objetivo
+  (esta sesión); 15b será el warm-start. Razón: medir el warm-start exige poder leer
+  el objetivo por código y distinguir OPTIMAL probado de FEASIBLE por timeout; sin
+  ese canal el verde del Bloque 14 era engañoso.
+
+  Construido (Opción 2, firma vieja intacta): record ResultadoOptimizacion(solucion,
+  estado CpSolverStatus, objetivo, cotaInferior) en cpsat; método nuevo
+  SolverHorario.resolverOptimizandoConDetalle que lee solver.objectiveValue() y
+  solver.bestObjectiveBound(); resolverOptimizando se reimplementa delegando y
+  descartando el detalle (cero rotura del contrato). cotaInferior incluida (gratis de
+  leer; el gap objetivo−cotaInferior es lo que hace MEDIBLE una FEASIBLE cortada por
+  timeout — sin él, una FEASIBLE es un número ciego, el problema del Bloque 14).
+
+  Test SolverHorarioDetalleOptimizacionTest (3 casos, calca SolverHorarioOroFuerte-
+  VentanasTest, reutiliza sus dos fixtures): (1) óptimo positivo conocido (=1, hueco
+  inevitable por veto) → estado OPTIMAL, objetivo==suma de ventanas del verificador,
+  cotaInferior==objetivo; (2) sin veto → óptimo 0 concordante; (3) el método clásico
+  y el de detalle dan el mismo coste (la refactorización no cambió el contrato). La
+  aserción clave es de CONCORDANCIA: ata el objetivo de CP-SAT al recomputo
+  independiente del verificador (autoridad sobre el coste real). Frontera documentada
+  en el test: objetivo==suma de ventanas vale SOLO porque estos fixtures activan un
+  único término blando (peso 1); no es fórmula general del objetivo. El epsilon del
+  bound que se marcó como riesgo NO saltó: isEqualTo exacto valió en OPTIMAL.
+
+  Resultado del bloque (test propio): 3/3 verde en 0,063 s. src/main tocado (firma
+  pública nueva) → índice referencia-codigo-solver.md regenerado. modelo NO tocado
+  (no añade entidad ni invariante de dominio; ResultadoOptimizacion es tipo de salida
+  del solver, no del modelo de datos).
+
+  HALLAZGO (separado de 15a, diferido a bloque de higiene de suite): mvn test completo
+  da BUILD FAILURE, pero NO por 15a. Falla SolverHorarioFusionInstitutoCompletoTest
+  (no tocado) con Estado CP-SAT: UNKNOWN tras 600 s, en resolver (factibilidad pura).
+  Reproducido AISLADO: el MISMO test resuelve FACTIBLE en 86,4 s. La causa es
+  contención de CPU: la suite arrastra DOS tests de límite ~600 s (fusión instituto +
+  optimización instituto) que, corriendo en la misma máquina, se quitan núcleos a
+  CP-SAT (multihilo en factibilidad pura) y el wall-clock se dispara hasta chocar con
+  su propio maxTimeInSeconds. No es regresión funcional (código y fixture intactos;
+  test aislado verde y más rápido que los 269 s de S36). Es deuda de higiene de la
+  suite, agravada por la curva no lineal de D23. SIGUIENTE BLOQUE acordado: etiquetar
+  los tests pesados con @Tag("escala") y excluirlos del mvn test por defecto (perfil
+  aparte), ANTES del warm-start (15b añadirá otro test pesado; limpiar el banco antes
+  de medir sobre él). Ver nueva deuda D24.
 
 Sesión 36 — Fase 5, Bloque 13: FUSIÓN INSTITUTO
   COMPLETO (ESO + 1º/2ºBach + FPB en un único fixture). CIERRA CRITERIOS 1-2 de
@@ -1260,6 +1307,21 @@ descripción completa.
   incremental, (b) estrechar aulasCandidatas con heurística de aula preferente,
   (c) warm-start desde la solución de factibilidad pura. Severidad: media (no
   bloquea Fase 5 hoy; condiciona el cierre de los criterios 3-4).
+- **D24 (Sesión 38, Fase 5 Bloque 15a)**: la suite de tests se autoenvenena por
+  contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
+  CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
+  mvn test. En la misma máquina se quitan núcleos a CP-SAT (multihilo en factibilidad
+  pura) y el wall-clock se dispara: en S38 el de fusión dio UNKNOWN a 600 s en la
+  suite completa pero FACTIBLE en 86,4 s aislado. No es regresión funcional. Impacto:
+  (a) la suite tarda 20 min y crecerá con cada palanca de D23 medida a escala; (b) el
+  build es inestable (el orden de Surefire decide quién envenena a quién); (c) rompe
+  el criterio de cierre "suite verde" por una razón no funcional. Solución acordada
+  (Opción A): @Tag("escala") en los tests pesados + exclusión del mvn test por defecto
+  + perfil/job dedicado para correrlos a propósito. Descartadas: bajar maxTimeInSeconds
+  (no arregla la contención, falsea el criterio de 10 min) y setNumWorkers(1) (haría
+  los tests deterministas pero mucho más lentos y mediría un rendimiento distinto al de
+  producción). Severidad: media (no es bug del solver, pero bloquea el cierre limpio de
+  bloques a escala). Asignación: bloque inmediato, ANTES del warm-start (15b).
 - **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
   no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
   solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
