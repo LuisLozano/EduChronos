@@ -7,6 +7,7 @@ import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.io.ProblemaHorarioJsonLoader;
 import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -80,6 +81,7 @@ import org.junit.jupiter.api.Timeout;
  * <p>Medición wall-clock en modo factibilidad pura (sin objetivo): tiempo hasta
  * PRIMERA solución factible. Semilla fija (42). El {@code @Timeout} actúa como red.
  */
+@Tag("escala")
 class SolverHorarioFusionInstitutoCompletoTest {
 
     private static final String FIXTURE = "/fixtures/problema-5-fusion-instituto-completo.json";

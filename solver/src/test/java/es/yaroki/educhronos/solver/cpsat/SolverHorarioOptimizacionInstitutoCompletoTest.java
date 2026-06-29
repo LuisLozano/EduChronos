@@ -9,6 +9,7 @@ import es.yaroki.educhronos.solver.io.ProblemaHorarioJsonLoader;
 import java.io.InputStream;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -56,6 +57,7 @@ import org.junit.jupiter.api.Timeout;
  * ausencia del dato. Meter disponibilidades reales endurece el problema y es alcance
  * de un bloque posterior.
  */
+@Tag("escala")
 class SolverHorarioOptimizacionInstitutoCompletoTest {
 
     private static final String FIXTURE = "/fixtures/problema-5-fusion-instituto-completo.json";

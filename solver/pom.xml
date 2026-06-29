@@ -16,6 +16,15 @@
     <name>Educhronos :: Solver</name>
     <description>Motor de planificación (OR-Tools CP-SAT, POJOs puros, sin Spring)</description>
 
+    <properties>
+        <!-- D24: grupos JUnit excluidos del 'mvn test' por defecto. Parametrizado
+             como property (no como elemento de plugin) para que el perfil 'escala'
+             lo sobrescriba de forma determinista: el merge de properties entre
+             perfil y build es fiable; el de elementos <configuration> vacíos no. -->
+        <surefire.excluded.groups>escala</surefire.excluded.groups>
+        <surefire.included.groups></surefire.included.groups>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.google.ortools</groupId>
@@ -55,6 +64,34 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.3.0</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- D24: por defecto excluye @Tag("escala") (instituto completo,
+                         ~600 s) para evitar la contención de CPU que envenena la
+                         suite. Los grupos vienen de properties para que el perfil
+                         'escala' los invierta. Uso normal: 'mvn test'.
+                         Solo pesados: 'mvn test -Pescala'. -->
+                    <groups>${surefire.included.groups}</groups>
+                    <excludedGroups>${surefire.excluded.groups}</excludedGroups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- D24: perfil para correr SOLO los tests pesados @Tag("escala").
+             Uso: mvn test -Pescala
+             Invierte las properties base: incluye 'escala' y vacía la exclusión.
+             Sobrescribir properties (no elementos <configuration>) garantiza el
+             merge determinista. -->
+        <profile>
+            <id>escala</id>
+            <properties>
+                <surefire.included.groups>escala</surefire.included.groups>
+                <surefire.excluded.groups></surefire.excluded.groups>
+            </properties>
+        </profile>
+    </profiles>
 </project>
