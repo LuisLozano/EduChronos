@@ -101,6 +101,44 @@ final class ModeloCpSat {
      * otros pesos blandos; calibración relativa diferida (deuda D21).
      */
     private static final long PESO_CONSECUTIVAS = 1L;
+    /**
+     * Umbral de poda de aulas candidatas (Fase 5, Bloque 16, palanca (b) de la
+     * deuda D23). Una plaza con MÁS de {@code UMBRAL_PODA_AULA} aulas candidatas
+     * se considera de "cola larga" y se poda a {@link #MAX_AULAS_PODA} candidatas;
+     * las plazas con {@code <=} este umbral se dejan intactas (su margen es
+     * pequeño y podarlas arriesga factibilidad sin reducir apenas el espacio de
+     * búsqueda). La poda SOLO actúa en el régimen de optimización
+     * ({@link #construirConObjetivo()}); en factibilidad pura ({@link #construir()})
+     * no se aplica, para no alterar la curva de escala que cerró el criterio 1 de
+     * Fase 5 en S36. Constante hardcodeada, misma decisión que los pesos blandos:
+     * calibración con datos del centro diferida (deuda D21, ampliada).
+     *
+     * <p>Valor 8: sobre el instituto completo la distribución de tamaños de
+     * candidatas es {2,3,4,25}; cualquier umbral en [4,24] toca solo las plazas de
+     * 25 (modalidades de 2ºBach, el foco de D23) y respeta las pequeñas.
+     */
+    private static final int UMBRAL_PODA_AULA = 8;
+    /**
+     * Número de aulas candidatas que conserva la poda en una plaza de cola larga
+     * (Fase 5, Bloque 16, palanca (b) de D23). Se conservan las {@code K} primeras
+     * por orden de código de aula (determinista y auditable; NO inventa
+     * preferencias del centro). El límite inferior seguro lo fija la saturación: K
+     * debe bastar para colocar sin solape todas las plazas podadas que coincidan en
+     * un tramo; un K demasiado pequeño produce INFEASIBLE (caracterizado en el
+     * fixture de oro de este bloque). Suelo de saturación medido sobre el instituto
+     * completo: 3 (máximo de plazas de cola larga simultáneas en un tramo, acotado
+     * por el no-solape de grupo y de profesor; las 21 plazas de 25 candidatas son
+     * modalidades de 2ºBach y casi todas se bloquean entre sí). K=8 mantiene margen
+     * ×2,6 sobre ese suelo y reduce 25→8 (−68% de presencias en esas plazas).
+     * Constante hardcodeada (deuda D21).
+     */
+    private static final int MAX_AULAS_PODA = 8;
+    /**
+     * Activa la poda de aulas candidatas. Falso por defecto (régimen de
+     * factibilidad pura); {@link #construirConObjetivo()} lo pone a verdadero antes
+     * de construir, de modo que la poda solo afecta al camino de optimización.
+     */
+    private boolean podarAulas = false;
     private final ProblemaHorario problema;
     private final CpModel model = new CpModel();
     private final List<InstanciaProgramada> instancias = new ArrayList<>();
@@ -147,6 +185,7 @@ final class ModeloCpSat {
      * @return {@code this} para encadenar.
      */
     ModeloCpSat construirConObjetivo() {
+        this.podarAulas = true; // Fase 5, Bloque 16 (D23 palanca b): poda solo en optimización
         construir();
         objetivoVentanasProfesor();
         objetivoIndisponibilidadBlandaProfesor(); // Fase 5, Bloque 6c
@@ -760,7 +799,7 @@ final class ModeloCpSat {
             }
             List<AulaOpcion> opciones = new ArrayList<>();
             List<Literal> presencias = new ArrayList<>();
-            for (Aula aula : plaza.aulasCandidatas()) {
+            for (Aula aula : candidatasPodadas(plaza)) {
                 BoolVar presencia = model.newBoolVar(
                         "aula_" + nombre + "_" + plaza.codigo() + "_" + aula.codigo());
                 IntervalVar opcional = model.newOptionalFixedSizeIntervalVar(
@@ -773,6 +812,31 @@ final class ModeloCpSat {
             porPlaza.put(plaza, opciones);
         }
         return porPlaza;
+    }
+
+    /**
+     * Aplica la poda de aulas candidatas (Fase 5, Bloque 16, palanca (b) de D23).
+     * Si la poda no está activa, o la plaza tiene {@code <= UMBRAL_PODA_AULA}
+     * candidatas, devuelve el conjunto íntegro (orden de iteración del Set, igual
+     * que antes del bloque). Si la plaza supera el umbral, conserva las
+     * {@link #MAX_AULAS_PODA} primeras por orden de código de aula: determinista,
+     * auditable y estable entre ejecuciones (a diferencia del orden de un HashSet).
+     *
+     * <p>El recorte reduce el número de {@code BoolVar} de presencia y de
+     * intervalos opcionales que el solver debe decidir; sobre el instituto
+     * completo, las plazas de cola larga (modalidades de 2ºBach con 25 candidatas)
+     * concentran el grueso de ese espacio. Riesgo: un recorte excesivo puede
+     * volver INFEASIBLE un problema antes factible por saturación de aulas en un
+     * tramo (caracterizado en el fixture de oro de este bloque).
+     */
+    private List<Aula> candidatasPodadas(Plaza plaza) {
+        if (!podarAulas || plaza.aulasCandidatas().size() <= UMBRAL_PODA_AULA) {
+            return new ArrayList<>(plaza.aulasCandidatas());
+        }
+        return plaza.aulasCandidatas().stream()
+                .sorted(java.util.Comparator.comparing(Aula::codigo))
+                .limit(MAX_AULAS_PODA)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // -------------------------------------------------------------- no-solapes
