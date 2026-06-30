@@ -533,11 +533,32 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (por arrancar)
+Fase actual: 6 — Persistencia de datos (en curso; Bloque 1 cerrado en S45)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 44 — Fase 5, CIERRE DE FASE. Sub-bloque de respaldo
+Última sesión registrada: Sesión 45 — Fase 6, Bloque 1: ANDAMIAJE DEL MÓDULO app/ +
+  HUMO DE PERSISTENCIA. Arranque de Fase 6 en modo híbrido (decisión y cierre en el
+  Project; teclear/compilar en Claude Code). Se crea el módulo Maven app/ (declarado
+  en el pom raíz, como anticipaba la decisión táctica de Fase 2: el módulo app/ se
+  declara al entrar en Fase 6, no antes). Stack de persistencia fijado y validado:
+  Spring Boot 4.1.0 (GA) + Hibernate 7.4.1 + driver SQLite + dialecto de comunidad
+  org.hibernate.community.dialect.SQLiteDialect. El contexto Spring arranca, abre
+  SQLite en fichero local (ruta relativa al working dir vía application.properties:
+  spring.datasource.url=jdbc:sqlite:educhronos.db; SQLite 3.53.2) e Hibernate genera
+  el esquema vía hbm2ddl sobre una HumoEntity desechable. RIESGO CERRADO EN POSITIVO:
+  el dialecto de comunidad (best-effort, sin dialecto SQLite oficial en Hibernate)
+  funciona sobre Hibernate 7.4 sin tocar nada. Frontera respetada: dependencia de
+  módulo app -> solver (unidireccional; solver no toca app); el modelo del solver
+  permanece libre de JPA (HumoEntity es desechable, NO es del modelo real). NO entran
+  en este bloque entidades del modelo real, mapper ni CRUD (Bloque 2 en adelante).
+  Test de integración: levanta el contexto, verifica que el .db se crea en disco y lo
+  limpia en @AfterAll (working tree sin .db residuales; .gitignore ignora *.db). suite
+  rápida verde: solver 59 + app 1, BUILD SUCCESS. src/main del solver NO tocado ->
+  índice NO regenerado; modelo NO tocado (la entidad de humo no cuenta como entidad de
+  dominio). Commits separados código/doc, de una línea. Siguiente: Bloque 2 (catálogo
+  del centro como entidades JPA + repos + mapper entidad->dominio; alcance a acordar).
+Última sesión registrada (previa): Sesión 44 — Fase 5, CIERRE DE FASE. Sub-bloque de respaldo
   descriptivo + cierre de criterios 3 y 4 como decisión de producto gemela de D23.
   Con D23 cerrada (S43), los criterios 3 (calidad comparable) y 4 (ventanas no
   excesivas) quedaban bloqueados por una MISMA causa: no hay umbral sin datos del
@@ -1153,8 +1174,8 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 | Capa | Decisión |
 |---|---|
 | Solver | OR-Tools CP-SAT — bindings Java (ortools-java 9.11.4210) |
-| Backend | Spring Boot + Java 17 |
-| Base de datos | SQLite + Hibernate |
+| Backend | Spring Boot 4.1.0 (GA) + Java 17. Versión fijada en S45 (Fase 6, Bloque 1) al declarar el módulo app/ |
+| Base de datos | SQLite + Hibernate 7.4.1, dialecto de comunidad org.hibernate.community.dialect.SQLiteDialect (Hibernate no trae dialecto SQLite oficial; el best-effort funciona sobre Hibernate 7.4, verificado en S45). Esquema vía hbm2ddl en Fase 6; sin Flyway por ahora. Fichero local, ruta relativa al working dir |
 | UI | Angular |
 | Empaquetado Windows | jpackage app-image (bundle portable, sin instalador) |
 | Estructura del repositorio | Maven multimódulo. Módulo `solver` (POJOs + OR-Tools, sin Spring ni Hibernate) y módulo `app` (Spring Boot, persistencia, REST) introducido en Fase 6. Frontend Angular en directorio adyacente, integrado vía `frontend-maven-plugin` en Fase 7-8 (Sesión 6, decisión 1) |
