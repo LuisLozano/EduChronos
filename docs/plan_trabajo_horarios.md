@@ -333,6 +333,19 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
       profesor/aula/subgrupo/grupo, D13 bloques FPB, todas las instancias colocadas).
 - [ ] El horario generado es comparable en calidad al horario real de los PDFs 
       (no necesita ser idéntico, pero debe ser razonable)
+      — ABIERTO. ESTADO (S42): el régimen de optimización a escala (instituto
+      completo) NO converge: devuelve FEASIBLE con gap grande (objetivo ~215, cota
+      ~1-2, sin OPTIMAL probado en 600 s). Las tres palancas de aceleración de D23
+      están AGOTADAS: (b) poda de aula medida e INVIABLE (rompe la factibilidad,
+      Bloque 17) y (c) warm-start CERRADA (ayuda, objetivo 215->204, no resuelve la
+      no-convergencia, Bloque 15b); solo queda viva (a) límite de tiempo con mejora
+      incremental, sin promesa de convergencia. Además el UMBRAL de "comparable"
+      sigue exigiendo datos del centro (decisión consciente, gemela del criterio 4).
+      Camino realista al cierre: aceptar el objetivo relajado (FEASIBLE sin
+      optimalidad probada) como DECISIÓN DE PRODUCTO explícita —el plan dejó este
+      desenlace legítimo desde S36—, no esperar convergencia. Pendiente de decidir
+      con el dueño del proyecto. Ver D23 (palancas) y D25 (el perfil escala no es
+      fiable corrido entero por contención).
 - [~] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
       un horario sin ventanas excesivas
       — PARCIAL (S25, Bloque 6b): el MECANISMO está implementado (penalización
@@ -494,7 +507,30 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (D23, palanca b),
+Última sesión registrada: Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA —
+  INVIABLE. CIERRA la palanca (b) de D23 con dato negativo. El frente era medir la poda de
+  S41 sobre el instituto completo; la medición destapó que la poda NO acelera: ROMPE la
+  factibilidad. Diagnóstico pareado en la MISMA máquina/fixture, aislado y sin JaCoCo
+  (problema-5-fusion-instituto-completo.json): SIN poda -> FEASIBLE objetivo 215 cota 2 en
+  600 s; CON poda (K=8) -> el solver NO halla ni una factible en 600 s (UNKNOWN). Atribución
+  limpia: la poda daba UNKNOWN incluso aislada (3 corridas: suite, aislada, aislada-sin-JaCoCo);
+  sin poda da FEASIBLE aislada. El error de S41: el "suelo de saturación 3 => K=8 seguro" medía
+  saturación máxima en UN tramo (necesaria, no suficiente para factibilidad global); el recorte
+  25->8 en las 21 plazas acopladas de 2ºBach aprieta el problema lo bastante como para que la
+  heurística de CP-SAT deje de tropezar con una factible. DECISIÓN (opción 2): poda DESACTIVADA
+  por defecto (construirConObjetivo() delega en construirConObjetivo(false)); mecanismo conservado
+  LATENTE (sobrecarga construirConObjetivo(boolean podar), constantes y candidatasPodadas intactos)
+  documentado en javadoc; reactivar exige REDISEÑO (otro K, poda selectiva o poda blanda), no
+  encender tal cual. Reorganización de tests de escala: eliminados SolverHorarioOptimizacion-
+  InstitutoCompletoTest (S37, vía pelada) y SolverHorarioPodaAulaTest + sus 2 fixtures
+  (discriminación de poda, ya sin anclaje a producción); nuevo SolverHorarioOptimizacionEscala-
+  InstitutoCompletoTest (@Tag escala, lee ResultadoOptimizacion: estado/objetivo/cota). Suite
+  rápida 59 verde, BUILD SUCCESS, 11,8 s. ALTA de deuda D25 (reactivación agravada de D24): el
+  perfil -Pescala corrido entero NO pasa por contención de CPU (4 núcleos físicos, i7-4790K) —
+  los tests de optimización a escala solo son fiables AISLADOS (con -Dtest=...). src/main tocado
+  (default de poda + javadoc; método diagnóstico no quedó en árbol) -> índice regenerado; modelo
+  NO tocado.
+Última sesión registrada (previa): Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (D23, palanca b),
   mecanismo + discriminación. Poda dura de aulasCandidatas activa SOLO en optimización
   (construirConObjetivo pone podarAulas=true antes de construir; factibilidad pura intacta,
   no se invalida la curva de escala de S36). candidatasPodadas(plaza): si poda activa y la
@@ -560,6 +596,80 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   → índice NO regenerado; modelo NO tocado (el bloque no añade entidad ni invariante).
   Test SolverHorarioOptimizacionInstitutoCompletoTest (calca el de fusión, cambia
   resolver→resolverOptimizando y la aserción de tiempo).
+
+Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA — INVIABLE. CIERRA palanca (b)
+  de D23 con dato NEGATIVO. Frente fijado por S41: medir la poda construida (S41) sobre el
+  instituto completo vs. la línea base de S40 (215, 600 s sin converger), con dos desenlaces
+  legítimos abiertos (la poda mueve el régimen, o no lo mueve y D23 -> decisión de producto).
+
+  Diseño acordado antes de codear (configuración A): medir SOLO poda en frío vs. línea base
+  frío, lectura por RÉGIMEN no por delta (CP-SAT no determinista en multihilo; un delta fino
+  no es atribuible — solo un cambio de régimen lo es: OPTIMAL probado, o cota cerrando gap
+  cualitativamente). Confirmado leyendo SolverHorario.java que resolverOptimizandoConDetalle
+  -> construirConObjetivo() -> poda activa (S41): el test mide POST-poda sin tocar src/main.
+
+  La medición destapó algo que invalidó la premisa de A: la poda no acelera, ROMPE la
+  factibilidad. Cadena de diagnóstico (cada corrida ~10 min, las corrió el usuario; el advisor
+  no ejecuta Maven):
+    1. -Pescala completo: los TRES tests de optimización (S37, poda, warm-start) dan UNKNOWN.
+       Sospecha inicial: contención (HALLAZGO S38). 
+    2. Poda AISLADA (-Dtest=...): UNKNOWN. Descarta contención.
+    3. Poda aislada + -Djacoco.skip=true: UNKNOWN. Descarta JaCoCo.
+    4. Factibilidad pura (resolver, sin poda) del mismo fixture: FACTIBLE 86 s (ya medida).
+       Descarta "máquina rota / problema base infactible".
+    5. Para aislar poda vs. entorno hizo falta lo que la config A evitaba: una vía SIN poda en
+       optimización. Cambio mínimo y reversible en src/main (sobrecarga construirConObjetivo
+       (boolean) + método diagnóstico temporal) -> test SIN poda aislado: FEASIBLE objetivo 215
+       cota 2. CONCLUYENTE: con poda UNKNOWN / sin poda FEASIBLE, misma máquina/fixture/vía.
+       Además 215/cota 2 reproduce EXACTAMENTE la base S40 -> el entorno está sano, S40 es
+       reproducible, lo único que rompe es la poda.
+
+  Diagnóstico del fallo de S41: el "suelo de saturación 3 => K=8 seguro con margen ×2,6" medía
+  la saturación MÁXIMA en UN tramo (clique de plazas mutuamente compatibles). Eso es condición
+  NECESARIA pero NO SUFICIENTE de la factibilidad global de 30 tramos × 341 subgrupos con las
+  demás duras entrelazadas. Recortar 25->8 en las 21 plazas acopladas de 2ºBach estrecha el
+  espacio de aulas de forma acoplada en toda la semana: un espacio más estrecho pero más difícil
+  de explorar, donde la heurística de CP-SAT ya no tropieza con una factible en 600 s.
+
+  DECISIÓN (opción 2 de 3, con el usuario; descartadas: 1 revertir todo — tira el mecanismo
+  correcto en sí y su test de discriminación; 3 rediseñar la poda ahora — frente nuevo, caro,
+  éxito incierto dado que sin poda tampoco converge): poda DESACTIVADA por defecto
+  (construirConObjetivo() delega en construirConObjetivo(false)); mecanismo conservado LATENTE
+  (sobrecarga construirConObjetivo(boolean), constantes y candidatasPodadas intactos),
+  documentado a fondo en javadoc de ModeloCpSat (por qué está apagado, diagnóstico pareado,
+  que reactivar exige rediseño). El método diagnóstico sin-poda se eliminó (A1): tras apagar la
+  poda por defecto, resolverOptimizandoConDetalle ya construye sin poda, así que el método
+  duplicaba; la capacidad con/sin poda la conserva la sobrecarga package-private.
+
+  Reorganización de tests (A1+B2): eliminados (a) el test de poda a escala creado en esta sesión
+  (medía la vía rota), (b) SolverHorarioPodaAulaTest + sus 2 fixtures problema-poda-aula-*
+  (discriminación de S41; al apagar la poda perdió su anclaje a producción — fallaba el oro de
+  saturación porque resolverOptimizando ya no poda; opción Z: el conocimiento queda en javadoc +
+  plan, no en un test verde sobre vía artificial), y (c) SolverHorarioOptimizacionInstituto-
+  CompletoTest de S37 (vía pelada, javadoc con afirmaciones obsoletas). Nuevo
+  SolverHorarioOptimizacionEscalaInstitutoCompletoTest (@Tag escala): lee ResultadoOptimizacion
+  (estado/objetivo/cota, canal S38), sustituye al de S37 con instrumentación más rica.
+
+  Verificación: suite rápida 59 verde, BUILD SUCCESS, 11,8 s (el javadoc no cambia
+  comportamiento; recompila y pasa). El usuario corrió además -Pescala completo (no requerido):
+  confirma D25 — fusión 139 s FACTIBLE, optimización fría 601 s UNKNOWN, warm-start completa
+  FEASIBLE (frío 222, caliente 207); el test nuevo es flaky en el perfil entero (verde aislado,
+  rojo en suite) por contención, NO por su lógica.
+
+  ALTA de deuda D25 (reactivación agravada de D24): el perfil -Pescala corrido entero no pasa
+  por contención de CPU (4 núcleos físicos, i7-4790K; CP-SAT lanza ~8 workers por test). @Tag
+  solo separó los pesados de la suite rápida; no resuelve la contención ENTRE ellos. Los tests
+  de optimización a escala solo son fiables AISLADOS. Frente futuro propio (forkear por clase /
+  limitar workers / serializar); cada intento 30+ min, no se aborda al cierre de sesión.
+
+  ESTADO DE D23 TRAS S42: palancas (b) poda CERRADA-inviable y (c) warm-start CERRADA-ayuda-no-
+  resuelve; viva solo (a) límite de tiempo con mejora incremental (sin promesa de convergencia).
+  El advisor recomienda cerrar D23 como DECISIÓN DE PRODUCTO (aceptar FEASIBLE ~215 sin
+  optimalidad probada) — desenlace que el plan dejó legítimo desde S36 —; pendiente de decidir
+  con el dueño del proyecto. src/main tocado (default de poda + javadoc; el método diagnóstico
+  no quedó en el árbol commiteado) -> índice regenerado; modelo NO tocado (la poda es config del
+  solver, no añade entidad ni invariante). Commits separados: código (fix), índice (docs), plan
+  (docs).
 
 Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (deuda D23, palanca (b): estrechar
   aulasCandidatas). Frente elegido con el usuario al arrancar entre las rutas vivas que dejó
@@ -1197,6 +1307,22 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       INFEASIBLE por palomar — atribución perfecta). Suite 61 verde, BUILD SUCCESS.
       src/main tocado (ModeloCpSat: campos + método private). NO mide aún el efecto
       sobre D23 a escala (bloque siguiente, @Tag escala). NO cierra criterio 3 ni D23.
+- [x] Bloque 17 — PODA DE AULA MEDIDA A ESCALA: INVIABLE. CIERRA palanca (b) de D23
+      con dato NEGATIVO (S42). El frente era medir la poda de S41 sobre el instituto
+      completo; la medición destapó que la poda ROMPE la factibilidad en vez de
+      acelerar. Diagnóstico pareado (misma máquina/fixture, aislado, sin JaCoCo): SIN
+      poda -> FEASIBLE objetivo 215 cota 2 en 600 s; CON poda K=8 -> UNKNOWN (ni una
+      factible en 600 s). Atribución limpia: la poda dio UNKNOWN en las 3 corridas
+      (suite, aislada, aislada-sin-JaCoCo); sin poda da FEASIBLE aislada. Fallo de S41:
+      el suelo de saturación medía un tramo (necesario, no suficiente para factibilidad
+      global). DECISIÓN (opción 2): poda OFF por defecto (construirConObjetivo() delega
+      en construirConObjetivo(false)); mecanismo conservado latente y documentado en
+      javadoc. Tests reorganizados: eliminados SolverHorarioPodaAulaTest + 2 fixtures y
+      el de S37; nuevo SolverHorarioOptimizacionEscalaInstitutoCompletoTest (lee
+      ResultadoOptimizacion). Suite 59 verde, BUILD SUCCESS. ALTA D25 (contención del
+      perfil -Pescala entero, reactivación de D24). src/main tocado (default poda +
+      javadoc) -> índice regenerado; modelo NO tocado. CIERRA palanca (b); empuja D23
+      hacia decisión de producto.
 
 ### Fases completadas
 
@@ -1544,7 +1670,59 @@ descripción completa.
   (aceptar objetivo relajado). Palanca (a) límite de tiempo con mejora incremental sigue
   abierta. Interacción a vigilar: la semilla de resolver() (sin poda) puede elegir un aula
   que la poda elimina; sembrarHint la siembra 0 en las opciones podadas (benigno).
-- **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39)**: la suite de tests se autoenvenena por
+  ACTUALIZACIÓN (S42, Bloque 17 — CIERRA la palanca b con dato NEGATIVO): la poda NO acelera
+  la convergencia; ROMPE la factibilidad a escala. Diagnóstico pareado en la misma máquina y
+  fixture (problema-5-fusion-instituto-completo.json), aislado y sin JaCoCo: SIN poda ->
+  FEASIBLE objetivo 215 cota 2 en 600 s; CON poda (K=8) -> el solver NO halla ni una solución
+  factible en 600 s (UNKNOWN). Atribución limpia: la poda dio UNKNOWN en las TRES corridas
+  (suite -Pescala, aislada, aislada-sin-JaCoCo), descartando contención y JaCoCo como causa;
+  sin poda la misma vía da FEASIBLE aislada (= línea base S40). Diagnóstico del fallo de S41:
+  el "suelo de saturación 3 => K=8 seguro con margen ×2,6" medía la saturación MÁXIMA en UN
+  tramo (clique de plazas mutuamente compatibles), que es condición NECESARIA pero NO
+  SUFICIENTE de la factibilidad global; recortar 25->8 en las 21 plazas acopladas de 2ºBach
+  estrecha el espacio de aulas de forma acoplada en toda la semana y la heurística de CP-SAT
+  deja de tropezar con una factible. La poda no es un mecanismo "correcto pero apagado": es
+  inviable con K=8 y, si se retoma, será REDISEÑADA (otro K, poda selectiva o poda blanda vía
+  hint), no resucitada. DECISIÓN (opción 2 de 3; descartadas: 1 revertir todo — tira el
+  mecanismo correcto en sí; 3 rediseñar ahora — frente nuevo, caro, éxito incierto): poda
+  DESACTIVADA por defecto (construirConObjetivo() delega en construirConObjetivo(false)),
+  mecanismo conservado LATENTE (sobrecarga construirConObjetivo(boolean), constantes
+  UMBRAL_PODA_AULA/MAX_AULAS_PODA y candidatasPodadas intactos), documentado en javadoc de
+  ModeloCpSat. Producción vuelve a FEASIBLE 215 (estado conocido de S40). Tests: eliminados el
+  de poda a escala (S41 medía la vía rota), el de discriminación SolverHorarioPodaAulaTest +
+  sus 2 fixtures (sin anclaje a producción tras apagar la poda), y el de S37 (vía pelada);
+  nuevo SolverHorarioOptimizacionEscalaInstitutoCompletoTest lee estado/objetivo/cota. ESTADO
+  DE D23 TRAS S42: palancas (b) poda CERRADA-inviable y (c) warm-start CERRADA-ayuda-no-resuelve;
+  queda viva (a) límite de tiempo con mejora incremental, y el desenlace de fondo que el plan
+  dejó legítimo desde el principio: D23 se reduce a DECISIÓN DE PRODUCTO (aceptar objetivo
+  relajado FEASIBLE ~215 sin convergencia probada). Recomendación del advisor: con (b) y (c)
+  agotadas y (a) sin promesa de convergencia, el siguiente paso natural NO es otra palanca de
+  velocidad sino cerrar D23 como decisión de producto explícita. Pendiente de decidir con el
+  dueño del proyecto.
+- **D25 (Sesión 42, Fase 5 Bloque 17 — reactivación agravada de D24)**: el perfil -Pescala
+  corrido ENTERO no pasa por contención de CPU. D24 se dio por CERRADA en S39 asumiendo que
+  @Tag("escala") bastaba; pero @Tag solo SEPARA los pesados de la suite rápida — NO resuelve
+  la contención ENTRE ellos cuando corren juntos en -Pescala. Con 3 tests de optimización a
+  escala (fusión factibilidad + optimización + warm-start) secuenciales, en una máquina de
+  4 núcleos físicos / 8 hilos (Intel i7-4790K), CP-SAT lanza ~8 workers por test y satura los
+  núcleos reales. Evidencia (run S42, -Pescala completo, 34:39 min): fusión 139 s FACTIBLE
+  (vs. 86 s aislada — la misma factibilidad pura tarda +60% según carga); optimización fría
+  601 s UNKNOWN (vs. FEASIBLE 215 aislada); warm-start COMPLETA FEASIBLE (frío 222, caliente
+  207). Observación NO explicada (conjetura, no hecho): el test del MEDIO falla y el ÚLTIMO
+  pasa, lo que no encaja con contención acumulativa simple; hipótesis = el warm-start arranca
+  con su propia semilla (factib pura interna) y es más robusto a la contención que la
+  optimización fría. Los objetivos NO son reproducibles entre runs (215/204 en S40, 222/207
+  en S42): la varianza de ejecución multihilo es de ±7 puntos, lo que confirma la lectura "por
+  régimen, no por delta" de S42. Impacto: los tests de optimización a escala SOLO son fiables
+  AISLADOS (mvn test -Pescala -Dtest=NombreTest); el perfil completo es un build rojo
+  inestable. Severidad: media (no es bug del solver ni bloquea la suite rápida, que sigue 59
+  verde; bloquea correr -Pescala entero como gate). Soluciones candidatas (NO evaluadas, frente
+  futuro propio): forkear surefire por clase con reuseForks=false; limitar num_search_workers
+  de CP-SAT en el perfil escala; serializar los pesados; o asumir que -Pescala se corre
+  test-a-test a mano. Cada intento son 30+ min de corrida -> es su propio bloque, no se aborda
+  al cierre de una sesión. Asignación: sin asignar; abordar antes de depender de -Pescala como
+  gate de CI (Fase 12).
+- **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39; ver D25, S42)**: la suite de tests se autoenvenena por
   contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
   CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
   mvn test. En la misma máquina se quitan núcleos a CP-SAT (multihilo en factibilidad
@@ -1664,6 +1842,11 @@ descripción completa.
   `ProfesorRestriccionHoraria` (modelo §4.3) es parte de (a): hoy se ignora en el
   término blando, que usa la constante. Relacionada con el criterio 3 de Fase 5
   (calidad). Fase 5 (términos blandos restantes) o Fase 8 (UI de configuración).
+  ACTUALIZACIÓN (S42): `UMBRAL_PODA_AULA`/`MAX_AULAS_PODA` ya NO son constantes
+  "calibrables vivas": la poda que las usa quedó DESACTIVADA por defecto (D23, palanca b
+  inviable con K=8). Siguen en código como mecanismo latente, pero calibrarlas no procede
+  hasta un eventual rediseño de la poda; (a)/(b)/(c) de esta deuda aplican solo a los tres
+  PESO_* y MAX_CONSECUTIVAS.
 
 ### Notas técnicas validadas en Fase 0
 
