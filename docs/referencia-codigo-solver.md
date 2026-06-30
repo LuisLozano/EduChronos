@@ -1,656 +1,758 @@
 # Referencia de código — módulo `solver/`
 
-Índice de API puro, construido a partir de las firmas del código fuente actual
-(`solver/src/main/java` y `solver/src/test/java`). Solo miembros con visibilidad
-public, protected o package-private; todo miembro `private` queda excluido.
+Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-06-29
-- Commit (`git rev-parse --short HEAD`): `ceb6e5e`
+- Fecha: 2026-06-30
+- Commit: `fdb2ce7`
 
----
-
-## Paquete `es.yaroki.educhronos.solver.domain`
-
-### Actividad
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `Optional<Asignatura> asignatura`
-  - `int repeticionesPorSemana`
-  - `int duracionTramos`
-  - `PatronTemporal patronTemporal`
-  - `List<Plaza> plazas`
-- Consume: `Asignatura`, `PatronTemporal`, `Plaza`
-
-### ActividadInstancia
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `Actividad actividad`
-  - `int indice`
-- Consume: `Actividad`
-
-### Asignatura
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
-
-### Aula
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
-
-### GrupoAdministrativo
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `TipoGrupo tipo`
-  - `Optional<GrupoAdministrativo> grupoPadre`
-- Consume: `TipoGrupo`, `GrupoAdministrativo`
-
-### PatronTemporal
-- public enum (`es.yaroki.educhronos.solver.domain`)
-- Constantes: `DISTRIBUIDA`, `AGRUPADA`, `NEUTRA`
-- Consume: —
-
-### Plaza
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `Asignatura asignatura`
-  - `Set<Profesor> profesores`
-  - `Optional<Aula> aulaFija`
-  - `Set<Aula> aulasCandidatas`
-  - `Set<Subgrupo> subgrupos`
-- Consume: `Asignatura`, `Profesor`, `Aula`, `Subgrupo`
-
-### ProblemaHorario
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `List<Tramo> tramos`
-  - `List<Aula> aulas`
-  - `List<Asignatura> asignaturas`
-  - `List<Profesor> profesores`
-  - `List<GrupoAdministrativo> grupos`
-  - `List<Subgrupo> subgrupos`
-  - `List<Actividad> actividades`
-  - `List<RestriccionHoraria> restriccionesHorarias`
-- Métodos:
-  - `public int indiceDeTramo(Tramo tramo)`
-- Consume: `Tramo`, `Aula`, `Asignatura`, `Profesor`, `GrupoAdministrativo`, `Subgrupo`, `Actividad`, `RestriccionHoraria`
-
-### Profesor
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
-
-### RestriccionHoraria
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `Profesor profesor`
-  - `Tramo tramo`
-  - `TipoRestriccion tipo`
-  - `int peso`
-  - `Optional<String> motivo`
-- Consume: `Profesor`, `Tramo`, `TipoRestriccion`
-
-### SolucionHorario
-- public class (`es.yaroki.educhronos.solver.domain`)
-- Constructores:
-  - `public SolucionHorario(Map<ActividadInstancia, Tramo> asignaciones)`
-  - `public SolucionHorario(Map<ActividadInstancia, Tramo> asignaciones, Map<ActividadInstancia, Map<Plaza, Aula>> aulasElegidas)`
-- Métodos:
-  - `public Optional<Tramo> tramoDeInstancia(ActividadInstancia instancia)`
-  - `public Optional<Aula> aulaElegida(ActividadInstancia instancia, Plaza plaza)`
-  - `public Map<ActividadInstancia, Tramo> asignaciones()`
-- Consume: `ActividadInstancia`, `Tramo`, `Plaza`, `Aula`
-
-### Subgrupo
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `Set<GrupoAdministrativo> grupos`
-- Métodos:
-  - `public boolean equals(Object o)`
-  - `public int hashCode()`
-- Consume: `GrupoAdministrativo`
-
-### TipoGrupo
-- public enum (`es.yaroki.educhronos.solver.domain`)
-- Constantes: `ORDINARIO`, `DIVERSIFICACION_PDC`
-- Consume: —
-
-### TipoRestriccion
-- public enum (`es.yaroki.educhronos.solver.domain`)
-- Constantes: `DURA`, `BLANDA`
-- Consume: —
-
-### Tramo
-- public record (`es.yaroki.educhronos.solver.domain`)
-- Componentes:
-  - `String codigo`
-  - `int diaSemana`
-  - `int ordenEnDia`
-- Consume: —
+Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
+miembros `private`. La línea **Consume** lista los tipos del módulo
+(`es.yaroki.educhronos.solver.*`) que aparecen en firmas o imports del tipo.
 
 ---
 
-## Paquete `es.yaroki.educhronos.solver.cpsat`
+## Paquete `domain`
 
-### AulaOpcion
-- package-private record (`es.yaroki.educhronos.solver.cpsat`)
-- Componentes:
-  - `Aula aula`
-  - `BoolVar presencia`
-  - `IntervalVar intervalo`
-- Consume: `Aula`
+### `Actividad` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `Optional<Asignatura> asignatura`
+- `int repeticionesPorSemana`
+- `int duracionTramos`
+- `PatronTemporal patronTemporal`
+- `List<Plaza> plazas`
 
-### Expansion
-- package-private final class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `static List<ActividadInstancia> instanciasDe(Actividad actividad)`
-  - `static List<ActividadInstancia> todas(ProblemaHorario problema)`
-- Consume: `ActividadInstancia`, `Actividad`, `ProblemaHorario`
+Consume: `Asignatura`, `PatronTemporal`, `Plaza`
 
-### HorarioInfactibleException
-- public class (`es.yaroki.educhronos.solver.cpsat`) extends `RuntimeException`
-- Constructores:
-  - `public HorarioInfactibleException(String mensaje)`
-- Consume: —
+### `ActividadInstancia` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `Actividad actividad`
+- `int indice`
 
-### InstanciaProgramada
-- package-private final class (`es.yaroki.educhronos.solver.cpsat`)
-- Constructores:
-  - `InstanciaProgramada(ActividadInstancia instancia, IntVar tramoIndex, IntervalVar intervalo, Map<Plaza, List<AulaOpcion>> opcionesDeAula)`
-- Métodos:
-  - `ActividadInstancia instancia()`
-  - `IntVar tramoIndex()`
-  - `IntervalVar intervalo()`
-  - `Map<Plaza, List<AulaOpcion>> opcionesDeAula()`
-- Consume: `ActividadInstancia`, `Plaza`, `AulaOpcion`
+Consume: `Actividad`
 
-### ModeloCpSat
-- package-private final class (`es.yaroki.educhronos.solver.cpsat`)
-- Constructores:
-  - `ModeloCpSat(ProblemaHorario problema)`
-- Métodos:
-  - `CpModel model()`
-  - `ModeloCpSat construir()`
-  - `ModeloCpSat construirConObjetivo()`
-  - `ModeloCpSat sembrarHint(SolucionHorario semilla)`
-  - `SolucionHorario extraerSolucion(CpSolver solver)`
-- Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `TipoRestriccion`, `SolucionHorario`, `Subgrupo`, `Tramo`
+### `Asignatura` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `String nombre`
 
-### ResultadoOptimizacion
-- public record (`es.yaroki.educhronos.solver.cpsat`)
-- Componentes:
-  - `SolucionHorario solucion`
-  - `CpSolverStatus estado`
-  - `double objetivo`
-  - `double cotaInferior`
-- Métodos:
-  - `public boolean esOptimo()`
-- Consume: `SolucionHorario`
+Consume: (ninguno)
 
-### ResultadoVerificacion
-- public record (`es.yaroki.educhronos.solver.cpsat`)
-- Componentes:
-  - `List<String> violaciones`
-- Métodos:
-  - `public boolean esValida()`
-- Consume: —
+### `Aula` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `String nombre`
 
-### RestriccionNoSolapeGrupoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void dosActividadesDelMismoGrupoCaenEnTramosDistintos() throws IOException`
-  - `void mismoGrupoEnUnUnicoTramoEsInfactible() throws IOException`
-- Consume: `ActividadInstancia`, `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
+Consume: (ninguno)
 
-### SolverHorario
-- public final class (`es.yaroki.educhronos.solver.cpsat`)
-- Constructores:
-  - `public SolverHorario()`
-  - `public SolverHorario(double maxSegundos, int semilla)`
-- Métodos:
-  - `public SolucionHorario resolver(ProblemaHorario problema)`
-  - `public SolucionHorario resolverOptimizando(ProblemaHorario problema)`
-  - `public ResultadoOptimizacion resolverOptimizandoConDetalle(ProblemaHorario problema)`
-  - `public ResultadoOptimizacion resolverOptimizandoConSemilla(ProblemaHorario problema, SolucionHorario semilla)`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ResultadoOptimizacion`
+### `GrupoAdministrativo` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `TipoGrupo tipo`
+- `Optional<GrupoAdministrativo> grupoPadre`
 
-### SolverHorario1EsoOrdinariasTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void resuelveFactibleSinViolaciones() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: `TipoGrupo`
 
-### SolverHorarioAulaCandidataTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void candidatasEligeAulaLibre() throws Exception`
-  - `void mixtaEnMismoTramoEligeAulaLibre() throws Exception`
-  - `void candidataUnicaCompartidaEsInfactible() throws Exception`
-- Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `PatronTemporal` — public enum
+Paquete: `es.yaroki.educhronos.solver.domain`
+Constantes: `DISTRIBUIDA`, `AGRUPADA`, `NEUTRA`
 
-### SolverHorarioBloqueD13Test
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void bloqueDuracion2CabeEnInicioValido() throws IOException`
-  - `void bloqueDuracion2QueDesbordaElDiaEsInfactible() throws IOException`
-  - `void bloqueDuracion2QueCruzaElRecreoEsInfactible() throws IOException`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: (ninguno)
 
-### SolverHorarioCierreFase3Test
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void cierreDeFase3() throws Exception`
-- Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
+### `Plaza` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `Asignatura asignatura`
+- `Set<Profesor> profesores`
+- `Optional<Aula> aulaFija`
+- `Set<Aula> aulasCandidatas`
+- `Set<Subgrupo> subgrupos`
 
-### SolverHorarioCierreFase4Test
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void cierreDeFase4() throws Exception`
-- Consume: `Actividad`, `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `Subgrupo`, `Tramo`, `ProblemaHorarioJsonLoader`
+Consume: `Asignatura`, `Aula`, `Profesor`, `Subgrupo`
 
-### SolverHorarioConsecutivasProfesorTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elOptimizadorEvitaEncadenarDeMasCuandoPuede() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
+### `ProblemaHorario` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `List<Tramo> tramos`
+- `List<Aula> aulas`
+- `List<Asignatura> asignaturas`
+- `List<Profesor> profesores`
+- `List<GrupoAdministrativo> grupos`
+- `List<Subgrupo> subgrupos`
+- `List<Actividad> actividades`
+- `List<RestriccionHoraria> restriccionesHorarias`
 
-### SolverHorarioDetalleOptimizacionTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void detalleReportaOptimoProbadoYObjetivoPositivoConcordante() throws Exception`
-  - `void detalleReportaOptimoCeroSinVeto() throws Exception`
-  - `void resolverOptimizandoClasicoDevuelveLaMismaSolucionQueElDetalle() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Métodos:
+- `public int indiceDeTramo(Tramo tramo)`
 
-### SolverHorarioEscala1BachTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void resuelveFactibleSinViolaciones() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `RestriccionHoraria`, `Subgrupo`, `Tramo`
 
-### SolverHorarioEscala1FpbTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void resuelveFactibleSinViolaciones() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `Profesor` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `String nombre`
 
-### SolverHorarioEscala2FpbTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void resuelveFactibleSinViolaciones() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: (ninguno)
 
-### SolverHorarioEscala4EsoDiTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void escala4EsoCompleto() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `RestriccionHoraria` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `Profesor profesor`
+- `Tramo tramo`
+- `TipoRestriccion tipo`
+- `int peso`
+- `Optional<String> motivo`
 
-### SolverHorarioEscala4EsoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void escala4EsoOrdinario() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: `Profesor`, `TipoRestriccion`, `Tramo`
 
-### SolverHorarioEscalaInstitutoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void escala1y2y3ESOconPDC() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `SolucionHorario` — public class
+Paquete: `es.yaroki.educhronos.solver.domain`
+Constructores:
+- `public SolucionHorario(Map<ActividadInstancia, Tramo> asignaciones)`
+- `public SolucionHorario(Map<ActividadInstancia, Tramo> asignaciones, Map<ActividadInstancia, Map<Plaza, Aula>> aulasElegidas)`
 
-### SolverHorarioFusion34EsoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void fusion34Eso() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Métodos:
+- `public Optional<Tramo> tramoDeInstancia(ActividadInstancia instancia)`
+- `public Optional<Aula> aulaElegida(ActividadInstancia instancia, Plaza plaza)`
+- `public Map<ActividadInstancia, Tramo> asignaciones()`
 
-### SolverHorarioFusionEsoCompletaTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void fusionEsoCompleta() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: `ActividadInstancia`, `Aula`, `Plaza`, `Tramo`
 
-### SolverHorarioFusionInstitutoCompletoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void fusionInstitutoCompleto() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `Subgrupo` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `Set<GrupoAdministrativo> grupos`
 
-### SolverHorarioIndisponibilidadBlandaProfesorTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elOptimizadorEvitaElTramoVetadoBlandoCuandoPuede() throws Exception`
-- Consume: `ActividadInstancia`, `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
+Métodos:
+- `public boolean equals(Object o)`
+- `public int hashCode()`
 
-### SolverHorarioIndisponibilidadProfesorTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elVetoRedirigeLaInstanciaAlTramoNoVetado() throws Exception`
-  - `void elVetoVuelveInfactibleElPalomarDeProfesor() throws Exception`
-  - `void sinElVetoElMismoProblemaEsFactible_discriminacion() throws Exception`
-- Consume: `ActividadInstancia`, `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
+Consume: `GrupoAdministrativo`
 
-### SolverHorarioLecturaBTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void bloqueOptativasMultigrupoEsFactible() throws Exception`
-  - `void optativaMultigrupoBloqueaAmbosGrupos_infactible() throws Exception`
-- Consume: `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `Subgrupo`, `ProblemaHorarioJsonLoader`
+### `TipoGrupo` — public enum
+Paquete: `es.yaroki.educhronos.solver.domain`
+Constantes: `ORDINARIO`, `DIVERSIFICACION_PDC`
 
-### SolverHorarioOptimizacionInstitutoCompletoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void optimizacionInstitutoCompleto() throws Exception`
-- Consume: `ProblemaHorario`, `Profesor`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: (ninguno)
 
-### SolverHorarioOroFuerteConsecutivasTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elOptimizadorMinimizaLasConsecutivasCuandoEncadenarEsInevitable() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `TipoRestriccion` — public enum
+Paquete: `es.yaroki.educhronos.solver.domain`
+Constantes: `DURA`, `BLANDA`
 
-### SolverHorarioOroFuerteIndispBlandaTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elOptimizadorMinimizaLaBlandaCuandoIncumplirEsInevitable() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+Consume: (ninguno)
 
-### SolverHorarioOroFuerteVentanasTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void elOptimizadorAlcanzaElOptimoPositivoForzadoPorElVeto() throws Exception`
-  - `void sinElVetoElOptimoEsCero_discriminacion() throws Exception`
-- Consume: `ProblemaHorario`, `Profesor`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
+### `Tramo` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `String codigo`
+- `int diaSemana`
+- `int ordenEnDia`
 
-### SolverHorarioPodaAulaTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void podaMantieneFactibleYRespetaRecorte() throws Exception`
-  - `void podaInsuficienteSaturaYEsInfactible() throws Exception`
-- Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
-
-### SolverHorarioReligionParejasTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void cierreBloque1Fase5() throws Exception`
-- Consume: `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `SolucionHorario`, `Subgrupo`, `Tramo`, `ProblemaHorarioJsonLoader`
-
-### SolverHorarioTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void resuelveElFixtureMinimoSinViolaciones() throws Exception`
-  - `void todasLasInstanciasQuedanColocadas() throws Exception`
-  - `void laCoDocenciaOcupaAAmbosProfesores() throws Exception`
-  - `void elVerificadorDetectaUnSolapeDeProfesor() throws Exception`
-- Consume: `ActividadInstancia`, `ProblemaHorario`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
-
-### SolverHorarioVentanasProfesorTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void conObjetivoElSolverEliminaLasVentanasDelProfesorado() throws Exception`
-  - `void elContadorDetectaVentanasEnUnaSolucionConHuecos() throws Exception`
-- Consume: `ActividadInstancia`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Tramo`, `ProblemaHorarioJsonLoader`
-
-### SolverHorarioWarmStartInstitutoCompletoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void warmStartInstitutoCompleto() throws Exception`
-- Consume: `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`
-
-### VerificadorSolucion
-- public final class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `public ResultadoVerificacion verificar(ProblemaHorario problema, SolucionHorario solucion)`
-  - `public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
-  - `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
-  - `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
-- Consume: `ResultadoVerificacion`, `ProblemaHorario`, `SolucionHorario`, `Profesor`
-
-### VerificadorSolucionGrupoTest
-- package-private class (`es.yaroki.educhronos.solver.cpsat`)
-- Métodos:
-  - `void reportaSolapeDeGrupoEntreActividadesDistintas()`
-  - `void noReportaGrupoEnTramosDistintos()`
-  - `void desdobleNoSeReportaComoSolapeDeGrupo_regresion()`
-- Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Asignatura`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `Profesor`, `ProblemaHorario`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+Consume: (ninguno)
 
 ---
 
-## Paquete `es.yaroki.educhronos.solver.io`
+## Paquete `cpsat`
 
-### ActividadDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String asignatura`
-  - `Integer repeticionesPorSemana`
-  - `Integer duracionTramos`
-  - `String patronTemporal`
-  - `List<PlazaDto> plazas`
-- Consume: `PlazaDto`
+### `AulaOpcion` — package-private record
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Componentes:
+- `Aula aula`
+- `BoolVar presencia`
+- `IntervalVar intervalo`
 
-### AsignaturaDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
+Consume: `Aula`
 
-### AulaDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
+### `Expansion` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `static List<ActividadInstancia> instanciasDe(Actividad actividad)`
+- `static List<ActividadInstancia> todas(ProblemaHorario problema)`
 
-### GrupoDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String tipo`
-  - `String grupoPadre`
-- Consume: —
+Consume: `Actividad`, `ActividadInstancia`, `ProblemaHorario`
 
-### PlazaDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String asignatura`
-  - `List<String> profesores`
-  - `String aulaFija`
-  - `List<String> aulasCandidatas`
-  - `List<String> subgrupos`
-- Consume: —
+### `HorarioInfactibleException` — public class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Extiende: `RuntimeException`
+Constructores:
+- `public HorarioInfactibleException(String mensaje)`
 
-### ProblemaHorarioDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `List<TramoDto> tramos`
-  - `List<AulaDto> aulas`
-  - `List<AsignaturaDto> asignaturas`
-  - `List<ProfesorDto> profesores`
-  - `List<GrupoDto> grupos`
-  - `List<SubgrupoDto> subgrupos`
-  - `List<ActividadDto> actividades`
-  - `List<RestriccionHorariaDto> restriccionesHorarias`
-- Consume: `TramoDto`, `AulaDto`, `AsignaturaDto`, `ProfesorDto`, `GrupoDto`, `SubgrupoDto`, `ActividadDto`, `RestriccionHorariaDto`
+Consume: (ninguno)
 
-### ProblemaHorarioJsonLoader
-- public final class (`es.yaroki.educhronos.solver.io`)
-- Constructores:
-  - `public ProblemaHorarioJsonLoader()`
-- Métodos:
-  - `public ProblemaHorario cargar(InputStream entrada)`
-- Consume: `ProblemaHorario`
+### `InstanciaProgramada` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Constructores:
+- `InstanciaProgramada(ActividadInstancia instancia, IntVar tramoIndex, IntervalVar intervalo, Map<Plaza, List<AulaOpcion>> opcionesDeAula)`
 
-### ProblemaHorarioJsonLoaderTest
-- package-private class (`es.yaroki.educhronos.solver.io`)
-- Métodos:
-  - `void cargaDatasetMinimoValidoSinExcepciones() throws Exception`
-  - `void rechazaReferenciaAProfesorInexistente()`
-  - `void rechazaPlazaSinProfesores()`
-  - `void cargaAulasCandidatasResueltas() throws Exception`
-  - `void rechazaGrupoPdcSinGrupoPadre()`
-  - `void rechazaSubgrupoEnDosPlazasDeLaMismaActividad()`
-  - `void cargaRestriccionHorariaDuraResuelta() throws Exception`
-  - `void cargaProblemaSinRestriccionesHorarias() throws Exception`
-  - `void rechazaRestriccionHorariaConTramoInexistente()`
-- Consume: `Actividad`, `Aula`, `Plaza`, `Profesor`, `ProblemaHorario`, `RestriccionHoraria`, `TipoRestriccion`
+Métodos:
+- `ActividadInstancia instancia()`
+- `IntVar tramoIndex()`
+- `IntervalVar intervalo()`
+- `Map<Plaza, List<AulaOpcion>> opcionesDeAula()`
 
-### ProblemaHorarioMapper
-- public final class (`es.yaroki.educhronos.solver.io`)
-- Métodos:
-  - `public static ProblemaHorario aDominio(ProblemaHorarioDto dto)`
-- Consume: `ProblemaHorario`, `ProblemaHorarioDto`, `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `Profesor`, `RestriccionHoraria`, `TipoRestriccion`, `Subgrupo`, `TipoGrupo`, `Tramo`
+Consume: `ActividadInstancia`, `AulaOpcion`, `Plaza`
 
-### ProblemaInvalidoException
-- public class (`es.yaroki.educhronos.solver.io`) extends `RuntimeException`
-- Constructores:
-  - `public ProblemaInvalidoException(String mensaje)`
-  - `public ProblemaInvalidoException(String mensaje, Throwable causa)`
-- Consume: —
+### `ModeloCpSat` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Constructores:
+- `ModeloCpSat(ProblemaHorario problema)`
 
-### ProfesorDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `String nombre`
-- Consume: —
+Métodos:
+- `CpModel model()`
+- `ModeloCpSat construir()`
+- `ModeloCpSat construirConObjetivo()`
+- `ModeloCpSat construirConObjetivo(boolean podar)`
+- `ModeloCpSat sembrarHint(SolucionHorario semilla)`
+- `SolucionHorario extraerSolucion(CpSolver solver)`
 
-### RestriccionHorariaDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String profesor`
-  - `String tramo`
-  - `String tipo`
-  - `Integer peso`
-  - `String motivo`
-- Consume: —
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
-### SubgrupoDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `List<String> grupos`
-- Consume: —
+### `ResultadoOptimizacion` — public record
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Componentes:
+- `SolucionHorario solucion`
+- `CpSolverStatus estado`
+- `double objetivo`
+- `double cotaInferior`
 
-### TramoDto
-- public record (`es.yaroki.educhronos.solver.io`)
-- Componentes:
-  - `String codigo`
-  - `Integer diaSemana`
-  - `Integer ordenEnDia`
-- Consume: —
+Métodos:
+- `public boolean esOptimo()`
+
+Consume: `SolucionHorario`
+
+### `ResultadoVerificacion` — public record
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Componentes:
+- `List<String> violaciones`
+
+Métodos:
+- `public boolean esValida()`
+
+Consume: (ninguno)
+
+### `SolverHorario` — public final class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Constructores:
+- `public SolverHorario()`
+- `public SolverHorario(double maxSegundos, int semilla)`
+
+Métodos:
+- `public SolucionHorario resolver(ProblemaHorario problema)`
+- `public SolucionHorario resolverOptimizando(ProblemaHorario problema)`
+- `public ResultadoOptimizacion resolverOptimizandoConDetalle(ProblemaHorario problema)`
+- `public ResultadoOptimizacion resolverOptimizandoConSemilla(ProblemaHorario problema, SolucionHorario semilla)`
+
+Consume: `ProblemaHorario`, `ResultadoOptimizacion`, `SolucionHorario`
+
+### `VerificadorSolucion` — public final class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `public ResultadoVerificacion verificar(ProblemaHorario problema, SolucionHorario solucion)`
+- `public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
+- `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
+- `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
+
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
 ---
 
-## Paquete `es.yaroki.educhronos.solver.cli`
+## Paquete `io`
 
-### CodigoSalida
-- package-private enum (`es.yaroki.educhronos.solver.cli`)
-- Constantes: `OK`, `INFACTIBLE`, `ENTRADA_INVALIDA`, `VIOLACIONES_DURAS`
-- Métodos:
-  - `int valor()`
-- Consume: —
+### `ActividadDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String asignatura`
+- `Integer repeticionesPorSemana`
+- `Integer duracionTramos`
+- `String patronTemporal`
+- `List<PlazaDto> plazas`
 
-### FormatoCelda
-- package-private final class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `static String formatear(SesionMaterializada sesion)`
-- Consume: `SesionMaterializada`, `Profesor`
+Consume: `PlazaDto`
 
-### HelloOrTools
-- public class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `public static void main(String[] args)`
-- Consume: —
+### `AsignaturaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String nombre`
 
-### HorarioPrinter
-- package-private final class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `static <K> void imprimir(PrintStream out, ProblemaHorario problema, List<SesionMaterializada> sesiones, VistaHorario<K> vista)`
-- Consume: `ProblemaHorario`, `Tramo`, `SesionMaterializada`, `VistaHorario`
+Consume: (ninguno)
 
-### Main
-- public final class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `public static void main(String[] args)`
-  - `static int ejecutar(String[] args, PrintStream out, PrintStream err)`
-- Consume: `HorarioInfactibleException`, `ResultadoVerificacion`, `SolverHorario`, `VerificadorSolucion`, `ProblemaHorario`, `SolucionHorario`, `ProblemaHorarioJsonLoader`, `ProblemaInvalidoException`
+### `AulaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String nombre`
 
-### Main1EsoOrdinariasTest
-- package-private class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `void endToEnd_codigoSalidaOk(@TempDir Path tempDir) throws Exception`
-- Consume: —
+Consume: (ninguno)
 
-### MainTest
-- package-private class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `void sinArgumentosSaleConCodigo2()`
-  - `void demasiadosArgumentosSaleConCodigo2()`
-  - `void ficheroInexistenteSaleConCodigo2()`
-  - `void problemaMinimoResolubleSaleConCodigo0() throws Exception`
-  - `void problemaMinimoMuestraCabecerasDeDiasYTramos() throws Exception`
-  - `void problemaMinimoMuestraCodigosClaveDelFixture() throws Exception`
-- Consume: —
+### `GrupoDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String tipo`
+- `String grupoPadre`
 
-### Materializador
-- package-private final class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `static List<SesionMaterializada> materializar(SolucionHorario solucion)`
-- Consume: `SolucionHorario`, `SesionMaterializada`
+Consume: (ninguno)
 
-### SesionMaterializada
-- package-private record (`es.yaroki.educhronos.solver.cli`)
-- Componentes:
-  - `Tramo tramo`
-  - `ActividadInstancia instancia`
-  - `Plaza plaza`
-- Consume: `Tramo`, `ActividadInstancia`, `Plaza`
+### `PlazaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String asignatura`
+- `List<String> profesores`
+- `String aulaFija`
+- `List<String> aulasCandidatas`
+- `List<String> subgrupos`
 
-### VerificacionPrinter
-- package-private final class (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `static void imprimir(PrintStream out, ResultadoVerificacion resultado)`
-- Consume: `ResultadoVerificacion`
+Consume: (ninguno)
 
-### VistaHorario
-- package-private interface (`es.yaroki.educhronos.solver.cli`)
-- Métodos:
-  - `String titulo()`
-  - `List<K> filas(ProblemaHorario problema)`
-  - `String etiquetaFila(K clave)`
-  - `Set<K> filasDe(SesionMaterializada sesion)`
-  - `String contenidoCelda(SesionMaterializada sesion)`
-- Consume: `ProblemaHorario`, `SesionMaterializada`
+### `ProblemaHorarioDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `List<TramoDto> tramos`
+- `List<AulaDto> aulas`
+- `List<AsignaturaDto> asignaturas`
+- `List<ProfesorDto> profesores`
+- `List<GrupoDto> grupos`
+- `List<SubgrupoDto> subgrupos`
+- `List<ActividadDto> actividades`
+- `List<RestriccionHorariaDto> restriccionesHorarias`
 
-### VistaPorGrupo
-- package-private final class (`es.yaroki.educhronos.solver.cli`) implements `VistaHorario<GrupoAdministrativo>`
-- Métodos:
-  - `public String titulo()`
-  - `public List<GrupoAdministrativo> filas(ProblemaHorario problema)`
-  - `public String etiquetaFila(GrupoAdministrativo clave)`
-  - `public Set<GrupoAdministrativo> filasDe(SesionMaterializada sesion)`
-  - `public String contenidoCelda(SesionMaterializada sesion)`
-- Consume: `GrupoAdministrativo`, `ProblemaHorario`, `Subgrupo`, `SesionMaterializada`, `VistaHorario`
+Consume: `ActividadDto`, `AsignaturaDto`, `AulaDto`, `GrupoDto`, `ProfesorDto`, `RestriccionHorariaDto`, `SubgrupoDto`, `TramoDto`
 
-### VistaPorProfesor
-- package-private final class (`es.yaroki.educhronos.solver.cli`) implements `VistaHorario<Profesor>`
-- Métodos:
-  - `public String titulo()`
-  - `public List<Profesor> filas(ProblemaHorario problema)`
-  - `public String etiquetaFila(Profesor clave)`
-  - `public Set<Profesor> filasDe(SesionMaterializada sesion)`
-  - `public String contenidoCelda(SesionMaterializada sesion)`
-- Consume: `Profesor`, `ProblemaHorario`, `SesionMaterializada`, `VistaHorario`
+### `ProblemaHorarioJsonLoader` — public final class
+Paquete: `es.yaroki.educhronos.solver.io`
+Constructores:
+- `public ProblemaHorarioJsonLoader()`
+
+Métodos:
+- `public ProblemaHorario cargar(InputStream entrada)`
+
+Consume: `ProblemaHorario`
+
+### `ProblemaHorarioMapper` — public final class
+Paquete: `es.yaroki.educhronos.solver.io`
+Métodos:
+- `public static ProblemaHorario aDominio(ProblemaHorarioDto dto)`
+
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioDto`, `Profesor`, `RestriccionHoraria`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
+
+### `ProblemaInvalidoException` — public class
+Paquete: `es.yaroki.educhronos.solver.io`
+Extiende: `RuntimeException`
+Constructores:
+- `public ProblemaInvalidoException(String mensaje)`
+- `public ProblemaInvalidoException(String mensaje, Throwable causa)`
+
+Consume: (ninguno)
+
+### `ProfesorDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `String nombre`
+
+Consume: (ninguno)
+
+### `RestriccionHorariaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String profesor`
+- `String tramo`
+- `String tipo`
+- `Integer peso`
+- `String motivo`
+
+Consume: (ninguno)
+
+### `SubgrupoDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `List<String> grupos`
+
+Consume: (ninguno)
+
+### `TramoDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String codigo`
+- `Integer diaSemana`
+- `Integer ordenEnDia`
+
+Consume: (ninguno)
+
+---
+
+## Paquete `cli`
+
+### `CodigoSalida` — package-private enum
+Paquete: `es.yaroki.educhronos.solver.cli`
+Constantes: `OK`, `INFACTIBLE`, `ENTRADA_INVALIDA`, `VIOLACIONES_DURAS`
+Métodos:
+- `int valor()`
+
+Consume: (ninguno)
+
+### `FormatoCelda` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `static String formatear(SesionMaterializada sesion)`
+
+Consume: `Profesor`, `SesionMaterializada`
+
+### `HelloOrTools` — public class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `public static void main(String[] args)`
+
+Consume: (ninguno)
+
+### `HorarioPrinter` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `static <K> void imprimir(PrintStream out, ProblemaHorario problema, List<SesionMaterializada> sesiones, VistaHorario<K> vista)`
+
+Consume: `ProblemaHorario`, `SesionMaterializada`, `Tramo`, `VistaHorario`
+
+### `Main` — public final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `public static void main(String[] args)`
+- `static int ejecutar(String[] args, PrintStream out, PrintStream err)`
+
+Consume: `HorarioInfactibleException`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `ProblemaInvalidoException`, `ResultadoVerificacion`, `SolucionHorario`, `SolverHorario`, `VerificadorSolucion`
+
+### `Materializador` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `static List<SesionMaterializada> materializar(SolucionHorario solucion)`
+
+Consume: `SesionMaterializada`, `SolucionHorario`
+
+### `SesionMaterializada` — package-private record
+Paquete: `es.yaroki.educhronos.solver.cli`
+Componentes:
+- `Tramo tramo`
+- `ActividadInstancia instancia`
+- `Plaza plaza`
+
+Consume: `ActividadInstancia`, `Plaza`, `Tramo`
+
+### `VerificacionPrinter` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `static void imprimir(PrintStream out, ResultadoVerificacion resultado)`
+
+Consume: `ResultadoVerificacion`
+
+### `VistaHorario` — package-private interface
+Paquete: `es.yaroki.educhronos.solver.cli`
+Parámetro de tipo: `<K>`
+Métodos:
+- `String titulo()`
+- `List<K> filas(ProblemaHorario problema)`
+- `String etiquetaFila(K clave)`
+- `Set<K> filasDe(SesionMaterializada sesion)`
+- `String contenidoCelda(SesionMaterializada sesion)`
+
+Consume: `ProblemaHorario`, `SesionMaterializada`
+
+### `VistaPorGrupo` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Implementa: `VistaHorario<GrupoAdministrativo>`
+Métodos:
+- `public String titulo()`
+- `public List<GrupoAdministrativo> filas(ProblemaHorario problema)`
+- `public String etiquetaFila(GrupoAdministrativo clave)`
+- `public Set<GrupoAdministrativo> filasDe(SesionMaterializada sesion)`
+- `public String contenidoCelda(SesionMaterializada sesion)`
+
+Consume: `GrupoAdministrativo`, `ProblemaHorario`, `SesionMaterializada`, `Subgrupo`, `VistaHorario`
+
+### `VistaPorProfesor` — package-private final class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Implementa: `VistaHorario<Profesor>`
+Métodos:
+- `public String titulo()`
+- `public List<Profesor> filas(ProblemaHorario problema)`
+- `public String etiquetaFila(Profesor clave)`
+- `public Set<Profesor> filasDe(SesionMaterializada sesion)`
+- `public String contenidoCelda(SesionMaterializada sesion)`
+
+Consume: `ProblemaHorario`, `Profesor`, `SesionMaterializada`, `VistaHorario`
+
+---
+
+## Tests — paquete `cli`
+
+### `Main1EsoOrdinariasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `void endToEnd_codigoSalidaOk(Path tempDir) throws Exception`
+
+Consume: (ninguno)
+
+### `MainTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cli`
+Métodos:
+- `void sinArgumentosSaleConCodigo2()`
+- `void demasiadosArgumentosSaleConCodigo2()`
+- `void ficheroInexistenteSaleConCodigo2()`
+- `void problemaMinimoResolubleSaleConCodigo0() throws Exception`
+- `void problemaMinimoMuestraCabecerasDeDiasYTramos() throws Exception`
+- `void problemaMinimoMuestraCodigosClaveDelFixture() throws Exception`
+
+Consume: (ninguno)
+
+---
+
+## Tests — paquete `cpsat`
+
+### `RestriccionNoSolapeGrupoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void dosActividadesDelMismoGrupoCaenEnTramosDistintos() throws IOException`
+- `void mismoGrupoEnUnUnicoTramoEsInfactible() throws IOException`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorario1EsoOrdinariasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void resuelveFactibleSinViolaciones() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioAulaCandidataTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void candidatasEligeAulaLibre() throws Exception`
+- `void mixtaEnMismoTramoEligeAulaLibre() throws Exception`
+- `void candidataUnicaCompartidaEsInfactible() throws Exception`
+
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioBloqueD13Test` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void bloqueDuracion2CabeEnInicioValido() throws IOException`
+- `void bloqueDuracion2QueDesbordaElDiaEsInfactible() throws IOException`
+- `void bloqueDuracion2QueCruzaElRecreoEsInfactible() throws IOException`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioCierreFase3Test` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void cierreDeFase3() throws Exception`
+
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioCierreFase4Test` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void cierreDeFase4() throws Exception`
+
+Consume: `Actividad`, `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Subgrupo`, `Tramo`
+
+### `SolverHorarioConsecutivasProfesorTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elOptimizadorEvitaEncadenarDeMasCuandoPuede() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioDetalleOptimizacionTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void detalleReportaOptimoProbadoYObjetivoPositivoConcordante() throws Exception`
+- `void detalleReportaOptimoCeroSinVeto() throws Exception`
+- `void resolverOptimizandoClasicoDevuelveLaMismaSolucionQueElDetalle() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscala1BachTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void resuelveFactibleSinViolaciones() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscala1FpbTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void resuelveFactibleSinViolaciones() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscala2FpbTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void resuelveFactibleSinViolaciones() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscala4EsoDiTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void escala4EsoCompleto() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscala4EsoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void escala4EsoOrdinario() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioEscalaInstitutoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void escala1y2y3ESOconPDC() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioFusion34EsoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void fusion34Eso() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioFusionEsoCompletaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void fusionEsoCompleta() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioFusionInstitutoCompletoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void fusionInstitutoCompleto() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioIndisponibilidadBlandaProfesorTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elOptimizadorEvitaElTramoVetadoBlandoCuandoPuede() throws Exception`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioIndisponibilidadProfesorTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elVetoRedirigeLaInstanciaAlTramoNoVetado() throws Exception`
+- `void elVetoVuelveInfactibleElPalomarDeProfesor() throws Exception`
+- `void sinElVetoElMismoProblemaEsFactible_discriminacion() throws Exception`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioLecturaBTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void bloqueOptativasMultigrupoEsFactible() throws Exception`
+- `void optativaMultigrupoBloqueaAmbosGrupos_infactible() throws Exception`
+
+Consume: `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Subgrupo`
+
+### `SolverHorarioOptimizacionEscalaInstitutoCompletoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void optimizacionInstitutoCompleto() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`
+
+### `SolverHorarioOroFuerteConsecutivasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elOptimizadorMinimizaLasConsecutivasCuandoEncadenarEsInevitable() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioOroFuerteIndispBlandaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elOptimizadorMinimizaLaBlandaCuandoIncumplirEsInevitable() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `SolverHorarioOroFuerteVentanasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void elOptimizadorAlcanzaElOptimoPositivoForzadoPorElVeto() throws Exception`
+- `void sinElVetoElOptimoEsCero_discriminacion() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`
+
+### `SolverHorarioReligionParejasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void cierreBloque1Fase5() throws Exception`
+
+Consume: `ActividadInstancia`, `GrupoAdministrativo`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Subgrupo`, `Tramo`
+
+### `SolverHorarioTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void resuelveElFixtureMinimoSinViolaciones() throws Exception`
+- `void todasLasInstanciasQuedanColocadas() throws Exception`
+- `void laCoDocenciaOcupaAAmbosProfesores() throws Exception`
+- `void elVerificadorDetectaUnSolapeDeProfesor() throws Exception`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioVentanasProfesorTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void conObjetivoElSolverEliminaLasVentanasDelProfesorado() throws Exception`
+- `void elContadorDetectaVentanasEnUnaSolucionConHuecos() throws Exception`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioWarmStartInstitutoCompletoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void warmStartInstitutoCompleto() throws Exception`
+
+Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `VerificadorSolucionGrupoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void reportaSolapeDeGrupoEntreActividadesDistintas()`
+- `void noReportaGrupoEnTramosDistintos()`
+- `void desdobleNoSeReportaComoSolapeDeGrupo_regresion()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
+---
+
+## Tests — paquete `io`
+
+### `ProblemaHorarioJsonLoaderTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.io`
+Métodos:
+- `void cargaDatasetMinimoValidoSinExcepciones() throws Exception`
+- `void rechazaReferenciaAProfesorInexistente()`
+- `void rechazaPlazaSinProfesores()`
+- `void cargaAulasCandidatasResueltas() throws Exception`
+- `void rechazaGrupoPdcSinGrupoPadre()`
+- `void rechazaSubgrupoEnDosPlazasDeLaMismaActividad()`
+- `void cargaRestriccionHorariaDuraResuelta() throws Exception`
+- `void cargaProblemaSinRestriccionesHorarias() throws Exception`
+- `void rechazaRestriccionHorariaConTramoInexistente()`
+
+Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `TipoRestriccion`
