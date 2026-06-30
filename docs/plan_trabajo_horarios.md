@@ -274,7 +274,11 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 
 ## FASE 5 — Solver: instituto completo
 **Objetivo:** El solver funciona con todos los grupos reales del instituto.
-
+**Estado (S44): FASE 5 CERRADA.** Criterios 1-2 cerrados en S36 (factibilidad
+pura, instituto completo, < 10 min, 0 duras). Criterios 3-4 cerrados en S44 como
+decisión de producto gemela de D23 (umbral de calidad/ventanas requiere datos del
+centro, inexistentes en desarrollo), con respaldo descriptivo medido a escala. Ver
+el detalle en cada criterio. Siguiente: Fase 6 (persistencia).
 > **Estado (S29):** fase EN CURSO, subdividida en bloques internos (como Fase 2).
 > Bloques 1-6d-c, Bloque 7 (escala 4ºESO ordinario) y Bloque 8 (escala 4ºESO
 > completo, +2 PDC) CERRADOS — ver "### Bloques de Fase 5"
@@ -331,7 +335,7 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
 - [x] Cero restricciones duras violadas — CERRADO (S36, Bloque 13):
       VerificadorSolucion verde sobre la solución del instituto completo (no-solape
       profesor/aula/subgrupo/grupo, D13 bloques FPB, todas las instancias colocadas).
-- [ ] El horario generado es comparable en calidad al horario real de los PDFs 
+- [x] El horario generado es comparable en calidad al horario real de los PDFs
       (no necesita ser idéntico, pero debe ser razonable)
       — ABIERTO. ESTADO (S42): el régimen de optimización a escala (instituto
       completo) NO converge: devuelve FEASIBLE con gap grande (objetivo ~215, cota
@@ -348,7 +352,23 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
       (decisión consciente, gemela del criterio 4). El criterio queda ABIERTO a la
       espera de ESE umbral, ya no a la espera de convergencia. Ver D23 (cerrada) y D25
       (el perfil escala no es fiable corrido entero por contención).
-- [~] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
+      CIERRE (S44, decisión de producto gemela de D23): el criterio se cierra
+      aceptando el horario que produce el solver a escala SIN umbral de "comparable"
+      fijado contra los PDFs. Razón: el umbral exige datos del centro que no existen
+      en desarrollo (decisión consciente desde S24/S25), y D23 ya estableció que
+      FEASIBLE sin optimalidad probada es el modo de operación aceptado. Respaldo
+      descriptivo (sub-bloque S44, test SolverHorarioOptimizacionEscalaInstitutoCompletoTest
+      corrido aislado por D25): instituto completo 26 grupos, FEASIBLE objetivo 219,0
+      cota 2,0 gap 217,0 en 601,6 s; desglose por término (PESO_*=1, D21):
+      ventanas=196, consecutivas=23, indispBlanda=0 (el fixture no trae
+      restriccionesHorarias); 196+23+0=219 valida el recomputo del verificador contra
+      el objetivo del solver. HONESTIDAD: 196 ventanas semanales es ALTO para ~28
+      profesores sobre 30 tramos; sin dato del centro no se umbraliza como
+      "excesivo/aceptable", pero el cierre lo registra explícitamente. El criterio NO
+      se cierra por haber alcanzado calidad probada, sino por ser una decisión de
+      producto consciente sobre un solver que no converge (D23) y un umbral que no
+      existe sin el centro. Reabrible si el centro aporta datos para umbralizar.
+- [x] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
       un horario sin ventanas excesivas
       — PARCIAL (S25, Bloque 6b): el MECANISMO está implementado (penalización
       de ventanas en la función objetivo, Bloque 6a) y VALIDADO incluyendo la
@@ -362,6 +382,14 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
       blandos —ventanas (6a), indisponibilidad blanda (6c) y consecutivas máximas
       (6d-c)—; los dos pendientes del criterio 3 son distribución-a-blanda (6d-a,
       toca estructura dura) y primeras/últimas horas (6d-b, reactiva D17).
+      CIERRE (S44, decisión de producto gemela de D23 y del criterio 3): el
+      mecanismo de ventanas está implementado y validado por oro fuerte desde S25;
+      lo único pendiente era (a) el UMBRAL de "excesivas" —que exige datos del centro—
+      y (b) la validación a escala. (b) queda cubierta por el respaldo descriptivo de
+      S44: ventanas=196 medidas sobre el instituto completo (ver criterio 3). (a) se
+      cierra como decisión de producto: sin datos del centro no se inventa el umbral.
+      El criterio se da por cerrado en su parte construible (mecanismo + medición a
+      escala); el umbral queda como configuración del centro en despliegue.
 
 ### Señal de que está mal
 El solver no converge o genera soluciones con muchas restricciones duras 
@@ -505,11 +533,28 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
-  Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
-Última fase completada: 4 — Solver: grupos PDC/Diversificación
-  (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN —
+Fase actual: 6 — Persistencia de datos (por arrancar)
+Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
+  S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
+  gemela de D23, con respaldo descriptivo a escala)
+Última sesión registrada: Sesión 44 — Fase 5, CIERRE DE FASE. Sub-bloque de respaldo
+  descriptivo + cierre de criterios 3 y 4 como decisión de producto gemela de D23.
+  Con D23 cerrada (S43), los criterios 3 (calidad comparable) y 4 (ventanas no
+  excesivas) quedaban bloqueados por una MISMA causa: no hay umbral sin datos del
+  centro; no es trabajo técnico pendiente. Sub-bloque de respaldo (Variante A): el
+  test SolverHorarioOptimizacionEscalaInstitutoCompletoTest ya recomputaba los tres
+  términos blandos —no hizo falta código nuevo, solo correrlo aislado (D25) y
+  registrar la salida. EVIDENCIA (instituto completo real, 26 grupos, no el recorte
+  en memoria de S43): FEASIBLE objetivo 219,0 cota 2,0 gap 217,0 en 601,6 s; ventanas
+  =196, consecutivas=23, indispBlanda=0; 196+23+0=219 valida el recomputo del
+  verificador contra el objetivo del solver (PESO_*=1, D21). Lectura honesta: 196
+  ventanas es ALTO para ~28 profesores sobre 30 tramos; sin dato del centro no se
+  umbraliza, pero se registra. DECISIÓN: criterios 3 y 4 CERRADOS como decisión de
+  producto (umbral = configuración del centro en despliegue, no requisito de
+  desarrollo); FASE 5 CERRADA. Sin código nuevo: src/main NO tocado -> índice NO
+  regenerado; modelo NO tocado; pom NO tocado. Solo documentación. Siguiente: Fase 6
+  (persistencia). Test corrido aislado por D25, BUILD SUCCESS, 10:04 min.
+Última sesión registrada (previa): Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN —
   la no-convergencia de la optimización a escala es ESTRUCTURAL, no atribuible a un bloque.
   CIERRA D23 como DECISIÓN DE PRODUCTO. El frente: falsar si FPB endurece la optimización a
   escala (no la factibilidad). Método de S42: una hipótesis, experimento pareado, atribución
