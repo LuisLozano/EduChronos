@@ -339,13 +339,15 @@ para evitar el conflicto en lugar de forzar la simultaneidad.
       están AGOTADAS: (b) poda de aula medida e INVIABLE (rompe la factibilidad,
       Bloque 17) y (c) warm-start CERRADA (ayuda, objetivo 215->204, no resuelve la
       no-convergencia, Bloque 15b); solo queda viva (a) límite de tiempo con mejora
-      incremental, sin promesa de convergencia. Además el UMBRAL de "comparable"
-      sigue exigiendo datos del centro (decisión consciente, gemela del criterio 4).
-      Camino realista al cierre: aceptar el objetivo relajado (FEASIBLE sin
-      optimalidad probada) como DECISIÓN DE PRODUCTO explícita —el plan dejó este
-      desenlace legítimo desde S36—, no esperar convergencia. Pendiente de decidir
-      con el dueño del proyecto. Ver D23 (palancas) y D25 (el perfil escala no es
-      fiable corrido entero por contención).
+      incremental, sin promesa de convergencia. ACTUALIZACIÓN (S43, Bloque 18): el
+      experimento pareado de atribución descartó que la no-convergencia sea de un
+      bloque concreto (P0 base, P1 sin FPB y P2 solo ESO, los tres FEASIBLE con cota
+      0-2): es ESTRUCTURAL del modelo a escala. D23 CERRADA como DECISIÓN DE PRODUCTO
+      (FEASIBLE sin optimalidad probada es el modo de operación aceptado). Esto NO
+      cierra este criterio: el UMBRAL de "comparable" sigue exigiendo datos del centro
+      (decisión consciente, gemela del criterio 4). El criterio queda ABIERTO a la
+      espera de ESE umbral, ya no a la espera de convergencia. Ver D23 (cerrada) y D25
+      (el perfil escala no es fiable corrido entero por contención).
 - [~] Un profesor con muchos grupos (ej. REL1, INF1, TEC3) tiene
       un horario sin ventanas excesivas
       — PARCIAL (S25, Bloque 6b): el MECANISMO está implementado (penalización
@@ -507,7 +509,29 @@ Fase actual: 5 — Solver: instituto completo (en curso, subdividida en bloques;
   Bloques 1-6d-c, 7, 8, 9 y 10 cerrados)
 Última fase completada: 4 — Solver: grupos PDC/Diversificación
   (criterios 1-4 cerrados; validados con fixture real 3ºA/3ºADi)
-Última sesión registrada: Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA —
+Última sesión registrada: Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN —
+  la no-convergencia de la optimización a escala es ESTRUCTURAL, no atribuible a un bloque.
+  CIERRA D23 como DECISIÓN DE PRODUCTO. El frente: falsar si FPB endurece la optimización a
+  escala (no la factibilidad). Método de S42: una hipótesis, experimento pareado, atribución
+  limpia. Tres puntos sobre el mismo fixture (problema-5-fusion-instituto-completo.json)
+  recortado EN MEMORIA por bloque académico (catálogo idéntico; frontera ESO/Bach/FPB separable
+  sin referencias colgantes, verificado por réplica: 0 subgrupos y 0 actividades cruzan), cada
+  uno aislado (D25) tras -Pescala. RESULTADO: P0 base 26 grupos -> FEASIBLE obj 221 cota 0;
+  P1 sin FPB 24 grupos -> FEASIBLE obj 216 cota 2; P2 solo ESO 17 grupos -> FEASIBLE obj 62
+  cota 0. LECTURA (sobre estado/cota, no objetivo absoluto por varianza D25 ±7): (1) FPB
+  inocente — P0->P1 no cambia de régimen; (2) Bach domina la MAGNITUD del objetivo (216->62 al
+  quitarlo, colapso 3,5x, no ruido) PERO quitarlo NO da convergencia — P2 sigue FEASIBLE cota 0
+  gap 62; (3) la incapacidad de cerrar la cota ya está presente con solo ESO, luego es
+  propiedad del MODELO a escala, no de un bloque. Descartadas las dos hipótesis localizables.
+  DECISIÓN DE PRODUCTO (firmada por el dueño): FEASIBLE sin optimalidad probada es el modo de
+  operación aceptado del solver a escala; un horario con objetivo ~221 es usable, la prueba de
+  optimalidad no aporta valor aquí. D23 CERRADA (ya no es deuda con palanca pendiente). NO
+  cierra el criterio 3 (sigue exigiendo umbral con datos del centro). Test nuevo
+  SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, 3 métodos p0base/p1SinFpb/
+  p2SoloEso, recorte en memoria con fail-fast de frontera), convive con el de instituto
+  completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
+  regenerado; modelo NO tocado.
+Última sesión registrada (previa): Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA —
   INVIABLE. CIERRA la palanca (b) de D23 con dato negativo. El frente era medir la poda de
   S41 sobre el instituto completo; la medición destapó que la poda NO acelera: ROMPE la
   factibilidad. Diagnóstico pareado en la MISMA máquina/fixture, aislado y sin JaCoCo
@@ -1323,7 +1347,22 @@ Sesión 32 — Fase 5, Bloque 11 cerrado (ESCALA 1ºBACH
       perfil -Pescala entero, reactivación de D24). src/main tocado (default poda +
       javadoc) -> índice regenerado; modelo NO tocado. CIERRA palanca (b); empuja D23
       hacia decisión de producto.
-
+- [x] Bloque 18 — EXPERIMENTO PAREADO DE ATRIBUCIÓN: la no-convergencia a escala es
+      ESTRUCTURAL, no de un bloque. CIERRA D23 como decisión de producto (S43). Falsar
+      si FPB endurece la optimización a escala. Tres puntos sobre el mismo fixture
+      (problema-5-fusion-instituto-completo.json) recortado EN MEMORIA por bloque
+      académico (catálogo idéntico entre puntos; frontera ESO/Bach/FPB separable sin
+      referencias colgantes, verificado por réplica). Cada punto aislado (D25). RESULTADO:
+      P0 base 26g FEASIBLE obj 221 cota 0; P1 sin FPB 24g FEASIBLE obj 216 cota 2; P2 solo
+      ESO 17g FEASIBLE obj 62 cota 0. ATRIBUCIÓN (sobre estado/cota, no objetivo absoluto):
+      FPB inocente (P0->P1 sin cambio de régimen); Bach domina la magnitud (216->62) pero
+      quitarlo NO da convergencia (P2 sigue FEASIBLE cota 0); la cota no se cierra ni con
+      solo ESO -> propiedad del modelo, no de un bloque. DECISIÓN DE PRODUCTO firmada:
+      FEASIBLE sin optimalidad probada es el modo aceptado del solver a escala. Test nuevo
+      SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, recorte en memoria con
+      fail-fast de frontera), convive con el de instituto completo. Suite rápida 59 verde,
+      BUILD SUCCESS. src/main NO tocado -> índice NO regenerado; modelo NO tocado. NO cierra
+      criterio 3 (sigue exigiendo umbral con datos del centro).
 ### Fases completadas
 
 **Fase 0 — Decisión de stack tecnológico** (cerrada).
@@ -1699,6 +1738,23 @@ descripción completa.
   agotadas y (a) sin promesa de convergencia, el siguiente paso natural NO es otra palanca de
   velocidad sino cerrar D23 como decisión de producto explícita. Pendiente de decidir con el
   dueño del proyecto.
+  CIERRE (S43, Bloque 18 — D23 CERRADA como DECISIÓN DE PRODUCTO): antes de cerrar, un
+  experimento pareado descartó las dos hipótesis localizables de la no-convergencia. Tres
+  puntos sobre el mismo fixture recortado en memoria por bloque académico (catálogo idéntico;
+  frontera separable sin referencias colgantes, verificado por réplica), cada uno aislado:
+  P0 base 26 grupos FEASIBLE obj 221 cota 0; P1 sin FPB 24 grupos FEASIBLE obj 216 cota 2;
+  P2 solo ESO 17 grupos FEASIBLE obj 62 cota 0. Lectura sobre estado/cota (no objetivo
+  absoluto, varianza ±7 por D25): (1) FPB NO endurece (P0->P1 no cambia de régimen); (2) Bach
+  domina la MAGNITUD del objetivo (216->62 al retirarlo) pero retirarlo NO produce convergencia
+  (P2 sigue FEASIBLE cota 0); (3) la cota inferior no se cierra ni con solo ESO -> la
+  no-convergencia es propiedad del MODELO/objetivo a esta escala, no atribuible a un bloque. Sin
+  palanca de velocidad con promesa de convergencia, y siendo una FEASIBLE obj ~221 un horario
+  usable, el dueño del proyecto FIRMA la decisión de producto: aceptar FEASIBLE sin optimalidad
+  probada como modo de operación del solver a escala. D23 deja de ser deuda técnica abierta. Dato
+  útil si alguna vez se reabre la optimización: el esfuerzo de modelado rendiría más concentrado
+  en la estructura de Bach (mayor contribuyente al coste). NOTA: esto NO cierra el criterio 3 de
+  Fase 5 (calidad comparable), que sigue ABIERTO a la espera del umbral con datos del centro, no
+  de convergencia. Test de evidencia: SolverHorarioOptimizacionEscalaSubconjuntosTest (Bloque 18).
 - **D25 (Sesión 42, Fase 5 Bloque 17 — reactivación agravada de D24)**: el perfil -Pescala
   corrido ENTERO no pasa por contención de CPU. D24 se dio por CERRADA en S39 asumiendo que
   @Tag("escala") bastaba; pero @Tag solo SEPARA los pesados de la suite rápida — NO resuelve
