@@ -172,20 +172,58 @@ final class ModeloCpSat {
     }
 
     /**
-     * Construye el modelo en modo OPTIMIZACIÓN: las mismas restricciones duras
-     * que {@link #construir()} más la función objetivo de restricciones blandas.
-     * Los términos son la penalización de ventanas del profesorado (6a) y la
-     * penalización por incumplir indisponibilidades BLANDA del profesorado (6c).
+     * Construye el modelo en modo OPTIMIZACIÓN con la configuración de PRODUCCIÓN:
+     * restricciones duras + función objetivo blanda, SIN poda de aulas candidatas.
+     * Delega en {@link #construirConObjetivo(boolean)} con {@code podar=false}.
      *
-     * <p>{@link #construir()} se mantiene intacto y separado a propósito
-     * (decisión 1a): los tests de escala miden tiempo hasta primera solución
-     * factible en factibilidad pura; añadir el objetivo a ese camino los
-     * invalidaría. Aquí vive el camino de optimización; allí, el de factibilidad.
+     * <p><b>Por qué la poda está desactivada (S42, deuda D23).</b> La poda de aulas
+     * (Bloque 16/S41, palanca b de D23: recortar {@code aulasCandidatas} de cola larga
+     * a {@link #MAX_AULAS_PODA}) se construyó para acelerar la convergencia estrechando
+     * el espacio de búsqueda. Medida a escala sobre el instituto completo, hace lo
+     * contrario: ROMPE la factibilidad. Diagnóstico pareado en la misma máquina y
+     * fixture ({@code problema-5-fusion-instituto-completo.json}), aislado y sin
+     * JaCoCo: SIN poda → {@code FEASIBLE} objetivo 215 en 600 s; CON poda (K=8) → el
+     * solver NO halla ni una solución factible en 600 s ({@code UNKNOWN}). El recorte
+     * 25→8 en las 21 plazas acopladas de 2ºBach aprieta el problema lo bastante como
+     * para que la heurística de CP-SAT deje de tropezar con una factible. El análisis
+     * local de S41 (suelo de saturación 3 ⟹ K=8 "seguro") medía saturación máxima en
+     * UN tramo, que es condición necesaria pero NO suficiente de factibilidad global.
+     *
+     * <p>El mecanismo se conserva LATENTE, no se borra: {@link #construirConObjetivo(boolean)}
+     * con {@code podar=true} lo reactiva, y las constantes/método de poda siguen en
+     * esta clase. Reactivarlo a escala exige REDISEÑO (otro K, poda selectiva, o poda
+     * blanda vía hint), no encenderlo tal cual. Ver D23 en el plan de trabajo.
      *
      * @return {@code this} para encadenar.
      */
     ModeloCpSat construirConObjetivo() {
-        this.podarAulas = true; // Fase 5, Bloque 16 (D23 palanca b): poda solo en optimización
+        return construirConObjetivo(false); // S42: poda OFF por defecto (ver javadoc; deuda D23)
+    }
+
+    /**
+     * Variante de {@link #construirConObjetivo()} con control explícito de la poda de
+     * aulas candidatas (deuda D23, palanca b, Bloque 16/S41). El punto de entrada de
+     * PRODUCCIÓN —{@link #construirConObjetivo()}— delega aquí con {@code podar=false}:
+     * la poda está DESACTIVADA por defecto porque rompe la factibilidad a escala (ver
+     * el javadoc de {@link #construirConObjetivo()} para el diagnóstico que lo demostró
+     * en S42).
+     *
+     * <p>{@code podar=true} reactiva el mecanismo de poda LATENTE: recorta a
+     * {@link #MAX_AULAS_PODA} las {@code aulasCandidatas} de las plazas de cola larga
+     * (más de {@link #UMBRAL_PODA_AULA} candidatas), vía {@link #candidatasPodadas}.
+     * No lo usa ningún test ni vía de producción a día de hoy (el test de discriminación
+     * de S41 se retiró en S42 junto con la poda a escala); NO
+     * debe activarse en el camino de optimización a escala sin un rediseño previo del
+     * criterio de poda (otro K, poda selectiva o poda blanda). Mantener la vía con
+     * {@code true} preserva el mecanismo medible para ese eventual rediseño sin
+     * resucitar una poda que sabemos inviable con K=8.
+     *
+     * @param podar si {@code true}, recorta las aulasCandidatas de cola larga (S41);
+     *              si {@code false} (producción), no poda.
+     * @return {@code this} para encadenar.
+     */
+    ModeloCpSat construirConObjetivo(boolean podar) {
+        this.podarAulas = podar; // Fase 5, Bloque 16 (D23 palanca b): poda solo en optimización
         construir();
         objetivoVentanasProfesor();
         objetivoIndisponibilidadBlandaProfesor(); // Fase 5, Bloque 6c
