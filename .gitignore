@@ -3,6 +3,9 @@ target/
 *.versionsBackup
 dependency-reduced-pom.xml
 
+# Bases de datos SQLite locales (Fase 6)
+*.db
+
 # IntelliJ
 .idea/
 *.iml

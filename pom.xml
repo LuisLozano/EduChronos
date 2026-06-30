@@ -15,7 +15,7 @@
 
     <modules>
         <module>solver</module>
-        <!-- app se añadirá en Fase 6 -->
+        <module>app</module>
     </modules>
 
     <properties>
@@ -29,6 +29,17 @@
         <jackson.version>2.21.3</jackson.version>
         <jacoco.version>0.8.14</jacoco.version>
 
+        <!-- Fase 6: stack de persistencia del módulo app. SB 4.1.0 (Java 17
+             baseline, Spring Framework 7 + Hibernate 7.4). Línea 3.5 descartada:
+             EOL de OSS el 30-06-2026. -->
+        <spring-boot.version>4.1.0</spring-boot.version>
+        <!-- Hibernate 6/7 NO trae dialecto SQLite oficial; va en el artefacto
+             de comunidad hibernate-community-dialects (org.hibernate.community.
+             dialect.SQLiteDialect), que la BOM de Spring Boot NO gestiona. Hay
+             que fijarlo a mano y DEBE coincidir con la hibernate.version que
+             gestiona SB (7.4.1.Final en SB 4.1.0). -->
+        <hibernate-community-dialects.version>7.4.1.Final</hibernate-community-dialects.version>
+
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <exec-maven-plugin.version>3.2.0</exec-maven-plugin.version>
@@ -40,6 +51,22 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- BOM de Spring Boot: gestiona Spring, Hibernate core, sqlite-jdbc,
+                 starters de test, etc. El módulo app no puede heredar de
+                 spring-boot-starter-parent (ya hereda de educhronos-parent),
+                 así que se importa la BOM aquí. -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-community-dialects</artifactId>
+                <version>${hibernate-community-dialects.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.ortools</groupId>
                 <artifactId>ortools-java</artifactId>
@@ -87,6 +114,11 @@
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>5.6.0.6792</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
