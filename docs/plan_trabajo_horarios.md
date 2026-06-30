@@ -620,25 +620,9 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloque 1 cerrado en S45)
   los tests de optimización a escala solo son fiables AISLADOS (con -Dtest=...). src/main tocado
   (default de poda + javadoc; método diagnóstico no quedó en árbol) -> índice regenerado; modelo
   NO tocado.
-Última sesión registrada (previa): Sesión 41 — Fase 5, Bloque 16: PODA DE AULA (D23, palanca b),
-  mecanismo + discriminación. Poda dura de aulasCandidatas activa SOLO en optimización
-  (construirConObjetivo pone podarAulas=true antes de construir; factibilidad pura intacta,
-  no se invalida la curva de escala de S36). candidatasPodadas(plaza): si poda activa y la
-  plaza supera UMBRAL_PODA_AULA=8 candidatas, conserva las MAX_AULAS_PODA=8 primeras por código
-  (orden lexicográfico, determinista). Medición previa sobre el instituto completo que justifica
-  el frente: 52/328 plazas usan candidatas; 21 de ellas (modalidades 2ºBach, el foco de D23)
-  listan 25 candidatas y concentran el 92% de las 1835 presencias de aula. Suelo de saturación
-  medido: 3 (máx. plazas de cola larga simultáneas en un tramo); K=8 mantiene margen ×2,6. Par
-  de fixtures sintéticos (linaje propio): factible (poda 12->8, sigue factible, aula elegida ∈
-  recorte) + oro de saturación (9 plazas simultáneas, 12 candidatas, 1 tramo: sin poda factible,
-  con poda 8<9 INFEASIBLE por palomar — atribución perfecta). NO mide aún el efecto sobre D23 a
-  escala (eso es el bloque siguiente, @Tag escala). NO cierra criterio 3 ni D23; construye y
-  valida la palanca (b) en discriminación. Suite rápida 61 verde, BUILD SUCCESS, 11,5 s. src/main
-  tocado (campos + método private en ModeloCpSat) -> índice regenerado (sin cambio de firmas
-  públicas/package); modelo NO tocado.
 Las cabeceras compactas de S37–S40 y el registro detallado de S10–S42
 se han archivado en `docs/bitacora-sesiones.md` (Sesión 44, higiene
-documental). El plan conserva las 4 últimas cabeceras (S41–S44) por estar
+documental). El plan conserva las 4 últimas cabeceras (S42–S45) por estar
 referenciadas por deuda abierta (D25 cita S42; el cierre de Fase 5 cita
 S43/S44). Para el detalle histórico de cualquier sesión anterior, consultar
 la bitácora.
