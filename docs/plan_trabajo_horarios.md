@@ -533,11 +533,44 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloque 1 cerrado en S45)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-2 cerrados en S45-S46)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 45 — Fase 6, Bloque 1: ANDAMIAJE DEL MÓDULO app/ +
+Última sesión registrada: Sesión 46 — Fase 6, Bloque 2: CATÁLOGO DEL CENTRO COMO
+  ENTIDADES JPA + REPOSITORIOS. Implementa el catálogo §4.1 del modelo como entidades
+  JPA en el módulo app/ (paquete app.catalog), sin mapper ni capa web. Corte acordado
+  en el Project: "una capa por bloque"; el mapper Entidad->modelo del solver se separa
+  al Bloque 3 (las entidades deben estar estables antes de mapearlas, misma disciplina
+  que dejó el mapper fuera del Bloque 1). Entran 8 entidades: Nivel, GrupoAdministrativo,
+  Profesor, Aula (con todos sus campos: tipo, capacidad, edificio, planta, sector),
+  Asignatura, AsignaturaAulaCompatible, TramoSemanal, Configuracion; + 3 enums propios
+  de la capa JPA (TipoGrupo con 3 valores ORDINARIO/DIVERSIFICACION_PDC/VIRTUAL_OPTATIVA,
+  TipoAula con 9, Dia) + 8 repositorios Spring Data. Decisiones de modelado: id sintético
+  en todas salvo Configuracion (clave natural); AsignaturaAulaCompatible con id sintético
+  + @UniqueConstraint(asignatura, tipo_aula); enums @Enumerated(STRING); FK
+  autorreferenciales @ManyToOne(LAZY) en GrupoAdministrativo.grupoPadre y
+  TramoSemanal.siguienteInmediato. ASIMETRÍA CONSCIENTE (la vigila el mapper de Bloque 3):
+  app.catalog.TipoGrupo tiene 3 valores, solver.domain.TipoGrupo solo 2 (ORDINARIO,
+  DIVERSIFICACION_PDC); VIRTUAL_OPTATIVA no existe en el solver. Los enums TipoGrupo y Dia
+  de app/ son PROPIOS por diseño (frontera "entidad JPA con su forma, modelo del solver
+  con la suya"), NO duplicados a deduplicar; el javadoc del enum ya lo documenta. RIESGO
+  CERRADO EN POSITIVO: LocalTime de TramoSemanal viaja a SQLite y vuelve intacto, sin
+  fallback a String (era la incógnita del dialecto de comunidad al planificar). Frontera
+  respetada: entidades en app/, CERO anotaciones JPA en solver/; dependencia app -> solver
+  unidireccional; modelo del solver libre de JPA. HumoEntity y PersistenceSmokeTest del
+  Bloque 1 retirados, sustituidos por un test de round-trip (@DataJpaTest + replace=NONE
+  sobre la SQLite real) que persiste y recupera filas de cada entidad y verifica relaciones
+  (Grupo->Nivel, Grupo->grupoPadre, Tramo->siguienteInmediato, Asignatura<->tipoAula).
+  IMPREVISTO DE STACK (ver "### Notas técnicas validadas en Fase 6"): Spring Boot 4
+  modularizó los test slices; @DataJpaTest ya no viene en spring-boot-starter-test (hubo
+  que añadir spring-boot-starter-data-jpa-test en scope test y corregir paquetes SB4).
+  Commit de código 612a70e (una línea). suite rápida verde: solver 59 + app 1 (round-trip),
+  BUILD SUCCESS. src/main del solver NO tocado -> índice NO regenerado; modelo NO tocado.
+  Commits separados código/doc, de una línea. Siguiente: Bloque 3 (primer tramo del mapper
+  Entidad JPA -> modelo del solver, limitado a las entidades de catálogo que el solver
+  consume: Aula, Asignatura, Profesor, Grupo, Tramo).
+Última sesión registrada (previa): Sesión 45 — Fase 6, Bloque 1: ANDAMIAJE DEL MÓDULO app/ +
   HUMO DE PERSISTENCIA. Arranque de Fase 6 en modo híbrido (decisión y cierre en el
   Project; teclear/compilar en Claude Code). Se crea el módulo Maven app/ (declarado
   en el pom raíz, como anticipaba la decisión táctica de Fase 2: el módulo app/ se
@@ -1001,6 +1034,17 @@ la bitácora.
       fail-fast de frontera), convive con el de instituto completo. Suite rápida 59 verde,
       BUILD SUCCESS. src/main NO tocado -> índice NO regenerado; modelo NO tocado. NO cierra
       criterio 3 (sigue exigiendo umbral con datos del centro).
+
+### Bloques de Fase 6
+- [x] Bloque 1 — Andamiaje del módulo app/ + humo de persistencia (S45). Spring Boot
+      4.1.0 + Hibernate 7.4.1 + SQLite + dialecto de comunidad; hbm2ddl sobre
+      HumoEntity desechable; test de integración del .db en disco.
+- [x] Bloque 2 — Catálogo del centro como entidades JPA + repositorios (S46). 8
+      entidades §4.1 en app.catalog + 3 enums propios + 8 repos; round-trip
+      @DataJpaTest sobre SQLite real; LocalTime intacto. Mapper fuera (Bloque 3).
+- [ ] Bloque 3 — Primer tramo del mapper Entidad JPA -> modelo del solver (Aula,
+      Asignatura, Profesor, Grupo, Tramo).
+
 ### Fases completadas
 
 **Fase 0 — Decisión de stack tecnológico** (cerrada).
@@ -1551,6 +1595,18 @@ descripción completa.
   con módulos mínimos falla por dependencias transitivas de OR-Tools/Protobuf
 - Bundle resultante: ~200-250MB. Optimización de módulos diferida a Fase 11
 - Distribución: zip del app-image. Sin permisos de administrador en Windows
+
+### Notas técnicas validadas en Fase 6
+
+- Hibernate 7.4.1 persiste LocalTime en SQLite vía el dialecto de comunidad
+  org.hibernate.community.dialect.SQLiteDialect y lo recupera intacto, sin
+  fallback a String (verificado S46, round-trip del catálogo)
+- Spring Boot 4 modularizó los test slices de persistencia. @DataJpaTest ya NO
+  viene en spring-boot-starter-test: hay que añadir spring-boot-starter-data-jpa-test
+  en scope test. Los paquetes cambiaron en SB4:
+  org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest y
+  org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
+  (verificado S46; afecta a todo test de slice JPA de Fase 6 en adelante)
 
 ### Por qué OR-Tools sobre Timefold (no reabrir)
 
