@@ -1781,30 +1781,6 @@ D3 sin tocar.
   fase1.md NO tocado (la poda es config del solver, no añade entidad ni invariante; mismo criterio
   que warm-start en S40). Commits separados código/test/doc.
 
-### Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN — la no-convergencia
-  de la optimización a escala es ESTRUCTURAL, no atribuible a un bloque. CIERRA D23 como
-  DECISIÓN DE PRODUCTO. El frente: falsar si FPB endurece la optimización a escala (no la
-  factibilidad). Método de S42: una hipótesis, experimento pareado, atribución limpia. Tres
-  puntos sobre el mismo fixture (problema-5-fusion-instituto-completo.json) recortado EN
-  MEMORIA por bloque académico (catálogo idéntico; frontera ESO/Bach/FPB separable sin
-  referencias colgantes, verificado por réplica: 0 subgrupos y 0 actividades cruzan), cada
-  uno aislado (D25) tras -Pescala. RESULTADO: P0 base 26 grupos -> FEASIBLE obj 221 cota 0;
-  P1 sin FPB 24 grupos -> FEASIBLE obj 216 cota 2; P2 solo ESO 17 grupos -> FEASIBLE obj 62
-  cota 0. LECTURA (sobre estado/cota, no objetivo absoluto por varianza D25 ±7): (1) FPB
-  inocente — P0->P1 no cambia de régimen; (2) Bach domina la MAGNITUD del objetivo (216->62
-  al quitarlo, colapso 3,5x, no ruido) PERO quitarlo NO da convergencia — P2 sigue FEASIBLE
-  cota 0 gap 62; (3) la incapacidad de cerrar la cota ya está presente con solo ESO, luego es
-  propiedad del MODELO a escala, no de un bloque. Descartadas las dos hipótesis localizables.
-  DECISIÓN DE PRODUCTO (firmada por el dueño): FEASIBLE sin optimalidad probada es el modo de
-  operación aceptado del solver a escala; un horario con objetivo ~221 es usable, la prueba de
-  optimalidad no aporta valor aquí. D23 CERRADA (ya no es deuda con palanca pendiente). NO
-  cierra el criterio 3 (sigue exigiendo umbral con datos del centro). Test nuevo
-  SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, 3 métodos p0base/p1SinFpb/
-  p2SoloEso, recorte en memoria con fail-fast de frontera), convive con el de instituto
-  completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
-  regenerado; modelo NO tocado.
-
-
 ### Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA — INVIABLE. CIERRA palanca (b)
   de D23 con dato NEGATIVO. Frente fijado por S41: medir la poda construida (S41) sobre el
   instituto completo vs. la línea base de S40 (215, 600 s sin converger), con dos desenlaces
@@ -1878,5 +1854,28 @@ D3 sin tocar.
   no quedó en el árbol commiteado) -> índice regenerado; modelo NO tocado (la poda es config del
   solver, no añade entidad ni invariante). Commits separados: código (fix), índice (docs), plan
   (docs).
+
+### Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN — la no-convergencia
+  de la optimización a escala es ESTRUCTURAL, no atribuible a un bloque. CIERRA D23 como
+  DECISIÓN DE PRODUCTO. El frente: falsar si FPB endurece la optimización a escala (no la
+  factibilidad). Método de S42: una hipótesis, experimento pareado, atribución limpia. Tres
+  puntos sobre el mismo fixture (problema-5-fusion-instituto-completo.json) recortado EN
+  MEMORIA por bloque académico (catálogo idéntico; frontera ESO/Bach/FPB separable sin
+  referencias colgantes, verificado por réplica: 0 subgrupos y 0 actividades cruzan), cada
+  uno aislado (D25) tras -Pescala. RESULTADO: P0 base 26 grupos -> FEASIBLE obj 221 cota 0;
+  P1 sin FPB 24 grupos -> FEASIBLE obj 216 cota 2; P2 solo ESO 17 grupos -> FEASIBLE obj 62
+  cota 0. LECTURA (sobre estado/cota, no objetivo absoluto por varianza D25 ±7): (1) FPB
+  inocente — P0->P1 no cambia de régimen; (2) Bach domina la MAGNITUD del objetivo (216->62
+  al quitarlo, colapso 3,5x, no ruido) PERO quitarlo NO da convergencia — P2 sigue FEASIBLE
+  cota 0 gap 62; (3) la incapacidad de cerrar la cota ya está presente con solo ESO, luego es
+  propiedad del MODELO a escala, no de un bloque. Descartadas las dos hipótesis localizables.
+  DECISIÓN DE PRODUCTO (firmada por el dueño): FEASIBLE sin optimalidad probada es el modo de
+  operación aceptado del solver a escala; un horario con objetivo ~221 es usable, la prueba de
+  optimalidad no aporta valor aquí. D23 CERRADA (ya no es deuda con palanca pendiente). NO
+  cierra el criterio 3 (sigue exigiendo umbral con datos del centro). Test nuevo
+  SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, 3 métodos p0base/p1SinFpb/
+  p2SoloEso, recorte en memoria con fail-fast de frontera), convive con el de instituto
+  completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
+  regenerado; modelo NO tocado.
 
 
