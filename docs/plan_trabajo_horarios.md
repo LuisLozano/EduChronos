@@ -630,35 +630,11 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-2 cerrados en S45-
   p2SoloEso, recorte en memoria con fail-fast de frontera), convive con el de instituto
   completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
   regenerado; modelo NO tocado.
-Última sesión registrada (previa): Sesión 42 — Fase 5, Bloque 17: PODA DE AULA MEDIDA A ESCALA —
-  INVIABLE. CIERRA la palanca (b) de D23 con dato negativo. El frente era medir la poda de
-  S41 sobre el instituto completo; la medición destapó que la poda NO acelera: ROMPE la
-  factibilidad. Diagnóstico pareado en la MISMA máquina/fixture, aislado y sin JaCoCo
-  (problema-5-fusion-instituto-completo.json): SIN poda -> FEASIBLE objetivo 215 cota 2 en
-  600 s; CON poda (K=8) -> el solver NO halla ni una factible en 600 s (UNKNOWN). Atribución
-  limpia: la poda daba UNKNOWN incluso aislada (3 corridas: suite, aislada, aislada-sin-JaCoCo);
-  sin poda da FEASIBLE aislada. El error de S41: el "suelo de saturación 3 => K=8 seguro" medía
-  saturación máxima en UN tramo (necesaria, no suficiente para factibilidad global); el recorte
-  25->8 en las 21 plazas acopladas de 2ºBach aprieta el problema lo bastante como para que la
-  heurística de CP-SAT deje de tropezar con una factible. DECISIÓN (opción 2): poda DESACTIVADA
-  por defecto (construirConObjetivo() delega en construirConObjetivo(false)); mecanismo conservado
-  LATENTE (sobrecarga construirConObjetivo(boolean podar), constantes y candidatasPodadas intactos)
-  documentado en javadoc; reactivar exige REDISEÑO (otro K, poda selectiva o poda blanda), no
-  encender tal cual. Reorganización de tests de escala: eliminados SolverHorarioOptimizacion-
-  InstitutoCompletoTest (S37, vía pelada) y SolverHorarioPodaAulaTest + sus 2 fixtures
-  (discriminación de poda, ya sin anclaje a producción); nuevo SolverHorarioOptimizacionEscala-
-  InstitutoCompletoTest (@Tag escala, lee ResultadoOptimizacion: estado/objetivo/cota). Suite
-  rápida 59 verde, BUILD SUCCESS, 11,8 s. ALTA de deuda D25 (reactivación agravada de D24): el
-  perfil -Pescala corrido entero NO pasa por contención de CPU (4 núcleos físicos, i7-4790K) —
-  los tests de optimización a escala solo son fiables AISLADOS (con -Dtest=...). src/main tocado
-  (default de poda + javadoc; método diagnóstico no quedó en árbol) -> índice regenerado; modelo
-  NO tocado.
-Las cabeceras compactas de S37–S40 y el registro detallado de S10–S42
-se han archivado en `docs/bitacora-sesiones.md` (Sesión 44, higiene
-documental). El plan conserva las 4 últimas cabeceras (S42–S45) por estar
-referenciadas por deuda abierta (D25 cita S42; el cierre de Fase 5 cita
-S43/S44). Para el detalle histórico de cualquier sesión anterior, consultar
-la bitácora.
+Las cabeceras compactas de S37–S42 y el registro detallado de S10–S42
+se han archivado en `docs/bitacora-sesiones.md` (Sesión 44 el detalle S10–S42
+y las cabeceras S37–S40; Sesión 47 la cabecera S42). El plan conserva las 4
+últimas cabeceras (S43–S46). El detalle histórico de cualquier sesión anterior,
+incluida S42 (citada por la deuda abierta D25), está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
 
