@@ -82,6 +82,40 @@ public final class CatalogoMapper {
     }
 
     /**
+     * Convierte una entidad {@link es.yaroki.educhronos.app.catalog.Subgrupo} JPA
+     * al {@code Subgrupo} del dominio del solver.
+     *
+     * <p>Los grupos de la población se resuelven por identidad de objeto contra los
+     * grupos de dominio ya mapeados (mismo patrón que {@link #aGrupo} resuelve
+     * {@code grupoPadre}): se busca cada {@code GrupoAdministrativo} JPA por su
+     * código en {@code gruposPorCodigo}. Un código sin correspondencia es un error
+     * de integridad referencial del catálogo y aborta con excepción explícita.
+     *
+     * @param entidad         subgrupo JPA de {@code app.catalog}
+     * @param gruposPorCodigo  índice de grupos de dominio ya mapeados, por código
+     * @return el {@code Subgrupo} de dominio con su {@code Set<GrupoAdministrativo>}
+     */
+    public static es.yaroki.educhronos.solver.domain.Subgrupo aSubgrupo(
+            es.yaroki.educhronos.app.catalog.Subgrupo entidad,
+            java.util.Map<String, es.yaroki.educhronos.solver.domain.GrupoAdministrativo> gruposPorCodigo) {
+
+        java.util.Set<es.yaroki.educhronos.solver.domain.GrupoAdministrativo> grupos =
+                new java.util.HashSet<>();
+        for (es.yaroki.educhronos.app.catalog.GrupoAdministrativo g : entidad.getGrupos()) {
+            es.yaroki.educhronos.solver.domain.GrupoAdministrativo mapeado =
+                    gruposPorCodigo.get(g.getCodigo());
+            if (mapeado == null) {
+                throw new IllegalArgumentException(
+                        "Subgrupo '" + entidad.getCodigo()
+                                + "' referencia un grupo no presente en el catálogo mapeado: "
+                                + g.getCodigo());
+            }
+            grupos.add(mapeado);
+        }
+        return new es.yaroki.educhronos.solver.domain.Subgrupo(entidad.getCodigo(), grupos);
+    }
+
+    /**
      * Lista de {@code TramoSemanal} JPA → lista de {@code domain.Tramo}. Es un
      * mapeo a nivel de lista (no entidad a entidad) porque {@code ordenEnDia}
      * (1..6) no es derivable de un tramo aislado: el {@code orden} de la entidad
