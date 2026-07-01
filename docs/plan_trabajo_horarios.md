@@ -533,11 +533,51 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-2 cerrados en S45-S46)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-3 cerrados en S45-S47)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 46 — Fase 6, Bloque 2: CATÁLOGO DEL CENTRO COMO
+Última sesión registrada: Sesión 47 — Fase 6, Bloque 3: MAPEO CATÁLOGO ENTIDAD JPA
+  -> MODELO DEL SOLVER (CatalogoMapper). Construido en modo híbrido (decisión y
+  cierre en el Project, código en Claude Code). Entrega CatalogoMapper (app/,
+  paquete app.mapper — clase final, ctor privado, métodos estáticos, mismo estilo
+  que ProblemaHorarioMapper) con cinco conversiones JPA->domain: aAula,
+  aAsignatura, aProfesor (directos; nombreCompleto->nombre), aGrupo (grupoPadre
+  resuelto por referencia de objeto recursiva; I5 la valida el record de
+  dominio) y aTramos(List<TramoSemanal>) a nivel de LISTA (excluye
+  es_lectivo=false/recreo -> domain.Tramo no porta ese flag y el schema JSON ya
+  confirmaba ordenEnDia 1..6 sin hueco para el recreo; ordena por día+orden
+  global; renumera ordenEnDia 1..6 reiniciando por día; sintetiza codigo
+  "L1".."V6"). DECISIÓN CERRADA EN EL PROJECT ANTES DE CONSTRUIR: VIRTUAL_OPTATIVA
+  lanza excepción explícita (IllegalArgumentException) en vez de mapear a
+  ORDINARIO o filtrar en silencio — ningún caso validado en modelo_datos_fase1.md
+  usa GrupoAdministrativo virtual para optativas (el patrón real, Lectura B, ya
+  se resuelve con Subgrupo N:M sobre grupos ORDINARIO); fallo ruidoso evita
+  pérdida silenciosa de un grupo real si el tipo llega a usarse. Nivel no se
+  mapea (el dominio del solver no lo necesita). Aula pierde tipo/capacidad/
+  edificio/planta/sector (deuda ya documentada, distancia entre aulas pendiente
+  en el solver). Tramo.siguienteInmediato no se mapea (la adyacencia de bloques
+  FPB la resuelve ModeloCpSat, D13, no este campo).
+  DOS HALLAZGOS DE CÓDIGO REAL que el Project había dejado como pregunta abierta,
+  resueltos por Claude Code al leer las entidades JPA reales antes de teclear:
+  (1) Aula (JPA, S46) NO tiene campo nombre — ni la entidad ni §4.1 lo listan,
+  pero el schema JSON exige Aula.nombre no nulo. Resuelto con nombre=codigo
+  (Opción 1), documentado en el mapper como deuda consciente (ALTA D26). (2) el
+  código de Tramo ("L1".."V6") es una clave SINTETIZADA por el mapper: el modelo
+  no define una convención de código de TramoSemanal reutilizable por
+  domain.Tramo (ALTA D27).
+  Tests: CatalogoMapperTest, 7 casos unitarios puros (entidades JPA en memoria,
+  sin Spring/BD) — un caso por método (incluyendo aGrupo con grupoPadre PDC),
+  VIRTUAL_OPTATIVA lanza, y aTramos (recreo excluido, ordenEnDia reiniciado por
+  día, código sintetizado). Suite verde: solver 59 + app 8 (CatalogoRoundTripTest
+  1 del Bloque 2 + CatalogoMapperTest 7), BUILD SUCCESS. src/main del solver NO
+  tocado -> índice NO regenerado; modelo NO tocado (el mapper no añade entidad ni
+  invariante al dominio del solver). Commit de código c3ec500
+  (una línea). Commits separados código/doc. Siguiente:
+  Bloque 4 (a decidir; candidato natural:
+  Subgrupo/Actividad como entidades JPA, prerrequisito para poder ensamblar
+  ProblemaHorario completo).
+Última sesión registrada (previa): Sesión 46 — Fase 6, Bloque 2: CATÁLOGO DEL CENTRO COMO
   ENTIDADES JPA + REPOSITORIOS. Implementa el catálogo §4.1 del modelo como entidades
   JPA en el módulo app/ (paquete app.catalog), sin mapper ni capa web. Corte acordado
   en el Project: "una capa por bloque"; el mapper Entidad->modelo del solver se separa
@@ -1018,8 +1058,11 @@ incluida S42 (citada por la deuda abierta D25), está en la bitácora.
 - [x] Bloque 2 — Catálogo del centro como entidades JPA + repositorios (S46). 8
       entidades §4.1 en app.catalog + 3 enums propios + 8 repos; round-trip
       @DataJpaTest sobre SQLite real; LocalTime intacto. Mapper fuera (Bloque 3).
-- [ ] Bloque 3 — Primer tramo del mapper Entidad JPA -> modelo del solver (Aula,
-      Asignatura, Profesor, Grupo, Tramo).
+- [x] Bloque 3 — Mapeo catálogo Entidad JPA -> modelo del solver (S47).
+      CatalogoMapper (Aula, Asignatura, Profesor, Grupo, Tramo); VIRTUAL_OPTATIVA
+      lanza excepción explícita; recreo excluido de Tramo; Aula.nombre=codigo
+      (D26); código de Tramo sintetizado L1..V6 (D27). Mapea a listas sueltas,
+      NO a ProblemaHorario (faltan Subgrupo/Actividad).
 
 ### Fases completadas
 
@@ -1561,6 +1604,24 @@ descripción completa.
   inviable con K=8). Siguen en código como mecanismo latente, pero calibrarlas no procede
   hasta un eventual rediseño de la poda; (a)/(b)/(c) de esta deuda aplican solo a los tres
   PESO_* y MAX_CONSECUTIVAS.
+- **D26 (Sesión 47, Fase 6 Bloque 3): `Aula` (JPA) no tiene campo `nombre`.**
+  Ni la entidad de catálogo (S46) ni §4.1 de `modelo_datos_fase1.md` definen un
+  nombre completo de aula (a diferencia de `Profesor`/`Asignatura`, que sí tienen
+  `nombre_completo`). El schema JSON del solver exige `Aula.nombre` no nulo, y
+  `CatalogoMapper.aAula` lo resuelve con `nombre = codigo`. Válido para arrancar
+  Fase 6 (el solver no distingue código de nombre en el objetivo ni en el
+  verificador), pero es una simplificación: si la UI de Fase 8 necesita mostrar
+  un nombre descriptivo de aula distinto del código ("Laboratorio de Ciencias"
+  vs "A6"), hace falta añadir el campo a la entidad JPA y decidir si el mapper
+  deja de derivarlo. Fase 8 (UI) o antes si algún criterio de Fase 6/7 lo exige.
+- **D27 (Sesión 47, Fase 6 Bloque 3): código de `Tramo` sintetizado por el
+  mapper.** `modelo_datos_fase1.md` no define una convención de código legible
+  para `TramoSemanal`; `CatalogoMapper.aTramos` sintetiza `"L1".."V6"` (letra de
+  día + ordenEnDia) porque `domain.Tramo.codigo` es un campo obligatorio sin
+  fuente en el JPA. Riesgo bajo (es un identificador interno del solver, no se
+  muestra al usuario), pero si la UI de Fase 7/8 llega a mostrar este código
+  directamente hay que decidir si se mantiene la convención sintética o se
+  sustituye por algo más descriptivo (p. ej. "Lunes 8:00-9:00"). Fase 7/8.
 
 ### Notas técnicas validadas en Fase 0
 
