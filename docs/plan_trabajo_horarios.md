@@ -648,33 +648,12 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-3 cerrados en S45-
   desarrollo); FASE 5 CERRADA. Sin código nuevo: src/main NO tocado -> índice NO
   regenerado; modelo NO tocado; pom NO tocado. Solo documentación. Siguiente: Fase 6
   (persistencia). Test corrido aislado por D25, BUILD SUCCESS, 10:04 min.
-Última sesión registrada (previa): Sesión 43 — Fase 5, Bloque 18: EXPERIMENTO PAREADO DE ATRIBUCIÓN —
-  la no-convergencia de la optimización a escala es ESTRUCTURAL, no atribuible a un bloque.
-  CIERRA D23 como DECISIÓN DE PRODUCTO. El frente: falsar si FPB endurece la optimización a
-  escala (no la factibilidad). Método de S42: una hipótesis, experimento pareado, atribución
-  limpia. Tres puntos sobre el mismo fixture (problema-5-fusion-instituto-completo.json)
-  recortado EN MEMORIA por bloque académico (catálogo idéntico; frontera ESO/Bach/FPB separable
-  sin referencias colgantes, verificado por réplica: 0 subgrupos y 0 actividades cruzan), cada
-  uno aislado (D25) tras -Pescala. RESULTADO: P0 base 26 grupos -> FEASIBLE obj 221 cota 0;
-  P1 sin FPB 24 grupos -> FEASIBLE obj 216 cota 2; P2 solo ESO 17 grupos -> FEASIBLE obj 62
-  cota 0. LECTURA (sobre estado/cota, no objetivo absoluto por varianza D25 ±7): (1) FPB
-  inocente — P0->P1 no cambia de régimen; (2) Bach domina la MAGNITUD del objetivo (216->62 al
-  quitarlo, colapso 3,5x, no ruido) PERO quitarlo NO da convergencia — P2 sigue FEASIBLE cota 0
-  gap 62; (3) la incapacidad de cerrar la cota ya está presente con solo ESO, luego es
-  propiedad del MODELO a escala, no de un bloque. Descartadas las dos hipótesis localizables.
-  DECISIÓN DE PRODUCTO (firmada por el dueño): FEASIBLE sin optimalidad probada es el modo de
-  operación aceptado del solver a escala; un horario con objetivo ~221 es usable, la prueba de
-  optimalidad no aporta valor aquí. D23 CERRADA (ya no es deuda con palanca pendiente). NO
-  cierra el criterio 3 (sigue exigiendo umbral con datos del centro). Test nuevo
-  SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, 3 métodos p0base/p1SinFpb/
-  p2SoloEso, recorte en memoria con fail-fast de frontera), convive con el de instituto
-  completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
-  regenerado; modelo NO tocado.
-Las cabeceras compactas de S37–S42 y el registro detallado de S10–S42
+Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42
 se han archivado en `docs/bitacora-sesiones.md` (Sesión 44 el detalle S10–S42
-y las cabeceras S37–S40; Sesión 47 la cabecera S42). El plan conserva las 4
-últimas cabeceras (S43–S46). El detalle histórico de cualquier sesión anterior,
-incluida S42 (citada por la deuda abierta D25), está en la bitácora.
+y las cabeceras S37–S40; Sesión 47 las cabeceras S42 y S43). El plan conserva
+las 4 últimas cabeceras (S44–S47). El detalle histórico de cualquier sesión
+anterior, incluida S42 (citada por la deuda abierta D25) y S43 (citada por el
+cierre de D23), está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
 
