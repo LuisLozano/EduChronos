@@ -533,11 +533,42 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-6 cerrados en S45-S50)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-7 cerrados en S45-S51)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 50 — Fase 6, Bloque 6: ENSAMBLADO DE
+Última sesión registrada: Sesión 51 — Fase 6, Bloque 7: ENTIDAD JPA DE
+  RESTRICCIONES HORARIAS (§4.3) + MAPPER. Modo híbrido (decisión y cierre en el
+  Project, código en Claude Code). Cierra la deuda D28: el camino JPA ensambla
+  ya un ProblemaHorario COMPLETO. Entidad ProfesorRestriccionHoraria (app.catalog,
+  calcada de TramoSemanal: id IDENTITY, dos @ManyToOne LAZY a Profesor y
+  TramoSemanal nullable=false, @Enumerated(STRING) tipo, int peso, String motivo
+  nullable) + enum propio app.catalog.TipoRestriccion {DURA,BLANDA} +
+  ProfesorRestriccionHorariaRepository vacío. CatalogoMapper: aTipoRestriccion
+  (gemelo de aPatronTemporal), aRestriccionHoraria (profesor por código, tramo por
+  REFERENCIA de objeto vía IdentityHashMap, tramo ausente/recreo aborta, motivo →
+  Optional.ofNullable), refactor de aTramos SIN cambio observable (helper
+  aTramosConIndice devuelve List<Tramo> + IdentityHashMap<TramoSemanal,Tramo>;
+  aTramos público delega), y aProblemaHorario gana el 8º parámetro
+  List<ProfesorRestriccionHoraria>, sustituyendo el List.of() centinela. Decisión
+  de alcance tomada al inicio entre los dos candidatos de B7: entidad (esta) frente
+  a servicio de orquestación; se eligió la entidad porque el servicio (B8) debe
+  orquestar un mapper YA completo, no uno con el agujero de D28. El tramo se
+  resuelve por referencia de objeto, NO por el código sintético L1..V6 (D27 no se
+  reabre) ni por (día,ordenEnDia) —TramoSemanal porta orden GLOBAL con recreo, no
+  ordenEnDia—. El peso DEFAULT 1 de §4.3 NO se materializa en la entidad (política
+  de la UI de Fase 8; la entidad exige peso explícito). RIESGO CERRADO EN POSITIVO:
+  primer @ManyToOne a TramoSemanal no autorreferencial sobrevive el round-trip
+  sobre SQLite real. Tests: ProfesorRestriccionHorariaRoundTripTest (@DataJpaTest,
+  DURA+BLANDA) + CatalogoMapperRestriccionTest (unitario, 5 casos incl. recreo
+  aborta) + centinela de D28 en CatalogoMapperProblemaTest reconvertido a
+  verificar restricción real. src/main del solver NO tocado (record
+  domain.RestriccionHoraria ya existía desde S25) → índice NO regenerado; modelo
+  NO tocado. Suite: solver 59 + app 32 (+6), BUILD SUCCESS con mvn clean test desde
+  la raíz. Commits separados código/tests 84a8bed/f2e81a7, de una línea; commit de
+  doc pendiente. Siguiente: Bloque 8 (servicio de aplicación repos → mapper →
+  solver, sobre ensamblado completo).
+Última sesión registrada (previa): Sesión 50 — Fase 6, Bloque 6: ENSAMBLADO DE
   ProblemaHorario (JPA → dominio del solver). Modo híbrido (decisión y cierre en
   el Project, código en Claude Code). CatalogoMapper.aProblemaHorario ensambla el
   ProblemaHorario completo desde las siete listas de entidades JPA del catálogo,
@@ -610,52 +641,14 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-6 cerrados en S45-
   Subgrupo de dominio y su Set<GrupoAdministrativo> ya existían desde Fase 5). Commit
   de código 09b7b77 (una línea). Commits separados código/doc. Siguiente: Bloque 5
   (Actividad/Plaza como entidades JPA §4.6 + mapper; se apoya en el Subgrupo de B4).
-Última sesión registrada (previa): Sesión 47 — Fase 6, Bloque 3: MAPEO CATÁLOGO ENTIDAD JPA
-  -> MODELO DEL SOLVER (CatalogoMapper). Construido en modo híbrido (decisión y
-  cierre en el Project, código en Claude Code). Entrega CatalogoMapper (app/,
-  paquete app.mapper — clase final, ctor privado, métodos estáticos, mismo estilo
-  que ProblemaHorarioMapper) con cinco conversiones JPA->domain: aAula,
-  aAsignatura, aProfesor (directos; nombreCompleto->nombre), aGrupo (grupoPadre
-  resuelto por referencia de objeto recursiva; I5 la valida el record de
-  dominio) y aTramos(List<TramoSemanal>) a nivel de LISTA (excluye
-  es_lectivo=false/recreo -> domain.Tramo no porta ese flag y el schema JSON ya
-  confirmaba ordenEnDia 1..6 sin hueco para el recreo; ordena por día+orden
-  global; renumera ordenEnDia 1..6 reiniciando por día; sintetiza codigo
-  "L1".."V6"). DECISIÓN CERRADA EN EL PROJECT ANTES DE CONSTRUIR: VIRTUAL_OPTATIVA
-  lanza excepción explícita (IllegalArgumentException) en vez de mapear a
-  ORDINARIO o filtrar en silencio — ningún caso validado en modelo_datos_fase1.md
-  usa GrupoAdministrativo virtual para optativas (el patrón real, Lectura B, ya
-  se resuelve con Subgrupo N:M sobre grupos ORDINARIO); fallo ruidoso evita
-  pérdida silenciosa de un grupo real si el tipo llega a usarse. Nivel no se
-  mapea (el dominio del solver no lo necesita). Aula pierde tipo/capacidad/
-  edificio/planta/sector (deuda ya documentada, distancia entre aulas pendiente
-  en el solver). Tramo.siguienteInmediato no se mapea (la adyacencia de bloques
-  FPB la resuelve ModeloCpSat, D13, no este campo).
-  DOS HALLAZGOS DE CÓDIGO REAL que el Project había dejado como pregunta abierta,
-  resueltos por Claude Code al leer las entidades JPA reales antes de teclear:
-  (1) Aula (JPA, S46) NO tiene campo nombre — ni la entidad ni §4.1 lo listan,
-  pero el schema JSON exige Aula.nombre no nulo. Resuelto con nombre=codigo
-  (Opción 1), documentado en el mapper como deuda consciente (ALTA D26). (2) el
-  código de Tramo ("L1".."V6") es una clave SINTETIZADA por el mapper: el modelo
-  no define una convención de código de TramoSemanal reutilizable por
-  domain.Tramo (ALTA D27).
-  Tests: CatalogoMapperTest, 7 casos unitarios puros (entidades JPA en memoria,
-  sin Spring/BD) — un caso por método (incluyendo aGrupo con grupoPadre PDC),
-  VIRTUAL_OPTATIVA lanza, y aTramos (recreo excluido, ordenEnDia reiniciado por
-  día, código sintetizado). Suite verde: solver 59 + app 8 (CatalogoRoundTripTest
-  1 del Bloque 2 + CatalogoMapperTest 7), BUILD SUCCESS. src/main del solver NO
-  tocado -> índice NO regenerado; modelo NO tocado (el mapper no añade entidad ni
-  invariante al dominio del solver). Commit de código c3ec500
-  (una línea). Commits separados código/doc. Siguiente:
-  Bloque 4 (a decidir; candidato natural:
-  Subgrupo/Actividad como entidades JPA, prerrequisito para poder ensamblar
-  ProblemaHorario completo).
+
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
-de S44, S45 y S46 se archivaron en la Sesión 50 (misma higiene documental). El
-plan conserva las 4 últimas cabeceras compactas (S47–S50). El detalle histórico
-de cualquier sesión anterior —incluida S42 (citada por la deuda abierta D25) y
-S43 (citada por el cierre de D23)— está en la bitácora.
+de S44, S45 y S46 se archivaron en la Sesión 50 y la de S47 en la Sesión 51
+(misma higiene documental). El plan conserva las 4 últimas cabeceras compactas
+(S48–S51). El detalle histórico de cualquier sesión anterior —incluida S42
+(citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en
+la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
 
@@ -1124,6 +1117,47 @@ S43 (citada por el cierre de D23)— está en la bitácora.
       horarias (D28). Siguiente: Bloque 7 (a decidir; candidatos: entidad JPA de
       restricciones horarias que cierre D28, o servicio de aplicación que orqueste
       repos→mapper→solver).
+- [x] Bloque 7 — Entidad JPA de restricciones horarias (§4.3) + mapper (S51).
+      Cierra D28: el camino JPA ya ensambla un ProblemaHorario COMPLETO, con
+      restricciones horarias incluidas. Entidad ProfesorRestriccionHoraria en
+      app.catalog (id sintético IDENTITY; @ManyToOne LAZY a Profesor y a
+      TramoSemanal, ambos nullable=false; @Enumerated(STRING) tipo; int peso;
+      String motivo nullable; ctor protected + público, sin equals/hashCode,
+      calcada de TramoSemanal) + enum propio app.catalog.TipoRestriccion
+      {DURA,BLANDA} + ProfesorRestriccionHorariaRepository vacío. En CatalogoMapper:
+      aTipoRestriccion (switch, gemelo de aPatronTemporal); aRestriccionHoraria
+      (profesor por código vía resolver, tramo por REFERENCIA de objeto,
+      motivo → Optional.ofNullable); refactor de aTramos SIN cambio observable
+      (helper privado aTramosConIndice produce en un mismo bucle la List<Tramo> y
+      un IdentityHashMap<TramoSemanal,Tramo>; aTramos público delega); y
+      aProblemaHorario gana el 8º parámetro List<ProfesorRestriccionHoraria>,
+      sustituyendo el List.of() centinela por las restricciones mapeadas.
+      Seis decisiones cerradas antes de construir (D-B7-1 a D-B7-6, inline abajo).
+      Clave: D-B7-1 alcance = entidad (no servicio de
+      orquestación, que es B8, porque el servicio debe orquestar un mapper YA
+      completo); D-B7-2 el tramo se resuelve por referencia de objeto
+      (IdentityHashMap), NO por el código sintético L1..V6 (no reabre D27) ni por
+      (día,ordenEnDia) —la entidad TramoSemanal porta orden GLOBAL con recreo, no
+      ordenEnDia—; D-B7-3 una restricción sobre un tramo de recreo (ausente del
+      índice) ABORTA, no se ignora; D-B7-6 el peso DEFAULT 1 de §4.3 NO se
+      materializa en la entidad (exige peso explícito): es política de la capa de
+      configuración/UI (Fase 8), no dato de la entidad. RIESGO CERRADO EN POSITIVO:
+      primer @ManyToOne JPA a TramoSemanal no autorreferencial sobrevive el
+      round-trip sobre SQLite real (dialecto de comunidad). Tests:
+      ProfesorRestriccionHorariaRoundTripTest (@DataJpaTest, DURA+BLANDA, ambas FK
+      + tipo + peso + motivo intactos) + CatalogoMapperRestriccionTest (unitario:
+      DURA con motivo, BLANDA sin motivo, profesor huérfano aborta, tramo de recreo
+      aborta, resolución por referencia con varios tramos; índices construidos
+      consumiendo aProfesor/aTramos, no `new` sobre solver.domain). El centinela de
+      D28 en CatalogoMapperProblemaTest pasa de "verifica vacío" a ensamblar y
+      verificar una restricción real (ensamblaUnaRestriccionHorariaReal); los 5
+      casos previos ganan List.of() como 8º arg. src/main del solver NO tocado
+      (todo en app/; el record domain.RestriccionHoraria ya existía desde S25) →
+      referencia-codigo-solver.md NO regenerado; modelo NO tocado. Suite: solver 59
+      + app 32 (26 previos + 6), BUILD SUCCESS con mvn clean test desde la raíz.
+      Commits separados código/tests 84a8bed/f2e81a7, de una línea. Siguiente:
+      Bloque 8 (servicio de aplicación que orqueste repos → CatalogoMapper →
+      SolverHorario, ya sobre un ensamblado sin agujeros).
 
 ### Fases completadas
 
@@ -1683,7 +1717,7 @@ descripción completa.
   muestra al usuario), pero si la UI de Fase 7/8 llega a mostrar este código
   directamente hay que decidir si se mantiene la convención sintética o se
   sustituye por algo más descriptivo (p. ej. "Lunes 8:00-9:00"). Fase 7/8.
-- **D28 (Sesión 50, Fase 6 Bloque 6)**: el ensamblado
+- **D28 (Sesión 50, Fase 6 Bloque 6) — CERRADA en S51 (Bloque 7)**: el ensamblado
   CatalogoMapper.aProblemaHorario pasa List.of() al componente
   restriccionesHorarias del ProblemaHorario, porque el catálogo JPA de B2 (§4.1)
   no materializó la entidad ProfesorRestriccionHoraria: no hay tabla, repositorio
@@ -1698,6 +1732,16 @@ descripción completa.
   test CatalogoMapperProblemaTest fija el vacío como contrato (centinela): cuando
   se materialice la entidad, ese aserto salta y obliga a revisitar esta decisión
   conscientemente. Asignación: Fase 6, bloque futuro.
+  CIERRE (S51, Bloque 7): materializada la entidad ProfesorRestriccionHoraria
+  (§4.3) con su repositorio y CatalogoMapper.aRestriccionHoraria; aProblemaHorario
+  la ensambla. El tramo se resuelve por referencia de objeto (IdentityHashMap
+  TramoSemanal→Tramo construido en aTramosConIndice), NO por el código sintético
+  L1..V6, de modo que D27 NO se reabre. El centinela saltó como estaba previsto y
+  pasó a verificar el round-trip real. Queda VIVA solo la parte de D21 (el campo
+  peso por-restricción sigue sin consumirse en el objetivo; el término blando usa
+  la constante PESO_INDISP_BLANDA=1); y el default 1 de §4.3 NO se materializa en
+  la entidad (exige peso explícito): es política de la capa de configuración/UI
+  (Fase 8), no dato de la entidad.
 
 ### Notas técnicas validadas en Fase 0
 
