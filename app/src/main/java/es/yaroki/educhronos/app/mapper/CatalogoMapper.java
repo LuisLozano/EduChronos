@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.app.mapper;
 
 import es.yaroki.educhronos.app.catalog.Dia;
+import es.yaroki.educhronos.app.catalog.PatronTemporal;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
@@ -113,6 +114,128 @@ public final class CatalogoMapper {
             grupos.add(mapeado);
         }
         return new es.yaroki.educhronos.solver.domain.Subgrupo(entidad.getCodigo(), grupos);
+    }
+
+    /**
+     * {@code Actividad} JPA → {@code domain.Actividad}. Entidad a entidad: una
+     * actividad es autocontenida (no depende de las demás), a diferencia de
+     * {@code aTramos}. El ensamblado de la lista completa lo hace el Bloque 6.
+     *
+     * <p>La {@code asignatura} de la actividad es opcional: si la entidad la trae
+     * null (plazas de distinta asignatura, p. ej. bloque CyR/OyD/RefMt), se mapea
+     * a {@code Optional.empty()}; mismo shape que {@code aGrupo} con {@code grupoPadre}.
+     *
+     * <p>{@code requiereTutor} de la entidad NO se propaga al dominio: el record
+     * {@code domain.Actividad} no tiene ese campo (la invariante S8 no la consume
+     * el solver hoy). Es dato de configuración de §4.6 que persiste para Fase 8
+     * pero el mapper lo ignora, igual que ignora Nivel o los campos extra de Aula.
+     * Decisión D-B5-5.
+     *
+     * <p>Las plazas se resuelven con el helper privado {@link #aPlaza}, que
+     * comparte los mismos índices por código. Un código sin correspondencia en
+     * cualquier índice es error de integridad referencial y aborta con excepción.
+     *
+     * @param entidad             actividad JPA de {@code app.catalog}
+     * @param asignaturasPorCodigo índice de asignaturas de dominio ya mapeadas
+     * @param profesoresPorCodigo  índice de profesores de dominio ya mapeados
+     * @param aulasPorCodigo       índice de aulas de dominio ya mapeadas
+     * @param subgruposPorCodigo   índice de subgrupos de dominio ya mapeados
+     */
+    public static es.yaroki.educhronos.solver.domain.Actividad aActividad(
+            es.yaroki.educhronos.app.catalog.Actividad entidad,
+            Map<String, Asignatura> asignaturasPorCodigo,
+            Map<String, Profesor> profesoresPorCodigo,
+            Map<String, Aula> aulasPorCodigo,
+            Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo) {
+
+        Objects.requireNonNull(entidad, "actividad no puede ser null");
+
+        Optional<Asignatura> asignatura = entidad.getAsignatura() == null
+                ? Optional.empty()
+                : Optional.of(resolver(asignaturasPorCodigo, entidad.getAsignatura().getCodigo(),
+                "asignatura", entidad.getCodigo()));
+
+        List<es.yaroki.educhronos.solver.domain.Plaza> plazas =
+                new ArrayList<>(entidad.getPlazas().size());
+        for (es.yaroki.educhronos.app.catalog.Plaza p : entidad.getPlazas()) {
+            plazas.add(aPlaza(p, asignaturasPorCodigo, profesoresPorCodigo,
+                    aulasPorCodigo, subgruposPorCodigo));
+        }
+
+        return new es.yaroki.educhronos.solver.domain.Actividad(
+                entidad.getCodigo(),
+                asignatura,
+                entidad.getRepeticionesPorSemana(),
+                entidad.getDuracionTramos(),
+                aPatronTemporal(entidad.getPatronTemporal()),
+                plazas);
+    }
+
+    /**
+     * {@code Plaza} JPA → {@code domain.Plaza}. Helper privado de {@link #aActividad}:
+     * una plaza no tiene identidad de mapeo fuera de su actividad. El XOR
+     * aula_fija / aulasCandidatas lo hace cumplir el record del dominio; aquí
+     * solo se traduce (aula_fija presente → aulaFija con candidatas vacías;
+     * ausente → aulasCandidatas resueltas y aulaFija vacía).
+     */
+    private static es.yaroki.educhronos.solver.domain.Plaza aPlaza(
+            es.yaroki.educhronos.app.catalog.Plaza entidad,
+            Map<String, Asignatura> asignaturasPorCodigo,
+            Map<String, Profesor> profesoresPorCodigo,
+            Map<String, Aula> aulasPorCodigo,
+            Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo) {
+
+        Asignatura asignatura = resolver(asignaturasPorCodigo,
+                entidad.getAsignatura().getCodigo(), "asignatura", entidad.getCodigo());
+
+        java.util.Set<Profesor> profesores = new java.util.HashSet<>();
+        for (es.yaroki.educhronos.app.catalog.Profesor prof : entidad.getProfesores()) {
+            profesores.add(resolver(profesoresPorCodigo, prof.getCodigo(),
+                    "profesor", entidad.getCodigo()));
+        }
+
+        Optional<Aula> aulaFija = entidad.getAulaFija() == null
+                ? Optional.empty()
+                : Optional.of(resolver(aulasPorCodigo, entidad.getAulaFija().getCodigo(),
+                "aula fija", entidad.getCodigo()));
+
+        java.util.Set<Aula> aulasCandidatas = new java.util.HashSet<>();
+        for (es.yaroki.educhronos.app.catalog.Aula a : entidad.getAulasCandidatas()) {
+            aulasCandidatas.add(resolver(aulasPorCodigo, a.getCodigo(),
+                    "aula candidata", entidad.getCodigo()));
+        }
+
+        java.util.Set<es.yaroki.educhronos.solver.domain.Subgrupo> subgrupos =
+                new java.util.HashSet<>();
+        for (es.yaroki.educhronos.app.catalog.Subgrupo sg : entidad.getSubgrupos()) {
+            subgrupos.add(resolver(subgruposPorCodigo, sg.getCodigo(),
+                    "subgrupo", entidad.getCodigo()));
+        }
+
+        return new es.yaroki.educhronos.solver.domain.Plaza(
+                entidad.getCodigo(), asignatura, profesores,
+                aulaFija, aulasCandidatas, subgrupos);
+    }
+
+    /** Resuelve un código contra un índice o aborta con error de integridad referencial. */
+    private static <T> T resolver(Map<String, T> indice, String codigo,
+                                  String tipoReferencia, String codigoPlazaOActividad) {
+        T valor = indice.get(codigo);
+        if (valor == null) {
+            throw new IllegalArgumentException(
+                    "'" + codigoPlazaOActividad + "' referencia un/a " + tipoReferencia
+                            + " no presente en el catálogo mapeado: " + codigo);
+        }
+        return valor;
+    }
+
+    private static es.yaroki.educhronos.solver.domain.PatronTemporal aPatronTemporal(
+            es.yaroki.educhronos.app.catalog.PatronTemporal patron) {
+        return switch (patron) {
+            case DISTRIBUIDA -> es.yaroki.educhronos.solver.domain.PatronTemporal.DISTRIBUIDA;
+            case AGRUPADA -> es.yaroki.educhronos.solver.domain.PatronTemporal.AGRUPADA;
+            case NEUTRA -> es.yaroki.educhronos.solver.domain.PatronTemporal.NEUTRA;
+        };
     }
 
     /**
