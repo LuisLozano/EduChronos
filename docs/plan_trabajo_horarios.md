@@ -533,11 +533,31 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-5 cerrados en S45-S49)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-6 cerrados en S45-S50)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 49 — Fase 6, Bloque 5: ACTIVIDAD Y PLAZA COMO
+Última sesión registrada: Sesión 50 — Fase 6, Bloque 6: ENSAMBLADO DE
+  ProblemaHorario (JPA → dominio del solver). Modo híbrido (decisión y cierre en
+  el Project, código en Claude Code). CatalogoMapper.aProblemaHorario ensambla el
+  ProblemaHorario completo desde las siete listas de entidades JPA del catálogo,
+  construyendo en producción los cinco índices por código (consumiendo la salida
+  del propio mapper) en orden de dependencia; código duplicado aborta
+  (IllegalStateException). Cinco decisiones cerradas (D-B6-1 a D-B6-5); la de más
+  impacto, D-B6-3: restriccionesHorarias diferida con List.of() porque no existe
+  entidad JPA que las persista (deuda D28 nueva; el dato solo entra por el camino
+  JSON, RestriccionHorariaDto + ProblemaHorarioMapper.aDominio). Firmas y orden del
+  record confirmados contra el repo real: sin desajustes, no hubo que parar.
+  CatalogoMapperProblemaTest (6 casos, app.catalog por ctor protected): feliz con
+  recreo intercalado, coherencia subgrupo↔grupo por equals estructural (S9),
+  huérfanos en top-level (D-B6-1), restricciones vacías (centinela D28), aula
+  duplicada y actividad huérfana abortan. Suite solver 59 + app 26, BUILD SUCCESS
+  con mvn clean test desde la raíz. src/main del solver NO tocado (mapper en app/)
+  → índice NO regenerado; modelo NO tocado. Commits separados código/tests
+  be80f90/90da600, de una línea; commit de doc pendiente. Siguiente: Bloque 7
+  (candidatos: entidad JPA de restricciones horarias —cierra D28— o servicio de
+  orquestación repos→mapper→solver).
+Última sesión registrada (previa): Sesión 49 — Fase 6, Bloque 5: ACTIVIDAD Y PLAZA COMO
   ENTIDADES JPA (§4.6) + MAPPER. Modo híbrido. Entidades Actividad (agregado raíz,
   @OneToMany cascade+orphanRemoval) y Plaza (dependiente; @ManyToOne opcional
   aula_fija + tres @ManyToMany) en app.catalog + enum propio PatronTemporal +
@@ -1140,6 +1160,41 @@ cierre de D23), está en la bitácora.
       CatalogoMapperActividadTest 5), BUILD SUCCESS con mvn clean test desde la raíz.
       src/main del solver NO tocado. Siguiente: Bloque 6 (ensamblado de
       ProblemaHorario completo sobre las entidades ya mapeadas de B2-B5).
+- [x] Bloque 6 — Ensamblado de ProblemaHorario (JPA → dominio del solver) (S50).
+      CatalogoMapper.aProblemaHorario(tramos, aulas, asignaturas, profesores,
+      grupos, subgrupos, actividades) — siete listas de entidades JPA de
+      app.catalog → domain.ProblemaHorario completo. Construye en producción los
+      cinco índices Map<String,...> (aulas/asignaturas/profesores/grupos/subgrupos)
+      consumiendo la salida del propio mapper (aprendizaje B4/B5 promovido de test
+      a producción), en orden de dependencia: tramos → hojas → grupos → subgrupos →
+      actividades. Índices con Collectors.toMap de dos argumentos → código
+      duplicado ABORTA con IllegalStateException, no gana el último. Listas de
+      dominio con stream().map().toList() (preservan orden de entrada). Cinco
+      decisiones cerradas antes de construir: D-B6-1 catálogo COMPLETO sin poda
+      (grupos/subgrupos huérfanos entran en las listas top-level; el mapper
+      traduce, no poda); D-B6-2 índices en producción consumiendo el mapper, nunca
+      new sobre solver.domain; D-B6-3 restriccionesHorarias DIFERIDA (List.of(): no
+      existe entidad JPA ProfesorRestriccionHoraria; el dato solo entra por el
+      camino JSON; deuda D28); D-B6-4 recibe listas ya cargadas, no repositorios —
+      mapper puro, la orquestación carga-repos→mapper→solver es un servicio de
+      aplicación posterior; D-B6-5 método en CatalogoMapper, no clase nueva.
+      Firmas confirmadas contra el repo real; el orden del record ProblemaHorario
+      coincidió con la firma del contrato (sin desajustes, no hubo que parar).
+      CatalogoMapperProblemaTest en app.catalog (Actividad/Plaza con ctor
+      protected, como CatalogoMapperActividadTest): ensamblado feliz con recreo
+      intercalado + referencia por valor; coherencia subgrupo↔grupo top-level por
+      igualdad estructural (protege S9); catálogo completo con huérfanos (protege
+      D-B6-1); restriccionesHorarias vacía por contrato (centinela de D28); código
+      de aula duplicado → IllegalStateException; actividad con profesor ausente →
+      IllegalArgumentException con el código huérfano. src/main del solver NO tocado
+      (el mapper vive en app/) → referencia-codigo-solver.md NO regenerado; modelo
+      NO tocado. Suite: solver 59 + app 26 (20 previos + CatalogoMapperProblemaTest
+      6), BUILD SUCCESS con mvn clean test desde la raíz. Commits separados
+      código/tests be80f90/90da600, de una línea. Cierra el ensamblado del catálogo:
+      el camino JPA produce ya un ProblemaHorario completo salvo restricciones
+      horarias (D28). Siguiente: Bloque 7 (a decidir; candidatos: entidad JPA de
+      restricciones horarias que cierre D28, o servicio de aplicación que orqueste
+      repos→mapper→solver).
 
 ### Fases completadas
 
@@ -1699,6 +1754,21 @@ descripción completa.
   muestra al usuario), pero si la UI de Fase 7/8 llega a mostrar este código
   directamente hay que decidir si se mantiene la convención sintética o se
   sustituye por algo más descriptivo (p. ej. "Lunes 8:00-9:00"). Fase 7/8.
+- **D28 (Sesión 50, Fase 6 Bloque 6)**: el ensamblado
+  CatalogoMapper.aProblemaHorario pasa List.of() al componente
+  restriccionesHorarias del ProblemaHorario, porque el catálogo JPA de B2 (§4.1)
+  no materializó la entidad ProfesorRestriccionHoraria: no hay tabla, repositorio
+  ni tramo de mapper para ella. El dato de indisponibilidades del profesorado
+  (DURA/BLANDA, consumido por el solver desde S25, Bloque 6b) solo entra hoy por el
+  camino JSON (RestriccionHorariaDto + ProblemaHorarioMapper.aDominio).
+  Materializar la entidad JPA (FK a Profesor + FK a TramoSemanal + TipoRestriccion
+  + peso + motivo) con su repositorio y su conversión aRestriccionHoraria es un
+  bloque propio de Fase 6 (tamaño comparable a B4/B5); resolver la restricción
+  contra el Tramo de dominio correcto no es trivial: el código de Tramo es
+  sintetizado L1..V6 por aTramos, la entidad TramoSemanal no lo porta (ver D27). El
+  test CatalogoMapperProblemaTest fija el vacío como contrato (centinela): cuando
+  se materialice la entidad, ese aserto salta y obliga a revisitar esta decisión
+  conscientemente. Asignación: Fase 6, bloque futuro.
 
 ### Notas técnicas validadas en Fase 0
 
