@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S46. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S47. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -9,9 +9,9 @@ deuda consciente abierta, decisiones permanentes, bloques de fase) está en
 `plan_trabajo_horarios.md`. Esta bitácora es histórico de solo lectura: no se
 consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. El plan conserva además las 4 últimas cabeceras compactas de
-sesión (S47–S50); las anteriores se archivan aquí conforme avanza el trabajo.
+sesión (S48–S51); las anteriores se archivan aquí conforme avanza el trabajo.
 
-Orden: cronológico ascendente (S10 → S46). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S47). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -1955,3 +1955,45 @@ D3 sin tocar.
   Entidad JPA -> modelo del solver, limitado a las entidades de catálogo que el solver
   consume: Aula, Asignatura, Profesor, Grupo, Tramo).
 
+
+### Sesión 47 — Fase 6, Bloque 3: MAPEO CATÁLOGO ENTIDAD JPA -> MODELO DEL SOLVER (CatalogoMapper).
+
+Construido en modo híbrido (decisión y
+  cierre en el Project, código en Claude Code). Entrega CatalogoMapper (app/,
+  paquete app.mapper — clase final, ctor privado, métodos estáticos, mismo estilo
+  que ProblemaHorarioMapper) con cinco conversiones JPA->domain: aAula,
+  aAsignatura, aProfesor (directos; nombreCompleto->nombre), aGrupo (grupoPadre
+  resuelto por referencia de objeto recursiva; I5 la valida el record de
+  dominio) y aTramos(List<TramoSemanal>) a nivel de LISTA (excluye
+  es_lectivo=false/recreo -> domain.Tramo no porta ese flag y el schema JSON ya
+  confirmaba ordenEnDia 1..6 sin hueco para el recreo; ordena por día+orden
+  global; renumera ordenEnDia 1..6 reiniciando por día; sintetiza codigo
+  "L1".."V6"). DECISIÓN CERRADA EN EL PROJECT ANTES DE CONSTRUIR: VIRTUAL_OPTATIVA
+  lanza excepción explícita (IllegalArgumentException) en vez de mapear a
+  ORDINARIO o filtrar en silencio — ningún caso validado en modelo_datos_fase1.md
+  usa GrupoAdministrativo virtual para optativas (el patrón real, Lectura B, ya
+  se resuelve con Subgrupo N:M sobre grupos ORDINARIO); fallo ruidoso evita
+  pérdida silenciosa de un grupo real si el tipo llega a usarse. Nivel no se
+  mapea (el dominio del solver no lo necesita). Aula pierde tipo/capacidad/
+  edificio/planta/sector (deuda ya documentada, distancia entre aulas pendiente
+  en el solver). Tramo.siguienteInmediato no se mapea (la adyacencia de bloques
+  FPB la resuelve ModeloCpSat, D13, no este campo).
+  DOS HALLAZGOS DE CÓDIGO REAL que el Project había dejado como pregunta abierta,
+  resueltos por Claude Code al leer las entidades JPA reales antes de teclear:
+  (1) Aula (JPA, S46) NO tiene campo nombre — ni la entidad ni §4.1 lo listan,
+  pero el schema JSON exige Aula.nombre no nulo. Resuelto con nombre=codigo
+  (Opción 1), documentado en el mapper como deuda consciente (ALTA D26). (2) el
+  código de Tramo ("L1".."V6") es una clave SINTETIZADA por el mapper: el modelo
+  no define una convención de código de TramoSemanal reutilizable por
+  domain.Tramo (ALTA D27).
+  Tests: CatalogoMapperTest, 7 casos unitarios puros (entidades JPA en memoria,
+  sin Spring/BD) — un caso por método (incluyendo aGrupo con grupoPadre PDC),
+  VIRTUAL_OPTATIVA lanza, y aTramos (recreo excluido, ordenEnDia reiniciado por
+  día, código sintetizado). Suite verde: solver 59 + app 8 (CatalogoRoundTripTest
+  1 del Bloque 2 + CatalogoMapperTest 7), BUILD SUCCESS. src/main del solver NO
+  tocado -> índice NO regenerado; modelo NO tocado (el mapper no añade entidad ni
+  invariante al dominio del solver). Commit de código c3ec500
+  (una línea). Commits separados código/doc. Siguiente:
+  Bloque 4 (a decidir; candidato natural:
+  Subgrupo/Actividad como entidades JPA, prerrequisito para poder ensamblar
+  ProblemaHorario completo).
