@@ -6,6 +6,7 @@ import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
+import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.Tramo;
@@ -16,13 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Convierte entidades JPA del catálogo del centro ({@code app.catalog}) al
- * modelo puro del solver ({@code solver.domain}). Primer tramo del mapper
- * (Fase 6, Bloque 3): solo el catálogo que el solver consume; el ensamblado de
- * {@code ProblemaHorario} (faltan Subgrupo/Actividad como entidades) y el mapeo
- * inverso (solución → entidades) llegan en bloques posteriores.
+ * modelo puro del solver ({@code solver.domain}). {@link #aProblemaHorario}
+ * ensambla la entrada completa del solver a partir de las siete listas de
+ * entidades del catálogo (Fase 6, Bloque 6); los métodos por-entidad que consume
+ * se añadieron en los Bloques 3–5. El mapeo inverso (solución → entidades) llega
+ * en un bloque posterior.
  *
  * <p>Respeta la frontera dura: esta clase vive en {@code app/} y depende de
  * {@code solver} en un solo sentido; el modelo del solver ignora que JPA existe.
@@ -45,6 +48,82 @@ import java.util.Optional;
 public final class CatalogoMapper {
 
     private CatalogoMapper() { }
+
+    /**
+     * Ensambla un {@link ProblemaHorario} completo del solver a partir de las
+     * siete listas de entidades JPA del catálogo, ya cargadas. No lee de
+     * repositorios ni abre transacción: recibe las colecciones y las traduce.
+     *
+     * <p>El orden de resolución lo dictan las dependencias entre entidades: los
+     * subgrupos se resuelven contra los grupos ya mapeados, y las actividades
+     * (con sus plazas) contra asignaturas/profesores/aulas/subgrupos ya mapeados.
+     * Cada índice {@code Map<String, ...>} se construye volcando la lista de
+     * dominio del paso previo —nunca fabricando tipos de {@code solver.domain}—
+     * y usa un colector que ABORTA ante código duplicado
+     * ({@link Collectors#toMap(java.util.function.Function, java.util.function.Function)}
+     * lanza {@link IllegalStateException}): un código repetido es un error de
+     * integridad del catálogo, no algo a colapsar en silencio.
+     *
+     * <p>Las listas de dominio preservan el orden de entrada (los tramos, además,
+     * quedan ordenados por {@code aTramos}). El octavo componente,
+     * {@code restriccionesHorarias}, se pasa {@code List.of()}: no existe entidad
+     * JPA de restricciones horarias todavía (deuda D28), y este mapper no inventa
+     * su forma.
+     */
+    public static ProblemaHorario aProblemaHorario(
+            List<TramoSemanal> tramos,
+            List<es.yaroki.educhronos.app.catalog.Aula> aulas,
+            List<es.yaroki.educhronos.app.catalog.Asignatura> asignaturas,
+            List<es.yaroki.educhronos.app.catalog.Profesor> profesores,
+            List<es.yaroki.educhronos.app.catalog.GrupoAdministrativo> grupos,
+            List<es.yaroki.educhronos.app.catalog.Subgrupo> subgrupos,
+            List<es.yaroki.educhronos.app.catalog.Actividad> actividades) {
+
+        Objects.requireNonNull(tramos,      "tramos no puede ser null");
+        Objects.requireNonNull(aulas,       "aulas no puede ser null");
+        Objects.requireNonNull(asignaturas, "asignaturas no puede ser null");
+        Objects.requireNonNull(profesores,  "profesores no puede ser null");
+        Objects.requireNonNull(grupos,      "grupos no puede ser null");
+        Objects.requireNonNull(subgrupos,   "subgrupos no puede ser null");
+        Objects.requireNonNull(actividades, "actividades no puede ser null");
+
+        List<Tramo> tramosDom = aTramos(tramos);
+
+        List<Aula> aulasDom = aulas.stream().map(CatalogoMapper::aAula).toList();
+        Map<String, Aula> aulasPorCodigo =
+                aulasDom.stream().collect(Collectors.toMap(Aula::codigo, a -> a));
+
+        List<Asignatura> asignaturasDom =
+                asignaturas.stream().map(CatalogoMapper::aAsignatura).toList();
+        Map<String, Asignatura> asignaturasPorCodigo =
+                asignaturasDom.stream().collect(Collectors.toMap(Asignatura::codigo, a -> a));
+
+        List<Profesor> profesoresDom =
+                profesores.stream().map(CatalogoMapper::aProfesor).toList();
+        Map<String, Profesor> profesoresPorCodigo =
+                profesoresDom.stream().collect(Collectors.toMap(Profesor::codigo, p -> p));
+
+        List<GrupoAdministrativo> gruposDom =
+                grupos.stream().map(CatalogoMapper::aGrupo).toList();
+        Map<String, GrupoAdministrativo> gruposPorCodigo =
+                gruposDom.stream().collect(Collectors.toMap(GrupoAdministrativo::codigo, g -> g));
+
+        List<es.yaroki.educhronos.solver.domain.Subgrupo> subgruposDom =
+                subgrupos.stream().map(sg -> aSubgrupo(sg, gruposPorCodigo)).toList();
+        Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo =
+                subgruposDom.stream().collect(Collectors.toMap(
+                        es.yaroki.educhronos.solver.domain.Subgrupo::codigo, s -> s));
+
+        List<es.yaroki.educhronos.solver.domain.Actividad> actividadesDom =
+                actividades.stream()
+                        .map(act -> aActividad(act, asignaturasPorCodigo,
+                                profesoresPorCodigo, aulasPorCodigo, subgruposPorCodigo))
+                        .toList();
+
+        return new ProblemaHorario(
+                tramosDom, aulasDom, asignaturasDom, profesoresDom,
+                gruposDom, subgruposDom, actividadesDom, List.of());
+    }
 
     /**
      * {@code Aula} JPA → {@code domain.Aula}. El {@code nombre} del dominio se
