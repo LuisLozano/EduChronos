@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S42. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S46. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -9,9 +9,9 @@ deuda consciente abierta, decisiones permanentes, bloques de fase) está en
 `plan_trabajo_horarios.md`. Esta bitácora es histórico de solo lectura: no se
 consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. El plan conserva además las 4 últimas cabeceras compactas de
-sesión (S41–S44) por estar referenciadas por deuda abierta.
+sesión (S47–S50); las anteriores se archivan aquí conforme avanza el trabajo.
 
-Orden: cronológico ascendente (S10 → S42). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S46). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -1878,4 +1878,80 @@ D3 sin tocar.
   completo. Suite rápida 59 verde, BUILD SUCCESS, 9,2 s. src/main NO tocado -> índice NO
   regenerado; modelo NO tocado.
 
+
+### Sesión 44 — Fase 5, CIERRE DE FASE. Sub-bloque de respaldo
+  descriptivo + cierre de criterios 3 y 4 como decisión de producto gemela de D23.
+  Con D23 cerrada (S43), los criterios 3 (calidad comparable) y 4 (ventanas no
+  excesivas) quedaban bloqueados por una MISMA causa: no hay umbral sin datos del
+  centro; no es trabajo técnico pendiente. Sub-bloque de respaldo (Variante A): el
+  test SolverHorarioOptimizacionEscalaInstitutoCompletoTest ya recomputaba los tres
+  términos blandos —no hizo falta código nuevo, solo correrlo aislado (D25) y
+  registrar la salida. EVIDENCIA (instituto completo real, 26 grupos, no el recorte
+  en memoria de S43): FEASIBLE objetivo 219,0 cota 2,0 gap 217,0 en 601,6 s; ventanas
+  =196, consecutivas=23, indispBlanda=0; 196+23+0=219 valida el recomputo del
+  verificador contra el objetivo del solver (PESO_*=1, D21). Lectura honesta: 196
+  ventanas es ALTO para ~28 profesores sobre 30 tramos; sin dato del centro no se
+  umbraliza, pero se registra. DECISIÓN: criterios 3 y 4 CERRADOS como decisión de
+  producto (umbral = configuración del centro en despliegue, no requisito de
+  desarrollo); FASE 5 CERRADA. Sin código nuevo: src/main NO tocado -> índice NO
+  regenerado; modelo NO tocado; pom NO tocado. Solo documentación. Siguiente: Fase 6
+  (persistencia). Test corrido aislado por D25, BUILD SUCCESS, 10:04 min.
+
+
+### Sesión 45 — Fase 6, Bloque 1: ANDAMIAJE DEL MÓDULO app/ +
+  HUMO DE PERSISTENCIA. Arranque de Fase 6 en modo híbrido (decisión y cierre en el
+  Project; teclear/compilar en Claude Code). Se crea el módulo Maven app/ (declarado
+  en el pom raíz, como anticipaba la decisión táctica de Fase 2: el módulo app/ se
+  declara al entrar en Fase 6, no antes). Stack de persistencia fijado y validado:
+  Spring Boot 4.1.0 (GA) + Hibernate 7.4.1 + driver SQLite + dialecto de comunidad
+  org.hibernate.community.dialect.SQLiteDialect. El contexto Spring arranca, abre
+  SQLite en fichero local (ruta relativa al working dir vía application.properties:
+  spring.datasource.url=jdbc:sqlite:educhronos.db; SQLite 3.53.2) e Hibernate genera
+  el esquema vía hbm2ddl sobre una HumoEntity desechable. RIESGO CERRADO EN POSITIVO:
+  el dialecto de comunidad (best-effort, sin dialecto SQLite oficial en Hibernate)
+  funciona sobre Hibernate 7.4 sin tocar nada. Frontera respetada: dependencia de
+  módulo app -> solver (unidireccional; solver no toca app); el modelo del solver
+  permanece libre de JPA (HumoEntity es desechable, NO es del modelo real). NO entran
+  en este bloque entidades del modelo real, mapper ni CRUD (Bloque 2 en adelante).
+  Test de integración: levanta el contexto, verifica que el .db se crea en disco y lo
+  limpia en @AfterAll (working tree sin .db residuales; .gitignore ignora *.db). suite
+  rápida verde: solver 59 + app 1, BUILD SUCCESS. src/main del solver NO tocado ->
+  índice NO regenerado; modelo NO tocado (la entidad de humo no cuenta como entidad de
+  dominio). Commits separados código/doc, de una línea. Siguiente: Bloque 2 (catálogo
+  del centro como entidades JPA + repos + mapper entidad->dominio; alcance a acordar).
+
+
+### Sesión 46 — Fase 6, Bloque 2: CATÁLOGO DEL CENTRO COMO
+  ENTIDADES JPA + REPOSITORIOS. Implementa el catálogo §4.1 del modelo como entidades
+  JPA en el módulo app/ (paquete app.catalog), sin mapper ni capa web. Corte acordado
+  en el Project: "una capa por bloque"; el mapper Entidad->modelo del solver se separa
+  al Bloque 3 (las entidades deben estar estables antes de mapearlas, misma disciplina
+  que dejó el mapper fuera del Bloque 1). Entran 8 entidades: Nivel, GrupoAdministrativo,
+  Profesor, Aula (con todos sus campos: tipo, capacidad, edificio, planta, sector),
+  Asignatura, AsignaturaAulaCompatible, TramoSemanal, Configuracion; + 3 enums propios
+  de la capa JPA (TipoGrupo con 3 valores ORDINARIO/DIVERSIFICACION_PDC/VIRTUAL_OPTATIVA,
+  TipoAula con 9, Dia) + 8 repositorios Spring Data. Decisiones de modelado: id sintético
+  en todas salvo Configuracion (clave natural); AsignaturaAulaCompatible con id sintético
+  + @UniqueConstraint(asignatura, tipo_aula); enums @Enumerated(STRING); FK
+  autorreferenciales @ManyToOne(LAZY) en GrupoAdministrativo.grupoPadre y
+  TramoSemanal.siguienteInmediato. ASIMETRÍA CONSCIENTE (la vigila el mapper de Bloque 3):
+  app.catalog.TipoGrupo tiene 3 valores, solver.domain.TipoGrupo solo 2 (ORDINARIO,
+  DIVERSIFICACION_PDC); VIRTUAL_OPTATIVA no existe en el solver. Los enums TipoGrupo y Dia
+  de app/ son PROPIOS por diseño (frontera "entidad JPA con su forma, modelo del solver
+  con la suya"), NO duplicados a deduplicar; el javadoc del enum ya lo documenta. RIESGO
+  CERRADO EN POSITIVO: LocalTime de TramoSemanal viaja a SQLite y vuelve intacto, sin
+  fallback a String (era la incógnita del dialecto de comunidad al planificar). Frontera
+  respetada: entidades en app/, CERO anotaciones JPA en solver/; dependencia app -> solver
+  unidireccional; modelo del solver libre de JPA. HumoEntity y PersistenceSmokeTest del
+  Bloque 1 retirados, sustituidos por un test de round-trip (@DataJpaTest + replace=NONE
+  sobre la SQLite real) que persiste y recupera filas de cada entidad y verifica relaciones
+  (Grupo->Nivel, Grupo->grupoPadre, Tramo->siguienteInmediato, Asignatura<->tipoAula).
+  IMPREVISTO DE STACK (ver "### Notas técnicas validadas en Fase 6"): Spring Boot 4
+  modularizó los test slices; @DataJpaTest ya no viene en spring-boot-starter-test (hubo
+  que añadir spring-boot-starter-data-jpa-test en scope test y corregir paquetes SB4).
+  Commit de código 612a70e (una línea). suite rápida verde: solver 59 + app 1 (round-trip),
+  BUILD SUCCESS. src/main del solver NO tocado -> índice NO regenerado; modelo NO tocado.
+  Commits separados código/doc, de una línea. Siguiente: Bloque 3 (primer tramo del mapper
+  Entidad JPA -> modelo del solver, limitado a las entidades de catálogo que el solver
+  consume: Aula, Asignatura, Profesor, Grupo, Tramo).
 
