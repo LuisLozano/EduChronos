@@ -2,17 +2,20 @@ package es.yaroki.educhronos.app.mapper;
 
 import es.yaroki.educhronos.app.catalog.Dia;
 import es.yaroki.educhronos.app.catalog.PatronTemporal;
+import es.yaroki.educhronos.app.catalog.ProfesorRestriccionHoraria;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,10 +68,11 @@ public final class CatalogoMapper {
      * integridad del catálogo, no algo a colapsar en silencio.
      *
      * <p>Las listas de dominio preservan el orden de entrada (los tramos, además,
-     * quedan ordenados por {@code aTramos}). El octavo componente,
-     * {@code restriccionesHorarias}, se pasa {@code List.of()}: no existe entidad
-     * JPA de restricciones horarias todavía (deuda D28), y este mapper no inventa
-     * su forma.
+     * quedan ordenados por {@code aTramos}). Las {@code restricciones} horarias
+     * (deuda D28, cerrada en el Bloque 7) se resuelven contra los profesores ya
+     * mapeados y contra el índice {@code TramoSemanal → Tramo} que produce el
+     * mapeo de tramos: una restricción sobre un tramo no lectivo (excluido por
+     * {@code aTramos}) aborta con excepción explícita.
      */
     public static ProblemaHorario aProblemaHorario(
             List<TramoSemanal> tramos,
@@ -77,17 +81,20 @@ public final class CatalogoMapper {
             List<es.yaroki.educhronos.app.catalog.Profesor> profesores,
             List<es.yaroki.educhronos.app.catalog.GrupoAdministrativo> grupos,
             List<es.yaroki.educhronos.app.catalog.Subgrupo> subgrupos,
-            List<es.yaroki.educhronos.app.catalog.Actividad> actividades) {
+            List<es.yaroki.educhronos.app.catalog.Actividad> actividades,
+            List<ProfesorRestriccionHoraria> restricciones) {
 
-        Objects.requireNonNull(tramos,      "tramos no puede ser null");
-        Objects.requireNonNull(aulas,       "aulas no puede ser null");
-        Objects.requireNonNull(asignaturas, "asignaturas no puede ser null");
-        Objects.requireNonNull(profesores,  "profesores no puede ser null");
-        Objects.requireNonNull(grupos,      "grupos no puede ser null");
-        Objects.requireNonNull(subgrupos,   "subgrupos no puede ser null");
-        Objects.requireNonNull(actividades, "actividades no puede ser null");
+        Objects.requireNonNull(tramos,       "tramos no puede ser null");
+        Objects.requireNonNull(aulas,        "aulas no puede ser null");
+        Objects.requireNonNull(asignaturas,  "asignaturas no puede ser null");
+        Objects.requireNonNull(profesores,   "profesores no puede ser null");
+        Objects.requireNonNull(grupos,       "grupos no puede ser null");
+        Objects.requireNonNull(subgrupos,    "subgrupos no puede ser null");
+        Objects.requireNonNull(actividades,  "actividades no puede ser null");
+        Objects.requireNonNull(restricciones, "restricciones no puede ser null");
 
-        List<Tramo> tramosDom = aTramos(tramos);
+        TramosMapeados tramosMapeados = aTramosConIndice(tramos);
+        List<Tramo> tramosDom = tramosMapeados.lista();
 
         List<Aula> aulasDom = aulas.stream().map(CatalogoMapper::aAula).toList();
         Map<String, Aula> aulasPorCodigo =
@@ -120,9 +127,13 @@ public final class CatalogoMapper {
                                 profesoresPorCodigo, aulasPorCodigo, subgruposPorCodigo))
                         .toList();
 
+        List<RestriccionHoraria> restriccionesDom = restricciones.stream()
+                .map(r -> aRestriccionHoraria(r, profesoresPorCodigo, tramosMapeados.porEntidad()))
+                .toList();
+
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
-                gruposDom, subgruposDom, actividadesDom, List.of());
+                gruposDom, subgruposDom, actividadesDom, restriccionesDom);
     }
 
     /**
@@ -332,6 +343,20 @@ public final class CatalogoMapper {
      * Los rangos (día 1..5, ordenEnDia 1..6) los valida el record del dominio.
      */
     public static List<Tramo> aTramos(List<TramoSemanal> tramos) {
+        return aTramosConIndice(tramos).lista();
+    }
+
+    /**
+     * Núcleo de {@link #aTramos}: produce en un solo recorrido la lista de
+     * {@code Tramo} de dominio y el índice {@code TramoSemanal → Tramo} (entidad
+     * de origen → tramo mapeado). El índice usa identidad de objeto
+     * ({@link IdentityHashMap}) porque la clave es la entidad JPA, no su código.
+     * Solo los tramos lectivos entran (el recreo se excluye), así que una entidad
+     * de recreo no aparece en el índice: {@link #aRestriccionHoraria} lo aprovecha
+     * para abortar si una restricción apunta a un tramo no lectivo. {@link #aTramos}
+     * expone solo la lista y conserva su comportamiento observable.
+     */
+    private static TramosMapeados aTramosConIndice(List<TramoSemanal> tramos) {
         Objects.requireNonNull(tramos, "tramos no puede ser null");
         List<TramoSemanal> lectivos = tramos.stream()
                 .filter(TramoSemanal::isEsLectivo)
@@ -341,12 +366,61 @@ public final class CatalogoMapper {
 
         Map<Dia, Integer> ordenPorDia = new EnumMap<>(Dia.class);
         List<Tramo> resultado = new ArrayList<>(lectivos.size());
+        Map<TramoSemanal, Tramo> porEntidad = new IdentityHashMap<>();
         for (TramoSemanal t : lectivos) {
             int ordenEnDia = ordenPorDia.merge(t.getDia(), 1, Integer::sum);
             int diaSemana = t.getDia().ordinal() + 1;
-            resultado.add(new Tramo(codigoDe(t.getDia(), ordenEnDia), diaSemana, ordenEnDia));
+            Tramo tramo = new Tramo(codigoDe(t.getDia(), ordenEnDia), diaSemana, ordenEnDia);
+            resultado.add(tramo);
+            porEntidad.put(t, tramo);
         }
-        return resultado;
+        return new TramosMapeados(resultado, porEntidad);
+    }
+
+    /** Par (lista ordenada, índice por identidad de entidad) que devuelve {@link #aTramosConIndice}. */
+    private record TramosMapeados(List<Tramo> lista, Map<TramoSemanal, Tramo> porEntidad) { }
+
+    /**
+     * {@code ProfesorRestriccionHoraria} JPA → {@code domain.RestriccionHoraria}.
+     * El profesor se resuelve por código contra {@code profesoresPorCodigo}; el
+     * tramo por referencia de objeto contra {@code tramosPorEntidad} (el índice
+     * que produce {@link #aTramosConIndice}). Un tramo ausente del índice —p. ej.
+     * una restricción sobre un tramo de recreo, que {@code aTramos} excluye— es un
+     * error de integridad y aborta con excepción explícita. {@code motivo} nullable
+     * → {@code Optional.ofNullable}.
+     */
+    public static RestriccionHoraria aRestriccionHoraria(
+            ProfesorRestriccionHoraria entidad,
+            Map<String, Profesor> profesoresPorCodigo,
+            Map<TramoSemanal, Tramo> tramosPorEntidad) {
+
+        Objects.requireNonNull(entidad, "restriccion no puede ser null");
+
+        String codigoProfesor = entidad.getProfesor().getCodigo();
+        Profesor profesor = resolver(profesoresPorCodigo, codigoProfesor, "profesor", codigoProfesor);
+
+        Tramo tramo = tramosPorEntidad.get(entidad.getTramo());
+        if (tramo == null) {
+            throw new IllegalArgumentException(
+                    "La restricción horaria del profesor '" + codigoProfesor
+                            + "' referencia un tramo que no está en el catálogo lectivo"
+                            + " mapeado (¿un tramo de recreo, excluido por aTramos?)");
+        }
+
+        return new RestriccionHoraria(
+                profesor,
+                tramo,
+                aTipoRestriccion(entidad.getTipo()),
+                entidad.getPeso(),
+                Optional.ofNullable(entidad.getMotivo()));
+    }
+
+    private static es.yaroki.educhronos.solver.domain.TipoRestriccion aTipoRestriccion(
+            es.yaroki.educhronos.app.catalog.TipoRestriccion tipo) {
+        return switch (tipo) {
+            case DURA -> es.yaroki.educhronos.solver.domain.TipoRestriccion.DURA;
+            case BLANDA -> es.yaroki.educhronos.solver.domain.TipoRestriccion.BLANDA;
+        };
     }
 
     private static TipoGrupo aTipoGrupo(es.yaroki.educhronos.app.catalog.TipoGrupo tipo) {
