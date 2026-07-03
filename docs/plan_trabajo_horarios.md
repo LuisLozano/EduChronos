@@ -533,11 +533,28 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-4 cerrados en S45-S48)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-5 cerrados en S45-S49)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 48 — Fase 6, Bloque 4: SUBGRUPO COMO ENTIDAD JPA
+Última sesión registrada: Sesión 49 — Fase 6, Bloque 5: ACTIVIDAD Y PLAZA COMO
+  ENTIDADES JPA (§4.6) + MAPPER. Modo híbrido. Entidades Actividad (agregado raíz,
+  @OneToMany cascade+orphanRemoval) y Plaza (dependiente; @ManyToOne opcional
+  aula_fija + tres @ManyToMany) en app.catalog + enum propio PatronTemporal +
+  ActividadRepository + CatalogoMapper.aActividad/aPlaza/aPatronTemporal (entidad a
+  entidad). Seis decisiones cerradas antes de construir (D-B5-1 a D-B5-6; ver la
+  entrada del Bloque 5 en "### Bloques de Fase 6"). Clave: D-B5-1 ActividadInstancia
+  NO se materializa como tabla (artefacto derivado que expande cpsat.Expansion en
+  runtime; §4.7 decidirá su identidad persistida); D-B5-6 PatronTemporal propio de
+  app.catalog, no reutilización del de dominio (el compilador forzó el traductor
+  aPatronTemporal, validando la frontera). TRES RIESGOS DE PERSISTENCIA CERRADOS EN
+  POSITIVO por round-trip SQLite real: cascade Actividad→Plaza, densidad aula_fija +
+  tres @ManyToMany (primera entidad con esta densidad), ambas ramas del XOR. Suite:
+  solver 59 + app 20 (+8: ActividadRoundTripTest 3 + CatalogoMapperActividadTest 5),
+  BUILD SUCCESS con mvn clean test desde la raíz (reactor completo, no -pl). src/main
+  del solver NO tocado -> índice NO regenerado. Commits separados código/tests/doc, de
+  una línea. Siguiente: Bloque 6 (ensamblado de ProblemaHorario completo).
+Última sesión registrada (previa): Sesión 48 — Fase 6, Bloque 4: SUBGRUPO COMO ENTIDAD JPA
   (§4.2) + TRAMO DE MAPPER. Construido en modo híbrido (decisión y cierre en el
   Project, código en Claude Code). Candidato tentativo de cierre de B3 ("Subgrupo
   y Actividad juntos") PARTIDO en tres bloques por dependencia técnica: Plaza
@@ -1091,6 +1108,38 @@ cierre de D23), está en la bitácora.
       ProblemaHorario (Bloque 6). Primer @ManyToMany del proyecto: round-trip
       sobre SQLite real (dialecto de comunidad) verde para subgrupo multi-grupo
       (Lectura B, 3 grupos) y mono-grupo. Suite: solver 59 + app 12, BUILD SUCCESS.
+- [x] Bloque 5 — Actividad y Plaza como entidades JPA (§4.6) + mapper (S49).
+      Entidades Actividad (agregado raíz, @OneToMany cascade+orphanRemoval a
+      Plaza) y Plaza (dependiente; @ManyToOne opcional aula_fija + tres
+      @ManyToMany: plaza_profesor/plaza_aula_candidata/plaza_subgrupo) en
+      app.catalog + enum propio app.catalog.PatronTemporal (D-B5-6) +
+      ActividadRepository (Plaza sin repo propio, es dependiente).
+      CatalogoMapper.aActividad (entidad a entidad) + helper privado aPlaza +
+      resolver genérico + aPatronTemporal (traduce entre los dos PatronTemporal).
+      Cinco decisiones cerradas antes de construir: D-B5-1 ActividadInstancia NO
+      se materializa (artefacto derivado, lo expande cpsat.Expansion; §4.7 decidirá
+      su identidad persistida); D-B5-2 el XOR aula_fija/candidatas lo valida el
+      record de dominio, no la entidad JPA; D-B5-3 la política "candidatas hasta
+      Fase 3" no aplica (era del mapper del JSON); D-B5-4 Actividad.asignatura FK
+      nullable, Plaza.asignatura FK not null; D-B5-5 requiereTutor persiste pero el
+      mapper lo ignora (el record domain.Actividad no lo porta, S8 no la consume el
+      solver hoy); D-B5-6 PatronTemporal propio, no reutilización del de dominio
+      (frontera "entidad JPA con su forma", como TipoGrupo/Dia). NO entra el
+      ensamblado de ProblemaHorario (Bloque 6). TRES RIESGOS DE PERSISTENCIA
+      CERRADOS EN POSITIVO por round-trip sobre SQLite real (dialecto de comunidad):
+      (1) cascade Actividad→Plaza con un solo save; (2) densidad de Plaza (aula_fija
+      @ManyToOne + tres @ManyToMany conviviendo) —primera entidad con esta densidad,
+      B4 solo validó un @ManyToMany aislado—; (3) ambas ramas del XOR. Modo híbrido:
+      esqueletos y decisiones en el Project, tecleo/compilación en Claude Code;
+      tests generados en Claude Code. Aprendizaje de proceso reafirmado: índices del
+      test del mapper construidos consumiendo la salida del propio mapper
+      (aAsignatura/aProfesor/aAula/aSubgrupo), no con new sobre solver.domain.
+      CatalogoMapperActividadTest quedó en app.catalog (no app.mapper) porque
+      Actividad/Plaza solo tienen constructor protected; asimetría menor registrada.
+      Suite: solver 59 + app 20 (12 previos + ActividadRoundTripTest 3 +
+      CatalogoMapperActividadTest 5), BUILD SUCCESS con mvn clean test desde la raíz.
+      src/main del solver NO tocado. Siguiente: Bloque 6 (ensamblado de
+      ProblemaHorario completo sobre las entidades ya mapeadas de B2-B5).
 
 ### Fases completadas
 

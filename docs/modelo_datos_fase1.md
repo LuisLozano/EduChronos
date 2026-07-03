@@ -573,6 +573,14 @@ ActividadInstancia(
   indice,                           -- 1..repeticiones_por_semana
   UNIQUE (actividad_id, indice)
 )
+-- NOTA (Fase 6, Bloque 5, D-B5-1): ActividadInstancia NO se materializa como
+-- entidad/tabla JPA en la capa de persistencia (Fase 6). Es un artefacto derivado
+-- que el dominio del solver expande en runtime (cpsat.Expansion.instanciasDe) a
+-- partir de Actividad.repeticiones_por_semana; persistirla sería denormalización.
+-- Su identidad persistida solo se necesita para §4.7 (SesionBloqueada, Sesion, que
+-- la referencian); cuando se aborde §4.7 se decidirá cómo se identifica (candidato:
+-- par lógico (actividad_id, indice), sin tabla intermedia). El esquema de arriba es
+-- el modelo conceptual de Fase 1, no lo que la capa JPA de Fase 6 materializa.
 
 Plaza(
   id PRIMARY KEY,
@@ -580,6 +588,10 @@ Plaza(
   asignatura_id FOREIGN KEY,        -- siempre rellena, aunque Actividad.asignatura_id sea null
   aula_fija_id NULL FOREIGN KEY     -- si null, ver PlazaAulaCandidata
 )
+-- NOTA (Fase 6, Bloque 5): el record domain.Plaza y la entidad JPA Plaza tienen un
+-- campo `codigo` (identificador legible) que este esquema conceptual no listaba. El
+-- dominio es la autoridad; la entidad lo porta. Discrepancia menor registrada, sin
+-- impacto en invariantes.
 -- La relación Plaza ↔ Profesor es M:N (ver PlazaProfesor). Una plaza
 -- tiene 1..N profesores. Caso típico N=1: sesión ordinaria, desdoble,
 -- agrupamiento. Caso N≥2: co-docencia intra-aula (Hallazgo J;
