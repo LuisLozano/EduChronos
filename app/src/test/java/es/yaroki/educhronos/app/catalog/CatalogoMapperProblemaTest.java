@@ -43,7 +43,7 @@ class CatalogoMapperProblemaTest {
 
         ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
                 tramos, List.of(aula), List.of(asig), List.of(prof),
-                List.of(grupo), List.of(sg), List.of(act));
+                List.of(grupo), List.of(sg), List.of(act), List.of());
 
         assertThat(problema.tramos()).hasSize(2); // el recreo se filtró
         assertThat(problema.aulas()).hasSize(1);
@@ -78,7 +78,7 @@ class CatalogoMapperProblemaTest {
         ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(prof),
-                List.of(grupo), List.of(sg), List.of(act));
+                List.of(grupo), List.of(sg), List.of(act), List.of());
 
         // El grupo que cuelga del subgrupo es el mismo que el de la lista
         // top-level. Basta la igualdad por equals (no ==): domain.GrupoAdministrativo
@@ -104,7 +104,7 @@ class CatalogoMapperProblemaTest {
         ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(prof),
-                List.of(g1, g2), List.of(s1, s2), List.of(act));
+                List.of(g1, g2), List.of(s1, s2), List.of(act), List.of());
 
         // El catálogo top-level es exhaustivo: incluye entidades no referenciadas
         // por ninguna actividad. El mapper no las poda.
@@ -116,17 +116,30 @@ class CatalogoMapperProblemaTest {
                 .containsExactlyInAnyOrder("1ºA-Completo", "1ºB-Completo");
     }
 
-    // ── Caso 4: restriccionesHorarias vacía por contrato (D28, centinela) ──
+    // ── Caso 4: una restricción horaria real se ensambla (cierre de D28) ──
     @Test
-    void restriccionesHorariasVaciaPorContrato() {
-        // Centinela deliberado (deuda D28): no existe entidad JPA de restricciones
-        // horarias, así que el 8º componente se pasa List.of(). El día que se
-        // añada su mapeo, este test obliga a revisar el contrato conscientemente.
-        ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
-                List.of(tramo(Dia.LUNES, 1, true)),
-                List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+    void ensamblaUnaRestriccionHorariaReal() {
+        // El tramo de la restricción debe ser la MISMA instancia que va en la
+        // lista de tramos: aRestriccionHoraria resuelve el tramo por identidad de
+        // objeto contra el índice que produce el mapeo de tramos.
+        TramoSemanal lunes1 = tramo(Dia.LUNES, 1, true);
+        Profesor prof = prof("MAT8", "María Martínez");
+        ProfesorRestriccionHoraria restr = new ProfesorRestriccionHoraria(
+                prof, lunes1, TipoRestriccion.DURA, 0, "Reducción por tutoría");
 
-        assertThat(problema.restriccionesHorarias()).isEmpty();
+        ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
+                List.of(lunes1),
+                List.of(), List.of(), List.of(prof),
+                List.of(), List.of(), List.of(),
+                List.of(restr));
+
+        assertThat(problema.restriccionesHorarias()).singleElement().satisfies(r -> {
+            assertThat(r.profesor().codigo()).isEqualTo("MAT8");
+            assertThat(r.tramo().codigo()).isEqualTo("L1"); // lunes, 1er tramo lectivo
+            assertThat(r.tipo())
+                    .isEqualTo(es.yaroki.educhronos.solver.domain.TipoRestriccion.DURA);
+            assertThat(r.motivo()).contains("Reducción por tutoría");
+        });
     }
 
     // ── Caso 5: código de aula duplicado en la entrada → aborta ───────────
@@ -139,7 +152,7 @@ class CatalogoMapperProblemaTest {
         // IllegalStateException ante clave duplicada: no se colapsa en silencio.
         assertThatThrownBy(() -> CatalogoMapper.aProblemaHorario(
                 List.of(), List.of(a1, a2), List.of(), List.of(),
-                List.of(), List.of(), List.of()))
+                List.of(), List.of(), List.of(), List.of()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -159,7 +172,7 @@ class CatalogoMapperProblemaTest {
         assertThatThrownBy(() -> CatalogoMapper.aProblemaHorario(
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(), // profesores: vacío
-                List.of(grupo), List.of(sg), List.of(act)))
+                List.of(grupo), List.of(sg), List.of(act), List.of()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("GHOST");
     }
