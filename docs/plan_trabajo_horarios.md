@@ -533,11 +533,35 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-7 cerrados en S45-S51)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-8 cerrados en S45-S52)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 51 — Fase 6, Bloque 7: ENTIDAD JPA DE
+Última sesión registrada: Sesión 52 — Fase 6, Bloque 8: SERVICIO DE APLICACIÓN,
+  ORQUESTACIÓN repos → mapper → solver. Modo híbrido (decisión y cierre en el
+  Project, código en Claude Code). GeneradorHorarioService (app.service, @Service,
+  primer bean de servicio del módulo; constructor injection, 8 repos private final).
+  cargarProblema() @Transactional(readOnly=true) ejecuta los 8 findAll() + el mapeo en
+  una sola transacción (las relaciones LAZY se navegan por identidad de objeto: sin
+  transacción habría LazyInitializationException, y proxies de sesiones distintas
+  romperían la resolución por referencia EN SILENCIO). generar() SIN transacción: llama
+  a cargarProblema() y, sobre el ProblemaHorario ya desligado de JPA, invoca
+  new SolverHorario().resolverOptimizandoConDetalle → ResultadoOptimizacion (mantener
+  la transacción abierta durante la resolución sería antipatrón: el solver tarda). Cuatro
+  decisiones cerradas (D-B8-1 a D-B8-4): la de más impacto, la frontera transaccional
+  entre carga (dentro) y solver (fuera); el servicio no valida integridad (la aborta el
+  mapper, propaga) ni guarda catálogo vacío (Fase 8); constructor por defecto del solver
+  (120 s/semilla 42), que a escala de instituto dará FEASIBLE, no OPTIMAL (deuda D29). Test
+  GeneradorHorarioServiceTest (@DataJpaTest + @Import, SQLite real): catálogo mínimo con
+  grupo PDC (grupoPadre no nulo) y restricción horaria sobre TramoSemanal real, recargado
+  por el servicio, verificando el enlace de padre y tramo por identidad —ejercita el fallo
+  silencioso por identidad de objeto, el riesgo dominante del bloque—. Caso de generar()
+  omitido conscientemente (exigiría catálogo factible garantizado; el valor está en la
+  carga+frontera, no en re-testear el solver). src/main del solver NO tocado → índice NO
+  regenerado; modelo NO tocado. Suite: solver 59 + app 33 (+1), BUILD SUCCESS con mvn clean
+  test desde la raíz. Commits separados código/tests f72ca82/44694d1, de una línea.
+  Siguiente: Bloque 9 (a decidir).
+Última sesión registrada (previa): Sesión 51 — Fase 6, Bloque 7: ENTIDAD JPA DE
   RESTRICCIONES HORARIAS (§4.3) + MAPPER. Modo híbrido (decisión y cierre en el
   Project, código en Claude Code). Cierra la deuda D28: el camino JPA ensambla
   ya un ProblemaHorario COMPLETO. Entidad ProfesorRestriccionHoraria (app.catalog,
@@ -605,48 +629,13 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-7 cerrados en S45-
   BUILD SUCCESS con mvn clean test desde la raíz (reactor completo, no -pl). src/main
   del solver NO tocado -> índice NO regenerado. Commits separados código/tests/doc, de
   una línea. Siguiente: Bloque 6 (ensamblado de ProblemaHorario completo).
-Última sesión registrada (previa): Sesión 48 — Fase 6, Bloque 4: SUBGRUPO COMO ENTIDAD JPA
-  (§4.2) + TRAMO DE MAPPER. Construido en modo híbrido (decisión y cierre en el
-  Project, código en Claude Code). Candidato tentativo de cierre de B3 ("Subgrupo
-  y Actividad juntos") PARTIDO en tres bloques por dependencia técnica: Plaza
-  (JPA) referencia Subgrupo, que debe estar estable y con round-trip verde antes
-  de mapear Actividad. B4=Subgrupo, B5=Actividad/Plaza, B6=ensamblado de
-  ProblemaHorario (el prerrequisito que motivaba el candidato se alcanza en B6
-  sobre cimientos probados por capas, no en un B4 monolítico). Cinco decisiones
-  cerradas en el Project ANTES de construir: D-a Particion/SubgrupoParticion
-  DIFERIDAS a Fase 8 (el dominio del solver no las consume; su UX se diseña con
-  la UI, deudas D1/D7); D-b id sintético + codigo único como el resto del
-  catálogo; D-c/D-d @ManyToMany unidireccional Subgrupo->GrupoAdministrativo,
-  Subgrupo dueño, LAZY (primer @ManyToMany del proyecto); D-e mapper en
-  CatalogoMapper (no clase nueva), reutilizando la resolución de grupos.
-  ENTREGA: entidad Subgrupo (app.catalog, join table subgrupo_grupo) +
-  SubgrupoRepository + CatalogoMapper.aSubgrupo(entidad, gruposPorCodigo) que
-  resuelve la población por identidad de objeto (mismo patrón que aGrupo con
-  grupoPadre) y aborta con IllegalArgumentException ante grupo huérfano.
-  RIESGO CERRADO EN POSITIVO (D-c, gemelo del LocalTime de B2): el @ManyToMany
-  sobrevive el round-trip sobre SQLite real con el dialecto de comunidad, tanto
-  multi-grupo (Lectura B, 3 filas en subgrupo_grupo) como mono-grupo. Frontera
-  app->solver intacta (cero JPA en solver/). Tests: SubgrupoRoundTripTest (2,
-  @DataJpaTest sobre SQLite real) + CatalogoMapperSubgrupoTest (2, unitario puro).
-  APRENDIZAJE DE PROCESO (reutilizable en B5/B6): (1) fabricar tipos solver.domain
-  con `new` en un test de app/ NO es el patrón; el correcto es consumir la salida
-  del mapper (CatalogoMapper.aGrupo), como CatalogoMapperTest de B3 — más fiel y
-  sin sorpresas de carga de clase. (2) iterar tests con `mvn test -pl app` en
-  aislamiento asume el jar de solver ya instalado en ~/.m2; tras un `mvn clean`
-  que borra solver/target, app pierde solver.domain en compilación de test. El
-  cierre de bloque se valida con `mvn clean test` desde la raíz (reactor completo),
-  no con -pl. Suite: solver 59 + app 12 (CatalogoRoundTripTest 1 + CatalogoMapperTest
-  7 + SubgrupoRoundTripTest 2 + CatalogoMapperSubgrupoTest 2), BUILD SUCCESS.
-  src/main del solver NO tocado -> índice NO regenerado; modelo NO tocado (el
-  Subgrupo de dominio y su Set<GrupoAdministrativo> ya existían desde Fase 5). Commit
-  de código 09b7b77 (una línea). Commits separados código/doc. Siguiente: Bloque 5
   (Actividad/Plaza como entidades JPA §4.6 + mapper; se apoya en el Subgrupo de B4).
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
-de S44, S45 y S46 se archivaron en la Sesión 50 y la de S47 en la Sesión 51
-(misma higiene documental). El plan conserva las 4 últimas cabeceras compactas
-(S48–S51). El detalle histórico de cualquier sesión anterior —incluida S42
+de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51 la de S48
+en la Sesión 52(misma higiene documental). El plan conserva las 4 últimas cabeceras
+compactas (S49–S52). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en
 la bitácora.
 
@@ -1158,6 +1147,40 @@ la bitácora.
       Commits separados código/tests 84a8bed/f2e81a7, de una línea. Siguiente:
       Bloque 8 (servicio de aplicación que orqueste repos → CatalogoMapper →
       SolverHorario, ya sobre un ensamblado sin agujeros).
+- [x] Bloque 8 — Servicio de aplicación: orquestación repos → mapper → solver (S52).
+      GeneradorHorarioService (es.yaroki.educhronos.app.service, @Service, PRIMER bean
+      de servicio del módulo; constructor injection, 8 repos private final; commit
+      f72ca82). Dos métodos: cargarProblema() @Transactional(readOnly=true) —los 8
+      findAll() + CatalogoMapper.aProblemaHorario(...) en una MISMA transacción, para
+      mantener la sesión Hibernate viva (sin LazyInitializationException) y la identidad
+      de objeto que la resolución por referencia del mapper exige (grupoPadre, población
+      de subgrupo, TramoSemanal de restricciones)— y generar() SIN transacción, que llama
+      a cargarProblema() (la transacción se cierra ahí; el ProblemaHorario es ya un POJO
+      desligado de JPA) e invoca fuera de transacción
+      new SolverHorario().resolverOptimizandoConDetalle(problema), devolviendo
+      ResultadoOptimizacion. Cuatro decisiones cerradas antes de construir (D-B8-1
+      transacción en cargarProblema, solver fuera; D-B8-2 8× findAll() sin
+      @EntityGraph/fetch-joins, N+1 irrelevante a esta escala; D-B8-3 dos métodos, salida
+      ResultadoOptimizacion por la vía de optimización; D-B8-4 el servicio NO valida
+      integridad —la aborta el mapper, deja propagar— ni guarda catálogo vacío, Fase 8).
+      Constructor por defecto del solver (120 s / semilla 42, confirmado en
+      SolverHorario.java): a escala de instituto completo la optimización no converge en
+      ese presupuesto (S38/S42), luego generar() sobre un centro real dará
+      ResultadoOptimizacion en estado FEASIBLE, no OPTIMAL —no es fallo: el record porta
+      estado+objetivo+cotaInferior para distinguirlo; parametrización de tiempo/semilla y
+      elección de vía diferidas a Fase 8, deuda D29—. Test de integración
+      GeneradorHorarioServiceTest (@DataJpaTest + @Import(GeneradorHorarioService.class)
+      sobre SQLite real; commit 44694d1): catálogo mínimo con un grupo PDC (3ºADi →
+      grupoPadre 1ºA no nulo) y una restricción horaria (referencia al TramoSemanal L1),
+      recargado por el servicio, verificando que el ProblemaHorario enlaza padre y tramo
+      por identidad —ejercita el fallo SILENCIOSO por identidad de objeto, el riesgo
+      dominante del bloque—. Caso opcional de generar() OMITIDO conscientemente (exigiría
+      un catálogo garantizado factible con actividades/plazas: más código y riesgo de
+      lentitud; el valor del bloque está en cargarProblema() y la frontera transaccional,
+      no en re-testear el solver). src/main del solver NO tocado → referencia-codigo-
+      solver.md NO regenerado; modelo NO tocado. Suite: solver 59 + app 33 (32 previos +
+      1), BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
+      f72ca82/44694d1, de una línea. Siguiente: Bloque 9 (a decidir).
 
 ### Fases completadas
 
@@ -1742,6 +1765,16 @@ descripción completa.
   la constante PESO_INDISP_BLANDA=1); y el default 1 de §4.3 NO se materializa en
   la entidad (exige peso explícito): es política de la capa de configuración/UI
   (Fase 8), no dato de la entidad.
+- **D29 (Sesión 52, Fase 6 Bloque 8): tiempo/semilla y vía del solver hardcodeados
+  al default en el servicio.** GeneradorHorarioService.generar() usa new SolverHorario()
+  (120 s, semilla 42) y la vía de optimización (resolverOptimizandoConDetalle). A escala
+  de instituto completo la optimización no converge en ese presupuesto (S38/S42: sin
+  converger en 600 s), luego generar() sobre un centro real devolverá estado FEASIBLE, no
+  OPTIMAL. No es un bug (ResultadoOptimizacion porta estado+objetivo+cotaInferior para
+  distinguirlo del óptimo probado), pero el límite de tiempo, la semilla y la elección de
+  vía (factibilidad pura resolver / optimización / warm-start resolverOptimizandoConSemilla)
+  deben ser configurables desde la UI y no constantes en el servicio. Hermana de D21/D23.
+  Fase 8.
 
 ### Notas técnicas validadas en Fase 0
 

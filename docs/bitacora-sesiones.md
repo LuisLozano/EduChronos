@@ -1997,3 +1997,39 @@ Construido en modo híbrido (decisión y
   Bloque 4 (a decidir; candidato natural:
   Subgrupo/Actividad como entidades JPA, prerrequisito para poder ensamblar
   ProblemaHorario completo).
+
+### Sesión 48 — Fase 6, Bloque 4: SUBGRUPO COMO ENTIDAD JPA
+  (§4.2) + TRAMO DE MAPPER. Construido en modo híbrido (decisión y cierre en el
+  Project, código en Claude Code). Candidato tentativo de cierre de B3 ("Subgrupo
+  y Actividad juntos") PARTIDO en tres bloques por dependencia técnica: Plaza
+  (JPA) referencia Subgrupo, que debe estar estable y con round-trip verde antes
+  de mapear Actividad. B4=Subgrupo, B5=Actividad/Plaza, B6=ensamblado de
+  ProblemaHorario (el prerrequisito que motivaba el candidato se alcanza en B6
+  sobre cimientos probados por capas, no en un B4 monolítico). Cinco decisiones
+  cerradas en el Project ANTES de construir: D-a Particion/SubgrupoParticion
+  DIFERIDAS a Fase 8 (el dominio del solver no las consume; su UX se diseña con
+  la UI, deudas D1/D7); D-b id sintético + codigo único como el resto del
+  catálogo; D-c/D-d @ManyToMany unidireccional Subgrupo->GrupoAdministrativo,
+  Subgrupo dueño, LAZY (primer @ManyToMany del proyecto); D-e mapper en
+  CatalogoMapper (no clase nueva), reutilizando la resolución de grupos.
+  ENTREGA: entidad Subgrupo (app.catalog, join table subgrupo_grupo) +
+  SubgrupoRepository + CatalogoMapper.aSubgrupo(entidad, gruposPorCodigo) que
+  resuelve la población por identidad de objeto (mismo patrón que aGrupo con
+  grupoPadre) y aborta con IllegalArgumentException ante grupo huérfano.
+  RIESGO CERRADO EN POSITIVO (D-c, gemelo del LocalTime de B2): el @ManyToMany
+  sobrevive el round-trip sobre SQLite real con el dialecto de comunidad, tanto
+  multi-grupo (Lectura B, 3 filas en subgrupo_grupo) como mono-grupo. Frontera
+  app->solver intacta (cero JPA en solver/). Tests: SubgrupoRoundTripTest (2,
+  @DataJpaTest sobre SQLite real) + CatalogoMapperSubgrupoTest (2, unitario puro).
+  APRENDIZAJE DE PROCESO (reutilizable en B5/B6): (1) fabricar tipos solver.domain
+  con `new` en un test de app/ NO es el patrón; el correcto es consumir la salida
+  del mapper (CatalogoMapper.aGrupo), como CatalogoMapperTest de B3 — más fiel y
+  sin sorpresas de carga de clase. (2) iterar tests con `mvn test -pl app` en
+  aislamiento asume el jar de solver ya instalado en ~/.m2; tras un `mvn clean`
+  que borra solver/target, app pierde solver.domain en compilación de test. El
+  cierre de bloque se valida con `mvn clean test` desde la raíz (reactor completo),
+  no con -pl. Suite: solver 59 + app 12 (CatalogoRoundTripTest 1 + CatalogoMapperTest
+  7 + SubgrupoRoundTripTest 2 + CatalogoMapperSubgrupoTest 2), BUILD SUCCESS.
+  src/main del solver NO tocado -> índice NO regenerado; modelo NO tocado (el
+  Subgrupo de dominio y su Set<GrupoAdministrativo> ya existían desde Fase 5). Commit
+  de código 09b7b77 (una línea). Commits separados código/doc. Siguiente: Bloque 5
