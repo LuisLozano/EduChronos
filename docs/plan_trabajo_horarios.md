@@ -533,11 +533,37 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-8 cerrados en S45-S52)
+Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-9 cerrados en S45-S53)
 Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
   S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
   gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 52 — Fase 6, Bloque 8: SERVICIO DE APLICACIÓN,
+Última sesión registrada: Sesión 53 — Fase 6, Bloque 9: PERSISTENCIA DE LA
+  SolucionHorario (§4.7). Modo híbrido (decisión y cierre en el Project, código en
+  Claude Code). Cierra el criterio abierto de Fase 6 ("cerrar la app, reabrir, el
+  horario intacto"): B8 dejó el flujo entrada->solver; B9 cierra solver->persistencia,
+  la segunda mitad del entregable. Entidades nuevas HorarioGenerado y Sesion (§4.7,
+  app.persistence) + enum propio EstadoHorario {BORRADOR,DEFINITIVO,DESCARTADO} + dos
+  repos. Mapper de salida SolucionMapper (dominio->JPA): por cada (instancia, plaza)
+  del ProblemaHorario emite una fila Sesion, resolviendo plaza y aula a entidad JPA
+  por CÓDIGO (dos índices Map<String,_> recargados en la transacción de escritura, no
+  por identidad de objeto: la solución es dominio desligado de JPA tras B8). Servicio:
+  generar() SIGUE puro (sin BD, solver fuera de transacción, respeta D-B8-1); método
+  nuevo guardar(ResultadoOptimizacion, ProblemaHorario, String) @Transactional que
+  persiste HorarioGenerado + N Sesion; cargarHorario(id) devuelve entidades JPA (lo
+  que pinta Fase 7), no reconstruye SolucionHorario de dominio. Ocho decisiones
+  cerradas antes de construir (D-B9-1 a D-B9-8): la de más impacto, la granularidad
+  Sesion = PLAZA colocada (Opción A), que CORRIGE el UNIQUE de §4.7 (era por
+  actividad_instancia, imposibilitaba el desdoble) a (horario_id, plaza_id, indice), y
+  deriva la actividad desde la plaza (sin FK redundante). HorarioGenerado persiste
+  estado_solver (String, sin acoplar a CpSolverStatus) + objetivo/cotaInferior
+  (Double NULLABLE real, no centinela). Aula por vía uniforme aulaElegida().orElseThrow()
+  (aborta ruidoso si empty, bug de solver). Test de integración con actividad
+  MULTI-PLAZA (desdoble) como caso central: guardar->recargar, las 2 filas Sesion
+  sobreviven con tramo y aula. src/main del solver NO tocado -> índice NO regenerado;
+  §4.7 del modelo CORREGIDO (Sesion + HorarioGenerado).
+  Suite: solver 59 + app 35 (+2 del IT), BUILD SUCCESS con mvn clean test desde la raíz.
+  Commits separados código/tests aaa660a/84cdba5, de una línea.
+Última sesión registrada (previa): Sesión 52 — Fase 6, Bloque 8: SERVICIO DE APLICACIÓN,
   ORQUESTACIÓN repos → mapper → solver. Modo híbrido (decisión y cierre en el
   Project, código en Claude Code). GeneradorHorarioService (app.service, @Service,
   primer bean de servicio del módulo; constructor injection, 8 repos private final).
@@ -612,32 +638,13 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-8 cerrados en S45-
   be80f90/90da600, de una línea; commit de doc pendiente. Siguiente: Bloque 7
   (candidatos: entidad JPA de restricciones horarias —cierra D28— o servicio de
   orquestación repos→mapper→solver).
-Última sesión registrada (previa): Sesión 49 — Fase 6, Bloque 5: ACTIVIDAD Y PLAZA COMO
-  ENTIDADES JPA (§4.6) + MAPPER. Modo híbrido. Entidades Actividad (agregado raíz,
-  @OneToMany cascade+orphanRemoval) y Plaza (dependiente; @ManyToOne opcional
-  aula_fija + tres @ManyToMany) en app.catalog + enum propio PatronTemporal +
-  ActividadRepository + CatalogoMapper.aActividad/aPlaza/aPatronTemporal (entidad a
-  entidad). Seis decisiones cerradas antes de construir (D-B5-1 a D-B5-6; ver la
-  entrada del Bloque 5 en "### Bloques de Fase 6"). Clave: D-B5-1 ActividadInstancia
-  NO se materializa como tabla (artefacto derivado que expande cpsat.Expansion en
-  runtime; §4.7 decidirá su identidad persistida); D-B5-6 PatronTemporal propio de
-  app.catalog, no reutilización del de dominio (el compilador forzó el traductor
-  aPatronTemporal, validando la frontera). TRES RIESGOS DE PERSISTENCIA CERRADOS EN
-  POSITIVO por round-trip SQLite real: cascade Actividad→Plaza, densidad aula_fija +
-  tres @ManyToMany (primera entidad con esta densidad), ambas ramas del XOR. Suite:
-  solver 59 + app 20 (+8: ActividadRoundTripTest 3 + CatalogoMapperActividadTest 5),
-  BUILD SUCCESS con mvn clean test desde la raíz (reactor completo, no -pl). src/main
-  del solver NO tocado -> índice NO regenerado. Commits separados código/tests/doc, de
-  una línea. Siguiente: Bloque 6 (ensamblado de ProblemaHorario completo).
-  (Actividad/Plaza como entidades JPA §4.6 + mapper; se apoya en el Subgrupo de B4).
-
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
-de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51 la de S48
-en la Sesión 52(misma higiene documental). El plan conserva las 4 últimas cabeceras
-compactas (S49–S52). El detalle histórico de cualquier sesión anterior —incluida S42
-(citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en
-la bitácora.
+de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
+en la Sesión 52, y la de S49 en la Sesión 53 (misma higiene documental). El plan
+conserva las 4 últimas cabeceras compactas (S50–S53). El detalle histórico de cualquier sesión
+anterior —incluida S42 (citada por la deuda abierta D25) y S43
+(citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
 
@@ -1181,6 +1188,46 @@ la bitácora.
       solver.md NO regenerado; modelo NO tocado. Suite: solver 59 + app 33 (32 previos +
       1), BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
       f72ca82/44694d1, de una línea. Siguiente: Bloque 9 (a decidir).
+- [x] Bloque 9 — Persistencia de la SolucionHorario (§4.7) (S53). Cierra el
+      criterio abierto de Fase 6 ("cerrar la app, reabrir, el horario intacto"):
+      B8 dejó entrada->solver; B9 cierra solver->persistencia. En app.persistence:
+      enum EstadoHorario {BORRADOR,DEFINITIVO,DESCARTADO}; entidad HorarioGenerado
+      (Instant fechaGeneracion, estado @Enumerated STRING def. BORRADOR, estadoSolver
+      String, objetivo/cotaInferior Double NULLABLE reales, @OneToMany a Sesion);
+      entidad Sesion (una por PLAZA colocada; @ManyToOne a horario/plaza/tramoInicio/
+      aula, int indice, @UniqueConstraint(horario_id,plaza_id,indice), SIN FK de
+      actividad —se deriva por plaza.getActividad()—); repos HorarioGeneradoRepository/
+      SesionRepository. Mapper de salida app.mapper.SolucionMapper (final, ctor privado,
+      estáticos): aSesiones recorre actividades × índices × plazas del ProblemaHorario,
+      resuelve plaza y aula a entidad JPA por CÓDIGO (índices Map<String,_> recargados
+      en la transacción de escritura) y el tramo por el puente P1 (indiceTramos, ver
+      D30); aula SIEMPRE por solucion.aulaElegida(inst,plaza).orElseThrow (aborta
+      ruidoso si empty); código/tramo sin correspondencia aborta ruidoso. Servicio:
+      generar() INTACTO (puro, solver fuera de transacción, D-B8-1); guardar(
+      ResultadoOptimizacion,ProblemaHorario,String) @Transactional (índices por código
+      —plazas derivadas de actividadRepository.findAll().flatMap(getPlazas), NO hay
+      PlazaRepository: Plaza es entidad dependiente de Actividad, B5— + puente de tramo,
+      crea la cabecera con estadoSolver/objetivo/cotaInferior del resultado, materializa
+      las N sesiones); cargarHorario(Long) @Transactional(readOnly) devuelve
+      HorarioGenerado + sus Sesion (entidades JPA, lo que consume Fase 7), NO reconstruye
+      SolucionHorario de dominio. Ocho decisiones cerradas antes de construir (D-B9-1 a
+      D-B9-8): la de más impacto, Sesion = plaza colocada (Opción A), que CORRIGIÓ el
+      UNIQUE de §4.7 (era por actividad_instancia, imposibilitaba el desdoble). RIESGO
+      PRINCIPAL CERRADO EN POSITIVO: el puente del tramo (domain.Tramo con código
+      sintético L1..V6 y ordenEnDia por día vs TramoSemanal con orden GLOBAL con recreo,
+      sin código ni ordenEnDia) NO resuelve por código; se replica la renumeración de
+      aTramos y se empareja por (diaSemana,ordenEnDia) —deuda D30—. Test de integración
+      GuardarHorarioServiceTest (@DataJpaTest+@Import, SQLite real, en app.catalog por
+      los ctor protected): desdoble de 2 plazas con recreo intercalado -> 2 filas Sesion
+      con tramo/aula/índice correctos + metadata del solve round-trip; caso negativo
+      aula ausente -> aborta con el código de la plaza. Cobertura pendiente (deuda de
+      test menor, no bloqueante): plaza con aulasCandidatas (rama variable de
+      aulaElegida); el test solo ejercita aula fija. src/main del solver NO tocado ->
+      referencia-codigo-solver.md NO regenerado; §4.7 del modelo ya corregido en S53
+      (Sesion + HorarioGenerado). Suite: solver 59 + app 35 (33 previos + 2 del IT),
+      BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
+      aaa660a/84cdba5, de una línea. Siguiente: cierre de Fase 6 (revisar los 4
+      criterios) o Bloque 10 (a decidir).
 
 ### Fases completadas
 
@@ -1775,6 +1822,20 @@ descripción completa.
   vía (factibilidad pura resolver / optimización / warm-start resolverOptimizandoConSemilla)
   deben ser configurables desde la UI y no constantes en el servicio. Hermana de D21/D23.
   Fase 8.
+- **D30 (Sesión 53, Fase 6 Bloque 9): la renumeración de tramos está duplicada
+  entre el mapper de entrada y el de salida.** `CatalogoMapper.aTramos` (entrada,
+  JPA->dominio) y `SolucionMapper.indiceTramos` (salida, dominio->JPA) replican la
+  MISMA regla: filtrar `esLectivo`, ordenar por `orden` global, renumerar `ordenEnDia`
+  1..N reiniciando por día, y emparejar `diaSemana = Dia.ordinal()+1`. Es un espejo
+  frágil (hermano de D21/D22): si una lógica cambia (p. ej. otra estructura de jornada,
+  recreo en otra posición) y la otra no, el emparejamiento del tramo de salida diverge
+  EN SILENCIO —una Sesion apuntaría a un TramoSemanal equivocado sin error—. La causa
+  raíz es D27 (el código de Tramo es sintético y TramoSemanal no lo porta) más la
+  ausencia de `ordenEnDia` en la entidad (solo hay `orden` global con recreo). Se
+  resuelve cuando la estructura de jornada pase a configuración (Fase 8, donde ya vive
+  D22): ambos mappers leerían el mismo origen de numeración, o TramoSemanal ganaría un
+  código/ordenEnDia estable que haga innecesaria la síntesis. Riesgo hoy: bajo (ninguna
+  jornada real contradice la estructura 6+recreo asumida), pero real. Asignación: Fase 8.
 
 ### Notas técnicas validadas en Fase 0
 

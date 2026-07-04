@@ -2033,3 +2033,21 @@ Construido en modo híbrido (decisión y
   src/main del solver NO tocado -> índice NO regenerado; modelo NO tocado (el
   Subgrupo de dominio y su Set<GrupoAdministrativo> ya existían desde Fase 5). Commit
   de código 09b7b77 (una línea). Commits separados código/doc. Siguiente: Bloque 5
+
+### Sesión 49 — Fase 6, Bloque 5: ACTIVIDAD Y PLAZA COMO ENTIDADES JPA (§4.6) + MAPPER.
+
+Modo híbrido. Entidades Actividad (agregado raíz, @OneToMany cascade+orphanRemoval)
+y Plaza (dependiente; @ManyToOne opcional aula_fija + tres @ManyToMany) en app.catalog
++ enum propio PatronTemporal + ActividadRepository + CatalogoMapper.aActividad/aPlaza/
+aPatronTemporal (entidad a entidad). Seis decisiones cerradas antes de construir (D-B5-1
+a D-B5-6; ver la entrada del Bloque 5 en "### Bloques de Fase 6" del plan). Clave: D-B5-1
+ActividadInstancia NO se materializa como tabla (artefacto derivado que expande
+cpsat.Expansion en runtime; §4.7 decidirá su identidad persistida); D-B5-6 PatronTemporal
+propio de app.catalog, no reutilización del de dominio (el compilador forzó el traductor
+aPatronTemporal, validando la frontera). TRES RIESGOS DE PERSISTENCIA CERRADOS EN POSITIVO
+por round-trip SQLite real: cascade Actividad→Plaza, densidad aula_fija + tres @ManyToMany
+(primera entidad con esta densidad), ambas ramas del XOR. Suite: solver 59 + app 20 (+8:
+ActividadRoundTripTest 3 + CatalogoMapperActividadTest 5), BUILD SUCCESS con mvn clean test
+desde la raíz (reactor completo, no -pl). src/main del solver NO tocado -> índice NO
+regenerado. Commits separados código/tests/doc, de una línea. Siguiente: Bloque 6 (ensamblado
+de ProblemaHorario completo).

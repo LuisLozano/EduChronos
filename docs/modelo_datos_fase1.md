@@ -636,17 +636,39 @@ HorarioGenerado(
   id PRIMARY KEY,
   nombre,                           -- texto descriptivo
   fecha_generacion TIMESTAMP,
-  estado                            -- BORRADOR | DEFINITIVO | DESCARTADO
+  estado,                           -- BORRADOR | DEFINITIVO | DESCARTADO (ciclo de vida editorial)
+  estado_solver,                    -- String: CpSolverStatus.name() (OPTIMAL | FEASIBLE | ...)
+  objetivo NULL,                    -- Double: valor del objetivo del solve; NULL si la vía no optimiza
+  cota_inferior NULL                -- Double: mejor cota inferior; NULL si la vía no optimiza
 )
+-- NOTA (Fase 6, Bloque 9): `estado` (ciclo editorial que decide el usuario) y
+-- `estado_solver` (veredicto del solver) son campos DISTINTOS a propósito. objetivo
+-- y cota_inferior son NULLABLE reales, no centinela: 0.0 es un objetivo válido
+-- (óptimo sin penalizaciones), distinguirlo de "no medido" exige null. Metadata de
+-- ResultadoOptimizacion, persistida para que las vistas de Fase 7 muestren
+-- "FEASIBLE, objetivo N" sin re-ejecutar el solver (D23/D29: FEASIBLE sin
+-- optimalidad probada es el modo de operación aceptado a escala).
 
 Sesion(
   id PRIMARY KEY,
   horario_id FOREIGN KEY,
-  actividad_instancia_id FOREIGN KEY,
+  plaza_id FOREIGN KEY,             -- la plaza colocada (unidad física de la sesión)
+  indice,                           -- 1..Actividad.repeticiones_por_semana de la actividad de la plaza
   tramo_inicio_id FOREIGN KEY,
-  aula_id FOREIGN KEY,
-  UNIQUE (horario_id, actividad_instancia_id)
+  aula_id FOREIGN KEY,              -- aula EFECTIVAMENTE ocupada (fija de la plaza, o la elegida por el solver)
+  UNIQUE (horario_id, plaza_id, indice)
 )
+-- NOTA (Fase 6, Bloque 9 — CORRECCIÓN del esquema conceptual de Fase 1):
+-- la fila de salida es la PLAZA COLOCADA, no la ActividadInstancia. Una
+-- ActividadInstancia con varias plazas (desdoble Tipo 2, agrupamiento Tipo 3,
+-- optativa Bach Tipo 7) produce VARIAS sesiones físicas en el mismo tramo, una por
+-- plaza. El UNIQUE (horario_id, actividad_instancia_id) original era incorrecto:
+-- impedía persistir un desdoble (dos plazas, misma instancia). La identidad de la
+-- instancia se conserva como par lógico (plaza.actividad, indice), sin materializar
+-- la tabla ActividadInstancia (D-B5-1). La actividad NO se lleva como FK propia en
+-- Sesion: se deriva por plaza_id -> Plaza.actividad (la entidad JPA Plaza ya porta
+-- @ManyToOne a Actividad). aula_id guarda el aula efectiva vía
+-- SolucionHorario.aulaElegida(instancia, plaza), único punto de verdad fija/variable.
 ```
 
 ---
