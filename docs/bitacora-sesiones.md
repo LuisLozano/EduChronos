@@ -2051,3 +2051,22 @@ ActividadRoundTripTest 3 + CatalogoMapperActividadTest 5), BUILD SUCCESS con mvn
 desde la raíz (reactor completo, no -pl). src/main del solver NO tocado -> índice NO
 regenerado. Commits separados código/tests/doc, de una línea. Siguiente: Bloque 6 (ensamblado
 de ProblemaHorario completo).
+
+### Sesión 50 — Fase 6, Bloque 6: ENSAMBLADO DE ProblemaHorario (JPA → dominio del solver).
+
+Modo híbrido (decisión y cierre en el Project, código en Claude Code).
+CatalogoMapper.aProblemaHorario ensambla el ProblemaHorario completo desde las siete
+listas de entidades JPA del catálogo, construyendo en producción los cinco índices por
+código (consumiendo la salida del propio mapper) en orden de dependencia; código
+duplicado aborta (IllegalStateException). Cinco decisiones cerradas (D-B6-1 a D-B6-5);
+la de más impacto, D-B6-3: restriccionesHorarias diferida con List.of() porque no existe
+entidad JPA que las persista (deuda D28 nueva; el dato solo entra por el camino JSON,
+RestriccionHorariaDto + ProblemaHorarioMapper.aDominio). Firmas y orden del record
+confirmados contra el repo real: sin desajustes, no hubo que parar. CatalogoMapperProblemaTest
+(6 casos, app.catalog por ctor protected): feliz con recreo intercalado, coherencia
+subgrupo↔grupo por equals estructural (S9), huérfanos en top-level (D-B6-1), restricciones
+vacías (centinela D28), aula duplicada y actividad huérfana abortan. Suite solver 59 + app 26,
+BUILD SUCCESS con mvn clean test desde la raíz. src/main del solver NO tocado (mapper en app/)
+→ índice NO regenerado; modelo NO tocado. Commits separados código/tests be80f90/90da600,
+de una línea; commit de doc pendiente. Siguiente: Bloque 7 (candidatos: entidad JPA de
+restricciones horarias —cierra D28— o servicio de orquestación repos→mapper→solver).

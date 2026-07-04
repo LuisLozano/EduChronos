@@ -410,15 +410,36 @@ Base de datos local (SQLite + Hibernate) con:
   del solver permanece libre de anotaciones JPA. El flujo es:
   cargar entidades → mapear a modelo del solver → ejecutar solver →
   mapear solución a entidades → persistir
-- CRUD básico para todos los datos de configuración
+- CRUD básico para todos los datos de configuración (satisfecho con los
+  repositorios Spring Data de B2/B5/B7: save/find/delete/findAll sobre todas las
+  entidades de catálogo. El CRUD CON interfaz —formularios— es Fase 8, no Fase 6)
 - Guardado y carga de horarios generados
 
 ### Criterios de verificación
-- [ ] Puedes cerrar la aplicación, volver a abrirla y el horario está intacto
-- [ ] Puedes modificar un profesor y relanzar el solver sin perder otros datos
-- [ ] La base de datos funciona en Windows sin instalación adicional
-- [ ] El solver sigue funcionando con el mismo rendimiento que en Fase 5
-      (señal de que el mapper no introduce regresiones)
+- [x] Puedes cerrar la aplicación, volver a abrirla y el horario está intacto
+      (S54: CierreFase6HumoTest, round-trip end-to-end real
+      cargar→resolver→guardar→recargar sobre SQLite en disco; una actividad
+      multi-plaza —agrupamiento de 6 plazas × 2 rep— sobrevive con tramo y aula)
+- [x] Puedes modificar un profesor y relanzar el solver sin perder otros datos
+      (S54: verificado con modificación testigo = alta de ProfesorRestriccionHoraria
+      BLANDA + relanzado, comprobando que los 8 conteos de catálogo y el horario
+      previo sobreviven. "Modificar un profesor" se satisface como "modificar la
+      configuración y relanzar sin pérdida": Profesor es entidad inmutable —sin
+      setters— hasta la UI de Fase 8, luego el testigo edita configuración editable
+      sin forzar mutabilidad en el catálogo)
+- [x] La base de datos funciona en Windows sin instalación adicional
+      (SQLite embebido, decisión permanente; round-trips sobre el .db real en disco
+      verdes desde S45. No re-verificado empíricamente en Windows en Fase 6: el
+      binario SQLite es multiplataforma y el empaquetado Windows se valida en Fase 11)
+- [x] El solver sigue funcionando con el mismo rendimiento que en Fase 5
+      (no-regresión por ARGUMENTO ESTRUCTURAL: el solver recibe el mismo
+      ProblemaHorario de dominio venga del loader JSON o del CatalogoMapper JPA
+      —la transacción se cierra antes de resolver, frontera D-B8-1—, luego no puede
+      rendir distinto según el origen de los datos; la marca de Fase 5 = 601,6 s a
+      escala de instituto sigue vigente. NO se re-midió el rendimiento a escala por
+      JPA: exigiría poblar el instituto completo en JPA, trabajo desproporcionado
+      para un cierre. Confirmación a escala pequeña: CierreFase6HumoTest resuelve
+      dos veces el solver real en 1,8 s)
 
 ---
 
@@ -533,11 +554,57 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-9 cerrados en S45-S53)
-Última fase completada: 5 — Solver: instituto completo (criterios 1-2 cerrados en
-  S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión de producto
-  gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 53 — Fase 6, Bloque 9: PERSISTENCIA DE LA
+Fase actual: 7 — UI: visualización de horarios (sin iniciar). Fase 6 CERRADA en S54.
+Última fase completada: 6 — Persistencia de datos (CERRADA en S54: los 4 criterios
+  firmados con evidencia ejecutable. El cierre NO fue un bloque de persistencia
+  nuevo sino un test de humo end-to-end —CierreFase6HumoTest— que ejercita el
+  pipeline completo repos JPA → CatalogoMapper → solver real → SolucionMapper →
+  persistencia → recarga. Bloques 1-9 (S45-S53) construyeron las piezas; S54 las
+  ensambla y verifica de una tirada. Deuda que la fase deja viva y asignada:
+  D26/D27 (nombre de aula, código de tramo) Fase 7/8; D29 (parametrización del
+  solver) Fase 8; D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo
+  manual de tramo / SesionBloqueada §4.7) sin mecanismo en el solver, diferido)
+Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
+  cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
+  de producto gemela de D23, con respaldo descriptivo a escala)
+Última sesión registrada: Sesión 54 — Fase 6, CIERRE DE FASE. Modo híbrido (decisión
+  y cierre en el Project, código en Claude Code). NO es un bloque de persistencia nuevo:
+  el alcance se decidió al inicio entre (a) cerrar Fase 6 y (b) un Bloque 10 (candidato
+  SesionBloqueada §4.7); se eligió (a) porque un B10 de persistencia no acerca el cierre
+  —SesionBloqueada es inútil sin que el solver la consuma (C5, toca src/main del solver,
+  reabre superficie estabilizada)— y dejaba igualmente sin firmar los criterios 2 y 4.
+  Entregable: un único test de integración de humo end-to-end CierreFase6HumoTest
+  (app.catalog, por los ctor protected de Actividad/Plaza; @DataJpaTest + replace=NONE +
+  @Import(GeneradorHorarioService)). Ejercita el pipeline COMPLETO por primera vez de una
+  tirada: repos JPA → CatalogoMapper.aProblemaHorario → SolverHorario real → SolucionMapper
+  → guardar → recargar. Fixture: builder JPA que TRANSCRIBE problema-3-cierre-cyr-refmt.json
+  (agrupamiento denso de 1ºESO: bloque de 6 plazas CyR/OyD/RefMt rep=2 + 4 Mat) como
+  ESPECIFICACIÓN de referencia; el JSON NO se carga (entraría por el camino JSON, que no
+  ejercita JPA) —se replica a new+save, patrón de GuardarHorarioServiceTest—. El builder
+  añade los 5 recreos (esLectivo=false) que el JSON omite, intercalados por orden global,
+  porque el puente de tramo (SolucionMapper.indiceTramos) los espera para renumerar (D30).
+  Nueve decisiones cerradas antes de construir (D-B10-1 a D-B10-9). Las de más impacto:
+  D-B10-7 el test orquesta cargarProblema()+new SolverHorario(10,42)+guardar() SIN tocar el
+  servicio (evita meter el solver a 120 s en la suite, veneno de D24/D25); D-B10-9 vía de
+  factibilidad; D-B10-8 testigo del criterio 2 = alta de restricción BLANDA (no editar
+  Profesor —inmutable— ni Actividad —alteraría factibilidad—). NOTA de honestidad: objetivo
+  y cotaInferior de ResultadoOptimizacion son double PRIMITIVOS (verificado leyendo el
+  repo), no admiten null; el test recorre por eso resolverOptimizandoConDetalle y persiste
+  objetivo/cota reales —NO se ejercita el caso NULLABLE de §4.7, contra lo previsto—.
+  ModeloCpSat NO restringe por tipo de aula (I3 no participa en CP-SAT): todas las aulas
+  ORDINARIA, sin INFEASIBLE. Cobertura ganada respecto a B9: plaza con aulasCandidatas
+  resuelta por el solver (B9 solo probó aula fija). D30 NO queda verificada: la aserción
+  "toda sesión en tramo lectivo" descarta que una sesión caiga en recreo, pero no que se
+  empareje al TramoSemanal lectivo EXACTO que el solver eligió; D30 sigue viva (Fase 8).
+  Los 4 criterios de Fase 6 firmados (ver "### Criterios de verificación" de Fase 6); nota
+  "CRUD = repos, no formularios" añadida al entregable. Los dos tests resuelven el solver
+  real dos veces en 1,8 s (lejísimos del techo de 10 s). Suite: solver 59 + app 37 (35
+  previos + 2) = 96 en el reactor completo, BUILD SUCCESS con mvn clean test desde la raíz
+  (no -pl). src/main NO tocado (ni solver ni app): un único fichero de test nuevo →
+  referencia-codigo-solver.md NO regenerado; modelo NO tocado (§4.7 ya estaba correcto de
+  S53). Commit de una línea 549bc92 (solo el test); commit de doc aparte, pendiente de push.
+  Siguiente: Fase 7 (UI de visualización: vistas por grupo, profesor y aula).
+Última sesión registrada (previa): Sesión 53 — Fase 6, Bloque 9: PERSISTENCIA DE LA
   SolucionHorario (§4.7). Modo híbrido (decisión y cierre en el Project, código en
   Claude Code). Cierra el criterio abierto de Fase 6 ("cerrar la app, reabrir, el
   horario intacto"): B8 dejó el flujo entrada->solver; B9 cierra solver->persistencia,
@@ -618,31 +685,12 @@ Fase actual: 6 — Persistencia de datos (en curso; Bloques 1-9 cerrados en S45-
   la raíz. Commits separados código/tests 84a8bed/f2e81a7, de una línea; commit de
   doc pendiente. Siguiente: Bloque 8 (servicio de aplicación repos → mapper →
   solver, sobre ensamblado completo).
-Última sesión registrada (previa): Sesión 50 — Fase 6, Bloque 6: ENSAMBLADO DE
-  ProblemaHorario (JPA → dominio del solver). Modo híbrido (decisión y cierre en
-  el Project, código en Claude Code). CatalogoMapper.aProblemaHorario ensambla el
-  ProblemaHorario completo desde las siete listas de entidades JPA del catálogo,
-  construyendo en producción los cinco índices por código (consumiendo la salida
-  del propio mapper) en orden de dependencia; código duplicado aborta
-  (IllegalStateException). Cinco decisiones cerradas (D-B6-1 a D-B6-5); la de más
-  impacto, D-B6-3: restriccionesHorarias diferida con List.of() porque no existe
-  entidad JPA que las persista (deuda D28 nueva; el dato solo entra por el camino
-  JSON, RestriccionHorariaDto + ProblemaHorarioMapper.aDominio). Firmas y orden del
-  record confirmados contra el repo real: sin desajustes, no hubo que parar.
-  CatalogoMapperProblemaTest (6 casos, app.catalog por ctor protected): feliz con
-  recreo intercalado, coherencia subgrupo↔grupo por equals estructural (S9),
-  huérfanos en top-level (D-B6-1), restricciones vacías (centinela D28), aula
-  duplicada y actividad huérfana abortan. Suite solver 59 + app 26, BUILD SUCCESS
-  con mvn clean test desde la raíz. src/main del solver NO tocado (mapper en app/)
-  → índice NO regenerado; modelo NO tocado. Commits separados código/tests
-  be80f90/90da600, de una línea; commit de doc pendiente. Siguiente: Bloque 7
-  (candidatos: entidad JPA de restricciones horarias —cierra D28— o servicio de
-  orquestación repos→mapper→solver).
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
-en la Sesión 52, y la de S49 en la Sesión 53 (misma higiene documental). El plan
-conserva las 4 últimas cabeceras compactas (S50–S53). El detalle histórico de cualquier sesión
+en la Sesión 52, la de S49 en la Sesión 53, y la de S50 en la Sesión 54 (misma
+higiene documental). El plan
+conserva las 4 últimas cabeceras compactas (S51–S54). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1228,6 +1276,29 @@ anterior —incluida S42 (citada por la deuda abierta D25) y S43
       BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
       aaa660a/84cdba5, de una línea. Siguiente: cierre de Fase 6 (revisar los 4
       criterios) o Bloque 10 (a decidir).
+- [x] CIERRE DE FASE (S54). Alcance decidido al inicio entre cerrar Fase 6 y abrir
+      un Bloque 10 (candidato SesionBloqueada §4.7); se eligió cerrar, porque un B10
+      de persistencia no acercaba el cierre (SesionBloqueada no la consume el solver,
+      C5) y dejaba sin firmar los criterios 2 y 4. Entregable: test de humo
+      end-to-end CierreFase6HumoTest (app.catalog), que ejercita por primera vez el
+      pipeline completo de una tirada: repos JPA → CatalogoMapper → SolverHorario
+      real (vía de factibilidad, presupuesto 10 s) → SolucionMapper → guardar →
+      recargar. Fixture = builder JPA que transcribe problema-3-cierre-cyr-refmt.json
+      (bloque de 6 plazas de 1ºESO rep=2 + 4 Mat) SIN cargarlo, añadiendo los recreos
+      que el JSON omite. Test 1 verifica el round-trip (bloque → 12 sesiones, cada Mat
+      → 3, total 24, toda Sesion con plaza/tramo/aula no null y en tramo lectivo, 0
+      violaciones duras por VerificadorSolucion). Test 2 (criterio 2) da de alta una
+      ProfesorRestriccionHoraria BLANDA y relanza, comprobando conteos de catálogo
+      intactos y coexistencia de los dos horarios. Nueve decisiones D-B10-1..9
+      cerradas antes de construir. Hallazgos al leer el repo: objetivo/cota de
+      ResultadoOptimizacion son double primitivos (no null → vía con detalle, persiste
+      valores reales); ModeloCpSat no filtra por tipo de aula (todas ORDINARIA).
+      Cobertura ganada: plaza con aulasCandidatas resuelta por el solver (B9 solo
+      probó aula fija). D30 NO verificada (la aserción vigila que no caiga en recreo,
+      no el emparejamiento exacto). Suite: solver 59 + app 37 = 96, BUILD SUCCESS con
+      mvn clean test desde la raíz. Un único fichero de test nuevo; src/main NO tocado.
+      Commit de código 549bc92 de una línea; commit de doc aparte. Los 4 criterios de
+      Fase 6 quedan firmados: la fase se da por CERRADA. Siguiente: Fase 7 (UI).
 
 ### Fases completadas
 
