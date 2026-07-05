@@ -1,0 +1,28 @@
+<section class="controles">
+  <label>
+    Vista
+    <select (change)="cambiarVista($any($event.target).value)">
+      <option value="grupo" [selected]="vista() === 'grupo'">Grupo</option>
+      <option value="profesor" [selected]="vista() === 'profesor'">Profesor</option>
+      <option value="aula" [selected]="vista() === 'aula'">Aula</option>
+    </select>
+  </label>
+
+  <label>
+    {{ vista() }}
+    <select (change)="cambiarEntidad($any($event.target).value)">
+      @for (e of entidades(); track e) {
+        <option [value]="e" [selected]="e === entidad()">{{ e }}</option>
+      }
+    </select>
+  </label>
+</section>
+
+@if (error(); as msg) {
+  <p class="error">{{ msg }}</p>
+} @else if (proyeccion(); as p) {
+  <h2>{{ p.nombre }} <small>— {{ vista() }}: {{ entidad() }}</small></h2>
+  <app-horario-grid [sesiones]="sesionesFiltradas()" />
+} @else {
+  <p>Cargando…</p>
+}

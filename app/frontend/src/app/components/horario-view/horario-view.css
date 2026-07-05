@@ -1,0 +1,18 @@
+.controles {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.controles label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.error {
+  color: #b00;
+  font-weight: 600;
+}

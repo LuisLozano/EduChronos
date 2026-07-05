@@ -1,0 +1,31 @@
+<table class="rejilla">
+  <thead>
+    <tr>
+      <th class="esquina">Tramo</th>
+      @for (d of dias; track d) {
+        <th>{{ d }}</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (t of tramos; track t) {
+      <tr>
+        <th class="tramo">{{ t }}</th>
+        @for (d of dias; track d; let i = $index) {
+          <td>
+            @for (e of entradas(i + 1, t); track e.sesionId) {
+              <div class="entrada">
+                <span class="asig">{{ e.asignaturaCodigo }}</span>
+                <span class="prof">{{ e.profesores.join(', ') }}</span>
+                <span class="aula">{{ e.aulaCodigo }}</span>
+                <span class="grupos">{{ e.grupos.join(', ') }}</span>
+              </div>
+            } @empty {
+              <span class="vacio">·</span>
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

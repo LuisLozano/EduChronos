@@ -1,0 +1,51 @@
+.rejilla {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.85rem;
+}
+
+.rejilla th,
+.rejilla td {
+  border: 1px solid #ccc;
+  padding: 0.25rem;
+  vertical-align: top;
+}
+
+.rejilla thead th,
+.tramo {
+  background: #f2f2f2;
+  text-align: center;
+}
+
+.esquina {
+  width: 3rem;
+}
+
+.entrada {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.2rem;
+  margin-bottom: 0.2rem;
+  border-left: 3px solid #4a7;
+  background: #fafafa;
+}
+
+.entrada:last-child {
+  margin-bottom: 0;
+}
+
+.asig {
+  font-weight: 600;
+}
+
+.prof,
+.aula,
+.grupos {
+  color: #555;
+}
+
+.vacio {
+  color: #ddd;
+}
