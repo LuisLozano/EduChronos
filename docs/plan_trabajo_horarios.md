@@ -455,6 +455,30 @@ Interfaz con las tres vistas: por grupo, por profesor, por aula.
 - [ ] La vista de aula muestra correctamente los grupos que la usan
 - [ ] La navegación entre grupos/profesores/aulas es fluida
 
+### Bloques de Fase 7
+- [x] Bloque 7A — Backend de lectura: contrato de las tres vistas (S55). Endpoint
+      GET /api/horarios/{id}/proyeccion que devuelve una proyección plana
+      (HorarioProyeccionDTO + N SesionVistaDTO, una por plaza colocada) construida en
+      GeneradorHorarioService.proyectar(Long) @Transactional(readOnly), navegando el
+      grafo LAZY de cada Plaza dentro de la transacción. grupos[] (unión de
+      subgrupo→grupos, sin duplicados) es la clave de las tres vistas (D-F7-1); las
+      vistas grupo/profesor/aula son filtros cliente sobre esa proyección (B1). Añadido
+      spring-boot-starter-web a app/ (D-F7-6, era persistencia pura). renumerarLectivos
+      extraído como núcleo único de renumeración de tramos (CatalogoMapper.
+      indiceOrdenEnDia keyed-by-id para proyectar; aTramosConIndice keyed-by-identidad
+      para tests): D30 de 3 copias potenciales a 2, SolucionMapper.indiceTramos intacta
+      con nota (unificación = D30, Fase 8). Test ProyeccionHorarioTest firma criterios
+      1/2 a nivel de contrato (el agrupamiento de nivel se proyecta entero en la vista de
+      grupo; co-docencia colapsa a una entrada por plaza). Desviaciones del prompt al
+      leer el repo, todas señaladas: getNombreCompleto (no getNombre), TramoSemanal sin
+      getOrdenEnDia (renumerar), import @DataJpaTest en ruta nueva de Boot 4.x. Suite 97,
+      BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. SOLO backend: las
+      tres vistas Angular son 7B. Deuda de test menor para 7B: reforzar el assert de
+      exclusión (containsExactly) sobre la vista de un grupo.
+- [ ] Bloque 7B — Frontend Angular: proyecto, integración frontend-maven-plugin,
+      las tres vistas (grupo/profesor/aula) con celda-como-lista, navegación, y
+      validación visual contra los volcados de 1ºESO. (Sin iniciar.)
+
 ---
 
 ## FASE 8 — UI: configuración y ajuste manual
@@ -554,7 +578,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 7 — UI: visualización de horarios (sin iniciar). Fase 6 CERRADA en S54.
+Fase actual: 7 — UI: visualización de horarios (EN CURSO). Bloque 7A (backend de lectura) CERRADO en S55. Fase 6 CERRADA en S54.
 Última fase completada: 6 — Persistencia de datos (CERRADA en S54: los 4 criterios
   firmados con evidencia ejecutable. El cierre NO fue un bloque de persistencia
   nuevo sino un test de humo end-to-end —CierreFase6HumoTest— que ejercita el
@@ -567,7 +591,49 @@ Fase actual: 7 — UI: visualización de horarios (sin iniciar). Fase 6 CERRADA 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 54 — Fase 6, CIERRE DE FASE. Modo híbrido (decisión
+Última sesión registrada: Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de
+  las tres vistas). Modo híbrido (decisión y contrato en el Project, código en Claude Code).
+  Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
+  frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
+  vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
+  siguen en Fase 8). Seis decisiones cerradas antes de teclear: D-F7-1 (proyección de celda =
+  plazas cuyo subgrupo toca el grupo/profesor/aula; (a)=(b) verificado sobre problema-3-
+  cierre-cyr-refmt.json: cada subgrupo es MONO-GRUPO, la plaza agrupa los mono-grupo de los 4
+  grupos, luego filtrar por "toca 1ºA" devuelve las 6 plazas del bloque = lo que pinta el
+  PDF); D-F7-2 (co-docencia = UNA sub-entrada con N profesores, no N); D-F7-3 (validación
+  estructural {asignatura, profesor, subgrupos} por slot, aula validada aparte contra vista-
+  aula); D-F7-4 (el DTO plano se construye en método @Transactional(readOnly) del servicio, NO
+  en el controlador: cargarHorario solo inicializa la lista de Sesion, no el grafo LAZY de
+  cada Plaza); D-F7-5 (forma de SesionVistaDTO con grupos[] derivado de subgrupos, clave de
+  las tres vistas); D-F7-6 (añadir spring-boot-starter-web a app/, que era persistencia pura).
+  Entregado (6 commits de código, uno por artefacto): spring-boot-starter-web en app/pom.xml;
+  extracción del núcleo único de renumeración de tramos (renumerarLectivos) +
+  CatalogoMapper.indiceOrdenEnDia(List<TramoSemanal>) → Map<Long,Integer> keyed-by-getId();
+  records SesionVistaDTO/HorarioProyeccionDTO (app.web.dto); GeneradorHorarioService.
+  proyectar(Long) @Transactional(readOnly) que navega el grafo LAZY dentro de la transacción y
+  arma el DTO plano; HorarioController GET /api/horarios/{id}/proyeccion (404 vía
+  ResponseStatusException); ProyeccionHorarioTest (@DataJpaTest + replace=NONE, solver real
+  corto new SolverHorario(10,42), patrón D-B10-7) que firma criterios 1/2 a nivel de contrato:
+  el bloque de 6 plazas rep=2 proyecta 6 SesionVistaDTO en el mismo (dia,tramo) y filtrar por
+  grupos∋"1ºA" las devuelve todas; cada Mat-1ºX (rep=3) da 3 con grupos==["1ºX"]. Hallazgos al
+  leer el repo (desviaciones del prompt, todas señaladas): Asignatura expone getNombreCompleto()
+  (no getNombre()); TramoSemanal NO tiene getOrdenEnDia() —ordenEnDia 1..6 no es derivable de un
+  tramo aislado, exige renumerar excluyendo recreos (deuda D30)—; aTramosConIndice se llama en
+  tests con tramos SIN persistir (getId()==null), por lo que NO puede consumir el helper keyed-
+  by-id: ambos comparten el núcleo renumerarLectivos (fuente única) pero indexan distinto (id
+  para proyectar, identidad de objeto para el mapper); import de @DataJpaTest en Spring Boot
+  4.1.0 es org.springframework.boot.data.jpa.test.autoconfigure (ruta nueva de Boot 4.x,
+  verificada contra la API oficial). D30 baja de 3 copias potenciales a 2; SolucionMapper.
+  indiceTramos (copia 2, ruta de persistencia) intacta con nota de una línea, su unificación
+  sigue siendo D30 (Fase 8). Deuda de test para 7B (anotada, no bloqueante): el assert (b) usa
+  containsAll (verifica que la vista de 1ºA contiene las 6 plazas, no que EXCLUYA sesiones
+  ajenas); en 7B añadir containsExactly sobre la vista de un grupo. Suite: solver 59 + app 38
+  (37 previos + ProyeccionHorarioTest) = 97, BUILD SUCCESS con mvn clean test desde la raíz.
+  src/main del solver NO tocado (solo lectura de Tramo.java) → referencia-codigo-solver.md NO
+  regenerado; modelo NO tocado. Siguiente: Bloque 7B (frontend Angular: proyecto, integración
+  frontend-maven-plugin, las tres vistas con celda-como-lista, validación visual contra los
+  volcados de 1ºESO).
+Última sesión registrada (previa): Sesión 54 — Fase 6, CIERRE DE FASE. Modo híbrido (decisión
   y cierre en el Project, código en Claude Code). NO es un bloque de persistencia nuevo:
   el alcance se decidió al inicio entre (a) cerrar Fase 6 y (b) un Bloque 10 (candidato
   SesionBloqueada §4.7); se eligió (a) porque un B10 de persistencia no acerca el cierre
