@@ -30,6 +30,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- Capa REST de solo lectura (Fase 7). Versión gestionada por la BOM del parent. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!-- Driver SQLite (versión gestionada por la BOM de Spring Boot). -->
         <dependency>
             <groupId>org.xerial</groupId>
