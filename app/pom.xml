@@ -80,7 +80,10 @@
             </plugin>
 
             <!-- Fase 7: compila el frontend Angular (app/frontend) y lo empaqueta
-                 en el jar. Node/npm se instalan bajo target/ (no en el sistema). -->
+                 en el jar. Node/npm se instalan bajo target/ (no en el sistema).
+                 En prepare-package (no generate-resources) para que `mvn test` del
+                 backend NO reconstruya Angular: el frontend solo se construye al
+                 empaquetar. La copia a static/ va después, en esta misma fase. -->
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
@@ -92,7 +95,7 @@
                     <execution>
                         <id>install-node-and-npm</id>
                         <goals><goal>install-node-and-npm</goal></goals>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <!-- 22.x LTS dentro del rango de Angular 21 (>=22.22.0);
                                  npm = el bundleado con esta Node. -->
@@ -102,7 +105,7 @@
                     <execution>
                         <id>npm-ci</id>
                         <goals><goal>npm</goal></goals>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <arguments>ci</arguments>
                         </configuration>
@@ -110,7 +113,7 @@
                     <execution>
                         <id>npm-run-build</id>
                         <goals><goal>npm</goal></goals>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <arguments>run build</arguments>
                         </configuration>
