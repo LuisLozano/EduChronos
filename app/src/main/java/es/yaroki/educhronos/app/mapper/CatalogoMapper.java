@@ -15,6 +15,7 @@ import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -357,6 +358,50 @@ public final class CatalogoMapper {
      * expone solo la lista y conserva su comportamiento observable.
      */
     private static TramosMapeados aTramosConIndice(List<TramoSemanal> tramos) {
+        List<TramoOrdenado> ordenados = renumerarLectivos(tramos);
+        List<Tramo> resultado = new ArrayList<>(ordenados.size());
+        Map<TramoSemanal, Tramo> porEntidad = new IdentityHashMap<>();
+        for (TramoOrdenado to : ordenados) {
+            TramoSemanal t = to.tramo();
+            int diaSemana = t.getDia().ordinal() + 1;
+            Tramo tramo = new Tramo(codigoDe(t.getDia(), to.ordenEnDia()), diaSemana, to.ordenEnDia());
+            resultado.add(tramo);
+            porEntidad.put(t, tramo);
+        }
+        return new TramosMapeados(resultado, porEntidad);
+    }
+
+    /**
+     * Índice {@code TramoSemanal.getId() → ordenEnDia} (1..6, recreos excluidos).
+     * Comparte la renumeración con {@link #aTramosConIndice} vía
+     * {@link #renumerarLectivos} (fuente única; no se copia la lógica). A
+     * diferencia del índice interno de {@code aTramosConIndice} —que indexa por
+     * IDENTIDAD DE OBJETO—, este helper indexa por {@code getId()}: lo consume la
+     * proyección de horarios de Fase 7, que cruza el {@code tramoInicio} de una
+     * {@code Sesion} recargada en otra transacción (donde el proxy LAZY NO es el
+     * mismo objeto que el {@code findAll()}, mismo motivo que la frontera
+     * transaccional del servicio). Exige, por tanto, tramos persistidos
+     * ({@code getId()} no null).
+     */
+    public static Map<Long, Integer> indiceOrdenEnDia(List<TramoSemanal> tramos) {
+        Map<Long, Integer> indice = new HashMap<>();
+        for (TramoOrdenado to : renumerarLectivos(tramos)) {
+            indice.put(to.tramo().getId(), to.ordenEnDia());
+        }
+        return indice;
+    }
+
+    /**
+     * Núcleo ÚNICO de la renumeración {@code ordenEnDia} (deuda D30): excluye los
+     * recreos ({@code esLectivo=false}), ordena por (día, {@code orden} global) y
+     * numera 1..6 reiniciando en cada día. Devuelve la lista ordenada de pares
+     * (tramo lectivo, ordenEnDia); las CLAVES las pone cada consumidor —por
+     * identidad de objeto en {@link #aTramosConIndice}, por {@code getId()} en
+     * {@link #indiceOrdenEnDia}—, por eso el núcleo no impone ninguna. La réplica
+     * de {@code SolucionMapper.indiceTramos} (deuda D30) queda pendiente de
+     * unificar contra este núcleo en Fase 8.
+     */
+    private static List<TramoOrdenado> renumerarLectivos(List<TramoSemanal> tramos) {
         Objects.requireNonNull(tramos, "tramos no puede ser null");
         List<TramoSemanal> lectivos = tramos.stream()
                 .filter(TramoSemanal::isEsLectivo)
@@ -365,20 +410,18 @@ public final class CatalogoMapper {
                 .toList();
 
         Map<Dia, Integer> ordenPorDia = new EnumMap<>(Dia.class);
-        List<Tramo> resultado = new ArrayList<>(lectivos.size());
-        Map<TramoSemanal, Tramo> porEntidad = new IdentityHashMap<>();
+        List<TramoOrdenado> resultado = new ArrayList<>(lectivos.size());
         for (TramoSemanal t : lectivos) {
-            int ordenEnDia = ordenPorDia.merge(t.getDia(), 1, Integer::sum);
-            int diaSemana = t.getDia().ordinal() + 1;
-            Tramo tramo = new Tramo(codigoDe(t.getDia(), ordenEnDia), diaSemana, ordenEnDia);
-            resultado.add(tramo);
-            porEntidad.put(t, tramo);
+            resultado.add(new TramoOrdenado(t, ordenPorDia.merge(t.getDia(), 1, Integer::sum)));
         }
-        return new TramosMapeados(resultado, porEntidad);
+        return resultado;
     }
 
     /** Par (lista ordenada, índice por identidad de entidad) que devuelve {@link #aTramosConIndice}. */
     private record TramosMapeados(List<Tramo> lista, Map<TramoSemanal, Tramo> porEntidad) { }
+
+    /** Un tramo lectivo con su {@code ordenEnDia} (1..6) ya renumerado (núcleo {@link #renumerarLectivos}). */
+    private record TramoOrdenado(TramoSemanal tramo, int ordenEnDia) { }
 
     /**
      * {@code ProfesorRestriccionHoraria} JPA → {@code domain.RestriccionHoraria}.

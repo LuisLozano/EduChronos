@@ -49,6 +49,7 @@ public final class SolucionMapper {
      */
     public static Map<Tramo, TramoSemanal> indiceTramos(
             ProblemaHorario problema, List<TramoSemanal> tramosJpa) {
+        // Comparte la renumeración con CatalogoMapper.indiceOrdenEnDia; su unificación es deuda D30.
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(tramosJpa, "tramosJpa no puede ser null");
 
