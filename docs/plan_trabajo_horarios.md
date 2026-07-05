@@ -450,10 +450,16 @@ Base de datos local (SQLite + Hibernate) con:
 Interfaz con las tres vistas: por grupo, por profesor, por aula.
 
 ### Criterios de verificación
-- [ ] Las tres vistas muestran la misma información que los PDFs de ejemplo
-- [ ] Los desdobles se visualizan correctamente (dos entradas en el mismo tramo)
-- [ ] La vista de aula muestra correctamente los grupos que la usan
-- [ ] La navegación entre grupos/profesores/aulas es fluida
+- [x] Las tres vistas muestran la misma información que los PDFs de ejemplo
+      (firmado a nivel de contrato + mecanismo, NO celda-a-celda: el fixture
+      reducido de 7B coloca 5 slots y la posición la fija el solver, no el PDF —
+      D-F7B-4. La fidelidad celda-a-celda contra el PDF requiere el fixture de
+      semana completa, diferido a Fase 8)
+- [x] Los desdobles se visualizan correctamente (dos entradas en el mismo tramo)
+      (validado en pantalla: CyR TEC3/B07 + INF1/A12In como dos sub-entradas del
+      mismo slot; agrupamiento RefMt como tres; test de colapso verde)
+- [x] La vista de aula muestra correctamente los grupos que la usan
+- [x] La navegación entre grupos/profesores/aulas es fluida
 
 ### Bloques de Fase 7
 - [x] Bloque 7A — Backend de lectura: contrato de las tres vistas (S55). Endpoint
@@ -475,9 +481,19 @@ Interfaz con las tres vistas: por grupo, por profesor, por aula.
       BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. SOLO backend: las
       tres vistas Angular son 7B. Deuda de test menor para 7B: reforzar el assert de
       exclusión (containsExactly) sobre la vista de un grupo.
-- [ ] Bloque 7B — Frontend Angular: proyecto, integración frontend-maven-plugin,
-      las tres vistas (grupo/profesor/aula) con celda-como-lista, navegación, y
-      validación visual contra los volcados de 1ºESO. (Sin iniciar.)
+- [x] Bloque 7B — Frontend Angular CERRADO (S56). Proyecto Angular 21 en
+      app/frontend/ (proyecto Node, NO módulo Maven), integrado en el fat jar vía
+      frontend-maven-plugin 2.0.1. Las tres vistas (grupo/profesor/aula) son filtros
+      cliente sobre la proyección plana de 7A, con celda-como-lista (N sub-entradas
+      por slot; co-docencia = 1 entrada con N profes; sub-entrada con grupos[]
+      múltiple en agrupamiento). Validación visual hecha contra el seed real: bloque
+      CyR/OyD/RefMt como celda-con-6-entradas, Mat como celda simple. Decisiones
+      D-F7B-1..6 (ver cabecera S56). Suite: 99 backend (solver 59 + app 40) + 6
+      frontend, verde. Cuatro desviaciones al leer el repo, todas resueltas (repackage
+      no enganchado —hueco de Fase 6—, build a prepare-package, fix del 500 del
+      endpoint por -parameters, fixture del frontend con profesor inventado TEC4). La
+      deuda de exclusión de 7A (containsExactly) queda saldada con igualdad exacta de
+      conjunto. Andamiaje vivo: SeedHorarioRunner (borrar en Fase 8).
 
 ---
 
@@ -578,7 +594,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 7 — UI: visualización de horarios (EN CURSO). Bloque 7A (backend de lectura) CERRADO en S55. Fase 6 CERRADA en S54.
+Fase actual: 7 — UI: visualización de horarios CERRADA en S56 (7A backend de lectura en S55 + 7B frontend Angular en S56). Siguiente: Fase 8 — UI: configuración y ajuste manual. Fase 6 CERRADA en S54.
 Última fase completada: 6 — Persistencia de datos (CERRADA en S54: los 4 criterios
   firmados con evidencia ejecutable. El cierre NO fue un bloque de persistencia
   nuevo sino un test de humo end-to-end —CierreFase6HumoTest— que ejercita el
@@ -591,7 +607,48 @@ Fase actual: 7 — UI: visualización de horarios (EN CURSO). Bloque 7A (backend
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de
+Última sesión registrada: Sesión 56 — Fase 7, Bloque 7B: FRONTEND ANGULAR (las tres vistas)
+  y CIERRE de Fase 7. Modo híbrido (decisión y contrato en el Project, código en Claude Code).
+  Seis decisiones cerradas antes de teclear: D-F7B-1 (alimentación por fixture conocido {id}, sin
+  endpoint de listado: Fase 7 = solo lectura); D-F7B-2 (Angular 21 + Node v22.23.1, verificado
+  contra angular.dev —matriz A21 ^22.22.0||^24.13.1—; A22 descartado por novedad innecesaria, Node
+  ≥24.15); D-F7B-3 (frontend en app/frontend/, proyecto Node NO módulo Maven; frontend-maven-plugin
+  2.0.1, versión en pluginManagement del parent, ejecución en app/pom.xml); D-F7B-4 (validación =
+  mecanismo por test + visual manual, NO celda-a-celda contra PDF con el fixture reducido); D-F7B-5
+  (celda-como-lista: co-docencia = 1 entrada con N profes, sub-entrada con grupos[] múltiple en
+  agrupamiento; confirmado en proyectar() y en pantalla); D-F7B-6 (aulaCodigo NUNCA null —Sesion.aula
+  optional=false—, javadoc de SesionVistaDTO corregido; el "aula null" del PDF es artefacto de
+  extracción de co-docencia). Entregado (Claude Code, commits de una línea por artefacto): scaffold
+  Angular 21; modelos TS + servicio de proyección; rejilla 5×6 + las tres vistas con celda-como-lista;
+  integración frontend-maven-plugin; tests de mecanismo; corrección de javadoc. Cuatro desviaciones
+  al leer el repo, todas señaladas y resueltas: (1) repackage de Spring Boot NO estaba enganchado
+  (app/ hereda de educhronos-parent, no de spring-boot-starter-parent —solo importa la BOM—; hueco
+  preexistente de Fase 6), saldado en 7B: app pasa de librería a aplicación arrancable (fat jar); (2)
+  build del frontend movido de generate-resources a prepare-package (decisión C): mvn test del backend
+  ya NO reconstruye Angular (~29s→~11.7s), el frontend entra en el jar en package, verificado con
+  jar tf ... grep static/index.html; (3) fix preexistente de 7A: el endpoint daba HTTP 500 al ejercerse
+  por HTTP por primera vez (falta -parameters, misma raíz que (1): no hereda del starter-parent),
+  resuelto con <parameters>true</parameters> en el maven-compiler-plugin del parent + @PathVariable("id")
+  explícito + test de integración HTTP (standaloneSetup, sin dependencias nuevas) → cierra la deuda de
+  test web de 7A; (4) el fixture de test del frontend (proyeccion-1eso.fixture.ts) había divergido del
+  contrato: inventaba un profesor TEC4 para fingir co-docencia (el fixture reducido no tiene ninguna
+  plaza multi-profesor), corregido eliminando TEC4 y añadiendo co-docencia REAL LEN2+LEN8 (de los
+  volcados de 1ºESO) como caso legítimo de D-F7-2. La deuda de EXCLUSIÓN de 7A (containsExactly) queda
+  saldada: el test de exclusión usa igualdad exacta de conjunto de plazas (toEqual), NO relajado a
+  contains. Validación visual hecha por el usuario contra el seed real (horario id=1, 24 sesiones,
+  OPTIMAL): el bloque CyR/OyD/RefMt se pinta como celda-con-6-sub-entradas y las Mat como celda simple;
+  la posición del bloque la fija el solver (viernes t4 con seed=42, NO el miércoles t3 del PDF: correcto
+  por D-F7B-4). Andamiaje vivo asignado a Fase 8: SeedHorarioRunner (app.catalog, @Profile("seed"),
+  duplica el builder de CierreFase6HumoTest para poblar la BD; BORRAR EN FASE 8 cuando exista la vía
+  real —CRUD o loader—, marcado en su javadoc). Deuda nueva anotada: el fixture del frontend es un
+  artefacto escrito a mano sin mecanismo que lo ate al DTO real (el TEC4 divergió sin detección) →
+  Fase 8 considerar test de contrato que deserialice un JSON capturado del endpoint real; Node de dev
+  (nvm) y Node del pom (<nodeVersion>v22.23.1</nodeVersion>) deben mantenerse en la misma versión
+  ≥22.22.0 (nvm 0.39.1 tiene el índice LTS caducado, no bloquea). Suite: 99 (solver 59 + app 40) + 6
+  frontend, BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. Siguiente: Fase 8 — UI:
+  configuración y ajuste manual (drag&drop D19/D20, parametrización del solver D29, CRUD del centro).
+
+Última sesión registrada (previa): Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de
   las tres vistas). Modo híbrido (decisión y contrato en el Project, código en Claude Code).
   Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
   frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
