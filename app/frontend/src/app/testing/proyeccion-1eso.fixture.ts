@@ -1,10 +1,13 @@
 import { HorarioProyeccion, SesionVista } from '../models/horario.model';
 
 /**
- * Proyección de fixture (mock del JSON de 7A) del bloque 1ºESO de
- * problema-3-cierre-cyr-refmt: bloque CyR/OyD/RefMt (6 plazas, rep 2) + 4 Mat
- * (1 plaza, rep 3) = 24 sesiones. `Bloque-CyR-Tec` lleva co-docencia (2
- * profesores en UNA entrada) para ejercitar D-F7-2.
+ * Fixture COMPUESTO (no es espejo puro del fixture del backend): la proyección
+ * del bloque 1ºESO de problema-3-cierre-cyr-refmt —bloque CyR/OyD/RefMt (6
+ * plazas, rep 2) + 4 Mat (1 plaza, rep 3) = 24 sesiones, todas mono-profesor—
+ * MÁS una sesión de LCL de 1ºA tomada de los volcados de 1ºESO, añadida a mano
+ * para ejercitar D-F7-2. La co-docencia la aporta esa LCL (dos profesores,
+ * LEN2 + LEN8, en UNA sola entrada), no el bloque: `Bloque-CyR-Tec` es
+ * mono-profesor (TEC3), como en el fixture real y el seed.
  */
 const BLOQUE = 'Bloque-CyR_OyD_RefMt-1ESO';
 const GRUPOS_NIVEL = ['1ºA', '1ºB', '1ºC', '1ºD'];
@@ -23,7 +26,7 @@ function bloque(dia: number, tramo: number, indice: number): SesionVista[] {
   const base = { indice, dia, tramo, grupos: GRUPOS_NIVEL, actividadCodigo: BLOQUE };
   return [
     s({ ...base, asignaturaCodigo: 'CyR', asignaturaNombre: 'Computacion y Robotica',
-      profesores: ['TEC3', 'TEC4'], aulaCodigo: 'A5', subgrupos: sufijo('CyR-Tec'), plazaCodigo: 'Bloque-CyR-Tec' }),
+      profesores: ['TEC3'], aulaCodigo: 'A5', subgrupos: sufijo('CyR-Tec'), plazaCodigo: 'Bloque-CyR-Tec' }),
     s({ ...base, asignaturaCodigo: 'CyR', asignaturaNombre: 'Computacion y Robotica',
       profesores: ['INF1'], aulaCodigo: 'A12In', subgrupos: sufijo('CyR-Inf'), plazaCodigo: 'Bloque-CyR-Inf' }),
     s({ ...base, asignaturaCodigo: 'OyD', asignaturaNombre: 'Oratoria y Debate',
@@ -35,6 +38,21 @@ function bloque(dia: number, tramo: number, indice: number): SesionVista[] {
     s({ ...base, asignaturaCodigo: 'RefMt', asignaturaNombre: 'Refuerzo de Matematicas',
       profesores: ['MAT4'], aulaCodigo: 'A10', subgrupos: sufijo('RefMt-MAT4'), plazaCodigo: 'Bloque-RefMt-MAT4' }),
   ];
+}
+
+/**
+ * Co-docencia REAL de los volcados de 1ºESO: LCL con dos profesores (LEN2 + LEN8)
+ * en UNA sola entrada, mono-grupo de 1ºA, en un slot libre (dia 3, tramo 1). Aula
+ * válida (nunca null: el modelo es optional=false, D-F7B-6).
+ */
+function lclCoDocencia(): SesionVista {
+  return s({
+    indice: 1, dia: 3, tramo: 1,
+    asignaturaCodigo: 'LCL', asignaturaNombre: 'Lengua Castellana y Literatura',
+    profesores: ['LEN2', 'LEN8'], aulaCodigo: 'A5',
+    subgrupos: ['1ºA-Completo'], grupos: ['1ºA'],
+    actividadCodigo: 'LCL-1ºA', plazaCodigo: 'LCL-1ºA-P1',
+  });
 }
 
 /** Mat de un grupo: 1 plaza, 3 repeticiones, grupos == ["1ºX"]. */
@@ -62,5 +80,6 @@ export const PROYECCION_1ESO: HorarioProyeccion = {
     ...mat('B', 'A2', 'MATB'),
     ...mat('C', 'A4', 'MATC'),
     ...mat('D', 'A7', 'MATD'),
+    lclCoDocencia(), // co-docencia real de 1ºA (LEN2 + LEN8) en (dia 3, tramo 1)
   ],
 };

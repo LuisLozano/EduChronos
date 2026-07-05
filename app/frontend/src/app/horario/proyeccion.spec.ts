@@ -37,20 +37,20 @@ describe('mecanismo de las tres vistas', () => {
     // Toda sesión de la vista lleva "1ºA" en grupos.
     expect(vista1A.every((s) => s.grupos.includes('1ºA'))).toBe(true);
 
-    // El conjunto exacto de plazas es el bloque + Mat-1ºA, nada más.
-    expect(plazasUnicas(vista1A)).toEqual([...PLAZAS_BLOQUE, 'Mat-1ºA-P1'].sort());
+    // El conjunto exacto de plazas es el bloque + Mat-1ºA + la LCL de co-docencia, nada más.
+    expect(plazasUnicas(vista1A)).toEqual([...PLAZAS_BLOQUE, 'Mat-1ºA-P1', 'LCL-1ºA-P1'].sort());
   });
 
-  it('(4) co-docencia: una plaza multi-profesor es UNA sub-entrada con lista de profesores', () => {
+  it('(4) co-docencia: la LCL multi-profesor es UNA sub-entrada con lista de profesores', () => {
     const vista1A = filtrar(SESIONES, 'grupo', '1ºA');
-    const coDocencia = vista1A.filter((s) => s.plazaCodigo === 'Bloque-CyR-Tec');
+    const coDocencia = vista1A.filter((s) => s.plazaCodigo === 'LCL-1ºA-P1');
 
     expect(coDocencia.length).toBeGreaterThan(0);
     for (const e of coDocencia) {
-      expect(e.profesores).toEqual(['TEC3', 'TEC4']);
+      expect(e.profesores).toEqual(['LEN2', 'LEN8']);
     }
-    // En el slot del bloque, Bloque-CyR-Tec aporta una sola sub-entrada (no una por profesor).
-    const slot = agruparPorSlot(vista1A).get(claveSlot(1, 1)) ?? [];
-    expect(slot.filter((s) => s.plazaCodigo === 'Bloque-CyR-Tec')).toHaveLength(1);
+    // En su slot (dia 3, tramo 1), LCL-1ºA-P1 aporta una sola sub-entrada (no una por profesor).
+    const slot = agruparPorSlot(vista1A).get(claveSlot(3, 1)) ?? [];
+    expect(slot.filter((s) => s.plazaCodigo === 'LCL-1ºA-P1')).toHaveLength(1);
   });
 });
