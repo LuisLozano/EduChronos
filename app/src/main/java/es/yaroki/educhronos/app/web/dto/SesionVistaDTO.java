@@ -13,6 +13,10 @@ import java.util.List;
  * co-docencia se proyecta en UNA sola entrada con varios {@code profesores}
  * (D-F7-2); {@code grupos} es la unión sin duplicados de los grupos de todos los
  * subgrupos de la plaza (D-F7-1). Las listas van ordenadas para salida estable.
+ *
+ * <p>{@code aulaCodigo} NUNCA es null: {@code Sesion.aula} es {@code optional=false}
+ * (D-F7B-6). El "aula null" que aparece en el PDF de referencia es un artefacto de
+ * la extracción de la co-docencia, no del modelo: toda plaza colocada ocupa un aula.
  */
 public record SesionVistaDTO(
         Long sesionId,
