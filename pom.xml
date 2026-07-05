@@ -44,6 +44,11 @@
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <exec-maven-plugin.version>3.2.0</exec-maven-plugin.version>
 
+        <!-- Fase 7: build del frontend Angular vía Node/npm (módulo app). Requiere
+             Maven >= 3.6.0. El Node lo baja el propio plugin en target/ (no se
+             versiona). -->
+        <frontend-maven-plugin.version>2.0.1</frontend-maven-plugin.version>
+
         <sonar.host.url>http://192.168.0.130:9000</sonar.host.url>
         <sonar.projectKey>EduChronos</sonar.projectKey>
         <sonar.projectName>EduChronos</sonar.projectName>
@@ -119,6 +124,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>${frontend-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
