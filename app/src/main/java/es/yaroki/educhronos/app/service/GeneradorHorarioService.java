@@ -4,11 +4,16 @@ import es.yaroki.educhronos.app.catalog.ActividadRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
+import es.yaroki.educhronos.app.catalog.Asignatura;
+import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
 import es.yaroki.educhronos.app.catalog.Plaza;
+import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.ProfesorRestriccionHorariaRepository;
+import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
@@ -16,11 +21,15 @@ import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
+import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
+import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,5 +177,76 @@ public class GeneradorHorarioService {
                 new IllegalArgumentException("No existe HorarioGenerado con id " + id));
         horario.getSesiones().size(); // fuerza la carga LAZY dentro de la transacción
         return horario;
+    }
+
+    /**
+     * Proyecta un {@link HorarioGenerado} a un {@link HorarioProyeccionDTO} plano,
+     * listo para las vistas de Fase 7 (grupo, profesor, aula). Todo el mapeo —y la
+     * navegación de las relaciones LAZY de cada {@link Sesion} (tramo, plaza,
+     * asignatura, profesores, aula, subgrupos, grupos)— ocurre DENTRO de esta
+     * transacción de solo lectura, con la sesión de Hibernate abierta; devolver un
+     * DTO desligado evita {@code LazyInitializationException} en el consumidor
+     * (mismo motivo que la frontera transaccional de {@link #cargarProblema()}).
+     *
+     * <p>El {@code ordenEnDia} (campo {@code tramo} del DTO, 1..6) no es un getter
+     * de {@code TramoSemanal} —cuyo {@code orden} es un índice GLOBAL con recreos—,
+     * sino la renumeración por día que produce {@link CatalogoMapper#indiceOrdenEnDia}
+     * (fuente única, deuda D30). Se construye UNA vez por proyección y se cruza por
+     * {@code tramoInicio.getId()}. Un tramo sin entrada en ese índice (no lectivo o
+     * ausente del catálogo) aborta ruidosamente: nunca se proyecta con un valor por
+     * defecto.
+     *
+     * <p>{@code grupos} es la unión SIN duplicados de los grupos de todos los
+     * subgrupos de la plaza (D-F7-1), y una co-docencia se queda en UNA sola
+     * {@link SesionVistaDTO} con varios {@code profesores} (D-F7-2). Profesores,
+     * subgrupos y grupos van ordenados alfabéticamente para salida estable; las
+     * sesiones, por {@code (dia, tramo, asignaturaCodigo)}.
+     */
+    @Transactional(readOnly = true)
+    public HorarioProyeccionDTO proyectar(Long horarioId) {
+        HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow(() ->
+                new IllegalArgumentException("No existe HorarioGenerado con id " + horarioId));
+
+        Map<Long, Integer> ordenEnDia = CatalogoMapper.indiceOrdenEnDia(tramoRepository.findAll());
+
+        List<SesionVistaDTO> sesiones = new ArrayList<>();
+        for (Sesion sesion : horario.getSesiones()) {
+            TramoSemanal tramo = sesion.getTramoInicio();
+            int dia = tramo.getDia().ordinal() + 1;
+            Integer ordenTramo = ordenEnDia.get(tramo.getId());
+            if (ordenTramo == null) {
+                throw new IllegalStateException("El tramoInicio " + tramo.getId()
+                        + " de una sesion del horario " + horarioId
+                        + " no está en el índice de tramos lectivos (¿recreo o ausente del catálogo?)");
+            }
+
+            Plaza plaza = sesion.getPlaza();
+            Asignatura asignatura = plaza.getAsignatura();
+
+            List<String> profesores = plaza.getProfesores().stream()
+                    .map(Profesor::getCodigo).sorted().toList();
+            List<String> subgrupos = plaza.getSubgrupos().stream()
+                    .map(Subgrupo::getCodigo).sorted().toList();
+            List<String> grupos = plaza.getSubgrupos().stream()
+                    .flatMap(sg -> sg.getGrupos().stream())
+                    .map(GrupoAdministrativo::getCodigo)
+                    .distinct().sorted().toList();
+
+            sesiones.add(new SesionVistaDTO(
+                    sesion.getId(), sesion.getIndice(), dia, ordenTramo,
+                    asignatura.getCodigo(), asignatura.getNombreCompleto(),
+                    profesores, sesion.getAula().getCodigo(),
+                    subgrupos, grupos,
+                    plaza.getActividad().getCodigo(), plaza.getCodigo()));
+        }
+
+        sesiones.sort(Comparator.comparingInt(SesionVistaDTO::dia)
+                .thenComparingInt(SesionVistaDTO::tramo)
+                .thenComparing(SesionVistaDTO::asignaturaCodigo));
+
+        return new HorarioProyeccionDTO(
+                horario.getId(), horario.getNombre(), horario.getEstado().name(),
+                horario.getEstadoSolver(), horario.getObjetivo(), horario.getCotaInferior(),
+                horario.getFechaGeneracion().toString(), sesiones);
     }
 }
