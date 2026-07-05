@@ -3,6 +3,11 @@ target/
 *.versionsBackup
 dependency-reduced-pom.xml
 
+# Frontend Angular (Fase 7). Artefactos de Node/CLI: no se versionan.
+app/frontend/node_modules/
+app/frontend/dist/
+app/frontend/.angular/
+
 # Bases de datos SQLite locales (Fase 6)
 *.db
 
