@@ -104,6 +104,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <!-- Emite nombres de parámetros en el bytecode. Spring MVC los
+                             necesita para resolver @PathVariable/@RequestParam sin nombre
+                             explícito; app/ no hereda de spring-boot-starter-parent, que
+                             lo activaría por defecto. Crítico para los endpoints de Fase 8. -->
+                        <parameters>true</parameters>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

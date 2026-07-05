@@ -29,7 +29,7 @@ public class HorarioController {
     }
 
     @GetMapping("/{id}/proyeccion")
-    public HorarioProyeccionDTO proyeccion(@PathVariable Long id) {
+    public HorarioProyeccionDTO proyeccion(@PathVariable("id") Long id) {
         try {
             return service.proyectar(id);
         } catch (IllegalArgumentException e) {
