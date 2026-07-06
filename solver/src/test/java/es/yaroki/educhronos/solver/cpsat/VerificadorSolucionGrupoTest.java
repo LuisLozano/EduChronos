@@ -58,7 +58,8 @@ class VerificadorSolucionGrupoTest {
                 List.of(LUN_1, LUN_2),
                 List.of(), List.of(), List.of(), List.of(), List.of(),
                 actividades,
-                List.of());   // restriccionesHorarias: vacío (6b: el verificador de grupo no las usa)
+                List.of(),    // restriccionesHorarias: vacío (6b: el verificador de grupo no las usa)
+                List.of());   // bloqueos: sin pines
     }
 
     /** La (unica) instancia esperada de una actividad, segun la expansion real. */

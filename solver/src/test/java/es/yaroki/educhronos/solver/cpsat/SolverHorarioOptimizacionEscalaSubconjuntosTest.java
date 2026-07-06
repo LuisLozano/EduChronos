@@ -180,7 +180,8 @@ class SolverHorarioOptimizacionEscalaSubconjuntosTest {
                 List.copyOf(gruposVivos),
                 subgruposVivos,
                 actividadesVivas,
-                base.restriccionesHorarias());
+                base.restriccionesHorarias(),
+                base.bloqueos());
     }
 
     /** Un subgrupo es coherente si TODOS sus grupos sobreviven o NINGUNO; mixto = error de dato. */

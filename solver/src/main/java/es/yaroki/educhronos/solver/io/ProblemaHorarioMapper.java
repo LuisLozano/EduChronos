@@ -182,7 +182,8 @@ public final class ProblemaHorarioMapper {
                 new ArrayList<>(grupos.values()),
                 new ArrayList<>(subgrupos.values()),
                 actividades,
-                restricciones), "problema");
+                restricciones,
+                List.of()), "problema"); // bloqueos: placeholder (mapeo real en Fase 4 / 8.2a)
     }
 
     private static Plaza mapearPlaza(PlazaDto pl, String ctxActividad,

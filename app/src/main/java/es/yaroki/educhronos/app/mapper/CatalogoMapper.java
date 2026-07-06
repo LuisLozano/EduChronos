@@ -134,7 +134,8 @@ public final class CatalogoMapper {
 
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
-                gruposDom, subgruposDom, actividadesDom, restriccionesDom);
+                gruposDom, subgruposDom, actividadesDom, restriccionesDom,
+                List.of()); // bloqueos: placeholder (los poblará 8.2b desde la BD)
     }
 
     /**
