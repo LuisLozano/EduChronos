@@ -242,12 +242,15 @@ no la salida de referencia. Decidido en Sesión 11.
       en otras sesiones)
 - [x] Las aulas del desdoble/agrupamiento son distintas y correctas
       (A12In para INF1, A5 para TEC3, etc.)
-- [ ] Puedes bloquear manualmente un tramo y el solver lo respeta
-      — DIFERIDO: no existe mecanismo de bloqueo manual de tramo en el
-      modelo actual. Requiere trabajo estructural propio (DTO + schema +
-      dominio + restricción de pin/prohibición de tramo). Movido a Fase 4
-      o commit estructural intercalado. No es validación de lo construido
-      en Fase 3, sino funcionalidad nueva.
+- [x] Puedes bloquear manualmente un tramo y el solver lo respeta
+      — CERRADO en S58 (Bloque 8.2a). Mecanismo implementado como pin de
+      instancia a tramo: record domain.SesionBloqueada(instancia, tramo), 9º
+      componente de ProblemaHorario, restricción dura restriccionSesionBloqueada()
+      en construir() (addEquality sobre el tramoIndex), verificador independiente
+      contarBloqueosViolados, entrada por JSON (SesionBloqueadaDto + schema). El
+      desdoble se pina simultáneo por el tramoIndex compartido. Validado por ORO
+      (comentar la restricción hace caer 3 de 4 tests del pin). Pin de AULA diferido
+      a 8.2b (requiere el par plaza,aula). Persistencia/REST del bloqueo = 8.2b.
 
 ### Señal de que está mal
 El solver "resuelve" el problema metiendo las sesiones en tramos distintos 
@@ -597,10 +600,12 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.1 CERRADO en S57
-  (vía REST de generación+persistencia, D29 cerrada parcialmente, SeedHorarioRunner partido en
-  SeedCatalogoRunner). Fase 7 CERRADA en S56 (7A backend de lectura en S55 + 7B frontend Angular en S56).
-  Fase 6 CERRADA en S54.
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2a CERRADO en S58
+  (pin de instancia a tramo en el solver: SesionBloqueada estructural + restricción dura +
+  verificador + I/O de test; cierra el criterio 5 de Fase 3; pin de aula y persistencia/REST -> 8.2b).
+  Bloque 8.1 CERRADO en S57 (vía REST de generación+persistencia, D29 cerrada parcialmente,
+  SeedHorarioRunner partido en SeedCatalogoRunner). Fase 7 CERRADA en S56 (7A backend de lectura
+  en S55 + 7B frontend Angular en S56). Fase 6 CERRADA en S54.
 Última fase completada: 6 — Persistencia de datos (CERRADA en S54: los 4 criterios
   firmados con evidencia ejecutable. El cierre NO fue un bloque de persistencia
   nuevo sino un test de humo end-to-end —CierreFase6HumoTest— que ejercita el
@@ -615,7 +620,34 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 57 — Fase 8 [ARRANQUE] + Bloque 8.1 CERRADO
+Última sesión registrada: Sesión 58 — Fase 8, Bloque 8.2a: PIN DE INSTANCIA A TRAMO
+  (bloqueo manual) en el solver. Modo híbrido (decisión y contrato en el Project, código en
+  Claude Code). Cierra el criterio 5 de Fase 3 (diferido desde S17: "bloquear un tramo y el
+  solver lo respeta"). Trabajo de dominio + cpsat + io de test; NO toca persistencia/REST (8.2b).
+  Alcance cortado con el usuario: 8.2 partido en 8.2a (solver+modelo, esta sesión) y 8.2b
+  (persistencia+REST+pin de aula). Decisiones D-F8.2-1..6 (ver bloque de decisiones de 8.2a arriba);
+  la 6 REVERTIDA en diseño (pin de aula fuera de 8.2a: es por-plaza (plaza, aula), no por-instancia).
+  El pin es el DUAL de restriccionIndisponibilidadProfesor (addEquality sobre el tramoIndex en vez
+  de dominio complementario); el desdoble se pina simultáneo gratis por el tramoIndex compartido por
+  las plazas. La Fase 0 de lectura del repo (parada incondicional antes de teclear) descubrió tres
+  cosas que el índice de solver/ no veía: la instancia se localiza recorriendo
+  List<InstanciaProgramada> por equals de record; un 4º new ProblemaHorario( en app/CatalogoMapper
+  (resuelto con List.of() placeholder, opción A, cableado real en 8.2b); y que ProblemaInvalidoException
+  vive en io -> no se puede lanzar desde cpsat sin romper capas (resuelto: IllegalArgumentException
+  en ModeloCpSat como salvaguarda, ProblemaInvalidoException en el mapper como validación de entrada).
+  Entregado (7 commits de una línea): record SesionBloqueada + 9º componente de ProblemaHorario;
+  restriccionSesionBloqueada() en construir(); contarBloqueosViolados en el verificador;
+  SesionBloqueadaDto + mapper + schema; 4 fixtures + tests de solver (respeto, desdoble, infactible,
+  gemelo sin-pin) + 2 de loader. ORO en positivo: comentar la restricción hace caer 3 de 4 tests del
+  pin; reactivada, ModeloCpSat idéntico a HEAD. Suite: solver 59->65 (+6), app 43 (sin cambio),
+  BUILD SUCCESS con mvn clean test desde la raíz, árbol limpio. src/main del solver SÍ tocado ->
+  referencia-codigo-solver.md REGENERADO (commit 350258b); modelo NO tocado (§4.7 ya correcto de S53).
+  Commits 6ef0c14/7dd9048/1987925/5a144d3/0150e64/350258b. Deuda VIVA que 8.2a deja para 8.2b: pin de
+  AULA (contrato por-plaza + restricción + verificación), persistencia de SesionBloqueada (entidad JPA
+  §4.7 + schema) y entrada del bloqueo por REST, y el List.of() placeholder de app/CatalogoMapper.
+  Siguiente: 8.2b (persistencia+REST del bloqueo + pin de aula) o intercalar D-F8.1-8 (test de contrato
+  del fixture del frontend, deuda pequeña de 8.1).
+Última sesión registrada (previa): Sesión 57 — Fase 8 [ARRANQUE] + Bloque 8.1 CERRADO
   (backend). Modo híbrido: alcance, descomposición y decisiones en el Project;
   código en Claude Code. Se ABRE Fase 8 fijando alcance antes de construir. Fase 8
   descompuesta en bloques por dependencias: 8.1 vía REST generar+guardar (raíz de
@@ -623,6 +655,30 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   celda (D19 backend) → 8.4 pre-validación (D18/D20) → 8.5+ CRUD de catálogo (D10
   plazas multi-profesor, D1/D7 asistentes) → 8.6+ drag&drop + bloqueo interactivo.
   D21/D22/D30 diferibles a lo largo de la fase.
+  Deuda VIVA que 8.2a deja para 8.2b: (i) pin de AULA (contrato por-plaza (plaza, aula) +
+  restricción + verificación); (ii) persistencia de SesionBloqueada (entidad JPA §4.7 + schema) y
+  entrada del bloqueo por REST (body de POST /api/horarios vs endpoint propio, a decidir); (iii)
+  app/CatalogoMapper:135 lleva List.of() como placeholder de bloqueos —cablearlo cuando 8.2b los lea
+  de la BD—.
+  Bloque 8.2a — decisiones cerradas antes de teclear (D-F8.2-1..6): (1) identidad
+  del bloqueo = ActividadInstancia(actividad, indice) de dominio, reutilizada sin materializar
+  tabla nueva (coherente con D-B5-1 y con la identidad de Sesion en B9); en JSON se referencia
+  por (actividad_codigo, indice). (2) el bloqueo vive como List<SesionBloqueada> bloqueos, 9º
+  componente del record ProblemaHorario (forma 2, gemela de restriccionesHorarias); el cambio de
+  firma se propagó a 4 constructores —io/ProblemaHorarioMapper (main), app/CatalogoMapper:135
+  (main), y 2 tests VerificadorSolucionGrupoTest y SolverHorarioOptimizacionEscalaSubconjuntosTest—.
+  (3) restricción DURA restriccionSesionBloqueada() en construir() (aplica en factibilidad y en
+  optimización): addEquality(tramoIndex, indiceDeTramo(tramo)); el desdoble se pina simultáneo gratis
+  porque las N plazas comparten tramoIndex. Aula contradictoria -> INFEASIBLE; validación amable
+  diferida a 8.4. (4) verificador independiente contarBloqueosViolados (recomputo sin OR-Tools) que
+  habilitó el ORO. (5) I/O de test: SesionBloqueadaDto(actividad, indice, tramo), array top-level
+  "bloqueos" opcional en el schema. (6) REVERTIDA en diseño: el pin de aula NO va en 8.2a; el
+  candidato Optional<Aula> en el record se retiró al descubrir en la lectura del repo que el pin de
+  aula correcto es por PLAZA (plaza, aula), no por instancia —una instancia de desdoble tiene varias
+  plazas—; SesionBloqueada queda (instancia, tramo) sin aula, y el pin de aula (contrato incluido) se
+  difiere a 8.2b. Separación de capas respetada: cpsat NO importa io; la salvaguarda de instancia
+  inexistente en ModeloCpSat usa IllegalArgumentException, la validación de entrada de usuario (índice
+  fuera de rango, actividad desconocida) vive en el mapper con ProblemaInvalidoException.
   Bloque 8.1 — decisiones cerradas antes de teclear (D-F8.1-1..8): (1) endpoint
   síncrono POST /api/horarios, monousuario local; (2) persistir + devolver
   proyección (reutiliza HorarioProyeccionDTO de 7A, que ya porta id/estadoSolver/
@@ -743,130 +799,12 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   regenerado; modelo NO tocado. Siguiente: Bloque 7B (frontend Angular: proyecto, integración
   frontend-maven-plugin, las tres vistas con celda-como-lista, validación visual contra los
   volcados de 1ºESO).
-Última sesión registrada (previa): Sesión 54 — Fase 6, CIERRE DE FASE. Modo híbrido (decisión
-  y cierre en el Project, código en Claude Code). NO es un bloque de persistencia nuevo:
-  el alcance se decidió al inicio entre (a) cerrar Fase 6 y (b) un Bloque 10 (candidato
-  SesionBloqueada §4.7); se eligió (a) porque un B10 de persistencia no acerca el cierre
-  —SesionBloqueada es inútil sin que el solver la consuma (C5, toca src/main del solver,
-  reabre superficie estabilizada)— y dejaba igualmente sin firmar los criterios 2 y 4.
-  Entregable: un único test de integración de humo end-to-end CierreFase6HumoTest
-  (app.catalog, por los ctor protected de Actividad/Plaza; @DataJpaTest + replace=NONE +
-  @Import(GeneradorHorarioService)). Ejercita el pipeline COMPLETO por primera vez de una
-  tirada: repos JPA → CatalogoMapper.aProblemaHorario → SolverHorario real → SolucionMapper
-  → guardar → recargar. Fixture: builder JPA que TRANSCRIBE problema-3-cierre-cyr-refmt.json
-  (agrupamiento denso de 1ºESO: bloque de 6 plazas CyR/OyD/RefMt rep=2 + 4 Mat) como
-  ESPECIFICACIÓN de referencia; el JSON NO se carga (entraría por el camino JSON, que no
-  ejercita JPA) —se replica a new+save, patrón de GuardarHorarioServiceTest—. El builder
-  añade los 5 recreos (esLectivo=false) que el JSON omite, intercalados por orden global,
-  porque el puente de tramo (SolucionMapper.indiceTramos) los espera para renumerar (D30).
-  Nueve decisiones cerradas antes de construir (D-B10-1 a D-B10-9). Las de más impacto:
-  D-B10-7 el test orquesta cargarProblema()+new SolverHorario(10,42)+guardar() SIN tocar el
-  servicio (evita meter el solver a 120 s en la suite, veneno de D24/D25); D-B10-9 vía de
-  factibilidad; D-B10-8 testigo del criterio 2 = alta de restricción BLANDA (no editar
-  Profesor —inmutable— ni Actividad —alteraría factibilidad—). NOTA de honestidad: objetivo
-  y cotaInferior de ResultadoOptimizacion son double PRIMITIVOS (verificado leyendo el
-  repo), no admiten null; el test recorre por eso resolverOptimizandoConDetalle y persiste
-  objetivo/cota reales —NO se ejercita el caso NULLABLE de §4.7, contra lo previsto—.
-  ModeloCpSat NO restringe por tipo de aula (I3 no participa en CP-SAT): todas las aulas
-  ORDINARIA, sin INFEASIBLE. Cobertura ganada respecto a B9: plaza con aulasCandidatas
-  resuelta por el solver (B9 solo probó aula fija). D30 NO queda verificada: la aserción
-  "toda sesión en tramo lectivo" descarta que una sesión caiga en recreo, pero no que se
-  empareje al TramoSemanal lectivo EXACTO que el solver eligió; D30 sigue viva (Fase 8).
-  Los 4 criterios de Fase 6 firmados (ver "### Criterios de verificación" de Fase 6); nota
-  "CRUD = repos, no formularios" añadida al entregable. Los dos tests resuelven el solver
-  real dos veces en 1,8 s (lejísimos del techo de 10 s). Suite: solver 59 + app 37 (35
-  previos + 2) = 96 en el reactor completo, BUILD SUCCESS con mvn clean test desde la raíz
-  (no -pl). src/main NO tocado (ni solver ni app): un único fichero de test nuevo →
-  referencia-codigo-solver.md NO regenerado; modelo NO tocado (§4.7 ya estaba correcto de
-  S53). Commit de una línea 549bc92 (solo el test); commit de doc aparte, pendiente de push.
-  Siguiente: Fase 7 (UI de visualización: vistas por grupo, profesor y aula).
-Última sesión registrada (previa): Sesión 53 — Fase 6, Bloque 9: PERSISTENCIA DE LA
-  SolucionHorario (§4.7). Modo híbrido (decisión y cierre en el Project, código en
-  Claude Code). Cierra el criterio abierto de Fase 6 ("cerrar la app, reabrir, el
-  horario intacto"): B8 dejó el flujo entrada->solver; B9 cierra solver->persistencia,
-  la segunda mitad del entregable. Entidades nuevas HorarioGenerado y Sesion (§4.7,
-  app.persistence) + enum propio EstadoHorario {BORRADOR,DEFINITIVO,DESCARTADO} + dos
-  repos. Mapper de salida SolucionMapper (dominio->JPA): por cada (instancia, plaza)
-  del ProblemaHorario emite una fila Sesion, resolviendo plaza y aula a entidad JPA
-  por CÓDIGO (dos índices Map<String,_> recargados en la transacción de escritura, no
-  por identidad de objeto: la solución es dominio desligado de JPA tras B8). Servicio:
-  generar() SIGUE puro (sin BD, solver fuera de transacción, respeta D-B8-1); método
-  nuevo guardar(ResultadoOptimizacion, ProblemaHorario, String) @Transactional que
-  persiste HorarioGenerado + N Sesion; cargarHorario(id) devuelve entidades JPA (lo
-  que pinta Fase 7), no reconstruye SolucionHorario de dominio. Ocho decisiones
-  cerradas antes de construir (D-B9-1 a D-B9-8): la de más impacto, la granularidad
-  Sesion = PLAZA colocada (Opción A), que CORRIGE el UNIQUE de §4.7 (era por
-  actividad_instancia, imposibilitaba el desdoble) a (horario_id, plaza_id, indice), y
-  deriva la actividad desde la plaza (sin FK redundante). HorarioGenerado persiste
-  estado_solver (String, sin acoplar a CpSolverStatus) + objetivo/cotaInferior
-  (Double NULLABLE real, no centinela). Aula por vía uniforme aulaElegida().orElseThrow()
-  (aborta ruidoso si empty, bug de solver). Test de integración con actividad
-  MULTI-PLAZA (desdoble) como caso central: guardar->recargar, las 2 filas Sesion
-  sobreviven con tramo y aula. src/main del solver NO tocado -> índice NO regenerado;
-  §4.7 del modelo CORREGIDO (Sesion + HorarioGenerado).
-  Suite: solver 59 + app 35 (+2 del IT), BUILD SUCCESS con mvn clean test desde la raíz.
-  Commits separados código/tests aaa660a/84cdba5, de una línea.
-Última sesión registrada (previa): Sesión 52 — Fase 6, Bloque 8: SERVICIO DE APLICACIÓN,
-  ORQUESTACIÓN repos → mapper → solver. Modo híbrido (decisión y cierre en el
-  Project, código en Claude Code). GeneradorHorarioService (app.service, @Service,
-  primer bean de servicio del módulo; constructor injection, 8 repos private final).
-  cargarProblema() @Transactional(readOnly=true) ejecuta los 8 findAll() + el mapeo en
-  una sola transacción (las relaciones LAZY se navegan por identidad de objeto: sin
-  transacción habría LazyInitializationException, y proxies de sesiones distintas
-  romperían la resolución por referencia EN SILENCIO). generar() SIN transacción: llama
-  a cargarProblema() y, sobre el ProblemaHorario ya desligado de JPA, invoca
-  new SolverHorario().resolverOptimizandoConDetalle → ResultadoOptimizacion (mantener
-  la transacción abierta durante la resolución sería antipatrón: el solver tarda). Cuatro
-  decisiones cerradas (D-B8-1 a D-B8-4): la de más impacto, la frontera transaccional
-  entre carga (dentro) y solver (fuera); el servicio no valida integridad (la aborta el
-  mapper, propaga) ni guarda catálogo vacío (Fase 8); constructor por defecto del solver
-  (120 s/semilla 42), que a escala de instituto dará FEASIBLE, no OPTIMAL (deuda D29). Test
-  GeneradorHorarioServiceTest (@DataJpaTest + @Import, SQLite real): catálogo mínimo con
-  grupo PDC (grupoPadre no nulo) y restricción horaria sobre TramoSemanal real, recargado
-  por el servicio, verificando el enlace de padre y tramo por identidad —ejercita el fallo
-  silencioso por identidad de objeto, el riesgo dominante del bloque—. Caso de generar()
-  omitido conscientemente (exigiría catálogo factible garantizado; el valor está en la
-  carga+frontera, no en re-testear el solver). src/main del solver NO tocado → índice NO
-  regenerado; modelo NO tocado. Suite: solver 59 + app 33 (+1), BUILD SUCCESS con mvn clean
-  test desde la raíz. Commits separados código/tests f72ca82/44694d1, de una línea.
-  Siguiente: Bloque 9 (a decidir).
-Última sesión registrada (previa): Sesión 51 — Fase 6, Bloque 7: ENTIDAD JPA DE
-  RESTRICCIONES HORARIAS (§4.3) + MAPPER. Modo híbrido (decisión y cierre en el
-  Project, código en Claude Code). Cierra la deuda D28: el camino JPA ensambla
-  ya un ProblemaHorario COMPLETO. Entidad ProfesorRestriccionHoraria (app.catalog,
-  calcada de TramoSemanal: id IDENTITY, dos @ManyToOne LAZY a Profesor y
-  TramoSemanal nullable=false, @Enumerated(STRING) tipo, int peso, String motivo
-  nullable) + enum propio app.catalog.TipoRestriccion {DURA,BLANDA} +
-  ProfesorRestriccionHorariaRepository vacío. CatalogoMapper: aTipoRestriccion
-  (gemelo de aPatronTemporal), aRestriccionHoraria (profesor por código, tramo por
-  REFERENCIA de objeto vía IdentityHashMap, tramo ausente/recreo aborta, motivo →
-  Optional.ofNullable), refactor de aTramos SIN cambio observable (helper
-  aTramosConIndice devuelve List<Tramo> + IdentityHashMap<TramoSemanal,Tramo>;
-  aTramos público delega), y aProblemaHorario gana el 8º parámetro
-  List<ProfesorRestriccionHoraria>, sustituyendo el List.of() centinela. Decisión
-  de alcance tomada al inicio entre los dos candidatos de B7: entidad (esta) frente
-  a servicio de orquestación; se eligió la entidad porque el servicio (B8) debe
-  orquestar un mapper YA completo, no uno con el agujero de D28. El tramo se
-  resuelve por referencia de objeto, NO por el código sintético L1..V6 (D27 no se
-  reabre) ni por (día,ordenEnDia) —TramoSemanal porta orden GLOBAL con recreo, no
-  ordenEnDia—. El peso DEFAULT 1 de §4.3 NO se materializa en la entidad (política
-  de la UI de Fase 8; la entidad exige peso explícito). RIESGO CERRADO EN POSITIVO:
-  primer @ManyToOne a TramoSemanal no autorreferencial sobrevive el round-trip
-  sobre SQLite real. Tests: ProfesorRestriccionHorariaRoundTripTest (@DataJpaTest,
-  DURA+BLANDA) + CatalogoMapperRestriccionTest (unitario, 5 casos incl. recreo
-  aborta) + centinela de D28 en CatalogoMapperProblemaTest reconvertido a
-  verificar restricción real. src/main del solver NO tocado (record
-  domain.RestriccionHoraria ya existía desde S25) → índice NO regenerado; modelo
-  NO tocado. Suite: solver 59 + app 32 (+6), BUILD SUCCESS con mvn clean test desde
-  la raíz. Commits separados código/tests 84a8bed/f2e81a7, de una línea; commit de
-  doc pendiente. Siguiente: Bloque 8 (servicio de aplicación repos → mapper →
-  solver, sobre ensamblado completo).
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
-en la Sesión 52, la de S49 en la Sesión 53, y la de S50 en la Sesión 54 (misma
-higiene documental). El plan
-conserva las 4 últimas cabeceras compactas (S51–S54). El detalle histórico de cualquier sesión
+en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, y las de S51, S52,
+S53 y S54 en la Sesión 58 (misma higiene documental). El plan
+conserva las 4 últimas cabeceras compactas (S55–S58). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
