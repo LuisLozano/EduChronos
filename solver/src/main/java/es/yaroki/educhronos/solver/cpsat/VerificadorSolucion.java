@@ -9,6 +9,7 @@ import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
@@ -244,6 +245,32 @@ public final class VerificadorSolucion {
                     }
                 }
                 total += Math.max(0, longitudRacha - n);
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Cuenta los bloqueos (pines) violados sobre una solución dada, de forma
+     * <b>independiente del solver</b> (Fase 8, Bloque 8.2a). Recomputo gemelo de la
+     * restricción {@code ModeloCpSat.restriccionSesionBloqueada}: por cada
+     * {@link SesionBloqueada}, compara el tramo real de su instancia en la solución
+     * ({@link SolucionHorario#tramoDeInstancia}) con el tramo pinado y cuenta los
+     * desajustes. Si el modelo CP-SAT dejara de respetar un pin, este conteo —que
+     * recorre el dominio, sin OR-Tools— lo delataría.
+     *
+     * <p>Una instancia sin colocar cuenta como violación (el pin no se cumplió); su
+     * ausencia la reporta además {@link #verificar}. Sin verificación de AULA: el
+     * pin de aula se difiere a 8.2b (el record {@link SesionBloqueada} no lleva aula).
+     *
+     * @return número de bloqueos cuyo tramo real no coincide con el pinado.
+     */
+    public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion) {
+        int total = 0;
+        for (SesionBloqueada bloqueo : problema.bloqueos()) {
+            Optional<Tramo> real = solucion.tramoDeInstancia(bloqueo.instancia());
+            if (real.isEmpty() || !real.get().equals(bloqueo.tramo())) {
+                total++;
             }
         }
         return total;
