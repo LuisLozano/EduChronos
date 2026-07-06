@@ -1,11 +1,5 @@
 package es.yaroki.educhronos.app.catalog;
 
-import es.yaroki.educhronos.app.persistence.HorarioGenerado;
-import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
-import es.yaroki.educhronos.app.service.GeneradorHorarioService;
-import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
-import es.yaroki.educhronos.solver.cpsat.SolverHorario;
-import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalTime;
@@ -13,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -22,10 +15,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * ANDAMIAJE TEMPORAL (Fase 7, Bloque 7B). Seed desechable para validación visual.
- * Duplica el builder de CierreFase6HumoTest a propósito. BORRAR EN FASE 8 cuando
- * exista la vía real de poblar la BD (formularios CRUD o loader). No construir
- * nada encima de esta clase.
+ * ANDAMIAJE TEMPORAL (Fase 7, Bloque 7B). Seed desechable que puebla SOLO el
+ * catálogo (no genera horario: para eso está ya el {@code POST /api/horarios} de
+ * Fase 8, Bloque 8.1). Duplica el builder de CierreFase6HumoTest a propósito.
+ * BORRAR en Fase 8 al llegar al bloque de CRUD del centro, cuando exista la vía
+ * real de poblar la BD (formularios). No construir nada encima de esta clase.
  *
  * <p>Solo se activa con el perfil {@code seed}
  * ({@code --spring.profiles.active=seed}); el arranque normal no re-siembra.
@@ -33,19 +27,17 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Plaza} son {@code protected} (accesibles solo desde su paquete), igual
  * que {@code CierreFase6HumoTest}. La siembra corre en una única transacción de
  * escritura sobre el contexto Spring Boot completo (COMMIT real contra
- * {@code educhronos.db}); el solver resuelve dentro de ella (~10 s).
+ * {@code educhronos.db}).
  */
 @Component
 @Profile("seed")
-public class SeedHorarioRunner implements CommandLineRunner {
+public class SeedCatalogoRunner implements CommandLineRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(SeedHorarioRunner.class);
+    private static final Logger log = LoggerFactory.getLogger(SeedCatalogoRunner.class);
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final GeneradorHorarioService service;
-    private final HorarioGeneradoRepository horarioRepository;
     private final NivelRepository nivelRepository;
     private final GrupoAdministrativoRepository grupoRepository;
     private final SubgrupoRepository subgrupoRepository;
@@ -55,9 +47,7 @@ public class SeedHorarioRunner implements CommandLineRunner {
     private final TramoSemanalRepository tramoRepository;
     private final ActividadRepository actividadRepository;
 
-    public SeedHorarioRunner(
-            GeneradorHorarioService service,
-            HorarioGeneradoRepository horarioRepository,
+    public SeedCatalogoRunner(
             NivelRepository nivelRepository,
             GrupoAdministrativoRepository grupoRepository,
             SubgrupoRepository subgrupoRepository,
@@ -66,8 +56,6 @@ public class SeedHorarioRunner implements CommandLineRunner {
             AulaRepository aulaRepository,
             TramoSemanalRepository tramoRepository,
             ActividadRepository actividadRepository) {
-        this.service = service;
-        this.horarioRepository = horarioRepository;
         this.nivelRepository = nivelRepository;
         this.grupoRepository = grupoRepository;
         this.subgrupoRepository = subgrupoRepository;
@@ -81,26 +69,17 @@ public class SeedHorarioRunner implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        long existentes = horarioRepository.count();
+        long existentes = actividadRepository.count();
         if (existentes > 0) {
-            String ids = horarioRepository.findAll().stream()
-                    .map(h -> String.valueOf(h.getId()))
-                    .collect(Collectors.joining(", "));
-            log.info("[seed] Ya hay {} horario(s) en la BD (id: {}); NO se re-siembra.", existentes, ids);
+            log.info("[seed] El catálogo ya tiene {} actividad(es); NO se re-siembra.", existentes);
             return;
         }
 
         poblarCatalogo();
         entityManager.flush();
 
-        ProblemaHorario problema = service.cargarProblema();
-        ResultadoOptimizacion resultado =
-                new SolverHorario(10, 42).resolverOptimizandoConDetalle(problema);
-        HorarioGenerado horario = service.guardar(resultado, problema, "Horario seed 7B");
-
-        log.info("[seed] Horario guardado con id={} (estadoSolver={}). "
-                        + "URL: http://localhost:8080/api/horarios/{}/proyeccion",
-                horario.getId(), resultado.estado().name(), horario.getId());
+        log.info("[seed] Catálogo poblado. Genera un horario con "
+                + "POST http://localhost:8080/api/horarios");
     }
 
     // ---------------------------------------------------------- fixture builder
