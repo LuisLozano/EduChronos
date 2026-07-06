@@ -50,8 +50,8 @@ import org.springframework.context.annotation.Import;
  * son {@code double} primitivos (no admiten {@code null}), no se puede envolver a
  * mano una solución de factibilidad pura con cotas nulas. Se recorre la vía real de
  * optimización, {@link SolverHorario#resolverOptimizandoConDetalle}, y se persisten
- * el objetivo y la cota reales que devuelve — que es además lo que hace
- * {@code GeneradorHorarioService.generar()} en producción.
+ * el objetivo y la cota reales que devuelve — que es además la vía que recorre
+ * {@code GeneradorHorarioService.generar(...)} en producción (OPTIMIZACION).
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

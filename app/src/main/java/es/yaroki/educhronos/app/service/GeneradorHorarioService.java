@@ -50,8 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
  * subgrupo, el {@code TramoSemanal} de una restricción). Fuera de la sesión de
  * Hibernate eso lanzaría {@code LazyInitializationException}; peor aún, listas
  * cargadas en contextos de persistencia distintos darían proxies distintos y la
- * resolución por referencia fallaría EN SILENCIO. {@link #generar()} NO es
- * transaccional: la transacción se abre y cierra en {@code cargarProblema()}, y
+ * resolución por referencia fallaría EN SILENCIO. {@link #generar(Integer, Integer,
+ * ViaSolver, String)} NO es transaccional: la transacción se abre y cierra en
+ * {@code cargarProblema()}, y
  * la resolución (potencialmente larga) corre sobre un POJO ya desligado de JPA,
  * sin mantener abierta la conexión SQLite.
  */
@@ -116,13 +117,52 @@ public class GeneradorHorarioService {
     }
 
     /**
-     * Genera un horario: carga el problema (transacción abierta y cerrada en
-     * {@link #cargarProblema()}) y lo resuelve FUERA de transacción con la
-     * configuración por defecto del solver (120 s, semilla 42).
+     * Orquesta la generación completa de un horario y lo PERSISTE (Fase 8,
+     * Bloque 8.1; cierra D29 para la vía de OPTIMIZACIÓN). Encadena
+     * {@link #cargarProblema()} → resolución del solver → {@link #guardar} y
+     * devuelve la cabecera persistida.
+     *
+     * <p><b>Frontera transaccional (deliberada).</b> Este método NO es
+     * {@code @Transactional}: {@code cargarProblema()} abre y cierra su transacción
+     * de solo lectura, la resolución (potencialmente larga) corre FUERA de toda
+     * transacción sobre un POJO ya desligado de JPA, y {@code guardar()} abre la
+     * transacción de escritura al final. Envolver el solve en una transacción
+     * mantendría abierta la conexión SQLite durante la búsqueda (ver nota de clase).
+     *
+     * <p>Todos los parámetros son opcionales: {@code maxSegundos} y {@code semilla}
+     * caen a los valores por defecto del solver cuando ambos faltan; {@code via} a
+     * {@link ViaSolver#OPTIMIZACION} (única vía de 8.1); {@code nombre} a
+     * {@code "Horario " + Instant.now()} si viene nulo o en blanco.
+     *
+     * @throws IllegalArgumentException si {@code maxSegundos} se especifica y no
+     *         es estrictamente positivo.
+     * @throws es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException si el
+     *         problema no admite un horario factible.
      */
-    public ResultadoOptimizacion generar() {
+    public HorarioGenerado generar(Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
+        if (maxSegundos != null && maxSegundos <= 0) {
+            throw new IllegalArgumentException(
+                    "maxSegundos debe ser > 0 si se especifica; recibido " + maxSegundos);
+        }
+        ViaSolver viaEfectiva = via != null ? via : ViaSolver.OPTIMIZACION;
+        String nombreEfectivo = (nombre != null && !nombre.isBlank())
+                ? nombre : "Horario " + Instant.now();
+
         ProblemaHorario problema = cargarProblema();
-        return new SolverHorario().resolverOptimizandoConDetalle(problema);
+
+        // Ambos nulos ⇒ delega en los valores por defecto del solver (no se duplican
+        // aquí); si viene solo uno, el otro cae al mismo defecto (120 s / semilla 42).
+        SolverHorario solver = (maxSegundos == null && semilla == null)
+                ? new SolverHorario()
+                : new SolverHorario(
+                        maxSegundos != null ? maxSegundos : 120.0,
+                        semilla != null ? semilla : 42);
+
+        ResultadoOptimizacion resultado = switch (viaEfectiva) {
+            case OPTIMIZACION -> solver.resolverOptimizandoConDetalle(problema);
+        };
+
+        return guardar(resultado, problema, nombreEfectivo);
     }
 
     /**
