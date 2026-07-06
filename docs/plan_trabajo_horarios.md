@@ -493,7 +493,10 @@ Interfaz con las tres vistas: por grupo, por profesor, por aula.
       no enganchado —hueco de Fase 6—, build a prepare-package, fix del 500 del
       endpoint por -parameters, fixture del frontend con profesor inventado TEC4). La
       deuda de exclusión de 7A (containsExactly) queda saldada con igualdad exacta de
-      conjunto. Andamiaje vivo: SeedHorarioRunner (borrar en Fase 8).
+      conjunto. Andamiaje: SeedHorarioRunner PARTIDO en S57 (Bloque 8.1) en
+      SeedCatalogoRunner (solo puebla catálogo, @Profile("seed"), idempotencia por
+      actividadRepository.count()); la generación+guardado se movió a POST /api/horarios.
+      SeedCatalogoRunner sobrevive hasta el CRUD de catálogo (bloque posterior de Fase 8).
 
 ---
 
@@ -594,20 +597,70 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 7 — UI: visualización de horarios CERRADA en S56 (7A backend de lectura en S55 + 7B frontend Angular en S56). Siguiente: Fase 8 — UI: configuración y ajuste manual. Fase 6 CERRADA en S54.
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.1 CERRADO en S57
+  (vía REST de generación+persistencia, D29 cerrada parcialmente, SeedHorarioRunner partido en
+  SeedCatalogoRunner). Fase 7 CERRADA en S56 (7A backend de lectura en S55 + 7B frontend Angular en S56).
+  Fase 6 CERRADA en S54.
 Última fase completada: 6 — Persistencia de datos (CERRADA en S54: los 4 criterios
   firmados con evidencia ejecutable. El cierre NO fue un bloque de persistencia
   nuevo sino un test de humo end-to-end —CierreFase6HumoTest— que ejercita el
   pipeline completo repos JPA → CatalogoMapper → solver real → SolucionMapper →
   persistencia → recarga. Bloques 1-9 (S45-S53) construyeron las piezas; S54 las
   ensambla y verifica de una tirada. Deuda que la fase deja viva y asignada:
-  D26/D27 (nombre de aula, código de tramo) Fase 7/8; D29 (parametrización del
-  solver) Fase 8; D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo
-  manual de tramo / SesionBloqueada §4.7) sin mecanismo en el solver, diferido)
+  D26/D27 (nombre de aula, código de tramo) Fase 7/8; D29 (parametrización del solver)
+  Fase 8 — CIERRE PARCIAL en S57 (Bloque 8.1): tiempo/semilla/vía expuestos por POST /api/horarios,
+  vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
+  D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
+  sin mecanismo en el solver, diferido)
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 56 — Fase 7, Bloque 7B: FRONTEND ANGULAR (las tres vistas)
+Última sesión registrada: Sesión 57 — Fase 8 [ARRANQUE] + Bloque 8.1 CERRADO
+  (backend). Modo híbrido: alcance, descomposición y decisiones en el Project;
+  código en Claude Code. Se ABRE Fase 8 fijando alcance antes de construir. Fase 8
+  descompuesta en bloques por dependencias: 8.1 vía REST generar+guardar (raíz de
+  la que cuelga el resto) → 8.2 C5/SesionBloqueada estructural → 8.3 atribución por
+  celda (D19 backend) → 8.4 pre-validación (D18/D20) → 8.5+ CRUD de catálogo (D10
+  plazas multi-profesor, D1/D7 asistentes) → 8.6+ drag&drop + bloqueo interactivo.
+  D21/D22/D30 diferibles a lo largo de la fase.
+  Bloque 8.1 — decisiones cerradas antes de teclear (D-F8.1-1..8): (1) endpoint
+  síncrono POST /api/horarios, monousuario local; (2) persistir + devolver
+  proyección (reutiliza HorarioProyeccionDTO de 7A, que ya porta id/estadoSolver/
+  objetivo/cota); (3) D29 = params de solve en body opcional (maxSegundos default
+  30, semilla default 42, via default OPTIMIZACION); (4) nombre opcional en body,
+  default "Horario "+timestamp; (5) generar() parametrizado, se ELIMINA el sin-args
+  (evita segunda puerta con defaults hardcodeados, el patrón que dejó divergir al
+  runner); (6) reutilizar proyectar(id) sin tocar su firma; (7) SeedHorarioRunner
+  partido; (8) deuda de 7B (atar fixture al contrato real) = D-F8.1-8, DIFERIDA.
+  Decisión de alcance clave: vía FACTIBILIDAD sacada del bloque. Motivo confirmado
+  en el código: resolver() devuelve SolucionHorario sin estado y ResultadoOptimizacion
+  .objetivo/cota son double primitivos (no null); persistir factibilidad por el canal
+  de guardar() exigiría o un centinela 0.0 falso o tocar el solver (fuera de alcance).
+  El enum ViaSolver arranca solo con OPTIMIZACION; el switch sin default hará que
+  añadir FACTIBILIDAD sea error de compilación guía, no olvido silencioso.
+  Hallazgos al leer el repo: la generación estaba DUPLICADA (generar() en el servicio
+  vs. secuencia inline en el runner con new SolverHorario(10,42)); no hay
+  @ControllerAdvice global (patrón 7A = try/catch por método, se sigue). Regresión
+  detectada y corregida: el default de 30 s NO estaba cableado —con body por defecto
+  se caía al new SolverHorario() (120 s); arreglado en el servicio (seg=30, sem=42 si
+  null), test de regresión con mockConstruction capturando args del constructor.
+  Nota viva: 30 s es conjetura de UX, NO validada contra el centro real (~28 grupos;
+  el instituto completo no converge a óptimo ni en 600 s); constante revisable.
+  Episodio de toolchain (frontend): ng test dejó de arrancar por ERR_REQUIRE_ESM —
+  Node del sistema v20.5.1 por debajo del mínimo de Angular 21 (@angular/build engines
+  ^20.19.0||^22.12.0||>=24.0.0, verificado contra el paquete instalado). Resuelto
+  subiendo a Node 22.23.1 vía nvm (el default apuntaba a lts/* sin resolver → caía a
+  system; corregido con nvm alias default 22.23.1), .nvmrc en app/frontend, reinstalación
+  limpia (package-lock regenerado bajo npm 10, solo subidas de parche). ng test verde
+  (vitest+jsdom, 6 specs). NO afecta a 8.1 backend. 5 commits de código (uno por
+  artefacto A–E) + fix del default 30 (7ebe21e) + .nvmrc (ece9455) + regen del lock.
+  Suite backend: solver 59 + app 43, BUILD SUCCESS con mvn clean test y mvn clean
+  package (static/index.html en el jar). src/main del solver NO tocado (referencia-
+  codigo-solver.md sin regen); modelo NO tocado. Deuda VIVA que 8.1 deja: D-F8.1-8
+  (atar el fixture del frontend proyeccion-1eso.fixture.ts al contrato real, sub-bloque
+  de frontend); FACTIBILIDAD por REST (mini-bloque con decisión de estadoSolver
+  pendiente); warm-start por REST (si se pide).
+Última sesión registrada (previa): Sesión 56 — Fase 7, Bloque 7B: FRONTEND ANGULAR (las tres vistas)
   y CIERRE de Fase 7. Modo híbrido (decisión y contrato en el Project, código en Claude Code).
   Seis decisiones cerradas antes de teclear: D-F7B-1 (alimentación por fixture conocido {id}, sin
   endpoint de listado: Fase 7 = solo lectura); D-F7B-2 (Angular 21 + Node v22.23.1, verificado
@@ -618,7 +671,9 @@ Fase actual: 7 — UI: visualización de horarios CERRADA en S56 (7A backend de 
   (celda-como-lista: co-docencia = 1 entrada con N profes, sub-entrada con grupos[] múltiple en
   agrupamiento; confirmado en proyectar() y en pantalla); D-F7B-6 (aulaCodigo NUNCA null —Sesion.aula
   optional=false—, javadoc de SesionVistaDTO corregido; el "aula null" del PDF es artefacto de
-  extracción de co-docencia). Entregado (Claude Code, commits de una línea por artefacto): scaffold
+  extracción de co-docencia).
+
+  Entregado (Claude Code, commits de una línea por artefacto): scaffold
   Angular 21; modelos TS + servicio de proyección; rejilla 5×6 + las tres vistas con celda-como-lista;
   integración frontend-maven-plugin; tests de mecanismo; corrección de javadoc. Cuatro desviaciones
   al leer el repo, todas señaladas y resueltas: (1) repackage de Spring Boot NO estaba enganchado
@@ -633,9 +688,7 @@ Fase actual: 7 — UI: visualización de horarios CERRADA en S56 (7A backend de 
   test web de 7A; (4) el fixture de test del frontend (proyeccion-1eso.fixture.ts) había divergido del
   contrato: inventaba un profesor TEC4 para fingir co-docencia (el fixture reducido no tiene ninguna
   plaza multi-profesor), corregido eliminando TEC4 y añadiendo co-docencia REAL LEN2+LEN8 (de los
-  volcados de 1ºESO) como caso legítimo de D-F7-2. La deuda de EXCLUSIÓN de 7A (containsExactly) queda
-  saldada: el test de exclusión usa igualdad exacta de conjunto de plazas (toEqual), NO relajado a
-  contains. Validación visual hecha por el usuario contra el seed real (horario id=1, 24 sesiones,
+  volcados de 1ºESO) como caso legítimo de D-F7-2. Validación visual hecha por el usuario contra el seed real (horario id=1, 24 sesiones,
   OPTIMAL): el bloque CyR/OyD/RefMt se pinta como celda-con-6-sub-entradas y las Mat como celda simple;
   la posición del bloque la fija el solver (viernes t4 con seed=42, NO el miércoles t3 del PDF: correcto
   por D-F7B-4). Andamiaje vivo asignado a Fase 8: SeedHorarioRunner (app.catalog, @Profile("seed"),
@@ -2015,7 +2068,12 @@ descripción completa.
   distinguirlo del óptimo probado), pero el límite de tiempo, la semilla y la elección de
   vía (factibilidad pura resolver / optimización / warm-start resolverOptimizandoConSemilla)
   deben ser configurables desde la UI y no constantes en el servicio. Hermana de D21/D23.
-  Fase 8.
+  Fase 8. CIERRE PARCIAL en S57 (Bloque 8.1): maxSegundos/semilla/via expuestos por
+  POST /api/horarios (body opcional; defaults 30 s / 42 / OPTIMIZACION). Vía = OPTIMIZACION
+  únicamente; FACTIBILIDAD por REST diferida (resolver() no da estado/objetivo y
+  ResultadoOptimizacion.objetivo/cota son double primitivos → persistirla exigiría centinela
+  falso o tocar el solver); warm-start por REST no expuesto. El default 30 s es conjetura de
+  UX no validada contra el centro real, no constante definitiva.
 - **D30 (Sesión 53, Fase 6 Bloque 9): la renumeración de tramos está duplicada
   entre el mapper de entrada y el de salida.** `CatalogoMapper.aTramos` (entrada,
   JPA->dominio) y `SolucionMapper.indiceTramos` (salida, dominio->JPA) replican la
