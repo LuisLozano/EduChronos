@@ -13,7 +13,8 @@
     "grupos":      { "type": "array", "items": { "$ref": "#/$defs/grupo" } },
     "subgrupos":   { "type": "array", "items": { "$ref": "#/$defs/subgrupo" } },
     "actividades": { "type": "array", "items": { "$ref": "#/$defs/actividad" } },
-    "restriccionesHorarias": { "type": "array", "items": { "$ref": "#/$defs/restriccionHoraria" } }
+    "restriccionesHorarias": { "type": "array", "items": { "$ref": "#/$defs/restriccionHoraria" } },
+    "bloqueos": { "type": "array", "items": { "$ref": "#/$defs/sesionBloqueada" } }
   },
   "$defs": {
     "tramo": {
@@ -90,6 +91,15 @@
         "tipo":     { "enum": ["DURA", "BLANDA"] },
         "peso":     { "type": "integer", "minimum": 1 },
         "motivo":   { "type": ["string", "null"] }
+      }
+    },
+    "sesionBloqueada": {
+      "type": "object", "additionalProperties": false,
+      "required": ["actividad", "indice", "tramo"],
+      "properties": {
+        "actividad": { "type": "string", "minLength": 1 },
+        "indice":    { "type": "integer", "minimum": 1 },
+        "tramo":     { "type": "string", "minLength": 1 }
       }
     }
   }

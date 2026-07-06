@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.solver.io;
 
 import es.yaroki.educhronos.solver.domain.Actividad;
+import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
@@ -9,6 +10,7 @@ import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
@@ -168,6 +170,28 @@ public final class ProblemaHorarioMapper {
                     ctx + " (profesor '" + r.profesor() + "', tramo '" + r.tramo() + "')"));
         }
 
+        // ---- Bloqueos manuales de instancia a tramo (Bloque 8.2a) ----
+        // Sección opcional (como restriccionesHorarias). Referencias (actividad,
+        // tramo) por código; la instancia es el par (actividad, indice). El rango del
+        // índice [1..repeticionesPorSemana] lo valida el constructor de
+        // ActividadInstancia (dominio), envuelto aquí en ProblemaInvalidoException.
+        Map<String, Actividad> actividadesPorCodigo = new LinkedHashMap<>();
+        for (Actividad a : actividades) {
+            actividadesPorCodigo.put(a.codigo(), a);
+        }
+        List<SesionBloqueadaDto> bloqueosDto =
+                dto.bloqueos() == null ? List.of() : dto.bloqueos();
+        List<SesionBloqueada> bloqueos = new ArrayList<>();
+        for (SesionBloqueadaDto b : bloqueosDto) {
+            String ctx = "bloqueo (actividad '" + b.actividad() + "', indice " + b.indice()
+                    + ", tramo '" + b.tramo() + "')";
+            Actividad actividad = resolver(actividadesPorCodigo, b.actividad(), "actividad", ctx);
+            Tramo tr = resolver(tramos, b.tramo(), "tramo", ctx);
+            ActividadInstancia instancia =
+                    construir(() -> new ActividadInstancia(actividad, b.indice()), ctx);
+            bloqueos.add(new SesionBloqueada(instancia, tr));
+        }
+
         // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia).
         // El mapper los ordena: el autor del JSON no tiene que preocuparse del orden.
         List<Tramo> tramosOrdenados = new ArrayList<>(tramos.values());
@@ -183,7 +207,7 @@ public final class ProblemaHorarioMapper {
                 new ArrayList<>(subgrupos.values()),
                 actividades,
                 restricciones,
-                List.of()), "problema"); // bloqueos: placeholder (mapeo real en Fase 4 / 8.2a)
+                bloqueos), "problema");
     }
 
     private static Plaza mapearPlaza(PlazaDto pl, String ctxActividad,
