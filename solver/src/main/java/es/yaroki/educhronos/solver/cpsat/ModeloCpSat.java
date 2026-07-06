@@ -18,6 +18,7 @@ import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
@@ -168,6 +169,7 @@ final class ModeloCpSat {
         restriccionNoSolapeGrupo(); // Fase 3
         restriccionDistribucionPorDia();
         restriccionIndisponibilidadProfesor(); // Fase 5, Bloque 6b (solo DURA)
+        restriccionSesionBloqueada(); // Fase 8, Bloque 8.2a (pin de instancia a tramo)
         return this;
     }
 
@@ -502,6 +504,47 @@ final class ModeloCpSat {
                 }
             }
         }
+    }
+
+    /**
+     * Pin manual de instancia a tramo (Fase 8, Bloque 8.2a). Por cada
+     * {@link SesionBloqueada}, fija el {@code tramoIndex} de su instancia al índice
+     * del tramo indicado con {@code addEquality}. Es el DUAL exacto de
+     * {@link #restriccionIndisponibilidadProfesor()}: donde aquella PROHÍBE tramos
+     * (dominio complementario), esta FIJA el único tramo permitido.
+     *
+     * <p>El pin es a nivel de INSTANCIA: como todas las plazas comparten el mismo
+     * {@code tramoIndex}, un desdoble pinado cae simultáneo en el tramo sin iterar
+     * plazas. Es restricción DURA (vive en {@link #construir()}), así que aplica en
+     * factibilidad pura y en optimización.
+     *
+     * <p>Si ninguna instancia del problema casa con el bloqueo (actividad ausente o
+     * índice inexistente), lanza {@link IllegalArgumentException}: es entrada
+     * inválida —típicamente un {@link ProblemaHorario} montado a mano en un test—,
+     * no una infactibilidad, y no debe caer a un {@code INFEASIBLE} opaco. La
+     * validación de la entrada de USUARIO vive en el mapper de {@code io} (donde
+     * {@code ProblemaInvalidoException} es la excepción natural); {@code cpsat} no
+     * depende de {@code io}, de ahí que la salvaguarda use {@code IllegalArgumentException}.
+     * Un tramo ajeno al problema lo delata {@link ProblemaHorario#indiceDeTramo}
+     * con la misma excepción.
+     */
+    private void restriccionSesionBloqueada() {
+        for (SesionBloqueada bloqueo : problema.bloqueos()) {
+            InstanciaProgramada ip = localizarInstancia(bloqueo.instancia());
+            model.addEquality(ip.tramoIndex(), problema.indiceDeTramo(bloqueo.tramo()));
+        }
+    }
+
+    /** Localiza la {@link InstanciaProgramada} de una instancia por igualdad de valor. */
+    private InstanciaProgramada localizarInstancia(ActividadInstancia instancia) {
+        for (InstanciaProgramada ip : instancias) {
+            if (ip.instancia().equals(instancia)) {
+                return ip;
+            }
+        }
+        throw new IllegalArgumentException(
+                "Bloqueo sobre una instancia inexistente en el problema: "
+                        + instancia.actividad().codigo() + "#" + instancia.indice());
     }
 
     /** Dominio con todos los índices de tramo salvo los del conjunto {@code prohibidos}. */
