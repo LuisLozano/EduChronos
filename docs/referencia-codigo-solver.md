@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-06-30
-- Commit: `fdb2ce7`
+- Fecha: 2026-07-06
+- Commit: `0150e64`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -87,11 +87,12 @@ Componentes:
 - `List<Subgrupo> subgrupos`
 - `List<Actividad> actividades`
 - `List<RestriccionHoraria> restriccionesHorarias`
+- `List<SesionBloqueada> bloqueos`
 
 Métodos:
 - `public int indiceDeTramo(Tramo tramo)`
 
-Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `RestriccionHoraria`, `Subgrupo`, `Tramo`
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
 
 ### `Profesor` — public record
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -111,6 +112,14 @@ Componentes:
 - `Optional<String> motivo`
 
 Consume: `Profesor`, `TipoRestriccion`, `Tramo`
+
+### `SesionBloqueada` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `ActividadInstancia instancia`
+- `Tramo tramo`
+
+Consume: `ActividadInstancia`, `Tramo`
 
 ### `SolucionHorario` — public class
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -213,7 +222,7 @@ Métodos:
 - `ModeloCpSat sembrarHint(SolucionHorario semilla)`
 - `SolucionHorario extraerSolucion(CpSolver solver)`
 
-Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
 ### `ResultadoOptimizacion` — public record
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -259,8 +268,9 @@ Métodos:
 - `public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
+- `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
 
-Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
 ---
 
@@ -326,8 +336,9 @@ Componentes:
 - `List<SubgrupoDto> subgrupos`
 - `List<ActividadDto> actividades`
 - `List<RestriccionHorariaDto> restriccionesHorarias`
+- `List<SesionBloqueadaDto> bloqueos`
 
-Consume: `ActividadDto`, `AsignaturaDto`, `AulaDto`, `GrupoDto`, `ProfesorDto`, `RestriccionHorariaDto`, `SubgrupoDto`, `TramoDto`
+Consume: `ActividadDto`, `AsignaturaDto`, `AulaDto`, `GrupoDto`, `ProfesorDto`, `RestriccionHorariaDto`, `SesionBloqueadaDto`, `SubgrupoDto`, `TramoDto`
 
 ### `ProblemaHorarioJsonLoader` — public final class
 Paquete: `es.yaroki.educhronos.solver.io`
@@ -344,7 +355,7 @@ Paquete: `es.yaroki.educhronos.solver.io`
 Métodos:
 - `public static ProblemaHorario aDominio(ProblemaHorarioDto dto)`
 
-Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioDto`, `Profesor`, `RestriccionHoraria`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioDto`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
 
 ### `ProblemaInvalidoException` — public class
 Paquete: `es.yaroki.educhronos.solver.io`
@@ -371,6 +382,15 @@ Componentes:
 - `String tipo`
 - `Integer peso`
 - `String motivo`
+
+Consume: (ninguno)
+
+### `SesionBloqueadaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String actividad`
+- `int indice`
+- `String tramo`
 
 Consume: (ninguno)
 
@@ -697,6 +717,16 @@ Métodos:
 
 Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`
 
+### `SolverHorarioPinTramoTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void pinRespetado_laInstanciaCaeEnElTramoPinado() throws Exception`
+- `void sinPin_elSolverEsLibre() throws Exception`
+- `void pinDesdoble_lasDosPlazasCaenSimultaneasEnElTramoPinado() throws Exception`
+- `void pinInfactible_lanzaHorarioInfactibleException() throws Exception`
+
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
 ### `SolverHorarioReligionParejasTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -754,5 +784,7 @@ Métodos:
 - `void cargaRestriccionHorariaDuraResuelta() throws Exception`
 - `void cargaProblemaSinRestriccionesHorarias() throws Exception`
 - `void rechazaRestriccionHorariaConTramoInexistente()`
+- `void cargaBloqueoResuelto() throws Exception`
+- `void rechazaBloqueoConIndiceFueraDeRango()`
 
-Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `TipoRestriccion`
+Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `TipoRestriccion`
