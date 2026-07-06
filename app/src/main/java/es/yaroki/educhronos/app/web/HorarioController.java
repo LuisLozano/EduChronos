@@ -1,22 +1,31 @@
 package es.yaroki.educhronos.app.web;
 
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
+import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Capa REST de SOLO LECTURA de Fase 7 (Bloque 7A). Expone la proyección plana de
- * un horario ya persistido para las vistas (grupo, profesor, aula). No genera, no
- * lista, no muta: la generación y la persistencia siguen siendo del servicio.
+ * Capa REST FINA de horarios. Genera (Fase 8, Bloque 8.1) y proyecta (Fase 7,
+ * Bloque 7A) horarios persistidos; no lista ni edita. Toda la orquestación y la
+ * persistencia siguen en {@link GeneradorHorarioService}: el controlador solo
+ * enruta y traduce excepciones a códigos HTTP (no hay {@code @ControllerAdvice}
+ * global; cada controlador traduce las suyas, patrón de 7A).
  *
- * <p>El {@code IllegalArgumentException} que lanza
- * {@link GeneradorHorarioService#proyectar} cuando el id no existe se traduce a
- * {@code 404 Not Found}; todo lo demás (errores de integridad) se deja propagar.
+ * <p>Traducciones: {@code IllegalArgumentException} de {@link GeneradorHorarioService#proyectar}
+ * (id inexistente) → {@code 404}; {@code HorarioInfactibleException} → {@code 422}
+ * (problema bien formado sin solución); {@code IllegalArgumentException} de la
+ * generación (p. ej. {@code maxSegundos} no positivo) → {@code 400}. El resto
+ * (errores de integridad del catálogo) se deja propagar.
  */
 @RestController
 @RequestMapping("/api/horarios")
@@ -26,6 +35,27 @@ public class HorarioController {
 
     public HorarioController(GeneradorHorarioService service) {
         this.service = service;
+    }
+
+    /**
+     * Genera y persiste un horario, y devuelve su proyección plana (misma forma que
+     * el GET). Acepta cuerpo ausente o vacío ({@code {}}): todos los parámetros caen
+     * a sus valores por defecto (ver {@link GenerarHorarioRequest}).
+     */
+    @PostMapping
+    public HorarioProyeccionDTO generar(@RequestBody(required = false) GenerarHorarioRequest peticion) {
+        GenerarHorarioRequest req = peticion != null
+                ? peticion
+                : new GenerarHorarioRequest(null, null, null, null);
+        try {
+            HorarioGenerado horario =
+                    service.generar(req.maxSegundos(), req.semilla(), req.via(), req.nombre());
+            return service.proyectar(horario.getId());
+        } catch (HorarioInfactibleException e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping("/{id}/proyeccion")
