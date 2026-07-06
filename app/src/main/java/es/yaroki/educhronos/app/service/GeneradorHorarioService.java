@@ -129,10 +129,12 @@ public class GeneradorHorarioService {
      * transacción de escritura al final. Envolver el solve en una transacción
      * mantendría abierta la conexión SQLite durante la búsqueda (ver nota de clase).
      *
-     * <p>Todos los parámetros son opcionales: {@code maxSegundos} y {@code semilla}
-     * caen a los valores por defecto del solver cuando ambos faltan; {@code via} a
-     * {@link ViaSolver#OPTIMIZACION} (única vía de 8.1); {@code nombre} a
-     * {@code "Horario " + Instant.now()} si viene nulo o en blanco.
+     * <p>Todos los parámetros son opcionales: {@code maxSegundos} cae a 30 s y
+     * {@code semilla} a 42 cuando faltan (defaults de la capa de aplicación,
+     * D-F8.1-3: acotan una petición síncrona sin depender del techo de 120 s del
+     * constructor por defecto del solver); {@code via} a {@link ViaSolver#OPTIMIZACION}
+     * (única vía de 8.1); {@code nombre} a {@code "Horario " + Instant.now()} si viene
+     * nulo o en blanco.
      *
      * @throws IllegalArgumentException si {@code maxSegundos} se especifica y no
      *         es estrictamente positivo.
@@ -150,13 +152,12 @@ public class GeneradorHorarioService {
 
         ProblemaHorario problema = cargarProblema();
 
-        // Ambos nulos ⇒ delega en los valores por defecto del solver (no se duplican
-        // aquí); si viene solo uno, el otro cae al mismo defecto (120 s / semilla 42).
-        SolverHorario solver = (maxSegundos == null && semilla == null)
-                ? new SolverHorario()
-                : new SolverHorario(
-                        maxSegundos != null ? maxSegundos : 120.0,
-                        semilla != null ? semilla : 42);
+        // Defaults de la capa de aplicación (D-F8.1-3): 30 s de presupuesto y semilla
+        // 42 cuando el body no los especifica. NO se delega en el constructor por
+        // defecto del solver (120 s), demasiado alto para una petición síncrona.
+        int seg = maxSegundos != null ? maxSegundos : 30;
+        int sem = semilla != null ? semilla : 42;
+        SolverHorario solver = new SolverHorario(seg, sem);
 
         ResultadoOptimizacion resultado = switch (viaEfectiva) {
             case OPTIMIZACION -> solver.resolverOptimizandoConDetalle(problema);

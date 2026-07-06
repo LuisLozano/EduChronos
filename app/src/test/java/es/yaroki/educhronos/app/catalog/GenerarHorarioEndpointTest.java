@@ -1,18 +1,30 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.HorarioController;
+import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
+import es.yaroki.educhronos.solver.cpsat.SolverHorario;
+import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import jakarta.persistence.EntityManager;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -109,6 +121,36 @@ class GenerarHorarioEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"maxSegundos\":5}"))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void post_conBodyPorDefecto_acotaElSolveA30sYsemilla42() throws Exception {
+        poblarCatalogoMinimo(1, 5);
+        entityManager.flush();
+
+        // Intercepta la construcción de SolverHorario (se hace con 'new' dentro del
+        // servicio) para capturar los argumentos del constructor SIN resolver de verdad.
+        // El constructor se invoca ANTES del solve/guardar, así que basta con el POST:
+        // no se asierta el status (que el pipeline complete con éxito lo cubren los casos
+        // factible/infactible); aquí solo importa el PRESUPUESTO que recibe el solver.
+        List<Object> argsConstructor = new ArrayList<>();
+        ResultadoOptimizacion resultadoVacio = new ResultadoOptimizacion(
+                new SolucionHorario(Map.of()), CpSolverStatus.OPTIMAL, 0.0, 0.0);
+
+        try (MockedConstruction<SolverHorario> mocked = Mockito.mockConstruction(
+                SolverHorario.class,
+                (mock, context) -> {
+                    argsConstructor.addAll(context.arguments());
+                    when(mock.resolverOptimizandoConDetalle(any())).thenReturn(resultadoVacio);
+                })) {
+
+            mockMvc.perform(post("/api/horarios")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}"));
+        }
+
+        // D-F8.1-3: body por defecto ⇒ 30 s (no el techo de 120 del solver) y semilla 42.
+        assertThat(argsConstructor).containsExactly(30.0, 42);
     }
 
     /**
