@@ -1,0 +1,16 @@
+{
+  "tramos": [
+    {"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1},
+    {"codigo":"LUN-2","diaSemana":1,"ordenEnDia":2}
+  ],
+  "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+  "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+  "profesores": [{"codigo":"MAT8","nombre":"P8"}],
+  "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+  "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+  "actividades": [
+    {"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,"duracionTramos":1,
+     "patronTemporal":"NEUTRA","plazas":[
+       {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],"aulaFija":"A5","subgrupos":["S"]}]}
+  ]
+}
