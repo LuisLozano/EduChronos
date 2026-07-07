@@ -2086,3 +2086,73 @@ Modo híbrido (decisión y cierre en el Project, código en Claude Code). Cierra
 ### Sesión 54 — Fase 6, CIERRE DE FASE.
 
 Modo híbrido (decisión y cierre en el Project, código en Claude Code). NO es un bloque de persistencia nuevo: el alcance se decidió al inicio entre (a) cerrar Fase 6 y (b) un Bloque 10 (candidato SesionBloqueada §4.7); se eligió (a) porque un B10 de persistencia no acerca el cierre —SesionBloqueada es inútil sin que el solver la consuma (C5, toca src/main del solver, reabre superficie estabilizada)— y dejaba igualmente sin firmar los criterios 2 y 4. Entregable: un único test de integración de humo end-to-end CierreFase6HumoTest (app.catalog, por los ctor protected de Actividad/Plaza; @DataJpaTest + replace=NONE + @Import(GeneradorHorarioService)). Ejercita el pipeline COMPLETO por primera vez de una tirada: repos JPA → CatalogoMapper.aProblemaHorario → SolverHorario real → SolucionMapper → guardar → recargar. Fixture: builder JPA que TRANSCRIBE problema-3-cierre-cyr-refmt.json (agrupamiento denso de 1ºESO: bloque de 6 plazas CyR/OyD/RefMt rep=2 + 4 Mat) como ESPECIFICACIÓN de referencia; el JSON NO se carga (entraría por el camino JSON, que no ejercita JPA) —se replica a new+save, patrón de GuardarHorarioServiceTest—. El builder añade los 5 recreos (esLectivo=false) que el JSON omite, intercalados por orden global, porque el puente de tramo (SolucionMapper.indiceTramos) los espera para renumerar (D30). Nueve decisiones cerradas antes de construir (D-B10-1 a D-B10-9). Las de más impacto: D-B10-7 el test orquesta cargarProblema()+new SolverHorario(10,42)+guardar() SIN tocar el servicio (evita meter el solver a 120 s en la suite, veneno de D24/D25); D-B10-9 vía de factibilidad; D-B10-8 testigo del criterio 2 = alta de restricción BLANDA (no editar Profesor —inmutable— ni Actividad —alteraría factibilidad—). NOTA de honestidad: objetivo y cotaInferior de ResultadoOptimizacion son double PRIMITIVOS (verificado leyendo el repo), no admiten null; el test recorre por eso resolverOptimizandoConDetalle y persiste objetivo/cota reales —NO se ejercita el caso NULLABLE de §4.7, contra lo previsto—. ModeloCpSat NO restringe por tipo de aula (I3 no participa en CP-SAT): todas las aulas ORDINARIA, sin INFEASIBLE. Cobertura ganada respecto a B9: plaza con aulasCandidatas resuelta por el solver (B9 solo probó aula fija). D30 NO queda verificada: la aserción "toda sesión en tramo lectivo" descarta que una sesión caiga en recreo, pero no que se empareje al TramoSemanal lectivo EXACTO que el solver eligió; D30 sigue viva (Fase 8). Los 4 criterios de Fase 6 firmados (ver "### Criterios de verificación" de Fase 6); nota "CRUD = repos, no formularios" añadida al entregable. Los dos tests resuelven el solver real dos veces en 1,8 s (lejísimos del techo de 10 s). Suite: solver 59 + app 37 (35 previos + 2) = 96 en el reactor completo, BUILD SUCCESS con mvn clean test desde la raíz (no -pl). src/main NO tocado (ni solver ni app): un único fichero de test nuevo → referencia-codigo-solver.md NO regenerado; modelo NO tocado (§4.7 ya estaba correcto de S53). Commit de una línea 549bc92 (solo el test); commit de doc aparte, pendiente de push. Siguiente: Fase 7 (UI de visualización: vistas por grupo, profesor y aula).
+
+### Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de las tres vistas).
+
+Modo híbrido (decisión y contrato en el Project, código en Claude Code).
+Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
+frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
+vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
+siguen en Fase 8). Seis decisiones cerradas antes de teclear: D-F7-1 (proyección de celda =
+plazas cuyo subgrupo toca el grupo/profesor/aula; (a)=(b) verificado sobre problema-3-
+cierre-cyr-refmt.json: cada subgrupo es MONO-GRUPO, la plaza agrupa los mono-grupo de los 4
+grupos, luego filtrar por "toca 1ºA" devuelve las 6 plazas del bloque = lo que pinta el
+PDF); D-F7-2 (co-docencia = UNA sub-entrada con N profesores, no N); D-F7-3 (validación
+estructural {asignatura, profesor, subgrupos} por slot, aula validada aparte contra vista-
+aula); D-F7-4 (el DTO plano se construye en método @Transactional(readOnly) del servicio, NO
+en el controlador: cargarHorario solo inicializa la lista de Sesion, no el grafo LAZY de
+cada Plaza); D-F7-5 (forma de SesionVistaDTO con grupos[] derivado de subgrupos, clave de
+las tres vistas); D-F7-6 (añadir spring-boot-starter-web a app/, que era persistencia pura).
+Entregado (6 commits de código, uno por artefacto): spring-boot-starter-web en app/pom.xml;
+extracción del núcleo único de renumeración de tramos (renumerarLectivos) +
+CatalogoMapper.indiceOrdenEnDia(List<TramoSemanal>) → Map<Long,Integer> keyed-by-getId();
+records SesionVistaDTO/HorarioProyeccionDTO (app.web.dto); GeneradorHorarioService.
+proyectar(Long) @Transactional(readOnly) que navega el grafo LAZY dentro de la transacción y
+arma el DTO plano; HorarioController GET /api/horarios/{id}/proyeccion (404 vía
+ResponseStatusException); ProyeccionHorarioTest (@DataJpaTest + replace=NONE, solver real
+corto new SolverHorario(10,42), patrón D-B10-7) que firma criterios 1/2 a nivel de contrato:
+el bloque de 6 plazas rep=2 proyecta 6 SesionVistaDTO en el mismo (dia,tramo) y filtrar por
+grupos∋"1ºA" las devuelve todas; cada Mat-1ºX (rep=3) da 3 con grupos==["1ºX"].
+
+### Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de las tres vistas).
+
+Modo híbrido (decisión y contrato en el Project, código en Claude Code). Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
+  frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
+  vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
+  siguen en Fase 8). Seis decisiones cerradas antes de teclear: D-F7-1 (proyección de celda =
+  plazas cuyo subgrupo toca el grupo/profesor/aula; (a)=(b) verificado sobre problema-3-
+  cierre-cyr-refmt.json: cada subgrupo es MONO-GRUPO, la plaza agrupa los mono-grupo de los 4
+  grupos, luego filtrar por "toca 1ºA" devuelve las 6 plazas del bloque = lo que pinta el
+  PDF); D-F7-2 (co-docencia = UNA sub-entrada con N profesores, no N); D-F7-3 (validación
+  estructural {asignatura, profesor, subgrupos} por slot, aula validada aparte contra vista-
+  aula); D-F7-4 (el DTO plano se construye en método @Transactional(readOnly) del servicio, NO
+  en el controlador: cargarHorario solo inicializa la lista de Sesion, no el grafo LAZY de
+  cada Plaza); D-F7-5 (forma de SesionVistaDTO con grupos[] derivado de subgrupos, clave de
+  las tres vistas); D-F7-6 (añadir spring-boot-starter-web a app/, que era persistencia pura).
+  Entregado (6 commits de código, uno por artefacto): spring-boot-starter-web en app/pom.xml;
+  extracción del núcleo único de renumeración de tramos (renumerarLectivos) +
+  CatalogoMapper.indiceOrdenEnDia(List<TramoSemanal>) → Map<Long,Integer> keyed-by-getId();
+  records SesionVistaDTO/HorarioProyeccionDTO (app.web.dto); GeneradorHorarioService.
+  proyectar(Long) @Transactional(readOnly) que navega el grafo LAZY dentro de la transacción y
+  arma el DTO plano; HorarioController GET /api/horarios/{id}/proyeccion (404 vía
+  ResponseStatusException); ProyeccionHorarioTest (@DataJpaTest + replace=NONE, solver real
+  corto new SolverHorario(10,42), patrón D-B10-7) que firma criterios 1/2 a nivel de contrato:
+  el bloque de 6 plazas rep=2 proyecta 6 SesionVistaDTO en el mismo (dia,tramo) y filtrar por
+  grupos∋"1ºA" las devuelve todas; cada Mat-1ºX (rep=3) da 3 con grupos==["1ºX"]. Hallazgos al
+  leer el repo (desviaciones del prompt, todas señaladas): Asignatura expone getNombreCompleto()
+  (no getNombre()); TramoSemanal NO tiene getOrdenEnDia() —ordenEnDia 1..6 no es derivable de un
+  tramo aislado, exige renumerar excluyendo recreos (deuda D30)—; aTramosConIndice se llama en
+  tests con tramos SIN persistir (getId()==null), por lo que NO puede consumir el helper keyed-
+  by-id: ambos comparten el núcleo renumerarLectivos (fuente única) pero indexan distinto (id
+  para proyectar, identidad de objeto para el mapper); import de @DataJpaTest en Spring Boot
+  4.1.0 es org.springframework.boot.data.jpa.test.autoconfigure (ruta nueva de Boot 4.x,
+  verificada contra la API oficial). D30 baja de 3 copias potenciales a 2; SolucionMapper.
+  indiceTramos (copia 2, ruta de persistencia) intacta con nota de una línea, su unificación
+  sigue siendo D30 (Fase 8). Deuda de test para 7B (anotada, no bloqueante): el assert (b) usa
+  containsAll (verifica que la vista de 1ºA contiene las 6 plazas, no que EXCLUYA sesiones
+  ajenas); en 7B añadir containsExactly sobre la vista de un grupo. Suite: solver 59 + app 38
+  (37 previos + ProyeccionHorarioTest) = 97, BUILD SUCCESS con mvn clean test desde la raíz.
+  src/main del solver NO tocado (solo lectura de Tramo.java) → referencia-codigo-solver.md NO
+  regenerado; modelo NO tocado. Siguiente: Bloque 7B (frontend Angular: proyecto, integración
+  frontend-maven-plugin, las tres vistas con celda-como-lista, validación visual contra los
+  volcados de 1ºESO).

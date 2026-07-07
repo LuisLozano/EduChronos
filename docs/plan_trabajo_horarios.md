@@ -620,7 +620,34 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 58 — Fase 8, Bloque 8.2a: PIN DE INSTANCIA A TRAMO
+Última sesión registrada: Sesión 59 — Fase 8, deuda D-F8.1-8 CERRADA: test de contrato de
+  serialización de los DTOs de proyección (blinda contra la divergencia silenciosa que en 7B
+  dejó colar el profesor TEC4). Modo híbrido (decisión y contrato en el Project, código en Claude
+  Code). Enfoque cerrado = Opción B sola (test JVM que serializa y afirma la FORMA del JSON),
+  descartadas A (snapshot capturado a mano, repite la debilidad del TEC4) y C (acoplar builds
+  Maven/Node, arrastra el toolchain de 8.1). Nuevo ProyeccionDtoContratoTest (app.web.dto) con el
+  ObjectMapper REAL de la ruta MVC (new MappingJackson2HttpMessageConverter().getObjectMapper(),
+  el mismo de HorarioControllerHttpTest; SB 4.1 no trae @JsonTest): 3 métodos —(A) SesionVistaDTO
+  exactamente 12 claves + tipo JSON de cada una; (B) HorarioProyeccionDTO exactamente 8 claves +
+  tipos con objetivo/cota no nulos; (C) objetivo=null/cota=null siguen presentes con isNull()==true,
+  confirma que NO hay @JsonInclude(NON_NULL) y honra el contrato con horario.model.ts (number|null
+  siempre presente)—. Claves por containsExactlyInAnyOrder derivadas de fieldNames(): añadir un
+  campo rompe igual que quitarlo. Lista de claves EXPLÍCITA (no reflexión del record) → un renombrado
+  mueve un solo lado y el test salta (verificado en el oro negativo). CENTINELA en cada método: al
+  cambiar el DTO, actualizar TAMBIÉN app/frontend/src/app/models/horario.model.ts (interfaz espejo,
+  no atada automáticamente). ORO NEGATIVO (hecho y revertido, no commiteado): renombrar
+  asignaturaNombre→asignaturaNom deja el test ROJO por containsExactlyInAnyOrder; revertido, verde.
+  horario.model.ts NO se toca (hoy es espejo fiel del DTO, sin corrección pendiente). Deuda residual
+  anotada: B no detecta que la interfaz TS quede rezagada tras un cambio propagado correctamente en
+  Java; el centinela lo mitiga, no lo elimina. Suite: solver 59 + app 46 (43 + 3), BUILD SUCCESS con
+  mvn clean test desde la raíz; mvn -pl app test en solitario da NoSuchMethodError por jar rancio de
+  solver en .m2 (artefacto conocido de la frontera modular, no regresión). src/main del solver NO
+  tocado (referencia-codigo-solver.md sin regen); modelo NO tocado. Commit 9d0fb5f. Siguiente: 8.2b
+  (persistencia+REST del bloqueo + pin de aula), con la tensión §4.7 a cerrar antes de teclear (el
+  modelo especifica SesionBloqueada con aula_id por-instancia, pero 8.2a fijó que el pin de aula es
+  por-plaza; hay que rediseñar §4.7 o llevar el aula a otra entidad antes de persistir); o el
+  candidato que decidas al abrir sesión.
+Última sesión registrada (previa): Sesión 58 — Fase 8, Bloque 8.2a: PIN DE INSTANCIA A TRAMO
   (bloqueo manual) en el solver. Modo híbrido (decisión y contrato en el Project, código en
   Claude Code). Cierra el criterio 5 de Fase 3 (diferido desde S17: "bloquear un tramo y el
   solver lo respeta"). Trabajo de dominio + cpsat + io de test; NO toca persistencia/REST (8.2b).
@@ -645,8 +672,9 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Commits 6ef0c14/7dd9048/1987925/5a144d3/0150e64/350258b. Deuda VIVA que 8.2a deja para 8.2b: pin de
   AULA (contrato por-plaza + restricción + verificación), persistencia de SesionBloqueada (entidad JPA
   §4.7 + schema) y entrada del bloqueo por REST, y el List.of() placeholder de app/CatalogoMapper.
-  Siguiente: 8.2b (persistencia+REST del bloqueo + pin de aula) o intercalar D-F8.1-8 (test de contrato
-  del fixture del frontend, deuda pequeña de 8.1).
+  Siguiente: 8.2b (persistencia+REST del bloqueo + pin de aula). Antes de teclear, cerrar la tensión
+  §4.7: el modelo especifica SesionBloqueada con aula por-instancia, pero 8.2a fijó el pin de aula
+  por-plaza; §4.7 debe rediseñarse o el aula moverse a otra entidad. (D-F8.1-8 cerrada en S59.)
 Última sesión registrada (previa): Sesión 57 — Fase 8 [ARRANQUE] + Bloque 8.1 CERRADO
   (backend). Modo híbrido: alcance, descomposición y decisiones en el Project;
   código en Claude Code. Se ABRE Fase 8 fijando alcance antes de construir. Fase 8
@@ -757,54 +785,12 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   frontend, BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. Siguiente: Fase 8 — UI:
   configuración y ajuste manual (drag&drop D19/D20, parametrización del solver D29, CRUD del centro).
 
-Última sesión registrada (previa): Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de
-  las tres vistas). Modo híbrido (decisión y contrato en el Project, código en Claude Code).
-  Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
-  frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
-  vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
-  siguen en Fase 8). Seis decisiones cerradas antes de teclear: D-F7-1 (proyección de celda =
-  plazas cuyo subgrupo toca el grupo/profesor/aula; (a)=(b) verificado sobre problema-3-
-  cierre-cyr-refmt.json: cada subgrupo es MONO-GRUPO, la plaza agrupa los mono-grupo de los 4
-  grupos, luego filtrar por "toca 1ºA" devuelve las 6 plazas del bloque = lo que pinta el
-  PDF); D-F7-2 (co-docencia = UNA sub-entrada con N profesores, no N); D-F7-3 (validación
-  estructural {asignatura, profesor, subgrupos} por slot, aula validada aparte contra vista-
-  aula); D-F7-4 (el DTO plano se construye en método @Transactional(readOnly) del servicio, NO
-  en el controlador: cargarHorario solo inicializa la lista de Sesion, no el grafo LAZY de
-  cada Plaza); D-F7-5 (forma de SesionVistaDTO con grupos[] derivado de subgrupos, clave de
-  las tres vistas); D-F7-6 (añadir spring-boot-starter-web a app/, que era persistencia pura).
-  Entregado (6 commits de código, uno por artefacto): spring-boot-starter-web en app/pom.xml;
-  extracción del núcleo único de renumeración de tramos (renumerarLectivos) +
-  CatalogoMapper.indiceOrdenEnDia(List<TramoSemanal>) → Map<Long,Integer> keyed-by-getId();
-  records SesionVistaDTO/HorarioProyeccionDTO (app.web.dto); GeneradorHorarioService.
-  proyectar(Long) @Transactional(readOnly) que navega el grafo LAZY dentro de la transacción y
-  arma el DTO plano; HorarioController GET /api/horarios/{id}/proyeccion (404 vía
-  ResponseStatusException); ProyeccionHorarioTest (@DataJpaTest + replace=NONE, solver real
-  corto new SolverHorario(10,42), patrón D-B10-7) que firma criterios 1/2 a nivel de contrato:
-  el bloque de 6 plazas rep=2 proyecta 6 SesionVistaDTO en el mismo (dia,tramo) y filtrar por
-  grupos∋"1ºA" las devuelve todas; cada Mat-1ºX (rep=3) da 3 con grupos==["1ºX"]. Hallazgos al
-  leer el repo (desviaciones del prompt, todas señaladas): Asignatura expone getNombreCompleto()
-  (no getNombre()); TramoSemanal NO tiene getOrdenEnDia() —ordenEnDia 1..6 no es derivable de un
-  tramo aislado, exige renumerar excluyendo recreos (deuda D30)—; aTramosConIndice se llama en
-  tests con tramos SIN persistir (getId()==null), por lo que NO puede consumir el helper keyed-
-  by-id: ambos comparten el núcleo renumerarLectivos (fuente única) pero indexan distinto (id
-  para proyectar, identidad de objeto para el mapper); import de @DataJpaTest en Spring Boot
-  4.1.0 es org.springframework.boot.data.jpa.test.autoconfigure (ruta nueva de Boot 4.x,
-  verificada contra la API oficial). D30 baja de 3 copias potenciales a 2; SolucionMapper.
-  indiceTramos (copia 2, ruta de persistencia) intacta con nota de una línea, su unificación
-  sigue siendo D30 (Fase 8). Deuda de test para 7B (anotada, no bloqueante): el assert (b) usa
-  containsAll (verifica que la vista de 1ºA contiene las 6 plazas, no que EXCLUYA sesiones
-  ajenas); en 7B añadir containsExactly sobre la vista de un grupo. Suite: solver 59 + app 38
-  (37 previos + ProyeccionHorarioTest) = 97, BUILD SUCCESS con mvn clean test desde la raíz.
-  src/main del solver NO tocado (solo lectura de Tramo.java) → referencia-codigo-solver.md NO
-  regenerado; modelo NO tocado. Siguiente: Bloque 7B (frontend Angular: proyecto, integración
-  frontend-maven-plugin, las tres vistas con celda-como-lista, validación visual contra los
-  volcados de 1ºESO).
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, y las de S51, S52,
-S53 y S54 en la Sesión 58 (misma higiene documental). El plan
-conserva las 4 últimas cabeceras compactas (S55–S58). El detalle histórico de cualquier sesión
+S53 y S54 en la Sesión 58, y la de S55 en la Sesión 59 (misma higiene documental). El plan
+conserva las 4 últimas cabeceras compactas (S56–S59). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
