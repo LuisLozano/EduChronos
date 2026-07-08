@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-07-06
-- Commit: `0150e64`
+- Fecha: 2026-07-08
+- Commit: `0066e56`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -118,8 +118,9 @@ Paquete: `es.yaroki.educhronos.solver.domain`
 Componentes:
 - `ActividadInstancia instancia`
 - `Tramo tramo`
+- `Map<Plaza, Aula> aulasPinadas`
 
-Consume: `ActividadInstancia`, `Tramo`
+Consume: `ActividadInstancia`, `Aula`, `Plaza`, `Tramo`
 
 ### `SolucionHorario` — public class
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -269,6 +270,7 @@ Métodos:
 - `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
+- `public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion)`
 
 Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
@@ -301,6 +303,14 @@ Paquete: `es.yaroki.educhronos.solver.io`
 Componentes:
 - `String codigo`
 - `String nombre`
+
+Consume: (ninguno)
+
+### `AulaPinDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String plaza`
+- `String aula`
 
 Consume: (ninguno)
 
@@ -391,8 +401,9 @@ Componentes:
 - `String actividad`
 - `int indice`
 - `String tramo`
+- `List<AulaPinDto> aulasPinadas`
 
-Consume: (ninguno)
+Consume: `AulaPinDto`
 
 ### `SubgrupoDto` — public record
 Paquete: `es.yaroki.educhronos.solver.io`
@@ -717,6 +728,15 @@ Métodos:
 
 Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`
 
+### `SolverHorarioPinAulaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void pinRespetado_laPlazaCaeEnElAulaPinada() throws Exception`
+- `void pinDesdoble_lasDosPlazasCaenEnAulasDistintasPinadas() throws Exception`
+- `void sinPinDeAula_elSolverEsLibre() throws Exception`
+
+Consume: `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
 ### `SolverHorarioPinTramoTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -786,5 +806,8 @@ Métodos:
 - `void rechazaRestriccionHorariaConTramoInexistente()`
 - `void cargaBloqueoResuelto() throws Exception`
 - `void rechazaBloqueoConIndiceFueraDeRango()`
+- `void cargaBloqueoConPinDeAula() throws Exception`
+- `void rechazaPinDeAulaSobrePlazaConAulaFija()`
+- `void rechazaPinDeAulaFueraDeCandidatas()`
 
 Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `TipoRestriccion`
