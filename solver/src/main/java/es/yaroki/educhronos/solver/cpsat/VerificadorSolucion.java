@@ -277,6 +277,34 @@ public final class VerificadorSolucion {
     }
 
     /**
+     * Cuenta los pines de AULA violados sobre una solución dada, de forma
+     * <b>independiente del solver</b> (Fase 8, Bloque 8.2b). Recomputo gemelo de la
+     * restricción {@code ModeloCpSat.restriccionAulaBloqueada}: por cada par
+     * {@code (plaza, aula)} de {@link SesionBloqueada#aulasPinadas}, compara el aula
+     * real que la solución dio a esa plaza ({@link SolucionHorario#aulaElegida}) con
+     * el aula pinada y cuenta los desajustes. Si el modelo CP-SAT dejara de respetar
+     * un pin de aula, este conteo —que recorre el dominio, sin OR-Tools— lo delataría.
+     *
+     * <p>Una plaza sin aula registrada cuenta como violación ({@code aulaElegida}
+     * devuelve empty y no coincide con {@code Optional.of(aula)}). Un bloqueo con
+     * {@code aulasPinadas} vacío no aporta violaciones (retrocompat 8.2a).
+     *
+     * @return número de pines de aula cuyo aula real no coincide con la pinada.
+     */
+    public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion) {
+        int total = 0;
+        for (SesionBloqueada bloqueo : problema.bloqueos()) {
+            for (Map.Entry<Plaza, Aula> pin : bloqueo.aulasPinadas().entrySet()) {
+                Optional<Aula> real = solucion.aulaElegida(bloqueo.instancia(), pin.getKey());
+                if (!real.equals(Optional.of(pin.getValue()))) {
+                    total++;
+                }
+            }
+        }
+        return total;
+    }
+
+    /**
      * {@code ordenEnDia} del primer tramo lectivo tras el recreo. Espejo
      * independiente de {@code ModeloCpSat.ORDEN_TRAS_RECREO} (constante privada del
      * modelo; el verificador no puede importarla por diseño). Misma deuda D22 de
