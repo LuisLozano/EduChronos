@@ -189,7 +189,8 @@ public final class ProblemaHorarioMapper {
             Tramo tr = resolver(tramos, b.tramo(), "tramo", ctx);
             ActividadInstancia instancia =
                     construir(() -> new ActividadInstancia(actividad, b.indice()), ctx);
-            bloqueos.add(new SesionBloqueada(instancia, tr));
+            Map<Plaza, Aula> aulasPinadas = mapearAulasPinadas(b, actividad, aulas, ctx);
+            bloqueos.add(new SesionBloqueada(instancia, tr, aulasPinadas));
         }
 
         // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia).
@@ -208,6 +209,45 @@ public final class ProblemaHorarioMapper {
                 actividades,
                 restricciones,
                 bloqueos), "problema");
+    }
+
+    /**
+     * Resuelve el pin de aula por plaza de un bloqueo (Bloque 8.2b) a {@code Map<Plaza,
+     * Aula>} de dominio y aplica las validaciones de entrada de USUARIO:
+     *  - la plaza debe ser de aula variable: pinar un aula sobre una plaza con
+     *    {@code aulaFija} es inválido (el aula no es decisión del solver, 2A);
+     *  - el aula pinada debe estar entre las {@code aulasCandidatas} de la plaza:
+     *    un aula fuera de esa lista es imposible (4C).
+     * Ambas se reportan como {@link ProblemaInvalidoException} (entrada de usuario);
+     * la salvaguarda equivalente de {@code cpsat} usa {@code IllegalArgumentException}.
+     * Sección opcional: sin 'aulasPinadas' devuelve {@code Map.of()} (pin de solo tramo).
+     */
+    private static Map<Plaza, Aula> mapearAulasPinadas(SesionBloqueadaDto b, Actividad actividad,
+                                                       Map<String, Aula> aulas, String ctx) {
+        List<AulaPinDto> pins = b.aulasPinadas() == null ? List.of() : b.aulasPinadas();
+        if (pins.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Plaza> plazasPorCodigo = new LinkedHashMap<>();
+        for (Plaza p : actividad.plazas()) {
+            plazasPorCodigo.put(p.codigo(), p);
+        }
+        Map<Plaza, Aula> resultado = new LinkedHashMap<>();
+        for (AulaPinDto pin : pins) {
+            Plaza plaza = resolver(plazasPorCodigo, pin.plaza(), "plaza", ctx);
+            Aula aula = resolver(aulas, pin.aula(), "aula", ctx);
+            if (plaza.aulaFija().isPresent()) {
+                throw new ProblemaInvalidoException(ctx + ": pin de aula sobre la plaza '"
+                        + plaza.codigo() + "' que tiene aula fija (el aula no es variable)");
+            }
+            if (!plaza.aulasCandidatas().contains(aula)) {
+                throw new ProblemaInvalidoException(ctx + ": el aula '" + aula.codigo()
+                        + "' pinada a la plaza '" + plaza.codigo()
+                        + "' no esta entre sus aulasCandidatas");
+            }
+            resultado.put(plaza, aula);
+        }
+        return resultado;
     }
 
     private static Plaza mapearPlaza(PlazaDto pl, String ctxActividad,

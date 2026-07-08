@@ -97,9 +97,18 @@
       "type": "object", "additionalProperties": false,
       "required": ["actividad", "indice", "tramo"],
       "properties": {
-        "actividad": { "type": "string", "minLength": 1 },
-        "indice":    { "type": "integer", "minimum": 1 },
-        "tramo":     { "type": "string", "minLength": 1 }
+        "actividad":    { "type": "string", "minLength": 1 },
+        "indice":       { "type": "integer", "minimum": 1 },
+        "tramo":        { "type": "string", "minLength": 1 },
+        "aulasPinadas": { "type": "array", "items": { "$ref": "#/$defs/aulaPin" } }
+      }
+    },
+    "aulaPin": {
+      "type": "object", "additionalProperties": false,
+      "required": ["plaza", "aula"],
+      "properties": {
+        "plaza": { "type": "string", "minLength": 1 },
+        "aula":  { "type": "string", "minLength": 1 }
       }
     }
   }
