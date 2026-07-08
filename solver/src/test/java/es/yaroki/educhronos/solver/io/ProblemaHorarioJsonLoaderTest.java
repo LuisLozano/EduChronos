@@ -245,6 +245,76 @@ class ProblemaHorarioJsonLoaderTest {
                 .hasMessageContaining("indice");
     }
 
+    @Test
+    void cargaBloqueoConPinDeAula() throws Exception {
+        // La plaza P (aula variable {A5,A6}) se pina al aula A6 en la instancia A#1.
+        String json = """
+            { "tramos": [{"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"},{"codigo":"A6","nombre":"Aula 6"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulasCandidatas":["A5","A6"],"subgrupos":["S"]}]}],
+              "bloqueos": [{"actividad":"A","indice":1,"tramo":"LUN-1",
+                "aulasPinadas":[{"plaza":"P","aula":"A6"}]}] }
+            """;
+        ProblemaHorario problema = loader.cargar(stream(json));
+
+        assertThat(problema.bloqueos()).hasSize(1);
+        SesionBloqueada b = problema.bloqueos().get(0);
+        assertThat(b.aulasPinadas()).hasSize(1);
+        Plaza plaza = problema.actividades().get(0).plazas().get(0);
+        assertThat(b.aulasPinadas().get(plaza).codigo()).isEqualTo("A6");
+    }
+
+    @Test
+    void rechazaPinDeAulaSobrePlazaConAulaFija() {
+        // 2A: la plaza P tiene aulaFija A5; pinar un aula sobre ella es invalido.
+        String json = """
+            { "tramos": [{"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "bloqueos": [{"actividad":"A","indice":1,"tramo":"LUN-1",
+                "aulasPinadas":[{"plaza":"P","aula":"A5"}]}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("aula fija");
+    }
+
+    @Test
+    void rechazaPinDeAulaFueraDeCandidatas() {
+        // 4C: la plaza P tiene candidatas {A5}; pinar A6 (no candidata) es invalido.
+        String json = """
+            { "tramos": [{"codigo":"LUN-1","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"},{"codigo":"A6","nombre":"Aula 6"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulasCandidatas":["A5"],"subgrupos":["S"]}]}],
+              "bloqueos": [{"actividad":"A","indice":1,"tramo":"LUN-1",
+                "aulasPinadas":[{"plaza":"P","aula":"A6"}]}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("aulasCandidatas");
+    }
+
     private InputStream recurso(String ruta) {
         InputStream in = getClass().getResourceAsStream(ruta);
         if (in == null) {
