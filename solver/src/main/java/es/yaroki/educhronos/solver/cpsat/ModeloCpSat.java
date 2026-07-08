@@ -170,6 +170,7 @@ final class ModeloCpSat {
         restriccionDistribucionPorDia();
         restriccionIndisponibilidadProfesor(); // Fase 5, Bloque 6b (solo DURA)
         restriccionSesionBloqueada(); // Fase 8, Bloque 8.2a (pin de instancia a tramo)
+        restriccionAulaBloqueada();   // Fase 8, Bloque 8.2b (pin de aula por plaza)
         return this;
     }
 
@@ -532,6 +533,51 @@ final class ModeloCpSat {
         for (SesionBloqueada bloqueo : problema.bloqueos()) {
             InstanciaProgramada ip = localizarInstancia(bloqueo.instancia());
             model.addEquality(ip.tramoIndex(), problema.indiceDeTramo(bloqueo.tramo()));
+        }
+    }
+
+    /**
+     * Pin de AULA por plaza (Fase 8, Bloque 8.2b). Por cada {@link SesionBloqueada}
+     * con {@code aulasPinadas}, fuerza a 1 el literal de presencia de la
+     * {@link AulaOpcion} cuyo aula coincide con la pinada: el solver debe elegir esa
+     * aula para esa plaza. Hermano de {@link #restriccionSesionBloqueada}, opera sobre
+     * las mismas instancias.
+     *
+     * <p>Salvaguarda de entrada (misma filosofía que {@link #restriccionSesionBloqueada}):
+     * una plaza sin opciones de aula (fija o inexistente) o un aula que no es candidata
+     * de la plaza es entrada inválida —típicamente un {@link ProblemaHorario} montado a
+     * mano en un test—, y lanza {@link IllegalArgumentException}, no una infactibilidad.
+     * La validación de la entrada de USUARIO vive en el mapper de {@code io}
+     * ({@code ProblemaInvalidoException}); {@code cpsat} no depende de {@code io}, de ahí
+     * la {@link IllegalArgumentException}.
+     */
+    private void restriccionAulaBloqueada() {
+        for (SesionBloqueada bloqueo : problema.bloqueos()) {
+            InstanciaProgramada ip = localizarInstancia(bloqueo.instancia());
+            for (Map.Entry<Plaza, Aula> pin : bloqueo.aulasPinadas().entrySet()) {
+                Plaza plaza = pin.getKey();
+                Aula aula = pin.getValue();
+                List<AulaOpcion> opciones = ip.opcionesDeAula().get(plaza);
+                if (opciones == null) {
+                    throw new IllegalArgumentException(
+                            "Pin de aula sobre plaza fija o inexistente: "
+                                    + bloqueo.instancia().actividad().codigo() + "#"
+                                    + bloqueo.instancia().indice() + " plaza '" + plaza.codigo() + "'");
+                }
+                AulaOpcion elegida = null;
+                for (AulaOpcion opcion : opciones) {
+                    if (opcion.aula().equals(aula)) {
+                        elegida = opcion;
+                        break;
+                    }
+                }
+                if (elegida == null) {
+                    throw new IllegalArgumentException(
+                            "Pin de aula a un aula que no es candidata de la plaza '"
+                                    + plaza.codigo() + "': " + aula.codigo());
+                }
+                model.addEquality(elegida.presencia(), 1);
+            }
         }
     }
 
