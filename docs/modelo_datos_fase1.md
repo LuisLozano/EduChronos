@@ -626,11 +626,35 @@ PlazaSubgrupo(
 ```
 SesionBloqueada(
   actividad_instancia_id PRIMARY KEY FOREIGN KEY,
-  tramo_inicio_id FOREIGN KEY,
-  aula_id NULL FOREIGN KEY          -- opcional: forzar también el aula
+  tramo_inicio_id FOREIGN KEY
 )
--- Antes de invocar el solver, el usuario puede fijar instancias a tramos concretos.
--- El solver respeta estos bloqueos como constantes.
+-- Pin de TRAMO, granularidad INSTANCIA (una fila por instancia pinada).
+-- Todas las plazas de la instancia comparten tramo, así que un desdoble
+-- pinado cae simultáneo sin ambigüedad. Introducido en Fase 8, Bloque 8.2a.
+
+AulaBloqueada(
+  actividad_instancia_id FOREIGN KEY,
+  plaza_id FOREIGN KEY,
+  aula_id FOREIGN KEY,
+  PRIMARY KEY (actividad_instancia_id, plaza_id)
+)
+-- Pin de AULA, granularidad PLAZA (0..N filas por instancia; a lo sumo una
+-- por plaza). Cardinalidad DISTINTA a la del pin de tramo: una instancia de
+-- desdoble tiene varias plazas, cada una con su aula, luego el aula NO puede
+-- colgar de la instancia (error de §4.7 original, corregido en Bloque 8.2b).
+-- Solo aplica a plazas de aula VARIABLE (aulasCandidatas); pinar el aula de
+-- una plaza de aula_fija es entrada inválida (el aula ya está determinada).
+-- El aula pinada debe pertenecer a las aulasCandidatas de la plaza.
+--
+-- NOTA DE MODELADO (dominio del solver): en el record de dominio, ambos pines
+-- viven acoplados en SesionBloqueada(instancia, tramo, Map<Plaza,Aula>): el pin
+-- de aula sin pin de tramo no es un caso soportado (la UX pina la sesión
+-- completa). La separación en dos entidades de arriba es la forma NORMALIZADA
+-- para la persistencia de Fase 8 (Bloque 8.2b-ii); el dominio la agrega.
+--
+-- Antes de invocar el solver, el usuario puede fijar instancias a tramos y,
+-- opcionalmente, plazas a aulas. El solver respeta estos bloqueos como
+-- restricciones DURAS.
 
 HorarioGenerado(
   id PRIMARY KEY,
@@ -749,9 +773,13 @@ en una `PlazaSubgrupo` de la primera y otra de la segunda.
 `Sesion.tramo_inicio_id` apunta a un `TramoSemanal` con `es_lectivo = true`.
 
 **S5. Bloqueos respetados.**
-Si existe `SesionBloqueada` para una `ActividadInstancia`, la `Sesion`
-generada usa exactamente ese `tramo_inicio_id` (y, si fue especificada,
-esa `aula_id`).
+Si existe `SesionBloqueada` para una `ActividadInstancia`, todas las `Sesion`
+generadas para esa instancia usan exactamente ese `tramo_inicio_id`. Si además
+existe `AulaBloqueada` para un par `(ActividadInstancia, Plaza)`, la `Sesion`
+de esa plaza usa exactamente esa `aula_id`. El pin de aula solo es válido sobre
+plazas de aula variable (`aulasCandidatas`); sobre una plaza de `aula_fija` es
+entrada inválida, no un pin. El aula pinada debe pertenecer a las
+`aulasCandidatas` de la plaza.
 
 **S6. Bloque obligatorio.**
 Si `Actividad.duracion_tramos > 1`, la `Sesion` ocupa N tramos consecutivos

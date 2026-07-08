@@ -620,7 +620,41 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 59 — Fase 8, deuda D-F8.1-8 CERRADA: test de contrato de
+Última sesión registrada: Sesión 60 — Fase 8, Bloque 8.2b-i: PIN DE AULA por-plaza en el solver
+  + rediseño §4.7/S5 del modelo. Modo híbrido (diseño y documentación en el Project, código en
+  Claude Code). Cierra la deuda (i) de 8.2b (pin de aula por-plaza); persistencia y REST del bloqueo
+  siguen diferidos a 8.2b-ii/iii. Decisiones cerradas antes de teclear D-F8.2b-1..4: (1) forma 1A —
+  SesionBloqueada de dominio gana 3er componente Map<Plaza,Aula> aulasPinadas (vacío = solo pin de
+  tramo, retrocompat 8.2a); ProblemaHorario NO cambia de firma. (2) 2A — pinar aula de plaza aulaFija
+  es entrada inválida (ProblemaInvalidoException en io, IllegalArgumentException de salvaguarda en
+  cpsat, separación de capas de 8.2a respetada). (3) restriccionAulaBloqueada() en construir() tras
+  restriccionSesionBloqueada(): addEquality(opcion.presencia(), 1) sobre la AulaOpcion casada por
+  aula.equals; verificador gemelo contarAulasBloqueadasVioladas sin OR-Tools. (4) 4C validada en el
+  mapper (aula pinada ∈ aulasCandidatas); 4B (pin×poda) REBAJADA a deuda documental D-F8.2b-4B,
+  condicionada al grep de Claude Code —que salió VACÍO (sin llamadores de construirConObjetivo(true)):
+  la poda está muerta en todo camino vivo, 4B defendería un caso imposible—. Rediseño de MODELO:
+  §4.7 corrige el error de cardinalidad (aula NO cuelga de la instancia: una instancia de desdoble
+  tiene N plazas con N aulas); split en SesionBloqueada (pin de tramo, por instancia) + AulaBloqueada
+  (pin de aula, por plaza, PK (instancia, plaza)) como forma normalizada para la persistencia de
+  8.2b-ii; el dominio la agrega en el Map. S5 reformulada (pin de tramo sobre todas las Sesion de la
+  instancia; pin de aula por plaza; solo aula variable; aula ∈ candidatas). Réplica del rediseño
+  §4.7/S5 validada contra el código tecleado (el Map<Plaza,Aula> del dominio == AulaBloqueada
+  normalizada). ORO (criterio 5): comentar restriccionAulaBloqueada() tira EXACTAMENTE los tests de
+  respeto y desdoble, deja verde el sin-pin; restaurada, ModeloCpSat idéntico salvo la adición
+  (46 insertions, 0 deletions). Entregado (6 commits de una línea, código y doc separados): dominio
+  da33330, cpsat restricción 25ae7fb, verificador c9e76e7, io+schema (AulaPinDto(plaza,aula) +
+  SesionBloqueadaDto gana List<AulaPinDto>) f30347f, tests+fixtures (3 cpsat respeto/desdoble/sin-pin
+  + 3 io positiva/2A/4C) 00291af, índice regenerado 271a1a4. Suite: solver 65→71 (+6); app 46 sin
+  cambio (NO se tocó app/, ni persistencia, ni REST, ni el List.of() de CatalogoMapper, que sigue
+  placeholder hasta 8.2b-ii). BUILD SUCCESS con mvn clean test desde la raíz. src/main del solver SÍ
+  tocado → referencia-codigo-solver.md regenerado. Deuda de test menor anotada: la salvaguarda
+  IllegalArgumentException de cpsat (pin de plaza fija en un ProblemaHorario montado a mano, sin pasar
+  por el mapper) no tiene test propio; el mapper cubre la ruta de usuario. Deuda VIVA para 8.2b-ii:
+  persistencia JPA de SesionBloqueada + AulaBloqueada (§4.7) y cableado del List.of() de
+  CatalogoMapper:135; para 8.2b-iii: entrada del bloqueo por REST (body de POST /api/horarios vs
+  endpoint propio, decisión abierta). Siguiente: 8.2b-ii (persistencia de bloqueos) o el candidato
+  que se decida al abrir sesión.
+Última sesión registrada (previa): Sesión 59 — Fase 8, deuda D-F8.1-8 CERRADA: test de contrato de
   serialización de los DTOs de proyección (blinda contra la divergencia silenciosa que en 7B
   dejó colar el profesor TEC4). Modo híbrido (decisión y contrato en el Project, código en Claude
   Code). Enfoque cerrado = Opción B sola (test JVM que serializa y afirma la FORMA del JSON),
@@ -744,53 +778,15 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   (atar el fixture del frontend proyeccion-1eso.fixture.ts al contrato real, sub-bloque
   de frontend); FACTIBILIDAD por REST (mini-bloque con decisión de estadoSolver
   pendiente); warm-start por REST (si se pide).
-Última sesión registrada (previa): Sesión 56 — Fase 7, Bloque 7B: FRONTEND ANGULAR (las tres vistas)
-  y CIERRE de Fase 7. Modo híbrido (decisión y contrato en el Project, código en Claude Code).
-  Seis decisiones cerradas antes de teclear: D-F7B-1 (alimentación por fixture conocido {id}, sin
-  endpoint de listado: Fase 7 = solo lectura); D-F7B-2 (Angular 21 + Node v22.23.1, verificado
-  contra angular.dev —matriz A21 ^22.22.0||^24.13.1—; A22 descartado por novedad innecesaria, Node
-  ≥24.15); D-F7B-3 (frontend en app/frontend/, proyecto Node NO módulo Maven; frontend-maven-plugin
-  2.0.1, versión en pluginManagement del parent, ejecución en app/pom.xml); D-F7B-4 (validación =
-  mecanismo por test + visual manual, NO celda-a-celda contra PDF con el fixture reducido); D-F7B-5
-  (celda-como-lista: co-docencia = 1 entrada con N profes, sub-entrada con grupos[] múltiple en
-  agrupamiento; confirmado en proyectar() y en pantalla); D-F7B-6 (aulaCodigo NUNCA null —Sesion.aula
-  optional=false—, javadoc de SesionVistaDTO corregido; el "aula null" del PDF es artefacto de
-  extracción de co-docencia).
-
-  Entregado (Claude Code, commits de una línea por artefacto): scaffold
-  Angular 21; modelos TS + servicio de proyección; rejilla 5×6 + las tres vistas con celda-como-lista;
-  integración frontend-maven-plugin; tests de mecanismo; corrección de javadoc. Cuatro desviaciones
-  al leer el repo, todas señaladas y resueltas: (1) repackage de Spring Boot NO estaba enganchado
-  (app/ hereda de educhronos-parent, no de spring-boot-starter-parent —solo importa la BOM—; hueco
-  preexistente de Fase 6), saldado en 7B: app pasa de librería a aplicación arrancable (fat jar); (2)
-  build del frontend movido de generate-resources a prepare-package (decisión C): mvn test del backend
-  ya NO reconstruye Angular (~29s→~11.7s), el frontend entra en el jar en package, verificado con
-  jar tf ... grep static/index.html; (3) fix preexistente de 7A: el endpoint daba HTTP 500 al ejercerse
-  por HTTP por primera vez (falta -parameters, misma raíz que (1): no hereda del starter-parent),
-  resuelto con <parameters>true</parameters> en el maven-compiler-plugin del parent + @PathVariable("id")
-  explícito + test de integración HTTP (standaloneSetup, sin dependencias nuevas) → cierra la deuda de
-  test web de 7A; (4) el fixture de test del frontend (proyeccion-1eso.fixture.ts) había divergido del
-  contrato: inventaba un profesor TEC4 para fingir co-docencia (el fixture reducido no tiene ninguna
-  plaza multi-profesor), corregido eliminando TEC4 y añadiendo co-docencia REAL LEN2+LEN8 (de los
-  volcados de 1ºESO) como caso legítimo de D-F7-2. Validación visual hecha por el usuario contra el seed real (horario id=1, 24 sesiones,
-  OPTIMAL): el bloque CyR/OyD/RefMt se pinta como celda-con-6-sub-entradas y las Mat como celda simple;
-  la posición del bloque la fija el solver (viernes t4 con seed=42, NO el miércoles t3 del PDF: correcto
-  por D-F7B-4). Andamiaje vivo asignado a Fase 8: SeedHorarioRunner (app.catalog, @Profile("seed"),
-  duplica el builder de CierreFase6HumoTest para poblar la BD; BORRAR EN FASE 8 cuando exista la vía
-  real —CRUD o loader—, marcado en su javadoc). Deuda nueva anotada: el fixture del frontend es un
-  artefacto escrito a mano sin mecanismo que lo ate al DTO real (el TEC4 divergió sin detección) →
-  Fase 8 considerar test de contrato que deserialice un JSON capturado del endpoint real; Node de dev
-  (nvm) y Node del pom (<nodeVersion>v22.23.1</nodeVersion>) deben mantenerse en la misma versión
-  ≥22.22.0 (nvm 0.39.1 tiene el índice LTS caducado, no bloquea). Suite: 99 (solver 59 + app 40) + 6
-  frontend, BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. Siguiente: Fase 8 — UI:
-  configuración y ajuste manual (drag&drop D19/D20, parametrización del solver D29, CRUD del centro).
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, y las de S51, S52,
-S53 y S54 en la Sesión 58, y la de S55 en la Sesión 59 (misma higiene documental). El plan
-conserva las 4 últimas cabeceras compactas (S56–S59). El detalle histórico de cualquier sesión
+S53 y S54 se archivaron en la Sesión 58, la de S55 en la Sesión 59, y la de S56 en la Sesión 60
+(misma higiene documental; en S60 se corrigió además una copia truncada y duplicada de S55 que
+la operación de archivado de S59 dejó en la bitácora). El plan conserva las 4 últimas cabeceras
+compactas (S57–S60). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1792,6 +1788,14 @@ descripción completa.
   en la estructura de Bach (mayor contribuyente al coste). NOTA: esto NO cierra el criterio 3 de
   Fase 5 (calidad comparable), que sigue ABIERTO a la espera del umbral con datos del centro, no
   de convergencia. Test de evidencia: SolverHorarioOptimizacionEscalaSubconjuntosTest (Bloque 18).
+  - **D-F8.2b-4B (condicional, inerte): pin de aula × poda de aulasCandidatas.**
+  Si D23 se reabre y la poda (candidatasPodadas) se reactiva rediseñada, el pin de
+  aula debe forzar el aula pinada DENTRO de las candidatas conservadas: hoy la poda
+  podría eliminar un aula candidata legítima y dejar el pin inexpresable (sin BoolVar
+  de presencia). INERTE mientras podarAulas=false en todos los caminos (verificado en
+  8.2b-i: ModeloCpSat 142/202/216-217; grep sin llamadores de construirConObjetivo(true)).
+  No se implementa: sería defender un caso imposible con el código actual. Vigilancia
+  documental; se activa solo con la poda.
 - **D25 (Sesión 42, Fase 5 Bloque 17 — reactivación agravada de D24)**: el perfil -Pescala
   corrido ENTERO no pasa por contención de CPU. D24 se dio por CERRADA en S39 asumiendo que
   @Tag("escala") bastaba; pero @Tag solo SEPARA los pesados de la suite rápida — NO resuelve

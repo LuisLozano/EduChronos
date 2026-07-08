@@ -2089,33 +2089,6 @@ Modo híbrido (decisión y cierre en el Project, código en Claude Code). NO es 
 
 ### Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de las tres vistas).
 
-Modo híbrido (decisión y contrato en el Project, código en Claude Code).
-Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
-frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
-vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
-siguen en Fase 8). Seis decisiones cerradas antes de teclear: D-F7-1 (proyección de celda =
-plazas cuyo subgrupo toca el grupo/profesor/aula; (a)=(b) verificado sobre problema-3-
-cierre-cyr-refmt.json: cada subgrupo es MONO-GRUPO, la plaza agrupa los mono-grupo de los 4
-grupos, luego filtrar por "toca 1ºA" devuelve las 6 plazas del bloque = lo que pinta el
-PDF); D-F7-2 (co-docencia = UNA sub-entrada con N profesores, no N); D-F7-3 (validación
-estructural {asignatura, profesor, subgrupos} por slot, aula validada aparte contra vista-
-aula); D-F7-4 (el DTO plano se construye en método @Transactional(readOnly) del servicio, NO
-en el controlador: cargarHorario solo inicializa la lista de Sesion, no el grafo LAZY de
-cada Plaza); D-F7-5 (forma de SesionVistaDTO con grupos[] derivado de subgrupos, clave de
-las tres vistas); D-F7-6 (añadir spring-boot-starter-web a app/, que era persistencia pura).
-Entregado (6 commits de código, uno por artefacto): spring-boot-starter-web en app/pom.xml;
-extracción del núcleo único de renumeración de tramos (renumerarLectivos) +
-CatalogoMapper.indiceOrdenEnDia(List<TramoSemanal>) → Map<Long,Integer> keyed-by-getId();
-records SesionVistaDTO/HorarioProyeccionDTO (app.web.dto); GeneradorHorarioService.
-proyectar(Long) @Transactional(readOnly) que navega el grafo LAZY dentro de la transacción y
-arma el DTO plano; HorarioController GET /api/horarios/{id}/proyeccion (404 vía
-ResponseStatusException); ProyeccionHorarioTest (@DataJpaTest + replace=NONE, solver real
-corto new SolverHorario(10,42), patrón D-B10-7) que firma criterios 1/2 a nivel de contrato:
-el bloque de 6 plazas rep=2 proyecta 6 SesionVistaDTO en el mismo (dia,tramo) y filtrar por
-grupos∋"1ºA" las devuelve todas; cada Mat-1ºX (rep=3) da 3 con grupos==["1ºX"].
-
-### Sesión 55 — Fase 7, Bloque 7A: BACKEND DE LECTURA (contrato de las tres vistas).
-
 Modo híbrido (decisión y contrato en el Project, código en Claude Code). Abre Fase 7 tras cerrar el ALCANCE con el usuario: A1 (Angular servido por el jar vía
   frontend-maven-plugin, mecánica en 7B) + B1 (una proyección plana, la UI pivota) +
   vista-grupo primero + celda-como-lista. Fase 7 = SOLO visualización (drag&drop, D19/D20
@@ -2156,3 +2129,7 @@ Modo híbrido (decisión y contrato en el Project, código en Claude Code). Abre
   regenerado; modelo NO tocado. Siguiente: Bloque 7B (frontend Angular: proyecto, integración
   frontend-maven-plugin, las tres vistas con celda-como-lista, validación visual contra los
   volcados de 1ºESO).
+
+### Sesión 56 — Fase 7, Bloque 7B: FRONTEND ANGULAR (las tres vistas) y CIERRE de Fase 7.
+
+Modo híbrido (decisión y contrato en el Project, código en Claude Code). Seis decisiones cerradas antes de teclear: D-F7B-1 (alimentación por fixture conocido {id}, sin endpoint de listado: Fase 7 = solo lectura); D-F7B-2 (Angular 21 + Node v22.23.1, verificado contra angular.dev —matriz A21 ^22.22.0||^24.13.1—; A22 descartado por novedad innecesaria, Node ≥24.15); D-F7B-3 (frontend en app/frontend/, proyecto Node NO módulo Maven; frontend-maven-plugin 2.0.1, versión en pluginManagement del parent, ejecución en app/pom.xml); D-F7B-4 (validación = mecanismo por test + visual manual, NO celda-a-celda contra PDF con el fixture reducido); D-F7B-5 (celda-como-lista: co-docencia = 1 entrada con N profes, sub-entrada con grupos[] múltiple en agrupamiento; confirmado en proyectar() y en pantalla); D-F7B-6 (aulaCodigo NUNCA null —Sesion.aula optional=false—, javadoc de SesionVistaDTO corregido; el "aula null" del PDF es artefacto de extracción de co-docencia). Entregado (Claude Code, commits de una línea por artefacto): scaffold Angular 21; modelos TS + servicio de proyección; rejilla 5×6 + las tres vistas con celda-como-lista; integración frontend-maven-plugin; tests de mecanismo; corrección de javadoc. Cuatro desviaciones al leer el repo, todas señaladas y resueltas: (1) repackage de Spring Boot NO estaba enganchado (app/ hereda de educhronos-parent, no de spring-boot-starter-parent —solo importa la BOM—; hueco preexistente de Fase 6), saldado en 7B: app pasa de librería a aplicación arrancable (fat jar); (2) build del frontend movido de generate-resources a prepare-package (decisión C): mvn test del backend ya NO reconstruye Angular (~29s→~11.7s), el frontend entra en el jar en package, verificado con jar tf ... grep static/index.html; (3) fix preexistente de 7A: el endpoint daba HTTP 500 al ejercerse por HTTP por primera vez (falta -parameters, misma raíz que (1): no hereda del starter-parent), resuelto con <parameters>true</parameters> en el maven-compiler-plugin del parent + @PathVariable("id") explícito + test de integración HTTP (standaloneSetup, sin dependencias nuevas) → cierra la deuda de test web de 7A; (4) el fixture de test del frontend (proyeccion-1eso.fixture.ts) había divergido del contrato: inventaba un profesor TEC4 para fingir co-docencia (el fixture reducido no tiene ninguna plaza multi-profesor), corregido eliminando TEC4 y añadiendo co-docencia REAL LEN2+LEN8 (de los volcados de 1ºESO) como caso legítimo de D-F7-2. Validación visual hecha por el usuario contra el seed real (horario id=1, 24 sesiones, OPTIMAL): el bloque CyR/OyD/RefMt se pinta como celda-con-6-sub-entradas y las Mat como celda simple; la posición del bloque la fija el solver (viernes t4 con seed=42, NO el miércoles t3 del PDF: correcto por D-F7B-4). Andamiaje vivo asignado a Fase 8: SeedHorarioRunner (app.catalog, @Profile("seed"), duplica el builder de CierreFase6HumoTest para poblar la BD; BORRAR EN FASE 8 cuando exista la vía real —CRUD o loader—, marcado en su javadoc). Deuda nueva anotada: el fixture del frontend es un artefacto escrito a mano sin mecanismo que lo ate al DTO real (el TEC4 divergió sin detección) → Fase 8 considerar test de contrato que deserialice un JSON capturado del endpoint real; Node de dev (nvm) y Node del pom (<nodeVersion>v22.23.1</nodeVersion>) deben mantenerse en la misma versión ≥22.22.0 (nvm 0.39.1 tiene el índice LTS caducado, no bloquea). Suite: 99 (solver 59 + app 40) + 6 frontend, BUILD SUCCESS. src/main del solver NO tocado; modelo NO tocado. Siguiente: Fase 8 — UI: configuración y ajuste manual (drag&drop D19/D20, parametrización del solver D29, CRUD del centro).
