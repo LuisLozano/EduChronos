@@ -113,7 +113,9 @@ public class GeneradorHorarioService {
                 grupoRepository.findAll(),
                 subgrupoRepository.findAll(),
                 actividadRepository.findAll(),
-                restriccionRepository.findAll());
+                restriccionRepository.findAll(),
+                List.of(),   // pinesTramo: sin bloqueos manuales en la vía de generación (8.2b-ii)
+                List.of());  // pinesAula:  idem
     }
 
     /**
