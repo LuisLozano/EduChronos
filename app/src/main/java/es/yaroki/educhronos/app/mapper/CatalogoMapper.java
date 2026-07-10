@@ -1,8 +1,10 @@
 package es.yaroki.educhronos.app.mapper;
 
+import es.yaroki.educhronos.app.catalog.AulaBloqueada;
 import es.yaroki.educhronos.app.catalog.Dia;
 import es.yaroki.educhronos.app.catalog.PatronTemporal;
 import es.yaroki.educhronos.app.catalog.ProfesorRestriccionHoraria;
+import es.yaroki.educhronos.app.catalog.SesionBloqueada;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
@@ -74,6 +76,12 @@ public final class CatalogoMapper {
      * mapeados y contra el índice {@code TramoSemanal → Tramo} que produce el
      * mapeo de tramos: una restricción sobre un tramo no lectivo (excluido por
      * {@code aTramos}) aborta con excepción explícita.
+     *
+     * <p>Los {@code bloqueos} manuales (§4.7, Bloque 8.2b-ii) —los pines de tramo
+     * ({@code pinesTramo}) y de aula por plaza ({@code pinesAula})— los ensambla
+     * {@link BloqueoMapper#aBloqueos}, que reutiliza estos mismos índices por código
+     * y el puente {@code TramoSemanal → Tramo} (D30, no se duplica). Deja de ser el
+     * placeholder de {@code List.of()} de los bloques previos.
      */
     public static ProblemaHorario aProblemaHorario(
             List<TramoSemanal> tramos,
@@ -83,7 +91,9 @@ public final class CatalogoMapper {
             List<es.yaroki.educhronos.app.catalog.GrupoAdministrativo> grupos,
             List<es.yaroki.educhronos.app.catalog.Subgrupo> subgrupos,
             List<es.yaroki.educhronos.app.catalog.Actividad> actividades,
-            List<ProfesorRestriccionHoraria> restricciones) {
+            List<ProfesorRestriccionHoraria> restricciones,
+            List<SesionBloqueada> pinesTramo,
+            List<AulaBloqueada> pinesAula) {
 
         Objects.requireNonNull(tramos,       "tramos no puede ser null");
         Objects.requireNonNull(aulas,        "aulas no puede ser null");
@@ -93,6 +103,8 @@ public final class CatalogoMapper {
         Objects.requireNonNull(subgrupos,    "subgrupos no puede ser null");
         Objects.requireNonNull(actividades,  "actividades no puede ser null");
         Objects.requireNonNull(restricciones, "restricciones no puede ser null");
+        Objects.requireNonNull(pinesTramo,   "pinesTramo no puede ser null");
+        Objects.requireNonNull(pinesAula,    "pinesAula no puede ser null");
 
         TramosMapeados tramosMapeados = aTramosConIndice(tramos);
         List<Tramo> tramosDom = tramosMapeados.lista();
@@ -128,14 +140,29 @@ public final class CatalogoMapper {
                                 profesoresPorCodigo, aulasPorCodigo, subgruposPorCodigo))
                         .toList();
 
+        // Índices por código para los bloqueos: la actividad, y sus plazas aplanadas.
+        // toMap aborta ante código duplicado, mismo patrón que el resto del método.
+        Map<String, es.yaroki.educhronos.solver.domain.Actividad> actividadesPorCodigo =
+                actividadesDom.stream().collect(Collectors.toMap(
+                        es.yaroki.educhronos.solver.domain.Actividad::codigo, a -> a));
+        Map<String, es.yaroki.educhronos.solver.domain.Plaza> plazasPorCodigo =
+                actividadesDom.stream()
+                        .flatMap(a -> a.plazas().stream())
+                        .collect(Collectors.toMap(
+                                es.yaroki.educhronos.solver.domain.Plaza::codigo, p -> p));
+
         List<RestriccionHoraria> restriccionesDom = restricciones.stream()
                 .map(r -> aRestriccionHoraria(r, profesoresPorCodigo, tramosMapeados.porEntidad()))
                 .toList();
 
+        List<es.yaroki.educhronos.solver.domain.SesionBloqueada> bloqueosDom =
+                BloqueoMapper.aBloqueos(pinesTramo, pinesAula, actividadesPorCodigo,
+                        plazasPorCodigo, aulasPorCodigo, tramosMapeados.porEntidad());
+
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
                 gruposDom, subgruposDom, actividadesDom, restriccionesDom,
-                List.of()); // bloqueos: placeholder (los poblará 8.2b desde la BD)
+                bloqueosDom);
     }
 
     /**
