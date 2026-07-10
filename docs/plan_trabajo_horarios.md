@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2a CERRADO en S58
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2b-ii CERRADO en
+  S61 (persistencia JPA de los bloqueos §4.7: entidades SesionBloqueada + AulaBloqueada + repos +
+  BloqueoMapper de entrada + cableado del placeholder de CatalogoMapper; NO toca src/main del solver;
+  8.2b-iii REST + cableado del servicio siguen abiertos). Bloque 8.2b-i CERRADO en S60 (pin de aula
+  por-plaza en el solver + rediseño §4.7/S5). Bloque 8.2a CERRADO en S58
   (pin de instancia a tramo en el solver: SesionBloqueada estructural + restricción dura +
   verificador + I/O de test; cierra el criterio 5 de Fase 3; pin de aula y persistencia/REST -> 8.2b).
   Bloque 8.1 CERRADO en S57 (vía REST de generación+persistencia, D29 cerrada parcialmente,
@@ -620,7 +624,52 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 60 — Fase 8, Bloque 8.2b-i: PIN DE AULA por-plaza en el solver
+Última sesión registrada: Sesión 61 — Fase 8, Bloque 8.2b-ii: PERSISTENCIA JPA de los bloqueos
+  manuales (SesionBloqueada + AulaBloqueada, §4.7) + mapper de entrada + cableado del placeholder
+  de CatalogoMapper. Modo híbrido (diseño y documentación en el Project, código en Claude Code).
+  Cierra la deuda (ii) de 8.2b: materializa la forma normalizada de §4.7 que el rediseño de S60 dejó
+  especificada. Alcance cortado con el usuario: 8.2b-ii SOLO; 8.2b-iii (entrada del bloqueo por REST,
+  body de POST /api/horarios vs endpoint propio) sigue ABIERTO y aparte. NO se tocó src/main del
+  solver ni el modelo (§4.7 ya correcto de S60). Decisiones cerradas antes de teclear D-F8.2b-ii-1..5:
+  (1) el ensamblado JPA→dominio vive en clase nueva app.mapper.BloqueoMapper (final, ctor privado,
+  estático), espejo de SolucionMapper; NO dentro de CatalogoMapper. (2) aProblemaHorario gana DOS
+  parámetros (List<SesionBloqueada>, List<AulaBloqueada>), coherente con las siete listas de entidades
+  JPA que ya recibe; el cruce por (actividad_codigo, indice) para agregar el Map<Plaza,Aula> vive en
+  BloqueoMapper. (3) repos triviales JpaRepository vacíos, findAll() sin filtro (espejo de
+  Sesion/HorarioGeneradoRepository). (4) bloqueo GLOBAL del centro (SIN FK a HorarioGenerado): §4.7 fija
+  PK = instancia / (instancia, plaza), sin horario_id; el pin es ENTRADA del solver, precede al horario
+  que genera. (5) validaciones de entrada replicadas en BloqueoMapper con IllegalArgumentException (NO
+  se importa ProblemaInvalidoException de solver.io: frontera de capas, CatalogoMapper tampoco la
+  importa): actividad/plaza/aula huérfana, aula ∉ aulasCandidatas, pin sobre aula fija, y pin de aula
+  huérfano (aula sin su pin de tramo → abort, el record de dominio no soporta pin de aula suelto).
+  Naming: entidades JPA en app.catalog con los nombres de §4.7; el record de dominio homónimo se
+  referencia por FQN en BloqueoMapper (igual que CatalogoMapper distingue domain.Plaza de catalog.Plaza).
+  Puente de tramo REUTILIZADO: BloqueoMapper recibe el Map<TramoSemanal,Tramo> (IdentityHashMap) que
+  aProblemaHorario ya construye (tramosMapeados.porEntidad()), NO una cuarta copia de la renumeración;
+  D30 sigue viva, no se agrava. Precondición anotada: la catalog.SesionBloqueada.getTramoInicio() debe
+  ser la MISMA instancia TramoSemanal que la lista pasada a aProblemaHorario (se cumple en una
+  transacción JPA única, caché de primer nivel). Entregado (6 commits de una línea, código/doc
+  separados): entidades JPA 4a0c754, repos caa2d03, BloqueoMapper fe3d5a6, cableado de aProblemaHorario
+  (firma +2 params, índices actividadesPorCodigo/plazasPorCodigo, llamada a BloqueoMapper) f61300b,
+  actualización de los 7 llamadores de aProblemaHorario (servicio + 6 en CatalogoMapperProblemaTest,
+  bloqueos vacíos) 785f6c2, IT de round-trip a285adf. IT BloqueoPinRoundTripTest sobre un DESDOBLE
+  (multi-plaza): persistir catálogo + pin de tramo + pin de aula sobre una plaza variable, montar
+  ProblemaHorario vía CatalogoMapper, resolver con new SolverHorario(10,42) (patrón D-B10-7), guardar →
+  recargar; assert (a) las N plazas de la instancia caen en el tramo pinado (simultaneidad gratis por
+  instancia), assert (b) la plaza variable respeta el aula pinada. ORO: desactivar submapa.put(plaza,
+  aula) del Paso 1 de BloqueoMapper tira SOLO el assert (b) (expected "A2" but was "A1": sin el pin el
+  solver colocaba en A1, el pin fuerza A2 — el pin CAMBIA la solución, no es un no-op), assert (a) verde;
+  restaurado, verde. Suite: solver 71 intacto (no se tocó solver/src/main → referencia-codigo-solver.md
+  NO regenerado), app 46 → 47 (+1 IT). BUILD SUCCESS con mvn clean test desde la raíz; working tree
+  limpio. Deuda VIVA que 8.2b-ii deja: (a) cableado del servicio a los repos de bloqueo —
+  GeneradorHorarioService.cargarProblema() pasa List.of(), List.of(): la vía de generación (POST
+  /api/horarios) NO lee aún los bloqueos vigentes de la BD, persistir un bloqueo hoy no afecta a un
+  solve por REST; complemento natural de 8.2b-iii o mini-bloque previo—; (b) 8.2b-iii sigue abierto
+  (entrada del bloqueo por REST, decisión de contrato sin cerrar); (c) deuda de test menor: el caso de
+  pin de aula huérfano (abort) no tiene test negativo propio, el IT solo ejercita la ruta feliz.
+  Siguiente: 8.2b-iii (REST del bloqueo + cableado del servicio) o el candidato que se decida al abrir
+  sesión.
+Última sesión registrada (previa): Sesión 60 — Fase 8, Bloque 8.2b-i: PIN DE AULA por-plaza en el solver
   + rediseño §4.7/S5 del modelo. Modo híbrido (diseño y documentación en el Project, código en
   Claude Code). Cierra la deuda (i) de 8.2b (pin de aula por-plaza); persistencia y REST del bloqueo
   siguen diferidos a 8.2b-ii/iii. Decisiones cerradas antes de teclear D-F8.2b-1..4: (1) forma 1A —
@@ -709,84 +758,15 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: 8.2b (persistencia+REST del bloqueo + pin de aula). Antes de teclear, cerrar la tensión
   §4.7: el modelo especifica SesionBloqueada con aula por-instancia, pero 8.2a fijó el pin de aula
   por-plaza; §4.7 debe rediseñarse o el aula moverse a otra entidad. (D-F8.1-8 cerrada en S59.)
-Última sesión registrada (previa): Sesión 57 — Fase 8 [ARRANQUE] + Bloque 8.1 CERRADO
-  (backend). Modo híbrido: alcance, descomposición y decisiones en el Project;
-  código en Claude Code. Se ABRE Fase 8 fijando alcance antes de construir. Fase 8
-  descompuesta en bloques por dependencias: 8.1 vía REST generar+guardar (raíz de
-  la que cuelga el resto) → 8.2 C5/SesionBloqueada estructural → 8.3 atribución por
-  celda (D19 backend) → 8.4 pre-validación (D18/D20) → 8.5+ CRUD de catálogo (D10
-  plazas multi-profesor, D1/D7 asistentes) → 8.6+ drag&drop + bloqueo interactivo.
-  D21/D22/D30 diferibles a lo largo de la fase.
-  Deuda VIVA que 8.2a deja para 8.2b: (i) pin de AULA (contrato por-plaza (plaza, aula) +
-  restricción + verificación); (ii) persistencia de SesionBloqueada (entidad JPA §4.7 + schema) y
-  entrada del bloqueo por REST (body de POST /api/horarios vs endpoint propio, a decidir); (iii)
-  app/CatalogoMapper:135 lleva List.of() como placeholder de bloqueos —cablearlo cuando 8.2b los lea
-  de la BD—.
-  Bloque 8.2a — decisiones cerradas antes de teclear (D-F8.2-1..6): (1) identidad
-  del bloqueo = ActividadInstancia(actividad, indice) de dominio, reutilizada sin materializar
-  tabla nueva (coherente con D-B5-1 y con la identidad de Sesion en B9); en JSON se referencia
-  por (actividad_codigo, indice). (2) el bloqueo vive como List<SesionBloqueada> bloqueos, 9º
-  componente del record ProblemaHorario (forma 2, gemela de restriccionesHorarias); el cambio de
-  firma se propagó a 4 constructores —io/ProblemaHorarioMapper (main), app/CatalogoMapper:135
-  (main), y 2 tests VerificadorSolucionGrupoTest y SolverHorarioOptimizacionEscalaSubconjuntosTest—.
-  (3) restricción DURA restriccionSesionBloqueada() en construir() (aplica en factibilidad y en
-  optimización): addEquality(tramoIndex, indiceDeTramo(tramo)); el desdoble se pina simultáneo gratis
-  porque las N plazas comparten tramoIndex. Aula contradictoria -> INFEASIBLE; validación amable
-  diferida a 8.4. (4) verificador independiente contarBloqueosViolados (recomputo sin OR-Tools) que
-  habilitó el ORO. (5) I/O de test: SesionBloqueadaDto(actividad, indice, tramo), array top-level
-  "bloqueos" opcional en el schema. (6) REVERTIDA en diseño: el pin de aula NO va en 8.2a; el
-  candidato Optional<Aula> en el record se retiró al descubrir en la lectura del repo que el pin de
-  aula correcto es por PLAZA (plaza, aula), no por instancia —una instancia de desdoble tiene varias
-  plazas—; SesionBloqueada queda (instancia, tramo) sin aula, y el pin de aula (contrato incluido) se
-  difiere a 8.2b. Separación de capas respetada: cpsat NO importa io; la salvaguarda de instancia
-  inexistente en ModeloCpSat usa IllegalArgumentException, la validación de entrada de usuario (índice
-  fuera de rango, actividad desconocida) vive en el mapper con ProblemaInvalidoException.
-  Bloque 8.1 — decisiones cerradas antes de teclear (D-F8.1-1..8): (1) endpoint
-  síncrono POST /api/horarios, monousuario local; (2) persistir + devolver
-  proyección (reutiliza HorarioProyeccionDTO de 7A, que ya porta id/estadoSolver/
-  objetivo/cota); (3) D29 = params de solve en body opcional (maxSegundos default
-  30, semilla default 42, via default OPTIMIZACION); (4) nombre opcional en body,
-  default "Horario "+timestamp; (5) generar() parametrizado, se ELIMINA el sin-args
-  (evita segunda puerta con defaults hardcodeados, el patrón que dejó divergir al
-  runner); (6) reutilizar proyectar(id) sin tocar su firma; (7) SeedHorarioRunner
-  partido; (8) deuda de 7B (atar fixture al contrato real) = D-F8.1-8, DIFERIDA.
-  Decisión de alcance clave: vía FACTIBILIDAD sacada del bloque. Motivo confirmado
-  en el código: resolver() devuelve SolucionHorario sin estado y ResultadoOptimizacion
-  .objetivo/cota son double primitivos (no null); persistir factibilidad por el canal
-  de guardar() exigiría o un centinela 0.0 falso o tocar el solver (fuera de alcance).
-  El enum ViaSolver arranca solo con OPTIMIZACION; el switch sin default hará que
-  añadir FACTIBILIDAD sea error de compilación guía, no olvido silencioso.
-  Hallazgos al leer el repo: la generación estaba DUPLICADA (generar() en el servicio
-  vs. secuencia inline en el runner con new SolverHorario(10,42)); no hay
-  @ControllerAdvice global (patrón 7A = try/catch por método, se sigue). Regresión
-  detectada y corregida: el default de 30 s NO estaba cableado —con body por defecto
-  se caía al new SolverHorario() (120 s); arreglado en el servicio (seg=30, sem=42 si
-  null), test de regresión con mockConstruction capturando args del constructor.
-  Nota viva: 30 s es conjetura de UX, NO validada contra el centro real (~28 grupos;
-  el instituto completo no converge a óptimo ni en 600 s); constante revisable.
-  Episodio de toolchain (frontend): ng test dejó de arrancar por ERR_REQUIRE_ESM —
-  Node del sistema v20.5.1 por debajo del mínimo de Angular 21 (@angular/build engines
-  ^20.19.0||^22.12.0||>=24.0.0, verificado contra el paquete instalado). Resuelto
-  subiendo a Node 22.23.1 vía nvm (el default apuntaba a lts/* sin resolver → caía a
-  system; corregido con nvm alias default 22.23.1), .nvmrc en app/frontend, reinstalación
-  limpia (package-lock regenerado bajo npm 10, solo subidas de parche). ng test verde
-  (vitest+jsdom, 6 specs). NO afecta a 8.1 backend. 5 commits de código (uno por
-  artefacto A–E) + fix del default 30 (7ebe21e) + .nvmrc (ece9455) + regen del lock.
-  Suite backend: solver 59 + app 43, BUILD SUCCESS con mvn clean test y mvn clean
-  package (static/index.html en el jar). src/main del solver NO tocado (referencia-
-  codigo-solver.md sin regen); modelo NO tocado. Deuda VIVA que 8.1 deja: D-F8.1-8
-  (atar el fixture del frontend proyeccion-1eso.fixture.ts al contrato real, sub-bloque
-  de frontend); FACTIBILIDAD por REST (mini-bloque con decisión de estadoSolver
-  pendiente); warm-start por REST (si se pide).
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
-en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, y las de S51, S52,
-S53 y S54 se archivaron en la Sesión 58, la de S55 en la Sesión 59, y la de S56 en la Sesión 60
-(misma higiene documental; en S60 se corrigió además una copia truncada y duplicada de S55 que
-la operación de archivado de S59 dejó en la bitácora). El plan conserva las 4 últimas cabeceras
-compactas (S57–S60). El detalle histórico de cualquier sesión
+en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
+S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, y la de S57
+en la Sesión 61 (misma higiene documental; en S60 se corrigió además una copia truncada y
+duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El plan conserva
+las 4 últimas cabeceras compactas (S58–S61). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
