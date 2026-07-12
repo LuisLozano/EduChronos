@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S57. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S58. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -9,9 +9,9 @@ deuda consciente abierta, decisiones permanentes, bloques de fase) está en
 `plan_trabajo_horarios.md`. Esta bitácora es histórico de solo lectura: no se
 consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. El plan conserva además las 4 últimas cabeceras compactas de
-sesión (S58–S61); las anteriores se archivan aquí conforme avanza el trabajo.
+sesión (S58–S62); las anteriores se archivan aquí conforme avanza el trabajo.
 
-Orden: cronológico ascendente (S10 → S57). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S58). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2204,3 +2204,39 @@ Modo híbrido (decisión y contrato en el Project, código en Claude Code). Seis
   (atar el fixture del frontend proyeccion-1eso.fixture.ts al contrato real, sub-bloque
   de frontend); FACTIBILIDAD por REST (mini-bloque con decisión de estadoSolver
   pendiente); warm-start por REST (si se pide).
+
+### Sesión 58 — Fase 8, Bloque 8.2a: PIN DE INSTANCIA A TRAMO (bloqueo manual) en el solver.
+
+Modo híbrido (decisión y contrato en el Project, código en Claude Code). Cierra el
+criterio 5 de Fase 3 (diferido desde S17: "bloquear un tramo y el solver lo respeta").
+Trabajo de dominio + cpsat + io de test; NO toca persistencia/REST (8.2b). Alcance
+cortado con el usuario: 8.2 partido en 8.2a (solver+modelo, esta sesión) y 8.2b
+(persistencia+REST+pin de aula). Decisiones D-F8.2-1..6; la 6 REVERTIDA en diseño (pin
+de aula fuera de 8.2a: es por-plaza (plaza, aula), no por-instancia).
+
+El pin es el DUAL de restriccionIndisponibilidadProfesor (addEquality sobre el tramoIndex
+en vez de dominio complementario); el desdoble se pina simultáneo gratis por el tramoIndex
+compartido por las plazas.
+
+La Fase 0 de lectura del repo (parada incondicional antes de teclear) descubrió tres cosas
+que el índice de solver/ no veía: la instancia se localiza recorriendo
+List<InstanciaProgramada> por equals de record; un 4º new ProblemaHorario( en
+app/CatalogoMapper (resuelto con List.of() placeholder, opción A, cableado real en 8.2b);
+y que ProblemaInvalidoException vive en io -> no se puede lanzar desde cpsat sin romper
+capas (resuelto: IllegalArgumentException en ModeloCpSat como salvaguarda,
+ProblemaInvalidoException en el mapper como validación de entrada).
+
+Entregado (7 commits de una línea): record SesionBloqueada + 9º componente de
+ProblemaHorario; restriccionSesionBloqueada() en construir(); contarBloqueosViolados en el
+verificador; SesionBloqueadaDto + mapper + schema; 4 fixtures + tests de solver (respeto,
+desdoble, infactible, gemelo sin-pin) + 2 de loader. ORO en positivo: comentar la
+restricción hace caer 3 de 4 tests del pin; reactivada, ModeloCpSat idéntico a HEAD.
+
+Suite: solver 59->65 (+6), app 43 (sin cambio), BUILD SUCCESS con mvn clean test desde la
+raíz, árbol limpio. src/main del solver SÍ tocado -> referencia-codigo-solver.md REGENERADO
+(commit 350258b); modelo NO tocado (§4.7 ya correcto de S53). Commits
+6ef0c14/7dd9048/1987925/5a144d3/0150e64/350258b.
+
+Deuda VIVA que 8.2a deja para 8.2b: pin de AULA (contrato por-plaza + restricción +
+verificación), persistencia de SesionBloqueada (entidad JPA §4.7 + schema) y entrada del
+bloqueo por REST, y el List.of() placeholder de app/CatalogoMapper.
