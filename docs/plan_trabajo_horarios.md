@@ -627,7 +627,28 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 62 — Fase 8, Bloque 8.2b-iii-A: CABLEADO del servicio a los repos
+Última sesión registrada: Sesión 63 — HIGIENE DOCUMENTAL del plan y la bitácora (sin código, 3 commits).
+  Modo interactivo (revisión por secciones con el usuario). DOS operaciones. Op1: archivó la cabecera
+  compacta de S59 a la bitácora (la ventana del plan conserva SIEMPRE las 4 últimas) y borró de la
+  bitácora el dato duplicado de qué ventana conserva el plan, que había quedado rezagado. Op2 (LIMPIEZA
+  DE FONDO): condensó los bloques de fases CERRADAS —Fase 5 (21 bloques → una línea cada uno) y Fase 6
+  (bloques 1-7, 9 y CIERRE)— con el formato "qué (Sxx) → deuda/decisión superviviente; Detalle: bitácora
+  Sxx", y partió la deuda consciente en dos secciones físicas: VIVA (íntegra) y CERRADA (histórico,
+  condensada a una línea que CONSERVA su mecanismo vivo de src/main). Deuda nueva D31 (poblaciones y
+  particiones a confirmar con el centro) que absorbe las cuatro deudas dispersas "a confirmar con el
+  centro" de B3/B7/B11/B13 + la invariante de población.
+  Guardarraíles cristalizados como DECISIÓN PERMANENTE (ver "Criterio de higiene documental del plan"):
+  R4 (ningún token —Dxx/D-Bx-y/Cx/§x.y— sin citante vivo ni definición viva, verificado por grep) y R5
+  (mecanismo vivo de src/main ≠ historia de sesión). Una PARADA de R4: Fase 6 Bloque 8 queda ÍNTEGRO
+  porque D-B8-1 se cita desde el criterio vivo de Fase 6 (l.440) y solo se define ahí. El bloque CIERRE
+  de Fase 6 lleva la remisión "Detalle y decisiones D-B10-1..9: bitácora S54" para dar destino a la cita
+  viva de D-B10-7 (cabecera de S61). Veredicto D24: CONDENSADA (D25, VIVA, se entiende sola: re-expone
+  inline el @Tag de D24 y su insuficiencia). D13/D15/D23/D24/D28 condensadas conservando su mecanismo.
+  Resultado: plan 2154 → 1429 líneas (−725, −34 %); bitácora 2242 → 2270 (+28 por S59). Estructura viva
+  intacta (Bloques de Fase 8 EN CURSO, Decisiones permanentes, Hallazgos PDFs, criterios de fase). No se
+  tocó código, ni modelo_datos_fase1.md, ni nada fuera de docs/. Tres commits de una línea. Árbol limpio.
+  Siguiente: 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el candidato que se decida al abrir sesión.
+Última sesión registrada (previa): Sesión 62 — Fase 8, Bloque 8.2b-iii-A: CABLEADO del servicio a los repos
   de bloqueo. Modo híbrido (diseño en el Project, código en Claude Code). CIERRA EL LAZO end-to-end
   del bloqueo manual: hasta S61 el pin funcionaba en el solver, se persistía y se mapeaba, pero la
   vía REST de generación NO lo leía (cargarProblema() pasaba List.of(), List.of()) — todo lo
@@ -760,7 +781,7 @@ en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62 y la de S59 en la Sesión 63 (misma higiene documental; en S60 se corrigió además una copia truncada y
 duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El plan conserva
-las últimas cabeceras compactas (S60–S62): transitoriamente son 3, hasta que se registre S63, que devolverá la ventana a cuatro (S60–S63). El detalle histórico de cualquier sesión
+las 4 últimas cabeceras compactas (S60–S63). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1063,6 +1084,17 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 - Separación loader/mapper: Jackson queda aislado en ProblemaHorarioJsonLoader; el ProblemaHorarioMapper es puro y testeable sin I/O.
 - Reparto de validación en la carga: los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas y los rangos. El mapper posee en exclusiva: integridad referencial por código, códigos duplicados, I2 y la política "aulasCandidatas rechazado hasta Fase 3".
 - I1, I3 e I6 no se validan en la carga del JSON del solver (el JSON no transporta particiones). Se validan en la capa de configuración (Fase 6/8). Corrige el alcance de la decisión de Sesión 6, que las incluía antes de existir el dominio reducido.
+- **Criterio de higiene documental del plan** (S63). Al archivar o condensar cualquier cosa del
+  plan rigen dos reglas, en este orden:
+  R4 (guardarraíl de tokens): ningún identificador (Dxx, D-Bx-y, Cx, §x.y) puede quedar sin citante
+  vivo NI sin definición viva. Se verifica por grep contra el fichero, no por inspección visual. Si un
+  recorte dejaría un token huérfano, NO se recorta: se para y se decide.
+  R5 (mecanismo vivo ≠ historia): el texto que describe CÓMO SE COMPORTA EL SISTEMA o QUÉ QUEDA
+  PENDIENTE es estado vivo y no se archiva, aunque no tenga identificador. Nombres de clases, métodos y
+  comportamientos de src/main son estado vivo. Una deuda se cierra IMPLEMENTANDO algo: su línea
+  condensada conserva esa implementación.
+  Origen: S62 perdió la descomposición de Fase 8 por archivarla sin comprobar que era la única copia
+  viva; S63 estuvo a punto de perder D-B8-1 y el mecanismo de D13.
 
 ### Deuda consciente VIVA
 
