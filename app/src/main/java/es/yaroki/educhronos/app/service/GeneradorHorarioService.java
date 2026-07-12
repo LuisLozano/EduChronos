@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.service;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
+import es.yaroki.educhronos.app.catalog.AulaBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
 import es.yaroki.educhronos.app.catalog.Asignatura;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
@@ -11,6 +12,7 @@ import es.yaroki.educhronos.app.catalog.Plaza;
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.ProfesorRestriccionHorariaRepository;
+import es.yaroki.educhronos.app.catalog.SesionBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
@@ -69,6 +71,8 @@ public class GeneradorHorarioService {
     private final ProfesorRestriccionHorariaRepository restriccionRepository;
     private final HorarioGeneradoRepository horarioRepository;
     private final SesionRepository sesionRepository;
+    private final SesionBloqueadaRepository sesionBloqueadaRepository;
+    private final AulaBloqueadaRepository aulaBloqueadaRepository;
 
     public GeneradorHorarioService(
             TramoSemanalRepository tramoRepository,
@@ -80,7 +84,9 @@ public class GeneradorHorarioService {
             ActividadRepository actividadRepository,
             ProfesorRestriccionHorariaRepository restriccionRepository,
             HorarioGeneradoRepository horarioRepository,
-            SesionRepository sesionRepository) {
+            SesionRepository sesionRepository,
+            SesionBloqueadaRepository sesionBloqueadaRepository,
+            AulaBloqueadaRepository aulaBloqueadaRepository) {
         this.tramoRepository = tramoRepository;
         this.aulaRepository = aulaRepository;
         this.asignaturaRepository = asignaturaRepository;
@@ -91,6 +97,8 @@ public class GeneradorHorarioService {
         this.restriccionRepository = restriccionRepository;
         this.horarioRepository = horarioRepository;
         this.sesionRepository = sesionRepository;
+        this.sesionBloqueadaRepository = sesionBloqueadaRepository;
+        this.aulaBloqueadaRepository = aulaBloqueadaRepository;
     }
 
     /**
@@ -102,6 +110,16 @@ public class GeneradorHorarioService {
      * <p>La integridad referencial del catálogo (huérfanos, códigos duplicados) la
      * hace cumplir el propio {@link CatalogoMapper}; este servicio deja propagar
      * sus {@code IllegalArgumentException} / {@code IllegalStateException}.
+     *
+     * <p>Los bloqueos manuales vigentes (§4.7, Bloque 8.2b-iii) —los pines de tramo
+     * ({@code sesion_bloqueada}) y de aula ({@code aula_bloqueada})— se leen DENTRO
+     * de esta misma transacción, junto al resto del catálogo. Es OBLIGATORIO: el
+     * {@code TramoSemanal} que devuelve {@link es.yaroki.educhronos.app.catalog.SesionBloqueada#getTramoInicio()}
+     * debe ser LA MISMA INSTANCIA que la de {@code tramoRepository.findAll()}, porque
+     * {@code BloqueoMapper} cruza el pin de tramo por IDENTIDAD DE OBJETO contra el
+     * {@code IdentityHashMap} que construye {@code aProblemaHorario}. Cargar los
+     * bloqueos fuera de esta transacción daría instancias {@code TramoSemanal}
+     * distintas y el pin se perdería EN SILENCIO (sin excepción).
      */
     @Transactional(readOnly = true)
     public ProblemaHorario cargarProblema() {
@@ -114,8 +132,8 @@ public class GeneradorHorarioService {
                 subgrupoRepository.findAll(),
                 actividadRepository.findAll(),
                 restriccionRepository.findAll(),
-                List.of(),   // pinesTramo: sin bloqueos manuales en la vía de generación (8.2b-ii)
-                List.of());  // pinesAula:  idem
+                sesionBloqueadaRepository.findAll(),
+                aulaBloqueadaRepository.findAll());
     }
 
     /**
