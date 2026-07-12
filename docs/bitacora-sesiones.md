@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S58. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S59. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -8,10 +8,10 @@ aligerar el plan de trabajo, conservando la traza completa de decisiones.
 deuda consciente abierta, decisiones permanentes, bloques de fase) está en
 `plan_trabajo_horarios.md`. Esta bitácora es histórico de solo lectura: no se
 consulta para conocer el estado actual, sino para entender por qué se tomó una
-decisión pasada. El plan conserva además las 4 últimas cabeceras compactas de
-sesión (S58–S62); las anteriores se archivan aquí conforme avanza el trabajo.
+decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
+archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S58). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S59). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2240,3 +2240,31 @@ raíz, árbol limpio. src/main del solver SÍ tocado -> referencia-codigo-solver
 Deuda VIVA que 8.2a deja para 8.2b: pin de AULA (contrato por-plaza + restricción +
 verificación), persistencia de SesionBloqueada (entidad JPA §4.7 + schema) y entrada del
 bloqueo por REST, y el List.of() placeholder de app/CatalogoMapper.
+
+### Sesión 59 — Fase 8, deuda D-F8.1-8 CERRADA: test de contrato de serialización de los DTOs de proyección (blinda contra la divergencia silenciosa que en 7B dejó colar el profesor TEC4).
+
+Modo híbrido (decisión y contrato en el Project, código en Claude
+  Code). Enfoque cerrado = Opción B sola (test JVM que serializa y afirma la FORMA del JSON),
+  descartadas A (snapshot capturado a mano, repite la debilidad del TEC4) y C (acoplar builds
+  Maven/Node, arrastra el toolchain de 8.1). Nuevo ProyeccionDtoContratoTest (app.web.dto) con el
+  ObjectMapper REAL de la ruta MVC (new MappingJackson2HttpMessageConverter().getObjectMapper(),
+  el mismo de HorarioControllerHttpTest; SB 4.1 no trae @JsonTest): 3 métodos —(A) SesionVistaDTO
+  exactamente 12 claves + tipo JSON de cada una; (B) HorarioProyeccionDTO exactamente 8 claves +
+  tipos con objetivo/cota no nulos; (C) objetivo=null/cota=null siguen presentes con isNull()==true,
+  confirma que NO hay @JsonInclude(NON_NULL) y honra el contrato con horario.model.ts (number|null
+  siempre presente)—. Claves por containsExactlyInAnyOrder derivadas de fieldNames(): añadir un
+  campo rompe igual que quitarlo. Lista de claves EXPLÍCITA (no reflexión del record) → un renombrado
+  mueve un solo lado y el test salta (verificado en el oro negativo). CENTINELA en cada método: al
+  cambiar el DTO, actualizar TAMBIÉN app/frontend/src/app/models/horario.model.ts (interfaz espejo,
+  no atada automáticamente). ORO NEGATIVO (hecho y revertido, no commiteado): renombrar
+  asignaturaNombre→asignaturaNom deja el test ROJO por containsExactlyInAnyOrder; revertido, verde.
+  horario.model.ts NO se toca (hoy es espejo fiel del DTO, sin corrección pendiente). Deuda residual
+  anotada: B no detecta que la interfaz TS quede rezagada tras un cambio propagado correctamente en
+  Java; el centinela lo mitiga, no lo elimina. Suite: solver 59 + app 46 (43 + 3), BUILD SUCCESS con
+  mvn clean test desde la raíz; mvn -pl app test en solitario da NoSuchMethodError por jar rancio de
+  solver en .m2 (artefacto conocido de la frontera modular, no regresión). src/main del solver NO
+  tocado (referencia-codigo-solver.md sin regen); modelo NO tocado. Commit 9d0fb5f. Siguiente: 8.2b
+  (persistencia+REST del bloqueo + pin de aula), con la tensión §4.7 a cerrar antes de teclear (el
+  modelo especifica SesionBloqueada con aula_id por-instancia, pero 8.2a fijó que el pin de aula es
+  por-plaza; hay que rediseñar §4.7 o llevar el aula a otra entidad antes de persistir); o el
+  candidato que decidas al abrir sesión.

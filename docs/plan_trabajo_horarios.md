@@ -752,42 +752,15 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   CatalogoMapper:135; para 8.2b-iii: entrada del bloqueo por REST (body de POST /api/horarios vs
   endpoint propio, decisión abierta). Siguiente: 8.2b-ii (persistencia de bloqueos) o el candidato
   que se decida al abrir sesión.
-Última sesión registrada (previa): Sesión 59 — Fase 8, deuda D-F8.1-8 CERRADA: test de contrato de
-  serialización de los DTOs de proyección (blinda contra la divergencia silenciosa que en 7B
-  dejó colar el profesor TEC4). Modo híbrido (decisión y contrato en el Project, código en Claude
-  Code). Enfoque cerrado = Opción B sola (test JVM que serializa y afirma la FORMA del JSON),
-  descartadas A (snapshot capturado a mano, repite la debilidad del TEC4) y C (acoplar builds
-  Maven/Node, arrastra el toolchain de 8.1). Nuevo ProyeccionDtoContratoTest (app.web.dto) con el
-  ObjectMapper REAL de la ruta MVC (new MappingJackson2HttpMessageConverter().getObjectMapper(),
-  el mismo de HorarioControllerHttpTest; SB 4.1 no trae @JsonTest): 3 métodos —(A) SesionVistaDTO
-  exactamente 12 claves + tipo JSON de cada una; (B) HorarioProyeccionDTO exactamente 8 claves +
-  tipos con objetivo/cota no nulos; (C) objetivo=null/cota=null siguen presentes con isNull()==true,
-  confirma que NO hay @JsonInclude(NON_NULL) y honra el contrato con horario.model.ts (number|null
-  siempre presente)—. Claves por containsExactlyInAnyOrder derivadas de fieldNames(): añadir un
-  campo rompe igual que quitarlo. Lista de claves EXPLÍCITA (no reflexión del record) → un renombrado
-  mueve un solo lado y el test salta (verificado en el oro negativo). CENTINELA en cada método: al
-  cambiar el DTO, actualizar TAMBIÉN app/frontend/src/app/models/horario.model.ts (interfaz espejo,
-  no atada automáticamente). ORO NEGATIVO (hecho y revertido, no commiteado): renombrar
-  asignaturaNombre→asignaturaNom deja el test ROJO por containsExactlyInAnyOrder; revertido, verde.
-  horario.model.ts NO se toca (hoy es espejo fiel del DTO, sin corrección pendiente). Deuda residual
-  anotada: B no detecta que la interfaz TS quede rezagada tras un cambio propagado correctamente en
-  Java; el centinela lo mitiga, no lo elimina. Suite: solver 59 + app 46 (43 + 3), BUILD SUCCESS con
-  mvn clean test desde la raíz; mvn -pl app test en solitario da NoSuchMethodError por jar rancio de
-  solver en .m2 (artefacto conocido de la frontera modular, no regresión). src/main del solver NO
-  tocado (referencia-codigo-solver.md sin regen); modelo NO tocado. Commit 9d0fb5f. Siguiente: 8.2b
-  (persistencia+REST del bloqueo + pin de aula), con la tensión §4.7 a cerrar antes de teclear (el
-  modelo especifica SesionBloqueada con aula_id por-instancia, pero 8.2a fijó que el pin de aula es
-  por-plaza; hay que rediseñar §4.7 o llevar el aula a otra entidad antes de persistir); o el
-  candidato que decidas al abrir sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
-en la Sesión 61 y la de S58 en la Sesión 62 (misma higiene documental; en S60 se corrigió además una copia truncada y
+en la Sesión 61, la de S58 en la Sesión 62 y la de S59 en la Sesión 63 (misma higiene documental; en S60 se corrigió además una copia truncada y
 duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El plan conserva
-las 4 últimas cabeceras compactas (S59–S62). El detalle histórico de cualquier sesión
+las últimas cabeceras compactas (S60–S62): transitoriamente son 3, hasta que se registre S63, que devolverá la ventana a cuatro (S60–S63). El detalle histórico de cualquier sesión
 anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
