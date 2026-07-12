@@ -775,503 +775,36 @@ anterior —incluida S42 (citada por la deuda abierta D25) y S43
 - [x] Bloque 6 — Dataset real 1ºESO ordinarias + verificación PDFs
 
 ### Bloques de Fase 5
-- [x] Bloque 1 — Religión multi-grupo por parejas (Tipo 4), validado con 1ºESO
-      real (S19). Fixture problema-5-religion-parejas-1eso.json +
-      SolverHorarioReligionParejasTest. Datos 6/6 verificados contra volcado fiel.
-- [x] Bloque 2 — Escala 1ºESO + 2ºESO (7 grupos: 4 de 1º + 3 de 2º), medición de
-      tiempo de solver (S20). Fixture problema-5-escala-instituto.json (linaje
-      NUEVO de fixture de escala, separado de los de discriminación; crece por
-      niveles hasta el instituto) + SolverHorarioEscalaInstitutoTest. 1º y 2º
-      verificados plaza a plaza contra volcado fiel. Medición: solución factible
-      en 0,317 s, 0 violaciones duras (suite 30 verde). Códigos de grupo
-      normalizados sin "º" (1A..2C).
-- [x] Bloque 3 — Escala 3ºESO ordinario (3A–3C); 10 grupos totales (S21). Fixture
-      problema-5-escala-instituto.json AMPLIADO (mismo linaje, crece in situ) +
-      SolverHorarioEscalaInstitutoTest mutado a 10 grupos. 3º verificado plaza a
-      plaza contra volcado fiel (125/125). Escala pura: ningún cambio de dominio;
-      reutiliza el mecanismo multi-plaza de §6.4 (dos coordinadas de nivel rep=1,
-      K=6: CyR desdoblado + refuerzo×3 + BioNu) y el Hallazgo F (Religión partida
-      AB/C, no transversal). Sesiones compartidas ord+Di modeladas con subgrupo
-      del ordinario solo (Di excluido; verificado que 3º ordinario es separable).
-      Medición: factible en 0,469 s, 0 duras (suite 30 verde). Segundo punto de
-      la curva de escala. Geo→Geogr normalizado en 3º (ruido de extracción del
-      volcado de 3ºB). Particiones de refuerzo/ATED: plausibles, a confirmar con
-      el centro (deuda, en el Javadoc del test). Precisión (S22): el dominio
-      modela SUBGRUPOS, no ALUMNOS — no existe entidad Alumno. Que cada subgrupo
-      se corresponda con una partición real (disjunta y exhaustiva) de los
-      alumnos de su grupo NO lo verifica ningún componente del sistema: es
-      invariante de población, responsabilidad del constructor del fixture y a
-      confirmar con el centro. Confirmado leyendo VerificadorSolucion.java en
-      S21: el no-solape de GRUPO se cuenta con un Set POR INSTANCIA de actividad,
-      de modo que varios subgrupos del mismo grupo dentro de una misma actividad
-      coordinada/desdoble colapsan a "grupo contado 1 vez" (por eso las plazas de
-      las coordinadas de 3º coexisten sin violación). SÍ están verificados, en
-      cambio, la disjunción estructural intra-actividad (I2) y el no-solape de
-      grupo entre actividades distintas.
-
-- [x] Bloque 4 — Lectura B (SubgrupoGrupo N:M): subgrupo cuya población son
-      alumnos de varios grupos (S22). TRABAJO ESTRUCTURAL, no escala: el dominio
-      pasó de Subgrupo→grupo 1:1 a Subgrupo→grupos N:M (Set<GrupoAdministrativo>).
-      Desbloquea el Tipo 7 (optativas multi-grupo de Bachillerato), última
-      tipología del enunciado sin soporte de dominio. Tocó: Subgrupo (record +
-      equals/hashCode por código), SubgrupoDto, schema (grupo→grupos array),
-      mapper, ModeloCpSat.tocaGrupo (sg.grupos().contains), VerificadorSolucion
-      (gs.addAll(s.grupos())), VistaPorGrupo (flatMap). Migrados 12 fixtures +
-      JSON inline de ProblemaHorarioJsonLoaderTest + VerificadorSolucionGrupoTest.
-      Fixture de discriminación PROPIO (no toca el de escala): bloque de optativas
-      1ºBach C+D (TICO/DTec/DA), recorte fiel de §6.3, verificado cruzando
-      grupo-1BACH-C/D.json. Prueba positiva (problema-5-lecturab-optativas-bach.json:
-      factible, 0 duras, el bloque toca C y D) + prueba negativa
-      (problema-5-lecturab-optativas-bach-infactible.json: el subgrupo multi-grupo
-      bloquea ambos grupos → infactible por palomar). Suite 32 verde (30+2).
-      CORRECCIÓN de S20: "1B-C 1B-D" del volcado de aulas NO es Lectura B; es
-      notación "1ºBach C + 1ºBach D" (dos grupos enteros) y corresponde a LU =
-      Lectura A. La evidencia real de Lectura B es el bloque de optativas, no esa
-      celda. Modelo: §6.3/§6.4/§6.5 y la invariante S9 actualizadas (Lectura B
-      soportada y validada; Lectura A es el caso particular de conjunto unitario).
-- [x] Bloque 5 — PDC de 3º a escala (S23). ESCALA con capa de modelado nueva
-      (grupo de Diversificación). El PDC de 3º se modela como UN grupo
-      administrativo propio 3PDC (tipo DIVERSIFICACION_PDC, padre 3C por I5), NO
-      como subgrupo Lectura B sobre {3A,3B,3C}: el Di saca parte de cada grupo y
-      el resto sigue en clase ordinaria simultánea, así que 3PDC solo se bloquea
-      a sí mismo (subgrupo 3PDC→{3PDC} mono-grupo). Distinción estructural frente
-      a Bach: en Bach el subgrupo lista varios grupos porque los bloquea enteros
-      (redistribución total, Lectura B); en PDC no. Tronco A8 de 22 h (ÁmbCM 8 /
-      ÁmbSL 7 / OyD 2 / RefMt 2 / IngDi 2 / TPMAR 1), 6 actividades mono-plaza
-      DISTRIBUIDA aulaFija A8, verificado sin solapamiento interno contra volcado
-      fiel (tronco idéntico en los tres PDC A/B/C). Las 8 compartidas ord+Di se
-      quedan en el ordinario (opción 2: evita doble conteo de población
-      3PDC ⊂ 3A∪3B∪3C, que activaría D3). Fixture de escala AMPLIADO (mismo
-      linaje) + SolverHorarioEscalaInstitutoTest mutado (grupos 11, subgrupos 116,
-      actividades 116). Tercer punto de curva: 10 grupos + 1 grupo Di → 0,408 s,
-      0 duras, suite 32 verde. NO dispara salto de régimen (A8 exclusiva, profes
-      ≤14/30). Coste de proceso: 3 intentos (subgrupo {3A,3B,3C}→sobrecarga 52 h;
-      grupoPadre null→viola I5; grupoPadre 3C→OK), por razonar sobre código no
-      leído antes de pedirlo. Cierra dos deudas: "PDC a escala (3ºADi/3ºBDi/3ºCDi)"
-      (resuelta distinto a lo previsto: un grupo, no tres) y "reconciliación
-      3ºPDC↔3ºCDi" (cerrada por identidad: el PDC sin letra del volcado es el Di
-      adscrito a 3C, determinable por su envoltura ordinaria).
-- [x] Bloque 6a — Función objetivo: ventanas del profesorado (S24). Cambio de
-      régimen: el solver pasa de factibilidad pura a optimización por una vía
-      separada (`construirConObjetivo`/`resolverOptimizando`), dejando intacto
-      el camino de factibilidad (`construir`/`resolver`) para no invalidar la
-      curva de escala. Forma A (cotas tensadas) + andamiaje genérico de términos
-      ponderados con un único término. `contarVentanasProfesor` en el verificador
-      (recomputo independiente). Fixture problema-6-ventanas-profesor.json +
-      SolverHorarioVentanasProfesorTest (2 casos). Suite 34 verde. NO cierra
-      criterios de Fase 5 (el criterio 4 tiene mecanismo, falta umbral + escala).
-      Deuda D17. Comprobación de oro fuerte diferida a 6b (un hueco inevitable
-      exige indisponibilidades). Índice de API regenerado (src/main cambió).
-- [x] Bloque 6b — Indisponibilidades horarias DURA + oro fuerte de ventanas (S25).
-      El solver consume `ProfesorRestriccionHoraria` en su variante DURA
-      (`restriccionIndisponibilidadProfesor` en `construir()`, aplica en ambos
-      regímenes). BLANDA se carga y valida pero no se consume (difiere a 6c).
-      Cierra la comprobación de oro fuerte de ventanas comprometida en S24:
-      óptimo determinista > 0 (hueco inevitable forzado por veto), el optimizador
-      lo minimiza rechazando alternativas más caras. I/O ensanchado una vez
-      (records RestriccionHoraria + TipoRestriccion + DTO; campo en ProblemaHorario;
-      array top-level `restriccionesHorarias` en el schema). 4 commits, suite 42
-      verde. Índice regenerado, modelo §4.3 actualizado + D18. NO cierra criterios
-      de Fase 5 (criterio 4 PARCIAL: falta umbral + escala).
-- [x] Bloque 6c — Indisponibilidad BLANDA del profesorado como término del objetivo
-      (S26). El solver consume la variante BLANDA de `ProfesorRestriccionHoraria`
-      (`objetivoIndisponibilidadBlandaProfesor` en `construirConObjetivo()`):
-      penaliza, vía un literal por (restricción blanda × instancia que usa al
-      profesor), que la instancia caiga en el tramo vetado-blando. Segundo término
-      del objetivo (el primero fue ventanas, 6a). NO toca I/O (el dato entra desde
-      6b). Troceado en dos turnos: A — el término muerde (discriminación, óptimo 0
-      evitable) + recomputo gemelo `contarPenalizacionIndisponibilidadBlanda` en el
-      verificador; B — oro fuerte (incumplir inevitable, óptimo determinista 1 > 0,
-      el optimizador rechaza la alternativa de coste 2). Ambos fixtures de linaje
-      DISCRIMINACIÓN, validados por enumeración exhaustiva en diseño, con ventanas
-      idénticamente 0 (término aislado). D17 RESUELTA para este término: las cotas
-      tensadas siguen correctas porque la blanda penaliza el `tramoIndex` y no toca
-      span/primero/ultimo/huecos (separable; analizado en el Javadoc de
-      `objetivoVentanasProfesor`). Peso `PESO_INDISP_BLANDA=1` hardcodeado (gemelo
-      de `PESO_VENTANAS`): decisión consciente de no calibrar sin datos del centro;
-      parametrización diferida (deuda nueva de pesos blandos). Suite 44 verde,
-      BUILD SUCCESS. Criterio 3 de Fase 5 AVANZADO (segundo término blando), no
-      cerrado (faltan distribución-a-blanda / primeras-últimas horas + escala).
-- [x] Bloque 6d-c — Sesiones consecutivas máximas del profesorado como término del
-      objetivo (S27). El solver penaliza el exceso sobre `MAX_CONSECUTIVAS=3`
-      sesiones seguidas de un profesor en un día
-      (`objetivoConsecutivasProfesor` en `construirConObjetivo()`): por cada (prof,
-      día) y cada ventana deslizante de N+1 posiciones contiguas en `ordenEnDia`, un
-      literal `excede` reificado como "las N+1 ocupadas"; la suma penaliza
-      `Σ max(0, L−N)` por racha maximal de longitud L. Tercer término del objetivo
-      (ventanas 6a, indisponibilidad blanda 6c). NO toca I/O. Decidido al inicio con
-      el usuario entre 6d (tres términos blandos) y escala (4º/Bach/FPB): 6d-c es la
-      única capa LIMPIA que queda del criterio 3 (6d-a distribución-a-blanda toca
-      estructura dura en dos sitios; 6d-b primeras/últimas horas REACTIVA D17). Se
-      eligió cerrar la capa limpia antes de abrir escala (donde se espera el salto de
-      régimen D4), para que el criterio 3 no quede a medias si escala da problemas.
-      Troceado en dos turnos: A — el término muerde (discriminación, óptimo 0
-      evitable) + recomputo gemelo `contarPenalizacionConsecutivasProfesor` en el
-      verificador (cuenta rachas maximales; equivalencia con las ventanas deslizantes
-      del modelo validada por enumeración exhaustiva de los 256 subconjuntos de un
-      día de 8 tramos); B — oro fuerte (encadenar inevitable, óptimo determinista 1,
-      rechaza alternativa de coste 2). Fixtures: problema-6d-consecutivas-
-      discriminacion.json (4 actividades NEUTRA de P1, día de 4 tramos + día de 1 →
-      óptimo 0 repartiendo ≤3 al día1, alternativa de coste 1 con las 4 juntas; test
-      asevera coste 0 Y día1≤3) y problema-6d-consecutivas-oro-fuerte.json (7
-      actividades de P1, dos días de 4 tramos saturados → algún día fuerza 4 seguidas
-      ⇒ óptimo 1 inevitable; partir la racha cuesta ventana ⇒ coste 2, rechazado;
-      test asevera el COSTE =1, no la posición). Ventanas NO contaminan: enumeración
-      confirma que ningún óptimo de coste total ≤1 tiene consecutivas 0 (la vía-
-      ventanas a coste 1 no existe). D17 NO reactivada: el término no mira
-      primero/ultimo/span (separable como la blanda de 6c); no se migró a
-      addMinEquality/addMaxEquality. Sin APIs CP-SAT nuevas (newBoolVar, addBoolOr,
-      addBoolAnd, addImplication, addLinearExpressionInDomain, Domain.fromValues,
-      complemento, LinearExpr.term, todas desde 6a/6c); compiló a la primera.
-      No-regresión de ventanas (6a) e indisponibilidad blanda (6c) confirmada por
-      ejecución: los tres términos conviven sin interferencia. Peso
-      `PESO_CONSECUTIVAS=1` y N=3 hardcodeados (deuda D21 ampliada). Suite 46 verde,
-      BUILD SUCCESS. Índice regenerado. NO cierra criterios de Fase 5 (criterio 3
-      AVANZADO con tres términos, faltan distribución-a-blanda + primeras/últimas
-      horas + escala).
-- [x] Bloque 7 — Escala 4ºESO ordinario (4A–4D), sin Di (S28). Fixture PROPIO
-      problema-5-escala-4ESO.json (linaje de escala AISLADO, separado del de
-      escala-instituto: 4º introduce un salto de régimen propio —D4— que se
-      observa sin el ruido de 1º/2º/3º; la fusión al instituto es paso posterior)
-      + SolverHorarioEscala4EsoTest. 4 grupos, 30 tramos, 96 subgrupos, 31
-      actividades (7 bloques transversales NEUTRA + 24 ordinarias DISTRIBUIDA),
-      construidos desde los volcados fieles grupo-4-ESO-{A,B,C,D}.json y
-      verificados por cuadre 30/30 por grupo. Ejercita los TRES patrones de
-      agrupamiento del Hallazgo K simultáneos en un nivel: transversal sobre 4
-      grupos (DT+Ref+CeH+AFAVS en M5/J3; Rel+ATEDU en V4), sobre 3 {A,B,D}
-      (FQ+DIG; Biol+TEC+FOPP), sobre 2 {A,B} (mates partidas MatAp/MatAc); C y D
-      con itinerario propio (C letras LAT/ECO; D mixto) como ordinarias.
-      Optativas de nivel (TEC/DIG/FOPP) como plazas compartidas Tipo 7 (profesor
-      y aula únicos, no clonados; verificado celda a celda); EXPRE desdoblada por
-      taller (DIB1/TALL1 A,B; DIB2/C01 C,D) dentro de la misma actividad. D4 a
-      saturación (AFAVS Gim+Pista para los 4 grupos en M5/J3) y cuello INF1/A12In
-      (DIG 6h en aula única) NO rompen: factible en 0,126 s, 0 duras (suite 47
-      verde). Tercer-cuarto punto del seguimiento de escala, pero linaje SEPARADO
-      del de escala-instituto (no entra en su curva). Escala pura: ningún cambio
-      de dominio ni de src/main. NO cierra criterios de Fase 5 (4º AISLADO no
-      prueba D4 al fusionar niveles; criterios 1-2 exigen el instituto completo).
-      Deuda nueva: DIG/TEC/FOPP de 4º suman 6h entre dos bloques de perfil
-      distinto, lo que no encaja con la optativa única de 3h de la prematrícula;
-      modeladas como población propia por bloque (sin reuso de subgrupo, sin
-      acople S3), a confirmar con el centro. DT/CeH/AFAVS sí reusan subgrupo entre
-      M5 y J3 (misma partición demostrada). TUT4 como actividad ordinaria (el DTO
-      no transporta tutor obligatorio; S8 no ejercitada).
-- [x] Bloque 8 — Escala 4ºESO COMPLETO: ordinario (4A–4D) + 2 PDC (4APDC, 4DPDC)
-      en un único fixture (S29). Cierra 4º como linaje. Fixture problema-5-escala-
-      4ESO-Di.json (6 grupos, 30 tramos, 116 subgrupos, 39 actividades) +
-      SolverHorarioEscala4EsoDiTest. Mismo linaje AISLADO de 4º (no entra en la
-      curva de escala-instituto). DOS grupos Di (resuelto el cabo abierto: son dos,
-      no uno) NO separables del ordinario: comparten EF, tutoría y el agrupamiento
-      del V4. Modelado validado celda a celda: los 26 ámbitos son IDÉNTICOS en
-      ambos PDC → ámbito = UNA actividad con subgrupo compartido {4APDC,4DPDC}
-      (mono-Di, sin los padres: regla S23). EF/tutoría específicas de cada Di con
-      su grupo de origen, plaza única conjunta {4X,4XPDC}. EXPRE del Di con
-      aulasCandidatas [C01,TALL1]. FACTIBLE en 0,232 s, 0 duras (suite 48 verde).
-      Tipo 5 validado a escala con dos grupos Di. NO cierra criterios de Fase 5:
-      4º completo no agrava D4 (el PDC no añade presión sobre Gim/Pista; D4 sigue
-      esperando a la fusión de niveles). Escala pura: ningún cambio de dominio ni
-      de src/main. Dos INFEASIBLE durante la construcción (código de subgrupo
-      duplicado por EXPRE multi-aula; duplicación de B04 por tratar los ámbitos
-      como linajes separados) cazados y corregidos antes del cierre — aprendizaje:
-      cuadre 30/30 ≠ factibilidad; validar también unicidad y carga por recurso.
-- [x] Bloque 9 — FUSIÓN DE NIVELES 3º+4º ESO (S30). Primer fixture que reúne dos
-      linajes antes independientes: 3º (3A/3B/3C + 3PDC, extraído de escala-instituto)
-      + 4º completo (de escala-4ESO-Di). Fixture problema-5-fusion-3-4-eso.json (10
-      grupos, 30 tramos, 155 subgrupos, 79 actividades) + SolverHorarioFusion34EsoTest.
-      OBJETIVO: ejercitar D4 (Gim/Pista compartido entre cursos) por primera vez —
-      hasta S29 cada nivel tuvo Gim/Pista para sí. Par 3º+4º por atribución limpia (4º
-      satura Gim+Pista en J3/M5; 3º trae EF clavada a Pista por aulaFija). Unificación
-      de catálogos cruzada POR CÓDIGO: 16 profesores compartidos (código=persona,
-      carga ≤17h), 7 aulas compartidas (misma def. física), 0 colisiones de código,
-      tramos idénticos. Modelado Opción B (conservador, EF de 3º con aulaFija sin
-      relajar) para atribución limpia de un eventual INFEASIBLE. Validado con batería
-      completa (cuadre por grupo respeta la divergencia de estilos de PDC: 3PDC=22 por
-      opción 2 de S23, los Di de 4º=30 por plaza conjunta {4X,4XPDC} — la fusión NO
-      reconcilia los dos estilos). FACTIBLE en 0,300 s, 0 duras (suite 49 verde).
-      RESULTADO: D4 NO muerde en el par; cabe con holgura (Gim 8h, Pista 10h sobre 30).
-      Escala+estructura acoplados conscientemente (fusión no es capa limpia). NO cierra
-      criterios de Fase 5: el par no prueba D4 a escala de instituto (la demanda de
-      Pista crece con el nº de grupos). D4 baja de severidad, NO se cierra. src/main no
-      tocado.
-- [x] Bloque 10 — Fusión ESO completa: 1º+2º+3º+4º en un único fixture (S31).
-      Reúne los dos linajes de fusión: escala-instituto (1º-3º+3PDC) + escala-4ESO-Di
-      (4º completo). 17 grupos, 30 tramos, 232 subgrupos (116+116), 155 actividades
-      (116+39), 217 plazas. OBJETIVO: someter D4 a competencia REAL (no la holgura del
-      par de S30). Logrado: demanda de Gim 26h sobre 30 (vs 8h en el par), con los dos
-      NEUTRA de 4º (AFAVS Gim+Pista en J3/M5) compitiendo contra EF-3A/EF-3C clavadas a
-      Pista. Unificación cruzada POR CÓDIGO: 22 profesores compartidos (vs 16 en S30 al
-      sumar 1º/2º; código=persona, nombre no-placeholder priorizado, carga ≤18h), 12
-      aulas compartidas (diferencias cosméticas de nombre → linaje instituto), 0
-      colisiones grupo/subgrupo/actividad. Modelado Opción B (conservador): EF de 3º
-      conserva aulaFija para atribución limpia. Fixture generado programáticamente y
-      validado contra el schema real + batería completa (unicidad de las 7 colecciones
-      que el mapper deduplica —plaza NO, el mapper no la impone—, integridad, I2, I7,
-      XOR aula, aulas fijas disjuntas, carga ≤30, cuadre 16×30 + 3PDC=22) +
-      SolverHorarioFusionEsoCompletaTest (calca el de fusión 3º+4º). FACTIBLE en 2,110s,
-      0 duras (suite 50 verde). RESULTADO: D4 NO muerde ni a escala de ESO completa con
-      Gim 26/30; D4 rebajada a residual. SEÑAL DE COSTE: primer punto de la curva con
-      crecimiento no-lineal (×7 en tiempo por ×1,7 en grupos, 0,298s→2,110s); lejos del
-      límite (600s) pero a vigilar al sumar Bach/FPB. Falso positivo de método cazado y
-      corregido: la batería marcaba "unicidad global de plaza" como invariante; el
-      mapper real (leído) NO deduplica plazas (escala-instituto reutiliza B2-PEPA/CyR/
-      Fr2 entre dos actividades de bloque de 2º; legítimo). NO cierra criterios 1-2
-      (faltan Bach+FPB). Escala+fusión de fixtures, sin dominio nuevo: src/main no
-      tocado.
-- [x] Bloque 11 — Escala 1ºBach completo (4 grupos ordinarios A/B/C/D), linaje
-      AISLADO (S32). Fixture problema-5-escala-1bach.json (4 grupos, 30 tramos,
-      65 subgrupos, 30 actividades, 16 aulas, 28 profesores) +
-      SolverHorarioEscala1BachTest. PRIMERA validación a escala real de los dos
-      bloques de optativas transversales Tipo 7 sobre los 4 grupos (OPT1: DTec/
-      ANAP/TEstI/TICO/DA; OPT2: DTec/TEst2/Lab/CE/Pat), con DTec=4h compartida
-      entre ambos bloques (subgrupo único, I6). Tres bloques de modalidad sobre
-      subconjuntos: ciencias {A,B} (Bio/TecIn), humanidades {C,D} (Latín/MCCSS;
-      HMC con profesor distinto por grupo GH6/GH5; LU; ECO con dos plazas
-      paralelas; GRI sólo en oferta de D). Rel/PTVE intra-grupo, un tramo por
-      grupo (tutoría implícita en PTVE, S8/Hallazgo E). Aula variable como
-      aulasCandidatas (EF de C en Gim/Pista; LU; ECO-a; GRI). Decisión de
-      modelado: subgrupos mono-grupo listados en plaza (estilo linaje instituto,
-      frontera S14), NO Lectura B N:M de §6.5 — ambas válidas, se calca el
-      instituto para fusión limpia (divergencia consciente con §6.5). Población:
-      1 subgrupo por opción (plausible), DEUDA a confirmar con el centro
-      (invariante de población). Cribado de aulas y cruce grupo↔aula POR CÓDIGO:
-      0 celdas sin aula (Hallazgo H no muerde en Bach), 0 inconsistencias
-      profesor↔plaza (D8 no muerde). Construido programáticamente desde los 4
-      volcados de grupo + 11 volcados de aula; población real tomada del listado
-      por aula (no del de grupo). Validado contra schema real + batería completa
-      (integridad, unicidad, I2, I7, XOR aula, aulas fijas disjuntas, cuadre
-      30/30 los 4 grupos, carga por recurso ≤30: máx profesor 12, aula fija 24).
-      INFEASIBLE cazado durante la construcción (verificador Python contaba grupo
-      por plaza en vez de por instancia; corregido al conteo por instancia que usa
-      VerificadorSolucion, S21/D14) — aprendizaje reconfirmado: la autoridad es el
-      modelo real, no la intuición. FACTIBLE, 0 duras (suite 51 verde). 1ºBach
-      aislado es trivial para el solver (4 grupos). Escala pura: src/main NO
-      tocado. NO cierra criterios 1-2 (faltan 2ºBach y FPB, y la fusión con ESO).
-- [x] Bloque 12 (Sub-bloque A de FPB) — D13 en src/main (S33). PRIMER bloque de
-      Fase 5 que toca src/main desde 6d-c. Prerrequisito de FPB: los bloques de 2-3
-      tramos consecutivos exigen impedir que un IntervalVar cruce la frontera de día
-      o de recreo. Cerrada D13 (ver su entrada en Deuda consciente): lista blanca de
-      inicios en ModeloCpSat (no-op para duracion=1, sin regresión en ESO/Bach) +
-      espejo en VerificadorSolucion (tramosOcupados + verificarBloquesConsecutivos)
-      + verificarNoSolapes ahora cuenta por tramo ocupado (cierra ceguera a solapes
-      en tramos interiores de bloque, gemela del patrón D14). Decisión de modelado
-      (b)+(Vía B): D13 cubre cruce de día Y de recreo, frontera de recreo como
-      constante (deuda D22). Probada por discriminación pura (SolverHorarioBloqueD13Test
-      3 casos: control FEASIBLE, desborde de día INFEASIBLE, cruce de recreo
-      INFEASIBLE). Suite 54 verde, BUILD SUCCESS, sin regresión. NO cierra criterios
-      de Fase 5 (es prerrequisito; la prueba a escala es el Sub-bloque B). Índice de
-      código regenerado (src/main cambió).
-- [x] Sub-bloque B de FPB (S34) — fixture 1ºFPB real a escala. D13 ejercitada a
-      escala: 2 bloques-3 (PS, MECSO) + 5 bloques-2 + 9 sueltas, FACTIBLE 0,021 s,
-      0 duras. Aula técnica TALL_FPB nominal (Opción 1, Hallazgo H). Hallazgo K
-      (MECSO blk-2 + blk-3; §6.6 corregido). src/main NO tocado. NO cierra
-      criterios de Fase 5 (1ºFPB aislado). Fixture problema-5-escala-1fpb.json +
-      SolverHorarioEscala1FpbTest.
-- [x] Sub-bloque C de FPB (S35) — fixture 2ºFPB real a escala. CIERRA el nivel
-      FPB. D13 a más escala: 3 bloques-3 + 5 bloques-2 + 9 sueltas, FACTIBLE
-      0,020 s, 0 duras. Aula técnica TALL_FPB nominal (Opción 1, Hallazgo H);
-      CyS↔TALL3 cruzado exacto. Tutor PAU1. Troceo determinista validado;
-      Hallazgo K asumido (el volcado no etiqueta el troceo). Todo NEUTRA
-      (neutraliza D12 palomar). src/main NO tocado. NO cierra criterios de Fase 5.
-      Fixture problema-5-escala-2fpb.json + SolverHorarioEscala2FpbTest.
-- [x] Bloque 13 — FUSIÓN INSTITUTO COMPLETO (S36). ESO completa + 1ºBach +
-      2ºBach + 1ºFPB + 2ºFPB en un único fixture: 26 grupos, 341 subgrupos, 229
-      actividades, 35 aulas, 59 profesores. CIERRA los criterios 1-2 de Fase 5
-      (factible 269,4 s < 10 min; 0 duras). 2ºBach plegado dentro de la fusión
-      (no aislado; aprendizaje S31). 2ºBach derivado por FIRMA DE POSICIÓN de los
-      volcados grupo-2BACH-A/B/C.json (cada bloque NEUTRA = 1 slot del grupo,
-      cuadre 30/30 por construcción); optatividad transversal ABC 4h en dos NEUTRA
-      con DT compartido (I6), modalidades transversales B+C entrelazadas con
-      bloques internos, aulasCandidatas en plazas que rotan. 2ºBach SIN EF (no
-      añade D4). Fusión por unión de catálogos cruzada POR CÓDIGO (profesores
-      código=persona, máx 23/30; 0 colisiones grupo/subgrupo/actividad; prefijo
-      2BA/2BB/2BC limpio frente a 2A/2B/2C de ESO). HALLAZGO: TALL_FPB colapsaba
-      los talleres de 1ºFPB/2ºFPB → 49 tramos/30 INFEASIBLE; el centro confirmó
-      talleres distintos → TALL_FPB_1/TALL_FPB_2 (corrección de datos, no de
-      modelado). Coste no lineal confirmado (×78 en tiempo por ×1,53 en grupos):
-      deuda D23. Validado por réplica Python contra loader/mapper/Verificador
-      reales antes de ejecutar. Suite 57 verde, BUILD SUCCESS. src/main NO tocado.
-      Fixture problema-5-fusion-instituto-completo.json +
-      SolverHorarioFusionInstitutoCompletoTest. Población de subgrupos de 2ºBach
-      (qué alumnado cae en cada plaza de modalidad/optatividad): deuda a confirmar
-      con el centro, como en 1ºBach (S32).
-- [x] Bloque 16 — PODA DE AULA (D23 palanca b), mecanismo + discriminación (S41).
-      Poda dura de aulasCandidatas SOLO en optimización (construirConObjetivo): una
-      plaza con >UMBRAL_PODA_AULA=8 candidatas se recorta a MAX_AULAS_PODA=8 por orden
-      de código (determinista). Medición previa sobre el instituto completo: 21/52
-      plazas con candidatas (modalidades 2ºBach) listan 25 y concentran el 92% de las
-      1835 presencias de aula — el foco que D23 acusaba. Suelo de saturación medido 3;
-      K=8 con margen ×2,6. Fixtures sintéticos problema-poda-aula-factible /
-      -oro-saturacion + SolverHorarioPodaAulaTest (positivo: poda 12->8 sigue factible,
-      aula ∈ recorte; oro: 9 plazas simultáneas, sin poda factible / con poda 8<9
-      INFEASIBLE por palomar — atribución perfecta). Suite 61 verde, BUILD SUCCESS.
-      src/main tocado (ModeloCpSat: campos + método private). NO mide aún el efecto
-      sobre D23 a escala (bloque siguiente, @Tag escala). NO cierra criterio 3 ni D23.
-- [x] Bloque 17 — PODA DE AULA MEDIDA A ESCALA: INVIABLE. CIERRA palanca (b) de D23
-      con dato NEGATIVO (S42). El frente era medir la poda de S41 sobre el instituto
-      completo; la medición destapó que la poda ROMPE la factibilidad en vez de
-      acelerar. Diagnóstico pareado (misma máquina/fixture, aislado, sin JaCoCo): SIN
-      poda -> FEASIBLE objetivo 215 cota 2 en 600 s; CON poda K=8 -> UNKNOWN (ni una
-      factible en 600 s). Atribución limpia: la poda dio UNKNOWN en las 3 corridas
-      (suite, aislada, aislada-sin-JaCoCo); sin poda da FEASIBLE aislada. Fallo de S41:
-      el suelo de saturación medía un tramo (necesario, no suficiente para factibilidad
-      global). DECISIÓN (opción 2): poda OFF por defecto (construirConObjetivo() delega
-      en construirConObjetivo(false)); mecanismo conservado latente y documentado en
-      javadoc. Tests reorganizados: eliminados SolverHorarioPodaAulaTest + 2 fixtures y
-      el de S37; nuevo SolverHorarioOptimizacionEscalaInstitutoCompletoTest (lee
-      ResultadoOptimizacion). Suite 59 verde, BUILD SUCCESS. ALTA D25 (contención del
-      perfil -Pescala entero, reactivación de D24). src/main tocado (default poda +
-      javadoc) -> índice regenerado; modelo NO tocado. CIERRA palanca (b); empuja D23
-      hacia decisión de producto.
-- [x] Bloque 18 — EXPERIMENTO PAREADO DE ATRIBUCIÓN: la no-convergencia a escala es
-      ESTRUCTURAL, no de un bloque. CIERRA D23 como decisión de producto (S43). Falsar
-      si FPB endurece la optimización a escala. Tres puntos sobre el mismo fixture
-      (problema-5-fusion-instituto-completo.json) recortado EN MEMORIA por bloque
-      académico (catálogo idéntico entre puntos; frontera ESO/Bach/FPB separable sin
-      referencias colgantes, verificado por réplica). Cada punto aislado (D25). RESULTADO:
-      P0 base 26g FEASIBLE obj 221 cota 0; P1 sin FPB 24g FEASIBLE obj 216 cota 2; P2 solo
-      ESO 17g FEASIBLE obj 62 cota 0. ATRIBUCIÓN (sobre estado/cota, no objetivo absoluto):
-      FPB inocente (P0->P1 sin cambio de régimen); Bach domina la magnitud (216->62) pero
-      quitarlo NO da convergencia (P2 sigue FEASIBLE cota 0); la cota no se cierra ni con
-      solo ESO -> propiedad del modelo, no de un bloque. DECISIÓN DE PRODUCTO firmada:
-      FEASIBLE sin optimalidad probada es el modo aceptado del solver a escala. Test nuevo
-      SolverHorarioOptimizacionEscalaSubconjuntosTest (@Tag escala, recorte en memoria con
-      fail-fast de frontera), convive con el de instituto completo. Suite rápida 59 verde,
-      BUILD SUCCESS. src/main NO tocado -> índice NO regenerado; modelo NO tocado. NO cierra
-      criterio 3 (sigue exigiendo umbral con datos del centro).
+- [x] Bloque 1 — Religión multi-grupo por parejas (Tipo 4), validada con 1ºESO real. (S19) → —. Detalle: bitácora S19.
+- [x] Bloque 2 — Escala 1º+2ºESO (7 grupos); primer punto de la curva de escala, inaugura el linaje de fixture escala-instituto. (S20) → —. Detalle: bitácora S20.
+- [x] Bloque 3 — Escala 3ºESO ordinario (10 grupos), segundo punto de la curva. (S21) → deuda D31 (particiones de refuerzo/ATED de 3º sin validar por el centro). Detalle: bitácora S21.
+- [x] Bloque 4 — Lectura B (SubgrupoGrupo N:M): trabajo estructural que desbloquea el Tipo 7. (S22) → dominio Subgrupo→grupos N:M (decisión permanente); modelo §6.3/§6.4/§6.5 y S9 actualizados. Detalle: bitácora S22.
+- [x] Bloque 5 — PDC de 3º a escala, modelado como grupo de Diversificación propio (mono-Di), no como Lectura B. (S23) → regla "PDC = grupo administrativo propio con padre (I5), subgrupo mono-Di; compartidas en el ordinario para evitar el doble conteo que activaría D3". Detalle: bitácora S23.
+- [x] Bloque 6a — Nace el régimen de OPTIMIZACIÓN (vía separada de la de factibilidad) con el término de ventanas del profesorado. (S24) → el solver tiene dos vías (factibilidad / optimización); deuda D17. Detalle: bitácora S24.
+- [x] Bloque 6b — El solver consume las indisponibilidades DURA del profesorado + oro fuerte de ventanas. (S25) → indisponibilidad DURA consumida en ambos regímenes; modelo §4.3 actualizado; deuda D18. Detalle: bitácora S25.
+- [x] Bloque 6c — Indisponibilidad BLANDA del profesorado como segundo término del objetivo. (S26) → el solver consume BLANDA (2º término); D17 resuelta para este término; pesos hardcodeados (D21). Detalle: bitácora S26.
+- [x] Bloque 6d-c — Sesiones consecutivas máximas (MAX_CONSECUTIVAS=3) como tercer término del objetivo. (S27) → tercer término blando; deuda D21 ampliada (pesos y N hardcodeados). Detalle: bitácora S27.
+- [x] Bloque 7 — Escala 4ºESO ordinario (4A-4D, linaje aislado). (S28) → deuda D31 (optativas DIG/TEC/FOPP de 4º modeladas como población propia por bloque); S8 (tutor obligatorio) aún no la consume el solver. Detalle: bitácora S28.
+- [x] Bloque 8 — Escala 4ºESO COMPLETO (+2 PDC); cierra 4º como linaje. (S29) → aplica la regla S23 (ámbito = una actividad con subgrupo compartido de los dos Di). Detalle: bitácora S29.
+- [x] Bloque 9 — Fusión de niveles 3º+4º ESO; primer ejercicio de D4 (Gim/Pista compartido entre cursos). (S30) → D4 no muerde en el par, baja de severidad. Detalle: bitácora S30.
+- [x] Bloque 10 — Fusión ESO completa 1º-4º; D4 a competencia real (Gim 26/30). (S31) → D4 rebajada a residual; primera señal de coste no-lineal (D23). Detalle: bitácora S31.
+- [x] Bloque 11 — Escala 1ºBach completo; primera validación a escala del Tipo 7 (optativas transversales). (S32) → deuda D31 (población "1 subgrupo por opción"); modela subgrupos mono-grupo en plaza, no Lectura B N:M (divergencia consciente con §6.5, estilo linaje instituto/frontera S14). Detalle: bitácora S32.
+- [x] Bloque 12 (Sub-bloque A de FPB) — D13 en src/main: lista blanca de inicios para que un bloque de 2-3 tramos no cruce día ni recreo. (S33) → CIERRA D13; deuda D22 (frontera de recreo hardcodeada). Detalle: bitácora S33.
+- [x] Sub-bloque B de FPB — fixture 1ºFPB real a escala; D13 ejercitada. (S34) → —. Detalle: bitácora S34.
+- [x] Sub-bloque C de FPB — fixture 2ºFPB real a escala; CIERRA el nivel FPB. (S35) → —. Detalle: bitácora S35.
+- [x] Bloque 13 — FUSIÓN INSTITUTO COMPLETO (26 grupos), factible en 269,4 s < 10 min, 0 duras. (S36) → CIERRA los criterios 1-2 de Fase 5; deuda D23 (coste no lineal); deuda D31 (poblaciones de modalidades/optatividad de 2ºBach). Detalle: bitácora S36.
+- [x] Bloque 16 — Poda de aula (D23 palanca b): mecanismo + discriminación. (S41) → mecanismo LATENTE, se desactiva en B17 (ver D23). Detalle: bitácora S41.
+- [x] Bloque 17 — Poda de aula medida a escala: INVIABLE, poda OFF por defecto. (S42) → CIERRA la palanca (b) de D23; ALTA D25. Detalle: bitácora S42.
+- [x] Bloque 18 — Experimento pareado de atribución: la no-convergencia a escala es ESTRUCTURAL, no de un bloque. (S43) → CIERRA D23 como decisión de producto (FEASIBLE sin optimalidad probada a escala). Detalle: bitácora S43.
 
 ### Bloques de Fase 6
-- [x] Bloque 1 — Andamiaje del módulo app/ + humo de persistencia (S45). Spring Boot
-      4.1.0 + Hibernate 7.4.1 + SQLite + dialecto de comunidad; hbm2ddl sobre
-      HumoEntity desechable; test de integración del .db en disco.
-- [x] Bloque 2 — Catálogo del centro como entidades JPA + repositorios (S46). 8
-      entidades §4.1 en app.catalog + 3 enums propios + 8 repos; round-trip
-      @DataJpaTest sobre SQLite real; LocalTime intacto. Mapper fuera (Bloque 3).
-- [x] Bloque 3 — Mapeo catálogo Entidad JPA -> modelo del solver (S47).
-      CatalogoMapper (Aula, Asignatura, Profesor, Grupo, Tramo); VIRTUAL_OPTATIVA
-      lanza excepción explícita; recreo excluido de Tramo; Aula.nombre=codigo
-      (D26); código de Tramo sintetizado L1..V6 (D27). Mapea a listas sueltas,
-      NO a ProblemaHorario (faltan Subgrupo/Actividad).
-- [x] Bloque 4 — Subgrupo como entidad JPA (§4.2) + tramo de mapper (S48).
-      Entidad Subgrupo en app.catalog (id sintético + codigo único, mismo estilo
-      que GrupoAdministrativo JPA) con @ManyToMany unidireccional a
-      GrupoAdministrativo (materializa SubgrupoGrupo; join table subgrupo_grupo,
-      Subgrupo dueño, LAZY) + SubgrupoRepository. CatalogoMapper.aSubgrupo(entidad,
-      gruposPorCodigo) resuelve la población por identidad de objeto (mismo patrón
-      que aGrupo con grupoPadre) y aborta con IllegalArgumentException ante grupo
-      no presente en el índice. Particion/SubgrupoParticion DIFERIDAS a Fase 8
-      (decisión D-a: el dominio del solver no las consume; su UX se diseña con la
-      UI, deudas D1/D7). NO entra Actividad (Bloque 5) ni el ensamblado de
-      ProblemaHorario (Bloque 6). Primer @ManyToMany del proyecto: round-trip
-      sobre SQLite real (dialecto de comunidad) verde para subgrupo multi-grupo
-      (Lectura B, 3 grupos) y mono-grupo. Suite: solver 59 + app 12, BUILD SUCCESS.
-- [x] Bloque 5 — Actividad y Plaza como entidades JPA (§4.6) + mapper (S49).
-      Entidades Actividad (agregado raíz, @OneToMany cascade+orphanRemoval a
-      Plaza) y Plaza (dependiente; @ManyToOne opcional aula_fija + tres
-      @ManyToMany: plaza_profesor/plaza_aula_candidata/plaza_subgrupo) en
-      app.catalog + enum propio app.catalog.PatronTemporal (D-B5-6) +
-      ActividadRepository (Plaza sin repo propio, es dependiente).
-      CatalogoMapper.aActividad (entidad a entidad) + helper privado aPlaza +
-      resolver genérico + aPatronTemporal (traduce entre los dos PatronTemporal).
-      Cinco decisiones cerradas antes de construir: D-B5-1 ActividadInstancia NO
-      se materializa (artefacto derivado, lo expande cpsat.Expansion; §4.7 decidirá
-      su identidad persistida); D-B5-2 el XOR aula_fija/candidatas lo valida el
-      record de dominio, no la entidad JPA; D-B5-3 la política "candidatas hasta
-      Fase 3" no aplica (era del mapper del JSON); D-B5-4 Actividad.asignatura FK
-      nullable, Plaza.asignatura FK not null; D-B5-5 requiereTutor persiste pero el
-      mapper lo ignora (el record domain.Actividad no lo porta, S8 no la consume el
-      solver hoy); D-B5-6 PatronTemporal propio, no reutilización del de dominio
-      (frontera "entidad JPA con su forma", como TipoGrupo/Dia). NO entra el
-      ensamblado de ProblemaHorario (Bloque 6). TRES RIESGOS DE PERSISTENCIA
-      CERRADOS EN POSITIVO por round-trip sobre SQLite real (dialecto de comunidad):
-      (1) cascade Actividad→Plaza con un solo save; (2) densidad de Plaza (aula_fija
-      @ManyToOne + tres @ManyToMany conviviendo) —primera entidad con esta densidad,
-      B4 solo validó un @ManyToMany aislado—; (3) ambas ramas del XOR. Modo híbrido:
-      esqueletos y decisiones en el Project, tecleo/compilación en Claude Code;
-      tests generados en Claude Code. Aprendizaje de proceso reafirmado: índices del
-      test del mapper construidos consumiendo la salida del propio mapper
-      (aAsignatura/aProfesor/aAula/aSubgrupo), no con new sobre solver.domain.
-      CatalogoMapperActividadTest quedó en app.catalog (no app.mapper) porque
-      Actividad/Plaza solo tienen constructor protected; asimetría menor registrada.
-      Suite: solver 59 + app 20 (12 previos + ActividadRoundTripTest 3 +
-      CatalogoMapperActividadTest 5), BUILD SUCCESS con mvn clean test desde la raíz.
-      src/main del solver NO tocado. Siguiente: Bloque 6 (ensamblado de
-      ProblemaHorario completo sobre las entidades ya mapeadas de B2-B5).
-- [x] Bloque 6 — Ensamblado de ProblemaHorario (JPA → dominio del solver) (S50).
-      CatalogoMapper.aProblemaHorario(tramos, aulas, asignaturas, profesores,
-      grupos, subgrupos, actividades) — siete listas de entidades JPA de
-      app.catalog → domain.ProblemaHorario completo. Construye en producción los
-      cinco índices Map<String,...> (aulas/asignaturas/profesores/grupos/subgrupos)
-      consumiendo la salida del propio mapper (aprendizaje B4/B5 promovido de test
-      a producción), en orden de dependencia: tramos → hojas → grupos → subgrupos →
-      actividades. Índices con Collectors.toMap de dos argumentos → código
-      duplicado ABORTA con IllegalStateException, no gana el último. Listas de
-      dominio con stream().map().toList() (preservan orden de entrada). Cinco
-      decisiones cerradas antes de construir: D-B6-1 catálogo COMPLETO sin poda
-      (grupos/subgrupos huérfanos entran en las listas top-level; el mapper
-      traduce, no poda); D-B6-2 índices en producción consumiendo el mapper, nunca
-      new sobre solver.domain; D-B6-3 restriccionesHorarias DIFERIDA (List.of(): no
-      existe entidad JPA ProfesorRestriccionHoraria; el dato solo entra por el
-      camino JSON; deuda D28); D-B6-4 recibe listas ya cargadas, no repositorios —
-      mapper puro, la orquestación carga-repos→mapper→solver es un servicio de
-      aplicación posterior; D-B6-5 método en CatalogoMapper, no clase nueva.
-      Firmas confirmadas contra el repo real; el orden del record ProblemaHorario
-      coincidió con la firma del contrato (sin desajustes, no hubo que parar).
-      CatalogoMapperProblemaTest en app.catalog (Actividad/Plaza con ctor
-      protected, como CatalogoMapperActividadTest): ensamblado feliz con recreo
-      intercalado + referencia por valor; coherencia subgrupo↔grupo top-level por
-      igualdad estructural (protege S9); catálogo completo con huérfanos (protege
-      D-B6-1); restriccionesHorarias vacía por contrato (centinela de D28); código
-      de aula duplicado → IllegalStateException; actividad con profesor ausente →
-      IllegalArgumentException con el código huérfano. src/main del solver NO tocado
-      (el mapper vive en app/) → referencia-codigo-solver.md NO regenerado; modelo
-      NO tocado. Suite: solver 59 + app 26 (20 previos + CatalogoMapperProblemaTest
-      6), BUILD SUCCESS con mvn clean test desde la raíz. Commits separados
-      código/tests be80f90/90da600, de una línea. Cierra el ensamblado del catálogo:
-      el camino JPA produce ya un ProblemaHorario completo salvo restricciones
-      horarias (D28). Siguiente: Bloque 7 (a decidir; candidatos: entidad JPA de
-      restricciones horarias que cierre D28, o servicio de aplicación que orqueste
-      repos→mapper→solver).
-- [x] Bloque 7 — Entidad JPA de restricciones horarias (§4.3) + mapper (S51).
-      Cierra D28: el camino JPA ya ensambla un ProblemaHorario COMPLETO, con
-      restricciones horarias incluidas. Entidad ProfesorRestriccionHoraria en
-      app.catalog (id sintético IDENTITY; @ManyToOne LAZY a Profesor y a
-      TramoSemanal, ambos nullable=false; @Enumerated(STRING) tipo; int peso;
-      String motivo nullable; ctor protected + público, sin equals/hashCode,
-      calcada de TramoSemanal) + enum propio app.catalog.TipoRestriccion
-      {DURA,BLANDA} + ProfesorRestriccionHorariaRepository vacío. En CatalogoMapper:
-      aTipoRestriccion (switch, gemelo de aPatronTemporal); aRestriccionHoraria
-      (profesor por código vía resolver, tramo por REFERENCIA de objeto,
-      motivo → Optional.ofNullable); refactor de aTramos SIN cambio observable
-      (helper privado aTramosConIndice produce en un mismo bucle la List<Tramo> y
-      un IdentityHashMap<TramoSemanal,Tramo>; aTramos público delega); y
-      aProblemaHorario gana el 8º parámetro List<ProfesorRestriccionHoraria>,
-      sustituyendo el List.of() centinela por las restricciones mapeadas.
-      Seis decisiones cerradas antes de construir (D-B7-1 a D-B7-6, inline abajo).
-      Clave: D-B7-1 alcance = entidad (no servicio de
-      orquestación, que es B8, porque el servicio debe orquestar un mapper YA
-      completo); D-B7-2 el tramo se resuelve por referencia de objeto
-      (IdentityHashMap), NO por el código sintético L1..V6 (no reabre D27) ni por
-      (día,ordenEnDia) —la entidad TramoSemanal porta orden GLOBAL con recreo, no
-      ordenEnDia—; D-B7-3 una restricción sobre un tramo de recreo (ausente del
-      índice) ABORTA, no se ignora; D-B7-6 el peso DEFAULT 1 de §4.3 NO se
-      materializa en la entidad (exige peso explícito): es política de la capa de
-      configuración/UI (Fase 8), no dato de la entidad. RIESGO CERRADO EN POSITIVO:
-      primer @ManyToOne JPA a TramoSemanal no autorreferencial sobrevive el
-      round-trip sobre SQLite real (dialecto de comunidad). Tests:
-      ProfesorRestriccionHorariaRoundTripTest (@DataJpaTest, DURA+BLANDA, ambas FK
-      + tipo + peso + motivo intactos) + CatalogoMapperRestriccionTest (unitario:
-      DURA con motivo, BLANDA sin motivo, profesor huérfano aborta, tramo de recreo
-      aborta, resolución por referencia con varios tramos; índices construidos
-      consumiendo aProfesor/aTramos, no `new` sobre solver.domain). El centinela de
-      D28 en CatalogoMapperProblemaTest pasa de "verifica vacío" a ensamblar y
-      verificar una restricción real (ensamblaUnaRestriccionHorariaReal); los 5
-      casos previos ganan List.of() como 8º arg. src/main del solver NO tocado
-      (todo en app/; el record domain.RestriccionHoraria ya existía desde S25) →
-      referencia-codigo-solver.md NO regenerado; modelo NO tocado. Suite: solver 59
-      + app 32 (26 previos + 6), BUILD SUCCESS con mvn clean test desde la raíz.
-      Commits separados código/tests 84a8bed/f2e81a7, de una línea. Siguiente:
-      Bloque 8 (servicio de aplicación que orqueste repos → CatalogoMapper →
-      SolverHorario, ya sobre un ensamblado sin agujeros).
+- [x] Bloque 1 — Andamiaje del módulo `app/` + humo de persistencia sobre SQLite en disco. (S45) → stack de persistencia (Spring Boot 4.1.0 / Hibernate 7.4.1 / SQLite + dialecto de comunidad), fijado en Decisiones permanentes. Detalle: bitácora S45.
+- [x] Bloque 2 — Catálogo del centro como 8 entidades JPA (§4.1) en `app.catalog` + 3 enums + 8 repositorios; round-trip sobre SQLite real. (S46) → `LocalTime` persiste intacto en SQLite (ver Notas técnicas Fase 6). Detalle: bitácora S46.
+- [x] Bloque 3 — `CatalogoMapper` JPA→dominio (Aula/Asignatura/Profesor/Grupo/Tramo): `VIRTUAL_OPTATIVA` aborta con excepción explícita, recreo excluido del Tramo. (S47) → deudas D26 (`Aula.nombre = codigo`) y D27 (código de Tramo sintetizado L1..V6). Detalle: bitácora S47.
+- [x] Bloque 4 — Entidad JPA `Subgrupo` (§4.2, `@ManyToMany` a `GrupoAdministrativo` vía `subgrupo_grupo`) + `SubgrupoRepository` + `CatalogoMapper.aSubgrupo` (población por identidad, aborta ante grupo huérfano). (S48) → `Particion`/`SubgrupoParticion` diferidas a Fase 8 (deudas D1/D7). Detalle: bitácora S48.
+- [x] Bloque 5 — Entidades JPA `Actividad` (agregado raíz, cascade+orphanRemoval a `Plaza`) y `Plaza` (`aula_fija` `@ManyToOne` + 3 `@ManyToMany`) + `CatalogoMapper.aActividad`/`aPlaza`; enum `app.catalog.PatronTemporal` propio. (S49) → `ActividadInstancia` NO se materializa como tabla (artefacto derivado, D-B5-1); el XOR aula_fija/candidatas lo valida el record de dominio (D-B5-2); `requiereTutor` persiste pero el solver no lo consume (D-B5-5, S8). Detalle: bitácora S49.
+- [x] Bloque 6 — `CatalogoMapper.aProblemaHorario` (7 listas JPA → `ProblemaHorario` completo); índices por código con `toMap` que ABORTA ante código duplicado. (S50) → catálogo COMPLETO sin poda —huérfanos entran, el mapper traduce, no poda— (D-B6-1); dejó `restriccionesHorarias` vacía hasta B7 (D28). Detalle: bitácora S50.
+- [x] Bloque 7 — Entidad JPA `ProfesorRestriccionHoraria` (§4.3) + enum `TipoRestriccion` + `CatalogoMapper.aRestriccionHoraria`; refactor `aTramosConIndice` (produce la lista de Tramo y el `IdentityHashMap<TramoSemanal,Tramo>` en un bucle). CIERRA D28. (S51) → el tramo se resuelve por REFERENCIA de objeto, no por el código sintético L1..V6 (no reabre D27, D-B7-2); el peso DEFAULT 1 de §4.3 no se materializa en la entidad (política de UI/Fase 8, D-B7-6). Detalle: bitácora S51.
 - [x] Bloque 8 — Servicio de aplicación: orquestación repos → mapper → solver (S52).
       GeneradorHorarioService (es.yaroki.educhronos.app.service, @Service, PRIMER bean
       de servicio del módulo; constructor injection, 8 repos private final; commit
@@ -1306,69 +839,8 @@ anterior —incluida S42 (citada por la deuda abierta D25) y S43
       solver.md NO regenerado; modelo NO tocado. Suite: solver 59 + app 33 (32 previos +
       1), BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
       f72ca82/44694d1, de una línea. Siguiente: Bloque 9 (a decidir).
-- [x] Bloque 9 — Persistencia de la SolucionHorario (§4.7) (S53). Cierra el
-      criterio abierto de Fase 6 ("cerrar la app, reabrir, el horario intacto"):
-      B8 dejó entrada->solver; B9 cierra solver->persistencia. En app.persistence:
-      enum EstadoHorario {BORRADOR,DEFINITIVO,DESCARTADO}; entidad HorarioGenerado
-      (Instant fechaGeneracion, estado @Enumerated STRING def. BORRADOR, estadoSolver
-      String, objetivo/cotaInferior Double NULLABLE reales, @OneToMany a Sesion);
-      entidad Sesion (una por PLAZA colocada; @ManyToOne a horario/plaza/tramoInicio/
-      aula, int indice, @UniqueConstraint(horario_id,plaza_id,indice), SIN FK de
-      actividad —se deriva por plaza.getActividad()—); repos HorarioGeneradoRepository/
-      SesionRepository. Mapper de salida app.mapper.SolucionMapper (final, ctor privado,
-      estáticos): aSesiones recorre actividades × índices × plazas del ProblemaHorario,
-      resuelve plaza y aula a entidad JPA por CÓDIGO (índices Map<String,_> recargados
-      en la transacción de escritura) y el tramo por el puente P1 (indiceTramos, ver
-      D30); aula SIEMPRE por solucion.aulaElegida(inst,plaza).orElseThrow (aborta
-      ruidoso si empty); código/tramo sin correspondencia aborta ruidoso. Servicio:
-      generar() INTACTO (puro, solver fuera de transacción, D-B8-1); guardar(
-      ResultadoOptimizacion,ProblemaHorario,String) @Transactional (índices por código
-      —plazas derivadas de actividadRepository.findAll().flatMap(getPlazas), NO hay
-      PlazaRepository: Plaza es entidad dependiente de Actividad, B5— + puente de tramo,
-      crea la cabecera con estadoSolver/objetivo/cotaInferior del resultado, materializa
-      las N sesiones); cargarHorario(Long) @Transactional(readOnly) devuelve
-      HorarioGenerado + sus Sesion (entidades JPA, lo que consume Fase 7), NO reconstruye
-      SolucionHorario de dominio. Ocho decisiones cerradas antes de construir (D-B9-1 a
-      D-B9-8): la de más impacto, Sesion = plaza colocada (Opción A), que CORRIGIÓ el
-      UNIQUE de §4.7 (era por actividad_instancia, imposibilitaba el desdoble). RIESGO
-      PRINCIPAL CERRADO EN POSITIVO: el puente del tramo (domain.Tramo con código
-      sintético L1..V6 y ordenEnDia por día vs TramoSemanal con orden GLOBAL con recreo,
-      sin código ni ordenEnDia) NO resuelve por código; se replica la renumeración de
-      aTramos y se empareja por (diaSemana,ordenEnDia) —deuda D30—. Test de integración
-      GuardarHorarioServiceTest (@DataJpaTest+@Import, SQLite real, en app.catalog por
-      los ctor protected): desdoble de 2 plazas con recreo intercalado -> 2 filas Sesion
-      con tramo/aula/índice correctos + metadata del solve round-trip; caso negativo
-      aula ausente -> aborta con el código de la plaza. Cobertura pendiente (deuda de
-      test menor, no bloqueante): plaza con aulasCandidatas (rama variable de
-      aulaElegida); el test solo ejercita aula fija. src/main del solver NO tocado ->
-      referencia-codigo-solver.md NO regenerado; §4.7 del modelo ya corregido en S53
-      (Sesion + HorarioGenerado). Suite: solver 59 + app 35 (33 previos + 2 del IT),
-      BUILD SUCCESS con mvn clean test desde la raíz. Commits separados código/tests
-      aaa660a/84cdba5, de una línea. Siguiente: cierre de Fase 6 (revisar los 4
-      criterios) o Bloque 10 (a decidir).
-- [x] CIERRE DE FASE (S54). Alcance decidido al inicio entre cerrar Fase 6 y abrir
-      un Bloque 10 (candidato SesionBloqueada §4.7); se eligió cerrar, porque un B10
-      de persistencia no acercaba el cierre (SesionBloqueada no la consume el solver,
-      C5) y dejaba sin firmar los criterios 2 y 4. Entregable: test de humo
-      end-to-end CierreFase6HumoTest (app.catalog), que ejercita por primera vez el
-      pipeline completo de una tirada: repos JPA → CatalogoMapper → SolverHorario
-      real (vía de factibilidad, presupuesto 10 s) → SolucionMapper → guardar →
-      recargar. Fixture = builder JPA que transcribe problema-3-cierre-cyr-refmt.json
-      (bloque de 6 plazas de 1ºESO rep=2 + 4 Mat) SIN cargarlo, añadiendo los recreos
-      que el JSON omite. Test 1 verifica el round-trip (bloque → 12 sesiones, cada Mat
-      → 3, total 24, toda Sesion con plaza/tramo/aula no null y en tramo lectivo, 0
-      violaciones duras por VerificadorSolucion). Test 2 (criterio 2) da de alta una
-      ProfesorRestriccionHoraria BLANDA y relanza, comprobando conteos de catálogo
-      intactos y coexistencia de los dos horarios. Nueve decisiones D-B10-1..9
-      cerradas antes de construir. Hallazgos al leer el repo: objetivo/cota de
-      ResultadoOptimizacion son double primitivos (no null → vía con detalle, persiste
-      valores reales); ModeloCpSat no filtra por tipo de aula (todas ORDINARIA).
-      Cobertura ganada: plaza con aulasCandidatas resuelta por el solver (B9 solo
-      probó aula fija). D30 NO verificada (la aserción vigila que no caiga en recreo,
-      no el emparejamiento exacto). Suite: solver 59 + app 37 = 96, BUILD SUCCESS con
-      mvn clean test desde la raíz. Un único fichero de test nuevo; src/main NO tocado.
-      Commit de código 549bc92 de una línea; commit de doc aparte. Los 4 criterios de
-      Fase 6 quedan firmados: la fase se da por CERRADA. Siguiente: Fase 7 (UI).
+- [x] Bloque 9 — Persistencia de la solución (§4.7): entidades `HorarioGenerado` + `Sesion` (una por PLAZA colocada, `@UniqueConstraint(horario,plaza,indice)`) + repos + `SolucionMapper` (aula por código, tramo por el puente de renumeración —D30—, aborta ruidoso ante código/tramo/aula sin correspondencia); el servicio gana `guardar()` `@Transactional` y `cargarHorario()`. (S53) → cierra el criterio "reabrir y el horario intacto" de Fase 6; `Sesion = plaza colocada` (Opción A) corrigió el UNIQUE de §4.7 que imposibilitaba el desdoble. Detalle: bitácora S53.
+- [x] CIERRE DE FASE — test de humo end-to-end `CierreFase6HumoTest` (pipeline completo: repos JPA → `CatalogoMapper` → solver real → `SolucionMapper` → guardar → recargar); firma los 4 criterios y Fase 6 queda CERRADA. (S54) → un Bloque 10 de persistencia no acercaba el cierre (C5 no la consume el solver); D30 sigue sin verificar el emparejamiento exacto del tramo. Detalle y decisiones D-B10-1..9: bitácora S54.
 
 ### Bloques de Fase 8
 
@@ -1592,24 +1064,17 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 - Reparto de validación en la carga: los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas y los rangos. El mapper posee en exclusiva: integridad referencial por código, códigos duplicados, I2 y la política "aulasCandidatas rechazado hasta Fase 3".
 - I1, I3 e I6 no se validan en la carga del JSON del solver (el JSON no transporta particiones). Se validan en la capa de configuración (Fase 6/8). Corrige el alcance de la decisión de Sesión 6, que las incluía antes de existir el dominio reducido.
 
-### Deuda consciente registrada en Fase 1
+### Deuda consciente VIVA
 
-Las siguientes simplificaciones de Fase 1 se aceptan conscientemente y pueden
-requerir cambios en fases futuras. Ver `modelo_datos_fase1.md` sección 8 para
-descripción completa.
+Deuda técnica y de dominio ABIERTA, aceptada conscientemente y pendiente de resolver en
+fases futuras. Incluye las simplificaciones registradas en Fase 1 (D1-D12), cuya
+descripción completa vive en `modelo_datos_fase1.md` sección 8, y la deuda surgida en
+fases posteriores, descrita aquí. La deuda ya CERRADA se archiva condensada en la sección
+siguiente, con remisión a la bitácora.
 
 - **D1**: Generación automática de subgrupos por plantilla → Fase 8 (UI)
 - **D2**: Versionado intra-BD de cursos académicos → Fase 10 (si se requiere)
 - **D3**: Validación de capacidad de aulas → Fase 5 (evaluar con datos reales)
-- **D4**: Modelado explícito de recursos compartidos (Gim, Pista) → Fase 5 si
-  resulta insuficiente. CERRADA (S36): el instituto completo literal de los
-  criterios 1-2 (ESO + Bach + FPB, 26 grupos) resultó FACTIBLE con modelado
-  conservador (EF en aulaFija, sin relajar a aulasCandidatas), 0 duras. Gim a 28h
-  sobre 30 tras sumar la EF de 1ºBach (2ºBach no tiene EF); Pista a 14. La válvula
-  fue EdFís-1BC con candidatas {Gim,Pista}, que el solver desvió a Pista. La
-  pregunta de fondo de D4 (¿Gim/Pista compiten de verdad y rompen a escala total?)
-  tiene respuesta definitiva: NO. El segundo turno (relajar EF a aulasCandidatas)
-  NO fue necesario. Histórico: ESO completa (S31) ya iba a Gim 26/30 FACTIBLE.
 - **D5**: Asignaturas alternativas dentro del mismo grupo (MCCSS vs Latín) → 
   Fase 5 si resulta incómodo el mini-bloque de optativas
 - **D6**: Vínculo entre actividades distintas que deban ir en el mismo tramo →
@@ -1682,26 +1147,6 @@ descripción completa.
   actividad tiene repeticionesPorSemana > nº de días (palomar). En Fase 2
   ninguna asignatura de 1ºESO llega a 6, y la restricción lleva guarda.
   Fase 5 (FPB, frecuencias altas): revisar si procede relajar a blanda.
-- **D13 (CERRADA en Sesión 33, Fase 5 Sub-bloque A)**: el IntVar de tramo usa
-  índice plano [0, |tramos|). Con duracionTramos > 1, un IntervalVar podía
-  cruzar la frontera entre el último tramo de un día y el primero del siguiente
-  (cruce de día) y, además —al no ser el recreo un Tramo y numerar ordenEnDia
-  1..6 sin hueco—, podía cruzar el recreo (órdenes 3 y 4 contiguos en índice).
-  La D13 registrada solo contemplaba el cruce de día; el cruce de recreo era una
-  segunda cara descubierta al leer el código real (decisión (b): D13 cubre ambos,
-  alineado con S6 del modelo §6.6 y con los datos —Hallazgo I: los pares que
-  cruzan el recreo van como dos sueltas, no como bloque). Mecanismo:
-  ModeloCpSat.iniciosValidosDeBloque restringe el dominio del inicio (lista
-  blanca) a las posiciones desde las que el bloque cabe entero en el día sin
-  cruzar el recreo (no-op para duracion=1). Espejo independiente en
-  VerificadorSolucion.tramosOcupados + verificarBloquesConsecutivos; además
-  verificarNoSolapes pasó a contar por tramo ocupado (no solo por el de inicio),
-  cerrando una ceguera del verificador a solapes en tramos interiores de un
-  bloque. Probada por discriminación (SolverHorarioBloqueD13Test: control que
-  cabe FEASIBLE; desborde de día y cruce de recreo INFEASIBLE). Probada a escala
-  con FPB real en S34 (Sub-bloque B): bloques de 2 y 3 tramos
-  conviviendo con sueltas en 1ºFPB completo, FACTIBLE 0 duras; D13 discrimina
-  inicios válidos de inválidos sin INFEASIBLE espurio.
 - **D22 (Sesión 33, Fase 5 Sub-bloque A)**: la frontera del recreo está
   hardcodeada como constante de estructura de jornada (ORDEN_TRAS_RECREO=4 en
   ModeloCpSat y su espejo en VerificadorSolucion), asumiendo recreo tras el tercer
@@ -1714,93 +1159,7 @@ descripción completa.
   puede importarla), frágil del mismo modo que N de consecutivas (D21); se resuelve
   cuando la estructura de jornada pase a configuración, momento en que ambos leerán
   el mismo origen. Hoy ningún dato real la contradice.
-- **D23 (Sesión 36, Fase 5 Bloque 13)**: curva de coste del solver NO LINEAL,
-  confirmada con el instituto completo. Puntos medidos en factibilidad pura
-  (`resolver`, sin objetivo): ESO completa 17 grupos → 3,46 s (S31); instituto
-  completo 26 grupos → 269,4 s (S36). Un factor ×1,53 en grupos produjo ×78 en
-  tiempo: salto de régimen, no crecimiento suave. Causa probable: 2ºBach añade
-  mucho acoplamiento combinatorio (modalidades transversales B+C entrelazadas con
-  bloques internos + optatividad heterogénea), y las aulasCandidatas ampliadas
-  —necesarias para evitar el INFEASIBLE de saturación— ensanchan el espacio de
-  búsqueda. IMPLICACIÓN: el criterio 1 (< 10 min) se cumple HOY en factibilidad
-  pura con margen (269 s < 600 s), pero el régimen de optimización
-  (`resolverOptimizando`, criterios 3-4) parte de esos 269 s y subirá al añadir
-  términos blandos sobre el instituto completo. Riesgo de que el criterio 1 deje
-  de cumplirse en modo optimización. Acción cuando se aborden los criterios 3-4 a
-  escala: medir el tiempo optimizando sobre el instituto completo y, si excede,
-  considerar (a) límite de tiempo con primera solución factible + mejora
-  incremental, (b) estrechar aulasCandidatas con heurística de aula preferente,
-  (c) warm-start desde la solución de factibilidad pura. Severidad: media (no
-  bloquea Fase 5 hoy; condiciona el cierre de los criterios 3-4).
-  ACTUALIZACIÓN (S40, Bloque 15b): palanca (c) MEDIDA a escala (opción A, igual presupuesto
-  de optimización 600 s, instituto completo). El warm-start MEJORA calidad: objetivo 215->204
-  (-5,1%) a igual tiempo. Pero NO resuelve la deuda: ambas corridas (fría y caliente) siguen
-  FEASIBLE con cota ~1-2; la optimización a escala NO converge ni con hint. Palanca (c)
-  cerrada con evidencia (ayuda marginal, no convergencia). Palancas (a) límite de tiempo con
-  mejora incremental y (b) estrechar aulasCandidatas siguen abiertas si se busca convergencia
-  real. D23 permanece abierta (severidad media): el cierre de los criterios 3-4 a escala sigue
-  condicionado por la no-convergencia, no solo por la falta de datos del centro.
-  ACTUALIZACIÓN (S41, Bloque 16): palanca (b) CONSTRUIDA y validada en discriminación
-  (aún NO medida a escala). Medición que fijó el frente: de 328 plazas, 52 usan
-  aulasCandidatas; 21 (todas modalidades NEUTRA de 2ºBach, la estructura que esta deuda
-  acusaba) listan 25 candidatas —siempre las 35 aulas menos las 10 especializadas— y
-  concentran el 92% de las 1835 presencias de aula. La poda recorta esas colas a K=8
-  (UMBRAL_PODA_AULA=8); suelo de saturación medido 3, así que K=8 es seguro con margen
-  ×2,6 y el modo de fallo por saturación NO se da en los datos reales (haría falta K<3;
-  por eso el oro es sintético). Vive solo en construirConObjetivo (no altera la curva de
-  factibilidad pura de S36). Pendiente en el bloque siguiente: medir objetivo/tiempo con
-  poda sobre el instituto completo vs. la línea base de S40 (215, 600 s sin converger) y
-  decidir si la palanca mueve el régimen o si D23 se reduce a decisión de producto
-  (aceptar objetivo relajado). Palanca (a) límite de tiempo con mejora incremental sigue
-  abierta. Interacción a vigilar: la semilla de resolver() (sin poda) puede elegir un aula
-  que la poda elimina; sembrarHint la siembra 0 en las opciones podadas (benigno).
-  ACTUALIZACIÓN (S42, Bloque 17 — CIERRA la palanca b con dato NEGATIVO): la poda NO acelera
-  la convergencia; ROMPE la factibilidad a escala. Diagnóstico pareado en la misma máquina y
-  fixture (problema-5-fusion-instituto-completo.json), aislado y sin JaCoCo: SIN poda ->
-  FEASIBLE objetivo 215 cota 2 en 600 s; CON poda (K=8) -> el solver NO halla ni una solución
-  factible en 600 s (UNKNOWN). Atribución limpia: la poda dio UNKNOWN en las TRES corridas
-  (suite -Pescala, aislada, aislada-sin-JaCoCo), descartando contención y JaCoCo como causa;
-  sin poda la misma vía da FEASIBLE aislada (= línea base S40). Diagnóstico del fallo de S41:
-  el "suelo de saturación 3 => K=8 seguro con margen ×2,6" medía la saturación MÁXIMA en UN
-  tramo (clique de plazas mutuamente compatibles), que es condición NECESARIA pero NO
-  SUFICIENTE de la factibilidad global; recortar 25->8 en las 21 plazas acopladas de 2ºBach
-  estrecha el espacio de aulas de forma acoplada en toda la semana y la heurística de CP-SAT
-  deja de tropezar con una factible. La poda no es un mecanismo "correcto pero apagado": es
-  inviable con K=8 y, si se retoma, será REDISEÑADA (otro K, poda selectiva o poda blanda vía
-  hint), no resucitada. DECISIÓN (opción 2 de 3; descartadas: 1 revertir todo — tira el
-  mecanismo correcto en sí; 3 rediseñar ahora — frente nuevo, caro, éxito incierto): poda
-  DESACTIVADA por defecto (construirConObjetivo() delega en construirConObjetivo(false)),
-  mecanismo conservado LATENTE (sobrecarga construirConObjetivo(boolean), constantes
-  UMBRAL_PODA_AULA/MAX_AULAS_PODA y candidatasPodadas intactos), documentado en javadoc de
-  ModeloCpSat. Producción vuelve a FEASIBLE 215 (estado conocido de S40). Tests: eliminados el
-  de poda a escala (S41 medía la vía rota), el de discriminación SolverHorarioPodaAulaTest +
-  sus 2 fixtures (sin anclaje a producción tras apagar la poda), y el de S37 (vía pelada);
-  nuevo SolverHorarioOptimizacionEscalaInstitutoCompletoTest lee estado/objetivo/cota. ESTADO
-  DE D23 TRAS S42: palancas (b) poda CERRADA-inviable y (c) warm-start CERRADA-ayuda-no-resuelve;
-  queda viva (a) límite de tiempo con mejora incremental, y el desenlace de fondo que el plan
-  dejó legítimo desde el principio: D23 se reduce a DECISIÓN DE PRODUCTO (aceptar objetivo
-  relajado FEASIBLE ~215 sin convergencia probada). Recomendación del advisor: con (b) y (c)
-  agotadas y (a) sin promesa de convergencia, el siguiente paso natural NO es otra palanca de
-  velocidad sino cerrar D23 como decisión de producto explícita. Pendiente de decidir con el
-  dueño del proyecto.
-  CIERRE (S43, Bloque 18 — D23 CERRADA como DECISIÓN DE PRODUCTO): antes de cerrar, un
-  experimento pareado descartó las dos hipótesis localizables de la no-convergencia. Tres
-  puntos sobre el mismo fixture recortado en memoria por bloque académico (catálogo idéntico;
-  frontera separable sin referencias colgantes, verificado por réplica), cada uno aislado:
-  P0 base 26 grupos FEASIBLE obj 221 cota 0; P1 sin FPB 24 grupos FEASIBLE obj 216 cota 2;
-  P2 solo ESO 17 grupos FEASIBLE obj 62 cota 0. Lectura sobre estado/cota (no objetivo
-  absoluto, varianza ±7 por D25): (1) FPB NO endurece (P0->P1 no cambia de régimen); (2) Bach
-  domina la MAGNITUD del objetivo (216->62 al retirarlo) pero retirarlo NO produce convergencia
-  (P2 sigue FEASIBLE cota 0); (3) la cota inferior no se cierra ni con solo ESO -> la
-  no-convergencia es propiedad del MODELO/objetivo a esta escala, no atribuible a un bloque. Sin
-  palanca de velocidad con promesa de convergencia, y siendo una FEASIBLE obj ~221 un horario
-  usable, el dueño del proyecto FIRMA la decisión de producto: aceptar FEASIBLE sin optimalidad
-  probada como modo de operación del solver a escala. D23 deja de ser deuda técnica abierta. Dato
-  útil si alguna vez se reabre la optimización: el esfuerzo de modelado rendiría más concentrado
-  en la estructura de Bach (mayor contribuyente al coste). NOTA: esto NO cierra el criterio 3 de
-  Fase 5 (calidad comparable), que sigue ABIERTO a la espera del umbral con datos del centro, no
-  de convergencia. Test de evidencia: SolverHorarioOptimizacionEscalaSubconjuntosTest (Bloque 18).
-  - **D-F8.2b-4B (condicional, inerte): pin de aula × poda de aulasCandidatas.**
+- **D-F8.2b-4B (condicional, inerte): pin de aula × poda de aulasCandidatas.**
   Si D23 se reabre y la poda (candidatasPodadas) se reactiva rediseñada, el pin de
   aula debe forzar el aula pinada DENTRO de las candidatas conservadas: hoy la poda
   podría eliminar un aula candidata legítima y dejar el pin inexpresable (sin BoolVar
@@ -1831,60 +1190,6 @@ descripción completa.
   test-a-test a mano. Cada intento son 30+ min de corrida -> es su propio bloque, no se aborda
   al cierre de una sesión. Asignación: sin asignar; abordar antes de depender de -Pescala como
   gate de CI (Fase 12).
-- **D24 (Sesión 38, Fase 5 Bloque 15a — CERRADA en Sesión 39; ver D25, S42)**: la suite de tests se autoenvenena por
-  contención de CPU. Hay dos tests de límite ~600 s (SolverHorarioFusionInstituto-
-  CompletoTest y SolverHorarioOptimizacionInstitutoCompletoTest) que corren en CADA
-  mvn test. En la misma máquina se quitan núcleos a CP-SAT (multihilo en factibilidad
-  pura) y el wall-clock se dispara: en S38 el de fusión dio UNKNOWN a 600 s en la
-  suite completa pero FACTIBLE en 86,4 s aislado. No es regresión funcional. Impacto:
-  (a) la suite tarda 20 min y crecerá con cada palanca de D23 medida a escala; (b) el
-  build es inestable (el orden de Surefire decide quién envenena a quién); (c) rompe
-  el criterio de cierre "suite verde" por una razón no funcional. Solución acordada
-  (Opción A): @Tag("escala") en los tests pesados + exclusión del mvn test por defecto
-  + perfil/job dedicado para correrlos a propósito. Descartadas: bajar maxTimeInSeconds
-  (no arregla la contención, falsea el criterio de 10 min) y setNumWorkers(1) (haría
-  los tests deterministas pero mucho más lentos y mediría un rendimiento distinto al de
-  producción). Severidad: media (no es bug del solver, pero bloquea el cierre limpio de
-  bloques a escala). Asignación: bloque inmediato, ANTES del warm-start (15b).
-  RESUELTA (S39): @Tag("escala") en los dos tests pesados + exclusión por defecto vía
-  property surefire.excluded.groups=escala en el pom del módulo solver + perfil 'escala'
-  que invierte las properties (incluye escala, vacía exclusión). mvn test → 59 verde en
-  8,6 s; mvn test -Pescala → solo los 2 pesados. Iteración registrada: vaciar
-  <excludedGroups> como elemento literal en el perfil daba Tests run: 0 (merge de
-  <configuration> vacío no determinista en Maven); la solución por property sí mergea
-  limpio. CI inexistente hoy (confirmado); gancho dejado para Fase 12.
-- **D14 (CERRADA en Sesión 15)**: `VerificadorSolucion` no comprobaba el
-  no-solape por grupo (S9). En Fase 2 no importaba (sin subgrupos partidos,
-  solape de grupo ⟺ solape de subgrupo, que sí verifica). Desde Fase 3 son
-  distintos: el verificador era ciego a una restricción dura que el solver sí
-  impone, así que un bug del modelo CP-SAT que solapara grupos pasaría
-  desapercibido por la red de seguridad independiente. Cerrada en Sesión 15
-  (commit intermedio de Fase 3), ANTES de meter la complejidad del aula
-  variable: `VerificadorSolucion.verificarNoSolapes` añade un cuarto conteo
-  por `GrupoAdministrativo` (derivado del Set de subgrupos por instancia, de
-  modo que un desdoble cuenta el grupo una sola vez), gemelo de los de
-  profesor/aula/subgrupo y ciego al `grupoPadre`. Deuda de vida corta: nació y
-  murió dentro de Fase 3.
-- **D15 (CERRADA en Sesión 18)**: era de DOBLE cara; la nota original solo veía
-  la del verificador y afirmaba erróneamente que el solver prevenía la otra.
-  Cara A — verificador: `VerificadorSolucion` contaba el aula con un `Set` POR
-  INSTANCIA, lo que enmascaraba una violación de S2 (dos plazas de la misma
-  instancia con la misma aula colapsan a un conteo de 1 → no se reporta). Por S2
-  + glosario del modelo esas dos plazas son colisión, no uso compartido (el uso
-  compartido legítimo es UNA plaza con varios profesores, no varias plazas con
-  un aula). CERRADA: el aula se cuenta POR PLAZA; profesor y subgrupo siguen por
-  instancia, donde el colapso es correcto por S1.
-  Cara B — configuración: la afirmación original "el solver SÍ la previene vía
-  `addNoOverlap`" era cierta SOLO para la rama de candidatas. Para dos `aulaFija`
-  IGUALES en una misma instancia, la rama `aulaFija` de `restriccionNoSolapeAula`
-  añade el intervalo POR INSTANCIA (no por plaza), de modo que el `addNoOverlap`
-  ve un único intervalo y tampoco la previene: doble fallo silencioso (ni solver
-  ni verificador). CERRADA por vía A (decidida con el usuario): validación de
-  configuración `verificarAulasFijasDisjuntas` en `ProblemaHorarioMapper`, junto
-  a `verificarI2`, que rechaza dos plazas de la misma actividad con la misma
-  `aulaFija` ANTES del solver. No toca el modelo CP-SAT. No aplica a
-  `aulasCandidatas` (el solver elige aulas distintas vía `addExactlyOne` +
-  no-solape). El comentario de `verificarNoSolapes` se actualizó en consecuencia.
 - **D16**: el CLI (`Materializador`, `FormatoCelda`) no pinta el aula ELEGIDA de
   las plazas con aula variable: `FormatoCelda` muestra `?` cuando no hay
   `aulaFija`. La Sesión 16 dejó el CLI fuera a propósito (el commit ya era ancho
@@ -1974,31 +1279,6 @@ descripción completa.
   muestra al usuario), pero si la UI de Fase 7/8 llega a mostrar este código
   directamente hay que decidir si se mantiene la convención sintética o se
   sustituye por algo más descriptivo (p. ej. "Lunes 8:00-9:00"). Fase 7/8.
-- **D28 (Sesión 50, Fase 6 Bloque 6) — CERRADA en S51 (Bloque 7)**: el ensamblado
-  CatalogoMapper.aProblemaHorario pasa List.of() al componente
-  restriccionesHorarias del ProblemaHorario, porque el catálogo JPA de B2 (§4.1)
-  no materializó la entidad ProfesorRestriccionHoraria: no hay tabla, repositorio
-  ni tramo de mapper para ella. El dato de indisponibilidades del profesorado
-  (DURA/BLANDA, consumido por el solver desde S25, Bloque 6b) solo entra hoy por el
-  camino JSON (RestriccionHorariaDto + ProblemaHorarioMapper.aDominio).
-  Materializar la entidad JPA (FK a Profesor + FK a TramoSemanal + TipoRestriccion
-  + peso + motivo) con su repositorio y su conversión aRestriccionHoraria es un
-  bloque propio de Fase 6 (tamaño comparable a B4/B5); resolver la restricción
-  contra el Tramo de dominio correcto no es trivial: el código de Tramo es
-  sintetizado L1..V6 por aTramos, la entidad TramoSemanal no lo porta (ver D27). El
-  test CatalogoMapperProblemaTest fija el vacío como contrato (centinela): cuando
-  se materialice la entidad, ese aserto salta y obliga a revisitar esta decisión
-  conscientemente. Asignación: Fase 6, bloque futuro.
-  CIERRE (S51, Bloque 7): materializada la entidad ProfesorRestriccionHoraria
-  (§4.3) con su repositorio y CatalogoMapper.aRestriccionHoraria; aProblemaHorario
-  la ensambla. El tramo se resuelve por referencia de objeto (IdentityHashMap
-  TramoSemanal→Tramo construido en aTramosConIndice), NO por el código sintético
-  L1..V6, de modo que D27 NO se reabre. El centinela saltó como estaba previsto y
-  pasó a verificar el round-trip real. Queda VIVA solo la parte de D21 (el campo
-  peso por-restricción sigue sin consumirse en el objetivo; el término blando usa
-  la constante PESO_INDISP_BLANDA=1); y el default 1 de §4.3 NO se materializa en
-  la entidad (exige peso explícito): es política de la capa de configuración/UI
-  (Fase 8), no dato de la entidad.
 - **D29 (Sesión 52, Fase 6 Bloque 8): tiempo/semilla y vía del solver hardcodeados
   al default en el servicio.** GeneradorHorarioService.generar() usa new SolverHorario()
   (120 s, semilla 42) y la vía de optimización (resolverOptimizandoConDetalle). A escala
@@ -2028,6 +1308,15 @@ descripción completa.
   D22): ambos mappers leerían el mismo origen de numeración, o TramoSemanal ganaría un
   código/ordenEnDia estable que haga innecesaria la síntesis. Riesgo hoy: bajo (ninguna
   jornada real contradice la estructura 6+recreo asumida), pero real. Asignación: Fase 8.
+- **D31 — Poblaciones y particiones a confirmar con el centro** (nueva, S63): los
+  fixtures de escala asumen particiones y poblaciones PLAUSIBLES pero no validadas
+  por el centro: (a) particiones de refuerzo/ATED de 3ºESO (B3/S21); (b) optativas
+  DIG/TEC/FOPP de 4ºESO, 6h en dos bloques de perfil distinto, modeladas como
+  población propia por bloque (B7/S28); (c) población "1 subgrupo por opción" en las
+  optativas de 1ºBach (B11/S32); (d) modalidades y optatividad de 2ºBach (B13/S36).
+  Relacionada: la invariante de población (el dominio modela SUBGRUPOS, no ALUMNOS;
+  que un subgrupo sea partición real disjunta y exhaustiva NO lo verifica ningún
+  componente). → Fase 8 (CRUD de catálogo) o antes, si hay contacto con el centro.
 - **D-F8.2b-iii-A-a** (S62, VIVA, no bloqueante) — `GeneradorHorarioService` tiene 12
   repositorios inyectados en el constructor. Es olor a clase que hace demasiado. Decisión
   consciente de S62: NO refactorizar en un bloque cuyo valor era cerrar un lazo funcional
@@ -2049,6 +1338,19 @@ descripción completa.
   necesita. (4) El body de POST /api/horarios ya arrastra D29; un segundo eje lo
   convertiría en cajón de sastre. Contra asumido: más superficie que mantener — pero es la
   superficie que la UI va a pedir igualmente. El body de POST /api/horarios NO cambia.
+
+### Deuda consciente CERRADA (histórico)
+
+Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
+el detalle narrativo vive en la bitácora.
+
+- **D4** — Modelado explícito de recursos compartidos (Gim, Pista) por si el solver no bastaba a escala. CERRADA en S36: el instituto completo (26 grupos) resultó FACTIBLE con modelado conservador (EF en aulaFija), 0 duras, Gim 28/30 sin que Gim/Pista compitan hasta romper; no hizo falta relajar EF a aulasCandidatas. La pregunta de fondo (¿Gim/Pista compiten de verdad y rompen a escala total?) tiene respuesta definitiva: NO. Detalle: bitácora S36.
+- **D13** — El IntVar de tramo usa índice plano, y con duracionTramos > 1 un bloque podía cruzar la frontera de día y la del recreo (dos caras; la nota original solo veía la de día). CERRADA en S33: `ModeloCpSat.iniciosValidosDeBloque` restringe el dominio del inicio por lista blanca a las posiciones desde las que el bloque cabe entero en el día sin cruzar el recreo (no-op para duracion=1), con espejo independiente en `VerificadorSolucion.tramosOcupados` + `verificarBloquesConsecutivos`; además `verificarNoSolapes` pasó a contar por TRAMO OCUPADO y no solo por el de inicio, cerrando una ceguera a solapes en tramos interiores. Deja viva D22 (frontera de recreo hardcodeada). Detalle: bitácora S33/S34.
+- **D14** — `VerificadorSolucion` no comprobaba el no-solape por grupo (S9). CERRADA en S15: `verificarNoSolapes` añade un cuarto conteo por `GrupoAdministrativo` derivado del Set de subgrupos POR INSTANCIA (los subgrupos de un mismo grupo en una actividad coordinada/desdoble colapsan a uno, ciego al `grupoPadre`). Detalle: bitácora S15.
+- **D15** — doble ceguera al no-solape de aula: `VerificadorSolucion` contaba el aula con un Set POR INSTANCIA (dos plazas de una misma instancia con la misma aula colapsaban a 1, violación de S2 no reportada) y la rama `aulaFija` de `restriccionNoSolapeAula` añadía el intervalo por instancia (tampoco la prevenía). CERRADA en S18: el aula se cuenta POR PLAZA (profesor y subgrupo siguen por instancia, correcto por S1) + validación `verificarAulasFijasDisjuntas` en `ProblemaHorarioMapper` que rechaza dos plazas de una actividad con la misma `aulaFija` ANTES del solver (no aplica a aulasCandidatas: las separa `addExactlyOne` + no-solape). Detalle: bitácora S18.
+- **D23** — curva de coste del solver NO LINEAL a escala (instituto completo ×78 en tiempo por ×1,53 en grupos); la optimización no converge (FEASIBLE con cota abierta). CERRADA en S43 como DECISIÓN DE PRODUCTO (FEASIBLE sin optimalidad probada es el modo aceptado a escala). De las tres palancas: (a) límite de tiempo con mejora incremental sigue viva; (b) poda de aulasCandidatas resultó INVIABLE a escala (S42) y quedó LATENTE y OFF por defecto (`construirConObjetivo()` delega en `construirConObjetivo(false)`; constantes `UMBRAL_PODA_AULA`/`MAX_AULAS_PODA` y `candidatasPodadas` intactas — ver D-F8.2b-4B); (c) warm-start ("Bloque 15b", S40) ayuda (215→204) pero no converge. El experimento pareado (S43) mostró que la no-convergencia es ESTRUCTURAL, no de un bloque. Detalle: bitácora S36/S40/S42/S43.
+- **D24** — la suite se autoenvenena por contención de CPU (dos tests de límite ~600 s en cada `mvn test` disparan el wall-clock). CERRADA en S39: `@Tag("escala")` en los pesados + exclusión por defecto vía property `surefire.excluded.groups=escala` + perfil `escala` que la invierte (`mvn test` rápido; `mvn test -Pescala` corre solo los pesados). Reactivada agravada por D25 (VIVA) para el perfil `-Pescala` completo. Detalle: bitácora S38/S39.
+- **D28** — `CatalogoMapper.aProblemaHorario` pasaba `List.of()` a restriccionesHorarias porque el catálogo JPA no materializaba la entidad `ProfesorRestriccionHoraria`. CERRADA en S51: materializada la entidad (§4.3) con su repositorio y `CatalogoMapper.aRestriccionHoraria`; el tramo se resuelve por identidad de objeto (IdentityHashMap TramoSemanal→Tramo, no por el código sintético L1..V6, no reabre D27). Queda viva solo la parte de D21 (el peso por-restricción sigue sin consumirse en el objetivo). Detalle: bitácora S51.
 
 ### Notas técnicas validadas en Fase 0
 
