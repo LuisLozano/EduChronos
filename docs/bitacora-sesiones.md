@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S61. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S62. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S61). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S62). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2349,4 +2349,51 @@ Modo híbrido (decisión y contrato en el Project, código en Claude
   (entrada del bloqueo por REST, decisión de contrato sin cerrar); (c) deuda de test menor: el caso de
   pin de aula huérfano (abort) no tiene test negativo propio, el IT solo ejercita la ruta feliz.
   Siguiente: 8.2b-iii (REST del bloqueo + cableado del servicio) o el candidato que se decida al abrir
+  sesión.
+
+### Sesión 62 — Fase 8, Bloque 8.2b-iii-A: CABLEADO del servicio a los repos de bloqueo.
+  Modo híbrido (diseño en el Project, código en Claude Code). CIERRA EL LAZO end-to-end
+  del bloqueo manual: hasta S61 el pin funcionaba en el solver, se persistía y se mapeaba, pero la
+  vía REST de generación NO lo leía (cargarProblema() pasaba List.of(), List.of()) — todo lo
+  construido en S58/S60/S61 era INERTE en producción. Alcance CORTADO con el usuario al abrir: se
+  descartó hacer 8.2b-iii entero (cableado + REST) y se partió en 8.2b-iii-A (cableado, esta sesión)
+  + 8.2b-iv (REST, diferido). Razón del corte: el cableado es la pieza que hace útil lo ya
+  construido y tiene oro trivial; la superficie REST no tiene consumidor todavía (la UI de drag&drop
+  es 8.6) y diseñar su API sin el consumidor delante es diseñar a ciegas.
+  Decisiones cerradas antes de teclear (D-F8.2b-iii-A-1..2): (1) inyección DIRECTA de los dos repos
+  en el constructor de GeneradorHorarioService (pasa de 10 a 12), patrón vivo; se descartó envolverlos
+  en un servicio intermedio (capa sin ganancia: los findAll() son triviales y sin filtro) → deuda
+  nueva D-F8.2b-iii-A-a. (2) el ORO es un IT que llama a generar(...) por la VÍA REAL, no a
+  cargarProblema() suelta, con maxSegundos=10 EXPLÍCITO (el default de 30 s del servicio es veneno
+  para la suite, D24/D25).
+  Hallazgo clave de la lectura del repo (el riesgo que se temía NO se materializó): cargarProblema()
+  YA era @Transactional(readOnly=true) y su javadoc ya documentaba la razón (identidad de objeto en
+  relaciones LAZY). Por tanto añadir los findAll() de bloqueo DENTRO de ese método hace que el
+  TramoSemanal de SesionBloqueada.getTramoInicio() salga de la MISMA caché de primer nivel que
+  tramoRepository.findAll(), y el IdentityHashMap de S61 funciona. No había decisión que tomar: el
+  sitio correcto era el único sitio. Segundo hallazgo: NINGÚN llamador del constructor se rompió —los
+  6 tests usan @Import + @DataJpaTest, que auto-inyecta los repos nuevos.
+  Entregado (3 commits de una línea, código y tests separados): (TAREA 1) cableado de
+  GeneradorHorarioService —2 repos inyectados, los 2 List.of() → findAll(), javadoc de cargarProblema()
+  ampliado con la precondición de identidad de instancia y el modo de fallo SILENCIOSO (cargar los
+  bloqueos fuera de la transacción daría instancias distintas y el pin se perdería sin excepción);
+  (TAREA 2) PinTramoGeneracionRoundTripTest, IT end-to-end: persistir catálogo + pin de tramo →
+  service.generar(10, 42, null, "test-pin") → recargar → toda Sesion de la instancia pinada cae en el
+  tramo pinado; (TAREA 3) BloqueoMapperPinAulaHuerfanoTest, unitario (sin Spring/BD, en app.catalog por
+  los ctor protected), cierra la deuda de test (c) de S61.
+  VALIDEZ DEL FIXTURE (procedimiento obligatorio, lección del assert (b) de S61): sonda temporal
+  confirmó que SIN pin el solver con semilla 42 coloca la instancia en L1; se pina L5, tramo que el
+  solver NO elegiría por su cuenta. ORO NEGATIVO: revertir los dos findAll() a List.of() deja el test
+  ROJO (cae en L1, id=1 ≠ 5) — el pin CAMBIA la solución, no es un no-op; restaurado, verde.
+  Parada de lectura confirmada antes de teclear: la validación del pin de aula huérfano SÍ estaba
+  implementada en BloqueoMapper (lanza IllegalArgumentException "pin de aula sin pin de tramo para …"),
+  no solo documentada → TAREA 3 procedía sin cambio de alcance.
+  Suite: solver 71 intacto (no se tocó solver/src/main → referencia-codigo-solver.md NO regenerado),
+  app 47 → 49 (+2). BUILD SUCCESS con mvn clean test desde la raíz; working tree limpio. Modelo NO
+  tocado; REST NO tocado.
+  Deuda VIVA que 8.2b-iii-A deja: D-F8.2b-iii-A-a (12 repos en el constructor de
+  GeneradorHorarioService: extraer un CatalogoLoader cuando moleste; NO bloqueante). Deuda (a) y (c)
+  de 8.2b-ii CERRADAS.
+  Siguiente: LIMPIEZA DE FONDO del plan (candidato principal de S63, acordada y pospuesta dos veces),
+  o 8.2b-iv (REST de bloqueos, con contrato ya pre-cerrado), o el candidato que se decida al abrir
   sesión.

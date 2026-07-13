@@ -600,7 +600,10 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.3-B CERRADO en S65
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2b-iv CERRADO en S66
+  (entrada del bloqueo por REST: /api/bloqueos, POST idempotente
+  con reemplazo total, tramo por (dia, ordenEnDia); deuda nueva D-F8.2b-iv-a, espejo de
+  validación alta↔BloqueoMapper, mitigada por test de contrato).Bloque 8.3-B CERRADO en S65
   (atribución CONTRAFACTUAL de reglas blandas por celda: delta CON SIGNO = cuánto cambia la penalización
   si la celda no estuviera; tipos ReglaBlanda/Penalizacion/AtribucionBlanda; la fórmula de ventanas y
   consecutivas se EXTRAE a funciones puras que llaman tanto el gemelo como el atribuidor. D19 BACKEND
@@ -635,7 +638,59 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 65 — Fase 8, Bloque 8.3-B: ATRIBUCIÓN CONTRAFACTUAL de reglas
+Última sesión registrada: Sesión 66 — Fase 8, Bloque 8.2b-iv: ENTRADA DEL BLOQUEO POR REST.
+  Modo híbrido. 2 commits de código (071852c + 94e2649, el segundo por rehacer el test de
+  contrato). ALCANCE RECORTADO EN SESIÓN: se confirmó "8.2b-iv + REST de atribución" y se
+  RETIRÓ la mitad de atribución al leer el repo. Motivo (hecho, no juicio): SolucionHorario NO
+  es reconstruible desde las filas de Sesion —Sesion guarda (plaza, indice, tramoInicio, aula)
+  y tramoInicio es un TramoSemanal de orden GLOBAL con recreos, no un domain.Tramo (dia +
+  ordenEnDia)—; reconstruirla exigiría un INVERSO de SolucionMapper.indiceTramos, es decir un
+  TERCER espejo de la renumeración de jornada (D30 ya se queja de dos), más un constructor de
+  SolucionHorario que D-B9-5 decidió NO tener. Y peor: el consumidor real (8.6 drag&drop)
+  necesita atribución sobre una solución CANDIDATA que llega en el request (el usuario acaba de
+  mover una celda y NO ha guardado), no sobre un horario recargado de BD —luego GET
+  /{id}/diagnostico es la forma EQUIVOCADA—. Diseñarla hoy sería diseñar a ciegas antes del
+  consumidor: el mismo error que S62 evitó con este mismo bloque. La atribución REST se abre
+  como bloque 8.3-C, con su diseño explícitamente PENDIENTE.
+  Decisiones cerradas antes de teclear (D-F8.2b-iv-1..7): (1) un recurso = pin de tramo + sus
+  pines de aula, sin endpoint de aula suelto (el dominio no lo admite: la API no debe poder
+  escribir lo que el consumidor rechaza); DELETE en cascada por la misma razón. (2) tramo por
+  (dia, ordenEnDia), NO por TramoSemanal.id, porque la UI no ve ese id —SesionVistaDTO lleva
+  (dia, tramo)—; implementado INVIRTIENDO CatalogoMapper.indiceOrdenEnDia, no reimplementando
+  la renumeración: D30 gana un consumidor, no un tercer espejo. (3) el alta valida contra el
+  catálogo JPA y NO llama a BloqueoMapper (exigiría mapear el catálogo entero para un pin) →
+  deuda D-F8.2b-iv-a. (4) POST idempotente por instancia (reemplaza, 200; no 409: la
+  restricción única (actividad, indice) haría reventar un insert ciego, y el gesto de la UI es
+  "clavar aquí", no "conflicto"). (5) reemplazo TOTAL, PUT semántico: sin merge parcial, no se
+  distingue null de [] (esa sutileza produce bugs silenciosos). (6) GET plano simétrico; la UI
+  cruza (actividadCodigo, indice) contra SesionVistaDTO, que YA lleva la clave compuesta →
+  SesionVistaDTO NO se toca. (7) BloqueoController + BloqueoService nuevos, no ampliar
+  GeneradorHorarioService (arrastra D-F8.2b-iii-A-a: 12 repos).
+  HALLAZGO de la parada de lectura, que despeja una duda del contrato: catalog.Plaza SÍ expone
+  el XOR (getAulaFija() != null vs getAulasCandidatas()) —la validación (e) era implementable
+  sobre la ENTIDAD, no solo sobre domain.Plaza—.
+  REVISIÓN POR JUICIO (reparto de S64/S65): el PRIMER test de contrato fue RECHAZADO por el
+  arquitecto y rehecho. Probaba el CAMINO FELIZ (alta válida → cargarProblema() la mapea), y
+  eso NO detecta lo que el test existe para detectar: una divergencia entre los dos validadores
+  NO se manifiesta en el camino feliz —se manifiesta cuando el alta ACEPTA lo que el mapper
+  RECHAZA—. Con aquel fixture, borrar la comprobación de candidatura del alta dejaba el test
+  VERDE y el fallo salía como 500 en el solve. Rehecho por VÍA B: inyecta en BD
+  —SALTÁNDOSE BloqueoService— un pin de aula NO candidata y asevera que cargarProblema()
+  LANZA. Verificado además que el chequeo de candidatura vive SOLO en BloqueoMapper (el ctor de
+  domain.SesionBloqueada solo hace null-checks), luego el hasMessageContaining("candidata") no
+  captura otro throw por accidente. El camino feliz sobrevive RENOMBRADO a
+  humo_altaValidaLlegaAlProblemaHorario: un test llamado "contrato" que probaba humo era un
+  nombre que MIENTE, la misma clase de deuda que S65 cazó en un comentario.
+  Lección de método: el prompt especificó el PROPÓSITO del test ("el que ata los dos
+  validadores") pero no el ASERTO DISCRIMINANTE, y Claude Code escribió el camino feliz. Es el
+  mismo aprendizaje que el isEqualTo(-1) de S65: hay que escribir el aserto, no el propósito.
+  Suite: app 49 → 56 (+7, todos BloqueoEndpointTest); solver 78 intacto. solver/src/main NO
+  tocado → referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md NO tocado (el
+  bloqueo REST no añade entidad ni invariante: §4.7 ya lo describe). SesionVistaDTO, frontend y
+  HorarioController NO tocados.
+  Siguiente: 8.4 (pre-validación, D18/D20), 8.3-C (REST de atribución, DISEÑO PENDIENTE: cómo
+  llega la SolucionHorario candidata) o el candidato que se decida al abrir sesión.
+Última sesión registrada (previa): Sesión 65 — Fase 8, Bloque 8.3-B: ATRIBUCIÓN CONTRAFACTUAL de reglas
   BLANDAS por celda. CIERRA D19 en BACKEND (duras en 8.3-A, blandas aquí). Modo híbrido (diseño en el
   Project, código en Claude Code). 3 commits (c74f2b8 código + 1f14e42 referencia + fix de comentario).
   HALLAZGO que resuelve la decisión de diseño que S64 dejó ABIERTA ("¿el atribuidor blando ES el gemelo,
@@ -773,52 +828,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   intacta (Bloques de Fase 8 EN CURSO, Decisiones permanentes, Hallazgos PDFs, criterios de fase). No se
   tocó código, ni modelo_datos_fase1.md, ni nada fuera de docs/. Tres commits de una línea. Árbol limpio.
   Siguiente: 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el candidato que se decida al abrir sesión.
-Última sesión registrada (previa): Sesión 62 — Fase 8, Bloque 8.2b-iii-A: CABLEADO del servicio a los repos
-  de bloqueo. Modo híbrido (diseño en el Project, código en Claude Code). CIERRA EL LAZO end-to-end
-  del bloqueo manual: hasta S61 el pin funcionaba en el solver, se persistía y se mapeaba, pero la
-  vía REST de generación NO lo leía (cargarProblema() pasaba List.of(), List.of()) — todo lo
-  construido en S58/S60/S61 era INERTE en producción. Alcance CORTADO con el usuario al abrir: se
-  descartó hacer 8.2b-iii entero (cableado + REST) y se partió en 8.2b-iii-A (cableado, esta sesión)
-  + 8.2b-iv (REST, diferido). Razón del corte: el cableado es la pieza que hace útil lo ya
-  construido y tiene oro trivial; la superficie REST no tiene consumidor todavía (la UI de drag&drop
-  es 8.6) y diseñar su API sin el consumidor delante es diseñar a ciegas.
-  Decisiones cerradas antes de teclear (D-F8.2b-iii-A-1..2): (1) inyección DIRECTA de los dos repos
-  en el constructor de GeneradorHorarioService (pasa de 10 a 12), patrón vivo; se descartó envolverlos
-  en un servicio intermedio (capa sin ganancia: los findAll() son triviales y sin filtro) → deuda
-  nueva D-F8.2b-iii-A-a. (2) el ORO es un IT que llama a generar(...) por la VÍA REAL, no a
-  cargarProblema() suelta, con maxSegundos=10 EXPLÍCITO (el default de 30 s del servicio es veneno
-  para la suite, D24/D25).
-  Hallazgo clave de la lectura del repo (el riesgo que se temía NO se materializó): cargarProblema()
-  YA era @Transactional(readOnly=true) y su javadoc ya documentaba la razón (identidad de objeto en
-  relaciones LAZY). Por tanto añadir los findAll() de bloqueo DENTRO de ese método hace que el
-  TramoSemanal de SesionBloqueada.getTramoInicio() salga de la MISMA caché de primer nivel que
-  tramoRepository.findAll(), y el IdentityHashMap de S61 funciona. No había decisión que tomar: el
-  sitio correcto era el único sitio. Segundo hallazgo: NINGÚN llamador del constructor se rompió —los
-  6 tests usan @Import + @DataJpaTest, que auto-inyecta los repos nuevos.
-  Entregado (3 commits de una línea, código y tests separados): (TAREA 1) cableado de
-  GeneradorHorarioService —2 repos inyectados, los 2 List.of() → findAll(), javadoc de cargarProblema()
-  ampliado con la precondición de identidad de instancia y el modo de fallo SILENCIOSO (cargar los
-  bloqueos fuera de la transacción daría instancias distintas y el pin se perdería sin excepción);
-  (TAREA 2) PinTramoGeneracionRoundTripTest, IT end-to-end: persistir catálogo + pin de tramo →
-  service.generar(10, 42, null, "test-pin") → recargar → toda Sesion de la instancia pinada cae en el
-  tramo pinado; (TAREA 3) BloqueoMapperPinAulaHuerfanoTest, unitario (sin Spring/BD, en app.catalog por
-  los ctor protected), cierra la deuda de test (c) de S61.
-  VALIDEZ DEL FIXTURE (procedimiento obligatorio, lección del assert (b) de S61): sonda temporal
-  confirmó que SIN pin el solver con semilla 42 coloca la instancia en L1; se pina L5, tramo que el
-  solver NO elegiría por su cuenta. ORO NEGATIVO: revertir los dos findAll() a List.of() deja el test
-  ROJO (cae en L1, id=1 ≠ 5) — el pin CAMBIA la solución, no es un no-op; restaurado, verde.
-  Parada de lectura confirmada antes de teclear: la validación del pin de aula huérfano SÍ estaba
-  implementada en BloqueoMapper (lanza IllegalArgumentException "pin de aula sin pin de tramo para …"),
-  no solo documentada → TAREA 3 procedía sin cambio de alcance.
-  Suite: solver 71 intacto (no se tocó solver/src/main → referencia-codigo-solver.md NO regenerado),
-  app 47 → 49 (+2). BUILD SUCCESS con mvn clean test desde la raíz; working tree limpio. Modelo NO
-  tocado; REST NO tocado.
-  Deuda VIVA que 8.2b-iii-A deja: D-F8.2b-iii-A-a (12 repos en el constructor de
-  GeneradorHorarioService: extraer un CatalogoLoader cuando moleste; NO bloqueante). Deuda (a) y (c)
-  de 8.2b-ii CERRADAS.
-  Siguiente: LIMPIEZA DE FONDO del plan (candidato principal de S63, acordada y pospuesta dos veces),
-  o 8.2b-iv (REST de bloqueos, con contrato ya pre-cerrado), o el candidato que se decida al abrir
-  sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
@@ -826,9 +835,9 @@ de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
-Sesión 64 y la de S61 en la Sesión 65 (misma higiene documental; en S60 se corrigió además una
+Sesión 64, la de S61 en la Sesión 65 y la de S62 en la Sesión 66 (misma higiene documental; en S60 se corrigió además una
 copia truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El
-plan conserva las 4 últimas cabeceras compactas (S62–S65). El detalle histórico de cualquier
+plan conserva las 4 últimas cabeceras compactas (S63–S66). El detalle histórico de cualquier
 sesión anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
@@ -931,10 +940,15 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
 - [x] Bloque 8.2b-iii-A — Cableado del servicio a los repos de bloqueo (S62). Cierra el
       lazo end-to-end: un solve por POST /api/horarios respeta los pines persistidos.
       Deuda (a) y (c) de 8.2b-ii CERRADAS.
-- [ ] Bloque 8.2b-iv — Entrada del bloqueo por REST. Contrato PRE-CERRADO en S62
-      (endpoint propio /api/bloqueos; ver deuda). Sin consumidor real hasta 8.6
-      (drag&drop): no urge, y diseñar su superficie antes del consumidor es diseñar a
-      ciegas.
+- [x] Bloque 8.2b-iv — Entrada del bloqueo por REST (S66). BloqueoController + BloqueoService
+      + 4 DTOs. Contrato de S62 respetado (endpoint propio /api/bloqueos). El pin de tramo es
+      el recurso y los pines de aula su contenido: no hay endpoint de aula suelto porque el
+      dominio no lo admite (BloqueoMapper aborta) y la API no debe poder escribir estados que
+      el consumidor rechaza. POST idempotente con REEMPLAZO TOTAL (PUT semántico: body sin
+      "aulas" deja el pin sin aulas; no hay merge parcial). El tramo se referencia por
+      (dia, ordenEnDia), el mismo par que ya lleva SesionVistaDTO, INVIRTIENDO
+      CatalogoMapper.indiceOrdenEnDia (fuente única: NO se reimplementa la renumeración, D30
+      no se agrava con un tercer espejo). Solo app/: sin tocar solver/src/main.
 - [x] Bloque 8.3-A — Atribución ESTRUCTURADA de reglas DURAS por celda (S64, D19 backend
       parcial). ResultadoVerificacion: List<String> → List<Violacion>. Tipos ReglaDura +
       CeldaRef(actividadCodigo, indice 1-based, plazaCodigo nullable) + Violacion(regla,
@@ -953,6 +967,15 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       Penalizacion + AtribucionBlanda; ResultadoVerificacion/Violacion NO se tocan (una
       penalización blanda no es una violación) y por tanto D15 queda fuera del radio. Solo
       solver/: sin REST.
+- [ ] Bloque 8.3-C — REST de atribución (duras + blandas). DISEÑO PENDIENTE, abierto en S66 al
+      retirarlo del alcance. El backend está CERRADO (8.3-A + 8.3-B) pero SIN CONSUMIDOR. La
+      pregunta abierta NO es de mapeo: es CÓMO LLEGA LA SOLUCIÓN A VERIFICAR. No sirve
+      recargarla de BD (SolucionHorario no es reconstruible desde Sesion sin un tercer espejo de
+      la renumeración de jornada, D30; y D-B9-5 decidió no reconstruirla), y el consumidor real
+      —8.6, drag&drop— necesita evaluar una solución CANDIDATA que el usuario acaba de mover y
+      NO ha guardado. Luego la forma probable NO es GET /{id}/diagnostico sino un POST que
+      TRANSPORTE la solución candidata (o un verificador en cliente). Decidirlo CON el
+      consumidor, no antes: diseñarlo hoy es diseñar a ciegas.
 - [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
 - [ ] Bloque 8.5+ — CRUD de catálogo (D10 plazas multi-profesor, D1/D7 asistentes).
@@ -1419,8 +1442,21 @@ siguiente, con remisión a la bitácora.
   (mezclaría capas). Extraer un `CatalogoLoader` (o similar) que agrupe la carga del
   catálogo cuando el constructor moleste de verdad — típicamente al añadir el siguiente
   repo. Sin impacto funcional.
+- **D-F8.2b-iv-a** (S66, VIVA) — ESPEJO DE VALIDACIÓN: las reglas de coherencia del bloqueo
+  están implementadas DOS veces. `BloqueoService` las valida sobre entidades JPA en el alta;
+  `BloqueoMapper` las valida sobre el dominio ya mapeado al generar. Se aceptó
+  conscientemente: llamar al mapper desde el alta exigiría cargar y mapear el catálogo
+  completo (10 findAll()) para dar de alta un pin, y unificarlos obligaría a reescribir
+  BloqueoMapper —refactor de un componente probado dentro de un bloque cuyo valor era abrir
+  una superficie (misma decisión que S62 con los 12 repos)—. Si una diverge, el alta acepta
+  algo que el solve rechaza con 500. MITIGACIÓN VIVA: el test de contrato
+  `contrato_pinQueElAltaRechazaLoRechazaTambienElMapper` (BloqueoEndpointTest) inyecta en BD
+  —saltándose BloqueoService— un pin que el alta rechazaría por la regla (e) y asevera que
+  cargarProblema() TAMBIÉN lo rechaza. Es el único componente que detecta la divergencia.
+  Hermana de D21/D22/D30. → resolver si el número de reglas crece.
 
-- **Contrato PRE-CERRADO de 8.2b-iv** (S62, decisión tomada, implementación DIFERIDA) —
+- **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
+  documenta el PORQUÉ del endpoint propio, que sigue vivo) —
   la entrada del bloqueo por REST va en **endpoint propio**, NO en el body de
   POST /api/horarios:
       POST   /api/bloqueos       → alta de un pin (tramo + opcionalmente aulas por plaza)
