@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-07-13
-- Commit: `c74f2b8`
+- Fecha: 2026-07-14
+- Commit: `ff1efbf`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -132,6 +132,7 @@ Métodos:
 - `public Optional<Tramo> tramoDeInstancia(ActividadInstancia instancia)`
 - `public Optional<Aula> aulaElegida(ActividadInstancia instancia, Plaza plaza)`
 - `public Map<ActividadInstancia, Tramo> asignaciones()`
+- `public Map<ActividadInstancia, Map<Plaza, Aula>> aulasElegidas()`
 
 Consume: `ActividadInstancia`, `Aula`, `Plaza`, `Tramo`
 
