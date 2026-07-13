@@ -64,4 +64,19 @@ public class SolucionHorario {
     public Map<ActividadInstancia, Tramo> asignaciones() {
         return asignaciones;
     }
+
+    /**
+     * Aulas que el solver ELIGIÓ, por instancia y plaza. Solo contiene las plazas con
+     * {@code aulasCandidatas}: las de {@code aulaFija} NO aparecen aquí (su aula no es
+     * resultado del solve). Para obtener el aula EFECTIVA de cualquier plaza —fija o
+     * variable— usa {@link #aulaElegida(ActividadInstancia, Plaza)}, que oculta esa
+     * diferencia; este accessor la EXPONE, y existe para que esa distinción sea
+     * verificable desde fuera (Bloque 8.3-C).
+     *
+     * <p>El mapa devuelto es inmutable (congelado por el constructor con
+     * {@code Map.copyOf} anidado).
+     */
+    public Map<ActividadInstancia, Map<Plaza, Aula>> aulasElegidas() {
+        return aulasElegidas;
+    }
 }

@@ -1,7 +1,9 @@
 package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
+import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
@@ -32,9 +34,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class HorarioController {
 
     private final GeneradorHorarioService service;
+    private final DiagnosticoService diagnosticoService;
 
-    public HorarioController(GeneradorHorarioService service) {
+    public HorarioController(GeneradorHorarioService service, DiagnosticoService diagnosticoService) {
         this.service = service;
+        this.diagnosticoService = diagnosticoService;
     }
 
     /**
@@ -62,6 +66,20 @@ public class HorarioController {
     public HorarioProyeccionDTO proyeccion(@PathVariable("id") Long id) {
         try {
             return service.proyectar(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Diagnostica un horario generado (Fase 8, Bloque 8.3-C): violaciones duras y
+     * penalizaciones blandas atribuidas por celda, más los totales blandos. {@code 404}
+     * si el id no existe (misma traducción que {@link #proyeccion}).
+     */
+    @GetMapping("/{id}/diagnostico")
+    public DiagnosticoDTO diagnostico(@PathVariable("id") Long id) {
+        try {
+            return diagnosticoService.diagnosticar(id);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
