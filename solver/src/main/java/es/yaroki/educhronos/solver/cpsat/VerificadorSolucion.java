@@ -42,7 +42,7 @@ import java.util.function.Function;
 public final class VerificadorSolucion {
 
     public ResultadoVerificacion verificar(ProblemaHorario problema, SolucionHorario solucion) {
-        List<String> violaciones = new ArrayList<>();
+        List<Violacion> violaciones = new ArrayList<>();
         List<ActividadInstancia> esperadas = Expansion.todas(problema);
 
         verificarTodasColocadas(esperadas, solucion, violaciones);
@@ -354,10 +354,12 @@ public final class VerificadorSolucion {
 
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,
                                          SolucionHorario solucion,
-                                         List<String> violaciones) {
+                                         List<Violacion> violaciones) {
         for (ActividadInstancia inst : esperadas) {
             if (solucion.tramoDeInstancia(inst).isEmpty()) {
-                violaciones.add("Instancia sin colocar: " + etiqueta(inst));
+                CeldaRef celda = new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
+                violaciones.add(new Violacion(ReglaDura.INSTANCIA_SIN_COLOCAR, null, null,
+                        List.of(celda), "Instancia sin colocar: " + etiqueta(inst)));
             }
         }
     }
@@ -375,7 +377,7 @@ public final class VerificadorSolucion {
     private void verificarBloquesConsecutivos(ProblemaHorario problema,
                                               List<ActividadInstancia> esperadas,
                                               SolucionHorario solucion,
-                                              List<String> violaciones) {
+                                              List<Violacion> violaciones) {
         for (ActividadInstancia inst : esperadas) {
             int duracion = inst.actividad().duracionTramos();
             if (duracion <= 1) {
@@ -386,9 +388,12 @@ public final class VerificadorSolucion {
                 continue; // ya lo reporta verificarTodasColocadas
             }
             if (tramosOcupados(inicioOpt.get(), duracion, problema).isEmpty()) {
-                violaciones.add("Bloque " + etiqueta(inst) + " (duracion=" + duracion
-                        + ") inicia en " + inicioOpt.get().codigo()
-                        + " y desborda el día o cruza el recreo");
+                CeldaRef celda = new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
+                violaciones.add(new Violacion(ReglaDura.BLOQUE_IMPOSIBLE, null,
+                        inicioOpt.get().codigo(), List.of(celda),
+                        "Bloque " + etiqueta(inst) + " (duracion=" + duracion
+                                + ") inicia en " + inicioOpt.get().codigo()
+                                + " y desborda el día o cruza el recreo"));
             }
         }
     }
@@ -396,7 +401,7 @@ public final class VerificadorSolucion {
     private void verificarNoSolapes(ProblemaHorario problema,
                                     List<ActividadInstancia> esperadas,
                                     SolucionHorario solucion,
-                                    List<String> violaciones) {
+                                    List<Violacion> violaciones) {
         // Cada instancia se explota a TODOS los tramos que ocupa (inicio +
         // duración), no solo al de inicio: un bloque de duracion>1 ocupa también
         // sus tramos interiores, y un solape en un tramo interior es colisión
@@ -422,12 +427,18 @@ public final class VerificadorSolucion {
         for (Map.Entry<Tramo, List<ActividadInstancia>> entrada : porTramo.entrySet()) {
             Tramo tramo = entrada.getKey();
 
-            Map<Profesor, Integer> profesores = new HashMap<>();
-            Map<Aula, Integer> aulas = new HashMap<>();
-            Map<Subgrupo, Integer> subgrupos = new HashMap<>();
-            Map<GrupoAdministrativo, Integer> grupos = new HashMap<>();
+            // Acumular las CeldaRef culpables (no un contador): así una colisión
+            // sabe QUIÉNES la causan (8.3-A). La condición de colisión pasa de
+            // valor>1 a lista.size()>1; la cardinalidad de conteo es idéntica.
+            Map<Profesor, List<CeldaRef>> profesores = new HashMap<>();
+            Map<Aula, List<CeldaRef>> aulas = new HashMap<>();
+            Map<Subgrupo, List<CeldaRef>> subgrupos = new HashMap<>();
+            Map<GrupoAdministrativo, List<CeldaRef>> grupos = new HashMap<>();
 
             for (ActividadInstancia inst : entrada.getValue()) {
+                // Celda POR INSTANCIA (plazaCodigo=null): profesor/subgrupo/grupo.
+                CeldaRef celdaInstancia =
+                        new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
                 // Set por instancia para profesor y subgrupo: si dos plazas de la
                 // misma actividad listan el mismo recurso, la instancia lo ocupa
                 // una vez, no dos. Correcto: S1 permite un profesor en varias
@@ -447,8 +458,12 @@ public final class VerificadorSolucion {
                 for (Plaza plaza : inst.actividad().plazas()) {
                     ps.addAll(plaza.profesores());
                     ss.addAll(plaza.subgrupos());
-                    solucion.aulaElegida(inst, plaza)
-                            .ifPresent(a -> aulas.merge(a, 1, Integer::sum));
+                    // Aula POR PLAZA (D15): la celda lleva plazaCodigo no-null,
+                    // para distinguir las dos plazas que colisionan en el aula.
+                    solucion.aulaElegida(inst, plaza).ifPresent(a ->
+                            aulas.computeIfAbsent(a, k -> new ArrayList<>())
+                                    .add(new CeldaRef(inst.actividad().codigo(),
+                                            inst.indice(), plaza.codigo())));
                 }
                 // Grupo derivado de los subgrupos de la instancia. Como ss ya es
                 // un Set por instancia, varios subgrupos del mismo grupo en la
@@ -458,27 +473,40 @@ public final class VerificadorSolucion {
                 Set<GrupoAdministrativo> gs = new HashSet<>();
                 ss.forEach(s -> gs.addAll(s.grupos()));
 
-                ps.forEach(p -> profesores.merge(p, 1, Integer::sum));
-                ss.forEach(s -> subgrupos.merge(s, 1, Integer::sum));
-                gs.forEach(g -> grupos.merge(g, 1, Integer::sum));
+                ps.forEach(p -> profesores.computeIfAbsent(p, k -> new ArrayList<>())
+                        .add(celdaInstancia));
+                ss.forEach(s -> subgrupos.computeIfAbsent(s, k -> new ArrayList<>())
+                        .add(celdaInstancia));
+                gs.forEach(g -> grupos.computeIfAbsent(g, k -> new ArrayList<>())
+                        .add(celdaInstancia));
             }
 
-            reportarColisiones("Profesor", tramo, profesores, Profesor::codigo, violaciones);
-            reportarColisiones("Aula", tramo, aulas, Aula::codigo, violaciones);
-            reportarColisiones("Subgrupo", tramo, subgrupos, Subgrupo::codigo, violaciones);
-            reportarColisiones("Grupo", tramo, grupos, GrupoAdministrativo::codigo, violaciones);
+            reportarColisiones(ReglaDura.SOLAPE_PROFESOR, "Profesor", tramo, profesores,
+                    Profesor::codigo, violaciones);
+            reportarColisiones(ReglaDura.SOLAPE_AULA, "Aula", tramo, aulas,
+                    Aula::codigo, violaciones);
+            reportarColisiones(ReglaDura.SOLAPE_SUBGRUPO, "Subgrupo", tramo, subgrupos,
+                    Subgrupo::codigo, violaciones);
+            reportarColisiones(ReglaDura.SOLAPE_GRUPO, "Grupo", tramo, grupos,
+                    GrupoAdministrativo::codigo, violaciones);
         }
     }
 
-    private <T> void reportarColisiones(String tipo,
+    private <T> void reportarColisiones(ReglaDura regla,
+                                        String etiquetaTipo,
                                         Tramo tramo,
-                                        Map<T, Integer> conteo,
+                                        Map<T, List<CeldaRef>> conteo,
                                         Function<T, String> codigo,
-                                        List<String> violaciones) {
-        for (Map.Entry<T, Integer> e : conteo.entrySet()) {
-            if (e.getValue() > 1) {
-                violaciones.add(tipo + " " + codigo.apply(e.getKey())
-                        + " usado " + e.getValue() + " veces en el tramo " + tramo.codigo());
+                                        List<Violacion> violaciones) {
+        for (Map.Entry<T, List<CeldaRef>> e : conteo.entrySet()) {
+            List<CeldaRef> celdas = e.getValue();
+            if (celdas.size() > 1) {
+                String recurso = codigo.apply(e.getKey());
+                // Mismo texto que antes: "Profesor MAT8 usado 2 veces en el tramo
+                // LUN-1". El "N veces" se deriva de celdas.size().
+                String descripcion = etiquetaTipo + " " + recurso
+                        + " usado " + celdas.size() + " veces en el tramo " + tramo.codigo();
+                violaciones.add(new Violacion(regla, recurso, tramo.codigo(), celdas, descripcion));
             }
         }
     }
@@ -486,7 +514,7 @@ public final class VerificadorSolucion {
     private void verificarDistribucion(ProblemaHorario problema,
                                        List<ActividadInstancia> esperadas,
                                        SolucionHorario solucion,
-                                       List<String> violaciones) {
+                                       List<Violacion> violaciones) {
         int numDias = (int) problema.tramos().stream()
                 .map(Tramo::diaSemana)
                 .distinct()
@@ -505,16 +533,26 @@ public final class VerificadorSolucion {
             if (actividad.repeticionesPorSemana() > numDias) {
                 continue; // misma guarda anti-palomar (D12) que el modelo
             }
-            Set<Integer> diasUsados = new HashSet<>();
+            // primera instancia colocada por día, para poder poner AMBAS culpables
+            // en celdas cuando un día se repite (misma cardinalidad que antes: una
+            // violación por cada instancia repetida del día).
+            Map<Integer, ActividadInstancia> primeraDelDia = new HashMap<>();
             for (ActividadInstancia inst : e.getValue()) {
                 Optional<Tramo> tramo = solucion.tramoDeInstancia(inst);
                 if (tramo.isEmpty()) {
                     continue; // ya reportado por verificarTodasColocadas
                 }
                 int dia = tramo.get().diaSemana();
-                if (!diasUsados.add(dia)) {
-                    violaciones.add("Actividad " + actividad.codigo()
-                            + " tiene dos sesiones el mismo día (diaSemana=" + dia + ")");
+                ActividadInstancia previa = primeraDelDia.putIfAbsent(dia, inst);
+                if (previa != null) {
+                    CeldaRef celdaPrevia =
+                            new CeldaRef(previa.actividad().codigo(), previa.indice(), null);
+                    CeldaRef celdaActual =
+                            new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
+                    violaciones.add(new Violacion(ReglaDura.DISTRIBUCION_MISMO_DIA, null, null,
+                            List.of(celdaPrevia, celdaActual),
+                            "Actividad " + actividad.codigo()
+                                    + " tiene dos sesiones el mismo día (diaSemana=" + dia + ")"));
                 }
             }
         }

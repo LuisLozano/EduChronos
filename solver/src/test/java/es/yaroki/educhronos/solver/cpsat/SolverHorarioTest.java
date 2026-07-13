@@ -91,7 +91,9 @@ class SolverHorarioTest {
 
         assertThat(resultado.esValida()).isFalse();
         assertThat(resultado.violaciones())
-                .anyMatch(v -> v.contains("MAT8"));
+                .anyMatch(v -> v.regla() == ReglaDura.SOLAPE_PROFESOR
+                        && "MAT8".equals(v.recursoCodigo())
+                        && v.celdas().size() == 2);
     }
 
     // --------------------------------------------------------------- helpers

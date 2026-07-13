@@ -89,7 +89,9 @@ class VerificadorSolucionGrupoTest {
 
         assertThat(r.violaciones())
                 .as("solape de grupo 1A en LUN-1 debe reportarse")
-                .anyMatch(v -> v.contains("Grupo 1A") && v.contains("2 veces"));
+                .anyMatch(v -> v.regla() == ReglaDura.SOLAPE_GRUPO
+                        && v.recursoCodigo().equals("1A")
+                        && v.celdas().size() == 2);
     }
 
     @Test
@@ -109,7 +111,7 @@ class VerificadorSolucionGrupoTest {
 
         assertThat(r.violaciones())
                 .as("en tramos distintos no hay solape de grupo")
-                .noneMatch(v -> v.contains("Grupo"));
+                .noneMatch(v -> v.regla() == ReglaDura.SOLAPE_GRUPO);
     }
 
     @Test
@@ -135,6 +137,6 @@ class VerificadorSolucionGrupoTest {
 
         assertThat(r.violaciones())
                 .as("un desdoble es una sola actividad: el grupo se ocupa una vez")
-                .noneMatch(v -> v.contains("Grupo"));
+                .noneMatch(v -> v.regla() == ReglaDura.SOLAPE_GRUPO);
     }
 }
