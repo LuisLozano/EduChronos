@@ -115,8 +115,10 @@ class VerificadorSolucionAtribucionBlandaTest {
                 .as("VENTANA_PROFESOR penaliza el día, no un tramo: tramoCodigo null")
                 .isNull();
 
-        // Discriminación: solo la celda del medio aporta. Las de los extremos (pos 1
-        // y 3) tienen delta 0 (quitarlas no crea hueco) y NO aparecen en el mapa.
+        // Discriminación: solo la celda del medio aporta. Los extremos (pos 1 y 3)
+        // dan delta 0 AQUÍ porque quitarlos reduce span y nClases en 1 cada uno y la
+        // resta se cancela — NO porque los extremos nunca aporten: en {1,3,4} quitar
+        // el extremo 1 da delta +1 (ver el test de {1,3}). El caso {1,2,3} es contiguo.
         assertThat(atr.porCelda())
                 .as("solo la celda que tapa el hueco aporta; las demás no aparecen")
                 .containsOnlyKeys(celdaMedio);
