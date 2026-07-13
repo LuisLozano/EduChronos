@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.3-A CERRADO en S64
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.3-B CERRADO en S65
+  (atribución CONTRAFACTUAL de reglas blandas por celda: delta CON SIGNO = cuánto cambia la penalización
+  si la celda no estuviera; tipos ReglaBlanda/Penalizacion/AtribucionBlanda; la fórmula de ventanas y
+  consecutivas se EXTRAE a funciones puras que llaman tanto el gemelo como el atribuidor. D19 BACKEND
+  CERRADA). Bloque 8.3-A CERRADO en S64
   (atribución ESTRUCTURADA de reglas duras por celda: ResultadoVerificacion pasa de List<String> a
   List<Violacion>; tipos nuevos ReglaDura/CeldaRef/Violacion; una violación conoce QUIÉNES la causan.
   8.3-B —blandas— DIFERIDO por decisión de diseño: los recomputos gemelos valen por ser independientes
@@ -631,7 +635,71 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 64 — Fase 8, Bloque 8.3-A: ATRIBUCIÓN ESTRUCTURADA de reglas
+Última sesión registrada: Sesión 65 — Fase 8, Bloque 8.3-B: ATRIBUCIÓN CONTRAFACTUAL de reglas
+  BLANDAS por celda. CIERRA D19 en BACKEND (duras en 8.3-A, blandas aquí). Modo híbrido (diseño en el
+  Project, código en Claude Code). 3 commits (c74f2b8 código + 1f14e42 referencia + fix de comentario).
+  HALLAZGO que resuelve la decisión de diseño que S64 dejó ABIERTA ("¿el atribuidor blando ES el gemelo,
+  o es un tercer camino?"): la pregunta estaba MAL PLANTEADA porque presupone que hay UN atribuidor
+  blando. Los tres gemelos NO son del mismo tipo. contarPenalizacionIndisponibilidadBlanda es LOCAL: su
+  bucle YA sabe qué instancia penaliza (atribuir = no tirar el dato que tiene en la mano; mismo hallazgo
+  que S64 hizo sobre reportarColisiones). contarVentanasProfesor y
+  contarPenalizacionConsecutivasProfesor son NO-LOCALES: la penalización es propiedad de un CONJUNTO de
+  posiciones (Set<Integer>), no de ninguna celda — ninguna celda "causa" una ventana, y el dato de qué
+  instancia puso cada posición no se perdió por descuido sino porque NO HACE FALTA para contar.
+  Decisiones cerradas antes de teclear (D-F8.3-B-1..4): (1) [D-F8.3-B-1, la que S64 dejó abierta] la
+  atribución blanda NO es culpabilidad sino CONTRAFACTUAL: delta = penalización_actual −
+  penalización_si_esa_celda_no_estuviera. Eso responde a lo que la UI necesita ("¿qué gano si muevo
+  esto?") y CONSERVA la independencia respecto a CP-SAT por construcción: el atribuidor USA al gemelo
+  como oráculo, sin ser él ni reimplementarlo. Se descartó de plano cualquier reparto de culpa
+  (proporcional, por primera-instancia): la ventana es propiedad de un conjunto y todo reparto sería una
+  invención sin correlato en el dominio. (2) Coste vs no-duplicación: se EXTRAEN las fórmulas existentes
+  a funciones puras estáticas ventanasDe(Set<Integer>) y excesoConsecutivasDe(Set<Integer>, int) que
+  llaman TANTO el gemelo público COMO el atribuidor — una sola definición de "qué es una ventana", coste
+  O(1) por celda. Se descartó el oráculo puro (reinvocar el gemelo entero por celda, O(celdas ×
+  Expansion.todas)): cuando el coste mordiera, alguien duplicaría la fórmula sin decisión consciente. NO
+  es una segunda definición: es la ÚNICA definición movida a donde ambos la alcanzan. (3) Vehículo
+  SEPARADO de verificar(): tipos nuevos ReglaBlanda + Penalizacion + AtribucionBlanda; NO se toca
+  ResultadoVerificacion/Violacion/ReglaDura. Una penalización blanda NO es una Violacion (no invalida la
+  solución, no tiene recurso violado, y sus N celdas tienen deltas DISTINTOS entre sí). Meterla en
+  List<Violacion> habría sido el refactor de uniformización que amenaza la asimetría D15 — que por tanto
+  NO entra en el radio de este bloque, por construcción y no por vigilancia. (4) Alcance solver/
+  únicamente, sin REST ni app/ (gemelo de 8.3-A: el consumidor real es 8.6).
+  CORRECCIÓN AL CONTRATO DURANTE EL DISEÑO (el detalle que salva el bloque): delta LLEVA SIGNO y NO se
+  normaliza. delta>0 = mover la celda MEJORA; delta<0 = la celda está TAPANDO un hueco y moverla EMPEORA
+  ({1,2,3} = 0 ventanas; quitar la del medio deja {1,3} = 1 ventana, delta = −1); delta=0 = indiferente,
+  y NO se emite (el mapa no se ensucia con ceros). El contrato inicial decía "delta > 0 siempre" y era
+  FALSO: de haberlo dejado al teclado habría salido un Math.max(0,delta) silencioso que MIENTE y que
+  sobrevive a una suite verde. tramoCodigo es null en VENTANA_PROFESOR y EXCESO_CONSECUTIVAS (penalizan
+  una configuración de DÍA, no de tramo; rellenarlo sería mentir) y no-null solo en
+  INDISPONIBILIDAD_BLANDA. Asimetría deliberada, gemela de la de Violacion.
+  ORO del bloque: test que asevera delta EXACTAMENTE −1 (isEqualTo(-1), no "<=0" ni "!=0") en la celda
+  del medio de {1,2,3} — es el único aserto que un clamp a positivo NO sobrevive. Más discriminación con
+  delta +1 en la punta de {1,3}. Consistencia de los gemelos tras la extracción aseverada contra VALORES
+  LITERALES conocidos (ventanas=3, consecutivas=1) sobre solución construida a mano y enumerada en
+  diseño, NO tautológica; se usó fixture propio y no uno existente porque ninguno ejercita ambos gemelos
+  con valores no triviales sobre una solución DETERMINISTA por día (el papel de no-regresión contra el
+  comportamiento histórico lo hacen los oro-fuerte de S24/S25/S27, que sí corren sobre los fixtures
+  reales y quedaron verdes).
+  REVISIÓN POR JUICIO (reparto de S64): el diff de los dos gemelos se verificó como EXTRACCIÓN PURA
+  (líneas movidas, no reescritas; única diferencia continue→return 0, correcta al pasar de bucle a
+  función). Se cazó y corrigió un COMENTARIO ENGAÑOSO en el test del delta −1, que afirmaba que "los
+  extremos tienen delta 0 porque quitarlos no crea hueco": el aserto pasa, pero la razón es falsa y
+  CONTRADICE al test hermano — los extremos dan 0 en {1,2,3} porque quitarlos reduce span y nClases en 1
+  y la resta se cancela, NO porque los extremos nunca aporten (en {1,3,4}, quitar el extremo 1 da delta
+  +1). Un comentario que miente sobre la semántica es deuda viva en src/test: invita a "optimizar" el
+  atribuidor saltándose los extremos.
+  Suite: 122 → 127 (solver 73 → 78; app 49 intacto), 0 fallos, BUILD SUCCESS. ModeloCpSat NO tocado
+  (probado por git diff --stat) — el atribuidor es independiente de CP-SAT, que es todo el punto.
+  app/, REST, DTOs, frontend y modelo_datos_fase1.md NO tocados (los tipos de atribución son
+  infraestructura de verificación, no entidad ni invariante nueva). verificarNoSolapes NO tocado: D15
+  intacta. src/main del solver SÍ tocado → referencia-codigo-solver.md REGENERADO (1f14e42).
+  Deuda que deja viva: el n=3 literal de atribuirBlandas es el MISMO espejo frágil de MAX_CONSECUTIVAS
+  que ya tenía el gemelo; la extracción lo PARAMETRIZA (excesoConsecutivasDe recibe n) pero no resuelve
+  el origen. Es D21(c), ya registrada, NO ampliada aquí.
+  Siguiente: 8.4 (pre-validación, D18/D20), 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el
+  candidato que se decida al abrir sesión. D19 backend CERRADA; D19 queda viva solo en su parte de UI
+  (8.6, consumidor real de la atribución).
+Última sesión registrada (previa): Sesión 64 — Fase 8, Bloque 8.3-A: ATRIBUCIÓN ESTRUCTURADA de reglas
   DURAS por celda. Modo híbrido (diseño en el Project, código en Claude Code). 2 commits
   (6e9f68d código + f4df782 referencia). Alcance CORTADO al abrir: 8.3 partido en 8.3-A (duras,
   esta sesión) y 8.3-B (blandas, DIFERIDO). Razón del corte: los "recomputos gemelos" de las
@@ -751,61 +819,17 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: LIMPIEZA DE FONDO del plan (candidato principal de S63, acordada y pospuesta dos veces),
   o 8.2b-iv (REST de bloqueos, con contrato ya pre-cerrado), o el candidato que se decida al abrir
   sesión.
-Última sesión registrada (previa): Sesión 61 — Fase 8, Bloque 8.2b-ii: PERSISTENCIA JPA de los bloqueos
-  manuales (SesionBloqueada + AulaBloqueada, §4.7) + mapper de entrada + cableado del placeholder
-  de CatalogoMapper. Modo híbrido (diseño y documentación en el Project, código en Claude Code).
-  Cierra la deuda (ii) de 8.2b: materializa la forma normalizada de §4.7 que el rediseño de S60 dejó
-  especificada. Alcance cortado con el usuario: 8.2b-ii SOLO; 8.2b-iii (entrada del bloqueo por REST,
-  body de POST /api/horarios vs endpoint propio) sigue ABIERTO y aparte. NO se tocó src/main del
-  solver ni el modelo (§4.7 ya correcto de S60). Decisiones cerradas antes de teclear D-F8.2b-ii-1..5:
-  (1) el ensamblado JPA→dominio vive en clase nueva app.mapper.BloqueoMapper (final, ctor privado,
-  estático), espejo de SolucionMapper; NO dentro de CatalogoMapper. (2) aProblemaHorario gana DOS
-  parámetros (List<SesionBloqueada>, List<AulaBloqueada>), coherente con las siete listas de entidades
-  JPA que ya recibe; el cruce por (actividad_codigo, indice) para agregar el Map<Plaza,Aula> vive en
-  BloqueoMapper. (3) repos triviales JpaRepository vacíos, findAll() sin filtro (espejo de
-  Sesion/HorarioGeneradoRepository). (4) bloqueo GLOBAL del centro (SIN FK a HorarioGenerado): §4.7 fija
-  PK = instancia / (instancia, plaza), sin horario_id; el pin es ENTRADA del solver, precede al horario
-  que genera. (5) validaciones de entrada replicadas en BloqueoMapper con IllegalArgumentException (NO
-  se importa ProblemaInvalidoException de solver.io: frontera de capas, CatalogoMapper tampoco la
-  importa): actividad/plaza/aula huérfana, aula ∉ aulasCandidatas, pin sobre aula fija, y pin de aula
-  huérfano (aula sin su pin de tramo → abort, el record de dominio no soporta pin de aula suelto).
-  Naming: entidades JPA en app.catalog con los nombres de §4.7; el record de dominio homónimo se
-  referencia por FQN en BloqueoMapper (igual que CatalogoMapper distingue domain.Plaza de catalog.Plaza).
-  Puente de tramo REUTILIZADO: BloqueoMapper recibe el Map<TramoSemanal,Tramo> (IdentityHashMap) que
-  aProblemaHorario ya construye (tramosMapeados.porEntidad()), NO una cuarta copia de la renumeración;
-  D30 sigue viva, no se agrava. Precondición anotada: la catalog.SesionBloqueada.getTramoInicio() debe
-  ser la MISMA instancia TramoSemanal que la lista pasada a aProblemaHorario (se cumple en una
-  transacción JPA única, caché de primer nivel). Entregado (6 commits de una línea, código/doc
-  separados): entidades JPA 4a0c754, repos caa2d03, BloqueoMapper fe3d5a6, cableado de aProblemaHorario
-  (firma +2 params, índices actividadesPorCodigo/plazasPorCodigo, llamada a BloqueoMapper) f61300b,
-  actualización de los 7 llamadores de aProblemaHorario (servicio + 6 en CatalogoMapperProblemaTest,
-  bloqueos vacíos) 785f6c2, IT de round-trip a285adf. IT BloqueoPinRoundTripTest sobre un DESDOBLE
-  (multi-plaza): persistir catálogo + pin de tramo + pin de aula sobre una plaza variable, montar
-  ProblemaHorario vía CatalogoMapper, resolver con new SolverHorario(10,42) (patrón D-B10-7), guardar →
-  recargar; assert (a) las N plazas de la instancia caen en el tramo pinado (simultaneidad gratis por
-  instancia), assert (b) la plaza variable respeta el aula pinada. ORO: desactivar submapa.put(plaza,
-  aula) del Paso 1 de BloqueoMapper tira SOLO el assert (b) (expected "A2" but was "A1": sin el pin el
-  solver colocaba en A1, el pin fuerza A2 — el pin CAMBIA la solución, no es un no-op), assert (a) verde;
-  restaurado, verde. Suite: solver 71 intacto (no se tocó solver/src/main → referencia-codigo-solver.md
-  NO regenerado), app 46 → 47 (+1 IT). BUILD SUCCESS con mvn clean test desde la raíz; working tree
-  limpio. Deuda VIVA que 8.2b-ii deja: (a) cableado del servicio a los repos de bloqueo —
-  GeneradorHorarioService.cargarProblema() pasa List.of(), List.of(): la vía de generación (POST
-  /api/horarios) NO lee aún los bloqueos vigentes de la BD, persistir un bloqueo hoy no afecta a un
-  solve por REST; complemento natural de 8.2b-iii o mini-bloque previo—; (b) 8.2b-iii sigue abierto
-  (entrada del bloqueo por REST, decisión de contrato sin cerrar); (c) deuda de test menor: el caso de
-  pin de aula huérfano (abort) no tiene test negativo propio, el IT solo ejercita la ruta feliz.
-  Siguiente: 8.2b-iii (REST del bloqueo + cableado del servicio) o el candidato que se decida al abrir
-  sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
-en la Sesión 61, la de S58 en la Sesión 62 y la de S59 en la Sesión 63 (misma higiene documental; en S60 se corrigió además una copia truncada y
-duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El plan conserva
-las 4 últimas cabeceras compactas (S60–S63). El detalle histórico de cualquier sesión
-anterior —incluida S42 (citada por la deuda abierta D25) y S43
+en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
+Sesión 64 y la de S61 en la Sesión 65 (misma higiene documental; en S60 se corrigió además una
+copia truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El
+plan conserva las 4 últimas cabeceras compactas (S62–S65). El detalle histórico de cualquier
+sesión anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -916,13 +940,19 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       CeldaRef(actividadCodigo, indice 1-based, plazaCodigo nullable) + Violacion(regla,
       recursoCodigo, tramoCodigo, celdas, descripcion). Una violación = N celdas. Asimetría D15
       protegida por test (aula por PLAZA, resto por INSTANCIA). Solo solver/: sin REST.
-- [ ] Bloque 8.3-B — Atribución de reglas BLANDAS por celda (cierra D19 backend). DECISIÓN DE
-      DISEÑO ABIERTA, resolver antes de teclear: contarVentanasProfesor,
-      contarPenalizacionIndisponibilidadBlanda y contarPenalizacionConsecutivasProfesor son
-      "recomputos gemelos" cuyo VALOR ESTÁ en ser independientes del modelo CP-SAT (cuentan de
-      otra manera, y por eso delatarían un error del modelo). Convertirlos en atribuidores por
-      celda amenaza esa independencia. ¿El atribuidor blando ES el gemelo, o es un tercer
-      camino? Sin resolver.
+- [x] Bloque 8.3-B — Atribución CONTRAFACTUAL de reglas BLANDAS por celda (S65). CIERRA D19
+      BACKEND. La decisión de diseño que S64 dejó abierta se resolvió mostrando que la pregunta
+      estaba mal planteada: los tres gemelos no son del mismo tipo (indisponibilidad blanda es
+      LOCAL —su bucle ya sabe qué instancia penaliza—; ventanas y consecutivas son NO-LOCALES —la
+      penalización es propiedad de un CONJUNTO de posiciones, ninguna celda la "causa"—). La
+      atribución blanda NO es culpabilidad sino CONTRAFACTUAL: delta = penalización_actual −
+      penalización_si_esa_celda_no_estuviera, CON SIGNO (delta<0 = la celda tapa un hueco; mover
+      empeora). El atribuidor USA al gemelo como oráculo: las fórmulas se EXTRAEN a funciones
+      puras ventanasDe/excesoConsecutivasDe que llaman AMBOS — una sola definición, coste O(1)
+      por celda, independencia de CP-SAT conservada por construcción. Tipos ReglaBlanda +
+      Penalizacion + AtribucionBlanda; ResultadoVerificacion/Violacion NO se tocan (una
+      penalización blanda no es una violación) y por tanto D15 queda fuera del radio. Solo
+      solver/: sin REST.
 - [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
 - [ ] Bloque 8.5+ — CRUD de catálogo (D10 plazas multi-profesor, D1/D7 asistentes).
