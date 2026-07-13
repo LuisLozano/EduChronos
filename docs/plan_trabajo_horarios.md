@@ -600,9 +600,13 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2b-iii-A CERRADO en
-  S62 (cableado del servicio a los repos de bloqueo: GeneradorHorarioService.cargarProblema() lee
-  los pines de la BD; el lazo bloqueo→BD→solve por POST /api/horarios queda CERRADO end-to-end.
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.3-A CERRADO en S64
+  (atribución ESTRUCTURADA de reglas duras por celda: ResultadoVerificacion pasa de List<String> a
+  List<Violacion>; tipos nuevos ReglaDura/CeldaRef/Violacion; una violación conoce QUIÉNES la causan.
+  8.3-B —blandas— DIFERIDO por decisión de diseño: los recomputos gemelos valen por ser independientes
+  del modelo CP-SAT). Bloque 8.2b-iii-A CERRADO en S62 (cableado del servicio a los repos de bloqueo:
+  GeneradorHorarioService.cargarProblema() lee los pines de la BD; el lazo bloqueo→BD→solve por
+  POST /api/horarios queda CERRADO end-to-end.
   Cierra la deuda (a) y (c) de 8.2b-ii. 8.2b-iv —entrada del bloqueo por REST— sigue ABIERTO, con
   contrato PRE-CERRADO en S62: endpoint propio /api/bloqueos, NO body de POST /api/horarios).
   Bloque 8.2b-ii CERRADO en S61 (persistencia JPA de los bloqueos §4.7: entidades SesionBloqueada +
@@ -627,7 +631,60 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 63 — HIGIENE DOCUMENTAL del plan y la bitácora (sin código, 3 commits).
+Última sesión registrada: Sesión 64 — Fase 8, Bloque 8.3-A: ATRIBUCIÓN ESTRUCTURADA de reglas
+  DURAS por celda. Modo híbrido (diseño en el Project, código en Claude Code). 2 commits
+  (6e9f68d código + f4df782 referencia). Alcance CORTADO al abrir: 8.3 partido en 8.3-A (duras,
+  esta sesión) y 8.3-B (blandas, DIFERIDO). Razón del corte: los "recomputos gemelos" de las
+  blandas (contarVentanasProfesor, contarPenalizacionIndisponibilidadBlanda,
+  contarPenalizacionConsecutivasProfesor) valen precisamente por ser INDEPENDIENTES del modelo
+  CP-SAT —delatan un error del modelo porque cuentan de otra manera—; convertirlos en
+  atribuidores por celda amenaza esa independencia. Es una decisión de DISEÑO sin resolver, no
+  un pendiente mecánico, y no debía contaminar el trabajo de las duras.
+  HALLAZGO que motivó el bloque: ResultadoVerificacion era List<String> y reportarColisiones
+  agregaba en Map<T,Integer> —un CONTADOR que TIRABA las instancias culpables—. Sabía QUE había
+  colisión y DE QUIÉN, pero no QUIÉNES la causaban: la atribución por celda era imposible sin
+  instrumentar. Confirmado por grep que en src/main solo lo consumían VerificacionPrinter y Main
+  (CLI, andamiaje): la List<String> no era API de producción que mereciera protección.
+  Decisiones cerradas antes de teclear (D-F8.3-A-1..5): (1) ResultadoVerificacion pasa a
+  List<Violacion> —se descartó añadir un campo extra conservando las cadenas: dos fuentes de
+  verdad que se desincronizan— y se descartó de plano un atribuidor nuevo en app/ que
+  reimplementara las comprobaciones (dos definiciones de "qué es un solape" divergen). (2) tipos
+  nuevos ReglaDura (enum, 7 valores) + CeldaRef(actividadCodigo, indice, plazaCodigo) +
+  Violacion(regla, recursoCodigo, tramoCodigo, celdas, descripcion). (3) UNA violación = N celdas
+  (un solape de profesor entre 2 instancias es UNA Violacion con celdas.size()==2, no dos):
+  preserva la cardinalidad que los tests ya asumían y es lo que la UI querrá resaltar. (4) el
+  puente a sesionId vive en app/, NO en solver/: CeldaRef usa códigos de negocio y
+  SesionVistaDTO ya lleva indice+actividadCodigo+plazaCodigo —la clave compuesta ya existe, no
+  hubo que tocar el DTO—. (5) alcance ESTRICTO a solver/: sin REST (el endpoint necesita las
+  blandas, que son 8.3-B; sacar una superficie solo-duras obligaría a reescribirla en la
+  siguiente sesión, el error que S62 evitó).
+  CORRECCIÓN AL CONTRATO durante la parada de lectura: D-2 especificaba CeldaRef.indice >= 0;
+  el dominio es 1-based (ActividadInstancia rechaza indice < 1), así que la guarda correcta es
+  >= 1. Con >= 0, CeldaRef podía representar un estado imposible en el dominio y la validación
+  no validaba nada. CeldaRef.indice transporta el índice 1-based TAL CUAL, sin reindexar:
+  cualquier traducción sería un bug silencioso en el puente a sesionId.
+  ASIMETRÍA D15 PRESERVADA y ahora protegida por test: profesor/subgrupo/grupo se cuentan POR
+  INSTANCIA (celda con plazaCodigo=null); el AULA se cuenta POR PLAZA (celda con plazaCodigo
+  no-null). El acumulador del aula vive DENTRO del bucle de plazas y los de profesor/subgrupo
+  FUERA. Es frágil a la lectura —un refactor "de limpieza" que uniformara la granularidad
+  rompería D15 sin que la suite se pusiera roja— y por eso el oro afirma las dos direcciones.
+  ORO: VerificadorSolucionAtribucionTest (2 casos). SOLAPE_PROFESOR: exactamente 1 violación,
+  regla + recurso + tramo, y celdas() containsExactlyInAnyOrder las 2 CeldaRef culpables — esto
+  último es lo que la implementación anterior era INCAPAZ de producir. SOLAPE_AULA: plazaCodigo
+  no-null y celdas por plaza. El aislamiento (grupos distintos, aulas distintas / profesores
+  distintos) hace que hasSize(1) sea informativo y no accidental.
+  verificarDistribucion emite la violación con AMBAS instancias del día (Map primeraDelDia +
+  putIfAbsent): salió barato, así que se hizo completo en vez de dejarlo como deuda.
+  Roturas colaterales previstas y reparadas: VerificadorSolucionGrupoTest (3 aserciones
+  .contains sobre String → sobre el record, quedan MEJOR) y SolverHorarioTest:94 (que la parada
+  de lectura de Claude Code cazó y yo había pasado por alto; reforzada además con
+  celdas().size()==2). Salida de consola de VerificacionPrinter byte-idéntica.
+  Suite: 73 tests, 0 fallos, BUILD SUCCESS. +334/−43. app/ intacto, modelo NO tocado (CeldaRef
+  y Violacion son infraestructura de verificación, no entidad ni invariante nueva). src/main del
+  solver SÍ tocado → referencia-codigo-solver.md REGENERADO (f4df782). Sin deuda funcional nueva.
+  Siguiente: 8.3-B (atribución de las BLANDAS, con la decisión de diseño sobre los gemelos por
+  resolver), o el candidato que se decida al abrir sesión.
+Última sesión registrada (previa): Sesión 63 — HIGIENE DOCUMENTAL del plan y la bitácora (sin código, 3 commits).
   Modo interactivo (revisión por secciones con el usuario). DOS operaciones. Op1: archivó la cabecera
   compacta de S59 a la bitácora (la ventana del plan conserva SIEMPRE las 4 últimas) y borró de la
   bitácora el dato duplicado de qué ventana conserva el plan, que había quedado rezagado. Op2 (LIMPIEZA
@@ -739,40 +796,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   pin de aula huérfano (abort) no tiene test negativo propio, el IT solo ejercita la ruta feliz.
   Siguiente: 8.2b-iii (REST del bloqueo + cableado del servicio) o el candidato que se decida al abrir
   sesión.
-Última sesión registrada (previa): Sesión 60 — Fase 8, Bloque 8.2b-i: PIN DE AULA por-plaza en el solver
-  + rediseño §4.7/S5 del modelo. Modo híbrido (diseño y documentación en el Project, código en
-  Claude Code). Cierra la deuda (i) de 8.2b (pin de aula por-plaza); persistencia y REST del bloqueo
-  siguen diferidos a 8.2b-ii/iii. Decisiones cerradas antes de teclear D-F8.2b-1..4: (1) forma 1A —
-  SesionBloqueada de dominio gana 3er componente Map<Plaza,Aula> aulasPinadas (vacío = solo pin de
-  tramo, retrocompat 8.2a); ProblemaHorario NO cambia de firma. (2) 2A — pinar aula de plaza aulaFija
-  es entrada inválida (ProblemaInvalidoException en io, IllegalArgumentException de salvaguarda en
-  cpsat, separación de capas de 8.2a respetada). (3) restriccionAulaBloqueada() en construir() tras
-  restriccionSesionBloqueada(): addEquality(opcion.presencia(), 1) sobre la AulaOpcion casada por
-  aula.equals; verificador gemelo contarAulasBloqueadasVioladas sin OR-Tools. (4) 4C validada en el
-  mapper (aula pinada ∈ aulasCandidatas); 4B (pin×poda) REBAJADA a deuda documental D-F8.2b-4B,
-  condicionada al grep de Claude Code —que salió VACÍO (sin llamadores de construirConObjetivo(true)):
-  la poda está muerta en todo camino vivo, 4B defendería un caso imposible—. Rediseño de MODELO:
-  §4.7 corrige el error de cardinalidad (aula NO cuelga de la instancia: una instancia de desdoble
-  tiene N plazas con N aulas); split en SesionBloqueada (pin de tramo, por instancia) + AulaBloqueada
-  (pin de aula, por plaza, PK (instancia, plaza)) como forma normalizada para la persistencia de
-  8.2b-ii; el dominio la agrega en el Map. S5 reformulada (pin de tramo sobre todas las Sesion de la
-  instancia; pin de aula por plaza; solo aula variable; aula ∈ candidatas). Réplica del rediseño
-  §4.7/S5 validada contra el código tecleado (el Map<Plaza,Aula> del dominio == AulaBloqueada
-  normalizada). ORO (criterio 5): comentar restriccionAulaBloqueada() tira EXACTAMENTE los tests de
-  respeto y desdoble, deja verde el sin-pin; restaurada, ModeloCpSat idéntico salvo la adición
-  (46 insertions, 0 deletions). Entregado (6 commits de una línea, código y doc separados): dominio
-  da33330, cpsat restricción 25ae7fb, verificador c9e76e7, io+schema (AulaPinDto(plaza,aula) +
-  SesionBloqueadaDto gana List<AulaPinDto>) f30347f, tests+fixtures (3 cpsat respeto/desdoble/sin-pin
-  + 3 io positiva/2A/4C) 00291af, índice regenerado 271a1a4. Suite: solver 65→71 (+6); app 46 sin
-  cambio (NO se tocó app/, ni persistencia, ni REST, ni el List.of() de CatalogoMapper, que sigue
-  placeholder hasta 8.2b-ii). BUILD SUCCESS con mvn clean test desde la raíz. src/main del solver SÍ
-  tocado → referencia-codigo-solver.md regenerado. Deuda de test menor anotada: la salvaguarda
-  IllegalArgumentException de cpsat (pin de plaza fija en un ProblemaHorario montado a mano, sin pasar
-  por el mapper) no tiene test propio; el mapper cubre la ruta de usuario. Deuda VIVA para 8.2b-ii:
-  persistencia JPA de SesionBloqueada + AulaBloqueada (§4.7) y cableado del List.of() de
-  CatalogoMapper:135; para 8.2b-iii: entrada del bloqueo por REST (body de POST /api/horarios vs
-  endpoint propio, decisión abierta). Siguiente: 8.2b-ii (persistencia de bloqueos) o el candidato
-  que se decida al abrir sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
@@ -888,7 +911,18 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       (endpoint propio /api/bloqueos; ver deuda). Sin consumidor real hasta 8.6
       (drag&drop): no urge, y diseñar su superficie antes del consumidor es diseñar a
       ciegas.
-- [ ] Bloque 8.3 — Atribución por celda (D19, backend).
+- [x] Bloque 8.3-A — Atribución ESTRUCTURADA de reglas DURAS por celda (S64, D19 backend
+      parcial). ResultadoVerificacion: List<String> → List<Violacion>. Tipos ReglaDura +
+      CeldaRef(actividadCodigo, indice 1-based, plazaCodigo nullable) + Violacion(regla,
+      recursoCodigo, tramoCodigo, celdas, descripcion). Una violación = N celdas. Asimetría D15
+      protegida por test (aula por PLAZA, resto por INSTANCIA). Solo solver/: sin REST.
+- [ ] Bloque 8.3-B — Atribución de reglas BLANDAS por celda (cierra D19 backend). DECISIÓN DE
+      DISEÑO ABIERTA, resolver antes de teclear: contarVentanasProfesor,
+      contarPenalizacionIndisponibilidadBlanda y contarPenalizacionConsecutivasProfesor son
+      "recomputos gemelos" cuyo VALOR ESTÁ en ser independientes del modelo CP-SAT (cuentan de
+      otra manera, y por eso delatarían un error del modelo). Convertirlos en atribuidores por
+      celda amenaza esa independencia. ¿El atribuidor blando ES el gemelo, o es un tercer
+      camino? Sin resolver.
 - [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
 - [ ] Bloque 8.5+ — CRUD de catálogo (D10 plazas multi-profesor, D1/D7 asistentes).

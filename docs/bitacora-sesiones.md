@@ -2268,3 +2268,38 @@ Modo híbrido (decisión y contrato en el Project, código en Claude
   modelo especifica SesionBloqueada con aula_id por-instancia, pero 8.2a fijó que el pin de aula es
   por-plaza; hay que rediseñar §4.7 o llevar el aula a otra entidad antes de persistir); o el
   candidato que decidas al abrir sesión.
+---
+### Sesión 60 — Fase 8, Bloque 8.2b-i: PIN DE AULA por-plaza en el solver
+  + rediseño §4.7/S5 del modelo. Modo híbrido (diseño y documentación en el Project, código en
+  Claude Code). Cierra la deuda (i) de 8.2b (pin de aula por-plaza); persistencia y REST del bloqueo
+  siguen diferidos a 8.2b-ii/iii. Decisiones cerradas antes de teclear D-F8.2b-1..4: (1) forma 1A —
+  SesionBloqueada de dominio gana 3er componente Map<Plaza,Aula> aulasPinadas (vacío = solo pin de
+  tramo, retrocompat 8.2a); ProblemaHorario NO cambia de firma. (2) 2A — pinar aula de plaza aulaFija
+  es entrada inválida (ProblemaInvalidoException en io, IllegalArgumentException de salvaguarda en
+  cpsat, separación de capas de 8.2a respetada). (3) restriccionAulaBloqueada() en construir() tras
+  restriccionSesionBloqueada(): addEquality(opcion.presencia(), 1) sobre la AulaOpcion casada por
+  aula.equals; verificador gemelo contarAulasBloqueadasVioladas sin OR-Tools. (4) 4C validada en el
+  mapper (aula pinada ∈ aulasCandidatas); 4B (pin×poda) REBAJADA a deuda documental D-F8.2b-4B,
+  condicionada al grep de Claude Code —que salió VACÍO (sin llamadores de construirConObjetivo(true)):
+  la poda está muerta en todo camino vivo, 4B defendería un caso imposible—. Rediseño de MODELO:
+  §4.7 corrige el error de cardinalidad (aula NO cuelga de la instancia: una instancia de desdoble
+  tiene N plazas con N aulas); split en SesionBloqueada (pin de tramo, por instancia) + AulaBloqueada
+  (pin de aula, por plaza, PK (instancia, plaza)) como forma normalizada para la persistencia de
+  8.2b-ii; el dominio la agrega en el Map. S5 reformulada (pin de tramo sobre todas las Sesion de la
+  instancia; pin de aula por plaza; solo aula variable; aula ∈ candidatas). Réplica del rediseño
+  §4.7/S5 validada contra el código tecleado (el Map<Plaza,Aula> del dominio == AulaBloqueada
+  normalizada). ORO (criterio 5): comentar restriccionAulaBloqueada() tira EXACTAMENTE los tests de
+  respeto y desdoble, deja verde el sin-pin; restaurada, ModeloCpSat idéntico salvo la adición
+  (46 insertions, 0 deletions). Entregado (6 commits de una línea, código y doc separados): dominio
+  da33330, cpsat restricción 25ae7fb, verificador c9e76e7, io+schema (AulaPinDto(plaza,aula) +
+  SesionBloqueadaDto gana List<AulaPinDto>) f30347f, tests+fixtures (3 cpsat respeto/desdoble/sin-pin
+  + 3 io positiva/2A/4C) 00291af, índice regenerado 271a1a4. Suite: solver 65→71 (+6); app 46 sin
+  cambio (NO se tocó app/, ni persistencia, ni REST, ni el List.of() de CatalogoMapper, que sigue
+  placeholder hasta 8.2b-ii). BUILD SUCCESS con mvn clean test desde la raíz. src/main del solver SÍ
+  tocado → referencia-codigo-solver.md regenerado. Deuda de test menor anotada: la salvaguarda
+  IllegalArgumentException de cpsat (pin de plaza fija en un ProblemaHorario montado a mano, sin pasar
+  por el mapper) no tiene test propio; el mapper cubre la ruta de usuario. Deuda VIVA para 8.2b-ii:
+  persistencia JPA de SesionBloqueada + AulaBloqueada (§4.7) y cableado del List.of() de
+  CatalogoMapper:135; para 8.2b-iii: entrada del bloqueo por REST (body de POST /api/horarios vs
+  endpoint propio, decisión abierta). Siguiente: 8.2b-ii (persistencia de bloqueos) o el candidato
+  que se decida al abrir sesión.
