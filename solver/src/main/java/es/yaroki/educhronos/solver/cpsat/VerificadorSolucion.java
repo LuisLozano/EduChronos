@@ -109,17 +109,30 @@ public final class VerificadorSolucion {
         for (Map.Entry<Profesor, Map<Integer, Set<Integer>>> ep : ocupacion.entrySet()) {
             int total = 0;
             for (Set<Integer> posicionesDelDia : ep.getValue().values()) {
-                if (posicionesDelDia.size() <= 1) {
-                    continue; // 0 ó 1 clase: sin ventanas
-                }
-                int min = posicionesDelDia.stream().min(Integer::compareTo).get();
-                int max = posicionesDelDia.stream().max(Integer::compareTo).get();
-                int span = max - min + 1;
-                total += span - posicionesDelDia.size();
+                total += ventanasDe(posicionesDelDia);
             }
             ventanas.put(ep.getKey(), total);
         }
         return ventanas;
+    }
+
+    /**
+     * Ventanas (huecos) de un profesor en UN día, dado el conjunto de posiciones
+     * ({@code ordenEnDia}) que ocupa ese día. Función pura extraída del bucle de
+     * {@link #contarVentanasProfesor} (8.3-B); es la MISMA fórmula, movida para que
+     * la reuse también la atribución contrafactual ({@link #atribuirBlandas}) sin
+     * duplicarla.
+     *
+     * <p>{@code ventanas = (max − min + 1) − nClases}; 0 con 0 ó 1 posición.
+     */
+    static int ventanasDe(Set<Integer> posicionesDelDia) {
+        if (posicionesDelDia.size() <= 1) {
+            return 0; // 0 ó 1 clase: sin ventanas
+        }
+        int min = posicionesDelDia.stream().min(Integer::compareTo).get();
+        int max = posicionesDelDia.stream().max(Integer::compareTo).get();
+        int span = max - min + 1;
+        return span - posicionesDelDia.size();
     }
 
     /**
@@ -230,24 +243,156 @@ public final class VerificadorSolucion {
         int total = 0;
         for (Map<Integer, Set<Integer>> porDia : ocupacion.values()) {
             for (Set<Integer> posiciones : porDia.values()) {
-                if (posiciones.size() <= n) {
-                    continue; // con ≤N clases ese día no puede haber racha de N+1
-                }
-                List<Integer> ordenadas = new ArrayList<>(posiciones);
-                ordenadas.sort(Integer::compareTo);
-                int longitudRacha = 1;
-                for (int i = 1; i < ordenadas.size(); i++) {
-                    if (ordenadas.get(i) == ordenadas.get(i - 1) + 1) {
-                        longitudRacha++;
-                    } else {
-                        total += Math.max(0, longitudRacha - n);
-                        longitudRacha = 1;
-                    }
-                }
-                total += Math.max(0, longitudRacha - n);
+                total += excesoConsecutivasDe(posiciones, n);
             }
         }
         return total;
+    }
+
+    /**
+     * Exceso de sesiones consecutivas de un profesor en UN día, dado el conjunto de
+     * posiciones ({@code ordenEnDia}) que ocupa y el umbral {@code n}. Función pura
+     * extraída del bucle de {@link #contarPenalizacionConsecutivasProfesor} (8.3-B);
+     * es la MISMA fórmula (suma de {@code max(0, L − n)} sobre rachas maximales de
+     * posiciones contiguas), movida para que la reuse también la atribución
+     * contrafactual ({@link #atribuirBlandas}) sin duplicarla.
+     */
+    static int excesoConsecutivasDe(Set<Integer> posicionesDelDia, int n) {
+        if (posicionesDelDia.size() <= n) {
+            return 0; // con ≤N clases ese día no puede haber racha de N+1
+        }
+        List<Integer> ordenadas = new ArrayList<>(posicionesDelDia);
+        ordenadas.sort(Integer::compareTo);
+        int total = 0;
+        int longitudRacha = 1;
+        for (int i = 1; i < ordenadas.size(); i++) {
+            if (ordenadas.get(i) == ordenadas.get(i - 1) + 1) {
+                longitudRacha++;
+            } else {
+                total += Math.max(0, longitudRacha - n);
+                longitudRacha = 1;
+            }
+        }
+        total += Math.max(0, longitudRacha - n);
+        return total;
+    }
+
+    /**
+     * Atribuye a cada celda su aportación CONTRAFACTUAL a los tres términos blandos
+     * del objetivo (Fase 8, Bloque 8.3-B; cierra D19 en backend). No es
+     * culpabilidad: {@code delta = penalización_actual − penalización_si_esa_celda_no
+     * _estuviera}, con signo. Responde a "¿qué gano si muevo esta sesión?".
+     *
+     * <p>Recorre las instancias colocadas; para cada profesor que usa una instancia
+     * (unión de los de sus plazas, una vez por instancia — MISMO criterio que los
+     * gemelos {@link #contarVentanasProfesor} y
+     * {@link #contarPenalizacionConsecutivasProfesor}), calcula el delta de ventanas
+     * y de exceso de consecutivas quitando la posición de esa instancia del día del
+     * profesor, reusando las funciones puras {@link #ventanasDe} y
+     * {@link #excesoConsecutivasDe}. La indisponibilidad blanda es LOCAL (no
+     * contrafactual): cuenta las restricciones BLANDA {@code (profesor, tramo)} que
+     * la instancia incumple por caer en ese tramo.
+     *
+     * <p>Solo se emite {@link Penalizacion} con {@code delta != 0}: una celda sin
+     * aportación no aparece en el mapa. La celda es POR INSTANCIA
+     * ({@code plazaCodigo == null}): los tres términos son por instancia (todas las
+     * plazas comparten tramo). {@code tramoCodigo} es no-null solo en la
+     * indisponibilidad blanda (el tramo vetado); null en ventanas y consecutivas,
+     * que penalizan una configuración de día.
+     */
+    public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion) {
+        final int n = 3; // MAX_CONSECUTIVAS (mismo literal que el gemelo; deuda D21c, no de este bloque)
+
+        // (profesor, diaSemana) -> posiciones (ordenEnDia) ocupadas. Mismo criterio
+        // de ocupación que los gemelos: una vez por instancia, unión de las plazas.
+        Map<Profesor, Map<Integer, Set<Integer>>> ocupacion = new HashMap<>();
+        for (Profesor p : problema.profesores()) {
+            ocupacion.put(p, new HashMap<>());
+        }
+        List<ActividadInstancia> todas = Expansion.todas(problema);
+        for (ActividadInstancia inst : todas) {
+            Optional<Tramo> tramoOpt = solucion.tramoDeInstancia(inst);
+            if (tramoOpt.isEmpty()) {
+                continue; // sin colocar: ya lo reporta verificar()
+            }
+            Tramo tramo = tramoOpt.get();
+            for (Profesor p : profesoresDe(inst)) {
+                ocupacion.get(p)
+                        .computeIfAbsent(tramo.diaSemana(), k -> new HashSet<>())
+                        .add(tramo.ordenEnDia());
+            }
+        }
+
+        Map<CeldaRef, List<Penalizacion>> porCelda = new LinkedHashMap<>();
+        for (ActividadInstancia inst : todas) {
+            Optional<Tramo> tramoOpt = solucion.tramoDeInstancia(inst);
+            if (tramoOpt.isEmpty()) {
+                continue;
+            }
+            Tramo tramo = tramoOpt.get();
+            int dia = tramo.diaSemana();
+            int pos = tramo.ordenEnDia();
+            CeldaRef celda = new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
+            Set<Profesor> profesoresInstancia = profesoresDe(inst);
+
+            for (Profesor p : profesoresInstancia) {
+                Set<Integer> conEsta = ocupacion.get(p).getOrDefault(dia, Set.of());
+                // Contrafactual: el día del profesor SIN la posición de esta celda.
+                Set<Integer> sinEsta = new HashSet<>(conEsta);
+                sinEsta.remove(pos);
+
+                int deltaVentana = ventanasDe(conEsta) - ventanasDe(sinEsta);
+                if (deltaVentana != 0) {
+                    emitir(porCelda, celda, new Penalizacion(
+                            ReglaBlanda.VENTANA_PROFESOR, p.codigo(), null, deltaVentana,
+                            "Mover esta sesión cambia las ventanas de " + p.codigo()
+                                    + " el día " + dia + " en " + deltaVentana));
+                }
+                int deltaConsec = excesoConsecutivasDe(conEsta, n) - excesoConsecutivasDe(sinEsta, n);
+                if (deltaConsec != 0) {
+                    emitir(porCelda, celda, new Penalizacion(
+                            ReglaBlanda.EXCESO_CONSECUTIVAS, p.codigo(), null, deltaConsec,
+                            "Mover esta sesión cambia el exceso de consecutivas de "
+                                    + p.codigo() + " el día " + dia + " en " + deltaConsec));
+                }
+                // INDISPONIBILIDAD_BLANDA: LOCAL (no contrafactual). Nº de restricciones
+                // BLANDA (p, tramo actual) que la instancia incumple por caer en él.
+                int incumplidas = 0;
+                for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+                    if (r.tipo() == TipoRestriccion.BLANDA
+                            && r.profesor().equals(p)
+                            && r.tramo().equals(tramo)) {
+                        incumplidas++;
+                    }
+                }
+                if (incumplidas != 0) {
+                    emitir(porCelda, celda, new Penalizacion(
+                            ReglaBlanda.INDISPONIBILIDAD_BLANDA, p.codigo(), tramo.codigo(),
+                            incumplidas,
+                            "Sesión en tramo con indisponibilidad blanda de " + p.codigo()
+                                    + " en " + tramo.codigo()));
+                }
+            }
+        }
+        return new AtribucionBlanda(porCelda);
+    }
+
+    /**
+     * Profesores que usa una instancia: unión de los de todas sus plazas, una sola
+     * vez (un profesor en dos plazas de la misma actividad ocupa el tramo una vez).
+     * Mismo criterio que el no-solape de profesor del modelo y que los gemelos.
+     */
+    private static Set<Profesor> profesoresDe(ActividadInstancia inst) {
+        Set<Profesor> profesores = new HashSet<>();
+        for (Plaza plaza : inst.actividad().plazas()) {
+            profesores.addAll(plaza.profesores());
+        }
+        return profesores;
+    }
+
+    private static void emitir(Map<CeldaRef, List<Penalizacion>> porCelda,
+                               CeldaRef celda, Penalizacion penalizacion) {
+        porCelda.computeIfAbsent(celda, k -> new ArrayList<>()).add(penalizacion);
     }
 
     /**
