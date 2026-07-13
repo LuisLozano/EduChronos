@@ -83,7 +83,9 @@ class GenerarHorarioEndpointTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new HorarioController(service)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new HorarioController(
+                service, new es.yaroki.educhronos.app.service.DiagnosticoService(service, tramoRepository)))
+                .build();
     }
 
     @Test

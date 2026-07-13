@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
@@ -35,11 +36,15 @@ class HorarioControllerHttpTest {
     @Mock
     private GeneradorHorarioService service;
 
+    @Mock
+    private DiagnosticoService diagnosticoService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new HorarioController(service)).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new HorarioController(service, diagnosticoService)).build();
     }
 
     @Test
