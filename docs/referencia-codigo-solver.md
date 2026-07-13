@@ -3,7 +3,7 @@
 Índice de API generado exclusivamente a partir del código fuente.
 
 - Fecha: 2026-07-13
-- Commit: `6e9f68d`
+- Commit: `c74f2b8`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -172,6 +172,16 @@ Consume: (ninguno)
 
 ## Paquete `cpsat`
 
+### `AtribucionBlanda` — public record
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Componentes:
+- `Map<CeldaRef, List<Penalizacion>> porCelda`
+
+Métodos:
+- `public int deltaTotal(CeldaRef celda)`
+
+Consume: `CeldaRef`, `Penalizacion`
+
 ### `AulaOpcion` — package-private record
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Componentes:
@@ -234,6 +244,23 @@ Métodos:
 
 Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
+### `Penalizacion` — public record
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Componentes:
+- `ReglaBlanda regla`
+- `String recursoCodigo`
+- `String tramoCodigo`
+- `int delta`
+- `String descripcion`
+
+Consume: `ReglaBlanda`
+
+### `ReglaBlanda` — public enum
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Constantes: `VENTANA_PROFESOR`, `INDISPONIBILIDAD_BLANDA`, `EXCESO_CONSECUTIVAS`
+
+Consume: (ninguno)
+
 ### `ReglaDura` — public enum
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`
@@ -284,10 +311,13 @@ Métodos:
 - `public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
+- `public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion)`
+- `static int ventanasDe(Set<Integer> posicionesDelDia)`
+- `static int excesoConsecutivasDe(Set<Integer> posicionesDelDia, int n)`
 
-Consume: `Actividad`, `ActividadInstancia`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `AtribucionBlanda`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
 ### `Violacion` — public record
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -813,6 +843,17 @@ Métodos:
 - `void warmStartInstitutoCompleto() throws Exception`
 
 Consume: `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
+
+### `VerificadorSolucionAtribucionBlandaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void ventanaProfesor_celdaDelMedioTapaHueco_deltaExactamenteMenosUno()`
+- `void ventanaProfesor_celdaEnPuntaDeHueco_deltaExactamenteMasUno()`
+- `void gemelosTrasExtraccion_devuelvenValoresConocidos()`
+- `void indisponibilidadBlanda_sesionEnTramoVetado_deltaUnoConTramoNoNull() throws Exception`
+- `void celdaSinPenalizacion_noApareceEnElMapa()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
 ### `VerificadorSolucionAtribucionTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
