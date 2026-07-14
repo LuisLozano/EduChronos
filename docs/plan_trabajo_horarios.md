@@ -638,7 +638,73 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 66 — Fase 8, Bloque 8.2b-iv: ENTRADA DEL BLOQUEO POR REST.
+Última sesión registrada: Sesión 67 — Fase 8, Bloques 8.6-A (contrato de ajuste manual) + 8.3-C
+  (REST de atribución). Modo híbrido. 3 commits (1772af6 código + ff1efbf tests + 619ef34
+  referencia regenerada). ALCANCE: se abrió 8.6-A —no 8.4— porque 8.3-C llevaba una decisión de
+  DISEÑO bloqueada, y bloqueada por su CONSUMIDOR: el plan (S66) ya avisaba de que 8.3-C y 8.6
+  eran el mismo frente. Confirmado.
+  HALLAZGO 1 (el que desbloquea el frente): POST /api/bloqueos —construido en S66 creyendo que
+  era "el endpoint del bloqueo"— YA ES el endpoint del drag&drop. "Mover una celda" = "pinarla
+  en el tramo destino": mismo payload, misma semántica idempotente, mismo par (dia, ordenEnDia)
+  que ya lleva SesionVistaDTO. No había que inventar superficie.
+  D-F8.6-A-1 (vía C, pinar en caliente + re-solve diferido): se descartaron las dos vías puras.
+  A (solve por gesto) es INVIABLE por latencia —S44: 601 s a escala real, nadie arrastra y espera
+  diez minutos—. B (editor libre con verificación en cliente) es INACEPTABLE por el CUARTO ESPEJO
+  —portar verificarNoSolapes a TypeScript, sin el test que protege D15, en otro lenguaje—.
+  C evita ambas: el gesto pina (ms), el solve es explícito, y el aviso de conflicto en cliente es
+  un CRUCE DE ÍNDICES sobre datos ya cargados, no una verificación: si se equivoca, no pasa nada,
+  porque el solver es quien decide y un pin contradictorio dará INFEASIBLE (que es lo que 8.4
+  existe para hacer amable). Precio asumido: el usuario no controla el resultado final.
+  D-F8.6-A-2: la sub-entrada de un desdoble NO es arrastrable (S5 obliga a compartir tramo);
+  arrastrable = la celda (instancia). El cambio de aula es otro gesto, por plaza.
+  MOCKUP (Claude Design, primera vez en el proyecto): dibujó la celda de desdoble con las tres
+  granularidades encima. Contestó que se distinguen sin colisión —badge de cabecera = coste
+  blando (instancia); fondo de sub-entrada = conflicto de aula (plaza); borde de celda = solape
+  de profesor/subgrupo (instancia)— y que la sub-entrada arrastrable sería una promesa falsa. La
+  asimetría D15 SE PINTA sin aplanarse. Deuda de método nueva: D-F8.6-a.
+  HALLAZGO 2 (corrige a S66, y es un hecho, no un juicio): el plan afirmaba que reconstruir
+  SolucionHorario exigiría "un TERCER espejo de la renumeración". FALSO. indiceTramos YA devuelve
+  Map<Tramo,TramoSemanal>; el inverso es un for sobre entrySet(). S66 lo dedujo SIN HABER LEÍDO
+  indiceTramos. Corregido en el bloque 8.3-C.
+  Decisiones de 8.3-C (D-F8.3-C-1..6): (1) la solución se RECONSTRUYE desde BD, no se transporta
+  (habilitado por C: no hay candidata). (2) el inverso vive en SolucionMapper —donde YA está la
+  correspondencia—, invirtiendo el mapa, no recalculando: D30 gana un consumidor. (3) aulasElegidas
+  OMITE las plazas con aulaFija (FIDELIDAD, no equivalencia) + guarda de corrupción si el aula
+  persistida contradice la fija. (4) el DTO lleva violaciones + penalizaciones + totales; las duras
+  vienen VACÍAS en un horario del solver —son RED DE SEGURIDAD VISIBLE ("0 conflictos, verificado
+  independientemente de CP-SAT"), no diagnóstico—. PenalizacionDTO NO lleva plazaCodigo: la
+  atribución blanda es por INSTANCIA y un campo siempre-null es un campo que MIENTE. (5)
+  SesionVistaDTO NO se toca (la UI cruza por (actividadCodigo, indice)). (6) SolucionHorario gana
+  un getter aulasElegidas().
+  REVISIÓN POR JUICIO (reparto de S64/S65/S66): el primer Test 1 fue RECHAZADO. Inspeccionaba
+  aulasElegidas POR REFLEXIÓN del campo privado, con el argumento de que era "la única vía sin
+  tocar solver/". El argumento era correcto y la conclusión no: si la distinción fija/elegida solo
+  es observable por reflexión, entonces NO es observable por la API pública, y D-F8.3-C-3
+  protegería una propiedad que NINGÚN consumidor legítimo puede comprobar. Un invariante que exige
+  violar el encapsulamiento para verificarse no es un invariante: es un comentario. Y el javadoc de
+  SolucionHorario YA AFIRMA la propiedad ("las aulas de plazas con aulaFija NO se almacenan aquí").
+  Si la clase la afirma, la clase debe permitir comprobarla → D-F8.3-C-6: getter público,
+  ESTRICTAMENTE ADITIVO (+15 líneas, 0 modificadas; constructor, aulaElegida, tramoDeInstancia,
+  asignaciones, ModeloCpSat y VerificadorSolucion intactos). Fue la ÚNICA excepción al alcance
+  "solver/src/main no se toca", tomada a sabiendas y con su coste (regeneración de la referencia).
+  ORO: round-trip que compara asignaciones() por igualdad de MAPAS (no isNotNull ni hasSize) contra
+  la solución que devolvió el solver, más doesNotContain(plazaFija) y comparación directa de
+  aulasElegidas() reconstruido vs original. ORO NEGATIVO: con las fijas metidas dentro, Test 1 ROJO
+  en el aserto (2); revertido, verde. Sin él, D-F8.3-C-3 sería decorativa.
+  DiagnosticoService DELEGA en GeneradorHorarioService.cargarProblema() por método público —no
+  hereda sus 12 repos (D-F8.2b-iii-A-a)—, y es OBLIGATORIO, no solo permitido: cargar el catálogo
+  por su cuenta reproduciría la trampa de S62 (los bloqueos deben leerse DENTRO de la misma
+  transacción readOnly o el pin se pierde EN SILENCIO, por identidad de objeto de TramoSemanal
+  contra el IdentityHashMap de BloqueoMapper). El porqué quedó ESCRITO en su javadoc de clase, o el
+  próximo refactor de "limpieza" lo deshace.
+  D15 NO tocada (verificarNoSolapes fuera del radio, esta vez POR CONSTRUCCIÓN y verificado por
+  git diff). D-F8.2b-iv-a NO crece (el bloque no añade reglas de coherencia al bloqueo).
+  Suite: solver 78 + app 60, sin regresión (recuento ANTES y DESPUÉS idénticos; CierreFase6HumoTest
+  verde). solver/src/main SÍ tocado → referencia-codigo-solver.md REGENERADO (619ef34).
+  modelo_datos_fase1.md NO tocado (ni entidad ni invariante nueva). Frontend NO tocado (es 8.6).
+  Siguiente: 8.6 (drag&drop, con el contrato YA cerrado en 8.6-A: es teclear Angular, no decidir),
+  8.4 (pre-validación, D18/D20) o el candidato que se decida al abrir sesión.
+Última sesión registrada (previa): Sesión 66 — Fase 8, Bloque 8.2b-iv: ENTRADA DEL BLOQUEO POR REST.
   Modo híbrido. 2 commits de código (071852c + 94e2649, el segundo por rehacer el test de
   contrato). ALCANCE RECORTADO EN SESIÓN: se confirmó "8.2b-iv + REST de atribución" y se
   RETIRÓ la mitad de atribución al leer el repo. Motivo (hecho, no juicio): SolucionHorario NO
@@ -807,27 +873,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   solver SÍ tocado → referencia-codigo-solver.md REGENERADO (f4df782). Sin deuda funcional nueva.
   Siguiente: 8.3-B (atribución de las BLANDAS, con la decisión de diseño sobre los gemelos por
   resolver), o el candidato que se decida al abrir sesión.
-Última sesión registrada (previa): Sesión 63 — HIGIENE DOCUMENTAL del plan y la bitácora (sin código, 3 commits).
-  Modo interactivo (revisión por secciones con el usuario). DOS operaciones. Op1: archivó la cabecera
-  compacta de S59 a la bitácora (la ventana del plan conserva SIEMPRE las 4 últimas) y borró de la
-  bitácora el dato duplicado de qué ventana conserva el plan, que había quedado rezagado. Op2 (LIMPIEZA
-  DE FONDO): condensó los bloques de fases CERRADAS —Fase 5 (21 bloques → una línea cada uno) y Fase 6
-  (bloques 1-7, 9 y CIERRE)— con el formato "qué (Sxx) → deuda/decisión superviviente; Detalle: bitácora
-  Sxx", y partió la deuda consciente en dos secciones físicas: VIVA (íntegra) y CERRADA (histórico,
-  condensada a una línea que CONSERVA su mecanismo vivo de src/main). Deuda nueva D31 (poblaciones y
-  particiones a confirmar con el centro) que absorbe las cuatro deudas dispersas "a confirmar con el
-  centro" de B3/B7/B11/B13 + la invariante de población.
-  Guardarraíles cristalizados como DECISIÓN PERMANENTE (ver "Criterio de higiene documental del plan"):
-  R4 (ningún token —Dxx/D-Bx-y/Cx/§x.y— sin citante vivo ni definición viva, verificado por grep) y R5
-  (mecanismo vivo de src/main ≠ historia de sesión). Una PARADA de R4: Fase 6 Bloque 8 queda ÍNTEGRO
-  porque D-B8-1 se cita desde el criterio vivo de Fase 6 (l.440) y solo se define ahí. El bloque CIERRE
-  de Fase 6 lleva la remisión "Detalle y decisiones D-B10-1..9: bitácora S54" para dar destino a la cita
-  viva de D-B10-7 (cabecera de S61). Veredicto D24: CONDENSADA (D25, VIVA, se entiende sola: re-expone
-  inline el @Tag de D24 y su insuficiencia). D13/D15/D23/D24/D28 condensadas conservando su mecanismo.
-  Resultado: plan 2154 → 1429 líneas (−725, −34 %); bitácora 2242 → 2270 (+28 por S59). Estructura viva
-  intacta (Bloques de Fase 8 EN CURSO, Decisiones permanentes, Hallazgos PDFs, criterios de fase). No se
-  tocó código, ni modelo_datos_fase1.md, ni nada fuera de docs/. Tres commits de una línea. Árbol limpio.
-  Siguiente: 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el candidato que se decida al abrir sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
@@ -835,9 +880,9 @@ de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
-Sesión 64, la de S61 en la Sesión 65 y la de S62 en la Sesión 66 (misma higiene documental; en S60 se corrigió además una
+Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66 y la de S63 en la Sesión 67 (misma higiene documental; en S60 se corrigió además una
 copia truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El
-plan conserva las 4 últimas cabeceras compactas (S63–S66). El detalle histórico de cualquier
+plan conserva las 4 últimas cabeceras compactas (S64–S67). El detalle histórico de cualquier
 sesión anterior —incluida S42 (citada por la deuda abierta D25) y S43
 (citada por el cierre de D23)— está en la bitácora.
 
@@ -967,22 +1012,43 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       Penalizacion + AtribucionBlanda; ResultadoVerificacion/Violacion NO se tocan (una
       penalización blanda no es una violación) y por tanto D15 queda fuera del radio. Solo
       solver/: sin REST.
-- [ ] Bloque 8.3-C — REST de atribución (duras + blandas). DISEÑO PENDIENTE, abierto en S66 al
-      retirarlo del alcance. El backend está CERRADO (8.3-A + 8.3-B) pero SIN CONSUMIDOR. La
-      pregunta abierta NO es de mapeo: es CÓMO LLEGA LA SOLUCIÓN A VERIFICAR. No sirve
-      recargarla de BD (SolucionHorario no es reconstruible desde Sesion sin un tercer espejo de
-      la renumeración de jornada, D30; y D-B9-5 decidió no reconstruirla), y el consumidor real
-      —8.6, drag&drop— necesita evaluar una solución CANDIDATA que el usuario acaba de mover y
-      NO ha guardado. Luego la forma probable NO es GET /{id}/diagnostico sino un POST que
-      TRANSPORTE la solución candidata (o un verificador en cliente). Decidirlo CON el
-      consumidor, no antes: diseñarlo hoy es diseñar a ciegas.
+- [x] Bloque 8.3-C — REST de atribución: GET /api/horarios/{id}/diagnostico (S67). La pregunta
+      abierta de S66 ("cómo llega la solución a verificar") se resolvió al fijar el modelo de
+      interacción (D-F8.6-A-1, vía C): NO hay solución candidata que transportar, luego la
+      solución se RECONSTRUYE desde BD. SolucionMapper.aSolucionHorario es el INVERSO de
+      aSesiones: obtiene la correspondencia Tramo↔TramoSemanal INVIRTIENDO el mapa que
+      indiceTramos ya construye —D30 gana un CONSUMIDOR, no un espejo—. CORRIGE A S66: el plan
+      afirmaba que reconstruir exigiría "un TERCER espejo de la renumeración"; es FALSO, y S66 lo
+      dedujo sin haber leído indiceTramos. aulasElegidas se reconstruye OMITIENDO las plazas con
+      aulaFija (fidelidad, no equivalencia: D-F8.3-C-3), con guarda de corrupción si el aula
+      persistida contradice la fija. SolucionHorario gana un getter aulasElegidas() —única línea
+      de solver/src/main tocada, estrictamente aditiva— porque sin él la fidelidad solo era
+      verificable por reflexión, y un invariante que exige violar el encapsulamiento para
+      comprobarse no es un invariante (D-F8.3-C-6). DTO: violaciones + penalizaciones + totales;
+      las duras vienen VACÍAS en un horario del solver (red de seguridad visible, no diagnóstico).
+      SesionVistaDTO NO tocado. D19 CERRADA salvo su parte de UI (8.6).
 - [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
 - [ ] Bloque 8.5+ — CRUD de catálogo (D10 plazas multi-profesor, D1/D7 asistentes).
       Aquí muere SeedCatalogoRunner (andamiaje marcado para BORRAR en Fase 8 cuando
       exista la vía real).
-- [ ] Bloque 8.6+ — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de
-      8.2b-iv.
+- [ ] Bloque 8.6 — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de 8.2b-iv y
+      8.3-C. Modelo de interacción YA FIJADO en S67 (8.6-A, decisiones D-F8.6-A-1/2): NO es un
+      editor libre. El usuario PINA (POST /api/bloqueos, instantáneo) y el solver RECOLOCA lo
+      demás al regenerar (POST /api/horarios, explícito). Consecuencias: (a) no hay verificador
+      en cliente —el aviso de conflicto durante el arrastre es un cruce de índices sobre la
+      SesionVista ya cargada, NO una reimplementación de verificarNoSolapes: si se equivoca no
+      pasa nada, el solver decide—; (b) el arrastre es POR CELDA (instancia): la sub-entrada de
+      un desdoble NO es arrastrable (S5 obliga a que las plazas compartan tramo), es objeto de
+      inspección y de cambio de aula, que es otro gesto; (c) el precio asumido es que el usuario
+      no controla el resultado final —pina 3 celdas y el solver puede mover otras 5—.
+      Pendiente de 8.6: el Angular (rejilla arrastrable sobre horario-grid, candado del pin,
+      badge del delta blando por celda, resalte de violación a DOS granularidades: aula por
+      sub-entrada, profesor/subgrupo por celda). No hay librería de d&d en el frontend hoy.
+- [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
+      NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
+      PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
+      protege D15.
 
 Diferibles a lo largo de la fase: D21, D22, D26/D27 (nombre de aula, código de tramo),
 D30 (renumeración de tramos duplicada). D-F8.2b-4B: condicional e INERTE (la poda que
@@ -1454,6 +1520,16 @@ siguiente, con remisión a la bitácora.
   —saltándose BloqueoService— un pin que el alta rechazaría por la regla (e) y asevera que
   cargarProblema() TAMBIÉN lo rechaza. Es el único componente que detecta la divergencia.
   Hermana de D21/D22/D30. → resolver si el número de reglas crece.
+- **D-F8.6-a** (S67, VIVA, de MÉTODO, no técnica) — AVISO DE OPORTUNIDAD DE MOCKUP. Cuando un
+  bloque de Fase 8 lleve una decisión cuya respuesta dependa de CÓMO SE VE O SE GESTICULA algo
+  (no de cómo se computa), el arquitecto debe avisarlo explícitamente AL PROPONER ALCANCE, y
+  usar un mockup para resolverla antes de fijar el contrato. Origen: en S67 el mockup de la
+  celda de desdoble reveló que las TRES granularidades (coste blando por instancia, conflicto
+  de aula por plaza, solape por instancia — asimetría D15) se pintan sin colisión, y que la
+  sub-entrada NO puede ser arrastrable; ambas cosas ENTRARON en el contrato. Bloques candidatos
+  vivos: 8.6 (drag&drop), 8.5 (UX de subgrupos compartidos entre particiones, D7), 8.4 (D20:
+  ¿los avisos de pre-validación bloquean o advierten?). Se cierra cuando esos tres cierren.
+  El mockup NO es entregable: el frontend real vive en el repo (7B). Es una pregunta dibujada.
 
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —

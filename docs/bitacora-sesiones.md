@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S62. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S63. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S62). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S63). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2397,3 +2397,25 @@ Modo híbrido (decisión y contrato en el Project, código en Claude
   Siguiente: LIMPIEZA DE FONDO del plan (candidato principal de S63, acordada y pospuesta dos veces),
   o 8.2b-iv (REST de bloqueos, con contrato ya pre-cerrado), o el candidato que se decida al abrir
   sesión.
+
+### Sesión 63 — HIGIENE DOCUMENTAL del plan y la bitácora (sin código, 3 commits).
+  Modo interactivo (revisión por secciones con el usuario). DOS operaciones. Op1: archivó la cabecera
+  compacta de S59 a la bitácora (la ventana del plan conserva SIEMPRE las 4 últimas) y borró de la
+  bitácora el dato duplicado de qué ventana conserva el plan, que había quedado rezagado. Op2 (LIMPIEZA
+  DE FONDO): condensó los bloques de fases CERRADAS —Fase 5 (21 bloques → una línea cada uno) y Fase 6
+  (bloques 1-7, 9 y CIERRE)— con el formato "qué (Sxx) → deuda/decisión superviviente; Detalle: bitácora
+  Sxx", y partió la deuda consciente en dos secciones físicas: VIVA (íntegra) y CERRADA (histórico,
+  condensada a una línea que CONSERVA su mecanismo vivo de src/main). Deuda nueva D31 (poblaciones y
+  particiones a confirmar con el centro) que absorbe las cuatro deudas dispersas "a confirmar con el
+  centro" de B3/B7/B11/B13 + la invariante de población.
+  Guardarraíles cristalizados como DECISIÓN PERMANENTE (ver "Criterio de higiene documental del plan"):
+  R4 (ningún token —Dxx/D-Bx-y/Cx/§x.y— sin citante vivo ni definición viva, verificado por grep) y R5
+  (mecanismo vivo de src/main ≠ historia de sesión). Una PARADA de R4: Fase 6 Bloque 8 queda ÍNTEGRO
+  porque D-B8-1 se cita desde el criterio vivo de Fase 6 (l.440) y solo se define ahí. El bloque CIERRE
+  de Fase 6 lleva la remisión "Detalle y decisiones D-B10-1..9: bitácora S54" para dar destino a la cita
+  viva de D-B10-7 (cabecera de S61). Veredicto D24: CONDENSADA (D25, VIVA, se entiende sola: re-expone
+  inline el @Tag de D24 y su insuficiencia). D13/D15/D23/D24/D28 condensadas conservando su mecanismo.
+  Resultado: plan 2154 → 1429 líneas (−725, −34 %); bitácora 2242 → 2270 (+28 por S59). Estructura viva
+  intacta (Bloques de Fase 8 EN CURSO, Decisiones permanentes, Hallazgos PDFs, criterios de fase). No se
+  tocó código, ni modelo_datos_fase1.md, ni nada fuera de docs/. Tres commits de una línea. Árbol limpio.
+  Siguiente: 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el candidato que se decida al abrir sesión.
