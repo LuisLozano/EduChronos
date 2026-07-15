@@ -42,4 +42,15 @@ public class Asignatura {
     public String getNombreCompleto() {
         return nombreCompleto;
     }
+
+    /**
+     * Reasigna código y nombre de una asignatura gestionada (edición del CRUD,
+     * Bloque 8.5-A). Mutación de dominio nombrada y única en lugar de setters
+     * libres: la valida el servicio antes de invocarla (código y nombre no vacíos,
+     * unicidad de código) y el flush transaccional la persiste sin {@code save}.
+     */
+    public void actualizar(String codigo, String nombreCompleto) {
+        this.codigo = codigo;
+        this.nombreCompleto = nombreCompleto;
+    }
 }
