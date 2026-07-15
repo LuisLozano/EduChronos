@@ -638,7 +638,56 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 68 — Fase 8, Bloque 8.5 (CRUD de catálogo): precondición D31,
+Última sesión registrada: Sesión 69 — Fase 8, Bloque 8.5-A: CRUD REST de Asignatura (piloto del
+  patrón CRUD de catálogo). Modo híbrido (diseño en el Project, código en Claude Code). 1 commit de
+  código (f5b95f3). PRECONDICIÓN DESBLOQUEADA: la conversación con el jefe de estudios sobre la lámina
+  de S68 OCURRIÓ; sus respuestas cierran parcialmente D31 (ver deuda) y habilitan teclear el CRUD.
+  RESPUESTAS DEL CENTRO (las dos preguntas de la lámina): (1) «¿ves un grupo o cajas?» → CAJAS: el jefe
+  de estudios piensa el tramo denso como alumnos repartidos en cajas, cada una con su profesor y su aula,
+  y confirma que así monta los horarios. El modelo Actividad→Plaza→Subgrupo queda validado por el dominio
+  en su punto más difícil. (2) «¿el PDC 3ºADi es grupo propio o parte de 3ºA?» → «parte de 3ºA que a
+  ratos sale aparte, mismo tutor», PERO «en pantalla deben mostrarse los dos horarios, el de 3ºA y el del
+  PDC». Lectura: las dos mitades NO se contradicen y apuntan al modelo QUE YA TENEMOS (§6.2/S9: grupo
+  administrativo propio con grupo_padre I5). El grupo_padre ES la formalización de «sale aparte»; el
+  requisito de «dos horarios en pantalla» EXIGE identidad propia (un PDC sin identidad sería una columna
+  dentro de 3ºA, no un horario aparte), luego confirma el modelo, no lo reabre. La creación del PDC
+  colgando del padre + tutor heredado + sesiones compartidas marcadas es D1/D7, y por depender de CÓMO SE
+  GESTICULA la creación, arrastra mockup previo (D-F8.6-a) en su bloque (8.5-D).
+  CORTE DE 8.5 (fijado con el arquitecto, por dependencias/riesgo/tamaño): 8.5-A CRUD plano de las
+  raíces (Nivel, Asignatura, Profesor-plano, Aula) → 8.5-B GrupoAdministrativo + Subgrupo ordinarios →
+  8.5-C Actividad + Plaza (XOR aula, N profes/subgrupos; decisión pendiente del ctor protected) → 8.5-D
+  PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7) → 8.5-E rejilla de
+  ProfesorRestriccionHoraria «puede/no puede/prefiere-que-no» + peso (MOCKUP PREVIO, D20). 8.5-A/B/C
+  matan SeedCatalogoRunner (cubren lo que el seed crea); 8.5-D/E son catálogo que el seed NO cubre. La
+  rejilla de restricciones horarias del profesor se SEPARÓ de 8.5-A a 8.5-E a propuesta del usuario: no
+  es formulario plano sino rejilla de 30 celdas con tres estados, y su peso/gesto es UX pura.
+  QUÉ SE CONSTRUYÓ EN 8.5-A: /api/asignaturas con las 5 operaciones (GET lista ordenada por codigo, GET
+  /{id}, POST 201, PUT /{id} 200, DELETE 204). 6 ficheros (5 nuevos: AsignaturaDTO, AsignaturaRequest,
+  AsignaturaService, AsignaturaController, AsignaturaEndpointTest; 1 tocado: Asignatura.java +11).
+  Solo app/: solver/src/main NO tocado → referencia NO regenerada; modelo NO tocado (§4.1 ya describe
+  Asignatura). Suite app verde (~11 tests nuevos de AsignaturaEndpointTest), solver intacto.
+  PRECEDENTE 1 (lo hereda el resto del CRUD): las entidades inmutables (solo ctor+getters, como
+  Asignatura) reciben MÉTODO DE DOMINIO de actualización —Asignatura.actualizar(codigo, nombreCompleto)—,
+  NO setters, aunque Actividad/Plaza sí usen setters. Los setters de Actividad/Plaza son residuo del
+  builder de SeedCatalogoRunner (constructor vacío + setX), andamiaje que morirá; no son convención
+  elegida. El estilo bueno es el de Asignatura; cuando 8.5-C toque Actividad/Plaza, converger hacia
+  mutación nombrada. Un actualizar(...) además cierra por construcción el riesgo de setId (el id no es
+  parámetro). VERIFICADO POR JUICIO (arquitecto): diff de Asignatura.java añade solo actualizar, sin
+  setId ni otros setters.
+  PRECEDENTE 2 (lo hereda el resto del CRUD): convención de excepciones → HTTP:
+  NoSuchElementException → 404 (id inexistente), IllegalArgumentException → 400 (validación). El
+  controller las distingue POR TIPO, no por endpoint —crítico en PUT, donde ambos códigos son posibles
+  (404 si el id no existe, 400 si el código pisa a otra)—. Es MÁS limpio que el patrón de bloqueo, que
+  traduce una misma excepción distinto por endpoint. Validación única en el Service (sin espejo que
+  reflejar, a diferencia del bloqueo): la unicidad-en-edición se excluye a sí misma
+  (filter(otra -> !otra.getId().equals(id))). VERIFICADO POR JUICIO: los tests 8 y 9
+  (edicion_codigoQuePisaAOtra_400 / edicion_guardaMismoCodigo_200) son el par discriminante —el 9 edita
+  con el MISMO código y espera 200; sin la cláusula de exclusión saldría rojo, luego no es tautológico—.
+  DEUDA NUEVA: D-F8.5-A-a (DELETE de catálogo borra sin comprobar referencias entrantes → 500 opaco por
+  FK en vez de 400 amable; aplica a las cuatro raíces; se difiere a 8.5-C o al primer borrado con FK).
+  Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios), replicando el patrón piloto de 8.5-A
+  sobre Nivel/Profesor-plano/Aula primero si se prefiere consolidar las raíces antes de subir a grupos.
+Última sesión registrada (previa): Sesión 68 — Fase 8, Bloque 8.5 (CRUD de catálogo): precondición D31,
   no código. Modo híbrido, sin tocar el repo. ALCANCE: el prompt proponía abrir 8.5; se PARÓ en su
   precondición. La decisión de producto de S67 fija que la mitigación de D31 (enseñar el modelo
   DIBUJADO al jefe de estudios) es PRECONDICIÓN de teclear el CRUD, no un extra. Esa conversación NO
@@ -1412,6 +1461,15 @@ siguiente, con remisión a la bitácora.
   Relacionada: la invariante de población (el dominio modela SUBGRUPOS, no ALUMNOS;
   que un subgrupo sea partición real disjunta y exhaustiva NO lo verifica ningún
   componente). → Fase 8 (CRUD de catálogo) o antes, si hay contacto con el centro.
+  CIERRE PARCIAL (S69): la conversación con el jefe de estudios (lámina de S68) VALIDÓ dos cosas y
+  deja el resto VIVO. Validado: (i) el tramo denso de 1ºESO se piensa como CAJAS (Actividad→Plaza→
+  Subgrupo correcto en su punto más difícil); (ii) el PDC de 3º es «parte de 3ºA que sale aparte, mismo
+  tutor» con «dos horarios en pantalla» → confirma el modelado como grupo_padre (§6.2/S9), no lo reabre.
+  SIGUE VIVO (no puesto ante el centro): las poblaciones/particiones (b) optativas de 4ºESO, (c)
+  subgrupos de 1ºBach, (d) modalidades de 2ºBach; y la invariante de población en general. La parte (a)
+  —refuerzo/ATED de 3ºESO— queda cubierta por la validación del tramo denso de 1ºESO como caso gemelo,
+  pero NO se puso el de 3º explícitamente ante el centro: se considera validada por analogía, no por
+  confirmación directa. → resolver (b)/(c)/(d) al abrir el CRUD de esos niveles o antes si hay contacto.
 - DECISIÓN DE PRODUCTO (S67): el usuario decide NO hacer demo al cliente hasta terminar
   8.5 (CRUD de catálogo). Razón: mientras el catálogo se defina en SeedCatalogoRunner
   (Java), no hay producto que enseñar, y una demo provocaría "¿cómo meto yo mis datos?"
@@ -1423,6 +1481,9 @@ siguiente, con remisión a la bitácora.
   él sus grupos y agrupamientos. Media hora. Es la misma disciplina que el proyecto aplica
   al código (verificar el hecho antes de asumirlo); aquí el hecho vive en la cabeza de una
   persona, no en el repo.
+  CONSUMADA (S69): la mitigación se ejecutó —lámina de S68 puesta ante el jefe de estudios— y validó el
+  modelo (ver cierre parcial de D31 arriba). El «no demo hasta 8.5» sigue VIVO; lo consumado es solo la
+  precondición de mitigación, que ya no bloquea teclear el CRUD.
 - **D-F8.2b-iii-A-a** (S62, VIVA, no bloqueante) — `GeneradorHorarioService` tiene 12
   repositorios inyectados en el constructor. Es olor a clase que hace demasiado. Decisión
   consciente de S62: NO refactorizar en un bloque cuyo valor era cerrar un lazo funcional
@@ -1451,6 +1512,13 @@ siguiente, con remisión a la bitácora.
   vivos: 8.6 (drag&drop), 8.5 (UX de subgrupos compartidos entre particiones, D7), 8.4 (D20:
   ¿los avisos de pre-validación bloquean o advierten?). Se cierra cuando esos tres cierren.
   El mockup NO es entregable: el frontend real vive en el repo (7B). Es una pregunta dibujada.
+- **D-F8.5-A-a** (S69, VIVA, no bloqueante) — El DELETE de catálogo (piloto en 8.5-A, Asignatura)
+  borra sin comprobar referencias entrantes. Hoy borrar una Asignatura referenciada por una
+  Actividad/Plaza salta la FK como DataIntegrityViolationException → 500 opaco, no un 400 con
+  mensaje accionable («no se puede borrar: usada por N actividades»). Aplica a las CUATRO raíces del
+  CRUD (Nivel/Asignatura/Profesor/Aula), no solo a Asignatura. Se difiere a propósito: la integridad
+  referencial merece decisión propia y se vuelve inevitable al llegar al CRUD de Actividad/Plaza. →
+  resolver en 8.5-C o cuando el primer borrado con FK muerda.
 
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —
