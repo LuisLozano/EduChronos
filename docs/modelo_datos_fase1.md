@@ -852,6 +852,15 @@ contiene seis tramos no triviales: dos bloques con seis plazas simultáneas
 (CyR + OyD + RefMt), dos bloques con dos plazas (Fr2 / ALCT), un bloque con
 dos plazas (Religión / Atención Educativa), cuatro tramos de desdoble de
 LCL, una tutoría y veintiún tramos ordinarios.
+> **Nota (Sesión 68, verificación contra volcado).** El volcado fiel
+> `grupo-1-ESO-A.json` confirma el bloque de seis plazas del miércoles y viernes
+> a 3ª hora, pero muestra que sus destinos alternativos son CUATRO, no tres: el
+> desdoble de CyR (TEC3 + INF1), el agrupamiento de RefMt (MAT6 + MAT7 + MAT4) y
+> además **OyD (FIL3)**, que la redacción original de esta sección no listaba
+> como destino del bloque. El modelo lo absorbe sin cambios (la partición
+> unificada por bloque temporal ya contempla «tantos subgrupos por grupo como
+> destinos alternativos haya»); se registra por fidelidad, dado que la jerarquía
+> de autoridad manda volcado sobre §6.x.
 
 #### Principio aplicable al modelado
 
