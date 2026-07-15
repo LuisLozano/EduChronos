@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S63. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S65. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S63). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S65). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2473,3 +2473,69 @@ Modo híbrido (decisión y contrato en el Project, código en Claude
   solver SÍ tocado → referencia-codigo-solver.md REGENERADO (f4df782). Sin deuda funcional nueva.
   Siguiente: 8.3-B (atribución de las BLANDAS, con la decisión de diseño sobre los gemelos por
   resolver), o el candidato que se decida al abrir sesión.
+
+### Sesión 65 — Fase 8, Bloque 8.3-B: ATRIBUCIÓN CONTRAFACTUAL de reglas BLANDAS por celda.
+
+CIERRA D19 en BACKEND (duras en 8.3-A, blandas aquí). Modo híbrido (diseño en el
+Project, código en Claude Code). 3 commits (c74f2b8 código + 1f14e42 referencia + fix de comentario).
+HALLAZGO que resuelve la decisión de diseño que S64 dejó ABIERTA ("¿el atribuidor blando ES el gemelo,
+o es un tercer camino?"): la pregunta estaba MAL PLANTEADA porque presupone que hay UN atribuidor
+blando. Los tres gemelos NO son del mismo tipo. contarPenalizacionIndisponibilidadBlanda es LOCAL: su
+bucle YA sabe qué instancia penaliza (atribuir = no tirar el dato que tiene en la mano; mismo hallazgo
+que S64 hizo sobre reportarColisiones). contarVentanasProfesor y
+contarPenalizacionConsecutivasProfesor son NO-LOCALES: la penalización es propiedad de un CONJUNTO de
+posiciones (Set<Integer>), no de ninguna celda — ninguna celda "causa" una ventana, y el dato de qué
+instancia puso cada posición no se perdió por descuido sino porque NO HACE FALTA para contar.
+Decisiones cerradas antes de teclear (D-F8.3-B-1..4): (1) [D-F8.3-B-1, la que S64 dejó abierta] la
+atribución blanda NO es culpabilidad sino CONTRAFACTUAL: delta = penalización_actual −
+penalización_si_esa_celda_no_estuviera. Eso responde a lo que la UI necesita ("¿qué gano si muevo
+esto?") y CONSERVA la independencia respecto a CP-SAT por construcción: el atribuidor USA al gemelo
+como oráculo, sin ser él ni reimplementarlo. Se descartó de plano cualquier reparto de culpa
+(proporcional, por primera-instancia): la ventana es propiedad de un conjunto y todo reparto sería una
+invención sin correlato en el dominio. (2) Coste vs no-duplicación: se EXTRAEN las fórmulas existentes
+a funciones puras estáticas ventanasDe(Set<Integer>) y excesoConsecutivasDe(Set<Integer>, int) que
+llaman TANTO el gemelo público COMO el atribuidor — una sola definición de "qué es una ventana", coste
+O(1) por celda. Se descartó el oráculo puro (reinvocar el gemelo entero por celda, O(celdas ×
+Expansion.todas)): cuando el coste mordiera, alguien duplicaría la fórmula sin decisión consciente. NO
+es una segunda definición: es la ÚNICA definición movida a donde ambos la alcanzan. (3) Vehículo
+SEPARADO de verificar(): tipos nuevos ReglaBlanda + Penalizacion + AtribucionBlanda; NO se toca
+ResultadoVerificacion/Violacion/ReglaDura. Una penalización blanda NO es una Violacion (no invalida la
+solución, no tiene recurso violado, y sus N celdas tienen deltas DISTINTOS entre sí). Meterla en
+List<Violacion> habría sido el refactor de uniformización que amenaza la asimetría D15 — que por tanto
+NO entra en el radio de este bloque, por construcción y no por vigilancia. (4) Alcance solver/
+únicamente, sin REST ni app/ (gemelo de 8.3-A: el consumidor real es 8.6).
+CORRECCIÓN AL CONTRATO DURANTE EL DISEÑO (el detalle que salva el bloque): delta LLEVA SIGNO y NO se
+normaliza. delta>0 = mover la celda MEJORA; delta<0 = la celda está TAPANDO un hueco y moverla EMPEORA
+({1,2,3} = 0 ventanas; quitar la del medio deja {1,3} = 1 ventana, delta = −1); delta=0 = indiferente,
+y NO se emite (el mapa no se ensucia con ceros). El contrato inicial decía "delta > 0 siempre" y era
+FALSO: de haberlo dejado al teclado habría salido un Math.max(0,delta) silencioso que MIENTE y que
+sobrevive a una suite verde. tramoCodigo es null en VENTANA_PROFESOR y EXCESO_CONSECUTIVAS (penalizan
+una configuración de DÍA, no de tramo; rellenarlo sería mentir) y no-null solo en
+INDISPONIBILIDAD_BLANDA. Asimetría deliberada, gemela de la de Violacion.
+ORO del bloque: test que asevera delta EXACTAMENTE −1 (isEqualTo(-1), no "<=0" ni "!=0") en la celda
+del medio de {1,2,3} — es el único aserto que un clamp a positivo NO sobrevive. Más discriminación con
+delta +1 en la punta de {1,3}. Consistencia de los gemelos tras la extracción aseverada contra VALORES
+LITERALES conocidos (ventanas=3, consecutivas=1) sobre solución construida a mano y enumerada en
+diseño, NO tautológica; se usó fixture propio y no uno existente porque ninguno ejercita ambos gemelos
+con valores no triviales sobre una solución DETERMINISTA por día (el papel de no-regresión contra el
+comportamiento histórico lo hacen los oro-fuerte de S24/S25/S27, que sí corren sobre los fixtures
+reales y quedaron verdes).
+REVISIÓN POR JUICIO (reparto de S64): el diff de los dos gemelos se verificó como EXTRACCIÓN PURA
+(líneas movidas, no reescritas; única diferencia continue→return 0, correcta al pasar de bucle a
+función). Se cazó y corrigió un COMENTARIO ENGAÑOSO en el test del delta −1, que afirmaba que "los
+extremos tienen delta 0 porque quitarlos no crea hueco": el aserto pasa, pero la razón es falsa y
+CONTRADICE al test hermano — los extremos dan 0 en {1,2,3} porque quitarlos reduce span y nClases en 1
+y la resta se cancela, NO porque los extremos nunca aporten (en {1,3,4}, quitar el extremo 1 da delta
++1). Un comentario que miente sobre la semántica es deuda viva en src/test: invita a "optimizar" el
+atribuidor saltándose los extremos.
+Suite: 122 → 127 (solver 73 → 78; app 49 intacto), 0 fallos, BUILD SUCCESS. ModeloCpSat NO tocado
+(probado por git diff --stat) — el atribuidor es independiente de CP-SAT, que es todo el punto.
+app/, REST, DTOs, frontend y modelo_datos_fase1.md NO tocados (los tipos de atribución son
+infraestructura de verificación, no entidad ni invariante nueva). verificarNoSolapes NO tocado: D15
+intacta. src/main del solver SÍ tocado → referencia-codigo-solver.md REGENERADO (1f14e42).
+Deuda que deja viva: el n=3 literal de atribuirBlandas es el MISMO espejo frágil de MAX_CONSECUTIVAS
+que ya tenía el gemelo; la extracción lo PARAMETRIZA (excesoConsecutivasDe recibe n) pero no resuelve
+el origen. Es D21(c), ya registrada, NO ampliada aquí.
+Siguiente: 8.4 (pre-validación, D18/D20), 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el
+candidato que se decida al abrir sesión. D19 backend CERRADA; D19 queda viva solo en su parte de UI
+(8.6, consumidor real de la atribución).
