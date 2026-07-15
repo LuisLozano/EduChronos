@@ -2419,3 +2419,57 @@ Modo híbrido (decisión y contrato en el Project, código en Claude
   intacta (Bloques de Fase 8 EN CURSO, Decisiones permanentes, Hallazgos PDFs, criterios de fase). No se
   tocó código, ni modelo_datos_fase1.md, ni nada fuera de docs/. Tres commits de una línea. Árbol limpio.
   Siguiente: 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el candidato que se decida al abrir sesión.
+
+### Sesión 64 — Fase 8, Bloque 8.3-A: ATRIBUCIÓN ESTRUCTURADA de reglas DURAS por celda.
+  Modo híbrido (diseño en el Project, código en Claude Code). 2 commits
+  (6e9f68d código + f4df782 referencia). Alcance CORTADO al abrir: 8.3 partido en 8.3-A (duras,
+  esta sesión) y 8.3-B (blandas, DIFERIDO). Razón del corte: los "recomputos gemelos" de las
+  blandas (contarVentanasProfesor, contarPenalizacionIndisponibilidadBlanda,
+  contarPenalizacionConsecutivasProfesor) valen precisamente por ser INDEPENDIENTES del modelo
+  CP-SAT —delatan un error del modelo porque cuentan de otra manera—; convertirlos en
+  atribuidores por celda amenaza esa independencia. Es una decisión de DISEÑO sin resolver, no
+  un pendiente mecánico, y no debía contaminar el trabajo de las duras.
+  HALLAZGO que motivó el bloque: ResultadoVerificacion era List<String> y reportarColisiones
+  agregaba en Map<T,Integer> —un CONTADOR que TIRABA las instancias culpables—. Sabía QUE había
+  colisión y DE QUIÉN, pero no QUIÉNES la causaban: la atribución por celda era imposible sin
+  instrumentar. Confirmado por grep que en src/main solo lo consumían VerificacionPrinter y Main
+  (CLI, andamiaje): la List<String> no era API de producción que mereciera protección.
+  Decisiones cerradas antes de teclear (D-F8.3-A-1..5): (1) ResultadoVerificacion pasa a
+  List<Violacion> —se descartó añadir un campo extra conservando las cadenas: dos fuentes de
+  verdad que se desincronizan— y se descartó de plano un atribuidor nuevo en app/ que
+  reimplementara las comprobaciones (dos definiciones de "qué es un solape" divergen). (2) tipos
+  nuevos ReglaDura (enum, 7 valores) + CeldaRef(actividadCodigo, indice, plazaCodigo) +
+  Violacion(regla, recursoCodigo, tramoCodigo, celdas, descripcion). (3) UNA violación = N celdas
+  (un solape de profesor entre 2 instancias es UNA Violacion con celdas.size()==2, no dos):
+  preserva la cardinalidad que los tests ya asumían y es lo que la UI querrá resaltar. (4) el
+  puente a sesionId vive en app/, NO en solver/: CeldaRef usa códigos de negocio y
+  SesionVistaDTO ya lleva indice+actividadCodigo+plazaCodigo —la clave compuesta ya existe, no
+  hubo que tocar el DTO—. (5) alcance ESTRICTO a solver/: sin REST (el endpoint necesita las
+  blandas, que son 8.3-B; sacar una superficie solo-duras obligaría a reescribirla en la
+  siguiente sesión, el error que S62 evitó).
+  CORRECCIÓN AL CONTRATO durante la parada de lectura: D-2 especificaba CeldaRef.indice >= 0;
+  el dominio es 1-based (ActividadInstancia rechaza indice < 1), así que la guarda correcta es
+  >= 1. Con >= 0, CeldaRef podía representar un estado imposible en el dominio y la validación
+  no validaba nada. CeldaRef.indice transporta el índice 1-based TAL CUAL, sin reindexar:
+  cualquier traducción sería un bug silencioso en el puente a sesionId.
+  ASIMETRÍA D15 PRESERVADA y ahora protegida por test: profesor/subgrupo/grupo se cuentan POR
+  INSTANCIA (celda con plazaCodigo=null); el AULA se cuenta POR PLAZA (celda con plazaCodigo
+  no-null). El acumulador del aula vive DENTRO del bucle de plazas y los de profesor/subgrupo
+  FUERA. Es frágil a la lectura —un refactor "de limpieza" que uniformara la granularidad
+  rompería D15 sin que la suite se pusiera roja— y por eso el oro afirma las dos direcciones.
+  ORO: VerificadorSolucionAtribucionTest (2 casos). SOLAPE_PROFESOR: exactamente 1 violación,
+  regla + recurso + tramo, y celdas() containsExactlyInAnyOrder las 2 CeldaRef culpables — esto
+  último es lo que la implementación anterior era INCAPAZ de producir. SOLAPE_AULA: plazaCodigo
+  no-null y celdas por plaza. El aislamiento (grupos distintos, aulas distintas / profesores
+  distintos) hace que hasSize(1) sea informativo y no accidental.
+  verificarDistribucion emite la violación con AMBAS instancias del día (Map primeraDelDia +
+  putIfAbsent): salió barato, así que se hizo completo en vez de dejarlo como deuda.
+  Roturas colaterales previstas y reparadas: VerificadorSolucionGrupoTest (3 aserciones
+  .contains sobre String → sobre el record, quedan MEJOR) y SolverHorarioTest:94 (que la parada
+  de lectura de Claude Code cazó y yo había pasado por alto; reforzada además con
+  celdas().size()==2). Salida de consola de VerificacionPrinter byte-idéntica.
+  Suite: 73 tests, 0 fallos, BUILD SUCCESS. +334/−43. app/ intacto, modelo NO tocado (CeldaRef
+  y Violacion son infraestructura de verificación, no entidad ni invariante nueva). src/main del
+  solver SÍ tocado → referencia-codigo-solver.md REGENERADO (f4df782). Sin deuda funcional nueva.
+  Siguiente: 8.3-B (atribución de las BLANDAS, con la decisión de diseño sobre los gemelos por
+  resolver), o el candidato que se decida al abrir sesión.

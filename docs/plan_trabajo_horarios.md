@@ -638,7 +638,33 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 67 — Fase 8, Bloques 8.6-A (contrato de ajuste manual) + 8.3-C
+Última sesión registrada: Sesión 68 — Fase 8, Bloque 8.5 (CRUD de catálogo): precondición D31,
+  no código. Modo híbrido, sin tocar el repo. ALCANCE: el prompt proponía abrir 8.5; se PARÓ en su
+  precondición. La decisión de producto de S67 fija que la mitigación de D31 (enseñar el modelo
+  DIBUJADO al jefe de estudios) es PRECONDICIÓN de teclear el CRUD, no un extra. Esa conversación NO
+  ha ocurrido, así que 8.5 sigue bloqueado; la sesión se dedicó a construir la herramienta de la
+  mitigación. ENTREGABLE (no versionado, "pregunta dibujada" en el sentido de D-F8.6-a): lámina HTML
+  estática de validación, tres hojas, sobre datos de VOLCADO FIEL (no §6.x): (0) horario completo de
+  1ºA con toggle de resalte de dos colores —rojo «se parte» (desdoble/agrupamiento) / verde «sigue
+  junto» (co-docencia LCL)—, es prueba de FIDELIDAD; (1) tramo denso de 1ºESO ampliado (desdoble CyR
+  + agrupamiento RefMt), es la PREGUNTA conceptual «¿ves un grupo o cajas?»; (2) PDC 3ºADi opcional,
+  «¿grupo propio o parte de 3ºA?». Segundo toggle: capa técnica de correspondencia con el modelo,
+  para el arquitecto, oculta por defecto.
+  HALLAZGO (jerarquía volcado > §6.x): el bloque del miércoles/viernes 10:00 de 1ºESO tiene CUATRO
+  destinos (CyR desdoblado + RefMt triple + OyD/FIL3), no tres como decía §6.1. El modelo lo absorbe
+  sin cambios (partición unificada por bloque temporal); nota añadida a §6.1 en commit de doc aparte.
+  CONTEO de 1ºA verificado contra el volcado por procesamiento, no de memoria: 21 ordinarias + 5 slots
+  «se parte» (mié/vie 10:00, lun 13:30, mié 11:30, jue 12:30) + 4 co-docencias LCL = 30. Corrige un
+  conteo verbal previo del arquitecto («4 slots») que era erróneo.
+  modelo_datos_fase1.md: SOLO nota en §6.1 (sin entidad ni invariante nueva). solver/src/main NO
+  tocado → referencia NO regenerada. Suite NO tocada (sesión sin código). Frontend real (app/frontend)
+  NO tocado: la lámina no es entregable.
+  PENDIENTE DE USUARIO, desbloquea 8.5: la conversación con el jefe de estudios sobre la lámina. Sus
+  respuestas a las dos preguntas cierran o reabren D31 y fijan el corte de 8.5. Hasta entonces 8.5
+  sigue en su precondición.
+  Siguiente: usar la lámina con el centro y traer sus respuestas; alternativa SIN dependencia de D31 =
+  8.4 (pre-validación, D18/D20), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 67 — Fase 8, Bloques 8.6-A (contrato de ajuste manual) + 8.3-C
   (REST de atribución). Modo híbrido. 3 commits (1772af6 código + ff1efbf tests + 619ef34
   referencia regenerada). ALCANCE: se abrió 8.6-A —no 8.4— porque 8.3-C llevaba una decisión de
   DISEÑO bloqueada, y bloqueada por su CONSUMIDOR: el plan (S66) ya avisaba de que 8.3-C y 8.6
@@ -820,59 +846,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: 8.4 (pre-validación, D18/D20), 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el
   candidato que se decida al abrir sesión. D19 backend CERRADA; D19 queda viva solo en su parte de UI
   (8.6, consumidor real de la atribución).
-Última sesión registrada (previa): Sesión 64 — Fase 8, Bloque 8.3-A: ATRIBUCIÓN ESTRUCTURADA de reglas
-  DURAS por celda. Modo híbrido (diseño en el Project, código en Claude Code). 2 commits
-  (6e9f68d código + f4df782 referencia). Alcance CORTADO al abrir: 8.3 partido en 8.3-A (duras,
-  esta sesión) y 8.3-B (blandas, DIFERIDO). Razón del corte: los "recomputos gemelos" de las
-  blandas (contarVentanasProfesor, contarPenalizacionIndisponibilidadBlanda,
-  contarPenalizacionConsecutivasProfesor) valen precisamente por ser INDEPENDIENTES del modelo
-  CP-SAT —delatan un error del modelo porque cuentan de otra manera—; convertirlos en
-  atribuidores por celda amenaza esa independencia. Es una decisión de DISEÑO sin resolver, no
-  un pendiente mecánico, y no debía contaminar el trabajo de las duras.
-  HALLAZGO que motivó el bloque: ResultadoVerificacion era List<String> y reportarColisiones
-  agregaba en Map<T,Integer> —un CONTADOR que TIRABA las instancias culpables—. Sabía QUE había
-  colisión y DE QUIÉN, pero no QUIÉNES la causaban: la atribución por celda era imposible sin
-  instrumentar. Confirmado por grep que en src/main solo lo consumían VerificacionPrinter y Main
-  (CLI, andamiaje): la List<String> no era API de producción que mereciera protección.
-  Decisiones cerradas antes de teclear (D-F8.3-A-1..5): (1) ResultadoVerificacion pasa a
-  List<Violacion> —se descartó añadir un campo extra conservando las cadenas: dos fuentes de
-  verdad que se desincronizan— y se descartó de plano un atribuidor nuevo en app/ que
-  reimplementara las comprobaciones (dos definiciones de "qué es un solape" divergen). (2) tipos
-  nuevos ReglaDura (enum, 7 valores) + CeldaRef(actividadCodigo, indice, plazaCodigo) +
-  Violacion(regla, recursoCodigo, tramoCodigo, celdas, descripcion). (3) UNA violación = N celdas
-  (un solape de profesor entre 2 instancias es UNA Violacion con celdas.size()==2, no dos):
-  preserva la cardinalidad que los tests ya asumían y es lo que la UI querrá resaltar. (4) el
-  puente a sesionId vive en app/, NO en solver/: CeldaRef usa códigos de negocio y
-  SesionVistaDTO ya lleva indice+actividadCodigo+plazaCodigo —la clave compuesta ya existe, no
-  hubo que tocar el DTO—. (5) alcance ESTRICTO a solver/: sin REST (el endpoint necesita las
-  blandas, que son 8.3-B; sacar una superficie solo-duras obligaría a reescribirla en la
-  siguiente sesión, el error que S62 evitó).
-  CORRECCIÓN AL CONTRATO durante la parada de lectura: D-2 especificaba CeldaRef.indice >= 0;
-  el dominio es 1-based (ActividadInstancia rechaza indice < 1), así que la guarda correcta es
-  >= 1. Con >= 0, CeldaRef podía representar un estado imposible en el dominio y la validación
-  no validaba nada. CeldaRef.indice transporta el índice 1-based TAL CUAL, sin reindexar:
-  cualquier traducción sería un bug silencioso en el puente a sesionId.
-  ASIMETRÍA D15 PRESERVADA y ahora protegida por test: profesor/subgrupo/grupo se cuentan POR
-  INSTANCIA (celda con plazaCodigo=null); el AULA se cuenta POR PLAZA (celda con plazaCodigo
-  no-null). El acumulador del aula vive DENTRO del bucle de plazas y los de profesor/subgrupo
-  FUERA. Es frágil a la lectura —un refactor "de limpieza" que uniformara la granularidad
-  rompería D15 sin que la suite se pusiera roja— y por eso el oro afirma las dos direcciones.
-  ORO: VerificadorSolucionAtribucionTest (2 casos). SOLAPE_PROFESOR: exactamente 1 violación,
-  regla + recurso + tramo, y celdas() containsExactlyInAnyOrder las 2 CeldaRef culpables — esto
-  último es lo que la implementación anterior era INCAPAZ de producir. SOLAPE_AULA: plazaCodigo
-  no-null y celdas por plaza. El aislamiento (grupos distintos, aulas distintas / profesores
-  distintos) hace que hasSize(1) sea informativo y no accidental.
-  verificarDistribucion emite la violación con AMBAS instancias del día (Map primeraDelDia +
-  putIfAbsent): salió barato, así que se hizo completo en vez de dejarlo como deuda.
-  Roturas colaterales previstas y reparadas: VerificadorSolucionGrupoTest (3 aserciones
-  .contains sobre String → sobre el record, quedan MEJOR) y SolverHorarioTest:94 (que la parada
-  de lectura de Claude Code cazó y yo había pasado por alto; reforzada además con
-  celdas().size()==2). Salida de consola de VerificacionPrinter byte-idéntica.
-  Suite: 73 tests, 0 fallos, BUILD SUCCESS. +334/−43. app/ intacto, modelo NO tocado (CeldaRef
-  y Violacion son infraestructura de verificación, no entidad ni invariante nueva). src/main del
-  solver SÍ tocado → referencia-codigo-solver.md REGENERADO (f4df782). Sin deuda funcional nueva.
-  Siguiente: 8.3-B (atribución de las BLANDAS, con la decisión de diseño sobre los gemelos por
-  resolver), o el candidato que se decida al abrir sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
@@ -880,11 +853,11 @@ de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la
 en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de S51, S52,
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
-Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66 y la de S63 en la Sesión 67 (misma higiene documental; en S60 se corrigió además una
-copia truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora). El
-plan conserva las 4 últimas cabeceras compactas (S64–S67). El detalle histórico de cualquier
-sesión anterior —incluida S42 (citada por la deuda abierta D25) y S43
-(citada por el cierre de D23)— está en la bitácora.
+Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67 y la de S64 en
+la Sesión 68 (misma higiene documental; en S60 se corrigió además una copia truncada y duplicada de S55
+que la operación de archivado de S59 dejó en la bitácora). El plan conserva las 4 últimas cabeceras
+compactas (S65–S68). El detalle histórico de cualquier sesión anterior —incluida S42
+(citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
 
@@ -1502,6 +1475,17 @@ siguiente, con remisión a la bitácora.
   Relacionada: la invariante de población (el dominio modela SUBGRUPOS, no ALUMNOS;
   que un subgrupo sea partición real disjunta y exhaustiva NO lo verifica ningún
   componente). → Fase 8 (CRUD de catálogo) o antes, si hay contacto con el centro.
+- DECISIÓN DE PRODUCTO (S67): el usuario decide NO hacer demo al cliente hasta terminar
+  8.5 (CRUD de catálogo). Razón: mientras el catálogo se defina en SeedCatalogoRunner
+  (Java), no hay producto que enseñar, y una demo provocaría "¿cómo meto yo mis datos?"
+  sin respuesta. RIESGO ACEPTADO A SABIENDAS: D31 es deuda de REQUISITOS, no de código, y
+  solo se cierra hablando con el centro; construir el CRUD encima de un modelo no validado
+  con ellos significa que un desencaje se descubriría DESPUÉS de haber construido la UI.
+  MITIGACIÓN ACORDADA (barata, no cuesta sesión): antes de teclear el CRUD de 8.5,
+  enseñar al jefe de estudios el MODELO DIBUJADO —no la app— y preguntarle si así piensa
+  él sus grupos y agrupamientos. Media hora. Es la misma disciplina que el proyecto aplica
+  al código (verificar el hecho antes de asumirlo); aquí el hecho vive en la cabeza de una
+  persona, no en el repo.
 - **D-F8.2b-iii-A-a** (S62, VIVA, no bloqueante) — `GeneradorHorarioService` tiene 12
   repositorios inyectados en el constructor. Es olor a clase que hace demasiado. Decisión
   consciente de S62: NO refactorizar en un bloque cuyo valor era cerrar un lazo funcional
