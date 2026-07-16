@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S66. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S67. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S66). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S67). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2593,3 +2593,71 @@ bloqueo REST no añade entidad ni invariante: §4.7 ya lo describe). SesionVista
 HorarioController NO tocados.
 Siguiente: 8.4 (pre-validación, D18/D20), 8.3-C (REST de atribución, DISEÑO PENDIENTE: cómo
 llega la SolucionHorario candidata) o el candidato que se decida al abrir sesión.
+
+### Sesión 67 — Fase 8, Bloques 8.6-A (contrato de ajuste manual) + 8.3-C (REST de atribución).
+
+Modo híbrido. 3 commits (1772af6 código + ff1efbf tests + 619ef34
+referencia regenerada). ALCANCE: se abrió 8.6-A —no 8.4— porque 8.3-C llevaba una decisión de
+DISEÑO bloqueada, y bloqueada por su CONSUMIDOR: el plan (S66) ya avisaba de que 8.3-C y 8.6
+eran el mismo frente. Confirmado.
+HALLAZGO 1 (el que desbloquea el frente): POST /api/bloqueos —construido en S66 creyendo que
+era "el endpoint del bloqueo"— YA ES el endpoint del drag&drop. "Mover una celda" = "pinarla
+en el tramo destino": mismo payload, misma semántica idempotente, mismo par (dia, ordenEnDia)
+que ya lleva SesionVistaDTO. No había que inventar superficie.
+D-F8.6-A-1 (vía C, pinar en caliente + re-solve diferido): se descartaron las dos vías puras.
+A (solve por gesto) es INVIABLE por latencia —S44: 601 s a escala real, nadie arrastra y espera
+diez minutos—. B (editor libre con verificación en cliente) es INACEPTABLE por el CUARTO ESPEJO
+—portar verificarNoSolapes a TypeScript, sin el test que protege D15, en otro lenguaje—.
+C evita ambas: el gesto pina (ms), el solve es explícito, y el aviso de conflicto en cliente es
+un CRUCE DE ÍNDICES sobre datos ya cargados, no una verificación: si se equivoca, no pasa nada,
+porque el solver es quien decide y un pin contradictorio dará INFEASIBLE (que es lo que 8.4
+existe para hacer amable). Precio asumido: el usuario no controla el resultado final.
+D-F8.6-A-2: la sub-entrada de un desdoble NO es arrastrable (S5 obliga a compartir tramo);
+arrastrable = la celda (instancia). El cambio de aula es otro gesto, por plaza.
+MOCKUP (Claude Design, primera vez en el proyecto): dibujó la celda de desdoble con las tres
+granularidades encima. Contestó que se distinguen sin colisión —badge de cabecera = coste
+blando (instancia); fondo de sub-entrada = conflicto de aula (plaza); borde de celda = solape
+de profesor/subgrupo (instancia)— y que la sub-entrada arrastrable sería una promesa falsa. La
+asimetría D15 SE PINTA sin aplanarse. Deuda de método nueva: D-F8.6-a.
+HALLAZGO 2 (corrige a S66, y es un hecho, no un juicio): el plan afirmaba que reconstruir
+SolucionHorario exigiría "un TERCER espejo de la renumeración". FALSO. indiceTramos YA devuelve
+Map<Tramo,TramoSemanal>; el inverso es un for sobre entrySet(). S66 lo dedujo SIN HABER LEÍDO
+indiceTramos. Corregido en el bloque 8.3-C.
+Decisiones de 8.3-C (D-F8.3-C-1..6): (1) la solución se RECONSTRUYE desde BD, no se transporta
+(habilitado por C: no hay candidata). (2) el inverso vive en SolucionMapper —donde YA está la
+correspondencia—, invirtiendo el mapa, no recalculando: D30 gana un consumidor. (3) aulasElegidas
+OMITE las plazas con aulaFija (FIDELIDAD, no equivalencia) + guarda de corrupción si el aula
+persistida contradice la fija. (4) el DTO lleva violaciones + penalizaciones + totales; las duras
+vienen VACÍAS en un horario del solver —son RED DE SEGURIDAD VISIBLE ("0 conflictos, verificado
+independientemente de CP-SAT"), no diagnóstico—. PenalizacionDTO NO lleva plazaCodigo: la
+atribución blanda es por INSTANCIA y un campo siempre-null es un campo que MIENTE. (5)
+SesionVistaDTO NO se toca (la UI cruza por (actividadCodigo, indice)). (6) SolucionHorario gana
+un getter aulasElegidas().
+REVISIÓN POR JUICIO (reparto de S64/S65/S66): el primer Test 1 fue RECHAZADO. Inspeccionaba
+aulasElegidas POR REFLEXIÓN del campo privado, con el argumento de que era "la única vía sin
+tocar solver/". El argumento era correcto y la conclusión no: si la distinción fija/elegida solo
+es observable por reflexión, entonces NO es observable por la API pública, y D-F8.3-C-3
+protegería una propiedad que NINGÚN consumidor legítimo puede comprobar. Un invariante que exige
+violar el encapsulamiento para verificarse no es un invariante: es un comentario. Y el javadoc de
+SolucionHorario YA AFIRMA la propiedad ("las aulas de plazas con aulaFija NO se almacenan aquí").
+Si la clase la afirma, la clase debe permitir comprobarla → D-F8.3-C-6: getter público,
+ESTRICTAMENTE ADITIVO (+15 líneas, 0 modificadas; constructor, aulaElegida, tramoDeInstancia,
+asignaciones, ModeloCpSat y VerificadorSolucion intactos). Fue la ÚNICA excepción al alcance
+"solver/src/main no se toca", tomada a sabiendas y con su coste (regeneración de la referencia).
+ORO: round-trip que compara asignaciones() por igualdad de MAPAS (no isNotNull ni hasSize) contra
+la solución que devolvió el solver, más doesNotContain(plazaFija) y comparación directa de
+aulasElegidas() reconstruido vs original. ORO NEGATIVO: con las fijas metidas dentro, Test 1 ROJO
+en el aserto (2); revertido, verde. Sin él, D-F8.3-C-3 sería decorativa.
+DiagnosticoService DELEGA en GeneradorHorarioService.cargarProblema() por método público —no
+hereda sus 12 repos (D-F8.2b-iii-A-a)—, y es OBLIGATORIO, no solo permitido: cargar el catálogo
+por su cuenta reproduciría la trampa de S62 (los bloqueos deben leerse DENTRO de la misma
+transacción readOnly o el pin se pierde EN SILENCIO, por identidad de objeto de TramoSemanal
+contra el IdentityHashMap de BloqueoMapper). El porqué quedó ESCRITO en su javadoc de clase, o el
+próximo refactor de "limpieza" lo deshace.
+D15 NO tocada (verificarNoSolapes fuera del radio, esta vez POR CONSTRUCCIÓN y verificado por
+git diff). D-F8.2b-iv-a NO crece (el bloque no añade reglas de coherencia al bloqueo).
+Suite: solver 78 + app 60, sin regresión (recuento ANTES y DESPUÉS idénticos; CierreFase6HumoTest
+verde). solver/src/main SÍ tocado → referencia-codigo-solver.md REGENERADO (619ef34).
+modelo_datos_fase1.md NO tocado (ni entidad ni invariante nueva). Frontend NO tocado (es 8.6).
+Siguiente: 8.6 (drag&drop, con el contrato YA cerrado en 8.6-A: es teclear Angular, no decidir),
+8.4 (pre-validación, D18/D20) o el candidato que se decida al abrir sesión.
