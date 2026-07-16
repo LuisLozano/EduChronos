@@ -638,7 +638,40 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 69 — Fase 8, Bloque 8.5-A: CRUD REST de Asignatura (piloto del
+Última sesión registrada: Sesión 70 — Fase 8, Bloque 8.5-A': CRUD REST de las raíces restantes de
+  catálogo (Nivel, Profesor, Aula), replicando el patrón piloto de 8.5-A. Modo híbrido (diseño en el
+  Project, código en Claude Code). 1 commit de código (18 ficheros: 15 nuevos + 3 entidades tocadas,
+  solo app/). CORTE DE 8.5 (recordatorio): 8.5-A (Asignatura, S69) y 8.5-A' (Nivel/Profesor/Aula, esta
+  sesión) cierran las RAÍCES planas; siguen 8.5-B (Grupo+Subgrupo, N:M) → 8.5-C (Actividad+Plaza) →
+  8.5-D (PDC, MOCKUP PREVIO) → 8.5-E (rejilla de restricciones, MOCKUP PREVIO).
+  QUÉ SE CONSTRUYÓ: tres CRUD REST (/api/niveles, /api/profesores, /api/aulas) con las 5 operaciones
+  cada uno (GET lista, GET /{id}, POST 201, PUT 200, DELETE 204), replicando los DOS PRECEDENTES de
+  S69 (método de dominio actualizar(...) en las tres entidades inmutables, sin setId; excepción→HTTP
+  por TIPO, validación única en el Service, unicidad-en-edición excluida por id). Suite app 73 → 114
+  (+41: Nivel 12, Profesor 13, Aula 16). solver/ intacto → referencia NO regenerada; modelo NO tocado
+  (§4.1 ya describe las tres entidades). SeedCatalogoRunner NO borrado (aún faltan Grupo/Subgrupo/
+  Actividad/Plaza; muere en 8.5-C).
+  DECISIONES CERRADAS (heredables por el resto del CRUD): (D-1) Nivel ordena su listado por 'orden'
+  (campo de §4.1 para ordenación UI), NO por 'codigo' como Asignatura/Profesor/Aula; el test discrimina
+  con orden alfabético y numérico CRUZADOS. (D-3) los enum viajan como String en el BORDE del DTO:
+  AulaRequest.tipo = String (para dar un 400 accionable en TipoAula.valueOf con el valor malo + lista
+  de válidos), AulaDTO.tipo = String vía getTipo().name(). Se descartó AulaDTO.tipo=TipoAula: la
+  verificación del repo mostró que 7A ya serializa enums como String (.name()) y ProyeccionDtoContratoTest
+  lo blinda (isTextual()); dos reglas de serialización de enum en el mismo paquete app.web.dto sería
+  deuda de coherencia. Sin asimetría entrada/salida final: String en ambos lados. (D-4) los cuatro
+  campos nullable de Aula (capacidad/edificio/planta/sector) son opcionales de verdad: entran null, se
+  persisten null, no se validan; únicos obligatorios de Aula = codigo + tipo.
+  VERIFICADO POR JUICIO (arquitecto): los tres actualizar(...) mutan solo campos editables, ninguno
+  asigna id; el par de edición de las tres raíces (editar con el MISMO código espera 200) protege la
+  cláusula de exclusión por id, no es tautológico; el aserto de orden de Nivel usa el cruce
+  alfabético/numérico; el 400 de tipo inválido de Aula asevera que el mensaje NOMBRA el valor malo
+  (reason(containsString("CHUCHE"))), no solo el status; los nullable de Aula se verifican null
+  explícito tras round-trip. D-F8.5-A-a (DELETE sin comprobar refs → 500 opaco por FK) queda intacta y
+  ahora aplica formalmente a las CUATRO raíces (decisión confirmada: replicar el piloto, no adelantar
+  la integridad referencial, que merece su bloque en 8.5-C).
+  Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios, N:M de Subgrupo, toca I1/I6), a decidir
+  al abrir sesión.
+Última sesión registrada (previa): Sesión 69 — Fase 8, Bloque 8.5-A: CRUD REST de Asignatura (piloto del
   patrón CRUD de catálogo). Modo híbrido (diseño en el Project, código en Claude Code). 1 commit de
   código (f5b95f3). PRECONDICIÓN DESBLOQUEADA: la conversación con el jefe de estudios sobre la lámina
   de S68 OCURRIÓ; sus respuestas cierran parcialmente D31 (ver deuda) y habilitan teclear el CRUD.
@@ -779,58 +812,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   modelo_datos_fase1.md NO tocado (ni entidad ni invariante nueva). Frontend NO tocado (es 8.6).
   Siguiente: 8.6 (drag&drop, con el contrato YA cerrado en 8.6-A: es teclear Angular, no decidir),
   8.4 (pre-validación, D18/D20) o el candidato que se decida al abrir sesión.
-Última sesión registrada (previa): Sesión 66 — Fase 8, Bloque 8.2b-iv: ENTRADA DEL BLOQUEO POR REST.
-  Modo híbrido. 2 commits de código (071852c + 94e2649, el segundo por rehacer el test de
-  contrato). ALCANCE RECORTADO EN SESIÓN: se confirmó "8.2b-iv + REST de atribución" y se
-  RETIRÓ la mitad de atribución al leer el repo. Motivo (hecho, no juicio): SolucionHorario NO
-  es reconstruible desde las filas de Sesion —Sesion guarda (plaza, indice, tramoInicio, aula)
-  y tramoInicio es un TramoSemanal de orden GLOBAL con recreos, no un domain.Tramo (dia +
-  ordenEnDia)—; reconstruirla exigiría un INVERSO de SolucionMapper.indiceTramos, es decir un
-  TERCER espejo de la renumeración de jornada (D30 ya se queja de dos), más un constructor de
-  SolucionHorario que D-B9-5 decidió NO tener. Y peor: el consumidor real (8.6 drag&drop)
-  necesita atribución sobre una solución CANDIDATA que llega en el request (el usuario acaba de
-  mover una celda y NO ha guardado), no sobre un horario recargado de BD —luego GET
-  /{id}/diagnostico es la forma EQUIVOCADA—. Diseñarla hoy sería diseñar a ciegas antes del
-  consumidor: el mismo error que S62 evitó con este mismo bloque. La atribución REST se abre
-  como bloque 8.3-C, con su diseño explícitamente PENDIENTE.
-  Decisiones cerradas antes de teclear (D-F8.2b-iv-1..7): (1) un recurso = pin de tramo + sus
-  pines de aula, sin endpoint de aula suelto (el dominio no lo admite: la API no debe poder
-  escribir lo que el consumidor rechaza); DELETE en cascada por la misma razón. (2) tramo por
-  (dia, ordenEnDia), NO por TramoSemanal.id, porque la UI no ve ese id —SesionVistaDTO lleva
-  (dia, tramo)—; implementado INVIRTIENDO CatalogoMapper.indiceOrdenEnDia, no reimplementando
-  la renumeración: D30 gana un consumidor, no un tercer espejo. (3) el alta valida contra el
-  catálogo JPA y NO llama a BloqueoMapper (exigiría mapear el catálogo entero para un pin) →
-  deuda D-F8.2b-iv-a. (4) POST idempotente por instancia (reemplaza, 200; no 409: la
-  restricción única (actividad, indice) haría reventar un insert ciego, y el gesto de la UI es
-  "clavar aquí", no "conflicto"). (5) reemplazo TOTAL, PUT semántico: sin merge parcial, no se
-  distingue null de [] (esa sutileza produce bugs silenciosos). (6) GET plano simétrico; la UI
-  cruza (actividadCodigo, indice) contra SesionVistaDTO, que YA lleva la clave compuesta →
-  SesionVistaDTO NO se toca. (7) BloqueoController + BloqueoService nuevos, no ampliar
-  GeneradorHorarioService (arrastra D-F8.2b-iii-A-a: 12 repos).
-  HALLAZGO de la parada de lectura, que despeja una duda del contrato: catalog.Plaza SÍ expone
-  el XOR (getAulaFija() != null vs getAulasCandidatas()) —la validación (e) era implementable
-  sobre la ENTIDAD, no solo sobre domain.Plaza—.
-  REVISIÓN POR JUICIO (reparto de S64/S65): el PRIMER test de contrato fue RECHAZADO por el
-  arquitecto y rehecho. Probaba el CAMINO FELIZ (alta válida → cargarProblema() la mapea), y
-  eso NO detecta lo que el test existe para detectar: una divergencia entre los dos validadores
-  NO se manifiesta en el camino feliz —se manifiesta cuando el alta ACEPTA lo que el mapper
-  RECHAZA—. Con aquel fixture, borrar la comprobación de candidatura del alta dejaba el test
-  VERDE y el fallo salía como 500 en el solve. Rehecho por VÍA B: inyecta en BD
-  —SALTÁNDOSE BloqueoService— un pin de aula NO candidata y asevera que cargarProblema()
-  LANZA. Verificado además que el chequeo de candidatura vive SOLO en BloqueoMapper (el ctor de
-  domain.SesionBloqueada solo hace null-checks), luego el hasMessageContaining("candidata") no
-  captura otro throw por accidente. El camino feliz sobrevive RENOMBRADO a
-  humo_altaValidaLlegaAlProblemaHorario: un test llamado "contrato" que probaba humo era un
-  nombre que MIENTE, la misma clase de deuda que S65 cazó en un comentario.
-  Lección de método: el prompt especificó el PROPÓSITO del test ("el que ata los dos
-  validadores") pero no el ASERTO DISCRIMINANTE, y Claude Code escribió el camino feliz. Es el
-  mismo aprendizaje que el isEqualTo(-1) de S65: hay que escribir el aserto, no el propósito.
-  Suite: app 49 → 56 (+7, todos BloqueoEndpointTest); solver 78 intacto. solver/src/main NO
-  tocado → referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md NO tocado (el
-  bloqueo REST no añade entidad ni invariante: §4.7 ya lo describe). SesionVistaDTO, frontend y
-  HorarioController NO tocados.
-  Siguiente: 8.4 (pre-validación, D18/D20), 8.3-C (REST de atribución, DISEÑO PENDIENTE: cómo
-  llega la SolucionHorario candidata) o el candidato que se decida al abrir sesión.
 
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
@@ -839,10 +820,10 @@ en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
-la Sesión 68 y la de S65 en la Sesión 69 (misma higiene documental; en S60 se corrigió además una copia
+la Sesión 68 y la de S65 en la Sesión 69 y la de S66 en la Sesión 70 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S66–S69). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S67–S70). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->

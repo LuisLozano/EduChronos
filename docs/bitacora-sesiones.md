@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S65. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S66. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S65). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S66). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2539,3 +2539,57 @@ el origen. Es D21(c), ya registrada, NO ampliada aquí.
 Siguiente: 8.4 (pre-validación, D18/D20), 8.2b-iv (REST de bloqueos, contrato pre-cerrado en S62) o el
 candidato que se decida al abrir sesión. D19 backend CERRADA; D19 queda viva solo en su parte de UI
 (8.6, consumidor real de la atribución).
+
+### Sesión 66 — Fase 8, Bloque 8.2b-iv: ENTRADA DEL BLOQUEO POR REST.
+
+Modo híbrido. 2 commits de código (071852c + 94e2649, el segundo por rehacer el test de
+contrato). ALCANCE RECORTADO EN SESIÓN: se confirmó "8.2b-iv + REST de atribución" y se
+RETIRÓ la mitad de atribución al leer el repo. Motivo (hecho, no juicio): SolucionHorario NO
+es reconstruible desde las filas de Sesion —Sesion guarda (plaza, indice, tramoInicio, aula)
+y tramoInicio es un TramoSemanal de orden GLOBAL con recreos, no un domain.Tramo (dia +
+ordenEnDia)—; reconstruirla exigiría un INVERSO de SolucionMapper.indiceTramos, es decir un
+TERCER espejo de la renumeración de jornada (D30 ya se queja de dos), más un constructor de
+SolucionHorario que D-B9-5 decidió NO tener. Y peor: el consumidor real (8.6 drag&drop)
+necesita atribución sobre una solución CANDIDATA que llega en el request (el usuario acaba de
+mover una celda y NO ha guardado), no sobre un horario recargado de BD —luego GET
+/{id}/diagnostico es la forma EQUIVOCADA—. Diseñarla hoy sería diseñar a ciegas antes del
+consumidor: el mismo error que S62 evitó con este mismo bloque. La atribución REST se abre
+como bloque 8.3-C, con su diseño explícitamente PENDIENTE.
+Decisiones cerradas antes de teclear (D-F8.2b-iv-1..7): (1) un recurso = pin de tramo + sus
+pines de aula, sin endpoint de aula suelto (el dominio no lo admite: la API no debe poder
+escribir lo que el consumidor rechaza); DELETE en cascada por la misma razón. (2) tramo por
+(dia, ordenEnDia), NO por TramoSemanal.id, porque la UI no ve ese id —SesionVistaDTO lleva
+(dia, tramo)—; implementado INVIRTIENDO CatalogoMapper.indiceOrdenEnDia, no reimplementando
+la renumeración: D30 gana un consumidor, no un tercer espejo. (3) el alta valida contra el
+catálogo JPA y NO llama a BloqueoMapper (exigiría mapear el catálogo entero para un pin) →
+deuda D-F8.2b-iv-a. (4) POST idempotente por instancia (reemplaza, 200; no 409: la
+restricción única (actividad, indice) haría reventar un insert ciego, y el gesto de la UI es
+"clavar aquí", no "conflicto"). (5) reemplazo TOTAL, PUT semántico: sin merge parcial, no se
+distingue null de [] (esa sutileza produce bugs silenciosos). (6) GET plano simétrico; la UI
+cruza (actividadCodigo, indice) contra SesionVistaDTO, que YA lleva la clave compuesta →
+SesionVistaDTO NO se toca. (7) BloqueoController + BloqueoService nuevos, no ampliar
+GeneradorHorarioService (arrastra D-F8.2b-iii-A-a: 12 repos).
+HALLAZGO de la parada de lectura, que despeja una duda del contrato: catalog.Plaza SÍ expone
+el XOR (getAulaFija() != null vs getAulasCandidatas()) —la validación (e) era implementable
+sobre la ENTIDAD, no solo sobre domain.Plaza—.
+REVISIÓN POR JUICIO (reparto de S64/S65): el PRIMER test de contrato fue RECHAZADO por el
+arquitecto y rehecho. Probaba el CAMINO FELIZ (alta válida → cargarProblema() la mapea), y
+eso NO detecta lo que el test existe para detectar: una divergencia entre los dos validadores
+NO se manifiesta en el camino feliz —se manifiesta cuando el alta ACEPTA lo que el mapper
+RECHAZA—. Con aquel fixture, borrar la comprobación de candidatura del alta dejaba el test
+VERDE y el fallo salía como 500 en el solve. Rehecho por VÍA B: inyecta en BD
+—SALTÁNDOSE BloqueoService— un pin de aula NO candidata y asevera que cargarProblema()
+LANZA. Verificado además que el chequeo de candidatura vive SOLO en BloqueoMapper (el ctor de
+domain.SesionBloqueada solo hace null-checks), luego el hasMessageContaining("candidata") no
+captura otro throw por accidente. El camino feliz sobrevive RENOMBRADO a
+humo_altaValidaLlegaAlProblemaHorario: un test llamado "contrato" que probaba humo era un
+nombre que MIENTE, la misma clase de deuda que S65 cazó en un comentario.
+Lección de método: el prompt especificó el PROPÓSITO del test ("el que ata los dos
+validadores") pero no el ASERTO DISCRIMINANTE, y Claude Code escribió el camino feliz. Es el
+mismo aprendizaje que el isEqualTo(-1) de S65: hay que escribir el aserto, no el propósito.
+Suite: app 49 → 56 (+7, todos BloqueoEndpointTest); solver 78 intacto. solver/src/main NO
+tocado → referencia-codigo-solver.md NO regenerado. modelo_datos_fase1.md NO tocado (el
+bloqueo REST no añade entidad ni invariante: §4.7 ya lo describe). SesionVistaDTO, frontend y
+HorarioController NO tocados.
+Siguiente: 8.4 (pre-validación, D18/D20), 8.3-C (REST de atribución, DISEÑO PENDIENTE: cómo
+llega la SolucionHorario candidata) o el candidato que se decida al abrir sesión.
