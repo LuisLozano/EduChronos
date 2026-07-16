@@ -18,8 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
  * ANDAMIAJE TEMPORAL (Fase 7, Bloque 7B). Seed desechable que puebla SOLO el
  * catálogo (no genera horario: para eso está ya el {@code POST /api/horarios} de
  * Fase 8, Bloque 8.1). Duplica el builder de CierreFase6HumoTest a propósito.
- * BORRAR en Fase 8 al llegar al bloque de CRUD del centro, cuando exista la vía
- * real de poblar la BD (formularios). No construir nada encima de esta clase.
+ * Ya NO muere en 8.5-C (Actividad/Plaza tienen CRUD): sobrevive solo por
+ * {@code TramoSemanal}, que aún no lo tiene, y muere en el bloque de configuración
+ * de jornada. No construir nada encima de esta clase.
  *
  * <p>Solo se activa con el perfil {@code seed}
  * ({@code --spring.profiles.active=seed}); el arranque normal no re-siembra.

@@ -13,6 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Unidad de planificación que el solver coloca en el tiempo (§4.6 del modelo).
@@ -67,6 +68,54 @@ public class Actividad {
     private List<Plaza> plazas = new ArrayList<>();
 
     protected Actividad() { }   // JPA
+
+    /**
+     * Alta de una actividad (CRUD 8.5-C1). Constructor público paralelo al de
+     * {@link Asignatura}/{@link Subgrupo}: {@code ActividadService} lo usa para no
+     * tocar setters ni el ctor protegido de JPA. Nace SIN plazas; se añaden con
+     * {@link #agregarPlaza}. NO recibe {@code id} (lo asigna JPA).
+     */
+    public Actividad(String codigo, Asignatura asignatura, int duracionTramos,
+            int repeticionesPorSemana, PatronTemporal patronTemporal, boolean requiereTutor) {
+        this.codigo = codigo;
+        this.asignatura = asignatura;
+        this.duracionTramos = duracionTramos;
+        this.repeticionesPorSemana = repeticionesPorSemana;
+        this.patronTemporal = patronTemporal;
+        this.requiereTutor = requiereTutor;
+    }
+
+    /**
+     * Reasigna los campos escalares de una actividad gestionada (edición del CRUD
+     * 8.5-C1). Mutación de dominio nombrada en lugar de setters libres: la valida el
+     * servicio y el flush transaccional la persiste sin {@code save}. NO toca la lista
+     * de plazas —la gestiona el servicio con {@link #limpiarPlazas} + {@link #agregarPlaza},
+     * regenerando sus códigos— ni el {@code id}.
+     */
+    public void actualizar(String codigo, Asignatura asignatura, int duracionTramos,
+            int repeticionesPorSemana, PatronTemporal patronTemporal, boolean requiereTutor) {
+        this.codigo = codigo;
+        this.asignatura = asignatura;
+        this.duracionTramos = duracionTramos;
+        this.repeticionesPorSemana = repeticionesPorSemana;
+        this.patronTemporal = patronTemporal;
+        this.requiereTutor = requiereTutor;
+    }
+
+    /**
+     * Crea una {@link Plaza} dependiente, enlazada a esta actividad, con su código estable
+     * y su contenido ya fijado, y la añade al agregado. Construir la plaza aquí (mismo
+     * paquete) evita exponer su ctor al servicio y mantiene a la raíz del agregado dueña
+     * del ciclo de vida de sus plazas. El borrado de plazas sobrantes lo hace el servicio
+     * quitándolas de {@link #getPlazas()} (orphanRemoval).
+     */
+    public Plaza agregarPlaza(String codigo, Asignatura asignatura, Aula aulaFija,
+            Set<Profesor> profesores, Set<Aula> aulasCandidatas, Set<Subgrupo> subgrupos) {
+        Plaza plaza = new Plaza(this, codigo);
+        plaza.actualizar(asignatura, aulaFija, profesores, aulasCandidatas, subgrupos);
+        this.plazas.add(plaza);
+        return plaza;
+    }
 
     public Long getId() {
         return id;

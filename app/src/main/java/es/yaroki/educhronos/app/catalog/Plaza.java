@@ -72,6 +72,33 @@ public class Plaza {
 
     protected Plaza() { }   // JPA
 
+    /**
+     * Ctor de dependencia (visible en el paquete): fija la {@link Actividad} dueña y el
+     * {@code codigo}, ambos estructurales (el código, tras la reevaluación de 8.5-C1, es
+     * ESTABLE: no cambia mientras la plaza sobreviva). Lo usa {@link Actividad#agregarPlaza}
+     * para que la raíz del agregado construya sus plazas sin exponer este ctor al servicio.
+     */
+    Plaza(Actividad actividad, String codigo) {
+        this.actividad = actividad;
+        this.codigo = codigo;
+    }
+
+    /**
+     * Reasigna el CONTENIDO editable de una plaza (CRUD 8.5-C1): asignatura, aula
+     * (fija/candidatas) y las tres M:N. Mutación de dominio nombrada en lugar de setters
+     * libres. NO toca el {@code codigo} (estable, se conserva en la reconciliación
+     * posicional del PUT), ni el {@code id}, ni la {@link #actividad} dueña. Los tres
+     * conjuntos M:N se REEMPLAZAN con copia defensiva, como {@link Subgrupo#actualizar}.
+     */
+    public void actualizar(Asignatura asignatura, Aula aulaFija,
+            Set<Profesor> profesores, Set<Aula> aulasCandidatas, Set<Subgrupo> subgrupos) {
+        this.asignatura = asignatura;
+        this.aulaFija = aulaFija;
+        this.profesores = new HashSet<>(profesores);
+        this.aulasCandidatas = new HashSet<>(aulasCandidatas);
+        this.subgrupos = new HashSet<>(subgrupos);
+    }
+
     public Long getId() {
         return id;
     }
