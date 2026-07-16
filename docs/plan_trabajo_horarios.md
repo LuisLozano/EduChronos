@@ -600,7 +600,8 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.2b-iv CERRADO en S66
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C1 CERRADO en S72
+  (CRUD de Actividad agregado; 8.5-C partido en C1/C2/C3). Bloque 8.2b-iv CERRADO en S66
   (entrada del bloqueo por REST: /api/bloqueos, POST idempotente
   con reemplazo total, tramo por (dia, ordenEnDia); deuda nueva D-F8.2b-iv-a, espejo de
   validación alta↔BloqueoMapper, mitigada por test de contrato).Bloque 8.3-B CERRADO en S65
@@ -638,7 +639,62 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 71 — Fase 8, Bloque 8.5-B: CRUD REST de GrupoAdministrativo
+Última sesión registrada: Sesión 72 — Fase 8, Bloque 8.5-C1: CRUD REST de Actividad como AGREGADO
+  (Plaza embebida). Modo híbrido. 1 commit de código (solo app/). CORTE DE 8.5 REVISADO EN SESIÓN:
+  8.5-C se PARTIÓ en C1 (Actividad+Plaza, esta sesión) → C2 (integridad referencial: activar FK +
+  borrado amable) → C3 (I3 + CRUD de AsignaturaAulaCompatible); siguen 8.5-D (PDC, MOCKUP PREVIO) →
+  8.5-E (rejilla, MOCKUP PREVIO).
+  DECISIONES DE ALCANCE (cerradas con el arquitecto antes de teclear): (D-C1-A) Actividad como
+  agregado; Plaza es sub-recurso EMBEBIDO en /api/actividades; NO hay /api/plazas ni PlazaController
+  ni PlazaRepository (Plaza se persiste/borra por cascade+orphanRemoval vía Actividad). (D-C1-B) I3
+  (asignatura↔tipo aula) FUERA de C1 → C3, porque arrastra materializar el CRUD de
+  AsignaturaAulaCompatible y una decisión de tabla-vacía; hoy NADIE valida I3 en escritura, así que no
+  es regresión. (D-C1-C) el borrado referencial FUERA de C1 → C2.
+  QUÉ SE CONSTRUYÓ: /api/actividades con las 5 operaciones. Validación en ActividadService (ninguna
+  delegada a la entidad JPA, que es POJO de persistencia): XOR aula por plaza (aulaFija Y candidatas →
+  400; ninguna de las dos → 400), I7 (plaza sin profesor → 400), I2 (subgrupo repetido en dos plazas
+  de la misma actividad → 400 que nombra el subgrupo), refs por código (asignatura/profesor/aula/
+  subgrupo inexistente → 400 que nombra el código), unicidad de codigo excluida por id en edición.
+  Convergencia S69: Actividad.actualizar / Plaza.actualizar (mutación nombrada, sin setId).
+  HALLAZGO GRAVE (leído del repo, no de memoria): las FK de SQLite NO están activadas
+  (application.properties no fuerza PRAGMA foreign_keys=ON; SQLite las tiene OFF por defecto por
+  conexión). Consecuencia viva HOY, no solo tarea futura: borrar un catálogo referenciado probablemente
+  NO lanza excepción — deja filas huérfanas SILENCIOSAS que solo se manifiestan cuando el mapper del
+  solver resuelve la referencia y encuentra null. Esto REESCRIBE D-F8.5-A-a: el problema no es «500
+  opaco por FK» (que quizá ni ocurre) sino «sin integridad referencial real». Verificación en EJECUCIÓN
+  de qué hace el driver Xerial + SQLiteDialect ante violación de FK con pragma OFF: NO hecha; hipótesis
+  por defecto = sin integridad. Reasignada a C2.
+  SEED DEGRADADO (corrige al plan, que decía «SeedCatalogoRunner muere en 8.5-C»): el seed NO puebla
+  AsignaturaAulaCompatible (verificado línea a línea: no inyecta su repo, todas sus aulas son
+  ORDINARIA) — esa tabla ya estaba vacía hoy, matar el seed no la vacía. C1 cubre lo único que el seed
+  crea además de las raíces A/A'/B (Actividad+Plaza) SALVO TramoSemanal, que no tiene CRUD en ningún
+  bloque de 8.5 (es D22, config de jornada). Por eso el seed NO muere en C1: se degrada a andamiaje de
+  tramos; su muerte total → bloque de configuración de jornada (D22). Javadoc del seed actualizado.
+  D-C1-E (código de plaza, CORREGIDA DOS VECES en sesión, matiz final crítico): el usuario NO teclea
+  código de plaza (Op-2); se DERIVA {codigoActividad}-P{n}. Contra lo que se supuso al abrir, el grep
+  probó que plaza.codigo SÍ es clave de correspondencia del solver (GeneradorHorarioService:209 y
+  CatalogoMapper:148 hacen toMap(codigo) que aborta ante duplicados; SolucionMapper:130,247 y
+  BloqueoMapper:80 emparejan por código). Por tanto el código debe ser ESTABLE. Regla final:
+  reconciliación POSICIONAL en el PUT (emparejar entrante↔existente por orden de creación/id; las
+  supervivientes CONSERVAN su código vía Plaza.actualizar; las sobrantes se borran por orphanRemoval;
+  las nuevas reciben maxSufijoVIVO+1). MATIZ que NO se puede perder: estable ≠ irrepetible-en-el-tiempo.
+  El código de una plaza VIVA no cambia (es lo que el solver necesita); un código LIBERADO por borrado
+  SÍ puede reasignarse a una plaza futura distinta, y es seguro porque Sesion/AulaBloqueada referencian
+  la plaza por plaza_id (FK al id), no por código. Se RETIRÓ una «regla anti-reuso» (high-water) que el
+  arquitecto había metido por error: era más estricta de lo que el solver necesita y exigía estado
+  persistido fuera de alcance. Emparejamiento posicional = decisión de UX PROVISIONAL (roza D-F8.6-a):
+  se confirma cuando exista el formulario de Actividad en 8.6.
+  ASERTOS DISCRIMINANTES (verdes, sin flush() explícito): putEstabilidad (editar contenido NO regenera
+  códigos: los 3 idénticos); putReduccion (6→2 plazas sin violar UNIQUE, supervivientes conservan
+  código); putReusoDeHueco (borrar P3, la nueva reusa P3, códigos vivos únicos); round-trip del bloque
+  CyR/OyD/RefMt (containsInAnyOrder de códigos por plaza, no tamaño); XOR/I7/I2/refs. Suite app 143 →
+  162 (+19). solver/ intacto → referencia NO regenerada; modelo NO tocado (§4.6 ya describe Actividad/
+  Plaza).
+  DEUDA NUEVA: setters de Actividad/Plaza NO retirados pese a la obligación S69: 12 tests verdes previos
+  los usan y el contrato prohíbe romper la suite. El Service nuevo no usa ninguno (ctor + actualizar +
+  agregarPlaza). Retirada → bloque que migre esos 12 tests.
+  Siguiente: 8.5-C2 (integridad referencial) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 71 — Fase 8, Bloque 8.5-B: CRUD REST de GrupoAdministrativo
   (ordinario) + Subgrupo, con el N:M subgrupo_grupo por códigos. Modo híbrido (diseño en el
   Project, código en Claude Code). 2 commits de código (c21d0e2 Grupo + 744b724 Subgrupo), solo app/.
   CORTE DE 8.5 (recordatorio): A (Asignatura, S69), A' (Nivel/Profesor/Aula, S70) y B (esta sesión)
@@ -759,32 +815,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   FK en vez de 400 amable; aplica a las cuatro raíces; se difiere a 8.5-C o al primer borrado con FK).
   Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios), replicando el patrón piloto de 8.5-A
   sobre Nivel/Profesor-plano/Aula primero si se prefiere consolidar las raíces antes de subir a grupos.
-Última sesión registrada (previa): Sesión 68 — Fase 8, Bloque 8.5 (CRUD de catálogo): precondición D31,
-  no código. Modo híbrido, sin tocar el repo. ALCANCE: el prompt proponía abrir 8.5; se PARÓ en su
-  precondición. La decisión de producto de S67 fija que la mitigación de D31 (enseñar el modelo
-  DIBUJADO al jefe de estudios) es PRECONDICIÓN de teclear el CRUD, no un extra. Esa conversación NO
-  ha ocurrido, así que 8.5 sigue bloqueado; la sesión se dedicó a construir la herramienta de la
-  mitigación. ENTREGABLE (no versionado, "pregunta dibujada" en el sentido de D-F8.6-a): lámina HTML
-  estática de validación, tres hojas, sobre datos de VOLCADO FIEL (no §6.x): (0) horario completo de
-  1ºA con toggle de resalte de dos colores —rojo «se parte» (desdoble/agrupamiento) / verde «sigue
-  junto» (co-docencia LCL)—, es prueba de FIDELIDAD; (1) tramo denso de 1ºESO ampliado (desdoble CyR
-  + agrupamiento RefMt), es la PREGUNTA conceptual «¿ves un grupo o cajas?»; (2) PDC 3ºADi opcional,
-  «¿grupo propio o parte de 3ºA?». Segundo toggle: capa técnica de correspondencia con el modelo,
-  para el arquitecto, oculta por defecto.
-  HALLAZGO (jerarquía volcado > §6.x): el bloque del miércoles/viernes 10:00 de 1ºESO tiene CUATRO
-  destinos (CyR desdoblado + RefMt triple + OyD/FIL3), no tres como decía §6.1. El modelo lo absorbe
-  sin cambios (partición unificada por bloque temporal); nota añadida a §6.1 en commit de doc aparte.
-  CONTEO de 1ºA verificado contra el volcado por procesamiento, no de memoria: 21 ordinarias + 5 slots
-  «se parte» (mié/vie 10:00, lun 13:30, mié 11:30, jue 12:30) + 4 co-docencias LCL = 30. Corrige un
-  conteo verbal previo del arquitecto («4 slots») que era erróneo.
-  modelo_datos_fase1.md: SOLO nota en §6.1 (sin entidad ni invariante nueva). solver/src/main NO
-  tocado → referencia NO regenerada. Suite NO tocada (sesión sin código). Frontend real (app/frontend)
-  NO tocado: la lámina no es entregable.
-  PENDIENTE DE USUARIO, desbloquea 8.5: la conversación con el jefe de estudios sobre la lámina. Sus
-  respuestas a las dos preguntas cierran o reabren D31 y fijan el corte de 8.5. Hasta entonces 8.5
-  sigue en su precondición.
-  Siguiente: usar la lámina con el centro y traer sus respuestas; alternativa SIN dependencia de D31 =
-  8.4 (pre-validación, D18/D20), a decidir al abrir sesión.
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
@@ -792,10 +822,11 @@ en la Sesión 52, la de S49 en la Sesión 53, la de S50 en la Sesión 54, las de
 S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 60, la de S57
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
-la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70 y la de S67 en la Sesión 71 (misma higiene documental; en S60 se corrigió además una copia
+la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
+S68 en la Sesión 72 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S68–S71). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S69–S72). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -941,9 +972,14 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       SesionVistaDTO NO tocado. D19 CERRADA salvo su parte de UI (8.6).
 - [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
-- [ ] Bloque 8.5+ — CRUD de catálogo (D10 plazas multi-profesor, D1/D7 asistentes).
-      Aquí muere SeedCatalogoRunner (andamiaje marcado para BORRAR en Fase 8 cuando
-      exista la vía real).
+- [x] Bloque 8.5-A/A'/B — CRUD de catálogo, raíces + grupos/subgrupos (S69/S70/S71).
+- [x] Bloque 8.5-C1 — CRUD de Actividad como agregado (S72). XOR/I7/I2, reconciliación posicional.
+- [ ] Bloque 8.5-C2 — Integridad referencial: activar FK SQLite + borrado amable (D-F8.5-A-a).
+- [ ] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de AsignaturaAulaCompatible.
+- [ ] Bloque 8.5-D — PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7).
+- [ ] Bloque 8.5-E — Rejilla de ProfesorRestriccionHoraria (MOCKUP PREVIO, D20).
+      El seed muere en el bloque de configuración de jornada (D22), no en 8.5-C: sobrevive por
+      TramoSemanal, que no tiene CRUD.
 - [ ] Bloque 8.6 — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de 8.2b-iv y
       8.3-C. Modelo de interacción YA FIJADO en S67 (8.6-A, decisiones D-F8.6-A-1/2): NO es un
       editor libre. El usuario PINA (POST /api/bloqueos, instantáneo) y el solver RECOLOCA lo
@@ -1465,13 +1501,17 @@ siguiente, con remisión a la bitácora.
   vivos: 8.6 (drag&drop), 8.5 (UX de subgrupos compartidos entre particiones, D7), 8.4 (D20:
   ¿los avisos de pre-validación bloquean o advierten?). Se cierra cuando esos tres cierren.
   El mockup NO es entregable: el frontend real vive en el repo (7B). Es una pregunta dibujada.
-- **D-F8.5-A-a** (S69, VIVA, no bloqueante) — El DELETE de catálogo (piloto en 8.5-A, Asignatura)
-  borra sin comprobar referencias entrantes. Hoy borrar una Asignatura referenciada por una
-  Actividad/Plaza salta la FK como DataIntegrityViolationException → 500 opaco, no un 400 con
-  mensaje accionable («no se puede borrar: usada por N actividades»). Aplica a las CUATRO raíces del
-  CRUD (Nivel/Asignatura/Profesor/Aula), no solo a Asignatura. Se difiere a propósito: la integridad
-  referencial merece decisión propia y se vuelve inevitable al llegar al CRUD de Actividad/Plaza. →
-  resolver en 8.5-C o cuando el primer borrado con FK muerda.
+- **D-F8.5-A-a** (S69, VIVA, no bloqueante; REESCRITA en S72) — Integridad referencial del borrado
+  de catálogo. El diagnóstico original de S69 («borrar un catálogo referenciado salta la FK → 500
+  opaco») resultó INCOMPLETO al leer el repo en S72: las FK de SQLite NO están activadas
+  (application.properties no fuerza PRAGMA foreign_keys=ON), así que el borrado probablemente NO lanza
+  excepción y deja filas HUÉRFANAS silenciosas. El problema real no es el código HTTP sino la ausencia
+  de integridad referencial. Resolverlo tiene dos partes de naturaleza distinta: (1) activar FK en
+  SQLite (cambio GLOBAL de datasource, con riesgo propio: puede destapar fallos hoy enmascarados);
+  (2) comprobación amable de referencias entrantes antes de borrar (409 con «usada por N actividades»),
+  que exige método de consulta inversa (PlazaRepository no existe; iría en ActividadRepository). Ambas
+  → bloque propio 8.5-C2. Aplica a las CUATRO raíces (Nivel/Asignatura/Profesor/Aula) y ahora también
+  a Subgrupo (referenciado por Plaza). → resolver en 8.5-C2.
 
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —

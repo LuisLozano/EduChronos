@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S67. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S68. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S67). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S68). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2661,3 +2661,30 @@ verde). solver/src/main SÍ tocado → referencia-codigo-solver.md REGENERADO (6
 modelo_datos_fase1.md NO tocado (ni entidad ni invariante nueva). Frontend NO tocado (es 8.6).
 Siguiente: 8.6 (drag&drop, con el contrato YA cerrado en 8.6-A: es teclear Angular, no decidir),
 8.4 (pre-validación, D18/D20) o el candidato que se decida al abrir sesión.
+
+### Sesión 68 — Fase 8, Bloque 8.5 (CRUD de catálogo): precondición D31, no código.
+
+Modo híbrido, sin tocar el repo. ALCANCE: el prompt proponía abrir 8.5; se PARÓ en su precondición. La decisión de producto de S67 fija que la mitigación de D31 (enseñar el modelo
+DIBUJADO al jefe de estudios) es PRECONDICIÓN de teclear el CRUD, no un extra. Esa conversación NO
+ha ocurrido, así que 8.5 sigue bloqueado; la sesión se dedicó a construir la herramienta de la
+mitigación. ENTREGABLE (no versionado, "pregunta dibujada" en el sentido de D-F8.6-a): lámina HTML
+estática de validación, tres hojas, sobre datos de VOLCADO FIEL (no §6.x): (0) horario completo de
+1ºA con toggle de resalte de dos colores —rojo «se parte» (desdoble/agrupamiento) / verde «sigue
+junto» (co-docencia LCL)—, es prueba de FIDELIDAD; (1) tramo denso de 1ºESO ampliado (desdoble CyR
++ agrupamiento RefMt), es la PREGUNTA conceptual «¿ves un grupo o cajas?»; (2) PDC 3ºADi opcional,
+«¿grupo propio o parte de 3ºA?». Segundo toggle: capa técnica de correspondencia con el modelo,
+para el arquitecto, oculta por defecto.
+HALLAZGO (jerarquía volcado > §6.x): el bloque del miércoles/viernes 10:00 de 1ºESO tiene CUATRO
+destinos (CyR desdoblado + RefMt triple + OyD/FIL3), no tres como decía §6.1. El modelo lo absorbe
+sin cambios (partición unificada por bloque temporal); nota añadida a §6.1 en commit de doc aparte.
+CONTEO de 1ºA verificado contra el volcado por procesamiento, no de memoria: 21 ordinarias + 5 slots
+«se parte» (mié/vie 10:00, lun 13:30, mié 11:30, jue 12:30) + 4 co-docencias LCL = 30. Corrige un
+conteo verbal previo del arquitecto («4 slots») que era erróneo.
+modelo_datos_fase1.md: SOLO nota en §6.1 (sin entidad ni invariante nueva). solver/src/main NO
+tocado → referencia NO regenerada. Suite NO tocada (sesión sin código). Frontend real (app/frontend)
+NO tocado: la lámina no es entregable.
+PENDIENTE DE USUARIO, desbloquea 8.5: la conversación con el jefe de estudios sobre la lámina. Sus
+respuestas a las dos preguntas cierran o reabren D31 y fijan el corte de 8.5. Hasta entonces 8.5
+sigue en su precondición.
+Siguiente: usar la lámina con el centro y traer sus respuestas; alternativa SIN dependencia de D31 =
+8.4 (pre-validación, D18/D20), a decidir al abrir sesión.
