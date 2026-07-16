@@ -82,4 +82,21 @@ public class Aula {
     public String getSector() {
         return sector;
     }
+
+    /**
+     * Reasigna todos los campos editables de un aula gestionada (edición del CRUD,
+     * Bloque 8.5-A'). Mutación de dominio nombrada y única en lugar de setters
+     * libres: la valida el servicio antes de invocarla (código no vacío, tipo no
+     * vacío y parseable; capacidad/edificio/planta/sector son nullable de verdad y
+     * no se validan) y el flush transaccional la persiste sin {@code save}.
+     */
+    public void actualizar(String codigo, TipoAula tipo, Integer capacidad,
+                           String edificio, Integer planta, String sector) {
+        this.codigo = codigo;
+        this.tipo = tipo;
+        this.capacidad = capacidad;
+        this.edificio = edificio;
+        this.planta = planta;
+        this.sector = sector;
+    }
 }

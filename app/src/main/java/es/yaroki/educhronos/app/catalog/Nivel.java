@@ -43,4 +43,15 @@ public class Nivel {
     public int getOrden() {
         return orden;
     }
+
+    /**
+     * Reasigna código y orden de un nivel gestionado (edición del CRUD,
+     * Bloque 8.5-A'). Mutación de dominio nombrada y única en lugar de setters
+     * libres: la valida el servicio antes de invocarla (código no vacío, unicidad
+     * de código) y el flush transaccional la persiste sin {@code save}.
+     */
+    public void actualizar(String codigo, int orden) {
+        this.codigo = codigo;
+        this.orden = orden;
+    }
 }
