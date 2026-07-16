@@ -67,4 +67,17 @@ public class Subgrupo {
     public Set<GrupoAdministrativo> getGrupos() {
         return grupos;
     }
+
+    /**
+     * Reasigna código y población de grupos de un subgrupo gestionado (edición del
+     * CRUD, Bloque 8.5-B). Mutación de dominio nombrada y única en lugar de setters
+     * libres: la valida el servicio antes de invocarla (código no vacío, unicidad de
+     * código, ≥1 grupo resoluble) y el flush transaccional la persiste sin
+     * {@code save}. El set se REEMPLAZA por completo (copia defensiva, coherente con
+     * el ctor), no hay unión ni deltas. NO toca {@code id}.
+     */
+    public void actualizar(String codigo, Set<GrupoAdministrativo> grupos) {
+        this.codigo = codigo;
+        this.grupos = new HashSet<>(grupos);
+    }
 }
