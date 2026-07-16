@@ -70,4 +70,17 @@ public class GrupoAdministrativo {
     public GrupoAdministrativo getGrupoPadre() {
         return grupoPadre;
     }
+
+    /**
+     * Reasigna código, nivel y tipo de un grupo gestionado (edición del CRUD,
+     * Bloque 8.5-B). Mutación de dominio nombrada y única en lugar de setters
+     * libres: la valida el servicio antes de invocarla (código no vacío, unicidad
+     * de código, nivel resoluble, tipo ORDINARIO) y el flush transaccional la
+     * persiste sin {@code save}. NO toca {@code id} ni {@code grupoPadre}.
+     */
+    public void actualizar(String codigo, Nivel nivel, TipoGrupo tipo) {
+        this.codigo = codigo;
+        this.nivel = nivel;
+        this.tipo = tipo;
+    }
 }
