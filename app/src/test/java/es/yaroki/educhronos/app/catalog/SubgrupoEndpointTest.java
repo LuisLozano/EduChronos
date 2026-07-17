@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,8 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.service.SubgrupoService;
 import es.yaroki.educhronos.app.web.SubgrupoController;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +55,10 @@ class SubgrupoEndpointTest {
     @Autowired private SubgrupoService service;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
+    @Autowired private SubgrupoRepository subgrupoRepository;
+    @Autowired private AsignaturaRepository asignaturaRepository;
+    @Autowired private AulaRepository aulaRepository;
+    @Autowired private ActividadRepository actividadRepository;
     @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
@@ -238,6 +248,47 @@ class SubgrupoEndpointTest {
 
         mockMvc.perform(get("/api/subgrupos/" + id))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Borrado amable (8.5-C2b) de subgrupo: un subgrupo usado por una {@link Plaza} (FK
+     * {@code plaza_subgrupo.subgrupo_id}) NO se borra → 409. Complementa los dos tests del 204:
+     * su población en {@code subgrupo_grupo} NO cuenta (es agregado propio que Hibernate limpia),
+     * solo una referencia ENTRANTE desde fuera —una plaza— lo veta.
+     *
+     * <p><b>El {@code containsExactly} con un ÚNICO referente {@code plaza(s)} es el aserto que
+     * blinda el fix del falso positivo</b>: si {@code subgrupo_grupo} volviera a contarse, aquí
+     * sobraría un referente {@code grupo(s)} y el test caería. El desalineado de ids (un subgrupo
+     * de relleno) evita que una {@code @Query} desviada a otra columna acierte por colisión;
+     * verificado por la mutación de {@code contarPlazas}.
+     */
+    @Test
+    void borrado_subgrupoUsadoPorPlaza_409YSoloPlazaComoReferente() throws Exception {
+        // Desalineado: un subgrupo de relleno empuja el id del subgrupo real fuera del id de la plaza.
+        subgrupoRepository.save(new Subgrupo("SG_RELLENO",
+                Set.of(grupoRepository.findByCodigo("G_C").orElseThrow())));
+        Subgrupo subgrupo = subgrupoRepository.save(new Subgrupo("SG1",
+                Set.of(grupoRepository.findByCodigo("G_A").orElseThrow())));
+
+        // Una plaza (dentro de una actividad) que referencia el subgrupo por su M:N.
+        Asignatura mat = asignaturaRepository.save(new Asignatura("MAT", "Matematicas"));
+        Aula aula = aulaRepository.save(new Aula("AULA_T", TipoAula.ORDINARIA, null, null, null, null));
+        Actividad actividad = new Actividad("ACT", mat, 1, 1, PatronTemporal.NEUTRA, false);
+        Plaza plaza = actividad.agregarPlaza("ACT-P1", mat, aula, Set.of(), Set.of(), Set.of(subgrupo));
+        actividadRepository.save(actividad);
+        entityManager.flush();
+
+        // Precondición del desalineado: el id del subgrupo no coincide con el de la plaza ni la actividad.
+        assertThat(List.of(plaza.getId(), actividad.getId())).doesNotContain(subgrupo.getId());
+
+        mockMvc.perform(delete("/api/subgrupos/" + subgrupo.getId()))
+                .andExpect(status().isConflict());
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(subgrupo.getId()), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias())
+                .containsExactly(new Referencia("plaza(s)", 1L));
     }
 
     /**

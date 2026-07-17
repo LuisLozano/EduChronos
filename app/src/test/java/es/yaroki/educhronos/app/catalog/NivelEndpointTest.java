@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,12 +11,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.NivelService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.NivelController;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +42,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class NivelEndpointTest {
 
     @Autowired private NivelService service;
+    @Autowired private NivelRepository nivelRepository;
+    @Autowired private GrupoAdministrativoRepository grupoRepository;
+    @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
 
@@ -160,6 +169,39 @@ class NivelEndpointTest {
     void borrado_inexistente_404() throws Exception {
         mockMvc.perform(delete("/api/niveles/9999"))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * RÉPLICA del borrado amable (8.5-C2b) más allá del piloto: un nivel con un
+     * {@link GrupoAdministrativo} que lo referencia por {@code nivel_id} NO se borra → 409 con el
+     * desglose. Prueba que el patrón replica en una raíz de una sola FK entrante, no solo en Aula.
+     *
+     * <p><b>Desalineado de ids</b> (lección de los tests 1 y 3): se siembra un nivel de relleno
+     * para que el nivel real no comparta id con el grupo. Sin él ambos serían id=1 y una
+     * {@code @Query} desviada a otra columna ({@code id}, {@code grupo_padre_id}) contaría por
+     * colisión; con el id desalineado cuenta 0 y el test cae. El {@code doesNotContain} lo verifica
+     * en runtime; el {@code containsExactly} exige el único referente {@code grupo(s)} con conteo
+     * real y ninguno de más.
+     */
+    @Test
+    void borrado_nivelConGrupo_409YDesgloseConElConteoReal() throws Exception {
+        nivelRepository.save(new Nivel("RELLENO", 99));   // desalinea: el nivel real no será id=1
+        Nivel nivel = nivelRepository.save(new Nivel("1ESO", 1));
+        GrupoAdministrativo grupo = grupoRepository.save(
+                new GrupoAdministrativo("1ºA", nivel, TipoGrupo.ORDINARIO, null));
+        entityManager.flush();
+
+        // Precondición del desalineado: el id del nivel no coincide con el del grupo.
+        assertThat(List.of(grupo.getId())).doesNotContain(nivel.getId());
+
+        mockMvc.perform(delete("/api/niveles/" + nivel.getId()))
+                .andExpect(status().isConflict());
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(nivel.getId()), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias())
+                .containsExactly(new Referencia("grupo(s)", 1L));
     }
 
     @Test

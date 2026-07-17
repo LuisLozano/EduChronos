@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -11,12 +13,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.AulaService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.AulaController;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,7 +49,22 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @Import(AulaService.class)
 class AulaEndpointTest {
 
+    /** Cuántas plazas usan el aula del test del 409. Cambiarlo debe cambiar el conteo del 409. */
+    private static final int PLAZAS_MONTADAS = 2;
+
+    /**
+     * Aulas de relleno que {@link #desalinearIdsDeAula} siembra para que el aula del test reciba
+     * un id ALTO, distinto de los ids bajos de asignatura/actividad/plaza. Con margen holgado
+     * sobre {@link #PLAZAS_MONTADAS} para que ninguna plaza alcance ese id.
+     */
+    private static final int AULAS_RELLENO = 10;
+
     @Autowired private AulaService service;
+    @Autowired private AulaRepository aulaRepository;
+    @Autowired private AsignaturaRepository asignaturaRepository;
+    @Autowired private ProfesorRepository profesorRepository;
+    @Autowired private ActividadRepository actividadRepository;
+    @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
 
@@ -223,6 +244,82 @@ class AulaEndpointTest {
     void borrado_inexistente_404() throws Exception {
         mockMvc.perform(delete("/api/aulas/9999"))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * PILOTO del borrado amable (8.5-C2b): un aula que {@code PLAZAS_MONTADAS} plazas usan como
+     * aula fija NO se borra; el 409 nombra al referente con su conteo REAL.
+     *
+     * <p><b>Este test es la única red del {@code @Query} nativo</b> {@code plaza.aula_fija_id}:
+     * al ser SQL en un String, ningún compilador comprueba que apunte a la columna correcta. Por
+     * eso el aserto no mira el status: compara el DESGLOSE estructurado
+     * ({@link ReferenciaEntranteException#getReferencias()}) contra el número de plazas que el
+     * fixture montó de verdad —montar 3 tendría que reportar 3—. El {@code containsExactly}
+     * añade el otro lado del discriminante: exige que las otras TRES FK entrantes del aula
+     * (candidatas, aula_bloqueada, sesion) NO se reporten, porque ninguna tiene filas. Si alguna
+     * consulta apuntase a la tabla o columna equivocada, sobraría o faltaría un referente aquí.
+     */
+    @Test
+    void borrado_aulaFijaDeDosPlazas_409YDesgloseConElConteoReal() throws Exception {
+        desalinearIdsDeAula();
+        long id = crear(bodySoloTipo("A1", "ORDINARIA"));
+        int plazasMontadas = montarPlazasConAulaFija(id, PLAZAS_MONTADAS);
+
+        // (a) Contrato HTTP: el conflicto viaja como 409, no como el 500 del mordisco de la FK.
+        mockMvc.perform(delete("/api/aulas/" + id))
+                .andExpect(status().isConflict());
+
+        // (b) Desglose: un solo referente, "plaza(s)", con el conteo REAL del fixture.
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(id), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias())
+                .containsExactly(new Referencia("plaza(s)", plazasMontadas));
+    }
+
+    /**
+     * DESALINEA el id del aula del test respecto de todos los ids del fixture, sembrando
+     * {@code AULAS_RELLENO} aulas antes de crear la del test: así esta recibe un id ALTO
+     * (≈ {@code AULAS_RELLENO}+1) que no coincide con ningún id de plaza (1..PLAZAS_MONTADAS),
+     * asignatura (1), actividad (1) ni sesion (0) montados después.
+     *
+     * <p><b>Por qué es imprescindible</b> (D-C2b-5). El id del aula es el parámetro común a las
+     * CUATRO {@code @Query} del mapa inverso. Si arrancara en 1 —como arrancan también la primera
+     * asignatura, la primera actividad y la primera plaza—, una consulta que por error apuntara a
+     * {@code asignatura_id}, {@code actividad_id} o al {@code id} de plaza contaría LAS MISMAS
+     * filas que la correcta ({@code aula_fija_id}) y el test pasaría en verde MINTIENDO. Con el id
+     * desalineado, una columna equivocada cuenta 0 y el test cae: ver la verificación por mutación
+     * en el javadoc de {@link #borrado_aulaFijaDeDosPlazas_409YDesgloseConElConteoReal}.
+     */
+    private void desalinearIdsDeAula() {
+        for (int i = 1; i <= AULAS_RELLENO; i++) {
+            aulaRepository.save(new Aula("RELLENO-" + i, TipoAula.ORDINARIA, null, null, null, null));
+        }
+    }
+
+    /**
+     * Monta {@code cuantas} plazas con {@code aulaFija} = el aula dada y devuelve cuántas montó
+     * (el aserto usa ESE número, no un literal). Las plazas se crean desde su raíz de agregado
+     * con {@link Actividad#agregarPlaza} y se persisten por cascade: {@code Plaza} no tiene
+     * repositorio propio (D-C1-A) y su ctor es de paquete, accesible desde este test como en
+     * {@code BloqueoMapperPinAulaHuerfanoTest}.
+     *
+     * <p>El {@code flush} final NO es ceremonia: las consultas del mapa inverso son nativas, e
+     * Hibernate no sincroniza el contexto de persistencia antes de un SQL que no sabe interpretar.
+     * Sin él las plazas seguirían en memoria y el conteo daría 0 dentro de esta transacción.
+     */
+    private int montarPlazasConAulaFija(long idAula, int cuantas) {
+        Aula aula = aulaRepository.findById(idAula).orElseThrow();
+        Asignatura asignatura = asignaturaRepository.save(new Asignatura("MAT", "Matematicas"));
+        Profesor profesor = profesorRepository.save(new Profesor("MAT1", "Profesor MAT1"));
+        Actividad actividad = new Actividad("ACT", asignatura, 1, 1, PatronTemporal.NEUTRA, false);
+        for (int i = 1; i <= cuantas; i++) {
+            actividad.agregarPlaza("ACT-P" + i, asignatura, aula,
+                    Set.of(profesor), Set.of(), Set.of());
+        }
+        actividadRepository.save(actividad);
+        entityManager.flush();
+        return cuantas;
     }
 
     /** Da de alta por la red con el body dado y devuelve el id sintético asignado. */

@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -11,15 +13,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
+import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
+import es.yaroki.educhronos.app.persistence.Sesion;
+import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.service.ActividadService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.ActividadController;
+import java.time.Instant;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,6 +56,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @Import(ActividadService.class)
 class ActividadEndpointTest {
 
+    /**
+     * Plazas de la actividad de RELLENO que el test de la travesía siembra para desalinear el id
+     * de la plaza real por encima de los ids de sesion/horario/aula_bloqueada. Ver
+     * {@link #borrado_actividadConTravesia_409YDesgloseSinDuplicarAulaBloqueada}.
+     */
+    private static final int RELLENO_PLAZAS = 3;
+
     @Autowired private ActividadService service;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
@@ -51,6 +70,12 @@ class ActividadEndpointTest {
     @Autowired private ProfesorRepository profesorRepository;
     @Autowired private AsignaturaRepository asignaturaRepository;
     @Autowired private AulaRepository aulaRepository;
+    @Autowired private ActividadRepository actividadRepository;
+    @Autowired private TramoSemanalRepository tramoRepository;
+    @Autowired private AulaBloqueadaRepository aulaBloqueadaRepository;
+    @Autowired private HorarioGeneradoRepository horarioRepository;
+    @Autowired private SesionRepository sesionRepository;
+    @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
 
@@ -364,6 +389,80 @@ class ActividadEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(actividadMat("Mat-1ºA")))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ──────────────────────────────────────── borrado amable (8.5-C2b)
+
+    /**
+     * CASO PROPIO del borrado amable (8.5-C2b): una actividad NO se borra si alguien retiene sus
+     * PLAZAS desde fuera del agregado, aunque las plazas mismas cascadeen. Monta la actividad con
+     * 1 plaza, y sobre esa plaza una {@link Sesion} (FK RESTRICT {@code sesion.plaza_id}) y una
+     * {@link AulaBloqueada} (que apunta a la actividad por DOS FK: {@code actividad_id} y
+     * {@code plaza_id}). El DELETE devuelve 409 con el desglose de la travesía.
+     *
+     * <p><b>Dos discriminantes, verificados por mutación (D-C2b-5).</b>
+     * <ul>
+     *   <li><b>Travesía de sesion.</b> El conteo sale de {@code plaza_id in (select id from plaza
+     *       where actividad_id=:id)}. Como {@link #RELLENO_PLAZAS} desalinea el id de la plaza real
+     *       de los ids de la actividad, la sesion y el horario, una consulta que apuntara a la
+     *       columna equivocada contaría 0 y el test caería (comprobado apuntándola a otra columna).
+     *   <li><b>Fusión de aula_bloqueada.</b> La única fila de {@code aula_bloqueada} satisface las
+     *       dos FK a la vez; el {@code or} de la {@code @Query} las une y el {@code count} la cuenta
+     *       UNA vez. El aserto exige conteo 1, NO 2: si el {@code or} fuese una suma de dos counts,
+     *       daría 2 y {@code containsExactly} caería.
+     * </ul>
+     * El {@code containsExactly} cierra además el flanco negativo: {@code sesion(es) bloqueada(s)}
+     * (0 filas) NO aparece, y ningún referente sobra.
+     */
+    @Test
+    void borrado_actividadConTravesia_409YDesgloseSinDuplicarAulaBloqueada() throws Exception {
+        // Catálogo del setUp reutilizable: la asignatura "Mat" y el aula "A5" ya existen.
+        Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
+        Aula aula = aulaRepository.findByCodigo("A5").orElseThrow();
+        TramoSemanal tramo = tramoRepository.save(
+                new TramoSemanal(Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+
+        // DESALINEADO (lección del test 1): una actividad de relleno con RELLENO_PLAZAS plazas
+        // empuja el id de la plaza real por encima de los ids (bajos) de sesion/horario/
+        // aula_bloqueada, para que ninguna @Query que apunte a la columna equivocada acierte por
+        // colisión. La precondición de más abajo lo verifica en runtime, no se fía de la aritmética.
+        Actividad relleno = new Actividad("RELLENO", mat, 1, 1, PatronTemporal.NEUTRA, false);
+        for (int i = 1; i <= RELLENO_PLAZAS; i++) {
+            relleno.agregarPlaza("RELLENO-P" + i, mat, aula, Set.of(), Set.of(), Set.of());
+        }
+        actividadRepository.save(relleno);
+
+        // Actividad real: 1 plaza con aula fija = A5.
+        Actividad actividad = new Actividad("ACT", mat, 1, 1, PatronTemporal.NEUTRA, false);
+        Plaza plaza = actividad.agregarPlaza("ACT-P1", mat, aula, Set.of(), Set.of(), Set.of());
+        actividadRepository.save(actividad);
+        entityManager.flush();
+
+        // 1 Sesion (travesía) y 1 AulaBloqueada (fusión), AMBAS sobre la plaza real.
+        HorarioGenerado horario = horarioRepository.save(
+                new HorarioGenerado("H", Instant.now(), "OPTIMAL", 0.0, 0.0));
+        Sesion sesion = sesionRepository.save(new Sesion(horario, plaza, 1, tramo, aula));
+        AulaBloqueada aulaBloqueada = aulaBloqueadaRepository.save(
+                new AulaBloqueada(actividad, 1, plaza, aula));
+        entityManager.flush();
+
+        // Precondición del desalineado: idAct e idPlaza no colisionan entre sí ni con los ids de
+        // sesion/horario/aula_bloqueada. Si un cambio futuro los realineara, esto cae ruidosamente.
+        assertThat(actividad.getId()).isNotEqualTo(plaza.getId());
+        assertThat(List.of(sesion.getId(), horario.getId(), aulaBloqueada.getId()))
+                .doesNotContain(actividad.getId(), plaza.getId());
+
+        // (a) 409, no el 500 del mordisco de las FK RESTRICT sesion.plaza_id / aula_bloqueada.*
+        mockMvc.perform(delete("/api/actividades/" + actividad.getId()))
+                .andExpect(status().isConflict());
+
+        // (b) Desglose: la sesion (travesía) y el aula_bloqueada (contado UNA vez pese a las 2 FK).
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(actividad.getId()), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias()).containsExactly(
+                new Referencia("sesion(es)", 1L),
+                new Referencia("aula(s) bloqueada(s)", 1L));
     }
 
     // ─────────────────────────────────────────────────── helpers de fixture
