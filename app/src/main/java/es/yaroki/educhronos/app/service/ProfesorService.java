@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorRequest;
 import java.util.Comparator;
@@ -99,6 +100,12 @@ public class ProfesorService {
     public void borrar(Long id) {
         Profesor entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe profesor con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("plaza(s)", repositorio.contarPlazas(id)),
+                new Referencia("restriccion(es) horaria(s)", repositorio.contarRestriccionesHorarias(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

@@ -4,6 +4,7 @@ import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.SubgrupoDTO;
 import es.yaroki.educhronos.app.web.dto.SubgrupoRequest;
 import java.util.Comparator;
@@ -112,6 +113,14 @@ public class SubgrupoService {
     public void borrar(Long id) {
         Subgrupo entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe subgrupo con id " + id));
+        // Solo plaza_subgrupo es referente ENTRANTE: subgrupo_grupo es la POBLACIÓN propia del
+        // subgrupo (Subgrupo.grupos es owner del @ManyToMany), que Hibernate limpia al borrar; no
+        // impide el borrado (contarla vetaría a TODO subgrupo, que exige >=1 grupo). Ver Actividad.
+        List<Referencia> entrantes = List.of(
+                new Referencia("plaza(s)", repositorio.contarPlazas(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

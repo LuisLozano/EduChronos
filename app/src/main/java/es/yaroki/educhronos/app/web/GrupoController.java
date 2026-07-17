@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.GrupoService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoRequest;
 import java.util.List;
@@ -81,6 +82,8 @@ public class GrupoController {
             service.borrar(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ReferenciaEntranteException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
 }

@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.NivelService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.web.dto.NivelDTO;
 import es.yaroki.educhronos.app.web.dto.NivelRequest;
 import java.util.List;
@@ -80,6 +81,8 @@ public class NivelController {
             service.borrar(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ReferenciaEntranteException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
 }

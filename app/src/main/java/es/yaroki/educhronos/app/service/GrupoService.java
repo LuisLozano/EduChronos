@@ -5,6 +5,7 @@ import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
 import es.yaroki.educhronos.app.catalog.Nivel;
 import es.yaroki.educhronos.app.catalog.NivelRepository;
 import es.yaroki.educhronos.app.catalog.TipoGrupo;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoRequest;
 import java.util.Arrays;
@@ -115,6 +116,12 @@ public class GrupoService {
     public void borrar(Long id) {
         GrupoAdministrativo entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe grupo con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("subgrupo(s)", repositorio.contarSubgrupos(id)),
+                new Referencia("grupo(s) hijo(s)", repositorio.contarGruposHijos(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

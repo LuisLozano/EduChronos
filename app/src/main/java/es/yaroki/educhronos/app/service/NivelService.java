@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Nivel;
 import es.yaroki.educhronos.app.catalog.NivelRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.NivelDTO;
 import es.yaroki.educhronos.app.web.dto.NivelRequest;
 import java.util.Comparator;
@@ -101,6 +102,11 @@ public class NivelService {
     public void borrar(Long id) {
         Nivel entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe nivel con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("grupo(s)", repositorio.contarGrupos(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

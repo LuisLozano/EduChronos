@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.service;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
 import es.yaroki.educhronos.app.catalog.TipoAula;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.AulaDTO;
 import es.yaroki.educhronos.app.web.dto.AulaRequest;
 import java.util.Arrays;
@@ -110,11 +111,26 @@ public class AulaService {
         return aDTO(entidad);
     }
 
-    /** Borra un aula por id. {@link NoSuchElementException} (→ 404) si no existe. */
+    /**
+     * Borra un aula por id. {@link NoSuchElementException} (→ 404) si no existe;
+     * {@link ReferenciaEntranteException} (→ 409) si alguien la referencia todavía.
+     *
+     * <p>PILOTO del borrado amable (8.5-C2b): consulta las CUATRO FK entrantes del mapa
+     * ({@code schema.sql}) antes del {@code delete} y, si alguna tiene filas, aborta
+     * nombrándolas con su conteo real en vez de dejar morder a la FK (500 opaco).
+     */
     @Transactional
     public void borrar(Long id) {
         Aula entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe aula con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("plaza(s)", repositorio.contarPlazasConAulaFija(id)),
+                new Referencia("plaza(s) candidata(s)", repositorio.contarPlazasCandidatas(id)),
+                new Referencia("aula(s) bloqueada(s)", repositorio.contarAulasBloqueadas(id)),
+                new Referencia("sesion(es)", repositorio.contarSesiones(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

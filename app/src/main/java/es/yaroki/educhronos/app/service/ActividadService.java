@@ -12,6 +12,7 @@ import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ActividadDTO;
 import es.yaroki.educhronos.app.web.dto.ActividadRequest;
 import es.yaroki.educhronos.app.web.dto.PlazaDTO;
@@ -155,6 +156,13 @@ public class ActividadService {
     public void borrar(Long id) {
         Actividad entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe actividad con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("sesion(es) bloqueada(s)", repositorio.contarSesionesBloqueadas(id)),
+                new Referencia("sesion(es)", repositorio.contarSesionesSobreSusPlazas(id)),
+                new Referencia("aula(s) bloqueada(s)", repositorio.contarAulasBloqueadas(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 

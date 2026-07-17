@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.ActividadService;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.web.dto.ActividadDTO;
 import es.yaroki.educhronos.app.web.dto.ActividadRequest;
 import java.util.List;
@@ -82,6 +83,8 @@ public class ActividadController {
             service.borrar(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ReferenciaEntranteException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
 }

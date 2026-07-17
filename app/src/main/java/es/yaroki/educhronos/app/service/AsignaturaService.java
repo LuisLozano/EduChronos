@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Asignatura;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.AsignaturaDTO;
 import es.yaroki.educhronos.app.web.dto.AsignaturaRequest;
 import java.util.Comparator;
@@ -103,6 +104,13 @@ public class AsignaturaService {
     public void borrar(Long id) {
         Asignatura entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
+        List<Referencia> entrantes = List.of(
+                new Referencia("actividad(es)", repositorio.contarActividades(id)),
+                new Referencia("plaza(s)", repositorio.contarPlazas(id)),
+                new Referencia("compatibilidad(es) de aula", repositorio.contarCompatibilidadesDeAula(id)));
+        if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
+            throw new ReferenciaEntranteException(entrantes);
+        }
         repositorio.delete(entidad);
     }
 
