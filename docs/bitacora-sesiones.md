@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S69. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S70. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S68). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S70). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2739,3 +2739,37 @@ DEUDA NUEVA: D-F8.5-A-a (DELETE de catálogo borra sin comprobar referencias ent
 FK en vez de 400 amable; aplica a las cuatro raíces; se difiere a 8.5-C o al primer borrado con FK).
 Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios), replicando el patrón piloto de 8.5-A
 sobre Nivel/Profesor-plano/Aula primero si se prefiere consolidar las raíces antes de subir a grupos.
+
+### Sesión 70 — Fase 8, Bloque 8.5-A': CRUD REST de las raíces restantes de catálogo (Nivel, Profesor, Aula), replicando el patrón piloto de 8.5-A.
+Modo híbrido (diseño en el
+Project, código en Claude Code). 1 commit de código (18 ficheros: 15 nuevos + 3 entidades tocadas,
+solo app/). CORTE DE 8.5 (recordatorio): 8.5-A (Asignatura, S69) y 8.5-A' (Nivel/Profesor/Aula, esta
+sesión) cierran las RAÍCES planas; siguen 8.5-B (Grupo+Subgrupo, N:M) → 8.5-C (Actividad+Plaza) →
+8.5-D (PDC, MOCKUP PREVIO) → 8.5-E (rejilla de restricciones, MOCKUP PREVIO).
+QUÉ SE CONSTRUYÓ: tres CRUD REST (/api/niveles, /api/profesores, /api/aulas) con las 5 operaciones
+cada uno (GET lista, GET /{id}, POST 201, PUT 200, DELETE 204), replicando los DOS PRECEDENTES de
+S69 (método de dominio actualizar(...) en las tres entidades inmutables, sin setId; excepción→HTTP
+por TIPO, validación única en el Service, unicidad-en-edición excluida por id). Suite app 73 → 114
+(+41: Nivel 12, Profesor 13, Aula 16). solver/ intacto → referencia NO regenerada; modelo NO tocado
+(§4.1 ya describe las tres entidades). SeedCatalogoRunner NO borrado (aún faltan Grupo/Subgrupo/
+Actividad/Plaza; muere en 8.5-C).
+DECISIONES CERRADAS (heredables por el resto del CRUD): (D-1) Nivel ordena su listado por 'orden'
+(campo de §4.1 para ordenación UI), NO por 'codigo' como Asignatura/Profesor/Aula; el test discrimina
+con orden alfabético y numérico CRUZADOS. (D-3) los enum viajan como String en el BORDE del DTO:
+AulaRequest.tipo = String (para dar un 400 accionable en TipoAula.valueOf con el valor malo + lista
+de válidos), AulaDTO.tipo = String vía getTipo().name(). Se descartó AulaDTO.tipo=TipoAula: la
+verificación del repo mostró que 7A ya serializa enums como String (.name()) y ProyeccionDtoContratoTest
+lo blinda (isTextual()); dos reglas de serialización de enum en el mismo paquete app.web.dto sería
+deuda de coherencia. Sin asimetría entrada/salida final: String en ambos lados. (D-4) los cuatro
+campos nullable de Aula (capacidad/edificio/planta/sector) son opcionales de verdad: entran null, se
+persisten null, no se validan; únicos obligatorios de Aula = codigo + tipo.
+VERIFICADO POR JUICIO (arquitecto): los tres actualizar(...) mutan solo campos editables, ninguno
+asigna id; el par de edición de las tres raíces (editar con el MISMO código espera 200) protege la
+cláusula de exclusión por id, no es tautológico; el aserto de orden de Nivel usa el cruce
+alfabético/numérico; el 400 de tipo inválido de Aula asevera que el mensaje NOMBRA el valor malo
+(reason(containsString("CHUCHE"))), no solo el status; los nullable de Aula se verifican null
+explícito tras round-trip. D-F8.5-A-a (DELETE sin comprobar refs → 500 opaco por FK) queda intacta y
+ahora aplica formalmente a las CUATRO raíces (decisión confirmada: replicar el piloto, no adelantar
+la integridad referencial, que merece su bloque en 8.5-C).
+Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios, N:M de Subgrupo, toca I1/I6), a decidir
+al abrir sesión.

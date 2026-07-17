@@ -600,7 +600,8 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C2a-DDL CERRADO en S73
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C2b CERRADO en S74
+  (borrado amable de catálogo: 409 en referencia entrante; cierra D-F8.5-A-a). Bloque 8.5-C2a-DDL CERRADO en S73
   (integridad referencial de esquema: schema.sql + FK + pragma; 8.5-C partido en C1/C2a-DDL/C2b/C3).
   Bloque 8.5-C1 CERRADO en S72 (CRUD de Actividad agregado). Bloque 8.2b-iv CERRADO en S66
   (entrada del bloqueo por REST: /api/bloqueos, POST idempotente
@@ -637,10 +638,55 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
+Última sesión registrada: Sesión 74 — Fase 8, Bloque 8.5-C2b: BORRADO AMABLE DE CATÁLOGO (409 en
+  referencia entrante, en vez de la SQLException de FK cruda). Modo híbrido. 2 commits de código
+  (e60680a producción 22 ficheros + 2293d31 tests 4 ficheros, solo app/) + 1 commit de doc (este).
+  Cierra la mitad de aplicación de D-F8.5-A-a (la de esquema la cerró S73) → D-F8.5-A-a CERRADA entera.
+  DECISIONES DE DISEÑO (cerradas con el arquitecto antes de teclear): (2A) traducción a 409 vía
+  excepción de dominio nueva ReferenciaEntranteException lanzada por el Service + catch por endpoint en
+  cada Controller; NO se introduce @ControllerAdvice (fiel al patrón vigente S70: cada controller
+  traduce las suyas). (b) consulta inversa por @Query NATIVA en el repo de cada raíz, NO derivados
+  countBy* que exigirían un PlazaRepository: Plaza es agregado de Actividad (D-C1-A/S72), abrir su repo
+  para un chequeo de borrado rompería el agregado; el SQL nativo se acopla a nombres de tabla/columna
+  pero schema.sql (en el repo) es su autoridad y el test lo delata si se desvía. (C) híbrido: la
+  consulta inversa da el 409 legible, la FK física de S73 es la red dura por debajo. Alcance: 7 raíces
+  (Tramo NO tiene CRUD → fuera, D22), Actividad como caso propio.
+  QUÉ SE CONSTRUYÓ: ReferenciaEntranteException (record Referencia(String,long), filtra a conteo>0,
+  mensaje que nombra referente+conteo) + @Query nativas de conteo inverso en los 7 repos + guarda en
+  cada Service.borrar (consulta inversa ANTES de delete; si hay referencias, 409) + catch→409 en cada
+  Controller. Caso Actividad: NO cuenta sus plazas (cascadean); cuenta sesion_bloqueada.actividad_id,
+  la FUSIÓN aula_bloqueada (actividad_id OR plaza_id IN plazas-de-la-actividad, unidas con OR porque
+  una fila satisface ambas FK y contarlas por separado la duplicaría — única @Query no-1:1 del bloque)
+  y la TRAVESÍA sesion (plaza_id IN plazas-de-la-actividad; sesion no tiene actividad_id).
+  HALLAZGO (cazado por la suite completa, no por los tests nuevos): el §B del contrato contó por error
+  subgrupo_grupo.subgrupo_id como referente entrante de Subgrupo. Es su POBLACIÓN PROPIA: Subgrupo es
+  owner del @ManyToMany grupos, así que Hibernate emite DELETE de subgrupo_grupo al borrar el subgrupo
+  ANTES del delete → no bloquea. Contarla hacía que NINGÚN subgrupo fuera borrable (el endpoint exige
+  ≥1 grupo). Corregido: SubgrupoService.borrar cuenta solo plaza_subgrupo (owner Plaza = externo real).
+  Asimetría confirmatoria: GrupoService SÍ cuenta subgrupo_grupo.grupo_id porque Grupo NO es owner
+  (Hibernate no lo limpia al borrar un grupo). REGLA DERIVADA: referencia entrante = FK que un TERCERO
+  controla, no toda FK que apunte a mi id; las FK del propio agregado (que Hibernate limpia al borrarme)
+  no cuentan. El mapa de FK de S73 era CORRECTO (ya listaba solo plaza_subgrupo para Subgrupo); el error
+  fue del §B de esta sesión, no del insumo. Verificación cruzada de las 7 raíces (grep de
+  @OneToMany/@ManyToMany, no de memoria): Subgrupo era el único falso positivo.
+  ASERTOS DISCRIMINANTES (4 tests nuevos, cada uno VERIFICADO POR MUTACIÓN — romper el @Query pone el
+  test rojo, restaurarlo verde; el desalineado de ids es lo que hace la mutación detectable, porque con
+  ids colisionando una @Query desviada a otra columna cuenta por accidente): test 1 Aula (2 plazas por
+  aula_fija → 409, containsExactly cierra las otras 3 FK a 0); test 3 Actividad (Sesion+AulaBloqueada
+  sobre su plaza → 409, travesía probada por M1, deduplicación del OR probada por M2c=suma da 2;
+  M2a/M2b —quitar una rama del OR— indetectables con datos legítimos y es honesto que así sea, reportado
+  no tapado); test 4 Nivel (réplica); test positivo de Subgrupo (usado por plaza → 409, containsExactly
+  blinda que subgrupo_grupo NO reaparezca). Suite app 169 verde (+4 sobre 165), demostrada no-vacía
+  (break-restore de AulaService.borrar → Failures:1 → restaurado verde). solver/ intacto → referencia
+  NO regenerada. modelo NO tocado (§4.7 ya tenía la nota de integridad de S73; sin entidad ni invariante
+  nueva). Tres cortes de servicio de Claude Code en sesión (2 «mid-response» + 1 529), ninguno dejó el
+  árbol sucio (diagnosticado cada vez); mitigados fragmentando los turnos (un test por turno).
+  DEUDA NUEVA: ninguna. Vivos para cerrar 8.5: C3 (I3 + AsignaturaAulaCompatible) y D/E (MOCKUP PREVIO).
+  Siguiente: 8.5-C3 (I3 + compatibilidades) o 8.5-D/E, a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 73 — Fase 8, Bloque 8.5-C2a-DDL: INTEGRIDAD REFERENCIAL DE ESQUEMA
+Última sesión registrada (previa): Sesión 73 — Fase 8, Bloque 8.5-C2a-DDL: INTEGRIDAD REFERENCIAL DE ESQUEMA
   (schema.sql + FK + pragma por conexión). Modo híbrido. 1 commit de código (d27518f, solo app/) +
   1 commit de doc (plan + modelo §4.7). El bloque nació como «8.5-C2 = activar FK + borrado amable» y
   se transformó dos veces al chocar con la realidad medida; el borrado amable se difirió a 8.5-C2b.
@@ -774,39 +820,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   de 8.5 entero para condensar el bloque completo con criterio uniforme, recomendación de S70).
   Siguiente: 8.5-C (Actividad + Plaza; XOR aula, N profes/subgrupos; decisión pendiente del ctor
   protected; aquí muere SeedCatalogoRunner y muerde D-F8.5-A-a), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 70 — Fase 8, Bloque 8.5-A': CRUD REST de las raíces restantes de
-  catálogo (Nivel, Profesor, Aula), replicando el patrón piloto de 8.5-A. Modo híbrido (diseño en el
-  Project, código en Claude Code). 1 commit de código (18 ficheros: 15 nuevos + 3 entidades tocadas,
-  solo app/). CORTE DE 8.5 (recordatorio): 8.5-A (Asignatura, S69) y 8.5-A' (Nivel/Profesor/Aula, esta
-  sesión) cierran las RAÍCES planas; siguen 8.5-B (Grupo+Subgrupo, N:M) → 8.5-C (Actividad+Plaza) →
-  8.5-D (PDC, MOCKUP PREVIO) → 8.5-E (rejilla de restricciones, MOCKUP PREVIO).
-  QUÉ SE CONSTRUYÓ: tres CRUD REST (/api/niveles, /api/profesores, /api/aulas) con las 5 operaciones
-  cada uno (GET lista, GET /{id}, POST 201, PUT 200, DELETE 204), replicando los DOS PRECEDENTES de
-  S69 (método de dominio actualizar(...) en las tres entidades inmutables, sin setId; excepción→HTTP
-  por TIPO, validación única en el Service, unicidad-en-edición excluida por id). Suite app 73 → 114
-  (+41: Nivel 12, Profesor 13, Aula 16). solver/ intacto → referencia NO regenerada; modelo NO tocado
-  (§4.1 ya describe las tres entidades). SeedCatalogoRunner NO borrado (aún faltan Grupo/Subgrupo/
-  Actividad/Plaza; muere en 8.5-C).
-  DECISIONES CERRADAS (heredables por el resto del CRUD): (D-1) Nivel ordena su listado por 'orden'
-  (campo de §4.1 para ordenación UI), NO por 'codigo' como Asignatura/Profesor/Aula; el test discrimina
-  con orden alfabético y numérico CRUZADOS. (D-3) los enum viajan como String en el BORDE del DTO:
-  AulaRequest.tipo = String (para dar un 400 accionable en TipoAula.valueOf con el valor malo + lista
-  de válidos), AulaDTO.tipo = String vía getTipo().name(). Se descartó AulaDTO.tipo=TipoAula: la
-  verificación del repo mostró que 7A ya serializa enums como String (.name()) y ProyeccionDtoContratoTest
-  lo blinda (isTextual()); dos reglas de serialización de enum en el mismo paquete app.web.dto sería
-  deuda de coherencia. Sin asimetría entrada/salida final: String en ambos lados. (D-4) los cuatro
-  campos nullable de Aula (capacidad/edificio/planta/sector) son opcionales de verdad: entran null, se
-  persisten null, no se validan; únicos obligatorios de Aula = codigo + tipo.
-  VERIFICADO POR JUICIO (arquitecto): los tres actualizar(...) mutan solo campos editables, ninguno
-  asigna id; el par de edición de las tres raíces (editar con el MISMO código espera 200) protege la
-  cláusula de exclusión por id, no es tautológico; el aserto de orden de Nivel usa el cruce
-  alfabético/numérico; el 400 de tipo inválido de Aula asevera que el mensaje NOMBRA el valor malo
-  (reason(containsString("CHUCHE"))), no solo el status; los nullable de Aula se verifican null
-  explícito tras round-trip. D-F8.5-A-a (DELETE sin comprobar refs → 500 opaco por FK) queda intacta y
-  ahora aplica formalmente a las CUATRO raíces (decisión confirmada: replicar el piloto, no adelantar
-  la integridad referencial, que merece su bloque en 8.5-C).
-  Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios, N:M de Subgrupo, toca I1/I6), a decidir
-  al abrir sesión.
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
@@ -815,10 +828,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73 y la de S70 en la Sesión 74 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S69–S72). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S71–S74). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -970,8 +983,12 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       27 FK + `PRAGMA foreign_keys=ON` por conexión; reabre la decisión de BD (hbm2ddl→schema.sql,
       Flyway descartado). Corrige la PK `id` inservible del dialecto. Suite 165/165. Detalle: bitácora
       S73. Deuda: D-F8.5-C2a-a (.db preexistente); D-F8.5-A-a queda parcialmente resuelta.
-- [ ] Bloque 8.5-C2b — Borrado amable: comprobación de refs entrantes antes de borrar → 409 «usada por
-      N…» (mitad de aplicación de D-F8.5-A-a; insumo = mapa de FK RESTRICT de S73, no un test rojo).
+- [x] Bloque 8.5-C2b — Borrado amable: comprobación de refs entrantes antes de borrar → 409 «usada por
+      N…» (S74). ReferenciaEntranteException + @Query nativas de conteo inverso por raíz (opción b, sin
+      PlazaRepository) + guarda en Service + catch→409 en Controller (opción 2A, sin @ControllerAdvice);
+      7 raíces + Actividad (caso propio). Hallazgo: falso positivo de Subgrupo (subgrupo_grupo es
+      población propia, no referente entrante) → corregido a solo plaza_subgrupo. 4 tests por mutación,
+      suite 169. CIERRA D-F8.5-A-a entera. Detalle: bitácora S74.
 - [ ] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de AsignaturaAulaCompatible.
 - [ ] Bloque 8.5-D — PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7).
 - [ ] Bloque 8.5-E — Rejilla de ProfesorRestriccionHoraria (MOCKUP PREVIO, D20).
@@ -1498,20 +1515,6 @@ siguiente, con remisión a la bitácora.
   vivos: 8.6 (drag&drop), 8.5 (UX de subgrupos compartidos entre particiones, D7), 8.4 (D20:
   ¿los avisos de pre-validación bloquean o advierten?). Se cierra cuando esos tres cierren.
   El mockup NO es entregable: el frontend real vive en el repo (7B). Es una pregunta dibujada.
-- **D-F8.5-A-a** (S69, VIVA, no bloqueante; REESCRITA en S72, PARCIALMENTE RESUELTA en S73) —
-  Integridad referencial del borrado de catálogo. Historia: el diagnóstico de S69 («500 opaco por FK»)
-  fue INCOMPLETO (S72: las FK ni siquiera se enforzaban) y aún más incompleto de lo que S72 creía
-  (S73: el dialecto NO emitía FK en el DDL, y la PK `id` era inservible como destino de FK). El bloque
-  8.5-C2a-DDL (S73) CERRÓ la mitad de esquema: `schema.sql` con 27 FK + pragma por conexión → la
-  integridad referencial está ACTIVA y probada (`SQLITE_CONSTRAINT_FOREIGNKEY`), suite 165/165 verde.
-  QUEDA VIVO el borrado amable (mitad de aplicación): hoy un borrado de catálogo referenciado lanza una
-  `SQLException` de FK CRUDA, no un 409 legible. Falta la comprobación de referencias entrantes antes de
-  borrar (409 «usada por N actividades»), que exige consulta inversa. El insumo NO es un test rojo (la
-  suite no ejercita «borrar padre con hijos»): es el mapa de FK RESTRICT derivado en S73 (Nivel←grupo,
-  Grupo←subgrupo_grupo/padre, Asignatura←actividad/plaza/compat, Aula←plaza/candidata/bloqueada/sesion,
-  Profesor←plaza_profesor/restriccion, Subgrupo←plaza_subgrupo, Tramo←restriccion/bloqueos/sesion/
-  siguiente, y Actividad←pins de bloqueo + sesiones sobre sus plazas cascadeadas). Aplica a las cuatro
-  raíces + Subgrupo. → resolver en **8.5-C2b** (borrado amable).
 - **D-F8.5-C2a-a** (S73, VIVA, no bloqueante, TEÓRICA hoy) — `.db` preexistente con PK NULL. Cualquier
   base creada por hbm2ddl ANTES de S73 tiene la columna `id` en NULL en 8 tablas (ver Notas técnicas
   Fase 6). El cambio a `schema.sql` arregla las bases NUEVAS, pero NO migra una existente (SQLite no
@@ -1547,7 +1550,7 @@ el detalle narrativo vive en la bitácora.
 - **D23** — curva de coste del solver NO LINEAL a escala (instituto completo ×78 en tiempo por ×1,53 en grupos); la optimización no converge (FEASIBLE con cota abierta). CERRADA en S43 como DECISIÓN DE PRODUCTO (FEASIBLE sin optimalidad probada es el modo aceptado a escala). De las tres palancas: (a) límite de tiempo con mejora incremental sigue viva; (b) poda de aulasCandidatas resultó INVIABLE a escala (S42) y quedó LATENTE y OFF por defecto (`construirConObjetivo()` delega en `construirConObjetivo(false)`; constantes `UMBRAL_PODA_AULA`/`MAX_AULAS_PODA` y `candidatasPodadas` intactas — ver D-F8.2b-4B); (c) warm-start ("Bloque 15b", S40) ayuda (215→204) pero no converge. El experimento pareado (S43) mostró que la no-convergencia es ESTRUCTURAL, no de un bloque. Detalle: bitácora S36/S40/S42/S43.
 - **D24** — la suite se autoenvenena por contención de CPU (dos tests de límite ~600 s en cada `mvn test` disparan el wall-clock). CERRADA en S39: `@Tag("escala")` en los pesados + exclusión por defecto vía property `surefire.excluded.groups=escala` + perfil `escala` que la invierte (`mvn test` rápido; `mvn test -Pescala` corre solo los pesados). Reactivada agravada por D25 (VIVA) para el perfil `-Pescala` completo. Detalle: bitácora S38/S39.
 - **D28** — `CatalogoMapper.aProblemaHorario` pasaba `List.of()` a restriccionesHorarias porque el catálogo JPA no materializaba la entidad `ProfesorRestriccionHoraria`. CERRADA en S51: materializada la entidad (§4.3) con su repositorio y `CatalogoMapper.aRestriccionHoraria`; el tramo se resuelve por identidad de objeto (IdentityHashMap TramoSemanal→Tramo, no por el código sintético L1..V6, no reabre D27). Queda viva solo la parte de D21 (el peso por-restricción sigue sin consumirse en el objetivo). Detalle: bitácora S51.
-
+- **D-F8.5-A-a** — Integridad referencial del borrado de catálogo. Dos mitades: ESQUEMA (FK reales + pragma) CERRADA en S73 (8.5-C2a-DDL: schema.sql con 27 FK + PRAGMA foreign_keys=ON por conexión → SQLITE_CONSTRAINT_FOREIGNKEY muerde); APLICACIÓN (borrado amable → 409 legible) CERRADA en S74 (8.5-C2b): excepción de dominio ReferenciaEntranteException + @Query nativas de conteo inverso por raíz (opción b: sin PlazaRepository, sin romper el agregado) + guarda en cada Service.borrar (409 antes de tocar la BD) + catch→409 en cada Controller (opción 2A: sin @ControllerAdvice). 7 raíces cubiertas. Hallazgo de S74: el §B de C2b contó por error subgrupo_grupo.subgrupo_id como referente entrante de Subgrupo, pero es su POBLACIÓN PROPIA (Subgrupo es owner del @ManyToMany; Hibernate la limpia al borrar) → ningún subgrupo era borrable; corregido a solo plaza_subgrupo. Regla derivada: referencia entrante = FK que un TERCERO controla, no toda FK que apunte a mi id; las FK del propio agregado no cuentan. El mapa de FK de S73 era correcto (ya listaba solo plaza_subgrupo para Subgrupo). Detalle: bitácora S74.
 ### Notas técnicas validadas en Fase 0
 
 - OR-Tools CP-SAT en Java funciona en Windows sin recompilar desde Linux
