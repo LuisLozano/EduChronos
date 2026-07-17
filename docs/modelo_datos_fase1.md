@@ -693,6 +693,26 @@ Sesion(
 -- Sesion: se deriva por plaza_id -> Plaza.actividad (la entidad JPA Plaza ya porta
 -- @ManyToOne a Actividad). aula_id guarda el aula efectiva vía
 -- SolucionHorario.aulaElegida(instancia, plaza), único punto de verdad fija/variable.
+--
+-- NOTA DE INTEGRIDAD REFERENCIAL (S73, Bloque 8.5-C2a-DDL): hasta S73 el esquema
+-- físico NO declaraba ninguna FK (el dialecto de comunidad no las emite por hbm2ddl;
+-- ver Notas técnicas Fase 6 del plan). Desde S73 el esquema se gobierna con `schema.sql`
+-- (`ddl-auto=none`) y declara las FK de TODO el modelo (27 en total), con enforcement
+-- ACTIVO vía `PRAGMA foreign_keys=ON` por conexión. Semántica de borrado (parte del
+-- diseño de datos, no detalle de implementación):
+--   · ON DELETE CASCADE: plaza.actividad_id (Actividad dueña de sus Plazas, coherente con
+--     el orphanRemoval de JPA) y las 3 columnas plaza_id de las join tables de Plaza
+--     (plaza_profesor, plaza_aula_candidata, plaza_subgrupo), de modo que borrar una
+--     Actividad se lleva sus Plazas y sus filas de join por CUALQUIER vía (BD y ORM cuentan
+--     la misma historia); y sesion.horario_id (una Sesion no existe sin su HorarioGenerado).
+--   · RESTRICT (NO ACTION, default SQLite) para TODO lo demás: borrar una raíz de catálogo
+--     (Nivel/Asignatura/Profesor/Aula/Subgrupo) o un Tramo/Actividad referenciados FALLA con
+--     SQLITE_CONSTRAINT_FOREIGNKEY. Ese fallo crudo es la red dura; el 409 legible («usada
+--     por N…») lo añade la capa de aplicación en 8.5-C2b (borrado amable). Nótese que borrar
+--     una Actividad, aunque cascadee sus Plazas, queda BLOQUEADO si tiene pins de bloqueo
+--     (sesion_bloqueada/aula_bloqueada.actividad_id) o Sesiones colocadas sobre sus plazas
+--     (sesion.plaza_id, aula_bloqueada.plaza_id son RESTRICT): correcto, no se borra una
+--     actividad pinada o ya colocada en un horario.
 ```
 
 ---

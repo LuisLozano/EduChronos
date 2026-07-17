@@ -600,8 +600,9 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C1 CERRADO en S72
-  (CRUD de Actividad agregado; 8.5-C partido en C1/C2/C3). Bloque 8.2b-iv CERRADO en S66
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C2a-DDL CERRADO en S73
+  (integridad referencial de esquema: schema.sql + FK + pragma; 8.5-C partido en C1/C2a-DDL/C2b/C3).
+  Bloque 8.5-C1 CERRADO en S72 (CRUD de Actividad agregado). Bloque 8.2b-iv CERRADO en S66
   (entrada del bloqueo por REST: /api/bloqueos, POST idempotente
   con reemplazo total, tramo por (dia, ordenEnDia); deuda nueva D-F8.2b-iv-a, espejo de
   validación alta↔BloqueoMapper, mitigada por test de contrato).Bloque 8.3-B CERRADO en S65
@@ -639,7 +640,47 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
-Última sesión registrada: Sesión 72 — Fase 8, Bloque 8.5-C1: CRUD REST de Actividad como AGREGADO
+Última sesión registrada: Sesión 73 — Fase 8, Bloque 8.5-C2a-DDL: INTEGRIDAD REFERENCIAL DE ESQUEMA
+  (schema.sql + FK + pragma por conexión). Modo híbrido. 1 commit de código (d27518f, solo app/) +
+  1 commit de doc (plan + modelo §4.7). El bloque nació como «8.5-C2 = activar FK + borrado amable» y
+  se transformó dos veces al chocar con la realidad medida; el borrado amable se difirió a 8.5-C2b.
+  CADENA DE HALLAZGOS (cada uno reescribió el anterior, todos medidos en ejecución vía Claude Code):
+  (1) el HALLAZGO GRAVE de S72 («FK OFF») era INCOMPLETO: el community SQLiteDialect 7.4.1 NO emite FK
+  en el DDL de hbm2ddl, ni con @OnDelete ni con @ForeignKey ni combinadas (DDL byte-idéntico). El
+  agujero no era «FK declaradas, pragma OFF» sino «FK inexistentes». (2) ddl-auto=validate es INUSABLE
+  con el dialecto (crea PK integer, valida esperando bigint; falla incluso contra su propio esquema).
+  (3) el DDL del dialecto declara la PK `id` SIN tipo en 8 tablas → en SQLite no es alias de rowid → la
+  columna queda NULL y NINGUNA FK entrante resuelve; invisible hasta ahora porque nada recargaba por id
+  fresco fuera del caché L1. (4) ni connection-init-sql ni el parámetro de URL propagan el pragma en
+  este stack (SB4+Hikari 7.0.2+Xerial 3.53.2); solo PRAGMA explícito por conexión aplica.
+  DECISIONES DE ALCANCE (cerradas con el arquitecto, varias reconsideradas EN sesión por el usuario):
+  (a) partir 8.5-C2 en C2a-DDL (esquema, esta sesión) + C2b (borrado amable, siguiente). (b) medir el
+  comportamiento FK-OFF antes de activar nada (test de caracterización efímero, Op-A; descartado del
+  repo tras confirmar el hallazgo, DA-8=Op-B′). (c) tras descubrir que el problema era de DDL: NO H2
+  (mantener SQLite por inspeccionabilidad universal del .db y estabilidad de formato; H2 tiene formato
+  propietario e incompatibilidad entre mayores). (d) el usuario reconsideró Flyway→DDL-3′ (schema.sql +
+  ddl-auto=none), más simple y misma integridad para «una BD por centro»: Flyway daba versionado sin
+  retorno aquí. (e) cascadas: CASCADE en plaza.actividad_id + las 3 plaza_id de join + sesion.horario_id
+  (coherencia BD↔ORM); resto RESTRICT (la red dura; el 409 lo pone C2b).
+  QUÉ SE CONSTRUYÓ: schema.sql (20 tablas VERBATIM del DDL de Hibernate + 27 FK inline, DROP…IF EXISTS
+  hijo→padre para idempotencia entre contextos), ddl-auto=none, SqliteForeignKeysConfig (DelegatingDataSource
+  que ejecuta PRAGMA foreign_keys=ON en cada getConnection), el fichero AutoConfigureDataJpa.imports que
+  SB4.1 exige para que el customizer corra en slices @DataJpaTest, y 2 tests de juicio: IntegridadReferencialTest
+  (pragma=1 desde el pool + insert colgante → SQLITE_CONSTRAINT_FOREIGNKEY código 19) e IdPrimaryKeyRoundTripTest
+  (persist→clear→find prueba que la PK integer se puebla y el puente Long↔INTEGER no trunca).
+  AUDITORÍA (el valor del bloque): 1ª pasada 88/164 (76 rojos), TODOS con causa raíz única = la PK `id`
+  NULL (hallazgo 3), no «tests que asumían esquema sin integridad». Normalizadas las 8 PK a `id integer`
+  (corrección de un defecto del generador, no desviación del verbatim, aprobada por el arquitecto). 2ª
+  pasada: 165/165 verde. Rojos (a) «borrado que ahora falla por FK» = NINGUNO: la suite no ejercita
+  «borrar padre con hijos», así que el insumo de C2b NO es un test rojo sino el MAPA DE FK RESTRICT
+  derivado (en D-F8.5-A-a). solver/ intacto → referencia NO regenerada; modelo §4.7 SÍ tocado (nota de
+  integridad referencial física con la semántica de cascadas).
+  DEUDA NUEVA: D-F8.5-C2a-a (.db preexistente con PK NULL en 8 tablas; sin producción hoy → teórico,
+  pero un .db de pruebas viejo fallará con FK-ON; migración = recreación). D-F8.5-A-a parcialmente
+  resuelta: mitad de esquema CERRADA, mitad de aplicación (borrado amable → 409) VIVA en C2b. Setters de
+  Actividad/Plaza siguen sin retirar (deuda de S72, intacta).
+  Siguiente: 8.5-C2b (borrado amable) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 72 — Fase 8, Bloque 8.5-C1: CRUD REST de Actividad como AGREGADO
   (Plaza embebida). Modo híbrido. 1 commit de código (solo app/). CORTE DE 8.5 REVISADO EN SESIÓN:
   8.5-C se PARTIÓ en C1 (Actividad+Plaza, esta sesión) → C2 (integridad referencial: activar FK +
   borrado amable) → C3 (I3 + CRUD de AsignaturaAulaCompatible); siguen 8.5-D (PDC, MOCKUP PREVIO) →
@@ -766,55 +807,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   la integridad referencial, que merece su bloque en 8.5-C).
   Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios, N:M de Subgrupo, toca I1/I6), a decidir
   al abrir sesión.
-Última sesión registrada (previa): Sesión 69 — Fase 8, Bloque 8.5-A: CRUD REST de Asignatura (piloto del
-  patrón CRUD de catálogo). Modo híbrido (diseño en el Project, código en Claude Code). 1 commit de
-  código (f5b95f3). PRECONDICIÓN DESBLOQUEADA: la conversación con el jefe de estudios sobre la lámina
-  de S68 OCURRIÓ; sus respuestas cierran parcialmente D31 (ver deuda) y habilitan teclear el CRUD.
-  RESPUESTAS DEL CENTRO (las dos preguntas de la lámina): (1) «¿ves un grupo o cajas?» → CAJAS: el jefe
-  de estudios piensa el tramo denso como alumnos repartidos en cajas, cada una con su profesor y su aula,
-  y confirma que así monta los horarios. El modelo Actividad→Plaza→Subgrupo queda validado por el dominio
-  en su punto más difícil. (2) «¿el PDC 3ºADi es grupo propio o parte de 3ºA?» → «parte de 3ºA que a
-  ratos sale aparte, mismo tutor», PERO «en pantalla deben mostrarse los dos horarios, el de 3ºA y el del
-  PDC». Lectura: las dos mitades NO se contradicen y apuntan al modelo QUE YA TENEMOS (§6.2/S9: grupo
-  administrativo propio con grupo_padre I5). El grupo_padre ES la formalización de «sale aparte»; el
-  requisito de «dos horarios en pantalla» EXIGE identidad propia (un PDC sin identidad sería una columna
-  dentro de 3ºA, no un horario aparte), luego confirma el modelo, no lo reabre. La creación del PDC
-  colgando del padre + tutor heredado + sesiones compartidas marcadas es D1/D7, y por depender de CÓMO SE
-  GESTICULA la creación, arrastra mockup previo (D-F8.6-a) en su bloque (8.5-D).
-  CORTE DE 8.5 (fijado con el arquitecto, por dependencias/riesgo/tamaño): 8.5-A CRUD plano de las
-  raíces (Nivel, Asignatura, Profesor-plano, Aula) → 8.5-B GrupoAdministrativo + Subgrupo ordinarios →
-  8.5-C Actividad + Plaza (XOR aula, N profes/subgrupos; decisión pendiente del ctor protected) → 8.5-D
-  PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7) → 8.5-E rejilla de
-  ProfesorRestriccionHoraria «puede/no puede/prefiere-que-no» + peso (MOCKUP PREVIO, D20). 8.5-A/B/C
-  matan SeedCatalogoRunner (cubren lo que el seed crea); 8.5-D/E son catálogo que el seed NO cubre. La
-  rejilla de restricciones horarias del profesor se SEPARÓ de 8.5-A a 8.5-E a propuesta del usuario: no
-  es formulario plano sino rejilla de 30 celdas con tres estados, y su peso/gesto es UX pura.
-  QUÉ SE CONSTRUYÓ EN 8.5-A: /api/asignaturas con las 5 operaciones (GET lista ordenada por codigo, GET
-  /{id}, POST 201, PUT /{id} 200, DELETE 204). 6 ficheros (5 nuevos: AsignaturaDTO, AsignaturaRequest,
-  AsignaturaService, AsignaturaController, AsignaturaEndpointTest; 1 tocado: Asignatura.java +11).
-  Solo app/: solver/src/main NO tocado → referencia NO regenerada; modelo NO tocado (§4.1 ya describe
-  Asignatura). Suite app verde (~11 tests nuevos de AsignaturaEndpointTest), solver intacto.
-  PRECEDENTE 1 (lo hereda el resto del CRUD): las entidades inmutables (solo ctor+getters, como
-  Asignatura) reciben MÉTODO DE DOMINIO de actualización —Asignatura.actualizar(codigo, nombreCompleto)—,
-  NO setters, aunque Actividad/Plaza sí usen setters. Los setters de Actividad/Plaza son residuo del
-  builder de SeedCatalogoRunner (constructor vacío + setX), andamiaje que morirá; no son convención
-  elegida. El estilo bueno es el de Asignatura; cuando 8.5-C toque Actividad/Plaza, converger hacia
-  mutación nombrada. Un actualizar(...) además cierra por construcción el riesgo de setId (el id no es
-  parámetro). VERIFICADO POR JUICIO (arquitecto): diff de Asignatura.java añade solo actualizar, sin
-  setId ni otros setters.
-  PRECEDENTE 2 (lo hereda el resto del CRUD): convención de excepciones → HTTP:
-  NoSuchElementException → 404 (id inexistente), IllegalArgumentException → 400 (validación). El
-  controller las distingue POR TIPO, no por endpoint —crítico en PUT, donde ambos códigos son posibles
-  (404 si el id no existe, 400 si el código pisa a otra)—. Es MÁS limpio que el patrón de bloqueo, que
-  traduce una misma excepción distinto por endpoint. Validación única en el Service (sin espejo que
-  reflejar, a diferencia del bloqueo): la unicidad-en-edición se excluye a sí misma
-  (filter(otra -> !otra.getId().equals(id))). VERIFICADO POR JUICIO: los tests 8 y 9
-  (edicion_codigoQuePisaAOtra_400 / edicion_guardaMismoCodigo_200) son el par discriminante —el 9 edita
-  con el MISMO código y espera 200; sin la cláusula de exclusión saldría rojo, luego no es tautológico—.
-  DEUDA NUEVA: D-F8.5-A-a (DELETE de catálogo borra sin comprobar referencias entrantes → 500 opaco por
-  FK en vez de 400 amable; aplica a las cuatro raíces; se difiere a 8.5-C o al primer borrado con FK).
-  Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios), replicando el patrón piloto de 8.5-A
-  sobre Nivel/Profesor-plano/Aula primero si se prefiere consolidar las raíces antes de subir a grupos.
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
@@ -974,7 +966,12 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
 - [x] Bloque 8.5-A/A'/B — CRUD de catálogo, raíces + grupos/subgrupos (S69/S70/S71).
 - [x] Bloque 8.5-C1 — CRUD de Actividad como agregado (S72). XOR/I7/I2, reconciliación posicional.
-- [ ] Bloque 8.5-C2 — Integridad referencial: activar FK SQLite + borrado amable (D-F8.5-A-a).
+- [x] Bloque 8.5-C2a-DDL — Integridad referencial de ESQUEMA (S73). `schema.sql` + `ddl-auto=none` +
+      27 FK + `PRAGMA foreign_keys=ON` por conexión; reabre la decisión de BD (hbm2ddl→schema.sql,
+      Flyway descartado). Corrige la PK `id` inservible del dialecto. Suite 165/165. Detalle: bitácora
+      S73. Deuda: D-F8.5-C2a-a (.db preexistente); D-F8.5-A-a queda parcialmente resuelta.
+- [ ] Bloque 8.5-C2b — Borrado amable: comprobación de refs entrantes antes de borrar → 409 «usada por
+      N…» (mitad de aplicación de D-F8.5-A-a; insumo = mapa de FK RESTRICT de S73, no un test rojo).
 - [ ] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de AsignaturaAulaCompatible.
 - [ ] Bloque 8.5-D — PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7).
 - [ ] Bloque 8.5-E — Rejilla de ProfesorRestriccionHoraria (MOCKUP PREVIO, D20).
@@ -1160,7 +1157,7 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 |---|---|
 | Solver | OR-Tools CP-SAT — bindings Java (ortools-java 9.11.4210) |
 | Backend | Spring Boot 4.1.0 (GA) + Java 17. Versión fijada en S45 (Fase 6, Bloque 1) al declarar el módulo app/ |
-| Base de datos | SQLite + Hibernate 7.4.1, dialecto de comunidad org.hibernate.community.dialect.SQLiteDialect (Hibernate no trae dialecto SQLite oficial; el best-effort funciona sobre Hibernate 7.4, verificado en S45). Esquema vía hbm2ddl en Fase 6; sin Flyway por ahora. Fichero local, ruta relativa al working dir |
+| Base de datos | SQLite + Hibernate 7.4.1, dialecto de comunidad org.hibernate.community.dialect.SQLiteDialect (Hibernate no trae dialecto SQLite oficial; el best-effort funciona sobre Hibernate 7.4, verificado en S45). **Esquema vía `schema.sql` + `ddl-auto=none` desde S73** (antes hbm2ddl; reabierto conscientemente el "sin Flyway por ahora" y también descartado hbm2ddl para el esquema, porque el dialecto de comunidad NO emite FK en el DDL, rompe `ddl-auto=validate` y genera la PK `id` sin tipo —inservible como destino de FK en SQLite—; ver Notas técnicas Fase 6 y 8.5-C2a-DDL). Integridad referencial ACTIVA = dos piezas: FK declaradas en `schema.sql` + `PRAGMA foreign_keys=ON` por conexión vía customizer (ni `connection-init-sql` ni el parámetro de URL lo propagan en este stack). Flyway se evaluó y se descartó (peso sin retorno: una BD por centro, esquema casi estático); queda como upgrade futuro si hiciera falta migrar esquemas en caliente. Fichero local, ruta relativa al working dir |
 | UI | Angular |
 | Empaquetado Windows | jpackage app-image (bundle portable, sin instalador) |
 | Estructura del repositorio | Maven multimódulo. Módulo `solver` (POJOs + OR-Tools, sin Spring ni Hibernate) y módulo `app` (Spring Boot, persistencia, REST) introducido en Fase 6. Frontend Angular en directorio adyacente, integrado vía `frontend-maven-plugin` en Fase 7-8 (Sesión 6, decisión 1) |
@@ -1501,17 +1498,26 @@ siguiente, con remisión a la bitácora.
   vivos: 8.6 (drag&drop), 8.5 (UX de subgrupos compartidos entre particiones, D7), 8.4 (D20:
   ¿los avisos de pre-validación bloquean o advierten?). Se cierra cuando esos tres cierren.
   El mockup NO es entregable: el frontend real vive en el repo (7B). Es una pregunta dibujada.
-- **D-F8.5-A-a** (S69, VIVA, no bloqueante; REESCRITA en S72) — Integridad referencial del borrado
-  de catálogo. El diagnóstico original de S69 («borrar un catálogo referenciado salta la FK → 500
-  opaco») resultó INCOMPLETO al leer el repo en S72: las FK de SQLite NO están activadas
-  (application.properties no fuerza PRAGMA foreign_keys=ON), así que el borrado probablemente NO lanza
-  excepción y deja filas HUÉRFANAS silenciosas. El problema real no es el código HTTP sino la ausencia
-  de integridad referencial. Resolverlo tiene dos partes de naturaleza distinta: (1) activar FK en
-  SQLite (cambio GLOBAL de datasource, con riesgo propio: puede destapar fallos hoy enmascarados);
-  (2) comprobación amable de referencias entrantes antes de borrar (409 con «usada por N actividades»),
-  que exige método de consulta inversa (PlazaRepository no existe; iría en ActividadRepository). Ambas
-  → bloque propio 8.5-C2. Aplica a las CUATRO raíces (Nivel/Asignatura/Profesor/Aula) y ahora también
-  a Subgrupo (referenciado por Plaza). → resolver en 8.5-C2.
+- **D-F8.5-A-a** (S69, VIVA, no bloqueante; REESCRITA en S72, PARCIALMENTE RESUELTA en S73) —
+  Integridad referencial del borrado de catálogo. Historia: el diagnóstico de S69 («500 opaco por FK»)
+  fue INCOMPLETO (S72: las FK ni siquiera se enforzaban) y aún más incompleto de lo que S72 creía
+  (S73: el dialecto NO emitía FK en el DDL, y la PK `id` era inservible como destino de FK). El bloque
+  8.5-C2a-DDL (S73) CERRÓ la mitad de esquema: `schema.sql` con 27 FK + pragma por conexión → la
+  integridad referencial está ACTIVA y probada (`SQLITE_CONSTRAINT_FOREIGNKEY`), suite 165/165 verde.
+  QUEDA VIVO el borrado amable (mitad de aplicación): hoy un borrado de catálogo referenciado lanza una
+  `SQLException` de FK CRUDA, no un 409 legible. Falta la comprobación de referencias entrantes antes de
+  borrar (409 «usada por N actividades»), que exige consulta inversa. El insumo NO es un test rojo (la
+  suite no ejercita «borrar padre con hijos»): es el mapa de FK RESTRICT derivado en S73 (Nivel←grupo,
+  Grupo←subgrupo_grupo/padre, Asignatura←actividad/plaza/compat, Aula←plaza/candidata/bloqueada/sesion,
+  Profesor←plaza_profesor/restriccion, Subgrupo←plaza_subgrupo, Tramo←restriccion/bloqueos/sesion/
+  siguiente, y Actividad←pins de bloqueo + sesiones sobre sus plazas cascadeadas). Aplica a las cuatro
+  raíces + Subgrupo. → resolver en **8.5-C2b** (borrado amable).
+- **D-F8.5-C2a-a** (S73, VIVA, no bloqueante, TEÓRICA hoy) — `.db` preexistente con PK NULL. Cualquier
+  base creada por hbm2ddl ANTES de S73 tiene la columna `id` en NULL en 8 tablas (ver Notas técnicas
+  Fase 6). El cambio a `schema.sql` arregla las bases NUEVAS, pero NO migra una existente (SQLite no
+  soporta `ALTER TABLE` para esto; requeriría recreación). Sin producción hoy → teórico. Riesgo real:
+  un `.db` de pruebas viejo fallará al arrancar con FK-ON. Si algún día hay bases en producción antes de
+  otro cambio de esquema, hará falta una estrategia de migración (recreación / copia-y-swap). → vigilar.
 
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —
@@ -1563,6 +1569,28 @@ el detalle narrativo vive en la bitácora.
   org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest y
   org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
   (verificado S46; afecta a todo test de slice JPA de Fase 6 en adelante)
+- **Límites del community SQLiteDialect 7.4.1 para integridad de esquema (medidos en S73, 8.5-C2a-DDL):**
+  (1) NO emite cláusulas FOREIGN KEY en el DDL de hbm2ddl, ni con `@OnDelete`, ni con
+  `@ForeignKey(ConstraintMode.CONSTRAINT)`, ni combinadas (verificado: DDL byte-idéntico en las tres
+  variantes). (2) `ddl-auto=validate` es INUSABLE: crea la PK de identidad como `integer` (necesario
+  para el rowid autoincremental) pero la valida esperando `bigint` (mapeo Long→BIGINT), y falla incluso
+  contra un esquema que él mismo generó. (3) Más grave: el DDL que genera declara la PK `id` SIN el tipo
+  `integer` en 8 tablas (actividad, aula, aula_bloqueada, nivel, profesor_restriccion_horaria, sesion,
+  sesion_bloqueada, tramo_semanal); en SQLite, `id` sin tipo con `primary key(id)` NO es alias de rowid,
+  así que la columna queda NULL mientras el rowid oculto sí se autoincrementa. Sin FK y sin recarga por
+  id fresco (fuera del caché L1) el defecto era invisible; con FK reales, ninguna FK entrante resuelve.
+  Corrección en `schema.sql`: normalizar esas 8 PK a `id integer`. Consecuencia latente: cualquier `.db`
+  creado por hbm2ddl (antes de S73) tiene esas 8 columnas `id` en NULL y no se arregla cambiando el
+  esquema —requeriría recreación— (deuda D-F8.5-C2a-a; sin producción hoy, teórico).
+- **PRAGMA foreign_keys por conexión (S73):** en este stack (SB4 + Hikari 7.0.2 + Xerial 3.53.2) ni
+  `spring.datasource.hikari.connection-init-sql` ni el parámetro de URL (`?foreign_keys=on/true`) dejan
+  el pragma ON en las conexiones del pool (leído `foreign_keys=0` en las tres vías). Solo aplica un
+  `PRAGMA foreign_keys=ON` explícito ejecutado por conexión física: vehículo final = auto-config que
+  envuelve el DataSource y lo ejecuta en cada `getConnection()`. Aserto de que muerde =
+  `SQLITE_CONSTRAINT_FOREIGNKEY` (getErrorCode()==19). Sin el pragma, declarar FK en el esquema NO basta
+  (ambas piezas son necesarias). Además, el slice `@DataJpaTest` de SB4.1 solo carga las auto-configs
+  listadas en `META-INF/spring/org.springframework.boot.data.jpa.test.autoconfigure.AutoConfigureDataJpa.imports`;
+  hubo que añadir ese fichero en test-resources para que el customizer corriera en los slices.
 
 ### Por qué OR-Tools sobre Timefold (no reabrir)
 

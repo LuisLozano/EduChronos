@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S68. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S69. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -2688,3 +2688,54 @@ respuestas a las dos preguntas cierran o reabren D31 y fijan el corte de 8.5. Ha
 sigue en su precondición.
 Siguiente: usar la lámina con el centro y traer sus respuestas; alternativa SIN dependencia de D31 =
 8.4 (pre-validación, D18/D20), a decidir al abrir sesión.
+
+### Sesión 69 — Fase 8, Bloque 8.5-A: CRUD REST de Asignatura (piloto del patrón CRUD de catálogo).
+
+Modo híbrido (diseño en el Project, código en Claude Code). 1 commit de
+código (f5b95f3). PRECONDICIÓN DESBLOQUEADA: la conversación con el jefe de estudios sobre la lámina
+de S68 OCURRIÓ; sus respuestas cierran parcialmente D31 (ver deuda) y habilitan teclear el CRUD.
+RESPUESTAS DEL CENTRO (las dos preguntas de la lámina): (1) «¿ves un grupo o cajas?» → CAJAS: el jefe
+de estudios piensa el tramo denso como alumnos repartidos en cajas, cada una con su profesor y su aula,
+y confirma que así monta los horarios. El modelo Actividad→Plaza→Subgrupo queda validado por el dominio
+en su punto más difícil. (2) «¿el PDC 3ºADi es grupo propio o parte de 3ºA?» → «parte de 3ºA que a
+ratos sale aparte, mismo tutor», PERO «en pantalla deben mostrarse los dos horarios, el de 3ºA y el del
+PDC». Lectura: las dos mitades NO se contradicen y apuntan al modelo QUE YA TENEMOS (§6.2/S9: grupo
+administrativo propio con grupo_padre I5). El grupo_padre ES la formalización de «sale aparte»; el
+requisito de «dos horarios en pantalla» EXIGE identidad propia (un PDC sin identidad sería una columna
+dentro de 3ºA, no un horario aparte), luego confirma el modelo, no lo reabre. La creación del PDC
+colgando del padre + tutor heredado + sesiones compartidas marcadas es D1/D7, y por depender de CÓMO SE
+GESTICULA la creación, arrastra mockup previo (D-F8.6-a) en su bloque (8.5-D).
+CORTE DE 8.5 (fijado con el arquitecto, por dependencias/riesgo/tamaño): 8.5-A CRUD plano de las
+raíces (Nivel, Asignatura, Profesor-plano, Aula) → 8.5-B GrupoAdministrativo + Subgrupo ordinarios →
+8.5-C Actividad + Plaza (XOR aula, N profes/subgrupos; decisión pendiente del ctor protected) → 8.5-D
+PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7) → 8.5-E rejilla de
+ProfesorRestriccionHoraria «puede/no puede/prefiere-que-no» + peso (MOCKUP PREVIO, D20). 8.5-A/B/C
+matan SeedCatalogoRunner (cubren lo que el seed crea); 8.5-D/E son catálogo que el seed NO cubre. La
+rejilla de restricciones horarias del profesor se SEPARÓ de 8.5-A a 8.5-E a propuesta del usuario: no
+es formulario plano sino rejilla de 30 celdas con tres estados, y su peso/gesto es UX pura.
+QUÉ SE CONSTRUYÓ EN 8.5-A: /api/asignaturas con las 5 operaciones (GET lista ordenada por codigo, GET
+/{id}, POST 201, PUT /{id} 200, DELETE 204). 6 ficheros (5 nuevos: AsignaturaDTO, AsignaturaRequest,
+AsignaturaService, AsignaturaController, AsignaturaEndpointTest; 1 tocado: Asignatura.java +11).
+Solo app/: solver/src/main NO tocado → referencia NO regenerada; modelo NO tocado (§4.1 ya describe
+Asignatura). Suite app verde (~11 tests nuevos de AsignaturaEndpointTest), solver intacto.
+PRECEDENTE 1 (lo hereda el resto del CRUD): las entidades inmutables (solo ctor+getters, como
+Asignatura) reciben MÉTODO DE DOMINIO de actualización —Asignatura.actualizar(codigo, nombreCompleto)—,
+NO setters, aunque Actividad/Plaza sí usen setters. Los setters de Actividad/Plaza son residuo del
+builder de SeedCatalogoRunner (constructor vacío + setX), andamiaje que morirá; no son convención
+elegida. El estilo bueno es el de Asignatura; cuando 8.5-C toque Actividad/Plaza, converger hacia
+mutación nombrada. Un actualizar(...) además cierra por construcción el riesgo de setId (el id no es
+parámetro). VERIFICADO POR JUICIO (arquitecto): diff de Asignatura.java añade solo actualizar, sin
+setId ni otros setters.
+PRECEDENTE 2 (lo hereda el resto del CRUD): convención de excepciones → HTTP:
+NoSuchElementException → 404 (id inexistente), IllegalArgumentException → 400 (validación). El
+controller las distingue POR TIPO, no por endpoint —crítico en PUT, donde ambos códigos son posibles
+(404 si el id no existe, 400 si el código pisa a otra)—. Es MÁS limpio que el patrón de bloqueo, que
+traduce una misma excepción distinto por endpoint. Validación única en el Service (sin espejo que
+reflejar, a diferencia del bloqueo): la unicidad-en-edición se excluye a sí misma
+(filter(otra -> !otra.getId().equals(id))). VERIFICADO POR JUICIO: los tests 8 y 9
+(edicion_codigoQuePisaAOtra_400 / edicion_guardaMismoCodigo_200) son el par discriminante —el 9 edita
+con el MISMO código y espera 200; sin la cláusula de exclusión saldría rojo, luego no es tautológico—.
+DEUDA NUEVA: D-F8.5-A-a (DELETE de catálogo borra sin comprobar referencias entrantes → 500 opaco por
+FK en vez de 400 amable; aplica a las cuatro raíces; se difiere a 8.5-C o al primer borrado con FK).
+Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios), replicando el patrón piloto de 8.5-A
+sobre Nivel/Profesor-plano/Aula primero si se prefiere consolidar las raíces antes de subir a grupos.
