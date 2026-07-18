@@ -69,6 +69,7 @@ class ActividadEndpointTest {
     @Autowired private SubgrupoRepository subgrupoRepository;
     @Autowired private ProfesorRepository profesorRepository;
     @Autowired private AsignaturaRepository asignaturaRepository;
+    @Autowired private AsignaturaAulaCompatibleRepository compatibilidadRepository;
     @Autowired private AulaRepository aulaRepository;
     @Autowired private ActividadRepository actividadRepository;
     @Autowired private TramoSemanalRepository tramoRepository;
@@ -463,6 +464,96 @@ class ActividadEndpointTest {
         assertThat(error.getReferencias()).containsExactly(
                 new Referencia("sesion(es)", 1L),
                 new Referencia("aula(s) bloqueada(s)", 1L));
+    }
+
+    // ───────────────── I3: compatibilidad asignatura↔tipo de aula (§4.7, Bloque 8.5-C3)
+
+    /**
+     * Fixture SINTÉTICO de I3 (no del seed): asignatura {@code X} compatible SOLO con
+     * {@code INFORMATICA}, un aula {@code ORD} de tipo {@code ORDINARIA} y un aula {@code INF}
+     * de tipo {@code INFORMATICA}. Reutiliza el profesor {@code MATA} y el subgrupo
+     * {@code 1ºA-Completo} del {@code setUp}.
+     */
+    private void fixtureI3() {
+        Asignatura x = asignaturaRepository.save(new Asignatura("X", "Asignatura X"));
+        aulaRepository.save(new Aula("ORD", TipoAula.ORDINARIA, null, null, null, null));
+        aulaRepository.save(new Aula("INF", TipoAula.INFORMATICA, null, null, null, null));
+        compatibilidadRepository.save(new AsignaturaAulaCompatible(x, TipoAula.INFORMATICA));
+    }
+
+    @Test
+    void i3_aulaFijaIncompatible_400ConAsignaturaAulaYTipo() throws Exception {
+        // X admite solo INFORMATICA; aula fija ORD es ORDINARIA → 400 que nombra X, ORD y ORDINARIA.
+        fixtureI3();
+        String plaza = plazaJson("X", "ORD", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActX", null, "DISTRIBUIDA", plaza)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("X")))
+                .andExpect(status().reason(containsString("ORD")))
+                .andExpect(status().reason(containsString("ORDINARIA")));
+    }
+
+    @Test
+    void i3_aulaFijaCompatible_201() throws Exception {
+        fixtureI3();
+        String plaza = plazaJson("X", "INF", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActX", null, "DISTRIBUIDA", plaza)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void i3_candidatasConUnaMala_400() throws Exception {
+        // Candidatas {INF, ORD}: una mala (ORD) basta para abortar.
+        fixtureI3();
+        String plaza = plazaJson("X", null, List.of("INF", "ORD"), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActX", null, "DISTRIBUIDA", plaza)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("ORD")));
+    }
+
+    @Test
+    void i3_candidatasTodasCompatibles_201() throws Exception {
+        fixtureI3();
+        String plaza = plazaJson("X", null, List.of("INF"), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActX", null, "DISTRIBUIDA", plaza)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void i3_asignaturaSinCompatibilidades_aulaOrdinaria_201_DISCRIMINANTE_C() throws Exception {
+        // ASERTO DISCRIMINANTE DE LA SEMÁNTICA (C): "Y" no declara compatibilidades → irrestricta →
+        // una plaza con aula ORDINARIA pasa (201). Si alguien cambiara la semántica a
+        // "vacío = nada permitido", este 201 se volvería 400 y ESTE test caería. Es su razón de ser.
+        asignaturaRepository.save(new Asignatura("Y", "Asignatura Y sin compatibilidades"));
+        aulaRepository.save(new Aula("ORD", TipoAula.ORDINARIA, null, null, null, null));
+        String plaza = plazaJson("Y", "ORD", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActY", null, "DISTRIBUIDA", plaza)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void i3_muerdeEnElPut_noSoloEnElPost() throws Exception {
+        // I3 vive en el punto único que atraviesan alta y edición: un PUT que cambia la plaza a
+        // un aula incompatible (aplicarContenido) muerde igual que el POST.
+        fixtureI3();
+        long id = crear(actividad("ActX", null, "DISTRIBUIDA",
+                plazaJson("X", "INF", List.of(), List.of("MATA"), List.of("1ºA-Completo"))));
+        String malo = plazaJson("X", "ORD", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(put("/api/actividades/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ActX", null, "DISTRIBUIDA", malo)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("ORDINARIA")));
     }
 
     // ─────────────────────────────────────────────────── helpers de fixture
