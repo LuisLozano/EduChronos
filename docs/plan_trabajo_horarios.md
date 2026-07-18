@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C2b CERRADO en S74
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-C3 CERRADO en S75
+  (I3 en escritura + CRUD de compatibilidades asignatura↔tipo de aula: semántica (C) opt-in por
+  asignatura, sub-recurso con reemplazo total, funnel único resolverContenido; revierte la Referencia
+  de compatibilidades que S74 había puesto en AsignaturaService.borrar, reclasificadas como población
+  propia; tipificación incidental B07/A12In). Bloque 8.5-C2b CERRADO en S74
   (borrado amable de catálogo: 409 en referencia entrante; cierra D-F8.5-A-a). Bloque 8.5-C2a-DDL CERRADO en S73
   (integridad referencial de esquema: schema.sql + FK + pragma; 8.5-C partido en C1/C2a-DDL/C2b/C3).
   Bloque 8.5-C1 CERRADO en S72 (CRUD de Actividad agregado). Bloque 8.2b-iv CERRADO en S66
@@ -638,7 +642,56 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-Última sesión registrada: Sesión 74 — Fase 8, Bloque 8.5-C2b: BORRADO AMABLE DE CATÁLOGO (409 en
+Última sesión registrada: Sesión 75 — Fase 8, Bloque 8.5-C3: I3 + CRUD DE COMPATIBILIDADES
+  asignatura↔tipo de aula. Modo híbrido. 4 commits de código (por concern + tests aparte) + doc.
+  MEDICIÓN PREVIA (§A, instrumento efímero descartado, patrón Op-A/S73) que REENCUADRÓ el bloque:
+  M1=0 filas en asignatura_aula_compatible; M2=0 asignaturas restringidas; M3/M4=0 pero
+  TAUTOLÓGICOS (con 0 compatibilidades ninguna plaza puede ser incompatible: ceros por
+  consecuencia lógica, no por evidencia); M5 = 11 aulas, TODAS `ORDINARIA`, porque
+  SeedCatalogoRunner las creaba con el tipo HARDCODEADO. HALLAZGO: `TipoAula` era COLUMNA MUERTA
+  → I3 no tenía un lado, tenía cero. La medición desmintió mi propia recomendación de apertura
+  («riesgo bajo y acotado»), que era suposición sobre el estado de los datos.
+  DECISIONES CERRADAS antes de teclear: (C) semántica de tabla vacía POR ASIGNATURA (0 filas ⇒
+  irrestricta; ≥1 ⇒ solo esos tipos) — descartadas «todo permitido» global (pierde granularidad)
+  y «nada permitido» (obliga a poblar el catálogo entero antes de que el sistema arranque, para
+  un usuario no técnico). Sub-recurso GET/PUT con REEMPLAZO TOTAL (no CRUD de fila con id
+  sintético): la unidad de la operación coincide con la del gesto del usuario y el id sintético
+  —que la entidad documenta como concesión a JPA— no sale nunca al API; precedente de idempotencia
+  en POST /api/bloqueos (S66). Compatibilidades = POBLACIÓN PROPIA de Asignatura (cascade), lo que
+  REVIERTE la Referencia de S74. I3 valida aulaFija Y TODAS las candidatas (una candidata
+  incompatible da un horario que viola I3 cuando el solver la elige).
+  PUNTO ÚNICO (lo más delicado del bloque): `crearPlaza` y `aplicarContenido` NO compartían funnel
+  —resolvían las 5 piezas por separado hacia sinks distintos (agregarPlaza vs plaza.actualizar)—.
+  Se CREÓ el funnel `resolverContenido(PlazaRequest, Map cacheI3)` → record `ContenidoPlaza`.
+  Descartado un `validarI3(...)` suelto llamado desde ambos: la lógica estaría una vez pero serían
+  DOS CALL-SITES, y un tercer camino futuro podría olvidarlo sin que la suite se pusiera roja. Con
+  el funnel la validación es inevitable POR CONSTRUCCIÓN (quien quiera contenido de plaza pasa por
+  ahí), no por disciplina — que es justo lo que D-F8.2b-iv-a lamenta no tener. Caché
+  Map<Long,Set<TipoAula>> LOCAL a la operación (no campo: el servicio es singleton y quedaría rancia).
+  TIPIFICACIÓN INCIDENTAL (2 líneas del seed, no sub-bloque propio: el seed muere en 8.5):
+  B07→TALLER_TEC DERIVADO del volcado aula-B07.json (Tec/TEC/TecIn/CyR); A12In→INFORMATICA por
+  DECISIÓN DEL ARQUITECTO contra el PDF «A12 Informática» —no derivado: el seed usa `A12In` y el
+  volcado `codigo_crudo` = `A12 Informática`, único de los 11 que no casa exacto (roza D8-1)—. Las
+  otras 9 son aulas ordinarias de grupo, verificado contra sus volcados. NO se amplió el seed a las
+  35 aulas reales (invertir en componente condenado) → oro SINTÉTICO, patrón S41.
+  HALLAZGO COLATERAL del test de cascada: en `@DataJpaTest` de una sola transacción las filas hijas
+  quedan MANAGED y Hibernate no conoce la cascada de BD; hizo falta flush()+clear() para desligarlas
+  y flush() explícito tras el DELETE (el autoflush ante un count() sobre la hija no dispara el DELETE
+  del padre). Sin eso el test observaría la caché L1, no la base. En producción no aplica (PUT y
+  DELETE son transacciones distintas). Mismo género que S73 (pragma que no se propaga) y S74 (falso
+  positivo de Subgrupo): el framework media entre lo que crees probar y lo que pruebas.
+  ASERTOS: 8 tests de compatibilidades + cascada VERIFICADA POR MUTACIÓN (quitar `on delete cascade`
+  → SQLITE_CONSTRAINT_FOREIGNKEY en el DELETE del padre → restaurar → verde) + 6 de I3, entre ellos
+  el DISCRIMINANTE DE (C): asignatura sin compatibilidades + aulaFija ORDINARIA → 201; si la
+  semántica pasara a «vacío = nada permitido» ese 201 sería 400 y el test caería. Suite 184 verde,
+  demostrada no-vacía (neutralizar validarI3 → 3 rojos esperados → restaurar → verde).
+  ALCANCE HONESTO: el bloque entrega MECANISMO Y SUPERFICIE, no una restricción activa: el catálogo
+  real sigue con 0 compatibilidades declaradas y poblarlas es trabajo de usuario en la UI.
+  solver/ intacto → referencia NO regenerada. modelo §4.1/I3 SÍ tocado (commit aparte).
+  DEUDA NUEVA: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
+  Vivos para cerrar 8.5: D y E, ambos MOCKUP PREVIO.
+  Siguiente: 8.5-D o 8.5-E (el primero de los dos empieza por MOCKUP, no por código), o 8.4.
+Última sesión registrada (previa): Sesión 74 — Fase 8, Bloque 8.5-C2b: BORRADO AMABLE DE CATÁLOGO (409 en
   referencia entrante, en vez de la SQLException de FK cruda). Modo híbrido. 2 commits de código
   (e60680a producción 22 ficheros + 2293d31 tests 4 ficheros, solo app/) + 1 commit de doc (este).
   Cierra la mitad de aplicación de D-F8.5-A-a (la de esquema la cerró S73) → D-F8.5-A-a CERRADA entera.
@@ -781,45 +834,7 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   los usan y el contrato prohíbe romper la suite. El Service nuevo no usa ninguno (ctor + actualizar +
   agregarPlaza). Retirada → bloque que migre esos 12 tests.
   Siguiente: 8.5-C2 (integridad referencial) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 71 — Fase 8, Bloque 8.5-B: CRUD REST de GrupoAdministrativo
-  (ordinario) + Subgrupo, con el N:M subgrupo_grupo por códigos. Modo híbrido (diseño en el
-  Project, código en Claude Code). 2 commits de código (c21d0e2 Grupo + 744b724 Subgrupo), solo app/.
-  CORTE DE 8.5 (recordatorio): A (Asignatura, S69), A' (Nivel/Profesor/Aula, S70) y B (esta sesión)
-  cierran raíces planas + grupos/subgrupos ordinarios; siguen 8.5-C (Actividad+Plaza) → 8.5-D (PDC,
-  MOCKUP PREVIO) → 8.5-E (rejilla de restricciones, MOCKUP PREVIO).
-  HALLAZGO QUE RECORTÓ EL ALCANCE (leído del repo antes de teclear): Particion y SubgrupoParticion
-  (§4.2) NO están materializadas como entidad JPA —el javadoc de Subgrupo lo dice: no las consume el
-  solver, su UX es D1/D7 en Fase 8 UI—. Consecuencia: I1 (cobertura de partición) queda FUERA del
-  contrato de 8.5-B, no como deuda diferida sino porque no hay Particion que validar. El único N:M
-  existente es subgrupo↔grupos (población, tabla subgrupo_grupo), ya construido y probado desde
-  S22/S48; 8.5-B lo CONSUME desde formulario, no lo construye. Por eso NO se partió el bloque.
-  QUÉ SE CONSTRUYÓ: dos CRUD REST (/api/grupos, /api/subgrupos) con las 5 operaciones cada uno,
-  replicando los DOS PRECEDENTES de S69 (método de dominio actualizar(...) en ambas entidades
-  inmutables, sin setId; excepción→HTTP por tipo, validación única en el Service, unicidad-en-edición
-  excluida por id). DTOs planos en app.web.dto con referencias por CÓDIGO de negocio: GrupoDTO/Request
-  llevan nivel y tipo como String; SubgrupoDTO/Request llevan grupos como array de códigos String.
-  DECISIONES CERRADAS (heredables): (D-nueva-1) Subgrupo rechaza grupos vacío (≥1) → 400. (D-nueva-2,
-  lista BLANCA) Grupo acepta solo tipo=ORDINARIO; rechaza DIVERSIFICACION_PDC (es 8.5-D) y
-  VIRTUAL_OPTATIVA (es 8.5-C+) → 400 cuyo reason NOMBRA el tipo rechazado. (D-nueva-4) resolución
-  N:M y FK Nivel en escritura por bucle findByCodigo (Opción 1); código inexistente → 400 que nombra
-  el código faltante. (D-nueva-5) aserto discriminante del bloque = alta de Subgrupo con 2+ códigos +
-  round-trip que verifica los CÓDIGOS exactos (containsInAnyOrder), no el tamaño.
-  D-nueva-3 RESUELTA A FAVOR POR TEST (era comportamiento de framework, no se afirmó de memoria): el
-  borrado de un Subgrupo limpia sus filas de subgrupo_grupo (query nativa cuenta 2→0) sin cascade
-  configurado —el @ManyToMany unidireccional limpia su join table al borrar el propietario— y los
-  GrupoAdministrativo sobreviven. Test borrado_limpiaJoinTableYNoBorraGrupos. Sin hallazgo que reportar.
-  VERIFICADO POR JUICIO (arquitecto): los dos actualizar(...) mutan solo campos editables, ninguno
-  asigna id (Grupo no toca grupoPadre, Subgrupo reemplaza el set con copia defensiva, no une); el par
-  de unicidad-en-edición (editar con el MISMO código espera 200) no es tautológico; el round-trip de
-  Subgrupo asevera códigos, no tamaño; el borrado fuerte cuenta la join table de verdad (0 filas).
-  Suite app 114 → 143 (+29: Grupo 14, Subgrupo 15). solver/ intacto → referencia NO regenerada;
-  modelo NO tocado (§4.1/§4.2 ya describen las entidades y el N:M). SeedCatalogoRunner NO borrado
-  (muere en 8.5-C). D-F8.5-A-a intacta: sigue difiriendo a 8.5-C el borde de FK entrante
-  (Plaza→Subgrupo, Nivel→Grupo); 8.5-B no comprueba referencias entrantes en el borrado.
-  LIMPIEZA DE FONDO del plan: NO ejecutada (seguimos dentro de 8.5; el default es posponer al cierre
-  de 8.5 entero para condensar el bloque completo con criterio uniforme, recomendación de S70).
-  Siguiente: 8.5-C (Actividad + Plaza; XOR aula, N profes/subgrupos; decisión pendiente del ctor
-  protected; aquí muere SeedCatalogoRunner y muerde D-F8.5-A-a), a decidir al abrir sesión.
+
 Las cabeceras compactas de S37–S43 y el registro detallado de S10–S42 se
 archivaron en `docs/bitacora-sesiones.md` en sesiones anteriores; las cabeceras
 de S44, S45 y S46 se archivaron en la Sesión 50, la de S47 en la Sesión 51, la de S48
@@ -831,7 +846,7 @@ la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67
 S68 en la Sesión 72, la de S69 en la Sesión 73 y la de S70 en la Sesión 74 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S71–S74). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S72–S75). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -989,7 +1004,15 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       7 raíces + Actividad (caso propio). Hallazgo: falso positivo de Subgrupo (subgrupo_grupo es
       población propia, no referente entrante) → corregido a solo plaza_subgrupo. 4 tests por mutación,
       suite 169. CIERRA D-F8.5-A-a entera. Detalle: bitácora S74.
-- [ ] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de AsignaturaAulaCompatible.
+- [x] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de compatibilidades (S75). Semántica (C):
+      0 filas para una asignatura ⇒ irrestricta; ≥1 ⇒ solo esos tipos. Sub-recurso
+      GET/PUT /api/asignaturas/{id}/aulas-compatibles con reemplazo total idempotente.
+      Compatibilidades reclasificadas como POBLACIÓN PROPIA de Asignatura → FK a cascade →
+      REVIERTE la Referencia que S74 había puesto en AsignaturaService.borrar. I3 valida
+      aulaFija Y todas las candidatas, en el funnel único resolverContenido (no dos call-sites).
+      Tipificación incidental: B07→TALLER_TEC, A12In→INFORMATICA. Suite 184.
+      Deuda: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
+      Detalle: bitácora S75.
 - [ ] Bloque 8.5-D — PDC + subgrupos compartidos + tutoría heredada (MOCKUP PREVIO, D1/D7).
 - [ ] Bloque 8.5-E — Rejilla de ProfesorRestriccionHoraria (MOCKUP PREVIO, D20).
       El seed muere en el bloque de configuración de jornada (D22), no en 8.5-C: sobrevive por
@@ -1521,7 +1544,20 @@ siguiente, con remisión a la bitácora.
   soporta `ALTER TABLE` para esto; requeriría recreación). Sin producción hoy → teórico. Riesgo real:
   un `.db` de pruebas viejo fallará al arrancar con FK-ON. Si algún día hay bases en producción antes de
   otro cambio de esquema, hará falta una estrategia de migración (recreación / copia-y-swap). → vigilar.
-
+- **D-F8.5-C3-a** (S75, VIVA, no bloqueante) — `TipoAula.COMUN` SIN SEMÁNTICA DEFINIDA. Existe
+  como valor del enum y en los dos CHECK de `schema.sql` (`aula.tipo`, `asignatura_aula_compatible.tipo_aula`),
+  con CERO usos en src/main, tests y fixtures (grep concluyente, S75). Nadie sabe qué lo distingue
+  de `ORDINARIA`. Conjetura del usuario ("aula compartida con otras actividades") NO confirmada
+  con el centro. NO USAR hasta definirlo. Retirarlo del enum tocaría los dos CHECK: coste
+  desproporcionado hoy. → definir con el centro (hermana de D31) o retirar en un bloque de esquema.
+- **D-F8.5-C3-b** (S75, VIVA, de DOMINIO, no bloqueante) — Los códigos de asignatura del centro
+  son POR CURRÍCULO, no por materia: `EF` (EF de ESO) y `EdFís` (EF de Bachillerato) son
+  asignaturas DISTINTAS, y lo mismo `Bio`/`Biol`/`BioNu`, `Tec`/`TecIn`, `Mat`/`MatAc`/`MatAp`/`Mate2`.
+  CONFIRMADO por el arquitecto en S75 como correcto por dominio (no es sinonimia a normalizar).
+  Consecuencia para I3: las compatibilidades se declaran por asignatura-currículo, y poblarlas es
+  trabajo de USUARIO en la UI, no de código — el catálogo real tiene hoy 0 compatibilidades (M1=0,
+  medición de S75). MENOR y distinto: `EFis` vs `EFís` (solo un acento, mismos grupos de 4ºESO)
+  sí parece variante de transcripción del PDF → cae en D8 (importador), no aquí.
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —
   la entrada del bloqueo por REST va en **endpoint propio**, NO en el body de
@@ -1551,6 +1587,12 @@ el detalle narrativo vive en la bitácora.
 - **D24** — la suite se autoenvenena por contención de CPU (dos tests de límite ~600 s en cada `mvn test` disparan el wall-clock). CERRADA en S39: `@Tag("escala")` en los pesados + exclusión por defecto vía property `surefire.excluded.groups=escala` + perfil `escala` que la invierte (`mvn test` rápido; `mvn test -Pescala` corre solo los pesados). Reactivada agravada por D25 (VIVA) para el perfil `-Pescala` completo. Detalle: bitácora S38/S39.
 - **D28** — `CatalogoMapper.aProblemaHorario` pasaba `List.of()` a restriccionesHorarias porque el catálogo JPA no materializaba la entidad `ProfesorRestriccionHoraria`. CERRADA en S51: materializada la entidad (§4.3) con su repositorio y `CatalogoMapper.aRestriccionHoraria`; el tramo se resuelve por identidad de objeto (IdentityHashMap TramoSemanal→Tramo, no por el código sintético L1..V6, no reabre D27). Queda viva solo la parte de D21 (el peso por-restricción sigue sin consumirse en el objetivo). Detalle: bitácora S51.
 - **D-F8.5-A-a** — Integridad referencial del borrado de catálogo. Dos mitades: ESQUEMA (FK reales + pragma) CERRADA en S73 (8.5-C2a-DDL: schema.sql con 27 FK + PRAGMA foreign_keys=ON por conexión → SQLITE_CONSTRAINT_FOREIGNKEY muerde); APLICACIÓN (borrado amable → 409 legible) CERRADA en S74 (8.5-C2b): excepción de dominio ReferenciaEntranteException + @Query nativas de conteo inverso por raíz (opción b: sin PlazaRepository, sin romper el agregado) + guarda en cada Service.borrar (409 antes de tocar la BD) + catch→409 en cada Controller (opción 2A: sin @ControllerAdvice). 7 raíces cubiertas. Hallazgo de S74: el §B de C2b contó por error subgrupo_grupo.subgrupo_id como referente entrante de Subgrupo, pero es su POBLACIÓN PROPIA (Subgrupo es owner del @ManyToMany; Hibernate la limpia al borrar) → ningún subgrupo era borrable; corregido a solo plaza_subgrupo. Regla derivada: referencia entrante = FK que un TERCERO controla, no toda FK que apunte a mi id; las FK del propio agregado no cuentan. El mapa de FK de S73 era correcto (ya listaba solo plaza_subgrupo para Subgrupo). Detalle: bitácora S74.
+REVERSIÓN PARCIAL EN S75 (8.5-C3): la Referencia de `asignatura_aula_compatible` que este
+bloque había añadido a AsignaturaService.borrar se RETIRA, y su @Query contarCompatibilidadesDeAula
+se borra. Razón: las compatibilidades se reclasifican como POBLACIÓN PROPIA de Asignatura
+(cascade), no como referente entrante de un tercero — misma relación que Plaza↔Actividad
+(D-C1-A). Aplica la propia regla derivada de S74, no la contradice: lo que cambió fue la
+clasificación de la relación, no la regla. Las otras dos FK (actividad, plaza) siguen contándose.
 ### Notas técnicas validadas en Fase 0
 
 - OR-Tools CP-SAT en Java funciona en Windows sin recompilar desde Linux

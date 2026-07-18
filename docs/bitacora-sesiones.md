@@ -2773,3 +2773,43 @@ ahora aplica formalmente a las CUATRO raíces (decisión confirmada: replicar el
 la integridad referencial, que merece su bloque en 8.5-C).
 Siguiente: 8.5-B (GrupoAdministrativo + Subgrupo ordinarios, N:M de Subgrupo, toca I1/I6), a decidir
 al abrir sesión.
+
+### Sesión 71 — Fase 8, Bloque 8.5-B: CRUD REST de GrupoAdministrativo
+  (ordinario) + Subgrupo, con el N:M subgrupo_grupo por códigos. Modo híbrido (diseño en el
+  Project, código en Claude Code). 2 commits de código (c21d0e2 Grupo + 744b724 Subgrupo), solo app/.
+  CORTE DE 8.5 (recordatorio): A (Asignatura, S69), A' (Nivel/Profesor/Aula, S70) y B (esta sesión)
+  cierran raíces planas + grupos/subgrupos ordinarios; siguen 8.5-C (Actividad+Plaza) → 8.5-D (PDC,
+  MOCKUP PREVIO) → 8.5-E (rejilla de restricciones, MOCKUP PREVIO).
+  HALLAZGO QUE RECORTÓ EL ALCANCE (leído del repo antes de teclear): Particion y SubgrupoParticion
+  (§4.2) NO están materializadas como entidad JPA —el javadoc de Subgrupo lo dice: no las consume el
+  solver, su UX es D1/D7 en Fase 8 UI—. Consecuencia: I1 (cobertura de partición) queda FUERA del
+  contrato de 8.5-B, no como deuda diferida sino porque no hay Particion que validar. El único N:M
+  existente es subgrupo↔grupos (población, tabla subgrupo_grupo), ya construido y probado desde
+  S22/S48; 8.5-B lo CONSUME desde formulario, no lo construye. Por eso NO se partió el bloque.
+  QUÉ SE CONSTRUYÓ: dos CRUD REST (/api/grupos, /api/subgrupos) con las 5 operaciones cada uno,
+  replicando los DOS PRECEDENTES de S69 (método de dominio actualizar(...) en ambas entidades
+  inmutables, sin setId; excepción→HTTP por tipo, validación única en el Service, unicidad-en-edición
+  excluida por id). DTOs planos en app.web.dto con referencias por CÓDIGO de negocio: GrupoDTO/Request
+  llevan nivel y tipo como String; SubgrupoDTO/Request llevan grupos como array de códigos String.
+  DECISIONES CERRADAS (heredables): (D-nueva-1) Subgrupo rechaza grupos vacío (≥1) → 400. (D-nueva-2,
+  lista BLANCA) Grupo acepta solo tipo=ORDINARIO; rechaza DIVERSIFICACION_PDC (es 8.5-D) y
+  VIRTUAL_OPTATIVA (es 8.5-C+) → 400 cuyo reason NOMBRA el tipo rechazado. (D-nueva-4) resolución
+  N:M y FK Nivel en escritura por bucle findByCodigo (Opción 1); código inexistente → 400 que nombra
+  el código faltante. (D-nueva-5) aserto discriminante del bloque = alta de Subgrupo con 2+ códigos +
+  round-trip que verifica los CÓDIGOS exactos (containsInAnyOrder), no el tamaño.
+  D-nueva-3 RESUELTA A FAVOR POR TEST (era comportamiento de framework, no se afirmó de memoria): el
+  borrado de un Subgrupo limpia sus filas de subgrupo_grupo (query nativa cuenta 2→0) sin cascade
+  configurado —el @ManyToMany unidireccional limpia su join table al borrar el propietario— y los
+  GrupoAdministrativo sobreviven. Test borrado_limpiaJoinTableYNoBorraGrupos. Sin hallazgo que reportar.
+  VERIFICADO POR JUICIO (arquitecto): los dos actualizar(...) mutan solo campos editables, ninguno
+  asigna id (Grupo no toca grupoPadre, Subgrupo reemplaza el set con copia defensiva, no une); el par
+  de unicidad-en-edición (editar con el MISMO código espera 200) no es tautológico; el round-trip de
+  Subgrupo asevera códigos, no tamaño; el borrado fuerte cuenta la join table de verdad (0 filas).
+  Suite app 114 → 143 (+29: Grupo 14, Subgrupo 15). solver/ intacto → referencia NO regenerada;
+  modelo NO tocado (§4.1/§4.2 ya describen las entidades y el N:M). SeedCatalogoRunner NO borrado
+  (muere en 8.5-C). D-F8.5-A-a intacta: sigue difiriendo a 8.5-C el borde de FK entrante
+  (Plaza→Subgrupo, Nivel→Grupo); 8.5-B no comprueba referencias entrantes en el borrado.
+  LIMPIEZA DE FONDO del plan: NO ejecutada (seguimos dentro de 8.5; el default es posponer al cierre
+  de 8.5 entero para condensar el bloque completo con criterio uniforme, recomendación de S70).
+  Siguiente: 8.5-C (Actividad + Plaza; XOR aula, N profes/subgrupos; decisión pendiente del ctor
+  protected; aquí muere SeedCatalogoRunner y muerde D-F8.5-A-a), a decidir al abrir sesión.
