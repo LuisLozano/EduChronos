@@ -374,6 +374,18 @@ TramoSemanal(
 )
 ```
 
+**Semántica de ausencia (Bloque 8.5-C3, S75).** La compatibilidad es OPT-IN POR ASIGNATURA:
+una asignatura SIN filas en `AsignaturaAulaCompatible` es IRRESTRICTA (cualquier tipo de aula
+le vale); una con ≥1 fila solo admite los tipos declarados. No es "tabla vacía = todo permitido"
+global, sino ausencia evaluada por asignatura. Consecuencia asumida: "sin restricción" y "todas
+las restricciones" son indistinguibles desde la UI, que debe mostrar el estado irrestricto
+explícitamente.
+
+**I3 en escritura (S75).** Deja de ser invariante solo documental: `ActividadService` la valida
+sobre `aulaFija` Y sobre TODAS las `aulasCandidatas` de cada plaza, en el funnel único
+`resolverContenido`. Una candidata incompatible es rechazada aunque el solver pudiera no
+elegirla, porque si la eligiera el horario violaría I3.
+
 ### 4.2 Particiones de alumnos y subgrupos
 
 ```
