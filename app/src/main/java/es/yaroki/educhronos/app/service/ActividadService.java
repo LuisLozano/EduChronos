@@ -3,6 +3,8 @@ package es.yaroki.educhronos.app.service;
 import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
 import es.yaroki.educhronos.app.catalog.Asignatura;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatible;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatibleRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
@@ -12,6 +14,7 @@ import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ActividadDTO;
 import es.yaroki.educhronos.app.web.dto.ActividadRequest;
@@ -20,12 +23,16 @@ import es.yaroki.educhronos.app.web.dto.PlazaRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,17 +78,20 @@ public class ActividadService {
     private final AulaRepository aulaRepositorio;
     private final ProfesorRepository profesorRepositorio;
     private final SubgrupoRepository subgrupoRepositorio;
+    private final AsignaturaAulaCompatibleRepository compatibilidadRepositorio;
 
     public ActividadService(ActividadRepository repositorio,
             AsignaturaRepository asignaturaRepositorio,
             AulaRepository aulaRepositorio,
             ProfesorRepository profesorRepositorio,
-            SubgrupoRepository subgrupoRepositorio) {
+            SubgrupoRepository subgrupoRepositorio,
+            AsignaturaAulaCompatibleRepository compatibilidadRepositorio) {
         this.repositorio = repositorio;
         this.asignaturaRepositorio = asignaturaRepositorio;
         this.aulaRepositorio = aulaRepositorio;
         this.profesorRepositorio = profesorRepositorio;
         this.subgrupoRepositorio = subgrupoRepositorio;
+        this.compatibilidadRepositorio = compatibilidadRepositorio;
     }
 
     /** Todas las actividades como {@link ActividadDTO}, ORDENADAS por código. */
@@ -118,7 +128,7 @@ public class ActividadService {
         Actividad actividad = new Actividad(peticion.codigo(), asignatura,
                 peticion.duracionTramos(), peticion.repeticionesPorSemana(),
                 patron, peticion.requiereTutor());
-        agregarPlazas(actividad, peticion);
+        agregarPlazas(actividad, peticion, new HashMap<>());
         Actividad guardada = repositorio.save(actividad);
         return aDTO(guardada);
     }
@@ -146,7 +156,7 @@ public class ActividadService {
         Asignatura asignatura = resolverAsignaturaActividad(peticion.asignatura());
         entidad.actualizar(peticion.codigo(), asignatura, peticion.duracionTramos(),
                 peticion.repeticionesPorSemana(), patron, peticion.requiereTutor());
-        reconciliarPlazas(entidad, peticion.plazas());
+        reconciliarPlazas(entidad, peticion.plazas(), new HashMap<>());
         return aDTO(entidad);
     }
 
@@ -257,10 +267,11 @@ public class ActividadService {
      * Monta las plazas del ALTA: por cada {@link PlazaRequest}, en orden de llegada, deriva
      * el código posicional simple {@code {codigo}-P{n}} (1..n, una sola vez) y la crea.
      */
-    private void agregarPlazas(Actividad actividad, ActividadRequest peticion) {
+    private void agregarPlazas(Actividad actividad, ActividadRequest peticion,
+            Map<Long, Set<TipoAula>> cacheI3) {
         List<PlazaRequest> plazas = peticion.plazas();
         for (int i = 0; i < plazas.size(); i++) {
-            crearPlaza(actividad, peticion.codigo() + "-P" + (i + 1), plazas.get(i));
+            crearPlaza(actividad, peticion.codigo() + "-P" + (i + 1), plazas.get(i), cacheI3);
         }
     }
 
@@ -277,7 +288,8 @@ public class ActividadService {
      * con la UNIQUE: no hace falta flush() explícito. El emparejamiento por posición es una
      * decisión de UX provisional (roza D-F8.6-a), a confirmar con el formulario de Fase 8.6.
      */
-    private void reconciliarPlazas(Actividad actividad, List<PlazaRequest> entrantes) {
+    private void reconciliarPlazas(Actividad actividad, List<PlazaRequest> entrantes,
+            Map<Long, Set<TipoAula>> cacheI3) {
         List<Plaza> existentes = new ArrayList<>(actividad.getPlazas());
         existentes.sort(Comparator.comparing(Plaza::getId));
         int k = existentes.size();
@@ -285,7 +297,7 @@ public class ActividadService {
 
         // (1) posiciones comunes: conservar código, actualizar contenido.
         for (int i = 0; i < Math.min(k, m); i++) {
-            aplicarContenido(existentes.get(i), entrantes.get(i));
+            aplicarContenido(existentes.get(i), entrantes.get(i), cacheI3);
         }
         // (2) sobran existentes (m < k): borrar posiciones ≥ m (orphanRemoval).
         for (int i = m; i < k; i++) {
@@ -295,30 +307,88 @@ public class ActividadService {
         if (m > k) {
             int siguiente = maxSufijoVivo(actividad) + 1;
             for (int i = k; i < m; i++) {
-                crearPlaza(actividad, actividad.getCodigo() + "-P" + siguiente, entrantes.get(i));
+                crearPlaza(actividad, actividad.getCodigo() + "-P" + siguiente, entrantes.get(i), cacheI3);
                 siguiente++;
             }
         }
     }
 
-    /** Crea una plaza resolviendo sus cuatro familias de referencia (regla 6) por código. */
-    private void crearPlaza(Actividad actividad, String codigoPlaza, PlazaRequest plaza) {
-        actividad.agregarPlaza(codigoPlaza,
-                resolverAsignaturaPlaza(plaza.asignatura()),
-                resolverAulaFija(plaza.aulaFija()),
-                resolverProfesores(plaza.profesores()),
-                resolverAulas(plaza.aulasCandidatas()),
-                resolverSubgrupos(plaza.subgrupos()));
+    /** Crea una plaza a partir de su contenido resuelto y validado (regla 6 + I3). */
+    private void crearPlaza(Actividad actividad, String codigoPlaza, PlazaRequest plaza,
+            Map<Long, Set<TipoAula>> cacheI3) {
+        ContenidoPlaza c = resolverContenido(plaza, cacheI3);
+        actividad.agregarPlaza(codigoPlaza, c.asignatura(), c.aulaFija(),
+                c.profesores(), c.aulasCandidatas(), c.subgrupos());
     }
 
-    /** Actualiza el contenido de una plaza viva (regla 6), CONSERVANDO su código estable. */
-    private void aplicarContenido(Plaza plaza, PlazaRequest entrante) {
-        plaza.actualizar(
-                resolverAsignaturaPlaza(entrante.asignatura()),
-                resolverAulaFija(entrante.aulaFija()),
-                resolverProfesores(entrante.profesores()),
-                resolverAulas(entrante.aulasCandidatas()),
-                resolverSubgrupos(entrante.subgrupos()));
+    /** Actualiza una plaza viva con su contenido resuelto y validado (regla 6 + I3), CONSERVANDO
+     * su código estable. */
+    private void aplicarContenido(Plaza plaza, PlazaRequest entrante,
+            Map<Long, Set<TipoAula>> cacheI3) {
+        ContenidoPlaza c = resolverContenido(entrante, cacheI3);
+        plaza.actualizar(c.asignatura(), c.aulaFija(),
+                c.profesores(), c.aulasCandidatas(), c.subgrupos());
+    }
+
+    /**
+     * PUNTO ÚNICO que atraviesan {@code crearPlaza} y {@code aplicarContenido}: resuelve las
+     * cinco familias de referencia (regla 6) y valida I3 sobre la asignatura y el aula resueltas,
+     * una sola vez. Devuelve el contenido en bruto para que cada llamante lo entregue a su sink
+     * (crear plaza nueva / mutar plaza viva) sin duplicar la comprobación (D-F8.2b-iv-a).
+     */
+    private ContenidoPlaza resolverContenido(PlazaRequest plaza, Map<Long, Set<TipoAula>> cacheI3) {
+        Asignatura asignatura = resolverAsignaturaPlaza(plaza.asignatura());
+        Aula aulaFija = resolverAulaFija(plaza.aulaFija());
+        Set<Profesor> profesores = resolverProfesores(plaza.profesores());
+        Set<Aula> aulasCandidatas = resolverAulas(plaza.aulasCandidatas());
+        Set<Subgrupo> subgrupos = resolverSubgrupos(plaza.subgrupos());
+        validarI3(asignatura, aulaFija, aulasCandidatas, cacheI3);
+        return new ContenidoPlaza(asignatura, aulaFija, profesores, aulasCandidatas, subgrupos);
+    }
+
+    /**
+     * I3 (§4.7): sea A la asignatura de la plaza y T sus tipos de aula compatibles.
+     * <ul>
+     *   <li>T vacío → la plaza pasa (semántica C: asignatura irrestricta).
+     *   <li>T no vacío y aulaFija → su tipo debe estar en T.
+     *   <li>T no vacío y aulasCandidatas → TODAS deben tener tipo en T (la primera mala aborta).
+     * </ul>
+     * El XOR aula ya está garantizado por {@code validarPlazas}: exactamente una rama aplica.
+     * Una consulta por asignatura distinta, memoizada en {@code cacheI3} (local a la operación).
+     */
+    private void validarI3(Asignatura asignatura, Aula aulaFija, Set<Aula> aulasCandidatas,
+            Map<Long, Set<TipoAula>> cacheI3) {
+        Set<TipoAula> compatibles = cacheI3.computeIfAbsent(asignatura.getId(), id ->
+                compatibilidadRepositorio.findByAsignatura(asignatura).stream()
+                        .map(AsignaturaAulaCompatible::getTipoAula)
+                        .collect(Collectors.toCollection(() -> EnumSet.noneOf(TipoAula.class))));
+        if (compatibles.isEmpty()) {
+            return;   // semántica C: sin compatibilidades declaradas, cualquier aula vale.
+        }
+        if (aulaFija != null) {
+            if (!compatibles.contains(aulaFija.getTipo())) {
+                throw incompatible(asignatura, aulaFija, compatibles);
+            }
+            return;
+        }
+        for (Aula candidata : aulasCandidatas) {
+            if (!compatibles.contains(candidata.getTipo())) {
+                throw incompatible(asignatura, candidata, compatibles);
+            }
+        }
+    }
+
+    /** Mensaje 400 de I3: nombra asignatura, aula, tipo del aula y los tipos compatibles. */
+    private static IllegalArgumentException incompatible(
+            Asignatura asignatura, Aula aula, Set<TipoAula> compatibles) {
+        return new IllegalArgumentException(
+                "la asignatura " + asignatura.getCodigo() + " no admite el aula " + aula.getCodigo()
+                        + " de tipo " + aula.getTipo() + " (tipos compatibles: " + compatibles + ")");
+    }
+
+    /** Contenido resuelto de una plaza (regla 6), producido por {@link #resolverContenido}. */
+    private record ContenidoPlaza(Asignatura asignatura, Aula aulaFija, Set<Profesor> profesores,
+            Set<Aula> aulasCandidatas, Set<Subgrupo> subgrupos) {
     }
 
     /** Máximo N en los sufijos {@code -P{N}} de las plazas VIVAS; 0 si ninguno casa el patrón. */
