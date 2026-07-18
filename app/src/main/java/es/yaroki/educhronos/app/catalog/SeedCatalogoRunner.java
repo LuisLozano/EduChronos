@@ -102,10 +102,16 @@ public class SeedCatalogoRunner implements CommandLineRunner {
             prof.put(cod, profesorRepository.save(new Profesor(cod, "Profesor " + cod)));
         }
 
+        // Tipo por defecto ORDINARIA (aulas ordinarias de grupo, verificado contra sus
+        // volcados). Dos excepciones tipificadas: B07 es TALLER_TEC (volcado aula-B07.json:
+        // Tec/TEC/TecIn/CyR) y A12In es INFORMATICA (decisión del arquitecto contra el PDF
+        // "A12 Informática").
+        Map<String, TipoAula> tipoDeAula = Map.of("B07", TipoAula.TALLER_TEC, "A12In", TipoAula.INFORMATICA);
         Map<String, Aula> aula = new HashMap<>();
         for (String cod : List.of("A5", "B07", "A12In", "A11", "A3", "A14",
                 "A10", "A1", "A2", "A4", "A7")) {
-            aula.put(cod, aulaRepository.save(new Aula(cod, TipoAula.ORDINARIA, null, null, null, null)));
+            TipoAula tipo = tipoDeAula.getOrDefault(cod, TipoAula.ORDINARIA);
+            aula.put(cod, aulaRepository.save(new Aula(cod, tipo, null, null, null, null)));
         }
 
         Map<String, Subgrupo> sub = new HashMap<>();
