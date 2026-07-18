@@ -708,11 +708,29 @@ Sesion(
 --   · RESTRICT (NO ACTION, default SQLite) para TODO lo demás: borrar una raíz de catálogo
 --     (Nivel/Asignatura/Profesor/Aula/Subgrupo) o un Tramo/Actividad referenciados FALLA con
 --     SQLITE_CONSTRAINT_FOREIGNKEY. Ese fallo crudo es la red dura; el 409 legible («usada
---     por N…») lo añade la capa de aplicación en 8.5-C2b (borrado amable). Nótese que borrar
+--     por N…») lo añade la capa de aplicación, implementado en 8.5-C2b (S74, borrado amable:
+--     consulta inversa de referencias entrantes ANTES del delete). Nótese que borrar
 --     una Actividad, aunque cascadee sus Plazas, queda BLOQUEADO si tiene pins de bloqueo
 --     (sesion_bloqueada/aula_bloqueada.actividad_id) o Sesiones colocadas sobre sus plazas
 --     (sesion.plaza_id, aula_bloqueada.plaza_id son RESTRICT): correcto, no se borra una
 --     actividad pinada o ya colocada en un horario.
+--
+-- PROPIEDAD vs REFERENCIA (S74, Bloque 8.5-C2b): no toda FK que apunte a una entidad es una
+-- REFERENCIA ENTRANTE que deba bloquear su borrado. Hay que distinguir dos naturalezas:
+--   · PROPIEDAD (parte del propio agregado): la entidad es dueña de la relación y al borrarla
+--     el ORM/la cascada limpia esas filas ANTES del DELETE, así que NO bloquean. Casos:
+--     Actividad→sus Plazas y las joins de Plaza (CASCADE explícito arriba); y Subgrupo→
+--     subgrupo_grupo, que es la POBLACIÓN del subgrupo (§4.2: los grupos administrativos que
+--     aportan alumnos). Subgrupo es el lado dueño de esa relación, luego borrar un subgrupo
+--     disuelve su población sin tocar los grupos: es correcto y no debe dar 409.
+--   · REFERENCIA DE UN TERCERO: otra entidad, que la entidad borrada no controla, la señala.
+--     Estas SÍ bloquean. Ej.: plaza_subgrupo.subgrupo_id (dueña es Plaza, no Subgrupo) impide
+--     borrar un Subgrupo usado por una plaza.
+--   Asimetría ilustrativa, misma tabla y dos lecturas opuestas: subgrupo_grupo.subgrupo_id es
+--   propiedad (Subgrupo es dueño) y NO bloquea; subgrupo_grupo.grupo_id es referencia de un
+--   tercero (Grupo NO es dueño; nadie limpia esas filas al borrar un grupo) y SÍ bloquea.
+--   REGLA: referencia entrante = FK que un TERCERO controla, no toda FK que apunte a mi id.
+--   Ignorar esto hacía que NINGÚN subgrupo fuera borrable (bug detectado y corregido en S74).
 ```
 
 ---
