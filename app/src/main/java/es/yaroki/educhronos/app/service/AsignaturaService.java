@@ -1,14 +1,22 @@
 package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Asignatura;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatible;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatibleRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
+import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.AsignaturaDTO;
 import es.yaroki.educhronos.app.web.dto.AsignaturaRequest;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +48,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class AsignaturaService {
 
     private final AsignaturaRepository repositorio;
+    private final AsignaturaAulaCompatibleRepository compatibilidadRepositorio;
 
-    public AsignaturaService(AsignaturaRepository repositorio) {
+    public AsignaturaService(AsignaturaRepository repositorio,
+            AsignaturaAulaCompatibleRepository compatibilidadRepositorio) {
         this.repositorio = repositorio;
+        this.compatibilidadRepositorio = compatibilidadRepositorio;
     }
 
     /** Todas las asignaturas como {@link AsignaturaDTO}, ORDENADAS por código. */
@@ -106,12 +117,81 @@ public class AsignaturaService {
                 .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
         List<Referencia> entrantes = List.of(
                 new Referencia("actividad(es)", repositorio.contarActividades(id)),
-                new Referencia("plaza(s)", repositorio.contarPlazas(id)),
-                new Referencia("compatibilidad(es) de aula", repositorio.contarCompatibilidadesDeAula(id)));
+                new Referencia("plaza(s)", repositorio.contarPlazas(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }
         repositorio.delete(entidad);
+    }
+
+    // ------------------------------------------ compatibilidades de aula (I3, §4.7)
+
+    /**
+     * Tipos de aula compatibles de una asignatura, como nombres de {@link TipoAula} ORDENADOS
+     * por el orden natural del enum. {@link NoSuchElementException} (→ 404) si el id no existe.
+     * Lista vacía = asignatura irrestricta (semántica C de §4.7).
+     */
+    @Transactional(readOnly = true)
+    public List<String> obtenerAulasCompatibles(Long id) {
+        Asignatura entidad = repositorio.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
+        return ordenar(tiposDe(entidad));
+    }
+
+    /**
+     * REEMPLAZO TOTAL e idempotente de las compatibilidades de una asignatura: borra las filas
+     * actuales y crea las de {@code tiposCrudos}. Lista vacía = borrar todas (irrestricta).
+     * {@link NoSuchElementException} (→ 404) si el id no existe; {@link IllegalArgumentException}
+     * (→ 400) si algún valor no parsea a {@link TipoAula} (lo nombra y lista los válidos) o si la
+     * lista trae un tipo duplicado (lo nombra). Devuelve la lista resultante ordenada por enum.
+     */
+    @Transactional
+    public List<String> reemplazarAulasCompatibles(Long id, List<String> tiposCrudos) {
+        Asignatura entidad = repositorio.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
+        Set<TipoAula> nuevos = new LinkedHashSet<>();
+        for (String crudo : tiposCrudos == null ? List.<String>of() : tiposCrudos) {
+            TipoAula tipo = parseTipoAula(crudo);
+            if (!nuevos.add(tipo)) {
+                throw new IllegalArgumentException("tipo de aula duplicado: " + tipo.name());
+            }
+        }
+        // Borra lo actual y FLUSHEA antes de insertar: así el DELETE precede al INSERT y no choca
+        // con la UNIQUE (asignatura, tipo) cuando la lista repite un tipo ya presente (idempotencia).
+        compatibilidadRepositorio.deleteAll(compatibilidadRepositorio.findByAsignatura(entidad));
+        compatibilidadRepositorio.flush();
+        for (TipoAula tipo : nuevos) {
+            compatibilidadRepositorio.save(new AsignaturaAulaCompatible(entidad, tipo));
+        }
+        return ordenar(nuevos);
+    }
+
+    /** Los {@link TipoAula} compatibles de una asignatura (sin orden intrínseco). */
+    private Set<TipoAula> tiposDe(Asignatura asignatura) {
+        return compatibilidadRepositorio.findByAsignatura(asignatura).stream()
+                .map(AsignaturaAulaCompatible::getTipoAula)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /** Nombres de {@link TipoAula} ordenados por el orden natural del enum (orden de declaración). */
+    private static List<String> ordenar(Collection<TipoAula> tipos) {
+        return tipos.stream().sorted().map(TipoAula::name).toList();
+    }
+
+    /** Parsea un nombre a {@link TipoAula}; valor malo → 400 que lo nombra y lista los válidos
+     * (mismo patrón que {@code parsePatron} en {@code ActividadService}). */
+    private static TipoAula parseTipoAula(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException(
+                    "tipo de aula en blanco. Valores validos: " + Arrays.toString(TipoAula.values()));
+        }
+        try {
+            return TipoAula.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "tipo de aula invalido: '" + valor + "'. Valores validos: "
+                            + Arrays.toString(TipoAula.values()));
+        }
     }
 
     /** Reglas (a) y (b): código y nombre no nulos ni en blanco. */

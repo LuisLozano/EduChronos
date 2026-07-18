@@ -86,4 +86,27 @@ public class AsignaturaController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
+
+    // ----------------------------- sub-recurso: aulas compatibles (§4.7, Bloque 8.5-C3)
+
+    @GetMapping("/{id}/aulas-compatibles")
+    public List<String> aulasCompatibles(@PathVariable("id") Long id) {
+        try {
+            return service.obtenerAulasCompatibles(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/{id}/aulas-compatibles")
+    public List<String> reemplazarAulasCompatibles(
+            @PathVariable("id") Long id, @RequestBody List<String> tipos) {
+        try {
+            return service.reemplazarAulasCompatibles(id, tipos);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }
