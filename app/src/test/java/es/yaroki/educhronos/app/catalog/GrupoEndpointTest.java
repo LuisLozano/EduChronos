@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.GrupoService;
+import es.yaroki.educhronos.app.service.TutoriaService;
 import es.yaroki.educhronos.app.web.GrupoController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,17 +40,18 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(GrupoService.class)
+@Import({GrupoService.class, TutoriaService.class})
 class GrupoEndpointTest {
 
     @Autowired private GrupoService service;
+    @Autowired private TutoriaService tutoriaService;
     @Autowired private NivelRepository nivelRepository;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new GrupoController(service)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new GrupoController(service, tutoriaService)).build();
         // Niveles de apoyo: el grupo referencia el nivel por CÓDIGO de negocio.
         nivelRepository.save(new Nivel("1ESO", 1));
         nivelRepository.save(new Nivel("2ESO", 2));
