@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S72. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S73. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S72). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S73). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2869,3 +2869,44 @@ al abrir sesión.
   los usan y el contrato prohíbe romper la suite. El Service nuevo no usa ninguno (ctor + actualizar +
   agregarPlaza). Retirada → bloque que migre esos 12 tests.
   Siguiente: 8.5-C2 (integridad referencial) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
+
+### Sesión 73 — Fase 8, Bloque 8.5-C2a-DDL: INTEGRIDAD REFERENCIAL DE ESQUEMA
+  (schema.sql + FK + pragma por conexión). Modo híbrido. 1 commit de código (d27518f, solo app/) +
+  1 commit de doc (plan + modelo §4.7). El bloque nació como «8.5-C2 = activar FK + borrado amable» y
+  se transformó dos veces al chocar con la realidad medida; el borrado amable se difirió a 8.5-C2b.
+  CADENA DE HALLAZGOS (cada uno reescribió el anterior, todos medidos en ejecución vía Claude Code):
+  (1) el HALLAZGO GRAVE de S72 («FK OFF») era INCOMPLETO: el community SQLiteDialect 7.4.1 NO emite FK
+  en el DDL de hbm2ddl, ni con @OnDelete ni con @ForeignKey ni combinadas (DDL byte-idéntico). El
+  agujero no era «FK declaradas, pragma OFF» sino «FK inexistentes». (2) ddl-auto=validate es INUSABLE
+  con el dialecto (crea PK integer, valida esperando bigint; falla incluso contra su propio esquema).
+  (3) el DDL del dialecto declara la PK `id` SIN tipo en 8 tablas → en SQLite no es alias de rowid → la
+  columna queda NULL y NINGUNA FK entrante resuelve; invisible hasta ahora porque nada recargaba por id
+  fresco fuera del caché L1. (4) ni connection-init-sql ni el parámetro de URL propagan el pragma en
+  este stack (SB4+Hikari 7.0.2+Xerial 3.53.2); solo PRAGMA explícito por conexión aplica.
+  DECISIONES DE ALCANCE (cerradas con el arquitecto, varias reconsideradas EN sesión por el usuario):
+  (a) partir 8.5-C2 en C2a-DDL (esquema, esta sesión) + C2b (borrado amable, siguiente). (b) medir el
+  comportamiento FK-OFF antes de activar nada (test de caracterización efímero, Op-A; descartado del
+  repo tras confirmar el hallazgo, DA-8=Op-B′). (c) tras descubrir que el problema era de DDL: NO H2
+  (mantener SQLite por inspeccionabilidad universal del .db y estabilidad de formato; H2 tiene formato
+  propietario e incompatibilidad entre mayores). (d) el usuario reconsideró Flyway→DDL-3′ (schema.sql +
+  ddl-auto=none), más simple y misma integridad para «una BD por centro»: Flyway daba versionado sin
+  retorno aquí. (e) cascadas: CASCADE en plaza.actividad_id + las 3 plaza_id de join + sesion.horario_id
+  (coherencia BD↔ORM); resto RESTRICT (la red dura; el 409 lo pone C2b).
+  QUÉ SE CONSTRUYÓ: schema.sql (20 tablas VERBATIM del DDL de Hibernate + 27 FK inline, DROP…IF EXISTS
+  hijo→padre para idempotencia entre contextos), ddl-auto=none, SqliteForeignKeysConfig (DelegatingDataSource
+  que ejecuta PRAGMA foreign_keys=ON en cada getConnection), el fichero AutoConfigureDataJpa.imports que
+  SB4.1 exige para que el customizer corra en slices @DataJpaTest, y 2 tests de juicio: IntegridadReferencialTest
+  (pragma=1 desde el pool + insert colgante → SQLITE_CONSTRAINT_FOREIGNKEY código 19) e IdPrimaryKeyRoundTripTest
+  (persist→clear→find prueba que la PK integer se puebla y el puente Long↔INTEGER no trunca).
+  AUDITORÍA (el valor del bloque): 1ª pasada 88/164 (76 rojos), TODOS con causa raíz única = la PK `id`
+  NULL (hallazgo 3), no «tests que asumían esquema sin integridad». Normalizadas las 8 PK a `id integer`
+  (corrección de un defecto del generador, no desviación del verbatim, aprobada por el arquitecto). 2ª
+  pasada: 165/165 verde. Rojos (a) «borrado que ahora falla por FK» = NINGUNO: la suite no ejercita
+  «borrar padre con hijos», así que el insumo de C2b NO es un test rojo sino el MAPA DE FK RESTRICT
+  derivado (en D-F8.5-A-a). solver/ intacto → referencia NO regenerada; modelo §4.7 SÍ tocado (nota de
+  integridad referencial física con la semántica de cascadas).
+  DEUDA NUEVA: D-F8.5-C2a-a (.db preexistente con PK NULL en 8 tablas; sin producción hoy → teórico,
+  pero un .db de pruebas viejo fallará con FK-ON; migración = recreación). D-F8.5-A-a parcialmente
+  resuelta: mitad de esquema CERRADA, mitad de aplicación (borrado amable → 409) VIVA en C2b. Setters de
+  Actividad/Plaza siguen sin retirar (deuda de S72, intacta).
+  Siguiente: 8.5-C2b (borrado amable) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.

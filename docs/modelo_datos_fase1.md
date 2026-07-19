@@ -445,6 +445,24 @@ ProfesorRestriccionHoraria(
   motivo NULL       -- texto libre para auditoría
 )
 ```
+
+> **Estado de implementación de `ProfesorTutoria` (Sesión 77, Bloque 8.5-D2a).**
+> Materializada como entidad JPA (`@IdClass`, PK compuesta profesor+grupo) con enum
+> `RolTutoria`. Superficie: sub-recurso `GET/PUT /api/grupos/{id}/tutoria`, con
+> REEMPLAZO TOTAL idempotente (mismo patrón que las compatibilidades de aula de §4.7).
+> **I4 se valida en escritura**, sobre la lista entrante y antes de tocar la base; **no
+> hay constraint que la sostenga**: la PK compuesta no puede expresar «un
+> `TUTOR_PRINCIPAL` por grupo» (verificado por mutación en S77: neutralizada la guarda,
+> la escritura pasa con 200 y quedan dos principales del mismo grupo). Ver deuda
+> D-F8.5-D2a-a. La FK a `grupo` es `ON DELETE CASCADE` —la tutoría es población propia
+> del grupo, criterio de §4.7— y la FK a `profesor` es RESTRICT, con borrado a 409. Un
+> grupo PDC HEREDA por COPIA el `TUTOR_PRINCIPAL` de su padre en el alta y puede
+> editarlo después; los co-tutores NO se heredan. **S8 sigue sin consumirse por el
+> solver**: `Actividad.requiere_tutor` no se propaga al dominio (D-B5-5) y
+> `ProfesorTutoria` no viaja al `ProblemaHorario` — es el Bloque 8.5-D2b. Nota de
+> diseño: S8 NO es restricción de scheduling (no depende del tramo elegido, es
+> verificable sobre el catálogo), luego no corresponde a `ModeloCpSat`.
+
 > **Estado de implementación (Sesión 26, Bloques 6b y 6c).** El solver consume
 > esta tabla en ambas variantes. **DURA** (6b): una restricción DURA prohíbe al
 > profesor ocupar el tramo (veta el `tramoIndex` de toda instancia que lo liste
