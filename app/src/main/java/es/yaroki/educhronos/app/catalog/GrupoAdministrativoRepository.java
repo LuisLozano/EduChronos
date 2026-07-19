@@ -14,6 +14,14 @@ import org.springframework.data.repository.query.Param;
 public interface GrupoAdministrativoRepository extends JpaRepository<GrupoAdministrativo, Long> {
     Optional<GrupoAdministrativo> findByCodigo(String codigo);
 
+    /**
+     * El grupo hijo (PDC) que apunta a este padre por {@code grupo_padre_id} (I5). Finder
+     * derivado, no {@code @Query}: navega la asociación autorreferencial {@code grupoPadre}.
+     * {@link Optional} porque un padre ordinario tiene 0 o 1 PDC (la unicidad la garantiza
+     * {@code PdcService} en el alta); lo consumen el GET y el DELETE del sub-recurso PDC.
+     */
+    Optional<GrupoAdministrativo> findByGrupoPadre_Id(Long idPadre);
+
     /** FK {@code subgrupo_grupo.grupo_id} → grupo_administrativo (join del M:N de población). */
     @Query(value = "select count(*) from subgrupo_grupo where grupo_id = :id", nativeQuery = true)
     long contarSubgrupos(@Param("id") Long id);
