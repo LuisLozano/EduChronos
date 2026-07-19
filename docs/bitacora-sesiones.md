@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S71. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S72. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S71). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S72). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2813,3 +2813,59 @@ al abrir sesión.
   de 8.5 entero para condensar el bloque completo con criterio uniforme, recomendación de S70).
   Siguiente: 8.5-C (Actividad + Plaza; XOR aula, N profes/subgrupos; decisión pendiente del ctor
   protected; aquí muere SeedCatalogoRunner y muerde D-F8.5-A-a), a decidir al abrir sesión.
+
+### Sesión 72 — Fase 8, Bloque 8.5-C1: CRUD REST de Actividad como AGREGADO
+  (Plaza embebida). Modo híbrido. 1 commit de código (solo app/). CORTE DE 8.5 REVISADO EN SESIÓN:
+  8.5-C se PARTIÓ en C1 (Actividad+Plaza, esta sesión) → C2 (integridad referencial: activar FK +
+  borrado amable) → C3 (I3 + CRUD de AsignaturaAulaCompatible); siguen 8.5-D (PDC, MOCKUP PREVIO) →
+  8.5-E (rejilla, MOCKUP PREVIO).
+  DECISIONES DE ALCANCE (cerradas con el arquitecto antes de teclear): (D-C1-A) Actividad como
+  agregado; Plaza es sub-recurso EMBEBIDO en /api/actividades; NO hay /api/plazas ni PlazaController
+  ni PlazaRepository (Plaza se persiste/borra por cascade+orphanRemoval vía Actividad). (D-C1-B) I3
+  (asignatura↔tipo aula) FUERA de C1 → C3, porque arrastra materializar el CRUD de
+  AsignaturaAulaCompatible y una decisión de tabla-vacía; hoy NADIE valida I3 en escritura, así que no
+  es regresión. (D-C1-C) el borrado referencial FUERA de C1 → C2.
+  QUÉ SE CONSTRUYÓ: /api/actividades con las 5 operaciones. Validación en ActividadService (ninguna
+  delegada a la entidad JPA, que es POJO de persistencia): XOR aula por plaza (aulaFija Y candidatas →
+  400; ninguna de las dos → 400), I7 (plaza sin profesor → 400), I2 (subgrupo repetido en dos plazas
+  de la misma actividad → 400 que nombra el subgrupo), refs por código (asignatura/profesor/aula/
+  subgrupo inexistente → 400 que nombra el código), unicidad de codigo excluida por id en edición.
+  Convergencia S69: Actividad.actualizar / Plaza.actualizar (mutación nombrada, sin setId).
+  HALLAZGO GRAVE (leído del repo, no de memoria): las FK de SQLite NO están activadas
+  (application.properties no fuerza PRAGMA foreign_keys=ON; SQLite las tiene OFF por defecto por
+  conexión). Consecuencia viva HOY, no solo tarea futura: borrar un catálogo referenciado probablemente
+  NO lanza excepción — deja filas huérfanas SILENCIOSAS que solo se manifiestan cuando el mapper del
+  solver resuelve la referencia y encuentra null. Esto REESCRIBE D-F8.5-A-a: el problema no es «500
+  opaco por FK» (que quizá ni ocurre) sino «sin integridad referencial real». Verificación en EJECUCIÓN
+  de qué hace el driver Xerial + SQLiteDialect ante violación de FK con pragma OFF: NO hecha; hipótesis
+  por defecto = sin integridad. Reasignada a C2.
+  SEED DEGRADADO (corrige al plan, que decía «SeedCatalogoRunner muere en 8.5-C»): el seed NO puebla
+  AsignaturaAulaCompatible (verificado línea a línea: no inyecta su repo, todas sus aulas son
+  ORDINARIA) — esa tabla ya estaba vacía hoy, matar el seed no la vacía. C1 cubre lo único que el seed
+  crea además de las raíces A/A'/B (Actividad+Plaza) SALVO TramoSemanal, que no tiene CRUD en ningún
+  bloque de 8.5 (es D22, config de jornada). Por eso el seed NO muere en C1: se degrada a andamiaje de
+  tramos; su muerte total → bloque de configuración de jornada (D22). Javadoc del seed actualizado.
+  D-C1-E (código de plaza, CORREGIDA DOS VECES en sesión, matiz final crítico): el usuario NO teclea
+  código de plaza (Op-2); se DERIVA {codigoActividad}-P{n}. Contra lo que se supuso al abrir, el grep
+  probó que plaza.codigo SÍ es clave de correspondencia del solver (GeneradorHorarioService:209 y
+  CatalogoMapper:148 hacen toMap(codigo) que aborta ante duplicados; SolucionMapper:130,247 y
+  BloqueoMapper:80 emparejan por código). Por tanto el código debe ser ESTABLE. Regla final:
+  reconciliación POSICIONAL en el PUT (emparejar entrante↔existente por orden de creación/id; las
+  supervivientes CONSERVAN su código vía Plaza.actualizar; las sobrantes se borran por orphanRemoval;
+  las nuevas reciben maxSufijoVIVO+1). MATIZ que NO se puede perder: estable ≠ irrepetible-en-el-tiempo.
+  El código de una plaza VIVA no cambia (es lo que el solver necesita); un código LIBERADO por borrado
+  SÍ puede reasignarse a una plaza futura distinta, y es seguro porque Sesion/AulaBloqueada referencian
+  la plaza por plaza_id (FK al id), no por código. Se RETIRÓ una «regla anti-reuso» (high-water) que el
+  arquitecto había metido por error: era más estricta de lo que el solver necesita y exigía estado
+  persistido fuera de alcance. Emparejamiento posicional = decisión de UX PROVISIONAL (roza D-F8.6-a):
+  se confirma cuando exista el formulario de Actividad en 8.6.
+  ASERTOS DISCRIMINANTES (verdes, sin flush() explícito): putEstabilidad (editar contenido NO regenera
+  códigos: los 3 idénticos); putReduccion (6→2 plazas sin violar UNIQUE, supervivientes conservan
+  código); putReusoDeHueco (borrar P3, la nueva reusa P3, códigos vivos únicos); round-trip del bloque
+  CyR/OyD/RefMt (containsInAnyOrder de códigos por plaza, no tamaño); XOR/I7/I2/refs. Suite app 143 →
+  162 (+19). solver/ intacto → referencia NO regenerada; modelo NO tocado (§4.6 ya describe Actividad/
+  Plaza).
+  DEUDA NUEVA: setters de Actividad/Plaza NO retirados pese a la obligación S69: 12 tests verdes previos
+  los usan y el contrato prohíbe romper la suite. El Service nuevo no usa ninguno (ctor + actualizar +
+  agregarPlaza). Retirada → bloque que migre esos 12 tests.
+  Siguiente: 8.5-C2 (integridad referencial) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
