@@ -199,8 +199,10 @@ class PdcEndpointTest {
     /**
      * (4) POR MUTACIÓN: el subgrupo mono-Di metido en una plaza veta el borrado → 409, y no
      * borra nada. El desglose estructurado ({@code containsExactly} un único referente
-     * {@code plaza(s)}) es el aserto que blinda la guarda {@code contarPlazas}: verificado a
-     * mano quitando la guarda (pasa a 204) y restaurándola.
+     * {@code plaza(s)}) es el aserto que blinda la guarda {@code contarPlazas}. Patrón
+     * híbrido S74 (consulta inversa = 409 legible; FK física = red dura): al quitar la
+     * guarda el test SIGUE cayendo, pero por un 500 ({@code TransientPropertyValueException})
+     * de la red FK, no por un 204 — la FK física protege igual que la guarda de aplicación.
      */
     @Test
     void discriminante4_subgrupoMonoDiEnPlaza_delete409() throws Exception {

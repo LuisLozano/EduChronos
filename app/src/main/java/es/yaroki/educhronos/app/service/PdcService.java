@@ -77,10 +77,15 @@ public class PdcService {
         grupoRepositorio.findByCodigo(codigo).ifPresent(existente -> {
             throw new IllegalArgumentException("Ya existe un grupo con codigo " + codigo);
         });
-        if (grupoRepositorio.contarGruposHijos(idPadre) > 0) {
-            throw new IllegalArgumentException(
-                    "El grupo padre " + padre.getCodigo() + " ya tiene un PDC");
-        }
+        // "Un PDC por padre", no "un hijo por padre": filtra por tipo DIVERSIFICACION_PDC,
+        // no cualquier hijo por grupo_padre_id (hoy coinciden porque solo los PDC usan esa
+        // FK, pero otro tipo con grupoPadre no debe disparar este 400 con mensaje falso).
+        grupoRepositorio.findByGrupoPadre_Id(idPadre)
+                .filter(hijo -> hijo.getTipo() == TipoGrupo.DIVERSIFICACION_PDC)
+                .ifPresent(hijo -> {
+                    throw new IllegalArgumentException(
+                            "El grupo padre " + padre.getCodigo() + " ya tiene un PDC");
+                });
         String codigoSubgrupo = codigo + SUFIJO_SUBGRUPO;
         subgrupoRepositorio.findByCodigo(codigoSubgrupo).ifPresent(existente -> {
             throw new IllegalArgumentException(
