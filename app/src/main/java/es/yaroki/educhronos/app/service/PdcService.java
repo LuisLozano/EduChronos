@@ -2,6 +2,9 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
+import es.yaroki.educhronos.app.catalog.ProfesorTutoria;
+import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
+import es.yaroki.educhronos.app.catalog.RolTutoria;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TipoGrupo;
@@ -21,10 +24,15 @@ import org.springframework.transaction.annotation.Transactional;
  * RESTRINGIDO a ORDINARIOS y no se toca): el PDC no se crea por el CRUD plano de grupos
  * sino por esta vía compuesta.
  *
- * <p><b>Alta compuesta en UNA transacción</b> ({@link #crear}): crea el
- * {@code GrupoAdministrativo} PDC —nivel HEREDADO del padre, {@code grupoPadre = padre}—
- * y su subgrupo mono-Di {@code codigo + "-Completo"} cuya población es SOLO el PDC (nunca
- * el padre: regla S23; enlazar el padre haría INFEASIBLE al solver).
+ * <p><b>Alta compuesta en UNA transacción</b> ({@link #crear}): TRES cosas, no dos.
+ * <ol>
+ *   <li>el {@code GrupoAdministrativo} PDC —nivel HEREDADO del padre, {@code grupoPadre = padre}—;
+ *   <li>su subgrupo mono-Di {@code codigo + "-Completo"} cuya población es SOLO el PDC (nunca
+ *       el padre: regla S23; enlazar el padre haría INFEASIBLE al solver);
+ *   <li>la TUTORÍA heredada (8.5-D2a): si el padre tiene {@code TUTOR_PRINCIPAL}, el PDC nace
+ *       con ese mismo profesor como principal. Los co-tutores NO se heredan, y un padre SIN
+ *       tutor principal no es un error: el PDC nace sin tutoría.
+ * </ol>
  *
  * <p>Toda la validación vive AQUÍ, una sola vez, en este orden:
  * <ul>
@@ -50,11 +58,14 @@ public class PdcService {
 
     private final GrupoAdministrativoRepository grupoRepositorio;
     private final SubgrupoRepository subgrupoRepositorio;
+    private final ProfesorTutoriaRepository tutoriaRepositorio;
 
     public PdcService(GrupoAdministrativoRepository grupoRepositorio,
-                      SubgrupoRepository subgrupoRepositorio) {
+                      SubgrupoRepository subgrupoRepositorio,
+                      ProfesorTutoriaRepository tutoriaRepositorio) {
         this.grupoRepositorio = grupoRepositorio;
         this.subgrupoRepositorio = subgrupoRepositorio;
+        this.tutoriaRepositorio = tutoriaRepositorio;
     }
 
     /**
@@ -96,6 +107,7 @@ public class PdcService {
                 codigo, padre.getNivel(), TipoGrupo.DIVERSIFICACION_PDC, padre));
         // Población SOLO el PDC, nunca el padre (regla S23).
         subgrupoRepositorio.save(new Subgrupo(codigoSubgrupo, Set.of(pdc)));
+        heredarTutorPrincipal(padre, pdc);
         return aDTO(pdc);
     }
 
@@ -109,6 +121,7 @@ public class PdcService {
             throw new NoSuchElementException("No existe grupo con id " + idPadre);
         }
         return grupoRepositorio.findByGrupoPadre_Id(idPadre)
+                .filter(hijo -> hijo.getTipo() == TipoGrupo.DIVERSIFICACION_PDC)
                 .map(PdcService::aDTO)
                 .orElseThrow(() -> new NoSuchElementException(
                         "El grupo con id " + idPadre + " no tiene PDC"));
@@ -125,6 +138,7 @@ public class PdcService {
             throw new NoSuchElementException("No existe grupo con id " + idPadre);
         }
         GrupoAdministrativo pdc = grupoRepositorio.findByGrupoPadre_Id(idPadre)
+                .filter(hijo -> hijo.getTipo() == TipoGrupo.DIVERSIFICACION_PDC)
                 .orElseThrow(() -> new NoSuchElementException(
                         "El grupo con id " + idPadre + " no tiene PDC"));
         Subgrupo subgrupo = subgrupoRepositorio.findByCodigo(pdc.getCodigo() + SUFIJO_SUBGRUPO)
@@ -142,6 +156,23 @@ public class PdcService {
         subgrupoRepositorio.delete(subgrupo);
         subgrupoRepositorio.flush();
         grupoRepositorio.delete(pdc);
+    }
+
+    /**
+     * Copia al PDC el {@code TUTOR_PRINCIPAL} del padre, si lo tiene (tercera pieza del alta
+     * compuesta, Bloque 8.5-D2a). Los CO_TUTOR NO se heredan: el co-tutor lo es de la tutoría
+     * del ordinario, y arrastrarlo al PDC inventaría una tutoría que nadie ha decidido.
+     *
+     * <p>Que el padre NO tenga tutor principal no es un error: el PDC nace sin tutoría y se le
+     * asigna después por {@code PUT /api/grupos/{id}/tutoria}. Coherente con que la escritura
+     * solo hace cumplir "como mucho un principal", no "exactamente uno" (ver {@code TutoriaService}).
+     */
+    private void heredarTutorPrincipal(GrupoAdministrativo padre, GrupoAdministrativo pdc) {
+        tutoriaRepositorio.findByGrupo(padre).stream()
+                .filter(t -> t.getRol() == RolTutoria.TUTOR_PRINCIPAL)
+                .findFirst()
+                .ifPresent(tutoria -> tutoriaRepositorio.save(new ProfesorTutoria(
+                        tutoria.getProfesor(), pdc, RolTutoria.TUTOR_PRINCIPAL)));
     }
 
     private static GrupoDTO aDTO(GrupoAdministrativo grupo) {

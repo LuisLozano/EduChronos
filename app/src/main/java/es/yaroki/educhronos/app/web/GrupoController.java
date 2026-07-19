@@ -2,8 +2,11 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.GrupoService;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.TutoriaService;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoRequest;
+import es.yaroki.educhronos.app.web.dto.TutoriaDTO;
+import es.yaroki.educhronos.app.web.dto.TutoriaRequest;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
@@ -29,15 +32,23 @@ import org.springframework.web.server.ResponseStatusException;
  * {@link IllegalArgumentException} (validación: código, tipo no ordinario/no
  * parseable, nivel inexistente, unicidad) → {@code 400} con el mensaje en el reason.
  * En el {@code PUT} ambos son posibles y hay que distinguirlos por tipo.
+ *
+ * <p>Aloja además el sub-recurso {@code /{id}/tutoria} (I4, Bloque 8.5-D2a), delegado en
+ * {@link TutoriaService}: sub-recurso INLINE en el controlador del padre (patrón S75 de
+ * {@code AsignaturaController} con {@code /aulas-compatibles}), no controlador aparte
+ * como {@code PdcController}. Consecuencia asumida: el ctor gana un colaborador y los
+ * {@code standaloneSetup} de los tests lo reflejan.
  */
 @RestController
 @RequestMapping("/api/grupos")
 public class GrupoController {
 
     private final GrupoService service;
+    private final TutoriaService tutoriaService;
 
-    public GrupoController(GrupoService service) {
+    public GrupoController(GrupoService service, TutoriaService tutoriaService) {
         this.service = service;
+        this.tutoriaService = tutoriaService;
     }
 
     @GetMapping
@@ -84,6 +95,29 @@ public class GrupoController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (ReferenciaEntranteException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        }
+    }
+
+    // --------------------------------- sub-recurso: tutoría del grupo (I4, Bloque 8.5-D2a)
+
+    @GetMapping("/{id}/tutoria")
+    public List<TutoriaDTO> tutoria(@PathVariable("id") Long id) {
+        try {
+            return tutoriaService.obtener(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/{id}/tutoria")
+    public List<TutoriaDTO> reemplazarTutoria(
+            @PathVariable("id") Long id, @RequestBody List<TutoriaRequest> peticiones) {
+        try {
+            return tutoriaService.reemplazar(id, peticiones);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 }

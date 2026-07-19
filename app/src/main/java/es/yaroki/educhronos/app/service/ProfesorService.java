@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
+import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorRequest;
@@ -36,9 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfesorService {
 
     private final ProfesorRepository repositorio;
+    private final ProfesorTutoriaRepository tutoriaRepositorio;
 
-    public ProfesorService(ProfesorRepository repositorio) {
+    public ProfesorService(ProfesorRepository repositorio,
+                           ProfesorTutoriaRepository tutoriaRepositorio) {
         this.repositorio = repositorio;
+        this.tutoriaRepositorio = tutoriaRepositorio;
     }
 
     /** Todos los profesores como {@link ProfesorDTO}, ORDENADOS por código. */
@@ -102,7 +106,8 @@ public class ProfesorService {
                 .orElseThrow(() -> new NoSuchElementException("No existe profesor con id " + id));
         List<Referencia> entrantes = List.of(
                 new Referencia("plaza(s)", repositorio.contarPlazas(id)),
-                new Referencia("restriccion(es) horaria(s)", repositorio.contarRestriccionesHorarias(id)));
+                new Referencia("restriccion(es) horaria(s)", repositorio.contarRestriccionesHorarias(id)),
+                new Referencia("tutoria(s)", tutoriaRepositorio.contarTutorias(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }

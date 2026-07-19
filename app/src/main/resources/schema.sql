@@ -12,7 +12,11 @@
 -- FK quedan declaradas pero inertes.
 --
 -- Cascadas (decididas): ON DELETE CASCADE en plaza.actividad_id, en las tres
--- columnas plaza_id de las join tables y en sesion.horario_id. Todo lo demás
+-- columnas plaza_id de las join tables, en sesion.horario_id, en
+-- asignatura_aula_compatible.asignatura_id y en profesor_tutoria.grupo_id (las
+-- dos últimas son población PROPIA de su padre, no referencias entrantes: se van
+-- con él). profesor_tutoria.profesor_id NO cascadea: un profesor tutor no se
+-- borra en silencio, su borrado da 409. Todo lo demás
 -- queda en NO ACTION (equivale a RESTRICT en SQLite), incluidas las autoref
 -- nullables grupo_padre_id y siguiente_inmediato_id.
 --
@@ -24,6 +28,7 @@ drop table if exists sesion;
 drop table if exists aula_bloqueada;
 drop table if exists sesion_bloqueada;
 drop table if exists profesor_restriccion_horaria;
+drop table if exists profesor_tutoria;
 drop table if exists plaza_aula_candidata;
 drop table if exists plaza_profesor;
 drop table if exists plaza_subgrupo;
@@ -56,6 +61,7 @@ create table plaza_profesor (plaza_id bigint not null, profesor_id bigint not nu
 create table plaza_subgrupo (plaza_id bigint not null, subgrupo_id bigint not null, primary key (plaza_id, subgrupo_id), foreign key (plaza_id) references plaza(id) on delete cascade, foreign key (subgrupo_id) references subgrupo(id));
 create table profesor (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, primary key (id));
 create table profesor_restriccion_horaria (peso integer not null, id integer, profesor_id bigint not null, tramo_id bigint not null, motivo varchar(255), tipo varchar(255) not null check ((tipo in ('DURA','BLANDA'))), primary key (id), foreign key (profesor_id) references profesor(id), foreign key (tramo_id) references tramo_semanal(id));
+create table profesor_tutoria (grupo_id bigint not null, profesor_id bigint not null, rol varchar(255) not null check ((rol in ('TUTOR_PRINCIPAL','CO_TUTOR'))), primary key (profesor_id, grupo_id), foreign key (profesor_id) references profesor(id), foreign key (grupo_id) references grupo_administrativo(id) on delete cascade);
 create table sesion (indice integer not null, aula_id bigint not null, horario_id bigint not null, id integer, plaza_id bigint not null, tramo_inicio_id bigint not null, primary key (id), foreign key (aula_id) references aula(id), foreign key (horario_id) references horario_generado(id) on delete cascade, foreign key (plaza_id) references plaza(id), foreign key (tramo_inicio_id) references tramo_semanal(id));
 create table sesion_bloqueada (indice integer not null, actividad_id bigint not null, id integer, tramo_inicio_id bigint not null, primary key (id), foreign key (actividad_id) references actividad(id), foreign key (tramo_inicio_id) references tramo_semanal(id));
 create table subgrupo (id integer, codigo varchar(255) not null unique, primary key (id));
