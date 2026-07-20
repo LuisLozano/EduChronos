@@ -12,6 +12,7 @@ import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.HorarioController;
+import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
@@ -112,17 +113,31 @@ class GenerarHorarioEndpointTest {
                 .andExpect(jsonPath("$.sesiones").isNotEmpty());
     }
 
+    /**
+     * El 422 que llega DEL SOLVER, no de la pre-validación de 8.4-A. El fixture es
+     * infactible por una vía que la pre-validación NO cubre a propósito —el palomar de
+     * AULAS, fuera de alcance por decisión de S79—: dos actividades de 2 repeticiones
+     * comparten una única aula fija y solo hay 2 tramos, así que las 4 sesiones no caben
+     * en el aula. Todas las cuentas que sí se pre-validan salen justas (cada profesor 2 de
+     * 2, cada grupo 2 de 2, 2 repeticiones en 2 días), de modo que la petición ATRAVIESA la
+     * pre-validación y es el solver quien la declara infactible.
+     *
+     * <p>El aserto sobre la CAUSA es lo que mantiene honesto al test: sin él, el día que
+     * una regla nueva de pre-validación cubriera este caso, el test seguiría verde
+     * afirmando algo falso sobre el solver. El fixture anterior ({@code (2, 1)}) cayó
+     * justamente en eso al entrar 8.4-A: lo capturaban (a) y (d) antes del solve.
+     */
     @Test
-    void post_conCatalogoInfactible_devuelve422() throws Exception {
-        // 2 repeticiones de la MISMA actividad (mismo profesor/subgrupo/aula) pero un
-        // ÚNICO tramo lectivo: las dos instancias no caben en el mismo tramo -> INFEASIBLE.
-        poblarCatalogoMinimo(2, 1);
+    void post_conCatalogoInfactible_devuelve422DelSolver() throws Exception {
+        poblarCatalogoInfactiblePorAula();
         entityManager.flush();
 
         mockMvc.perform(post("/api/horarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"maxSegundos\":5}"))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(resultado -> assertThat(resultado.getResolvedException())
+                        .hasCauseInstanceOf(HorarioInfactibleException.class));
     }
 
     @Test
@@ -153,6 +168,55 @@ class GenerarHorarioEndpointTest {
 
         // D-F8.1-3: body por defecto ⇒ 30 s (no el techo de 120 del solver) y semilla 42.
         assertThat(argsConstructor).containsExactly(30.0, 42);
+    }
+
+    /**
+     * Infactible SOLO por el aula: 2 tramos lectivos (lunes, martes), dos actividades de 2
+     * repeticiones cada una, con profesores, subgrupos y grupos DISTINTOS pero la MISMA
+     * aula fija. Las cuentas pre-validables cuadran justas —cada profesor necesita 2 de sus
+     * 2 tramos, cada grupo 2 de 2, y 2 repeticiones caben en 2 días—, así que solo el
+     * no-solape de aula del solver detecta que 4 sesiones no entran en 2 tramos de A1.
+     */
+    private void poblarCatalogoInfactiblePorAula() {
+        Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
+        GrupoAdministrativo grupoA =
+                grupoRepository.save(new GrupoAdministrativo("1ºA", eso1, TipoGrupo.ORDINARIO, null));
+        GrupoAdministrativo grupoB =
+                grupoRepository.save(new GrupoAdministrativo("1ºB", eso1, TipoGrupo.ORDINARIO, null));
+        Subgrupo sgA = subgrupoRepository.save(new Subgrupo("1ºA-Completo", Set.of(grupoA)));
+        Subgrupo sgB = subgrupoRepository.save(new Subgrupo("1ºB-Completo", Set.of(grupoB)));
+        Profesor mat8 = profesorRepository.save(new Profesor("MAT8", "María Martínez"));
+        Profesor len1 = profesorRepository.save(new Profesor("LEN1", "Luis Lopez"));
+        Asignatura mat = asignaturaRepository.save(new Asignatura("Mat", "Matemáticas"));
+        Aula a1 = aulaRepository.save(new Aula("A1", TipoAula.ORDINARIA, null, null, null, null));
+
+        tramoRepository.save(new TramoSemanal(
+                Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+        tramoRepository.save(new TramoSemanal(
+                Dia.MARTES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 2, null));
+
+        crearActividadDeUnaPlaza("Mat-1ºA", mat, a1, mat8, sgA);
+        crearActividadDeUnaPlaza("Mat-1ºB", mat, a1, len1, sgB);
+    }
+
+    /** Actividad DISTRIBUIDA de 2 repeticiones y una sola plaza, con aula fija. */
+    private void crearActividadDeUnaPlaza(
+            String codigo, Asignatura asignatura, Aula aula, Profesor profesor, Subgrupo subgrupo) {
+        Actividad act = new Actividad();
+        act.setCodigo(codigo);
+        act.setAsignatura(asignatura);
+        act.setRepeticionesPorSemana(2);
+        act.setDuracionTramos(1);
+        act.setPatronTemporal(PatronTemporal.DISTRIBUIDA);
+        Plaza plaza = new Plaza();
+        plaza.setCodigo(codigo + "-P1");
+        plaza.setActividad(act);
+        plaza.setAsignatura(asignatura);
+        plaza.setProfesores(Set.of(profesor));
+        plaza.setAulaFija(aula);
+        plaza.setSubgrupos(Set.of(subgrupo));
+        act.getPlazas().add(plaza);
+        actividadRepository.save(act);
     }
 
     /**
