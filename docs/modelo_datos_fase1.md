@@ -476,6 +476,42 @@ ProfesorRestriccionHoraria(
 > la parametrización de pesos se difieren (deuda D21). El comentario "aplica si
 > tipo=BLANDA" del campo `peso` describe la intención de diseño, aún no realizada.
 
+> **Estado de implementación de `ProfesorRestriccionHoraria` — SUPERFICIE DE ESCRITURA
+> (Sesión 78, Bloque 8.5-E).** Hasta S78 la tabla se consumía (ver nota de S26) pero no
+> había forma de POBLARLA salvo SQL a mano: `SeedCatalogoRunner` no crea ninguna. El
+> bloque añade el sub-recurso `GET/PUT /api/profesores/{id}/restricciones-horarias`, con
+> REEMPLAZO TOTAL idempotente (mismo patrón que la tutoría de arriba y que las
+> compatibilidades de aula de §4.7): `deleteAll` + `flush` antes de insertar, validación
+> sobre la lista ENTRANTE. Un PUT con lista vacía borra todas las del profesor y es
+> válido. El tramo se referencia por `(dia, ordenEnDia)`, invirtiendo
+> `CatalogoMapper.indiceOrdenEnDia` (fuente única; ver D30). La restricción es
+> REFERENCIA ENTRANTE del profesor —FK RESTRICT, borrado a 409 desde S74— y no población
+> propia: el criterio de §4.7 se aplica al lado que POSEE la población, no al referenciado.
+>
+> **PRECISIÓN al párrafo anterior (S26), medida en S78 por lectura literal de
+> `ModeloCpSat`.** La nota de S26 dice que `peso` «no se consume todavía» en BLANDA. Es
+> correcto pero incompleto en dos puntos: (1) tampoco se consume en DURA —el javadoc del
+> record decía «se ignora en DURA», dando a entender que en BLANDA sí; no es así—, de modo
+> que `peso` es una columna `not null` en tres capas (esquema, JPA, dominio) que **ningún
+> consumidor lee jamás**; (2) por eso 8.5-E **NO lo expone**: no entra en el DTO de entrada
+> ni en la rejilla, y el servicio lo escribe siempre a 1. Ofrecer un control que el solver
+> ignora haría que la UI mintiera al usuario. Activarlo es trabajo de D21 (parametrización
+> y calibración de pesos), y activarlo sin calibrar sería peor que dejarlo inerte. Ver
+> deuda D-F8.5-E-a. El comentario «aplica si tipo=BLANDA» del campo `peso` en el
+> pseudo-DDL de arriba sigue describiendo intención, no comportamiento.
+>
+> **Sin constraint de unicidad.** Que un profesor no tenga dos restricciones sobre el mismo
+> tramo se valida SOLO en la aplicación, sobre la lista entrante (duplicado en el body →
+> 400, con la base intacta porque la validación precede al borrado). No hay
+> `UNIQUE (profesor_id, tramo_id)` en `schema.sql`: verificado por mutación en S78 —
+> neutralizada la guarda, el PUT pasa con 200 y quedan dos filas—. Misma situación que I4
+> en la tutoría de arriba. Ver deuda D-F8.5-E-b.
+>
+> **Los tres estados de la UI** son `{ausencia de fila, BLANDA, DURA}`: no hay enum nuevo,
+> y el CHECK de `schema.sql` ancla los dos valores. Volver un tramo a «puede» BORRA la fila
+> y con ella su `motivo`. El recreo NO es celda de la rejilla porque no es un `TramoSemanal`
+> (los tramos lectivos numeran 1..6 sin hueco; ver `ORDEN_TRAS_RECREO` y D22).
+
 > **D18 (deuda, Sesión 25; ampliada en Sesión 26). INFEASIBLE no diagnostica
 > la causa → condiciones necesarias baratas de factibilidad.** Un problema
 > infactible (un profesor con todos los tramos de sus clases vetados por
