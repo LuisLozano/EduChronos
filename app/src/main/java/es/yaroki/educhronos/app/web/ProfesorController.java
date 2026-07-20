@@ -2,8 +2,11 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.ProfesorService;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.service.RestriccionHorariaService;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorRequest;
+import es.yaroki.educhronos.app.web.dto.RestriccionHorariaDTO;
+import es.yaroki.educhronos.app.web.dto.RestriccionHorariaRequest;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
@@ -29,15 +32,25 @@ import org.springframework.web.server.ResponseStatusException;
  * {@link NoSuchElementException} (id inexistente) → {@code 404};
  * {@link IllegalArgumentException} (validación) → {@code 400}. En el {@code PUT}
  * ambos son posibles y hay que distinguirlos por tipo.
+ *
+ * <p>Aloja además el sub-recurso {@code /{id}/restricciones-horarias} (§4.3, Bloque
+ * 8.5-E), delegado en {@link RestriccionHorariaService}: sub-recurso INLINE en el
+ * controlador del padre (patrón S75 de {@code AsignaturaController} con
+ * {@code /aulas-compatibles} y S77 de {@code GrupoController} con {@code /tutoria}), no
+ * controlador aparte como {@code PdcController}. Consecuencia asumida: el ctor gana un
+ * colaborador y los {@code standaloneSetup} de los tests lo reflejan.
  */
 @RestController
 @RequestMapping("/api/profesores")
 public class ProfesorController {
 
     private final ProfesorService service;
+    private final RestriccionHorariaService restriccionService;
 
-    public ProfesorController(ProfesorService service) {
+    public ProfesorController(
+            ProfesorService service, RestriccionHorariaService restriccionService) {
         this.service = service;
+        this.restriccionService = restriccionService;
     }
 
     @GetMapping
@@ -84,6 +97,34 @@ public class ProfesorController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (ReferenciaEntranteException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        }
+    }
+
+    // ------------------- sub-recurso: restricciones horarias del profesor (Bloque 8.5-E)
+
+    @GetMapping("/{id}/restricciones-horarias")
+    public List<RestriccionHorariaDTO> restriccionesHorarias(@PathVariable("id") Long id) {
+        try {
+            return restriccionService.obtener(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Reemplazo TOTAL de las restricciones horarias del profesor. Un cuerpo vacío
+     * ({@code []}) las borra todas y devuelve {@code 200} con lista vacía: es un PUT
+     * legítimo, no un error.
+     */
+    @PutMapping("/{id}/restricciones-horarias")
+    public List<RestriccionHorariaDTO> reemplazarRestriccionesHorarias(
+            @PathVariable("id") Long id, @RequestBody List<RestriccionHorariaRequest> peticiones) {
+        try {
+            return restriccionService.reemplazar(id, peticiones);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 }
