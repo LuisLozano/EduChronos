@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S74. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S75. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S74). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S75). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2956,3 +2956,53 @@ al abrir sesión.
   árbol sucio (diagnosticado cada vez); mitigados fragmentando los turnos (un test por turno).
   DEUDA NUEVA: ninguna. Vivos para cerrar 8.5: C3 (I3 + AsignaturaAulaCompatible) y D/E (MOCKUP PREVIO).
   Siguiente: 8.5-C3 (I3 + compatibilidades) o 8.5-D/E, a decidir al abrir sesión.
+
+### Sesión 75 — Fase 8, Bloque 8.5-C3: I3 + CRUD DE COMPATIBILIDADES
+  asignatura↔tipo de aula. Modo híbrido. 4 commits de código (por concern + tests aparte) + doc.
+  MEDICIÓN PREVIA (§A, instrumento efímero descartado, patrón Op-A/S73) que REENCUADRÓ el bloque:
+  M1=0 filas en asignatura_aula_compatible; M2=0 asignaturas restringidas; M3/M4=0 pero
+  TAUTOLÓGICOS (con 0 compatibilidades ninguna plaza puede ser incompatible: ceros por
+  consecuencia lógica, no por evidencia); M5 = 11 aulas, TODAS `ORDINARIA`, porque
+  SeedCatalogoRunner las creaba con el tipo HARDCODEADO. HALLAZGO: `TipoAula` era COLUMNA MUERTA
+  → I3 no tenía un lado, tenía cero. La medición desmintió mi propia recomendación de apertura
+  («riesgo bajo y acotado»), que era suposición sobre el estado de los datos.
+  DECISIONES CERRADAS antes de teclear: (C) semántica de tabla vacía POR ASIGNATURA (0 filas ⇒
+  irrestricta; ≥1 ⇒ solo esos tipos) — descartadas «todo permitido» global (pierde granularidad)
+  y «nada permitido» (obliga a poblar el catálogo entero antes de que el sistema arranque, para
+  un usuario no técnico). Sub-recurso GET/PUT con REEMPLAZO TOTAL (no CRUD de fila con id
+  sintético): la unidad de la operación coincide con la del gesto del usuario y el id sintético
+  —que la entidad documenta como concesión a JPA— no sale nunca al API; precedente de idempotencia
+  en POST /api/bloqueos (S66). Compatibilidades = POBLACIÓN PROPIA de Asignatura (cascade), lo que
+  REVIERTE la Referencia de S74. I3 valida aulaFija Y TODAS las candidatas (una candidata
+  incompatible da un horario que viola I3 cuando el solver la elige).
+  PUNTO ÚNICO (lo más delicado del bloque): `crearPlaza` y `aplicarContenido` NO compartían funnel
+  —resolvían las 5 piezas por separado hacia sinks distintos (agregarPlaza vs plaza.actualizar)—.
+  Se CREÓ el funnel `resolverContenido(PlazaRequest, Map cacheI3)` → record `ContenidoPlaza`.
+  Descartado un `validarI3(...)` suelto llamado desde ambos: la lógica estaría una vez pero serían
+  DOS CALL-SITES, y un tercer camino futuro podría olvidarlo sin que la suite se pusiera roja. Con
+  el funnel la validación es inevitable POR CONSTRUCCIÓN (quien quiera contenido de plaza pasa por
+  ahí), no por disciplina — que es justo lo que D-F8.2b-iv-a lamenta no tener. Caché
+  Map<Long,Set<TipoAula>> LOCAL a la operación (no campo: el servicio es singleton y quedaría rancia).
+  TIPIFICACIÓN INCIDENTAL (2 líneas del seed, no sub-bloque propio: el seed muere en 8.5):
+  B07→TALLER_TEC DERIVADO del volcado aula-B07.json (Tec/TEC/TecIn/CyR); A12In→INFORMATICA por
+  DECISIÓN DEL ARQUITECTO contra el PDF «A12 Informática» —no derivado: el seed usa `A12In` y el
+  volcado `codigo_crudo` = `A12 Informática`, único de los 11 que no casa exacto (roza D8-1)—. Las
+  otras 9 son aulas ordinarias de grupo, verificado contra sus volcados. NO se amplió el seed a las
+  35 aulas reales (invertir en componente condenado) → oro SINTÉTICO, patrón S41.
+  HALLAZGO COLATERAL del test de cascada: en `@DataJpaTest` de una sola transacción las filas hijas
+  quedan MANAGED y Hibernate no conoce la cascada de BD; hizo falta flush()+clear() para desligarlas
+  y flush() explícito tras el DELETE (el autoflush ante un count() sobre la hija no dispara el DELETE
+  del padre). Sin eso el test observaría la caché L1, no la base. En producción no aplica (PUT y
+  DELETE son transacciones distintas). Mismo género que S73 (pragma que no se propaga) y S74 (falso
+  positivo de Subgrupo): el framework media entre lo que crees probar y lo que pruebas.
+  ASERTOS: 8 tests de compatibilidades + cascada VERIFICADA POR MUTACIÓN (quitar `on delete cascade`
+  → SQLITE_CONSTRAINT_FOREIGNKEY en el DELETE del padre → restaurar → verde) + 6 de I3, entre ellos
+  el DISCRIMINANTE DE (C): asignatura sin compatibilidades + aulaFija ORDINARIA → 201; si la
+  semántica pasara a «vacío = nada permitido» ese 201 sería 400 y el test caería. Suite 184 verde,
+  demostrada no-vacía (neutralizar validarI3 → 3 rojos esperados → restaurar → verde).
+  ALCANCE HONESTO: el bloque entrega MECANISMO Y SUPERFICIE, no una restricción activa: el catálogo
+  real sigue con 0 compatibilidades declaradas y poblarlas es trabajo de usuario en la UI.
+  solver/ intacto → referencia NO regenerada. modelo §4.1/I3 SÍ tocado (commit aparte).
+  DEUDA NUEVA: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
+  Vivos para cerrar 8.5: D y E, ambos MOCKUP PREVIO.
+  Siguiente: 8.5-D o 8.5-E (el primero de los dos empieza por MOCKUP, no por código), o 8.4.

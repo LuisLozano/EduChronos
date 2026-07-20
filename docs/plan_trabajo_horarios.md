@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-E CERRADO en S78
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.4-A CERRADO en S79
+  (pre-validación por condiciones necesarias, D18: tres reglas ERROR sobre el catálogo, deduplicando
+  por ACTIVIDAD; `GET /api/prevalidacion` + guarda en `generar()` → 422 distinguible del infactible del
+  solver; (c) subida a ERROR por hallazgo sobre `ModeloCpSat:1046-1074`; 8.4 partido en A/B, D20 va a
+  8.4-B). Bloque 8.5-E CERRADO en S78
   (CRUD REST de ProfesorRestriccionHoraria: sub-recurso GET/PUT con reemplazo total; la cadena JPA→
   dominio→CP-SAT ya existía y solo faltaba la superficie de escritura; `peso` NO se expone porque
   ModeloCpSat nunca lo lee). CON ÉL SE CIERRA 8.5: cero sub-bloques vivos (D2b es de solver/, D3
@@ -650,56 +654,62 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-Última sesión registrada (previa): Sesión 75 — Fase 8, Bloque 8.5-C3: I3 + CRUD DE COMPATIBILIDADES
-  asignatura↔tipo de aula. Modo híbrido. 4 commits de código (por concern + tests aparte) + doc.
-  MEDICIÓN PREVIA (§A, instrumento efímero descartado, patrón Op-A/S73) que REENCUADRÓ el bloque:
-  M1=0 filas en asignatura_aula_compatible; M2=0 asignaturas restringidas; M3/M4=0 pero
-  TAUTOLÓGICOS (con 0 compatibilidades ninguna plaza puede ser incompatible: ceros por
-  consecuencia lógica, no por evidencia); M5 = 11 aulas, TODAS `ORDINARIA`, porque
-  SeedCatalogoRunner las creaba con el tipo HARDCODEADO. HALLAZGO: `TipoAula` era COLUMNA MUERTA
-  → I3 no tenía un lado, tenía cero. La medición desmintió mi propia recomendación de apertura
-  («riesgo bajo y acotado»), que era suposición sobre el estado de los datos.
-  DECISIONES CERRADAS antes de teclear: (C) semántica de tabla vacía POR ASIGNATURA (0 filas ⇒
-  irrestricta; ≥1 ⇒ solo esos tipos) — descartadas «todo permitido» global (pierde granularidad)
-  y «nada permitido» (obliga a poblar el catálogo entero antes de que el sistema arranque, para
-  un usuario no técnico). Sub-recurso GET/PUT con REEMPLAZO TOTAL (no CRUD de fila con id
-  sintético): la unidad de la operación coincide con la del gesto del usuario y el id sintético
-  —que la entidad documenta como concesión a JPA— no sale nunca al API; precedente de idempotencia
-  en POST /api/bloqueos (S66). Compatibilidades = POBLACIÓN PROPIA de Asignatura (cascade), lo que
-  REVIERTE la Referencia de S74. I3 valida aulaFija Y TODAS las candidatas (una candidata
-  incompatible da un horario que viola I3 cuando el solver la elige).
-  PUNTO ÚNICO (lo más delicado del bloque): `crearPlaza` y `aplicarContenido` NO compartían funnel
-  —resolvían las 5 piezas por separado hacia sinks distintos (agregarPlaza vs plaza.actualizar)—.
-  Se CREÓ el funnel `resolverContenido(PlazaRequest, Map cacheI3)` → record `ContenidoPlaza`.
-  Descartado un `validarI3(...)` suelto llamado desde ambos: la lógica estaría una vez pero serían
-  DOS CALL-SITES, y un tercer camino futuro podría olvidarlo sin que la suite se pusiera roja. Con
-  el funnel la validación es inevitable POR CONSTRUCCIÓN (quien quiera contenido de plaza pasa por
-  ahí), no por disciplina — que es justo lo que D-F8.2b-iv-a lamenta no tener. Caché
-  Map<Long,Set<TipoAula>> LOCAL a la operación (no campo: el servicio es singleton y quedaría rancia).
-  TIPIFICACIÓN INCIDENTAL (2 líneas del seed, no sub-bloque propio: el seed muere en 8.5):
-  B07→TALLER_TEC DERIVADO del volcado aula-B07.json (Tec/TEC/TecIn/CyR); A12In→INFORMATICA por
-  DECISIÓN DEL ARQUITECTO contra el PDF «A12 Informática» —no derivado: el seed usa `A12In` y el
-  volcado `codigo_crudo` = `A12 Informática`, único de los 11 que no casa exacto (roza D8-1)—. Las
-  otras 9 son aulas ordinarias de grupo, verificado contra sus volcados. NO se amplió el seed a las
-  35 aulas reales (invertir en componente condenado) → oro SINTÉTICO, patrón S41.
-  HALLAZGO COLATERAL del test de cascada: en `@DataJpaTest` de una sola transacción las filas hijas
-  quedan MANAGED y Hibernate no conoce la cascada de BD; hizo falta flush()+clear() para desligarlas
-  y flush() explícito tras el DELETE (el autoflush ante un count() sobre la hija no dispara el DELETE
-  del padre). Sin eso el test observaría la caché L1, no la base. En producción no aplica (PUT y
-  DELETE son transacciones distintas). Mismo género que S73 (pragma que no se propaga) y S74 (falso
-  positivo de Subgrupo): el framework media entre lo que crees probar y lo que pruebas.
-  ASERTOS: 8 tests de compatibilidades + cascada VERIFICADA POR MUTACIÓN (quitar `on delete cascade`
-  → SQLITE_CONSTRAINT_FOREIGNKEY en el DELETE del padre → restaurar → verde) + 6 de I3, entre ellos
-  el DISCRIMINANTE DE (C): asignatura sin compatibilidades + aulaFija ORDINARIA → 201; si la
-  semántica pasara a «vacío = nada permitido» ese 201 sería 400 y el test caería. Suite 184 verde,
-  demostrada no-vacía (neutralizar validarI3 → 3 rojos esperados → restaurar → verde).
-  ALCANCE HONESTO: el bloque entrega MECANISMO Y SUPERFICIE, no una restricción activa: el catálogo
-  real sigue con 0 compatibilidades declaradas y poblarlas es trabajo de usuario en la UI.
-  solver/ intacto → referencia NO regenerada. modelo §4.1/I3 SÍ tocado (commit aparte).
-  DEUDA NUEVA: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
-  Vivos para cerrar 8.5: D y E, ambos MOCKUP PREVIO.
-  Siguiente: 8.5-D o 8.5-E (el primero de los dos empieza por MOCKUP, no por código), o 8.4.
-### Sesión 78 — Fase 8, Bloque 8.5-E: CRUD REST de ProfesorRestriccionHoraria (CIERRA 8.5).
+### Sesión 79 — Fase 8, Bloque 8.4-A: PRE-VALIDACIÓN por condiciones necesarias (D18).
+  Modo híbrido. 4 commits de código (1ea9103 + 838f944 producción/tests; 357d7c2 + 6cf44cb la
+  corrección de (c)) + doc. §A DE MEDICIÓN sobre CÓDIGO (greps + lectura literal) y §A-bis sobre
+  los VOLCADOS.
+  SALIDA DE §A: el hueco es TOTAL, no parcial. Las cuatro condiciones de D18 dan NO; `DemandaCurricular`
+  (§4.5) NO está materializada. Lo único que se validaba antes del solve era integridad referencial y
+  nulidad; CERO aritmética de capacidad. CORRIGE MI SUPOSICIÓN DE APERTURA: dije que el INFEASIBLE
+  podía salir opaco o 500; es FALSO —`HorarioController:59` ya traducía a 422 con test que lo cubre—.
+  Lo que faltaba no era el status sino el CONTENIDO: `HorarioInfactibleException` lleva UN SOLO String.
+  `DiagnosticoService` NO sirve de base: exige `HorarioGenerado` persistido (404 si no), y 8.4 corre
+  ANTES de que exista horario; comparten solo `cargarProblema()`. Patrón heredable = `ReferenciaEntranteException`.
+  SALIDA DE §A-bis (volcados): CERO guardias, reducciones u ocupación no docente, y NO PUEDE HABERLAS
+  —las fuentes son rejillas por grupo y por aula, y una guardia no ocupa ninguno de los dos—. No hay
+  volcado de profesor ni lo habrá. CONSECUENCIA: el numerador de (a) es medible desde los volcados; el
+  DENOMINADOR no lo es por ninguna fuente del proyecto. Que guardias y reducciones se declaren DURA es
+  DECISIÓN DEL ARQUITECTO (S79), no dato derivado; si el centro no las declara, (a) produce falsos
+  NEGATIVOS, nunca positivos. Escrito literal en el javadoc.
+  DECISIONES CERRADAS (F84-1..5): 8.4 PARTIDO en A/B —D20 no se puede dibujar antes de que existan
+  avisos que enseñar, luego el MOCKUP PREVIO se retira de esta sesión y va a 8.4-B—; excepción propia
+  en app/ con carga estructurada, sin tocar solver/; (b) palomar FUERA por riesgo de falso positivo;
+  una implementación, dos llamadores.
+  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code al preguntar antes de
+  teclear (registrados, no tapados). (1) Especifiqué (a) «suma por plaza»: MAL. Las plazas de una
+  actividad son SIMULTÁNEAS (S5); un profesor en dos plazas de la misma actividad consume UN tramo.
+  Contar por plaza sobrestima → falso positivo. (a) y (c) deduplican por actividad: helper único, dos
+  ejes. (2) Especifiqué (d) sin distinguir patrón: una NEUTRA con `repeticiones > días` NO es
+  infactible (7 caben en 5 días con 6 tramos). (d) se PARTE en (d1) solo DISTRIBUIDA y (d2)
+  `rep × dur > tramos totales` para todas, con `regla` distinta y mensaje distinto.
+  HALLAZGO QUE INVIRTIÓ UNA DECISIÓN MÍA (medido en el código por Claude Code, no razonado): (c) estaba
+  fijada como AVISO con el motivo «si el centro configura CyR/OyD como actividades separadas, la suma
+  sobrestima». FALSO bajo el modelo actual: `ModeloCpSat:1046-1074` impone `addNoOverlap` por grupo con
+  `tocaGrupo` deduplicando por INSTANCIA DE ACTIVIDAD —misma unidad que (c)—, así que si se configuran
+  separadas el solver TAMPOCO las deja compartir tramo. Es infactibilidad GARANTIZADA. (c) SUBE A ERROR.
+  TERCERA SESIÓN CONSECUTIVA (S77, S78, S79) con el mismo género de error: aplicar un criterio sin
+  comprobar el precedente en el código. Las tres veces lo destapó la ejecución, no el razonamiento.
+  ASERTOS: 10 tests. A3 es el ORO y su calibración no es gratuita: el fixture hace que AMBAS cuentas
+  superen el techo (7 por actividad, 10 por plaza, techo 5) para que la PRESENCIA del aviso no
+  discrimine y el único aserto posible sea el VALOR. MUTACIÓN (Set→List): cae SOLO A3, por el aserto de
+  valor (7 vs 10), +3 = la contribución duplicada de la segunda plaza. Los tres tests HTTP siguen verdes
+  bajo la mutación → D-F8.4-A-b. A4 INVERTIDO al subir (c) a ERROR, y su aserto más fuerte no es el 422
+  sino `mocked.constructed()).isEmpty()`: el solver NO SE CONSTRUYE, que es el propósito entero del
+  bloque y ningún status podía demostrarlo. Frontera `>` vs `>=` verificada por mutación (A1a) y con
+  peso real: `PinTramoGeneracionRoundTripTest` (1 tramo, demanda 1) pasa PRECISAMENTE por ella.
+  DOS TESTS QUE MENTÍAN, corregidos: `GenerarHorarioEndpointTest` seguía verde pero su fixture (2,1) ya
+  lo capturaba la pre-validación antes del solve —sustituido por uno infactible SOLO por aula, que de
+  paso documenta el hueco de (b)—; y el `noneMatch(ERROR)` de A3 se volvió FALSO (no tautológico) al
+  subir (c), sustituido por `hasSize(1)`, que conserva la propiedad útil sin afirmar nada falso.
+  A6 quedó SOBRE-DETERMINADO (su fixture dispara las tres reglas); el aislamiento limpio de (d) vive en
+  A5. Declarado, no tapado.
+  Suite 305 → 315 (+10), solver 78 intacto. solver/ NO tocado → referencia NO regenerada. modelo §4.3
+  SÍ tocado (nota de implementación de D18, commit aparte).
+  DEUDA NUEVA: D-F8.4-A-a (garantía de (c) derivada del no-solape por grupo), D-F8.4-A-b (la
+  deduplicación la protege UN solo test), D-F8.4-A-c (severidad tautológica, `AVISO` sin productor).
+  Siguiente: LIMPIEZA DE 8.5 (desplazada de S79, sesión en frío), 8.6 (Angular, contrato cerrado en
+  S67), 8.4-B (presentación, MOCKUP PREVIO) u 8.5-D2b (solver), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 78 — Fase 8, Bloque 8.5-E: CRUD REST de ProfesorRestriccionHoraria (CIERRA 8.5).
   Modo híbrido. 2 commits de código (producción + tests, solo app/) + doc. §A DE MEDICIÓN sobre CÓDIGO
   (greps + lectura literal, el instrumento MÁS BARATO que respondía: la pregunta era sobre el repo, no
   sobre datos; precedente S77). SALIDA que REENCUADRÓ el bloque: la cadena entera JPA → CatalogoMapper
@@ -885,10 +895,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77 y la de S74 en la Sesión 78 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 y la de S75 en la Sesión 79 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S75–S78). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S76–S79). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1032,8 +1042,23 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       comprobarse no es un invariante (D-F8.3-C-6). DTO: violaciones + penalizaciones + totales;
       las duras vienen VACÍAS en un horario del solver (red de seguridad visible, no diagnóstico).
       SesionVistaDTO NO tocado. D19 CERRADA salvo su parte de UI (8.6).
-- [ ] Bloque 8.4 — Pre-validación (D18/D20). Incluye la validación amable del bloqueo
-      contradictorio, diferida desde 8.2a (hoy da INFEASIBLE seco).
+- [x] Bloque 8.4-A — Pre-validación por CONDICIONES NECESARIAS (S79). 8.4 partido en A (backend,
+      esta sesión) y B (presentación, D20). Tres reglas, todas ERROR, en `PrevalidacionService`
+      (núcleo ESTÁTICO `prevalidar(ProblemaHorario)`: inyectar el bean daría ciclo Spring con
+      `GeneradorHorarioService`; el endpoint carga y `generar()` reutiliza el problema ya cargado,
+      sin doble lectura ni decimotercera dependencia). (a) demanda de profesor > tramos lectivos −
+      DURA; (c) demanda de grupo > tramos lectivos; (d1) `repeticiones > días` SOLO en DISTRIBUIDA;
+      (d2) `repeticiones × duracion > tramos totales` en TODAS. (a) y (c) DEDUPLICAN POR ACTIVIDAD,
+      no por plaza (las plazas de una actividad son simultáneas por S5): helper único, dos ejes.
+      Superficie: `GET /api/prevalidacion` → 200 con la lista completa; `generar()` aborta con
+      `PrevalidacionFallidaException` → 422, distinguible de `HorarioInfactibleException` por
+      aserto de causa. (b) palomar de aulas FUERA del alcance por riesgo de falso positivo.
+      Suite 305 → 315. Deuda: D-F8.4-A-a, D-F8.4-A-b, D-F8.4-A-c. Detalle: bitácora S79.
+- [ ] Bloque 8.4-B — Presentación de los avisos (D20). Arrastra MOCKUP PREVIO (D-F8.6-a): la
+      pregunta «¿bloquean o advierten?» resultó tener respuesta ESTRUCTURAL en 8.4-A —bloquea lo
+      que es condición necesaria demostrable— así que 8.4-B decide cómo se PINTAN, no cuáles
+      abortan. Incluye la validación amable del bloqueo contradictorio, diferida desde 8.2a
+      (hoy da INFEASIBLE seco): NO la cubre 8.4-A.
 - [x] Bloque 8.5-A/A'/B — CRUD de catálogo, raíces + grupos/subgrupos (S69/S70/S71).
 - [x] Bloque 8.5-C1 — CRUD de Actividad como agregado (S72). XOR/I7/I2, reconciliación posicional.
 - [x] Bloque 8.5-C2a-DDL — Integridad referencial de ESQUEMA (S73). `schema.sql` + `ddl-auto=none` +
@@ -1687,6 +1712,26 @@ siguiente, con remisión a la bitácora.
   por colaborador inyectado (S77). Mismo tipo de chequeo, misma raíz, dos sitios donde buscarlo.
   No es defecto funcional —los tres se ejecutan en `ProfesorService.borrar`— pero rompe la
   localidad que S74 perseguía. → unificar si se añade un tercer conteo a esta raíz.
+- **D-F8.4-A-a** (S79, VIVA) — LA GARANTÍA DE (c) ES DERIVADA, NO ESTRUCTURAL. Que «grupo con más
+  tramos de actividad que tramos lectivos ⇒ infactible» sea CIERTO depende de que
+  `ModeloCpSat.restriccionNoSolapeGrupo` (1046-1074) siga deduplicando un intervalo por INSTANCIA
+  de actividad vía `tocaGrupo` — la misma unidad de conteo que usa la regla. (a) y (d) son
+  estructurales; (c) no. Si el no-solape por grupo se relajara para modelar algo que hoy no
+  existe, (c) pasaría a producir FALSOS POSITIVOS EN SILENCIO, bloqueando problemas resolubles.
+  Citada en el javadoc de `sobrecargaGrupo`. → revisar si se toca el no-solape por grupo.
+- **D-F8.4-A-b** (S79, VIVA) — EL PODER DISCRIMINANTE DE LA DEDUPLICACIÓN VIVE EN UN SOLO TEST.
+  Medido POR MUTACIÓN en S79: al neutralizar la deduplicación (Set→List) cae ÚNICAMENTE A3
+  (`grupoConDesdoble_cuentaLaActividadUnaVezAunqueTengaDosPlazas`, aserto de VALOR demanda==7 vs 10).
+  Los tres tests HTTP siguieron VERDES: su fixture (6 de demanda contra 5 disponibles) dispara con
+  las dos formas de contar, luego prueban la superficie, no la aritmética. Si alguien «simplifica»
+  el fixture de A3 —calibrado a propósito para que AMBAS cuentas superen el techo, de modo que la
+  presencia no discrimine y el único aserto posible sea el valor—, la regla se queda sin red y
+  ningún otro test lo detectará. → no tocar el fixture de A3 sin rehacer la mutación.
+- **D-F8.4-A-c** (S79, VIVA, no bloqueante) — LA SEVERIDAD YA NO DISCRIMINA. Al subir (c) a ERROR,
+  ninguna de las reglas produce AVISO, y los asertos de severidad de A3 y A4 quedaron
+  TAUTOLÓGICOS: se conservan como red anti-regresión (por si (c) volviera a AVISO) pero NO cuentan
+  como cobertura. El enum `Severidad` conserva `AVISO` sin ningún productor. Declarado en la
+  réplica de S79, no descubierto después. → si nace una regla heurística, deja de ser deuda.
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —
   la entrada del bloqueo por REST va en **endpoint propio**, NO en el body de

@@ -545,6 +545,55 @@ ProfesorRestriccionHoraria(
 > (trabajo transversal no planificado, fuera del alcance de D18). En el Bloque
 > 6b se dejó caer deliberadamente en INFEASIBLE; el solver no lo detecta.
 
+**Nota de implementación (S79, Bloque 8.4-A).** D18 tiene ya implementación
+parcial en la capa de aplicación: `PrevalidacionService` (módulo `app/`, núcleo
+estático `prevalidar(ProblemaHorario)`) computa **tres** de las cuatro
+condiciones necesarias enumeradas arriba, todas con severidad ERROR, y su
+resultado se expone por `GET /api/prevalidacion` y actúa como guarda en
+`generar()` (aborta con 422 antes de construir el solver). Cuatro precisiones
+que el texto de la deuda no anticipaba:
+
+1. **La unidad de conteo es la ACTIVIDAD, no la plaza.** Tanto (a) —carga del
+   profesor— como (c) —carga del grupo— deduplican por actividad antes de
+   sumar `duracion_tramos × repeticiones_por_semana`. Las plazas de una misma
+   actividad son simultáneas por construcción (invariante S5), luego un
+   profesor que figura en dos plazas de la misma actividad (co-docencia,
+   desdoble cubierto por el mismo docente) consume **un** tramo, no dos.
+   Contar por plaza sobrestimaría la demanda y produciría falsos positivos.
+2. **(d) se parte en dos reglas distintas.** (d1) `repeticiones_por_semana >
+   nº de días lectivos` aplica **solo** a `patron_temporal = DISTRIBUIDA`: en
+   NEUTRA o AGRUPADA ese exceso no es infactible (siete repeticiones caben en
+   cinco días con seis tramos diarios). (d2) `repeticiones_por_semana ×
+   duracion_tramos > nº total de tramos lectivos` aplica a todas, sea cual sea
+   el patrón. (d1) convierte además en error visible la degradación muda de
+   `ModeloCpSat`, que ante ese caso desactiva la restricción de distribución
+   con un `continue` (guarda anti-palomar de D12) en vez de fallar.
+3. **(b), el palomar de aulas, queda fuera.** «Plazas forzosamente simultáneas»
+   solo es computable para las que comparten actividad; el resto lo decide el
+   solver. Un chequeo aproximado produciría falsos positivos, y un falso
+   positivo en pre-validación bloquea un problema resoluble, que es peor que no
+   validar.
+4. **La garantía de (c) es derivada, no estructural.** Que un grupo con más
+   tramos de actividad que tramos lectivos sea infactible se sigue del
+   `addNoOverlap` por grupo del modelo CP-SAT, que deduplica un intervalo por
+   instancia de actividad — la misma unidad que usa la regla. Si ese no-solape
+   se relajara, (c) pasaría a producir falsos positivos en silencio. (a) y (d)
+   no dependen de nada del modelo CP-SAT.
+
+Sobre el denominador de (a): la disponibilidad de un profesor se computa como
+`tramos lectivos − restricciones DURA`. Que las guardias, reducciones horarias
+y demás ocupación no docente se declaren como restricción DURA es **decisión
+del arquitecto (S79)**, no dato derivado: los volcados de referencia del centro
+no contienen ocupación no docente y no pueden contenerla, porque sus fuentes
+son rejillas indexadas por grupo y por aula, y una guardia no ocupa ninguno de
+los dos. Si un centro no las declara, (a) produce falsos **negativos** (deja
+pasar problemas infactibles), nunca falsos positivos.
+
+D20 —la presentación de estos avisos— sigue abierta y se resolvió que es
+posterior: la pregunta «¿bloquean o advierten?» tiene respuesta estructural
+(bloquea lo que es condición necesaria demostrable), de modo que lo que queda
+por decidir es cómo se pintan, no cuáles abortan.
+
 ### 4.4 Distancias entre aulas
 
 La distancia se calcula por defecto con una fórmula sobre los campos
