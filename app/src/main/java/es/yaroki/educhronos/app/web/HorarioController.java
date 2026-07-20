@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.web;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
@@ -25,9 +26,12 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <p>Traducciones: {@code IllegalArgumentException} de {@link GeneradorHorarioService#proyectar}
  * (id inexistente) → {@code 404}; {@code HorarioInfactibleException} → {@code 422}
- * (problema bien formado sin solución); {@code IllegalArgumentException} de la
- * generación (p. ej. {@code maxSegundos} no positivo) → {@code 400}. El resto
- * (errores de integridad del catálogo) se deja propagar.
+ * (problema bien formado sin solución); {@link PrevalidacionFallidaException} →
+ * {@code 422} TAMBIÉN (Bloque 8.4-A): es el mismo hecho —no hay horario posible—
+ * detectado ANTES del solve y con el recurso culpable nombrado, así que comparte
+ * status; {@code IllegalArgumentException} de la generación (p. ej. {@code maxSegundos}
+ * no positivo) → {@code 400}. El resto (errores de integridad del catálogo) se deja
+ * propagar.
  */
 @RestController
 @RequestMapping("/api/horarios")
@@ -55,6 +59,8 @@ public class HorarioController {
             HorarioGenerado horario =
                     service.generar(req.maxSegundos(), req.semilla(), req.via(), req.nombre());
             return service.proyectar(horario.getId());
+        } catch (PrevalidacionFallidaException e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         } catch (HorarioInfactibleException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         } catch (IllegalArgumentException e) {

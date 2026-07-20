@@ -156,8 +156,17 @@ public class GeneradorHorarioService {
      * (única vía de 8.1); {@code nombre} a {@code "Horario " + Instant.now()} si viene
      * nulo o en blanco.
      *
+     * <p><b>Pre-validación (Bloque 8.4-A, deuda D18).</b> Entre la carga y el solve se
+     * pasan las condiciones NECESARIAS de {@link PrevalidacionService}; si alguna sale
+     * con severidad {@link Severidad#ERROR} se aborta con
+     * {@link PrevalidacionFallidaException} y NO se invoca al solver. Se llama al núcleo
+     * ESTÁTICO con el {@code problema} YA cargado: ni se recarga el catálogo ni se
+     * inyecta el bean (que crearía un ciclo, ver javadoc de {@code PrevalidacionService}).
+     *
      * @throws IllegalArgumentException si {@code maxSegundos} se especifica y no
      *         es estrictamente positivo.
+     * @throws PrevalidacionFallidaException si el catálogo viola alguna condición
+     *         necesaria: el problema no puede tener solución y no se gasta el solver.
      * @throws es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException si el
      *         problema no admite un horario factible.
      */
@@ -171,6 +180,14 @@ public class GeneradorHorarioService {
                 ? nombre : "Horario " + Instant.now();
 
         ProblemaHorario problema = cargarProblema();
+
+        // Condiciones necesarias ANTES del solve (8.4-A, D18): un catálogo que las viola
+        // no tiene horario posible, y fallar aquí nombra al recurso culpable en vez de
+        // devolver un CpSolverStatus opaco tras agotar el presupuesto.
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        if (avisos.stream().anyMatch(a -> a.severidad() == Severidad.ERROR)) {
+            throw new PrevalidacionFallidaException(avisos);
+        }
 
         // Defaults de la capa de aplicación (D-F8.1-3): 30 s de presupuesto y semilla
         // 42 cuando el body no los especifica. NO se delega en el constructor por
