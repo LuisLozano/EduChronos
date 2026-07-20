@@ -600,7 +600,9 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.4-A CERRADO en S79
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGIENE DOCUMENTAL en S80
+  (condensación de los 8 sub-bloques CERRADOS de 8.5 a una línea cada uno, con los tokens de deuda
+  conservados dentro; 8.5-D2b y 8.5-D3 quedan íntegros por estar ABIERTOS; sin código). Bloque 8.4-A CERRADO en S79
   (pre-validación por condiciones necesarias, D18: tres reglas ERROR sobre el catálogo, deduplicando
   por ACTIVIDAD; `GET /api/prevalidacion` + guarda en `generar()` → 422 distinguible del infactible del
   solver; (c) subida a ERROR por hallazgo sobre `ModeloCpSat:1046-1074`; 8.4 partido en A/B, D20 va a
@@ -654,7 +656,60 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 79 — Fase 8, Bloque 8.4-A: PRE-VALIDACIÓN por condiciones necesarias (D18).
+### Sesión 80 — HIGIENE DOCUMENTAL: condensación de 8.5 y archivado de ventana (sin código).
+  Modo interactivo (documentación; el repo NO se tocó). 2 commits de doc, ninguno de código.
+  ALCANCE elegido sobre cuatro candidatos (8.6, 8.4-B, 8.5-D2b, limpieza): la limpieza de 8.5
+  llevaba desplazada TRES veces (S78, S79) y su condición habilitante se cumple desde S78. El
+  motivo por el que S79 la desplazó —concentrar dos operaciones de riesgo sobre el mismo fichero—
+  desaparece por construcción en una sesión sin código. Los tres candidatos de código NO estaban
+  tan listos como su casilla sugiere: 8.6 arrastra una elección de librería de d&d no tomada
+  («no hay librería de d&d en el frontend hoy»); 8.4-B dibujaría dos severidades cuando
+  D-F8.4-A-c dice que solo hay una viva; 8.5-D2b debe INVERTIR `CatalogoMapperActividadTest:136`,
+  que hoy asevera el olvido de D-B5-5.
+  §A DE MEDICIÓN (greps sobre el plan; instrumento más barato, precedente S77/S78/S79). Universo:
+  los 40 tokens citados textualmente en las casillas de 8.5. Se simuló el escenario CONJUNTO
+  (condensar + archivar S76 en la misma sesión). SALIDA: ningún token caía a cero, pero TRES
+  quedaban como definición SIN NINGÚN CITANTE —D-F8.5-C3-a, D-F8.5-C3-b y D-F8.5-D1-b—. El caso
+  agudo es D-F8.5-D1-b: sus dos citantes eran la cabecera de S76 (que se archiva) y la casilla de
+  8.5-D1 (que se condensa), y S80 se los quitaba A LA VEZ. Es el patrón exacto que costó a S62 la
+  descomposición de Fase 8.
+  CORRIGE UNA PREVISIÓN DE APERTURA: dije que las deudas D-F8.5-* estaban definidas en «Deuda
+  consciente VIVA» y que condensar las casillas no las mataría. Cierto para NUEVE de doce, FALSO
+  para tres. La diferencia solo se vio por grep.
+  DECISIÓN F80-1: R4 se lee LITERAL («ni citante vivo NI definición viva» ⇒ definición basta),
+  pero no hizo falta interpretarlo: el formato de condensación acordado —«qué (Sxx) →
+  deuda/decisión superviviente; Detalle: bitácora Sxx»— YA reserva sitio al token en «deuda
+  superviviente». Coste cero. Medido después: C3-a 2→2, C3-b 2→2, D1-b 3→3.
+  DECISIÓN F80-2: la NOTA del seed sale de la casilla de 8.5-E y va al párrafo «Diferibles»,
+  pegada a D22, que es donde el seed muere. Gana el nombre de clase real `SeedCatalogoRunner`,
+  que la nota original omitía (R5 pide mecanismo de src/main, no perífrasis).
+  DECISIÓN F80-3: 8.5-D2b y 8.5-D3 quedan ÍNTEGROS. Están ABIERTOS y R5 dice que lo PENDIENTE es
+  estado vivo: D2b lleva la NOTA DE DISEÑO (S8 no va en ModeloCpSat) y D3 su CRITERIO DE
+  REAPERTURA, sin el cual «aplazado» degenera en «olvidado». Se condensan SIETE casillas cerradas,
+  no nueve.
+  CONSERVADO POR R5 dentro de las líneas condensadas, pese a alargarlas: el funnel único
+  `resolverContenido` (C3), la asimetría cascade/409 de la tutoría (D2a), `PESO_INDISP_BLANDA`
+  (E) y «sin @ControllerAdvice» (C2b) —este último porque D-F8.5-E-c apunta explícitamente a esa
+  decisión y sin ella la deuda apuntaría al vacío—. PERDIDO A PROPÓSITO (vive en bitácora): los
+  recuentos de suite por bloque (la suite viva es 315), «Flyway descartado», «opción b / opción
+  2A», el falso positivo de Subgrupo, la tipificación B07/A12In y las decisiones de mockup de E.
+  HALLAZGO COLATERAL: la casilla 8.5-A/A'/B ya era una línea, sin deuda ni remisión. NO se
+  condensa: GANA texto («→ sin deuda viva; Detalle: bitácora S69/S70/S71»), porque le faltaba la
+  remisión que el formato exige.
+  PARADA REGISTRADA: el prompt manda «seguir el PROTOCOLO DE ARCHIVADO del plan». Ese protocolo
+  NO existe como sección nombrada en el plan ni en la bitácora —verificado por grep de
+  «protocolo»/«archivad» en ambos—. Se archivó siguiendo el PRECEDENTE OBSERVABLE (formato de las
+  entradas S69-S75) más R4/R5. Si se quiere protocolo, hay que escribirlo; hoy es costumbre, no norma.
+  VERIFICACIÓN: R4 por grep, 40 tokens ANTES vs DESPUÉS, cero huérfanos; seis tokens bajan una
+  unidad y se comprobó UNO A UNO que conservan citante vivo. Diff del cuerpo: tres regiones
+  tocadas y ninguna otra. Plan 1869 → 1831 (−38) por la condensación, y −46 más por el archivado.
+  Costura revisada: 8.4-B intacto encima, 8.5-D2b/D3 intactos, 8.6/8.6-B sin tocar.
+  Código NO tocado: solver/ ni app/ ni frontend/ → referencia-codigo-solver.md NO regenerada,
+  modelo_datos_fase1.md NO tocado, suite sin cambio (app 315, solver 78).
+  DEUDA NUEVA: D-F8.0-a (el PROTOCOLO DE ARCHIVADO se invoca pero no existe escrito).
+  Siguiente: 8.6 (Angular, contrato cerrado en S67; empezar por medir el estado real de frontend/
+  y elegir librería de d&d), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver, regenera la referencia).
+Última sesión registrada (previa): Sesión 79 — Fase 8, Bloque 8.4-A: PRE-VALIDACIÓN por condiciones necesarias (D18).
   Modo híbrido. 4 commits de código (1ea9103 + 838f944 producción/tests; 357d7c2 + 6cf44cb la
   corrección de (c)) + doc. §A DE MEDICIÓN sobre CÓDIGO (greps + lectura literal) y §A-bis sobre
   los VOLCADOS.
@@ -838,52 +893,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   8.5-D3 APLAZADO INDEFINIDAMENTE con criterio de reapertura explícito (no es arrastre).
   Siguiente: 8.5-E (MOCKUP PREVIO), 8.4 (pre-validación, D18/D20) o 8.5-D2b (solver), a decidir al
   abrir sesión.
-Última sesión registrada (previa): Sesión 76 — Fase 8, Bloque 8.5-D1: alta de grupo PDC como sub-recurso del padre.
-  Modo híbrido. 3 commits de código (ef14331 producción, 789a6c3 tests, 150e127 corrección) + doc aparte.
-  REENCUADRE DEL BLOQUE (hallazgo de la §A): 8.5-D estaba MAL DIMENSIONADO en el corte de S69, que lo
-  etiquetó como bloque de UI. La medición demostró que arrastra ESQUEMA: Particion/SubgrupoParticion NO
-  existen en JPA (ausencia deliberada, D-a del Bloque 4/S48) y ProfesorTutoria NO existe (solo el
-  booleano Actividad.requiereTutor). 8.5-D se PARTE en D1 (PDC sobre entidades existentes, esta sesión),
-  D2 (tutoría, entidad nueva) y D3 (particiones, dos tablas que el solver NO lee).
-  §A DE MEDICIÓN (patrón S73/S75): el instrumento propuesto —test JUnit sobre la BD— resultó INVIABLE
-  (mediría el vacío: el seed no crea ningún PDC). Se reorientó a los volcados del centro. SALIDA:
-  5 PDC, todos 1:1 con su padre, emparejamiento inequívoco por diagonal. Compartidas/propias 8/22 en
-  3ºESO pero 4/26 en 4ºESO → el ratio NO es constante del dominio. PARCIALES = 0 en los 5 (una celda es
-  copia exacta del padre o completamente propia, nunca a medias). Tutoría heredada CONFIRMADA en los 5
-  (misma celda: tramo, profesor y aula). El 8/22 de S23 queda validado por el centro y a la vez
-  generalizado mal: medir solo 3º habría bastado para equivocarse.
-  DECISIONES CERRADAS: (D1-1) sin flag de «sesión compartida», se DERIVA en cliente cruzando el campo
-  `grupos` que SesionVistaDTO ya trae (PARCIALES=0 lo justifica) → NO se tocó SesionVistaDTO ni
-  proyectar(); (D1-2) un PDC por padre → 400; (D1-3) código del PDC lo escribe el usuario (medido:
-  «3º ESO PDC» no contiene la letra del padre); (D1-4) subgrupo mono-Di automático con grupos={PDC}
-  únicamente (regla S23); (D1-5) I5 validada en escritura; (D1-7) ruta de entrada única desde la ficha
-  del padre → SUB-RECURSO /api/grupos/{idPadre}/pdc (patrón del sub-recurso de S75), NO se relajó la
-  lista blanca ORDINARIO de GrupoService; (D1-8) celda heredada = barra lateral sin tinte, el fondo
-  queda para las capas de 8.6; (D1-9) el PDC vive en una SECCIÓN de la ficha del padre, no en pestaña
-  (una pestaña estaría en los 23 de 28 grupos sin PDC); (D1-10) el resumen «N propias · M heredadas»
-  debe contemplar el estado SIN horario generado, que es el inicial de toda instalación.
-  DECISIÓN DEL ARQUITECTO (no derivada de dato): código del subgrupo mono-Di DERIVADO como
-  codigo+"-Completo" (convención de SeedCatalogoRunner); colisión → 400 que NOMBRA el código derivado.
-  CORRECCIÓN DE PATRÓN durante el contrato: D1-2 pasó de 409 a 400 — 409 está reservado en todo el
-  proyecto a ReferenciaEntranteException; «el padre ya tiene un PDC» es validación de entrada, no
-  referencia entrante.
-  HALLAZGO DE REVISIÓN (por juicio, tras el primer turno): la guarda de D1-2 usaba contarGruposHijos,
-  que cuenta CUALQUIER hijo por grupo_padre_id, no solo los PDC. Acoplamiento accidental a un hecho
-  actual —mismo género que el falso positivo de subgrupo_grupo en S74: contar la FK correcta por la
-  razón equivocada—. Corregido a findByGrupoPadre_Id + filtro por tipo. NO cambió ningún test verde
-  (hoy ambas cuentas coinciden), y por eso había que arreglarlo mientras era visible.
-  ASERTOS: 5 discriminantes. El (2) es el que protege S23 —contenido del Set (contains/doesNotContain),
-  no size()—, con flush+clear para leer la BASE y no la caché L1. El (4), por mutación, reveló que la
-  guarda de aplicación y la FK física protegen lo mismo: al quitarla el test cae por 500
-  (TransientPropertyValueException), no por 204 — patrón híbrido de S74, javadoc corregido para no
-  mentir. Suite 184 → 196 (+12).
-  El mockup NO se versiona (D-F8.6-a: es una pregunta dibujada); sobreviven sus decisiones, arriba.
-  solver/ intacto → referencia NO regenerada. modelo_datos_fase1.md NO tocado (ni entidad ni invariante
-  nueva: I5 ya está descrita en §5.1).
-  DEUDA NUEVA: D-F8.5-D1-a (tutoría del PDC no modelada), D-F8.5-D1-b (1:1 es decisión del arquitecto
-  sobre 5 casos).
-  Siguiente: 8.5-D2 (tutoría: entidad nueva ProfesorTutoria + I4 + herencia PDC←padre), 8.5-D3
-  (particiones, evaluar si procede), 8.5-E (MOCKUP PREVIO) o 8.4.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -895,10 +904,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 y la de S75 en la Sesión 79 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 y la de S76 en la Sesión 80 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S76–S79). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S77–S80). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1059,41 +1068,13 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       que es condición necesaria demostrable— así que 8.4-B decide cómo se PINTAN, no cuáles
       abortan. Incluye la validación amable del bloqueo contradictorio, diferida desde 8.2a
       (hoy da INFEASIBLE seco): NO la cubre 8.4-A.
-- [x] Bloque 8.5-A/A'/B — CRUD de catálogo, raíces + grupos/subgrupos (S69/S70/S71).
-- [x] Bloque 8.5-C1 — CRUD de Actividad como agregado (S72). XOR/I7/I2, reconciliación posicional.
-- [x] Bloque 8.5-C2a-DDL — Integridad referencial de ESQUEMA (S73). `schema.sql` + `ddl-auto=none` +
-      27 FK + `PRAGMA foreign_keys=ON` por conexión; reabre la decisión de BD (hbm2ddl→schema.sql,
-      Flyway descartado). Corrige la PK `id` inservible del dialecto. Suite 165/165. Detalle: bitácora
-      S73. Deuda: D-F8.5-C2a-a (.db preexistente); D-F8.5-A-a queda parcialmente resuelta.
-- [x] Bloque 8.5-C2b — Borrado amable: comprobación de refs entrantes antes de borrar → 409 «usada por
-      N…» (S74). ReferenciaEntranteException + @Query nativas de conteo inverso por raíz (opción b, sin
-      PlazaRepository) + guarda en Service + catch→409 en Controller (opción 2A, sin @ControllerAdvice);
-      7 raíces + Actividad (caso propio). Hallazgo: falso positivo de Subgrupo (subgrupo_grupo es
-      población propia, no referente entrante) → corregido a solo plaza_subgrupo. 4 tests por mutación,
-      suite 169. CIERRA D-F8.5-A-a entera. Detalle: bitácora S74.
-- [x] Bloque 8.5-C3 — I3 (asignatura↔tipo aula) + CRUD de compatibilidades (S75). Semántica (C):
-      0 filas para una asignatura ⇒ irrestricta; ≥1 ⇒ solo esos tipos. Sub-recurso
-      GET/PUT /api/asignaturas/{id}/aulas-compatibles con reemplazo total idempotente.
-      Compatibilidades reclasificadas como POBLACIÓN PROPIA de Asignatura → FK a cascade →
-      REVIERTE la Referencia que S74 había puesto en AsignaturaService.borrar. I3 valida
-      aulaFija Y todas las candidatas, en el funnel único resolverContenido (no dos call-sites).
-      Tipificación incidental: B07→TALLER_TEC, A12In→INFORMATICA. Suite 184.
-      Deuda: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
-      Detalle: bitácora S75.
-- [x] Bloque 8.5-D1 — PDC como sub-recurso del padre (S76). POST/GET/DELETE
-      /api/grupos/{idPadre}/pdc + subgrupo mono-Di automático (grupos={PDC}, regla S23). Nivel
-      heredado del padre; código del PDC lo escribe el usuario; código del subgrupo derivado
-      (+"-Completo"). Un PDC por padre → 400. «Sesión compartida» DERIVADA en cliente, sin flag
-      (PARCIALES=0 medido). NO se tocó GrupoService ni su lista blanca ORDINARIO. Suite 196.
-      Deuda: D-F8.5-D1-a, D-F8.5-D1-b. Detalle: bitácora S76.
-- [x] Bloque 8.5-D2a — Tutoría como entidad de CATÁLOGO (S77). ProfesorTutoria (@IdClass,
-      PK profesor+grupo) + RolTutoria + sub-recurso GET/PUT /api/grupos/{id}/tutoria con
-      reemplazo total idempotente (patrón S75). I4 validada en escritura sobre la lista
-      ENTRANTE. Herencia PDC←padre por COPIA en el alta (solo TUTOR_PRINCIPAL, co-tutores
-      no). Tutoría = población propia del Grupo (cascade, NO 409, criterio S75) y referencia
-      entrante del Profesor (409). Corrige de paso obtener/borrar de PdcService, que
-      arrastraban el findByGrupoPadre_Id sin filtro por tipo que S76 solo arregló en crear().
-      Suite 212. CIERRA D-F8.5-D1-a. Deuda: D-F8.5-D2a-a, D-F8.5-D2a-b. Detalle: bitácora S77.
+- [x] Bloque 8.5-A/A'/B — CRUD de catálogo: raíces + grupos/subgrupos (S69/S70/S71) → sin deuda viva; Detalle: bitácora S69/S70/S71.
+- [x] Bloque 8.5-C1 — CRUD de Actividad como AGREGADO, Plaza embebida sin /api/plazas (S72) → XOR aula, I7, I2 validadas en ActividadService; Detalle: bitácora S72.
+- [x] Bloque 8.5-C2a-DDL — Integridad referencial de ESQUEMA: `schema.sql` + `ddl-auto=none` + 27 FK + `PRAGMA foreign_keys=ON` por conexión (S73) → D-F8.5-C2a-a (.db preexistente con PK NULL); Detalle: bitácora S73.
+- [x] Bloque 8.5-C2b — Borrado amable: `ReferenciaEntranteException` + conteos inversos → 409 (S74) → CIERRA D-F8.5-A-a entera; cada controller traduce sus propias excepciones, sin @ControllerAdvice; Detalle: bitácora S74.
+- [x] Bloque 8.5-C3 — I3 + CRUD de compatibilidades asignatura↔tipo de aula, semántica (C): 0 filas ⇒ irrestricta (S75) → validada en el funnel único `resolverContenido`; D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo); Detalle: bitácora S75.
+- [x] Bloque 8.5-D1 — PDC como sub-recurso `/api/grupos/{idPadre}/pdc` + subgrupo mono-Di automático (S76) → un PDC por padre → 400; D-F8.5-D1-b (el 1:1 es decisión del arquitecto); Detalle: bitácora S76.
+- [x] Bloque 8.5-D2a — `ProfesorTutoria` (@IdClass) + I4 en escritura + herencia PDC←padre por copia (S77) → CIERRA D-F8.5-D1-a; tutoría = población propia del Grupo (cascade) y referencia entrante del Profesor (409); D-F8.5-D2a-a (I4 sin red en BD), D-F8.5-D2a-b (incoherencia 404/400); Detalle: bitácora S77.
 - [ ] Bloque 8.5-D2b — S8 verificable por el SOLVER. Bloque de solver/, no de catálogo:
       propagar requiereTutor al dominio (romper D-B5-5) + transportar ProfesorTutoria al
       ProblemaHorario + verificar S8. NOTA DE DISEÑO: S8 NO es restricción de scheduling
@@ -1106,20 +1087,7 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       contradicho. CRITERIO DE REAPERTURA: solo si (a) la UX de D7 pasa a requisito real de
       usuario, o (b) I1 falla en producción sin que nadie lo detecte. Consecuencia asumida:
       I1 sigue sin verificador, igual que hoy.
-- [x] Bloque 8.5-E — CRUD REST de ProfesorRestriccionHoraria (S78). CIERRA 8.5. Sub-recurso
-      GET/PUT /api/profesores/{id}/restricciones-horarias con reemplazo total idempotente
-      (patrón S75/S77). MEDIDO al abrir: la cadena JPA→CatalogoMapper→dominio→CP-SAT YA existía
-      y está consumida; lo único que faltaba era la SUPERFICIE DE ESCRITURA (el seed crea CERO
-      restricciones). Solo app/: NO toca solver/. `peso` NO se expone —ni DTO ni rejilla—: el
-      service lo escribe a 1 porque ModeloCpSat usa la constante PESO_INDISP_BLANDA y nunca lee
-      `r.peso()`. Tres estados = {ausencia de fila, BLANDA, DURA}, sin enum nuevo. Recreo =
-      separador, no celda. Mockup previo ejecutado (D-F8.6-a), no versionado; de él salen: click
-      selecciona + estado desde panel de detalle + acciones de FILA y COLUMNA (los dos patrones
-      reales del dominio son franja horaria y día completo); volver a `puede` borra fila y motivo,
-      silencioso; rejilla mono-profesor. Suite 227. Deuda: D-F8.5-E-a, D-F8.5-E-b, D-F8.5-E-c,
-      D-F8.5-E-d. Detalle: bitácora S78.
-      NOTA: el seed muere en el bloque de configuración de jornada (D22), no aquí: sobrevive por
-      TramoSemanal, que sigue sin CRUD.
+- [x] Bloque 8.5-E — CRUD REST de `ProfesorRestriccionHoraria`, sub-recurso GET/PUT con reemplazo total (S78). CIERRA 8.5 → `peso` NO se expone (ModeloCpSat usa la constante `PESO_INDISP_BLANDA` y nunca lee `r.peso()`); D-F8.5-E-a, D-F8.5-E-b, D-F8.5-E-c, D-F8.5-E-d; Detalle: bitácora S78.
 - [ ] Bloque 8.6 — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de 8.2b-iv y
       8.3-C. Modelo de interacción YA FIJADO en S67 (8.6-A, decisiones D-F8.6-A-1/2): NO es un
       editor libre. El usuario PINA (POST /api/bloqueos, instantáneo) y el solver RECOLOCA lo
@@ -1140,7 +1108,9 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
 
 Diferibles a lo largo de la fase: D21, D22, D26/D27 (nombre de aula, código de tramo),
 D30 (renumeración de tramos duplicada). D-F8.2b-4B: condicional e INERTE (la poda que
-defendería está muerta en todo camino vivo).
+defendería está muerta en todo camino vivo). El seed (`SeedCatalogoRunner`) muere en el
+bloque de configuración de jornada (D22), no en 8.5: sobrevive porque `TramoSemanal`
+sigue sin CRUD.
 
 ### Fases completadas
 
@@ -1747,6 +1717,18 @@ siguiente, con remisión a la bitácora.
   necesita. (4) El body de POST /api/horarios ya arrastra D29; un segundo eje lo
   convertiría en cajón de sastre. Contra asumido: más superficie que mantener — pero es la
   superficie que la UI va a pedir igualmente. El body de POST /api/horarios NO cambia.
+
+- **D-F8.0-a** (S80, VIVA, de MÉTODO, no técnica) — EL «PROTOCOLO DE ARCHIVADO» SE INVOCA PERO NO
+  ESTÁ ESCRITO. Las instrucciones de cierre de sesión mandan «seguir el PROTOCOLO DE ARCHIVADO del
+  plan»; verificado por grep en S80 sobre `plan_trabajo_horarios.md` y `bitacora-sesiones.md`: NO
+  existe ninguna sección con ese nombre. Lo que existe es (a) el «Criterio de higiene documental»
+  (R4/R5), que cubre qué NO se puede perder pero no el procedimiento, y (b) un precedente
+  observable de ~20 sesiones (formato `### Sesión NN` en bitácora, degradar la que deja de ser
+  reciente, actualizar los dos censos + crónica + frase de ventana). El archivado de S80 se hizo
+  por precedente, no por norma. RIESGO: los cinco pasos se recuerdan de memoria y la crónica y la
+  frase de ventana son las que se olvidan (el propio prompt lo advierte cada sesión, lo que es
+  síntoma). → escribirlo como sección del plan la próxima vez que se haga higiene, o aceptar
+  explícitamente que es costumbre.
 
 ### Deuda consciente CERRADA (histórico)
 

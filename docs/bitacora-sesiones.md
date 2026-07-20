@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S75. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S76. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S75). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S76). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3006,3 +3006,50 @@ al abrir sesión.
   DEUDA NUEVA: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
   Vivos para cerrar 8.5: D y E, ambos MOCKUP PREVIO.
   Siguiente: 8.5-D o 8.5-E (el primero de los dos empieza por MOCKUP, no por código), o 8.4.
+
+### Sesión 76 — Fase 8, Bloque 8.5-D1: alta de grupo PDC como sub-recurso del padre.
+  Modo híbrido. 3 commits de código (ef14331 producción, 789a6c3 tests, 150e127 corrección) + doc aparte.
+  REENCUADRE DEL BLOQUE (hallazgo de la §A): 8.5-D estaba MAL DIMENSIONADO en el corte de S69, que lo
+  etiquetó como bloque de UI. La medición demostró que arrastra ESQUEMA: Particion/SubgrupoParticion NO
+  existen en JPA (ausencia deliberada, D-a del Bloque 4/S48) y ProfesorTutoria NO existe (solo el
+  booleano Actividad.requiereTutor). 8.5-D se PARTE en D1 (PDC sobre entidades existentes, esta sesión),
+  D2 (tutoría, entidad nueva) y D3 (particiones, dos tablas que el solver NO lee).
+  §A DE MEDICIÓN (patrón S73/S75): el instrumento propuesto —test JUnit sobre la BD— resultó INVIABLE
+  (mediría el vacío: el seed no crea ningún PDC). Se reorientó a los volcados del centro. SALIDA:
+  5 PDC, todos 1:1 con su padre, emparejamiento inequívoco por diagonal. Compartidas/propias 8/22 en
+  3ºESO pero 4/26 en 4ºESO → el ratio NO es constante del dominio. PARCIALES = 0 en los 5 (una celda es
+  copia exacta del padre o completamente propia, nunca a medias). Tutoría heredada CONFIRMADA en los 5
+  (misma celda: tramo, profesor y aula). El 8/22 de S23 queda validado por el centro y a la vez
+  generalizado mal: medir solo 3º habría bastado para equivocarse.
+  DECISIONES CERRADAS: (D1-1) sin flag de «sesión compartida», se DERIVA en cliente cruzando el campo
+  `grupos` que SesionVistaDTO ya trae (PARCIALES=0 lo justifica) → NO se tocó SesionVistaDTO ni
+  proyectar(); (D1-2) un PDC por padre → 400; (D1-3) código del PDC lo escribe el usuario (medido:
+  «3º ESO PDC» no contiene la letra del padre); (D1-4) subgrupo mono-Di automático con grupos={PDC}
+  únicamente (regla S23); (D1-5) I5 validada en escritura; (D1-7) ruta de entrada única desde la ficha
+  del padre → SUB-RECURSO /api/grupos/{idPadre}/pdc (patrón del sub-recurso de S75), NO se relajó la
+  lista blanca ORDINARIO de GrupoService; (D1-8) celda heredada = barra lateral sin tinte, el fondo
+  queda para las capas de 8.6; (D1-9) el PDC vive en una SECCIÓN de la ficha del padre, no en pestaña
+  (una pestaña estaría en los 23 de 28 grupos sin PDC); (D1-10) el resumen «N propias · M heredadas»
+  debe contemplar el estado SIN horario generado, que es el inicial de toda instalación.
+  DECISIÓN DEL ARQUITECTO (no derivada de dato): código del subgrupo mono-Di DERIVADO como
+  codigo+"-Completo" (convención de SeedCatalogoRunner); colisión → 400 que NOMBRA el código derivado.
+  CORRECCIÓN DE PATRÓN durante el contrato: D1-2 pasó de 409 a 400 — 409 está reservado en todo el
+  proyecto a ReferenciaEntranteException; «el padre ya tiene un PDC» es validación de entrada, no
+  referencia entrante.
+  HALLAZGO DE REVISIÓN (por juicio, tras el primer turno): la guarda de D1-2 usaba contarGruposHijos,
+  que cuenta CUALQUIER hijo por grupo_padre_id, no solo los PDC. Acoplamiento accidental a un hecho
+  actual —mismo género que el falso positivo de subgrupo_grupo en S74: contar la FK correcta por la
+  razón equivocada—. Corregido a findByGrupoPadre_Id + filtro por tipo. NO cambió ningún test verde
+  (hoy ambas cuentas coinciden), y por eso había que arreglarlo mientras era visible.
+  ASERTOS: 5 discriminantes. El (2) es el que protege S23 —contenido del Set (contains/doesNotContain),
+  no size()—, con flush+clear para leer la BASE y no la caché L1. El (4), por mutación, reveló que la
+  guarda de aplicación y la FK física protegen lo mismo: al quitarla el test cae por 500
+  (TransientPropertyValueException), no por 204 — patrón híbrido de S74, javadoc corregido para no
+  mentir. Suite 184 → 196 (+12).
+  El mockup NO se versiona (D-F8.6-a: es una pregunta dibujada); sobreviven sus decisiones, arriba.
+  solver/ intacto → referencia NO regenerada. modelo_datos_fase1.md NO tocado (ni entidad ni invariante
+  nueva: I5 ya está descrita en §5.1).
+  DEUDA NUEVA: D-F8.5-D1-a (tutoría del PDC no modelada), D-F8.5-D1-b (1:1 es decisión del arquitecto
+  sobre 5 casos).
+  Siguiente: 8.5-D2 (tutoría: entidad nueva ProfesorTutoria + I4 + herencia PDC←padre), 8.5-D3
+  (particiones, evaluar si procede), 8.5-E (MOCKUP PREVIO) o 8.4.
