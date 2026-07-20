@@ -18,11 +18,19 @@
   </label>
 </section>
 
+@if (pinadas().size > 0) {
+  <p class="aviso">{{ pinadas().size }} pines sin aplicar — regenerar</p>
+}
+
+@if (errorPin(); as msg) {
+  <p class="error">{{ msg }}</p>
+}
+
 @if (error(); as msg) {
   <p class="error">{{ msg }}</p>
 } @else if (proyeccion(); as p) {
   <h2>{{ p.nombre }} <small>— {{ vista() }}: {{ entidad() }}</small></h2>
-  <app-horario-grid [sesiones]="sesionesFiltradas()" />
+  <app-horario-grid [sesiones]="sesionesFiltradas()" [pinadas]="pinadas()" (soltar)="alSoltar($event)" />
 } @else {
   <p>Cargando…</p>
 }

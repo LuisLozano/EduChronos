@@ -16,3 +16,12 @@
   color: #b00;
   font-weight: 600;
 }
+
+/* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
+.aviso {
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.6rem;
+  border-left: 4px solid #c80;
+  background: #fff8ec;
+  font-weight: 600;
+}

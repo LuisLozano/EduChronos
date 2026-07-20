@@ -1,4 +1,4 @@
-<table class="rejilla">
+<table class="rejilla" cdkDropListGroup>
   <thead>
     <tr>
       <th class="esquina">Tramo</th>
@@ -12,13 +12,20 @@
       <tr>
         <th class="tramo">{{ t }}</th>
         @for (d of dias; track d; let i = $index) {
-          <td>
-            @for (e of entradas(i + 1, t); track e.sesionId) {
-              <div class="entrada">
-                <span class="asig">{{ e.asignaturaCodigo }}</span>
-                <span class="prof">{{ e.profesores.join(', ') }}</span>
-                <span class="aula">{{ e.aulaCodigo }}</span>
-                <span class="grupos">{{ e.grupos.join(', ') }}</span>
+          <td cdkDropList (cdkDropListDropped)="alSoltar($event, i + 1, t)">
+            @for (inst of instancias(i + 1, t); track clave(inst)) {
+              <div class="instancia" [class.pinada]="estaPinada(inst)" cdkDrag [cdkDragData]="inst">
+                @if (estaPinada(inst)) {
+                  <span class="candado" title="Instancia pinada">&#128274;</span>
+                }
+                @for (e of inst.entradas; track e.sesionId) {
+                  <div class="entrada">
+                    <span class="asig">{{ e.asignaturaCodigo }}</span>
+                    <span class="prof">{{ e.profesores.join(', ') }}</span>
+                    <span class="aula">{{ e.aulaCodigo }}</span>
+                    <span class="grupos">{{ e.grupos.join(', ') }}</span>
+                  </div>
+                }
               </div>
             } @empty {
               <span class="vacio">·</span>

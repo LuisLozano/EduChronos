@@ -1,31 +1,73 @@
-import { Component, computed, input } from '@angular/core';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { Component, computed, input, output } from '@angular/core';
 
 import { SesionVista } from '../../models/horario.model';
-import { DIAS, TRAMOS, agruparPorSlot, claveSlot } from '../../horario/proyeccion';
+import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
+import { clavePin } from '../../horario/pines';
+
+/** Instancia soltada en un slot destino, en coordenadas de `TramoRef`. */
+export interface SueltaInstancia {
+  actividadCodigo: string;
+  indice: number;
+  dia: number;
+  orden: number;
+}
 
 /**
  * Rejilla reutilizable de 5 días × 6 tramos. Recibe una lista de `SesionVista`
- * YA filtrada (por grupo, profesor o aula) y la agrupa por `(dia, tramo)`. Un
- * slot con varias entradas se pinta como celda-como-lista, una sub-entrada por
- * plaza; cada sub-entrada muestra asignatura, profesores (lista), aula y grupos
- * (lista): no asume cardinalidad 1 en profesores ni en grupos.
+ * YA filtrada (por grupo, profesor o aula) y la agrupa por `(dia, tramo)` y, ya
+ * dentro del slot, por instancia. Cada sub-entrada muestra asignatura,
+ * profesores (lista), aula y grupos (lista): no asume cardinalidad 1 en
+ * profesores ni en grupos.
+ *
+ * <p>La unidad arrastrable es la INSTANCIA, nunca la sub-entrada (D-F8.6-A-2):
+ * las 6 plazas de un bloque comparten tramo y se mueven juntas. La rejilla NO
+ * mueve nada al soltar —sigue pintando la proyección vigente del servidor, que
+ * no cambia hasta regenerar— ni habla con el servicio: solo emite `soltar` y el
+ * contenedor decide.
  */
 @Component({
   selector: 'app-horario-grid',
-  imports: [],
+  imports: [DragDropModule],
   templateUrl: './horario-grid.html',
   styleUrl: './horario-grid.css',
 })
 export class HorarioGrid {
   readonly sesiones = input.required<readonly SesionVista[]>();
+  /** Claves de {@link clavePin} de las instancias ya pinadas: pintan candado. */
+  readonly pinadas = input<ReadonlySet<string>>(new Set<string>());
+
+  readonly soltar = output<SueltaInstancia>();
 
   protected readonly dias = DIAS;
   protected readonly tramos = TRAMOS;
 
-  private readonly slots = computed(() => agruparPorSlot(this.sesiones()));
+  private readonly celdas = computed(() => agruparPorActividad(this.sesiones()));
 
-  /** Sub-entradas del slot (dia, tramo); vacío si no hay ninguna. */
-  protected entradas(dia: number, tramo: number): SesionVista[] {
-    return this.slots().get(claveSlot(dia, tramo)) ?? [];
+  /** Instancias del slot (dia, tramo); vacío si no hay ninguna. */
+  protected instancias(dia: number, tramo: number): InstanciaCelda[] {
+    return this.celdas().get(claveSlot(dia, tramo)) ?? [];
+  }
+
+  protected clave(inst: InstanciaCelda): string {
+    return clavePin(inst.actividadCodigo, inst.indice);
+  }
+
+  protected estaPinada(inst: InstanciaCelda): boolean {
+    return this.pinadas().has(this.clave(inst));
+  }
+
+  /**
+   * Traduce el drop del CDK a `soltar`. Soltar en el mismo slot no es un pin
+   * nuevo y no emite nada; el resto se emite tal cual, sin validar (las reglas
+   * de D-3 son del backend).
+   */
+  protected alSoltar(evento: CdkDragDrop<{ dia: number; orden: number }>, dia: number, orden: number): void {
+    const inst = evento.item.data as InstanciaCelda;
+    const origen = inst.entradas[0];
+    if (origen.dia === dia && origen.tramo === orden) {
+      return;
+    }
+    this.soltar.emit({ actividadCodigo: inst.actividadCodigo, indice: inst.indice, dia, orden });
   }
 }

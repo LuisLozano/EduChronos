@@ -22,18 +22,51 @@
   width: 3rem;
 }
 
+/* La INSTANCIA es la unidad arrastrable (D-F8.6-A-2), no la sub-entrada. */
+.instancia {
+  position: relative;
+  margin-bottom: 0.2rem;
+  cursor: grab;
+}
+
+.instancia:last-child {
+  margin-bottom: 0;
+}
+
+.instancia.pinada .entrada {
+  border-left-color: #c80;
+  background: #fff8ec;
+}
+
+.candado {
+  position: absolute;
+  top: 0;
+  right: 0.1rem;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+/* Estados del CDK: el original se atenúa y el hueco de destino se marca. */
+.cdk-drag-preview .entrada {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drop-list-dragging {
+  outline: 2px dashed #4a7;
+  outline-offset: -2px;
+}
+
 .entrada {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.2rem;
-  margin-bottom: 0.2rem;
   border-left: 3px solid #4a7;
   background: #fafafa;
-}
-
-.entrada:last-child {
-  margin-bottom: 0;
 }
 
 .asig {

@@ -1,4 +1,5 @@
 import { SesionVista } from '../models/horario.model';
+import { clavePin } from './pines';
 
 /** Las tres vistas de Fase 7. */
 export type Vista = 'grupo' | 'profesor' | 'aula';
@@ -66,4 +67,39 @@ export function agruparPorSlot(sesiones: readonly SesionVista[]): Map<string, Se
     }
   }
   return slots;
+}
+
+/**
+ * Las sub-entradas de un slot que pertenecen a UNA instancia —el par
+ * (`actividadCodigo`, `indice`), D-6—. Es la unidad que el usuario manipula:
+ * las 6 plazas de un bloque se mueven juntas o no se mueven.
+ */
+export interface InstanciaCelda {
+  actividadCodigo: string;
+  indice: number;
+  entradas: SesionVista[];
+}
+
+/**
+ * Segundo nivel de agrupamiento SOBRE {@link agruparPorSlot}: dentro de cada
+ * slot, reúne las sub-entradas por instancia, preservando el orden de aparición
+ * tanto entre instancias como dentro de cada una. La clave externa del Map
+ * sigue siendo {@link claveSlot}, de modo que la rejilla indexa igual que antes.
+ */
+export function agruparPorActividad(sesiones: readonly SesionVista[]): Map<string, InstanciaCelda[]> {
+  const celdas = new Map<string, InstanciaCelda[]>();
+  for (const [k, entradas] of agruparPorSlot(sesiones)) {
+    const porInstancia = new Map<string, InstanciaCelda>();
+    for (const e of entradas) {
+      const ki = clavePin(e.actividadCodigo, e.indice);
+      const inst = porInstancia.get(ki);
+      if (inst) {
+        inst.entradas.push(e);
+      } else {
+        porInstancia.set(ki, { actividadCodigo: e.actividadCodigo, indice: e.indice, entradas: [e] });
+      }
+    }
+    celdas.set(k, [...porInstancia.values()]);
+  }
+  return celdas;
 }
