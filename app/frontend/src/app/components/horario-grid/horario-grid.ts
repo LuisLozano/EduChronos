@@ -61,6 +61,13 @@ export class HorarioGrid {
    * Traduce el drop del CDK a `soltar`. Soltar en el mismo slot no es un pin
    * nuevo y no emite nada; el resto se emite tal cual, sin validar (las reglas
    * de D-3 son del backend).
+   *
+   * <p>AVISO: `evento.item.data as InstanciaCelda` es un cast SIN comprobación.
+   * Solo es válido mientras el `cdkDropListGroup` de esta plantilla conecte
+   * únicamente celdas de esta rejilla, todas con `[cdkDragData]` de ese tipo. Si
+   * algún día se conecta otra fuente de arrastre (una paleta lateral, otra
+   * rejilla), el cast pasa a ser mentira y falla en runtime sin que el
+   * compilador avise: entonces habrá que discriminar el tipo del `data`.
    */
   protected alSoltar(evento: CdkDragDrop<{ dia: number; orden: number }>, dia: number, orden: number): void {
     const inst = evento.item.data as InstanciaCelda;

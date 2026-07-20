@@ -36,7 +36,8 @@ export interface BloqueoRequest {
 
 /** Espejo de `BloqueoDTO`. Simétrico a `BloqueoRequest` más el `id` del DELETE. */
 export interface Bloqueo {
-  id: number;
+  /** `Long` en el DTO: nullable de verdad, no se estrecha aquí por comodidad. */
+  id: number | null;
   actividadCodigo: string;
   indice: number;
   tramo: TramoRef;
