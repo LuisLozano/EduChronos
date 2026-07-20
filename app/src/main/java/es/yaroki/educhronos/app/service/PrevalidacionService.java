@@ -66,7 +66,7 @@ public class PrevalidacionService {
     /** Una actividad DISTRIBUIDA se repite más veces que días lectivos hay. ERROR. */
     public static final String REGLA_REPETICIONES_EXCEDEN_DIAS = "REPETICIONES_EXCEDEN_DIAS";
 
-    /** Un grupo tiene más horas curriculares que tramos lectivos. AVISO. */
+    /** Un grupo tiene más horas curriculares que tramos lectivos. ERROR. */
     public static final String REGLA_GRUPO_SOBRECARGADO = "GRUPO_SOBRECARGADO";
 
     private final GeneradorHorarioService generadorService;
@@ -226,20 +226,34 @@ public class PrevalidacionService {
     }
 
     /**
-     * (c) SOBRECARGA DE GRUPO — AVISO, no ERROR. Avisa si las horas curriculares de un
-     * grupo superan los tramos lectivos de la semana.
+     * (c) SOBRECARGA DE GRUPO — ERROR. Falla si las horas curriculares de un grupo
+     * superan los tramos lectivos de la semana.
      *
-     * <p><b>Por qué es AVISO y no ERROR.</b> Porque el modelo permite configurar como
-     * actividades SEPARADAS lo que el centro imparte como un BLOQUE ALTERNATIVO: CyR y
-     * OyD ocupan el mismo tramo, el alumno cursa una u otra, pero son dos actividades
-     * distintas en el catálogo y ambas tocan al grupo. La suma las cuenta las dos y
-     * SOBRESTIMA la demanda real. Un ERROR aquí bloquearía con un 422 un problema
-     * perfectamente resoluble; el aviso informa sin impedir.
+     * <p><b>Por qué es ERROR y no un simple aviso.</b> {@code ModeloCpSat:1046-1074}
+     * impone {@code addNoOverlap} POR GRUPO, y su helper {@code tocaGrupo} deduplica UN
+     * INTERVALO POR INSTANCIA DE ACTIVIDAD: exactamente la misma unidad de conteo que usa
+     * esta regla. Si un grupo acumula más tramos de actividad que tramos lectivos hay, ese
+     * {@code addNoOverlap} es insatisfacible. Es infactibilidad GARANTIZADA, no una
+     * sobrestimación.
+     *
+     * <p>El motivo que figuraba aquí antes —"el centro imparte CyR/OyD como bloque
+     * alternativo en el mismo tramo, luego configurarlas separadas hace que la suma
+     * sobrestime"— es FALSO bajo el modelo actual: si se configuran separadas, el solver
+     * TAMPOCO las deja compartir tramo, así que el problema es igual de infactible. Y si
+     * se configuran bien —una actividad con varias plazas de distinta asignatura, que es
+     * lo que contempla {@code CatalogoMapper}—, la deduplicación por actividad de abajo ya
+     * las cuenta una sola vez y no hay nada que sobrestimar.
+     *
+     * <p><b>Salvedad.</b> A diferencia de (a) y (d), que son estructurales, la garantía de
+     * esta regla es DERIVADA del modelo CP-SAT: depende de que restriccionNoSolapeGrupo
+     * siga deduplicando por instancia de actividad. Si el no-solape por grupo se relajara,
+     * esta regla pasaría a producir falsos positivos EN SILENCIO. Ver deuda D-F8.4-A-a.
      *
      * <p><b>Deduplicación POR ACTIVIDAD, no por plaza</b> —el núcleo de esta regla—. Un
      * desdoble son DOS plazas de la MISMA actividad, con subgrupos distintos del MISMO
      * grupo, que ocurren SIMULTÁNEAMENTE. El grupo consume UN tramo, no dos. Contar por
-     * plaza daría el doble en todo desdoble y convertiría el aviso en ruido permanente.
+     * plaza daría el doble en todo desdoble y —ahora que esto aborta con 422— bloquearía
+     * catálogos perfectamente sanos.
      * Por eso la ruta {@code Actividad → plazas → subgrupos → grupos} se recoge primero
      * en un {@code Set<Actividad>} por grupo y solo DESPUÉS se suma.
      *
@@ -270,15 +284,14 @@ public class PrevalidacionService {
 
             if (demanda > tramosLectivos) {
                 avisos.add(new AvisoPrevalidacion(
-                        Severidad.AVISO,
+                        Severidad.ERROR,
                         REGLA_GRUPO_SOBRECARGADO,
                         grupo.codigo(),
                         demanda,
                         tramosLectivos,
                         "El grupo '" + grupo.codigo() + "' acumula " + demanda
                                 + " tramos curriculares y la semana solo tiene "
-                                + tramosLectivos + " tramos lectivos (puede ser una"
-                                + " sobrestimacion si hay bloques alternativos)"));
+                                + tramosLectivos + " tramos lectivos"));
             }
         }
         return avisos;

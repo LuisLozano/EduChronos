@@ -5,10 +5,18 @@ package es.yaroki.educhronos.app.service;
  *
  * <p>La distinción es OPERATIVA, no informativa: {@link #ERROR} aborta la generación
  * ({@code GeneradorHorarioService.generar} lanza {@link PrevalidacionFallidaException}
- * → 422), {@link #AVISO} no aborta nada y solo se reporta. Una condición se declara
- * {@code AVISO} cuando su cómputo puede SOBRESTIMAR la demanda por cómo esté
- * configurado el catálogo; convertirla en {@code ERROR} bloquearía problemas
- * resolubles (falso positivo).
+ * → 422), {@link #AVISO} no aborta nada y solo se reporta. El criterio para declarar
+ * {@code ERROR} es que la violación implique infactibilidad CIERTA: una regla que
+ * pudiera sobrestimar la demanda bloquearía problemas resolubles (falso positivo) y
+ * debe quedarse en {@code AVISO}.
+ *
+ * <p><b>Hoy NINGUNA de las tres reglas produce {@code AVISO}</b>: las tres —(a)
+ * profesor, (c) grupo, (d) repeticiones— son condiciones necesarias exactas. (c) nació
+ * como {@code AVISO} y se corrigió a {@code ERROR} en S79 al comprobar que su supuesta
+ * sobrestimación no existía (ver el javadoc de {@code PrevalidacionService.sobrecargaGrupo}).
+ * {@code AVISO} se conserva porque la distinción es parte del contrato del endpoint
+ * {@code GET /api/prevalidacion} y porque el palomar de aulas, si algún día entra,
+ * es candidato natural a nacer así.
  */
 public enum Severidad {
 
