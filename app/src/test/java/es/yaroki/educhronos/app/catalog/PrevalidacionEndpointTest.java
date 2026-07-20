@@ -1,30 +1,20 @@
 package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.ortools.sat.CpSolverStatus;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.service.PrevalidacionService;
 import es.yaroki.educhronos.app.web.HorarioController;
 import es.yaroki.educhronos.app.web.PrevalidacionController;
-import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
-import es.yaroki.educhronos.solver.domain.ActividadInstancia;
-import es.yaroki.educhronos.solver.domain.ProblemaHorario;
-import es.yaroki.educhronos.solver.domain.SolucionHorario;
-import es.yaroki.educhronos.solver.domain.Tramo;
 import jakarta.persistence.EntityManager;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,21 +34,21 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * núcleo, sobre el MISMO catálogo persistido.
  * <ul>
  *   <li>{@code GET /api/prevalidacion} → siempre {@code 200} con la lista completa.</li>
- *   <li>{@code POST /api/horarios} → {@code 422} si hay al menos un ERROR, y sigue
- *       adelante hasta el solver si solo hay AVISOs.</li>
+ *   <li>{@code POST /api/horarios} → {@code 422} si hay al menos un ERROR, sin llegar a
+ *       construir el solver.</li>
  * </ul>
  *
  * <p>Vive en {@code app.catalog} —como {@code GenerarHorarioEndpointTest}— para construir
  * entidades {@code Actividad}/{@code Plaza} (ctor {@code protected}), y monta los
  * controladores reales con {@code standaloneSetup} sobre el servicio real.
  *
- * <p><b>Por qué el caso de solo-AVISO mockea el solver.</b> Un grupo sobrecargado es, con
- * el modelo actual, también infactible para el solver ({@code ModeloCpSat:1046} impone
- * no-solape POR GRUPO). Si se dejara resolver de verdad, el 422 llegaría igualmente pero
- * por la vía del solver, y el test no distinguiría "la pre-validación no abortó" de "la
- * pre-validación abortó". Interceptando la construcción de {@link SolverHorario} —mismo
- * patrón que {@code GenerarHorarioEndpointTest}— el 200 demuestra exactamente lo que se
- * quiere demostrar: que la petición ATRAVESÓ la pre-validación y llegó al solve.
+ * <p><b>Por qué se intercepta la construcción de {@link SolverHorario}.</b> Los catálogos
+ * que violan una condición necesaria son TAMBIÉN infactibles para el solver —es
+ * justamente lo que la regla garantiza—, así que un {@code 422} por sí solo no distingue
+ * cuál de las dos vías actuó. Se comprueban por eso las dos cosas que sí discriminan: la
+ * CAUSA de la excepción resuelta, y que {@code mocked.constructed()} quede vacío. Lo
+ * segundo es la prueba directa de que no se gastó presupuesto de solve, que es el
+ * propósito entero del bloque.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -117,53 +107,47 @@ class PrevalidacionEndpointTest {
     }
 
     /**
-     * (A4) La sobrecarga de GRUPO es AVISO y NO impide generar: el POST atraviesa la
-     * pre-validación y llega al solver (aquí interceptado, ver javadoc de clase), así que
-     * responde {@code 200}. El GET confirma que el aviso está ahí y que su severidad es
-     * {@code AVISO}, no {@code ERROR}: si (c) se elevara a ERROR, el POST daría 422 y este
-     * test caería.
+     * (A4, INVERTIDO en S79) La sobrecarga de GRUPO es ERROR y SÍ aborta la generación.
+     * Antes este test aseveraba lo contrario —que era AVISO y dejaba pasar—; el aserto se
+     * volvió falso por contrato al corregir (c), y se invierte en vez de borrarse porque
+     * el fixture sigue siendo el discriminante correcto de la regla.
+     *
+     * <p>Tres asertos, y el tercero es el que de verdad importa:
+     * <ol>
+     *   <li>el GET muestra el hallazgo con severidad {@code ERROR} (no {@code AVISO});</li>
+     *   <li>el POST da {@code 422} y su causa es {@link PrevalidacionFallidaException} —NO
+     *       {@link es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException}—, que es
+     *       la distinción que este catálogo hace delicada: es infactible por las DOS vías,
+     *       así que sin mirar la causa un 422 no probaría cuál de las dos actuó;</li>
+     *   <li>{@code mocked.constructed()} queda VACÍO: el solver ni siquiera se construye.
+     *       Ese es el objetivo entero de la pre-validación —no gastar el presupuesto— y
+     *       ningún aserto sobre el status puede demostrarlo.</li>
+     * </ol>
      */
     @Test
-    void grupoSobrecargado_esAvisoYNoImpideGenerar() throws Exception {
+    void grupoSobrecargado_abortaCon422SinLlegarAConstruirElSolver() throws Exception {
         poblarCatalogoConGrupoSobrecargado();
         entityManager.flush();
 
         mockMvc.perform(get("/api/prevalidacion"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.regla=='GRUPO_SOBRECARGADO')].severidad")
-                        .value(Matchers.hasItem("AVISO")))
-                .andExpect(jsonPath("$[?(@.severidad=='ERROR')]").isEmpty());
+                        .value(Matchers.hasItem("ERROR")))
+                .andExpect(jsonPath("$[?(@.regla=='GRUPO_SOBRECARGADO')].entidadCodigo")
+                        .value(Matchers.hasItem("1ºA")));
 
-        try (MockedConstruction<SolverHorario> mocked = Mockito.mockConstruction(
-                SolverHorario.class,
-                (mock, context) -> when(mock.resolverOptimizandoConDetalle(any()))
-                        .thenAnswer(invocacion -> solucionCompletaDe(invocacion.getArgument(0))))) {
+        try (MockedConstruction<SolverHorario> mocked =
+                     Mockito.mockConstruction(SolverHorario.class)) {
 
             mockMvc.perform(post("/api/horarios")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isOk());
-        }
-    }
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(resultado -> assertThat(resultado.getResolvedException())
+                            .hasCauseInstanceOf(PrevalidacionFallidaException.class));
 
-    /**
-     * Coloca CADA instancia de CADA actividad en algún tramo, rotando por la rejilla. No
-     * pretende ser un horario legal —solapa a propósito—: existe solo para que
-     * {@code SolucionMapper.aSesiones} encuentre colocada toda instancia (lanza si alguna
-     * falta, {@code SolucionMapper:119}) y el POST pueda completar con 200. El aula sale de
-     * {@code plaza.aulaFija()} por el fallback de {@code SolucionHorario.aulaElegida}.
-     */
-    private static ResultadoOptimizacion solucionCompletaDe(ProblemaHorario problema) {
-        Map<ActividadInstancia, Tramo> asignaciones = new HashMap<>();
-        int siguiente = 0;
-        for (es.yaroki.educhronos.solver.domain.Actividad act : problema.actividades()) {
-            for (int indice = 1; indice <= act.repeticionesPorSemana(); indice++) {
-                asignaciones.put(new ActividadInstancia(act, indice),
-                        problema.tramos().get(siguiente++ % problema.tramos().size()));
-            }
+            assertThat(mocked.constructed()).isEmpty();
         }
-        return new ResultadoOptimizacion(
-                new SolucionHorario(asignaciones), CpSolverStatus.OPTIMAL, 0.0, 0.0);
     }
 
     /** Un catálogo sano pre-valida a {@code 200} con lista VACÍA. */
@@ -191,8 +175,9 @@ class PrevalidacionEndpointTest {
 
     /**
      * 5 tramos lectivos y DOS actividades sobre subgrupos distintos del MISMO grupo, de 3
-     * repeticiones cada una: el grupo acumula 6 > 5 → AVISO. Ningún profesor se pasa (3
-     * cada uno ≤ 5) y ninguna es DISTRIBUIDA, así que NO hay ERROR.
+     * repeticiones cada una: el grupo acumula 6 > 5 → ERROR de (c). Ningún profesor se
+     * pasa (3 cada uno ≤ 5) y ninguna es DISTRIBUIDA, así que (c) es el ÚNICO hallazgo y
+     * el 422 no puede venir de otra regla.
      */
     private void poblarCatalogoConGrupoSobrecargado() {
         Contexto ctx = contextoBase(5);

@@ -176,9 +176,12 @@ class PrevalidacionServiceTest {
                     // 7 = 3 (la actividad de desdoble UNA vez) + 4. Por plaza daría 10.
                     assertThat(a.demanda()).isEqualTo(7);
                     assertThat(a.disponible()).isEqualTo(5);
+                    assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
                 });
-        // (A4) La sobrecarga de grupo NO aborta: es AVISO, y no hay ningún ERROR.
-        assertThat(avisos).noneMatch(a -> a.severidad() == Severidad.ERROR);
+        // AISLAMIENTO: ese es el ÚNICO hallazgo. Ni (a) ni (d) dicen nada con este
+        // fixture (los tres profesores caben, ninguna actividad es DISTRIBUIDA), así que
+        // el aserto de valor de arriba no puede quedar satisfecho por un aviso ajeno.
+        assertThat(avisos).hasSize(1);
     }
 
     // -------------------------------------------------------------- (d) repeticiones
