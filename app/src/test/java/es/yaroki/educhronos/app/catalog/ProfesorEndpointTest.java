@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.ProfesorService;
+import es.yaroki.educhronos.app.service.RestriccionHorariaService;
 import es.yaroki.educhronos.app.web.ProfesorController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,18 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(ProfesorService.class)
+@Import({ProfesorService.class, RestriccionHorariaService.class})
 class ProfesorEndpointTest {
 
     @Autowired private ProfesorService service;
+    @Autowired private RestriccionHorariaService restriccionService;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new ProfesorController(service)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                new ProfesorController(service, restriccionService)).build();
     }
 
     @Test

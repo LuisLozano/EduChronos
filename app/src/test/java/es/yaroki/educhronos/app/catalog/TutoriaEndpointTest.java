@@ -13,6 +13,7 @@ import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.GrupoService;
 import es.yaroki.educhronos.app.service.PdcService;
 import es.yaroki.educhronos.app.service.ProfesorService;
+import es.yaroki.educhronos.app.service.RestriccionHorariaService;
 import es.yaroki.educhronos.app.service.TutoriaService;
 import es.yaroki.educhronos.app.web.GrupoController;
 import es.yaroki.educhronos.app.web.PdcController;
@@ -41,13 +42,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({GrupoService.class, TutoriaService.class, PdcService.class, ProfesorService.class})
+@Import({GrupoService.class, TutoriaService.class, PdcService.class, ProfesorService.class,
+        RestriccionHorariaService.class})
 class TutoriaEndpointTest {
 
     @Autowired private GrupoService grupoService;
     @Autowired private TutoriaService tutoriaService;
     @Autowired private PdcService pdcService;
     @Autowired private ProfesorService profesorService;
+    @Autowired private RestriccionHorariaService restriccionService;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
     @Autowired private ProfesorRepository profesorRepository;
@@ -64,7 +67,7 @@ class TutoriaEndpointTest {
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new GrupoController(grupoService, tutoriaService),
                         new PdcController(pdcService),
-                        new ProfesorController(profesorService))
+                        new ProfesorController(profesorService, restriccionService))
                 .build();
         Nivel nivel = nivelRepository.save(new Nivel("1ESO", 1));
         grupoAId = grupoRepository.save(
