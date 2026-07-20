@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S73. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S74. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S73). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S74). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -2910,3 +2910,49 @@ al abrir sesión.
   resuelta: mitad de esquema CERRADA, mitad de aplicación (borrado amable → 409) VIVA en C2b. Setters de
   Actividad/Plaza siguen sin retirar (deuda de S72, intacta).
   Siguiente: 8.5-C2b (borrado amable) o 8.5-C3 (I3 + compatibilidades), a decidir al abrir sesión.
+
+### Sesión 74 — Fase 8, Bloque 8.5-C2b: BORRADO AMABLE DE CATÁLOGO (409 en
+  referencia entrante, en vez de la SQLException de FK cruda). Modo híbrido. 2 commits de código
+  (e60680a producción 22 ficheros + 2293d31 tests 4 ficheros, solo app/) + 1 commit de doc (este).
+  Cierra la mitad de aplicación de D-F8.5-A-a (la de esquema la cerró S73) → D-F8.5-A-a CERRADA entera.
+  DECISIONES DE DISEÑO (cerradas con el arquitecto antes de teclear): (2A) traducción a 409 vía
+  excepción de dominio nueva ReferenciaEntranteException lanzada por el Service + catch por endpoint en
+  cada Controller; NO se introduce @ControllerAdvice (fiel al patrón vigente S70: cada controller
+  traduce las suyas). (b) consulta inversa por @Query NATIVA en el repo de cada raíz, NO derivados
+  countBy* que exigirían un PlazaRepository: Plaza es agregado de Actividad (D-C1-A/S72), abrir su repo
+  para un chequeo de borrado rompería el agregado; el SQL nativo se acopla a nombres de tabla/columna
+  pero schema.sql (en el repo) es su autoridad y el test lo delata si se desvía. (C) híbrido: la
+  consulta inversa da el 409 legible, la FK física de S73 es la red dura por debajo. Alcance: 7 raíces
+  (Tramo NO tiene CRUD → fuera, D22), Actividad como caso propio.
+  QUÉ SE CONSTRUYÓ: ReferenciaEntranteException (record Referencia(String,long), filtra a conteo>0,
+  mensaje que nombra referente+conteo) + @Query nativas de conteo inverso en los 7 repos + guarda en
+  cada Service.borrar (consulta inversa ANTES de delete; si hay referencias, 409) + catch→409 en cada
+  Controller. Caso Actividad: NO cuenta sus plazas (cascadean); cuenta sesion_bloqueada.actividad_id,
+  la FUSIÓN aula_bloqueada (actividad_id OR plaza_id IN plazas-de-la-actividad, unidas con OR porque
+  una fila satisface ambas FK y contarlas por separado la duplicaría — única @Query no-1:1 del bloque)
+  y la TRAVESÍA sesion (plaza_id IN plazas-de-la-actividad; sesion no tiene actividad_id).
+  HALLAZGO (cazado por la suite completa, no por los tests nuevos): el §B del contrato contó por error
+  subgrupo_grupo.subgrupo_id como referente entrante de Subgrupo. Es su POBLACIÓN PROPIA: Subgrupo es
+  owner del @ManyToMany grupos, así que Hibernate emite DELETE de subgrupo_grupo al borrar el subgrupo
+  ANTES del delete → no bloquea. Contarla hacía que NINGÚN subgrupo fuera borrable (el endpoint exige
+  ≥1 grupo). Corregido: SubgrupoService.borrar cuenta solo plaza_subgrupo (owner Plaza = externo real).
+  Asimetría confirmatoria: GrupoService SÍ cuenta subgrupo_grupo.grupo_id porque Grupo NO es owner
+  (Hibernate no lo limpia al borrar un grupo). REGLA DERIVADA: referencia entrante = FK que un TERCERO
+  controla, no toda FK que apunte a mi id; las FK del propio agregado (que Hibernate limpia al borrarme)
+  no cuentan. El mapa de FK de S73 era CORRECTO (ya listaba solo plaza_subgrupo para Subgrupo); el error
+  fue del §B de esta sesión, no del insumo. Verificación cruzada de las 7 raíces (grep de
+  @OneToMany/@ManyToMany, no de memoria): Subgrupo era el único falso positivo.
+  ASERTOS DISCRIMINANTES (4 tests nuevos, cada uno VERIFICADO POR MUTACIÓN — romper el @Query pone el
+  test rojo, restaurarlo verde; el desalineado de ids es lo que hace la mutación detectable, porque con
+  ids colisionando una @Query desviada a otra columna cuenta por accidente): test 1 Aula (2 plazas por
+  aula_fija → 409, containsExactly cierra las otras 3 FK a 0); test 3 Actividad (Sesion+AulaBloqueada
+  sobre su plaza → 409, travesía probada por M1, deduplicación del OR probada por M2c=suma da 2;
+  M2a/M2b —quitar una rama del OR— indetectables con datos legítimos y es honesto que así sea, reportado
+  no tapado); test 4 Nivel (réplica); test positivo de Subgrupo (usado por plaza → 409, containsExactly
+  blinda que subgrupo_grupo NO reaparezca). Suite app 169 verde (+4 sobre 165), demostrada no-vacía
+  (break-restore de AulaService.borrar → Failures:1 → restaurado verde). solver/ intacto → referencia
+  NO regenerada. modelo NO tocado (§4.7 ya tenía la nota de integridad de S73; sin entidad ni invariante
+  nueva). Tres cortes de servicio de Claude Code en sesión (2 «mid-response» + 1 529), ninguno dejó el
+  árbol sucio (diagnosticado cada vez); mitigados fragmentando los turnos (un test por turno).
+  DEUDA NUEVA: ninguna. Vivos para cerrar 8.5: C3 (I3 + AsignaturaAulaCompatible) y D/E (MOCKUP PREVIO).
+  Siguiente: 8.5-C3 (I3 + compatibilidades) o 8.5-D/E, a decidir al abrir sesión.

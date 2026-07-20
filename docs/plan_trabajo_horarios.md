@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-D2a CERRADO en S77
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-E CERRADO en S78
+  (CRUD REST de ProfesorRestriccionHoraria: sub-recurso GET/PUT con reemplazo total; la cadena JPA→
+  dominio→CP-SAT ya existía y solo faltaba la superficie de escritura; `peso` NO se expone porque
+  ModeloCpSat nunca lo lee). CON ÉL SE CIERRA 8.5: cero sub-bloques vivos (D2b es de solver/, D3
+  aplazado). Bloque 8.5-D2a CERRADO en S77
   (ProfesorTutoria + I4 en escritura + herencia PDC←padre por copia; 8.5-D2 partido en D2a/D2b).
   Bloque 8.5-D1 CERRADO en S76 (alta/consulta/borrado de grupo PDC
   como sub-recurso /api/grupos/{idPadre}/pdc + subgrupo mono-Di automático; 8.5-D partido en D1/D2/D3
@@ -695,7 +699,75 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   DEUDA NUEVA: D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo).
   Vivos para cerrar 8.5: D y E, ambos MOCKUP PREVIO.
   Siguiente: 8.5-D o 8.5-E (el primero de los dos empieza por MOCKUP, no por código), o 8.4.
-### Sesión 77 — Fase 8, Bloque 8.5-D2a: ProfesorTutoria, I4 en escritura y herencia PDC←padre.
+### Sesión 78 — Fase 8, Bloque 8.5-E: CRUD REST de ProfesorRestriccionHoraria (CIERRA 8.5).
+  Modo híbrido. 2 commits de código (producción + tests, solo app/) + doc. §A DE MEDICIÓN sobre CÓDIGO
+  (greps + lectura literal, el instrumento MÁS BARATO que respondía: la pregunta era sobre el repo, no
+  sobre datos; precedente S77). SALIDA que REENCUADRÓ el bloque: la cadena entera JPA → CatalogoMapper
+  → dominio → CP-SAT YA EXISTÍA y está consumida —entidad `ProfesorRestriccionHoraria` + repo +
+  `schema.sql` (CHECK DURA|BLANDA) + record `RestriccionHoraria` + `ProblemaHorario.restriccionesHorarias`
+  + `ModeloCpSat` (dura en `restriccionIndisponibilidadProfesor`, blanda en
+  `objetivoIndisponibilidadBlandaProfesor`)—. Lo ÚNICO que faltaba era la SUPERFICIE DE ESCRITURA: sin
+  CRUD, poblar restricciones exigía SQL a mano (el seed crea CERO). El bloque es MÁS PEQUEÑO que su
+  casilla, y NO toca solver/ (lo que confirmó la elección de E sobre D2b al abrir).
+  HALLAZGO DE LA MEDICIÓN, decisivo para la UX: `ModeloCpSat` NUNCA lee `r.peso()`; usa la constante
+  `PESO_INDISP_BLANDA=1L` como coeficiente de un BoolVar puro. El javadoc del record afirmaba que `peso`
+  era «la penalización en la función objetivo»: FALSO. Y es peor de lo que el javadoc admitía —decía
+  «se ignora en DURA»; se ignora TAMBIÉN en BLANDA—. `peso` es columna `not null` en tres capas que
+  ningún consumidor lee.
+  MOCKUP PREVIO ejecutado (D-F8.6-a), como exige la casilla: rejilla 5 días × 6 tramos, tres estados,
+  panel de detalle. NO se versiona (es una pregunta dibujada); sobreviven sus decisiones.
+  DECISIONES CERRADAS: (E-0) `peso` NO entra en la superficie —ni en el DTO de entrada ni en la rejilla—;
+  el service lo escribe SIEMPRE a 1. Descartadas «dibujarlo inerte» (la UI mentiría: mover un control
+  que no cambia nada) y «hacerlo funcionar» (es D21(a), toca solver/ y activaría un campo SIN calibrar,
+  peor que inerte). (E-1) click SELECCIONA; el estado se cambia desde el panel de detalle, MÁS acciones
+  de FILA y COLUMNA (cabecera de tramo → los 5 días; cabecera de día → los 6 tramos). El arquitecto
+  eligió primero la variante sin complemento y el arquitecto-mentor la DEVOLVIÓ con su coste medido
+  (20 celdas = 40 clicks; la fila de 13:30 y el «día libre» son los patrones REALES del dominio, y son
+  exactamente fila y columna): se acordó (c) fila/columna sobre (b) arrastre por resolver mejor el caso
+  frecuente y costar menos. (E-2) volver a `puede` BORRA la fila y su motivo, SILENCIOSO (confirmar cada
+  despintado en 30 celdas es insufrible). (E-3) sub-recurso GET/PUT
+  /api/profesores/{id}/restricciones-horarias con REEMPLAZO TOTAL idempotente (patrón literal S75/S77:
+  deleteAll+flush ANTES de insertar); validación sobre la lista ENTRANTE. (E-4) rejilla MONO-PROFESOR.
+  (E-5) los tres estados son {ausencia de fila, BLANDA, DURA}: NO hay enum nuevo, `TipoRestriccion` ya
+  existe y el CHECK de `schema.sql` los ancla. (E-6) el recreo NO es celda sino separador: `TramoSemanal`
+  no lo contiene (los 6 tramos numeran 1..6 sin hueco, ver `ORDEN_TRAS_RECREO`).
+  Tramo referenciado por (dia, ordenEnDia) INVIRTIENDO `CatalogoMapper.indiceOrdenEnDia` (precedente
+  8.2b-iv/S66: fuente única, D30 no gana otro espejo). Tramo inexistente → 400.
+  ERROR DE ESPECIFICACIÓN DEL ARQUITECTO (registrado, no tapado): E-3 fijaba que la restricción horaria
+  era POBLACIÓN PROPIA del profesor (cascade, no 409). El código dice lo contrario desde `e60680a`
+  (S74/8.5-C2b) y el código TIENE RAZÓN: el criterio «población propia» se aplica al lado que POSEE la
+  población, no al lado REFERENCIADO, y la FK es RESTRICT en `schema.sql`. Verificado por `git log -S`,
+  no por conjetura: el 409 preexistía, 8.5-E no lo tocó. MISMO GÉNERO QUE D-F8.5-D2a-b —especificar sin
+  comprobar el precedente en el código—, dos sesiones seguidas. NO genera deuda: no hay incoherencia en
+  el código, había un error en mi contrato. La asimetría de `profesor_tutoria` (cascade por el lado del
+  Grupo, 409 por el del Profesor) es la de D2a-5, deliberada y vigente.
+  ASERTOS: 15 tests nuevos. (A2) reemplazo≠merge por `doesNotContain` del par previo. (A4) duplicado en
+  body → 400 CON LA BASE INTACTA, y el duplicado se elige DISTINTO de lo previo a propósito, o
+  `containsExactly` no distinguiría «no se tocó» de «se borró y reescribió idéntico» —evita el
+  acoplamiento accidental que S74/S76 cazaron tarde—. (A5) POR MUTACIÓN: neutralizada la pasada 3, cae
+  por la VÍA ESPERADA (400→200, no 500), y un test desechable confirmó que quedan DOS filas y el flush
+  pasa: NO existe UNIQUE(profesor,tramo), la guarda del service es lo ÚNICO que sostiene la regla —el
+  javadoc decía la verdad, no hubo que corregirlo—. (A6) borrado de profesor: 409 en servicio y
+  RESTRICT real en esquema, coherente con la cabecera de `schema.sql`.
+  HALLAZGO DE FRAMEWORK (familia S73/S74/S75/S76/S77): la violación de FK NO llega como
+  `DataIntegrityViolationException` sino como `GenericJDBCException`, por DOS causas medidas —
+  `TestEntityManager.flush()` no cruza la frontera del repositorio donde Spring traduce a su jerarquía
+  DAO, y el SQLiteDialect community 7.4.1 no clasifica el error de FK como violación de constraint—.
+  flush()+clear() necesario (no decorativo) en A1/A2/A3/A4 y en los de lista vacía y salto de recreo.
+  Efecto colateral asumido: el ctor de `ProfesorController` ganó un colaborador → `ProfesorEndpointTest`
+  y `TutoriaEndpointTest` reciben el servicio real vía `@Import`, NO un `null` (un null haría que esos
+  tests mintieran sobre el objeto que construyen).
+  Suite 212 → 227 (+15), solver 78 intacto. Demostrada no-vacía (PESO_POR_DEFECTO=99 → cae A3 →
+  restaurar → verde). solver/ intacto → referencia NO regenerada. modelo §4.3 SÍ tocado (nota de
+  implementación de `peso` inerte, commit aparte).
+  DEUDA NUEVA: D-F8.5-E-a (`peso` superficie muerta en tres capas), D-F8.5-E-b (unicidad
+  (profesor,tramo) sin red bajo la aplicación), D-F8.5-E-c (el dialecto no clasifica FK como
+  DataIntegrityViolation), D-F8.5-E-d (conteos inversos de Profesor en dos ubicaciones).
+  8.5 QUEDA CERRADO: cero sub-bloques vivos (D2b es de solver/, D3 aplazado con criterio de reapertura).
+  Siguiente: 8.4 (pre-validación, D18/D20; arrastra MOCKUP PREVIO por D20), 8.5-D2b (solver, regenera la
+  referencia) u 8.6 (Angular, contrato ya cerrado en S67), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 77 — Fase 8, Bloque 8.5-D2a: ProfesorTutoria, I4 en
+  escritura y herencia PDC←padre.
   Modo híbrido. 2 commits de código (producción + tests, solo app/) + 2 de doc (plan, modelo §4.3).
   §A DE MEDICIÓN sobre CÓDIGO Y SEED (no sobre datos: el estado a medir era el del repo, y un test
   habría medido lo mismo con más ceremonia). SALIDA: `requiereTutor` está VIVO como superficie y
@@ -802,51 +874,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   sobre 5 casos).
   Siguiente: 8.5-D2 (tutoría: entidad nueva ProfesorTutoria + I4 + herencia PDC←padre), 8.5-D3
   (particiones, evaluar si procede), 8.5-E (MOCKUP PREVIO) o 8.4.
-Última sesión registrada (previa): Sesión 74 — Fase 8, Bloque 8.5-C2b: BORRADO AMABLE DE CATÁLOGO (409 en
-  referencia entrante, en vez de la SQLException de FK cruda). Modo híbrido. 2 commits de código
-  (e60680a producción 22 ficheros + 2293d31 tests 4 ficheros, solo app/) + 1 commit de doc (este).
-  Cierra la mitad de aplicación de D-F8.5-A-a (la de esquema la cerró S73) → D-F8.5-A-a CERRADA entera.
-  DECISIONES DE DISEÑO (cerradas con el arquitecto antes de teclear): (2A) traducción a 409 vía
-  excepción de dominio nueva ReferenciaEntranteException lanzada por el Service + catch por endpoint en
-  cada Controller; NO se introduce @ControllerAdvice (fiel al patrón vigente S70: cada controller
-  traduce las suyas). (b) consulta inversa por @Query NATIVA en el repo de cada raíz, NO derivados
-  countBy* que exigirían un PlazaRepository: Plaza es agregado de Actividad (D-C1-A/S72), abrir su repo
-  para un chequeo de borrado rompería el agregado; el SQL nativo se acopla a nombres de tabla/columna
-  pero schema.sql (en el repo) es su autoridad y el test lo delata si se desvía. (C) híbrido: la
-  consulta inversa da el 409 legible, la FK física de S73 es la red dura por debajo. Alcance: 7 raíces
-  (Tramo NO tiene CRUD → fuera, D22), Actividad como caso propio.
-  QUÉ SE CONSTRUYÓ: ReferenciaEntranteException (record Referencia(String,long), filtra a conteo>0,
-  mensaje que nombra referente+conteo) + @Query nativas de conteo inverso en los 7 repos + guarda en
-  cada Service.borrar (consulta inversa ANTES de delete; si hay referencias, 409) + catch→409 en cada
-  Controller. Caso Actividad: NO cuenta sus plazas (cascadean); cuenta sesion_bloqueada.actividad_id,
-  la FUSIÓN aula_bloqueada (actividad_id OR plaza_id IN plazas-de-la-actividad, unidas con OR porque
-  una fila satisface ambas FK y contarlas por separado la duplicaría — única @Query no-1:1 del bloque)
-  y la TRAVESÍA sesion (plaza_id IN plazas-de-la-actividad; sesion no tiene actividad_id).
-  HALLAZGO (cazado por la suite completa, no por los tests nuevos): el §B del contrato contó por error
-  subgrupo_grupo.subgrupo_id como referente entrante de Subgrupo. Es su POBLACIÓN PROPIA: Subgrupo es
-  owner del @ManyToMany grupos, así que Hibernate emite DELETE de subgrupo_grupo al borrar el subgrupo
-  ANTES del delete → no bloquea. Contarla hacía que NINGÚN subgrupo fuera borrable (el endpoint exige
-  ≥1 grupo). Corregido: SubgrupoService.borrar cuenta solo plaza_subgrupo (owner Plaza = externo real).
-  Asimetría confirmatoria: GrupoService SÍ cuenta subgrupo_grupo.grupo_id porque Grupo NO es owner
-  (Hibernate no lo limpia al borrar un grupo). REGLA DERIVADA: referencia entrante = FK que un TERCERO
-  controla, no toda FK que apunte a mi id; las FK del propio agregado (que Hibernate limpia al borrarme)
-  no cuentan. El mapa de FK de S73 era CORRECTO (ya listaba solo plaza_subgrupo para Subgrupo); el error
-  fue del §B de esta sesión, no del insumo. Verificación cruzada de las 7 raíces (grep de
-  @OneToMany/@ManyToMany, no de memoria): Subgrupo era el único falso positivo.
-  ASERTOS DISCRIMINANTES (4 tests nuevos, cada uno VERIFICADO POR MUTACIÓN — romper el @Query pone el
-  test rojo, restaurarlo verde; el desalineado de ids es lo que hace la mutación detectable, porque con
-  ids colisionando una @Query desviada a otra columna cuenta por accidente): test 1 Aula (2 plazas por
-  aula_fija → 409, containsExactly cierra las otras 3 FK a 0); test 3 Actividad (Sesion+AulaBloqueada
-  sobre su plaza → 409, travesía probada por M1, deduplicación del OR probada por M2c=suma da 2;
-  M2a/M2b —quitar una rama del OR— indetectables con datos legítimos y es honesto que así sea, reportado
-  no tapado); test 4 Nivel (réplica); test positivo de Subgrupo (usado por plaza → 409, containsExactly
-  blinda que subgrupo_grupo NO reaparezca). Suite app 169 verde (+4 sobre 165), demostrada no-vacía
-  (break-restore de AulaService.borrar → Failures:1 → restaurado verde). solver/ intacto → referencia
-  NO regenerada. modelo NO tocado (§4.7 ya tenía la nota de integridad de S73; sin entidad ni invariante
-  nueva). Tres cortes de servicio de Claude Code en sesión (2 «mid-response» + 1 529), ninguno dejó el
-  árbol sucio (diagnosticado cada vez); mitigados fragmentando los turnos (un test por turno).
-  DEUDA NUEVA: ninguna. Vivos para cerrar 8.5: C3 (I3 + AsignaturaAulaCompatible) y D/E (MOCKUP PREVIO).
-  Siguiente: 8.5-C3 (I3 + compatibilidades) o 8.5-D/E, a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -858,10 +885,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76 y la de S73 en la Sesión 77 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77 y la de S74 en la Sesión 78 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S74–S77). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S75–S78). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1054,9 +1081,20 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       contradicho. CRITERIO DE REAPERTURA: solo si (a) la UX de D7 pasa a requisito real de
       usuario, o (b) I1 falla en producción sin que nadie lo detecte. Consecuencia asumida:
       I1 sigue sin verificador, igual que hoy.
-- [ ] Bloque 8.5-E — Rejilla de ProfesorRestriccionHoraria (MOCKUP PREVIO, D20).
-      El seed muere en el bloque de configuración de jornada (D22), no en 8.5-C: sobrevive por
-      TramoSemanal, que no tiene CRUD.
+- [x] Bloque 8.5-E — CRUD REST de ProfesorRestriccionHoraria (S78). CIERRA 8.5. Sub-recurso
+      GET/PUT /api/profesores/{id}/restricciones-horarias con reemplazo total idempotente
+      (patrón S75/S77). MEDIDO al abrir: la cadena JPA→CatalogoMapper→dominio→CP-SAT YA existía
+      y está consumida; lo único que faltaba era la SUPERFICIE DE ESCRITURA (el seed crea CERO
+      restricciones). Solo app/: NO toca solver/. `peso` NO se expone —ni DTO ni rejilla—: el
+      service lo escribe a 1 porque ModeloCpSat usa la constante PESO_INDISP_BLANDA y nunca lee
+      `r.peso()`. Tres estados = {ausencia de fila, BLANDA, DURA}, sin enum nuevo. Recreo =
+      separador, no celda. Mockup previo ejecutado (D-F8.6-a), no versionado; de él salen: click
+      selecciona + estado desde panel de detalle + acciones de FILA y COLUMNA (los dos patrones
+      reales del dominio son franja horaria y día completo); volver a `puede` borra fila y motivo,
+      silencioso; rejilla mono-profesor. Suite 227. Deuda: D-F8.5-E-a, D-F8.5-E-b, D-F8.5-E-c,
+      D-F8.5-E-d. Detalle: bitácora S78.
+      NOTA: el seed muere en el bloque de configuración de jornada (D22), no aquí: sobrevive por
+      TramoSemanal, que sigue sin CRUD.
 - [ ] Bloque 8.6 — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de 8.2b-iv y
       8.3-C. Modelo de interacción YA FIJADO en S67 (8.6-A, decisiones D-F8.6-A-1/2): NO es un
       editor libre. El usuario PINA (POST /api/bloqueos, instantáneo) y el solver RECOLOCA lo
@@ -1614,6 +1652,41 @@ siguiente, con remisión a la bitácora.
   devuelve 400 en el caso análogo. Dos respuestas al mismo hecho. Especificado así por el
   arquitecto en S77 sin comprobar el precedente; no se corrigió en caliente para no tocar
   GrupoService fuera de alcance. → unificar al abrir el próximo bloque que toque GrupoService.
+- **D-F8.5-E-a** (S78, VIVA, no bloqueante) — `peso` ES SUPERFICIE MUERTA EN TRES CAPAS.
+  Columna `not null` en `schema.sql`, campo en la entidad JPA y componente del record
+  `RestriccionHoraria`, escrito SIEMPRE a 1 por `RestriccionHorariaService` y **jamás leído por
+  ningún consumidor**: `ModeloCpSat.objetivoIndisponibilidadBlandaProfesor` pondera con la
+  constante `PESO_INDISP_BLANDA`, no con `r.peso()`, y la variante DURA no lo mira. Medido en S78
+  por lectura literal. El javadoc del record afirmaba que era «la penalización en la función
+  objetivo»: FALSO, y además decía «se ignora en DURA» cuando se ignora también en BLANDA.
+  Por eso 8.5-E NO lo expone (exponer un control inerte haría que la UI mintiera). Familia de
+  D21(a) —parametrización de pesos blandos— y hermana de `requiereTutor` (S77: superficie viva,
+  semántica muerta). → activarlo es trabajo de D21, con su calibración pendiente de datos del
+  centro; activarlo sin calibrar sería peor que dejarlo inerte.
+- **D-F8.5-E-b** (S78, VIVA) — UNICIDAD (profesor, tramo) SIN RED BAJO LA APLICACIÓN. Que un
+  profesor no tenga dos restricciones sobre el mismo tramo vive SOLO en la validación de
+  `RestriccionHorariaService` sobre la lista entrante. NO hay `UNIQUE (profesor_id, tramo_id)` en
+  `schema.sql`. Verificado POR MUTACIÓN en S78: neutralizada la guarda, el PUT pasa con 200 y la
+  base queda con DOS filas, con el flush sin error. Cualquier inserción por otra vía (test, seed,
+  script) viola la regla en silencio. Familia exacta de D-F8.5-D2a-a (I4) y de D-F8.2b-iv-a
+  (validación sin espejo en la BD). → índice único si aparece otra vía de escritura.
+- **D-F8.5-E-c** (S78, VIVA, de FRAMEWORK, no bloqueante) — EL DIALECTO NO CLASIFICA LOS FALLOS
+  DE FK COMO `DataIntegrityViolationException`. Medido en S78 al afinar el aserto de borrado: una
+  violación de FK llega como `GenericJDBCException`, por dos causas distintas y acumulativas —
+  (1) `TestEntityManager.flush()` no cruza la frontera del repositorio, que es donde Spring
+  traduce a su jerarquía DAO; (2) el SQLiteDialect community 7.4.1 no clasifica el error de FK
+  como violación de constraint—. CONSECUENCIA QUE EXCEDE AL TEST: un `@ControllerAdvice` que
+  pretenda mapear violaciones de FK a HTTP POR TIPO DE EXCEPCIÓN **no puede funcionar con este
+  dialecto**. Esto REFUERZA con un argumento técnico la decisión de S74 —hasta ahora sostenida
+  solo por estilo— de que cada controller traduzca sus propias excepciones. El discriminante
+  fiable hoy es el MENSAJE, no el tipo. → releer antes de proponer centralizar traducción de
+  excepciones.
+- **D-F8.5-E-d** (S78, VIVA, no bloqueante) — LOS CONTEOS INVERSOS DE `Profesor` VIVEN EN DOS
+  UBICACIONES. `contarPlazas` y `contarRestriccionesHorarias` son `@Query` nativas en
+  `ProfesorRepository` (patrón S74); `contarTutorias` vive en `ProfesorTutoriaRepository` y llega
+  por colaborador inyectado (S77). Mismo tipo de chequeo, misma raíz, dos sitios donde buscarlo.
+  No es defecto funcional —los tres se ejecutan en `ProfesorService.borrar`— pero rompe la
+  localidad que S74 perseguía. → unificar si se añade un tercer conteo a esta raíz.
 - **Contrato de 8.2b-iv** (S62, decisión tomada; IMPLEMENTADO en S66 — se conserva porque
   documenta el PORQUÉ del endpoint propio, que sigue vivo) —
   la entrada del bloqueo por REST va en **endpoint propio**, NO en el body de
