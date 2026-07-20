@@ -600,7 +600,9 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGIENE DOCUMENTAL en S80
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloques 8.6-i + 8.6-ii
+  CERRADOS en S81 (cliente REST de bloqueos + arrastre CDK que pina la instancia; 8.6 partido en
+  i/ii/iii; sin movimiento optimista; backend intacto). HIGIENE DOCUMENTAL en S80
   (condensación de los 8 sub-bloques CERRADOS de 8.5 a una línea cada uno, con los tokens de deuda
   conservados dentro; 8.5-D2b y 8.5-D3 quedan íntegros por estar ABIERTOS; sin código). Bloque 8.4-A CERRADO en S79
   (pre-validación por condiciones necesarias, D18: tres reglas ERROR sobre el catálogo, deduplicando
@@ -656,7 +658,73 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGI
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 80 — HIGIENE DOCUMENTAL: condensación de 8.5 y archivado de ventana (sin código).
+### Sesión 81 — Fase 8, Bloques 8.6-i + 8.6-ii: cliente de bloqueos y arrastre que pina.
+  Modo híbrido. 1 commit de código (solo `app/frontend/`) + doc aparte. §A DE MEDICIÓN sobre el
+  ESTADO REAL DEL FRONTEND (lectura literal de ficheros + `find`; instrumento más barato,
+  precedente S77-S80).
+  SALIDA DE §A: cero librerías de d&d y cero `@angular/cdk` —tampoco transitivo, porque no hay
+  Material que lo arrastre—; CONFIRMA la casilla de 8.6 y ELIMINA el atajo que supuse al abrir.
+  Angular 21. DATO NO PREVISTO Y DECISIVO: el runner es **Vitest + jsdom**, que NO implementa la
+  HTML Drag and Drop API — cualquier librería basada en `dragstart`/`drop` haría el gesto
+  INTESTABLE. Es el criterio que eligió CDK, no la limpieza. El cliente de 7B conocía UN solo
+  endpoint (`GET /api/horarios/{id}/proyeccion`): cero campos de atribución (8.3-C) y cero de
+  bloqueo (8.2b-iv) en el modelo TS.
+  HALLAZGO FAVORABLE: `SesionVista` ya lleva (`actividadCodigo`, `indice`), la clave que
+  `BloqueoDTO` declara para el cruce (D-6). 8.6-i NO toca backend ni `SesionVistaDTO`: la
+  predicción de S66 se cumple, medida.
+  8.6 PARTIDO en i/ii/iii. El antiguo iii (candado) se FUNDE en i: el `GET /api/bloqueos` es
+  precondición del CANDADO (sin él solo se conocen los pines de esta sesión de navegador), no del
+  POST. Mi justificación inicial de la fusión —«sin GET cada arrastre borra los pines anteriores»—
+  era FALSA y la corrigió la lectura literal del javadoc: el POST es idempotente POR INSTANCIA, no
+  reemplazo de colección. D-F8.6-ii-2 RETIRADA antes de implementarse.
+  DECISIONES CERRADAS: D-F8.6-i-1 (`BloqueoService` TS propio; `HorarioService` se declara de solo
+  lectura en su javadoc y no se contamina), D-F8.6-i-2 (`bloqueo.model.ts` nuevo, espejo de los 4
+  records), D-F8.6-i-3 (`Set` de claves `${actividadCodigo}|${indice}`), D-F8.6-ii-1 (envoltorio de
+  celda por PAR actividad+índice; `agruparPorActividad` NUEVA, construida sobre `agruparPorSlot`,
+  que queda intacta con su test), D-F8.6-ii-3 (el arrastre pina SOLO tramo, `aulas: []`; el aula es
+  otro gesto), D-F8.6-ii-5 (sin movimiento optimista: el candado NO se pinta hasta el OK del POST;
+  en 400 el `Set` no se toca y no hay nada que revertir), D-F8.6-ii-6 (`@angular/cdk@21.2.14`,
+  `DragDropModule`, verificado por instalación limpia sin peer warnings ANTES de cerrar contrato).
+  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code AL PREGUNTAR ANTES
+  DE TECLEAR: (1) especifiqué el fixture de 2b como «desdoble CyR + OyD = dos actividades
+  distintas»: FALSO — `proyeccion-1eso.fixture.ts:26-41` las modela como SEIS PLAZAS de la única
+  actividad `Bloque-CyR_OyD_RefMt-1ESO`, que es lo correcto por dominio (S5 obliga a que las plazas
+  simultáneas compartan tramo; el modelo unificado existe para no confundir «seis destinos» con
+  «seis actividades»). Ningún slot del fixture real tiene dos actividadCodigo distintos. Resuelto
+  con FIXTURE LOCAL en el spec, sin contaminar `PROYECCION_1ESO` (oro del centro, patrón S41).
+  (2) especifiqué «en ERROR revierte»: SIN SUJETO — sin movimiento optimista no existe estado que
+  revertir. CUARTA SESIÓN CONSECUTIVA (S78, S79, S80, S81) con el mismo género de error.
+  TERCER ERROR MÍO, ESTE DESTAPADO POR RÉPLICA (no por ejecución): al ver que `agruparPorActividad`
+  reutiliza `clavePin` —buena decisión, una sola fuente de D-6— DI POR CUBIERTA la mitad «índice»
+  de la clave. NO lo estaba: el fixture local tenía todos los `indice` a 1, y el test que tocaba dos
+  índices los ponía en SLOTS DISTINTOS, donde los separa `claveSlot`, no `clavePin`. Mutar `clavePin`
+  ponía rojo SOLO `pines.spec.ts`. Corregido con `SLOT_DOS_INDICES` (misma actividad, índices 1 y 2,
+  MISMO slot) y test (6). Es cobertura fantasma: reutilizar una función no hereda su test.
+  DECISIÓN SOBRE EL FIXTURE DEFENSIVO: `SLOT_DOS_INDICES` modela un estado que el DOMINIO PROHÍBE
+  (dos repeticiones de una actividad solaparían al grupo). Se mantiene a propósito: `agruparPorActividad`
+  es función PURA y su contrato es agrupar por el par, no validar horarios; la invariante la
+  garantiza el solver. Si el fixture solo tuviera estados válidos, el test NO discriminaría (práctica
+  (c)). La alternativa —atacar `clavePin` desde `proyeccion.spec.ts`— es peor: no sobreviviría a un
+  refactor que dejara de usar `clavePin`. Declarado en el TSDoc del fixture.
+  ASERTOS: TRES MUTACIONES, las tres caen y restauran verde — `clavePin` ignorando el índice (rojo en
+  `pines.spec.ts` Y en `proyeccion.spec.ts` (6) tras la ampliación), agrupado plano en
+  `agruparPorActividad` (rojo en (5)), y `claveSlot` ignorando el tramo (rotura trivial de
+  demostración de suite no-vacía). Suite frontend 6 → 13.
+  Decisiones de implementación de Claude Code, revisadas y aceptadas: `agruparPorActividad` reutiliza
+  `clavePin` (una sola fuente de D-6); `cdkDropListGroup` conecta los 30 `cdkDropList`; soltar en el
+  mismo slot no emite.
+  PRETTIER NO APLICADO a propósito: el repo no está formateado (marca ficheros preexistentes que el
+  bloque no tocó) y aplicarlo mezclaría ruido de formato con el diff del bloque. Sería commit propio.
+  `package.json`/`package-lock.json` van en el commit de CÓDIGO, no aparte: sin la dependencia el
+  `import` de `DragDropModule` no compila y el commit no construiría (la disciplina separa código de
+  DOCUMENTACIÓN, no código de su manifiesto).
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  DEUDA NUEVA: D-F8.6-ii-a (el `reason` de `ResponseStatusException` no viaja al cliente).
+  Siguiente: 8.6-iii (badge de delta blando + resalte de violación; MOCKUP PREVIO OBLIGATORIO y
+  cableado de 8.3-C, que el cliente no conoce), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver), a decidir
+  al abrir sesión.
+Última sesión registrada (previa): Sesión 80 — HIGIENE DOCUMENTAL: condensación de 8.5 y archivado de ventana (sin código).
   Modo interactivo (documentación; el repo NO se tocó). 2 commits de doc, ninguno de código.
   ALCANCE elegido sobre cuatro candidatos (8.6, 8.4-B, 8.5-D2b, limpieza): la limpieza de 8.5
   llevaba desplazada TRES veces (S78, S79) y su condición habilitante se cumple desde S78. El
@@ -831,68 +899,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGI
   8.5 QUEDA CERRADO: cero sub-bloques vivos (D2b es de solver/, D3 aplazado con criterio de reapertura).
   Siguiente: 8.4 (pre-validación, D18/D20; arrastra MOCKUP PREVIO por D20), 8.5-D2b (solver, regenera la
   referencia) u 8.6 (Angular, contrato ya cerrado en S67), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 77 — Fase 8, Bloque 8.5-D2a: ProfesorTutoria, I4 en
-  escritura y herencia PDC←padre.
-  Modo híbrido. 2 commits de código (producción + tests, solo app/) + 2 de doc (plan, modelo §4.3).
-  §A DE MEDICIÓN sobre CÓDIGO Y SEED (no sobre datos: el estado a medir era el del repo, y un test
-  habría medido lo mismo con más ceremonia). SALIDA: `requiereTutor` está VIVO como superficie y
-  MUERTO como semántica —entra por REST (ActividadRequest/ActividadDTO), lo persiste
-  ActividadService, y MUERE en el mapper: `CatalogoMapper:247` documenta que NO se propaga al
-  dominio, y `CatalogoMapperActividadTest:136` es un test que ASEVERA el olvido (D-B5-5)—. Cero
-  apariciones de tutoria/tutor en src/main fuera de esa columna; el seed no marca NINGUNA tutoría
-  (la entidad nace vacía, sin migración de datos); `GrupoAdministrativo` no tiene campo de tutor.
-  Línea base: solver 78 + app 196.
-  REENCUADRE POR LA MEDICIÓN: la casilla del plan decía que D2 «habilita que el solver consuma S8»,
-  y eso resultó ser TRES cosas encadenadas, no una: (1) la entidad en JPA —barato, app/—; (2)
-  propagar requiereTutor al dominio + transportar ProfesorTutoria al ProblemaHorario —rompe D-B5-5,
-  toca solver/src/main—; (3) verificar S8. 8.5-D2 se PARTE en D2a (catálogo, esta sesión) y D2b
-  (solver, diferido). NOTA DE DISEÑO que sobrevive al corte: S8 NO es restricción de scheduling —no
-  depende del tramo elegido, es verificable sobre el catálogo sin resolver nada—, luego NO va en
-  ModeloCpSat; meterla en CP-SAT sería un error de diseño.
-  DECISIONES CERRADAS: (D2a-1) @IdClass con PK compuesta (profesor_id, grupo_id), coherente con el
-  catálogo, que no usa value objects; consecuencia aceptada: la PK permite que un profesor sea
-  TUTOR_PRINCIPAL de N grupos —§4.3 no lo prohíbe e I4 tampoco—, no se añade guarda que el modelo no
-  pide. (D2a-2) I4 en escritura, segundo TUTOR_PRINCIPAL → 400 (validación de entrada, no
-  ReferenciaEntranteException; patrón corregido en S76). (D2a-3) sub-recurso GET/PUT
-  /api/grupos/{id}/tutoria con REEMPLAZO TOTAL idempotente, patrón literal de
-  AsignaturaService.reemplazarAulasCompatibles (deleteAll + flush ANTES de insertar); I4 se valida
-  sobre la lista ENTRANTE, antes de tocar la base. (D2a-4) herencia PDC←padre por COPIA en el alta,
-  no por derivación en lectura: lo que el centro dijo («mismo tutor») es un hecho de HOY, no una
-  regla del dominio, y la derivación haría IMPOSIBLE lo que la copia solo hace incómodo (el PDC
-  puede editar su tutoría después, D2a-7); si el padre NO tiene tutor, el PDC nace sin tutoría y NO
-  es error —el orden de alta no está garantizado—; los co-tutores NO se heredan (lo medido en S76 es
-  la herencia de una CELDA, no de una estructura de co-tutoría). (D2a-5) ASIMETRÍA DELIBERADA de
-  borrado: la tutoría es POBLACIÓN PROPIA del Grupo (FK ON DELETE CASCADE, GrupoService.borrar NO se
-  toca, criterio de S75 con las compatibilidades) y REFERENCIA ENTRANTE del Profesor (409), porque
-  borrar un profesor dejaría grupos sin tutor EN SILENCIO. (D2a-6) schema.sql: FK profesor RESTRICT,
-  FK grupo CASCADE, CHECK sobre rol.
-  CORRECCIÓN DE ARRASTRE (fuera del alcance nominal, hecha porque estaba delante): PdcService.obtener
-  y PdcService.borrar usaban findByGrupoPadre_Id SIN filtrar por tipo. S76 corrigió eso SOLO en
-  crear(); el mismo argumento —el método devuelve CUALQUIER hijo, hoy coinciden por accidente—
-  aplicaba a los otros dos, y en borrar() era peor: habría borrado un hijo no-PDC creyendo que lo era.
-  ASERTOS: 9 discriminantes + 1 que añadió Claude Code y cazó un javadoc que MENTÍA (decía que
-  profesor y rol se validaban en pasadas separadas; el código hacía un bucle único, y con rol malo en
-  el elemento 1 y profesor inexistente en el 2 daba 400 en vez de 404 — se corrigió el CÓDIGO para
-  cumplir el contrato, no el javadoc para excusar el código). El (A2) discrimina I4 «uno por grupo»
-  de una regla más fuerte que nadie pidió: el mismo profesor TUTOR_PRINCIPAL de dos grupos → 200.
-  A5 POR MUTACIÓN: neutralizada la guarda de I4, el fallo llega por 200, NO por 500 de constraint —y
-  esa es la diferencia con S76, donde guarda y FK física protegían lo mismo: aquí la guarda es LO
-  ÚNICO que existe, porque la PK compuesta no puede expresar «un principal por grupo». El javadoc ya
-  lo afirmaba antes de mutar, así que no hubo que corregirlo. A6 POR MUTACIÓN: quitado el CASCADE →
-  SQLITE_CONSTRAINT_FOREIGNKEY en el DELETE del grupo → restaurado → verde.
-  HALLAZGO DE FRAMEWORK (familia S73/S74/S75/S76): A8/A9 fallaban con TransientPropertyValueException
-  porque en @DataJpaTest todo comparte transacción y la tutoría recién escrita seguía MANAGED al
-  borrar su grupo. El arreglo fue del TEST (flush+clear para modelar producción), no de producción:
-  verificado por juicio que no hay camino real en que eso ocurra —GrupoService.borrar nunca carga
-  tutorías, y la única transacción que escribe tutoría y toca grupos a la vez es PdcService.crear,
-  que CREA, no borra—.
-  Suite 196 → 212 (+16), solver 78 intacto. Demostrada no-vacía (comparador invertido → rojo →
-  restaurar). solver/ intacto → referencia NO regenerada. modelo §4.3 SÍ tocado (commit aparte).
-  DEUDA NUEVA: D-F8.5-D2a-a (I4 sin red bajo la aplicación), D-F8.5-D2a-b (incoherencia 404/400 en FK
-  por clave natural, defecto de especificación del arquitecto). CIERRA D-F8.5-D1-a.
-  8.5-D3 APLAZADO INDEFINIDAMENTE con criterio de reapertura explícito (no es arrastre).
-  Siguiente: 8.5-E (MOCKUP PREVIO), 8.4 (pre-validación, D18/D20) o 8.5-D2b (solver), a decidir al
-  abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -904,10 +910,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 y la de S76 en la Sesión 80 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80 y la de S77 en la Sesión 81 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S77–S80). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S78–S81). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1088,19 +1094,24 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       usuario, o (b) I1 falla en producción sin que nadie lo detecte. Consecuencia asumida:
       I1 sigue sin verificador, igual que hoy.
 - [x] Bloque 8.5-E — CRUD REST de `ProfesorRestriccionHoraria`, sub-recurso GET/PUT con reemplazo total (S78). CIERRA 8.5 → `peso` NO se expone (ModeloCpSat usa la constante `PESO_INDISP_BLANDA` y nunca lee `r.peso()`); D-F8.5-E-a, D-F8.5-E-b, D-F8.5-E-c, D-F8.5-E-d; Detalle: bitácora S78.
-- [ ] Bloque 8.6 — Drag & drop + bloqueo interactivo (D19/D20). Consumidor real de 8.2b-iv y
-      8.3-C. Modelo de interacción YA FIJADO en S67 (8.6-A, decisiones D-F8.6-A-1/2): NO es un
-      editor libre. El usuario PINA (POST /api/bloqueos, instantáneo) y el solver RECOLOCA lo
-      demás al regenerar (POST /api/horarios, explícito). Consecuencias: (a) no hay verificador
-      en cliente —el aviso de conflicto durante el arrastre es un cruce de índices sobre la
-      SesionVista ya cargada, NO una reimplementación de verificarNoSolapes: si se equivoca no
-      pasa nada, el solver decide—; (b) el arrastre es POR CELDA (instancia): la sub-entrada de
-      un desdoble NO es arrastrable (S5 obliga a que las plazas compartan tramo), es objeto de
-      inspección y de cambio de aula, que es otro gesto; (c) el precio asumido es que el usuario
-      no controla el resultado final —pina 3 celdas y el solver puede mover otras 5—.
-      Pendiente de 8.6: el Angular (rejilla arrastrable sobre horario-grid, candado del pin,
-      badge del delta blando por celda, resalte de violación a DOS granularidades: aula por
-      sub-entrada, profesor/subgrupo por celda). No hay librería de d&d en el frontend hoy.
+- [x] Bloque 8.6-i — Cliente REST de bloqueos (S81): `bloqueo.model.ts` (espejo de los 4 records)
+      + `BloqueoService` TS propio + `pines.ts` (`clavePin`, `indicePines`). `HorarioService`
+      intacto (se declara de solo lectura). El `GET /api/bloqueos` es precondición del CANDADO, no
+      del POST: el POST es idempotente POR INSTANCIA, no reemplaza colección. NO toca backend:
+      `SesionVista` ya lleva (`actividadCodigo`, `indice`), la clave de cruce de D-6.
+      Detalle: bitácora S81.
+- [x] Bloque 8.6-ii — Arrastre que pina (S81): `@angular/cdk@21` `DragDropModule` (elegido porque
+      usa pointer events y el runner es Vitest+jsdom, que no implementa HTML5 DnD). Envoltorio de
+      celda por PAR (`actividadCodigo`, `indice`) vía `agruparPorActividad` NUEVA; `agruparPorSlot`
+      intacta. `cdkDrag` en la INSTANCIA, nunca en la sub-entrada (contrato S67, D-F8.6-A-2).
+      SIN movimiento optimista: el candado no se pinta hasta el OK del POST. Pin solo de tramo
+      (`aulas: []`). D-F8.6-ii-a, D-F8.6-ii-b (sin gesto de despinar). Detalle: bitácora S81.
+- [ ] Bloque 8.6-iii — Badge del delta blando por celda + resalte de violación a DOS granularidades
+      (aula por sub-entrada, profesor/subgrupo por celda). MOCKUP PREVIO OBLIGATORIO (D-F8.6-a): S67
+      dibujó las tres granularidades sobre una celda de desdoble, pero NO con el estado «pinada»
+      encima; son tres capas que nadie ha dibujado juntas. REQUIERE CABLEAR 8.3-C: medido en S81
+      que el cliente NO lo conoce (cero campos de atribución en `horario.model.ts`), luego no es
+      pintar sino ampliar contrato de lectura. Cierra D19/D20 en frontend.
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -1717,6 +1728,30 @@ siguiente, con remisión a la bitácora.
   necesita. (4) El body de POST /api/horarios ya arrastra D29; un segundo eje lo
   convertiría en cajón de sastre. Contra asumido: más superficie que mantener — pero es la
   superficie que la UI va a pedir igualmente. El body de POST /api/horarios NO cambia.
+
+- **D-F8.6-ii-a** (S81, VIVA, no bloqueante, DE SUPERFICIE DE ERROR) — EL `reason` DE
+  `ResponseStatusException` NO VIAJA AL CLIENTE. `server.error.include-message` no está en
+  `application.properties` y su defecto es `never`, así que el mensaje con que
+  `BloqueoController` traduce una violación de las reglas D-3 a 400 se pierde: el usuario ve un
+  texto degradado, no la regla violada. NO es específico de bloqueos —afecta a todo controller que
+  use `ResponseStatusException`, y el patrón «cada controller traduce las suyas, sin
+  `@ControllerAdvice`» (S74) lo generaliza—. NO se arregló en S81 a propósito: `include-message=always`
+  expone el mensaje de TODAS las excepciones y es decisión de superficie GLOBAL, impropia de un
+  bloque de frontend; además convive con los 422 de carga estructurada de 8.4-A y los 409 de 8.5-C2b,
+  que sí llevan cuerpo propio. → decidir como política global de errores, no de refilón.
+
+- **D-F8.6-ii-b** (S81, VIVA, HUECO FUNCIONAL, no bloqueante) — NO HAY GESTO DE DESPINAR. El
+  arrastre crea pines y el aviso los cuenta, pero la UI no ofrece forma de quitarlos:
+  `BloqueoService.borrar()` existe y NADIE lo llama, y soltar en el slot de origen no emite
+  (guarda de `alSoltar`, que compara el destino con `inst.entradas[0]`, leído de la proyección,
+  que no cambia al pinar). Hueco de ESPECIFICACIÓN del arquitecto, no de implementación: el
+  contrato de S81 cerró «arrastrar pina» y no dijo cómo se desmarca. Arreglarlo NO es cablear
+  `borrar()`: exige cambiar el estado del cliente de `Set<clave>` a `Map<clave, id>`, porque el
+  DELETE necesita el `id` de la `SesionBloqueada` que el `Set` no guarda. Además el gesto es
+  pregunta de UX (candado clicable / botón en el aviso) → MOCKUP (D-F8.6-a). HERMANA: el `Set`
+  tampoco se recarga tras el arranque (`listar()` solo en el constructor; `cambiarVista` y
+  `cargar(id)` no lo tocan), así que el candado miente si el horario se regenera o si se pina
+  desde otra pestaña. → resolver en 8.6-iii.
 
 - **D-F8.0-a** (S80, VIVA, de MÉTODO, no técnica) — EL «PROTOCOLO DE ARCHIVADO» SE INVOCA PERO NO
   ESTÁ ESCRITO. Las instrucciones de cierre de sesión mandan «seguir el PROTOCOLO DE ARCHIVADO del

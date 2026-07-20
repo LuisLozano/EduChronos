@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S76. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S77. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S76). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S77). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3053,3 +3053,66 @@ al abrir sesión.
   sobre 5 casos).
   Siguiente: 8.5-D2 (tutoría: entidad nueva ProfesorTutoria + I4 + herencia PDC←padre), 8.5-D3
   (particiones, evaluar si procede), 8.5-E (MOCKUP PREVIO) o 8.4.
+
+### Sesión 77 — Fase 8, Bloque 8.5-D2a: ProfesorTutoria, I4 en
+  escritura y herencia PDC←padre.
+  Modo híbrido. 2 commits de código (producción + tests, solo app/) + 2 de doc (plan, modelo §4.3).
+  §A DE MEDICIÓN sobre CÓDIGO Y SEED (no sobre datos: el estado a medir era el del repo, y un test
+  habría medido lo mismo con más ceremonia). SALIDA: `requiereTutor` está VIVO como superficie y
+  MUERTO como semántica —entra por REST (ActividadRequest/ActividadDTO), lo persiste
+  ActividadService, y MUERE en el mapper: `CatalogoMapper:247` documenta que NO se propaga al
+  dominio, y `CatalogoMapperActividadTest:136` es un test que ASEVERA el olvido (D-B5-5)—. Cero
+  apariciones de tutoria/tutor en src/main fuera de esa columna; el seed no marca NINGUNA tutoría
+  (la entidad nace vacía, sin migración de datos); `GrupoAdministrativo` no tiene campo de tutor.
+  Línea base: solver 78 + app 196.
+  REENCUADRE POR LA MEDICIÓN: la casilla del plan decía que D2 «habilita que el solver consuma S8»,
+  y eso resultó ser TRES cosas encadenadas, no una: (1) la entidad en JPA —barato, app/—; (2)
+  propagar requiereTutor al dominio + transportar ProfesorTutoria al ProblemaHorario —rompe D-B5-5,
+  toca solver/src/main—; (3) verificar S8. 8.5-D2 se PARTE en D2a (catálogo, esta sesión) y D2b
+  (solver, diferido). NOTA DE DISEÑO que sobrevive al corte: S8 NO es restricción de scheduling —no
+  depende del tramo elegido, es verificable sobre el catálogo sin resolver nada—, luego NO va en
+  ModeloCpSat; meterla en CP-SAT sería un error de diseño.
+  DECISIONES CERRADAS: (D2a-1) @IdClass con PK compuesta (profesor_id, grupo_id), coherente con el
+  catálogo, que no usa value objects; consecuencia aceptada: la PK permite que un profesor sea
+  TUTOR_PRINCIPAL de N grupos —§4.3 no lo prohíbe e I4 tampoco—, no se añade guarda que el modelo no
+  pide. (D2a-2) I4 en escritura, segundo TUTOR_PRINCIPAL → 400 (validación de entrada, no
+  ReferenciaEntranteException; patrón corregido en S76). (D2a-3) sub-recurso GET/PUT
+  /api/grupos/{id}/tutoria con REEMPLAZO TOTAL idempotente, patrón literal de
+  AsignaturaService.reemplazarAulasCompatibles (deleteAll + flush ANTES de insertar); I4 se valida
+  sobre la lista ENTRANTE, antes de tocar la base. (D2a-4) herencia PDC←padre por COPIA en el alta,
+  no por derivación en lectura: lo que el centro dijo («mismo tutor») es un hecho de HOY, no una
+  regla del dominio, y la derivación haría IMPOSIBLE lo que la copia solo hace incómodo (el PDC
+  puede editar su tutoría después, D2a-7); si el padre NO tiene tutor, el PDC nace sin tutoría y NO
+  es error —el orden de alta no está garantizado—; los co-tutores NO se heredan (lo medido en S76 es
+  la herencia de una CELDA, no de una estructura de co-tutoría). (D2a-5) ASIMETRÍA DELIBERADA de
+  borrado: la tutoría es POBLACIÓN PROPIA del Grupo (FK ON DELETE CASCADE, GrupoService.borrar NO se
+  toca, criterio de S75 con las compatibilidades) y REFERENCIA ENTRANTE del Profesor (409), porque
+  borrar un profesor dejaría grupos sin tutor EN SILENCIO. (D2a-6) schema.sql: FK profesor RESTRICT,
+  FK grupo CASCADE, CHECK sobre rol.
+  CORRECCIÓN DE ARRASTRE (fuera del alcance nominal, hecha porque estaba delante): PdcService.obtener
+  y PdcService.borrar usaban findByGrupoPadre_Id SIN filtrar por tipo. S76 corrigió eso SOLO en
+  crear(); el mismo argumento —el método devuelve CUALQUIER hijo, hoy coinciden por accidente—
+  aplicaba a los otros dos, y en borrar() era peor: habría borrado un hijo no-PDC creyendo que lo era.
+  ASERTOS: 9 discriminantes + 1 que añadió Claude Code y cazó un javadoc que MENTÍA (decía que
+  profesor y rol se validaban en pasadas separadas; el código hacía un bucle único, y con rol malo en
+  el elemento 1 y profesor inexistente en el 2 daba 400 en vez de 404 — se corrigió el CÓDIGO para
+  cumplir el contrato, no el javadoc para excusar el código). El (A2) discrimina I4 «uno por grupo»
+  de una regla más fuerte que nadie pidió: el mismo profesor TUTOR_PRINCIPAL de dos grupos → 200.
+  A5 POR MUTACIÓN: neutralizada la guarda de I4, el fallo llega por 200, NO por 500 de constraint —y
+  esa es la diferencia con S76, donde guarda y FK física protegían lo mismo: aquí la guarda es LO
+  ÚNICO que existe, porque la PK compuesta no puede expresar «un principal por grupo». El javadoc ya
+  lo afirmaba antes de mutar, así que no hubo que corregirlo. A6 POR MUTACIÓN: quitado el CASCADE →
+  SQLITE_CONSTRAINT_FOREIGNKEY en el DELETE del grupo → restaurado → verde.
+  HALLAZGO DE FRAMEWORK (familia S73/S74/S75/S76): A8/A9 fallaban con TransientPropertyValueException
+  porque en @DataJpaTest todo comparte transacción y la tutoría recién escrita seguía MANAGED al
+  borrar su grupo. El arreglo fue del TEST (flush+clear para modelar producción), no de producción:
+  verificado por juicio que no hay camino real en que eso ocurra —GrupoService.borrar nunca carga
+  tutorías, y la única transacción que escribe tutoría y toca grupos a la vez es PdcService.crear,
+  que CREA, no borra—.
+  Suite 196 → 212 (+16), solver 78 intacto. Demostrada no-vacía (comparador invertido → rojo →
+  restaurar). solver/ intacto → referencia NO regenerada. modelo §4.3 SÍ tocado (commit aparte).
+  DEUDA NUEVA: D-F8.5-D2a-a (I4 sin red bajo la aplicación), D-F8.5-D2a-b (incoherencia 404/400 en FK
+  por clave natural, defecto de especificación del arquitecto). CIERRA D-F8.5-D1-a.
+  8.5-D3 APLAZADO INDEFINIDAMENTE con criterio de reapertura explícito (no es arrastre).
+  Siguiente: 8.5-E (MOCKUP PREVIO), 8.4 (pre-validación, D18/D20) o 8.5-D2b (solver), a decidir al
+  abrir sesión.
