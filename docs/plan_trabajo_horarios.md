@@ -600,7 +600,10 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iii-A CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iii-B1 CERRADO
+  en S83 (gesto de despinar + `indicePines` de `Set<clave>` a `Map<clave, id>`; el candado pasa a
+  `<button>` y la rejilla emite la CLAVE, no el id; `listar()` MOVIDO del constructor a `cargar(id)`;
+  8.6-iii-B partido en B1/B2, el badge y los resaltes van a B2; backend intacto). Bloque 8.6-iii-A CERRADO
   en S82 (contrato de lectura del diagnóstico en el cliente: modelo TS espejo de los 5 DTOs con la
   asimetría D15 copiada, servicio propio y dos índices puros por `clavePin`; 8.6-iii partido en A/B,
   la pintura y el MOCKUP van a iii-B; backend intacto). Bloques 8.6-i + 8.6-ii
@@ -661,7 +664,80 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 82 — Fase 8, Bloque 8.6-iii-A: contrato de lectura del diagnóstico en el cliente.
+### Sesión 83 — Fase 8, Bloque 8.6-iii-B1: gesto de despinar e índice de pines con id.
+  Modo híbrido. 2 commits de código (3d96b7c producción, 98aab08 tests) + doc aparte. §A DE MEDICIÓN
+  sobre el ESTADO REAL DEL CLIENTE (lectura literal de los 10 ficheros de `frontend/` implicados +
+  `find`/`ls`; instrumento más barato, precedente S77-S82).
+  8.6-iii-B PARTIDO en B1/B2 al abrir. B1 = mockup + estructura de estado + gesto de despinar +
+  recarga del índice; B2 = badge del delta y los dos resaltes de violación. Razón del corte: el
+  despinar cambia la ESTRUCTURA de estado del cliente (`Set`→`Map`) y pintar encima de una estructura
+  que va a mutar es rehacer trabajo.
+  SALIDA DE §A: el estado del pin vive en `HorarioView` (`signal<ReadonlySet<string>>`), NO en la
+  rejilla, que solo lo consulta por `input`. `Bloqueo.id` EXISTE y es `number | null` por decisión
+  deliberada de S81 (espejo del DTO), pero `BloqueoService.borrar(id: number)` exige no-nulo: la
+  costura estaba oculta porque `borrar()` tenía CERO llamadas (confirmado por grep).
+  DECISIÓN (B) sobre (A)/(C): el índice pasa a `Map<string, number | null>` —no se descartan los
+  `id` nulos al indexar ni se mide el backend para saber si el null es alcanzable, que es lo que S81
+  declaró impropio de un bloque de frontend—.
+  HALLAZGO DEL MOCKUP (las 4 capas dibujadas juntas, aunque B1 solo implemente la de pinado, para que
+  B2 no tenga que recolocar): pinado y violación de profesor/subgrupo COMPETÍAN por el mismo borde.
+  Resuelto liberando el `border-left` en B1 (α).
+  HALLAZGO QUE CIERRA UNA PREGUNTA DE UX SIN DIBUJARLA: el gesto de despinar NO puede ser «soltar en
+  el origen» —ese slot es donde la instancia sigue pintada, porque la proyección no se recarga al
+  pinar— ni «botón en el aviso» —el aviso es un `<p>` global que no conoce la instancia—. Solo el
+  candado tiene acceso a la instancia: la medición resolvió la alternativa que D-F8.6-ii-b dejaba
+  abierta, no el dibujo.
+  TRES ERRORES DEL ARQUITECTO, destapados por el turno de CONTRASTE de Claude Code ANTES de teclear
+  (patrón S82: contrato criticado en un turno propio, sin escribir código): (1) C7 especificaba CSS
+  YA IMPLEMENTADO en S81 —`position: relative` (`horario-grid.css:27`), candado absoluto (:41-47) y
+  fondo tenue (:36-39)—, y peor: hizo confirmar al usuario una decisión INEXISTENTE («borde vs fondo»
+  cuando ya era fondo). La decisión REAL, que el error tapaba, era si se libera el `border-left`.
+  (2) C6 decía «también desde `cargar(id)`» conservando la del constructor: como `paramMap` emite en
+  init, habrían quedado DOS `GET /api/bloqueos`. (3) el contrato NO nombraba `pines.spec.ts:24`, que
+  `Map` rompe por `toEqual` entre constructores distintos. SEXTA SESIÓN CONSECUTIVA (S78-S83) con el
+  mismo género de error: afirmar cómo está el código sin comprobarlo —y esta vez tras haber PEDIDO
+  el fichero y escribir igualmente sin leerlo—.
+  OBJECIÓN SUYA ACEPTADA (O2), que cambió el contrato: `despinar` emite la CLAVE (`output<string>`),
+  no el `id`. La rejilla habla identidad de DOMINIO (`clavePin`, D-6); el `id` es identidad de FILA, y
+  meterlo en la presentación la obligaba a ramificar `<button>`/`<span>` por un detalle de
+  persistencia. `HorarioView` resuelve clave→id contra su Map y hace no-op si es null: la rejilla no
+  conoce nulls y el candado es SIEMPRE botón. Consecuencia asumida: el «estado 3» del mockup (candado
+  inerte) desaparece como estado visual.
+  F1 RESUELTA POR EVIDENCIA, no por criterio: `cdkDragHandle` NO hace falta. El CDK no registra
+  ningún listener de `click` (grep sobre `drag-drop.mjs`: cero coincidencias) y el arrastre no arranca
+  hasta superar `dragStartThreshold: 5` px (`drag-drop.mjs:589`, :896-901), así que un click sin
+  desplazamiento no puede reinterpretarse como arrastre.
+  TESTBED RECHAZADO A PROPÓSITO, contra la propuesta de Claude Code: estrenar la primera
+  infraestructura de test de componente del repo dentro de un bloque cuyo valor es otro es el patrón
+  que D-F8.6-iiiA-a ya declaró (misma decisión que S62 con los 12 repos y S75 con el mapper). La
+  evidencia del CDK zanja el riesgo que motivaba el test. Coste declarado, no tapado: T3/T4/T5 van a
+  producción con CERO tests (ver D-F8.6-iiiB1-a).
+  ASERTOS: los tres `it` de `pines.spec.ts` INVERTIDOS, no borrados (práctica (f)), más un `it` (4)
+  para `id: null`. DOS mutaciones, y la SEGUNDA la añadió Claude Code para someter a prueba una
+  afirmación mía: (A) valor constantizado (`b.id`→0) tumba (1), (2)-vía-`.get` y (4), y respeta (3);
+  (B) ids barajados tumba (1) y (2)-`.get`. (B) DESMIENTE mi afirmación de que (1) era «el único que
+  asevera que el id correcto va con la clave correcta»: no lo es. Lectura del solapamiento, que NO se
+  fuerza a disjunción: (1), (2)-`.get` y (4) leen la MISMA dimensión (el valor del mapa) a tres
+  granularidades —mapa entero, punto concreto, caso borde—; es un detector con tres lupas, y el
+  solapamiento es ESTRUCTURAL. El único aserto de dimensión distinta es (3), la cardinalidad. Que
+  (2)-`.has` sobreviva a (A) es el dato que valida el `.get` añadido: sin él, ese `it` no vería la
+  dimensión nueva. (4) es ciego al emparejamiento POR CONSTRUCCIÓN (un solo elemento: invertir es la
+  identidad). Lo que (1) aporta en exclusiva es la EXHAUSTIVIDAD (una entrada de más solo cae ahí);
+  eso se afirma como RAZONAMIENTO, no como medición: ninguna de las dos mutaciones lo aísla.
+  DESVIACIÓN DE ALCANCE APROBADA: T5 decía «eliminar `border-left-color`. Nada más», y Claude Code
+  añadió además el reset de `<button>` (`padding`, `border`, `background`, `cursor`) en `.candado`.
+  NO es mejora inventada: sin él, T3 deja un recuadro gris del agente de usuario en cada instancia
+  pinada. El T5 del arquitecto estaba mal especificado; el reset va CON el commit que lo necesita.
+  Suite frontend 22 → 23 (+1), backend intacto (app 315, solver 78). `ng build` limpio. Backend NO
+  tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  DEUDA NUEVA: D-F8.6-iiiB1-a (T3/T4/T5 sin ningún test; el doble GET corregido queda sin red),
+  D-F8.6-iiiB1-b (la recarga es correcta POR ACCIDENTE), D-F8.6-iiiB1-c (`mensaje()` miente en el
+  DELETE). CIERRA D-F8.6-ii-b.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; el borde ya está liberado y el mockup dibujado), 8.4-B
+  (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera
+  la referencia), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 82 — Fase 8, Bloque 8.6-iii-A: contrato de lectura del diagnóstico en el cliente.
   Modo híbrido. 3 commits de código (0e0bffd producción, a876e5d tests, 8e8cb71 el `it` (9)) + doc
   aparte. §A DE MEDICIÓN sobre el CONTRATO REAL DEL SERVIDOR (lectura literal de los 5 DTOs +
   controller; instrumento más barato, precedente S77-S81).
@@ -861,61 +937,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   DEUDA NUEVA: D-F8.0-a (el PROTOCOLO DE ARCHIVADO se invoca pero no existe escrito).
   Siguiente: 8.6 (Angular, contrato cerrado en S67; empezar por medir el estado real de frontend/
   y elegir librería de d&d), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver, regenera la referencia).
-Última sesión registrada (previa): Sesión 79 — Fase 8, Bloque 8.4-A: PRE-VALIDACIÓN por condiciones necesarias (D18).
-  Modo híbrido. 4 commits de código (1ea9103 + 838f944 producción/tests; 357d7c2 + 6cf44cb la
-  corrección de (c)) + doc. §A DE MEDICIÓN sobre CÓDIGO (greps + lectura literal) y §A-bis sobre
-  los VOLCADOS.
-  SALIDA DE §A: el hueco es TOTAL, no parcial. Las cuatro condiciones de D18 dan NO; `DemandaCurricular`
-  (§4.5) NO está materializada. Lo único que se validaba antes del solve era integridad referencial y
-  nulidad; CERO aritmética de capacidad. CORRIGE MI SUPOSICIÓN DE APERTURA: dije que el INFEASIBLE
-  podía salir opaco o 500; es FALSO —`HorarioController:59` ya traducía a 422 con test que lo cubre—.
-  Lo que faltaba no era el status sino el CONTENIDO: `HorarioInfactibleException` lleva UN SOLO String.
-  `DiagnosticoService` NO sirve de base: exige `HorarioGenerado` persistido (404 si no), y 8.4 corre
-  ANTES de que exista horario; comparten solo `cargarProblema()`. Patrón heredable = `ReferenciaEntranteException`.
-  SALIDA DE §A-bis (volcados): CERO guardias, reducciones u ocupación no docente, y NO PUEDE HABERLAS
-  —las fuentes son rejillas por grupo y por aula, y una guardia no ocupa ninguno de los dos—. No hay
-  volcado de profesor ni lo habrá. CONSECUENCIA: el numerador de (a) es medible desde los volcados; el
-  DENOMINADOR no lo es por ninguna fuente del proyecto. Que guardias y reducciones se declaren DURA es
-  DECISIÓN DEL ARQUITECTO (S79), no dato derivado; si el centro no las declara, (a) produce falsos
-  NEGATIVOS, nunca positivos. Escrito literal en el javadoc.
-  DECISIONES CERRADAS (F84-1..5): 8.4 PARTIDO en A/B —D20 no se puede dibujar antes de que existan
-  avisos que enseñar, luego el MOCKUP PREVIO se retira de esta sesión y va a 8.4-B—; excepción propia
-  en app/ con carga estructurada, sin tocar solver/; (b) palomar FUERA por riesgo de falso positivo;
-  una implementación, dos llamadores.
-  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code al preguntar antes de
-  teclear (registrados, no tapados). (1) Especifiqué (a) «suma por plaza»: MAL. Las plazas de una
-  actividad son SIMULTÁNEAS (S5); un profesor en dos plazas de la misma actividad consume UN tramo.
-  Contar por plaza sobrestima → falso positivo. (a) y (c) deduplican por actividad: helper único, dos
-  ejes. (2) Especifiqué (d) sin distinguir patrón: una NEUTRA con `repeticiones > días` NO es
-  infactible (7 caben en 5 días con 6 tramos). (d) se PARTE en (d1) solo DISTRIBUIDA y (d2)
-  `rep × dur > tramos totales` para todas, con `regla` distinta y mensaje distinto.
-  HALLAZGO QUE INVIRTIÓ UNA DECISIÓN MÍA (medido en el código por Claude Code, no razonado): (c) estaba
-  fijada como AVISO con el motivo «si el centro configura CyR/OyD como actividades separadas, la suma
-  sobrestima». FALSO bajo el modelo actual: `ModeloCpSat:1046-1074` impone `addNoOverlap` por grupo con
-  `tocaGrupo` deduplicando por INSTANCIA DE ACTIVIDAD —misma unidad que (c)—, así que si se configuran
-  separadas el solver TAMPOCO las deja compartir tramo. Es infactibilidad GARANTIZADA. (c) SUBE A ERROR.
-  TERCERA SESIÓN CONSECUTIVA (S77, S78, S79) con el mismo género de error: aplicar un criterio sin
-  comprobar el precedente en el código. Las tres veces lo destapó la ejecución, no el razonamiento.
-  ASERTOS: 10 tests. A3 es el ORO y su calibración no es gratuita: el fixture hace que AMBAS cuentas
-  superen el techo (7 por actividad, 10 por plaza, techo 5) para que la PRESENCIA del aviso no
-  discrimine y el único aserto posible sea el VALOR. MUTACIÓN (Set→List): cae SOLO A3, por el aserto de
-  valor (7 vs 10), +3 = la contribución duplicada de la segunda plaza. Los tres tests HTTP siguen verdes
-  bajo la mutación → D-F8.4-A-b. A4 INVERTIDO al subir (c) a ERROR, y su aserto más fuerte no es el 422
-  sino `mocked.constructed()).isEmpty()`: el solver NO SE CONSTRUYE, que es el propósito entero del
-  bloque y ningún status podía demostrarlo. Frontera `>` vs `>=` verificada por mutación (A1a) y con
-  peso real: `PinTramoGeneracionRoundTripTest` (1 tramo, demanda 1) pasa PRECISAMENTE por ella.
-  DOS TESTS QUE MENTÍAN, corregidos: `GenerarHorarioEndpointTest` seguía verde pero su fixture (2,1) ya
-  lo capturaba la pre-validación antes del solve —sustituido por uno infactible SOLO por aula, que de
-  paso documenta el hueco de (b)—; y el `noneMatch(ERROR)` de A3 se volvió FALSO (no tautológico) al
-  subir (c), sustituido por `hasSize(1)`, que conserva la propiedad útil sin afirmar nada falso.
-  A6 quedó SOBRE-DETERMINADO (su fixture dispara las tres reglas); el aislamiento limpio de (d) vive en
-  A5. Declarado, no tapado.
-  Suite 305 → 315 (+10), solver 78 intacto. solver/ NO tocado → referencia NO regenerada. modelo §4.3
-  SÍ tocado (nota de implementación de D18, commit aparte).
-  DEUDA NUEVA: D-F8.4-A-a (garantía de (c) derivada del no-solape por grupo), D-F8.4-A-b (la
-  deduplicación la protege UN solo test), D-F8.4-A-c (severidad tautológica, `AVISO` sin productor).
-  Siguiente: LIMPIEZA DE 8.5 (desplazada de S79, sesión en frío), 8.6 (Angular, contrato cerrado en
-  S67), 8.4-B (presentación, MOCKUP PREVIO) u 8.5-D2b (solver), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -927,10 +948,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81 y la de S78 en la Sesión 82 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 y la de S79 en la Sesión 83 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S79–S82). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S80–S83). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1132,13 +1153,24 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       `TotalesDTO`). El servicio NO traduce el 404: `Observable` crudo y TSDoc, patrón vigente.
       NO toca backend: `CeldaRefDTO` ya trae la clave de D-6. D-F8.6-iiiA-a, D-F8.6-iiiA-b,
       D-F8.6-iiiA-c. Detalle: bitácora S82.
-- [ ] Bloque 8.6-iii-B — Badge del delta blando por celda + resalte de violación a DOS granularidades
-      (aula por sub-entrada, profesor/subgrupo por celda). MOCKUP PREVIO OBLIGATORIO (D-F8.6-a): S67
-      dibujó las tres granularidades sobre una celda de desdoble, pero NO con el estado «pinada»
-      encima; son tres capas que nadie ha dibujado juntas. El contrato de lectura YA está cableado
-      (iii-A), luego esto es PINTAR: el mockup se dibuja sobre datos MEDIDOS, no imaginados. Hereda
-      D-F8.6-ii-b (gesto de despinar: exige `Set<clave>` → `Map<clave, id>`) y D-F8.6-iiiA-b (dónde
-      vive `Totales`). Cierra D19/D20 en frontend.
+- [x] Bloque 8.6-iii-B1 — Gesto de despinar e índice de pines con `id` (S83): `indicePines` pasa de
+      `Set<clave>` a `Map<clave, number | null>` (el `id` nullable del DTO NO se estrecha); el candado
+      pasa de `<span>` a `<button>` y `HorarioGrid` emite `despinar = output<string>()` con la CLAVE,
+      no el `id` —identidad de dominio (D-6), no de fila—; `HorarioView.alDespinar` resuelve clave→id
+      contra su Map y hace no-op si es null; sin movimiento optimista (el candado no se va hasta el
+      204). `listar()` MOVIDO del constructor a `cargar(id)`, no duplicado. `border-left` liberado en
+      `.instancia.pinada .entrada` para que B2 pinte ahí la violación. `cdkDragHandle` innecesario:
+      el CDK no escucha `click` y el umbral de arrastre es de 5 px. CIERRA D-F8.6-ii-b.
+      D-F8.6-iiiB1-a, D-F8.6-iiiB1-b, D-F8.6-iiiB1-c. Detalle: bitácora S83.
+- [ ] Bloque 8.6-iii-B2 — Badge del delta blando por celda + resalte de violación a DOS granularidades
+      (aula por sub-entrada, profesor/subgrupo por celda). MOCKUP YA DIBUJADO en S83 con las CUATRO
+      capas juntas (lo que S67 no hizo: no incluyó el estado «pinada» encima), a propósito y aunque B1
+      solo implementara la de pinado, para que B2 no tenga que recolocar: badge y candado comparten la
+      esquina superior derecha en fila flex, y el `border-left` está libre. PENDIENTE de B2, que el
+      mockup destapó y B1 no resuelve: con badge y candado en la esquina, una celda de UNA entrada y
+      otra de SEIS necesitan tratamiento distinto del hueco superior. Hereda D-F8.6-iiiA-b (dónde vive
+      `Totales`, con la trampa de que los totales NO son la suma de los `delta`). Cierra D19/D20 en
+      frontend.
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -1778,7 +1810,9 @@ siguiente, con remisión a la bitácora.
   pregunta de UX (candado clicable / botón en el aviso) → MOCKUP (D-F8.6-a). HERMANA: el `Set`
   tampoco se recarga tras el arranque (`listar()` solo en el constructor; `cambiarVista` y
   `cargar(id)` no lo tocan), así que el candado miente si el horario se regenera o si se pina
-  desde otra pestaña. → resolver en 8.6-iii-B.
+  desde otra pestaña. → CERRADA en S83 (8.6-iii-B1): `Map<clave, id>`, candado `<button>` que emite la
+  clave, `alDespinar` en el contenedor y `listar()` movido a `cargar(id)`. La mitad «hermana» queda
+  cubierta solo en parte: ver D-F8.6-iiiB1-b.
 
 - **D-F8.0-a** (S80, VIVA, de MÉTODO, no técnica) — EL «PROTOCOLO DE ARCHIVADO» SE INVOCA PERO NO
   ESTÁ ESCRITO. Las instrucciones de cierre de sesión mandan «seguir el PROTOCOLO DE ARCHIVADO del
@@ -1824,6 +1858,36 @@ siguiente, con remisión a la bitácora.
   con D-F8.6-ii-a. Nota: `ModeloCpSat.usaAula` (1091-1100) devuelve `boolean` y añade el intervalo UNA
   sola vez, así que el modelo TAMPOCO detectaría dos `aulaFija` iguales — la protección descansa
   ENTERA en el mapper. → auditar `ActividadService` al abrir el próximo bloque que toque backend.
+
+- **D-F8.6-iiiB1-a** (S83, VIVA, DE COBERTURA) — EL GESTO DE DESPINAR ENTERO VA A PRODUCCIÓN SIN UN
+  SOLO TEST. La suite subió 22 → 23, y ese +1 cubre `pines.ts` y nada más. Sin aseverar: el `output`
+  `despinar`, el `<button>` y su `stopPropagation`, la resolución clave→id de `alDespinar`, el no-op
+  con `id` null, el borrado de la clave en el `next` del 204, y el traslado de `listar()` a
+  `cargarPines()`. Su única verificación hoy es el typecheck de plantillas de `ng build`. Es
+  consecuencia DIRECTA y aceptada de dejar `horario-grid.spec.ts` fuera de alcance (estrenar TestBed
+  es bloque propio, D-F8.6-iiiA-a). LO CONCRETO QUE SALE SIN RED, señalado por Claude Code: que
+  `cargarPines()` se llame UNA vez y no dos es exactamente el bug que S83 corrigió, y hoy depende de
+  que nadie vuelva a añadir la llamada al constructor —ningún test lo impediría—. Hermana de
+  D-F8.6-iiiA-a: las dos piden la misma capa de test que nadie ha estrenado.
+  → cubrir cuando se abra el bloque de TestBed, y empezar por el conteo de llamadas a `listar()`.
+
+- **D-F8.6-iiiB1-b** (S83, VIVA, no bloqueante) — LA RECARGA DEL ÍNDICE ES CORRECTA POR ACCIDENTE.
+  `pinadas` es estado GLOBAL («en TODO el horario», por javadoc) y `GET /api/bloqueos` no filtra por
+  horario; `cargar(id)` es por horario. Llamar a `cargarPines()` desde `cargar(id)` no refresca «los
+  pines de este horario»: refresca TODOS, siempre. Funciona —cubre el caso real de regenerar y
+  volver— pero no por la razón que el código sugiere, y su valor es menor del que el contrato de S83
+  le atribuyó. Lo que NO cubre y nada puede cubrir sin polling: dos pestañas abiertas, donde la que
+  no pinó no se entera hasta un cambio de ruta. → releer antes de tocar el ciclo de vida de
+  `pinadas`, y no asumir que la recarga está ligada al horario.
+
+- **D-F8.6-iiiB1-c** (S83, VIVA, no bloqueante, DE SUPERFICIE DE ERROR) — `mensaje()` MIENTE EN EL
+  DELETE. `alDespinar` reutiliza el `mensaje(err)` de `alSoltar` como exigía el contrato (no inventar
+  superficie de error nueva), pero su degradado dice literalmente «El servidor rechazó el pin», que
+  para un DELETE fallido —p. ej. 404 por `id` rancio tras un `next` perdido— es falso: no se rechazó
+  un pin, no se pudo quitar. El caso del `id` rancio NO está cubierto por nada y se presentaría como
+  error genérico, indistinguible de un rechazo real. Familia de D-F8.6-ii-a: las dos son superficie
+  de error que solo tiene sentido decidir GLOBALMENTE, no de refilón en un bloque de frontend.
+  → parametrizar el degradado cuando se decida la política global de errores.
 
 ### Deuda consciente CERRADA (histórico)
 
