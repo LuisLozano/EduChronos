@@ -600,7 +600,13 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iv-B CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iv-A CERRADO
+  en S85 (specs de los TRES servicios REST del frontend: `horario.service.spec.ts` +
+  `bloqueo.service.spec.ts` + `diagnostico.service.spec.ts`, 5 tests con campaña de 6 mutaciones;
+  ESTRENA `provideHttpClientTesting` + `HttpTestingController`, hoy sin uso efectivo en el repo;
+  alcance HONESTO declarado —los cinco métodos son wrappers pelados, se congela el CONTRATO DE
+  ENDPOINTS, no se cubre lógica—; cierra D-F8.6-iiiA-a con matiz medido; cero dependencias nuevas;
+  backend intacto). Bloque 8.6-iv-B CERRADO
   en S84 (capa de test de COMPONENTE del frontend: `horario-view.spec.ts` + `horario-grid.spec.ts`,
   7 tests con campaña de 8 mutaciones; dobles por `useValue`, sin `HttpTestingController`; 8.6-iv
   ABIERTO como bloque que no tenía casilla y PARTIDO en iv-A/iv-B; cierra D-F8.6-iiiB1-a, deja viva
@@ -668,7 +674,110 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 84 — Fase 8, Bloque 8.6-iv-B: capa de test de componente (despinar bajo red).
+### Sesión 85 — Fase 8, Bloque 8.6-iv-A: specs de los tres servicios REST, estreno de HttpTestingController.
+  Modo híbrido. 1 commit de código (b11617d, solo tests, 3 ficheros nuevos, 299 inserciones, cero
+  borrados) + doc aparte. §A DE MEDICIÓN sobre el UNIVERSO A TESTEAR y su ENTORNO (lectura literal
+  de los 3 servicios + `bloqueo.model.ts` + `app.config.ts`, `ls` de `services/`/`testing/`/`models/`
+  y greps de `HttpTestingController`/`provideHttpClient`; instrumento más barato, precedente S77-S84).
+  RUTA VERIFICADA ANTES DE MEDIR (corolario que S84 añadió tras fallar en esto): se midió contra
+  `app/frontend/`, no contra `frontend/`; los comandos salieron a la primera.
+  SALIDA DE §A, que REENCUADRA EL BLOQUE ENTERO: los cinco métodos de los tres servicios son
+  WRAPPERS PELADOS —`return this.http.<verbo><T>(url[, body])` directo, sin `.pipe`, sin
+  `catchError`, sin transformación, sin `options`—. `provideHttpClient()` va SIN `withFetch` (backend
+  XHR, `HttpTestingController` intercepta sin ajuste). DESMIENTE MI SUPOSICIÓN DE APERTURA sobre
+  `app/frontend/src/app/testing/`: NO es infraestructura de test —contiene un único fichero,
+  `proyeccion-1eso.fixture.ts`, que es datos de dominio—, así que NO HABÍA HELPER QUE COPIAR.
+  Y PRECISA la casilla del bloque: `HttpTestingController` no tenía CERO apariciones sino UNA, dentro
+  de un comentario de `horario-view.spec.ts:15` que declara que NO se usa; cero usos EFECTIVOS, sí.
+  DECISIÓN DE ALCANCE HONESTO, tomada con la medición delante y contra la lectura literal de la
+  deuda: iv-A NO es cobertura de lógica y no se finge que lo sea. Lo que entrega es (a) CONGELACIÓN
+  DEL CONTRATO DE ENDPOINTS (verbo + URL, las dos únicas dimensiones sin red del compilador) y (b)
+  el ESTRENO de la capa `provideHttpClientTesting` + `HttpTestingController`, para que el primer
+  servicio con lógica real no tenga que inventarse el patrón bajo presión. Se rechazó a propósito
+  inflar el bloque con asertos sobre el tipo genérico, la propagación del 404 o «devuelve lo que
+  llega»: un aserto implicado o no-reddable es prosa, y su sitio es el TSDoc (precedente S84).
+  TURNO DE CONTRASTE, el más productivo de la fase: CINCO afirmaciones del arquitecto desmentidas,
+  las cinco aceptadas y ninguna rechazada por reflejo.
+  (1) `toBe` → `toEqual` en el aserto del cuerpo de `guardar`. Claude Code VERIFICÓ por lectura del
+  fuente instalado (`_module-chunk.mjs:449`, `:562`; `serializeBody()` solo lo invoca el backend
+  real, `http.mjs:183`) que `toBe` SÍ discrimina —el body no se clona ni se serializa en la ruta de
+  testing—, y aun así objetó que NO DEBE: `{...peticion}` produce el mismo JSON en el cable, así que
+  la mutación M3b no es un defecto sino una refactorización inocua, y un aserto que la pinta de rojo
+  discrimina un ESTILO DE ESCRITURA, no un contrato. Remate que cierra el argumento: NINGUNA de las
+  dos variantes caza el defecto real —que el servicio mute el objeto del llamante in situ—, porque
+  entonces `PETICION` sería el objeto ya mutado y ambas pasarían. M3b ELIMINADA de la campaña.
+  (2) LA RAZÓN ESCRITA DE UNA DECISIÓN ERA FALSA EN DOS DE SUS TRES ITEMS. Dejé fuera tres cosas
+  «porque no pueden ponerse rojo». Cierto solo del tipo genérico (se borra en runtime). La
+  propagación del 404 y «devuelve lo que llega» SÍ son reddables, con mutaciones que compilan
+  (`catchError(() => of(null))` y `map(x => ({...x}))`). Importa porque `diagnostico.service.ts:23-28`
+  dedica SEIS LÍNEAS de TSDoc a defender que el 404 se propaga sin traducir: dejar escrito que eso
+  es intestable lo condenaba a no verificarse nunca. CORREGIDA la razón: quedan fuera POR ALCANCE.
+  (3) CAMPAÑA INCOMPLETA EN UNA DIMENSIÓN VIVA. D4 exige aseverar verbo + URL en los cinco tests,
+  pero la campaña solo movía el verbo en T3: en T1/T2/T4/T5 el componente `method` del matcher no se
+  ponía a prueba y podría haberse borrado sin que nada cayera. NO es un aserto muerto (es reddable)
+  sino una MUTACIÓN QUE FALTA —distinción que importa y que Claude Code hizo explícita—. Añadida M4b
+  (`delete<void>` → `get<void>` en `borrar`), la más barata que demuestra la dimensión: el DELETE es
+  el único verbo no repetido. Medida: cae (11) con URL recibida `/api/bloqueos/7` IDÉNTICA a la
+  esperada, difiriendo solo el verbo ⇒ la mitad `method` está VIVA y no es adorno.
+  (4) UNA JUSTIFICACIÓN QUE DESCRIBÍA UN ESCENARIO IMPOSIBLE. Escribí que `id = 7` en las tres rutas
+  interpoladas evitaba que un cruce de rutas entre servicios cayera por el número en vez de por la
+  ruta. Ese cruce NO PUEDE OCURRIR: tres ficheros, tres `TestBed`, tres `HttpTestingController`
+  independientes; la petición de un spec no es visible desde otro. La DECISIÓN no cambia (7 y no 1,
+  porque con 1 una implementación que incrustara el id a mano seguiría verde, mismo criterio que el
+  «índice 2 y no 1» de `horario-grid.spec.ts:52-56`); la RAZÓN se reescribió.
+  (5) «DOBLE FALLO» ERA CASCADA, y lo destapó la campaña, no el razonamiento. Hice escribir en el
+  TSDoc que `verify()` produciría un doble fallo por una sola causa. FALSO en un fichero de varios
+  tests: `verify()` lanza dentro del `afterEach`, eso impide el reset del TestBed, y el `beforeEach`
+  del test SIGUIENTE revienta con «Cannot configure the test module when the test module has already
+  been instantiated». MEDIDO: M2, que solo toca la URL de `listar()`, tumbó (9), (10) y (11).
+  Importa porque la campaña se apoya en «qué test cae» como señal de ATRIBUCIÓN, y con cascada
+  «cayeron tres» ya no atribuye. Se salva por el MENSAJE, y esa regla de lectura quedó escrita:
+  víctima REAL = falla por `expectOne`; COLATERAL = falla por «Cannot configure the test module».
+  DECISIÓN sobre la cascada, entre tres salidas que Claude Code presentó sin elegir por su cuenta:
+  se corrige el TSDoc, NO el código. Descartado blindar el `afterEach` con
+  `try/finally + resetTestingModule()` (mete maquinaria permanente en tres ficheros y estrena un
+  patrón con cero apariciones en el repo, para un síntoma que solo existe bajo mutación) y descartado
+  partir `bloqueo.service.spec.ts` en varios `describe` (rompería «un describe por fichero», que es
+  el patrón vivo de los dos specs de referencia; sería dejar que el instrumento de medición dicte la
+  estructura del test). En VERDE `verify()` no lanza nunca: la patología solo aparece cuando ya
+  estás leyendo los mensajes con lupa. `verify()` se declara RED, no aserto: no es independientemente
+  reddable bajo la campaña, pero caza la petición no contemplada (p. ej. un método que dispare dos).
+  DESVIACIÓN DE CLAUDE CODE, ACEPTADA: no usó `compileComponents()` ni `beforeEach` async pese a
+  figurar en el «patrón a copiar». Razón suya, correcta: en los specs de referencia existe para
+  compilar COMPONENTES y aquí no hay ninguno —`TestBed.inject` sobre un servicio es síncrono—;
+  añadirlo sería copiar la forma sin la causa. Lo que había que copiar era el TSDoc, la forma de
+  `describe`/`it`, la numeración correlativa y el estilo de aserto, no la mecánica de arranque.
+  ENTREGADO: 3 specs junto a su fuente en `services/`, 5 tests numerados (8)..(12) continuando la
+  numeración correlativa del repo. Suite frontend 30 → 35 (+5), 6 → 9 ficheros. Fixture LOCAL al
+  spec, calibrado (`indice: 2` y no 1; `dia` ≠ `orden` para que un swap de campos fuera detectable;
+  `aulas` NO vacío, porque el vacío es el caso trivial y D-5 lo documenta como significativo);
+  `PROYECCION_1ESO` NO contaminado (patrón S41/S81/S82/S83/S84).
+  CAMPAÑA DE 6 MUTACIONES, las seis caen por `expectOne` y NINGUNA deja de compilar. M4 en
+  particular compila —deja `id` sin usar— lo que VERIFICA sobre el árbol real que
+  `noUnusedParameters` no está activo ni se hereda de `strict`; si algún día se activa, M4 deja de
+  ser expresable y hay que sustituirla por `/api/bloqueos/${id}` → `/api/bloqueo/${id}`. Dato de
+  método REGISTRADO POR CLAUDE CODE SIN QUE SE LE PIDIERA: la campaña se corrió sobre el estado
+  ANTERIOR a la corrección del TSDoc; sobre el commit final solo se redemostró UNA de las seis
+  (M4b, verde-rojo-verde). Como los cambios fueron solo comentarios ninguna mutación cambia de
+  resultado, y se acepta así en vez de dar las seis por buenas sobre el estado nuevo.
+  HALLAZGO DEL MATCHER, no previsto: `expectOne` compara contra `urlWithParams` por igualdad
+  ESTRICTA de string, y sus guardas son `!match.method` / `!match.url`, así que un campo omitido NO
+  restringe —que es lo que da contenido real a la regla «nunca matchear solo por URL»—. Hoy es
+  indiferente (ningún método pasa `params`), pero si alguien añade `params` a `listar()`, T2 se
+  pondrá rojo y ESE ROJO SERÁ CORRECTO. Escrito en el TSDoc para que no se lea como falso positivo.
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
+  solver 78). `ng build` limpio. CERO dependencias nuevas: `@angular/common/http/testing` resuelve
+  por exports map, VERIFICADO por `require.resolve` sobre la 21.2.17 instalada, no supuesto.
+  DEUDA NUEVA: D-F8.6-ivA-a (el 404 que el TSDoc de `DiagnosticoService` defiende no lo verifica
+  nadie, y SÍ es reddable), D-F8.6-ivA-b (la cascada de `verify()` rompe la atribución de una
+  campaña de mutación), D-F8.6-ivA-c (`TramoRef.orden` vs `SesionVista.tramo`, NO MEDIDO).
+  CIERRA D-F8.6-iiiA-a con MATIZ MEDIDO.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra
+  D19/D20 en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de
+  D-F8.4-A-c) u 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
+  referencia), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 84 — Fase 8, Bloque 8.6-iv-B: capa de test de componente (despinar bajo red).
   Modo híbrido. 1 commit de código (7c8f742, solo tests) + doc aparte. §A DE MEDICIÓN sobre el
   ENTORNO DE TEST (lectura literal de `angular.json`, `tsconfig.spec.json`, `package.json` y los 4
   specs; instrumento más barato, precedente S77-S83).
@@ -902,72 +1011,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   modelado y sin consumidor), D-F8.6-iiiA-c (S2 sobre `aulaFija` validada SOLO en la ruta JSON).
   Siguiente: 8.6-iii-B (MOCKUP PREVIO OBLIGATORIO; hereda D-F8.6-ii-b y D-F8.6-iiiA-b), 8.4-B (MOCKUP
   PREVIO) u 8.5-D2b (solver, regenera la referencia), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 81 — Fase 8, Bloques 8.6-i + 8.6-ii: cliente de bloqueos y arrastre que pina.
-  Modo híbrido. 1 commit de código (solo `app/frontend/`) + doc aparte. §A DE MEDICIÓN sobre el
-  ESTADO REAL DEL FRONTEND (lectura literal de ficheros + `find`; instrumento más barato,
-  precedente S77-S80).
-  SALIDA DE §A: cero librerías de d&d y cero `@angular/cdk` —tampoco transitivo, porque no hay
-  Material que lo arrastre—; CONFIRMA la casilla de 8.6 y ELIMINA el atajo que supuse al abrir.
-  Angular 21. DATO NO PREVISTO Y DECISIVO: el runner es **Vitest + jsdom**, que NO implementa la
-  HTML Drag and Drop API — cualquier librería basada en `dragstart`/`drop` haría el gesto
-  INTESTABLE. Es el criterio que eligió CDK, no la limpieza. El cliente de 7B conocía UN solo
-  endpoint (`GET /api/horarios/{id}/proyeccion`): cero campos de atribución (8.3-C) y cero de
-  bloqueo (8.2b-iv) en el modelo TS.
-  HALLAZGO FAVORABLE: `SesionVista` ya lleva (`actividadCodigo`, `indice`), la clave que
-  `BloqueoDTO` declara para el cruce (D-6). 8.6-i NO toca backend ni `SesionVistaDTO`: la
-  predicción de S66 se cumple, medida.
-  8.6 PARTIDO en i/ii/iii. El antiguo iii (candado) se FUNDE en i: el `GET /api/bloqueos` es
-  precondición del CANDADO (sin él solo se conocen los pines de esta sesión de navegador), no del
-  POST. Mi justificación inicial de la fusión —«sin GET cada arrastre borra los pines anteriores»—
-  era FALSA y la corrigió la lectura literal del javadoc: el POST es idempotente POR INSTANCIA, no
-  reemplazo de colección. D-F8.6-ii-2 RETIRADA antes de implementarse.
-  DECISIONES CERRADAS: D-F8.6-i-1 (`BloqueoService` TS propio; `HorarioService` se declara de solo
-  lectura en su javadoc y no se contamina), D-F8.6-i-2 (`bloqueo.model.ts` nuevo, espejo de los 4
-  records), D-F8.6-i-3 (`Set` de claves `${actividadCodigo}|${indice}`), D-F8.6-ii-1 (envoltorio de
-  celda por PAR actividad+índice; `agruparPorActividad` NUEVA, construida sobre `agruparPorSlot`,
-  que queda intacta con su test), D-F8.6-ii-3 (el arrastre pina SOLO tramo, `aulas: []`; el aula es
-  otro gesto), D-F8.6-ii-5 (sin movimiento optimista: el candado NO se pinta hasta el OK del POST;
-  en 400 el `Set` no se toca y no hay nada que revertir), D-F8.6-ii-6 (`@angular/cdk@21.2.14`,
-  `DragDropModule`, verificado por instalación limpia sin peer warnings ANTES de cerrar contrato).
-  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code AL PREGUNTAR ANTES
-  DE TECLEAR: (1) especifiqué el fixture de 2b como «desdoble CyR + OyD = dos actividades
-  distintas»: FALSO — `proyeccion-1eso.fixture.ts:26-41` las modela como SEIS PLAZAS de la única
-  actividad `Bloque-CyR_OyD_RefMt-1ESO`, que es lo correcto por dominio (S5 obliga a que las plazas
-  simultáneas compartan tramo; el modelo unificado existe para no confundir «seis destinos» con
-  «seis actividades»). Ningún slot del fixture real tiene dos actividadCodigo distintos. Resuelto
-  con FIXTURE LOCAL en el spec, sin contaminar `PROYECCION_1ESO` (oro del centro, patrón S41).
-  (2) especifiqué «en ERROR revierte»: SIN SUJETO — sin movimiento optimista no existe estado que
-  revertir. CUARTA SESIÓN CONSECUTIVA (S78, S79, S80, S81) con el mismo género de error.
-  TERCER ERROR MÍO, ESTE DESTAPADO POR RÉPLICA (no por ejecución): al ver que `agruparPorActividad`
-  reutiliza `clavePin` —buena decisión, una sola fuente de D-6— DI POR CUBIERTA la mitad «índice»
-  de la clave. NO lo estaba: el fixture local tenía todos los `indice` a 1, y el test que tocaba dos
-  índices los ponía en SLOTS DISTINTOS, donde los separa `claveSlot`, no `clavePin`. Mutar `clavePin`
-  ponía rojo SOLO `pines.spec.ts`. Corregido con `SLOT_DOS_INDICES` (misma actividad, índices 1 y 2,
-  MISMO slot) y test (6). Es cobertura fantasma: reutilizar una función no hereda su test.
-  DECISIÓN SOBRE EL FIXTURE DEFENSIVO: `SLOT_DOS_INDICES` modela un estado que el DOMINIO PROHÍBE
-  (dos repeticiones de una actividad solaparían al grupo). Se mantiene a propósito: `agruparPorActividad`
-  es función PURA y su contrato es agrupar por el par, no validar horarios; la invariante la
-  garantiza el solver. Si el fixture solo tuviera estados válidos, el test NO discriminaría (práctica
-  (c)). La alternativa —atacar `clavePin` desde `proyeccion.spec.ts`— es peor: no sobreviviría a un
-  refactor que dejara de usar `clavePin`. Declarado en el TSDoc del fixture.
-  ASERTOS: TRES MUTACIONES, las tres caen y restauran verde — `clavePin` ignorando el índice (rojo en
-  `pines.spec.ts` Y en `proyeccion.spec.ts` (6) tras la ampliación), agrupado plano en
-  `agruparPorActividad` (rojo en (5)), y `claveSlot` ignorando el tramo (rotura trivial de
-  demostración de suite no-vacía). Suite frontend 6 → 13.
-  Decisiones de implementación de Claude Code, revisadas y aceptadas: `agruparPorActividad` reutiliza
-  `clavePin` (una sola fuente de D-6); `cdkDropListGroup` conecta los 30 `cdkDropList`; soltar en el
-  mismo slot no emite.
-  PRETTIER NO APLICADO a propósito: el repo no está formateado (marca ficheros preexistentes que el
-  bloque no tocó) y aplicarlo mezclaría ruido de formato con el diff del bloque. Sería commit propio.
-  `package.json`/`package-lock.json` van en el commit de CÓDIGO, no aparte: sin la dependencia el
-  `import` de `DragDropModule` no compila y el commit no construiría (la disciplina separa código de
-  DOCUMENTACIÓN, no código de su manifiesto).
-  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
-  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
-  DEUDA NUEVA: D-F8.6-ii-a (el `reason` de `ResponseStatusException` no viaja al cliente).
-  Siguiente: 8.6-iii (badge de delta blando + resalte de violación; MOCKUP PREVIO OBLIGATORIO y
-  cableado de 8.3-C, que el cliente no conoce), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver), a decidir
-  al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -979,10 +1022,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 y la de S80 en la Sesión 84 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84 y la de S81 en la Sesión 85 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S81–S84). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S82–S85). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1173,7 +1216,8 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       usa pointer events y el runner es Vitest+jsdom, que no implementa HTML5 DnD). Envoltorio de
       celda por PAR (`actividadCodigo`, `indice`) vía `agruparPorActividad` NUEVA; `agruparPorSlot`
       intacta. `cdkDrag` en la INSTANCIA, nunca en la sub-entrada (contrato S67, D-F8.6-A-2).
-      SIN movimiento optimista: el candado no se pinta hasta el OK del POST. Pin solo de tramo
+      SIN movimiento optimista (D-F8.6-ii-5: el candado NO se pinta hasta el OK del POST; en 400 el
+      índice no se toca y no hay nada que revertir). Pin solo de tramo
       (`aulas: []`). D-F8.6-ii-a, D-F8.6-ii-b (sin gesto de despinar). Detalle: bitácora S81.
 - [x] Bloque 8.6-iii-A — Contrato de lectura del diagnóstico en el cliente (S82): `diagnostico.model.ts`
       (espejo de los 5 DTOs de `GET /api/horarios/{id}/diagnostico`, con la ASIMETRÍA D15 copiada:
@@ -1202,13 +1246,22 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       otra de SEIS necesitan tratamiento distinto del hueco superior. Hereda D-F8.6-iiiA-b (dónde vive
       `Totales`, con la trampa de que los totales NO son la suma de los `delta`). Cierra D19/D20 en
       frontend.
-- [ ] Bloque 8.6-iv-A — Specs de los TRES servicios del frontend (`horario`, `bloqueo`,
-      `diagnostico`). Estrena la capa HTTP de test: `provideHttpClientTesting` +
-      `HttpTestingController`, hoy con CERO usos en el repo (medido en S84). Sin dependencias
-      nuevas: `@angular/common/http/testing` viene dentro de `@angular/common`. NO hay precedente
-      que copiar en el repo. CIERRA D-F8.6-iiiA-a, que S84 dejó viva entera a propósito.
-      DESPLAZADO en S84 a favor de iv-B: el riesgo vive en la coordinación del contenedor, no en
-      wrappers de `HttpClient`, y la deuda nombraba un aserto de iv-B como el primero.
+- [x] Bloque 8.6-iv-A — Specs de los TRES servicios del frontend (S85): `horario.service.spec.ts`
+      (1 test) + `bloqueo.service.spec.ts` (3) + `diagnostico.service.spec.ts` (1), junto a su
+      fuente en `services/`, numerados (8)..(12) continuando la numeración correlativa del repo.
+      ESTRENA la capa HTTP de test (`provideHttpClientTesting` + `HttpTestingController`), que no
+      tenía uso efectivo: su única aparición previa era un comentario de `horario-view.spec.ts:15`
+      declarando que NO se usaba. ALCANCE HONESTO: los cinco métodos son WRAPPERS PELADOS (medido),
+      así que esto NO es cobertura de lógica sino CONGELACIÓN DEL CONTRATO DE ENDPOINTS —verbo +
+      URL, las dos únicas dimensiones sin red del compilador— más el precedente de capa para el
+      primer servicio con lógica real. `toEqual` y no `toBe` en el cuerpo de `guardar`: `toBe`
+      discrimina (verificado en el fuente de Angular) pero pondría rojo una refactorización inocua.
+      `verify()` en `afterEach` es RED, no aserto. Campaña de 6 mutaciones, las seis caen por
+      `expectOne` y ninguna deja de compilar. Suite frontend 30 → 35. Sin dependencias nuevas
+      (`@angular/common/http/testing` resuelve por exports map, verificado sobre la 21.2.17).
+      NO se usó `compileComponents()` ni `beforeEach` async: no hay componente que compilar y
+      copiarlo sería la forma sin la causa. CIERRA D-F8.6-iiiA-a con MATIZ MEDIDO.
+      D-F8.6-ivA-a, D-F8.6-ivA-b, D-F8.6-ivA-c. Detalle: bitácora S85.
 - [x] Bloque 8.6-iv-B — Capa de test de COMPONENTE (S84): `horario-view.spec.ts` (5 tests: las dos
       fases del conteo de `listar()`, el par ANTES/DESPUÉS del despinado, las dos salidas de la
       guarda de `id`, y el fallo de `listar()`) + `horario-grid.spec.ts` (2 tests: el candado emite
@@ -1873,7 +1926,7 @@ siguiente, con remisión a la bitácora.
   síntoma). → escribirlo como sección del plan la próxima vez que se haga higiene, o aceptar
   explícitamente que es costumbre.
 
-- **D-F8.6-iiiA-a** (S82, VIVA, DE COBERTURA, no bloqueante) — NINGÚN SERVICIO DEL FRONTEND TIENE
+- **D-F8.6-iiiA-a** (S82, CERRADA en S85, DE COBERTURA, no bloqueante) — NINGÚN SERVICIO DEL FRONTEND TIENE
   TEST. Medido en S82: los cuatro specs del frontend cubren funciones PURAS (`pines`, `proyeccion`,
   `diagnostico`) y el shell (`app`); `horario.service.ts`, `bloqueo.service.ts` y
   `diagnostico.service.ts` no tienen ni uno. iii-A NO lo empeora —siguió el patrón vigente: el
@@ -1887,6 +1940,14 @@ siguiente, con remisión a la bitácora.
   `HttpTestingController` es una capa de test NUEVA», y lo sigue siendo, pero la medición de S84
   desmintió la parte que hablaba de estrenar TestBed: `app.spec.ts` ya lo usaba—. El bloque propio
   que pedía existe ya con casilla: 8.6-iv-A.
+  → CERRADA en S85 (8.6-iv-A): los tres servicios tienen spec, con `provideHttpClientTesting` +
+  `HttpTestingController` estrenados y 5 tests bajo campaña de 6 mutaciones. MATIZ MEDIDO que esta
+  deuda no preveía y que REBAJA lo que el hueco valía: los cinco métodos son WRAPPERS PELADOS —sin
+  `.pipe`, sin `catchError`, sin transformación—, así que lo entregado es CONGELACIÓN DEL CONTRATO
+  DE ENDPOINTS (verbo + URL), no cobertura de lógica. La frase «el paso del 404 al consumidor NO está
+  aseverado por nada» SIGUE SIENDO CIERTA tras el cierre: se dejó fuera POR ALCANCE y se registra
+  aparte como D-F8.6-ivA-a, con la medición de que sí es reddable. Lo que esta deuda daba a entender
+  —que había riesgo de lógica sin red— la medición no lo confirma: no hay lógica que romper.
 
 - **D-F8.6-iiiA-b** (S82, VIVA, no bloqueante) — `Totales` SALE DE iii-A MODELADO Y SIN CONSUMIDOR.
   Es el único de los 5 DTOs del diagnóstico que el bloque no ejercita: no hay índice, no hay función,
@@ -1987,6 +2048,49 @@ siguiente, con remisión a la bitácora.
   `ActivatedRoute` real de Angular esto no suele filtrar, pero es una afirmación que NO SE HA
   MEDIDO y se registra como tal, no como «es inocuo». → decidir (a) al tocar el ciclo de carga del
   horario y (b) si aparece una segunda ruta que reutilice el componente.
+
+- **D-F8.6-ivA-a** (S85, VIVA, DE COBERTURA, no bloqueante) — EL 404 QUE EL TSDoc DEFIENDE NO LO
+  VERIFICA NADIE, Y SÍ ES TESTEABLE. `diagnostico.service.ts:23-28` dedica SEIS LÍNEAS a argumentar
+  que el 404 se deja PROPAGAR sin traducir, porque «no hay horario» (404) y «horario sin violaciones»
+  (200 con listas vacías) son estados DISTINTOS y colapsarlos le quitaría al consumidor la
+  información para distinguirlos. Es una afirmación de COMPORTAMIENTO y ningún test la sostiene.
+  Queda fuera de 8.6-iv-A POR ALCANCE (iv-A congela endpoints, no cubre lógica), NO por imposibilidad:
+  MEDIDO en el turno de contraste de S85 que es reddable con `req.flush('', {status: 404, ...})` +
+  `subscribe({error})`, cuya mutación `catchError(() => of(null))` COMPILA. Lo mismo vale para
+  «devuelve lo que llega» (mutación `map(x => ({...x}))`, también compila). El único item de los tres
+  que de verdad NO es reddable es el tipo genérico, que se borra en runtime. IMPORTA que la razón
+  quede escrita bien: con la razón falsa —«no puede ponerse rojo»— quien releyera la decisión
+  concluiría que el 404 es intestable y no se verificaría nunca. → cubrir si se abre un bloque de
+  cobertura de comportamiento del cliente, o al tocar la política global de errores (familia de
+  D-F8.6-ii-a y D-F8.6-iiiB1-c).
+
+- **D-F8.6-ivA-b** (S85, VIVA, de MÉTODO, no bloqueante) — LA CASCADA DE `verify()` ROMPE LA
+  ATRIBUCIÓN DE UNA CAMPAÑA DE MUTACIÓN. En un spec con `afterEach → HttpTestingController.verify()`,
+  una mutación hace que `verify()` LANCE dentro del `afterEach`; eso impide el reset del TestBed y el
+  `beforeEach` del test SIGUIENTE del mismo fichero revienta con «Cannot configure the test module
+  when the test module has already been instantiated». MEDIDO en S85: M2, que solo toca la URL de
+  `listar()`, tumbó (9), (10) y (11) de `bloqueo.service.spec.ts`. NO es el «doble fallo» que el
+  contrato de S85 predijo —esa predicción del arquitecto era FALSA y la desmintió la campaña—: es
+  cascada, y afecta a todo el fichero. Importa porque una campaña se apoya en QUÉ TEST CAE como señal
+  de atribución, y «cayeron tres» no atribuye nada. REGLA DE LECTURA, que salva la atribución y quedó
+  escrita en el TSDoc: la víctima REAL falla por `expectOne`; las COLATERALES fallan por «Cannot
+  configure the test module». Se decidió NO blindar con `try/finally + resetTestingModule()` (mete
+  maquinaria permanente en tres ficheros y estrena un patrón con cero apariciones en el repo) ni
+  partir el fichero en varios `describe` (rompería «un describe por fichero»), porque en VERDE
+  `verify()` no lanza nunca y la patología solo existe bajo mutación. Familia de D-F8.6-ivB-b: las dos
+  dicen que el instrumento de medición tiene sus propias trampas. → leer ANTES de correr una campaña
+  de mutación sobre cualquier spec que use `HttpTestingController`.
+
+- **D-F8.6-ivA-c** (S85, VIVA, no bloqueante, NO MEDIDA) — DOS NOMBRES PARA EL MISMO NÚMERO CRUZANDO
+  LA FRONTERA DEL CONTRATO. `TramoRef` (espejo de `TramoRefDTO`) declara `orden`, con el comentario
+  explícito «ordenEnDia 1..6, nunca `TramoSemanal.id`»; `SesionVista`, en la proyección, lleva `dia` y
+  `tramo` como números sueltos, no un `TramoRef`. Si ambos números significan lo mismo, hay dos
+  nombres para un solo concepto a los dos lados de la frontera; si significan cosas distintas, la
+  conversión no está en ninguno de los dos ficheros TS. Observada por Claude Code al leer
+  `bloqueo.model.ts` en S85 y registrada COMO PREGUNTA, no como defecto: decidirlo exige medir
+  `horario.model.ts` y los DTO del backend, que es trabajo de BACKEND y estaba fuera del alcance de un
+  bloque de frontend (mismo criterio con el que S81 evitó D-F8.6-ii-a y S83 el null de `Bloqueo.id`).
+  → medir al abrir el próximo bloque que toque la proyección o `SesionVistaDTO`.
 
 ### Deuda consciente CERRADA (histórico)
 

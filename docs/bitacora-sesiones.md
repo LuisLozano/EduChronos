@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S80. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S81. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S80). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S81). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3294,3 +3294,70 @@ al abrir sesión.
   DEUDA NUEVA: D-F8.0-a (el PROTOCOLO DE ARCHIVADO se invoca pero no existe escrito).
   Siguiente: 8.6 (Angular, contrato cerrado en S67; empezar por medir el estado real de frontend/
   y elegir librería de d&d), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver, regenera la referencia).
+
+### Sesión 81 — Fase 8, Bloques 8.6-i + 8.6-ii: cliente de bloqueos y arrastre que pina.
+  Modo híbrido. 1 commit de código (solo `app/frontend/`) + doc aparte. §A DE MEDICIÓN sobre el
+  ESTADO REAL DEL FRONTEND (lectura literal de ficheros + `find`; instrumento más barato,
+  precedente S77-S80).
+  SALIDA DE §A: cero librerías de d&d y cero `@angular/cdk` —tampoco transitivo, porque no hay
+  Material que lo arrastre—; CONFIRMA la casilla de 8.6 y ELIMINA el atajo que supuse al abrir.
+  Angular 21. DATO NO PREVISTO Y DECISIVO: el runner es **Vitest + jsdom**, que NO implementa la
+  HTML Drag and Drop API — cualquier librería basada en `dragstart`/`drop` haría el gesto
+  INTESTABLE. Es el criterio que eligió CDK, no la limpieza. El cliente de 7B conocía UN solo
+  endpoint (`GET /api/horarios/{id}/proyeccion`): cero campos de atribución (8.3-C) y cero de
+  bloqueo (8.2b-iv) en el modelo TS.
+  HALLAZGO FAVORABLE: `SesionVista` ya lleva (`actividadCodigo`, `indice`), la clave que
+  `BloqueoDTO` declara para el cruce (D-6). 8.6-i NO toca backend ni `SesionVistaDTO`: la
+  predicción de S66 se cumple, medida.
+  8.6 PARTIDO en i/ii/iii. El antiguo iii (candado) se FUNDE en i: el `GET /api/bloqueos` es
+  precondición del CANDADO (sin él solo se conocen los pines de esta sesión de navegador), no del
+  POST. Mi justificación inicial de la fusión —«sin GET cada arrastre borra los pines anteriores»—
+  era FALSA y la corrigió la lectura literal del javadoc: el POST es idempotente POR INSTANCIA, no
+  reemplazo de colección. D-F8.6-ii-2 RETIRADA antes de implementarse.
+  DECISIONES CERRADAS: D-F8.6-i-1 (`BloqueoService` TS propio; `HorarioService` se declara de solo
+  lectura en su javadoc y no se contamina), D-F8.6-i-2 (`bloqueo.model.ts` nuevo, espejo de los 4
+  records), D-F8.6-i-3 (`Set` de claves `${actividadCodigo}|${indice}`), D-F8.6-ii-1 (envoltorio de
+  celda por PAR actividad+índice; `agruparPorActividad` NUEVA, construida sobre `agruparPorSlot`,
+  que queda intacta con su test), D-F8.6-ii-3 (el arrastre pina SOLO tramo, `aulas: []`; el aula es
+  otro gesto), D-F8.6-ii-5 (sin movimiento optimista: el candado NO se pinta hasta el OK del POST;
+  en 400 el `Set` no se toca y no hay nada que revertir), D-F8.6-ii-6 (`@angular/cdk@21.2.14`,
+  `DragDropModule`, verificado por instalación limpia sin peer warnings ANTES de cerrar contrato).
+  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code AL PREGUNTAR ANTES
+  DE TECLEAR: (1) especifiqué el fixture de 2b como «desdoble CyR + OyD = dos actividades
+  distintas»: FALSO — `proyeccion-1eso.fixture.ts:26-41` las modela como SEIS PLAZAS de la única
+  actividad `Bloque-CyR_OyD_RefMt-1ESO`, que es lo correcto por dominio (S5 obliga a que las plazas
+  simultáneas compartan tramo; el modelo unificado existe para no confundir «seis destinos» con
+  «seis actividades»). Ningún slot del fixture real tiene dos actividadCodigo distintos. Resuelto
+  con FIXTURE LOCAL en el spec, sin contaminar `PROYECCION_1ESO` (oro del centro, patrón S41).
+  (2) especifiqué «en ERROR revierte»: SIN SUJETO — sin movimiento optimista no existe estado que
+  revertir. CUARTA SESIÓN CONSECUTIVA (S78, S79, S80, S81) con el mismo género de error.
+  TERCER ERROR MÍO, ESTE DESTAPADO POR RÉPLICA (no por ejecución): al ver que `agruparPorActividad`
+  reutiliza `clavePin` —buena decisión, una sola fuente de D-6— DI POR CUBIERTA la mitad «índice»
+  de la clave. NO lo estaba: el fixture local tenía todos los `indice` a 1, y el test que tocaba dos
+  índices los ponía en SLOTS DISTINTOS, donde los separa `claveSlot`, no `clavePin`. Mutar `clavePin`
+  ponía rojo SOLO `pines.spec.ts`. Corregido con `SLOT_DOS_INDICES` (misma actividad, índices 1 y 2,
+  MISMO slot) y test (6). Es cobertura fantasma: reutilizar una función no hereda su test.
+  DECISIÓN SOBRE EL FIXTURE DEFENSIVO: `SLOT_DOS_INDICES` modela un estado que el DOMINIO PROHÍBE
+  (dos repeticiones de una actividad solaparían al grupo). Se mantiene a propósito: `agruparPorActividad`
+  es función PURA y su contrato es agrupar por el par, no validar horarios; la invariante la
+  garantiza el solver. Si el fixture solo tuviera estados válidos, el test NO discriminaría (práctica
+  (c)). La alternativa —atacar `clavePin` desde `proyeccion.spec.ts`— es peor: no sobreviviría a un
+  refactor que dejara de usar `clavePin`. Declarado en el TSDoc del fixture.
+  ASERTOS: TRES MUTACIONES, las tres caen y restauran verde — `clavePin` ignorando el índice (rojo en
+  `pines.spec.ts` Y en `proyeccion.spec.ts` (6) tras la ampliación), agrupado plano en
+  `agruparPorActividad` (rojo en (5)), y `claveSlot` ignorando el tramo (rotura trivial de
+  demostración de suite no-vacía). Suite frontend 6 → 13.
+  Decisiones de implementación de Claude Code, revisadas y aceptadas: `agruparPorActividad` reutiliza
+  `clavePin` (una sola fuente de D-6); `cdkDropListGroup` conecta los 30 `cdkDropList`; soltar en el
+  mismo slot no emite.
+  PRETTIER NO APLICADO a propósito: el repo no está formateado (marca ficheros preexistentes que el
+  bloque no tocó) y aplicarlo mezclaría ruido de formato con el diff del bloque. Sería commit propio.
+  `package.json`/`package-lock.json` van en el commit de CÓDIGO, no aparte: sin la dependencia el
+  `import` de `DragDropModule` no compila y el commit no construiría (la disciplina separa código de
+  DOCUMENTACIÓN, no código de su manifiesto).
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  DEUDA NUEVA: D-F8.6-ii-a (el `reason` de `ResponseStatusException` no viaja al cliente).
+  Siguiente: 8.6-iii (badge de delta blando + resalte de violación; MOCKUP PREVIO OBLIGATORIO y
+  cableado de 8.3-C, que el cliente no conoce), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver), a decidir
+  al abrir sesión.
