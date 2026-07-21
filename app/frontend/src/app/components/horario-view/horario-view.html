@@ -30,7 +30,12 @@
   <p class="error">{{ msg }}</p>
 } @else if (proyeccion(); as p) {
   <h2>{{ p.nombre }} <small>— {{ vista() }}: {{ entidad() }}</small></h2>
-  <app-horario-grid [sesiones]="sesionesFiltradas()" [pinadas]="pinadas()" (soltar)="alSoltar($event)" />
+  <app-horario-grid
+    [sesiones]="sesionesFiltradas()"
+    [pinadas]="pinadas()"
+    (soltar)="alSoltar($event)"
+    (despinar)="alDespinar($event)"
+  />
 } @else {
   <p>Cargando…</p>
 }

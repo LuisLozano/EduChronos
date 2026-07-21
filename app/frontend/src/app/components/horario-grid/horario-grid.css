@@ -34,16 +34,20 @@
 }
 
 .instancia.pinada .entrada {
-  border-left-color: #c80;
   background: #fff8ec;
 }
 
+/* Botón desde 8.6-iii-B1: el reset lo deja como el <span> que era. */
 .candado {
   position: absolute;
   top: 0;
   right: 0.1rem;
   font-size: 0.7rem;
   line-height: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
 /* Estados del CDK: el original se atenúa y el hueco de destino se marca. */

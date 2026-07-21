@@ -9,7 +9,13 @@ export function clavePin(actividadCodigo: string, indice: number): string {
   return `${actividadCodigo}|${indice}`;
 }
 
-/** Índice de consulta O(1) de las instancias pinadas de una lista de bloqueos. */
-export function indicePines(bloqueos: readonly Bloqueo[]): Set<string> {
-  return new Set(bloqueos.map((b) => clavePin(b.actividadCodigo, b.indice)));
+/**
+ * Índice de consulta O(1) de las instancias pinadas de una lista de bloqueos.
+ * El valor es el `id` del bloqueo —lo que el DELETE necesita—, y es `number |
+ * null` porque el DTO lo declara nullable de verdad (ver `Bloqueo.id`): una
+ * clave presente con valor `null` es un pin VIVO que no se sabe borrar, no la
+ * ausencia de pin. Distinguirlo es de quien tenga el servicio, no de aquí.
+ */
+export function indicePines(bloqueos: readonly Bloqueo[]): Map<string, number | null> {
+  return new Map(bloqueos.map((b) => [clavePin(b.actividadCodigo, b.indice), b.id]));
 }

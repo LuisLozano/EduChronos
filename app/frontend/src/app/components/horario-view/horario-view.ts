@@ -37,8 +37,12 @@ export class HorarioView {
   protected readonly vista = signal<Vista>('grupo');
   protected readonly entidad = signal<string>('');
 
-  /** Claves de {@link clavePin} de las instancias pinadas, en TODO el horario. */
-  protected readonly pinadas = signal<ReadonlySet<string>>(new Set<string>());
+  /**
+   * Instancias pinadas en TODO el horario, de la clave de {@link clavePin} al
+   * `id` del bloqueo, que es lo que el DELETE necesita. `null` significa pin vivo
+   * sin id conocido: se pinta, pero no se puede borrar.
+   */
+  protected readonly pinadas = signal<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
   /** Último rechazo del backend (reglas de D-3); se limpia al siguiente intento. */
   protected readonly errorPin = signal<string | null>(null);
 
@@ -55,6 +59,17 @@ export class HorarioView {
 
   constructor() {
     this.route.paramMap.subscribe((pm) => this.cargar(Number(pm.get('id'))));
+  }
+
+  /**
+   * Refresca el índice de pines. NO se llama desde el constructor: `paramMap` ya
+   * emite en el arranque y {@link cargar} corre con él, así que llamarlo en ambos
+   * sitios dispararía dos GET /api/bloqueos por montaje.
+   *
+   * <p>Tampoco se llama al cambiar de vista o de entidad: el índice es de TODO el
+   * horario, no del filtro, y esos dos gestos no lo pueden invalidar.
+   */
+  private cargarPines(): void {
     this.bloqueos.listar().subscribe({
       next: (bs) => this.pinadas.set(indicePines(bs)),
       error: () => this.errorPin.set('No se pudieron cargar los pines existentes.'),
@@ -63,6 +78,7 @@ export class HorarioView {
 
   private cargar(id: number): void {
     this.error.set(null);
+    this.cargarPines();
     this.service.getProyeccion(id).subscribe({
       next: (p) => {
         this.proyeccion.set(p);
@@ -92,9 +108,34 @@ export class HorarioView {
         aulas: [],
       })
       .subscribe({
-        next: (b) => this.pinadas.set(new Set([...this.pinadas(), clavePin(b.actividadCodigo, b.indice)])),
+        next: (b) =>
+          this.pinadas.set(new Map(this.pinadas()).set(clavePin(b.actividadCodigo, b.indice), b.id)),
         error: (err) => this.errorPin.set(this.mensaje(err)),
       });
+  }
+
+  /**
+   * Quita el pin de la instancia cuya CLAVE emite la rejilla. El id se resuelve
+   * aquí —la rejilla no lo conoce—; si falta, no hay DELETE que emitir y se calla:
+   * un error de UI no ayudaría a quien no tiene forma de arreglarlo.
+   *
+   * <p>SIN movimiento optimista (D-F8.6-ii-5): el candado sigue pintado hasta el
+   * 204. Si el DELETE falla, no hay nada que revertir.
+   */
+  protected alDespinar(clave: string): void {
+    this.errorPin.set(null);
+    const id = this.pinadas().get(clave);
+    if (id === null || id === undefined) {
+      return;
+    }
+    this.bloqueos.borrar(id).subscribe({
+      next: () => {
+        const restantes = new Map(this.pinadas());
+        restantes.delete(clave);
+        this.pinadas.set(restantes);
+      },
+      error: (err) => this.errorPin.set(this.mensaje(err)),
+    });
   }
 
   /**

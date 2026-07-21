@@ -23,8 +23,14 @@ export interface SueltaInstancia {
  * <p>La unidad arrastrable es la INSTANCIA, nunca la sub-entrada (D-F8.6-A-2):
  * las 6 plazas de un bloque comparten tramo y se mueven juntas. La rejilla NO
  * mueve nada al soltar —sigue pintando la proyección vigente del servidor, que
- * no cambia hasta regenerar— ni habla con el servicio: solo emite `soltar` y el
- * contenedor decide.
+ * no cambia hasta regenerar— ni habla con el servicio: emite `soltar` y
+ * `despinar`, y el contenedor decide qué hacer con ambos.
+ *
+ * <p>Los dos outputs hablan el vocabulario de la INSTANCIA, no el de la
+ * persistencia: `despinar` emite la CLAVE de {@link clavePin}, nunca el `id` del
+ * bloqueo. La rejilla ignora que los pines tengan id, y por eso también ignora
+ * que ese id pueda faltar: el candado es SIEMPRE un botón, y resolver la clave
+ * —o descubrir que no se puede— es trabajo del contenedor.
  */
 @Component({
   selector: 'app-horario-grid',
@@ -34,10 +40,16 @@ export interface SueltaInstancia {
 })
 export class HorarioGrid {
   readonly sesiones = input.required<readonly SesionVista[]>();
-  /** Claves de {@link clavePin} de las instancias ya pinadas: pintan candado. */
-  readonly pinadas = input<ReadonlySet<string>>(new Set<string>());
+  /**
+   * Instancias ya pinadas, indexadas por la clave de {@link clavePin}: pintan
+   * candado. El valor del mapa —el id del bloqueo— NO se lee aquí; se acepta en
+   * el tipo para no obligar al contenedor a construir una proyección aparte.
+   */
+  readonly pinadas = input<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
 
   readonly soltar = output<SueltaInstancia>();
+  /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
+  readonly despinar = output<string>();
 
   protected readonly dias = DIAS;
   protected readonly tramos = TRAMOS;
@@ -55,6 +67,17 @@ export class HorarioGrid {
 
   protected estaPinada(inst: InstanciaCelda): boolean {
     return this.pinadas().has(this.clave(inst));
+  }
+
+  /**
+   * Emite la petición de despinar. El `stopPropagation` es DEFENSIVO: hoy ningún
+   * ancestro escucha `click`, pero el botón vive dentro del `cdkDrag`, y dejar
+   * que el evento suba invitaría a que un listener futuro en la instancia o en la
+   * celda tratase el despinado como una selección.
+   */
+  protected alDespinar(inst: InstanciaCelda, evento: Event): void {
+    evento.stopPropagation();
+    this.despinar.emit(this.clave(inst));
   }
 
   /**

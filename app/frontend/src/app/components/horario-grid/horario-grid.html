@@ -16,7 +16,15 @@
             @for (inst of instancias(i + 1, t); track clave(inst)) {
               <div class="instancia" [class.pinada]="estaPinada(inst)" cdkDrag [cdkDragData]="inst">
                 @if (estaPinada(inst)) {
-                  <span class="candado" title="Instancia pinada">&#128274;</span>
+                  <button
+                    type="button"
+                    class="candado"
+                    title="Quitar pin"
+                    [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
+                    (click)="alDespinar(inst, $event)"
+                  >
+                    &#128274;
+                  </button>
                 }
                 @for (e of inst.entradas; track e.sesionId) {
                   <div class="entrada">
