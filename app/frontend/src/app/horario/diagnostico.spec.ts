@@ -45,6 +45,40 @@ const SOLAPE_AULA = violacion('SOLAPE_AULA', [
   celda('LCL-1ºA', 2, 'LCL-1ºA-P1'),
 ]);
 
+/**
+ * Fixture del DESDOBLE: UNA violación de `SOLAPE_AULA` cuyas dos celdas son la
+ * MISMA instancia (mismo `actividadCodigo`, mismo `indice`) en plazas distintas.
+ * Es la forma que produce hoy el verificador: `VerificadorSolucion` emite una
+ * `CeldaRef` POR PLAZA en la lista de una única `Violacion`, `reportarColisiones`
+ * la emite entera y el constructor de `Violacion` usa `List.copyOf`, que NO
+ * deduplica. Luego las dos celdas llegan al DTO tal cual.
+ *
+ * (1) El SOLVER no puede producir hoy esta solución. Por `aulasCandidatas` lo
+ * impide `ModeloCpSat.restriccionNoSolapeAula`: las dos plazas aportan dos
+ * intervalos opcionales distintos al mismo `addNoOverlap`, y comparten `start`
+ * por ser la misma instancia, así que elegir el mismo aula en ambas es
+ * insatisfacible. Por `aulaFija` lo rechaza antes
+ * `ProblemaHorarioMapper.verificarAulasFijasDisjuntas` (S2), en configuración.
+ *
+ * (2) El fixture se mantiene A PROPÓSITO. Precedente S81: una función pura se
+ * prueba contra su CONTRATO —qué hace con la entrada que recibe—, no contra la
+ * validez del horario que esa entrada representa. Y `VerificadorSolucion` no
+ * verifica solo salidas del solver: el diagnóstico verifica lo RECONSTRUIDO
+ * DESDE PERSISTENCIA (`DiagnosticoService` llama a
+ * `SolucionMapper.aSolucionHorario` sobre las `Sesion` de la BD), donde ninguna
+ * de las dos barreras anteriores interviene.
+ *
+ * Consecuencia fijada aquí, que NO es un bug: bajo la única clave que producen
+ * ambas celdas el consumidor recibe la MISMA `Violacion` repetida, una vez por
+ * plaza. Es correcto para resaltar sub-entradas (cada plaza sabe que colisiona);
+ * si además se pinta una LISTA de violaciones, deduplicar es responsabilidad del
+ * consumidor.
+ */
+const DESDOBLE_MISMA_AULA = violacion('SOLAPE_AULA', [
+  celda('Mat-1ºA', 1, 'Mat-1ºA-P1'),
+  celda('Mat-1ºA', 1, 'Mat-1ºA-P2'),
+]);
+
 describe('índice de violaciones duras', () => {
   it('(1) la identidad es la INSTANCIA: dos repeticiones de la misma actividad son dos claves', () => {
     const indice = indiceViolaciones(DOS_INSTANCIAS_DURAS);
@@ -79,6 +113,20 @@ describe('índice de violaciones duras', () => {
 
   it('(5) sin violaciones el índice está vacío', () => {
     expect(indiceViolaciones([]).size).toBe(0);
+  });
+
+  it('(9) desdoble: dos plazas de la MISMA instancia dan UNA clave con DOS entradas, cada una con su plaza', () => {
+    const indice = indiceViolaciones([DESDOBLE_MISMA_AULA]);
+    const entradas = indice.get(clavePin('Mat-1ºA', 1)) ?? [];
+
+    // Ambas celdas colapsan a la misma clave: la plaza NO entra en clavePin.
+    expect(indice.size).toBe(1);
+    // Discriminante: una entrada por clave (sobrescribir en vez de acumular)
+    // daría 1, y perdería la segunda plaza.
+    expect(entradas).toHaveLength(2);
+    expect(entradas.map((e) => e.plazaCodigo)).toEqual(['Mat-1ºA-P1', 'Mat-1ºA-P2']);
+    // La MISMA Violacion repetida bajo la clave: comportamiento fijado.
+    expect(entradas.every((e) => e.violacion === DESDOBLE_MISMA_AULA)).toBe(true);
   });
 });
 
