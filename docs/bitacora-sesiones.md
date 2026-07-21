@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S78. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S79. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S78). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S79). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3184,3 +3184,59 @@ al abrir sesión.
   8.5 QUEDA CERRADO: cero sub-bloques vivos (D2b es de solver/, D3 aplazado con criterio de reapertura).
   Siguiente: 8.4 (pre-validación, D18/D20; arrastra MOCKUP PREVIO por D20), 8.5-D2b (solver, regenera la
   referencia) u 8.6 (Angular, contrato ya cerrado en S67), a decidir al abrir sesión.
+
+### Sesión 79 — Fase 8, Bloque 8.4-A: PRE-VALIDACIÓN por condiciones necesarias (D18).
+  Modo híbrido. 4 commits de código (1ea9103 + 838f944 producción/tests; 357d7c2 + 6cf44cb la
+  corrección de (c)) + doc. §A DE MEDICIÓN sobre CÓDIGO (greps + lectura literal) y §A-bis sobre
+  los VOLCADOS.
+  SALIDA DE §A: el hueco es TOTAL, no parcial. Las cuatro condiciones de D18 dan NO; `DemandaCurricular`
+  (§4.5) NO está materializada. Lo único que se validaba antes del solve era integridad referencial y
+  nulidad; CERO aritmética de capacidad. CORRIGE MI SUPOSICIÓN DE APERTURA: dije que el INFEASIBLE
+  podía salir opaco o 500; es FALSO —`HorarioController:59` ya traducía a 422 con test que lo cubre—.
+  Lo que faltaba no era el status sino el CONTENIDO: `HorarioInfactibleException` lleva UN SOLO String.
+  `DiagnosticoService` NO sirve de base: exige `HorarioGenerado` persistido (404 si no), y 8.4 corre
+  ANTES de que exista horario; comparten solo `cargarProblema()`. Patrón heredable = `ReferenciaEntranteException`.
+  SALIDA DE §A-bis (volcados): CERO guardias, reducciones u ocupación no docente, y NO PUEDE HABERLAS
+  —las fuentes son rejillas por grupo y por aula, y una guardia no ocupa ninguno de los dos—. No hay
+  volcado de profesor ni lo habrá. CONSECUENCIA: el numerador de (a) es medible desde los volcados; el
+  DENOMINADOR no lo es por ninguna fuente del proyecto. Que guardias y reducciones se declaren DURA es
+  DECISIÓN DEL ARQUITECTO (S79), no dato derivado; si el centro no las declara, (a) produce falsos
+  NEGATIVOS, nunca positivos. Escrito literal en el javadoc.
+  DECISIONES CERRADAS (F84-1..5): 8.4 PARTIDO en A/B —D20 no se puede dibujar antes de que existan
+  avisos que enseñar, luego el MOCKUP PREVIO se retira de esta sesión y va a 8.4-B—; excepción propia
+  en app/ con carga estructurada, sin tocar solver/; (b) palomar FUERA por riesgo de falso positivo;
+  una implementación, dos llamadores.
+  DOS ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, ambos destapados por Claude Code al preguntar antes de
+  teclear (registrados, no tapados). (1) Especifiqué (a) «suma por plaza»: MAL. Las plazas de una
+  actividad son SIMULTÁNEAS (S5); un profesor en dos plazas de la misma actividad consume UN tramo.
+  Contar por plaza sobrestima → falso positivo. (a) y (c) deduplican por actividad: helper único, dos
+  ejes. (2) Especifiqué (d) sin distinguir patrón: una NEUTRA con `repeticiones > días` NO es
+  infactible (7 caben en 5 días con 6 tramos). (d) se PARTE en (d1) solo DISTRIBUIDA y (d2)
+  `rep × dur > tramos totales` para todas, con `regla` distinta y mensaje distinto.
+  HALLAZGO QUE INVIRTIÓ UNA DECISIÓN MÍA (medido en el código por Claude Code, no razonado): (c) estaba
+  fijada como AVISO con el motivo «si el centro configura CyR/OyD como actividades separadas, la suma
+  sobrestima». FALSO bajo el modelo actual: `ModeloCpSat:1046-1074` impone `addNoOverlap` por grupo con
+  `tocaGrupo` deduplicando por INSTANCIA DE ACTIVIDAD —misma unidad que (c)—, así que si se configuran
+  separadas el solver TAMPOCO las deja compartir tramo. Es infactibilidad GARANTIZADA. (c) SUBE A ERROR.
+  TERCERA SESIÓN CONSECUTIVA (S77, S78, S79) con el mismo género de error: aplicar un criterio sin
+  comprobar el precedente en el código. Las tres veces lo destapó la ejecución, no el razonamiento.
+  ASERTOS: 10 tests. A3 es el ORO y su calibración no es gratuita: el fixture hace que AMBAS cuentas
+  superen el techo (7 por actividad, 10 por plaza, techo 5) para que la PRESENCIA del aviso no
+  discrimine y el único aserto posible sea el VALOR. MUTACIÓN (Set→List): cae SOLO A3, por el aserto de
+  valor (7 vs 10), +3 = la contribución duplicada de la segunda plaza. Los tres tests HTTP siguen verdes
+  bajo la mutación → D-F8.4-A-b. A4 INVERTIDO al subir (c) a ERROR, y su aserto más fuerte no es el 422
+  sino `mocked.constructed()).isEmpty()`: el solver NO SE CONSTRUYE, que es el propósito entero del
+  bloque y ningún status podía demostrarlo. Frontera `>` vs `>=` verificada por mutación (A1a) y con
+  peso real: `PinTramoGeneracionRoundTripTest` (1 tramo, demanda 1) pasa PRECISAMENTE por ella.
+  DOS TESTS QUE MENTÍAN, corregidos: `GenerarHorarioEndpointTest` seguía verde pero su fixture (2,1) ya
+  lo capturaba la pre-validación antes del solve —sustituido por uno infactible SOLO por aula, que de
+  paso documenta el hueco de (b)—; y el `noneMatch(ERROR)` de A3 se volvió FALSO (no tautológico) al
+  subir (c), sustituido por `hasSize(1)`, que conserva la propiedad útil sin afirmar nada falso.
+  A6 quedó SOBRE-DETERMINADO (su fixture dispara las tres reglas); el aislamiento limpio de (d) vive en
+  A5. Declarado, no tapado.
+  Suite 305 → 315 (+10), solver 78 intacto. solver/ NO tocado → referencia NO regenerada. modelo §4.3
+  SÍ tocado (nota de implementación de D18, commit aparte).
+  DEUDA NUEVA: D-F8.4-A-a (garantía de (c) derivada del no-solape por grupo), D-F8.4-A-b (la
+  deduplicación la protege UN solo test), D-F8.4-A-c (severidad tautológica, `AVISO` sin productor).
+  Siguiente: LIMPIEZA DE 8.5 (desplazada de S79, sesión en frío), 8.6 (Angular, contrato cerrado en
+  S67), 8.4-B (presentación, MOCKUP PREVIO) u 8.5-D2b (solver), a decidir al abrir sesión.
