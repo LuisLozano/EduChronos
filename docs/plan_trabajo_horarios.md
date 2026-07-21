@@ -600,7 +600,11 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iii-B1 CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iv-B CERRADO
+  en S84 (capa de test de COMPONENTE del frontend: `horario-view.spec.ts` + `horario-grid.spec.ts`,
+  7 tests con campaña de 8 mutaciones; dobles por `useValue`, sin `HttpTestingController`; 8.6-iv
+  ABIERTO como bloque que no tenía casilla y PARTIDO en iv-A/iv-B; cierra D-F8.6-iiiB1-a, deja viva
+  D-F8.6-iiiA-a; cero dependencias nuevas; backend intacto). Bloque 8.6-iii-B1 CERRADO
   en S83 (gesto de despinar + `indicePines` de `Set<clave>` a `Map<clave, id>`; el candado pasa a
   `<button>` y la rejilla emite la CLAVE, no el id; `listar()` MOVIDO del constructor a `cargar(id)`;
   8.6-iii-B partido en B1/B2, el badge y los resaltes van a B2; backend intacto). Bloque 8.6-iii-A CERRADO
@@ -664,7 +668,87 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 83 — Fase 8, Bloque 8.6-iii-B1: gesto de despinar e índice de pines con id.
+### Sesión 84 — Fase 8, Bloque 8.6-iv-B: capa de test de componente (despinar bajo red).
+  Modo híbrido. 1 commit de código (7c8f742, solo tests) + doc aparte. §A DE MEDICIÓN sobre el
+  ENTORNO DE TEST (lectura literal de `angular.json`, `tsconfig.spec.json`, `package.json` y los 4
+  specs; instrumento más barato, precedente S77-S83).
+  BLOQUE SIN CASILLA, abierto en S84: 8.6-iv es el bloque que D-F8.6-iiiA-a y D-F8.6-iiiB1-a
+  reclamaban las dos («la misma capa de test que nadie ha estrenado») y que no existía en «Bloques
+  de Fase 8». PARTIDO en iv-A (specs de los tres servicios, capa HTTP) y iv-B (componente), y se
+  eligió iv-B PRIMERO contra el orden por capas: la deuda nombra el aserto concreto por el que hay
+  que empezar (el conteo de `listar()`), el riesgo vive en la coordinación y no en los wrappers de
+  `HttpClient`, y testear `HorarioView` ANTES de 8.6-iii-B2 evita calibrar los tests contra una
+  superficie ya crecida. Consecuencia asumida y registrada: iv-A se desplaza, D-F8.6-iiiA-a NO se
+  cierra.
+  ERROR DE ENRUTADO DEL PROPIO INSTRUMENTO: la §A se lanzó contra `frontend/`, que NO EXISTE —el
+  frontend vive en `app/frontend/`— y los comandos fallaron enteros. Mismo género que S82/S83
+  (suponer la ubicación de un directorio), esta vez cometido DENTRO de la medición que existe para
+  no suponer.
+  SALIDA DE §A, que DESMIENTE la premisa de apertura: TestBed NO se estrena. `app.spec.ts` ya usa
+  `TestBed.configureTestingModule` + `createComponent` + `await fixture.whenStable()`, y el patrón
+  zoneless está fijado y es copiable. Lo NO estrenado es (1) la capa HTTP de test
+  (`HttpTestingController`: CERO usos en el repo) y (2) el test de un componente con `input`/`output`
+  y colaboradores inyectados. El nombre que la deuda usaba —«el bloque de TestBed»— inducía a error.
+  MEDIDO ADEMÁS: runner Vitest vía `@angular/build:unit-test` SIN bloque `options` (no hay
+  `vitest.config.ts` que tocar); zoneless POR OMISIÓN (sin `zone.js`, sin `provideZonelessChangeDetection`);
+  `vitest/globals`; `@angular/common/http/testing` disponible sin instalar. CERO dependencias nuevas
+  —a diferencia de S81, donde el runner SÍ decidió una dependencia—.
+  DECISIONES DE CONTRATO cerradas antes de teclear: (C1) dobles por `useValue` con `vi.fn()`, SIN
+  `HttpTestingController` —iv-B prueba COORDINACIÓN, no transporte; con el doble HTTP el conteo de
+  `listar()` pasaría a ser conteo de peticiones, que es otra dimensión, e invadiría iv-A—. (C4)
+  fixtures LOCALES y mínimos: NO se usa `PROYECCION_1ESO` (25 sesiones harían que un aserto pase por
+  ACUMULACIÓN y no por precisión, y su cabecera declara que no es espejo puro del backend) ni se
+  extrae `pin()` de `pines.spec.ts` (no se toca un fichero commiteado y verde por dos specs nuevos);
+  precedente S41/S81/S82/S83. (C5) `pinadas` se observa por el INPUT PÚBLICO de la hija
+  (`By.directive(HorarioGrid)`), NO por cast `as any`: el input es la frontera real del contrato y
+  `protected` declara privado lo otro. (C6) `Subject` PELADO, nunca `of()` ni `BehaviorSubject`.
+  (C7) `provideRouter([])` FUERA: `HorarioView` solo usa `ActivatedRoute`; divergencia deliberada
+  respecto al patrón de `app.spec.ts`, comentada en el TSDoc.
+  DOS TURNOS DE CONTRASTE, no uno (patrón S82/S83). El PRIMERO se envió con el marcador
+  «[pega aquí las dos tablas]» SIN PEGAR LAS TABLAS: Claude Code paró, dijo exactamente qué le
+  faltaba y entregó solo la extracción literal. Séptima sesión seguida con un defecto de
+  especificación del arquitecto, esta vez por contrato MUTILADO y no por afirmar el estado del código.
+  TRES AFIRMACIONES MÍAS DESMENTIDAS POR EL CONTRASTE, todas por matriz cruzada y no por opinión:
+  (1) «el Map NO cambia» en los asertos de guarda es COBERTURA FINGIDA tal como yo lo escribí —con
+  el doble sin emitir, queda VERDE bajo AMBAS mutaciones—; se salva solo emitiendo en `sujetoBorrar`
+  tras comprobar que no se llamó. Lo había añadido yo para corregir un aserto incompleto y era el
+  mismo defecto que critico en D-F8.4-A-c. (2) el antiguo aserto 1 (una emisión ⇒ 1 llamada) NO
+  aporta mutación propia: el 2 caza las dos. Mi argumento era de EDICIÓN DEL CÓDIGO y no de
+  DISCRIMINACIÓN DEL ASERTO, que son cosas distintas; se fusionaron en un test de DOS FASES que
+  conserva los dos puntos de medida (determinan a=0,b=1 unívocamente). (3) declaré el solapamiento
+  4↔5 como ESTRUCTURAL y era PREMATURO: la matriz demuestra discriminación perfecta —`id===undefined`
+  mata solo el de valor null, `id===null` mata solo el de clave ausente—. Retirado.
+  HALLAZGO DE LA CAMPAÑA, que DEGRADA lo que dos asertos valen: la mutación `id === undefined` NO ES
+  EXPRESABLE en TypeScript —`id` queda `number | null` y `borrar(id: number)` da TS2345—. El
+  compilador es una barrera ANTERIOR al test. Se corrió como 3′ añadiendo el `as number` que un
+  desarrollador escribiría para silenciar el error, que es la única vía por la que ese bug llega a
+  producción. Consecuencia honesta: esos dos asertos protegen contra guarda-más-cast, NO contra un
+  despiste de guarda a secas.
+  DECISIONES DE RÉPLICA (juicio, no ejecución): se BORRAN los dos `not.toHaveBeenCalledWith` del
+  aserto de la rejilla —implicados por `toHaveBeenCalledTimes(1)` + `toHaveBeenCalledWith`, no pueden
+  ponerse rojos, y su contenido pasa al TSDoc como prosa—; se MANTIENE el literal `'Mat-1ºA|2'`
+  frente a `clavePin(...)`, porque `pines.spec.ts` asevera con la propia función y ese literal es el
+  ÚNICO punto del repo que fija el formato de la clave; se MANTIENE el índice 2 en la instancia
+  pinada (con 1, una implementación que fijara `|1` a mano seguiría verde); se ACEPTA omitir el
+  aserto «0 llamadas antes de emitir» —con `Subject` pelado ese estado no existe en producción y
+  habría matado 1a y 1b en la misma línea, destruyendo su discriminación—.
+  ENTREGADO: `horario-view.spec.ts` (5 tests) y `horario-grid.spec.ts` (2 tests). Suite frontend
+  23 → 30 (+7), 4 → 6 ficheros. CAMPAÑA DE 8 MUTACIONES, todas por la vía esperada y cada una
+  poniendo rojo EXACTAMENTE el test que declara: 1a/1b discriminan las dos fases por separado; 2
+  cae en la mitad ANTES (el borrado optimista de D-F8.6-ii-5 daría el MISMO estado final); 3′ y 4
+  se dejan verde la una a la otra. `ng build` limpio. CERO dependencias nuevas.
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
+  solver 78).
+  DEUDA NUEVA: D-F8.6-ivB-a (`alSoltar` y tres ramas más del contenedor, sin cobertura),
+  D-F8.6-ivB-b (el compilador tapa dos mutaciones), D-F8.6-ivB-c (dos observaciones del código
+  destapadas al medir y que ninguna deuda recogía). CIERRA D-F8.6-iiiB1-a. D-F8.6-iiiA-a sigue
+  VIVA ENTERA: iv-B no ha testeado ni un servicio.
+  Siguiente: 8.6-iv-A (specs de los tres servicios, estrena `HttpTestingController`; cierra
+  D-F8.6-iiiA-a), 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado), 8.4-B (MOCKUP
+  PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera la
+  referencia), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 83 — Fase 8, Bloque 8.6-iii-B1: gesto de despinar e índice de pines con id.
   Modo híbrido. 2 commits de código (3d96b7c producción, 98aab08 tests) + doc aparte. §A DE MEDICIÓN
   sobre el ESTADO REAL DEL CLIENTE (lectura literal de los 10 ficheros de `frontend/` implicados +
   `find`/`ls`; instrumento más barato, precedente S77-S82).
@@ -884,59 +968,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: 8.6-iii (badge de delta blando + resalte de violación; MOCKUP PREVIO OBLIGATORIO y
   cableado de 8.3-C, que el cliente no conoce), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver), a decidir
   al abrir sesión.
-Última sesión registrada (previa): Sesión 80 — HIGIENE DOCUMENTAL: condensación de 8.5 y archivado de ventana (sin código).
-  Modo interactivo (documentación; el repo NO se tocó). 2 commits de doc, ninguno de código.
-  ALCANCE elegido sobre cuatro candidatos (8.6, 8.4-B, 8.5-D2b, limpieza): la limpieza de 8.5
-  llevaba desplazada TRES veces (S78, S79) y su condición habilitante se cumple desde S78. El
-  motivo por el que S79 la desplazó —concentrar dos operaciones de riesgo sobre el mismo fichero—
-  desaparece por construcción en una sesión sin código. Los tres candidatos de código NO estaban
-  tan listos como su casilla sugiere: 8.6 arrastra una elección de librería de d&d no tomada
-  («no hay librería de d&d en el frontend hoy»); 8.4-B dibujaría dos severidades cuando
-  D-F8.4-A-c dice que solo hay una viva; 8.5-D2b debe INVERTIR `CatalogoMapperActividadTest:136`,
-  que hoy asevera el olvido de D-B5-5.
-  §A DE MEDICIÓN (greps sobre el plan; instrumento más barato, precedente S77/S78/S79). Universo:
-  los 40 tokens citados textualmente en las casillas de 8.5. Se simuló el escenario CONJUNTO
-  (condensar + archivar S76 en la misma sesión). SALIDA: ningún token caía a cero, pero TRES
-  quedaban como definición SIN NINGÚN CITANTE —D-F8.5-C3-a, D-F8.5-C3-b y D-F8.5-D1-b—. El caso
-  agudo es D-F8.5-D1-b: sus dos citantes eran la cabecera de S76 (que se archiva) y la casilla de
-  8.5-D1 (que se condensa), y S80 se los quitaba A LA VEZ. Es el patrón exacto que costó a S62 la
-  descomposición de Fase 8.
-  CORRIGE UNA PREVISIÓN DE APERTURA: dije que las deudas D-F8.5-* estaban definidas en «Deuda
-  consciente VIVA» y que condensar las casillas no las mataría. Cierto para NUEVE de doce, FALSO
-  para tres. La diferencia solo se vio por grep.
-  DECISIÓN F80-1: R4 se lee LITERAL («ni citante vivo NI definición viva» ⇒ definición basta),
-  pero no hizo falta interpretarlo: el formato de condensación acordado —«qué (Sxx) →
-  deuda/decisión superviviente; Detalle: bitácora Sxx»— YA reserva sitio al token en «deuda
-  superviviente». Coste cero. Medido después: C3-a 2→2, C3-b 2→2, D1-b 3→3.
-  DECISIÓN F80-2: la NOTA del seed sale de la casilla de 8.5-E y va al párrafo «Diferibles»,
-  pegada a D22, que es donde el seed muere. Gana el nombre de clase real `SeedCatalogoRunner`,
-  que la nota original omitía (R5 pide mecanismo de src/main, no perífrasis).
-  DECISIÓN F80-3: 8.5-D2b y 8.5-D3 quedan ÍNTEGROS. Están ABIERTOS y R5 dice que lo PENDIENTE es
-  estado vivo: D2b lleva la NOTA DE DISEÑO (S8 no va en ModeloCpSat) y D3 su CRITERIO DE
-  REAPERTURA, sin el cual «aplazado» degenera en «olvidado». Se condensan SIETE casillas cerradas,
-  no nueve.
-  CONSERVADO POR R5 dentro de las líneas condensadas, pese a alargarlas: el funnel único
-  `resolverContenido` (C3), la asimetría cascade/409 de la tutoría (D2a), `PESO_INDISP_BLANDA`
-  (E) y «sin @ControllerAdvice» (C2b) —este último porque D-F8.5-E-c apunta explícitamente a esa
-  decisión y sin ella la deuda apuntaría al vacío—. PERDIDO A PROPÓSITO (vive en bitácora): los
-  recuentos de suite por bloque (la suite viva es 315), «Flyway descartado», «opción b / opción
-  2A», el falso positivo de Subgrupo, la tipificación B07/A12In y las decisiones de mockup de E.
-  HALLAZGO COLATERAL: la casilla 8.5-A/A'/B ya era una línea, sin deuda ni remisión. NO se
-  condensa: GANA texto («→ sin deuda viva; Detalle: bitácora S69/S70/S71»), porque le faltaba la
-  remisión que el formato exige.
-  PARADA REGISTRADA: el prompt manda «seguir el PROTOCOLO DE ARCHIVADO del plan». Ese protocolo
-  NO existe como sección nombrada en el plan ni en la bitácora —verificado por grep de
-  «protocolo»/«archivad» en ambos—. Se archivó siguiendo el PRECEDENTE OBSERVABLE (formato de las
-  entradas S69-S75) más R4/R5. Si se quiere protocolo, hay que escribirlo; hoy es costumbre, no norma.
-  VERIFICACIÓN: R4 por grep, 40 tokens ANTES vs DESPUÉS, cero huérfanos; seis tokens bajan una
-  unidad y se comprobó UNO A UNO que conservan citante vivo. Diff del cuerpo: tres regiones
-  tocadas y ninguna otra. Plan 1869 → 1831 (−38) por la condensación, y −46 más por el archivado.
-  Costura revisada: 8.4-B intacto encima, 8.5-D2b/D3 intactos, 8.6/8.6-B sin tocar.
-  Código NO tocado: solver/ ni app/ ni frontend/ → referencia-codigo-solver.md NO regenerada,
-  modelo_datos_fase1.md NO tocado, suite sin cambio (app 315, solver 78).
-  DEUDA NUEVA: D-F8.0-a (el PROTOCOLO DE ARCHIVADO se invoca pero no existe escrito).
-  Siguiente: 8.6 (Angular, contrato cerrado en S67; empezar por medir el estado real de frontend/
-  y elegir librería de d&d), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver, regenera la referencia).
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -948,10 +979,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 y la de S79 en la Sesión 83 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 y la de S80 en la Sesión 84 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S80–S83). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S81–S84). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1171,6 +1202,22 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       otra de SEIS necesitan tratamiento distinto del hueco superior. Hereda D-F8.6-iiiA-b (dónde vive
       `Totales`, con la trampa de que los totales NO son la suma de los `delta`). Cierra D19/D20 en
       frontend.
+- [ ] Bloque 8.6-iv-A — Specs de los TRES servicios del frontend (`horario`, `bloqueo`,
+      `diagnostico`). Estrena la capa HTTP de test: `provideHttpClientTesting` +
+      `HttpTestingController`, hoy con CERO usos en el repo (medido en S84). Sin dependencias
+      nuevas: `@angular/common/http/testing` viene dentro de `@angular/common`. NO hay precedente
+      que copiar en el repo. CIERRA D-F8.6-iiiA-a, que S84 dejó viva entera a propósito.
+      DESPLAZADO en S84 a favor de iv-B: el riesgo vive en la coordinación del contenedor, no en
+      wrappers de `HttpClient`, y la deuda nombraba un aserto de iv-B como el primero.
+- [x] Bloque 8.6-iv-B — Capa de test de COMPONENTE (S84): `horario-view.spec.ts` (5 tests: las dos
+      fases del conteo de `listar()`, el par ANTES/DESPUÉS del despinado, las dos salidas de la
+      guarda de `id`, y el fallo de `listar()`) + `horario-grid.spec.ts` (2 tests: el candado emite
+      la CLAVE por click directo, y no existe en la instancia sin pinar, con DOS instancias en el
+      mismo slot para que el aserto quede escopado). Dobles por `useValue` con `vi.fn()` y `Subject`
+      PELADO —sin él no existe la mitad «ANTES», que es la única que discrimina el borrado optimista
+      de D-F8.6-ii-5—; `pinadas` leído por el input público de la hija, no por cast; sin
+      `provideRouter`. 8 mutaciones, todas por la vía esperada. Suite frontend 23 → 30.
+      CIERRA D-F8.6-iiiB1-a. D-F8.6-ivB-a, D-F8.6-ivB-b, D-F8.6-ivB-c. Detalle: bitácora S84.
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -1835,7 +1882,11 @@ siguiente, con remisión a la bitácora.
   `HttpTestingController` es una CAPA DE TEST NUEVA y se descartó a propósito dentro de un bloque
   cuyo valor era el contrato de lectura (misma decisión que S62 con los 12 repos y S75 con el
   refactor del mapper). Hermana de D-F8.6-ii-a: las dos son superficie de error sin red.
-  → decidir como bloque propio, no de refilón.
+  → SIGUE VIVA ENTERA tras S84: 8.6-iv-B testeó COMPONENTES, no servicios, y no tocó ni un
+  `HttpTestingController`. Lo que S84 cambia es solo el encuadre —esta deuda decía «estrenar
+  `HttpTestingController` es una capa de test NUEVA», y lo sigue siendo, pero la medición de S84
+  desmintió la parte que hablaba de estrenar TestBed: `app.spec.ts` ya lo usaba—. El bloque propio
+  que pedía existe ya con casilla: 8.6-iv-A.
 
 - **D-F8.6-iiiA-b** (S82, VIVA, no bloqueante) — `Totales` SALE DE iii-A MODELADO Y SIN CONSUMIDOR.
   Es el único de los 5 DTOs del diagnóstico que el bloque no ejercita: no hay índice, no hay función,
@@ -1869,7 +1920,12 @@ siguiente, con remisión a la bitácora.
   `cargarPines()` se llame UNA vez y no dos es exactamente el bug que S83 corrigió, y hoy depende de
   que nadie vuelva a añadir la llamada al constructor —ningún test lo impediría—. Hermana de
   D-F8.6-iiiA-a: las dos piden la misma capa de test que nadie ha estrenado.
-  → cubrir cuando se abra el bloque de TestBed, y empezar por el conteo de llamadas a `listar()`.
+  → CERRADA en S84 (8.6-iv-B): `horario-view.spec.ts` + `horario-grid.spec.ts` cubren el `output`,
+  el `<button>`, la resolución clave→id, las DOS salidas de la guarda, el borrado en el `next` del
+  204 y el conteo de `listar()` en dos fases, con campaña de 8 mutaciones. Se empezó por el conteo,
+  como esta deuda pedía. MATIZ que S84 mide y que esta deuda no preveía: el `stopPropagation` NO
+  queda aseverado (el CDK no escucha `click`, así que ninguna mutación lo pondría rojo), y las dos
+  mutaciones de la guarda solo son expresables con un cast — ver D-F8.6-ivB-b.
 
 - **D-F8.6-iiiB1-b** (S83, VIVA, no bloqueante) — LA RECARGA DEL ÍNDICE ES CORRECTA POR ACCIDENTE.
   `pinadas` es estado GLOBAL («en TODO el horario», por javadoc) y `GET /api/bloqueos` no filtra por
@@ -1888,6 +1944,49 @@ siguiente, con remisión a la bitácora.
   error genérico, indistinguible de un rechazo real. Familia de D-F8.6-ii-a: las dos son superficie
   de error que solo tiene sentido decidir GLOBALMENTE, no de refilón en un bloque de frontend.
   → parametrizar el degradado cuando se decida la política global de errores.
+
+- **D-F8.6-ivB-a** (S84, VIVA, DE COBERTURA) — `alSoltar` Y TRES RAMAS MÁS DEL CONTENEDOR SIGUEN
+  SIN RED. 8.6-iv-B dio TRES asertos al despinado y CERO al pinado, que es su gemelo simétrico y
+  vive en el mismo componente. Señalado por Claude Code en el turno de contraste y dejado FUERA a
+  propósito: `alSoltar` es de 8.6-ii (S81) y su falta de cobertura NO estaba declarada en ninguna
+  deuda, así que meterlo habría doblado el bloque y mezclado dos deudas distintas. Las ramas
+  concretas, escritas aquí para que el próximo bloque no las redescubra: (1) `guardar()` recibe
+  `aulas: []` y `tramo: {dia, orden}` —el `aulas: []` es decisión documentada (D-5) y hoy nada la
+  fija—; (2) en OK la clave se construye con `clavePin(b.actividadCodigo, b.indice)`, del cuerpo de
+  la RESPUESTA y NO de la suelta: una mutación que usara `s.actividadCodigo` no la caza nadie, y es
+  la dimensión más peligrosa de las cuatro; (3) en ERROR, `errorPin` se pone y el Map NO crece (sin
+  alta optimista); (4) el invariante de clase «la proyección NO se recarga tras pinar»
+  (`getProyeccion` sigue en 1 llamada). MÁS: la rama `error:` de `alDespinar`, el
+  `errorPin.set(null)` de reintento al inicio de ambos gestos, y el invariante documentado en el
+  TSDoc de `cargarPines` de que el índice NO se recarga al cambiar de vista o de entidad —este
+  último es aseverable barato con el `<select>`—. → cubrir en el bloque que retome la coordinación
+  del contenedor, probablemente junto a 8.6-iv-A o después de 8.6-iii-B2.
+
+- **D-F8.6-ivB-b** (S84, VIVA, de MÉTODO Y COBERTURA, no bloqueante) — EL COMPILADOR TAPA DOS DE
+  LAS OCHO MUTACIONES, Y ESO DEGRADA LO QUE DOS ASERTOS VALEN. La guarda de `alDespinar` es
+  `if (id === null || id === undefined)`. Reducirla a `id === undefined` deja `id` como
+  `number | null` y `borrar(id: number)` no lo acepta: **TS2345**. La mutación NO ES EXPRESABLE en
+  TypeScript; el compilador es una barrera ANTERIOR al test. Se corrió como 3′ añadiendo el
+  `as number` que un desarrollador escribiría para silenciar el error —la única vía por la que ese
+  bug llegaría a producción—. Consecuencia honesta y declarada en la réplica, no descubierta
+  después: los dos asertos de guarda protegen contra «despiste de guarda MÁS cast», no contra un
+  despiste de guarda a secas. Siguen valiendo (el cast es una edición verosímil, es lo que se hace
+  para callar un error de compilación) pero valen MENOS de lo que la tabla del contrato afirmaba.
+  Familia de método, no de dominio: es la primera vez en el proyecto que una mutación se topa con
+  el sistema de tipos en vez de con un aserto. → leer antes de calibrar una campaña de mutación en
+  TypeScript: una mutación que no compila NO es una mutación, y hay que declarar el cast que la
+  hace expresable.
+
+- **D-F8.6-ivB-c** (S84, VIVA, no bloqueante, DOS OBSERVACIONES SIN DEUDA PREVIA) — Destapadas al
+  leer `horario-view.ts` para el contrato de iv-B; ninguna estaba recogida en ninguna deuda y
+  NINGUNA se arregló en S84 (fuera del alcance, que era escribir tests, no cambiar producción).
+  (a) `Number(pm.get('id'))`: si el parámetro falta, `pm.get('id')` devuelve `null` y `Number(null)`
+  es **0**, no `NaN`, así que se dispara un `getProyeccion(0)` contra el backend en vez de un
+  camino de error. No lo cubre ninguno de los 7 tests nuevos. (b) La suscripción del constructor
+  —`this.route.paramMap.subscribe(...)`— NO lleva `takeUntilDestroyed` ni se desuscribe. Con el
+  `ActivatedRoute` real de Angular esto no suele filtrar, pero es una afirmación que NO SE HA
+  MEDIDO y se registra como tal, no como «es inocuo». → decidir (a) al tocar el ciclo de carga del
+  horario y (b) si aparece una segunda ruta que reutilice el componente.
 
 ### Deuda consciente CERRADA (histórico)
 

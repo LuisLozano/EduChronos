@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S79. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S80. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S79). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S80). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3240,3 +3240,57 @@ al abrir sesión.
   deduplicación la protege UN solo test), D-F8.4-A-c (severidad tautológica, `AVISO` sin productor).
   Siguiente: LIMPIEZA DE 8.5 (desplazada de S79, sesión en frío), 8.6 (Angular, contrato cerrado en
   S67), 8.4-B (presentación, MOCKUP PREVIO) u 8.5-D2b (solver), a decidir al abrir sesión.
+
+### Sesión 80 — HIGIENE DOCUMENTAL: condensación de 8.5 y archivado de ventana (sin código).
+  Modo interactivo (documentación; el repo NO se tocó). 2 commits de doc, ninguno de código.
+  ALCANCE elegido sobre cuatro candidatos (8.6, 8.4-B, 8.5-D2b, limpieza): la limpieza de 8.5
+  llevaba desplazada TRES veces (S78, S79) y su condición habilitante se cumple desde S78. El
+  motivo por el que S79 la desplazó —concentrar dos operaciones de riesgo sobre el mismo fichero—
+  desaparece por construcción en una sesión sin código. Los tres candidatos de código NO estaban
+  tan listos como su casilla sugiere: 8.6 arrastra una elección de librería de d&d no tomada
+  («no hay librería de d&d en el frontend hoy»); 8.4-B dibujaría dos severidades cuando
+  D-F8.4-A-c dice que solo hay una viva; 8.5-D2b debe INVERTIR `CatalogoMapperActividadTest:136`,
+  que hoy asevera el olvido de D-B5-5.
+  §A DE MEDICIÓN (greps sobre el plan; instrumento más barato, precedente S77/S78/S79). Universo:
+  los 40 tokens citados textualmente en las casillas de 8.5. Se simuló el escenario CONJUNTO
+  (condensar + archivar S76 en la misma sesión). SALIDA: ningún token caía a cero, pero TRES
+  quedaban como definición SIN NINGÚN CITANTE —D-F8.5-C3-a, D-F8.5-C3-b y D-F8.5-D1-b—. El caso
+  agudo es D-F8.5-D1-b: sus dos citantes eran la cabecera de S76 (que se archiva) y la casilla de
+  8.5-D1 (que se condensa), y S80 se los quitaba A LA VEZ. Es el patrón exacto que costó a S62 la
+  descomposición de Fase 8.
+  CORRIGE UNA PREVISIÓN DE APERTURA: dije que las deudas D-F8.5-* estaban definidas en «Deuda
+  consciente VIVA» y que condensar las casillas no las mataría. Cierto para NUEVE de doce, FALSO
+  para tres. La diferencia solo se vio por grep.
+  DECISIÓN F80-1: R4 se lee LITERAL («ni citante vivo NI definición viva» ⇒ definición basta),
+  pero no hizo falta interpretarlo: el formato de condensación acordado —«qué (Sxx) →
+  deuda/decisión superviviente; Detalle: bitácora Sxx»— YA reserva sitio al token en «deuda
+  superviviente». Coste cero. Medido después: C3-a 2→2, C3-b 2→2, D1-b 3→3.
+  DECISIÓN F80-2: la NOTA del seed sale de la casilla de 8.5-E y va al párrafo «Diferibles»,
+  pegada a D22, que es donde el seed muere. Gana el nombre de clase real `SeedCatalogoRunner`,
+  que la nota original omitía (R5 pide mecanismo de src/main, no perífrasis).
+  DECISIÓN F80-3: 8.5-D2b y 8.5-D3 quedan ÍNTEGROS. Están ABIERTOS y R5 dice que lo PENDIENTE es
+  estado vivo: D2b lleva la NOTA DE DISEÑO (S8 no va en ModeloCpSat) y D3 su CRITERIO DE
+  REAPERTURA, sin el cual «aplazado» degenera en «olvidado». Se condensan SIETE casillas cerradas,
+  no nueve.
+  CONSERVADO POR R5 dentro de las líneas condensadas, pese a alargarlas: el funnel único
+  `resolverContenido` (C3), la asimetría cascade/409 de la tutoría (D2a), `PESO_INDISP_BLANDA`
+  (E) y «sin @ControllerAdvice» (C2b) —este último porque D-F8.5-E-c apunta explícitamente a esa
+  decisión y sin ella la deuda apuntaría al vacío—. PERDIDO A PROPÓSITO (vive en bitácora): los
+  recuentos de suite por bloque (la suite viva es 315), «Flyway descartado», «opción b / opción
+  2A», el falso positivo de Subgrupo, la tipificación B07/A12In y las decisiones de mockup de E.
+  HALLAZGO COLATERAL: la casilla 8.5-A/A'/B ya era una línea, sin deuda ni remisión. NO se
+  condensa: GANA texto («→ sin deuda viva; Detalle: bitácora S69/S70/S71»), porque le faltaba la
+  remisión que el formato exige.
+  PARADA REGISTRADA: el prompt manda «seguir el PROTOCOLO DE ARCHIVADO del plan». Ese protocolo
+  NO existe como sección nombrada en el plan ni en la bitácora —verificado por grep de
+  «protocolo»/«archivad» en ambos—. Se archivó siguiendo el PRECEDENTE OBSERVABLE (formato de las
+  entradas S69-S75) más R4/R5. Si se quiere protocolo, hay que escribirlo; hoy es costumbre, no norma.
+  VERIFICACIÓN: R4 por grep, 40 tokens ANTES vs DESPUÉS, cero huérfanos; seis tokens bajan una
+  unidad y se comprobó UNO A UNO que conservan citante vivo. Diff del cuerpo: tres regiones
+  tocadas y ninguna otra. Plan 1869 → 1831 (−38) por la condensación, y −46 más por el archivado.
+  Costura revisada: 8.4-B intacto encima, 8.5-D2b/D3 intactos, 8.6/8.6-B sin tocar.
+  Código NO tocado: solver/ ni app/ ni frontend/ → referencia-codigo-solver.md NO regenerada,
+  modelo_datos_fase1.md NO tocado, suite sin cambio (app 315, solver 78).
+  DEUDA NUEVA: D-F8.0-a (el PROTOCOLO DE ARCHIVADO se invoca pero no existe escrito).
+  Siguiente: 8.6 (Angular, contrato cerrado en S67; empezar por medir el estado real de frontend/
+  y elegir librería de d&d), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver, regenera la referencia).
