@@ -600,7 +600,10 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloques 8.6-i + 8.6-ii
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iii-A CERRADO
+  en S82 (contrato de lectura del diagnóstico en el cliente: modelo TS espejo de los 5 DTOs con la
+  asimetría D15 copiada, servicio propio y dos índices puros por `clavePin`; 8.6-iii partido en A/B,
+  la pintura y el MOCKUP van a iii-B; backend intacto). Bloques 8.6-i + 8.6-ii
   CERRADOS en S81 (cliente REST de bloqueos + arrastre CDK que pina la instancia; 8.6 partido en
   i/ii/iii; sin movimiento optimista; backend intacto). HIGIENE DOCUMENTAL en S80
   (condensación de los 8 sub-bloques CERRADOS de 8.5 a una línea cada uno, con los tokens de deuda
@@ -658,7 +661,88 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 81 — Fase 8, Bloques 8.6-i + 8.6-ii: cliente de bloqueos y arrastre que pina.
+### Sesión 82 — Fase 8, Bloque 8.6-iii-A: contrato de lectura del diagnóstico en el cliente.
+  Modo híbrido. 3 commits de código (0e0bffd producción, a876e5d tests, 8e8cb71 el `it` (9)) + doc
+  aparte. §A DE MEDICIÓN sobre el CONTRATO REAL DEL SERVIDOR (lectura literal de los 5 DTOs +
+  controller; instrumento más barato, precedente S77-S81).
+  8.6-iii PARTIDO en A/B al abrir. Razón: su casilla pedía TRES concerns —cablear 8.3-C, pintar tres
+  capas, y el gesto de despinar de D-F8.6-ii-b, que además lleva mockup—. iii-A es la parte que NO
+  necesita mockup y entrega contrato verificable; iii-B es la pintura y CONSERVA el MOCKUP PREVIO
+  OBLIGATORIO. Orden elegido a propósito: medir ANTES de dibujar, porque un mockup sobre datos
+  imaginados fija un contrato que el backend puede no poder alimentar.
+  SALIDA DE §A: NO existe `DiagnosticoController` —el endpoint es `GET /api/horarios/{id}/diagnostico`
+  en `HorarioController:85`, colgado del controller de horarios—. HALLAZGO FAVORABLE: `CeldaRefDTO`
+  lleva (`actividadCodigo`, `indice`), la clave de D-6 que `SesionVista` ya trae y que `clavePin` ya
+  computa → iii-A NO toca backend ni `SesionVistaDTO`. Los tipos homónimos de `solver/cpsat` son pares
+  espejo al otro lado de la frontera dura: `solver/src/main` NO se tocó (solo se leyó) → referencia NO
+  regenerada.
+  HALLAZGO ESTRUCTURAL, que es el núcleo del bloque: los dos lados del DTO NO tienen la misma forma.
+  `CeldaRefDTO` lleva `plazaCodigo` NULLABLE (no-null solo en `SOLAPE_AULA`); `PenalizacionDTO` NO lo
+  lleva EN ABSOLUTO y APLANA la celda a (`actividadCodigo`, `indice`), con el javadoc argumentando que
+  «un campo siempre null es un campo que miente». La asimetría D15 se COPIA al TS, no se normaliza:
+  son dos índices distintos, no uno.
+  DECISIONES CERRADAS: (iiiA-1) `diagnostico.model.ts` NUEVO en `models/`, no ampliar
+  `horario.model.ts`, que acota su alcance a Fase 7 en su cabecera (precedente literal
+  `bloqueo.model.ts:6-7`). (iiiA-2) espejo FIEL con la asimetría copiada: `regla` es `string` y no
+  unión de literales (patrón `horario.model.ts:31-32`, donde `estado` es string pese a ser enum),
+  `Totales` son tres `number` y NUNCA `number | null` —ensanchar es tan infiel como estrechar—.
+  (iiiA-3) `DiagnosticoService` TS propio. (iiiA-4) DOS funciones puras en `horario/diagnostico.ts`,
+  reutilizando `clavePin` de `pines.ts` (fuente única de D-6); `indicePenalizaciones` SIN sumatorio de
+  `delta`, porque el javadoc de `TotalesDTO` dice que los totales NO tienen por qué coincidir con la
+  suma de los delta contrafactuales y acumularlos invitaría a contrastarlos y a ver un bug donde no lo
+  hay. (iiiA-5) el servicio devuelve el `Observable` crudo y DOCUMENTA el 404 en TSDoc, sin traducir.
+  TRES ERRORES DEL ARQUITECTO, los tres destapados por Claude Code al contrastar el contrato ANTES de
+  teclear (registrados, no tapados). (1) Omití `ViolacionDTO.descripcion` del espejo: omisión, no
+  exclusión deliberada; entra. (2) La razón que di para (iiiA-3) —«`HorarioService` es de solo
+  lectura»— NO DISCRIMINA: `DiagnosticoService` también lo es. El argumento correcto, que es el que va
+  al TSDoc, es «cada contrato/bloque tiene su cliente» (precedente `BloqueoService`, S81). Conclusión
+  correcta, porqué mal enunciado. (3) Di por supuesto un patrón de manejo de error HTTP «mirando
+  `horario.service.ts` y sus specs»: NO TIENE SPECS, y NINGÚN servicio del frontend los tiene. Afirmé
+  cómo estaba algo sin comprobarlo — mismo género que S81, QUINTA sesión consecutiva.
+  ANOMALÍA DE FORMATO DESTAPADA POR LA MEDICIÓN DE R4, no por criterio: las 4 cabeceras vivas del plan
+  NO son homogéneas (la más reciente es `### Sesión NN`, las otras tres son texto plano con prefijo
+  «Última sesión registrada (previa):»), mientras que TODAS las entradas de la bitácora son
+  `### Sesión NN`. Archivar exige PROMOVER la línea, no solo moverla. Es costumbre observable
+  (entradas S69-S77), no norma escrita: D-F8.0-a sigue viva.
+  ASERTOS: 8 tests + el (9) del desdoble. TRES MUTACIONES sobre `diagnostico.ts`, todas caen y
+  restauran verde. M1 (clave solo por `actividadCodigo`) pone rojo `diagnostico.spec.ts` (1)(6), NO
+  solo `pines.spec.ts`: el requisito crítico de S81 —reutilizar una función no hereda su cobertura—
+  se cumple, MEDIDO, gracias al fixture de misma actividad con índices 1 y 2. M2 (indexar solo
+  `celdas[0]`) y M3 (propagar `celdas[0].plazaCodigo`) NO son disjuntas y NO PUEDEN SERLO: detectar M3
+  exige una entrada cuyo `plazaCodigo` difiera del de `celdas[0]`, y esa entrada procede de una celda
+  que M2 elimina. M3 ⊂ M2 por construcción del operador, no por fixture flojo. Se rechazó redefinir M2
+  para forzar disjunción: sería una mutación que nadie escribiría, y perseguir la métrica no es
+  perseguir cobertura. CONCLUSIÓN REGISTRADA: la mutación M3 no aporta sobre M2; el TEST (3) sí, y es
+  el único que asevera la propagación de plaza que iii-B necesitará.
+  DISTINCIÓN NUEVA, aportada por Claude Code al corregir su propia predicción: CAER ante una mutación
+  ≠ DISCRIMINAR la dimensión que ataca. El `it` (9) cae ante M1 por ACOPLAMIENTO a `clavePin` (la
+  lectura del test deja de casar con la escritura del índice), no por discriminar índice-vs-actividad
+  —sus dos celdas comparten actividad E índice—. El mérito de esa dimensión sigue siendo del (1). La
+  tabla de mutaciones NO se lee como matriz de cobertura.
+  MEDICIÓN ADICIONAL sobre `solver/` (lectura, sin tocar), disparada por una pregunta de Claude Code
+  que el contrato no cubría: ¿emite el verificador dos `CeldaRef` de la MISMA instancia con plazas
+  distintas? SÍ, y está en tres eslabones —`VerificadorSolucion:603-612` añade una `CeldaRef` POR
+  PLAZA al `ArrayList` de la clave `Aula`; `reportarColisiones:646-655` emite UNA sola `Violacion` con
+  la lista entera; `Violacion:39` usa `List.copyOf`, que NO deduplica—. Los comentarios 593-600 lo
+  declaran deliberado (por S2, dos plazas de una instancia en la misma aula son colisión, no uso
+  compartido). Como SALIDA DEL SOLVER es estado IMPOSIBLE (lo bloquean `restriccionNoSolapeAula` por
+  candidatas y `ProblemaHorarioMapper:315-326` por `aulaFija`), pero el diagnóstico NO verifica lo que
+  el solver acaba de emitir: verifica lo RECONSTRUIDO DESDE PERSISTENCIA (`SolucionMapper`), donde
+  ninguna de las dos barreras interviene. El `it` (9) se escribe como FIXTURE DEFENSIVO DECLARADO
+  (precedente S81: una función pura se prueba contra su contrato, no contra la validez del horario) y
+  fija que la `Violacion` repetida bajo una clave es contrato, no bug: deduplicar es del consumidor.
+  HALLAZGO COLATERAL sobre el solver, no arreglado aquí: el ÚNICO test de `SOLAPE_AULA`
+  (`VerificadorSolucionAtribucionTest:109-139`) usa dos actividades mono-plaza; el caso intra-instancia
+  NO está cubierto por ningún test del solver.
+  Suite frontend 13 → 22 (+9), backend intacto (app 315, solver 78). Demostrada no-vacía por las tres
+  mutaciones. Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO
+  regenerada, `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  `PROYECCION_1ESO` NO contaminado: fixtures LOCALES en el spec (patrón S41/S81).
+  DEUDA NUEVA: D-F8.6-iiiA-a (ningún servicio del frontend tiene test), D-F8.6-iiiA-b (`Totales` sale
+  modelado y sin consumidor), D-F8.6-iiiA-c (S2 sobre `aulaFija` validada SOLO en la ruta JSON).
+  Siguiente: 8.6-iii-B (MOCKUP PREVIO OBLIGATORIO; hereda D-F8.6-ii-b y D-F8.6-iiiA-b), 8.4-B (MOCKUP
+  PREVIO) u 8.5-D2b (solver, regenera la referencia), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 81 — Fase 8, Bloques 8.6-i + 8.6-ii: cliente de bloqueos y arrastre que pina.
   Modo híbrido. 1 commit de código (solo `app/frontend/`) + doc aparte. §A DE MEDICIÓN sobre el
   ESTADO REAL DEL FRONTEND (lectura literal de ficheros + `find`; instrumento más barato,
   precedente S77-S80).
@@ -832,73 +916,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   deduplicación la protege UN solo test), D-F8.4-A-c (severidad tautológica, `AVISO` sin productor).
   Siguiente: LIMPIEZA DE 8.5 (desplazada de S79, sesión en frío), 8.6 (Angular, contrato cerrado en
   S67), 8.4-B (presentación, MOCKUP PREVIO) u 8.5-D2b (solver), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 78 — Fase 8, Bloque 8.5-E: CRUD REST de ProfesorRestriccionHoraria (CIERRA 8.5).
-  Modo híbrido. 2 commits de código (producción + tests, solo app/) + doc. §A DE MEDICIÓN sobre CÓDIGO
-  (greps + lectura literal, el instrumento MÁS BARATO que respondía: la pregunta era sobre el repo, no
-  sobre datos; precedente S77). SALIDA que REENCUADRÓ el bloque: la cadena entera JPA → CatalogoMapper
-  → dominio → CP-SAT YA EXISTÍA y está consumida —entidad `ProfesorRestriccionHoraria` + repo +
-  `schema.sql` (CHECK DURA|BLANDA) + record `RestriccionHoraria` + `ProblemaHorario.restriccionesHorarias`
-  + `ModeloCpSat` (dura en `restriccionIndisponibilidadProfesor`, blanda en
-  `objetivoIndisponibilidadBlandaProfesor`)—. Lo ÚNICO que faltaba era la SUPERFICIE DE ESCRITURA: sin
-  CRUD, poblar restricciones exigía SQL a mano (el seed crea CERO). El bloque es MÁS PEQUEÑO que su
-  casilla, y NO toca solver/ (lo que confirmó la elección de E sobre D2b al abrir).
-  HALLAZGO DE LA MEDICIÓN, decisivo para la UX: `ModeloCpSat` NUNCA lee `r.peso()`; usa la constante
-  `PESO_INDISP_BLANDA=1L` como coeficiente de un BoolVar puro. El javadoc del record afirmaba que `peso`
-  era «la penalización en la función objetivo»: FALSO. Y es peor de lo que el javadoc admitía —decía
-  «se ignora en DURA»; se ignora TAMBIÉN en BLANDA—. `peso` es columna `not null` en tres capas que
-  ningún consumidor lee.
-  MOCKUP PREVIO ejecutado (D-F8.6-a), como exige la casilla: rejilla 5 días × 6 tramos, tres estados,
-  panel de detalle. NO se versiona (es una pregunta dibujada); sobreviven sus decisiones.
-  DECISIONES CERRADAS: (E-0) `peso` NO entra en la superficie —ni en el DTO de entrada ni en la rejilla—;
-  el service lo escribe SIEMPRE a 1. Descartadas «dibujarlo inerte» (la UI mentiría: mover un control
-  que no cambia nada) y «hacerlo funcionar» (es D21(a), toca solver/ y activaría un campo SIN calibrar,
-  peor que inerte). (E-1) click SELECCIONA; el estado se cambia desde el panel de detalle, MÁS acciones
-  de FILA y COLUMNA (cabecera de tramo → los 5 días; cabecera de día → los 6 tramos). El arquitecto
-  eligió primero la variante sin complemento y el arquitecto-mentor la DEVOLVIÓ con su coste medido
-  (20 celdas = 40 clicks; la fila de 13:30 y el «día libre» son los patrones REALES del dominio, y son
-  exactamente fila y columna): se acordó (c) fila/columna sobre (b) arrastre por resolver mejor el caso
-  frecuente y costar menos. (E-2) volver a `puede` BORRA la fila y su motivo, SILENCIOSO (confirmar cada
-  despintado en 30 celdas es insufrible). (E-3) sub-recurso GET/PUT
-  /api/profesores/{id}/restricciones-horarias con REEMPLAZO TOTAL idempotente (patrón literal S75/S77:
-  deleteAll+flush ANTES de insertar); validación sobre la lista ENTRANTE. (E-4) rejilla MONO-PROFESOR.
-  (E-5) los tres estados son {ausencia de fila, BLANDA, DURA}: NO hay enum nuevo, `TipoRestriccion` ya
-  existe y el CHECK de `schema.sql` los ancla. (E-6) el recreo NO es celda sino separador: `TramoSemanal`
-  no lo contiene (los 6 tramos numeran 1..6 sin hueco, ver `ORDEN_TRAS_RECREO`).
-  Tramo referenciado por (dia, ordenEnDia) INVIRTIENDO `CatalogoMapper.indiceOrdenEnDia` (precedente
-  8.2b-iv/S66: fuente única, D30 no gana otro espejo). Tramo inexistente → 400.
-  ERROR DE ESPECIFICACIÓN DEL ARQUITECTO (registrado, no tapado): E-3 fijaba que la restricción horaria
-  era POBLACIÓN PROPIA del profesor (cascade, no 409). El código dice lo contrario desde `e60680a`
-  (S74/8.5-C2b) y el código TIENE RAZÓN: el criterio «población propia» se aplica al lado que POSEE la
-  población, no al lado REFERENCIADO, y la FK es RESTRICT en `schema.sql`. Verificado por `git log -S`,
-  no por conjetura: el 409 preexistía, 8.5-E no lo tocó. MISMO GÉNERO QUE D-F8.5-D2a-b —especificar sin
-  comprobar el precedente en el código—, dos sesiones seguidas. NO genera deuda: no hay incoherencia en
-  el código, había un error en mi contrato. La asimetría de `profesor_tutoria` (cascade por el lado del
-  Grupo, 409 por el del Profesor) es la de D2a-5, deliberada y vigente.
-  ASERTOS: 15 tests nuevos. (A2) reemplazo≠merge por `doesNotContain` del par previo. (A4) duplicado en
-  body → 400 CON LA BASE INTACTA, y el duplicado se elige DISTINTO de lo previo a propósito, o
-  `containsExactly` no distinguiría «no se tocó» de «se borró y reescribió idéntico» —evita el
-  acoplamiento accidental que S74/S76 cazaron tarde—. (A5) POR MUTACIÓN: neutralizada la pasada 3, cae
-  por la VÍA ESPERADA (400→200, no 500), y un test desechable confirmó que quedan DOS filas y el flush
-  pasa: NO existe UNIQUE(profesor,tramo), la guarda del service es lo ÚNICO que sostiene la regla —el
-  javadoc decía la verdad, no hubo que corregirlo—. (A6) borrado de profesor: 409 en servicio y
-  RESTRICT real en esquema, coherente con la cabecera de `schema.sql`.
-  HALLAZGO DE FRAMEWORK (familia S73/S74/S75/S76/S77): la violación de FK NO llega como
-  `DataIntegrityViolationException` sino como `GenericJDBCException`, por DOS causas medidas —
-  `TestEntityManager.flush()` no cruza la frontera del repositorio donde Spring traduce a su jerarquía
-  DAO, y el SQLiteDialect community 7.4.1 no clasifica el error de FK como violación de constraint—.
-  flush()+clear() necesario (no decorativo) en A1/A2/A3/A4 y en los de lista vacía y salto de recreo.
-  Efecto colateral asumido: el ctor de `ProfesorController` ganó un colaborador → `ProfesorEndpointTest`
-  y `TutoriaEndpointTest` reciben el servicio real vía `@Import`, NO un `null` (un null haría que esos
-  tests mintieran sobre el objeto que construyen).
-  Suite 212 → 227 (+15), solver 78 intacto. Demostrada no-vacía (PESO_POR_DEFECTO=99 → cae A3 →
-  restaurar → verde). solver/ intacto → referencia NO regenerada. modelo §4.3 SÍ tocado (nota de
-  implementación de `peso` inerte, commit aparte).
-  DEUDA NUEVA: D-F8.5-E-a (`peso` superficie muerta en tres capas), D-F8.5-E-b (unicidad
-  (profesor,tramo) sin red bajo la aplicación), D-F8.5-E-c (el dialecto no clasifica FK como
-  DataIntegrityViolation), D-F8.5-E-d (conteos inversos de Profesor en dos ubicaciones).
-  8.5 QUEDA CERRADO: cero sub-bloques vivos (D2b es de solver/, D3 aplazado con criterio de reapertura).
-  Siguiente: 8.4 (pre-validación, D18/D20; arrastra MOCKUP PREVIO por D20), 8.5-D2b (solver, regenera la
-  referencia) u 8.6 (Angular, contrato ya cerrado en S67), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -910,10 +927,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80 y la de S77 en la Sesión 81 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81 y la de S78 en la Sesión 82 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S78–S81). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S79–S82). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1106,12 +1123,22 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       intacta. `cdkDrag` en la INSTANCIA, nunca en la sub-entrada (contrato S67, D-F8.6-A-2).
       SIN movimiento optimista: el candado no se pinta hasta el OK del POST. Pin solo de tramo
       (`aulas: []`). D-F8.6-ii-a, D-F8.6-ii-b (sin gesto de despinar). Detalle: bitácora S81.
-- [ ] Bloque 8.6-iii — Badge del delta blando por celda + resalte de violación a DOS granularidades
+- [x] Bloque 8.6-iii-A — Contrato de lectura del diagnóstico en el cliente (S82): `diagnostico.model.ts`
+      (espejo de los 5 DTOs de `GET /api/horarios/{id}/diagnostico`, con la ASIMETRÍA D15 copiada:
+      `CeldaRef.plazaCodigo` nullable, `Penalizacion` SIN `plazaCodigo` y con la celda aplanada),
+      `DiagnosticoService` TS propio y `horario/diagnostico.ts` con `indiceViolaciones` (una violación
+      de N celdas cae bajo CADA una, conservando SU `plazaCodigo`) e `indicePenalizaciones` SIN
+      sumatorio de `delta` (los totales no cuadran con la suma contrafactual, por javadoc de
+      `TotalesDTO`). El servicio NO traduce el 404: `Observable` crudo y TSDoc, patrón vigente.
+      NO toca backend: `CeldaRefDTO` ya trae la clave de D-6. D-F8.6-iiiA-a, D-F8.6-iiiA-b,
+      D-F8.6-iiiA-c. Detalle: bitácora S82.
+- [ ] Bloque 8.6-iii-B — Badge del delta blando por celda + resalte de violación a DOS granularidades
       (aula por sub-entrada, profesor/subgrupo por celda). MOCKUP PREVIO OBLIGATORIO (D-F8.6-a): S67
       dibujó las tres granularidades sobre una celda de desdoble, pero NO con el estado «pinada»
-      encima; son tres capas que nadie ha dibujado juntas. REQUIERE CABLEAR 8.3-C: medido en S81
-      que el cliente NO lo conoce (cero campos de atribución en `horario.model.ts`), luego no es
-      pintar sino ampliar contrato de lectura. Cierra D19/D20 en frontend.
+      encima; son tres capas que nadie ha dibujado juntas. El contrato de lectura YA está cableado
+      (iii-A), luego esto es PINTAR: el mockup se dibuja sobre datos MEDIDOS, no imaginados. Hereda
+      D-F8.6-ii-b (gesto de despinar: exige `Set<clave>` → `Map<clave, id>`) y D-F8.6-iiiA-b (dónde
+      vive `Totales`). Cierra D19/D20 en frontend.
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -1751,7 +1778,7 @@ siguiente, con remisión a la bitácora.
   pregunta de UX (candado clicable / botón en el aviso) → MOCKUP (D-F8.6-a). HERMANA: el `Set`
   tampoco se recarga tras el arranque (`listar()` solo en el constructor; `cambiarVista` y
   `cargar(id)` no lo tocan), así que el candado miente si el horario se regenera o si se pina
-  desde otra pestaña. → resolver en 8.6-iii.
+  desde otra pestaña. → resolver en 8.6-iii-B.
 
 - **D-F8.0-a** (S80, VIVA, de MÉTODO, no técnica) — EL «PROTOCOLO DE ARCHIVADO» SE INVOCA PERO NO
   ESTÁ ESCRITO. Las instrucciones de cierre de sesión mandan «seguir el PROTOCOLO DE ARCHIVADO del
@@ -1764,6 +1791,39 @@ siguiente, con remisión a la bitácora.
   frase de ventana son las que se olvidan (el propio prompt lo advierte cada sesión, lo que es
   síntoma). → escribirlo como sección del plan la próxima vez que se haga higiene, o aceptar
   explícitamente que es costumbre.
+
+- **D-F8.6-iiiA-a** (S82, VIVA, DE COBERTURA, no bloqueante) — NINGÚN SERVICIO DEL FRONTEND TIENE
+  TEST. Medido en S82: los cuatro specs del frontend cubren funciones PURAS (`pines`, `proyeccion`,
+  `diagnostico`) y el shell (`app`); `horario.service.ts`, `bloqueo.service.ts` y
+  `diagnostico.service.ts` no tienen ni uno. iii-A NO lo empeora —siguió el patrón vigente: el
+  servicio devuelve el `Observable` crudo, sin `catchError`, y documenta en TSDoc los códigos del
+  backend—, pero eso significa que el paso del 404 al consumidor NO está aseverado por nada. Estrenar
+  `HttpTestingController` es una CAPA DE TEST NUEVA y se descartó a propósito dentro de un bloque
+  cuyo valor era el contrato de lectura (misma decisión que S62 con los 12 repos y S75 con el
+  refactor del mapper). Hermana de D-F8.6-ii-a: las dos son superficie de error sin red.
+  → decidir como bloque propio, no de refilón.
+
+- **D-F8.6-iiiA-b** (S82, VIVA, no bloqueante) — `Totales` SALE DE iii-A MODELADO Y SIN CONSUMIDOR.
+  Es el único de los 5 DTOs del diagnóstico que el bloque no ejercita: no hay índice, no hay función,
+  no hay test. Es CORRECTO para iii-A —`TotalesDTO` es dato del horario ENTERO, no de celda, y no
+  encaja en el mecanismo de índices por `clavePin`—, pero deja un cabo suelto. TRAMPA DOCUMENTADA que
+  quien lo pinte debe tener delante: el javadoc de `TotalesDTO` dice que los totales son conteos SIN
+  signo del coste actual y NO tienen por qué coincidir con la suma de los `delta` contrafactuales;
+  por eso `indicePenalizaciones` NO acumula. Presentar el total como «suma de los badges» sería
+  mentir. → 8.6-iii-B decide dónde vive y con qué advertencia se pinta.
+
+- **D-F8.6-iiiA-c** (S82, VIVA, POSIBLE HUECO DE VALIDACIÓN, sin medir) — S2 SOBRE `aulaFija` SE
+  VALIDA SOLO EN LA RUTA JSON. Que dos plazas de una misma actividad no compartan `aulaFija` lo
+  rechaza `ProblemaHorarioMapper.verificarAulasFijasDisjuntas` (315-326), que está en `solver/io`, es
+  decir en la ruta JSON/fixtures. En `app/mapper/CatalogoMapper` no apareció equivalente al grepear, y
+  `ActividadService` NO SE AUDITÓ: se registra como «NO VISTO», no como «no existe». Importa porque el
+  CRUD de Actividad (8.5-C1) es hoy la puerta de entrada real de configuración: si la ruta JPA no
+  replica la validación, el catálogo podría admitir una duplicación que el modelo CP-SAT da por
+  imposible, y el caso pasaría de teórico a alcanzable por API. NO se midió desde S82 A PROPÓSITO: es
+  backend, y arreglar superficie de otra capa desde un bloque de frontend es el error que S81 evitó
+  con D-F8.6-ii-a. Nota: `ModeloCpSat.usaAula` (1091-1100) devuelve `boolean` y añade el intervalo UNA
+  sola vez, así que el modelo TAMPOCO detectaría dos `aulaFija` iguales — la protección descansa
+  ENTERA en el mapper. → auditar `ActividadService` al abrir el próximo bloque que toque backend.
 
 ### Deuda consciente CERRADA (histórico)
 
