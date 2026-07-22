@@ -603,7 +603,14 @@ nuevo a partir del anterior, modificando solo los cambios.
 Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉTODO ESCRITO en S86
   (sección «Método de trabajo (procedimiento vigente)», M1-M4, tras el criterio R4/R5: procedimiento
   de cierre de sesión con el archivado como paso verificado, §A de medición, campaña de mutación y
-  contraste previo; CIERRA D-F8.0-a; sin código). Bloque 8.6-iii-B2-a CERRADO
+  contraste previo; CIERRA D-F8.0-a; sin código). Bloque 8.6-iii-B2-b CERRADO
+  en S88 (los DOS resaltes de violación: input ÚNICO `violaciones` y dos predicados con `.some()`
+  que resuelven la asimetría D15 AL PINTAR —la rejilla es la única capa que enumera sub-entradas con
+  sus plazas—; resalte SOLO por `outline` tras medir que `background` estaba ocupado en dos capas y
+  corregir el mockup de S87 en sus dos sedes vivas; `diagnostico.ts` NO tocado, la capa pura estaba
+  completa desde S82 y le faltaba CONSUMIDOR; T5 del desdoble añadido por el contraste; campaña de 6
+  con la sexta destapada al ver que T2 no tenía killer; CIERRA el frente 8.6-iii entero y D19/D20 en
+  frontend). Bloque 8.6-iii-B2-a CERRADO
   en S87 (cableado del diagnóstico + badge del delta blando: la capa de diagnóstico llevaba desde
   S82 construida y probada pero DESCONECTADA —`DiagnosticoService` e `indiceViolaciones` solo los
   referenciaban sus propios specs—; B2 PARTIDO en B2-a (cable + badge) y B2-b (los dos resaltes);
@@ -683,6 +690,75 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
+### Sesión 88 — Fase 8, Bloque 8.6-iii-B2-b: los dos resaltes de violación (CIERRA el frente 8.6-iii).
+  Modo híbrido. 2 commits de código (2c48f9b rejilla, 15c8f31 contenedor) + doc aparte.
+  §A DE MEDICIÓN sobre el CSS y el estado del cable (lectura literal de los tres ficheros de
+  `horario-grid/` + greps de `indiceViolaciones` y del contenedor + suite de base).
+  §A CONFIRMA AL PLAN EN LO CENTRAL: `indiceViolaciones` seguía SIN CABLEAR (8 apariciones, 7 en su
+  spec y 1 en su definición; cero en componentes). Primera vez en el frente que la afirmación del
+  plan resiste la medición.
+  PERO §A DESMIENTE AL PLAN EN EL MOCKUP, y es el caso que estrena la corrección de método: el
+  mockup de S87 decía «`background` + `outline`». La mitad `background` se escribió SIN MEDIRLA:
+  `.entrada` la tiene en `#fafafa` y `.instancia.pinada .entrada` la sobrescribe con `#fff8ec`, que
+  ES la señal de pinada. Un resalte por fondo o la pisa o queda pisado según el orden de las reglas.
+  DECISIÓN: el resalte va SOLO a `outline`, única propiedad libre en ambos anclajes (`border-left`
+  ocupado 3px `#4a7` estructural, `background` ocupado en dos capas). El `outline` del CDK
+  (`.cdk-drop-list-dragging`) vive en el `<td>`: otro elemento, sin colisión de cascada.
+  CORREGIDA LA AFIRMACIÓN VIVA en sus DOS sedes (casilla del bloque y cabecera de S87), no solo
+  anotada. La copia archivada de S83 en la bitácora NO se toca: es histórico de solo lectura y
+  borrarla eliminaría la evidencia de que el error existió.
+  PATRÓN QUE ESTO DESTAPA, y que motiva la segunda mitad de la norma nueva: la afirmación falsa la
+  escribió la sesión ANTERIOR aplicando el método, para corregir a una sesión previa. S87 midió el
+  `border-left` con rigor, acertó, y en la MISMA FRASE escribió `background` sin medirlo. El rigor
+  fue parcial y la frase no distinguía la mitad medida de la supuesta.
+  HUECO DE MI PROPIA §A, declarado: el guion midió el componente y la capa pura pero NO
+  `horario.model.ts` ni `proyeccion.ts`, que son justo los dos ficheros que responden a la pregunta
+  más cara del bloque (¿es pintable la granularidad de aula?). Que la respuesta saliera favorable no
+  lo convierte en acierto.
+  EL CONTRASTE PREVIO (M4) CAZÓ CUATRO ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, todos aceptados.
+  (1) PREGUNTA 0 EN VERDE: `SesionVista.plazaCodigo` existe y NO es nullable
+  (`horario.model.ts:24`), `agruparPorActividad` lo conserva sin transformar (`proyeccion.ts:97-99`)
+  y la plantilla ya itera con `e` en mano ⇒ el matching plaza↔sub-entrada es directo, sin heurística
+  de `aulaCodigo` (dos plazas pueden compartir aula) y SIN TOCAR backend ni el DTO de Fase 7. El
+  bloque NO se parte. (2) T1 ERA REDUNDANTE Y CAÍA POR ACOPLAMIENTO: la mutación que declaré
+  —indexar por violación en vez de por celda— es de la CAPA PURA y ya la mata `diagnostico.spec (2)`;
+  reencuadrado a WIRING (el `computed` no liga → 0 claves), gemelo del T1 de badges que S87 reescribió
+  por lo mismo. (3) T3 SOBRE-DECLARABA: su fixture tiene plaza no-null, luego no puede ejercer la
+  dirección instancia→aula (esa es de T2); posee {aula→instancia, marcar-todas, plaza-equivocada}.
+  (4) LA PATA DEL `border-left` DE T4 ERA VACUA EN SU PROPIO FIXTURE —con la clave ausente no hay
+  clase aplicada, luego el borde queda intacto pase lo que pase— y además exigiría `getComputedStyle`
+  sobre hoja de estilos bajo encapsulación `_ngcontent`, sin precedente en la suite. ELIMINADA; la
+  ortogonalidad `outline`/`border` se garantiza POR CONSTRUCCIÓN y su sitio es el TSDoc, no un aserto.
+  (5) DIMENSIÓN VIVA SIN CUBRIR, añadida como T5: el DESDOBLE. `diagnostico.spec (9)` ya fija que un
+  `SOLAPE_AULA` puede tener dos celdas = misma instancia, dos plazas distintas; en la rejilla son dos
+  sub-entradas y AMBAS deben marcarse. T3 solo probaba «casa una de dos»; nadie probaba «casan las
+  dos, cada una por separado». No es hipotético: el desdoble es el caso estructural del dominio.
+  ENTREGADO: input ÚNICO `violaciones` (se RECHAZA pasar dos mapas pre-separados: aplanaría la
+  asimetría D15 justo donde el modelo declara que no se normaliza, y además no ahorraría trabajo
+  porque el matching plaza→sub-entrada SOLO es expresable en la rejilla, la única capa que enumera
+  sub-entradas con sus plazas); dos predicados con `.some()` en ambos, para que cada sub-entrada se
+  evalúe por separado (T5); CSS estrictamente ADITIVO, dos reglas nuevas y ninguna existente tocada.
+  `horario/diagnostico.ts` NO TOCADO: la capa pura estaba completa desde S82 y lo que faltaba era
+  CONSUMIDOR.
+  CAMPAÑA DE 6 MUTACIONES, no 5: la sexta la destapó Claude Code al notar que NINGUNA de las cinco
+  propuestas mataba a T2, que quedaba indistinguible de peso muerto. M6 (`tieneViolacionAula` casa
+  también con `plazaCodigo === null`) cae SOLO en T2 ⇒ T2 es independientemente reddable. DOS
+  ATRIBUCIONES MÍAS CORREGIDAS POR LA MEDIDA: M2 cae en T3 y NO en T2 (el fixture de T2 es ciego a
+  M2: una violación null marca la instancia bajo código correcto Y mutado), luego T3 es load-bearing
+  para esa dimensión y borrarlo dejaría M2 viva; y M5 cae en T4 y ADEMÁS en T3, que asevera
+  legítimamente «instancia no marcada» —compartido, no acoplamiento—. Ninguna mutación necesitó cast.
+  Suite frontend 41 → 46 (+5), 9 ficheros. `ng build` limpio. CERO dependencias nuevas.
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
+  solver 78).
+  CIERRA D19/D20 EN FRONTEND y CIERRA EL FRENTE 8.6-iii ENTERO (cero sub-bloques vivos, sexto
+  sub-bloque desde S82). D-F8.6-iiiA-b SIGUE VIVA, con destino más claro: `Totales` se dejó FUERA a
+  propósito —es dato del horario entero, no cruza por `clavePin`, no tiene sitio en la rejilla y su
+  trampa documentada exige decidir dónde vive; es cabecera o panel, no resalte de celda—.
+  DEUDA NUEVA: ninguna.
+  Siguiente: 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia),
+  8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos bloques),
+  8.6-B (aviso durante el arrastre) o la cobertura de D-F8.6-ivB-a, a decidir al abrir sesión.
 ### Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico y badge del delta blando.
   Modo híbrido. 3 commits de código (2047349 capa pura, 71c4fb6 rejilla, 709b58a contenedor) + doc
   aparte. §A DE MEDICIÓN sobre el ESTADO REAL DEL FRONTEND (lectura literal de los ficheros de
@@ -704,7 +780,10 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   a pelo (sin la config de Angular no hay globals). El corolario de S84 (verificar la ruta ANTES de
   medir) lo cazó en el comando 0 en vez de tumbar la medición entera.
   MOCKUP (D-F8.6-a) sobre el CSS MEDIDO y no el supuesto, que es la razón de rehacerlo: el resalte de
-  violación va a `background` + `outline`, NO al `border-left`. `outline` no ocupa layout, así que las
+  violación NO va al `border-left`. [CORREGIDO EN S88: la mitad «`background`» de este mockup se
+  escribió SIN medir el `background`, que está ocupado en dos capas —`.entrada` y
+  `.instancia.pinada .entrada`, esta última la señal de pinada—. El resalte va SOLO a `outline`. Es
+  el mismo defecto que esta sesión denunció de S83, una capa más abajo.] `outline` no ocupa layout, así que las
   dos granularidades se leen solas (sobre `.instancia` = profesor/subgrupo, sobre `.entrada` = aula):
   la asimetría D15 se pinta sin aplanarse. Desalojar el verde estructural haría que la ausencia de
   violación fuese ausencia de borde y desmontaría la celda de seis entradas.
@@ -906,86 +985,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   D19/D20 en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de
   D-F8.4-A-c) u 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
   referencia), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 84 — Fase 8, Bloque 8.6-iv-B: capa de test de componente (despinar bajo red).
-  Modo híbrido. 1 commit de código (7c8f742, solo tests) + doc aparte. §A DE MEDICIÓN sobre el
-  ENTORNO DE TEST (lectura literal de `angular.json`, `tsconfig.spec.json`, `package.json` y los 4
-  specs; instrumento más barato, precedente S77-S83).
-  BLOQUE SIN CASILLA, abierto en S84: 8.6-iv es el bloque que D-F8.6-iiiA-a y D-F8.6-iiiB1-a
-  reclamaban las dos («la misma capa de test que nadie ha estrenado») y que no existía en «Bloques
-  de Fase 8». PARTIDO en iv-A (specs de los tres servicios, capa HTTP) y iv-B (componente), y se
-  eligió iv-B PRIMERO contra el orden por capas: la deuda nombra el aserto concreto por el que hay
-  que empezar (el conteo de `listar()`), el riesgo vive en la coordinación y no en los wrappers de
-  `HttpClient`, y testear `HorarioView` ANTES de 8.6-iii-B2 evita calibrar los tests contra una
-  superficie ya crecida. Consecuencia asumida y registrada: iv-A se desplaza, D-F8.6-iiiA-a NO se
-  cierra.
-  ERROR DE ENRUTADO DEL PROPIO INSTRUMENTO: la §A se lanzó contra `frontend/`, que NO EXISTE —el
-  frontend vive en `app/frontend/`— y los comandos fallaron enteros. Mismo género que S82/S83
-  (suponer la ubicación de un directorio), esta vez cometido DENTRO de la medición que existe para
-  no suponer.
-  SALIDA DE §A, que DESMIENTE la premisa de apertura: TestBed NO se estrena. `app.spec.ts` ya usa
-  `TestBed.configureTestingModule` + `createComponent` + `await fixture.whenStable()`, y el patrón
-  zoneless está fijado y es copiable. Lo NO estrenado es (1) la capa HTTP de test
-  (`HttpTestingController`: CERO usos en el repo) y (2) el test de un componente con `input`/`output`
-  y colaboradores inyectados. El nombre que la deuda usaba —«el bloque de TestBed»— inducía a error.
-  MEDIDO ADEMÁS: runner Vitest vía `@angular/build:unit-test` SIN bloque `options` (no hay
-  `vitest.config.ts` que tocar); zoneless POR OMISIÓN (sin `zone.js`, sin `provideZonelessChangeDetection`);
-  `vitest/globals`; `@angular/common/http/testing` disponible sin instalar. CERO dependencias nuevas
-  —a diferencia de S81, donde el runner SÍ decidió una dependencia—.
-  DECISIONES DE CONTRATO cerradas antes de teclear: (C1) dobles por `useValue` con `vi.fn()`, SIN
-  `HttpTestingController` —iv-B prueba COORDINACIÓN, no transporte; con el doble HTTP el conteo de
-  `listar()` pasaría a ser conteo de peticiones, que es otra dimensión, e invadiría iv-A—. (C4)
-  fixtures LOCALES y mínimos: NO se usa `PROYECCION_1ESO` (25 sesiones harían que un aserto pase por
-  ACUMULACIÓN y no por precisión, y su cabecera declara que no es espejo puro del backend) ni se
-  extrae `pin()` de `pines.spec.ts` (no se toca un fichero commiteado y verde por dos specs nuevos);
-  precedente S41/S81/S82/S83. (C5) `pinadas` se observa por el INPUT PÚBLICO de la hija
-  (`By.directive(HorarioGrid)`), NO por cast `as any`: el input es la frontera real del contrato y
-  `protected` declara privado lo otro. (C6) `Subject` PELADO, nunca `of()` ni `BehaviorSubject`.
-  (C7) `provideRouter([])` FUERA: `HorarioView` solo usa `ActivatedRoute`; divergencia deliberada
-  respecto al patrón de `app.spec.ts`, comentada en el TSDoc.
-  DOS TURNOS DE CONTRASTE, no uno (patrón S82/S83). El PRIMERO se envió con el marcador
-  «[pega aquí las dos tablas]» SIN PEGAR LAS TABLAS: Claude Code paró, dijo exactamente qué le
-  faltaba y entregó solo la extracción literal. Séptima sesión seguida con un defecto de
-  especificación del arquitecto, esta vez por contrato MUTILADO y no por afirmar el estado del código.
-  TRES AFIRMACIONES MÍAS DESMENTIDAS POR EL CONTRASTE, todas por matriz cruzada y no por opinión:
-  (1) «el Map NO cambia» en los asertos de guarda es COBERTURA FINGIDA tal como yo lo escribí —con
-  el doble sin emitir, queda VERDE bajo AMBAS mutaciones—; se salva solo emitiendo en `sujetoBorrar`
-  tras comprobar que no se llamó. Lo había añadido yo para corregir un aserto incompleto y era el
-  mismo defecto que critico en D-F8.4-A-c. (2) el antiguo aserto 1 (una emisión ⇒ 1 llamada) NO
-  aporta mutación propia: el 2 caza las dos. Mi argumento era de EDICIÓN DEL CÓDIGO y no de
-  DISCRIMINACIÓN DEL ASERTO, que son cosas distintas; se fusionaron en un test de DOS FASES que
-  conserva los dos puntos de medida (determinan a=0,b=1 unívocamente). (3) declaré el solapamiento
-  4↔5 como ESTRUCTURAL y era PREMATURO: la matriz demuestra discriminación perfecta —`id===undefined`
-  mata solo el de valor null, `id===null` mata solo el de clave ausente—. Retirado.
-  HALLAZGO DE LA CAMPAÑA, que DEGRADA lo que dos asertos valen: la mutación `id === undefined` NO ES
-  EXPRESABLE en TypeScript —`id` queda `number | null` y `borrar(id: number)` da TS2345—. El
-  compilador es una barrera ANTERIOR al test. Se corrió como 3′ añadiendo el `as number` que un
-  desarrollador escribiría para silenciar el error, que es la única vía por la que ese bug llega a
-  producción. Consecuencia honesta: esos dos asertos protegen contra guarda-más-cast, NO contra un
-  despiste de guarda a secas.
-  DECISIONES DE RÉPLICA (juicio, no ejecución): se BORRAN los dos `not.toHaveBeenCalledWith` del
-  aserto de la rejilla —implicados por `toHaveBeenCalledTimes(1)` + `toHaveBeenCalledWith`, no pueden
-  ponerse rojos, y su contenido pasa al TSDoc como prosa—; se MANTIENE el literal `'Mat-1ºA|2'`
-  frente a `clavePin(...)`, porque `pines.spec.ts` asevera con la propia función y ese literal es el
-  ÚNICO punto del repo que fija el formato de la clave; se MANTIENE el índice 2 en la instancia
-  pinada (con 1, una implementación que fijara `|1` a mano seguiría verde); se ACEPTA omitir el
-  aserto «0 llamadas antes de emitir» —con `Subject` pelado ese estado no existe en producción y
-  habría matado 1a y 1b en la misma línea, destruyendo su discriminación—.
-  ENTREGADO: `horario-view.spec.ts` (5 tests) y `horario-grid.spec.ts` (2 tests). Suite frontend
-  23 → 30 (+7), 4 → 6 ficheros. CAMPAÑA DE 8 MUTACIONES, todas por la vía esperada y cada una
-  poniendo rojo EXACTAMENTE el test que declara: 1a/1b discriminan las dos fases por separado; 2
-  cae en la mitad ANTES (el borrado optimista de D-F8.6-ii-5 daría el MISMO estado final); 3′ y 4
-  se dejan verde la una a la otra. `ng build` limpio. CERO dependencias nuevas.
-  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
-  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
-  solver 78).
-  DEUDA NUEVA: D-F8.6-ivB-a (`alSoltar` y tres ramas más del contenedor, sin cobertura),
-  D-F8.6-ivB-b (el compilador tapa dos mutaciones), D-F8.6-ivB-c (dos observaciones del código
-  destapadas al medir y que ninguna deuda recogía). CIERRA D-F8.6-iiiB1-a. D-F8.6-iiiA-a sigue
-  VIVA ENTERA: iv-B no ha testeado ni un servicio.
-  Siguiente: 8.6-iv-A (specs de los tres servicios, estrena `HttpTestingController`; cierra
-  D-F8.6-iiiA-a), 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado), 8.4-B (MOCKUP
-  PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera la
-  referencia), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -997,7 +996,7 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 y la de S83 en la Sesión 87 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 y la de S84 en la Sesión 88 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
 últimas cabeceras compactas (S84–S87). El detalle histórico de cualquier sesión anterior —incluida S42
@@ -1228,16 +1227,28 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       reserva 16px SOLO por badge, nunca por candado (el candado sigue solapando como en B1: no se
       toca render ya cerrado). `.entrada` `border-left` NO tocado, reservado para B2-b.
       D-F8.6-iiiB2a-a. Detalle: bitácora S87.
-- [ ] Bloque 8.6-iii-B2-b — Los DOS resaltes de violación: aula por SUB-ENTRADA, profesor/subgrupo
+- [x] Bloque 8.6-iii-B2-b — Los DOS resaltes de violación: aula por SUB-ENTRADA, profesor/subgrupo
       por CELDA (asimetría D15 pintada, no aplanada). `indiceViolaciones` existe desde S82 y sigue
-      SIN CABLEAR: es lo único que queda del frente. DECIDIDO EN EL MOCKUP DE S87, sobre el CSS
-      MEDIDO y no el supuesto: el resalte va a `background` + `outline`, NO al `border-left` de
-      `.entrada`, que está OCUPADO (3px `#4a7`, estructural en toda entrada) —desalojarlo haría que
-      la ausencia de violación fuese ausencia de borde y desmontaría visualmente la celda de seis
-      entradas—. `outline` no ocupa layout, así que las dos granularidades se leen solas: outline
-      sobre `.instancia` = profesor/subgrupo, sobre `.entrada` = aula. Hereda D-F8.6-iiiA-b (dónde
-      vive `Totales`, con la trampa de que los totales NO son la suma de los `delta`). Cierra D19/D20 en
-      frontend.
+      SIN CABLEAR: es lo único que queda del frente. DECIDIDO EN EL MOCKUP DE S87 Y CORREGIDO EN S88
+      sobre la medición completa del CSS:
+      el resalte va SOLO a `outline`. NO al `border-left` de `.entrada`, que está OCUPADO (3px `#4a7`,
+      estructural en toda entrada) —desalojarlo haría que la ausencia de violación fuese ausencia
+      de borde y desmontaría visualmente la celda de seis entradas—. Y NO a `background`, como S87
+      escribió sin haberlo medido: `.entrada` lo tiene en `#fafafa` y `.instancia.pinada .entrada`
+      lo sobrescribe con `#fff8ec`, que ES la señal de pinada; un resalte por fondo o la pisa o
+      queda pisado según el orden de las reglas. `outline` no ocupa layout, así que las dos
+      granularidades se leen solas: outline sobre `.instancia` = profesor/subgrupo, sobre
+      `.entrada` = aula. NOTA: el CDK ya usa `outline` en `.cdk-drop-list-dragging`, pero sobre el
+      `<td>` y solo durante el arrastre; distinto elemento, sin colisión de cascada. Hereda D-F8.6-iiiA-b
+      (dónde vive `Totales`, con la trampa de que los totales NO son la suma de los `delta`).
+      Cierra D19/D20 en frontend.
+      CERRADO EN S88. §A confirmó que seguía sin cablear pero DESMINTIÓ el mockup: el resalte va
+      SOLO a `outline` (`background` estaba ocupado en dos capas, la segunda es la señal de pinada).
+      Input ÚNICO `violaciones` —dos mapas pre-separados aplanarían D15 y no ahorrarían trabajo: el
+      matching plaza→sub-entrada solo es expresable en la rejilla—; predicados con `.some()` para que
+      cada sub-entrada se evalúe por separado (T5, desdoble). `horario/diagnostico.ts` NO tocado.
+      D-F8.6-iiiA-b NO se cierra: `Totales` queda fuera a propósito (es cabecera o panel, no resalte
+      de celda). Suite 41 → 46. Detalle: bitácora S88.
 - [x] Bloque 8.6-iv-A — Specs de los TRES servicios del frontend (S85): `horario.service.spec.ts`
       (1 test) + `bloqueo.service.spec.ts` (3) + `diagnostico.service.spec.ts` (1), junto a su
       fuente en `services/`, numerados (8)..(12) continuando la numeración correlativa del repo.
@@ -1502,6 +1513,14 @@ precedente observable (S69-S85); el 6 es norma ya escrita (R4/R5, arriba).
 dejó una copia truncada y duplicada de S55 (corregida en S60) y S68 dejó el censo en S63 conteniendo
 ya S64 (corregido en S69). Los dos son fallos de transcripción o de censo, no de criterio, y por eso
 el paso lleva verificación propia:
+- TRES ROTACIONES, no una. La ventana se mueve en tres puntos y solo el segundo estaba escrito:
+  (1) NACE la cabecera de la sesión actual como `### Sesión NN`; (2) SALE la más antigua a la
+  bitácora (los tres sub-pasos de abajo); (3) DEGRADA la H3 anterior al prefijo compacto
+  «Última sesión registrada (previa):». El invariante que las tres mantienen es UNA SOLA
+  cabecera H3 viva en el plan: si hay dos, falta la degradación. Se verifica con
+  `grep -c "^### Sesión" plan_trabajo_horarios.md` → debe dar 1.
+  [Origen: S88 omitió la rotación (3) y la verificación de M1.6 la cazó. El paso existía como
+  precedente en catorce archivados, pero no estaba escrito.]
 - PROMOVER, no solo mover. Las 4 cabeceras vivas del plan NO son homogéneas —la más reciente es
   `### Sesión NN` y las otras tres son texto plano con prefijo «Última sesión registrada
   (previa):»—, mientras que TODAS las entradas de la bitácora son `### Sesión NN`. Archivar exige
@@ -1528,6 +1547,18 @@ proponer estructura. Lo que sostiene la regla no es la costumbre sino su rendimi
 sesiones S75-S85 la medición desmintió una suposición de apertura del arquitecto —no alguna vez,
 todas—. Corolario: una afirmación sobre el estado del repo que no se ha medido se declara como
 RAZONAMIENTO, no como medición.
+Dos precisiones que S87 y S88 obligaron a escribir, en el orden en que se aplican:
+- CUANDO LA MEDICIÓN DESMIENTE AL PLAN, y no a una suposición del arquitecto, se declara
+  explícitamente como tal y se CORRIGE LA AFIRMACIÓN VIVA en TODAS sus sedes vivas —una casilla de
+  bloque y una cabecera de ventana suelen ser dos copias de lo mismo—. Por R5, una descripción
+  equivocada del mecanismo actual es estado vivo equivocado, no crónica. Lo ya ARCHIVADO en la
+  bitácora NO se corrige: es histórico de solo lectura, y borrar el error eliminaría la evidencia de
+  que existió. Origen: S87 (el `border-left` que S83 daba por liberado) y S88 (el `background` que
+  S87 daba por libre sin medirlo).
+- UNA CONCLUSIÓN DE MEDICIÓN DECLARA QUÉ SE MIDIÓ, no solo qué se concluye. El caso que lo obliga es
+  incómodo: S87 midió el `border-left` con rigor, acertó, y en LA MISMA FRASE escribió `background`
+  sin medirlo. El rigor fue parcial y la frase no lo distinguía, así que S88 tuvo que tropezarlo. Una
+  conclusión que enumera su evidencia deja el hueco visible sin que nadie lo pise.
 
 **M3 — Campaña de mutación: lo que un aserto vale.** Un aserto vale lo que vale la mutación que lo
 pone rojo. Al cerrar un bloque con tests se declara la campaña (qué mutaciones, cuál cae y por qué
