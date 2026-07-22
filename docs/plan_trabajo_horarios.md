@@ -600,7 +600,10 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iv-A CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉTODO ESCRITO en S86
+  (sección «Método de trabajo (procedimiento vigente)», M1-M4, tras el criterio R4/R5: procedimiento
+  de cierre de sesión con el archivado como paso verificado, §A de medición, campaña de mutación y
+  contraste previo; CIERRA D-F8.0-a; sin código). Bloque 8.6-iv-A CERRADO
   en S85 (specs de los TRES servicios REST del frontend: `horario.service.spec.ts` +
   `bloqueo.service.spec.ts` + `diagnostico.service.spec.ts`, 5 tests con campaña de 6 mutaciones;
   ESTRENA `provideHttpClientTesting` + `HttpTestingController`, hoy sin uso efectivo en el repo;
@@ -674,7 +677,47 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 85 — Fase 8, Bloque 8.6-iv-A: specs de los tres servicios REST, estreno de HttpTestingController.
+### Sesión 86 — MÉTODO: se escribe el procedimiento que se invocaba y no existía (CIERRA D-F8.0-a).
+  Modo híbrido (greps en Claude Code, redacción y decisiones en el Project). Sin código: solo `docs/`.
+  §A DE MEDICIÓN sobre los DOS DOCUMENTOS (13 greps + lectura literal; instrumento más barato,
+  precedente S77-S85), corrida ANTES de redactar una línea de norma, porque el riesgo específico de
+  esta sesión era canonizar de memoria una costumbre de dos sesiones.
+  SALIDA DE §A, en tres partes. (1) PASOS REALES DEL ARCHIVADO: ocho, de los cuales solo el 6 (R4/R5)
+  estaba escrito; los otros siete son precedente observable S69-S85. (2) MÉTODO ATRAPADO EN CABECERAS:
+  cuatro candidatos vigentes sin sede —§A de medición, campaña de mutación, contraste con Claude Code
+  y regla de artefactos derivados— más uno que YA tiene sede y NO se duplica (MOCKUP PREVIO, D-F8.6-a:
+  se remite, no se reescribe). (3) DOS FALLOS HISTÓRICOS REALES del archivado, no hipotéticos: la copia
+  truncada y duplicada de S55 (S59, corregida en S60) y el censo desalineado (S68, corregido en S69);
+  los dos son de transcripción o censo, no de criterio. Eso es lo que justifica que M1-bis lleve
+  verificación propia en vez de ser un bullet más.
+  ENTREGADO: sección «Método de trabajo (procedimiento vigente)» (82 líneas) insertada TRAS el criterio
+  R4/R5 y no en sección aparte —R4/R5 ya es método y vive bajo «Decisiones permanentes»; separarlas
+  obligaría a duplicar la referencia—. M1 (ocho pasos del cierre), M1-bis (el archivado, con PROMOVER /
+  INSERTAR / COMPROBAR), M1-ter (el prompt de la sesión siguiente: no fija alcance, no copia el plan,
+  se poda si pasa de ~60 líneas), M2 (§A de medición), M3 (campaña de mutación y lo que un aserto vale),
+  M4 (contraste antes de teclear + artefactos derivados).
+  DOS COSAS MARCADAS COMO DECISIÓN DEL ARQUITECTO, no como norma medida, porque la evidencia no las
+  sostiene: que PROMOVER sea obligatorio (S82 lo registró como ANOMALÍA observada, no como regla
+  querida) y el umbral de ~60 líneas del prompt (cifra sin precedente). Marcarlas es el punto: una
+  sección de método que no distingue lo medido de lo decidido miente sobre su propia autoridad.
+  DESCARTADO POR R5, pese a estar en las cabeceras que se archivarán: recuentos de suite por bloque,
+  las mutaciones concretas de cada sesión y los hallazgos de framework de S73-S76. Son historia con
+  moraleja, no mecanismo vigente; una sección de método que narre sesiones es lo que R5 prohíbe.
+  PRIMERA PRUEBA REAL DEL PROCEDIMIENTO: el archivado de S82 se ejecutó SIGUIENDO M1-bis recién
+  escrito, no el precedente. Resultado: los tres sub-pasos se aplicaron sin fricción y el paso de
+  COMPROBAR (diff del cuerpo archivado contra el que salió del plan) resultó NO decorativo —es el
+  control que habría cazado el fallo de S59—. El procedimiento no necesitó corrección al aplicarlo.
+  CONSECUENCIA ASUMIDA Y REGISTRADA: S86 no toca código y desplaza por sexta vez 8.6-iii-B2, y
+  también 8.4-B y 8.5-D2b. Se acepta porque D-F8.0-a llevaba seis sesiones viva y el coste del prompt
+  de apertura sin sede era recurrente, no puntual.
+  Código NO tocado: `solver/`, `app/` ni `frontend/` → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado, suite sin cambio (app 315, solver 78, frontend 35).
+  DEUDA NUEVA: ninguna. CIERRA D-F8.0-a.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra D19/D20
+  en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u
+  8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia), a decidir al
+  abrir sesión.
+Última sesión registrada (previa): Sesión 85 — Fase 8, Bloque 8.6-iv-A: specs de los tres servicios REST, estreno de HttpTestingController.
   Modo híbrido. 1 commit de código (b11617d, solo tests, 3 ficheros nuevos, 299 inserciones, cero
   borrados) + doc aparte. §A DE MEDICIÓN sobre el UNIVERSO A TESTEAR y su ENTORNO (lectura literal
   de los 3 servicios + `bloqueo.model.ts` + `app.config.ts`, `ls` de `services/`/`testing/`/`models/`
@@ -930,87 +973,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: 8.6-iii-B2 (badge + resaltes; el borde ya está liberado y el mockup dibujado), 8.4-B
   (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera
   la referencia), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 82 — Fase 8, Bloque 8.6-iii-A: contrato de lectura del diagnóstico en el cliente.
-  Modo híbrido. 3 commits de código (0e0bffd producción, a876e5d tests, 8e8cb71 el `it` (9)) + doc
-  aparte. §A DE MEDICIÓN sobre el CONTRATO REAL DEL SERVIDOR (lectura literal de los 5 DTOs +
-  controller; instrumento más barato, precedente S77-S81).
-  8.6-iii PARTIDO en A/B al abrir. Razón: su casilla pedía TRES concerns —cablear 8.3-C, pintar tres
-  capas, y el gesto de despinar de D-F8.6-ii-b, que además lleva mockup—. iii-A es la parte que NO
-  necesita mockup y entrega contrato verificable; iii-B es la pintura y CONSERVA el MOCKUP PREVIO
-  OBLIGATORIO. Orden elegido a propósito: medir ANTES de dibujar, porque un mockup sobre datos
-  imaginados fija un contrato que el backend puede no poder alimentar.
-  SALIDA DE §A: NO existe `DiagnosticoController` —el endpoint es `GET /api/horarios/{id}/diagnostico`
-  en `HorarioController:85`, colgado del controller de horarios—. HALLAZGO FAVORABLE: `CeldaRefDTO`
-  lleva (`actividadCodigo`, `indice`), la clave de D-6 que `SesionVista` ya trae y que `clavePin` ya
-  computa → iii-A NO toca backend ni `SesionVistaDTO`. Los tipos homónimos de `solver/cpsat` son pares
-  espejo al otro lado de la frontera dura: `solver/src/main` NO se tocó (solo se leyó) → referencia NO
-  regenerada.
-  HALLAZGO ESTRUCTURAL, que es el núcleo del bloque: los dos lados del DTO NO tienen la misma forma.
-  `CeldaRefDTO` lleva `plazaCodigo` NULLABLE (no-null solo en `SOLAPE_AULA`); `PenalizacionDTO` NO lo
-  lleva EN ABSOLUTO y APLANA la celda a (`actividadCodigo`, `indice`), con el javadoc argumentando que
-  «un campo siempre null es un campo que miente». La asimetría D15 se COPIA al TS, no se normaliza:
-  son dos índices distintos, no uno.
-  DECISIONES CERRADAS: (iiiA-1) `diagnostico.model.ts` NUEVO en `models/`, no ampliar
-  `horario.model.ts`, que acota su alcance a Fase 7 en su cabecera (precedente literal
-  `bloqueo.model.ts:6-7`). (iiiA-2) espejo FIEL con la asimetría copiada: `regla` es `string` y no
-  unión de literales (patrón `horario.model.ts:31-32`, donde `estado` es string pese a ser enum),
-  `Totales` son tres `number` y NUNCA `number | null` —ensanchar es tan infiel como estrechar—.
-  (iiiA-3) `DiagnosticoService` TS propio. (iiiA-4) DOS funciones puras en `horario/diagnostico.ts`,
-  reutilizando `clavePin` de `pines.ts` (fuente única de D-6); `indicePenalizaciones` SIN sumatorio de
-  `delta`, porque el javadoc de `TotalesDTO` dice que los totales NO tienen por qué coincidir con la
-  suma de los delta contrafactuales y acumularlos invitaría a contrastarlos y a ver un bug donde no lo
-  hay. (iiiA-5) el servicio devuelve el `Observable` crudo y DOCUMENTA el 404 en TSDoc, sin traducir.
-  TRES ERRORES DEL ARQUITECTO, los tres destapados por Claude Code al contrastar el contrato ANTES de
-  teclear (registrados, no tapados). (1) Omití `ViolacionDTO.descripcion` del espejo: omisión, no
-  exclusión deliberada; entra. (2) La razón que di para (iiiA-3) —«`HorarioService` es de solo
-  lectura»— NO DISCRIMINA: `DiagnosticoService` también lo es. El argumento correcto, que es el que va
-  al TSDoc, es «cada contrato/bloque tiene su cliente» (precedente `BloqueoService`, S81). Conclusión
-  correcta, porqué mal enunciado. (3) Di por supuesto un patrón de manejo de error HTTP «mirando
-  `horario.service.ts` y sus specs»: NO TIENE SPECS, y NINGÚN servicio del frontend los tiene. Afirmé
-  cómo estaba algo sin comprobarlo — mismo género que S81, QUINTA sesión consecutiva.
-  ANOMALÍA DE FORMATO DESTAPADA POR LA MEDICIÓN DE R4, no por criterio: las 4 cabeceras vivas del plan
-  NO son homogéneas (la más reciente es `### Sesión NN`, las otras tres son texto plano con prefijo
-  «Última sesión registrada (previa):»), mientras que TODAS las entradas de la bitácora son
-  `### Sesión NN`. Archivar exige PROMOVER la línea, no solo moverla. Es costumbre observable
-  (entradas S69-S77), no norma escrita: D-F8.0-a sigue viva.
-  ASERTOS: 8 tests + el (9) del desdoble. TRES MUTACIONES sobre `diagnostico.ts`, todas caen y
-  restauran verde. M1 (clave solo por `actividadCodigo`) pone rojo `diagnostico.spec.ts` (1)(6), NO
-  solo `pines.spec.ts`: el requisito crítico de S81 —reutilizar una función no hereda su cobertura—
-  se cumple, MEDIDO, gracias al fixture de misma actividad con índices 1 y 2. M2 (indexar solo
-  `celdas[0]`) y M3 (propagar `celdas[0].plazaCodigo`) NO son disjuntas y NO PUEDEN SERLO: detectar M3
-  exige una entrada cuyo `plazaCodigo` difiera del de `celdas[0]`, y esa entrada procede de una celda
-  que M2 elimina. M3 ⊂ M2 por construcción del operador, no por fixture flojo. Se rechazó redefinir M2
-  para forzar disjunción: sería una mutación que nadie escribiría, y perseguir la métrica no es
-  perseguir cobertura. CONCLUSIÓN REGISTRADA: la mutación M3 no aporta sobre M2; el TEST (3) sí, y es
-  el único que asevera la propagación de plaza que iii-B necesitará.
-  DISTINCIÓN NUEVA, aportada por Claude Code al corregir su propia predicción: CAER ante una mutación
-  ≠ DISCRIMINAR la dimensión que ataca. El `it` (9) cae ante M1 por ACOPLAMIENTO a `clavePin` (la
-  lectura del test deja de casar con la escritura del índice), no por discriminar índice-vs-actividad
-  —sus dos celdas comparten actividad E índice—. El mérito de esa dimensión sigue siendo del (1). La
-  tabla de mutaciones NO se lee como matriz de cobertura.
-  MEDICIÓN ADICIONAL sobre `solver/` (lectura, sin tocar), disparada por una pregunta de Claude Code
-  que el contrato no cubría: ¿emite el verificador dos `CeldaRef` de la MISMA instancia con plazas
-  distintas? SÍ, y está en tres eslabones —`VerificadorSolucion:603-612` añade una `CeldaRef` POR
-  PLAZA al `ArrayList` de la clave `Aula`; `reportarColisiones:646-655` emite UNA sola `Violacion` con
-  la lista entera; `Violacion:39` usa `List.copyOf`, que NO deduplica—. Los comentarios 593-600 lo
-  declaran deliberado (por S2, dos plazas de una instancia en la misma aula son colisión, no uso
-  compartido). Como SALIDA DEL SOLVER es estado IMPOSIBLE (lo bloquean `restriccionNoSolapeAula` por
-  candidatas y `ProblemaHorarioMapper:315-326` por `aulaFija`), pero el diagnóstico NO verifica lo que
-  el solver acaba de emitir: verifica lo RECONSTRUIDO DESDE PERSISTENCIA (`SolucionMapper`), donde
-  ninguna de las dos barreras interviene. El `it` (9) se escribe como FIXTURE DEFENSIVO DECLARADO
-  (precedente S81: una función pura se prueba contra su contrato, no contra la validez del horario) y
-  fija que la `Violacion` repetida bajo una clave es contrato, no bug: deduplicar es del consumidor.
-  HALLAZGO COLATERAL sobre el solver, no arreglado aquí: el ÚNICO test de `SOLAPE_AULA`
-  (`VerificadorSolucionAtribucionTest:109-139`) usa dos actividades mono-plaza; el caso intra-instancia
-  NO está cubierto por ningún test del solver.
-  Suite frontend 13 → 22 (+9), backend intacto (app 315, solver 78). Demostrada no-vacía por las tres
-  mutaciones. Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO
-  regenerada, `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
-  `PROYECCION_1ESO` NO contaminado: fixtures LOCALES en el spec (patrón S41/S81).
-  DEUDA NUEVA: D-F8.6-iiiA-a (ningún servicio del frontend tiene test), D-F8.6-iiiA-b (`Totales` sale
-  modelado y sin consumidor), D-F8.6-iiiA-c (S2 sobre `aulaFija` validada SOLO en la ruta JSON).
-  Siguiente: 8.6-iii-B (MOCKUP PREVIO OBLIGATORIO; hereda D-F8.6-ii-b y D-F8.6-iiiA-b), 8.4-B (MOCKUP
-  PREVIO) u 8.5-D2b (solver, regenera la referencia), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1022,10 +984,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84 y la de S81 en la Sesión 85 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 y la de S82 en la Sesión 86 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S82–S85). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S83–S86). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1477,6 +1439,88 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
   Origen: S62 perdió la descomposición de Fase 8 por archivarla sin comprobar que era la única copia
   viva; S63 estuvo a punto de perder D-B8-1 y el mecanismo de D13.
 
+### Método de trabajo (procedimiento vigente)
+
+Procedimiento que el trabajo real sigue y que hasta S86 solo vivía en los prompts de apertura y
+dentro de cabeceras de sesión. Se escribe aquí porque una cabecera se archiva y un prompt no se
+conserva: lo que solo vive ahí se pierde (origen: D-F8.0-a). Es MECANISMO VIGENTE en el sentido de
+R5, no crónica: si un apartado deja de aplicarse se BORRA, no se narra. Las sesiones citadas lo son
+como evidencia de que la regla se practica, no como relato.
+
+**M1 — Procedimiento de cierre de sesión.** Ocho pasos. Los pasos 1-5 y 7-8 se derivan del
+precedente observable (S69-S85); el 6 es norma ya escrita (R4/R5, arriba).
+
+1. REGISTRAR la sesión en el plan: cabecera compacta nueva, actualización de «Fase actual», casilla
+   del bloque en «Bloques de Fase N», y la deuda nueva o cerrada. Una deuda que se cierra dice QUÉ
+   quedó implementado y DÓNDE; una deuda que sobrevive con matices dice cuáles.
+2. ARCHIVAR la cabecera más antigua de la ventana a la bitácora, para que el plan conserve siempre
+   las 4 últimas. Ver M1-bis: es el único paso con fallos históricos.
+3. ACTUALIZAR el censo de la bitácora. Su cabecera de fichero declara el rango DOS veces (la línea
+   de descripción y la línea de orden cronológico). Las dos.
+4. ACTUALIZAR en el plan la crónica de archivado («la de SNN en la Sesión MM») y la frase de
+   ventana («El plan conserva las 4 últimas cabeceras compactas (Sxx–Syy)»).
+5. EVALUAR LIMPIEZA del plan con el criterio de S63/S80: se condensa un frente CERRADO, nunca uno
+   con sub-bloques abiertos. Si no hay acumulación, se DICE y no se inventa trabajo (S81-S85 la
+   descartaron cinco veces por este mismo motivo).
+6. VERIFICAR R4 por grep y R5 por lectura, contra el fichero y no de memoria. Además: DIFF DEL
+   CUERPO (qué regiones se tocaron, y ninguna otra) y revisión de COSTURA (que lo de encima y lo de
+   debajo de cada recorte queden intactos).
+7. PROPONER EL NOMBRE DE SESIÓN con el patrón «Educhronos. Sesión NN. <breve resumen>».
+8. ENTREGAR EL PROMPT DE LA SESIÓN SIGUIENTE sin que el usuario tenga que pedirlo. Ver M1-ter.
+
+**M1-bis — El archivado, con verificación propia.** Es el único paso con fallos registrados: S59
+dejó una copia truncada y duplicada de S55 (corregida en S60) y S68 dejó el censo en S63 conteniendo
+ya S64 (corregido en S69). Los dos son fallos de transcripción o de censo, no de criterio, y por eso
+el paso lleva verificación propia:
+- PROMOVER, no solo mover. Las 4 cabeceras vivas del plan NO son homogéneas —la más reciente es
+  `### Sesión NN` y las otras tres son texto plano con prefijo «Última sesión registrada
+  (previa):»—, mientras que TODAS las entradas de la bitácora son `### Sesión NN`. Archivar exige
+  convertir el formato de la línea de cabecera (anomalía destapada en S82 por la medición de R4).
+- INSERTAR al final, en orden cronológico ascendente, la entrada ÍNTEGRA y una sola vez.
+- COMPROBAR después: una sola cabecera por sesión, el cuerpo archivado idéntico al que salió del
+  plan (diff), y los dos censos coherentes entre sí y con la crónica.
+  [DECISIÓN DEL ARQUITECTO (S86), no derivada de la evidencia: que PROMOVER sea obligatorio. S82 lo
+  registró como anomalía observada, no como regla querida.]
+
+**M1-ter — El prompt de la sesión siguiente.** Se entrega al cerrar y NO fija el alcance: nombra los
+candidatos vivos con su estado leído de «Bloques de Fase N» y deja la elección para el turno de
+apertura. NO copia lo que ya está en el plan: remite a esta sección y a las cabeceras vivas en vez
+de resumirlas. Si supera ~60 líneas es señal de que está duplicando documentación y hay que podarlo
+antes de entregarlo. Sin este criterio la sección no sirve de nada, porque el prompt vuelve a crecer
+—que es exactamente el problema que S86 vino a resolver—.
+[DECISIÓN DEL ARQUITECTO (S86): el umbral concreto de ~60 líneas, sin precedente medido.]
+
+**M2 — §A de medición previa, antes de decidir alcance.** Antes de fijar el contrato de un bloque se
+mide el estado real de aquello sobre lo que se va a trabajar, con el INSTRUMENTO MÁS BARATO que
+responda a la pregunta (greps y lectura literal bastaron de S77 a S85; un test desechable cuando la
+pregunta era sobre datos y no sobre el repo). La salida literal se trae SIN INTERPRETAR antes de
+proponer estructura. Lo que sostiene la regla no es la costumbre sino su rendimiento: en las once
+sesiones S75-S85 la medición desmintió una suposición de apertura del arquitecto —no alguna vez,
+todas—. Corolario: una afirmación sobre el estado del repo que no se ha medido se declara como
+RAZONAMIENTO, no como medición.
+
+**M3 — Campaña de mutación: lo que un aserto vale.** Un aserto vale lo que vale la mutación que lo
+pone rojo. Al cerrar un bloque con tests se declara la campaña (qué mutaciones, cuál cae y por qué
+vía) y se demuestra la suite NO VACÍA (romper algo → rojo esperado → restaurar → verde). Cuatro
+precisiones acumuladas, todas medidas y ninguna evidente:
+- CAER ante una mutación ≠ DISCRIMINAR la dimensión que ataca: un test puede caer por acoplamiento.
+  La tabla de mutaciones NO se lee como matriz de cobertura (S82).
+- Reutilizar una función NO hereda su test: es cobertura fantasma (S81).
+- Una mutación que no compila NO es una mutación. En TypeScript hay que declarar el cast que la
+  hace expresable, o el compilador tapa el hueco y el aserto vale menos (D-F8.6-ivB-b).
+- El instrumento tiene sus propias trampas: leer el spec ANTES de calibrar la campaña
+  (D-F8.6-ivA-b).
+
+**M4 — Contraste antes de teclear, y artefactos derivados.** En modo híbrido el contrato se
+contrasta con Claude Code ANTES de escribir código, y lo que ese turno destape se REGISTRA, no se
+tapa: es el mecanismo que más errores de especificación del arquitecto ha cazado (dos en S79, tres
+en S81, tres en S82, tres en S83, cinco en S85). Corolario operativo de S66: se especifica el ASERTO
+DISCRIMINANTE, no el propósito del test —un propósito bien enunciado produce el camino feliz, que
+es justo lo que NO detecta el fallo que el test existe para detectar—. Artefactos derivados, regla
+mecánica: si se toca `solver/src/main` se REGENERA `referencia-codigo-solver.md`; si no, se declara
+que no se ha tocado. La documentación va en commit APARTE del código; el manifiesto de dependencias
+va CON el código que lo necesita, porque sin él ese commit no construiría.
+
 ### Deuda consciente VIVA
 
 Deuda técnica y de dominio ABIERTA, aceptada conscientemente y pendiente de resolver en
@@ -1925,6 +1969,17 @@ siguiente, con remisión a la bitácora.
   frase de ventana son las que se olvidan (el propio prompt lo advierte cada sesión, lo que es
   síntoma). → escribirlo como sección del plan la próxima vez que se haga higiene, o aceptar
   explícitamente que es costumbre.
+  → CERRADA en S86. Escrita la sección «Método de trabajo (procedimiento vigente)» en este plan,
+  inmediatamente DESPUÉS del criterio de higiene documental (R4/R5) y dentro de «Decisiones
+  permanentes». Contiene: M1 (los OCHO pasos del cierre de sesión, no cinco —la medición contó dos
+  más de los que esta deuda suponía: evaluar limpieza y verificar diff/costura—), M1-bis (el
+  archivado con PROMOVER/INSERTAR/COMPROBAR y los dos fallos históricos que lo justifican),
+  M1-ter (el prompt de la sesión siguiente, con su criterio de poda), M2 (§A de medición), M3
+  (campaña de mutación) y M4 (contraste previo + artefactos derivados). Los dos últimos pasos que
+  esta deuda no nombraba —proponer el nombre de sesión y entregar el prompt siguiente— vivían SOLO
+  en el prompt de apertura y son ahora M1.7 y M1.8. Dos puntos van marcados como DECISIÓN DEL
+  ARQUITECTO por no sostenerlos la evidencia: la obligatoriedad de PROMOVER y el umbral de ~60
+  líneas.
 
 - **D-F8.6-iiiA-a** (S82, CERRADA en S85, DE COBERTURA, no bloqueante) — NINGÚN SERVICIO DEL FRONTEND TIENE
   TEST. Medido en S82: los cuatro specs del frontend cubren funciones PURAS (`pines`, `proyeccion`,
