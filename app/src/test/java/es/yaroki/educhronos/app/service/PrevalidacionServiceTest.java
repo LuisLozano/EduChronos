@@ -274,7 +274,7 @@ class PrevalidacionServiceTest {
 
     private static Actividad actividad(
             String codigo, int repeticiones, int duracion, PatronTemporal patron, Plaza... plazas) {
-        return new Actividad(codigo, Optional.of(MAT), repeticiones, duracion, patron, List.of(plazas));
+        return new Actividad(codigo, Optional.of(MAT), repeticiones, duracion, patron, List.of(plazas), false);
     }
 
     private static RestriccionHoraria dura(Profesor profesor, Tramo tramo) {
@@ -286,7 +286,7 @@ class PrevalidacionServiceTest {
             List<Subgrupo> subgrupos, List<Actividad> actividades,
             List<RestriccionHoraria> restricciones) {
         return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
-                subgrupos, actividades, restricciones, List.of());
+                subgrupos, actividades, restricciones, List.of(), List.of());
     }
 
     private static List<AvisoPrevalidacion> soloRegla(List<AvisoPrevalidacion> avisos, String regla) {

@@ -133,18 +133,21 @@ class CatalogoMapperActividadTest {
                 .isEqualTo(es.yaroki.educhronos.solver.domain.PatronTemporal.AGRUPADA);
     }
 
-    // ── Caso 4: requiereTutor se ignora (D-B5-5) ──
+    // ── Caso 4: requiereTutor se propaga al dominio (Bloque 8.5-D2b-1, revoca D-B5-5) ──
     @Test
-    void aActividad_ignoraRequiereTutor() {
-        Actividad jpaActividad = actividadMinima("ACT-TUT");
-        jpaActividad.setRequiereTutor(true);
+    void aActividad_propagaRequiereTutor() {
+        // Par discriminante: sin la pata 'false' un mapeo que clavase 'true' pasaría.
+        Actividad jpaConTutor = actividadMinima("ACT-CON-TUTOR");
+        jpaConTutor.setRequiereTutor(true);
+        es.yaroki.educhronos.solver.domain.Actividad dominioConTutor =
+                CatalogoMapper.aActividad(jpaConTutor, indiceAsig(), indiceProf(), indiceAula(), indiceSg());
+        assertThat(dominioConTutor.requiereTutor()).isTrue();
 
-        // El record domain.Actividad no tiene ese campo: basta con que el mapeo
-        // no falle y produzca la actividad.
-        es.yaroki.educhronos.solver.domain.Actividad dominio =
-                CatalogoMapper.aActividad(jpaActividad, indiceAsig(), indiceProf(), indiceAula(), indiceSg());
-
-        assertThat(dominio.codigo()).isEqualTo("ACT-TUT");
+        Actividad jpaSinTutor = actividadMinima("ACT-SIN-TUTOR");
+        jpaSinTutor.setRequiereTutor(false);
+        es.yaroki.educhronos.solver.domain.Actividad dominioSinTutor =
+                CatalogoMapper.aActividad(jpaSinTutor, indiceAsig(), indiceProf(), indiceAula(), indiceSg());
+        assertThat(dominioSinTutor.requiereTutor()).isFalse();
     }
 
     // ── Caso 5: integridad referencial ──

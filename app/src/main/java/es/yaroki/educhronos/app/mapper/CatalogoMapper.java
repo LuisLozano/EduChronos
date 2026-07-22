@@ -159,10 +159,13 @@ public final class CatalogoMapper {
                 BloqueoMapper.aBloqueos(pinesTramo, pinesAula, actividadesPorCodigo,
                         plazasPorCodigo, aulasPorCodigo, tramosMapeados.porEntidad());
 
+        // tutorias: lista vacía. El transporte de ProfesorTutoria (persistencia ->
+        // dominio) NO entra en este bloque (8.5-D2b-1, alcance solo aActividad); se
+        // cablea en un bloque posterior de D2b. La lista décima no puede ser null.
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
                 gruposDom, subgruposDom, actividadesDom, restriccionesDom,
-                bloqueosDom);
+                bloqueosDom, List.of());
     }
 
     /**
@@ -244,11 +247,11 @@ public final class CatalogoMapper {
      * null (plazas de distinta asignatura, p. ej. bloque CyR/OyD/RefMt), se mapea
      * a {@code Optional.empty()}; mismo shape que {@code aGrupo} con {@code grupoPadre}.
      *
-     * <p>{@code requiereTutor} de la entidad NO se propaga al dominio: el record
-     * {@code domain.Actividad} no tiene ese campo (la invariante S8 no la consume
-     * el solver hoy). Es dato de configuración de §4.6 que persiste para Fase 8
-     * pero el mapper lo ignora, igual que ignora Nivel o los campos extra de Aula.
-     * Decisión D-B5-5.
+     * <p>{@code requiereTutor} de la entidad SÍ se propaga al dominio como séptimo
+     * componente del record {@code domain.Actividad} (Bloque 8.5-D2b-1). Es dato de
+     * configuración de §4.6 (invariante S8) que el solver aún no consume, pero que
+     * viaja al dominio para la Fase 8. Esto REVOCA la decisión D-B5-5, que lo ignoraba
+     * cuando el record de dominio carecía del campo.
      *
      * <p>Las plazas se resuelven con el helper privado {@link #aPlaza}, que
      * comparte los mismos índices por código. Un código sin correspondencia en
@@ -287,7 +290,8 @@ public final class CatalogoMapper {
                 entidad.getRepeticionesPorSemana(),
                 entidad.getDuracionTramos(),
                 aPatronTemporal(entidad.getPatronTemporal()),
-                plazas);
+                plazas,
+                entidad.isRequiereTutor());
     }
 
     /**
