@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-07-14
-- Commit: `ff1efbf`
+- Fecha: 2026-07-23
+- Commit: `d0f5e9b`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -22,6 +22,7 @@ Componentes:
 - `int duracionTramos`
 - `PatronTemporal patronTemporal`
 - `List<Plaza> plazas`
+- `boolean requiereTutor`
 
 Consume: `Asignatura`, `PatronTemporal`, `Plaza`
 
@@ -88,11 +89,12 @@ Componentes:
 - `List<Actividad> actividades`
 - `List<RestriccionHoraria> restriccionesHorarias`
 - `List<SesionBloqueada> bloqueos`
+- `List<ProfesorTutoria> tutorias`
 
 Métodos:
 - `public int indiceDeTramo(Tramo tramo)`
 
-Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
 
 ### `Profesor` — public record
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -101,6 +103,15 @@ Componentes:
 - `String nombre`
 
 Consume: (ninguno)
+
+### `ProfesorTutoria` — public record
+Paquete: `es.yaroki.educhronos.solver.domain`
+Componentes:
+- `Profesor profesor`
+- `GrupoAdministrativo grupo`
+- `RolTutoria rol`
+
+Consume: `GrupoAdministrativo`, `Profesor`, `RolTutoria`
 
 ### `RestriccionHoraria` — public record
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -112,6 +123,12 @@ Componentes:
 - `Optional<String> motivo`
 
 Consume: `Profesor`, `TipoRestriccion`, `Tramo`
+
+### `RolTutoria` — public enum
+Paquete: `es.yaroki.educhronos.solver.domain`
+Constantes: `TUTOR_PRINCIPAL`, `CO_TUTOR`
+
+Consume: (ninguno)
 
 ### `SesionBloqueada` — public record
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -344,6 +361,7 @@ Componentes:
 - `Integer duracionTramos`
 - `String patronTemporal`
 - `List<PlazaDto> plazas`
+- `Boolean requiereTutor`
 
 Consume: `PlazaDto`
 
@@ -404,8 +422,9 @@ Componentes:
 - `List<ActividadDto> actividades`
 - `List<RestriccionHorariaDto> restriccionesHorarias`
 - `List<SesionBloqueadaDto> bloqueos`
+- `List<ProfesorTutoriaDto> tutorias`
 
-Consume: `ActividadDto`, `AsignaturaDto`, `AulaDto`, `GrupoDto`, `ProfesorDto`, `RestriccionHorariaDto`, `SesionBloqueadaDto`, `SubgrupoDto`, `TramoDto`
+Consume: `ActividadDto`, `AsignaturaDto`, `AulaDto`, `GrupoDto`, `ProfesorDto`, `ProfesorTutoriaDto`, `RestriccionHorariaDto`, `SesionBloqueadaDto`, `SubgrupoDto`, `TramoDto`
 
 ### `ProblemaHorarioJsonLoader` — public final class
 Paquete: `es.yaroki.educhronos.solver.io`
@@ -422,7 +441,7 @@ Paquete: `es.yaroki.educhronos.solver.io`
 Métodos:
 - `public static ProblemaHorario aDominio(ProblemaHorarioDto dto)`
 
-Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioDto`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioDto`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `RolTutoria`, `SesionBloqueada`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
 
 ### `ProblemaInvalidoException` — public class
 Paquete: `es.yaroki.educhronos.solver.io`
@@ -438,6 +457,15 @@ Paquete: `es.yaroki.educhronos.solver.io`
 Componentes:
 - `String codigo`
 - `String nombre`
+
+Consume: (ninguno)
+
+### `ProfesorTutoriaDto` — public record
+Paquete: `es.yaroki.educhronos.solver.io`
+Componentes:
+- `String profesor`
+- `String grupo`
+- `String rol`
 
 Consume: (ninguno)
 
@@ -894,5 +922,11 @@ Métodos:
 - `void cargaBloqueoConPinDeAula() throws Exception`
 - `void rechazaPinDeAulaSobrePlazaConAulaFija()`
 - `void rechazaPinDeAulaFueraDeCandidatas()`
+- `void cargaTutoriasResueltasConProfesorYGrupoCorrectos() throws Exception`
+- `void cargaProblemaSinTutorias() throws Exception`
+- `void requiereTutorAusenteEsFalseYPresenteViaja() throws Exception`
+- `void rechazaTutoriaConRolDesconocido()`
+- `void rechazaTutoriaConProfesorInexistente()`
+- `void rechazaTutoriaConGrupoInexistente()`
 
-Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `TipoRestriccion`
+Consume: `Actividad`, `Aula`, `Plaza`, `ProblemaHorario`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `RolTutoria`, `SesionBloqueada`, `TipoRestriccion`
