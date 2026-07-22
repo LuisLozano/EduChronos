@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S82. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S83. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S82). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S83). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3443,3 +3443,77 @@ al abrir sesión.
   modelado y sin consumidor), D-F8.6-iiiA-c (S2 sobre `aulaFija` validada SOLO en la ruta JSON).
   Siguiente: 8.6-iii-B (MOCKUP PREVIO OBLIGATORIO; hereda D-F8.6-ii-b y D-F8.6-iiiA-b), 8.4-B (MOCKUP
   PREVIO) u 8.5-D2b (solver, regenera la referencia), a decidir al abrir sesión.
+
+### Sesión 83 — Fase 8, Bloque 8.6-iii-B1: gesto de despinar e índice de pines con id.
+  Modo híbrido. 2 commits de código (3d96b7c producción, 98aab08 tests) + doc aparte. §A DE MEDICIÓN
+  sobre el ESTADO REAL DEL CLIENTE (lectura literal de los 10 ficheros de `frontend/` implicados +
+  `find`/`ls`; instrumento más barato, precedente S77-S82).
+  8.6-iii-B PARTIDO en B1/B2 al abrir. B1 = mockup + estructura de estado + gesto de despinar +
+  recarga del índice; B2 = badge del delta y los dos resaltes de violación. Razón del corte: el
+  despinar cambia la ESTRUCTURA de estado del cliente (`Set`→`Map`) y pintar encima de una estructura
+  que va a mutar es rehacer trabajo.
+  SALIDA DE §A: el estado del pin vive en `HorarioView` (`signal<ReadonlySet<string>>`), NO en la
+  rejilla, que solo lo consulta por `input`. `Bloqueo.id` EXISTE y es `number | null` por decisión
+  deliberada de S81 (espejo del DTO), pero `BloqueoService.borrar(id: number)` exige no-nulo: la
+  costura estaba oculta porque `borrar()` tenía CERO llamadas (confirmado por grep).
+  DECISIÓN (B) sobre (A)/(C): el índice pasa a `Map<string, number | null>` —no se descartan los
+  `id` nulos al indexar ni se mide el backend para saber si el null es alcanzable, que es lo que S81
+  declaró impropio de un bloque de frontend—.
+  HALLAZGO DEL MOCKUP (las 4 capas dibujadas juntas, aunque B1 solo implemente la de pinado, para que
+  B2 no tenga que recolocar): pinado y violación de profesor/subgrupo COMPETÍAN por el mismo borde.
+  Resuelto liberando el `border-left` en B1 (α).
+  HALLAZGO QUE CIERRA UNA PREGUNTA DE UX SIN DIBUJARLA: el gesto de despinar NO puede ser «soltar en
+  el origen» —ese slot es donde la instancia sigue pintada, porque la proyección no se recarga al
+  pinar— ni «botón en el aviso» —el aviso es un `<p>` global que no conoce la instancia—. Solo el
+  candado tiene acceso a la instancia: la medición resolvió la alternativa que D-F8.6-ii-b dejaba
+  abierta, no el dibujo.
+  TRES ERRORES DEL ARQUITECTO, destapados por el turno de CONTRASTE de Claude Code ANTES de teclear
+  (patrón S82: contrato criticado en un turno propio, sin escribir código): (1) C7 especificaba CSS
+  YA IMPLEMENTADO en S81 —`position: relative` (`horario-grid.css:27`), candado absoluto (:41-47) y
+  fondo tenue (:36-39)—, y peor: hizo confirmar al usuario una decisión INEXISTENTE («borde vs fondo»
+  cuando ya era fondo). La decisión REAL, que el error tapaba, era si se libera el `border-left`.
+  (2) C6 decía «también desde `cargar(id)`» conservando la del constructor: como `paramMap` emite en
+  init, habrían quedado DOS `GET /api/bloqueos`. (3) el contrato NO nombraba `pines.spec.ts:24`, que
+  `Map` rompe por `toEqual` entre constructores distintos. SEXTA SESIÓN CONSECUTIVA (S78-S83) con el
+  mismo género de error: afirmar cómo está el código sin comprobarlo —y esta vez tras haber PEDIDO
+  el fichero y escribir igualmente sin leerlo—.
+  OBJECIÓN SUYA ACEPTADA (O2), que cambió el contrato: `despinar` emite la CLAVE (`output<string>`),
+  no el `id`. La rejilla habla identidad de DOMINIO (`clavePin`, D-6); el `id` es identidad de FILA, y
+  meterlo en la presentación la obligaba a ramificar `<button>`/`<span>` por un detalle de
+  persistencia. `HorarioView` resuelve clave→id contra su Map y hace no-op si es null: la rejilla no
+  conoce nulls y el candado es SIEMPRE botón. Consecuencia asumida: el «estado 3» del mockup (candado
+  inerte) desaparece como estado visual.
+  F1 RESUELTA POR EVIDENCIA, no por criterio: `cdkDragHandle` NO hace falta. El CDK no registra
+  ningún listener de `click` (grep sobre `drag-drop.mjs`: cero coincidencias) y el arrastre no arranca
+  hasta superar `dragStartThreshold: 5` px (`drag-drop.mjs:589`, :896-901), así que un click sin
+  desplazamiento no puede reinterpretarse como arrastre.
+  TESTBED RECHAZADO A PROPÓSITO, contra la propuesta de Claude Code: estrenar la primera
+  infraestructura de test de componente del repo dentro de un bloque cuyo valor es otro es el patrón
+  que D-F8.6-iiiA-a ya declaró (misma decisión que S62 con los 12 repos y S75 con el mapper). La
+  evidencia del CDK zanja el riesgo que motivaba el test. Coste declarado, no tapado: T3/T4/T5 van a
+  producción con CERO tests (ver D-F8.6-iiiB1-a).
+  ASERTOS: los tres `it` de `pines.spec.ts` INVERTIDOS, no borrados (práctica (f)), más un `it` (4)
+  para `id: null`. DOS mutaciones, y la SEGUNDA la añadió Claude Code para someter a prueba una
+  afirmación mía: (A) valor constantizado (`b.id`→0) tumba (1), (2)-vía-`.get` y (4), y respeta (3);
+  (B) ids barajados tumba (1) y (2)-`.get`. (B) DESMIENTE mi afirmación de que (1) era «el único que
+  asevera que el id correcto va con la clave correcta»: no lo es. Lectura del solapamiento, que NO se
+  fuerza a disjunción: (1), (2)-`.get` y (4) leen la MISMA dimensión (el valor del mapa) a tres
+  granularidades —mapa entero, punto concreto, caso borde—; es un detector con tres lupas, y el
+  solapamiento es ESTRUCTURAL. El único aserto de dimensión distinta es (3), la cardinalidad. Que
+  (2)-`.has` sobreviva a (A) es el dato que valida el `.get` añadido: sin él, ese `it` no vería la
+  dimensión nueva. (4) es ciego al emparejamiento POR CONSTRUCCIÓN (un solo elemento: invertir es la
+  identidad). Lo que (1) aporta en exclusiva es la EXHAUSTIVIDAD (una entrada de más solo cae ahí);
+  eso se afirma como RAZONAMIENTO, no como medición: ninguna de las dos mutaciones lo aísla.
+  DESVIACIÓN DE ALCANCE APROBADA: T5 decía «eliminar `border-left-color`. Nada más», y Claude Code
+  añadió además el reset de `<button>` (`padding`, `border`, `background`, `cursor`) en `.candado`.
+  NO es mejora inventada: sin él, T3 deja un recuadro gris del agente de usuario en cada instancia
+  pinada. El T5 del arquitecto estaba mal especificado; el reset va CON el commit que lo necesita.
+  Suite frontend 22 → 23 (+1), backend intacto (app 315, solver 78). `ng build` limpio. Backend NO
+  tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  DEUDA NUEVA: D-F8.6-iiiB1-a (T3/T4/T5 sin ningún test; el doble GET corregido queda sin red),
+  D-F8.6-iiiB1-b (la recarga es correcta POR ACCIDENTE), D-F8.6-iiiB1-c (`mensaje()` miente en el
+  DELETE). CIERRA D-F8.6-ii-b.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; el borde ya está liberado y el mockup dibujado), 8.4-B
+  (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera
+  la referencia), a decidir al abrir sesión.
