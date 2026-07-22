@@ -9,4 +9,5 @@ public record ActividadDto(
         Integer repeticionesPorSemana,
         Integer duracionTramos,
         String patronTemporal,            // DISTRIBUIDA | AGRUPADA | NEUTRA
-        List<PlazaDto> plazas) { }
+        List<PlazaDto> plazas,
+        Boolean requiereTutor) { }        // wrapper: ausente/null lo traduce el mapper a false

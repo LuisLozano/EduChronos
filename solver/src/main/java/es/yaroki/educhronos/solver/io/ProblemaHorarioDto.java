@@ -11,4 +11,5 @@ public record ProblemaHorarioDto(
         List<SubgrupoDto> subgrupos,
         List<ActividadDto> actividades,
         List<RestriccionHorariaDto> restriccionesHorarias,
-        List<SesionBloqueadaDto> bloqueos) { }
+        List<SesionBloqueadaDto> bloqueos,
+        List<ProfesorTutoriaDto> tutorias) { }

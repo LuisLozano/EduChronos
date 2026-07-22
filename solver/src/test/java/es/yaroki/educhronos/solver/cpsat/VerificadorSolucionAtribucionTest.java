@@ -54,7 +54,7 @@ class VerificadorSolucionAtribucionTest {
         Plaza plaza = new Plaza(
                 cod + "-P1", ASIG, Set.of(prof),
                 Optional.of(aula), Set.of(), Set.of(sg));
-        return new Actividad(cod, Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(plaza));
+        return new Actividad(cod, Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(plaza), false);
     }
 
     private static ProblemaHorario problema(List<Actividad> actividades) {
@@ -63,7 +63,8 @@ class VerificadorSolucionAtribucionTest {
                 List.of(), List.of(), List.of(), List.of(), List.of(),
                 actividades,
                 List.of(),    // restriccionesHorarias
-                List.of());   // bloqueos
+                List.of(),    // bloqueos
+                List.of());   // tutorias
     }
 
     private static ActividadInstancia instanciaDe(ProblemaHorario problema, String codActividad) {

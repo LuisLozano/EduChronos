@@ -8,6 +8,9 @@ import java.util.Optional;
  * Unidad que el solver coloca en el tiempo.
  * Una actividad produce tantas ActividadInstancia como repeticionesPorSemana.
  * asignatura puede ser empty en actividades de bloque (ej. Religión/ATED).
+ *
+ * requiereTutor marca las actividades que un tutor del grupo debe impartir (§4.6,
+ * invariante S8). El solver aún no lo consume: es dato transportado para la Fase 8.
  */
 public record Actividad(
         String codigo,
@@ -15,7 +18,8 @@ public record Actividad(
         int repeticionesPorSemana,
         int duracionTramos,
         PatronTemporal patronTemporal,
-        List<Plaza> plazas) {
+        List<Plaza> plazas,
+        boolean requiereTutor) {
 
     public Actividad {
         Objects.requireNonNull(codigo,               "codigo no puede ser null");

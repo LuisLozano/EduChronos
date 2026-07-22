@@ -14,7 +14,8 @@
     "subgrupos":   { "type": "array", "items": { "$ref": "#/$defs/subgrupo" } },
     "actividades": { "type": "array", "items": { "$ref": "#/$defs/actividad" } },
     "restriccionesHorarias": { "type": "array", "items": { "$ref": "#/$defs/restriccionHoraria" } },
-    "bloqueos": { "type": "array", "items": { "$ref": "#/$defs/sesionBloqueada" } }
+    "bloqueos": { "type": "array", "items": { "$ref": "#/$defs/sesionBloqueada" } },
+    "tutorias": { "type": "array", "items": { "$ref": "#/$defs/tutoria" } }
   },
   "$defs": {
     "tramo": {
@@ -67,7 +68,8 @@
         "repeticionesPorSemana": { "type": "integer", "minimum": 1 },
         "duracionTramos":        { "type": "integer", "minimum": 1 },
         "patronTemporal":        { "enum": ["DISTRIBUIDA", "AGRUPADA", "NEUTRA"] },
-        "plazas":                { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/plaza" } }
+        "plazas":                { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/plaza" } },
+        "requiereTutor":         { "type": "boolean" }
       }
     },
     "plaza": {
@@ -109,6 +111,15 @@
       "properties": {
         "plaza": { "type": "string", "minLength": 1 },
         "aula":  { "type": "string", "minLength": 1 }
+      }
+    },
+    "tutoria": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profesor", "grupo", "rol"],
+      "properties": {
+        "profesor": { "type": "string", "minLength": 1 },
+        "grupo":    { "type": "string", "minLength": 1 },
+        "rol":      { "enum": ["TUTOR_PRINCIPAL", "CO_TUTOR"] }
       }
     }
   }

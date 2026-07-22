@@ -181,7 +181,8 @@ class SolverHorarioOptimizacionEscalaSubconjuntosTest {
                 subgruposVivos,
                 actividadesVivas,
                 base.restriccionesHorarias(),
-                base.bloqueos());
+                base.bloqueos(),
+                base.tutorias());
     }
 
     /** Un subgrupo es coherente si TODOS sus grupos sobreviven o NINGUNO; mixto = error de dato. */

@@ -1,0 +1,25 @@
+{
+  "tramos": [ {"codigo": "LUN-1", "diaSemana": 1, "ordenEnDia": 1} ],
+  "aulas": [ {"codigo": "A5", "nombre": "Aula 5"} ],
+  "asignaturas": [ {"codigo": "Mat", "nombre": "Matematicas"} ],
+  "profesores": [
+    {"codigo": "MAT8", "nombre": "Profesor Matematicas 8"},
+    {"codigo": "LEN2", "nombre": "Profesor Lengua 2"}
+  ],
+  "grupos": [
+    {"codigo": "1ESO-A", "tipo": "ORDINARIO", "grupoPadre": null},
+    {"codigo": "1ESO-B", "tipo": "ORDINARIO", "grupoPadre": null}
+  ],
+  "subgrupos": [ {"codigo": "1ESO-A-Completo", "grupos": ["1ESO-A"]} ],
+  "actividades": [
+    {
+      "codigo": "Mat-1ESOA", "asignatura": "Mat",
+      "repeticionesPorSemana": 1, "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "plazas": [ {"codigo": "Mat-1ESOA-P1", "asignatura": "Mat", "profesores": ["MAT8"],
+        "aulaFija": "A5", "subgrupos": ["1ESO-A-Completo"]} ]
+    }
+  ],
+  "tutorias": [
+    {"profesor": "MAT8", "grupo": "1ESO-A", "rol": "TUTOR_PRINCIPAL"}
+  ]
+}

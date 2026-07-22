@@ -50,7 +50,7 @@ class VerificadorSolucionGrupoTest {
         Plaza plaza = new Plaza(
                 cod + "-P1", ASIG, Set.of(prof),
                 Optional.of(aula), Set.of(), Set.of(sg));
-        return new Actividad(cod, Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(plaza));
+        return new Actividad(cod, Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(plaza), false);
     }
 
     private static ProblemaHorario problema(List<Actividad> actividades) {
@@ -59,7 +59,8 @@ class VerificadorSolucionGrupoTest {
                 List.of(), List.of(), List.of(), List.of(), List.of(),
                 actividades,
                 List.of(),    // restriccionesHorarias: vacío (6b: el verificador de grupo no las usa)
-                List.of());   // bloqueos: sin pines
+                List.of(),    // bloqueos: sin pines
+                List.of());   // tutorias
     }
 
     /** La (unica) instancia esperada de una actividad, segun la expansion real. */
@@ -127,7 +128,7 @@ class VerificadorSolucionGrupoTest {
                 Optional.of(new Aula("A1", "A1")), Set.of(), Set.of(sg1));
         Plaza p2 = new Plaza("CYR-P2", ASIG, Set.of(new Profesor("P2", "P2")),
                 Optional.of(new Aula("A2", "A2")), Set.of(), Set.of(sg2));
-        Actividad cyr = new Actividad("CyR", Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(p1, p2));
+        Actividad cyr = new Actividad("CyR", Optional.of(ASIG), 1, 1, NO_DISTRIBUIDA, List.of(p1, p2), false);
         ProblemaHorario problema = problema(List.of(cyr));
 
         SolucionHorario sol = new SolucionHorario(Map.of(

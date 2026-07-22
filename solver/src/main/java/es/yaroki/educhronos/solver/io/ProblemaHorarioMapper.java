@@ -9,7 +9,9 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.ProfesorTutoria;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.RolTutoria;
 import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
@@ -145,8 +147,10 @@ public final class ProblemaHorarioMapper {
             verificarI2(plazas, ctx);
             verificarAulasFijasDisjuntas(plazas, ctx);
 
+            // requiereTutor es opcional en el DTO (wrapper): ausente/null -> false.
+            boolean requiereTutor = act.requiereTutor() != null && act.requiereTutor();
             actividades.add(construir(
-                    () -> new Actividad(cod, asigAct, rep, dur, pat, plazas), ctx));
+                    () -> new Actividad(cod, asigAct, rep, dur, pat, plazas, requiereTutor), ctx));
         }
 
         // ---- Restricciones horarias del profesorado (Bloque 6b) ----
@@ -193,6 +197,24 @@ public final class ProblemaHorarioMapper {
             bloqueos.add(new SesionBloqueada(instancia, tr, aulasPinadas));
         }
 
+        // ---- Tutorias del profesorado sobre grupos (Bloque 8.5-D2b-1) ----
+        // Sección opcional (como restriccionesHorarias/bloqueos): sin ella la lista
+        // queda vacía. Referencias (profesor, grupo) por código, resueltas contra los
+        // catálogos de la pasada 1; el rol se traduce a RolTutoria (valor desconocido
+        // -> ProblemaInvalidoException). Dato transportado para la Fase 8 (S8): el
+        // solver no lo consume aún, este bloque solo lo lleva al dominio.
+        List<ProfesorTutoriaDto> tutoriasDto =
+                dto.tutorias() == null ? List.of() : dto.tutorias();
+        List<ProfesorTutoria> tutorias = new ArrayList<>();
+        for (ProfesorTutoriaDto t : tutoriasDto) {
+            String ctx = "tutoria (profesor '" + t.profesor() + "', grupo '" + t.grupo() + "')";
+            Profesor prof = resolver(profesores, t.profesor(), "profesor", ctx);
+            GrupoAdministrativo grupo = resolver(grupos, t.grupo(), "grupo", ctx);
+            String rolTxt = exigirTexto(t.rol(), "rol", ctx);
+            RolTutoria rol = construir(() -> RolTutoria.valueOf(rolTxt), ctx + ": rol");
+            tutorias.add(construir(() -> new ProfesorTutoria(prof, grupo, rol), ctx));
+        }
+
         // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia).
         // El mapper los ordena: el autor del JSON no tiene que preocuparse del orden.
         List<Tramo> tramosOrdenados = new ArrayList<>(tramos.values());
@@ -208,7 +230,8 @@ public final class ProblemaHorarioMapper {
                 new ArrayList<>(subgrupos.values()),
                 actividades,
                 restricciones,
-                bloqueos), "problema");
+                bloqueos,
+                tutorias), "problema");
     }
 
     /**

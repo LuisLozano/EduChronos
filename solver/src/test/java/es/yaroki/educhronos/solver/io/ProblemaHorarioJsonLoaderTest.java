@@ -5,7 +5,9 @@ import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
+import es.yaroki.educhronos.solver.domain.ProfesorTutoria;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.RolTutoria;
 import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import org.junit.jupiter.api.Test;
@@ -313,6 +315,125 @@ class ProblemaHorarioJsonLoaderTest {
         assertThatThrownBy(() -> loader.cargar(stream(json)))
                 .isInstanceOf(ProblemaInvalidoException.class)
                 .hasMessageContaining("aulasCandidatas");
+    }
+
+    // ── Bloque 8.5-D2b-1: transporte de tutorias y requiereTutor ──────────────
+
+    @Test
+    void cargaTutoriasResueltasConProfesorYGrupoCorrectos() throws Exception {
+        // Fixture defensivo: profesor "MAT8" y grupo "1ESO-A" con espacios de codigo
+        // divergentes, y con un profesor (LEN2) y un grupo (1ESO-B) extra. Asi un
+        // lookup cruzado (grupo por codigo de profesor, o resolver "el unico") no
+        // colaria: la resolucion tiene que casar por la clave correcta.
+        ProblemaHorario problema;
+        try (InputStream in = recurso("/fixtures/problema-8-5-tutorias.json")) {
+            problema = loader.cargar(in);
+        }
+        assertThat(problema.tutorias()).hasSize(1);
+        ProfesorTutoria t = problema.tutorias().get(0);
+        assertThat(t.profesor().codigo()).isEqualTo("MAT8");
+        assertThat(t.grupo().codigo()).isEqualTo("1ESO-A");
+        assertThat(t.rol()).isEqualTo(RolTutoria.TUTOR_PRINCIPAL);
+    }
+
+    @Test
+    void cargaProblemaSinTutorias() throws Exception {
+        // Seccion opcional: los 43 fixtures vivos la omiten -> lista VACIA, no null.
+        ProblemaHorario problema;
+        try (InputStream in = recurso("/fixtures/problema-minimo.json")) {
+            problema = loader.cargar(in);
+        }
+        assertThat(problema.tutorias()).isEmpty();
+    }
+
+    @Test
+    void requiereTutorAusenteEsFalseYPresenteViaja() throws Exception {
+        // Par discriminante: sin la pata 'ausente->false' un default clavado a true
+        // sobreviviria; sin la pata 'true' un mapeo que clavase false sobreviviria.
+        String sinFlag = """
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}] }
+            """;
+        ProblemaHorario sin = loader.cargar(stream(sinFlag));
+        assertThat(sin.actividades().get(0).requiereTutor()).isFalse();
+
+        String conFlag = """
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","requiereTutor":true,"plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}] }
+            """;
+        ProblemaHorario con = loader.cargar(stream(conFlag));
+        assertThat(con.actividades().get(0).requiereTutor()).isTrue();
+    }
+
+    @Test
+    void rechazaTutoriaConRolDesconocido() {
+        String json = """
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "tutorias": [{"profesor":"MAT8","grupo":"1A","rol":"SUPLENTE"}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("rol");
+    }
+
+    @Test
+    void rechazaTutoriaConProfesorInexistente() {
+        String json = """
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "tutorias": [{"profesor":"FANTASMA","grupo":"1A","rol":"TUTOR_PRINCIPAL"}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("FANTASMA");
+    }
+
+    @Test
+    void rechazaTutoriaConGrupoInexistente() {
+        String json = """
+            { "tramos": [], "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"S","grupos":["1A"]}],
+              "actividades": [{"codigo":"A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["S"]}]}],
+              "tutorias": [{"profesor":"MAT8","grupo":"GRUPO-X","rol":"TUTOR_PRINCIPAL"}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("GRUPO-X");
     }
 
     private InputStream recurso(String ruta) {

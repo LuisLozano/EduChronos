@@ -16,7 +16,8 @@ public record ProblemaHorario(
         List<Subgrupo> subgrupos,
         List<Actividad> actividades,
         List<RestriccionHoraria> restriccionesHorarias,
-        List<SesionBloqueada> bloqueos) {
+        List<SesionBloqueada> bloqueos,
+        List<ProfesorTutoria> tutorias) {
 
     public ProblemaHorario {
         Objects.requireNonNull(tramos,      "tramos no puede ser null");
@@ -28,6 +29,7 @@ public record ProblemaHorario(
         Objects.requireNonNull(actividades, "actividades no puede ser null");
         Objects.requireNonNull(restriccionesHorarias, "restriccionesHorarias no puede ser null");
         Objects.requireNonNull(bloqueos,    "bloqueos no puede ser null");
+        Objects.requireNonNull(tutorias,    "tutorias no puede ser null");
 
         tramos      = List.copyOf(tramos);
         aulas       = List.copyOf(aulas);
@@ -38,6 +40,7 @@ public record ProblemaHorario(
         actividades = List.copyOf(actividades);
         restriccionesHorarias = List.copyOf(restriccionesHorarias);
         bloqueos    = List.copyOf(bloqueos);
+        tutorias    = List.copyOf(tutorias);
     }
 
     /** Índice del tramo en la lista ordenada. Usado por el solver para construir IntVar. */
