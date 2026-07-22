@@ -600,7 +600,14 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deuda D-F8.6-ivB-a
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-D2b-1 CERRADO
+  en S90 (transporte de la tutoría al solver, PRIMER BLOQUE DE BACKEND desde S79: `requiereTutor`
+  al dominio + DÉCIMA lista `ProblemaHorario.tutorias` + `ProfesorTutoria`/`RolTutoria` propios de
+  solver; el corte de S89 se DESMINTIÓ en §A —dejaba la mitad-1 sin consumidor— y 8.5-D2b se parte
+  en transporte (D2b-1) y verificación de S8 (D2b-2); el contraste invalidó el contrato: había DOS
+  caminos a `domain.Actividad` y «solo io» era inalcanzable, así que `CatalogoMapper` PROPAGA y
+  D-B5-5 se REVOCA; 6 tests con fixture defensivo y campaña de 7; suite 315 → 321;
+  referencia regenerada. CIERRA D-B5-5). Deuda D-F8.6-ivB-a
   REDUCIDA en S89 (cobertura del camino de PINADO en el contenedor: seis tests (21)-(26) sobre
   `alSoltar`, que no tenía ni un aserto pese a los 11 `it` del fichero; `guardar` pasa a devolver un
   Subject FRESCO POR INVOCACIÓN —un Subject cerrado tras `.error()` redispara síncronamente y hacía
@@ -696,7 +703,86 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deud
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 89 — Fase 8, D-F8.6-ivB-a: cobertura del camino de PINADO en el contenedor.
+### Sesión 90 — Fase 8, Bloque 8.5-D2b-1: transporte de la tutoría al solver (CIERRA D-B5-5).
+  Modo híbrido. 3 commits (333dfb8 solver, d0f5e9b app, a363e72 doc). PRIMER BLOQUE DE BACKEND
+  desde S79: 8.5-D2b llevaba DOCE sesiones desplazado (desde S77), perdiendo cada vez contra
+  candidatos de frontend más baratos. Se abre PARTIDO en D2b-1 (transporte) y D2b-2 (verificación
+  de S8), y el corte NO es el que S89 recomendó: ver abajo.
+  §A DE MEDICIÓN sobre `referencia-codigo-solver.md` y los tres documentos, declarada COMO
+  RAZONAMIENTO SOBRE EL DERIVADO y no como medición del árbol —el Project no contiene `solver/`—.
+  Salida: cero apariciones de `requiereTutor`/`tutor`/`Tutoria` en toda la referencia (confirma
+  D-B5-5 en el derivado); `Actividad` 6 componentes, `ActividadDto` gemelo exacto de 6;
+  `ProblemaHorario` 9 listas; `Profesor` 2 componentes sin tutoría; `ReglaDura` 7 constantes,
+  ninguna de tutoría.
+  §A DESMIENTE EL CORTE QUE S89 RECOMENDÓ, y es el hallazgo que reordena el bloque. S89 proponía
+  D2b-1 = «§A + propagar `requiereTutor` + inversión del test». Medido: eso deja la mitad-1 SIN
+  CONSUMIDOR —un campo que nadie lee es D-B5-5 una capa más abajo, con otro nombre—. CORTE NUEVO:
+  D2b-1 = las DOS patas de transporte (`requiereTutor` + `ProfesorTutoria` al `ProblemaHorario`),
+  sin verificar S8; D2b-2 = `ReglaDura` + verificador. Criterio que lo justifica: cada mitad debe
+  entregar algo que un test pueda aseverar. Segundo hallazgo del §A, que el plan no decía: S8 exige
+  además resolver «grupo cubierto por los subgrupos de P», tercera pieza y no dos —el mecanismo ya
+  existe en el verificador vía S9—.
+  TURNO DE CONTRASTE (M4): SEIS correcciones, CINCO del arquitecto, y la primera INVALIDÓ EL
+  CONTRATO, no un detalle.
+  (1) «SOLO io» ERA INALCANZABLE. Hay DOS caminos que construyen `domain.Actividad`, no uno:
+  `ProblemaHorarioMapper:149` (el que yo tenía en la cabeza) y `CatalogoMapper:284` (app, olvidado).
+  Añadir el 7.º componente rompe la compilación del segundo y FUERZA la decisión semántica que el
+  bloque existe para tomar. Mi «fuera de alcance» no era una decisión: era un descuido que ocultaba
+  la decisión. RESUELTO: `CatalogoMapper` PROPAGA `isRequiereTutor()`. Clavar `false` produciría el
+  estado incoherente entidad=true/dominio=false por la puerta de entrada REAL de configuración
+  (el CRUD de 8.5-C1), y dejaría S8 verificable en fixtures e inverificable en producción —la misma
+  asimetría que D-F8.6-iiiA-c documenta en otra capa—.
+  (2) ORDEN DE ARGUMENTOS DEL RECORD, corregido contra mi propuesta: escribí
+  `(grupo, profesor, rol)` por analogía con la PROSA de S8 en el modelo, que no es una firma. La
+  entidad JPA gemela de S77 es `(profesor, grupo, rol)`. Dos gemelos con los dos primeros invertidos
+  es footgun sin contrapartida. ADOPTADO `(Profesor, GrupoAdministrativo, RolTutoria)`.
+  (3) TRES RAZONES DE ÁRBOL para la décima lista que yo no tenía, además de la mía (el `rol` se
+  perdería dentro del grupo): `GrupoAdministrativo` se usa como elemento de `Set` y como clave de
+  mapa, así que meterle tutores envenenaría su `equals`; la 2.ª pasada ya tiene profesores y grupos
+  construidos, luego una lista décima calca `bloqueos` sin ciclos; y `resolverGrupo` es recursivo con
+  detección de ciclos por `grupoPadre`, donde inyectar refs a `Profesor` acopla dos catálogos.
+  (4) LOS CALL SITES QUE MEDÍ ERAN LOS EQUIVOCADOS. Pedí los de `Actividad` (7: 2 main + 5 test) y
+  no los de `ProblemaHorario`, que son OTROS 7. Consecuencia mecánica de la décima lista, reparada
+  sin parar y ACEPTADA: no es alcance nuevo, es lo que «añadir un componente a un record» significa.
+  (5) SIN TESTS DE ROUND-TRIP EL BLOQUE ERA TRANSPORTE NO VERIFICADO POR CONSTRUCCIÓN. Cuatro
+  mutaciones compilables e invisibles hoy (cruce de lookup profesor/grupo, default invertido
+  `null→true` sobre 43 fixtures que omiten el campo, lista sin cablear, `CatalogoMapper` clavando
+  `false`). El criterio con el que defendí este corte —«cada mitad entrega algo aseverable»— se me
+  había olvidado materializar en el contrato. Los tests entraron por el contraste.
+  ENTREGADO: `domain` gana `Actividad.requiereTutor` (7.º, `boolean` primitivo), `RolTutoria`
+  PROPIO de solver (no se reutiliza el de `app/`: solver no depende de app), `ProfesorTutoria` y la
+  DÉCIMA lista `ProblemaHorario.tutorias`; `io` gana `ActividadDto.requiereTutor` (`Boolean`
+  WRAPPER, porque los 43 fixtures vivos omiten el campo y el mapper colapsa `null→false`),
+  `ProfesorTutoriaDto` y la décima lista del DTO; el mapper resuelve en 2.ª pasada calcando
+  `bloqueos` (idiom `== null ? List.of()`, helper `resolver`, helper `construir` para el enum);
+  schema con ambos campos OPCIONALES; `CatalogoMapper.aActividad` propaga y su Javadoc REVOCA
+  D-B5-5.
+  SEIS TESTS con asertos discriminantes: T1 round-trip con FIXTURE DEFENSIVO obligatorio
+  (`problema-8-5-tutorias.json`, MAT8/1ESO-A + LEN2/1ESO-B: códigos divergentes y un segundo par,
+  para que un lookup cruzado resuelva a algo DISTINTO en vez de fallar por casualidad; mata la
+  mutación del cruce); T2 sin `tutorias` → lista vacía; T3 el PAR ausente→false / presente→true;
+  T4 rol, profesor y grupo desconocidos → `ProblemaInvalidoException`; T5 sustituye el Caso 4 de
+  `CatalogoMapperActividadTest:136` —que aseveraba «el flag se ignora»— por el PAR true→true /
+  false→false, renombrado `aActividad_propagaRequiereTutor`: con un solo `isTrue()` no se discrimina
+  contra un `true` clavado. El aserto de lista cableada NO se duplicó: T1 lo mata por construcción.
+  CAMPAÑA DE 7 MUTACIONES, cero supervivientes. UNA OBJECIÓN DEL ARQUITECTO A SU PROPIA CAMPAÑA,
+  registrada como deuda en vez de reabrir el bloque: M6 («el mapper ignora el rol y clava
+  TUTOR_PRINCIPAL») cae por T4a, es decir por el test del rol INVÁLIDO, no por ninguno que asevere
+  que un rol VÁLIDO se transporta. Como el fixture de T1 lleva `TUTOR_PRINCIPAL`, clavarlo es
+  indistinguible del acierto. La mutación honesta exige un fixture con `CO_TUTOR` y un aserto sobre
+  `rol()`.
+  Suite solver 78 → 84 (+6), app 237 (Caso 4 sustituido, neto 0), total 315 → 321.
+  `solver/src/main` TOCADO → `referencia-codigo-solver.md` REGENERADA (commit aparte, M4).
+  `modelo_datos_fase1.md` no se toca por entidad ni invariante nueva (S8 ya existía, aquí solo se
+  transporta), PERO su nota de S77 (§ «Estado de implementación de `ProfesorTutoria`») queda como
+  ESTADO VIVO EQUIVOCADO por R5 y se corrige en la misma sesión.
+  CIERRA D-B5-5. DEUDA NUEVA: D-F8.5-D2b1-a (la ruta JPA clava `tutorias` vacía), D-F8.5-D2b1-b
+  (el rol no tiene aserto de transporte).
+  Siguiente: 8.5-D2b-2 (verificación de S8: `ReglaDura` + `VerificadorSolucion` + cableado del
+  `ProfesorTutoriaRepository`, que es la deuda D-F8.5-D2b1-a y NO puede quedar fuera o S8 sería
+  inverificable en producción), 8.6-B (contrato por decidir ANTES de medir) u 8.4-B (MOCKUP PREVIO;
+  D-F8.4-A-c es trabajo de backend), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 89 — Fase 8, D-F8.6-ivB-a: cobertura del camino de PINADO en el contenedor.
   Modo híbrido. 1 commit de código (solo tests, un único fichero modificado) + doc aparte.
   §A DE MEDICIÓN con TRES FALLOS DE INSTRUMENTO ENCADENADOS, todos del arquitecto y todos del mismo
   género —dar por sabido el terreno en vez de leerlo—: (1) el guion apuntó a `frontend/` cuando el
@@ -923,46 +1009,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deud
   ya decidido en mockup), 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
   referencia) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos
   bloques), a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 86 — MÉTODO: se escribe el procedimiento que se invocaba y no existía (CIERRA D-F8.0-a).
-  Modo híbrido (greps en Claude Code, redacción y decisiones en el Project). Sin código: solo `docs/`.
-  §A DE MEDICIÓN sobre los DOS DOCUMENTOS (13 greps + lectura literal; instrumento más barato,
-  precedente S77-S85), corrida ANTES de redactar una línea de norma, porque el riesgo específico de
-  esta sesión era canonizar de memoria una costumbre de dos sesiones.
-  SALIDA DE §A, en tres partes. (1) PASOS REALES DEL ARCHIVADO: ocho, de los cuales solo el 6 (R4/R5)
-  estaba escrito; los otros siete son precedente observable S69-S85. (2) MÉTODO ATRAPADO EN CABECERAS:
-  cuatro candidatos vigentes sin sede —§A de medición, campaña de mutación, contraste con Claude Code
-  y regla de artefactos derivados— más uno que YA tiene sede y NO se duplica (MOCKUP PREVIO, D-F8.6-a:
-  se remite, no se reescribe). (3) DOS FALLOS HISTÓRICOS REALES del archivado, no hipotéticos: la copia
-  truncada y duplicada de S55 (S59, corregida en S60) y el censo desalineado (S68, corregido en S69);
-  los dos son de transcripción o censo, no de criterio. Eso es lo que justifica que M1-bis lleve
-  verificación propia en vez de ser un bullet más.
-  ENTREGADO: sección «Método de trabajo (procedimiento vigente)» (82 líneas) insertada TRAS el criterio
-  R4/R5 y no en sección aparte —R4/R5 ya es método y vive bajo «Decisiones permanentes»; separarlas
-  obligaría a duplicar la referencia—. M1 (ocho pasos del cierre), M1-bis (el archivado, con PROMOVER /
-  INSERTAR / COMPROBAR), M1-ter (el prompt de la sesión siguiente: no fija alcance, no copia el plan,
-  se poda si pasa de ~60 líneas), M2 (§A de medición), M3 (campaña de mutación y lo que un aserto vale),
-  M4 (contraste antes de teclear + artefactos derivados).
-  DOS COSAS MARCADAS COMO DECISIÓN DEL ARQUITECTO, no como norma medida, porque la evidencia no las
-  sostiene: que PROMOVER sea obligatorio (S82 lo registró como ANOMALÍA observada, no como regla
-  querida) y el umbral de ~60 líneas del prompt (cifra sin precedente). Marcarlas es el punto: una
-  sección de método que no distingue lo medido de lo decidido miente sobre su propia autoridad.
-  DESCARTADO POR R5, pese a estar en las cabeceras que se archivarán: recuentos de suite por bloque,
-  las mutaciones concretas de cada sesión y los hallazgos de framework de S73-S76. Son historia con
-  moraleja, no mecanismo vigente; una sección de método que narre sesiones es lo que R5 prohíbe.
-  PRIMERA PRUEBA REAL DEL PROCEDIMIENTO: el archivado de S82 se ejecutó SIGUIENDO M1-bis recién
-  escrito, no el precedente. Resultado: los tres sub-pasos se aplicaron sin fricción y el paso de
-  COMPROBAR (diff del cuerpo archivado contra el que salió del plan) resultó NO decorativo —es el
-  control que habría cazado el fallo de S59—. El procedimiento no necesitó corrección al aplicarlo.
-  CONSECUENCIA ASUMIDA Y REGISTRADA: S86 no toca código y desplaza por sexta vez 8.6-iii-B2, y
-  también 8.4-B y 8.5-D2b. Se acepta porque D-F8.0-a llevaba seis sesiones viva y el coste del prompt
-  de apertura sin sede era recurrente, no puntual.
-  Código NO tocado: `solver/`, `app/` ni `frontend/` → `referencia-codigo-solver.md` NO regenerada,
-  `modelo_datos_fase1.md` NO tocado, suite sin cambio (app 315, solver 78, frontend 35).
-  DEUDA NUEVA: ninguna. CIERRA D-F8.0-a.
-  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra D19/D20
-  en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u
-  8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia), a decidir al
-  abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -974,10 +1020,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88 y la de S85 en la Sesión 89 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89 y la de S86 en la Sesión 90 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S86–S89). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S87–S90). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1018,7 +1064,7 @@ el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). 
 - [x] Bloque 2 — Catálogo del centro como 8 entidades JPA (§4.1) en `app.catalog` + 3 enums + 8 repositorios; round-trip sobre SQLite real. (S46) → `LocalTime` persiste intacto en SQLite (ver Notas técnicas Fase 6). Detalle: bitácora S46.
 - [x] Bloque 3 — `CatalogoMapper` JPA→dominio (Aula/Asignatura/Profesor/Grupo/Tramo): `VIRTUAL_OPTATIVA` aborta con excepción explícita, recreo excluido del Tramo. (S47) → deudas D26 (`Aula.nombre = codigo`) y D27 (código de Tramo sintetizado L1..V6). Detalle: bitácora S47.
 - [x] Bloque 4 — Entidad JPA `Subgrupo` (§4.2, `@ManyToMany` a `GrupoAdministrativo` vía `subgrupo_grupo`) + `SubgrupoRepository` + `CatalogoMapper.aSubgrupo` (población por identidad, aborta ante grupo huérfano). (S48) → `Particion`/`SubgrupoParticion` diferidas a Fase 8 (deudas D1/D7). Detalle: bitácora S48.
-- [x] Bloque 5 — Entidades JPA `Actividad` (agregado raíz, cascade+orphanRemoval a `Plaza`) y `Plaza` (`aula_fija` `@ManyToOne` + 3 `@ManyToMany`) + `CatalogoMapper.aActividad`/`aPlaza`; enum `app.catalog.PatronTemporal` propio. (S49) → `ActividadInstancia` NO se materializa como tabla (artefacto derivado, D-B5-1); el XOR aula_fija/candidatas lo valida el record de dominio (D-B5-2); `requiereTutor` persiste pero el solver no lo consume (D-B5-5, S8). Detalle: bitácora S49.
+- [x] Bloque 5 — Entidades JPA `Actividad` (agregado raíz, cascade+orphanRemoval a `Plaza`) y `Plaza` (`aula_fija` `@ManyToOne` + 3 `@ManyToMany`) + `CatalogoMapper.aActividad`/`aPlaza`; enum `app.catalog.PatronTemporal` propio. (S49) → `ActividadInstancia` NO se materializa como tabla (artefacto derivado, D-B5-1); el XOR aula_fija/candidatas lo valida el record de dominio (D-B5-2); `requiereTutor` persiste pero el solver no lo consume (D-B5-5, S8) → **D-B5-5 CERRADA en S90** (8.5-D2b-1): `CatalogoMapper.aActividad` propaga `entidad.isRequiereTutor()` al 7.º componente del record de dominio y su Javadoc revoca la decisión. Detalle: bitácora S49 y S90.
 - [x] Bloque 6 — `CatalogoMapper.aProblemaHorario` (7 listas JPA → `ProblemaHorario` completo); índices por código con `toMap` que ABORTA ante código duplicado. (S50) → catálogo COMPLETO sin poda —huérfanos entran, el mapper traduce, no poda— (D-B6-1); dejó `restriccionesHorarias` vacía hasta B7 (D28). Detalle: bitácora S50.
 - [x] Bloque 7 — Entidad JPA `ProfesorRestriccionHoraria` (§4.3) + enum `TipoRestriccion` + `CatalogoMapper.aRestriccionHoraria`; refactor `aTramosConIndice` (produce la lista de Tramo y el `IdentityHashMap<TramoSemanal,Tramo>` en un bucle). CIERRA D28. (S51) → el tramo se resuelve por REFERENCIA de objeto, no por el código sintético L1..V6 (no reabre D27, D-B7-2); el peso DEFAULT 1 de §4.3 no se materializa en la entidad (política de UI/Fase 8, D-B7-6). Detalle: bitácora S51.
 - [x] Bloque 8 — Servicio de aplicación: orquestación repos → mapper → solver (S52).
@@ -1145,11 +1191,29 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
 - [x] Bloque 8.5-C3 — I3 + CRUD de compatibilidades asignatura↔tipo de aula, semántica (C): 0 filas ⇒ irrestricta (S75) → validada en el funnel único `resolverContenido`; D-F8.5-C3-a (COMUN sin semántica), D-F8.5-C3-b (códigos por currículo); Detalle: bitácora S75.
 - [x] Bloque 8.5-D1 — PDC como sub-recurso `/api/grupos/{idPadre}/pdc` + subgrupo mono-Di automático (S76) → un PDC por padre → 400; D-F8.5-D1-b (el 1:1 es decisión del arquitecto); Detalle: bitácora S76.
 - [x] Bloque 8.5-D2a — `ProfesorTutoria` (@IdClass) + I4 en escritura + herencia PDC←padre por copia (S77) → CIERRA D-F8.5-D1-a; tutoría = población propia del Grupo (cascade) y referencia entrante del Profesor (409); D-F8.5-D2a-a (I4 sin red en BD), D-F8.5-D2a-b (incoherencia 404/400); Detalle: bitácora S77.
-- [ ] Bloque 8.5-D2b — S8 verificable por el SOLVER. Bloque de solver/, no de catálogo:
-      propagar requiereTutor al dominio (romper D-B5-5) + transportar ProfesorTutoria al
-      ProblemaHorario + verificar S8. NOTA DE DISEÑO: S8 NO es restricción de scheduling
-      (no depende del tramo elegido); va en VerificadorSolucion o en validación de catálogo,
-      NO en ModeloCpSat. Regenera referencia-codigo-solver.md.
+- [x] Bloque 8.5-D2b-1 — TRANSPORTE de la tutoría al solver (S90). CIERRA D-B5-5. `Actividad` gana
+      7.º componente `boolean requiereTutor` (primitivo; el WRAPPER `Boolean` vive solo en el DTO,
+      porque los 43 fixtures vivos omiten el campo y el mapper colapsa `null→false`);
+      `ProblemaHorario` gana DÉCIMA lista `tutorias`; `ProfesorTutoria(Profesor, GrupoAdministrativo,
+      RolTutoria)` y `RolTutoria` son PROPIOS de solver —no se reutiliza el enum de `app/`: solver no
+      depende de app— y con el ORDEN DE LA ENTIDAD JPA de S77, no el de la prosa de S8.
+      La décima lista se prefiere a meter tutores en `GrupoAdministrativo` por CUATRO razones: el
+      `rol` se perdería, `GrupoAdministrativo` se usa como elemento de `Set` y clave de mapa (su
+      `equals` quedaría envenenado), la 2.ª pasada ya tiene ambos catálogos construidos, y
+      `resolverGrupo` es recursivo con detección de ciclos donde inyectar `Profesor` acopla dos
+      catálogos. `CatalogoMapper.aActividad` PROPAGA `isRequiereTutor()`: clavar `false` dejaría
+      entidad=true/dominio=false por la puerta de entrada real de configuración y haría S8
+      verificable en fixtures e inverificable en producción. D-F8.5-D2b1-a, D-F8.5-D2b1-b.
+      Detalle: bitácora S90.
+- [ ] Bloque 8.5-D2b-2 — S8 VERIFICABLE por el solver. `ReglaDura` gana su constante de tutoría +
+      `VerificadorSolucion` la comprueba + CABLEADO del `ProfesorTutoriaRepository` en
+      `CatalogoMapper.aProblema`, que hoy clava `List.of()` (D-F8.5-D2b1-a): sin ese cableado S8
+      pasaría en fixtures y sería estructuralmente inverificable en producción, así que NO puede
+      quedar fuera. Cubre además D-F8.5-D2b1-b (fixture con `CO_TUTOR` y aserto sobre `rol()`).
+      NOTA DE DISEÑO: S8 NO es restricción de scheduling (no depende del tramo elegido); va en
+      VerificadorSolucion o en validación de catálogo, NO en ModeloCpSat. Tercera pieza medida en
+      S90 y que el plan no decía: S8 exige resolver «grupo cubierto por los subgrupos de P», cuyo
+      mecanismo ya existe en el verificador vía S9. Regenera referencia-codigo-solver.md.
 - [ ] Bloque 8.5-D3 — Particion/SubgrupoParticion + UX de subgrupo compartido (D7, I1, I6).
       APLAZADO INDEFINIDAMENTE (S77), decisión explícita, no arrastre. Son dos tablas que el
       SOLVER NO LEE; existirían solo para que I1 sea verificable y para la UX de D7. Su
@@ -2152,6 +2216,26 @@ siguiente, con remisión a la bitácora.
   `server.error.include-message` está desactivado (D-F8.6-ii-a), así que las dos ramas sin red son
   las que HOY no se ejecutan nunca. → cubrir cuando se decida la política global de errores
   (D-F8.6-ii-a), que es lo que las pondría en uso.
+
+- **D-F8.5-D2b1-a** (S90, VIVA, BLOQUEANTE PARA D2b-2) — LA RUTA JPA CLAVA `tutorias` VACÍA.
+  `CatalogoMapper.aProblema` pasa `List.of()` a la décima lista del `ProblemaHorario`: el
+  `ProfesorTutoriaRepository` existe desde S77 pero NO está cableado a dominio. Decisión
+  DELIBERADA de alcance —el contrato de D2b-1 declaraba «app: solo `aActividad`», y cablear el repo
+  exige decidir qué pasa con los co-tutores, que no se ha decidido—, no un descuido. Hoy es
+  INOCUO porque nadie lee `tutorias()` (S8 no se verifica todavía), pero deja la asimetría exacta
+  que este mismo bloque usó como argumento para propagar en `aActividad`: la ruta JSON transporta
+  tutorías y la ruta de producción las clava vacías. → D2b-2 NO PUEDE CERRARSE sin este cableado, o
+  S8 pasaría en fixtures y sería estructuralmente inverificable en producción.
+
+- **D-F8.5-D2b1-b** (S90, VIVA, DE COBERTURA, no bloqueante) — EL `rol` NO TIENE ASERTO DE
+  TRANSPORTE. Objeción del arquitecto a su propia campaña, registrada en vez de reabrir el bloque.
+  La mutación M6 («el mapper ignora el rol y clava `TUTOR_PRINCIPAL`») cae por T4a, es decir por el
+  test del rol INVÁLIDO, no por ninguno que asevere que un rol VÁLIDO viaja intacto. Como el fixture
+  de T1 lleva `TUTOR_PRINCIPAL`, clavarlo es indistinguible del acierto: la única red es que T4a
+  deje de lanzar, y un cambio futuro que mueva la validación del rol a otro sitio dejaría el
+  transporte sin aserto alguno. La mutación honesta exige un fixture con una tutoría `CO_TUTOR` y un
+  aserto sobre `rol()`. → lo cubre D2b-2, que es quien lee el rol de verdad (S8 solo mira
+  `TUTOR_PRINCIPAL`, así que discriminarlo es precisamente su trabajo).
 
 - **D-F8.6-ivB-b** (S84, VIVA, de MÉTODO Y COBERTURA, no bloqueante) — EL COMPILADOR TAPA DOS DE
   LAS OCHO MUTACIONES, Y ESO DEGRADA LO QUE DOS ASERTOS VALEN. La guarda de `alDespinar` es

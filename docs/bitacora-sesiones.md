@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S85. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S86. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S85). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S86). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3702,3 +3702,44 @@ al abrir sesión.
   D19/D20 en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de
   D-F8.4-A-c) u 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
   referencia), a decidir al abrir sesión.
+
+### Sesión 86 — MÉTODO: se escribe el procedimiento que se invocaba y no existía (CIERRA D-F8.0-a).
+  Modo híbrido (greps en Claude Code, redacción y decisiones en el Project). Sin código: solo `docs/`.
+  §A DE MEDICIÓN sobre los DOS DOCUMENTOS (13 greps + lectura literal; instrumento más barato,
+  precedente S77-S85), corrida ANTES de redactar una línea de norma, porque el riesgo específico de
+  esta sesión era canonizar de memoria una costumbre de dos sesiones.
+  SALIDA DE §A, en tres partes. (1) PASOS REALES DEL ARCHIVADO: ocho, de los cuales solo el 6 (R4/R5)
+  estaba escrito; los otros siete son precedente observable S69-S85. (2) MÉTODO ATRAPADO EN CABECERAS:
+  cuatro candidatos vigentes sin sede —§A de medición, campaña de mutación, contraste con Claude Code
+  y regla de artefactos derivados— más uno que YA tiene sede y NO se duplica (MOCKUP PREVIO, D-F8.6-a:
+  se remite, no se reescribe). (3) DOS FALLOS HISTÓRICOS REALES del archivado, no hipotéticos: la copia
+  truncada y duplicada de S55 (S59, corregida en S60) y el censo desalineado (S68, corregido en S69);
+  los dos son de transcripción o censo, no de criterio. Eso es lo que justifica que M1-bis lleve
+  verificación propia en vez de ser un bullet más.
+  ENTREGADO: sección «Método de trabajo (procedimiento vigente)» (82 líneas) insertada TRAS el criterio
+  R4/R5 y no en sección aparte —R4/R5 ya es método y vive bajo «Decisiones permanentes»; separarlas
+  obligaría a duplicar la referencia—. M1 (ocho pasos del cierre), M1-bis (el archivado, con PROMOVER /
+  INSERTAR / COMPROBAR), M1-ter (el prompt de la sesión siguiente: no fija alcance, no copia el plan,
+  se poda si pasa de ~60 líneas), M2 (§A de medición), M3 (campaña de mutación y lo que un aserto vale),
+  M4 (contraste antes de teclear + artefactos derivados).
+  DOS COSAS MARCADAS COMO DECISIÓN DEL ARQUITECTO, no como norma medida, porque la evidencia no las
+  sostiene: que PROMOVER sea obligatorio (S82 lo registró como ANOMALÍA observada, no como regla
+  querida) y el umbral de ~60 líneas del prompt (cifra sin precedente). Marcarlas es el punto: una
+  sección de método que no distingue lo medido de lo decidido miente sobre su propia autoridad.
+  DESCARTADO POR R5, pese a estar en las cabeceras que se archivarán: recuentos de suite por bloque,
+  las mutaciones concretas de cada sesión y los hallazgos de framework de S73-S76. Son historia con
+  moraleja, no mecanismo vigente; una sección de método que narre sesiones es lo que R5 prohíbe.
+  PRIMERA PRUEBA REAL DEL PROCEDIMIENTO: el archivado de S82 se ejecutó SIGUIENDO M1-bis recién
+  escrito, no el precedente. Resultado: los tres sub-pasos se aplicaron sin fricción y el paso de
+  COMPROBAR (diff del cuerpo archivado contra el que salió del plan) resultó NO decorativo —es el
+  control que habría cazado el fallo de S59—. El procedimiento no necesitó corrección al aplicarlo.
+  CONSECUENCIA ASUMIDA Y REGISTRADA: S86 no toca código y desplaza por sexta vez 8.6-iii-B2, y
+  también 8.4-B y 8.5-D2b. Se acepta porque D-F8.0-a llevaba seis sesiones viva y el coste del prompt
+  de apertura sin sede era recurrente, no puntual.
+  Código NO tocado: `solver/`, `app/` ni `frontend/` → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado, suite sin cambio (app 315, solver 78, frontend 35).
+  DEUDA NUEVA: ninguna. CIERRA D-F8.0-a.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra D19/D20
+  en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u
+  8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia), a decidir al
+  abrir sesión.
