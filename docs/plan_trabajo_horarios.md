@@ -759,7 +759,8 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   Siguiente: 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia),
   8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos bloques),
   8.6-B (aviso durante el arrastre) o la cobertura de D-F8.6-ivB-a, a decidir al abrir sesión.
-### Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico y badge del delta blando.
+  Última sesión registrada (previa): Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico
+  y badge del delta blando.
   Modo híbrido. 3 commits de código (2047349 capa pura, 71c4fb6 rejilla, 709b58a contenedor) + doc
   aparte. §A DE MEDICIÓN sobre el ESTADO REAL DEL FRONTEND (lectura literal de los ficheros de
   `app/frontend/` implicados + `ls`/`grep`; instrumento más barato, precedente S77-S86).
@@ -999,7 +1000,7 @@ la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67
 S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 y la de S84 en la Sesión 88 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S84–S87). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S85–S88). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
