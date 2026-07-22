@@ -83,6 +83,7 @@ describe('contenedor del horario', () => {
   let sujetoProyeccion: Subject<HorarioProyeccion>;
   let sujetoBorrar: Subject<void>;
   let sujetoDiagnostico: Subject<Diagnostico>;
+  let ultimoGuardar: Subject<Bloqueo>;
   let bloqueos: {
     listar: ReturnType<typeof vi.fn>;
     guardar: ReturnType<typeof vi.fn>;
@@ -100,7 +101,15 @@ describe('contenedor del horario', () => {
 
     bloqueos = {
       listar: vi.fn(() => sujetoListar),
-      guardar: vi.fn(),
+      // FRESCO POR INVOCACIÓN, no un Subject compartido como los otros dobles: un
+      // Subject que ya emitió `.error()` queda CERRADO, y re-suscribirse a él
+      // redispara el error de forma SÍNCRONA. El (25) encadena un alta fallida y
+      // otra a continuación; con un sujeto compartido, el segundo `guardar()`
+      // devolvería el cerrado y `alSoltar` repoblaría `errorPin` nada más
+      // suscribirse, haciendo INOBSERVABLE la fase "errorPin a null antes de
+      // responder". Cada llamada estrena Subject y guarda el último en
+      // `ultimoGuardar` para poder emitir sobre él.
+      guardar: vi.fn(() => (ultimoGuardar = new Subject<Bloqueo>())),
       borrar: vi.fn(() => sujetoBorrar),
     };
     horario = { getProyeccion: vi.fn(() => sujetoProyeccion) };
@@ -333,5 +342,193 @@ describe('contenedor del horario', () => {
 
     // Indexado por CELDA: la única violación aparece bajo sus dos instancias.
     expect(grid.violaciones().size).toBe(2);
+  });
+
+  /**
+   * El cuerpo del POST se CONSTRUYE en el contenedor a partir de la suelta: la
+   * rejilla emite la INSTANCIA y el tramo destino, y aquí se arma el
+   * `BloqueoRequest` con `aulas: []` —la suelta fija solo el TRAMO (D-5)—. El
+   * objeto esperado va LITERAL, nunca compuesto desde la suelta: componerlo desde
+   * `s` volvería circular el aserto. `dia = 3` y `orden = 4` son DISTINTOS a
+   * propósito —con `dia === orden` la permutación `{dia:s.orden, orden:s.dia}`
+   * (M21) saldría idéntica y quedaría sin medir—. No se emite respuesta: lo que
+   * mide este test es el argumento de la llamada, no la reacción al next.
+   */
+  it('(21) el cuerpo del POST se arma desde la suelta con aulas vacías y el tramo sin permutar', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    await fixture.whenStable();
+
+    expect(bloqueos.guardar).toHaveBeenCalledTimes(1);
+    expect(bloqueos.guardar).toHaveBeenCalledWith({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+  });
+
+  /**
+   * La clave del índice se toma de la RESPUESTA del POST (`b`), no de la suelta
+   * (`s`): el backend es la autoridad sobre qué instancia quedó pinada. Para que
+   * la mutación `clavePin(b...)` → `clavePin(s...)` (M22) tenga víctima, la
+   * respuesta DIVERGE de la suelta en las dos dimensiones de la clave.
+   *
+   * <p>FIXTURE DEFENSIVO DECLARADO: en producción el backend devuelve lo que
+   * recibe, así que esta divergencia (suelta `Mat-1ºA|2`, respuesta `LCL-1ºA|1`)
+   * es imposible. Es deliberada: sin ella, `s` y `b` coincidirían y la mutación
+   * quedaría verde. Mismo recurso que el it (9) de `diagnostico.spec` (S82). Se
+   * aseveran las DOS mitades: la clave de la respuesta presente con su valor, y
+   * la de la suelta ausente.
+   */
+  it('(22) la clave del índice sale de la respuesta del POST, no de la suelta', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    await fixture.whenStable();
+
+    ultimoGuardar.next({
+      id: 9,
+      actividadCodigo: 'LCL-1ºA',
+      indice: 1,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+    await fixture.whenStable();
+
+    expect(grid.pinadas().get('LCL-1ºA|1')).toBe(9);
+    expect(grid.pinadas().has('Mat-1ºA|2')).toBe(false);
+  });
+
+  /**
+   * SIN alta optimista: el candado aparece al llegar la respuesta del POST, no al
+   * emitir la suelta. La mitad "antes" es la única que discrimina —un alta
+   * optimista produce el MISMO estado final—, y por eso el sujeto del `guardar`
+   * NO se emite hasta haber comprobado el 0. Mata M23 (poblar `pinadas` antes del
+   * subscribe), que dejaría el tamaño en 1 ya en la fase "antes".
+   */
+  it('(23) el pin entra en el índice al llegar la respuesta, no al emitir la suelta', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    await fixture.whenStable();
+    // ANTES de la respuesta: nada pinado.
+    expect(grid.pinadas().size).toBe(0);
+
+    ultimoGuardar.next({
+      id: 9,
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+    await fixture.whenStable();
+    // DESPUÉS: el único pin.
+    expect(grid.pinadas().size).toBe(1);
+  });
+
+  /**
+   * Un POST que falla NO pina y su mensaje se DEGRADA cuando el body no trae
+   * `message` ni `error` (hoy `server.error.include-message` está desactivado).
+   * Se asevera el TEXTO EXACTO, no la mera presencia de `.error`: mata M24
+   * (`return cuerpo?.message ?? ''`), que dejaría el aviso vacío.
+   *
+   * <p>Se lee por el `<p class="error">`: aquí la proyección va OK (`error()` es
+   * null) y no hay fallo de diagnóstico, así que ese párrafo es inequívocamente
+   * `errorPin` —mismo razonamiento que el (5)—. El body es `{}` (ni `message` ni
+   * `error`) para forzar la rama del degradado, y `pinadas` sigue en 0.
+   */
+  it('(24) un POST que falla no pina y el mensaje se degrada a estado cuando el body va vacío', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    await fixture.whenStable();
+
+    ultimoGuardar.error({ status: 400, error: {} });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const aviso = raiz.querySelector('.error');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe('El servidor rechazó el pin (400).');
+    expect(grid.pinadas().size).toBe(0);
+  });
+
+  /**
+   * Dos invariantes del ciclo de pinado en un test:
+   *
+   * <p>(a) Tras un alta OK, la proyección NO se recarga: `getProyeccion` sigue en
+   * la ÚNICA llamada del montaje. El pin es una restricción para la PRÓXIMA
+   * generación, no un movimiento del horario vigente (TSDoc de la clase). Mata
+   * M25 (`this.cargar(1)` en el next), que dispararía un segundo `getProyeccion`.
+   *
+   * <p>(b) Un segundo `soltar` LIMPIA `errorPin` antes de que su POST responda:
+   * `alSoltar` hace `errorPin.set(null)` en su primera línea. Se comprueba con el
+   * segundo sujeto AÚN sin emitir. Mata M25b (quitar ese `set(null)`), que
+   * dejaría el aviso del fallo anterior pintado.
+   *
+   * <p>Aquí es donde el `guardar` FRESCO POR INVOCACIÓN es imprescindible: el
+   * sujeto del alta fallida queda cerrado tras `.error()`, y solo un sujeto nuevo
+   * en el segundo intento evita que re-suscribirse redispare el error y repueble
+   * `errorPin`, lo que haría inobservable la fase "a null".
+   */
+  it('(25) el alta OK no recarga la proyección, y un nuevo intento limpia el error previo antes de responder', async () => {
+    const grid = await montar([]);
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+
+    // (a) alta OK: la proyección no se recarga.
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    await fixture.whenStable();
+    ultimoGuardar.next({
+      id: 9,
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+    await fixture.whenStable();
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+
+    // (b) un alta que falla puebla el aviso...
+    const raiz = fixture.nativeElement as HTMLElement;
+    grid.soltar.emit({ actividadCodigo: 'LCL-1ºA', indice: 1, dia: 2, orden: 5 });
+    await fixture.whenStable();
+    ultimoGuardar.error({ status: 400, error: {} });
+    await fixture.whenStable();
+    expect(raiz.querySelector('.error')).not.toBeNull();
+
+    // ...y el siguiente intento lo limpia ANTES de que su POST responda.
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 3, dia: 1, orden: 1 });
+    await fixture.whenStable();
+    expect(raiz.querySelector('.error')).toBeNull();
+  });
+
+  /**
+   * El alta PRESERVA el índice previo: se añade la clave nueva sin borrar las que
+   * ya estaban. Es el único test del camino de alta que arranca con `pinadas` NO
+   * vacío —(22) y (23) parten de vacío, donde "mapa copiado" y "mapa desde cero"
+   * dan idéntico resultado—, así que es el único que mata M26 (`new Map()` en vez
+   * de `new Map(this.pinadas())`), que descartaría el pin preexistente al añadir
+   * el nuevo.
+   */
+  it('(26) el alta preserva los pines previos del índice', async () => {
+    const grid = await montar([pin(7, 'Mat-1ºA', 1, 1, 2)]);
+    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
+
+    grid.soltar.emit({ actividadCodigo: 'LCL-1ºA', indice: 1, dia: 3, orden: 4 });
+    await fixture.whenStable();
+    ultimoGuardar.next({
+      id: 9,
+      actividadCodigo: 'LCL-1ºA',
+      indice: 1,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+    await fixture.whenStable();
+
+    expect(grid.pinadas().size).toBe(2);
+    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
+    expect(grid.pinadas().get('LCL-1ºA|1')).toBe(9);
   });
 });
