@@ -296,4 +296,42 @@ describe('contenedor del horario', () => {
     expect(aviso).not.toBeNull();
     expect(aviso!.textContent?.trim()).toBe('No se pudo cargar el diagnóstico.');
   });
+
+  /**
+   * WIRING, no lógica: que el `computed` liga `indiceViolaciones(d.violaciones)`
+   * al input de la rejilla. Una violación con DOS celdas de instancias distintas
+   * ⇒ el índice tiene 2 claves, y eso es lo que debe ver la hija. Se lee por el
+   * input público de la rejilla ({@link rejilla} vía `By.directive`), no por cast
+   * sobre el padre.
+   *
+   * <p>La mutación que mata este test es de CABLEADO: el `computed` que no liga y
+   * devuelve `new Map()` ⇒ 0 claves. NO "indexar por violación en vez de por
+   * celda": esa es lógica pura y ya la mata `diagnostico.spec (2)`; ponerla aquí
+   * sería cobertura fingida.
+   */
+  it('(20) el input violaciones de la rejilla se cabla desde el diagnóstico (dos instancias ⇒ dos claves)', async () => {
+    const grid = await montar([]);
+
+    const diag: Diagnostico = {
+      violaciones: [
+        {
+          regla: 'SOLAPE_AULA',
+          recursoCodigo: null,
+          tramoCodigo: null,
+          celdas: [
+            { actividadCodigo: 'Mat-1ºA', indice: 1, plazaCodigo: 'Mat-1ºA-P1' },
+            { actividadCodigo: 'LCL-1ºA', indice: 2, plazaCodigo: 'LCL-1ºA-P1' },
+          ],
+          descripcion: 'una violación, dos instancias',
+        },
+      ],
+      penalizaciones: [],
+      totales: { ventanas: 0, consecutivas: 0, indispBlanda: 0 },
+    };
+    sujetoDiagnostico.next(diag);
+    await fixture.whenStable();
+
+    // Indexado por CELDA: la única violación aparece bajo sus dos instancias.
+    expect(grid.violaciones().size).toBe(2);
+  });
 });

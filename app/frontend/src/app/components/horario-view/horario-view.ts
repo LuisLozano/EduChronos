@@ -8,7 +8,7 @@ import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
 import { clavePin, indicePines } from '../../horario/pines';
-import { sumaDeltasPorInstancia } from '../../horario/diagnostico';
+import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
 
 /**
@@ -68,6 +68,17 @@ export class HorarioView {
   protected readonly badges = computed<ReadonlyMap<string, number>>(() => {
     const d = this.diagnostico();
     return d ? sumaDeltasPorInstancia(d.penalizaciones) : new Map<string, number>();
+  });
+
+  /**
+   * Violaciones duras por instancia (clave de {@link clavePin}), listas para el
+   * input de la rejilla. Hermano exacto de {@link badges}: el contenedor NO indexa
+   * —delega en la capa pura ({@link indiceViolaciones})—, igual que no suma ni
+   * agrupa a mano. La rejilla resuelve la asimetría D15 al pintar.
+   */
+  protected readonly violaciones = computed<ReadonlyMap<string, readonly ViolacionEnCelda[]>>(() => {
+    const d = this.diagnostico();
+    return d ? indiceViolaciones(d.violaciones) : new Map<string, readonly ViolacionEnCelda[]>();
   });
 
   protected readonly entidades = computed(() => {
