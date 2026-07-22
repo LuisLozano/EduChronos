@@ -778,6 +778,19 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   ESTADO VIVO EQUIVOCADO por R5 y se corrige en la misma sesión.
   CIERRA D-B5-5. DEUDA NUEVA: D-F8.5-D2b1-a (la ruta JPA clava `tutorias` vacía), D-F8.5-D2b1-b
   (el rol no tiene aserto de transporte).
+  MÉTODO CORREGIDO EN LA MISMA SESIÓN, a raíz del fallo (1) del contraste y por decisión explícita
+  del usuario de no dejarlo solo en el prompt de apertura: tercera precisión de M2 (un tipo
+  compartido se mide en TODOS los módulos; la pregunta es «quién más lo construye o consume», y si
+  el §A no puede verlo desde el Project la enumeración se pide en el contraste y el contrato NO se
+  cierra hasta tenerla) y precisión de ORDEN en M4 (bloque multi-módulo → el contraste mide ANTES
+  del contrato, no después). Ninguna nace como M5: son precisiones a procedimientos que ya existen
+  y ya funcionaron —el contraste cazó esto—, y un apartado nuevo sugeriría procedimiento nuevo.
+  Sede PERMANENTE y no prompt: un prompt no se conserva, que es D-F8.0-a otra vez. Se anota además
+  el criterio de acumulación de M2 (una cuarta precisión obliga a condensar, no a añadir).
+  LO QUE ESTAS NORMAS NO HACEN, escrito para que nadie lo dé por hecho: estrechan la rendija de
+  «tipo compartido entre módulos», no cierran la clase «afirmar sobre terreno no leído», que lleva
+  desmintiéndose desde S75 y produjo cuatro fallos de instrumento en S89. La red que hace el trabajo
+  sigue siendo el contraste.
   Siguiente: 8.5-D2b-2 (verificación de S8: `ReglaDura` + `VerificadorSolucion` + cableado del
   `ProfesorTutoriaRepository`, que es la deuda D-F8.5-D2b1-a y NO puede quedar fuera o S8 sería
   inverificable en producción), 8.6-B (contrato por decidir ANTES de medir) u 8.4-B (MOCKUP PREVIO;
@@ -1604,7 +1617,7 @@ proponer estructura. Lo que sostiene la regla no es la costumbre sino su rendimi
 sesiones S75-S85 la medición desmintió una suposición de apertura del arquitecto —no alguna vez,
 todas—. Corolario: una afirmación sobre el estado del repo que no se ha medido se declara como
 RAZONAMIENTO, no como medición.
-Dos precisiones que S87 y S88 obligaron a escribir, en el orden en que se aplican:
+Tres precisiones que S87, S88 y S90 obligaron a escribir, en el orden en que se aplican:
 - CUANDO LA MEDICIÓN DESMIENTE AL PLAN, y no a una suposición del arquitecto, se declara
   explícitamente como tal y se CORRIGE LA AFIRMACIÓN VIVA en TODAS sus sedes vivas —una casilla de
   bloque y una cabecera de ventana suelen ser dos copias de lo mismo—. Por R5, una descripción
@@ -1616,6 +1629,22 @@ Dos precisiones que S87 y S88 obligaron a escribir, en el orden en que se aplica
   incómodo: S87 midió el `border-left` con rigor, acertó, y en LA MISMA FRASE escribió `background`
   sin medirlo. El rigor fue parcial y la frase no lo distinguía, así que S88 tuvo que tropezarlo. Una
   conclusión que enumera su evidencia deja el hueco visible sin que nadie lo pise.
+- UN TIPO COMPARTIDO SE MIDE EN TODOS LOS MÓDULOS QUE LO TOCAN, y la pregunta que lo cubre es
+  «¿quién más CONSTRUYE o CONSUME este tipo?», no «¿cuántos call sites tiene aquí?». La forma del
+  fallo que lo obliga es la que importa: en S90 el §A midió los call sites de `Actividad` (siete) y
+  no los de `ProblemaHorario` (otros siete), y el contrato declaró «fuera de alcance» tres clases
+  que SÍ se pensaron mientras `CatalogoMapper` —segundo camino a `domain.Actividad`, en otro
+  módulo— no quedó ni incluido ni excluido: NO ESTABA. Un olvido con forma de decisión es peor que
+  un hueco visible, porque nadie lo audita. No se corrige con más cuidado: se corrige haciendo que
+  la pregunta no dependa de qué módulos recuerde el arquitecto.
+  COROLARIO OPERATIVO, que es donde está el filo: `referencia-codigo-solver.md` lista FIRMAS, no
+  quién las usa, así que es ciega por construcción a esta pregunta. Cuando el §A no pueda ver los
+  consumidores desde el Project, la enumeración se le PIDE a Claude Code en el turno de contraste y
+  EL CONTRATO NO SE CIERRA hasta tenerla. Declarar el hueco no basta: aquí lo que faltaba no era
+  rigor al responder, era cobertura de la pregunta.
+  [Nota de acumulación: si llegara una CUARTA precisión a M2, la salida correcta es condensar las
+  cuatro en un principio, no añadirla. Cuatro bullets con origen citado son norma; cinco empiezan a
+  ser crónica, y R5 dice que el método no narra sesiones.]
 
 **M3 — Campaña de mutación: lo que un aserto vale.** Un aserto vale lo que vale la mutación que lo
 pone rojo. Al cerrar un bloque con tests se declara la campaña (qué mutaciones, cuál cae y por qué
@@ -1634,7 +1663,16 @@ contrasta con Claude Code ANTES de escribir código, y lo que ese turno destape 
 tapa: es el mecanismo que más errores de especificación del arquitecto ha cazado (dos en S79, tres
 en S81, tres en S82, tres en S83, cinco en S85). Corolario operativo de S66: se especifica el ASERTO
 DISCRIMINANTE, no el propósito del test —un propósito bien enunciado produce el camino feliz, que
-es justo lo que NO detecta el fallo que el test existe para detectar—. Artefactos derivados, regla
+es justo lo que NO detecta el fallo que el test existe para detectar—. PRECISIÓN DE ORDEN (S90): si
+el bloque toca un tipo compartido ENTRE MÓDULOS, el contraste tiene un primer turno de MEDICIÓN
+—los consumidores y constructores del tipo, en `main` y en `test`, de todos los módulos— que va
+ANTES de que el arquitecto escriba contrato, no después. El orden por defecto (contrato → contraste)
+deja que el contraste descubra que el contrato era INALCANZABLE, que es lo que pasó en S90:
+`CatalogoMapper` rompía en compilación y forzaba una decisión semántica que el contrato ni
+mencionaba. Claude Code tiene el árbol y el arquitecto no; pedir la enumeración antes de decidir
+hace el error imposible en vez de detectable. NO se aplica a bloques de un solo módulo —el turno
+extra no compensa— y la condición es el número de módulos, no el tamaño del bloque. Artefactos
+derivados, regla
 mecánica: si se toca `solver/src/main` se REGENERA `referencia-codigo-solver.md`; si no, se declara
 que no se ha tocado. La documentación va en commit APARTE del código; el manifiesto de dependencias
 va CON el código que lo necesita, porque sin él ese commit no construiría.
