@@ -14,17 +14,30 @@
         @for (d of dias; track d; let i = $index) {
           <td cdkDropList (cdkDropListDropped)="alSoltar($event, i + 1, t)">
             @for (inst of instancias(i + 1, t); track clave(inst)) {
-              <div class="instancia" [class.pinada]="estaPinada(inst)" cdkDrag [cdkDragData]="inst">
-                @if (estaPinada(inst)) {
-                  <button
-                    type="button"
-                    class="candado"
-                    title="Quitar pin"
-                    [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
-                    (click)="alDespinar(inst, $event)"
-                  >
-                    &#128274;
-                  </button>
+              <div
+                class="instancia"
+                [class.pinada]="estaPinada(inst)"
+                [class.con-badge]="tieneBadge(inst)"
+                cdkDrag
+                [cdkDragData]="inst"
+              >
+                @if (tieneBadge(inst) || estaPinada(inst)) {
+                  <span class="adornos">
+                    @if (tieneBadge(inst)) {
+                      <span class="badge">{{ badge(inst) }}</span>
+                    }
+                    @if (estaPinada(inst)) {
+                      <button
+                        type="button"
+                        class="candado"
+                        title="Quitar pin"
+                        [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
+                        (click)="alDespinar(inst, $event)"
+                      >
+                        &#128274;
+                      </button>
+                    }
+                  </span>
                 }
                 @for (e of inst.entradas; track e.sesionId) {
                   <div class="entrada">

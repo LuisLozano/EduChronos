@@ -46,6 +46,14 @@ export class HorarioGrid {
    * el tipo para no obligar al contenedor a construir una proyección aparte.
    */
   readonly pinadas = input<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
+  /**
+   * Suma con signo del coste blando de cada instancia (clave de {@link clavePin}),
+   * YA agregada por el contenedor: la rejilla PINTA el número, no lo calcula ni
+   * conoce las penalizaciones que lo componen. No es `Totales` y no debe
+   * "cuadrarse" con nada. Una clave ausente significa "sin badge" —las de suma 0
+   * no llegan (C2/S65)—, así que el predicado es `has`, sin comparar con 0.
+   */
+  readonly badges = input<ReadonlyMap<string, number>>(new Map<string, number>());
 
   readonly soltar = output<SueltaInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
@@ -67,6 +75,16 @@ export class HorarioGrid {
 
   protected estaPinada(inst: InstanciaCelda): boolean {
     return this.pinadas().has(this.clave(inst));
+  }
+
+  /** Hay badge si la instancia tiene clave en el mapa. Suma 0 no llega (C2/S65). */
+  protected tieneBadge(inst: InstanciaCelda): boolean {
+    return this.badges().has(this.clave(inst));
+  }
+
+  /** El número del badge; `undefined` si no hay, pero solo se lee tras {@link tieneBadge}. */
+  protected badge(inst: InstanciaCelda): number | undefined {
+    return this.badges().get(this.clave(inst));
   }
 
   /**

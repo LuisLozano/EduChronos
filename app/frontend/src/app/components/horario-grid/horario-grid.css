@@ -37,11 +37,39 @@
   background: #fff8ec;
 }
 
-/* Botón desde 8.6-iii-B1: el reset lo deja como el <span> que era. */
-.candado {
+/* Solo el BADGE reserva hueco (C5): lleva texto y solaparía la primera entrada.
+   El candado es un glifo y sigue solapando sin reservar, como en B1: no se toca
+   el render de las celdas pin-only. */
+.instancia.con-badge {
+  padding-top: 16px;
+}
+
+/* Wrapper de adornos en la esquina sup-dcha, fila flex por dentro (badge +
+   candado). Absolute para no empujar las entradas; el hueco lo reserva
+   .con-badge, no este wrapper. El candado hereda de aquí el sitio que antes se
+   ponía él solo, así que la celda pin-only se ve igual que en B1. */
+.adornos {
   position: absolute;
   top: 0;
   right: 0.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  line-height: 1;
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0 0.2rem;
+  border-radius: 0.2rem;
+  background: #ece4f4;
+  color: #402a52;
+}
+
+/* Botón desde 8.6-iii-B1: el reset lo deja como el glifo que era. Ya NO se
+   posiciona solo —vive dentro de .adornos (flex)— desde 8.6-iii-B2-a. */
+.candado {
   font-size: 0.7rem;
   line-height: 1;
   padding: 0;

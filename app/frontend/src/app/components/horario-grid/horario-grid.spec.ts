@@ -139,4 +139,28 @@ describe('rejilla de horario', () => {
     // cero candados y el aserto pasaría por la razón equivocada.
     expect(instanciaDe(fixture, 'Mat').querySelector('button.candado')).not.toBeNull();
   });
+
+  /**
+   * El badge pinta el número que RECIBE, sin derivarlo de nada de la sesión (el
+   * -3 no es id, ni índice, ni sesionId de ningún fixture). Se pone sobre la
+   * instancia SIN pin (LCL) a propósito: así la pinada (Mat) queda pinada y SIN
+   * badge, que es lo único que discrimina "reservar hueco por candado" —con la
+   * mutación `con-badge = tieneBadge || estaPinada`, Mat ganaría la clase; sin
+   * ella, no—.
+   */
+  it('(15) el badge pinta lo que recibe; sin clave en el Map no hay badge ni clase con-badge', async () => {
+    fixture.componentRef.setInput('badges', new Map<string, number>([['LCL-1ºA|1', -3]]));
+    await fixture.whenStable();
+
+    const lcl = instanciaDe(fixture, 'LCL');
+    const badge = lcl.querySelector('.badge');
+    expect(badge).not.toBeNull();
+    expect(badge!.textContent?.trim()).toBe('-3');
+    expect(lcl.classList).toContain('con-badge');
+
+    // Mat está pinada pero NO tiene clave en badges: ni badge ni hueco reservado.
+    const mat = instanciaDe(fixture, 'Mat');
+    expect(mat.querySelector('.badge')).toBeNull();
+    expect(mat.classList).not.toContain('con-badge');
+  });
 });
