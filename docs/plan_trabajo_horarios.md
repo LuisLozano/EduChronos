@@ -600,7 +600,13 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉTODO ESCRITO en S86
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deuda D-F8.6-ivB-a
+  REDUCIDA en S89 (cobertura del camino de PINADO en el contenedor: seis tests (21)-(26) sobre
+  `alSoltar`, que no tenía ni un aserto pese a los 11 `it` del fichero; `guardar` pasa a devolver un
+  Subject FRESCO POR INVOCACIÓN —un Subject cerrado tras `.error()` redispara síncronamente y hacía
+  inobservable la fase «errorPin a null»—; nace (26), preservación del índice previo, que el
+  contraste destapó y ninguno de los 46 cubría; campaña de 7 con siete víctimas reales distintas;
+  `horario-view.ts` intacto; la deuda NO se cierra, sobrevive acotada). MÉTODO ESCRITO en S86
   (sección «Método de trabajo (procedimiento vigente)», M1-M4, tras el criterio R4/R5: procedimiento
   de cierre de sesión con el archivado como paso verificado, §A de medición, campaña de mutación y
   contraste previo; CIERRA D-F8.0-a; sin código). Bloque 8.6-iii-B2-b CERRADO
@@ -690,7 +696,81 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 88 — Fase 8, Bloque 8.6-iii-B2-b: los dos resaltes de violación (CIERRA el frente 8.6-iii).
+### Sesión 89 — Fase 8, D-F8.6-ivB-a: cobertura del camino de PINADO en el contenedor.
+  Modo híbrido. 1 commit de código (solo tests, un único fichero modificado) + doc aparte.
+  §A DE MEDICIÓN con TRES FALLOS DE INSTRUMENTO ENCADENADOS, todos del arquitecto y todos del mismo
+  género —dar por sabido el terreno en vez de leerlo—: (1) el guion apuntó a `frontend/` cuando el
+  frontend vive en `app/frontend/` (nueve comandos fallidos); (2) la tanda siguiente falló ENTERA
+  sobre rutas ya verificadas porque el cwd de la sesión de Claude Code era
+  `.../app/frontend` y las rutas eran relativas a la raíz; (3) la suite se invocó con
+  `npx vitest run`, que salta la configuración del builder de Angular 21 y da
+  `describe is not defined` en 9/9 ficheros —el script real es `ng test`
+  (`angular.json`: `"test": {"builder": "@angular/build:unit-test"}`, sin `setupFiles` ni `include`)—.
+  Ninguno tocó el contrato, pero costaron tres tandas. CORRECTIVO ADOPTADO: rutas ABSOLUTAS en todo
+  guion de medición, y leer la invocación de la suite en `package.json` antes de escribirla.
+  §A CONFIRMA AL PLAN EN LO CENTRAL: `alSoltar` no tenía NI UN ASERTO. El spec tenía 11 `it`, pero
+  (13)/(14) son de diagnóstico y (20) de cableado de `violaciones`; `guardar` aparecía en
+  `horario-view.ts:161` y en `bloqueo.service.spec.ts:128`, en NINGÚN punto del spec del contenedor.
+  Segunda vez consecutiva que la afirmación del plan resiste la medición.
+  PERO §A DESMIENTE LA ENUMERACIÓN DE LA DEUDA en dos puntos. (a) La deuda cuenta como rama propia
+  la `error:` de `alDespinar`, pero su `errorPin.set(this.mensaje(err))` (l.194) invoca EL MISMO
+  `mensaje()` que la de `alSoltar` (l.170): cubrir una cubre la función, y duplicarla sería cobertura
+  fingida. Eran dos ramas y son una y media. (b) La deuda enumeró ramas SUPONIENDO EL ANDAMIO LISTO,
+  y no lo estaba: `guardar: vi.fn()` devolvía `undefined` y `alSoltar` hace
+  `.guardar(...).subscribe(...)`, así que el primer test que lo disparase habría reventado.
+  TURNO DE CONTRASTE (M4), el que más valor añadió del bloque: CINCO correcciones, CUATRO del
+  arquitecto, y una de ellas de FIXTURE y no de redacción.
+  (1) DOS MUTACIONES DE MI CAMPAÑA ERAN INEXPRESABLES EN ESTE ÁRBOL. `aulas: []` → omitir el campo NO
+  compila (`BloqueoRequest.aulas` es obligatorio, TS2741); y mover el poblado del `next` «tal cual»
+  tampoco, porque usa `b`, que solo existe dentro del `next` ("Cannot find name 'b'"). La forma
+  compilable del alta optimista usa `s` y valor `null`, y es contra ESA contra la que hay que medir.
+  Escribir una mutación que nadie podría teclear es exactamente el vicio que M3 rechaza.
+  (2) EL ANDAMIO QUE PROPUSE ERA INCOMPATIBLE CON EL ESCENARIO QUE DEBÍA MEDIR. Un `Subject` que ya
+  hizo `.error()` queda CERRADO, y re-suscribirse redispara el error de forma SÍNCRONA: con un
+  sujeto compartido, el segundo `soltar` de (25) repoblaría `errorPin` nada más suscribirse y la fase
+  «`errorPin` a null antes de responder» sería INOBSERVABLE —el test habría pasado o fallado por la
+  razón equivocada—. `guardar` devuelve un Subject FRESCO POR INVOCACIÓN, con el porqué documentado
+  en el propio doble porque los otros tres dobles del fichero NO lo son.
+  (3) UNA RAMA SIN RED QUE MIS CINCO TESTS NO TOCABAN, aportada por el contraste: `new Map()` en vez
+  de `new Map(this.pinadas())` en el `next` borraría TODOS los pines previos al añadir uno nuevo.
+  Compila, es un desliz clásico y ninguno de los 46 lo detectaba: (22) y (23) arrancan con `pinadas`
+  VACÍO, donde «mapa copiado» y «mapa desde cero» dan idéntico resultado, y los únicos que parten de
+  mapa no vacío —(2),(3),(4)— son de DESPINAR. Nació (26), único test del camino de alta que arranca
+  con índice poblado.
+  ENTREGADO: SEIS tests (21)-(26) en `horario-view.spec.ts`, un solo fichero tocado, cero ficheros
+  nuevos, `horario-view.ts` INTACTO. (21) el cuerpo del POST se arma desde la suelta con `aulas: []`
+  y el tramo sin permutar —esperado LITERAL, nunca compuesto desde `s`, y `dia=3`≠`orden=4` porque
+  con `dia===orden` la permutación sería invisible—; (22) la clave sale de la RESPUESTA y no de la
+  suelta, con FIXTURE DEFENSIVO DECLARADO (suelta `Mat-1ºA|2` vs respuesta `LCL-1ºA|1`, divergencia
+  imposible en producción y deliberada: sin ella `s` y `b` coinciden y la mutación queda verde;
+  precedente del it (9) de `diagnostico.spec`, S82); (23) sin alta optimista, con las DOS fases;
+  (24) el error no pina y `mensaje()` degrada a `El servidor rechazó el pin (400).`, leído por el
+  `<p class="error">` que aquí es inequívocamente `errorPin` (mismo razonamiento que el (5));
+  (25) el alta OK NO recarga la proyección y un nuevo intento limpia el error previo ANTES de
+  responder; (26) el alta PRESERVA los pines previos.
+  CAMPAÑA DE 7 MUTACIONES (M25 desdoblada en M25/M25b), todas compilables, SIETE VÍCTIMAS REALES
+  DISTINTAS, ninguna superviviente ni huérfana. M23 arrastra tres colaterales porque su forma
+  compilable vacía el `next` y toca a la vez clave, estado-tras-error y preservación; la víctima real
+  sigue cayendo por su propio aserto de «antes» (mismo patrón cascada/colateral que
+  `bloqueo.service.spec` documenta desde S85). M24 → (25) es colateral fina y esperable: al vaciar el
+  mensaje, `errorPin('')` deja de renderizar el párrafo.
+  UN REPARO DEL ARQUITECTO RETIRADO TRAS VER EL DIFF, y se registra por simetría con los aceptados:
+  objeté que (25b) podría pasar por la razón equivocada si `errorPin` se pusiera a `''` en vez de a
+  `null`. Es cierto en abstracto e IRRELEVANTE aquí —`@if (errorPin(); as msg)` trata ambos como
+  falsy, así que la diferencia no tiene consecuencia observable en ninguna parte de la aplicación—.
+  No todo reparo del contraste sobrevive al fichero.
+  Suite frontend 46 → 52 (+6); backend intacto (app 315, solver 78). `horario-view.ts` NO tocado →
+  `referencia-codigo-solver.md` NO regenerada, `modelo_datos_fase1.md` NO tocado.
+  DEUDA NUEVA: D-F8.6-ivB-a-bis (precedencia interna de `mensaje()`).
+  D-F8.6-ivB-a NO SE CIERRA: se REDUCE a su alcance superviviente (ver su entrada). Cerrarla
+  obligaría a abrir una hermana con el resto y se perdería la traza; precedente D-F8.6-iiiA-a en S84,
+  que siguió viva con el encuadre corregido por la medición.
+  Siguiente: 8.5-D2b (solver, ÚNICO candidato de backend, desplazado desde S77; INVIERTE
+  `CatalogoMapperActividadTest:136` y regenera la referencia; recomendable PARTIRLO), 8.6-B (aviso
+  durante el arrastre; su pregunta es sobre un estado HIPOTÉTICO que ningún índice actual responde,
+  luego su contrato hay que decidirlo ANTES de medir) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo
+  de BACKEND y abrirlo puede ser abrir dos bloques), a decidir al abrir sesión.
+Última sesión registrada (previa): Sesión 88 — Fase 8, Bloque 8.6-iii-B2-b: los dos resaltes de violación (CIERRA el frente 8.6-iii).
   Modo híbrido. 2 commits de código (2c48f9b rejilla, 15c8f31 contenedor) + doc aparte.
   §A DE MEDICIÓN sobre el CSS y el estado del cable (lectura literal de los tres ficheros de
   `horario-grid/` + greps de `indiceViolaciones` y del contenedor + suite de base).
@@ -759,7 +839,7 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   Siguiente: 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia),
   8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos bloques),
   8.6-B (aviso durante el arrastre) o la cobertura de D-F8.6-ivB-a, a decidir al abrir sesión.
-  Última sesión registrada (previa): Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico
+Última sesión registrada (previa): Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico
   y badge del delta blando.
   Modo híbrido. 3 commits de código (2047349 capa pura, 71c4fb6 rejilla, 709b58a contenedor) + doc
   aparte. §A DE MEDICIÓN sobre el ESTADO REAL DEL FRONTEND (lectura literal de los ficheros de
@@ -883,109 +963,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). MÉT
   en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u
   8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia), a decidir al
   abrir sesión.
-Última sesión registrada (previa): Sesión 85 — Fase 8, Bloque 8.6-iv-A: specs de los tres servicios REST, estreno de HttpTestingController.
-  Modo híbrido. 1 commit de código (b11617d, solo tests, 3 ficheros nuevos, 299 inserciones, cero
-  borrados) + doc aparte. §A DE MEDICIÓN sobre el UNIVERSO A TESTEAR y su ENTORNO (lectura literal
-  de los 3 servicios + `bloqueo.model.ts` + `app.config.ts`, `ls` de `services/`/`testing/`/`models/`
-  y greps de `HttpTestingController`/`provideHttpClient`; instrumento más barato, precedente S77-S84).
-  RUTA VERIFICADA ANTES DE MEDIR (corolario que S84 añadió tras fallar en esto): se midió contra
-  `app/frontend/`, no contra `frontend/`; los comandos salieron a la primera.
-  SALIDA DE §A, que REENCUADRA EL BLOQUE ENTERO: los cinco métodos de los tres servicios son
-  WRAPPERS PELADOS —`return this.http.<verbo><T>(url[, body])` directo, sin `.pipe`, sin
-  `catchError`, sin transformación, sin `options`—. `provideHttpClient()` va SIN `withFetch` (backend
-  XHR, `HttpTestingController` intercepta sin ajuste). DESMIENTE MI SUPOSICIÓN DE APERTURA sobre
-  `app/frontend/src/app/testing/`: NO es infraestructura de test —contiene un único fichero,
-  `proyeccion-1eso.fixture.ts`, que es datos de dominio—, así que NO HABÍA HELPER QUE COPIAR.
-  Y PRECISA la casilla del bloque: `HttpTestingController` no tenía CERO apariciones sino UNA, dentro
-  de un comentario de `horario-view.spec.ts:15` que declara que NO se usa; cero usos EFECTIVOS, sí.
-  DECISIÓN DE ALCANCE HONESTO, tomada con la medición delante y contra la lectura literal de la
-  deuda: iv-A NO es cobertura de lógica y no se finge que lo sea. Lo que entrega es (a) CONGELACIÓN
-  DEL CONTRATO DE ENDPOINTS (verbo + URL, las dos únicas dimensiones sin red del compilador) y (b)
-  el ESTRENO de la capa `provideHttpClientTesting` + `HttpTestingController`, para que el primer
-  servicio con lógica real no tenga que inventarse el patrón bajo presión. Se rechazó a propósito
-  inflar el bloque con asertos sobre el tipo genérico, la propagación del 404 o «devuelve lo que
-  llega»: un aserto implicado o no-reddable es prosa, y su sitio es el TSDoc (precedente S84).
-  TURNO DE CONTRASTE, el más productivo de la fase: CINCO afirmaciones del arquitecto desmentidas,
-  las cinco aceptadas y ninguna rechazada por reflejo.
-  (1) `toBe` → `toEqual` en el aserto del cuerpo de `guardar`. Claude Code VERIFICÓ por lectura del
-  fuente instalado (`_module-chunk.mjs:449`, `:562`; `serializeBody()` solo lo invoca el backend
-  real, `http.mjs:183`) que `toBe` SÍ discrimina —el body no se clona ni se serializa en la ruta de
-  testing—, y aun así objetó que NO DEBE: `{...peticion}` produce el mismo JSON en el cable, así que
-  la mutación M3b no es un defecto sino una refactorización inocua, y un aserto que la pinta de rojo
-  discrimina un ESTILO DE ESCRITURA, no un contrato. Remate que cierra el argumento: NINGUNA de las
-  dos variantes caza el defecto real —que el servicio mute el objeto del llamante in situ—, porque
-  entonces `PETICION` sería el objeto ya mutado y ambas pasarían. M3b ELIMINADA de la campaña.
-  (2) LA RAZÓN ESCRITA DE UNA DECISIÓN ERA FALSA EN DOS DE SUS TRES ITEMS. Dejé fuera tres cosas
-  «porque no pueden ponerse rojo». Cierto solo del tipo genérico (se borra en runtime). La
-  propagación del 404 y «devuelve lo que llega» SÍ son reddables, con mutaciones que compilan
-  (`catchError(() => of(null))` y `map(x => ({...x}))`). Importa porque `diagnostico.service.ts:23-28`
-  dedica SEIS LÍNEAS de TSDoc a defender que el 404 se propaga sin traducir: dejar escrito que eso
-  es intestable lo condenaba a no verificarse nunca. CORREGIDA la razón: quedan fuera POR ALCANCE.
-  (3) CAMPAÑA INCOMPLETA EN UNA DIMENSIÓN VIVA. D4 exige aseverar verbo + URL en los cinco tests,
-  pero la campaña solo movía el verbo en T3: en T1/T2/T4/T5 el componente `method` del matcher no se
-  ponía a prueba y podría haberse borrado sin que nada cayera. NO es un aserto muerto (es reddable)
-  sino una MUTACIÓN QUE FALTA —distinción que importa y que Claude Code hizo explícita—. Añadida M4b
-  (`delete<void>` → `get<void>` en `borrar`), la más barata que demuestra la dimensión: el DELETE es
-  el único verbo no repetido. Medida: cae (11) con URL recibida `/api/bloqueos/7` IDÉNTICA a la
-  esperada, difiriendo solo el verbo ⇒ la mitad `method` está VIVA y no es adorno.
-  (4) UNA JUSTIFICACIÓN QUE DESCRIBÍA UN ESCENARIO IMPOSIBLE. Escribí que `id = 7` en las tres rutas
-  interpoladas evitaba que un cruce de rutas entre servicios cayera por el número en vez de por la
-  ruta. Ese cruce NO PUEDE OCURRIR: tres ficheros, tres `TestBed`, tres `HttpTestingController`
-  independientes; la petición de un spec no es visible desde otro. La DECISIÓN no cambia (7 y no 1,
-  porque con 1 una implementación que incrustara el id a mano seguiría verde, mismo criterio que el
-  «índice 2 y no 1» de `horario-grid.spec.ts:52-56`); la RAZÓN se reescribió.
-  (5) «DOBLE FALLO» ERA CASCADA, y lo destapó la campaña, no el razonamiento. Hice escribir en el
-  TSDoc que `verify()` produciría un doble fallo por una sola causa. FALSO en un fichero de varios
-  tests: `verify()` lanza dentro del `afterEach`, eso impide el reset del TestBed, y el `beforeEach`
-  del test SIGUIENTE revienta con «Cannot configure the test module when the test module has already
-  been instantiated». MEDIDO: M2, que solo toca la URL de `listar()`, tumbó (9), (10) y (11).
-  Importa porque la campaña se apoya en «qué test cae» como señal de ATRIBUCIÓN, y con cascada
-  «cayeron tres» ya no atribuye. Se salva por el MENSAJE, y esa regla de lectura quedó escrita:
-  víctima REAL = falla por `expectOne`; COLATERAL = falla por «Cannot configure the test module».
-  DECISIÓN sobre la cascada, entre tres salidas que Claude Code presentó sin elegir por su cuenta:
-  se corrige el TSDoc, NO el código. Descartado blindar el `afterEach` con
-  `try/finally + resetTestingModule()` (mete maquinaria permanente en tres ficheros y estrena un
-  patrón con cero apariciones en el repo, para un síntoma que solo existe bajo mutación) y descartado
-  partir `bloqueo.service.spec.ts` en varios `describe` (rompería «un describe por fichero», que es
-  el patrón vivo de los dos specs de referencia; sería dejar que el instrumento de medición dicte la
-  estructura del test). En VERDE `verify()` no lanza nunca: la patología solo aparece cuando ya
-  estás leyendo los mensajes con lupa. `verify()` se declara RED, no aserto: no es independientemente
-  reddable bajo la campaña, pero caza la petición no contemplada (p. ej. un método que dispare dos).
-  DESVIACIÓN DE CLAUDE CODE, ACEPTADA: no usó `compileComponents()` ni `beforeEach` async pese a
-  figurar en el «patrón a copiar». Razón suya, correcta: en los specs de referencia existe para
-  compilar COMPONENTES y aquí no hay ninguno —`TestBed.inject` sobre un servicio es síncrono—;
-  añadirlo sería copiar la forma sin la causa. Lo que había que copiar era el TSDoc, la forma de
-  `describe`/`it`, la numeración correlativa y el estilo de aserto, no la mecánica de arranque.
-  ENTREGADO: 3 specs junto a su fuente en `services/`, 5 tests numerados (8)..(12) continuando la
-  numeración correlativa del repo. Suite frontend 30 → 35 (+5), 6 → 9 ficheros. Fixture LOCAL al
-  spec, calibrado (`indice: 2` y no 1; `dia` ≠ `orden` para que un swap de campos fuera detectable;
-  `aulas` NO vacío, porque el vacío es el caso trivial y D-5 lo documenta como significativo);
-  `PROYECCION_1ESO` NO contaminado (patrón S41/S81/S82/S83/S84).
-  CAMPAÑA DE 6 MUTACIONES, las seis caen por `expectOne` y NINGUNA deja de compilar. M4 en
-  particular compila —deja `id` sin usar— lo que VERIFICA sobre el árbol real que
-  `noUnusedParameters` no está activo ni se hereda de `strict`; si algún día se activa, M4 deja de
-  ser expresable y hay que sustituirla por `/api/bloqueos/${id}` → `/api/bloqueo/${id}`. Dato de
-  método REGISTRADO POR CLAUDE CODE SIN QUE SE LE PIDIERA: la campaña se corrió sobre el estado
-  ANTERIOR a la corrección del TSDoc; sobre el commit final solo se redemostró UNA de las seis
-  (M4b, verde-rojo-verde). Como los cambios fueron solo comentarios ninguna mutación cambia de
-  resultado, y se acepta así en vez de dar las seis por buenas sobre el estado nuevo.
-  HALLAZGO DEL MATCHER, no previsto: `expectOne` compara contra `urlWithParams` por igualdad
-  ESTRICTA de string, y sus guardas son `!match.method` / `!match.url`, así que un campo omitido NO
-  restringe —que es lo que da contenido real a la regla «nunca matchear solo por URL»—. Hoy es
-  indiferente (ningún método pasa `params`), pero si alguien añade `params` a `listar()`, T2 se
-  pondrá rojo y ESE ROJO SERÁ CORRECTO. Escrito en el TSDoc para que no se lea como falso positivo.
-  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
-  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
-  solver 78). `ng build` limpio. CERO dependencias nuevas: `@angular/common/http/testing` resuelve
-  por exports map, VERIFICADO por `require.resolve` sobre la 21.2.17 instalada, no supuesto.
-  DEUDA NUEVA: D-F8.6-ivA-a (el 404 que el TSDoc de `DiagnosticoService` defiende no lo verifica
-  nadie, y SÍ es reddable), D-F8.6-ivA-b (la cascada de `verify()` rompe la atribución de una
-  campaña de mutación), D-F8.6-ivA-c (`TramoRef.orden` vs `SesionVista.tramo`, NO MEDIDO).
-  CIERRA D-F8.6-iiiA-a con MATIZ MEDIDO.
-  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra
-  D19/D20 en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de
-  D-F8.4-A-c) u 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
-  referencia), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -997,10 +974,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 y la de S84 en la Sesión 88 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88 y la de S85 en la Sesión 89 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S85–S88). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S86–S89). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1275,6 +1252,21 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       de D-F8.6-ii-5—; `pinadas` leído por el input público de la hija, no por cast; sin
       `provideRouter`. 8 mutaciones, todas por la vía esperada. Suite frontend 23 → 30.
       CIERRA D-F8.6-iiiB1-a. D-F8.6-ivB-a, D-F8.6-ivB-b, D-F8.6-ivB-c. Detalle: bitácora S84.
+- [x] Bloque 8.6-iv-C — Cobertura del camino de PINADO en el contenedor (S89, D-F8.6-ivB-a REDUCIDA,
+      no cerrada): seis tests (21)-(26) en `horario-view.spec.ts`, un solo fichero, `horario-view.ts`
+      INTACTO. ANDAMIO, no cosmética: `guardar` devuelve un Subject FRESCO POR INVOCACIÓN —hoy
+      `vi.fn()` devolvía `undefined` y `alSoltar` hace `.subscribe()`; y un Subject compartido queda
+      CERRADO tras `.error()` y redispara síncronamente al re-suscribirse, lo que haría INOBSERVABLE
+      la fase «`errorPin` a null antes de responder» de (25)—. Los seis: (21) cuerpo del POST armado
+      desde la suelta con `aulas: []` y tramo sin permutar (`dia`≠`orden` a propósito); (22) la clave
+      sale de la RESPUESTA y no de la suelta, con fixture defensivo declarado (divergencia imposible
+      en producción, deliberada: sin ella `s` y `b` coinciden y la mutación queda verde); (23) sin
+      alta optimista, dos fases; (24) el error no pina y `mensaje()` degrada al texto con estado;
+      (25) el alta OK no recarga la proyección + el reintento limpia el error previo; (26) el alta
+      PRESERVA los pines previos —única rama del alta que arranca con índice NO vacío, destapada por
+      el contraste: (22) y (23) parten de vacío, donde `new Map()` y `new Map(this.pinadas())` dan
+      idéntico resultado—. Campaña de 7 (M25 desdoblada), siete víctimas reales distintas, ninguna
+      superviviente. Suite 46 → 52. D-F8.6-ivB-a-bis. Detalle: bitácora S89.
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -2123,22 +2115,43 @@ siguiente, con remisión a la bitácora.
   de error que solo tiene sentido decidir GLOBALMENTE, no de refilón en un bloque de frontend.
   → parametrizar el degradado cuando se decida la política global de errores.
 
-- **D-F8.6-ivB-a** (S84, VIVA, DE COBERTURA) — `alSoltar` Y TRES RAMAS MÁS DEL CONTENEDOR SIGUEN
-  SIN RED. 8.6-iv-B dio TRES asertos al despinado y CERO al pinado, que es su gemelo simétrico y
-  vive en el mismo componente. Señalado por Claude Code en el turno de contraste y dejado FUERA a
-  propósito: `alSoltar` es de 8.6-ii (S81) y su falta de cobertura NO estaba declarada en ninguna
-  deuda, así que meterlo habría doblado el bloque y mezclado dos deudas distintas. Las ramas
-  concretas, escritas aquí para que el próximo bloque no las redescubra: (1) `guardar()` recibe
-  `aulas: []` y `tramo: {dia, orden}` —el `aulas: []` es decisión documentada (D-5) y hoy nada la
-  fija—; (2) en OK la clave se construye con `clavePin(b.actividadCodigo, b.indice)`, del cuerpo de
-  la RESPUESTA y NO de la suelta: una mutación que usara `s.actividadCodigo` no la caza nadie, y es
-  la dimensión más peligrosa de las cuatro; (3) en ERROR, `errorPin` se pone y el Map NO crece (sin
-  alta optimista); (4) el invariante de clase «la proyección NO se recarga tras pinar»
-  (`getProyeccion` sigue en 1 llamada). MÁS: la rama `error:` de `alDespinar`, el
-  `errorPin.set(null)` de reintento al inicio de ambos gestos, y el invariante documentado en el
-  TSDoc de `cargarPines` de que el índice NO se recarga al cambiar de vista o de entidad —este
-  último es aseverable barato con el `<select>`—. → cubrir en el bloque que retome la coordinación
-  del contenedor, probablemente junto a 8.6-iv-A o después de 8.6-iii-B2.
+- **D-F8.6-ivB-a** (S84, VIVA REDUCIDA en S89, DE COBERTURA) — `alSoltar` Y TRES RAMAS MÁS DEL
+  CONTENEDOR SIGUEN SIN RED. 8.6-iv-B dio TRES asertos al despinado y CERO al pinado, que es su
+  gemelo simétrico y vive en el mismo componente. Señalado por Claude Code en el turno de contraste
+  y dejado FUERA a propósito: `alSoltar` es de 8.6-ii (S81) y su falta de cobertura NO estaba
+  declarada en ninguna deuda, así que meterlo habría doblado el bloque y mezclado dos deudas
+  distintas.
+  → NÚCLEO CUBIERTO EN S89 (8.6-iv-C). Las cuatro ramas de `alSoltar` que esta deuda enumeró tienen
+  aserto: (1) `aulas: []` y `tramo` sin permutar → (21); (2) la clave desde la RESPUESTA y no desde
+  la suelta —«la dimensión más peligrosa de las cuatro», y lo era: sin fixture divergente la
+  mutación queda verde— → (22); (3) el ERROR no puebla el Map y `mensaje()` degrada → (23) y (24);
+  (4) `getProyeccion` sigue en 1 llamada tras pinar → (25a). MÁS el `errorPin.set(null)` de reintento
+  de `alSoltar` → (25b), y una rama que esta deuda NO nombraba y el contraste destapó: la
+  preservación del índice previo al añadir un pin → (26).
+  → SOBREVIVE, acotada a lo que S89 dejó fuera POR ALCANCE y no por descuido: (a) el
+  `errorPin.set(null)` de reintento de `alDespinar` (l.183), gemelo del que (25b) cubre; (b) el
+  invariante del TSDoc de `cargarPines` de que el índice NO se recarga al cambiar de vista o de
+  entidad —«aseverable barato con el `<select>`»—, dejado fuera porque mide `cambiarVista`, que es
+  otro gesto. NO sobrevive la rama `error:` de `alDespinar` que esta deuda contaba aparte: su
+  `errorPin.set(this.mensaje(err))` (l.194) invoca EL MISMO `mensaje()` que la de `alSoltar`
+  (l.170), que (24) cubre; duplicar el aserto sería cobertura fingida. Eran dos ramas y era una y
+  media (medido en S89).
+  → NO SE CIERRA a propósito: cerrarla obligaría a abrir una hermana con el resto y se perdería la
+  traza de por qué esas dos quedaron fuera. Precedente: D-F8.6-iiiA-a en S84. → cubrir (a) y (b) en
+  el bloque que retome la coordinación del contenedor o el gesto de cambio de vista.
+
+- **D-F8.6-ivB-a-bis** (S89, VIVA, DE COBERTURA, no bloqueante) — LA PRECEDENCIA INTERNA DE
+  `mensaje()` NO ESTÁ EJERCITADA. `mensaje()` devuelve `cuerpo?.message || cuerpo?.error || <texto
+  con estado>`. El test (24) solo llega a la TERCERA rama, la del degradado, porque el body del
+  fixture es `{}`. Las dos primeras —`message` poblado, `error` poblado— y el ORDEN entre ellas no
+  las asevera nadie: invertir a `cuerpo?.error || cuerpo?.message || ...` pasaría en silencio.
+  Aportada por el contraste de S89 y dejada fuera a propósito, con el mismo criterio con que se
+  aceptó (26) y se rechazó ésta: (26) es una TRANSICIÓN DE ESTADO del pinado (un pin previo
+  desaparece), y ésta es el FORMATO de un mensaje. La asimetría del criterio va escrita para que el
+  próximo bloque no la redescubra. Nota: hoy el degradado es el camino REAL en producción, porque
+  `server.error.include-message` está desactivado (D-F8.6-ii-a), así que las dos ramas sin red son
+  las que HOY no se ejecutan nunca. → cubrir cuando se decida la política global de errores
+  (D-F8.6-ii-a), que es lo que las pondría en uso.
 
 - **D-F8.6-ivB-b** (S84, VIVA, de MÉTODO Y COBERTURA, no bloqueante) — EL COMPILADOR TAPA DOS DE
   LAS OCHO MUTACIONES, Y ESO DEGRADA LO QUE DOS ASERTOS VALEN. La guarda de `alDespinar` es

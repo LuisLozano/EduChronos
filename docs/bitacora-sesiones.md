@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S84. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S85. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S84). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S85). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3597,4 +3597,108 @@ al abrir sesión.
   Siguiente: 8.6-iv-A (specs de los tres servicios, estrena `HttpTestingController`; cierra
   D-F8.6-iiiA-a), 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado), 8.4-B (MOCKUP
   PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u 8.5-D2b (solver, regenera la
+  referencia), a decidir al abrir sesión.
+
+### Sesión 85 — Fase 8, Bloque 8.6-iv-A: specs de los tres servicios REST, estreno de HttpTestingController.
+  Modo híbrido. 1 commit de código (b11617d, solo tests, 3 ficheros nuevos, 299 inserciones, cero
+  borrados) + doc aparte. §A DE MEDICIÓN sobre el UNIVERSO A TESTEAR y su ENTORNO (lectura literal
+  de los 3 servicios + `bloqueo.model.ts` + `app.config.ts`, `ls` de `services/`/`testing/`/`models/`
+  y greps de `HttpTestingController`/`provideHttpClient`; instrumento más barato, precedente S77-S84).
+  RUTA VERIFICADA ANTES DE MEDIR (corolario que S84 añadió tras fallar en esto): se midió contra
+  `app/frontend/`, no contra `frontend/`; los comandos salieron a la primera.
+  SALIDA DE §A, que REENCUADRA EL BLOQUE ENTERO: los cinco métodos de los tres servicios son
+  WRAPPERS PELADOS —`return this.http.<verbo><T>(url[, body])` directo, sin `.pipe`, sin
+  `catchError`, sin transformación, sin `options`—. `provideHttpClient()` va SIN `withFetch` (backend
+  XHR, `HttpTestingController` intercepta sin ajuste). DESMIENTE MI SUPOSICIÓN DE APERTURA sobre
+  `app/frontend/src/app/testing/`: NO es infraestructura de test —contiene un único fichero,
+  `proyeccion-1eso.fixture.ts`, que es datos de dominio—, así que NO HABÍA HELPER QUE COPIAR.
+  Y PRECISA la casilla del bloque: `HttpTestingController` no tenía CERO apariciones sino UNA, dentro
+  de un comentario de `horario-view.spec.ts:15` que declara que NO se usa; cero usos EFECTIVOS, sí.
+  DECISIÓN DE ALCANCE HONESTO, tomada con la medición delante y contra la lectura literal de la
+  deuda: iv-A NO es cobertura de lógica y no se finge que lo sea. Lo que entrega es (a) CONGELACIÓN
+  DEL CONTRATO DE ENDPOINTS (verbo + URL, las dos únicas dimensiones sin red del compilador) y (b)
+  el ESTRENO de la capa `provideHttpClientTesting` + `HttpTestingController`, para que el primer
+  servicio con lógica real no tenga que inventarse el patrón bajo presión. Se rechazó a propósito
+  inflar el bloque con asertos sobre el tipo genérico, la propagación del 404 o «devuelve lo que
+  llega»: un aserto implicado o no-reddable es prosa, y su sitio es el TSDoc (precedente S84).
+  TURNO DE CONTRASTE, el más productivo de la fase: CINCO afirmaciones del arquitecto desmentidas,
+  las cinco aceptadas y ninguna rechazada por reflejo.
+  (1) `toBe` → `toEqual` en el aserto del cuerpo de `guardar`. Claude Code VERIFICÓ por lectura del
+  fuente instalado (`_module-chunk.mjs:449`, `:562`; `serializeBody()` solo lo invoca el backend
+  real, `http.mjs:183`) que `toBe` SÍ discrimina —el body no se clona ni se serializa en la ruta de
+  testing—, y aun así objetó que NO DEBE: `{...peticion}` produce el mismo JSON en el cable, así que
+  la mutación M3b no es un defecto sino una refactorización inocua, y un aserto que la pinta de rojo
+  discrimina un ESTILO DE ESCRITURA, no un contrato. Remate que cierra el argumento: NINGUNA de las
+  dos variantes caza el defecto real —que el servicio mute el objeto del llamante in situ—, porque
+  entonces `PETICION` sería el objeto ya mutado y ambas pasarían. M3b ELIMINADA de la campaña.
+  (2) LA RAZÓN ESCRITA DE UNA DECISIÓN ERA FALSA EN DOS DE SUS TRES ITEMS. Dejé fuera tres cosas
+  «porque no pueden ponerse rojo». Cierto solo del tipo genérico (se borra en runtime). La
+  propagación del 404 y «devuelve lo que llega» SÍ son reddables, con mutaciones que compilan
+  (`catchError(() => of(null))` y `map(x => ({...x}))`). Importa porque `diagnostico.service.ts:23-28`
+  dedica SEIS LÍNEAS de TSDoc a defender que el 404 se propaga sin traducir: dejar escrito que eso
+  es intestable lo condenaba a no verificarse nunca. CORREGIDA la razón: quedan fuera POR ALCANCE.
+  (3) CAMPAÑA INCOMPLETA EN UNA DIMENSIÓN VIVA. D4 exige aseverar verbo + URL en los cinco tests,
+  pero la campaña solo movía el verbo en T3: en T1/T2/T4/T5 el componente `method` del matcher no se
+  ponía a prueba y podría haberse borrado sin que nada cayera. NO es un aserto muerto (es reddable)
+  sino una MUTACIÓN QUE FALTA —distinción que importa y que Claude Code hizo explícita—. Añadida M4b
+  (`delete<void>` → `get<void>` en `borrar`), la más barata que demuestra la dimensión: el DELETE es
+  el único verbo no repetido. Medida: cae (11) con URL recibida `/api/bloqueos/7` IDÉNTICA a la
+  esperada, difiriendo solo el verbo ⇒ la mitad `method` está VIVA y no es adorno.
+  (4) UNA JUSTIFICACIÓN QUE DESCRIBÍA UN ESCENARIO IMPOSIBLE. Escribí que `id = 7` en las tres rutas
+  interpoladas evitaba que un cruce de rutas entre servicios cayera por el número en vez de por la
+  ruta. Ese cruce NO PUEDE OCURRIR: tres ficheros, tres `TestBed`, tres `HttpTestingController`
+  independientes; la petición de un spec no es visible desde otro. La DECISIÓN no cambia (7 y no 1,
+  porque con 1 una implementación que incrustara el id a mano seguiría verde, mismo criterio que el
+  «índice 2 y no 1» de `horario-grid.spec.ts:52-56`); la RAZÓN se reescribió.
+  (5) «DOBLE FALLO» ERA CASCADA, y lo destapó la campaña, no el razonamiento. Hice escribir en el
+  TSDoc que `verify()` produciría un doble fallo por una sola causa. FALSO en un fichero de varios
+  tests: `verify()` lanza dentro del `afterEach`, eso impide el reset del TestBed, y el `beforeEach`
+  del test SIGUIENTE revienta con «Cannot configure the test module when the test module has already
+  been instantiated». MEDIDO: M2, que solo toca la URL de `listar()`, tumbó (9), (10) y (11).
+  Importa porque la campaña se apoya en «qué test cae» como señal de ATRIBUCIÓN, y con cascada
+  «cayeron tres» ya no atribuye. Se salva por el MENSAJE, y esa regla de lectura quedó escrita:
+  víctima REAL = falla por `expectOne`; COLATERAL = falla por «Cannot configure the test module».
+  DECISIÓN sobre la cascada, entre tres salidas que Claude Code presentó sin elegir por su cuenta:
+  se corrige el TSDoc, NO el código. Descartado blindar el `afterEach` con
+  `try/finally + resetTestingModule()` (mete maquinaria permanente en tres ficheros y estrena un
+  patrón con cero apariciones en el repo, para un síntoma que solo existe bajo mutación) y descartado
+  partir `bloqueo.service.spec.ts` en varios `describe` (rompería «un describe por fichero», que es
+  el patrón vivo de los dos specs de referencia; sería dejar que el instrumento de medición dicte la
+  estructura del test). En VERDE `verify()` no lanza nunca: la patología solo aparece cuando ya
+  estás leyendo los mensajes con lupa. `verify()` se declara RED, no aserto: no es independientemente
+  reddable bajo la campaña, pero caza la petición no contemplada (p. ej. un método que dispare dos).
+  DESVIACIÓN DE CLAUDE CODE, ACEPTADA: no usó `compileComponents()` ni `beforeEach` async pese a
+  figurar en el «patrón a copiar». Razón suya, correcta: en los specs de referencia existe para
+  compilar COMPONENTES y aquí no hay ninguno —`TestBed.inject` sobre un servicio es síncrono—;
+  añadirlo sería copiar la forma sin la causa. Lo que había que copiar era el TSDoc, la forma de
+  `describe`/`it`, la numeración correlativa y el estilo de aserto, no la mecánica de arranque.
+  ENTREGADO: 3 specs junto a su fuente en `services/`, 5 tests numerados (8)..(12) continuando la
+  numeración correlativa del repo. Suite frontend 30 → 35 (+5), 6 → 9 ficheros. Fixture LOCAL al
+  spec, calibrado (`indice: 2` y no 1; `dia` ≠ `orden` para que un swap de campos fuera detectable;
+  `aulas` NO vacío, porque el vacío es el caso trivial y D-5 lo documenta como significativo);
+  `PROYECCION_1ESO` NO contaminado (patrón S41/S81/S82/S83/S84).
+  CAMPAÑA DE 6 MUTACIONES, las seis caen por `expectOne` y NINGUNA deja de compilar. M4 en
+  particular compila —deja `id` sin usar— lo que VERIFICA sobre el árbol real que
+  `noUnusedParameters` no está activo ni se hereda de `strict`; si algún día se activa, M4 deja de
+  ser expresable y hay que sustituirla por `/api/bloqueos/${id}` → `/api/bloqueo/${id}`. Dato de
+  método REGISTRADO POR CLAUDE CODE SIN QUE SE LE PIDIERA: la campaña se corrió sobre el estado
+  ANTERIOR a la corrección del TSDoc; sobre el commit final solo se redemostró UNA de las seis
+  (M4b, verde-rojo-verde). Como los cambios fueron solo comentarios ninguna mutación cambia de
+  resultado, y se acepta así en vez de dar las seis por buenas sobre el estado nuevo.
+  HALLAZGO DEL MATCHER, no previsto: `expectOne` compara contra `urlWithParams` por igualdad
+  ESTRICTA de string, y sus guardas son `!match.method` / `!match.url`, así que un campo omitido NO
+  restringe —que es lo que da contenido real a la regla «nunca matchear solo por URL»—. Hoy es
+  indiferente (ningún método pasa `params`), pero si alguien añade `params` a `listar()`, T2 se
+  pondrá rojo y ESE ROJO SERÁ CORRECTO. Escrito en el TSDoc para que no se lea como falso positivo.
+  Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO regenerada,
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto (app 315,
+  solver 78). `ng build` limpio. CERO dependencias nuevas: `@angular/common/http/testing` resuelve
+  por exports map, VERIFICADO por `require.resolve` sobre la 21.2.17 instalada, no supuesto.
+  DEUDA NUEVA: D-F8.6-ivA-a (el 404 que el TSDoc de `DiagnosticoService` defiende no lo verifica
+  nadie, y SÍ es reddable), D-F8.6-ivA-b (la cascada de `verify()` rompe la atribución de una
+  campaña de mutación), D-F8.6-ivA-c (`TramoRef.orden` vs `SesionVista.tramo`, NO MEDIDO).
+  CIERRA D-F8.6-iiiA-a con MATIZ MEDIDO.
+  Siguiente: 8.6-iii-B2 (badge + resaltes; borde liberado y mockup dibujado desde S83; cierra
+  D19/D20 en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de
+  D-F8.4-A-c) u 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
   referencia), a decidir al abrir sesión.
