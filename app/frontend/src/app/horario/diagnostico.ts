@@ -54,3 +54,37 @@ export function indicePenalizaciones(
   }
   return indice;
 }
+
+/**
+ * Suma CON SIGNO de los delta blandos por instancia (clave de {@link clavePin}).
+ * Hermana de {@link indicePenalizaciones}, pero AGREGA en vez de agrupar: es lo
+ * que alimenta el badge, un único número por instancia. Vive aquí, en la capa
+ * pura, y no en el contenedor —el componente orquesta señales, no suma—.
+ *
+ * <p>El número NO es `Totales` y NO tiene por qué cuadrar con él: los `Totales`
+ * son conteos SIN signo del coste actual y estos son deltas CONTRAFACTUALES con
+ * signo (ver javadoc de `TotalesDTO`). Contrastarlos es la trampa del contrato,
+ * no un descuadre que arreglar.
+ *
+ * <p>C2/S65: una instancia cuyos delta suman 0 NO se emite. Un delta 0 es
+ * indiferente y el backend ya no lo manda; una instancia indiferente EN AGREGADO
+ * (sus delta se cancelan) tendría un badge que promete un coste que no existe.
+ * Por eso la clave se descarta, y el predicado del consumidor es `has(clave)`,
+ * sin comparar con 0. El filtrado es una SEGUNDA pasada a propósito: el signo
+ * puede cancelarse a mitad de la suma, así que solo el total decide.
+ */
+export function sumaDeltasPorInstancia(
+  penalizaciones: readonly Penalizacion[],
+): Map<string, number> {
+  const sumas = new Map<string, number>();
+  for (const penalizacion of penalizaciones) {
+    const clave = clavePin(penalizacion.actividadCodigo, penalizacion.indice);
+    sumas.set(clave, (sumas.get(clave) ?? 0) + penalizacion.delta);
+  }
+  for (const [clave, suma] of sumas) {
+    if (suma === 0) {
+      sumas.delete(clave);
+    }
+  }
+  return sumas;
+}

@@ -1,4 +1,4 @@
-import { indicePenalizaciones, indiceViolaciones } from './diagnostico';
+import { indicePenalizaciones, indiceViolaciones, sumaDeltasPorInstancia } from './diagnostico';
 import { clavePin } from './pines';
 import { CeldaRef, Penalizacion, Violacion } from '../models/diagnostico.model';
 
@@ -154,5 +154,46 @@ describe('índice de penalizaciones blandas', () => {
 
   it('(8) sin penalizaciones el índice está vacío', () => {
     expect(indicePenalizaciones([]).size).toBe(0);
+  });
+});
+
+describe('suma de deltas por instancia', () => {
+  it('(10) suma CON SIGNO: dos penalizaciones de una clave, +3 y -5, suman -2', () => {
+    const sumas = sumaDeltasPorInstancia([
+      penalizacion('VENTANA_PROFESOR', 'Mat-1ºA', 1, 3),
+      penalizacion('INDISPONIBILIDAD_BLANDA', 'Mat-1ºA', 1, -5),
+    ]);
+
+    // -2 calibrado para que ningún otro operador lo alcance: no la cardinalidad
+    // (2), ni el máximo (3), ni el mínimo/último (-5), ni el primero (3), ni la
+    // suma de absolutos (8), ni abs(suma) (2). Solo la suma con signo da -2.
+    expect(sumas.get(clavePin('Mat-1ºA', 1))).toBe(-2);
+  });
+
+  it('(11) la clave parte por instancia: dos índices de una actividad conservan su suma propia', () => {
+    const sumas = sumaDeltasPorInstancia([
+      penalizacion('VENTANA_PROFESOR', 'Mat-1ºA', 1, 3),
+      penalizacion('VENTANA_PROFESOR', 'Mat-1ºA', 2, -5),
+    ]);
+
+    // Dimensión que (10) NO cubre: con una sola clave, soltar el índice y agrupar
+    // solo por actividadCodigo pasaría (10). Aquí colapsaría las dos en una clave
+    // de suma -2; el size 2 y las sumas propias lo delatan.
+    expect(sumas.size).toBe(2);
+    expect(sumas.get(clavePin('Mat-1ºA', 1))).toBe(3);
+    expect(sumas.get(clavePin('Mat-1ºA', 2))).toBe(-5);
+  });
+
+  it('(12) C2/S65: una instancia cuyos delta suman 0 NO entra en el Map', () => {
+    const sumas = sumaDeltasPorInstancia([
+      penalizacion('VENTANA_PROFESOR', 'Mat-1ºA', 1, 3),
+      penalizacion('INDISPONIBILIDAD_BLANDA', 'Mat-1ºA', 1, -3),
+    ]);
+
+    // has() === false, NO get() === undefined: fija la AUSENCIA de la clave, no un
+    // valor. Una mutación que emitiera la clave con valor 0 daría has() === true y
+    // get() === 0 (no undefined), así que aseverar por get() la dejaría verde.
+    expect(sumas.has(clavePin('Mat-1ºA', 1))).toBe(false);
+    expect(sumas.size).toBe(0);
   });
 });
