@@ -457,11 +457,26 @@ ProfesorRestriccionHoraria(
 > D-F8.5-D2a-a. La FK a `grupo` es `ON DELETE CASCADE` —la tutoría es población propia
 > del grupo, criterio de §4.7— y la FK a `profesor` es RESTRICT, con borrado a 409. Un
 > grupo PDC HEREDA por COPIA el `TUTOR_PRINCIPAL` de su padre en el alta y puede
-> editarlo después; los co-tutores NO se heredan. **S8 sigue sin consumirse por el
-> solver**: `Actividad.requiere_tutor` no se propaga al dominio (D-B5-5) y
-> `ProfesorTutoria` no viaja al `ProblemaHorario` — es el Bloque 8.5-D2b. Nota de
-> diseño: S8 NO es restricción de scheduling (no depende del tramo elegido, es
-> verificable sobre el catálogo), luego no corresponde a `ModeloCpSat`.
+> editarlo después; los co-tutores NO se heredan. **S8 sigue SIN VERIFICARSE, pero ya
+> no por falta de transporte** (actualizado en Sesión 90, Bloque 8.5-D2b-1): hasta S90
+> este párrafo decía que `Actividad.requiere_tutor` no se propagaba al dominio (D-B5-5)
+> y que `ProfesorTutoria` no viajaba al `ProblemaHorario`; las dos mitades son falsas
+> desde entonces. **D-B5-5 está CERRADA**: `Actividad` tiene un séptimo componente
+> `boolean requiereTutor` que `CatalogoMapper.aActividad` propaga desde la entidad, y
+> `ProblemaHorario` tiene una DÉCIMA lista `tutorias` de `ProfesorTutoria(Profesor,
+> GrupoAdministrativo, RolTutoria)`, records PROPIOS del solver —no se reutilizan los de
+> `app/`: solver no depende de app— con el mismo orden de argumentos que la entidad JPA
+> de arriba. Lo que S90 dejó FUERA a propósito, y es lo que impide verificar S8 hoy:
+> (a) nadie LEE `tutorias()` todavía —no hay constante en `ReglaDura` ni comprobación en
+> `VerificadorSolucion`—, y (b) `CatalogoMapper.aProblema` clava `tutorias = List.of()`
+> porque el `ProfesorTutoriaRepository` NO está cableado a dominio (deuda
+> D-F8.5-D2b1-a): la ruta JSON transporta tutorías y la ruta de producción las clava
+> vacías. Las dos las cierra el Bloque 8.5-D2b-2, y el cableado de (b) no puede quedar
+> fuera de él, o S8 pasaría en fixtures y sería estructuralmente inverificable en
+> producción. Nota de diseño, sin cambios desde S77: S8 NO es restricción de scheduling
+> (no depende del tramo elegido, es verificable sobre el catálogo), luego no corresponde
+> a `ModeloCpSat`. Tercera pieza medida en S90: S8 exige además resolver «grupo cubierto
+> por los subgrupos de P», cuyo mecanismo ya existe en el verificador vía S9.
 
 > **Estado de implementación (Sesión 26, Bloques 6b y 6c).** El solver consume
 > esta tabla en ambas variantes. **DURA** (6b): una restricción DURA prohíbe al
