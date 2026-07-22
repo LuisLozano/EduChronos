@@ -17,6 +17,13 @@
   font-weight: 600;
 }
 
+/* Fallo NO fatal: el diagnóstico no cargó, pero la rejilla sigue en pie. Clase
+   PROPIA (no .error) para que la señal sea distinguible por DOM de error/errorPin. */
+.error-diagnostico {
+  color: #a60;
+  font-weight: 600;
+}
+
 /* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
 .aviso {
   padding: 0.4rem 0.6rem;

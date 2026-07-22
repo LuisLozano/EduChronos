@@ -7,8 +7,10 @@ import { HorarioView } from './horario-view';
 import { HorarioGrid } from '../horario-grid/horario-grid';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
+import { DiagnosticoService } from '../../services/diagnostico.service';
 import { Bloqueo } from '../../models/bloqueo.model';
 import { HorarioProyeccion } from '../../models/horario.model';
+import { Diagnostico } from '../../models/diagnostico.model';
 
 /**
  * COORDINACIÓN del contenedor, no transporte: los tres colaboradores son dobles
@@ -80,18 +82,21 @@ describe('contenedor del horario', () => {
   let sujetoListar: Subject<Bloqueo[]>;
   let sujetoProyeccion: Subject<HorarioProyeccion>;
   let sujetoBorrar: Subject<void>;
+  let sujetoDiagnostico: Subject<Diagnostico>;
   let bloqueos: {
     listar: ReturnType<typeof vi.fn>;
     guardar: ReturnType<typeof vi.fn>;
     borrar: ReturnType<typeof vi.fn>;
   };
   let horario: { getProyeccion: ReturnType<typeof vi.fn> };
+  let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
     sujetoListar = new Subject<Bloqueo[]>();
     sujetoProyeccion = new Subject<HorarioProyeccion>();
     sujetoBorrar = new Subject<void>();
+    sujetoDiagnostico = new Subject<Diagnostico>();
 
     bloqueos = {
       listar: vi.fn(() => sujetoListar),
@@ -99,6 +104,10 @@ describe('contenedor del horario', () => {
       borrar: vi.fn(() => sujetoBorrar),
     };
     horario = { getProyeccion: vi.fn(() => sujetoProyeccion) };
+    // Doble por `useValue`, como el resto: `cargar(id)` lo llama pero estos
+    // asertos de pines/proyección no lo hacen emitir; su sujeto queda pendiente
+    // sin efecto (badges vacío, la rejilla se monta igual).
+    diagnosticos = { getDiagnostico: vi.fn(() => sujetoDiagnostico) };
 
     await TestBed.configureTestingModule({
       imports: [HorarioView],
@@ -106,6 +115,7 @@ describe('contenedor del horario', () => {
         { provide: ActivatedRoute, useValue: { paramMap: sujetoParam } },
         { provide: HorarioService, useValue: horario },
         { provide: BloqueoService, useValue: bloqueos },
+        { provide: DiagnosticoService, useValue: diagnosticos },
       ],
     }).compileComponents();
 
@@ -237,5 +247,53 @@ describe('contenedor del horario', () => {
     const aviso = raiz.querySelector('.error');
     expect(aviso).not.toBeNull();
     expect(aviso!.textContent?.trim()).toBe('No se pudieron cargar los pines existentes.');
+  });
+
+  /**
+   * El diagnóstico es POR horario y se pide dentro de `cargar(id)`: una petición
+   * por emisión de ruta, con el id de ESA emisión. Las dos fases fijan el modelo
+   * `llamadas = a + b·emisiones` en `a = 0, b = 1`. La forma de UNA sola emisión
+   * dejaría viva la degeneración del constructor (`a = 1, b = 0`), que llama una
+   * vez al nacer y ninguna al cambiar de ruta: por eso hacen falta las dos.
+   */
+  it('(13) getDiagnostico se pide una vez por emisión de la ruta, con el id de la emisión', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    await fixture.whenStable();
+    expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(1);
+    expect(diagnosticos.getDiagnostico).toHaveBeenCalledWith(1);
+
+    sujetoParam.next(convertToParamMap({ id: '2' }));
+    await fixture.whenStable();
+    expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(2);
+    expect(diagnosticos.getDiagnostico).toHaveBeenCalledWith(2);
+  });
+
+  /**
+   * Un fallo del diagnóstico NO tumba la vista: la proyección vigente no depende
+   * de él. Los tres asertos van juntos porque cada uno mata una fuga distinta:
+   * vaciar la rejilla (reusar `error`), silenciar el fallo (no poblar
+   * `errorDiagnostico`) y confundir las señales (pintar el aviso bajo `.error`).
+   * `.error` cubre a la vez `error` y `errorPin` —comparten clase—: aquí ambos
+   * están vacíos, así que su ausencia es inequívoca.
+   */
+  it('(14) si getDiagnostico falla: la proyección sigue en pie, .error ausente y el aviso propio presente', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    sujetoListar.next([]);
+    sujetoProyeccion.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+
+    sujetoDiagnostico.error(new Error('diagnóstico caído'));
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // (1) proyección poblada ⇒ la rejilla sigue montada (la plantilla la gatea
+    // con `proyeccion()` en el `@else if`).
+    expect(fixture.debugElement.query(By.directive(HorarioGrid))).not.toBeNull();
+    // (2) el fallo del diagnóstico NO es el fallo de la proyección ni del pin.
+    expect(raiz.querySelector('.error')).toBeNull();
+    // (3) su aviso propio, con su texto y su clase.
+    const aviso = raiz.querySelector('.error-diagnostico');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe('No se pudo cargar el diagnóstico.');
   });
 });

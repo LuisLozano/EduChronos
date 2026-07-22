@@ -26,6 +26,10 @@
   <p class="error">{{ msg }}</p>
 }
 
+@if (errorDiagnostico(); as msg) {
+  <p class="error-diagnostico">{{ msg }}</p>
+}
+
 @if (error(); as msg) {
   <p class="error">{{ msg }}</p>
 } @else if (proyeccion(); as p) {
@@ -33,6 +37,7 @@
   <app-horario-grid
     [sesiones]="sesionesFiltradas()"
     [pinadas]="pinadas()"
+    [badges]="badges()"
     (soltar)="alSoltar($event)"
     (despinar)="alDespinar($event)"
   />

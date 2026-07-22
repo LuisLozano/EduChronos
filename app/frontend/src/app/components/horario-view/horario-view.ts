@@ -2,10 +2,13 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { HorarioProyeccion } from '../../models/horario.model';
+import { Diagnostico } from '../../models/diagnostico.model';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
+import { DiagnosticoService } from '../../services/diagnostico.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
 import { clavePin, indicePines } from '../../horario/pines';
+import { sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
 
 /**
@@ -31,6 +34,7 @@ export class HorarioView {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(HorarioService);
   private readonly bloqueos = inject(BloqueoService);
+  private readonly diagnosticos = inject(DiagnosticoService);
 
   protected readonly proyeccion = signal<HorarioProyeccion | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -45,6 +49,26 @@ export class HorarioView {
   protected readonly pinadas = signal<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
   /** Último rechazo del backend (reglas de D-3); se limpia al siguiente intento. */
   protected readonly errorPin = signal<string | null>(null);
+
+  /** Diagnóstico del horario cargado; null mientras no llega o si su carga falla. */
+  protected readonly diagnostico = signal<Diagnostico | null>(null);
+  /** Fallo NO fatal de la carga del diagnóstico. Señal PROPIA: ver {@link cargarDiagnostico}. */
+  protected readonly errorDiagnostico = signal<string | null>(null);
+
+  /**
+   * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
+   * lista para el input de la rejilla. La agregación es LÓGICA PURA
+   * ({@link sumaDeltasPorInstancia}); este contenedor NO suma, igual que no filtra
+   * ni agrupa a mano —solo orquesta señales—.
+   *
+   * <p>Esta suma NO es `Totales` y NO tiene por qué cuadrar con él: contrastarlos
+   * es la trampa del contrato, no un bug (ver la función pura y el javadoc de
+   * `TotalesDTO`). Las claves de suma 0 no llegan (C2/S65).
+   */
+  protected readonly badges = computed<ReadonlyMap<string, number>>(() => {
+    const d = this.diagnostico();
+    return d ? sumaDeltasPorInstancia(d.penalizaciones) : new Map<string, number>();
+  });
 
   protected readonly entidades = computed(() => {
     const p = this.proyeccion();
@@ -76,9 +100,31 @@ export class HorarioView {
     });
   }
 
+  /**
+   * Carga el diagnóstico del horario `{id}`. A DIFERENCIA de {@link cargarPines},
+   * que no lleva parámetro porque el índice de pines es de TODO el horario y se
+   * relee entero, este SÍ toma el id: el diagnóstico es POR horario. Esa asimetría
+   * es la razón de que no compartan forma —a este no le falta el id por descuido—.
+   *
+   * <p>Señal de error PROPIA ({@link errorDiagnostico}), nunca {@link error}: un
+   * fallo del diagnóstico no debe vaciar la rejilla —la rama `@else if` de la
+   * plantilla la gatea con `error()`— y la proyección vigente sigue siendo válida
+   * sin diagnóstico. Tampoco {@link errorPin}, que habla de otra cosa. Se limpia
+   * el diagnóstico anterior al empezar para no arrastrar badges de otro horario.
+   */
+  private cargarDiagnostico(id: number): void {
+    this.errorDiagnostico.set(null);
+    this.diagnostico.set(null);
+    this.diagnosticos.getDiagnostico(id).subscribe({
+      next: (d) => this.diagnostico.set(d),
+      error: () => this.errorDiagnostico.set('No se pudo cargar el diagnóstico.'),
+    });
+  }
+
   private cargar(id: number): void {
     this.error.set(null);
     this.cargarPines();
+    this.cargarDiagnostico(id);
     this.service.getProyeccion(id).subscribe({
       next: (p) => {
         this.proyeccion.set(p);
