@@ -18,6 +18,7 @@
                 class="instancia"
                 [class.pinada]="estaPinada(inst)"
                 [class.con-badge]="tieneBadge(inst)"
+                [class.en-violacion]="tieneViolacionInstancia(inst)"
                 cdkDrag
                 [cdkDragData]="inst"
               >
@@ -40,7 +41,7 @@
                   </span>
                 }
                 @for (e of inst.entradas; track e.sesionId) {
-                  <div class="entrada">
+                  <div class="entrada" [class.en-violacion]="tieneViolacionAula(inst, e)">
                     <span class="asig">{{ e.asignaturaCodigo }}</span>
                     <span class="prof">{{ e.profesores.join(', ') }}</span>
                     <span class="aula">{{ e.aulaCodigo }}</span>

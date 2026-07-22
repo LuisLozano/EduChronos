@@ -4,6 +4,7 @@ import { Component, computed, input, output } from '@angular/core';
 import { SesionVista } from '../../models/horario.model';
 import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
 import { clavePin } from '../../horario/pines';
+import { ViolacionEnCelda } from '../../horario/diagnostico';
 
 /** Instancia soltada en un slot destino, en coordenadas de `TramoRef`. */
 export interface SueltaInstancia {
@@ -54,6 +55,20 @@ export class HorarioGrid {
    * no llegan (C2/S65)—, así que el predicado es `has`, sin comparar con 0.
    */
   readonly badges = input<ReadonlyMap<string, number>>(new Map<string, number>());
+  /**
+   * Violaciones DURAS por instancia (clave de {@link clavePin}), cada una vista
+   * desde una de sus celdas ({@link ViolacionEnCelda}). La rejilla PINTA el
+   * resalte; no calcula el índice —lo recibe ya construido por la capa pura—.
+   *
+   * <p>La asimetría D15 se resuelve AQUÍ, al pintar, y no antes: solo esta capa
+   * enumera las sub-entradas y conoce su `plazaCodigo`, así que solo aquí se puede
+   * decidir si una violación de aula (plaza no-null) casa con ESTA sub-entrada o
+   * si una violación de instancia (plaza null) tiñe la celda entera. Por eso el
+   * input es UN mapa sin partir, no dos ya separados por granularidad.
+   */
+  readonly violaciones = input<ReadonlyMap<string, readonly ViolacionEnCelda[]>>(
+    new Map<string, readonly ViolacionEnCelda[]>(),
+  );
 
   readonly soltar = output<SueltaInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
@@ -85,6 +100,28 @@ export class HorarioGrid {
   /** El número del badge; `undefined` si no hay, pero solo se lee tras {@link tieneBadge}. */
   protected badge(inst: InstanciaCelda): number | undefined {
     return this.badges().get(this.clave(inst));
+  }
+
+  /**
+   * Resalte de la INSTANCIA entera: hay alguna violación de esta instancia con
+   * `plazaCodigo === null` —las de profesor y subgrupo, que no hablan de una
+   * plaza concreta (D15)—. `.some` porque una instancia puede tener a la vez
+   * violaciones de instancia y de aula, y basta una de las primeras.
+   */
+  protected tieneViolacionInstancia(inst: InstanciaCelda): boolean {
+    return (this.violaciones().get(this.clave(inst)) ?? []).some((v) => v.plazaCodigo === null);
+  }
+
+  /**
+   * Resalte de UNA sub-entrada: hay alguna violación de aula de esta instancia
+   * cuya plaza sea la de ESTA sub-entrada (D15). Se compara `plazaCodigo`, nunca
+   * `aulaCodigo`: dos plazas distintas pueden compartir aula y la clave de la
+   * violación es la plaza. `.some` evalúa cada entrada por separado, así que en un
+   * desdoble (una violación con dos celdas, una por plaza) cada sub-entrada casa
+   * con la SUYA (ver T5).
+   */
+  protected tieneViolacionAula(inst: InstanciaCelda, e: SesionVista): boolean {
+    return (this.violaciones().get(this.clave(inst)) ?? []).some((v) => v.plazaCodigo === e.plazaCodigo);
   }
 
   /**

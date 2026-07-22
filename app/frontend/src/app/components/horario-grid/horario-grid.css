@@ -114,3 +114,17 @@
 .vacio {
   color: #ddd;
 }
+
+/* Resalte de violación DURA (8.6-iii-B2-b). outline y NO border-left (ocupado:
+   3px #4a7 estructural) ni background (ocupado en dos capas, la segunda es la
+   señal de pinada). outline no ocupa layout, así que las dos granularidades de
+   D15 se leen anidadas —instancia entera y sub-entrada— sin desmontar la celda. */
+.instancia.en-violacion {
+  outline: 2px solid #c33;
+  outline-offset: -1px;
+}
+
+.entrada.en-violacion {
+  outline: 2px solid #c33;
+  outline-offset: -1px;
+}
