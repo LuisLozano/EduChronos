@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S81. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S82. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S81). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S82). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3361,3 +3361,85 @@ al abrir sesión.
   Siguiente: 8.6-iii (badge de delta blando + resalte de violación; MOCKUP PREVIO OBLIGATORIO y
   cableado de 8.3-C, que el cliente no conoce), 8.4-B (MOCKUP PREVIO) u 8.5-D2b (solver), a decidir
   al abrir sesión.
+
+### Sesión 82 — Fase 8, Bloque 8.6-iii-A: contrato de lectura del diagnóstico en el cliente.
+  Modo híbrido. 3 commits de código (0e0bffd producción, a876e5d tests, 8e8cb71 el `it` (9)) + doc
+  aparte. §A DE MEDICIÓN sobre el CONTRATO REAL DEL SERVIDOR (lectura literal de los 5 DTOs +
+  controller; instrumento más barato, precedente S77-S81).
+  8.6-iii PARTIDO en A/B al abrir. Razón: su casilla pedía TRES concerns —cablear 8.3-C, pintar tres
+  capas, y el gesto de despinar de D-F8.6-ii-b, que además lleva mockup—. iii-A es la parte que NO
+  necesita mockup y entrega contrato verificable; iii-B es la pintura y CONSERVA el MOCKUP PREVIO
+  OBLIGATORIO. Orden elegido a propósito: medir ANTES de dibujar, porque un mockup sobre datos
+  imaginados fija un contrato que el backend puede no poder alimentar.
+  SALIDA DE §A: NO existe `DiagnosticoController` —el endpoint es `GET /api/horarios/{id}/diagnostico`
+  en `HorarioController:85`, colgado del controller de horarios—. HALLAZGO FAVORABLE: `CeldaRefDTO`
+  lleva (`actividadCodigo`, `indice`), la clave de D-6 que `SesionVista` ya trae y que `clavePin` ya
+  computa → iii-A NO toca backend ni `SesionVistaDTO`. Los tipos homónimos de `solver/cpsat` son pares
+  espejo al otro lado de la frontera dura: `solver/src/main` NO se tocó (solo se leyó) → referencia NO
+  regenerada.
+  HALLAZGO ESTRUCTURAL, que es el núcleo del bloque: los dos lados del DTO NO tienen la misma forma.
+  `CeldaRefDTO` lleva `plazaCodigo` NULLABLE (no-null solo en `SOLAPE_AULA`); `PenalizacionDTO` NO lo
+  lleva EN ABSOLUTO y APLANA la celda a (`actividadCodigo`, `indice`), con el javadoc argumentando que
+  «un campo siempre null es un campo que miente». La asimetría D15 se COPIA al TS, no se normaliza:
+  son dos índices distintos, no uno.
+  DECISIONES CERRADAS: (iiiA-1) `diagnostico.model.ts` NUEVO en `models/`, no ampliar
+  `horario.model.ts`, que acota su alcance a Fase 7 en su cabecera (precedente literal
+  `bloqueo.model.ts:6-7`). (iiiA-2) espejo FIEL con la asimetría copiada: `regla` es `string` y no
+  unión de literales (patrón `horario.model.ts:31-32`, donde `estado` es string pese a ser enum),
+  `Totales` son tres `number` y NUNCA `number | null` —ensanchar es tan infiel como estrechar—.
+  (iiiA-3) `DiagnosticoService` TS propio. (iiiA-4) DOS funciones puras en `horario/diagnostico.ts`,
+  reutilizando `clavePin` de `pines.ts` (fuente única de D-6); `indicePenalizaciones` SIN sumatorio de
+  `delta`, porque el javadoc de `TotalesDTO` dice que los totales NO tienen por qué coincidir con la
+  suma de los delta contrafactuales y acumularlos invitaría a contrastarlos y a ver un bug donde no lo
+  hay. (iiiA-5) el servicio devuelve el `Observable` crudo y DOCUMENTA el 404 en TSDoc, sin traducir.
+  TRES ERRORES DEL ARQUITECTO, los tres destapados por Claude Code al contrastar el contrato ANTES de
+  teclear (registrados, no tapados). (1) Omití `ViolacionDTO.descripcion` del espejo: omisión, no
+  exclusión deliberada; entra. (2) La razón que di para (iiiA-3) —«`HorarioService` es de solo
+  lectura»— NO DISCRIMINA: `DiagnosticoService` también lo es. El argumento correcto, que es el que va
+  al TSDoc, es «cada contrato/bloque tiene su cliente» (precedente `BloqueoService`, S81). Conclusión
+  correcta, porqué mal enunciado. (3) Di por supuesto un patrón de manejo de error HTTP «mirando
+  `horario.service.ts` y sus specs»: NO TIENE SPECS, y NINGÚN servicio del frontend los tiene. Afirmé
+  cómo estaba algo sin comprobarlo — mismo género que S81, QUINTA sesión consecutiva.
+  ANOMALÍA DE FORMATO DESTAPADA POR LA MEDICIÓN DE R4, no por criterio: las 4 cabeceras vivas del plan
+  NO son homogéneas (la más reciente es `### Sesión NN`, las otras tres son texto plano con prefijo
+  «Última sesión registrada (previa):»), mientras que TODAS las entradas de la bitácora son
+  `### Sesión NN`. Archivar exige PROMOVER la línea, no solo moverla. Es costumbre observable
+  (entradas S69-S77), no norma escrita: D-F8.0-a sigue viva.
+  ASERTOS: 8 tests + el (9) del desdoble. TRES MUTACIONES sobre `diagnostico.ts`, todas caen y
+  restauran verde. M1 (clave solo por `actividadCodigo`) pone rojo `diagnostico.spec.ts` (1)(6), NO
+  solo `pines.spec.ts`: el requisito crítico de S81 —reutilizar una función no hereda su cobertura—
+  se cumple, MEDIDO, gracias al fixture de misma actividad con índices 1 y 2. M2 (indexar solo
+  `celdas[0]`) y M3 (propagar `celdas[0].plazaCodigo`) NO son disjuntas y NO PUEDEN SERLO: detectar M3
+  exige una entrada cuyo `plazaCodigo` difiera del de `celdas[0]`, y esa entrada procede de una celda
+  que M2 elimina. M3 ⊂ M2 por construcción del operador, no por fixture flojo. Se rechazó redefinir M2
+  para forzar disjunción: sería una mutación que nadie escribiría, y perseguir la métrica no es
+  perseguir cobertura. CONCLUSIÓN REGISTRADA: la mutación M3 no aporta sobre M2; el TEST (3) sí, y es
+  el único que asevera la propagación de plaza que iii-B necesitará.
+  DISTINCIÓN NUEVA, aportada por Claude Code al corregir su propia predicción: CAER ante una mutación
+  ≠ DISCRIMINAR la dimensión que ataca. El `it` (9) cae ante M1 por ACOPLAMIENTO a `clavePin` (la
+  lectura del test deja de casar con la escritura del índice), no por discriminar índice-vs-actividad
+  —sus dos celdas comparten actividad E índice—. El mérito de esa dimensión sigue siendo del (1). La
+  tabla de mutaciones NO se lee como matriz de cobertura.
+  MEDICIÓN ADICIONAL sobre `solver/` (lectura, sin tocar), disparada por una pregunta de Claude Code
+  que el contrato no cubría: ¿emite el verificador dos `CeldaRef` de la MISMA instancia con plazas
+  distintas? SÍ, y está en tres eslabones —`VerificadorSolucion:603-612` añade una `CeldaRef` POR
+  PLAZA al `ArrayList` de la clave `Aula`; `reportarColisiones:646-655` emite UNA sola `Violacion` con
+  la lista entera; `Violacion:39` usa `List.copyOf`, que NO deduplica—. Los comentarios 593-600 lo
+  declaran deliberado (por S2, dos plazas de una instancia en la misma aula son colisión, no uso
+  compartido). Como SALIDA DEL SOLVER es estado IMPOSIBLE (lo bloquean `restriccionNoSolapeAula` por
+  candidatas y `ProblemaHorarioMapper:315-326` por `aulaFija`), pero el diagnóstico NO verifica lo que
+  el solver acaba de emitir: verifica lo RECONSTRUIDO DESDE PERSISTENCIA (`SolucionMapper`), donde
+  ninguna de las dos barreras interviene. El `it` (9) se escribe como FIXTURE DEFENSIVO DECLARADO
+  (precedente S81: una función pura se prueba contra su contrato, no contra la validez del horario) y
+  fija que la `Violacion` repetida bajo una clave es contrato, no bug: deduplicar es del consumidor.
+  HALLAZGO COLATERAL sobre el solver, no arreglado aquí: el ÚNICO test de `SOLAPE_AULA`
+  (`VerificadorSolucionAtribucionTest:109-139`) usa dos actividades mono-plaza; el caso intra-instancia
+  NO está cubierto por ningún test del solver.
+  Suite frontend 13 → 22 (+9), backend intacto (app 315, solver 78). Demostrada no-vacía por las tres
+  mutaciones. Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO
+  regenerada, `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  `PROYECCION_1ESO` NO contaminado: fixtures LOCALES en el spec (patrón S41/S81).
+  DEUDA NUEVA: D-F8.6-iiiA-a (ningún servicio del frontend tiene test), D-F8.6-iiiA-b (`Totales` sale
+  modelado y sin consumidor), D-F8.6-iiiA-c (S2 sobre `aulaFija` validada SOLO en la ruta JSON).
+  Siguiente: 8.6-iii-B (MOCKUP PREVIO OBLIGATORIO; hereda D-F8.6-ii-b y D-F8.6-iiiA-b), 8.4-B (MOCKUP
+  PREVIO) u 8.5-D2b (solver, regenera la referencia), a decidir al abrir sesión.
