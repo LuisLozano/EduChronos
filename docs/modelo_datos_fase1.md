@@ -457,26 +457,39 @@ ProfesorRestriccionHoraria(
 > D-F8.5-D2a-a. La FK a `grupo` es `ON DELETE CASCADE` —la tutoría es población propia
 > del grupo, criterio de §4.7— y la FK a `profesor` es RESTRICT, con borrado a 409. Un
 > grupo PDC HEREDA por COPIA el `TUTOR_PRINCIPAL` de su padre en el alta y puede
-> editarlo después; los co-tutores NO se heredan. **S8 sigue SIN VERIFICARSE, pero ya
-> no por falta de transporte** (actualizado en Sesión 90, Bloque 8.5-D2b-1): hasta S90
-> este párrafo decía que `Actividad.requiere_tutor` no se propagaba al dominio (D-B5-5)
-> y que `ProfesorTutoria` no viajaba al `ProblemaHorario`; las dos mitades son falsas
-> desde entonces. **D-B5-5 está CERRADA**: `Actividad` tiene un séptimo componente
+> editarlo después; los co-tutores NO se heredan. **S8 SE VERIFICA desde la Sesión 91**
+> (Bloque 8.5-D2b-2), y con ello queda cerrado el frente 8.5-D2b entero, abierto en S77.
+> Las dos razones por las que S8 no se verificaba —que este párrafo enumeró primero en
+> S77 y luego, ya reducidas, en S90— han dejado de ser ciertas y se resuelven así:
+> **(a) alguien LEE `tutorias()`**: `ReglaDura` tiene la constante `TUTORIA_SIN_TUTOR` y
+> `VerificadorSolucion.verificarTutorias` es el QUINTO acumulador de `verificar()`. Es el
+> ÚNICO método del fichero que no recibe ni usa `SolucionHorario`, y es intencionado: S8
+> es propiedad del CATÁLOGO, no de la solución (ver la nota de diseño de abajo). La
+> `Violacion` emitida lleva `recursoCodigo` = código del GRUPO afectado y
+> `tramoCodigo = null`, calcando `DISTRIBUCION_MISMO_DIA`; no hizo falta forma nueva
+> porque dos de las siete reglas previas ya emitían sin tramo.
+> **(b) la ruta JPA transporta las tutorías**: `CatalogoMapper.aProblemaHorario` gana un
+> ONCEAVO parámetro `List<ProfesorTutoria>` —el mapper es `static` puro y NO inyecta
+> repositorios— y `GeneradorHorarioService.cargarProblema` le pasa
+> `profesorTutoriaRepository.findAll()` dentro de su `@Transactional(readOnly = true)`,
+> que es lo que permite navegar por identidad los `@ManyToOne(LAZY)` de la PK compuesta.
+> Cierra D-F8.5-D2b1-a. La ruta JSON y la de producción vuelven a ser simétricas.
+> **AMBOS ROLES viajan al dominio**; el filtro `TUTOR_PRINCIPAL` que S8 exige vive en el
+> verificador, no en el mapper: filtrar `CO_TUTOR` en el transporte haría que la ruta de
+> producción perdiera datos que la entidad sí tiene, que es la asimetría que S90 usó como
+> argumento para propagar `requiereTutor` en `aActividad`.
+> **D-B5-5 sigue CERRADA** desde S90: `Actividad` tiene un séptimo componente
 > `boolean requiereTutor` que `CatalogoMapper.aActividad` propaga desde la entidad, y
 > `ProblemaHorario` tiene una DÉCIMA lista `tutorias` de `ProfesorTutoria(Profesor,
 > GrupoAdministrativo, RolTutoria)`, records PROPIOS del solver —no se reutilizan los de
 > `app/`: solver no depende de app— con el mismo orden de argumentos que la entidad JPA
-> de arriba. Lo que S90 dejó FUERA a propósito, y es lo que impide verificar S8 hoy:
-> (a) nadie LEE `tutorias()` todavía —no hay constante en `ReglaDura` ni comprobación en
-> `VerificadorSolucion`—, y (b) `CatalogoMapper.aProblema` clava `tutorias = List.of()`
-> porque el `ProfesorTutoriaRepository` NO está cableado a dominio (deuda
-> D-F8.5-D2b1-a): la ruta JSON transporta tutorías y la ruta de producción las clava
-> vacías. Las dos las cierra el Bloque 8.5-D2b-2, y el cableado de (b) no puede quedar
-> fuera de él, o S8 pasaría en fixtures y sería estructuralmente inverificable en
-> producción. Nota de diseño, sin cambios desde S77: S8 NO es restricción de scheduling
+> de arriba. Nota de diseño, sin cambios desde S77: S8 NO es restricción de scheduling
 > (no depende del tramo elegido, es verificable sobre el catálogo), luego no corresponde
-> a `ModeloCpSat`. Tercera pieza medida en S90: S8 exige además resolver «grupo cubierto
-> por los subgrupos de P», cuyo mecanismo ya existe en el verificador vía S9.
+> a `ModeloCpSat`; la sede es el verificador y NO la pre-validación de 8.4-A, que es
+> superficie REST distinta con su propia excepción. Tercera pieza, medida en S90 y
+> resuelta en S91: S8 exige resolver «grupo cubierto por los subgrupos de P», y se
+> implementa con el criterio de S9 —CIEGO al `grupo_padre`—, con la consecuencia asumida
+> de que un grupo PDC que no haya heredado `TUTOR_PRINCIPAL` viola S8 legítimamente.
 
 > **Estado de implementación (Sesión 26, Bloques 6b y 6c).** El solver consume
 > esta tabla en ambas variantes. **DURA** (6b): una restricción DURA prohíbe al
