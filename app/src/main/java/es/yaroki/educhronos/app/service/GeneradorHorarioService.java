@@ -12,6 +12,7 @@ import es.yaroki.educhronos.app.catalog.Plaza;
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.ProfesorRestriccionHorariaRepository;
+import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
 import es.yaroki.educhronos.app.catalog.SesionBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
@@ -46,10 +47,11 @@ import org.springframework.transaction.annotation.Transactional;
  * servicio del módulo {@code app/} (Fase 6, Bloque 8).
  *
  * <p><b>Frontera transaccional deliberada.</b> {@link #cargarProblema()} corre
- * dentro de una única transacción de solo lectura: la carga de las ocho
- * colecciones Y su mapeo ocurren ahí, porque el mapper navega relaciones LAZY por
+ * dentro de una única transacción de solo lectura: la carga de las colecciones
+ * del catálogo Y su mapeo ocurren ahí, porque el mapper navega relaciones LAZY por
  * IDENTIDAD DE OBJETO (el {@code grupoPadre} de un grupo, la población de un
- * subgrupo, el {@code TramoSemanal} de una restricción). Fuera de la sesión de
+ * subgrupo, el {@code TramoSemanal} de una restricción, y el {@code profesor}/
+ * {@code grupo} @ManyToOne(LAZY) de la PK de cada {@code ProfesorTutoria}). Fuera de la sesión de
  * Hibernate eso lanzaría {@code LazyInitializationException}; peor aún, listas
  * cargadas en contextos de persistencia distintos darían proxies distintos y la
  * resolución por referencia fallaría EN SILENCIO. {@link #generar(Integer, Integer,
@@ -73,6 +75,7 @@ public class GeneradorHorarioService {
     private final SesionRepository sesionRepository;
     private final SesionBloqueadaRepository sesionBloqueadaRepository;
     private final AulaBloqueadaRepository aulaBloqueadaRepository;
+    private final ProfesorTutoriaRepository profesorTutoriaRepository;
 
     public GeneradorHorarioService(
             TramoSemanalRepository tramoRepository,
@@ -86,7 +89,8 @@ public class GeneradorHorarioService {
             HorarioGeneradoRepository horarioRepository,
             SesionRepository sesionRepository,
             SesionBloqueadaRepository sesionBloqueadaRepository,
-            AulaBloqueadaRepository aulaBloqueadaRepository) {
+            AulaBloqueadaRepository aulaBloqueadaRepository,
+            ProfesorTutoriaRepository profesorTutoriaRepository) {
         this.tramoRepository = tramoRepository;
         this.aulaRepository = aulaRepository;
         this.asignaturaRepository = asignaturaRepository;
@@ -99,6 +103,7 @@ public class GeneradorHorarioService {
         this.sesionRepository = sesionRepository;
         this.sesionBloqueadaRepository = sesionBloqueadaRepository;
         this.aulaBloqueadaRepository = aulaBloqueadaRepository;
+        this.profesorTutoriaRepository = profesorTutoriaRepository;
     }
 
     /**
@@ -133,7 +138,8 @@ public class GeneradorHorarioService {
                 actividadRepository.findAll(),
                 restriccionRepository.findAll(),
                 sesionBloqueadaRepository.findAll(),
-                aulaBloqueadaRepository.findAll());
+                aulaBloqueadaRepository.findAll(),
+                profesorTutoriaRepository.findAll());
     }
 
     /**

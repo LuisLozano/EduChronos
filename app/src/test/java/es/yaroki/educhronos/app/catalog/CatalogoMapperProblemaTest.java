@@ -44,7 +44,7 @@ class CatalogoMapperProblemaTest {
         ProblemaHorario problema = CatalogoMapper.aProblemaHorario(
                 tramos, List.of(aula), List.of(asig), List.of(prof),
                 List.of(grupo), List.of(sg), List.of(act), List.of(),
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
 
         assertThat(problema.tramos()).hasSize(2); // el recreo se filtró
         assertThat(problema.aulas()).hasSize(1);
@@ -80,7 +80,7 @@ class CatalogoMapperProblemaTest {
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(prof),
                 List.of(grupo), List.of(sg), List.of(act), List.of(),
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
 
         // El grupo que cuelga del subgrupo es el mismo que el de la lista
         // top-level. Basta la igualdad por equals (no ==): domain.GrupoAdministrativo
@@ -107,7 +107,7 @@ class CatalogoMapperProblemaTest {
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(prof),
                 List.of(g1, g2), List.of(s1, s2), List.of(act), List.of(),
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
 
         // El catálogo top-level es exhaustivo: incluye entidades no referenciadas
         // por ninguna actividad. El mapper no las poda.
@@ -135,7 +135,7 @@ class CatalogoMapperProblemaTest {
                 List.of(), List.of(), List.of(prof),
                 List.of(), List.of(), List.of(),
                 List.of(restr),
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
 
         assertThat(problema.restriccionesHorarias()).singleElement().satisfies(r -> {
             assertThat(r.profesor().codigo()).isEqualTo("MAT8");
@@ -157,7 +157,7 @@ class CatalogoMapperProblemaTest {
         assertThatThrownBy(() -> CatalogoMapper.aProblemaHorario(
                 List.of(), List.of(a1, a2), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(),
-                List.of(), List.of()))
+                List.of(), List.of(), List.of()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -178,7 +178,7 @@ class CatalogoMapperProblemaTest {
                 List.of(tramo(Dia.LUNES, 1, true)),
                 List.of(aula), List.of(asig), List.of(), // profesores: vacío
                 List.of(grupo), List.of(sg), List.of(act), List.of(),
-                List.of(), List.of()))
+                List.of(), List.of(), List.of()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("GHOST");
     }

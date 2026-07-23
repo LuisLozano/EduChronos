@@ -93,7 +93,8 @@ public final class CatalogoMapper {
             List<es.yaroki.educhronos.app.catalog.Actividad> actividades,
             List<ProfesorRestriccionHoraria> restricciones,
             List<SesionBloqueada> pinesTramo,
-            List<AulaBloqueada> pinesAula) {
+            List<AulaBloqueada> pinesAula,
+            List<es.yaroki.educhronos.app.catalog.ProfesorTutoria> tutorias) {
 
         Objects.requireNonNull(tramos,       "tramos no puede ser null");
         Objects.requireNonNull(aulas,        "aulas no puede ser null");
@@ -105,6 +106,7 @@ public final class CatalogoMapper {
         Objects.requireNonNull(restricciones, "restricciones no puede ser null");
         Objects.requireNonNull(pinesTramo,   "pinesTramo no puede ser null");
         Objects.requireNonNull(pinesAula,    "pinesAula no puede ser null");
+        Objects.requireNonNull(tutorias,     "tutorias no puede ser null");
 
         TramosMapeados tramosMapeados = aTramosConIndice(tramos);
         List<Tramo> tramosDom = tramosMapeados.lista();
@@ -159,13 +161,17 @@ public final class CatalogoMapper {
                 BloqueoMapper.aBloqueos(pinesTramo, pinesAula, actividadesPorCodigo,
                         plazasPorCodigo, aulasPorCodigo, tramosMapeados.porEntidad());
 
-        // tutorias: lista vacía. El transporte de ProfesorTutoria (persistencia ->
-        // dominio) NO entra en este bloque (8.5-D2b-1, alcance solo aActividad); se
-        // cablea en un bloque posterior de D2b. La lista décima no puede ser null.
+        // tutorias (§4.1, Bloque 8.5-D2b-2): se transportan AMBOS roles. El filtro de
+        // S8 (solo TUTOR_PRINCIPAL cuenta) vive en el verificador del solver, no aquí:
+        // esta es la ruta de producción y no debe perder datos que la entidad JPA tiene.
+        List<es.yaroki.educhronos.solver.domain.ProfesorTutoria> tutoriasDom = tutorias.stream()
+                .map(t -> aProfesorTutoria(t, profesoresPorCodigo, gruposPorCodigo))
+                .toList();
+
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
                 gruposDom, subgruposDom, actividadesDom, restriccionesDom,
-                bloqueosDom, List.of());
+                bloqueosDom, tutoriasDom);
     }
 
     /**
@@ -236,6 +242,59 @@ public final class CatalogoMapper {
             grupos.add(mapeado);
         }
         return new es.yaroki.educhronos.solver.domain.Subgrupo(entidad.getCodigo(), grupos);
+    }
+
+    /**
+     * {@code ProfesorTutoria} JPA → {@code domain.ProfesorTutoria} (Bloque 8.5-D2b-2).
+     * Resuelve {@code profesor} y {@code grupo} POR IDENTIDAD contra los catálogos de
+     * dominio ya mapeados en {@link #aProblemaHorario} (mismo patrón que las demás
+     * listas: nunca {@code findById}). Un código sin correspondencia es error de
+     * integridad referencial y aborta con excepción explícita.
+     *
+     * <p>Transporta AMBOS roles: no filtra {@code CO_TUTOR}. El filtro de S8 (solo el
+     * {@code TUTOR_PRINCIPAL} satisface la invariante) es del verificador del solver;
+     * aquí perderlo mutilaría un dato que la entidad JPA sí guarda.
+     *
+     * @param entidad          tutoría JPA de {@code app.catalog}
+     * @param profesoresPorCodigo índice de profesores de dominio ya mapeados, por código
+     * @param gruposPorCodigo     índice de grupos de dominio ya mapeados, por código
+     */
+    public static es.yaroki.educhronos.solver.domain.ProfesorTutoria aProfesorTutoria(
+            es.yaroki.educhronos.app.catalog.ProfesorTutoria entidad,
+            Map<String, Profesor> profesoresPorCodigo,
+            Map<String, GrupoAdministrativo> gruposPorCodigo) {
+        Objects.requireNonNull(entidad, "tutoria no puede ser null");
+
+        Profesor profesor = profesoresPorCodigo.get(entidad.getProfesor().getCodigo());
+        if (profesor == null) {
+            throw new IllegalArgumentException(
+                    "Tutoria referencia un profesor no presente en el catálogo mapeado: "
+                            + entidad.getProfesor().getCodigo());
+        }
+        GrupoAdministrativo grupo = gruposPorCodigo.get(entidad.getGrupo().getCodigo());
+        if (grupo == null) {
+            throw new IllegalArgumentException(
+                    "Tutoria referencia un grupo no presente en el catálogo mapeado: "
+                            + entidad.getGrupo().getCodigo());
+        }
+        return new es.yaroki.educhronos.solver.domain.ProfesorTutoria(
+                profesor, grupo, aRolTutoria(entidad.getRol()));
+    }
+
+    /**
+     * {@code app.catalog.RolTutoria} → {@code domain.RolTutoria}. Enum gemelos, tipos
+     * DISTINTOS (el solver no depende de {@code app}): se traduce POR NOMBRE. Un nombre
+     * sin equivalente en destino aborta ruidosamente; NO se colapsa a un rol por
+     * defecto, que perdería en silencio el rol real.
+     */
+    private static es.yaroki.educhronos.solver.domain.RolTutoria aRolTutoria(
+            es.yaroki.educhronos.app.catalog.RolTutoria rol) {
+        try {
+            return es.yaroki.educhronos.solver.domain.RolTutoria.valueOf(rol.name());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "RolTutoria sin equivalente en el dominio del solver: " + rol.name(), e);
+        }
     }
 
     /**

@@ -76,7 +76,8 @@ class BloqueoPinRoundTripTest {
                 actividadRepository.findAll(),
                 restriccionRepository.findAll(),
                 pinTramoRepository.findAll(),
-                pinAulaRepository.findAll());
+                pinAulaRepository.findAll(),
+                java.util.List.of());
 
         ResultadoOptimizacion resultado =
                 new SolverHorario(10, 42).resolverOptimizandoConDetalle(problema);
