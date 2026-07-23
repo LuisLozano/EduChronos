@@ -3,7 +3,7 @@
 Índice de API generado exclusivamente a partir del código fuente.
 
 - Fecha: 2026-07-23
-- Commit: `d0f5e9b`
+- Commit: `dc2ab65`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -281,7 +281,7 @@ Consume: (ninguno)
 
 ### `ReglaDura` — public enum
 Paquete: `es.yaroki.educhronos.solver.cpsat`
-Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`
+Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`, `TUTORIA_SIN_TUTOR`
 
 Consume: (ninguno)
 
@@ -335,7 +335,7 @@ Métodos:
 - `static int ventanasDe(Set<Integer> posicionesDelDia)`
 - `static int excesoConsecutivasDe(Set<Integer> posicionesDelDia, int n)`
 
-Consume: `Actividad`, `ActividadInstancia`, `AtribucionBlanda`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `ResultadoVerificacion`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `AtribucionBlanda`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `ResultadoVerificacion`, `RolTutoria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
 
 ### `Violacion` — public record
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -900,6 +900,19 @@ Métodos:
 - `void desdobleNoSeReportaComoSolapeDeGrupo_regresion()`
 
 Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
+### `VerificadorSolucionTutoriaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void tutorPrincipalDelGrupoCubierto_noViola()`
+- `void mismoProfesorPeroCoTutor_viola()`
+- `void tutorPrincipalDeOtroGrupo_viola()`
+- `void requiereTutorFalse_noViola()`
+- `void coDocenciaConUnSoloTutor_noViola()`
+- `void violacionLlevaTramoNullYRecursoElGrupoCubierto()`
+- `void fixtureS8_soloViolaLaActividadCoTutor() throws Exception`
+
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `ProfesorTutoria`, `RolTutoria`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
 ---
 
