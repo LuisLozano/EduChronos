@@ -14,6 +14,9 @@ package es.yaroki.educhronos.solver.cpsat;
  *       {@code SOLAPE_GRUPO} — dos o más celdas comparten un recurso en un tramo
  *       (S9). El aula se cuenta por plaza (D15); el resto, por instancia.</li>
  *   <li>{@code DISTRIBUCION_MISMO_DIA} — una actividad DISTRIBUIDA repite día.</li>
+ *   <li>{@code TUTORIA_SIN_TUTOR} — una actividad {@code requiereTutor} no la
+ *       imparte ningún TUTOR_PRINCIPAL de un grupo que cubre (§4.6, invariante S8).
+ *       Es propiedad del CATÁLOGO, no de la solución: no depende del tramo.</li>
  * </ul>
  */
 public enum ReglaDura {
@@ -23,5 +26,6 @@ public enum ReglaDura {
     SOLAPE_AULA,
     SOLAPE_SUBGRUPO,
     SOLAPE_GRUPO,
-    DISTRIBUCION_MISMO_DIA
+    DISTRIBUCION_MISMO_DIA,
+    TUTORIA_SIN_TUTOR
 }

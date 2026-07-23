@@ -1,0 +1,38 @@
+{
+  "tramos": [ {"codigo": "LUN-1", "diaSemana": 1, "ordenEnDia": 1} ],
+  "aulas": [ {"codigo": "AULA-X", "nombre": "Aula X"} ],
+  "asignaturas": [ {"codigo": "TUT", "nombre": "Tutoria"} ],
+  "profesores": [
+    {"codigo": "P-ALFA", "nombre": "Profesor Alfa"},
+    {"codigo": "P-BETA", "nombre": "Profesor Beta"}
+  ],
+  "grupos": [
+    {"codigo": "G-UNO", "tipo": "ORDINARIO", "grupoPadre": null},
+    {"codigo": "G-DOS", "tipo": "ORDINARIO", "grupoPadre": null}
+  ],
+  "subgrupos": [
+    {"codigo": "SG-UNO", "grupos": ["G-UNO"]},
+    {"codigo": "SG-DOS", "grupos": ["G-DOS"]}
+  ],
+  "actividades": [
+    {
+      "codigo": "ACT-SAT", "asignatura": "TUT",
+      "repeticionesPorSemana": 1, "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "requiereTutor": true,
+      "plazas": [ {"codigo": "ACT-SAT-P1", "asignatura": "TUT", "profesores": ["P-ALFA"],
+        "aulaFija": "AULA-X", "subgrupos": ["SG-UNO"]} ]
+    },
+    {
+      "codigo": "ACT-VIOLA", "asignatura": "TUT",
+      "repeticionesPorSemana": 1, "duracionTramos": 1, "patronTemporal": "NEUTRA",
+      "requiereTutor": true,
+      "plazas": [ {"codigo": "ACT-VIOLA-P1", "asignatura": "TUT", "profesores": ["P-BETA"],
+        "aulaFija": "AULA-X", "subgrupos": ["SG-DOS"]} ]
+    }
+  ],
+  "tutorias": [
+    {"profesor": "P-ALFA", "grupo": "G-UNO", "rol": "TUTOR_PRINCIPAL"},
+    {"profesor": "P-BETA", "grupo": "G-DOS", "rol": "CO_TUTOR"},
+    {"profesor": "P-BETA", "grupo": "G-UNO", "rol": "TUTOR_PRINCIPAL"}
+  ]
+}

@@ -8,7 +8,9 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.ProfesorTutoria;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.RolTutoria;
 import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
@@ -37,7 +39,9 @@ import java.util.function.Function;
  * aula, subgrupo y grupo (S9, espejo de la quinta restricción dura del solver;
  * agrupa por subgrupo.grupo() directo, ciega al grupoPadre); distribución por
  * día de las actividades {@code DISTRIBUIDA} (con la misma guarda anti-palomar
- * D12 que el modelo).
+ * D12 que el modelo); y S8 (una actividad {@code requiereTutor} la imparte un
+ * TUTOR_PRINCIPAL de un grupo que cubre). S8 es la única comprobación que NO
+ * mira la {@link SolucionHorario}: es propiedad del catálogo, no del horario.
  */
 public final class VerificadorSolucion {
 
@@ -49,6 +53,7 @@ public final class VerificadorSolucion {
         verificarBloquesConsecutivos(problema, esperadas, solucion, violaciones); // D13
         verificarNoSolapes(problema, esperadas, solucion, violaciones);
         verificarDistribucion(problema, esperadas, solucion, violaciones);
+        verificarTutorias(problema, violaciones); // S8: propiedad del catálogo, no usa la solución
 
         return new ResultadoVerificacion(violaciones);
     }
@@ -701,6 +706,88 @@ public final class VerificadorSolucion {
                 }
             }
         }
+    }
+
+    /**
+     * S8 (§4.6): toda actividad {@code requiereTutor} debe estar impartida por un
+     * TUTOR_PRINCIPAL de un grupo que la actividad cubre. Es propiedad del CATÁLOGO,
+     * no de la solución: por eso este método —único del fichero— NO recibe ni usa
+     * {@link SolucionHorario}. El tramo elegido es irrelevante para S8, así que la
+     * {@link Violacion} lleva {@code tramoCodigo == null} (calca DISTRIBUCION_MISMO_DIA,
+     * que también va sin tramo).
+     *
+     * <p>Semántica literal del modelo: una actividad la cumple si existe alguna plaza
+     * P y algún profesor T de P tal que hay {@code ProfesorTutoria(T, G, TUTOR_PRINCIPAL)}
+     * con G cubierto por los subgrupos de P ({@code sg.grupos().contains(G)}, por
+     * identidad — CIEGO al {@code grupoPadre}, igual criterio que el no-solape de grupo
+     * S9). Basta UNO: la co-docencia (dos profesores en una plaza) la cumple si
+     * cualquiera de los dos es tutor. Solo {@code TUTOR_PRINCIPAL}; {@code CO_TUTOR} no
+     * satisface S8.
+     */
+    private void verificarTutorias(ProblemaHorario problema, List<Violacion> violaciones) {
+        for (Actividad actividad : problema.actividades()) {
+            if (!actividad.requiereTutor()) {
+                continue; // S8 solo aplica a las actividades marcadas
+            }
+            if (impartidaPorTutorPrincipal(actividad, problema.tutorias())) {
+                continue; // basta un (plaza, profesor, grupo cubierto) con TUTOR_PRINCIPAL
+            }
+            String grupoAfectado = grupoAfectado(actividad);
+            List<CeldaRef> celdas = new ArrayList<>();
+            for (int indice = 1; indice <= actividad.repeticionesPorSemana(); indice++) {
+                celdas.add(new CeldaRef(actividad.codigo(), indice, null));
+            }
+            violaciones.add(new Violacion(ReglaDura.TUTORIA_SIN_TUTOR, grupoAfectado, null,
+                    celdas, "Actividad " + actividad.codigo() + " requiere tutor, pero ningún"
+                            + " profesor suyo es TUTOR_PRINCIPAL de un grupo que cubre"
+                            + " (grupo afectado: " + grupoAfectado + ")"));
+        }
+    }
+
+    /**
+     * ¿La imparte un TUTOR_PRINCIPAL de un grupo cubierto? El grupo de la tutoría debe
+     * estar cubierto por los subgrupos de LA MISMA plaza donde el profesor imparte. El
+     * predicado de cobertura {@code sg.grupos().contains(g)} es el mismo one-liner que
+     * usa el no-solape de grupo (S9); se reescribe inline en vez de reusar el de
+     * {@code ModeloCpSat}, que es privado y opera sobre {@code InstanciaProgramada}.
+     */
+    private static boolean impartidaPorTutorPrincipal(Actividad actividad,
+                                                      List<ProfesorTutoria> tutorias) {
+        for (Plaza plaza : actividad.plazas()) {
+            for (Profesor profesor : plaza.profesores()) {
+                for (ProfesorTutoria tutoria : tutorias) {
+                    if (tutoria.rol() != RolTutoria.TUTOR_PRINCIPAL) {
+                        continue; // CO_TUTOR no satisface S8
+                    }
+                    if (!tutoria.profesor().equals(profesor)) {
+                        continue;
+                    }
+                    boolean grupoCubierto = plaza.subgrupos().stream()
+                            .anyMatch(sg -> sg.grupos().contains(tutoria.grupo()));
+                    if (grupoCubierto) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Código del grupo afectado para el {@code recursoCodigo} de la violación S8: el
+     * primer grupo (orden natural) que la actividad cubre por los subgrupos de sus
+     * plazas. En una actividad tutorial hay un único grupo; el orden solo desempata el
+     * caso patológico de varios. {@code null} si la actividad no cubre grupo alguno.
+     */
+    private static String grupoAfectado(Actividad actividad) {
+        return actividad.plazas().stream()
+                .flatMap(plaza -> plaza.subgrupos().stream())
+                .flatMap(sg -> sg.grupos().stream())
+                .map(GrupoAdministrativo::codigo)
+                .distinct()
+                .sorted()
+                .findFirst()
+                .orElse(null);
     }
 
     private String etiqueta(ActividadInstancia inst) {
