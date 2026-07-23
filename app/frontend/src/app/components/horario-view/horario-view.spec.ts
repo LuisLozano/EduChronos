@@ -8,9 +8,11 @@ import { HorarioGrid } from '../horario-grid/horario-grid';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
+import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { Bloqueo } from '../../models/bloqueo.model';
 import { HorarioProyeccion } from '../../models/horario.model';
 import { Diagnostico } from '../../models/diagnostico.model';
+import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 
 /**
  * COORDINACIÓN del contenedor, no transporte: los tres colaboradores son dobles
@@ -91,6 +93,8 @@ describe('contenedor del horario', () => {
   };
   let horario: { getProyeccion: ReturnType<typeof vi.fn> };
   let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
+  let sujetoPrevalidacion: Subject<AvisoPrevalidacion[]>;
+  let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
@@ -98,6 +102,7 @@ describe('contenedor del horario', () => {
     sujetoProyeccion = new Subject<HorarioProyeccion>();
     sujetoBorrar = new Subject<void>();
     sujetoDiagnostico = new Subject<Diagnostico>();
+    sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
 
     bloqueos = {
       listar: vi.fn(() => sujetoListar),
@@ -117,6 +122,10 @@ describe('contenedor del horario', () => {
     // asertos de pines/proyección no lo hacen emitir; su sujeto queda pendiente
     // sin efecto (badges vacío, la rejilla se monta igual).
     diagnosticos = { getDiagnostico: vi.fn(() => sujetoDiagnostico) };
+    // Doble por `useValue`, como el resto: `cargar(id)` lo llama pero estos
+    // asertos no lo hacen emitir; su sujeto queda pendiente (el panel muestra la
+    // rama pendiente, que no colisiona por DOM con .error/.error-diagnostico/.aviso).
+    prevalidaciones = { getPrevalidacion: vi.fn(() => sujetoPrevalidacion) };
 
     await TestBed.configureTestingModule({
       imports: [HorarioView],
@@ -125,6 +134,7 @@ describe('contenedor del horario', () => {
         { provide: HorarioService, useValue: horario },
         { provide: BloqueoService, useValue: bloqueos },
         { provide: DiagnosticoService, useValue: diagnosticos },
+        { provide: PrevalidacionService, useValue: prevalidaciones },
       ],
     }).compileComponents();
 

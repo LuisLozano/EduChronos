@@ -3,13 +3,16 @@ import { ActivatedRoute } from '@angular/router';
 
 import { HorarioProyeccion } from '../../models/horario.model';
 import { Diagnostico } from '../../models/diagnostico.model';
+import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
+import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
 import { clavePin, indicePines } from '../../horario/pines';
 import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
+import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
 
 /**
  * Contenedor de las tres vistas: carga la proyección del horario `{id}` (param
@@ -26,7 +29,7 @@ import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
  */
 @Component({
   selector: 'app-horario-view',
-  imports: [HorarioGrid],
+  imports: [HorarioGrid, PanelPrevalidacion],
   templateUrl: './horario-view.html',
   styleUrl: './horario-view.css',
 })
@@ -35,6 +38,7 @@ export class HorarioView {
   private readonly service = inject(HorarioService);
   private readonly bloqueos = inject(BloqueoService);
   private readonly diagnosticos = inject(DiagnosticoService);
+  private readonly prevalidacion = inject(PrevalidacionService);
 
   protected readonly proyeccion = signal<HorarioProyeccion | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -54,6 +58,15 @@ export class HorarioView {
   protected readonly diagnostico = signal<Diagnostico | null>(null);
   /** Fallo NO fatal de la carga del diagnóstico. Señal PROPIA: ver {@link cargarDiagnostico}. */
   protected readonly errorDiagnostico = signal<string | null>(null);
+
+  /**
+   * Hallazgos de la pre-validación del catálogo; `null` mientras no llega
+   * (NO ejecutado), `[]` si el catálogo está sano. GLOBAL, no por horario: ver
+   * {@link cargarPrevalidacion}.
+   */
+  protected readonly avisosPrevalidacion = signal<AvisoPrevalidacion[] | null>(null);
+  /** Fallo NO fatal de la carga de pre-validación. Señal PROPIA: no gatea la rejilla. */
+  protected readonly errorPrevalidacion = signal<string | null>(null);
 
   /**
    * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
@@ -132,9 +145,36 @@ export class HorarioView {
     });
   }
 
+  /**
+   * Carga la pre-validación del catálogo. SIN parámetro `id` —a diferencia de
+   * {@link cargarDiagnostico}, que sí lo toma—: la pre-validación es del catálogo
+   * GLOBAL, no de un horario, exactamente como {@link cargarPines}. Es la MISMA
+   * asimetría que S87 documentó entre pines (global) y diagnóstico (por horario),
+   * y por eso este método comparte forma con `cargarPines`, no con `cargarDiagnostico`.
+   *
+   * <p>Se llama desde {@link cargar}, no desde el constructor, por la misma razón
+   * que `cargarPines`: `paramMap` ya emite en el arranque y `cargar` corre con
+   * esa emisión, así que invocarlo también en el constructor dispararía dos
+   * GET /api/prevalidacion por montaje.
+   *
+   * <p>Señal de error PROPIA ({@link errorPrevalidacion}), nunca {@link error}: un
+   * fallo de la pre-validación no debe vaciar la rejilla —la proyección vigente no
+   * depende de ella—. Se limpia el estado anterior al empezar para no arrastrar
+   * hallazgos de otra carga.
+   */
+  private cargarPrevalidacion(): void {
+    this.errorPrevalidacion.set(null);
+    this.avisosPrevalidacion.set(null);
+    this.prevalidacion.getPrevalidacion().subscribe({
+      next: (avisos) => this.avisosPrevalidacion.set(avisos),
+      error: () => this.errorPrevalidacion.set('No se pudo cargar la pre-validación.'),
+    });
+  }
+
   private cargar(id: number): void {
     this.error.set(null);
     this.cargarPines();
+    this.cargarPrevalidacion();
     this.cargarDiagnostico(id);
     this.service.getProyeccion(id).subscribe({
       next: (p) => {

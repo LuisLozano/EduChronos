@@ -1,0 +1,30 @@
+@if (error(); as msg) {
+  <p class="prevalidacion-error">{{ msg }}</p>
+} @else if (avisos() === null) {
+  <p class="prevalidacion-pendiente">Sin pre-validar todavía.</p>
+} @else if (avisos()!.length === 0) {
+  <p class="prevalidacion-limpia">Catálogo sano: sin hallazgos de pre-validación.</p>
+} @else {
+  <section class="prevalidacion-panel">
+    <header class="cabecera">
+      <span class="contador-errores">{{ numErrores() }}</span>
+      <span class="contador-avisos">{{ numAvisos() }}</span>
+      <button type="button" (click)="alternar()">
+        {{ colapsado() ? 'Mostrar detalle' : 'Ocultar detalle' }}
+      </button>
+    </header>
+
+    @if (!colapsado()) {
+      <ul class="lista">
+        @for (a of avisos()!; track $index) {
+          <li class="aviso-entrada" [class.es-error]="a.severidad === 'ERROR'">
+            <span class="regla">{{ a.regla }}</span>
+            <span class="entidad">{{ a.entidadCodigo }}</span>
+            <span class="cuenta">{{ a.demanda }} / {{ a.disponible }}</span>
+            <span class="descripcion">{{ a.descripcion }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

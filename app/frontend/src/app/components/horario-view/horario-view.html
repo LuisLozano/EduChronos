@@ -30,6 +30,8 @@
   <p class="error-diagnostico">{{ msg }}</p>
 }
 
+<app-panel-prevalidacion [avisos]="avisosPrevalidacion()" [error]="errorPrevalidacion()" />
+
 @if (error(); as msg) {
   <p class="error">{{ msg }}</p>
 } @else if (proyeccion(); as p) {
