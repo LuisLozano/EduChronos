@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S86. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S87. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S86). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S87). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3743,3 +3743,87 @@ al abrir sesión.
   en frontend), 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c) u
   8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia), a decidir al
   abrir sesión.
+
+### Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico y badge del delta blando.
+  Modo híbrido. 3 commits de código (2047349 capa pura, 71c4fb6 rejilla, 709b58a contenedor) + doc
+  aparte. §A DE MEDICIÓN sobre el ESTADO REAL DEL FRONTEND (lectura literal de los ficheros de
+  `app/frontend/` implicados + `ls`/`grep`; instrumento más barato, precedente S77-S86).
+  PRIMERA APLICACIÓN DE M1-M4 COMO NORMA ESCRITA (S86 los redactó sin probarlos en una sesión de
+  código).
+  SALIDA DE §A, que REENCUADRA EL BLOQUE: la capa de diagnóstico llevaba desde S82 construida y
+  probada pero DESCONECTADA —las únicas referencias a `DiagnosticoService`, `indiceViolaciones` e
+  `indicePenalizaciones` eran sus propios specs—. B2 NO era pintura: incluía el cableado. PARTIDO en
+  B2-a (cable + badge) y B2-b (los dos resaltes).
+  LA MEDICIÓN DESMIENTE AL PLAN, no solo una suposición de apertura: la cabecera de S83 afirma que el
+  `border-left` quedó «liberado en `.instancia.pinada .entrada` para que B2 pinte ahí la violación».
+  FALSO como se lee: lo liberado fue el `border-left-color` BAJO el estado pinada; el `border-left`
+  de `.entrada` está OCUPADO (3px `#4a7`) y es estructural en TODA entrada. El arquitecto repitió la
+  afirmación del plan como si fuera medida. Es un caso que M2 no contempla (ver corrección al método,
+  abajo).
+  RUTAS DEL PROPIO GUION DE MEDICIÓN, MAL: los componentes viven en `src/app/components/horario-{view,grid}/`,
+  no en `src/app/horario/`, que solo tiene lógica pura; y el runner es `ng test`, no `npx vitest run`
+  a pelo (sin la config de Angular no hay globals). El corolario de S84 (verificar la ruta ANTES de
+  medir) lo cazó en el comando 0 en vez de tumbar la medición entera.
+  MOCKUP (D-F8.6-a) sobre el CSS MEDIDO y no el supuesto, que es la razón de rehacerlo: el resalte de
+  violación NO va al `border-left`. [CORREGIDO EN S88: la mitad «`background`» de este mockup se
+  escribió SIN medir el `background`, que está ocupado en dos capas —`.entrada` y
+  `.instancia.pinada .entrada`, esta última la señal de pinada—. El resalte va SOLO a `outline`. Es
+  el mismo defecto que esta sesión denunció de S83, una capa más abajo.] `outline` no ocupa layout, así que las
+  dos granularidades se leen solas (sobre `.instancia` = profesor/subgrupo, sobre `.entrada` = aula):
+  la asimetría D15 se pinta sin aplanarse. Desalojar el verde estructural haría que la ausencia de
+  violación fuese ausencia de borde y desmontaría la celda de seis entradas.
+  DECISIÓN DE PRODUCTO sobre el número del badge, entre tres: (a) SUMA CON SIGNO de los deltas de la
+  instancia. Descartadas (b) cardinalidad —pierde el signo, que es el hallazgo caro de S65: `delta<0`
+  significa que mover EMPEORA— y (c) máximo absoluto. El signo agregado es lo que responde a «¿qué
+  gano si muevo esto?», que es el propósito con el que S65 definió el contrafactual (delta =
+  penalización_actual − penalización_si_esa_celda_no_estuviera; detalle: bitácora S65).
+  DECISIÓN sobre el edge suma-0, que el contraste destapó como agujero: las claves de suma 0 NO SE
+  EMITEN. Semántica de S65 (delta 0 = indiferente y el backend tampoco lo emite); un badge «0»
+  prometería información que no hay. Predicado del hueco = `has(clave)`, sin comparación con 0.
+  EL CONTRASTE PREVIO (M4) CAZÓ CUATRO ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, el registro más alto
+  del proyecto junto con las cinco de S85. (1) T1 PASABA SU PROPIA DEGENERACIÓN: «contador = 1 tras
+  dos ciclos de detección de cambios» da por bueno `getDiagnostico` en el constructor (a=1, b=0), que
+  es justo lo que existe para cazar; además usaba vocabulario que el arnés zoneless no tiene.
+  Reescrito al modelo lineal por EMISIÓN DE RUTA (una emisión ⇒ 1, dos ⇒ 2), que fija a=0, b=1. Es el
+  corolario de S66 incumplido con la regla delante: se enunció el PROPÓSITO y salió el camino feliz.
+  (2) LA AGREGACIÓN ESTABA EN EL SITIO EQUIVOCADO, contra el TSDoc del propio `horario-view.ts` («este
+  componente solo orquesta señales y delega»); el precedente que el arquitecto invocó (`pinadas`) dice
+  lo CONTRARIO, porque se construye con `indicePines`, que es función pura. (3) «Fila flex CON el
+  candado» era IMPOSIBLE: un `position:absolute` no participa del flex de su padre; hace falta wrapper.
+  (4) El hueco condicional metía DE CONTRABANDO un cambio visual a las celdas pin-only cerradas en B1.
+  RECHAZADA la mitad «candado» de esa cuarta objeción: la salida correcta no es declarar el cambio
+  sino NO hacerlo —el predicado es `tieneBadge`, no `badge || candado`; el candado lleva desde B1
+  solapando sin reservar y no es un problema reportado—.
+  ENTREGADO: `sumaDeltasPorInstancia` en la capa PURA (`horario/diagnostico.ts`), hermana de los dos
+  índices, en DOS PASADAS porque el signo puede cancelarse a mitad; wrapper `.adornos` (absolute, flex
+  por dentro) con badge + candado, `[class.con-badge]` reservando 16px solo por badge; `getDiagnostico`
+  dentro de `cargar(id)` y NO por analogía con `cargarPines()`, que es GLOBAL (D-F8.6-iiiB1-b) —la
+  asimetría va escrita en TSDoc—; `errorDiagnostico` con selector propio `.error-diagnostico` que NO
+  gatea la rejilla (si el diagnóstico falla, el horario sigue pintado), y sin selector propio la pata
+  «error vacío» de T4 sería ilegible por DOM sin el cast que el TSDoc del spec prohíbe. TSDoc
+  obligatorio de que la suma NO es `Totales` y no debe «arreglarse» (javadoc de `TotalesDTO`).
+  ASERTOS REDISTRIBUIDOS POR FRONTERA, consecuencia de mover la agregación: puros T2/T3/T5 en
+  `diagnostico.spec.ts` (sin componente, sin la dimensión sesión que `PROYECCION_VACIA` evita a
+  propósito), wiring T1/T4 en `horario-view.spec.ts`, render T6 en `horario-grid.spec.ts`. T2
+  calibrado para que −2 no lo dé cardinalidad (2), ni máximo absoluto (−5), ni suma de absolutos (8),
+  ni primero (3), ni último (−5), ni `abs(suma)` (2).
+  DESVIACIÓN DE CLAUDE CODE, ACEPTADA Y CORRECTA: intercambió el orden de commits 2↔3. El contenedor
+  liga el input de la rejilla, así que la rejilla debe aterrizar antes o el commit intermedio no
+  compila. El orden del arquitecto estaba mal.
+  Suite frontend 35 → 41 (+6). CAMPAÑA DE 6 MUTACIONES, todas caen por el aserto previsto y ninguna
+  necesitó cast: `clavePin(actividad,1)` deja T2 VERDE y cae solo T3 (dimensión índice aislada), y la
+  degeneración de constructor cae solo en T1. `horario-view.spec.ts` (verde, commiteado) EDITADO para
+  el doble de `DiagnosticoService`: dependencia nueva, no conveniencia; código y spec en el mismo
+  commit. Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO
+  regenerada, `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto
+  (app 315, solver 78).
+  CORRECCIÓN AL MÉTODO, pendiente de decidir: M2 dice que la medición desmiente «una suposición de
+  apertura del arquitecto» y no contempla que desmienta el PLAN (aquí, la cabecera archivada de S83).
+  R5 dice que el mecanismo vivo es estado vivo, luego una cabecera que describe mal el CSS actual es
+  estado vivo equivocado y habría que corregirla. NO se ha escrito como norma: escribir norma sin
+  decidirla con el usuario es lo que S86 marcó como «decisión del arquitecto». Se traslada a S88.
+  DEUDA NUEVA: D-F8.6-iiiB2a-a (tercer canal de error en el mismo componente, sin política global).
+  Siguiente: 8.6-iii-B2-b (los dos resaltes; es lo ÚNICO que queda del frente 8.6-iii, con el dónde
+  ya decidido en mockup), 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
+  referencia) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos
+  bloques), a decidir al abrir sesión.

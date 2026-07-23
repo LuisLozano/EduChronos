@@ -600,7 +600,18 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-D2b-1 CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.5-D2b-2 CERRADO
+  en S91 (S8 VERIFICABLE por el solver, y CIERRE del frente 8.5-D2b entero: `ReglaDura.TUTORIA_SIN_TUTOR`
+  + `VerificadorSolucion.verificarTutorias` —quinto acumulador, ÚNICO método del fichero que no usa
+  `solucion`, porque S8 es propiedad del CATÁLOGO— + ONCEAVO parámetro de `aProblemaHorario` con el
+  `findAll()` en `GeneradorHorarioService.cargarProblema`, dentro de su `@Transactional`. El §A contra
+  el ÁRBOL —cambio propuesto por el usuario— desmintió DOS afirmaciones del arquitecto invisibles en la
+  referencia: `Violacion` ya admitía `tramoCodigo=null`, y el mapper es `static` puro sin repositorios.
+  Tercer hallazgo: ningún fixture vivo llevaba `requiereTutor`, luego S8 era VACUAMENTE cierta en los
+  43. La partición 2a/2b se propuso y se RETIRÓ ante la objeción del usuario sobre el coste documental,
+  respaldada por la medición y con la condición de medir el llamador antes de escribir `app`. 13 tests,
+  campaña de 12, suite 321 → 333; referencia regenerada; `modelo_datos_fase1.md` corregido por R5.
+  CIERRA D-F8.5-D2b1-a y D-F8.5-D2b1-b). Bloque 8.5-D2b-1 CERRADO
   en S90 (transporte de la tutoría al solver, PRIMER BLOQUE DE BACKEND desde S79: `requiereTutor`
   al dominio + DÉCIMA lista `ProblemaHorario.tutorias` + `ProfesorTutoria`/`RolTutoria` propios de
   solver; el corte de S89 se DESMINTIÓ en §A —dejaba la mitad-1 sin consumidor— y 8.5-D2b se parte
@@ -703,7 +714,83 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 90 — Fase 8, Bloque 8.5-D2b-1: transporte de la tutoría al solver (CIERRA D-B5-5).
+### Sesión 91 — Fase 8, Bloque 8.5-D2b-2: S8 VERIFICABLE por el solver (CIERRA D-F8.5-D2b1-a y -b).
+  Modo híbrido, DOS turnos de Claude Code. 4 commits (solver: verificador; app: cableado; doc:
+  referencia regenerada). CIERRA el frente 8.5-D2b entero, abierto en S77 y desplazado doce sesiones.
+  §A DE MEDICIÓN CONTRA EL ÁRBOL, no contra el derivado: cambio propuesto por el USUARIO al cerrar
+  S90, porque `referencia-codigo-solver.md` lista FIRMAS y no CONSUMIDORES, y por eso el §A había
+  fallado en S89 y S90. DESMINTIÓ DOS AFIRMACIONES DEL ARQUITECTO, ninguna visible en la referencia:
+  (1) el supuesto ANCLAJE DE `tramoCodigo`, que el arquitecto declaró «problema estructural» sobre la
+  referencia: FALSO, dos de las siete reglas (`INSTANCIA_SIN_COLOCAR`, `DISTRIBUCION_MISMO_DIA`) ya
+  ponen `tramoCodigo=null` y tres ponen `recursoCodigo=null`; `Violacion` YA admite violaciones no
+  ancladas a tramo y S8 entra sin forma nueva. (2) `CatalogoMapper.aProblemaHorario` NO inyecta
+  repositorios: es `static` puro con las listas por parámetro, luego «cablear el repositorio en el
+  mapper» —como lo describía D-F8.5-D2b1-a y como lo escribió el arquitecto— era IMPOSIBLE: el
+  cableado es un PARÁMETRO y el `findAll()` vive en el llamador.
+  TERCER HALLAZGO, el que reordena el bloque: NINGÚN fixture `.json` vivo lleva `requiereTutor` (solo
+  el schema y un JSON inline en `ProblemaHorarioJsonLoaderTest:374`), así que S8 era VACUAMENTE cierta
+  en los 43. Encender el verificador sin fixture nuevo habría dejado los 84 tests verdes midiendo aire.
+  FALLO DEL §A, del arquitecto: NO midió los consumidores de `aProblemaHorario`. Es la tercera
+  precisión de M2 incumplida UNA SESIÓN después de escribirla. Se reparó metiendo la enumeración (ML1-
+  ML4) en el PRIMER turno de código, antes de contratar la mitad de `app` — que es la precisión de
+  orden de M4 aplicada dentro de la sesión.
+  PARTICIÓN PROPUESTA Y RETIRADA: el arquitecto propuso partir en 2a/2b por «superficie desconocida»
+  del frente `app`. El USUARIO objetó el coste documental de partir por enésima vez. La objeción se
+  aceptó porque la MEDICIÓN la respaldaba —`ReglaDura` cruza a `app` como `String` (`ViolacionDTO.regla`),
+  no como tipo, así que añadir constante no propaga; y el cableado resultó ser un parámetro—, con
+  UNA condición del método: el contraste mide el llamador ANTES de escribir `app`. Medido: UN solo
+  llamador en main (`GeneradorHorarioService.cargarProblema:126`), `@Transactional(readOnly=true)`, con
+  los `@ManyToOne(LAZY)` de la PK navegables en sesión. El riesgo de `LazyInitializationException` que
+  motivaba la cautela estaba cubierto por el diseño existente.
+  DECISIONES DEL CONTRATO, ninguna derivable de la medición: (D1) SEDE en `VerificadorSolucion` y no
+  en pre-validación —el modelo dejaba la disyuntiva abierta; pre-validación es superficie REST distinta
+  y abriría D-F8.4-A-c—; (D2) forma de la `Violacion` calcando `DISTRIBUCION_MISMO_DIA`, con
+  `recursoCodigo`=código del GRUPO (lo que falta es un profesor, no lo hay sobrante) y `tramoCodigo=null`;
+  (D4) el transporte JPA lleva AMBOS roles y el filtro vive en el verificador —filtrar `CO_TUTOR` en el
+  mapper reproduce la asimetría con la que S90 justificó propagar en `aActividad`—; (D6) cobertura
+  grupo←subgrupo CIEGA al `grupo_padre`, reutilizando el criterio de S9. NO fue decisión sino LECTURA
+  que el verificador filtre `TUTOR_PRINCIPAL`: el enunciado de S8 lo dice literal, aunque el prompt de
+  apertura lo presentaba como abierto.
+  ENTREGADO: `ReglaDura.TUTORIA_SIN_TUTOR` (no propagó: nadie hace `switch` exhaustivo);
+  `VerificadorSolucion.verificarTutorias` como QUINTO acumulador y ÚNICO método del fichero que NO
+  recibe ni usa `solucion` —S8 es propiedad del CATÁLOGO, no de la solución, y eso va en TSDoc para que
+  nadie lo «uniforme»—; fixture 44.º `problema-8-5-s8.json` con tutoría TRAMPA (P-BETA es
+  `TUTOR_PRINCIPAL`, pero de OTRO grupo: mata a la vez «ignoro el rol» e «ignoro el grupo»);
+  `aProblemaHorario` gana ONCEAVO parámetro `List<app.catalog.ProfesorTutoria>` (sigue `static` puro),
+  con resolución por IDENTIDAD contra los índices ya materializados y traducción de enum por nombre que
+  ABORTA si no existe en destino; `GeneradorHorarioService` inyecta el repo y pasa el `findAll()` dentro
+  de la misma transacción; SIETE call sites de test actualizados (el arquitecto contó SEIS y eran
+  siete: transcribió mal una medición correcta, inocuo porque Claude Code fue al árbol y no al guion).
+  TRECE TESTS: T1-T7 en solver (T2 es el par de T1 que discrimina el ROL, que es lo que D-F8.5-D2b1-b
+  exigía y S90 no pudo dar), B-T1..B-T5 en app. CAMPAÑA DE 12 (7+5), cero supervivientes.
+  DOS ASIMETRÍAS REGISTRADAS, no tapadas: (a) M6 («el acumulador no se invoca») lo matan T2/T3/T6/T7 y
+  SOBREVIVEN T1/T4/T5 —los tres casos NEGATIVOS—, porque un método que nunca corre hace pasar todos los
+  «no viola» trivialmente: T1/T4/T5 NO cubren el cableado, y leer la tabla como matriz de cobertura es
+  lo que M3 prohíbe desde S82; (b) N5 («`cargarProblema` pasa `List.of()`») lo mata B-T5 EN EXCLUSIVA,
+  ningún unitario lo caza: es exactamente la asimetría fixtures/producción que D-F8.5-D2b1-a describía,
+  y la razón de que el test de integración no fuera opcional.
+  Suite solver 84 → 91, app 237 → 242, total 321 → 333. `solver/src/main` TOCADO →
+  `referencia-codigo-solver.md` REGENERADA (commit aparte, M4). `modelo_datos_fase1.md` TOCADO: la nota
+  de §«Estado de implementación de `ProfesorTutoria`» declaraba S8 sin verificar por (a) nadie lee
+  `tutorias()` y (b) la ruta JPA las clava vacías; las DOS son falsas desde esta sesión, y por R5 eso
+  es estado vivo equivocado.
+  CIERRA D-F8.5-D2b1-a (BLOQUEANTE) y D-F8.5-D2b1-b. DEUDA NUEVA: D-F8.5-D2b2-a (triplicación del
+  predicado de cobertura de grupo), D-F8.5-D2b2-b (javadoc de `CatalogoMapper`, pre-existente).
+  PRUEBA DE PROCEDIMIENTO (S90-S91), NO canonizada: cinco pasos con el §A ejecutado por Claude Code
+  contra el árbol y un paso 3 de CONTRATO con la medición delante. Medidas: M-a=4 (D1, D2, D4, D6, cada
+  una con fuente señalable), M-b=1 (Claude Code devolvió la pregunta del predicado con tres opciones en
+  vez de decidir), M-c=0, M-d=2 (igual que S90: el paso 3 no costó turno extra). Veredicto FAVORABLE
+  con el sesgo declarado en pie —el arquitecto puntúa su propio paso y el sujeto le era favorable—, y
+  con la limitación de que M-a mide que el paso 3 APORTÓ decisiones, no que cuatro pasos no las
+  hubieran aportado igual. Lo que NO depende del juicio del arquitecto: el §A contra el árbol desmintió
+  dos afirmaciones suyas invisibles en la referencia, y eso valida el cambio del USUARIO, no el paso 3.
+  NO se escribe en el plan como método: canonizar un procedimiento con una sola ejecución es el vicio
+  que S86 identificó.
+  Siguiente: 8.4-B (MOCKUP PREVIO; arrastra la contradicción de severidades de D-F8.4-A-c, que es
+  trabajo de BACKEND y puede ser abrir dos bloques), 8.6-B (cruce de índices; su contrato hay que
+  decidirlo ANTES de medir, orden inverso a M2) o D-F8.6-iiiA-b (`Totales` sin sede), a decidir al
+  abrir sesión.
+Última sesión registrada (previa): Sesión 90 — Fase 8, Bloque 8.5-D2b-1: transporte de la tutoría al solver (CIERRA D-B5-5).
   Modo híbrido. 3 commits (333dfb8 solver, d0f5e9b app, a363e72 doc). PRIMER BLOQUE DE BACKEND
   desde S79: 8.5-D2b llevaba DOCE sesiones desplazado (desde S77), perdiendo cada vez contra
   candidatos de frontend más baratos. Se abre PARTIDO en D2b-1 (transporte) y D2b-2 (verificación
@@ -938,90 +1025,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   Siguiente: 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia),
   8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos bloques),
   8.6-B (aviso durante el arrastre) o la cobertura de D-F8.6-ivB-a, a decidir al abrir sesión.
-Última sesión registrada (previa): Sesión 87 — Fase 8, Bloque 8.6-iii-B2-a: cableado del diagnóstico
-  y badge del delta blando.
-  Modo híbrido. 3 commits de código (2047349 capa pura, 71c4fb6 rejilla, 709b58a contenedor) + doc
-  aparte. §A DE MEDICIÓN sobre el ESTADO REAL DEL FRONTEND (lectura literal de los ficheros de
-  `app/frontend/` implicados + `ls`/`grep`; instrumento más barato, precedente S77-S86).
-  PRIMERA APLICACIÓN DE M1-M4 COMO NORMA ESCRITA (S86 los redactó sin probarlos en una sesión de
-  código).
-  SALIDA DE §A, que REENCUADRA EL BLOQUE: la capa de diagnóstico llevaba desde S82 construida y
-  probada pero DESCONECTADA —las únicas referencias a `DiagnosticoService`, `indiceViolaciones` e
-  `indicePenalizaciones` eran sus propios specs—. B2 NO era pintura: incluía el cableado. PARTIDO en
-  B2-a (cable + badge) y B2-b (los dos resaltes).
-  LA MEDICIÓN DESMIENTE AL PLAN, no solo una suposición de apertura: la cabecera de S83 afirma que el
-  `border-left` quedó «liberado en `.instancia.pinada .entrada` para que B2 pinte ahí la violación».
-  FALSO como se lee: lo liberado fue el `border-left-color` BAJO el estado pinada; el `border-left`
-  de `.entrada` está OCUPADO (3px `#4a7`) y es estructural en TODA entrada. El arquitecto repitió la
-  afirmación del plan como si fuera medida. Es un caso que M2 no contempla (ver corrección al método,
-  abajo).
-  RUTAS DEL PROPIO GUION DE MEDICIÓN, MAL: los componentes viven en `src/app/components/horario-{view,grid}/`,
-  no en `src/app/horario/`, que solo tiene lógica pura; y el runner es `ng test`, no `npx vitest run`
-  a pelo (sin la config de Angular no hay globals). El corolario de S84 (verificar la ruta ANTES de
-  medir) lo cazó en el comando 0 en vez de tumbar la medición entera.
-  MOCKUP (D-F8.6-a) sobre el CSS MEDIDO y no el supuesto, que es la razón de rehacerlo: el resalte de
-  violación NO va al `border-left`. [CORREGIDO EN S88: la mitad «`background`» de este mockup se
-  escribió SIN medir el `background`, que está ocupado en dos capas —`.entrada` y
-  `.instancia.pinada .entrada`, esta última la señal de pinada—. El resalte va SOLO a `outline`. Es
-  el mismo defecto que esta sesión denunció de S83, una capa más abajo.] `outline` no ocupa layout, así que las
-  dos granularidades se leen solas (sobre `.instancia` = profesor/subgrupo, sobre `.entrada` = aula):
-  la asimetría D15 se pinta sin aplanarse. Desalojar el verde estructural haría que la ausencia de
-  violación fuese ausencia de borde y desmontaría la celda de seis entradas.
-  DECISIÓN DE PRODUCTO sobre el número del badge, entre tres: (a) SUMA CON SIGNO de los deltas de la
-  instancia. Descartadas (b) cardinalidad —pierde el signo, que es el hallazgo caro de S65: `delta<0`
-  significa que mover EMPEORA— y (c) máximo absoluto. El signo agregado es lo que responde a «¿qué
-  gano si muevo esto?», que es el propósito con el que S65 definió el contrafactual (delta =
-  penalización_actual − penalización_si_esa_celda_no_estuviera; detalle: bitácora S65).
-  DECISIÓN sobre el edge suma-0, que el contraste destapó como agujero: las claves de suma 0 NO SE
-  EMITEN. Semántica de S65 (delta 0 = indiferente y el backend tampoco lo emite); un badge «0»
-  prometería información que no hay. Predicado del hueco = `has(clave)`, sin comparación con 0.
-  EL CONTRASTE PREVIO (M4) CAZÓ CUATRO ERRORES DE ESPECIFICACIÓN DEL ARQUITECTO, el registro más alto
-  del proyecto junto con las cinco de S85. (1) T1 PASABA SU PROPIA DEGENERACIÓN: «contador = 1 tras
-  dos ciclos de detección de cambios» da por bueno `getDiagnostico` en el constructor (a=1, b=0), que
-  es justo lo que existe para cazar; además usaba vocabulario que el arnés zoneless no tiene.
-  Reescrito al modelo lineal por EMISIÓN DE RUTA (una emisión ⇒ 1, dos ⇒ 2), que fija a=0, b=1. Es el
-  corolario de S66 incumplido con la regla delante: se enunció el PROPÓSITO y salió el camino feliz.
-  (2) LA AGREGACIÓN ESTABA EN EL SITIO EQUIVOCADO, contra el TSDoc del propio `horario-view.ts` («este
-  componente solo orquesta señales y delega»); el precedente que el arquitecto invocó (`pinadas`) dice
-  lo CONTRARIO, porque se construye con `indicePines`, que es función pura. (3) «Fila flex CON el
-  candado» era IMPOSIBLE: un `position:absolute` no participa del flex de su padre; hace falta wrapper.
-  (4) El hueco condicional metía DE CONTRABANDO un cambio visual a las celdas pin-only cerradas en B1.
-  RECHAZADA la mitad «candado» de esa cuarta objeción: la salida correcta no es declarar el cambio
-  sino NO hacerlo —el predicado es `tieneBadge`, no `badge || candado`; el candado lleva desde B1
-  solapando sin reservar y no es un problema reportado—.
-  ENTREGADO: `sumaDeltasPorInstancia` en la capa PURA (`horario/diagnostico.ts`), hermana de los dos
-  índices, en DOS PASADAS porque el signo puede cancelarse a mitad; wrapper `.adornos` (absolute, flex
-  por dentro) con badge + candado, `[class.con-badge]` reservando 16px solo por badge; `getDiagnostico`
-  dentro de `cargar(id)` y NO por analogía con `cargarPines()`, que es GLOBAL (D-F8.6-iiiB1-b) —la
-  asimetría va escrita en TSDoc—; `errorDiagnostico` con selector propio `.error-diagnostico` que NO
-  gatea la rejilla (si el diagnóstico falla, el horario sigue pintado), y sin selector propio la pata
-  «error vacío» de T4 sería ilegible por DOM sin el cast que el TSDoc del spec prohíbe. TSDoc
-  obligatorio de que la suma NO es `Totales` y no debe «arreglarse» (javadoc de `TotalesDTO`).
-  ASERTOS REDISTRIBUIDOS POR FRONTERA, consecuencia de mover la agregación: puros T2/T3/T5 en
-  `diagnostico.spec.ts` (sin componente, sin la dimensión sesión que `PROYECCION_VACIA` evita a
-  propósito), wiring T1/T4 en `horario-view.spec.ts`, render T6 en `horario-grid.spec.ts`. T2
-  calibrado para que −2 no lo dé cardinalidad (2), ni máximo absoluto (−5), ni suma de absolutos (8),
-  ni primero (3), ni último (−5), ni `abs(suma)` (2).
-  DESVIACIÓN DE CLAUDE CODE, ACEPTADA Y CORRECTA: intercambió el orden de commits 2↔3. El contenedor
-  liga el input de la rejilla, así que la rejilla debe aterrizar antes o el commit intermedio no
-  compila. El orden del arquitecto estaba mal.
-  Suite frontend 35 → 41 (+6). CAMPAÑA DE 6 MUTACIONES, todas caen por el aserto previsto y ninguna
-  necesitó cast: `clavePin(actividad,1)` deja T2 VERDE y cae solo T3 (dimensión índice aislada), y la
-  degeneración de constructor cae solo en T1. `horario-view.spec.ts` (verde, commiteado) EDITADO para
-  el doble de `DiagnosticoService`: dependencia nueva, no conveniencia; código y spec en el mismo
-  commit. Backend NO tocado (`app/src/main` ni `solver/`) → `referencia-codigo-solver.md` NO
-  regenerada, `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva). Backend intacto
-  (app 315, solver 78).
-  CORRECCIÓN AL MÉTODO, pendiente de decidir: M2 dice que la medición desmiente «una suposición de
-  apertura del arquitecto» y no contempla que desmienta el PLAN (aquí, la cabecera archivada de S83).
-  R5 dice que el mecanismo vivo es estado vivo, luego una cabecera que describe mal el CSS actual es
-  estado vivo equivocado y habría que corregirla. NO se ha escrito como norma: escribir norma sin
-  decidirla con el usuario es lo que S86 marcó como «decisión del arquitecto». Se traslada a S88.
-  DEUDA NUEVA: D-F8.6-iiiB2a-a (tercer canal de error en el mismo componente, sin política global).
-  Siguiente: 8.6-iii-B2-b (los dos resaltes; es lo ÚNICO que queda del frente 8.6-iii, con el dónde
-  ya decidido en mockup), 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la
-  referencia) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos
-  bloques), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1033,10 +1036,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89 y la de S86 en la Sesión 90 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90 y la de S87 en la Sesión 91 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S87–S90). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S88–S91). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1218,15 +1221,24 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       entidad=true/dominio=false por la puerta de entrada real de configuración y haría S8
       verificable en fixtures e inverificable en producción. D-F8.5-D2b1-a, D-F8.5-D2b1-b.
       Detalle: bitácora S90.
-- [ ] Bloque 8.5-D2b-2 — S8 VERIFICABLE por el solver. `ReglaDura` gana su constante de tutoría +
-      `VerificadorSolucion` la comprueba + CABLEADO del `ProfesorTutoriaRepository` en
-      `CatalogoMapper.aProblema`, que hoy clava `List.of()` (D-F8.5-D2b1-a): sin ese cableado S8
-      pasaría en fixtures y sería estructuralmente inverificable en producción, así que NO puede
-      quedar fuera. Cubre además D-F8.5-D2b1-b (fixture con `CO_TUTOR` y aserto sobre `rol()`).
-      NOTA DE DISEÑO: S8 NO es restricción de scheduling (no depende del tramo elegido); va en
-      VerificadorSolucion o en validación de catálogo, NO en ModeloCpSat. Tercera pieza medida en
-      S90 y que el plan no decía: S8 exige resolver «grupo cubierto por los subgrupos de P», cuyo
-      mecanismo ya existe en el verificador vía S9. Regenera referencia-codigo-solver.md.
+- [x] Bloque 8.5-D2b-2 — S8 VERIFICABLE por el solver (S91). CIERRA D-F8.5-D2b1-a y -b, y CIERRA
+      el frente 8.5-D2b entero. SEDE: `VerificadorSolucion`, NO validación de catálogo —el modelo
+      dejaba la disyuntiva abierta; pre-validación es superficie REST distinta (422 propio) y
+      abriría D-F8.4-A-c—. `ReglaDura.TUTORIA_SIN_TUTOR` (no propaga: `ViolacionDTO.regla` es un
+      `String` con `.name()`, así que el enum NO cruza a `app` como tipo, y nadie hace `switch`
+      exhaustivo). `verificarTutorias` es el QUINTO acumulador y el ÚNICO método del fichero que no
+      recibe ni usa `solucion`: S8 es propiedad del CATÁLOGO, no de la solución, y va en TSDoc para
+      que nadie lo «uniforme». `Violacion` NO necesitó forma nueva —dos de las siete reglas ya ponen
+      `tramoCodigo=null`—: S8 calca `DISTRIBUCION_MISMO_DIA`, con `recursoCodigo`=código del GRUPO
+      (lo que falta es un profesor, no lo hay sobrante). Cobertura grupo←subgrupo CIEGA al
+      `grupo_padre`, criterio de S9: un PDC que no heredó `TUTOR_PRINCIPAL` falla S8 legítimamente.
+      El CABLEADO no era inyectar un repositorio —`aProblemaHorario` es `static` puro— sino un
+      ONCEAVO PARÁMETRO, con el `findAll()` en `GeneradorHorarioService.cargarProblema`, dentro de
+      su `@Transactional(readOnly=true)` (los `@ManyToOne(LAZY)` de la PK se navegan en sesión).
+      Se transportan AMBOS roles y el filtro `TUTOR_PRINCIPAL` vive en el verificador: filtrar
+      `CO_TUTOR` en el mapper reproduciría la asimetría con la que S90 justificó propagar en
+      `aActividad`. Fixture 44.º `problema-8-5-s8.json` con tutoría TRAMPA. 13 tests, campaña de 12.
+      Suite 321 → 333. Referencia regenerada. D-F8.5-D2b2-a, D-F8.5-D2b2-b. Detalle: bitácora S91.
 - [ ] Bloque 8.5-D3 — Particion/SubgrupoParticion + UX de subgrupo compartido (D7, I1, I6).
       APLAZADO INDEFINIDAMENTE (S77), decisión explícita, no arrastre. Son dos tablas que el
       SOLVER NO LEE; existirían solo para que I1 sea verificable y para la UX de D7. Su
@@ -2255,25 +2267,26 @@ siguiente, con remisión a la bitácora.
   las que HOY no se ejecutan nunca. → cubrir cuando se decida la política global de errores
   (D-F8.6-ii-a), que es lo que las pondría en uso.
 
-- **D-F8.5-D2b1-a** (S90, VIVA, BLOQUEANTE PARA D2b-2) — LA RUTA JPA CLAVA `tutorias` VACÍA.
-  `CatalogoMapper.aProblema` pasa `List.of()` a la décima lista del `ProblemaHorario`: el
-  `ProfesorTutoriaRepository` existe desde S77 pero NO está cableado a dominio. Decisión
-  DELIBERADA de alcance —el contrato de D2b-1 declaraba «app: solo `aActividad`», y cablear el repo
-  exige decidir qué pasa con los co-tutores, que no se ha decidido—, no un descuido. Hoy es
-  INOCUO porque nadie lee `tutorias()` (S8 no se verifica todavía), pero deja la asimetría exacta
-  que este mismo bloque usó como argumento para propagar en `aActividad`: la ruta JSON transporta
-  tutorías y la ruta de producción las clava vacías. → D2b-2 NO PUEDE CERRARSE sin este cableado, o
-  S8 pasaría en fixtures y sería estructuralmente inverificable en producción.
+- **D-F8.5-D2b2-a** (S91, VIVA, de DISEÑO, no bloqueante) — EL PREDICADO DE COBERTURA
+  GRUPO←SUBGRUPO ESTÁ TRIPLICADO. `sg.grupos().contains(g)` vive hoy en tres sitios:
+  `ModeloCpSat.tocaGrupo` (privado, sobre `InstanciaProgramada`), `VerificadorSolucion.verificarNoSolapes`
+  (L619) y el nuevo `verificarTutorias`. Claude Code lo reportó en el turno de código con TRES opciones
+  y sin decidir (M-b de la prueba de S91). ELEGIDA la opción 1 —dejarlo— con razón explícita y no por
+  pereza: (a) no es lógica duplicada sino ACCESO A UNA ESTRUCTURA, y extraerlo crearía API de dominio
+  para envolver un `contains`; (b) extraerlo a `cpsat/` acoplaría verificador↔modelo, que hoy son
+  INDEPENDIENTES POR DISEÑO —el verificador vale precisamente porque no comparte código con
+  `ModeloCpSat`: si el modelo tuviera un error de cobertura de grupo, el verificador debe poder
+  delatarlo—. Es el mismo argumento con el que S64 cortó 8.3 en A/B para no contaminar los recomputos
+  gemelos. → reabrir solo si aparece una CUARTA copia o si el criterio de cobertura deja de ser un
+  `contains` (p. ej. si algún día dejara de ser ciego al `grupo_padre`), momento en que la
+  triplicación pasaría a ser riesgo real de divergencia.
 
-- **D-F8.5-D2b1-b** (S90, VIVA, DE COBERTURA, no bloqueante) — EL `rol` NO TIENE ASERTO DE
-  TRANSPORTE. Objeción del arquitecto a su propia campaña, registrada en vez de reabrir el bloque.
-  La mutación M6 («el mapper ignora el rol y clava `TUTOR_PRINCIPAL`») cae por T4a, es decir por el
-  test del rol INVÁLIDO, no por ninguno que asevere que un rol VÁLIDO viaja intacto. Como el fixture
-  de T1 lleva `TUTOR_PRINCIPAL`, clavarlo es indistinguible del acierto: la única red es que T4a
-  deje de lanzar, y un cambio futuro que mueva la validación del rol a otro sitio dejaría el
-  transporte sin aserto alguno. La mutación honesta exige un fixture con una tutoría `CO_TUTOR` y un
-  aserto sobre `rol()`. → lo cubre D2b-2, que es quien lee el rol de verdad (S8 solo mira
-  `TUTOR_PRINCIPAL`, así que discriminarlo es precisamente su trabajo).
+- **D-F8.5-D2b2-b** (S91, VIVA, COSMÉTICA, no bloqueante) — EL JAVADOC DE CLASE DE `CatalogoMapper`
+  DICE «siete listas». Es PRE-EXISTENTE, no introducida por S91: ya estaba obsoleto desde que se
+  añadieron restricciones y bloqueos, y con el onceavo parámetro de esta sesión lo está más. Claude
+  Code lo detectó y lo dejó fuera para no expandir alcance, criterio correcto. (El javadoc de clase de
+  `GeneradorHorarioService`, que decía «ocho colecciones», SÍ se actualizó en S91 porque el bloque lo
+  tocaba.) → commit de limpieza cuando se toque la clase por otra razón; no merece bloque propio.
 
 - **D-F8.6-ivB-b** (S84, VIVA, de MÉTODO Y COBERTURA, no bloqueante) — EL COMPILADOR TAPA DOS DE
   LAS OCHO MUTACIONES, Y ESO DEGRADA LO QUE DOS ASERTOS VALEN. La guarda de `alDespinar` es
@@ -2358,6 +2371,9 @@ siguiente, con remisión a la bitácora.
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
+
+- **D-F8.5-D2b1-a** — la ruta JPA clavaba `tutorias = List.of()`: el `ProfesorTutoriaRepository` existía desde S77 pero no llegaba al dominio, y la ruta JSON transportaba tutorías mientras la de producción las perdía. CERRADA en S91: `CatalogoMapper.aProblemaHorario` gana un ONCEAVO parámetro `List<app.catalog.ProfesorTutoria>` —sigue `static` puro, sin repositorios inyectados— y `GeneradorHorarioService.cargarProblema` pasa `profesorTutoriaRepository.findAll()` dentro de su `@Transactional(readOnly=true)`, que es lo que permite navegar los `@ManyToOne(LAZY)` de la PK. La conversión resuelve profesor y grupo por IDENTIDAD contra los índices ya materializados (nunca `findById`) y traduce el enum por nombre abortando si no existe en destino. Aseverado por B-T5 (integración `@DataJpaTest` sobre SQLite real), que es su ÚNICO killer: ningún unitario caza el cableado del servicio. Detalle: bitácora S91.
+- **D-F8.5-D2b1-b** — el `rol` no tenía aserto de transporte: la mutación «el mapper clava `TUTOR_PRINCIPAL`» solo caía por el test del rol INVÁLIDO, y como el fixture de S90 llevaba `TUTOR_PRINCIPAL`, clavarlo era indistinguible del acierto. CERRADA en S91 por DOS pares discriminantes: T1/T2 en solver (mismo profesor y mismo grupo, `TUTOR_PRINCIPAL` no viola / `CO_TUTOR` sí) y B-T1/B-T2 en app (un `CO_TUTOR` llega como `CO_TUTOR` y no colapsado). La campaña distingue además N2 (rol filtrado: ausente) de N3 (rol colapsado: presente pero mal), que son firmas distintas. Detalle: bitácora S91.
 
 - **D4** — Modelado explícito de recursos compartidos (Gim, Pista) por si el solver no bastaba a escala. CERRADA en S36: el instituto completo (26 grupos) resultó FACTIBLE con modelado conservador (EF en aulaFija), 0 duras, Gim 28/30 sin que Gim/Pista compitan hasta romper; no hizo falta relajar EF a aulasCandidatas. La pregunta de fondo (¿Gim/Pista compiten de verdad y rompen a escala total?) tiene respuesta definitiva: NO. Detalle: bitácora S36.
 - **D13** — El IntVar de tramo usa índice plano, y con duracionTramos > 1 un bloque podía cruzar la frontera de día y la del recreo (dos caras; la nota original solo veía la de día). CERRADA en S33: `ModeloCpSat.iniciosValidosDeBloque` restringe el dominio del inicio por lista blanca a las posiciones desde las que el bloque cabe entero en el día sin cruzar el recreo (no-op para duracion=1), con espejo independiente en `VerificadorSolucion.tramosOcupados` + `verificarBloquesConsecutivos`; además `verificarNoSolapes` pasó a contar por TRAMO OCUPADO y no solo por el de inicio, cerrando una ceguera a solapes en tramos interiores. Deja viva D22 (frontera de recreo hardcodeada). Detalle: bitácora S33/S34.
