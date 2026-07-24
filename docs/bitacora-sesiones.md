@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S92. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S93. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S92). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S93). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4205,3 +4205,111 @@ al abrir sesión.
   Siguiente: 8.4-B2 (guarda + diálogo, pero antes hay que crear el gesto de generar), 8.6-B (aviso
   durante el arrastre; contrato ANTES de medir, orden inverso a M2), D-F8.6-ivB-a (resto: el
   `errorPin.set(null)` de `alDespinar`) o D-F8.6-iiiA-b (`Totales` sigue sin sede), a decidir al abrir.
+
+### Sesión 93 — Fase 8, Bloque 8.4-B2: gesto de generar + guarda con diálogo (CIERRA el frente 8.4).
+  Modo híbrido. 2 commits de código (37d1ba9 producción 8 ficheros, 6b6e88c tests 3 ficheros; sin
+  pushear al cerrar) + doc aparte. CIERRA 8.4 ENTERO (A en S79, B1 en S92, B2 aquí).
+  PARTICIÓN PROPUESTA Y RETIRADA POR MEDICIÓN, y esta vez el desmentido fue AL ARQUITECTO. El plan
+  declaraba 8.4-B2 bloqueado y candidato a partirse en «gesto» y «guarda», con el argumento de que el
+  diálogo sería el PRIMER modal del repo y decidiría la arquitectura de diálogos para siempre. El
+  USUARIO objetó partir de antemano (misma objeción que en S91, por el coste documental fijo de M1) y
+  propuso medir primero. Medido, las dos premisas del corte cayeron: (P2) `POST /api/horarios` acepta
+  BODY VACÍO —`@RequestBody(required=false)` y defaulting íntegro en `GeneradorHorarioService:179-203`:
+  via→OPTIMIZACION, maxSegundos→30, semilla→42, nombre→timestamp—, luego el botón es un botón y no un
+  formulario, que era mi preocupación mayor; (P5) `@angular/cdk` YA está en `dependencies` (^21.2.14)
+  con el entry point `dialog` presente, luego no había librería que elegir. UN SOLO BLOQUE. Lo que
+  mató la partición fue P2, no P5: el diálogo siguió costando (ver C2 abajo).
+  EL §A MIDIÓ LOS CONSUMIDORES, no solo el endpoint —correctivo explícito de la lección de S92, que
+  midió endpoint y DTO y no el gesto que el contrato daba por existente—. Se enumeraron SEIS
+  supuestos del contrato antes de escribirlo (endpoint, consumidor del resultado, fuente del id,
+  señal de la guarda, superficie del diálogo, parámetros de D29) y dos de ellos lo reformaron.
+  DOS HALLAZGOS DEL §A QUE CAMBIARON EL CONTRATO, no detalles: (1) el POST devuelve
+  `HorarioProyeccionDTO` ENTERO, no un id, así que «generar y recargar» era redundante; (2) NO HAY
+  selector de horario: el id sale de `paramMap` (`horario-view.ts:109`), y los dos `<select>` de la
+  plantilla emiten vista y entidad, no horario. Generar crea un horario NUEVO con id nuevo que no es
+  el de la ruta. DECISIÓN DE PRODUCTO que no estaba tomada y que S92 no podía prever: opción A
+  (navegar) frente a B (pintar en sitio). ELEGIDA A por el usuario con recomendación del arquitecto:
+  B dejaría rejilla, pines y diagnóstico pudiendo pertenecer a horarios DISTINTOS, clase de bug que
+  ningún test de este bloque detectaría. Coste asumido y declarado: un GET redundante, porque la
+  proyección que devuelve el POST se DESCARTA y la recarga la dispara `paramMap`.
+  EL CONTRASTE (M4) DESMINTIÓ CUATRO PREMISAS DEL ARQUITECTO, todas del mismo género —afirmar sobre
+  terreno no leído—: (1) la ruta declarada es `horario/:id` SINGULAR (`app.routes.ts:7`), no
+  `horarios/:id`: `navigate(['/horarios', id])` no casa con ninguna ruta y navegaría a ninguna parte;
+  (2) la señal del contenedor es `avisosPrevalidacion()` (`horario-view.ts:71`), NO `avisos()`, que es
+  el input del panel HIJO —el arquitecto citó la cabecera de S92, es decir el DERIVADO, en vez del
+  árbol: es la trampa que M2 documenta, cometida sobre el propio registro de la sesión anterior—;
+  (3) `@angular/cdk/dialog` es el PRIMITIVO SIN ESTILO, no un equivalente de `@angular/material`: hay
+  que aportar el componente de confirmación y su CSS enteros, así que «cero fricción» era medio falso;
+  (4) los 25 tests de `horario-view.spec.ts` caen por `Router`, NO por `Dialog` —`Dialog` es
+  `providedIn:'root'` y se inyecta solo—, y el TestBed omitía `provideRouter` CON RAZÓN DOCUMENTADA en
+  su cabecero (l.35-38: «añadir el router real metería un colaborador que el componente no usa»). Este
+  bloque INVALIDA esa razón: el comentario se corrige, porque por R5 una descripción equivocada del
+  mecanismo actual es estado vivo equivocado.
+  C6 DESMENTIDO COMO INALCANZABLE, y es el hallazgo que reencuadró el bloque. El contrato prometía
+  «mensaje distinto para el 422 de pre-validación y para el infactible», citando la casilla de 8.4-A.
+  MEDIDO: los dos 422 llegan al frontend con BODY SECO IDÉNTICO. `HorarioController:64-67` lanza
+  `ResponseStatusException(422, e.getMessage())`; el `reason` solo viajaría con
+  `server.error.include-message` activo, y `application.properties` no lo define (default `never`,
+  D-F8.6-ii-a). `PrevalidacionFallidaException` lleva `getAvisos()` estructurado DENTRO, pero el
+  controller descarta esa lista. La distinción existe EN EL BACKEND y no en el cable. Tres salidas
+  evaluadas: (A) cortar C6 y registrar deuda; (B) meter el backend, que convierte esto en bloque
+  MULTI-MÓDULO y toca la política global de errores que D-F8.6-ii-a y D-F8.6-iiiA-c dicen que solo
+  tiene sentido decidir GLOBALMENTE; (C) discriminar por `status`, descartada porque ambos son 422.
+  ELEGIDA A. D5 REVOCADA. Y el desmentido obligó a AJUSTAR D4: si el usuario no va a poder distinguir
+  la causa del rechazo, el DIÁLOGO se lo dice por adelantado —enumera los errores concretos que
+  `avisosPrevalidacion()` ya tiene y advierte de que el servidor rechazará sin detalle—. La información
+  existe en el cliente ANTES de enviar; es ahí donde vale. Sin ese ajuste, la guarda avisa de un error,
+  el usuario confirma, y el texto resultante es el mismo que si el solver no encontrara solución.
+  CORRECCIÓN POR R5 EN SEDE VIVA: la casilla de 8.4-A afirmaba «422 distinguible del infactible del
+  solver». Es FALSO desde el cliente y se corrige en su casilla. Lo archivado en la bitácora NO se
+  toca (histórico de solo lectura: borrar el error eliminaría la evidencia de que existió).
+  ENTREGADO: `horario.service.ts` gana `generar()` (POST con body `{}`, wrapper pelado, gemelo de
+  `getProyeccion`); `components/confirmar-generacion/` (.ts+.html+.css) como PRIMER diálogo del repo;
+  `horario-view` inyecta `Router` y `Dialog` y gana el gesto con sus TRES estados —sin ERROR genera
+  directo; con ERROR abre diálogo SIN escapatoria real; `avisosPrevalidacion() === null` deja el botón
+  DESHABILITADO, porque no se ha ejecutado la pre-validación y no hay nada sobre lo que guardar—;
+  `errorGeneracion` es señal propia que NO gatea la rejilla (criterio de S87, mismo que
+  `errorPrevalidacion` en S92).
+  `styles.css` GANA `@import '@angular/cdk/overlay-prebuilt.css'`: PRIMERA HOJA GLOBAL DEL CDK en el
+  repo, y es MECANISMO VIVO, no anécdota. Sin ella el overlay del `Dialog` se monta sin centrar ni
+  backdrop. Es la tercera cara del error de C2: la dependencia estaba instalada, pero «instalada» no
+  es «lista», y el §A no lo vio porque midió la API (`providedIn:'root'`, sin provider) y no el
+  montaje. Lo destapó Claude Code al integrar, no un usuario abriendo el diálogo. Queda importada
+  para cualquier uso futuro de overlay/tooltip del CDK.
+  DOS PARADAS DE CLAUDE CODE, las dos correctas y las dos por omisión del arquitecto: (1) el guion de
+  commits enumeraba ficheros y OLVIDABA `horario-view.css` (clase `.error-generacion`) y `styles.css`;
+  paró en vez de decidir el reparto por su cuenta. Van al commit de CÓDIGO: ninguno es test y ambos
+  son parte del mismo gesto —un tercer commit para CSS separaría un `<p>` de su estilo y un componente
+  de lo que lo hace visible, y el criterio de M4 es que un commit CONSTRUYA, no que agrupe por
+  extensión—. (2) Antes, en el turno de contraste, devolvió la pregunta de C6 con tres salidas en vez
+  de elegir.
+  TESTS: 7 en el primer turno (T1-T6 en contenedor + 1 de servicio) y 4 en el segundo (T7-T9), suite
+  frontend 56 → 63 → 67 (12 ficheros de test, antes 11). CAMPAÑA declarada en dos tandas. Los TRES
+  huecos que la primera campaña destapó se CERRARON en la misma sesión, con criterio explícito de por
+  qué esos tres y no el cuarto: (h1) la rama «no ejecutado» es el TERCER ESTADO de D4, contratado, y
+  su ausencia dejaba sin red media decisión de producto; (h2) el `data` del `open` es el AJUSTE D4'
+  ENTERO —si llega la lista completa o vacía, la razón por la que se eligió la opción A no existe y
+  nadie se entera—; (h3) `ConfirmarGeneracion` tenía CERO cobertura y la mutación de intercambiar
+  `true`/`false` en confirmar/cancelar invierte la guarda entera quedando verde.
+  DOS FIXTURES DIVERGENTES POR DISEÑO, mismo criterio que el (22) de S89: T5 navega a id 99 siendo 1
+  el de la ruta —con id igual, «navegó» y «no navegó» son indistinguibles—; T8 lleva un aviso ERROR y
+  otro AVISO con textos distintos —sin el no-ERROR, «pasar todo» y «filtrar» dan el mismo `data`—; T9
+  enumera DOS errores —con uno solo, «pinta el primero» y «pinta todos» coinciden—.
+  MATIZ DE T7 REGISTRADO Y NO TAPADO, que es lo que M3 exige: borrar la guarda a secas da
+  `null.filter` → TypeError, es decir ROJO POR EXCEPCIÓN y no por aserto. Sigue siendo rojo y el test
+  cumple, pero la mutación honesta contra esa dimensión es la que devuelve TRAS abrir/generar, y esa
+  sí cae limpia. Acoplamiento declarado también en T8 (el `toHaveBeenCalledWith` reddearía si `open`
+  no se llamara, pero de esa se encarga `open times(1)`/`generar times(0)` en el mismo test: el
+  `withArgs` no es quien la ataca) y en T9 (asevera presencia en `textContent`, no posición ni
+  estructura: reordenar o reestilar no reddea, y queda fuera de alcance a propósito).
+  Backend 333 INTACTO. No se tocó `solver/src/main` → `referencia-codigo-solver.md` NO regenerada;
+  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
+  DEUDA NUEVA: D-F8.4-B2-a (el `errorGeneracion.set(null)` de reintento sin test, gemelo de lo que
+  (25b) cubrió para los pines en S89; se deja fuera POR COHERENCIA con D-F8.6-ivB-a resto, que tiene
+  el gemelo abierto por el mismo motivo, no por descuido).
+  LIMPIEZA EVALUADA Y DESCARTADA (M1.5): 8.4 queda CERRADO entero y es candidato natural a
+  condensación, pero su casilla B2 es hoy lo ÚNICO que documenta el gesto y se acaba de escribir.
+  Se condensa en la próxima sesión de higiene, no en la que lo cierra.
+  Siguiente: 8.6-B (aviso durante el arrastre; cruce de índices, contrato ANTES de medir, orden
+  inverso a M2), D-F8.6-ivB-a resto + D-F8.4-B2-a (los dos `set(null)` de reintento, ahora gemelos
+  declarados), D-F8.6-iiiA-b (`Totales` sin sede) o HIGIENE (condensar 8.4), a decidir al abrir.
