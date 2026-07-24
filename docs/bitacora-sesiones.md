@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S89. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S90. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S89). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S90). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3972,3 +3972,96 @@ al abrir sesión.
   durante el arrastre; su pregunta es sobre un estado HIPOTÉTICO que ningún índice actual responde,
   luego su contrato hay que decidirlo ANTES de medir) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo
   de BACKEND y abrirlo puede ser abrir dos bloques), a decidir al abrir sesión.
+
+### Sesión 90 — Fase 8, Bloque 8.5-D2b-1: transporte de la tutoría al solver (CIERRA D-B5-5).
+  Modo híbrido. 3 commits (333dfb8 solver, d0f5e9b app, a363e72 doc). PRIMER BLOQUE DE BACKEND
+  desde S79: 8.5-D2b llevaba DOCE sesiones desplazado (desde S77), perdiendo cada vez contra
+  candidatos de frontend más baratos. Se abre PARTIDO en D2b-1 (transporte) y D2b-2 (verificación
+  de S8), y el corte NO es el que S89 recomendó: ver abajo.
+  §A DE MEDICIÓN sobre `referencia-codigo-solver.md` y los tres documentos, declarada COMO
+  RAZONAMIENTO SOBRE EL DERIVADO y no como medición del árbol —el Project no contiene `solver/`—.
+  Salida: cero apariciones de `requiereTutor`/`tutor`/`Tutoria` en toda la referencia (confirma
+  D-B5-5 en el derivado); `Actividad` 6 componentes, `ActividadDto` gemelo exacto de 6;
+  `ProblemaHorario` 9 listas; `Profesor` 2 componentes sin tutoría; `ReglaDura` 7 constantes,
+  ninguna de tutoría.
+  §A DESMIENTE EL CORTE QUE S89 RECOMENDÓ, y es el hallazgo que reordena el bloque. S89 proponía
+  D2b-1 = «§A + propagar `requiereTutor` + inversión del test». Medido: eso deja la mitad-1 SIN
+  CONSUMIDOR —un campo que nadie lee es D-B5-5 una capa más abajo, con otro nombre—. CORTE NUEVO:
+  D2b-1 = las DOS patas de transporte (`requiereTutor` + `ProfesorTutoria` al `ProblemaHorario`),
+  sin verificar S8; D2b-2 = `ReglaDura` + verificador. Criterio que lo justifica: cada mitad debe
+  entregar algo que un test pueda aseverar. Segundo hallazgo del §A, que el plan no decía: S8 exige
+  además resolver «grupo cubierto por los subgrupos de P», tercera pieza y no dos —el mecanismo ya
+  existe en el verificador vía S9—.
+  TURNO DE CONTRASTE (M4): SEIS correcciones, CINCO del arquitecto, y la primera INVALIDÓ EL
+  CONTRATO, no un detalle.
+  (1) «SOLO io» ERA INALCANZABLE. Hay DOS caminos que construyen `domain.Actividad`, no uno:
+  `ProblemaHorarioMapper:149` (el que yo tenía en la cabeza) y `CatalogoMapper:284` (app, olvidado).
+  Añadir el 7.º componente rompe la compilación del segundo y FUERZA la decisión semántica que el
+  bloque existe para tomar. Mi «fuera de alcance» no era una decisión: era un descuido que ocultaba
+  la decisión. RESUELTO: `CatalogoMapper` PROPAGA `isRequiereTutor()`. Clavar `false` produciría el
+  estado incoherente entidad=true/dominio=false por la puerta de entrada REAL de configuración
+  (el CRUD de 8.5-C1), y dejaría S8 verificable en fixtures e inverificable en producción —la misma
+  asimetría que D-F8.6-iiiA-c documenta en otra capa—.
+  (2) ORDEN DE ARGUMENTOS DEL RECORD, corregido contra mi propuesta: escribí
+  `(grupo, profesor, rol)` por analogía con la PROSA de S8 en el modelo, que no es una firma. La
+  entidad JPA gemela de S77 es `(profesor, grupo, rol)`. Dos gemelos con los dos primeros invertidos
+  es footgun sin contrapartida. ADOPTADO `(Profesor, GrupoAdministrativo, RolTutoria)`.
+  (3) TRES RAZONES DE ÁRBOL para la décima lista que yo no tenía, además de la mía (el `rol` se
+  perdería dentro del grupo): `GrupoAdministrativo` se usa como elemento de `Set` y como clave de
+  mapa, así que meterle tutores envenenaría su `equals`; la 2.ª pasada ya tiene profesores y grupos
+  construidos, luego una lista décima calca `bloqueos` sin ciclos; y `resolverGrupo` es recursivo con
+  detección de ciclos por `grupoPadre`, donde inyectar refs a `Profesor` acopla dos catálogos.
+  (4) LOS CALL SITES QUE MEDÍ ERAN LOS EQUIVOCADOS. Pedí los de `Actividad` (7: 2 main + 5 test) y
+  no los de `ProblemaHorario`, que son OTROS 7. Consecuencia mecánica de la décima lista, reparada
+  sin parar y ACEPTADA: no es alcance nuevo, es lo que «añadir un componente a un record» significa.
+  (5) SIN TESTS DE ROUND-TRIP EL BLOQUE ERA TRANSPORTE NO VERIFICADO POR CONSTRUCCIÓN. Cuatro
+  mutaciones compilables e invisibles hoy (cruce de lookup profesor/grupo, default invertido
+  `null→true` sobre 43 fixtures que omiten el campo, lista sin cablear, `CatalogoMapper` clavando
+  `false`). El criterio con el que defendí este corte —«cada mitad entrega algo aseverable»— se me
+  había olvidado materializar en el contrato. Los tests entraron por el contraste.
+  ENTREGADO: `domain` gana `Actividad.requiereTutor` (7.º, `boolean` primitivo), `RolTutoria`
+  PROPIO de solver (no se reutiliza el de `app/`: solver no depende de app), `ProfesorTutoria` y la
+  DÉCIMA lista `ProblemaHorario.tutorias`; `io` gana `ActividadDto.requiereTutor` (`Boolean`
+  WRAPPER, porque los 43 fixtures vivos omiten el campo y el mapper colapsa `null→false`),
+  `ProfesorTutoriaDto` y la décima lista del DTO; el mapper resuelve en 2.ª pasada calcando
+  `bloqueos` (idiom `== null ? List.of()`, helper `resolver`, helper `construir` para el enum);
+  schema con ambos campos OPCIONALES; `CatalogoMapper.aActividad` propaga y su Javadoc REVOCA
+  D-B5-5.
+  SEIS TESTS con asertos discriminantes: T1 round-trip con FIXTURE DEFENSIVO obligatorio
+  (`problema-8-5-tutorias.json`, MAT8/1ESO-A + LEN2/1ESO-B: códigos divergentes y un segundo par,
+  para que un lookup cruzado resuelva a algo DISTINTO en vez de fallar por casualidad; mata la
+  mutación del cruce); T2 sin `tutorias` → lista vacía; T3 el PAR ausente→false / presente→true;
+  T4 rol, profesor y grupo desconocidos → `ProblemaInvalidoException`; T5 sustituye el Caso 4 de
+  `CatalogoMapperActividadTest:136` —que aseveraba «el flag se ignora»— por el PAR true→true /
+  false→false, renombrado `aActividad_propagaRequiereTutor`: con un solo `isTrue()` no se discrimina
+  contra un `true` clavado. El aserto de lista cableada NO se duplicó: T1 lo mata por construcción.
+  CAMPAÑA DE 7 MUTACIONES, cero supervivientes. UNA OBJECIÓN DEL ARQUITECTO A SU PROPIA CAMPAÑA,
+  registrada como deuda en vez de reabrir el bloque: M6 («el mapper ignora el rol y clava
+  TUTOR_PRINCIPAL») cae por T4a, es decir por el test del rol INVÁLIDO, no por ninguno que asevere
+  que un rol VÁLIDO se transporta. Como el fixture de T1 lleva `TUTOR_PRINCIPAL`, clavarlo es
+  indistinguible del acierto. La mutación honesta exige un fixture con `CO_TUTOR` y un aserto sobre
+  `rol()`.
+  Suite solver 78 → 84 (+6), app 237 (Caso 4 sustituido, neto 0), total 315 → 321.
+  `solver/src/main` TOCADO → `referencia-codigo-solver.md` REGENERADA (commit aparte, M4).
+  `modelo_datos_fase1.md` no se toca por entidad ni invariante nueva (S8 ya existía, aquí solo se
+  transporta), PERO su nota de S77 (§ «Estado de implementación de `ProfesorTutoria`») queda como
+  ESTADO VIVO EQUIVOCADO por R5 y se corrige en la misma sesión.
+  CIERRA D-B5-5. DEUDA NUEVA: D-F8.5-D2b1-a (la ruta JPA clava `tutorias` vacía), D-F8.5-D2b1-b
+  (el rol no tiene aserto de transporte).
+  MÉTODO CORREGIDO EN LA MISMA SESIÓN, a raíz del fallo (1) del contraste y por decisión explícita
+  del usuario de no dejarlo solo en el prompt de apertura: tercera precisión de M2 (un tipo
+  compartido se mide en TODOS los módulos; la pregunta es «quién más lo construye o consume», y si
+  el §A no puede verlo desde el Project la enumeración se pide en el contraste y el contrato NO se
+  cierra hasta tenerla) y precisión de ORDEN en M4 (bloque multi-módulo → el contraste mide ANTES
+  del contrato, no después). Ninguna nace como M5: son precisiones a procedimientos que ya existen
+  y ya funcionaron —el contraste cazó esto—, y un apartado nuevo sugeriría procedimiento nuevo.
+  Sede PERMANENTE y no prompt: un prompt no se conserva, que es D-F8.0-a otra vez. Se anota además
+  el criterio de acumulación de M2 (una cuarta precisión obliga a condensar, no a añadir).
+  LO QUE ESTAS NORMAS NO HACEN, escrito para que nadie lo dé por hecho: estrechan la rendija de
+  «tipo compartido entre módulos», no cierran la clase «afirmar sobre terreno no leído», que lleva
+  desmintiéndose desde S75 y produjo cuatro fallos de instrumento en S89. La red que hace el trabajo
+  sigue siendo el contraste.
+  Siguiente: 8.5-D2b-2 (verificación de S8: `ReglaDura` + `VerificadorSolucion` + cableado del
+  `ProfesorTutoriaRepository`, que es la deuda D-F8.5-D2b1-a y NO puede quedar fuera o S8 sería
+  inverificable en producción), 8.6-B (contrato por decidir ANTES de medir) u 8.4-B (MOCKUP PREVIO;
+  D-F8.4-A-c es trabajo de backend), a decidir al abrir sesión.
