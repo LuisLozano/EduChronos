@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 
 import { SesionVista } from '../../models/horario.model';
 import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
@@ -76,12 +76,65 @@ export class HorarioGrid {
 
   protected readonly dias = DIAS;
   protected readonly tramos = TRAMOS;
+  /** Espejo de la función pura para que la plantilla la invoque (como {@link dias}). */
+  protected readonly claveSlot = claveSlot;
 
   private readonly celdas = computed(() => agruparPorActividad(this.sesiones()));
+
+  /**
+   * Clave de {@link clavePin} de la instancia que se está arrastrando; `null` en
+   * reposo. La fija {@link alIniciarArrastre} y la limpia {@link alTerminarArrastre};
+   * es la entrada de {@link slotsOcupados}.
+   */
+  private readonly arrastrando = signal<string | null>(null);
+
+  /**
+   * Claves de {@link claveSlot} de los slots que, DURANTE un arrastre, ya tienen
+   * al menos una instancia distinta de la que se arrastra. En reposo
+   * (`arrastrando() === null`) es el conjunto vacío: nada se marca. Cuenta
+   * {@link InstanciaCelda}, no `entradas`, así que un desdoble de seis plazas es
+   * UNA instancia y ocupa su slot una sola vez; la clave del propio arrastrado se
+   * excluye para no teñir su slot de origen.
+   *
+   * <p>(a) Afirma solo «en este tramo YA HAY clase EN LA VISTA ACTUAL». NO afirma
+   * que soltar ahí viole ninguna restricción: es una ayuda visual, no un veredicto.
+   *
+   * <p>(b) Es CIEGO por construcción a los recursos que la vista no muestra: en la
+   * vista por grupo no ve profesor ni aula, en la de aula no ve grupo ni profesor,
+   * etc. Un slot sin marca puede seguir siendo inviable por un recurso oculto.
+   *
+   * <p>(c) NO es una verificación y NO debe crecer hacia una. Portar aquí la lógica
+   * de solapes sería un CUARTO espejo de las restricciones —en otro lenguaje y sin
+   * el test que protege D15—: la validación es del backend, y esta marca se queda
+   * en «hay clase», deliberadamente por debajo de eso.
+   */
+  protected readonly slotsOcupados = computed<Set<string>>(() => {
+    const arrastrando = this.arrastrando();
+    if (arrastrando === null) {
+      return new Set<string>();
+    }
+    const ocupados = new Set<string>();
+    for (const [slot, instancias] of this.celdas()) {
+      if (instancias.some((inst) => this.clave(inst) !== arrastrando)) {
+        ocupados.add(slot);
+      }
+    }
+    return ocupados;
+  });
 
   /** Instancias del slot (dia, tramo); vacío si no hay ninguna. */
   protected instancias(dia: number, tramo: number): InstanciaCelda[] {
     return this.celdas().get(claveSlot(dia, tramo)) ?? [];
+  }
+
+  /** Registra la instancia que empieza a arrastrarse: abre la marca de ocupación. */
+  protected alIniciarArrastre(inst: InstanciaCelda): void {
+    this.arrastrando.set(this.clave(inst));
+  }
+
+  /** Cierra el arrastre: la marca de ocupación vuelve a reposo (Set vacío). */
+  protected alTerminarArrastre(): void {
+    this.arrastrando.set(null);
   }
 
   protected clave(inst: InstanciaCelda): string {

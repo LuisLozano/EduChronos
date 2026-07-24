@@ -128,3 +128,10 @@
   outline: 2px solid #c33;
   outline-offset: -1px;
 }
+
+/* Marca de slot ocupado durante el arrastre (8.6-B): "aquí ya hay clase en la
+   vista actual", no un veredicto. Coexiste a propósito con el outline verde de
+   .cdk-drop-list-dragging, que sigue siendo la señal de sobrevuelo. */
+.rejilla td.ocupado {
+  background: #eef2f6;
+}

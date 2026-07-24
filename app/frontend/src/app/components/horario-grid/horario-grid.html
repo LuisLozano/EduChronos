@@ -12,7 +12,11 @@
       <tr>
         <th class="tramo">{{ t }}</th>
         @for (d of dias; track d; let i = $index) {
-          <td cdkDropList (cdkDropListDropped)="alSoltar($event, i + 1, t)">
+          <td
+            cdkDropList
+            (cdkDropListDropped)="alSoltar($event, i + 1, t)"
+            [class.ocupado]="slotsOcupados().has(claveSlot(i + 1, t))"
+          >
             @for (inst of instancias(i + 1, t); track clave(inst)) {
               <div
                 class="instancia"
@@ -21,6 +25,8 @@
                 [class.en-violacion]="tieneViolacionInstancia(inst)"
                 cdkDrag
                 [cdkDragData]="inst"
+                (cdkDragStarted)="alIniciarArrastre(inst)"
+                (cdkDragEnded)="alTerminarArrastre()"
               >
                 @if (tieneBadge(inst) || estaPinada(inst)) {
                   <span class="adornos">
