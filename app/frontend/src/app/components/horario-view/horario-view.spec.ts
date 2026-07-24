@@ -857,4 +857,59 @@ describe('contenedor del horario', () => {
     ultimoBorrar.error({ status: 500 });
     await fixture.whenStable();
   });
+
+  /**
+   * El índice de pines es de TODO el horario, no del filtro: cambiar de VISTA no
+   * lo recarga (invariante del TSDoc de `cargarPines`, horario-view.ts:125-132).
+   * Hoy se sostiene por AUSENCIA de llamada, no por lógica defensiva; este test lo
+   * fija. El ASERTO A (precondición: `listar` en 1) evita medir un no-op —sin la
+   * carga del montaje, B pasaría trivial—, y el C confirma que el gesto ocurrió de
+   * verdad. `cambiarVista` es `protected` y se invoca por cast, único disparador
+   * que toca SOLO la vista sin reemitir la ruta (precedente: it (34), línea 776).
+   */
+  it('(37) cambiar de vista no recarga el índice de pines', async () => {
+    await montar([]);
+    const comp = fixture.componentInstance as unknown as {
+      cambiarVista(v: string): void;
+      vista(): string;
+    };
+
+    // ASERTO A (precondición): el montaje ya cargó el índice una vez.
+    expect(bloqueos.listar).toHaveBeenCalledTimes(1);
+
+    comp.cambiarVista('profesor');
+    await fixture.whenStable();
+
+    // ASERTO B (discriminante): el gesto NO redisparó la carga.
+    expect(bloqueos.listar).toHaveBeenCalledTimes(1);
+    // ASERTO C: el gesto ocurrió de verdad.
+    expect(comp.vista()).toBe('profesor');
+  });
+
+  /**
+   * Gemelo del (37) para el gesto de ENTIDAD: cambiar de entidad tampoco recarga
+   * el índice —es de TODO el horario, no del filtro—. `cambiarEntidad` es un setter
+   * puro (`this.entidad.set(e)`, horario-view.ts:309-311) que NO consulta
+   * `entidades()`, así que basta una entidad distinta de la actual: tras el montaje
+   * con proyección vacía `entidad()` es '', y se pasa un valor no vacío para que el
+   * ASERTO C discrimine. Mismos A/B/C que (37).
+   */
+  it('(38) cambiar de entidad no recarga el índice de pines', async () => {
+    await montar([]);
+    const comp = fixture.componentInstance as unknown as {
+      cambiarEntidad(e: string): void;
+      entidad(): string;
+    };
+
+    // ASERTO A (precondición): el montaje ya cargó el índice una vez.
+    expect(bloqueos.listar).toHaveBeenCalledTimes(1);
+
+    comp.cambiarEntidad('1ºA');
+    await fixture.whenStable();
+
+    // ASERTO B (discriminante): el gesto NO redisparó la carga.
+    expect(bloqueos.listar).toHaveBeenCalledTimes(1);
+    // ASERTO C: el gesto ocurrió de verdad.
+    expect(comp.entidad()).toBe('1ºA');
+  });
 });
