@@ -2389,6 +2389,46 @@ siguiente, con remisión a la bitácora.
   «¿qué ocupa este tramo?» que respondiera por los tres recursos sin que el cliente razone; hasta
   entonces, cualquier intento de completarlo en TS es la opción A por la puerta de atrás.
 
+- **D-UI-shell** (S97, VIVA, no bloqueante, DE ALCANCE) — NO HAY MAQUETACIÓN DE CHROME DE
+  APLICACIÓN. La UI se ha construido pantalla a pantalla por función; no existe layout global,
+  navegación por menú, cabecera con logotipo, tema visual ni página de inicio. Indicios (no
+  medición cerrada): `styles.css` son cinco líneas —comentario + `@import` del overlay del CDK para
+  el diálogo—, y la navegación que ha aparecido es por ruta puntual (`horario/:id`, `paramMap`), no
+  un menú. No bloquea ningún bloque funcional. MEDICIÓN PENDIENTE, deliberadamente dejada DENTRO de
+  la deuda (decisión del usuario en S97, no en el prompt): confirmar si hay algún shell mínimo en
+  `app.component`/`app.routes` antes de fijar el texto definitivo, o esta deuda mentirá sobre el
+  estado actual. → fase propia «shell de aplicación» (layout, navegación global, cabecera con logo,
+  tema, página de inicio, estados de carga/error de página), DESPUÉS de completar la configuración
+  por centro —el menú lista secciones que aún son deuda (D1, D7, D22)— y ANTES del empaquetado
+  (Fase 11), que debe entregar algo que parezca una aplicación terminada. Maquetar el menú antes de
+  saber sus entradas obliga a rehacerlo.
+
+- **D-seed-demo** (S97, VIVA, no bloqueante, DE ALCANCE) — NO HAY UN SEED POBLADO DESDE LOS DATOS
+  REALES DEL CENTRO. «Partir de la BD con los horarios reales» son DOS pasos, no uno, y confundirlos
+  es la trampa: (a) un IMPORTADOR que lea los volcados fieles `grupo-*.json`/`aula-*.json` y
+  construya el CATÁLOGO (actividades, plazas, subgrupos, particiones, tutorías, compatibilidades de
+  aula) — SOLAPA con D8 y arrastra sus cuatro problemas de conciliación (aulas implícitas, talleres
+  FPB ausentes del horario por aula, segundo profesor omitido en co-docencia, inconsistencias
+  profesor↔plaza entre PDFs)—; y (b) OPCIONAL, cargar el HORARIO YA RESUELTO del centro como
+  `HorarioProyeccion` persistida, para que la demo enseñe un horario pintado sin esperar los ~600 s
+  del solver a escala real (dato de S44). DISTINCIÓN QUE NO SE PUEDE PERDER: los volcados son el
+  horario RESUELTO (celdas colocadas), NO el catálogo de entrada (actividades sin colocar); son
+  cosas distintas y (a) transforma uno en otro. El `SeedCatalogoRunner` actual es SINTÉTICO y MUERE
+  en el bloque de configuración de jornada (D22): no es la base de la que partir. → fase o bloque
+  DESPUÉS de cerrar la configuración por centro; antes se rehace, porque un importador que puebla un
+  catálogo cuyo esquema aún no está cerrado se reescribe. La (b), si se aborda, exige decidir ANTES
+  si persistir una proyección «desde fuera» del solver es camino legítimo del modelo o atajo que
+  solo debe existir para demo.
+
+- **D-demo-cliente** (S97, VIVA, no bloqueante, DE PROCESO) — MOSTRAR LA APLICACIÓN AL USUARIO DEL
+  CENTRO NO ES FASE DE DESARROLLO. Es un evento de validación con interlocutor humano y calendario,
+  no trabajo de construcción. Se registra para que su DEPENDENCIA quede escrita y nadie intente
+  planificarla antes de tiempo: consume D-seed-demo (una BD que enseñar) + D-UI-shell (algo que
+  parezca una aplicación). No tiene entregable de código propio; su «hecho» es la sesión con el
+  centro y sus salidas son hallazgos que se convierten en deuda o en confirmaciones de D31
+  (poblaciones y particiones a confirmar con el centro). → agendar cuando D-seed-demo y D-UI-shell
+  estén cerradas, no antes.
+
 - **D-F8.5-D2b2-b** (S91, VIVA, COSMÉTICA, no bloqueante) — EL JAVADOC DE CLASE DE `CatalogoMapper`
   DICE «siete listas». Es PRE-EXISTENTE, no introducida por S91: ya estaba obsoleto desde que se
   añadieron restricciones y bloqueos, y con el onceavo parámetro de esta sesión lo está más. Claude
