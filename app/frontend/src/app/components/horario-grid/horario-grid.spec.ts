@@ -1,4 +1,6 @@
+import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { HorarioGrid } from './horario-grid';
 import { SesionVista } from '../../models/horario.model';
@@ -107,6 +109,34 @@ function instanciaDe(fixture: ComponentFixture<HorarioGrid>, asignatura: string)
     throw new Error(`No se pintó ninguna instancia de ${asignatura}`);
   }
   return encontrada;
+}
+
+/**
+ * DebugElement de la instancia que pinta `asignatura`. Hace falta el DebugElement
+ * —no el nativo— para disparar los outputs del `cdkDrag` (`cdkDragStarted` /
+ * `cdkDragEnded`) con `triggerEventHandler`, que invoca el handler cableado en la
+ * plantilla sin simular el gesto de puntero, irreproducible en jsdom.
+ */
+function debugDe(fixture: ComponentFixture<HorarioGrid>, asignatura: string): DebugElement {
+  const de = fixture.debugElement
+    .queryAll(By.css('div.instancia'))
+    .find((d) => (d.nativeElement as HTMLElement).querySelector('.asig')?.textContent?.trim() === asignatura);
+  if (!de) {
+    throw new Error(`No se pintó ninguna instancia de ${asignatura}`);
+  }
+  return de;
+}
+
+/** El `<td>` del slot (dia, tramo): fila `tramo`, columna `dia` (la 1ª celda es `<th>`). */
+function tdDe(fixture: ComponentFixture<HorarioGrid>, dia: number, tramo: number): HTMLTableCellElement {
+  const raiz = fixture.nativeElement as HTMLElement;
+  const fila = raiz.querySelectorAll('tbody tr')[tramo - 1];
+  return fila.querySelectorAll('td')[dia - 1] as HTMLTableCellElement;
+}
+
+/** Reubica una sesión en otro (dia, tramo) sin tocar el helper base {@link sesion}. */
+function enSlot(s: SesionVista, dia: number, tramo: number): SesionVista {
+  return { ...s, dia, tramo };
 }
 
 describe('rejilla de horario', () => {
@@ -263,5 +293,69 @@ describe('rejilla de horario', () => {
     // Cada sub-entrada casa con SU plaza: las dos marcadas, evaluadas por separado.
     expect(entradas[0].classList).toContain('en-violacion');
     expect(entradas[1].classList).toContain('en-violacion');
+  });
+
+  it('(T1) al iniciar arrastre, el <td> de un slot con instancias lleva .ocupado', async () => {
+    // beforeEach monta SESIONES: Mat y LCL comparten el slot (DIA, TRAMO).
+    const td = tdDe(fixture, DIA, TRAMO);
+    // Precondición: en reposo nada está marcado, para no medir un no-op.
+    expect(td.classList).not.toContain('ocupado');
+
+    debugDe(fixture, 'Mat').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+
+    // Arrastrando Mat, el slot conserva a LCL: sigue teniendo clase, luego ocupado.
+    expect(td.classList).toContain('ocupado');
+  });
+
+  it('(T2) el <td> del slot de ORIGEN de la instancia arrastrada NO lleva .ocupado', async () => {
+    // Mat SOLA en (DIA, TRAMO); LCL en OTRO slot (2,3) como testigo de que el gesto corrió.
+    fixture.componentRef.setInput('sesiones', [MAT_PINADA, enSlot(LCL_SIN_PIN, 2, 3)]);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // Precondición: en reposo, cero slots marcados.
+    expect(raiz.querySelectorAll('td.ocupado').length).toBe(0);
+
+    debugDe(fixture, 'Mat').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+
+    // El origen de Mat, donde está SOLA, no se tiñe: la marca excluye a la arrastrada.
+    expect(tdDe(fixture, DIA, TRAMO).classList).not.toContain('ocupado');
+    // Pero el otro slot, con LCL, SÍ: prueba de que el arrastre tomó efecto (no un no-op).
+    expect(tdDe(fixture, 2, 3).classList).toContain('ocupado');
+  });
+
+  it('(T3) un slot con desdoble marca su <td> UNA vez, no una por entrada', async () => {
+    // Mismo slot (DIA, TRAMO): el desdoble (una instancia, dos entradas) y LCL, que se arrastra.
+    fixture.componentRef.setInput('sesiones', [...DESDOBLE, LCL_SIN_PIN]);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const td = tdDe(fixture, DIA, TRAMO);
+    expect(td.classList).not.toContain('ocupado');
+
+    debugDe(fixture, 'LCL').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+
+    // Arrastrando LCL, el slot queda ocupado por el desdoble: UNA marca (una clase en el
+    // <td>) pese a sus dos entradas. El aserto va sobre el <td>, no sobre conteo de entradas.
+    expect(td.classList).toContain('ocupado');
+    expect(raiz.querySelectorAll('td.ocupado').length).toBe(1);
+  });
+
+  it('(T4) cdkDragEnded limpia la marca: ningún <td> queda .ocupado', async () => {
+    // beforeEach monta SESIONES (Mat y LCL en (DIA, TRAMO)).
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    debugDe(fixture, 'Mat').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+    // Precondición: el arrastre dejó algo marcado, para que "cero marcas" no sea un no-op.
+    expect(raiz.querySelectorAll('td.ocupado').length).toBeGreaterThan(0);
+
+    debugDe(fixture, 'Mat').triggerEventHandler('cdkDragEnded', {});
+    await fixture.whenStable();
+
+    expect(raiz.querySelectorAll('td.ocupado').length).toBe(0);
   });
 });
