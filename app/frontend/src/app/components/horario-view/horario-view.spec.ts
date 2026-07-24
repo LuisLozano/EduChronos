@@ -88,15 +88,15 @@ describe('contenedor del horario', () => {
   let sujetoParam: Subject<ParamMap>;
   let sujetoListar: Subject<Bloqueo[]>;
   let sujetoProyeccion: Subject<HorarioProyeccion>;
-  let sujetoBorrar: Subject<void>;
   let sujetoDiagnostico: Subject<Diagnostico>;
   let ultimoGuardar: Subject<Bloqueo>;
+  let ultimoBorrar: Subject<void>;
+  let ultimoGenerar: Subject<HorarioProyeccion>;
   let bloqueos: {
     listar: ReturnType<typeof vi.fn>;
     guardar: ReturnType<typeof vi.fn>;
     borrar: ReturnType<typeof vi.fn>;
   };
-  let sujetoGenerar: Subject<HorarioProyeccion>;
   let horario: { getProyeccion: ReturnType<typeof vi.fn>; generar: ReturnType<typeof vi.fn> };
   let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
   let sujetoPrevalidacion: Subject<AvisoPrevalidacion[]>;
@@ -109,10 +109,8 @@ describe('contenedor del horario', () => {
     sujetoParam = new Subject<ParamMap>();
     sujetoListar = new Subject<Bloqueo[]>();
     sujetoProyeccion = new Subject<HorarioProyeccion>();
-    sujetoBorrar = new Subject<void>();
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
-    sujetoGenerar = new Subject<HorarioProyeccion>();
     sujetoCerrado = new Subject<boolean | undefined>();
 
     bloqueos = {
@@ -126,11 +124,16 @@ describe('contenedor del horario', () => {
       // responder". Cada llamada estrena Subject y guarda el último en
       // `ultimoGuardar` para poder emitir sobre él.
       guardar: vi.fn(() => (ultimoGuardar = new Subject<Bloqueo>())),
-      borrar: vi.fn(() => sujetoBorrar),
+      // FRESCO POR INVOCACIÓN, por el mismo motivo que `guardar` (ver comentario
+      // arriba): el reintento de despinado (36) re-suscribe tras un `.error()`, y
+      // un Subject compartido cerrado redispararía el error síncronamente.
+      borrar: vi.fn(() => (ultimoBorrar = new Subject<void>())),
     };
     horario = {
       getProyeccion: vi.fn(() => sujetoProyeccion),
-      generar: vi.fn(() => sujetoGenerar),
+      // FRESCO POR INVOCACIÓN, por el mismo motivo que `guardar`: el reintento de
+      // generación (35) re-suscribe tras un `.error()` sobre el Subject anterior.
+      generar: vi.fn(() => (ultimoGenerar = new Subject<HorarioProyeccion>())),
     };
     // Doble del Dialog del CDK: `open` devuelve un objeto con `closed`, el único
     // miembro que `generar()` toca. El Subject de cierre es COMPARTIDO —cada test
@@ -219,7 +222,7 @@ describe('contenedor del horario', () => {
     expect(bloqueos.borrar).toHaveBeenCalledWith(7);
     expect(grid.pinadas().has('Mat-1ºA|1')).toBe(true);
 
-    sujetoBorrar.next();
+    ultimoBorrar.next();
     await fixture.whenStable();
 
     // DESPUÉS del 204.
@@ -241,11 +244,10 @@ describe('contenedor del horario', () => {
 
     expect(bloqueos.borrar).not.toHaveBeenCalled();
 
-    // Se emite igualmente en el sujeto del DELETE: si la guarda dejase pasar el
-    // null, la suscripción estaría viva y este `next` borraría la clave. Sin esta
-    // emisión, "el índice no cambia" quedaría verde bajo la mutación y sería
-    // cobertura fingida.
-    sujetoBorrar.next();
+    // No hay emisión del DELETE: con el doble FRESCO POR INVOCACIÓN, `borrar` no se
+    // invocó (la guarda retorna con id null), así que no existe Subject sobre el
+    // que emitir. La mutación que dejase pasar el null la mata directamente el
+    // `not.toHaveBeenCalled` de arriba —borrar(null) habría llamado al doble—.
     await fixture.whenStable();
 
     expect(grid.pinadas().has('LCL-1ºA|1')).toBe(true);
@@ -263,7 +265,9 @@ describe('contenedor del horario', () => {
 
     expect(bloqueos.borrar).not.toHaveBeenCalled();
 
-    sujetoBorrar.next();
+    // Sin emisión del DELETE: `borrar` no se invocó (clave ausente del índice), así
+    // que no hay Subject fresco sobre el que emitir. El `not.toHaveBeenCalled` de
+    // arriba es el discriminador.
     await fixture.whenStable();
 
     expect(grid.pinadas().size).toBe(1);
@@ -702,7 +706,7 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
-    sujetoGenerar.next({ ...PROYECCION_VACIA, id: 99 });
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 99 });
     await fixture.whenStable();
 
     expect(router.navigate).toHaveBeenCalledTimes(1);
@@ -723,7 +727,7 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
-    sujetoGenerar.error({ status: 422, error: {} });
+    ultimoGenerar.error({ status: 422, error: {} });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
@@ -774,5 +778,83 @@ describe('contenedor del horario', () => {
 
     expect(horario.generar).toHaveBeenCalledTimes(0);
     expect(dialog.open).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * REINTENTO de generación: un segundo gesto limpia `errorGeneracion` ANTES de
+   * que su POST responda (`lanzarGeneracion` hace `errorGeneracion.set(null)` en su
+   * primera línea, horario-view.ts:295). La fase "a null antes de responder" es la
+   * discriminante —el estado final tras un segundo fallo sería idéntico con o sin
+   * ese `set(null)`—, y por eso el segundo Subject NO se emite hasta comprobar el
+   * null. La pre-validación va SIN ERROR para entrar por la vía directa
+   * (horario-view.ts:285) sin abrir diálogo. Aquí es imprescindible el `generar`
+   * FRESCO POR INVOCACIÓN: con un Subject compartido, el segundo `generar()`
+   * devolvería el cerrado tras `.error()` y re-suscribirse repoblaría
+   * `errorGeneracion` síncronamente, haciendo INOBSERVABLE la fase "a null".
+   */
+  it('(35) el reintento de generación limpia el error previo antes de responder', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // Primer intento: falla y puebla el aviso propio de generación.
+    pulsarGenerar();
+    await fixture.whenStable();
+    ultimoGenerar.error({ status: 500 });
+    await fixture.whenStable();
+
+    // ASERTO A: el aviso de generación está poblado.
+    expect(raiz.querySelector('.error-generacion')).not.toBeNull();
+
+    // Segundo intento: limpia el error ANTES de que su POST responda (sin emitir).
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    // ASERTO B (discriminante): el aviso ya no está.
+    expect(raiz.querySelector('.error-generacion')).toBeNull();
+
+    // Cierre: el segundo Subject también falla; el test ya midió lo que importaba.
+    ultimoGenerar.error({ status: 500 });
+    await fixture.whenStable();
+  });
+
+  /**
+   * REINTENTO de despinado: gemelo del (35) para `alDespinar`. El segundo gesto
+   * limpia `errorPin` ANTES de que su DELETE responda (`alDespinar` hace
+   * `errorPin.set(null)` en su primera línea, horario-view.ts:236). Depende de que
+   * el pin SIGA en el índice tras el primer fallo: `alDespinar` en su rama de error
+   * solo puebla `errorPin`, no toca `pinadas` (horario-view.ts:247), así que el
+   * candado permanece y el segundo gesto vuelve a resolver el id en vez de salir por
+   * el `return` de la guarda (horario-view.ts:239). Imprescindible el `borrar`
+   * FRESCO POR INVOCACIÓN, por el mismo motivo que (35).
+   */
+  it('(36) el reintento de despinado limpia el error previo antes de responder', async () => {
+    const grid = await montar([pin(7, 'Mat-1ºA', 1, 1, 2)]);
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // Primer intento: falla y puebla errorPin (`.error`, inequívoco aquí como en el
+    // (24): proyección OK y sin fallo de diagnóstico).
+    grid.despinar.emit('Mat-1ºA|1');
+    await fixture.whenStable();
+    ultimoBorrar.error({ status: 500 });
+    await fixture.whenStable();
+
+    // ASERTO A: el aviso de pin está poblado.
+    expect(raiz.querySelector('.error')).not.toBeNull();
+
+    // ASERTO A-bis: el fallo NO sacó el pin del índice —si lo hubiera hecho, el
+    // segundo gesto saldría por el `return` de la guarda y mediríamos un no-op—.
+    expect(grid.pinadas().has('Mat-1ºA|1')).toBe(true);
+    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
+
+    // Segundo intento: limpia el error ANTES de que su DELETE responda (sin emitir).
+    grid.despinar.emit('Mat-1ºA|1');
+    await fixture.whenStable();
+
+    // ASERTO B (discriminante): el aviso ya no está.
+    expect(raiz.querySelector('.error')).toBeNull();
+
+    // Cierre: el segundo Subject también falla; el test ya midió lo que importaba.
+    ultimoBorrar.error({ status: 500 });
+    await fixture.whenStable();
   });
 });
