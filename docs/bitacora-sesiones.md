@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S91. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S92. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S91). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S92). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4142,3 +4142,66 @@ al abrir sesión.
   trabajo de BACKEND y puede ser abrir dos bloques), 8.6-B (cruce de índices; su contrato hay que
   decidirlo ANTES de medir, orden inverso a M2) o D-F8.6-iiiA-b (`Totales` sin sede), a decidir al
   abrir sesión.
+
+### Sesión 92 — Fase 8, Bloque 8.4-B1: panel de pre-validación (8.4-B PARTIDO por medición).
+  Modo híbrido. 1 commit de código (3a82744, amendado sobre 1787001 para absorber el movimiento
+  del modelo a `models/`; sin pushear al cerrar) + doc aparte.
+  DECISIÓN DE APERTURA — D-F8.4-A-c: el arquitecto recomendó MATAR `AVISO` y la MEDICIÓN LE
+  DESMINTIÓ. El §A destapó tres cosas invisibles desde el Project: (1) el javadoc de `Severidad`
+  documenta un CRITERIO DE DISEÑO —«una regla que pudiera sobrestimar la demanda debe quedarse en
+  AVISO»— y nombra el palomar de aulas como candidato natural, luego el valor no está huérfano por
+  descuido; (2) el string `"AVISO"` viaja en el contrato REST (`AvisoPrevalidacionDTO` serializa
+  `.name()`), así que borrarlo estrecha un contrato publicado aunque el frontend no conozca el enum;
+  (3) el beneficio que el arquitecto atribuía a la muerte —que caerían los asertos tautológicos de
+  A3/A4— es FALSO: ambos aseveran `ERROR`, valor que sobrevive. Nació la RAMA C: `AVISO` se queda,
+  el panel se diseña con dos niveles desde el principio (el frontend se construía desde cero, medido:
+  `grep` de prevalidacion en `.ts/.html/.scss/.css` dio EXIT=1), y el bloque queda de UN SOLO MÓDULO.
+  EL CONTRASTE (M4) TUMBÓ EL CONTRATO POR PREMISA, no por detalle: NO EXISTE gesto de generar en el
+  frontend. Cero `<button>` en todo `src` salvo el candado de `horario-grid.html:31,36`; cero `POST
+  /api/horarios` (el único POST del árbol es `bloqueo.service.ts:30`); `horario.service.ts` son 21
+  líneas con un solo método de lectura. Dos de los seis asertos —los que sostenían la decisión del
+  usuario sobre el botón— NO ERAN ESCRIBIBLES. Causa declarada: el §A midió el endpoint y el DTO pero
+  NO el CONSUMIDOR del gesto, mismo hueco que M2 documenta de S90 (medir `Actividad` y no
+  `ProblemaHorario`). 8.4-B se PARTE en B1 (panel, esta sesión) y B2 (guarda + diálogo), y la
+  partición es DESCUBIERTA POR MEDICIÓN, no planificada: el usuario había objetado —con razón— contra
+  particionar de antemano por el coste documental fijo de M1, y esa objeción sigue en pie.
+  SEGUNDO ERROR DEL CONTRASTE, de precedente: el arquitecto citó `errorDiagnostico` (S87) como modelo
+  de «no ejecutado vs vacío». Es el CONTRAEJEMPLO —distingue error de no-error, y `badges()`/
+  `violaciones()` colapsan `diagnostico() === null` y cargado-vacío en el mismo `new Map()`
+  (`horario-view.ts:68-82`)—. El discriminante real es el `@if/@else if/@else` de
+  `horario-view.html:33-47`, donde `proyeccion() === null` cae en «Cargando…» y una proyección vacía
+  monta la rejilla igual. Caveat que el propio contraste declaró: ese precedente funde «cargando» con
+  «aún null» y no tiene estado semántico nombrado, así que se EXTIENDE, no se copia.
+  TERCER FALLO, de forma y del arquitecto: el primer guion se entregó con referencias a «las clases
+  disjuntas de arriba» y «según la tabla» en un texto que se pega SOLO. Claude Code PARÓ en vez de
+  inventar los nombres de clase, que es lo correcto —inventarlos habría roto los asertos que se
+  aseveran por `querySelector('.clase-exacta')`—. Norma nueva del usuario: TODO GUION VA EN BLOQUE
+  COPIABLE Y AUTOCONTENIDO.
+  ENTREGADO: `models/prevalidacion.model.ts` (seis campos espejo del DTO, `severidad: string`),
+  `services/prevalidacion.service.ts` (wrapper pelado, gemelo de `diagnostico.service.ts:30-32`),
+  `components/panel-prevalidacion/` (.ts+.html+.css) y el cableado en `horario-view`. CUATRO RAMAS
+  con clases DISJUNTAS: `.prevalidacion-error` / `-pendiente` / `-limpia` / `-panel`, más
+  `.contador-errores` / `.contador-avisos` / `.aviso-entrada` / `.es-error` dentro de la cuarta.
+  `avisos()` es `signal<AvisoPrevalidacion[]|null>` con inicial `null`, y esa señal es la que separa
+  «no ejecutado» de «ejecutado y vacío». `getPrevalidacion` dentro de `cargar(id)` y NO en el
+  constructor; `errorPrevalidacion` es señal propia que NO gatea la rejilla (criterio de S87).
+  MOCKUP (D-F8.6-a) hecho y VALIDADO con el usuario: panel colapsable con cabecera siempre visible,
+  línea verde para el caso limpio, y dos niveles distinguidos por TRES señales (icono, borde, y sobre
+  todo el TEXTO DE LA CONSECUENCIA: «imposible de resolver» vs «puede ser sobrestimación»), no solo
+  por color. El diálogo del mockup salió del alcance con B2.
+  FICHERO TOCADO NO PREVISTO, señalado por Claude Code: `horario-view.spec.ts`. Al inyectar
+  `HorarioView` el nuevo servicio, su TestBed debía proveer un doble o los 14 tests reventaban por
+  inyección. NO es test nuevo (de ahí 52+4=56, no +5). Patrón que se repetirá: un componente que gana
+  dependencia obliga a tocar su spec previo.
+  CAMPAÑA DE 5, cada una por su vía prevista, SIN COLATERALES y ninguna dejó de compilar. M2 y M3
+  caen por el MISMO aserto atacando dimensiones distintas (estado inicial vs estructura de ramas):
+  no es cobertura duplicada, es el único punto donde ambas se observan. M6 (`=== 'ERROR'` →
+  `!== 'AVISO'`) NO SE EJECUTA: SUPERVIVIENTE DECLARADA, equivalente con dos valores en el enum; un
+  test que la matara cubriría un caso imposible hoy.
+  Suite frontend 52 → 56 (11 ficheros de test, antes 9); backend 333 INTACTO. No se tocó
+  `solver/src/main` → `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado.
+  DEUDA NUEVA: D-F8.4-B1-a (la caída de M2 depende de que (28) no llame a `setInput` en su primera
+  mitad). D-F8.4-A-c REENCUADRADA, no cerrada.
+  Siguiente: 8.4-B2 (guarda + diálogo, pero antes hay que crear el gesto de generar), 8.6-B (aviso
+  durante el arrastre; contrato ANTES de medir, orden inverso a M2), D-F8.6-ivB-a (resto: el
+  `errorPin.set(null)` de `alDespinar`) o D-F8.6-iiiA-b (`Totales` sigue sin sede), a decidir al abrir.
