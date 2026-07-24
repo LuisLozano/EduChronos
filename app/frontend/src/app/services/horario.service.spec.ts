@@ -74,4 +74,20 @@ describe('cliente de horarios', () => {
 
     req.flush(null);
   });
+
+  /**
+   * `generar` congela el otro par (verbo, URL): POST a la colección, sin id. El
+   * cuerpo se asevera `{}` LITERAL —no cualquier body—: una mutación que colara
+   * parámetros (p. ej. `{ maxSegundos: 30 }`) cambiaría el contrato con el backend
+   * y ESTE ROJO SERÍA CORRECTO. El body vacío es deliberado: el backend acepta
+   * `{}` y cae a sus defaults (S-medido).
+   */
+  it('(33) generar pide POST a la colección con body vacío', () => {
+    servicio.generar().subscribe();
+
+    const req = http.expectOne({ method: 'POST', url: '/api/horarios' });
+    expect(req.request.body).toEqual({});
+
+    req.flush(null);
+  });
 });

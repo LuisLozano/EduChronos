@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ActivatedRoute, ParamMap, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, convertToParamMap } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
 
 import { HorarioView } from './horario-view';
 import { HorarioGrid } from '../horario-grid/horario-grid';
+import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
@@ -32,10 +34,13 @@ import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
  * primera emisión es un artefacto del doble que en producción no existe, y por
  * eso este fichero no asevera sobre él.
  *
- * <p>SIN `provideRouter([])`, a diferencia de `app.spec.ts`: allí hace falta
- * porque `App` es el shell con `router-outlet`; `HorarioView` solo inyecta
- * `ActivatedRoute` y su plantilla no tiene `routerLink` ni outlet, así que
- * añadir el router real metería un colaborador que el componente no usa.
+ * <p>`Router` y `Dialog` son DOBLES por `useValue`, no el router/overlay reales,
+ * a diferencia de `app.spec.ts` que usa `provideRouter([])`. `HorarioView` sí usa
+ * ambos —`generar()` navega al horario nuevo y abre el diálogo de confirmación—,
+ * pero aquí se miden como colaboradores (`navigate`/`open` espiados), no se ejerce
+ * la navegación real ni el overlay del CDK: eso metería infraestructura que estos
+ * asertos de coordinación no necesitan. El `Router` real, además, no está
+ * cableado al `paramMap` doble, así que `navigate` no redispara `cargar`.
  *
  * <p>`pinadas` es `protected`, y se observa por el input PÚBLICO de la rejilla
  * hija ({@link rejilla}), que es la frontera real del contrato; nunca por un
@@ -91,10 +96,14 @@ describe('contenedor del horario', () => {
     guardar: ReturnType<typeof vi.fn>;
     borrar: ReturnType<typeof vi.fn>;
   };
-  let horario: { getProyeccion: ReturnType<typeof vi.fn> };
+  let sujetoGenerar: Subject<HorarioProyeccion>;
+  let horario: { getProyeccion: ReturnType<typeof vi.fn>; generar: ReturnType<typeof vi.fn> };
   let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
   let sujetoPrevalidacion: Subject<AvisoPrevalidacion[]>;
   let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
+  let sujetoCerrado: Subject<boolean | undefined>;
+  let dialog: { open: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
@@ -103,6 +112,8 @@ describe('contenedor del horario', () => {
     sujetoBorrar = new Subject<void>();
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
+    sujetoGenerar = new Subject<HorarioProyeccion>();
+    sujetoCerrado = new Subject<boolean | undefined>();
 
     bloqueos = {
       listar: vi.fn(() => sujetoListar),
@@ -117,7 +128,17 @@ describe('contenedor del horario', () => {
       guardar: vi.fn(() => (ultimoGuardar = new Subject<Bloqueo>())),
       borrar: vi.fn(() => sujetoBorrar),
     };
-    horario = { getProyeccion: vi.fn(() => sujetoProyeccion) };
+    horario = {
+      getProyeccion: vi.fn(() => sujetoProyeccion),
+      generar: vi.fn(() => sujetoGenerar),
+    };
+    // Doble del Dialog del CDK: `open` devuelve un objeto con `closed`, el único
+    // miembro que `generar()` toca. El Subject de cierre es COMPARTIDO —cada test
+    // abre a lo sumo una vez—, y emitir a mano da la fase "antes de confirmar".
+    dialog = { open: vi.fn(() => ({ closed: sujetoCerrado })) };
+    // Doble del Router: solo se espía `navigate`. No está cableado al `paramMap`
+    // doble, así que navegar NO redispara `cargar` (ver cabecero).
+    router = { navigate: vi.fn() };
     // Doble por `useValue`, como el resto: `cargar(id)` lo llama pero estos
     // asertos de pines/proyección no lo hacen emitir; su sujeto queda pendiente
     // sin efecto (badges vacío, la rejilla se monta igual).
@@ -131,6 +152,8 @@ describe('contenedor del horario', () => {
       imports: [HorarioView],
       providers: [
         { provide: ActivatedRoute, useValue: { paramMap: sujetoParam } },
+        { provide: Router, useValue: router },
+        { provide: Dialog, useValue: dialog },
         { provide: HorarioService, useValue: horario },
         { provide: BloqueoService, useValue: bloqueos },
         { provide: DiagnosticoService, useValue: diagnosticos },
@@ -540,5 +563,216 @@ describe('contenedor del horario', () => {
     expect(grid.pinadas().size).toBe(2);
     expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
     expect(grid.pinadas().get('LCL-1ºA|1')).toBe(9);
+  });
+
+  // --- Gesto de generar (Fase 8) ---------------------------------------------
+
+  /** Un aviso ERROR: condena la generación, exige confirmación. */
+  const AVISO_ERROR: AvisoPrevalidacion = {
+    severidad: 'ERROR',
+    regla: 'DEMANDA_INSATISFACIBLE',
+    entidadCodigo: 'MAT1',
+    demanda: 31,
+    disponible: 30,
+    descripcion: 'MAT1 necesita 31 tramos y dispone de 30',
+  };
+
+  /** Un aviso NO-ERROR: no condena nada, la generación procede sin diálogo. */
+  const AVISO_NO_ERROR: AvisoPrevalidacion = {
+    severidad: 'AVISO',
+    regla: 'HOLGURA_JUSTA',
+    entidadCodigo: 'LCL1',
+    demanda: 20,
+    disponible: 20,
+    descripcion: 'LCL1 ajusta demanda y disponibilidad',
+  };
+
+  /**
+   * Monta la vista Y emite la pre-validación con los avisos dados, que es lo que
+   * habilita el botón «Generar». Sin esta emisión `avisosPrevalidacion()` sigue en
+   * `null` y el botón está deshabilitado —el caso de la guarda, no del gesto—.
+   */
+  async function montarConPrevalidacion(avisos: AvisoPrevalidacion[]): Promise<void> {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    sujetoListar.next([]);
+    sujetoPrevalidacion.next(avisos);
+    sujetoProyeccion.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+  }
+
+  /** Pulsa el botón «Generar» por el DOM, la frontera real del gesto. */
+  function pulsarGenerar(): void {
+    const boton = (fixture.nativeElement as HTMLElement).querySelector(
+      'button.generar',
+    ) as HTMLButtonElement;
+    if (!boton) {
+      throw new Error('El botón de generar no está en el DOM.');
+    }
+    boton.click();
+  }
+
+  /**
+   * Pre-validación SIN ningún ERROR: la generación procede directa, sin diálogo.
+   * Las DOS mitades discriminan: `generar` recibe EXACTAMENTE 1 (no 0: la mutación
+   * que exige confirmación siempre) y `Dialog.open` recibe 0 (no ≥1: la mutación
+   * que abre el diálogo pase lo que pase). El fixture tiene un AVISO no vacío para
+   * que «sin ERROR» no sea «sin avisos»: separa `filter(sev==='ERROR')` de
+   * `avisos.length > 0`.
+   */
+  it('(27) sin ERROR en la pre-validación, generar procede directo: 1 al servicio, 0 al diálogo', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(1);
+    expect(dialog.open).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * Con al menos un ERROR se abre el diálogo y NO se llama al backend hasta que el
+   * cierre lo confirme. La mitad "antes de cerrar" es la única discriminante para
+   * ese punto: sin ella, una implementación que generara Y abriera el diálogo
+   * pasaría. El sujeto de cierre NO se emite en este test a propósito.
+   *
+   * <p>Además fija el `data` del diálogo (hueco 2): el fixture lleva DOS avisos con
+   * textos distintos, uno ERROR y uno AVISO, y al diálogo llega SOLO el ERROR
+   * (`{ data: [AVISO_ERROR] }`). El AVISO no-ERROR en el fixture es lo que separa
+   * "pasa la lista entera" de "filtra": sin él, `[AVISO_ERROR]` y "todo" coinciden.
+   * Con `data: []` (no pasar nada) también cae.
+   */
+  it('(28) con un ERROR, abre el diálogo con SOLO los errores y no llama al backend hasta el cierre', async () => {
+    await montarConPrevalidacion([AVISO_ERROR, AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, { data: [AVISO_ERROR] });
+    expect(horario.generar).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * Cierre por backdrop/Escape (emite `undefined`): la generación NO procede. Se
+   * usa `undefined` y no `false` porque es el valor que mata la mutación
+   * `confirmado !== false` (que dejaría pasar el `undefined` del backdrop); con
+   * `false` esa mutación quedaría verde.
+   */
+  it('(29) diálogo cerrado por backdrop (undefined) no llama al backend', async () => {
+    await montarConPrevalidacion([AVISO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+    expect(horario.generar).toHaveBeenCalledTimes(0);
+
+    sujetoCerrado.next(undefined);
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * Confirmado con `true`: ahí sí procede la generación, UNA vez. Es el gemelo de
+   * (29): mismo montaje, cierre opuesto, resultado opuesto. Juntos fijan que la
+   * condición del cierre es exactamente `=== true`.
+   */
+  it('(30) diálogo confirmado (true) llama al backend una vez', async () => {
+    await montarConPrevalidacion([AVISO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    sujetoCerrado.next(true);
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * Tras un 200, se navega a la ruta del horario DEVUELTO. El array esperado va
+   * LITERAL (`['/horario', 99]`), nunca compuesto desde `dto`: componerlo volvería
+   * circular el aserto. El id 99 es DISTINTO del id 1 de la ruta del fixture —con
+   * el mismo id, navegar a la ruta vigente sería indistinguible de no navegar, y
+   * la mutación que compone la ruta con el id de `route` quedaría verde—. El path
+   * es `/horario` singular (S-medido), no `/horarios`.
+   */
+  it('(31) tras el 200, navega a ["/horario", id] con el id de la respuesta', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    sujetoGenerar.next({ ...PROYECCION_VACIA, id: 99 });
+    await fixture.whenStable();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/horario', 99]);
+  });
+
+  /**
+   * Un POST de generación que falla puebla `errorGeneracion` (su clase propia
+   * `.error-generacion`) y NO vacía la rejilla: la proyección vigente sigue
+   * montada. Misma disciplina que el (14) del diagnóstico y que `errorPrevalidacion`
+   * (S92). Se comprueba a la vez que `.error` (error/errorPin) sigue ausente: el
+   * fallo de generación no se confunde con los otros. El body va `{}` para forzar
+   * el degradado de `mensaje()`.
+   */
+  it('(32) un POST de generación fallido puebla su aviso propio y no vacía la rejilla', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    sujetoGenerar.error({ status: 422, error: {} });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // (1) la rejilla sigue en pie: la proyección no se tocó.
+    expect(fixture.debugElement.query(By.directive(HorarioGrid))).not.toBeNull();
+    // (2) su aviso propio, con su clase y su texto degradado.
+    const aviso = raiz.querySelector('.error-generacion');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe('El servidor rechazó el pin (422).');
+    // (3) NO se confunde con error/errorPin (comparten `.error`).
+    expect(raiz.querySelector('.error')).toBeNull();
+  });
+
+  /**
+   * La rama "no ejecutado" (hueco 1): sin pre-validación emitida,
+   * `avisosPrevalidacion()` sigue en `null`. Los tres asertos atacan DOS
+   * mecanismos independientes y por eso van juntos —borrar uno solo debe poner el
+   * test rojo—:
+   *
+   * <p>(a) el binding `[disabled]="avisosPrevalidacion() === null"` del `<button>`;
+   * quitarlo o invertirlo deja `disabled` en `false`.
+   *
+   * <p>(b)+(c) la guarda `if (avisos === null) return` del método. Se invoca el
+   * gesto A MANO, no por el DOM: el botón está deshabilitado —que es justo lo que
+   * asevera (a)—, así que la vía del click no puede llegar a `generar()`, y solo la
+   * llamada directa ejercita la guarda. Es la ÚNICA excepción de este fichero al
+   * "observar por la frontera pública": aquí no se observa estado protegido con un
+   * cast, se DISPARA el gesto, que no tiene otra frontera cuando el botón está
+   * cerrado. Sin guarda, `avisos.filter` sobre `null` reventaría; con una guarda
+   * mutada a `!== null` se colaría y subiría `open` o `generar`.
+   */
+  it('(34) sin pre-validar: el botón está deshabilitado y el gesto no dispara backend ni diálogo', async () => {
+    // Montaje SIN emitir pre-validación: avisosPrevalidacion() queda en null.
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    sujetoListar.next([]);
+    sujetoProyeccion.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+
+    const boton = (fixture.nativeElement as HTMLElement).querySelector(
+      'button.generar',
+    ) as HTMLButtonElement;
+    // (a) el binding.
+    expect(boton.disabled).toBe(true);
+
+    // (b)+(c) la guarda del método, invocada directamente.
+    (fixture.componentInstance as unknown as { generar(): void }).generar();
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(0);
+    expect(dialog.open).toHaveBeenCalledTimes(0);
   });
 });
