@@ -327,8 +327,10 @@ describe('rejilla de horario', () => {
   });
 
   it('(T3) un slot con desdoble marca su <td> UNA vez, no una por entrada', async () => {
-    // Mismo slot (DIA, TRAMO): el desdoble (una instancia, dos entradas) y LCL, que se arrastra.
-    fixture.componentRef.setInput('sesiones', [...DESDOBLE, LCL_SIN_PIN]);
+    // El desdoble (una instancia, dos entradas) queda SOLO en (DIA, TRAMO); LCL vive en
+    // otro slot (2,3) para arrastrarlo desde allí. Así el slot examinado contiene una
+    // única InstanciaCelda —el desdoble—, que es lo que este test afirma medir.
+    fixture.componentRef.setInput('sesiones', [...DESDOBLE, enSlot(LCL_SIN_PIN, 2, 3)]);
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
@@ -338,8 +340,9 @@ describe('rejilla de horario', () => {
     debugDe(fixture, 'LCL').triggerEventHandler('cdkDragStarted', {});
     await fixture.whenStable();
 
-    // Arrastrando LCL, el slot queda ocupado por el desdoble: UNA marca (una clase en el
-    // <td>) pese a sus dos entradas. El aserto va sobre el <td>, no sobre conteo de entradas.
+    // Arrastrando LCL (en 2,3, su origen, excluido), el slot del desdoble queda ocupado:
+    // UNA marca (una clase en el <td>) pese a sus dos entradas. El aserto va sobre el <td>,
+    // no sobre conteo de entradas; el .toBe(1) cuadra porque (2,3) es origen y no se marca.
     expect(td.classList).toContain('ocupado');
     expect(raiz.querySelectorAll('td.ocupado').length).toBe(1);
   });
