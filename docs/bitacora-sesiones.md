@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S88. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S89. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S88). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S89). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -3897,3 +3897,78 @@ al abrir sesión.
   Siguiente: 8.5-D2b (solver, INVIERTE `CatalogoMapperActividadTest:136` y regenera la referencia),
   8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo de BACKEND y abrirlo puede ser abrir dos bloques),
   8.6-B (aviso durante el arrastre) o la cobertura de D-F8.6-ivB-a, a decidir al abrir sesión.
+
+### Sesión 89 — Fase 8, D-F8.6-ivB-a: cobertura del camino de PINADO en el contenedor.
+  Modo híbrido. 1 commit de código (solo tests, un único fichero modificado) + doc aparte.
+  §A DE MEDICIÓN con TRES FALLOS DE INSTRUMENTO ENCADENADOS, todos del arquitecto y todos del mismo
+  género —dar por sabido el terreno en vez de leerlo—: (1) el guion apuntó a `frontend/` cuando el
+  frontend vive en `app/frontend/` (nueve comandos fallidos); (2) la tanda siguiente falló ENTERA
+  sobre rutas ya verificadas porque el cwd de la sesión de Claude Code era
+  `.../app/frontend` y las rutas eran relativas a la raíz; (3) la suite se invocó con
+  `npx vitest run`, que salta la configuración del builder de Angular 21 y da
+  `describe is not defined` en 9/9 ficheros —el script real es `ng test`
+  (`angular.json`: `"test": {"builder": "@angular/build:unit-test"}`, sin `setupFiles` ni `include`)—.
+  Ninguno tocó el contrato, pero costaron tres tandas. CORRECTIVO ADOPTADO: rutas ABSOLUTAS en todo
+  guion de medición, y leer la invocación de la suite en `package.json` antes de escribirla.
+  §A CONFIRMA AL PLAN EN LO CENTRAL: `alSoltar` no tenía NI UN ASERTO. El spec tenía 11 `it`, pero
+  (13)/(14) son de diagnóstico y (20) de cableado de `violaciones`; `guardar` aparecía en
+  `horario-view.ts:161` y en `bloqueo.service.spec.ts:128`, en NINGÚN punto del spec del contenedor.
+  Segunda vez consecutiva que la afirmación del plan resiste la medición.
+  PERO §A DESMIENTE LA ENUMERACIÓN DE LA DEUDA en dos puntos. (a) La deuda cuenta como rama propia
+  la `error:` de `alDespinar`, pero su `errorPin.set(this.mensaje(err))` (l.194) invoca EL MISMO
+  `mensaje()` que la de `alSoltar` (l.170): cubrir una cubre la función, y duplicarla sería cobertura
+  fingida. Eran dos ramas y son una y media. (b) La deuda enumeró ramas SUPONIENDO EL ANDAMIO LISTO,
+  y no lo estaba: `guardar: vi.fn()` devolvía `undefined` y `alSoltar` hace
+  `.guardar(...).subscribe(...)`, así que el primer test que lo disparase habría reventado.
+  TURNO DE CONTRASTE (M4), el que más valor añadió del bloque: CINCO correcciones, CUATRO del
+  arquitecto, y una de ellas de FIXTURE y no de redacción.
+  (1) DOS MUTACIONES DE MI CAMPAÑA ERAN INEXPRESABLES EN ESTE ÁRBOL. `aulas: []` → omitir el campo NO
+  compila (`BloqueoRequest.aulas` es obligatorio, TS2741); y mover el poblado del `next` «tal cual»
+  tampoco, porque usa `b`, que solo existe dentro del `next` ("Cannot find name 'b'"). La forma
+  compilable del alta optimista usa `s` y valor `null`, y es contra ESA contra la que hay que medir.
+  Escribir una mutación que nadie podría teclear es exactamente el vicio que M3 rechaza.
+  (2) EL ANDAMIO QUE PROPUSE ERA INCOMPATIBLE CON EL ESCENARIO QUE DEBÍA MEDIR. Un `Subject` que ya
+  hizo `.error()` queda CERRADO, y re-suscribirse redispara el error de forma SÍNCRONA: con un
+  sujeto compartido, el segundo `soltar` de (25) repoblaría `errorPin` nada más suscribirse y la fase
+  «`errorPin` a null antes de responder» sería INOBSERVABLE —el test habría pasado o fallado por la
+  razón equivocada—. `guardar` devuelve un Subject FRESCO POR INVOCACIÓN, con el porqué documentado
+  en el propio doble porque los otros tres dobles del fichero NO lo son.
+  (3) UNA RAMA SIN RED QUE MIS CINCO TESTS NO TOCABAN, aportada por el contraste: `new Map()` en vez
+  de `new Map(this.pinadas())` en el `next` borraría TODOS los pines previos al añadir uno nuevo.
+  Compila, es un desliz clásico y ninguno de los 46 lo detectaba: (22) y (23) arrancan con `pinadas`
+  VACÍO, donde «mapa copiado» y «mapa desde cero» dan idéntico resultado, y los únicos que parten de
+  mapa no vacío —(2),(3),(4)— son de DESPINAR. Nació (26), único test del camino de alta que arranca
+  con índice poblado.
+  ENTREGADO: SEIS tests (21)-(26) en `horario-view.spec.ts`, un solo fichero tocado, cero ficheros
+  nuevos, `horario-view.ts` INTACTO. (21) el cuerpo del POST se arma desde la suelta con `aulas: []`
+  y el tramo sin permutar —esperado LITERAL, nunca compuesto desde `s`, y `dia=3`≠`orden=4` porque
+  con `dia===orden` la permutación sería invisible—; (22) la clave sale de la RESPUESTA y no de la
+  suelta, con FIXTURE DEFENSIVO DECLARADO (suelta `Mat-1ºA|2` vs respuesta `LCL-1ºA|1`, divergencia
+  imposible en producción y deliberada: sin ella `s` y `b` coinciden y la mutación queda verde;
+  precedente del it (9) de `diagnostico.spec`, S82); (23) sin alta optimista, con las DOS fases;
+  (24) el error no pina y `mensaje()` degrada a `El servidor rechazó el pin (400).`, leído por el
+  `<p class="error">` que aquí es inequívocamente `errorPin` (mismo razonamiento que el (5));
+  (25) el alta OK NO recarga la proyección y un nuevo intento limpia el error previo ANTES de
+  responder; (26) el alta PRESERVA los pines previos.
+  CAMPAÑA DE 7 MUTACIONES (M25 desdoblada en M25/M25b), todas compilables, SIETE VÍCTIMAS REALES
+  DISTINTAS, ninguna superviviente ni huérfana. M23 arrastra tres colaterales porque su forma
+  compilable vacía el `next` y toca a la vez clave, estado-tras-error y preservación; la víctima real
+  sigue cayendo por su propio aserto de «antes» (mismo patrón cascada/colateral que
+  `bloqueo.service.spec` documenta desde S85). M24 → (25) es colateral fina y esperable: al vaciar el
+  mensaje, `errorPin('')` deja de renderizar el párrafo.
+  UN REPARO DEL ARQUITECTO RETIRADO TRAS VER EL DIFF, y se registra por simetría con los aceptados:
+  objeté que (25b) podría pasar por la razón equivocada si `errorPin` se pusiera a `''` en vez de a
+  `null`. Es cierto en abstracto e IRRELEVANTE aquí —`@if (errorPin(); as msg)` trata ambos como
+  falsy, así que la diferencia no tiene consecuencia observable en ninguna parte de la aplicación—.
+  No todo reparo del contraste sobrevive al fichero.
+  Suite frontend 46 → 52 (+6); backend intacto (app 315, solver 78). `horario-view.ts` NO tocado →
+  `referencia-codigo-solver.md` NO regenerada, `modelo_datos_fase1.md` NO tocado.
+  DEUDA NUEVA: D-F8.6-ivB-a-bis (precedencia interna de `mensaje()`).
+  D-F8.6-ivB-a NO SE CIERRA: se REDUCE a su alcance superviviente (ver su entrada). Cerrarla
+  obligaría a abrir una hermana con el resto y se perdería la traza; precedente D-F8.6-iiiA-a en S84,
+  que siguió viva con el encuadre corregido por la medición.
+  Siguiente: 8.5-D2b (solver, ÚNICO candidato de backend, desplazado desde S77; INVIERTE
+  `CatalogoMapperActividadTest:136` y regenera la referencia; recomendable PARTIRLO), 8.6-B (aviso
+  durante el arrastre; su pregunta es sobre un estado HIPOTÉTICO que ningún índice actual responde,
+  luego su contrato hay que decidirlo ANTES de medir) u 8.4-B (MOCKUP PREVIO; D-F8.4-A-c es trabajo
+  de BACKEND y abrirlo puede ser abrir dos bloques), a decidir al abrir sesión.
