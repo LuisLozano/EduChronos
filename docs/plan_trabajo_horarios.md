@@ -600,7 +600,17 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.4-B2 CERRADO
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-iv-D CERRADO
+  en S94 (LOS DOS `set(null)` DE REINTENTO, cubiertos JUNTOS como S93 exigía: (35) para
+  `lanzarGeneracion` y (36) para `alDespinar`, ambos encadenando fallo → reintento y aseverando la
+  fase INTERMEDIA —error a `null` ANTES de que responda el segundo Subject—, que es la única que
+  discrimina el `set`. ANDAMIO: los dobles de `bloqueos.borrar` y `horario.generar` migran de
+  Subject COMPARTIDO a FRESCO POR INVOCACIÓN, forma que `guardar` ya tenía desde S89; los tres
+  dobles del contenedor quedan homogéneos y `sujetoBorrar`/`sujetoGenerar` desaparecen. Campaña de
+  2, cada una cae en su test y POR ASERTO —no por excepción—, y ninguna la mata ningún test previo,
+  lo que confirma que las deudas no estaban ya cubiertas. `horario-view.ts` INTACTO. Frontend
+  67 → 69, backend 333 intacto. CIERRA D-F8.4-B2-a y el punto (a) de D-F8.6-ivB-a, que SOBREVIVE
+  acotada a su punto (b). DEUDA NUEVA: D-F8.6-ivD-a). Bloque 8.4-B2 CERRADO
   en S93 (GESTO DE GENERAR + guarda con diálogo, y CIERRE del frente 8.4 entero: `generar()` en
   `horario.service.ts` con body `{}` —el backend hace TODO el defaulting—, `ConfirmarGeneracion`
   como PRIMER diálogo del repo sobre `@angular/cdk/dialog`, y navegación a `/horario/:id` SINGULAR
@@ -740,7 +750,75 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 93 — Fase 8, Bloque 8.4-B2: gesto de generar + guarda con diálogo (CIERRA el frente 8.4).
+### Sesión 94 — Fase 8, Bloque 8.6-iv-D: los `set(null)` DE REINTENTO, los dos juntos (CIERRA D-F8.4-B2-a y el punto (a) de D-F8.6-ivB-a).
+  Modo híbrido. 1 commit de código (solo `horario-view.spec.ts`) + doc aparte. Bloque BARATO por
+  criterio ya escrito: las dos deudas venían DECLARADAS GEMELAS en S93 y asignadas a cubrirse
+  JUNTAS con un test que encadenara dos invocaciones. Esta es la sesión que las cierra a la vez.
+  §A DE MEDICIÓN CONTRA EL ÁRBOL (Claude Code), y DESMINTIÓ CUATRO AFIRMACIONES DEL ARQUITECTO,
+  todas del mismo género —afirmar sobre terreno no leído—, tres de ellas sobre el PROPIO PLAN:
+  (1) la RUTA que el arquitecto puso en el guion (`app/frontend/src/app/horario/`) NO EXISTE: los
+  ficheros viven en `app/frontend/src/app/components/horario-view/`. La escribió sin medirla, dentro
+  del guion que existe para no suponer (mismo género que el error de enrutado de S84);
+  (2) la LÍNEA 183 que el plan fijaba para el `errorPin.set(null)` de `alDespinar` estaba RANCIA:
+  es la 236. La fijó S89 y S92/S93 tocaron el fichero en medio. Estado vivo equivocado por R5;
+  (3) «LOS DOS `set(null)`» DESCRIBE MAL EL FICHERO: el grep devuelve NUEVE, en seis métodos. Lo que
+  las deudas nombran no son «los `set(null)`» sino los DE REINTENTO (236 y 295); los otros siete son
+  limpieza de carga —nadie reintenta `cargarDiagnostico`—. La distinción se sostiene, pero el nombre
+  que el plan usaba no la llevaba dentro y por eso se pudo leer como «hay dos en el fichero»;
+  (4) EL ANDAMIO DE S89 NO SERVÍA, y es el hallazgo que REENCUADRÓ EL COSTE. El plan trataba «el
+  andamio» como uno solo y son TRES colaboradores con TRES formas: `guardar` es fresco por
+  invocación desde S89, pero `borrar` y `generar` eran Subject COMPARTIDO. Un Subject que ya emitió
+  `.error()` queda cerrado: al re-suscribirse redispara el error SÍNCRONAMENTE, lo que hace
+  inobservable la fase discriminante, y un `next` de éxito en el segundo intento es imposible.
+  Sin cambiar eso, el test que las deudas piden es INESCRIBIBLE.
+  EN VERDE, medido: los siete providers estaban puestos (no faltaba ninguno), y `lanzarGeneracion`
+  es alcanzable SIN diálogo por la vía directa de `generar()` cuando no hay avisos `ERROR`, así que
+  la guarda de S93 no estorbaba —supuesto del arquitecto que la medición descartó por infundado—.
+  CLAUDE CODE DEVOLVIÓ LA PREGUNTA SIN RESOLVERLA (versión fuerte vs. débil del «fallo → reintento»)
+  en vez de decidirla, que es lo correcto. ELEGIDA LA FUERTE y no por gusto de rigor: la débil
+  asevera `toHaveBeenCalledTimes(2)`, y contra la mutación de borrar el `set(null)` ese contador
+  sigue dando 2 y el test queda VERDE. Habría cerrado dos deudas dejándolas sin red, que es PEOR que
+  dejarlas abiertas, porque la casilla diría que están cubiertas.
+  DECISIÓN DE ANDAMIO (A frente a B), del usuario con recomendación del arquitecto: (A) migrar los
+  DOS dobles y adaptar los tests que emitían sobre ellos, dejando las tres formas homogéneas;
+  (B) añadir la fábrica fresca solo donde hiciera falta, sin tocar ningún test. ELEGIDA A: la forma
+  compartida no es una elección sino lo que había ANTES de que S89 descubriera que no servía, y
+  mantenerla conserva un estado ya sabido equivocado; B dejaría dos formas de doble conviviendo para
+  el mismo servicio y el próximo que escriba un test tendría que averiguar cuál toca —deuda de
+  andamio, y de la que no se ve—. COSTE DECLARADO Y REVISADO AL ALZA ANTES DE ELEGIR: el arquitecto
+  había dicho «bajo, un solo fichero»; con la medición delante pasó a MEDIO, porque A toca asertos
+  commiteados y verdes para escribir dos nuevos.
+  EL RECUENTO DE TESTS A ADAPTAR TAMBIÉN ERA DEL ARQUITECTO Y TAMBIÉN FALLÓ: listó (30) entre los
+  que emiten sobre `sujetoGenerar` leyendo la lista de `it()` sin abrir el cuerpo. (30) NO emite:
+  dispara vía `sujetoCerrado.next(true)` y solo asevera que `generar` fue llamado. Claude Code no lo
+  tocó y lo señaló.
+  ENTREGADO: `sujetoBorrar` y `sujetoGenerar` ELIMINADOS; `borrar` y `generar` pasan a
+  `vi.fn(() => (ultimo… = new Subject…))` con sus variables `ultimoBorrar`/`ultimoGenerar` junto a
+  `ultimoGuardar`; adaptados (2), (31) y (32) de forma mecánica y SIN tocar un solo aserto; (35) y
+  (36) nuevos, cada uno con su ASERTO A (error poblado tras el primer fallo), su A-bis donde aplica
+  (en (36), que el pin SIGA en el índice tras el fallo: si saliera, el segundo gesto se iría por el
+  `return` de la guarda y el test mediría el NO-OP en vez del reintento) y su ASERTO B discriminante.
+  CAMPAÑA DE 2, con la vía declarada como M3 exige tras el matiz de T7 en S93: M1 (borrar el
+  `errorGeneracion.set(null)`) cae SOLO en (35); M2 (borrar el `errorPin.set(null)`) cae SOLO en
+  (36); las dos POR ASERTO —un `expect(...).toBeNull()` recibe el `<p>` de error superviviente—, sin
+  `TypeError` ni otra excepción. NINGÚN test previo cae con ninguna de las dos, que es la
+  comprobación que M3 pide desde S82 y la que confirma que el bloque no sobraba.
+  Suite frontend 67 → 69 (12 ficheros, sin cambio); backend 333 INTACTO. `horario-view.ts` idéntico
+  a HEAD al cerrar (diff vacío): no hay producción en este bloque. No se tocó `solver/src/main` →
+  `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado.
+  DEUDA NUEVA: D-F8.6-ivD-a (la capa defensiva perdida en (3) y (4)). CIERRA D-F8.4-B2-a y el punto
+  (a) de D-F8.6-ivB-a, que SOBREVIVE acotada a su punto (b).
+  CORRIGE POR R5, en todas sus sedes vivas: la línea 183 → 236, y «los dos `set(null)`» → «los
+  `set(null)` DE REINTENTO».
+  LIMPIEZA EVALUADA Y DESCARTADA (M1.5): 8.4 sigue siendo candidato natural a condensación y ahora
+  se le suma 8.6-iv, pero esta sesión ya archiva ventana, y concentrar condensación y archivado
+  sobre el mismo fichero es el motivo por el que S79 desplazó una limpieza. Queda para S95 con DOS
+  frentes acumulados, no uno.
+  Siguiente: HIGIENE (condensar 8.4 y quizá 8.6-iv, dos frentes cerrados acumulados), 8.6-B (aviso
+  durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de medir, orden inverso a
+  M2) o D-F8.6-iiiA-b (`Totales` sigue sin sede, con la trampa de los conteos sin signo), a decidir
+  al abrir.
+Última sesión registrada (previa): Sesión 93 — Fase 8, Bloque 8.4-B2: gesto de generar + guarda con diálogo (CIERRA el frente 8.4).
   Modo híbrido. 2 commits de código (37d1ba9 producción 8 ficheros, 6b6e88c tests 3 ficheros; sin
   pushear al cerrar) + doc aparte. CIERRA 8.4 ENTERO (A en S79, B1 en S92, B2 aquí).
   PARTICIÓN PROPUESTA Y RETIRADA POR MEDICIÓN, y esta vez el desmentido fue AL ARQUITECTO. El plan
@@ -985,98 +1063,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   trabajo de BACKEND y puede ser abrir dos bloques), 8.6-B (cruce de índices; su contrato hay que
   decidirlo ANTES de medir, orden inverso a M2) o D-F8.6-iiiA-b (`Totales` sin sede), a decidir al
   abrir sesión.
-Última sesión registrada (previa): Sesión 90 — Fase 8, Bloque 8.5-D2b-1: transporte de la tutoría al solver (CIERRA D-B5-5).
-  Modo híbrido. 3 commits (333dfb8 solver, d0f5e9b app, a363e72 doc). PRIMER BLOQUE DE BACKEND
-  desde S79: 8.5-D2b llevaba DOCE sesiones desplazado (desde S77), perdiendo cada vez contra
-  candidatos de frontend más baratos. Se abre PARTIDO en D2b-1 (transporte) y D2b-2 (verificación
-  de S8), y el corte NO es el que S89 recomendó: ver abajo.
-  §A DE MEDICIÓN sobre `referencia-codigo-solver.md` y los tres documentos, declarada COMO
-  RAZONAMIENTO SOBRE EL DERIVADO y no como medición del árbol —el Project no contiene `solver/`—.
-  Salida: cero apariciones de `requiereTutor`/`tutor`/`Tutoria` en toda la referencia (confirma
-  D-B5-5 en el derivado); `Actividad` 6 componentes, `ActividadDto` gemelo exacto de 6;
-  `ProblemaHorario` 9 listas; `Profesor` 2 componentes sin tutoría; `ReglaDura` 7 constantes,
-  ninguna de tutoría.
-  §A DESMIENTE EL CORTE QUE S89 RECOMENDÓ, y es el hallazgo que reordena el bloque. S89 proponía
-  D2b-1 = «§A + propagar `requiereTutor` + inversión del test». Medido: eso deja la mitad-1 SIN
-  CONSUMIDOR —un campo que nadie lee es D-B5-5 una capa más abajo, con otro nombre—. CORTE NUEVO:
-  D2b-1 = las DOS patas de transporte (`requiereTutor` + `ProfesorTutoria` al `ProblemaHorario`),
-  sin verificar S8; D2b-2 = `ReglaDura` + verificador. Criterio que lo justifica: cada mitad debe
-  entregar algo que un test pueda aseverar. Segundo hallazgo del §A, que el plan no decía: S8 exige
-  además resolver «grupo cubierto por los subgrupos de P», tercera pieza y no dos —el mecanismo ya
-  existe en el verificador vía S9—.
-  TURNO DE CONTRASTE (M4): SEIS correcciones, CINCO del arquitecto, y la primera INVALIDÓ EL
-  CONTRATO, no un detalle.
-  (1) «SOLO io» ERA INALCANZABLE. Hay DOS caminos que construyen `domain.Actividad`, no uno:
-  `ProblemaHorarioMapper:149` (el que yo tenía en la cabeza) y `CatalogoMapper:284` (app, olvidado).
-  Añadir el 7.º componente rompe la compilación del segundo y FUERZA la decisión semántica que el
-  bloque existe para tomar. Mi «fuera de alcance» no era una decisión: era un descuido que ocultaba
-  la decisión. RESUELTO: `CatalogoMapper` PROPAGA `isRequiereTutor()`. Clavar `false` produciría el
-  estado incoherente entidad=true/dominio=false por la puerta de entrada REAL de configuración
-  (el CRUD de 8.5-C1), y dejaría S8 verificable en fixtures e inverificable en producción —la misma
-  asimetría que D-F8.6-iiiA-c documenta en otra capa—.
-  (2) ORDEN DE ARGUMENTOS DEL RECORD, corregido contra mi propuesta: escribí
-  `(grupo, profesor, rol)` por analogía con la PROSA de S8 en el modelo, que no es una firma. La
-  entidad JPA gemela de S77 es `(profesor, grupo, rol)`. Dos gemelos con los dos primeros invertidos
-  es footgun sin contrapartida. ADOPTADO `(Profesor, GrupoAdministrativo, RolTutoria)`.
-  (3) TRES RAZONES DE ÁRBOL para la décima lista que yo no tenía, además de la mía (el `rol` se
-  perdería dentro del grupo): `GrupoAdministrativo` se usa como elemento de `Set` y como clave de
-  mapa, así que meterle tutores envenenaría su `equals`; la 2.ª pasada ya tiene profesores y grupos
-  construidos, luego una lista décima calca `bloqueos` sin ciclos; y `resolverGrupo` es recursivo con
-  detección de ciclos por `grupoPadre`, donde inyectar refs a `Profesor` acopla dos catálogos.
-  (4) LOS CALL SITES QUE MEDÍ ERAN LOS EQUIVOCADOS. Pedí los de `Actividad` (7: 2 main + 5 test) y
-  no los de `ProblemaHorario`, que son OTROS 7. Consecuencia mecánica de la décima lista, reparada
-  sin parar y ACEPTADA: no es alcance nuevo, es lo que «añadir un componente a un record» significa.
-  (5) SIN TESTS DE ROUND-TRIP EL BLOQUE ERA TRANSPORTE NO VERIFICADO POR CONSTRUCCIÓN. Cuatro
-  mutaciones compilables e invisibles hoy (cruce de lookup profesor/grupo, default invertido
-  `null→true` sobre 43 fixtures que omiten el campo, lista sin cablear, `CatalogoMapper` clavando
-  `false`). El criterio con el que defendí este corte —«cada mitad entrega algo aseverable»— se me
-  había olvidado materializar en el contrato. Los tests entraron por el contraste.
-  ENTREGADO: `domain` gana `Actividad.requiereTutor` (7.º, `boolean` primitivo), `RolTutoria`
-  PROPIO de solver (no se reutiliza el de `app/`: solver no depende de app), `ProfesorTutoria` y la
-  DÉCIMA lista `ProblemaHorario.tutorias`; `io` gana `ActividadDto.requiereTutor` (`Boolean`
-  WRAPPER, porque los 43 fixtures vivos omiten el campo y el mapper colapsa `null→false`),
-  `ProfesorTutoriaDto` y la décima lista del DTO; el mapper resuelve en 2.ª pasada calcando
-  `bloqueos` (idiom `== null ? List.of()`, helper `resolver`, helper `construir` para el enum);
-  schema con ambos campos OPCIONALES; `CatalogoMapper.aActividad` propaga y su Javadoc REVOCA
-  D-B5-5.
-  SEIS TESTS con asertos discriminantes: T1 round-trip con FIXTURE DEFENSIVO obligatorio
-  (`problema-8-5-tutorias.json`, MAT8/1ESO-A + LEN2/1ESO-B: códigos divergentes y un segundo par,
-  para que un lookup cruzado resuelva a algo DISTINTO en vez de fallar por casualidad; mata la
-  mutación del cruce); T2 sin `tutorias` → lista vacía; T3 el PAR ausente→false / presente→true;
-  T4 rol, profesor y grupo desconocidos → `ProblemaInvalidoException`; T5 sustituye el Caso 4 de
-  `CatalogoMapperActividadTest:136` —que aseveraba «el flag se ignora»— por el PAR true→true /
-  false→false, renombrado `aActividad_propagaRequiereTutor`: con un solo `isTrue()` no se discrimina
-  contra un `true` clavado. El aserto de lista cableada NO se duplicó: T1 lo mata por construcción.
-  CAMPAÑA DE 7 MUTACIONES, cero supervivientes. UNA OBJECIÓN DEL ARQUITECTO A SU PROPIA CAMPAÑA,
-  registrada como deuda en vez de reabrir el bloque: M6 («el mapper ignora el rol y clava
-  TUTOR_PRINCIPAL») cae por T4a, es decir por el test del rol INVÁLIDO, no por ninguno que asevere
-  que un rol VÁLIDO se transporta. Como el fixture de T1 lleva `TUTOR_PRINCIPAL`, clavarlo es
-  indistinguible del acierto. La mutación honesta exige un fixture con `CO_TUTOR` y un aserto sobre
-  `rol()`.
-  Suite solver 78 → 84 (+6), app 237 (Caso 4 sustituido, neto 0), total 315 → 321.
-  `solver/src/main` TOCADO → `referencia-codigo-solver.md` REGENERADA (commit aparte, M4).
-  `modelo_datos_fase1.md` no se toca por entidad ni invariante nueva (S8 ya existía, aquí solo se
-  transporta), PERO su nota de S77 (§ «Estado de implementación de `ProfesorTutoria`») queda como
-  ESTADO VIVO EQUIVOCADO por R5 y se corrige en la misma sesión.
-  CIERRA D-B5-5. DEUDA NUEVA: D-F8.5-D2b1-a (la ruta JPA clava `tutorias` vacía), D-F8.5-D2b1-b
-  (el rol no tiene aserto de transporte).
-  MÉTODO CORREGIDO EN LA MISMA SESIÓN, a raíz del fallo (1) del contraste y por decisión explícita
-  del usuario de no dejarlo solo en el prompt de apertura: tercera precisión de M2 (un tipo
-  compartido se mide en TODOS los módulos; la pregunta es «quién más lo construye o consume», y si
-  el §A no puede verlo desde el Project la enumeración se pide en el contraste y el contrato NO se
-  cierra hasta tenerla) y precisión de ORDEN en M4 (bloque multi-módulo → el contraste mide ANTES
-  del contrato, no después). Ninguna nace como M5: son precisiones a procedimientos que ya existen
-  y ya funcionaron —el contraste cazó esto—, y un apartado nuevo sugeriría procedimiento nuevo.
-  Sede PERMANENTE y no prompt: un prompt no se conserva, que es D-F8.0-a otra vez. Se anota además
-  el criterio de acumulación de M2 (una cuarta precisión obliga a condensar, no a añadir).
-  LO QUE ESTAS NORMAS NO HACEN, escrito para que nadie lo dé por hecho: estrechan la rendija de
-  «tipo compartido entre módulos», no cierran la clase «afirmar sobre terreno no leído», que lleva
-  desmintiéndose desde S75 y produjo cuatro fallos de instrumento en S89. La red que hace el trabajo
-  sigue siendo el contraste.
-  Siguiente: 8.5-D2b-2 (verificación de S8: `ReglaDura` + `VerificadorSolucion` + cableado del
-  `ProfesorTutoriaRepository`, que es la deuda D-F8.5-D2b1-a y NO puede quedar fuera o S8 sería
-  inverificable en producción), 8.6-B (contrato por decidir ANTES de medir) u 8.4-B (MOCKUP PREVIO;
-  D-F8.4-A-c es trabajo de backend), a decidir al abrir sesión.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1088,10 +1074,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92 y la de S89 en la Sesión 93 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 y la de S90 en la Sesión 94 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S90–S93). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S91–S94). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1458,6 +1444,23 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       el contraste: (22) y (23) parten de vacío, donde `new Map()` y `new Map(this.pinadas())` dan
       idéntico resultado—. Campaña de 7 (M25 desdoblada), siete víctimas reales distintas, ninguna
       superviviente. Suite 46 → 52. D-F8.6-ivB-a-bis. Detalle: bitácora S89.
+- [x] Bloque 8.6-iv-D — Los `set(null)` DE REINTENTO, los dos JUNTOS (S94). CIERRA D-F8.4-B2-a y el
+      punto (a) de D-F8.6-ivB-a. Dos tests en `horario-view.spec.ts`
+      (`app/frontend/src/app/components/horario-view/`), `horario-view.ts` INTACTO. (35) generación y
+      (36) despinado, ambos encadenando fallo → reintento y aseverando la fase INTERMEDIA: el error
+      vuelve a `null` ANTES de que el segundo Subject responda. Esa fase es lo ÚNICO que discrimina
+      el `set`: la versión débil —`toHaveBeenCalledTimes(2)`— sigue dando 2 con el `set` borrado y
+      quedaría verde, cerrando dos deudas sin red. ANDAMIO (opción A del usuario): `bloqueos.borrar`
+      y `horario.generar` migran de Subject COMPARTIDO a FRESCO POR INVOCACIÓN —forma que `guardar`
+      tenía desde S89—, `sujetoBorrar`/`sujetoGenerar` DESAPARECEN y los tres dobles del contenedor
+      quedan homogéneos; se descartó dejar dos formas conviviendo para el mismo servicio. Un Subject
+      compartido ya cerrado por `.error()` redispara SÍNCRONAMENTE al re-suscribirse y hace
+      inobservable la fase discriminante, además de impedir un `next` de éxito en el reintento.
+      Adaptados (2), (31) y (32) sin tocar un aserto; (30) NO se tocó (no emite: dispara vía
+      `sujetoCerrado`). En (36), ASERTO A-bis: el pin SIGUE en el índice tras el fallo, o el segundo
+      gesto se iría por el `return` de la guarda y el test mediría el NO-OP. Campaña de 2, cada una
+      en su test, las dos POR ASERTO y no por excepción, y NINGÚN test previo las mata. Suite
+      frontend 67 → 69; backend 333 intacto. D-F8.6-ivD-a. Detalle: bitácora S94 (futura).
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -2350,20 +2353,23 @@ siguiente, con remisión a la bitácora.
   (4) `getProyeccion` sigue en 1 llamada tras pinar → (25a). MÁS el `errorPin.set(null)` de reintento
   de `alSoltar` → (25b), y una rama que esta deuda NO nombraba y el contraste destapó: la
   preservación del índice previo al añadir un pin → (26).
-  → SOBREVIVE, acotada a lo que S89 dejó fuera POR ALCANCE y no por descuido: (a) el
-  `errorPin.set(null)` de reintento de `alDespinar` (l.183), gemelo del que (25b) cubre; (b) el
+  → SOBREVIVIÓ tras S89, acotada a lo que ese bloque dejó fuera POR ALCANCE y no por descuido:
+  (a) el `errorPin.set(null)` de reintento de `alDespinar`, gemelo del que (25b) cubre; (b) el
   invariante del TSDoc de `cargarPines` de que el índice NO se recarga al cambiar de vista o de
   entidad —«aseverable barato con el `<select>`»—, dejado fuera porque mide `cambiarVista`, que es
   otro gesto. NO sobrevive la rama `error:` de `alDespinar` que esta deuda contaba aparte: su
-  `errorPin.set(this.mensaje(err))` (l.194) invoca EL MISMO `mensaje()` que la de `alSoltar`
-  (l.170), que (24) cubre; duplicar el aserto sería cobertura fingida. Eran dos ramas y era una y
-  media (medido en S89).
-  → NO SE CIERRA a propósito: cerrarla obligaría a abrir una hermana con el resto y se perdería la
-  traza de por qué esas dos quedaron fuera. Precedente: D-F8.6-iiiA-a en S84. → cubrir (a) y (b) en
-  el bloque que retome la coordinación del contenedor o el gesto de cambio de vista.
-  → GEMELA DECLARADA EN S93: D-F8.4-B2-a es el mismo `set(null)` de reintento en el gesto de
-  GENERAR. El punto (a) de esta deuda y aquélla se cubren JUNTOS, con el mismo test encadenado; el
-  punto (b) —el invariante del `<select>`— sigue asignado al bloque que retome el cambio de vista.
+  `errorPin.set(this.mensaje(err))` invoca EL MISMO `mensaje()` que la de `alSoltar`, que (24)
+  cubre; duplicar el aserto sería cobertura fingida. Eran dos ramas y era una y media (medido en
+  S89).
+  → PUNTO (a) CERRADO EN S94 (8.6-iv-D) por el test (36), que encadena fallo → reintento sobre
+  `alDespinar` y asevera que `errorPin` vuelve a `null` ANTES de que responda el segundo Subject;
+  la mutación que borra el `set` cae ahí y solo ahí, por aserto. Se cubrió JUNTO con su gemela
+  D-F8.4-B2-a, como S93 exigía. El `set(null)` vive en `horario-view.ts:236` —la l.183 que esta
+  deuda fijó en S89 quedó RANCIA al tocar S92/S93 el fichero, y se corrige aquí por R5—.
+  → SOBREVIVE SOLO EL PUNTO (b), el invariante del `<select>`, que mide `cambiarVista` y sigue
+  asignado al bloque que retome el gesto de cambio de vista. NO SE CIERRA a propósito: cerrarla
+  obligaría a abrir una hermana con ese resto y se perdería la traza de por qué quedó fuera.
+  Precedente: D-F8.6-iiiA-a en S84.
 
 - **D-F8.6-ivB-a-bis** (S89, VIVA, DE COBERTURA, no bloqueante) — LA PRECEDENCIA INTERNA DE
   `mensaje()` NO ESTÁ EJERCITADA. `mensaje()` devuelve `cuerpo?.message || cuerpo?.error || <texto
@@ -2386,16 +2392,19 @@ siguiente, con remisión a la bitácora.
   si alguien añadiera un `setInput(null)` explícito «por claridad», M2 sobreviviría en silencio.
   No es defecto del test sino dependencia implícita, y por eso se registra en vez de parchearse.
   → revisar si el bloque que retome el panel toca el montaje de (28).
-- **D-F8.4-B2-a** (S93, VIVA, DE COBERTURA, no bloqueante) — EL RESET DE `errorGeneracion` AL
-  REINTENTAR NO ESTÁ EJERCITADO. `lanzarGeneracion` hace `errorGeneracion.set(null)` al entrar, y lo
-  único que discriminaría ese `set` es un caso que ENCADENE fallo → reintento: con una sola
-  generación por test, quitarlo queda verde. Es el GEMELO EXACTO del `errorPin.set(null)` que (25b)
-  cubrió para los pines en S89, y por eso NO se cierra aquí: su hermana sigue abierta en
-  D-F8.6-ivB-a (resto, punto (a): el `set(null)` de reintento de `alDespinar`, l.183) por el mismo
-  motivo, y cerrar una sin la otra rompería la simetría del criterio. Las dos son transiciones de
-  estado del MISMO mecanismo —limpiar el error previo antes de reintentar— en tres gestos distintos
-  del mismo contenedor. → cubrir LAS DOS JUNTAS en el bloque que retome la coordinación del
-  contenedor, con un test que encadene dos invocaciones.
+- **D-F8.6-ivD-a** (S94, VIVA, DE COBERTURA, no bloqueante) — LA CAPA DEFENSIVA DE (3) Y (4) SE
+  PERDIÓ AL MIGRAR EL DOBLE. Los tests (3) —pin con `id` null— y (4) —clave ausente del índice—
+  emitían sobre `sujetoBorrar` después de aseverar el no-op. Al pasar `bloqueos.borrar` a fresco por
+  invocación, ese sujeto dejó de existir y la emisión no podía sobrevivir: en esos dos casos
+  `borrar` NUNCA se invoca, así que `ultimoBorrar` queda `undefined` y emitir sobre él reventaría.
+  El discriminante PRIMARIO de ambos sigue intacto y no se tocó ningún `expect`: es
+  `expect(bloqueos.borrar).not.toHaveBeenCalled()`, que mata la mutación de la guarda ANTES de
+  cualquier emisión. Lo que se pierde es la SEGUNDA capa: el escenario «hay suscripción viva y borra
+  la clave del índice» ya no se ejercita en esos dos. No merece mecanismo nuevo —sería andamio para
+  cubrir lo que el aserto primario ya cierra— pero se registra porque es una consecuencia colateral
+  de la opción A que ni el arquitecto ni el usuario previeron al elegirla, y porque una pérdida de
+  cobertura no declarada es indistinguible de un descuido. → reconsiderar solo si `alDespinar` gana
+  una rama que el `not.toHaveBeenCalled` deje de cubrir.
 - **D-F8.5-D2b2-a** (S91, VIVA, de DISEÑO, no bloqueante) — EL PREDICADO DE COBERTURA
   GRUPO←SUBGRUPO ESTÁ TRIPLICADO. `sg.grupos().contains(g)` vive hoy en tres sitios:
   `ModeloCpSat.tocaGrupo` (privado, sobre `InstanciaProgramada`), `VerificadorSolucion.verificarNoSolapes`
@@ -2501,6 +2510,7 @@ siguiente, con remisión a la bitácora.
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
 
+- **D-F8.4-B2-a** — el `errorGeneracion.set(null)` con que `lanzarGeneracion` limpia el error previo al reintentar no lo ejercitaba nadie: con una sola generación por test, borrarlo quedaba verde. CERRADA en S94 por el test (35) de `horario-view.spec.ts`, que encadena fallo → reintento y asevera la fase INTERMEDIA —el aviso de error desaparece ANTES de que el segundo Subject responda—, única que discrimina el `set`; la versión débil (`toHaveBeenCalledTimes(2)`) sigue dando 2 con el `set` borrado y se descartó por eso. Exigió migrar el doble de `horario.generar` de Subject compartido a FRESCO POR INVOCACIÓN: uno ya cerrado por `.error()` redispara síncronamente al re-suscribirse y hace la fase inobservable. Se cerró JUNTO con su gemela —el punto (a) de D-F8.6-ivB-a, mismo mecanismo en `alDespinar`— como S93 exigía. Detalle: bitácora S94.
 - **D-F8.5-D2b1-a** — la ruta JPA clavaba `tutorias = List.of()`: el `ProfesorTutoriaRepository` existía desde S77 pero no llegaba al dominio, y la ruta JSON transportaba tutorías mientras la de producción las perdía. CERRADA en S91: `CatalogoMapper.aProblemaHorario` gana un ONCEAVO parámetro `List<app.catalog.ProfesorTutoria>` —sigue `static` puro, sin repositorios inyectados— y `GeneradorHorarioService.cargarProblema` pasa `profesorTutoriaRepository.findAll()` dentro de su `@Transactional(readOnly=true)`, que es lo que permite navegar los `@ManyToOne(LAZY)` de la PK. La conversión resuelve profesor y grupo por IDENTIDAD contra los índices ya materializados (nunca `findById`) y traduce el enum por nombre abortando si no existe en destino. Aseverado por B-T5 (integración `@DataJpaTest` sobre SQLite real), que es su ÚNICO killer: ningún unitario caza el cableado del servicio. Detalle: bitácora S91.
 - **D-F8.5-D2b1-b** — el `rol` no tenía aserto de transporte: la mutación «el mapper clava `TUTOR_PRINCIPAL`» solo caía por el test del rol INVÁLIDO, y como el fixture de S90 llevaba `TUTOR_PRINCIPAL`, clavarlo era indistinguible del acierto. CERRADA en S91 por DOS pares discriminantes: T1/T2 en solver (mismo profesor y mismo grupo, `TUTOR_PRINCIPAL` no viola / `CO_TUTOR` sí) y B-T1/B-T2 en app (un `CO_TUTOR` llega como `CO_TUTOR` y no colapsado). La campaña distingue además N2 (rol filtrado: ausente) de N3 (rol colapsado: presente pero mal), que son firmas distintas. Detalle: bitácora S91.
 
