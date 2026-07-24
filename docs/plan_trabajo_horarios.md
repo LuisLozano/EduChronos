@@ -600,7 +600,24 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deuda D-F8.6-ivB-a
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-B CERRADO
+  en S97, y con él el FRENTE 8.6 ENTERO (AVISO DE OCUPACIÓN AL INICIAR EL ARRASTRE, elegido tras
+  CUATRO sesiones nombrado y descartado siempre por el mismo motivo; descartarlo una quinta vez era
+  aplazamiento circular. M2 INVERTIDO y declarado: el contrato se fijó ANTES de medir porque «¿qué es
+  un conflicto en el cliente?» no lo responde el árbol. El hueco es de DATOS: los índices de S82/S87
+  se construyen sobre el diagnóstico ACTUAL desde BD y 8.6-B pregunta por un estado HIPOTÉTICO, así
+  que el aviso se alimenta de la PROYECCIÓN. Opción B —«aquí ya hay clase EN LA VISTA ACTUAL»— sobre
+  la A, que es el camino al CUARTO ESPEJO que la casilla prohíbe y que el arquitecto desaconsejó por
+  escrito antes de que el usuario eligiera. El aviso NO PUEDE INTENTAR SER CORRECTO: en cuanto se le
+  pide que acierte, se acaba portando `verificarNoSolapes`. B-4 queda resuelto POR LA ESTRUCTURA
+  —`agruparPorActividad` ya devuelve `InstanciaCelda[]` por slot—, no por código nuevo. `background`
+  LIBRE sobre el `<td>`, medido aparte y NO heredado de S88, cuyos anclajes eran `<div>` hijos.
+  Campaña de 5: M1→T2, M2→T4, M4→los cuatro sin discriminar, M5→T3 y T2; M3 SUPERVIVIENTE DECLARADA
+  Y ANTICIPADA (el Set deduplica y la dimensión no es observable en un booleano sobre el `<td>`).
+  T3 pasaba POR LA RAZÓN EQUIVOCADA y se corrigió en la misma sesión: su slot tenía DOS
+  `InstanciaCelda` y el nombre prometía un escenario que nunca se examinaba; por R5 un test cuyo
+  nombre miente es estado vivo equivocado. Frontend 71 → 75; backend 333 intacto. DEUDA NUEVA:
+  D-F8.6-B-a, D-F8.6-B-b). Deuda D-F8.6-ivB-a
   CERRADA ENTERA en S96 (el INVARIANTE DEL `<select>`, punto (b) y último resto: tests (37) y (38)
   en `horario-view.spec.ts` aseveran que `bloqueos.listar` SIGUE EN 1 LLAMADA tras `cambiarVista` y
   tras `cambiarEntidad`. El invariante del TSDoc de `cargarPines` (125-132) se sostenía sobre una
@@ -769,7 +786,106 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deud
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 96 — Fase 8, D-F8.6-ivB-a punto (b): el invariante del `<select>` (CIERRA la deuda ENTERA).
+### Sesión 97 — Fase 8, Bloque 8.6-B: aviso de ocupación al iniciar el arrastre (CIERRA 8.6-B y el frente 8.6 ENTERO).
+  Modo híbrido. 3 commits de código (be9b4cf producción, d01c5ec tests, ec2a8b2 corrección de
+  fixture) + doc aparte. SESIÓN DE DISEÑO por decisión de apertura: el bloque llevaba CUATRO
+  sesiones nombrado y descartado siempre por el mismo motivo —«el contrato hay que decidirlo antes
+  de medir, orden inverso a M2»—, que no es un obstáculo sino EL TRABAJO. Descartarlo una quinta vez
+  era aplazamiento circular, el patrón que S95 rompió a la fuerza con 8.4.
+  M2 INVERTIDO Y DECLARADO: la pregunta «¿qué es un conflicto en el cliente?» no la responde el
+  árbol, así que el contrato se fijó primero y la medición vino después, con preguntas concretas.
+  Lo medible se midió igual, en DOS §A: uno de estructuras (proyección, CDK, contenedor) y otro de
+  CSS antes de dibujar nada.
+  EL HUECO QUE REENCUADRA EL BLOQUE, y es de DATOS y no de lógica: `indiceViolaciones` e
+  `indicePenalizaciones` (S82/S87) se construyen sobre el diagnóstico ACTUAL desde BD y responden a
+  «¿esta celda, donde está, tiene un problema?». 8.6-B pregunta por un estado HIPOTÉTICO —«si suelto
+  ahí, ¿chocaría?»— que ninguna capa viva produce. Conclusión: el aviso NO se alimenta del
+  diagnóstico sino de la PROYECCIÓN, que es la que sabe qué hay ya colocado en cada tramo.
+  TRES OPCIONES DE CONTRATO, con la elección razonada y no por coste. (A) aviso de recurso completo
+  —profesor/aula/subgrupo ocupados en el destino— es lo que el usuario esperaría de la palabra
+  «conflicto» y es EL CAMINO AL CUARTO ESPEJO que la casilla prohíbe: son las tres reglas de
+  `verificarNoSolapes` con D15 dentro. RECHAZADA, y el arquitecto declaró que la desaconsejaba por
+  escrito antes de que el usuario eligiera. (C) marcar solo destinos pinados es baratísimo pero
+  responde a una pregunta que casi nadie se hace. ELEGIDA (B): marcar los tramos que YA TIENEN algo
+  en la vista actual. No dice «esto viola una restricción», dice «aquí ya hay clase».
+  CONSECUENCIA DE LA GUILLOTINA DE LA CASILLA, escrita para que no se pierda: EL AVISO NO PUEDE
+  INTENTAR SER CORRECTO. En cuanto se le pide que acierte, se acaba portando `verificarNoSolapes`.
+  El diseño parte de que es barato, incompleto y HONESTO SOBRE SERLO.
+  §A-1 (estructuras) DESMINTIÓ UNA PREVISIÓN DEL ARQUITECTO Y CONFIRMÓ OTRA. Confirmada: no hay
+  NINGÚN handler de entrada, solo `(cdkDropListDropped)` (`horario-grid.html:15`) → el bloque
+  necesita cablear un evento que no existe, es PRODUCCIÓN y no un `computed`; coste al alza.
+  DESMENTIDA, y en dirección favorable: dije que esperaba que `proyeccion.ts` no tuviera nada
+  indexado por tramo y TIENE DOS —`agruparPorSlot` (:58) y `agruparPorActividad` (:89)—, ambas con
+  clave `claveSlot(dia, tramo)`. La mitad de datos del bloque ya existía y estaba probada.
+  TERCER HALLAZGO, no pedido, que va a DEUDA: `horario-grid.ts:150` anota
+  `CdkDragDrop<{dia, orden}>` pero NINGÚN `<td>` lleva `[cdkDropListData]`; el día y el tramo llegan
+  por argumentos del template. Es una firma que MIENTE sobre el mecanismo → D-F8.6-B-a. NO se
+  arregló aquí por decisión explícita del usuario (C-3): tocarlo exige cambiar cómo `alSoltar`
+  obtiene el tramo, que es camino de pinado ya cubierto por (21)-(26) y (35)-(38).
+  EL CONTRATO SE SIMPLIFICA POR LA ESTRUCTURA, no por código nuevo: B-4 («un desdoble ocupa el slot
+  UNA vez») queda RESUELTO por `agruparPorActividad`, que devuelve `InstanciaCelda[]` por slot con
+  las entradas dentro. NO hay que escribir la lógica de D15 aquí: la capa que ya existe la resolvió.
+  B-5, obligado por la medición: el aviso LEE el índice que la rejilla ya consume, no crea uno nuevo
+  —sin estructura nueva no hay tentación de meterle reglas—.
+  §A-2 (CSS) Y UN RIESGO MAL DIAGNOSTICADO POR EL ARQUITECTO, en la misma familia que la lección de
+  S96: declaré que la colisión con el CDK sería «peor que la de S88 porque competirían
+  simultáneamente». FALSO, medido: `.cdk-drop-list-dragging` (:90-93, `outline 2px dashed #4a7`) la
+  aplica el CDK SOLO al dropList sobrevolado, uno de treinta, mientras la marca de (ii) va sobre
+  todos los ocupados. Coexisten y solo se cruzan en un `<td>`, donde además informan de cosas
+  distintas. Declarar el riesgo no eximió de tenerlo mal formulado. `outline` se descarta igual, pero
+  por LEGIBILIDAD —misma propiedad y mismo verde para dos señales— y no por colisión destructiva.
+  HALLAZGO QUE FIJA LA PROPIEDAD: `background` está LIBRE sobre el `<td>` (`.rejilla td` :8-13 solo
+  declara `border`, `padding`, `vertical-align`; el `#f2f2f2` es de `.rejilla thead th, .tramo`, que
+  son `<th>`). Lo que S88 midió ocupado —`.entrada` `#fafafa`, `.instancia.pinada .entrada`
+  `#fff8ec`— cae sobre `<div>` HIJOS, no sobre el `<td>`: elementos distintos, medidos aparte y no
+  heredados de S88. Color `#eef2f6` (gris frío) elegido por el usuario sobre un ámbar que rozaba el
+  `#fff8ec` de pinada.
+  DECISIÓN C-1 DEL USUARIO, que se aparta de la LETRA de la casilla y por eso se preguntó en vez de
+  decidirse: (ii) `cdkDragStarted` marcando TODOS los slots ocupados de golpe, frente a (i)
+  `cdkDropListEntered` celda a celda. Razón: (i) informa cuando ya has decidido dónde vas, (ii)
+  informa MIENTRAS decides. Un solo evento en vez de uno por celda.
+  ENTREGADO: señal privada `arrastrando: signal<string | null>` con la `clavePin` de la instancia
+  arrastrada; `computed slotsOcupados: Set<string>` que en reposo devuelve Set VACÍO y arrastrando
+  incluye el slot si queda ≥1 `InstanciaCelda` distinta de la arrastrada; `claveSlot` expuesto
+  `protected readonly` (patrón de `dias`/`tramos`) para no cambiar firmas; `(cdkDragStarted)` /
+  `(cdkDragEnded)` en el `<div.instancia>`; `[class.ocupado]` en el `<td>` —PRIMER binding de clase
+  del `<td>`, que hasta hoy no tenía ninguno—; un ÚNICO bloque CSS nuevo
+  `.rejilla td.ocupado { background: #eef2f6 }`, el 21.º del fichero.
+  TSDoc OBLIGATORIO en `slotsOcupados` con las TRES afirmaciones, porque una incompletitud no
+  declarada es una promesa falsa (familia de D-F8.6-iiiB1-c): (a) dice «hay clase EN LA VISTA
+  ACTUAL», no un veredicto; (b) es CIEGO por construcción a los recursos que la vista no muestra —en
+  vista por grupo no ve profesor ni aula—; (c) NO es una verificación y NO debe crecer hacia una.
+  CINCO TESTS DE CAMPAÑA SOBRE CUATRO TESTS. M1 (no excluir el origen) cae SOLO en T2; M2 (no
+  limpiar en `cdkDragEnded`) cae SOLO en T4; M4 (Set vacío siempre) cae en los cuatro y NO discrimina
+  en exclusiva, registrado como tal. M3 (contar entradas en vez de instancias) SUPERVIVIENTE
+  DECLARADA Y ANTICIPADA ANTES DE CORRERLA: el Set deduplica, así que «una vez» y «tres veces» dan la
+  misma clase en el mismo `<td>`; la dimensión NO es observable en un booleano sobre el `<td>` y NO
+  se inventó aserto artificial para taparla. T3 documenta la intención, no la asevera.
+  T3 PASABA POR LA RAZÓN EQUIVOCADA Y SE CORRIGIÓ EN LA MISMA SESIÓN, no se dejó como deuda. El
+  arquitecto pidió transcribir el fixture de T3 y la primera entrega no lo hizo; al pedirlo se vio
+  que el slot examinado tenía DOS `InstanciaCelda` (el desdoble `Mat-1ºA|2` MÁS el `LCL-1ºA|1` que
+  se arrastraba), de modo que el nombre del test —«un slot con desdoble»— prometía un escenario que
+  NUNCA se examinaba. El desdoble era portante y el test no estaba roto, pero una mutación
+  `instancias.length > 1` lo dejaba VERDE mientras rompía en producción todo slot con un desdoble
+  solitario. Corregido con el patrón que T2 ya usaba (`enSlot(LCL_SIN_PIN, 2, 3)`) y nace M5, que
+  con el fixture viejo SOBREVIVÍA y con el nuevo CAE en T3 por `toContain('ocupado')` —y también en
+  T2, cuyo testigo es igualmente de una instancia: M5 tampoco discrimina en exclusiva—. Por R5, un
+  test cuyo nombre miente es estado vivo equivocado, igual que un mockup mal medido (S87/S88).
+  Suite frontend 71 → 75 (12 ficheros); `horario-grid.spec.ts` 7 → 11 `it()` (contados con
+  `grep -cE "^\s*it\("`, forma anclada); backend 333 INTACTO. No se tocó `solver/src/main` →
+  `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado (ni entidad ni
+  invariante nueva).
+  DEUDA NUEVA: D-F8.6-B-a (el genérico que miente), D-F8.6-B-b (el aviso es ciego a dos de los tres
+  recursos, por diseño). CIERRA el Bloque 8.6-B y con él el frente 8.6 ENTERO: cero sub-bloques
+  vivos.
+  LIMPIEZA EVALUADA PARA LA PRÓXIMA (M1.5): AHORA SÍ HAY ACUMULACIÓN. Con 8.6-B cerrado, el frente
+  8.6 queda cerrado entero y es condensable —condición que S95 y S96 declararon pendiente de
+  exactamente este bloque—. Es el candidato natural de la próxima sesión de higiene, y no se condensa
+  en la que lo cierra (criterio de S93).
+  Siguiente: HIGIENE (condensar 8.6, cuya condición habilitante se cumple HOY por primera vez),
+  D-F8.6-iiiA-b (`Totales` sin sede, con MOCKUP PREVIO por D-F8.6-a), D-F8.6-ivD-b (homogeneizar el
+  doble de `listar`) o D-F8.6-B-a (el genérico que miente), a decidir al abrir.
+Última sesión registrada (previa): Sesión 96 — Fase 8, D-F8.6-ivB-a punto (b): el invariante del `<select>` (CIERRA la deuda ENTERA).
   Modo híbrido. 1 commit de código (solo `horario-view.spec.ts`) + doc aparte. Bloque elegido entre
   tres candidatos por ser el ÚNICO que podía cerrar una deuda entera hoy: el argumento que la
   mantenía abierta —«cerrarla obligaría a abrir una hermana con ese resto»— MURIÓ en S94 al no
@@ -935,113 +1051,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deud
   durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de medir, orden inverso a
   M2) o D-F8.6-iiiA-b (`Totales` sigue sin sede, con la trampa de los conteos sin signo), a decidir
   al abrir.
-Última sesión registrada (previa): Sesión 93 — Fase 8, Bloque 8.4-B2: gesto de generar + guarda con diálogo (CIERRA el frente 8.4).
-  Modo híbrido. 2 commits de código (37d1ba9 producción 8 ficheros, 6b6e88c tests 3 ficheros; sin
-  pushear al cerrar) + doc aparte. CIERRA 8.4 ENTERO (A en S79, B1 en S92, B2 aquí).
-  PARTICIÓN PROPUESTA Y RETIRADA POR MEDICIÓN, y esta vez el desmentido fue AL ARQUITECTO. El plan
-  declaraba 8.4-B2 bloqueado y candidato a partirse en «gesto» y «guarda», con el argumento de que el
-  diálogo sería el PRIMER modal del repo y decidiría la arquitectura de diálogos para siempre. El
-  USUARIO objetó partir de antemano (misma objeción que en S91, por el coste documental fijo de M1) y
-  propuso medir primero. Medido, las dos premisas del corte cayeron: (P2) `POST /api/horarios` acepta
-  BODY VACÍO —`@RequestBody(required=false)` y defaulting íntegro en `GeneradorHorarioService:179-203`:
-  via→OPTIMIZACION, maxSegundos→30, semilla→42, nombre→timestamp—, luego el botón es un botón y no un
-  formulario, que era mi preocupación mayor; (P5) `@angular/cdk` YA está en `dependencies` (^21.2.14)
-  con el entry point `dialog` presente, luego no había librería que elegir. UN SOLO BLOQUE. Lo que
-  mató la partición fue P2, no P5: el diálogo siguió costando (ver C2 abajo).
-  EL §A MIDIÓ LOS CONSUMIDORES, no solo el endpoint —correctivo explícito de la lección de S92, que
-  midió endpoint y DTO y no el gesto que el contrato daba por existente—. Se enumeraron SEIS
-  supuestos del contrato antes de escribirlo (endpoint, consumidor del resultado, fuente del id,
-  señal de la guarda, superficie del diálogo, parámetros de D29) y dos de ellos lo reformaron.
-  DOS HALLAZGOS DEL §A QUE CAMBIARON EL CONTRATO, no detalles: (1) el POST devuelve
-  `HorarioProyeccionDTO` ENTERO, no un id, así que «generar y recargar» era redundante; (2) NO HAY
-  selector de horario: el id sale de `paramMap` (`horario-view.ts:109`), y los dos `<select>` de la
-  plantilla emiten vista y entidad, no horario. Generar crea un horario NUEVO con id nuevo que no es
-  el de la ruta. DECISIÓN DE PRODUCTO que no estaba tomada y que S92 no podía prever: opción A
-  (navegar) frente a B (pintar en sitio). ELEGIDA A por el usuario con recomendación del arquitecto:
-  B dejaría rejilla, pines y diagnóstico pudiendo pertenecer a horarios DISTINTOS, clase de bug que
-  ningún test de este bloque detectaría. Coste asumido y declarado: un GET redundante, porque la
-  proyección que devuelve el POST se DESCARTA y la recarga la dispara `paramMap`.
-  EL CONTRASTE (M4) DESMINTIÓ CUATRO PREMISAS DEL ARQUITECTO, todas del mismo género —afirmar sobre
-  terreno no leído—: (1) la ruta declarada es `horario/:id` SINGULAR (`app.routes.ts:7`), no
-  `horarios/:id`: `navigate(['/horarios', id])` no casa con ninguna ruta y navegaría a ninguna parte;
-  (2) la señal del contenedor es `avisosPrevalidacion()` (`horario-view.ts:71`), NO `avisos()`, que es
-  el input del panel HIJO —el arquitecto citó la cabecera de S92, es decir el DERIVADO, en vez del
-  árbol: es la trampa que M2 documenta, cometida sobre el propio registro de la sesión anterior—;
-  (3) `@angular/cdk/dialog` es el PRIMITIVO SIN ESTILO, no un equivalente de `@angular/material`: hay
-  que aportar el componente de confirmación y su CSS enteros, así que «cero fricción» era medio falso;
-  (4) los 25 tests de `horario-view.spec.ts` caen por `Router`, NO por `Dialog` —`Dialog` es
-  `providedIn:'root'` y se inyecta solo—, y el TestBed omitía `provideRouter` CON RAZÓN DOCUMENTADA en
-  su cabecero (l.35-38: «añadir el router real metería un colaborador que el componente no usa»). Este
-  bloque INVALIDA esa razón: el comentario se corrige, porque por R5 una descripción equivocada del
-  mecanismo actual es estado vivo equivocado.
-  C6 DESMENTIDO COMO INALCANZABLE, y es el hallazgo que reencuadró el bloque. El contrato prometía
-  «mensaje distinto para el 422 de pre-validación y para el infactible», citando la casilla de 8.4-A.
-  MEDIDO: los dos 422 llegan al frontend con BODY SECO IDÉNTICO. `HorarioController:64-67` lanza
-  `ResponseStatusException(422, e.getMessage())`; el `reason` solo viajaría con
-  `server.error.include-message` activo, y `application.properties` no lo define (default `never`,
-  D-F8.6-ii-a). `PrevalidacionFallidaException` lleva `getAvisos()` estructurado DENTRO, pero el
-  controller descarta esa lista. La distinción existe EN EL BACKEND y no en el cable. Tres salidas
-  evaluadas: (A) cortar C6 y registrar deuda; (B) meter el backend, que convierte esto en bloque
-  MULTI-MÓDULO y toca la política global de errores que D-F8.6-ii-a y D-F8.6-iiiA-c dicen que solo
-  tiene sentido decidir GLOBALMENTE; (C) discriminar por `status`, descartada porque ambos son 422.
-  ELEGIDA A. D5 REVOCADA. Y el desmentido obligó a AJUSTAR D4: si el usuario no va a poder distinguir
-  la causa del rechazo, el DIÁLOGO se lo dice por adelantado —enumera los errores concretos que
-  `avisosPrevalidacion()` ya tiene y advierte de que el servidor rechazará sin detalle—. La información
-  existe en el cliente ANTES de enviar; es ahí donde vale. Sin ese ajuste, la guarda avisa de un error,
-  el usuario confirma, y el texto resultante es el mismo que si el solver no encontrara solución.
-  CORRECCIÓN POR R5 EN SEDE VIVA: la casilla de 8.4-A afirmaba «422 distinguible del infactible del
-  solver». Es FALSO desde el cliente y se corrige en su casilla. Lo archivado en la bitácora NO se
-  toca (histórico de solo lectura: borrar el error eliminaría la evidencia de que existió).
-  ENTREGADO: `horario.service.ts` gana `generar()` (POST con body `{}`, wrapper pelado, gemelo de
-  `getProyeccion`); `components/confirmar-generacion/` (.ts+.html+.css) como PRIMER diálogo del repo;
-  `horario-view` inyecta `Router` y `Dialog` y gana el gesto con sus TRES estados —sin ERROR genera
-  directo; con ERROR abre diálogo SIN escapatoria real; `avisosPrevalidacion() === null` deja el botón
-  DESHABILITADO, porque no se ha ejecutado la pre-validación y no hay nada sobre lo que guardar—;
-  `errorGeneracion` es señal propia que NO gatea la rejilla (criterio de S87, mismo que
-  `errorPrevalidacion` en S92).
-  `styles.css` GANA `@import '@angular/cdk/overlay-prebuilt.css'`: PRIMERA HOJA GLOBAL DEL CDK en el
-  repo, y es MECANISMO VIVO, no anécdota. Sin ella el overlay del `Dialog` se monta sin centrar ni
-  backdrop. Es la tercera cara del error de C2: la dependencia estaba instalada, pero «instalada» no
-  es «lista», y el §A no lo vio porque midió la API (`providedIn:'root'`, sin provider) y no el
-  montaje. Lo destapó Claude Code al integrar, no un usuario abriendo el diálogo. Queda importada
-  para cualquier uso futuro de overlay/tooltip del CDK.
-  DOS PARADAS DE CLAUDE CODE, las dos correctas y las dos por omisión del arquitecto: (1) el guion de
-  commits enumeraba ficheros y OLVIDABA `horario-view.css` (clase `.error-generacion`) y `styles.css`;
-  paró en vez de decidir el reparto por su cuenta. Van al commit de CÓDIGO: ninguno es test y ambos
-  son parte del mismo gesto —un tercer commit para CSS separaría un `<p>` de su estilo y un componente
-  de lo que lo hace visible, y el criterio de M4 es que un commit CONSTRUYA, no que agrupe por
-  extensión—. (2) Antes, en el turno de contraste, devolvió la pregunta de C6 con tres salidas en vez
-  de elegir.
-  TESTS: 7 en el primer turno (T1-T6 en contenedor + 1 de servicio) y 4 en el segundo (T7-T9), suite
-  frontend 56 → 63 → 67 (12 ficheros de test, antes 11). CAMPAÑA declarada en dos tandas. Los TRES
-  huecos que la primera campaña destapó se CERRARON en la misma sesión, con criterio explícito de por
-  qué esos tres y no el cuarto: (h1) la rama «no ejecutado» es el TERCER ESTADO de D4, contratado, y
-  su ausencia dejaba sin red media decisión de producto; (h2) el `data` del `open` es el AJUSTE D4'
-  ENTERO —si llega la lista completa o vacía, la razón por la que se eligió la opción A no existe y
-  nadie se entera—; (h3) `ConfirmarGeneracion` tenía CERO cobertura y la mutación de intercambiar
-  `true`/`false` en confirmar/cancelar invierte la guarda entera quedando verde.
-  DOS FIXTURES DIVERGENTES POR DISEÑO, mismo criterio que el (22) de S89: T5 navega a id 99 siendo 1
-  el de la ruta —con id igual, «navegó» y «no navegó» son indistinguibles—; T8 lleva un aviso ERROR y
-  otro AVISO con textos distintos —sin el no-ERROR, «pasar todo» y «filtrar» dan el mismo `data`—; T9
-  enumera DOS errores —con uno solo, «pinta el primero» y «pinta todos» coinciden—.
-  MATIZ DE T7 REGISTRADO Y NO TAPADO, que es lo que M3 exige: borrar la guarda a secas da
-  `null.filter` → TypeError, es decir ROJO POR EXCEPCIÓN y no por aserto. Sigue siendo rojo y el test
-  cumple, pero la mutación honesta contra esa dimensión es la que devuelve TRAS abrir/generar, y esa
-  sí cae limpia. Acoplamiento declarado también en T8 (el `toHaveBeenCalledWith` reddearía si `open`
-  no se llamara, pero de esa se encarga `open times(1)`/`generar times(0)` en el mismo test: el
-  `withArgs` no es quien la ataca) y en T9 (asevera presencia en `textContent`, no posición ni
-  estructura: reordenar o reestilar no reddea, y queda fuera de alcance a propósito).
-  Backend 333 INTACTO. No se tocó `solver/src/main` → `referencia-codigo-solver.md` NO regenerada;
-  `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva).
-  DEUDA NUEVA: D-F8.4-B2-a (el `errorGeneracion.set(null)` de reintento sin test, gemelo de lo que
-  (25b) cubrió para los pines en S89; se deja fuera POR COHERENCIA con D-F8.6-ivB-a resto, que tiene
-  el gemelo abierto por el mismo motivo, no por descuido).
-  LIMPIEZA EVALUADA Y DESCARTADA (M1.5): 8.4 queda CERRADO entero y es candidato natural a
-  condensación, pero su casilla B2 es hoy lo ÚNICO que documenta el gesto y se acaba de escribir.
-  Se condensa en la próxima sesión de higiene, no en la que lo cierra.
-  Siguiente: 8.6-B (aviso durante el arrastre; cruce de índices, contrato ANTES de medir, orden
-  inverso a M2), D-F8.6-ivB-a resto + D-F8.4-B2-a (los dos `set(null)` de reintento, ahora gemelos
-  declarados), D-F8.6-iiiA-b (`Totales` sin sede) o HIGIENE (condensar 8.4), a decidir al abrir.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1053,10 +1062,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95 y la de S92 en la Sesión 96 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95, la de S92 en la Sesión 96 y la de S93 en la Sesión 97 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S93–S96). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S94–S97). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1388,10 +1397,33 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       que la mutación INSERTA `this.cargarPines()` en el gesto. M1 cae solo en (37), M2 solo en (38),
       las dos por ASERTO B; gestos NO acoplados. Suite frontend 69 → 71; backend 333 intacto.
       → D-F8.6-ivD-b. Detalle: bitácora S96 (futura).
-- [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
-      NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
-      PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
-      protege D15.
+- [x] Bloque 8.6-B — Aviso de OCUPACIÓN al iniciar el arrastre (S97). CIERRA el frente 8.6 ENTERO.
+      GUARDARRAÍL VIGENTE, que sobrevive al cierre: es cruce de índices, NO verificación. Si en algún
+      momento se propone portar el verificador a TS, PARAR: sería un cuarto espejo de la lógica de
+      solapes, en otro lenguaje, sin el test que protege D15. Corolario que el bloque obliga a
+      escribir: EL AVISO NO PUEDE INTENTAR SER CORRECTO —en cuanto se le pide que acierte, se acaba
+      portando `verificarNoSolapes`—; es barato, incompleto y honesto sobre serlo (D-F8.6-B-b).
+      OPCIÓN B elegida sobre A (recurso completo = el cuarto espejo, desaconsejada por escrito) y C
+      (solo destinos pinados, insuficiente). El aviso se alimenta de la PROYECCIÓN y no del
+      diagnóstico: los índices de S82/S87 se construyen sobre el estado ACTUAL desde BD y la pregunta
+      de este bloque es sobre uno HIPOTÉTICO. C-1 del usuario: `cdkDragStarted` marcando TODOS los
+      slots ocupados de golpe, no `cdkDropListEntered` celda a celda —informa MIENTRAS decides, no
+      cuando ya decidiste—; se apartaba de la letra de la casilla y por eso se preguntó.
+      `arrastrando: signal<string | null>` con la `clavePin` de la instancia arrastrada + `computed
+      slotsOcupados: Set<string>` que EXCLUYE el origen y cuenta `InstanciaCelda`, no `entradas`
+      —B-4 lo resuelve `agruparPorActividad`, que ya agrupa así: la lógica de D15 NO se reescribe—.
+      Set VACÍO en reposo. `claveSlot` expuesto `protected readonly` (patrón de `dias`/`tramos`) para
+      no cambiar firmas. `[class.ocupado]` es el PRIMER binding de clase del `<td>`, que no tenía
+      ninguno. `background: #eef2f6` sobre `.rejilla td.ocupado`, único bloque CSS nuevo: `background`
+      está LIBRE en el `<td>` —medido aparte, NO heredado de S88, cuyos anclajes (`.entrada` `#fafafa`,
+      `.instancia.pinada .entrada` `#fff8ec`) son `<div>` HIJOS—. `outline` descartado por LEGIBILIDAD
+      frente al `#4a7` del CDK, no por colisión: `.cdk-drop-list-dragging` solo marca el `<td>`
+      sobrevolado, y el riesgo que el arquitecto declaró como simultáneo estaba MAL FORMULADO.
+      TSDoc de `slotsOcupados` OBLIGATORIO con las tres afirmaciones (dice «hay clase en la vista
+      actual», es ciego por construcción, no es una verificación): sin él, el próximo lector lo
+      empuja hacia la opción A. Campaña de 5 sobre 4 tests; M3 SUPERVIVIENTE declarada y anticipada.
+      T3 corregido EN LA MISMA SESIÓN por R5 (su slot tenía dos `InstanciaCelda` y el nombre prometía
+      otro escenario). Suite 71 → 75. → D-F8.6-B-a, D-F8.6-B-b. Detalle: bitácora S97 (futura).
 
 Diferibles a lo largo de la fase: D21, D22, D26/D27 (nombre de aula, código de tramo),
 D30 (renumeración de tramos duplicada). D-F8.2b-4B: condicional e INERTE (la poda que
@@ -2328,6 +2360,34 @@ siguiente, con remisión a la bitácora.
   servicios del mismo contenedor, y el próximo que escriba un test tendrá que averiguar cuál toca.
   → migrar `listar` a fresco por invocación en el próximo bloque que toque `horario-view.spec.ts`,
   o antes si aparece un caso de reintento sobre el índice de pines.
+
+- **D-F8.6-B-a** (S97, VIVA, no bloqueante, DE FIRMA QUE MIENTE) — EL GENÉRICO DE `CdkDragDrop` NO
+  SE CORRESPONDE CON NINGÚN DATO REAL. `horario-grid.ts:150` anota
+  `CdkDragDrop<{ dia: number; orden: number }>`, pero NINGÚN `<td>` lleva `[cdkDropListData]`
+  (`horario-grid.html:15`, medido en S97): el día y el tramo llegan por ARGUMENTOS del template
+  —`alSoltar($event, i + 1, t)`— y el cuerpo NO lee `evento.container.data`. El genérico describe una
+  forma que el CDK nunca puebla, así que quien lo lea creerá que el tramo destino viaja por el
+  dropList. Por R5 es una descripción equivocada del mecanismo actual, es decir estado vivo
+  equivocado. NO se arregló en S97 por DECISIÓN EXPLÍCITA del usuario (C-3) y no por descuido:
+  arreglarlo bien es poner `[cdkDropListData]` y cambiar cómo `alSoltar` obtiene el tramo, que es
+  camino de PINADO ya cubierto por (21)-(26) y (35)-(38) —reabrir superficie probada dentro de un
+  bloque de diseño—. Hermana de D-F8.5-D2b2-b (javadoc obsoleto): las dos son documentación que
+  contradice el código, no defecto funcional. → corregir en el próximo bloque que toque el camino de
+  soltado, poniendo el `[cdkDropListData]` o quitando el genérico, pero no dejando los dos.
+
+- **D-F8.6-B-b** (S97, VIVA, ACEPTADA POR DISEÑO, no bloqueante) — EL AVISO DE OCUPACIÓN ES CIEGO A
+  DOS DE LOS TRES RECURSOS. `slotsOcupados` (`horario-grid.ts`) solo ve las sesiones de la ENTIDAD
+  de la vista actual: en vista por grupo no ve al profesor ni al aula, en vista por profesor no ve
+  el aula ni los otros grupos. NO es un hueco de implementación: es la consecuencia de haber
+  rechazado la opción A en S97, que habría exigido los ocupantes de los tres recursos y con ellos
+  las tres reglas de `verificarNoSolapes` —el CUARTO ESPEJO que la casilla de 8.6-B prohíbe—. La
+  incompletitud va DECLARADA en el TSDoc de `slotsOcupados` porque una incompletitud no declarada es
+  una promesa falsa (familia de D-F8.6-iiiB1-c, donde el degradado de `mensaje()` miente en el
+  DELETE). Lo que hace tolerable la ceguera es la vía C de D-F8.6-A-1: el aviso no decide nada, el
+  solver sí, y un pin contradictorio da INFEASIBLE, que es lo que 8.4 existe para hacer amable.
+  → NO se cierra ampliando el aviso. Solo dejaría de importar si el backend expusiera un endpoint de
+  «¿qué ocupa este tramo?» que respondiera por los tres recursos sin que el cliente razone; hasta
+  entonces, cualquier intento de completarlo en TS es la opción A por la puerta de atrás.
 
 - **D-F8.5-D2b2-b** (S91, VIVA, COSMÉTICA, no bloqueante) — EL JAVADOC DE CLASE DE `CatalogoMapper`
   DICE «siete listas». Es PRE-EXISTENTE, no introducida por S91: ya estaba obsoleto desde que se
