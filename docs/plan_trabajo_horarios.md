@@ -600,7 +600,21 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGIENE DOCUMENTAL
+Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Deuda D-F8.6-ivB-a
+  CERRADA ENTERA en S96 (el INVARIANTE DEL `<select>`, punto (b) y último resto: tests (37) y (38)
+  en `horario-view.spec.ts` aseveran que `bloqueos.listar` SIGUE EN 1 LLAMADA tras `cambiarVista` y
+  tras `cambiarEntidad`. El invariante del TSDoc de `cargarPines` (125-132) se sostenía sobre una
+  AUSENCIA de llamada —un solo call site, l.189 dentro de `cargar`— y por eso la campaña es POR
+  ADICIÓN, no por supresión: la mutación INSERTA `this.cargarPines()` en el gesto, que es el error
+  que cometerá quien "arregle" un filtro que parece no refrescarse. Género de mutación sin precedente
+  escrito en M3, declarado como novedad. El aserto NO es sobre `pinadas` —un doble que devuelve la
+  misma lista la deja idéntica y la mutación quedaría verde— sino sobre el COLABORADOR, con el
+  precedente de (25a) en S89. DOS gestos y DOS tests, no uno: `cambiarVista` (304-307) y
+  `cambiarEntidad` (309-311) son métodos distintos y cubrir uno dejaría la deuda entreabierta.
+  El contraste DESMINTIÓ el riesgo principal que el arquitecto declaró sin medir: `cambiarEntidad`
+  es un SETTER PURO que no consulta `entidades()`, así que el fixture vacío no estorbaba. Campaña de
+  2, cada una cae SOLO en su test y POR ASERTO B; gestos no acoplados. Suite frontend 69 → 71,
+  backend 333 intacto; `horario-view.ts` con diff VACÍO. DEUDA NUEVA: D-F8.6-ivD-b). HIGIENE DOCUMENTAL
   en S95 (condensación de DOS frentes CERRADOS —8.4 entero, 67 → 27 líneas; y el SUB-frente 8.6-iv,
   57 → 31—, más el archivado de S91. La distinción 8.6 / 8.6-iv es del criterio de S63/S80: 8.6-B
   sigue ABIERTO, así que solo el sub-frente era condensable. Cinco tokens tenían UN SOLO citante y era
@@ -755,7 +769,59 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGI
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 95 — Fase 8, HIGIENE DOCUMENTAL: condensación de DOS frentes cerrados (8.4 y 8.6-iv) y archivado de ventana.
+### Sesión 96 — Fase 8, D-F8.6-ivB-a punto (b): el invariante del `<select>` (CIERRA la deuda ENTERA).
+  Modo híbrido. 1 commit de código (solo `horario-view.spec.ts`) + doc aparte. Bloque elegido entre
+  tres candidatos por ser el ÚNICO que podía cerrar una deuda entera hoy: el argumento que la
+  mantenía abierta —«cerrarla obligaría a abrir una hermana con ese resto»— MURIÓ en S94 al no
+  quedar resto. El plan lo tenía «asignado al bloque que retome el gesto de cambio de vista», que es
+  preferencia de encaje y no prohibición.
+  §A DE MEDICIÓN (M2) CONTRA EL ÁRBOL, y su hallazgo REENCUADRÓ el bloque: `cargarPines` tiene UN
+  SOLO call site en `main` (l.189, dentro de `cargar`) y `cambiarVista` toca exactamente dos señales
+  —`vista` y `entidad`—, ninguna de ellas `pinadas` ni `bloqueos`. El invariante que el TSDoc
+  (125-132) declara NO SE DEFIENDE CON LÓGICA: se cumple porque nadie escribió la llamada. De ahí que
+  la campaña sea POR ADICIÓN y no por supresión, género sin precedente escrito en M3 y declarado
+  como novedad en vez de colarlo.
+  EL §A CORRIGIÓ TAMBIÉN EL ASERTO QUE EL ARQUITECTO TRAÍA. Aseverar sobre `pinadas` NO discrimina:
+  un doble de `listar` que devuelve la misma lista deja la señal con contenido idéntico y la
+  mutación queda VERDE. El aserto discriminante es sobre el COLABORADOR —`toHaveBeenCalledTimes(1)`
+  sobre `bloqueos.listar`—, con precedente en el propio fichero: (25a) hizo lo mismo con
+  `getProyeccion` tras pinar (S89).
+  DOS GESTOS, DOS TESTS. `cambiarVista` (304-307) y `cambiarEntidad` (309-311) son métodos
+  DISTINTOS y el TSDoc nombra los dos; cubrir uno solo dejaba la deuda entreabierta y volvería a
+  abrir una hermana, que es justo lo que S94 evitó al cerrar (a) y su gemela JUNTAS. Coste revisado
+  al alza ANTES de elegir, con la medición delante: de BAJO a BAJO-MEDIO, porque no era «un test».
+  EL CONTRASTE (M4) DESMINTIÓ EL RIESGO PRINCIPAL, y era el que el arquitecto había declarado
+  explícitamente como no medido: supuso que (38) necesitaba `entidades()` con dos elementos para
+  tener destino distinto, y `cambiarEntidad` es un SETTER PURO que no consulta ese computed. Basta
+  pasar una entidad distinta de la actual (`''`); el fixture `PROYECCION_VACIA` no se tocó. Acertó
+  al declararlo sin medir y erró en el CONTENIDO: queda como error de especificación, no como falso
+  positivo. En verde, medido: los `protected` se invocan con el precedente de cast de la l.776, el
+  helper `montar([])` (181-187) da el montaje mínimo, y NINGÚN test previo asevera sobre
+  `bloqueos.listar`, luego no había cobertura por acoplamiento que confundiera la campaña.
+  HALLAZGO NO PEDIDO POR EL CONTRATO y que va a deuda: `bloqueos.listar` es Subject COMPARTIDO, la
+  ÚNICA de las cuatro llamadas del contenedor que quedó en la forma vieja tras la homogeneización de
+  S94. No estorba a (37) ni a (38) —ninguno reintenta— pero es la asimetría de andamio «de la que no
+  se ve» que S94 nombró.
+  ENTREGADO: tests (37) y (38), cada uno con ASERTO A (precondición: `listar` llamado 1 vez ANTES
+  del gesto, para no medir un no-op), ASERTO B discriminante (sigue en 1 DESPUÉS) y ASERTO C
+  (`vista()`/`entidad()` cambió de verdad, para que B no mida una llamada que nunca ocurrió).
+  CAMPAÑA DE 2 POR ADICIÓN: M1 (insertar `this.cargarPines()` en `cambiarVista`) cae SOLO en (37);
+  M2 (lo mismo en `cambiarEntidad`) cae SOLO en (38); las dos POR ASERTO B —recibe 2 esperando 1—,
+  sin excepción. Los gestos NO están acoplados y ningún test previo cae con ninguna.
+  Suite frontend 69 → 71 (12 ficheros); `horario-view.spec.ts` 23 → 25 `it()`; backend 333 INTACTO.
+  `horario-view.ts` con diff VACÍO contra HEAD: cero producción. No se tocó `solver/src/main` →
+  `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado.
+  NOTA DE INSTRUMENTO: el recuento de `it()` del fichero es 23, no 36; `grep -c "it("` contaba
+  subcadenas (`emit(`, `split(`). Misma clase de trampa que la lección de S95 sobre `grep -c` sin
+  ancla. Los 69 del prompt son la suite ENTERA, no este fichero.
+  DEUDA NUEVA: D-F8.6-ivD-b. CIERRA D-F8.6-ivB-a ENTERA.
+  LIMPIEZA EVALUADA PARA LA PRÓXIMA (M1.5): sin frentes cerrados acumulados. 8.6 seguirá siendo
+  condensable solo cuando cierre 8.6-B, su único sub-bloque vivo; decirlo es la respuesta correcta.
+  Siguiente: 8.6-B (aviso durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de
+  medir, orden inverso a M2, y solo defendible si la sesión se dedica a DISEÑO), D-F8.6-iiiA-b
+  (`Totales` sin sede, con MOCKUP PREVIO por D-F8.6-a) o D-F8.6-ivD-b (homogeneizar el doble de
+  `listar`), a decidir al abrir.
+Última sesión registrada (previa): Sesión 95 — Fase 8, HIGIENE DOCUMENTAL: condensación de DOS frentes cerrados (8.4 y 8.6-iv) y archivado de ventana.
   Sin código. Modo interactivo. TRES operaciones sobre `docs/`, en commits separados con verificación
   de R4 y de COSTURA ENTRE cada una y no solo al final —criterio adoptado por el fallo de S94, donde
   un `str_replace` mal anclado descabezó una deuda vecina y lo cazó el grep de M1.6, no la lectura—.
@@ -976,68 +1042,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). HIGI
   Siguiente: 8.6-B (aviso durante el arrastre; cruce de índices, contrato ANTES de medir, orden
   inverso a M2), D-F8.6-ivB-a resto + D-F8.4-B2-a (los dos `set(null)` de reintento, ahora gemelos
   declarados), D-F8.6-iiiA-b (`Totales` sin sede) o HIGIENE (condensar 8.4), a decidir al abrir.
-Última sesión registrada (previa): Sesión 92 — Fase 8, Bloque 8.4-B1: panel de pre-validación (8.4-B PARTIDO por medición).
-  Modo híbrido. 1 commit de código (3a82744, amendado sobre 1787001 para absorber el movimiento
-  del modelo a `models/`; sin pushear al cerrar) + doc aparte.
-  DECISIÓN DE APERTURA — D-F8.4-A-c: el arquitecto recomendó MATAR `AVISO` y la MEDICIÓN LE
-  DESMINTIÓ. El §A destapó tres cosas invisibles desde el Project: (1) el javadoc de `Severidad`
-  documenta un CRITERIO DE DISEÑO —«una regla que pudiera sobrestimar la demanda debe quedarse en
-  AVISO»— y nombra el palomar de aulas como candidato natural, luego el valor no está huérfano por
-  descuido; (2) el string `"AVISO"` viaja en el contrato REST (`AvisoPrevalidacionDTO` serializa
-  `.name()`), así que borrarlo estrecha un contrato publicado aunque el frontend no conozca el enum;
-  (3) el beneficio que el arquitecto atribuía a la muerte —que caerían los asertos tautológicos de
-  A3/A4— es FALSO: ambos aseveran `ERROR`, valor que sobrevive. Nació la RAMA C: `AVISO` se queda,
-  el panel se diseña con dos niveles desde el principio (el frontend se construía desde cero, medido:
-  `grep` de prevalidacion en `.ts/.html/.scss/.css` dio EXIT=1), y el bloque queda de UN SOLO MÓDULO.
-  EL CONTRASTE (M4) TUMBÓ EL CONTRATO POR PREMISA, no por detalle: NO EXISTE gesto de generar en el
-  frontend. Cero `<button>` en todo `src` salvo el candado de `horario-grid.html:31,36`; cero `POST
-  /api/horarios` (el único POST del árbol es `bloqueo.service.ts:30`); `horario.service.ts` son 21
-  líneas con un solo método de lectura. Dos de los seis asertos —los que sostenían la decisión del
-  usuario sobre el botón— NO ERAN ESCRIBIBLES. Causa declarada: el §A midió el endpoint y el DTO pero
-  NO el CONSUMIDOR del gesto, mismo hueco que M2 documenta de S90 (medir `Actividad` y no
-  `ProblemaHorario`). 8.4-B se PARTE en B1 (panel, esta sesión) y B2 (guarda + diálogo), y la
-  partición es DESCUBIERTA POR MEDICIÓN, no planificada: el usuario había objetado —con razón— contra
-  particionar de antemano por el coste documental fijo de M1, y esa objeción sigue en pie.
-  SEGUNDO ERROR DEL CONTRASTE, de precedente: el arquitecto citó `errorDiagnostico` (S87) como modelo
-  de «no ejecutado vs vacío». Es el CONTRAEJEMPLO —distingue error de no-error, y `badges()`/
-  `violaciones()` colapsan `diagnostico() === null` y cargado-vacío en el mismo `new Map()`
-  (`horario-view.ts:68-82`)—. El discriminante real es el `@if/@else if/@else` de
-  `horario-view.html:33-47`, donde `proyeccion() === null` cae en «Cargando…» y una proyección vacía
-  monta la rejilla igual. Caveat que el propio contraste declaró: ese precedente funde «cargando» con
-  «aún null» y no tiene estado semántico nombrado, así que se EXTIENDE, no se copia.
-  TERCER FALLO, de forma y del arquitecto: el primer guion se entregó con referencias a «las clases
-  disjuntas de arriba» y «según la tabla» en un texto que se pega SOLO. Claude Code PARÓ en vez de
-  inventar los nombres de clase, que es lo correcto —inventarlos habría roto los asertos que se
-  aseveran por `querySelector('.clase-exacta')`—. Norma nueva del usuario: TODO GUION VA EN BLOQUE
-  COPIABLE Y AUTOCONTENIDO.
-  ENTREGADO: `models/prevalidacion.model.ts` (seis campos espejo del DTO, `severidad: string`),
-  `services/prevalidacion.service.ts` (wrapper pelado, gemelo de `diagnostico.service.ts:30-32`),
-  `components/panel-prevalidacion/` (.ts+.html+.css) y el cableado en `horario-view`. CUATRO RAMAS
-  con clases DISJUNTAS: `.prevalidacion-error` / `-pendiente` / `-limpia` / `-panel`, más
-  `.contador-errores` / `.contador-avisos` / `.aviso-entrada` / `.es-error` dentro de la cuarta.
-  `avisos()` es `signal<AvisoPrevalidacion[]|null>` con inicial `null`, y esa señal es la que separa
-  «no ejecutado» de «ejecutado y vacío». `getPrevalidacion` dentro de `cargar(id)` y NO en el
-  constructor; `errorPrevalidacion` es señal propia que NO gatea la rejilla (criterio de S87).
-  MOCKUP (D-F8.6-a) hecho y VALIDADO con el usuario: panel colapsable con cabecera siempre visible,
-  línea verde para el caso limpio, y dos niveles distinguidos por TRES señales (icono, borde, y sobre
-  todo el TEXTO DE LA CONSECUENCIA: «imposible de resolver» vs «puede ser sobrestimación»), no solo
-  por color. El diálogo del mockup salió del alcance con B2.
-  FICHERO TOCADO NO PREVISTO, señalado por Claude Code: `horario-view.spec.ts`. Al inyectar
-  `HorarioView` el nuevo servicio, su TestBed debía proveer un doble o los 14 tests reventaban por
-  inyección. NO es test nuevo (de ahí 52+4=56, no +5). Patrón que se repetirá: un componente que gana
-  dependencia obliga a tocar su spec previo.
-  CAMPAÑA DE 5, cada una por su vía prevista, SIN COLATERALES y ninguna dejó de compilar. M2 y M3
-  caen por el MISMO aserto atacando dimensiones distintas (estado inicial vs estructura de ramas):
-  no es cobertura duplicada, es el único punto donde ambas se observan. M6 (`=== 'ERROR'` →
-  `!== 'AVISO'`) NO SE EJECUTA: SUPERVIVIENTE DECLARADA, equivalente con dos valores en el enum; un
-  test que la matara cubriría un caso imposible hoy.
-  Suite frontend 52 → 56 (11 ficheros de test, antes 9); backend 333 INTACTO. No se tocó
-  `solver/src/main` → `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado.
-  DEUDA NUEVA: D-F8.4-B1-a (la caída de M2 depende de que (28) no llame a `setInput` en su primera
-  mitad). D-F8.4-A-c REENCUADRADA, no cerrada.
-  Siguiente: 8.4-B2 (guarda + diálogo, pero antes hay que crear el gesto de generar), 8.6-B (aviso
-  durante el arrastre; contrato ANTES de medir, orden inverso a M2), D-F8.6-ivB-a (resto: el
-  `errorPin.set(null)` de `alDespinar`) o D-F8.6-iiiA-b (`Totales` sigue sin sede), a decidir al abrir.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1049,10 +1053,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 y la de S91 en la Sesión 95 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95 y la de S92 en la Sesión 96 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S92–S95). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S93–S96). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -1370,6 +1374,20 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       el fallo, o el segundo gesto se iría por el `return` de la guarda y el test mediría el NO-OP.
       Campaña de 2, cada una en su test y POR ASERTO. Suite frontend 67 → 69; backend 333 intacto.
       → D-F8.6-ivD-a. Detalle: bitácora S94 (futura).
+- [x] Bloque 8.6-iv-E — El INVARIANTE DEL `<select>` (S96). CIERRA D-F8.6-ivB-a ENTERA, su punto
+      (b) y último resto. Tests (37) y (38) en `horario-view.spec.ts`
+      (`app/frontend/src/app/components/horario-view/`), `horario-view.ts` con diff VACÍO. Aseveran
+      que `bloqueos.listar` SIGUE EN 1 LLAMADA tras `cambiarVista` (304-307) y tras `cambiarEntidad`
+      (309-311), que son métodos DISTINTOS y por eso son DOS tests. El aserto va sobre el COLABORADOR
+      y NO sobre `pinadas`: un doble que devuelve la misma lista la deja idéntica y la mutación
+      quedaría verde; precedente, (25a) con `getProyeccion` en S89. Cada test lleva ASERTO A
+      (precondición: `listar` en 1 ANTES del gesto, para no medir un no-op) y ASERTO C (la señal
+      cambió de verdad, para que B no mida una llamada que nunca ocurrió). CAMPAÑA POR ADICIÓN, sin
+      precedente escrito en M3 y declarada como novedad: el invariante del TSDoc de `cargarPines`
+      (125-132) se sostiene sobre una AUSENCIA de llamada —UN SOLO call site, l.189 en `cargar`—, así
+      que la mutación INSERTA `this.cargarPines()` en el gesto. M1 cae solo en (37), M2 solo en (38),
+      las dos por ASERTO B; gestos NO acoplados. Suite frontend 69 → 71; backend 333 intacto.
+      → D-F8.6-ivD-b. Detalle: bitácora S96 (futura).
 - [ ] Bloque 8.6-B — Aviso de conflicto durante el arrastre. Depende de 8.6. Es cruce de índices,
       NO verificación (ver arriba). Si en algún momento se propone portar el verificador a TS,
       PARAR: sería un cuarto espejo de la lógica de solapes, en otro lenguaje, sin el test que
@@ -2249,37 +2267,6 @@ siguiente, con remisión a la bitácora.
   de error que solo tiene sentido decidir GLOBALMENTE, no de refilón en un bloque de frontend.
   → parametrizar el degradado cuando se decida la política global de errores.
 
-- **D-F8.6-ivB-a** (S84, VIVA REDUCIDA en S89, DE COBERTURA) — `alSoltar` Y TRES RAMAS MÁS DEL
-  CONTENEDOR SIGUEN SIN RED. 8.6-iv-B dio TRES asertos al despinado y CERO al pinado, que es su
-  gemelo simétrico y vive en el mismo componente. Señalado por Claude Code en el turno de contraste
-  y dejado FUERA a propósito: `alSoltar` es de 8.6-ii (S81) y su falta de cobertura NO estaba
-  declarada en ninguna deuda, así que meterlo habría doblado el bloque y mezclado dos deudas
-  distintas.
-  → NÚCLEO CUBIERTO EN S89 (8.6-iv-C). Las cuatro ramas de `alSoltar` que esta deuda enumeró tienen
-  aserto: (1) `aulas: []` y `tramo` sin permutar → (21); (2) la clave desde la RESPUESTA y no desde
-  la suelta —«la dimensión más peligrosa de las cuatro», y lo era: sin fixture divergente la
-  mutación queda verde— → (22); (3) el ERROR no puebla el Map y `mensaje()` degrada → (23) y (24);
-  (4) `getProyeccion` sigue en 1 llamada tras pinar → (25a). MÁS el `errorPin.set(null)` de reintento
-  de `alSoltar` → (25b), y una rama que esta deuda NO nombraba y el contraste destapó: la
-  preservación del índice previo al añadir un pin → (26).
-  → SOBREVIVIÓ tras S89, acotada a lo que ese bloque dejó fuera POR ALCANCE y no por descuido:
-  (a) el `errorPin.set(null)` de reintento de `alDespinar`, gemelo del que (25b) cubre; (b) el
-  invariante del TSDoc de `cargarPines` de que el índice NO se recarga al cambiar de vista o de
-  entidad —«aseverable barato con el `<select>`»—, dejado fuera porque mide `cambiarVista`, que es
-  otro gesto. NO sobrevive la rama `error:` de `alDespinar` que esta deuda contaba aparte: su
-  `errorPin.set(this.mensaje(err))` invoca EL MISMO `mensaje()` que la de `alSoltar`, que (24)
-  cubre; duplicar el aserto sería cobertura fingida. Eran dos ramas y era una y media (medido en
-  S89).
-  → PUNTO (a) CERRADO EN S94 (8.6-iv-D) por el test (36), que encadena fallo → reintento sobre
-  `alDespinar` y asevera que `errorPin` vuelve a `null` ANTES de que responda el segundo Subject;
-  la mutación que borra el `set` cae ahí y solo ahí, por aserto. Se cubrió JUNTO con su gemela
-  D-F8.4-B2-a, como S93 exigía. El `set(null)` vive en `horario-view.ts:236` —la l.183 que esta
-  deuda fijó en S89 quedó RANCIA al tocar S92/S93 el fichero, y se corrige aquí por R5—.
-  → SOBREVIVE SOLO EL PUNTO (b), el invariante del `<select>`, que mide `cambiarVista` y sigue
-  asignado al bloque que retome el gesto de cambio de vista. NO SE CIERRA a propósito: cerrarla
-  obligaría a abrir una hermana con ese resto y se perdería la traza de por qué quedó fuera.
-  Precedente: D-F8.6-iiiA-a en S84.
-
 - **D-F8.6-ivB-a-bis** (S89, VIVA, DE COBERTURA, no bloqueante) — LA PRECEDENCIA INTERNA DE
   `mensaje()` NO ESTÁ EJERCITADA. `mensaje()` devuelve `cuerpo?.message || cuerpo?.error || <texto
   con estado>`. El test (24) solo llega a la TERCERA rama, la del degradado, porque el body del
@@ -2327,6 +2314,20 @@ siguiente, con remisión a la bitácora.
   gemelos. → reabrir solo si aparece una CUARTA copia o si el criterio de cobertura deja de ser un
   `contains` (p. ej. si algún día dejara de ser ciego al `grupo_padre`), momento en que la
   triplicación pasaría a ser riesgo real de divergencia.
+
+- **D-F8.6-ivD-b** (S96, VIVA, DE ANDAMIO, no bloqueante) — `bloqueos.listar` SIGUE EN SUBJECT
+  COMPARTIDO. Es la ÚNICA de las cuatro llamadas dobladas del contenedor que quedó en la forma vieja
+  tras la homogeneización de S94: `guardar` es fresco por invocación desde S89, y `borrar` y `generar`
+  migraron en S94 (opción A del usuario), pero `listar` no entró en aquel alcance porque ningún test
+  lo reintentaba. Medido en el contraste de S96, no pedido por su contrato. NO estorba a (37) ni a
+  (38) —tampoco reintentan—, y por eso no se arregló aquí: tocarlo habría sido superficie fuera de
+  alcance. Importa por lo que S94 dejó escrito: un Subject cerrado por `.error()` redispara
+  SÍNCRONAMENTE al re-suscribirse, así que el primer test que quiera encadenar fallo → reintento
+  sobre `cargarPines` lo encontrará INESCRIBIBLE, y lo descubrirá a mitad del bloque en vez de al
+  planificarlo. Es deuda de andamio «de la que no se ve»: dos formas de doble conviviendo para
+  servicios del mismo contenedor, y el próximo que escriba un test tendrá que averiguar cuál toca.
+  → migrar `listar` a fresco por invocación en el próximo bloque que toque `horario-view.spec.ts`,
+  o antes si aparece un caso de reintento sobre el índice de pines.
 
 - **D-F8.5-D2b2-b** (S91, VIVA, COSMÉTICA, no bloqueante) — EL JAVADOC DE CLASE DE `CatalogoMapper`
   DICE «siete listas». Es PRE-EXISTENTE, no introducida por S91: ya estaba obsoleto desde que se
@@ -2418,6 +2419,8 @@ siguiente, con remisión a la bitácora.
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
+
+- **D-F8.6-ivB-a** — `alSoltar` y tres ramas más del contenedor sin red. NÚCLEO CUBIERTO en S89 (8.6-iv-C) por (21)-(26): las cuatro ramas de `alSoltar` —`aulas: []` y `tramo` sin permutar (21); la clave desde la RESPUESTA y no desde la suelta (22), la dimensión más peligrosa; el ERROR no puebla el Map y `mensaje()` degrada (23)/(24); `getProyeccion` sigue en 1 llamada tras pinar (25a)—, más el `errorPin.set(null)` de reintento de `alSoltar` (25b) y la preservación del índice previo (26), que la deuda no nombraba y destapó el contraste. La rama `error:` de `alDespinar` NO sobrevivió: invoca el MISMO `mensaje()` que (24) cubre y duplicar el aserto sería cobertura fingida. PUNTO (a) —el `errorPin.set(null)` de reintento de `alDespinar`, en `horario-view.ts:236`— CERRADO en S94 por (36), junto a su gemela D-F8.4-B2-a. PUNTO (b) y último resto —el invariante del TSDoc de `cargarPines` (125-132) de que el índice NO se recarga al cambiar de vista ni de entidad— CERRADO en S96 por (37) y (38), que aseveran `bloqueos.listar` en 1 llamada tras `cambiarVista` y tras `cambiarEntidad`: el aserto va sobre el COLABORADOR y no sobre `pinadas`, porque un doble que devuelve la misma lista la deja idéntica y la mutación quedaría verde. El invariante se sostiene sobre una AUSENCIA de llamada (un solo call site de `cargarPines`, l.189 en `cargar`), luego la campaña fue POR ADICIÓN. Detalle: bitácora S84, S89, S94 y S96 (futura).
 
 - **D-F8.4-B2-a** — el `errorGeneracion.set(null)` con que `lanzarGeneracion` limpia el error previo al reintentar no lo ejercitaba nadie: con una sola generación por test, borrarlo quedaba verde. CERRADA en S94 por el test (35) de `horario-view.spec.ts`, que encadena fallo → reintento y asevera la fase INTERMEDIA —el aviso de error desaparece ANTES de que el segundo Subject responda—, única que discrimina el `set`; la versión débil (`toHaveBeenCalledTimes(2)`) sigue dando 2 con el `set` borrado y se descartó por eso. Exigió migrar el doble de `horario.generar` de Subject compartido a FRESCO POR INVOCACIÓN: uno ya cerrado por `.error()` redispara síncronamente al re-suscribirse y hace la fase inobservable. Se cerró JUNTO con su gemela —el punto (a) de D-F8.6-ivB-a, mismo mecanismo en `alDespinar`— como S93 exigía. Detalle: bitácora S94.
 - **D-F8.5-D2b1-a** — la ruta JPA clavaba `tutorias = List.of()`: el `ProfesorTutoriaRepository` existía desde S77 pero no llegaba al dominio, y la ruta JSON transportaba tutorías mientras la de producción las perdía. CERRADA en S91: `CatalogoMapper.aProblemaHorario` gana un ONCEAVO parámetro `List<app.catalog.ProfesorTutoria>` —sigue `static` puro, sin repositorios inyectados— y `GeneradorHorarioService.cargarProblema` pasa `profesorTutoriaRepository.findAll()` dentro de su `@Transactional(readOnly=true)`, que es lo que permite navegar los `@ManyToOne(LAZY)` de la PK. La conversión resuelve profesor y grupo por IDENTIDAD contra los índices ya materializados (nunca `findById`) y traduce el enum por nombre abortando si no existe en destino. Aseverado por B-T5 (integración `@DataJpaTest` sobre SQLite real), que es su ÚNICO killer: ningún unitario caza el cableado del servicio. Detalle: bitácora S91.
