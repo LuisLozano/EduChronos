@@ -17,4 +17,13 @@ export class HorarioService {
   getProyeccion(id: number): Observable<HorarioProyeccion> {
     return this.http.get<HorarioProyeccion>(`/api/horarios/${id}/proyeccion`);
   }
+
+  /**
+   * POST /api/horarios (body `{}`) → genera y persiste un horario nuevo con los
+   * defaults del backend y devuelve su proyección completa. Gemelo pelado de
+   * {@link getProyeccion}: un `return this.http.post` sin `.pipe`.
+   */
+  generar(): Observable<HorarioProyeccion> {
+    return this.http.post<HorarioProyeccion>('/api/horarios', {});
+  }
 }

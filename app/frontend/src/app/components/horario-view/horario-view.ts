@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 
 import { HorarioProyeccion } from '../../models/horario.model';
 import { Diagnostico } from '../../models/diagnostico.model';
@@ -13,6 +14,7 @@ import { clavePin, indicePines } from '../../horario/pines';
 import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
+import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 
 /**
  * Contenedor de las tres vistas: carga la proyección del horario `{id}` (param
@@ -35,6 +37,8 @@ import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
 })
 export class HorarioView {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(Dialog);
   private readonly service = inject(HorarioService);
   private readonly bloqueos = inject(BloqueoService);
   private readonly diagnosticos = inject(DiagnosticoService);
@@ -67,6 +71,15 @@ export class HorarioView {
   protected readonly avisosPrevalidacion = signal<AvisoPrevalidacion[] | null>(null);
   /** Fallo NO fatal de la carga de pre-validación. Señal PROPIA: no gatea la rejilla. */
   protected readonly errorPrevalidacion = signal<string | null>(null);
+
+  /**
+   * Fallo del POST de generación. Señal PROPIA y DISJUNTA de {@link error}
+   * (misma disciplina que {@link errorPrevalidacion}, S92): un rechazo del solver
+   * no debe vaciar la rejilla del horario vigente. Se limpia al iniciar cada
+   * intento. Se pinta bajo `.error-generacion`, clase propia que NO colisiona con
+   * el `.error` de {@link error}/{@link errorPin}.
+   */
+  protected readonly errorGeneracion = signal<string | null>(null);
 
   /**
    * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
@@ -243,6 +256,49 @@ export class HorarioView {
   private mensaje(err: { status?: number; error?: { message?: string; error?: string } }): string {
     const cuerpo = err?.error;
     return cuerpo?.message || cuerpo?.error || `El servidor rechazó el pin (${err?.status ?? 'error'}).`;
+  }
+
+  /**
+   * Dispara una generación de horario. Gateado por {@link avisosPrevalidacion}:
+   * si es `null` (pre-validación no ejecutada) no hace nada —el botón ya está
+   * deshabilitado, esta guarda es el cinturón—. Si hay algún aviso de severidad
+   * `'ERROR'`, la generación está condenada: se pide confirmación explícita y solo
+   * se procede si el diálogo cierra con `true` (backdrop/Escape emiten `undefined`
+   * y abortan). Sin errores, procede directo.
+   */
+  protected generar(): void {
+    const avisos = this.avisosPrevalidacion();
+    if (avisos === null) {
+      return;
+    }
+    const errores = avisos.filter((a) => a.severidad === 'ERROR');
+    if (errores.length > 0) {
+      this.dialog
+        .open<boolean, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
+        .closed.subscribe((confirmado) => {
+          if (confirmado === true) {
+            this.lanzarGeneracion();
+          }
+        });
+      return;
+    }
+    this.lanzarGeneracion();
+  }
+
+  /**
+   * Lanza el POST y, en el next, navega a la ruta del horario nuevo. La proyección
+   * devuelta NO se consume: la recarga la dispara la emisión de `paramMap` al
+   * cambiar de ruta —igual que cualquier otra entrada a la vista—, no este next.
+   * El error puebla {@link errorGeneracion} (señal propia, no gatea la rejilla).
+   */
+  private lanzarGeneracion(): void {
+    this.errorGeneracion.set(null);
+    this.service.generar().subscribe({
+      next: (dto) => {
+        this.router.navigate(['/horario', dto.id]);
+      },
+      error: (err) => this.errorGeneracion.set(this.mensaje(err)),
+    });
   }
 
   protected cambiarVista(v: Vista): void {

@@ -1,0 +1,24 @@
+<section class="confirmar-generacion">
+  <h2>Generar pese a la pre-validación</h2>
+
+  <p class="advertencia">
+    El servidor rechazará esta generación y no detallará la causa en la respuesta.
+    Estos hallazgos de severidad ERROR lo impedirán:
+  </p>
+
+  <ul class="errores">
+    @for (a of errores; track $index) {
+      <li class="error-entrada">
+        <span class="regla">{{ a.regla }}</span>
+        <span class="entidad">{{ a.entidadCodigo }}</span>
+        <span class="cuenta">{{ a.demanda }} / {{ a.disponible }}</span>
+        <span class="descripcion">{{ a.descripcion }}</span>
+      </li>
+    }
+  </ul>
+
+  <div class="acciones">
+    <button type="button" class="cancelar" (click)="cancelar()">Cancelar</button>
+    <button type="button" class="confirmar" (click)="confirmar()">Generar de todos modos</button>
+  </div>
+</section>

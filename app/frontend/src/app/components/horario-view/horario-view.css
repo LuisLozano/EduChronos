@@ -24,6 +24,13 @@
   font-weight: 600;
 }
 
+/* Fallo del POST de generación. Clase PROPIA (no .error), misma razón que
+   .error-diagnostico: distinguible por DOM y sin vaciar la rejilla vigente. */
+.error-generacion {
+  color: #b00;
+  font-weight: 600;
+}
+
 /* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
 .aviso {
   padding: 0.4rem 0.6rem;

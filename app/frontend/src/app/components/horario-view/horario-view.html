@@ -16,7 +16,20 @@
       }
     </select>
   </label>
+
+  <button
+    type="button"
+    class="generar"
+    [disabled]="avisosPrevalidacion() === null"
+    (click)="generar()"
+  >
+    Generar horario
+  </button>
 </section>
+
+@if (errorGeneracion(); as msg) {
+  <p class="error-generacion">{{ msg }}</p>
+}
 
 @if (pinadas().size > 0) {
   <p class="aviso">{{ pinadas().size }} pines sin aplicar — regenerar</p>

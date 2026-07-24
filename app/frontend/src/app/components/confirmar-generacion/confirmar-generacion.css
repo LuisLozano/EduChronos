@@ -1,0 +1,48 @@
+/* El CDK monta el componente en un overlay SIN estilo: la caja la pone este CSS.
+   Fondo, borde y sombra para despegarlo del backdrop; ancho acotado para que la
+   lista de errores no se estire sin fin. */
+.confirmar-generacion {
+  max-width: 34rem;
+  padding: 1rem 1.2rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.confirmar-generacion h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+/* Mismo rojo de aviso que el resto de errores de severidad ERROR (panel y vista). */
+.advertencia {
+  color: #b00;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.errores {
+  margin: 0 0 0.8rem;
+  padding-left: 1rem;
+}
+
+.error-entrada {
+  display: flex;
+  gap: 0.5rem;
+  color: #b00;
+}
+
+.error-entrada .regla {
+  font-weight: 600;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.acciones .confirmar {
+  font-weight: 600;
+}

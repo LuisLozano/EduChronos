@@ -1,1 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Posicionado y backdrop del overlay del CDK (@angular/cdk/dialog). El CDK no
+   inyecta este CSS: sin él el diálogo se monta pero queda sin centrar ni fondo. */
+@import '@angular/cdk/overlay-prebuilt.css';
