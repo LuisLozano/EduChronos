@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S93. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S94. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S93). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S94). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4313,3 +4313,72 @@ al abrir sesión.
   Siguiente: 8.6-B (aviso durante el arrastre; cruce de índices, contrato ANTES de medir, orden
   inverso a M2), D-F8.6-ivB-a resto + D-F8.4-B2-a (los dos `set(null)` de reintento, ahora gemelos
   declarados), D-F8.6-iiiA-b (`Totales` sin sede) o HIGIENE (condensar 8.4), a decidir al abrir.
+
+### Sesión 94 — Fase 8, Bloque 8.6-iv-D: los `set(null)` DE REINTENTO, los dos juntos (CIERRA D-F8.4-B2-a y el punto (a) de D-F8.6-ivB-a).
+  Modo híbrido. 1 commit de código (solo `horario-view.spec.ts`) + doc aparte. Bloque BARATO por
+  criterio ya escrito: las dos deudas venían DECLARADAS GEMELAS en S93 y asignadas a cubrirse
+  JUNTAS con un test que encadenara dos invocaciones. Esta es la sesión que las cierra a la vez.
+  §A DE MEDICIÓN CONTRA EL ÁRBOL (Claude Code), y DESMINTIÓ CUATRO AFIRMACIONES DEL ARQUITECTO,
+  todas del mismo género —afirmar sobre terreno no leído—, tres de ellas sobre el PROPIO PLAN:
+  (1) la RUTA que el arquitecto puso en el guion (`app/frontend/src/app/horario/`) NO EXISTE: los
+  ficheros viven en `app/frontend/src/app/components/horario-view/`. La escribió sin medirla, dentro
+  del guion que existe para no suponer (mismo género que el error de enrutado de S84);
+  (2) la LÍNEA 183 que el plan fijaba para el `errorPin.set(null)` de `alDespinar` estaba RANCIA:
+  es la 236. La fijó S89 y S92/S93 tocaron el fichero en medio. Estado vivo equivocado por R5;
+  (3) «LOS DOS `set(null)`» DESCRIBE MAL EL FICHERO: el grep devuelve NUEVE, en seis métodos. Lo que
+  las deudas nombran no son «los `set(null)`» sino los DE REINTENTO (236 y 295); los otros siete son
+  limpieza de carga —nadie reintenta `cargarDiagnostico`—. La distinción se sostiene, pero el nombre
+  que el plan usaba no la llevaba dentro y por eso se pudo leer como «hay dos en el fichero»;
+  (4) EL ANDAMIO DE S89 NO SERVÍA, y es el hallazgo que REENCUADRÓ EL COSTE. El plan trataba «el
+  andamio» como uno solo y son TRES colaboradores con TRES formas: `guardar` es fresco por
+  invocación desde S89, pero `borrar` y `generar` eran Subject COMPARTIDO. Un Subject que ya emitió
+  `.error()` queda cerrado: al re-suscribirse redispara el error SÍNCRONAMENTE, lo que hace
+  inobservable la fase discriminante, y un `next` de éxito en el segundo intento es imposible.
+  Sin cambiar eso, el test que las deudas piden es INESCRIBIBLE.
+  EN VERDE, medido: los siete providers estaban puestos (no faltaba ninguno), y `lanzarGeneracion`
+  es alcanzable SIN diálogo por la vía directa de `generar()` cuando no hay avisos `ERROR`, así que
+  la guarda de S93 no estorbaba —supuesto del arquitecto que la medición descartó por infundado—.
+  CLAUDE CODE DEVOLVIÓ LA PREGUNTA SIN RESOLVERLA (versión fuerte vs. débil del «fallo → reintento»)
+  en vez de decidirla, que es lo correcto. ELEGIDA LA FUERTE y no por gusto de rigor: la débil
+  asevera `toHaveBeenCalledTimes(2)`, y contra la mutación de borrar el `set(null)` ese contador
+  sigue dando 2 y el test queda VERDE. Habría cerrado dos deudas dejándolas sin red, que es PEOR que
+  dejarlas abiertas, porque la casilla diría que están cubiertas.
+  DECISIÓN DE ANDAMIO (A frente a B), del usuario con recomendación del arquitecto: (A) migrar los
+  DOS dobles y adaptar los tests que emitían sobre ellos, dejando las tres formas homogéneas;
+  (B) añadir la fábrica fresca solo donde hiciera falta, sin tocar ningún test. ELEGIDA A: la forma
+  compartida no es una elección sino lo que había ANTES de que S89 descubriera que no servía, y
+  mantenerla conserva un estado ya sabido equivocado; B dejaría dos formas de doble conviviendo para
+  el mismo servicio y el próximo que escriba un test tendría que averiguar cuál toca —deuda de
+  andamio, y de la que no se ve—. COSTE DECLARADO Y REVISADO AL ALZA ANTES DE ELEGIR: el arquitecto
+  había dicho «bajo, un solo fichero»; con la medición delante pasó a MEDIO, porque A toca asertos
+  commiteados y verdes para escribir dos nuevos.
+  EL RECUENTO DE TESTS A ADAPTAR TAMBIÉN ERA DEL ARQUITECTO Y TAMBIÉN FALLÓ: listó (30) entre los
+  que emiten sobre `sujetoGenerar` leyendo la lista de `it()` sin abrir el cuerpo. (30) NO emite:
+  dispara vía `sujetoCerrado.next(true)` y solo asevera que `generar` fue llamado. Claude Code no lo
+  tocó y lo señaló.
+  ENTREGADO: `sujetoBorrar` y `sujetoGenerar` ELIMINADOS; `borrar` y `generar` pasan a
+  `vi.fn(() => (ultimo… = new Subject…))` con sus variables `ultimoBorrar`/`ultimoGenerar` junto a
+  `ultimoGuardar`; adaptados (2), (31) y (32) de forma mecánica y SIN tocar un solo aserto; (35) y
+  (36) nuevos, cada uno con su ASERTO A (error poblado tras el primer fallo), su A-bis donde aplica
+  (en (36), que el pin SIGA en el índice tras el fallo: si saliera, el segundo gesto se iría por el
+  `return` de la guarda y el test mediría el NO-OP en vez del reintento) y su ASERTO B discriminante.
+  CAMPAÑA DE 2, con la vía declarada como M3 exige tras el matiz de T7 en S93: M1 (borrar el
+  `errorGeneracion.set(null)`) cae SOLO en (35); M2 (borrar el `errorPin.set(null)`) cae SOLO en
+  (36); las dos POR ASERTO —un `expect(...).toBeNull()` recibe el `<p>` de error superviviente—, sin
+  `TypeError` ni otra excepción. NINGÚN test previo cae con ninguna de las dos, que es la
+  comprobación que M3 pide desde S82 y la que confirma que el bloque no sobraba.
+  Suite frontend 67 → 69 (12 ficheros, sin cambio); backend 333 INTACTO. `horario-view.ts` idéntico
+  a HEAD al cerrar (diff vacío): no hay producción en este bloque. No se tocó `solver/src/main` →
+  `referencia-codigo-solver.md` NO regenerada; `modelo_datos_fase1.md` NO tocado.
+  DEUDA NUEVA: D-F8.6-ivD-a (la capa defensiva perdida en (3) y (4)). CIERRA D-F8.4-B2-a y el punto
+  (a) de D-F8.6-ivB-a, que SOBREVIVE acotada a su punto (b).
+  CORRIGE POR R5, en todas sus sedes vivas: la línea 183 → 236, y «los dos `set(null)`» → «los
+  `set(null)` DE REINTENTO».
+  LIMPIEZA EVALUADA Y DESCARTADA (M1.5): 8.4 sigue siendo candidato natural a condensación y ahora
+  se le suma 8.6-iv, pero esta sesión ya archiva ventana, y concentrar condensación y archivado
+  sobre el mismo fichero es el motivo por el que S79 desplazó una limpieza. Queda para S95 con DOS
+  frentes acumulados, no uno.
+  Siguiente: HIGIENE (condensar 8.4 y quizá 8.6-iv, dos frentes cerrados acumulados), 8.6-B (aviso
+  durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de medir, orden inverso a
+  M2) o D-F8.6-iiiA-b (`Totales` sigue sin sede, con la trampa de los conteos sin signo), a decidir
+  al abrir.
