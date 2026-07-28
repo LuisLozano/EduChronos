@@ -600,6 +600,42 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
+### Sesión 99 — Fase 8, D-F8.6-ivD-b: homogeneización del doble de `bloqueos.listar` a fresco por invocación (CIERRA la deuda).
+  Modo híbrido. 1 commit de código (`horario-view.spec.ts` migrado) + doc aparte. ANDAMIO DE TEST,
+  no función: la deuda se cierra IMPLEMENTANDO la homogeneización, no añadiendo capacidad al producto.
+  Elegido sobre D-F8.6-B-a (reabre el camino de PINADO probado por (21)-(26)/(35)-(38), y el usuario
+  ya decidió NO tocarlo en S97, C-3) y D-F8.6-iiiA-b (arrastra MOCKUP PREVIO y diseño de presentación).
+  §A DE MEDICIÓN sobre el repo (greps y lectura literal, sin test desechable: la pregunta es sobre el
+  fichero, no sobre datos), traído al turno de contraste con Claude Code (M4, un solo módulo → sin el
+  turno inter-módulos de S90). LA MEDICIÓN CORRIGIÓ EL CONTRATO DEL ARQUITECTO en dos puntos, los dos
+  declarados: (1) yo dije «tres `.next([])` sueltos» como equivalentes, pero el de la l.601 NO está en
+  un `it`, está en el helper `montarConPrevalidacion` (usado por (27)-(33) y (35)); (2) supuse que
+  algún `.next([])` podría ser no-op por orden, pero los tres van DESPUÉS de su `sujetoParam.next` con
+  el componente ya suscrito, así que el bloque se reduce a un RENOMBRADO (`sujetoListar` →
+  `ultimoListar`) + cambio de forma del doble, sin reordenar ninguna emisión. Tercer hallazgo del
+  contraste (P3): el (1) es el ÚNICO `it` que invoca `listar` dos veces y NO emite en ninguna (solo
+  cuenta con `toHaveBeenCalledTimes`), luego un solo `ultimoListar` basta; ningún test re-suscribe
+  esperando emisión en dos suscripciones distintas. La forma correcta para `listar` NO es la de
+  `borrar`/`generar` (Subject fresco anónimo) sino la de `guardar` (fresco GUARDADO en `ultimoListar`
+  para poder emitir sobre él): `listar` se consume dentro de `cargar(id)`/`cargarPines`, disparado por
+  la emisión de ruta, y (1) y (5) aseveran sobre él.
+  ENTREGADO: ocho cambios en `horario-view.spec.ts` (declaración l.89, borrado del init en `beforeEach`,
+  doble a `vi.fn(() => (ultimoListar = new Subject()))` con comentario que cita D-F8.6-ivD-b, y seis
+  renombrados en `montar()`, (5), (14), `montarConPrevalidacion`, (34)). `grep sujetoListar` → cero.
+  `git diff --stat`: 1 fichero, +13/−8. Frontend 75 → 75 (sin tests nuevos: es andamio, el test de
+  reintento sobre `cargarPines` se escribe cuando llegue su caso real, como la propia deuda dice).
+  CAMPAÑA DE MUTACIÓN (M3, suite NO vacía demostrada): M-A comenta `ultimoListar.error(...)` en (5) →
+  cae SOLO (5) en `not.toBeNull` (sin la emisión el aviso ni se pinta: prueba que el error llega al
+  suscriptor real con el Subject fresco); M-B duplica la primera emisión de ruta en (1) → cae SOLO (1)
+  con expected 1/got 2 (el conteo discrimina la degeneración `a=1`). Ambas restauradas, sin residuo.
+  NO se tocó `solver/src/main` → `referencia-codigo-solver.md` NO regenerado (M4). NO se tocó
+  `modelo_datos_fase1.md`. Backend 333 intacto (no ejecutado: cero ficheros de backend en el diff).
+  LIMPIEZA EVALUADA (M1.5): sin frentes cerrados acumulados. 8.6 se condensó en S98; este bloque cierra
+  una DEUDA suelta, no un frente, así que no hay nada que condensar. Decirlo es la respuesta correcta.
+  Siguiente: abrir la CONFIGURACIÓN POR CENTRO (frente nuevo de Fase 8 que desbloquea D-UI-shell,
+  D-seed-demo, D-demo-cliente), o deuda de bajo coste con sede futura: D-F8.6-B-a (el genérico que
+  miente, en el próximo bloque que toque el camino de soltado) o D-F8.6-iiiA-b (`Totales` sin sede,
+  con MOCKUP PREVIO por D-F8.6-a), a decidir al abrir.
 Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-B CERRADO
   en S97, y con él el FRENTE 8.6 ENTERO (AVISO DE OCUPACIÓN AL INICIAR EL ARRASTRE, elegido tras
   CUATRO sesiones nombrado y descartado siempre por el mismo motivo; descartarlo una quinta vez era
@@ -786,7 +822,7 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   vía = OPTIMIZACION únicamente; FACTIBILIDAD y warm-start NO expuestos (ver nota abajo);
   D30 (renumeración de tramos duplicada) Fase 8; C5 (bloqueo manual de tramo / SesionBloqueada §4.7)
   sin mecanismo en el solver, diferido)
-### Sesión 98 — Fase 8, HIGIENE DOCUMENTAL: condensación del frente 8.6 ENTERO y archivado de ventana.
+Última sesión registrada (previa): Sesión 98 — Fase 8, HIGIENE DOCUMENTAL: condensación del frente 8.6 ENTERO y archivado de ventana.
   Sin código. Modo interactivo. DOS operaciones sobre `docs/`, en commits separados con verificación
   de R4 y de COSTURA ENTRE cada uno y no solo al final (criterio de S94/S95). El frente 8.6 es el más
   largo del plan y su condición habilitante —que S95 y S96 declararon pendiente de EXACTAMENTE el
@@ -976,52 +1012,6 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   medir, orden inverso a M2, y solo defendible si la sesión se dedica a DISEÑO), D-F8.6-iiiA-b
   (`Totales` sin sede, con MOCKUP PREVIO por D-F8.6-a) o D-F8.6-ivD-b (homogeneizar el doble de
   `listar`), a decidir al abrir.
-Última sesión registrada (previa): Sesión 95 — Fase 8, HIGIENE DOCUMENTAL: condensación de DOS frentes cerrados (8.4 y 8.6-iv) y archivado de ventana.
-  Sin código. Modo interactivo. TRES operaciones sobre `docs/`, en commits separados con verificación
-  de R4 y de COSTURA ENTRE cada una y no solo al final —criterio adoptado por el fallo de S94, donde
-  un `str_replace` mal anclado descabezó una deuda vecina y lo cazó el grep de M1.6, no la lectura—.
-  DESBLOQUEA UN APLAZAMIENTO CIRCULAR: S93 aplazó 8.4 por ser la sesión que lo cerró y S94 lo aplazó
-  otra vez por concentrar condensación y archivado sobre el mismo fichero (motivo de S79). El
-  argumento de S94 se cumple en TODA sesión —todas archivan ventana—, luego sostenerlo una tercera vez
-  equivalía a no condensar nunca. Se rompe una vez, con la mitigación escrita arriba.
-  ALCANCE FIJADO POR MEDICIÓN, y el criterio de S63/S80 obligó a una distinción fina: 8.6 NO está
-  cerrado entero —8.6-B sigue ABIERTO—, así que condensar «8.6» habría violado el criterio; lo cerrado
-  es el SUB-FRENTE 8.6-iv, cuyas cuatro casillas están todas `[x]`. Medido con `grep '^- \[ \]'` sobre
-  Fase 8: solo dos casillas abiertas, 8.5-D3 (aplazado indefinidamente) y 8.6-B.
-  DOS FALLOS DEL §A DEL ARQUITECTO, los dos suyos y los dos declarados en vez de tapados: (1) el `sed`
-  con que midió los tokens de 8.6-iv usaba el patrón `/Bloque 8.6-iv-A/` como ancla de inicio, y la
-  PRIMERA coincidencia no es la casilla (l.1407) sino la CABECERA DE VENTANA (l.679): barrió 785
-  líneas y devolvió 97 tokens, entre ellos `D-B5-5` y `D-B10-1..9`, que no pueden vivir en cuatro
-  casillas de tests de frontend. El dato se DESCARTÓ y se remidió con rangos numéricos explícitos.
-  (2) el censo de citantes contaba con `grep -c` sin ancla, que agrega la forma con punto final
-  (`D-F8.4-A-c` y `D-F8.4-A-c.`): correcto para contar, trampa para verificar.
-  EL HALLAZGO QUE FIJÓ EL CONTENIDO DE LAS LÍNEAS CONDENSADAS: cinco tokens tenían UN SOLO citante y
-  era justo la línea a reescribir —`D-F8.4-A-a` y `D-F8.4-A-b` (ambos en l.1242), `D-F8.6-ivA-a` y
-  `D-F8.6-ivA-c` (l.1422), `D-F8.6-ivB-c` (l.1431)—. Condensar sin conservarlos los dejaba HUÉRFANOS
-  y rompía R4 en el mismo commit. Regla aplicada, heredada de S63: cada línea condensada conserva
-  LITERALMENTE sus tokens dentro. `D-F8.4-B2-a` aparece en AMBOS frentes (8.4 y la casilla iv-D que la
-  cierra), lo que refuerza la separación en dos commits: un fallo en el primero sería indistinguible
-  de uno en el segundo.
-  DECISIÓN DEL USUARIO (A frente a B) sobre las remisiones «bitácora Sxx (futura)»: (A) condensar
-  igual conservando la marca, (B) condensar solo las casillas cuyas sesiones ya estén archivadas.
-  ELEGIDA A: la marca ya está en el plan y no se inventa nada; B fragmentaba el criterio de S63 —que
-  habla de frentes CERRADOS, no de sesiones archivadas— y garantizaba una cuarta visita a lo mismo.
-  Quedan tres remisiones a futuro (S92, S93, S94), que se resuelven solas al rotar la ventana.
-  ENTREGADO: frente 8.4 de 67 → 27 líneas (−40), frente 8.6-iv de 57 → 31 (−26), archivado de S91
-  con las TRES rotaciones de M1-bis (nace S95, sale S91 PROMOVIDA a `### Sesión 91`, degrada S94) y
-  los dos censos de la bitácora, la crónica y la frase de ventana actualizados. Plan 2630 → 2538
-  líneas (−92, −3,5 %; la condensación quita 66 y el registro de esta sesión devuelve parte);
-  bitácora 4067 → 4144 (+77 por S91). Estructura viva intacta: 8.6-B y 8.5-D3
-  siguen ABIERTOS y sin tocar, cero tokens huérfanos, ninguna deuda reescrita.
-  NO se tocó código, ni `modelo_datos_fase1.md`, ni `referencia-codigo-solver.md` (no hay `solver/
-  src/main` en esta sesión). Suites NO ejecutadas: no procede, cero ficheros de código en el diff.
-  LIMPIEZA EVALUADA PARA LA PRÓXIMA (M1.5): sin frentes cerrados acumulados. 8.6 quedará condensable
-  cuando cierre 8.6-B, su único sub-bloque vivo; hasta entonces no hay nada que condensar y decirlo
-  es la respuesta correcta (S81-S85 la descartaron cinco veces por este mismo motivo).
-  Siguiente: 8.6-B (aviso durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de
-  medir, orden inverso a M2, y solo defendible si la sesión se dedica a DISEÑO), D-F8.6-iiiA-b
-  (`Totales` sin sede, con MOCKUP PREVIO por D-F8.6-a) o el punto (b) de D-F8.6-ivB-a (invariante del
-  `<select>`, barato, cierra una deuda entera), a decidir al abrir.
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -1033,10 +1023,10 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95, la de S92 en la Sesión 96, la de S93 en la Sesión 97 y la de S94 en la Sesión 98 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95, la de S92 en la Sesión 96, la de S93 en la Sesión 97, la de S94 en la Sesión 98 y la de S95 en la Sesión 99 (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas cabeceras compactas (S95–S98). El detalle histórico de cualquier sesión anterior —incluida S42
+últimas cabeceras compactas (S96–S99). El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -2242,19 +2232,14 @@ siguiente, con remisión a la bitácora.
   `contains` (p. ej. si algún día dejara de ser ciego al `grupo_padre`), momento en que la
   triplicación pasaría a ser riesgo real de divergencia.
 
-- **D-F8.6-ivD-b** (S96, VIVA, DE ANDAMIO, no bloqueante) — `bloqueos.listar` SIGUE EN SUBJECT
-  COMPARTIDO. Es la ÚNICA de las cuatro llamadas dobladas del contenedor que quedó en la forma vieja
-  tras la homogeneización de S94: `guardar` es fresco por invocación desde S89, y `borrar` y `generar`
-  migraron en S94 (opción A del usuario), pero `listar` no entró en aquel alcance porque ningún test
-  lo reintentaba. Medido en el contraste de S96, no pedido por su contrato. NO estorba a (37) ni a
-  (38) —tampoco reintentan—, y por eso no se arregló aquí: tocarlo habría sido superficie fuera de
-  alcance. Importa por lo que S94 dejó escrito: un Subject cerrado por `.error()` redispara
-  SÍNCRONAMENTE al re-suscribirse, así que el primer test que quiera encadenar fallo → reintento
-  sobre `cargarPines` lo encontrará INESCRIBIBLE, y lo descubrirá a mitad del bloque en vez de al
-  planificarlo. Es deuda de andamio «de la que no se ve»: dos formas de doble conviviendo para
-  servicios del mismo contenedor, y el próximo que escriba un test tendrá que averiguar cuál toca.
-  → migrar `listar` a fresco por invocación en el próximo bloque que toque `horario-view.spec.ts`,
-  o antes si aparece un caso de reintento sobre el índice de pines.
+- **D-F8.6-ivD-b** (S96 → CERRADA S99) — `bloqueos.listar` estaba en Subject COMPARTIDO, la única de
+  las cuatro llamadas dobladas del contenedor en forma vieja. Cerrada en S99: el doble migra a FRESCO
+  POR INVOCACIÓN guardado en `ultimoListar` —forma de `guardar`, no de `borrar`/`generar` (anónimos):
+  `listar` se consume en `cargar`/`cargarPines` y (1)/(5) aseveran sobre él, así que hay que poder
+  emitir sobre el último Subject—. Ocho cambios en `horario-view.spec.ts` (renombrado + forma del
+  doble); ninguna emisión reordenada (los tres `.next([])` sueltos y los dos helpers ya emitían tras
+  la suscripción). Los cuatro dobles del contenedor quedan homogéneos. Suite 75 → 75, `src/main`
+  intacto. Detalle: bitácora S99 (futura).
 
 - **D-F8.6-B-a** (S97, VIVA, no bloqueante, DE FIRMA QUE MIENTE) — EL GENÉRICO DE `CdkDragDrop` NO
   SE CORRESPONDE CON NINGÚN DATO REAL. `horario-grid.ts:150` anota

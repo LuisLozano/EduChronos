@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S94. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S95. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S94). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S95). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4382,3 +4382,50 @@ al abrir sesión.
   durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de medir, orden inverso a
   M2) o D-F8.6-iiiA-b (`Totales` sigue sin sede, con la trampa de los conteos sin signo), a decidir
   al abrir.
+
+### Sesión 95 — Fase 8, HIGIENE DOCUMENTAL: condensación de DOS frentes cerrados (8.4 y 8.6-iv) y archivado de ventana.
+  Sin código. Modo interactivo. TRES operaciones sobre `docs/`, en commits separados con verificación
+  de R4 y de COSTURA ENTRE cada una y no solo al final —criterio adoptado por el fallo de S94, donde
+  un `str_replace` mal anclado descabezó una deuda vecina y lo cazó el grep de M1.6, no la lectura—.
+  DESBLOQUEA UN APLAZAMIENTO CIRCULAR: S93 aplazó 8.4 por ser la sesión que lo cerró y S94 lo aplazó
+  otra vez por concentrar condensación y archivado sobre el mismo fichero (motivo de S79). El
+  argumento de S94 se cumple en TODA sesión —todas archivan ventana—, luego sostenerlo una tercera vez
+  equivalía a no condensar nunca. Se rompe una vez, con la mitigación escrita arriba.
+  ALCANCE FIJADO POR MEDICIÓN, y el criterio de S63/S80 obligó a una distinción fina: 8.6 NO está
+  cerrado entero —8.6-B sigue ABIERTO—, así que condensar «8.6» habría violado el criterio; lo cerrado
+  es el SUB-FRENTE 8.6-iv, cuyas cuatro casillas están todas `[x]`. Medido con `grep '^- \[ \]'` sobre
+  Fase 8: solo dos casillas abiertas, 8.5-D3 (aplazado indefinidamente) y 8.6-B.
+  DOS FALLOS DEL §A DEL ARQUITECTO, los dos suyos y los dos declarados en vez de tapados: (1) el `sed`
+  con que midió los tokens de 8.6-iv usaba el patrón `/Bloque 8.6-iv-A/` como ancla de inicio, y la
+  PRIMERA coincidencia no es la casilla (l.1407) sino la CABECERA DE VENTANA (l.679): barrió 785
+  líneas y devolvió 97 tokens, entre ellos `D-B5-5` y `D-B10-1..9`, que no pueden vivir en cuatro
+  casillas de tests de frontend. El dato se DESCARTÓ y se remidió con rangos numéricos explícitos.
+  (2) el censo de citantes contaba con `grep -c` sin ancla, que agrega la forma con punto final
+  (`D-F8.4-A-c` y `D-F8.4-A-c.`): correcto para contar, trampa para verificar.
+  EL HALLAZGO QUE FIJÓ EL CONTENIDO DE LAS LÍNEAS CONDENSADAS: cinco tokens tenían UN SOLO citante y
+  era justo la línea a reescribir —`D-F8.4-A-a` y `D-F8.4-A-b` (ambos en l.1242), `D-F8.6-ivA-a` y
+  `D-F8.6-ivA-c` (l.1422), `D-F8.6-ivB-c` (l.1431)—. Condensar sin conservarlos los dejaba HUÉRFANOS
+  y rompía R4 en el mismo commit. Regla aplicada, heredada de S63: cada línea condensada conserva
+  LITERALMENTE sus tokens dentro. `D-F8.4-B2-a` aparece en AMBOS frentes (8.4 y la casilla iv-D que la
+  cierra), lo que refuerza la separación en dos commits: un fallo en el primero sería indistinguible
+  de uno en el segundo.
+  DECISIÓN DEL USUARIO (A frente a B) sobre las remisiones «bitácora Sxx (futura)»: (A) condensar
+  igual conservando la marca, (B) condensar solo las casillas cuyas sesiones ya estén archivadas.
+  ELEGIDA A: la marca ya está en el plan y no se inventa nada; B fragmentaba el criterio de S63 —que
+  habla de frentes CERRADOS, no de sesiones archivadas— y garantizaba una cuarta visita a lo mismo.
+  Quedan tres remisiones a futuro (S92, S93, S94), que se resuelven solas al rotar la ventana.
+  ENTREGADO: frente 8.4 de 67 → 27 líneas (−40), frente 8.6-iv de 57 → 31 (−26), archivado de S91
+  con las TRES rotaciones de M1-bis (nace S95, sale S91 PROMOVIDA a `### Sesión 91`, degrada S94) y
+  los dos censos de la bitácora, la crónica y la frase de ventana actualizados. Plan 2630 → 2538
+  líneas (−92, −3,5 %; la condensación quita 66 y el registro de esta sesión devuelve parte);
+  bitácora 4067 → 4144 (+77 por S91). Estructura viva intacta: 8.6-B y 8.5-D3
+  siguen ABIERTOS y sin tocar, cero tokens huérfanos, ninguna deuda reescrita.
+  NO se tocó código, ni `modelo_datos_fase1.md`, ni `referencia-codigo-solver.md` (no hay `solver/
+  src/main` en esta sesión). Suites NO ejecutadas: no procede, cero ficheros de código en el diff.
+  LIMPIEZA EVALUADA PARA LA PRÓXIMA (M1.5): sin frentes cerrados acumulados. 8.6 quedará condensable
+  cuando cierre 8.6-B, su único sub-bloque vivo; hasta entonces no hay nada que condensar y decirlo
+  es la respuesta correcta (S81-S85 la descartaron cinco veces por este mismo motivo).
+  Siguiente: 8.6-B (aviso durante el arrastre; ÚNICO bloque de frontend abierto, contrato ANTES de
+  medir, orden inverso a M2, y solo defendible si la sesión se dedica a DISEÑO), D-F8.6-iiiA-b
+  (`Totales` sin sede, con MOCKUP PREVIO por D-F8.6-a) o el punto (b) de D-F8.6-ivB-a (invariante del
+  `<select>`, barato, cierra una deuda entera), a decidir al abrir.
