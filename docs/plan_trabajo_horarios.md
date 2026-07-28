@@ -2,18 +2,42 @@
 
 ## Cómo usar este documento en el Project de Claude
 
-Pégalo como instrucción de contexto en el Project. Al iniciar cada sesión de trabajo, 
-indica en qué fase estás y qué has completado. El advisor usará este plan para orientarte.
+Este es uno de tres documentos con responsabilidad separada:
+- **`gestion_proyecto.md`** — planificación: el mapa Hito→Objetivo→Cambio, la
+  clasificación del trabajo pendiente y las reglas estratégicas. Responde «¿por
+  qué esta sesión?».
+- **`metodo.md`** — método: cómo se ejecuta una sesión (M0–M5, R4/R5, tipos de
+  sesión). Referencia estable; no se relee entero en cada apertura.
+- **`plan_trabajo_horarios.md`** (este) — registro: qué pasó (progreso,
+  decisiones permanentes de stack, fases completadas, notas técnicas) y la deuda
+  con su texto íntegro.
+
+Al iniciar cada sesión, la apertura sigue M0 de `metodo.md`: nombrar el Cambio,
+el Objetivo y el Hito que la sesión avanza (leídos de `gestion_proyecto.md`). La
+planificación NO gira ya alrededor de «la fase» ni de «la deuda», sino del
+objetivo activo. Este plan aporta el registro histórico y el detalle de la deuda;
+el mapa que decide qué se abre vive en `gestion_proyecto.md`.
 
 ---
 
 ## Principios de avance
 
-1. **No pasar de fase sin cumplir los criterios de verificación**
-2. **El solver va primero. Ninguna UI antes de la Fase 4**
-3. **Complejidad incremental: cada fase añade UNA capa nueva al solver**
-4. **Criterio de bloqueo: si llevas más de 2 sesiones atascado en algo, 
-   pídele al advisor que replantee el enfoque, no que lo parchee**
+Estos principios rigieron las Fases 0–7 (solver e infraestructura, ya cerradas).
+Desde la Fase 8 la planificación se rige por `gestion_proyecto.md` (mapa
+Hito→Objetivo→Cambio) y `metodo.md` (M0–M5). Se conservan como contexto histórico;
+los principios vivos hoy son las reglas estratégicas de `gestion_proyecto.md` §6:
+
+- **R-terminado** — un objetivo termina al cumplir su criterio; las mejoras que no
+  lo cambian ni desbloquean el siguiente objetivo no se ejecutan dentro de él.
+- **R-deuda** — la deuda nunca planifica; solo se salda si bloquea el objetivo
+  activo.
+- **R-invalidación** — no refinar lo que un objetivo ya planificado va a rehacer.
+- **R-apertura** — toda sesión nombra su Cambio, Objetivo e Hito (M0).
+
+Principios originales (Fases 0–7, cumplidos): no pasar de fase sin criterios de
+verificación; el solver primero (ninguna UI antes de la Fase 4); complejidad
+incremental (cada fase una capa nueva); criterio de bloqueo (más de 2 sesiones
+atascado ⇒ replantear, no parchear).
 
 ---
 
@@ -1513,138 +1537,49 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 
 ### Método de trabajo (procedimiento vigente)
 
-Procedimiento que el trabajo real sigue y que hasta S86 solo vivía en los prompts de apertura y
-dentro de cabeceras de sesión. Se escribe aquí porque una cabecera se archiva y un prompt no se
-conserva: lo que solo vive ahí se pierde (origen: D-F8.0-a). Es MECANISMO VIGENTE en el sentido de
-R5, no crónica: si un apartado deja de aplicarse se BORRA, no se narra. Las sesiones citadas lo son
-como evidencia de que la regla se practica, no como relato.
 
-**M1 — Procedimiento de cierre de sesión.** Ocho pasos. Los pasos 1-5 y 7-8 se derivan del
-precedente observable (S69-S85); el 6 es norma ya escrita (R4/R5, arriba).
+El texto íntegro del método (M0–M5, R4/R5, M1-bis, M1-ter, M-mockup, tipos de sesión
+y automatización del cierre) vive ahora en `metodo.md`, documento de referencia
+estable. Aquí se conservan los TOKENS con una línea cada uno —R4 exige que sigan
+definidos porque las cabeceras de sesión y D-F8.0-a los citan—; el detalle está en
+`metodo.md`. Origen de que el método se escriba y no viva solo en prompts: D-F8.0-a.
 
-1. REGISTRAR la sesión en el plan: cabecera compacta nueva, actualización de «Fase actual», casilla
-   del bloque en «Bloques de Fase N», y la deuda nueva o cerrada. Una deuda que se cierra dice QUÉ
-   quedó implementado y DÓNDE; una deuda que sobrevive con matices dice cuáles.
-2. ARCHIVAR la cabecera más antigua de la ventana a la bitácora, para que el plan conserve siempre
-   las 4 últimas. Ver M1-bis: es el único paso con fallos históricos.
-3. ACTUALIZAR el censo de la bitácora. Su cabecera de fichero declara el rango DOS veces (la línea
-   de descripción y la línea de orden cronológico). Las dos.
-4. ACTUALIZAR en el plan la crónica de archivado («la de SNN en la Sesión MM») y la frase de
-   ventana («El plan conserva las 4 últimas cabeceras compactas (Sxx–Syy)»).
-5. EVALUAR LIMPIEZA del plan con el criterio de S63/S80: se condensa un frente CERRADO, nunca uno
-   con sub-bloques abiertos. Si no hay acumulación, se DICE y no se inventa trabajo (S81-S85 la
-   descartaron cinco veces por este mismo motivo).
-6. VERIFICAR R4 por grep y R5 por lectura, contra el fichero y no de memoria. Además: DIFF DEL
-   CUERPO (qué regiones se tocaron, y ninguna otra) y revisión de COSTURA (que lo de encima y lo de
-   debajo de cada recorte queden intactos).
-7. PROPONER EL NOMBRE DE SESIÓN con el patrón «Educhronos. Sesión NN. <breve resumen>».
-8. ENTREGAR EL PROMPT DE LA SESIÓN SIGUIENTE sin que el usuario tenga que pedirlo. Ver M1-ter.
+- **M0** — Apertura: la sesión nombra su Cambio, Objetivo e Hito antes de fijar
+  alcance; si no puede, no se abre. Una deuda solo abre sesión propia si bloquea el
+  objetivo activo (R-deuda).
+- **M1** — Cierre de sesión, ocho pasos (M1.0 registrar objetivo/cambio avanzado …
+  M1.7 nombre, M1.8 prompt siguiente). **M1-bis**: archivado con tres rotaciones e
+  invariante de una sola cabecera H3 viva. **M1-ter**: prompt de la sesión siguiente,
+  no fija alcance, ≤~60 líneas. M1.5 = evaluar limpieza; M1.6 = verificar R4/diff/costura.
+- **M2** — Medición previa con el instrumento más barato, salida literal sin
+  interpretar, antes de fijar alcance. Cuatro precisiones (corregir afirmación viva
+  al desmentir el plan; declarar qué se midió; medir tipos compartidos en todos los
+  módulos; condensar una quinta precisión en vez de añadirla).
+- **M3** — Campaña de mutación: un aserto vale lo que la mutación que lo mata; suite
+  NO vacía demostrada. Se aplica donde hay lógica que mutar.
+- **M4** — Contraste con Claude Code antes de teclear; aserto discriminante, no
+  propósito; turno de medición inter-módulos ANTES del contrato si toca tipo
+  compartido (S90). Artefactos derivados: regenerar `referencia-codigo-solver.md` si
+  se toca `solver/src/main`; doc en commit aparte del código.
+- **M5** — Criterio de terminado y parada: un objetivo termina al cumplir su criterio;
+  las mejoras que no lo cambian no se ejecutan dentro de él.
+- **Tipos de sesión** (Desarrollo / Saneamiento / Configuración-UI / Higiene-Método):
+  ritual proporcional; M2 y M4 en casi todos, M3 solo donde hay lógica. Detalle y
+  tabla en `metodo.md`.
 
-**M1-bis — El archivado, con verificación propia.** Es el único paso con fallos registrados: S59
-dejó una copia truncada y duplicada de S55 (corregida en S60) y S68 dejó el censo en S63 conteniendo
-ya S64 (corregido en S69). Los dos son fallos de transcripción o de censo, no de criterio, y por eso
-el paso lleva verificación propia:
-- TRES ROTACIONES, no una. La ventana se mueve en tres puntos y solo el segundo estaba escrito:
-  (1) NACE la cabecera de la sesión actual como `### Sesión NN`; (2) SALE la más antigua a la
-  bitácora (los tres sub-pasos de abajo); (3) DEGRADA la H3 anterior al prefijo compacto
-  «Última sesión registrada (previa):». El invariante que las tres mantienen es UNA SOLA
-  cabecera H3 viva en el plan: si hay dos, falta la degradación. Se verifica con
-  `grep -c "^### Sesión" plan_trabajo_horarios.md` → debe dar 1.
-  [Origen: S88 omitió la rotación (3) y la verificación de M1.6 la cazó. El paso existía como
-  precedente en catorce archivados, pero no estaba escrito.]
-- PROMOVER, no solo mover. Las 4 cabeceras vivas del plan NO son homogéneas —la más reciente es
-  `### Sesión NN` y las otras tres son texto plano con prefijo «Última sesión registrada
-  (previa):»—, mientras que TODAS las entradas de la bitácora son `### Sesión NN`. Archivar exige
-  convertir el formato de la línea de cabecera (anomalía destapada en S82 por la medición de R4).
-- INSERTAR al final, en orden cronológico ascendente, la entrada ÍNTEGRA y una sola vez.
-- COMPROBAR después: una sola cabecera por sesión, el cuerpo archivado idéntico al que salió del
-  plan (diff), y los dos censos coherentes entre sí y con la crónica.
-  [DECISIÓN DEL ARQUITECTO (S86), no derivada de la evidencia: que PROMOVER sea obligatorio. S82 lo
-  registró como anomalía observada, no como regla querida.]
-
-**M1-ter — El prompt de la sesión siguiente.** Se entrega al cerrar y NO fija el alcance: nombra los
-candidatos vivos con su estado leído de «Bloques de Fase N» y deja la elección para el turno de
-apertura. NO copia lo que ya está en el plan: remite a esta sección y a las cabeceras vivas en vez
-de resumirlas. Si supera ~60 líneas es señal de que está duplicando documentación y hay que podarlo
-antes de entregarlo. Sin este criterio la sección no sirve de nada, porque el prompt vuelve a crecer
-—que es exactamente el problema que S86 vino a resolver—.
-[DECISIÓN DEL ARQUITECTO (S86): el umbral concreto de ~60 líneas, sin precedente medido.]
-
-**M2 — §A de medición previa, antes de decidir alcance.** Antes de fijar el contrato de un bloque se
-mide el estado real de aquello sobre lo que se va a trabajar, con el INSTRUMENTO MÁS BARATO que
-responda a la pregunta (greps y lectura literal bastaron de S77 a S85; un test desechable cuando la
-pregunta era sobre datos y no sobre el repo). La salida literal se trae SIN INTERPRETAR antes de
-proponer estructura. Lo que sostiene la regla no es la costumbre sino su rendimiento: en las once
-sesiones S75-S85 la medición desmintió una suposición de apertura del arquitecto —no alguna vez,
-todas—. Corolario: una afirmación sobre el estado del repo que no se ha medido se declara como
-RAZONAMIENTO, no como medición.
-Tres precisiones que S87, S88 y S90 obligaron a escribir, en el orden en que se aplican:
-- CUANDO LA MEDICIÓN DESMIENTE AL PLAN, y no a una suposición del arquitecto, se declara
-  explícitamente como tal y se CORRIGE LA AFIRMACIÓN VIVA en TODAS sus sedes vivas —una casilla de
-  bloque y una cabecera de ventana suelen ser dos copias de lo mismo—. Por R5, una descripción
-  equivocada del mecanismo actual es estado vivo equivocado, no crónica. Lo ya ARCHIVADO en la
-  bitácora NO se corrige: es histórico de solo lectura, y borrar el error eliminaría la evidencia de
-  que existió. Origen: S87 (el `border-left` que S83 daba por liberado) y S88 (el `background` que
-  S87 daba por libre sin medirlo).
-- UNA CONCLUSIÓN DE MEDICIÓN DECLARA QUÉ SE MIDIÓ, no solo qué se concluye. El caso que lo obliga es
-  incómodo: S87 midió el `border-left` con rigor, acertó, y en LA MISMA FRASE escribió `background`
-  sin medirlo. El rigor fue parcial y la frase no lo distinguía, así que S88 tuvo que tropezarlo. Una
-  conclusión que enumera su evidencia deja el hueco visible sin que nadie lo pise.
-- UN TIPO COMPARTIDO SE MIDE EN TODOS LOS MÓDULOS QUE LO TOCAN, y la pregunta que lo cubre es
-  «¿quién más CONSTRUYE o CONSUME este tipo?», no «¿cuántos call sites tiene aquí?». La forma del
-  fallo que lo obliga es la que importa: en S90 el §A midió los call sites de `Actividad` (siete) y
-  no los de `ProblemaHorario` (otros siete), y el contrato declaró «fuera de alcance» tres clases
-  que SÍ se pensaron mientras `CatalogoMapper` —segundo camino a `domain.Actividad`, en otro
-  módulo— no quedó ni incluido ni excluido: NO ESTABA. Un olvido con forma de decisión es peor que
-  un hueco visible, porque nadie lo audita. No se corrige con más cuidado: se corrige haciendo que
-  la pregunta no dependa de qué módulos recuerde el arquitecto.
-  COROLARIO OPERATIVO, que es donde está el filo: `referencia-codigo-solver.md` lista FIRMAS, no
-  quién las usa, así que es ciega por construcción a esta pregunta. Cuando el §A no pueda ver los
-  consumidores desde el Project, la enumeración se le PIDE a Claude Code en el turno de contraste y
-  EL CONTRATO NO SE CIERRA hasta tenerla. Declarar el hueco no basta: aquí lo que faltaba no era
-  rigor al responder, era cobertura de la pregunta.
-  [Nota de acumulación: si llegara una CUARTA precisión a M2, la salida correcta es condensar las
-  cuatro en un principio, no añadirla. Cuatro bullets con origen citado son norma; cinco empiezan a
-  ser crónica, y R5 dice que el método no narra sesiones.]
-
-**M3 — Campaña de mutación: lo que un aserto vale.** Un aserto vale lo que vale la mutación que lo
-pone rojo. Al cerrar un bloque con tests se declara la campaña (qué mutaciones, cuál cae y por qué
-vía) y se demuestra la suite NO VACÍA (romper algo → rojo esperado → restaurar → verde). Cuatro
-precisiones acumuladas, todas medidas y ninguna evidente:
-- CAER ante una mutación ≠ DISCRIMINAR la dimensión que ataca: un test puede caer por acoplamiento.
-  La tabla de mutaciones NO se lee como matriz de cobertura (S82).
-- Reutilizar una función NO hereda su test: es cobertura fantasma (S81).
-- Una mutación que no compila NO es una mutación. En TypeScript hay que declarar el cast que la
-  hace expresable, o el compilador tapa el hueco y el aserto vale menos (D-F8.6-ivB-b).
-- El instrumento tiene sus propias trampas: leer el spec ANTES de calibrar la campaña
-  (D-F8.6-ivA-b).
-
-**M4 — Contraste antes de teclear, y artefactos derivados.** En modo híbrido el contrato se
-contrasta con Claude Code ANTES de escribir código, y lo que ese turno destape se REGISTRA, no se
-tapa: es el mecanismo que más errores de especificación del arquitecto ha cazado (dos en S79, tres
-en S81, tres en S82, tres en S83, cinco en S85). Corolario operativo de S66: se especifica el ASERTO
-DISCRIMINANTE, no el propósito del test —un propósito bien enunciado produce el camino feliz, que
-es justo lo que NO detecta el fallo que el test existe para detectar—. PRECISIÓN DE ORDEN (S90): si
-el bloque toca un tipo compartido ENTRE MÓDULOS, el contraste tiene un primer turno de MEDICIÓN
-—los consumidores y constructores del tipo, en `main` y en `test`, de todos los módulos— que va
-ANTES de que el arquitecto escriba contrato, no después. El orden por defecto (contrato → contraste)
-deja que el contraste descubra que el contrato era INALCANZABLE, que es lo que pasó en S90:
-`CatalogoMapper` rompía en compilación y forzaba una decisión semántica que el contrato ni
-mencionaba. Claude Code tiene el árbol y el arquitecto no; pedir la enumeración antes de decidir
-hace el error imposible en vez de detectable. NO se aplica a bloques de un solo módulo —el turno
-extra no compensa— y la condición es el número de módulos, no el tamaño del bloque. Artefactos
-derivados, regla
-mecánica: si se toca `solver/src/main` se REGENERA `referencia-codigo-solver.md`; si no, se declara
-que no se ha tocado. La documentación va en commit APARTE del código; el manifiesto de dependencias
-va CON el código que lo necesita, porque sin él ese commit no construiría.
 
 ### Deuda consciente VIVA
 
-Deuda técnica y de dominio ABIERTA, aceptada conscientemente y pendiente de resolver en
-fases futuras. Incluye las simplificaciones registradas en Fase 1 (D1-D12), cuya
-descripción completa vive en `modelo_datos_fase1.md` sección 8, y la deuda surgida en
-fases posteriores, descrita aquí. La deuda ya CERRADA se archiva condensada en la sección
-siguiente, con remisión a la bitácora.
+Deuda técnica y de dominio ABIERTA. Esta sección es la FUENTE del texto íntegro de
+cada deuda; su CLASIFICACIÓN (deuda técnica real / mejora futura / decisión
+arquitectónica consciente / limitación conocida), su objetivo asignado y su
+disposición (si bloquea, si se paga ahora, si sale de la cola) viven en
+`gestion_proyecto.md` §4. Desde la adopción del sistema de objetivos, la deuda NO
+planifica el trabajo: solo se salda si bloquea el objetivo activo (R-deuda). Incluye
+las simplificaciones registradas en Fase 1 (D1-D12), cuya descripción completa vive
+en `modelo_datos_fase1.md` sección 8, y la deuda surgida en fases posteriores,
+descrita aquí. La deuda ya CERRADA se archiva condensada en la sección siguiente,
+con remisión a la bitácora.
 
 - **D1**: Generación automática de subgrupos por plantilla → Fase 8 (UI)
 - **D2**: Versionado intra-BD de cursos académicos → Fase 10 (si se requiere)
