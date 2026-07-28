@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~5% (O-shell hecho, S100; O-catálogo es el siguiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 1 de 4 entidades — Profesor hecho, faltan aula/asignatura/grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -106,18 +106,32 @@ de las Fases 9–12.
   ficheros (6 nuevos, 5 sobrescritos); suite frontend 75 → 76; ningún componente
   de H1 tocado. Detalle en la cabecera S100 del plan.
 
-#### O-catálogo — "Creo los elementos simples del centro."
+#### O-catálogo — "Creo los elementos simples del centro." ● ACTIVO (desde S101)
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
 - **Terminado cuando:** desde la UI se crea un centro mínimo y el solver corre
-  sobre él.
+  sobre él. Criterio AGREGADO: no lo cierra ninguna entidad suelta.
+- **Progreso (S101):** 1 de 4 entidades. Profesor HECHO (commit `ddc6c48`); faltan
+  aula, asignatura, grupo. La siguiente entidad (propuesta: aula) VALIDA el molde.
 - **Depende de:** O-shell.
 - **Valor:** primer centro creado sin SQL.
 - **Cambios que agrupa:** un formulario CRUD por entidad de catálogo. El backend
   REST ya existe desde la Fase 6; esto es la capa de presentación.
+- **Molde de CRUD de catálogo (candidato de S101, a VALIDAR en aulas):** la primera
+  entidad fija el patrón que heredan las otras tres. Decidido y NO se rediscute:
+  Reactive Forms tipados `nonNullable`; sin async validator de unicidad (el 400 del
+  backend se presenta); form en diálogo CDK + `ConfirmarBorrado` genérico (ya
+  existe); dos componentes lista+form; CRUD inline en `Configuracion` (la decisión
+  ruta-hija vs contenedor se toma con ≥2 entidades, en Cambio propio); servicio =
+  wrappers pelados; traducción de error propia del componente (no compartida:
+  tocaría H1); secuencia de tests propia por spec. La sesión de aulas confirma el
+  molde o lo corrige; hasta entonces es candidato, no canon (un patrón con un solo
+  ejemplo está sin validar).
 - **Absorbe:** las deudas D-F8.5-* de "sin red bajo la aplicación" (I4, unicidad
-  profesor-tramo), que pasan a pagarse DENTRO de este objetivo cuando las
-  validaciones importan de verdad. También D26 (nombre de aula) y D31 b/c/d
-  (poblaciones a confirmar con el centro, al abrir el CRUD de cada nivel).
+  profesor-tramo). MATIZ medido en S101: NO son del CRUD de Profesor sino de tutoría
+  (`ProfesorTutoria`) y disponibilidad (`ProfesorRestriccionHoraria`); se pagan con
+  el formulario de SU entidad, no con cualquier CRUD de catálogo (ver §4). También
+  D26 (nombre de aula) y D31 b/c/d (poblaciones a confirmar con el centro, al abrir
+  el CRUD de cada nivel).
 - **Consulta útil:** `INFORME-RECONCILIACION.md` documenta las discrepancias reales
   entre los horarios de origen (familia D8); las decisiones que tomó son evidencia
   de qué casos reales deben soportar estos formularios.
@@ -211,8 +225,8 @@ asigna categoría, objetivo y disposición.
 | Deuda | Objetivo | ¿Bloquea? | Disposición |
 |---|---|---|---|
 | D-F8.6-ii-b (no hay gesto de despinar) | O-ajuste-cierre | SÍ | Se paga al abrir O-ajuste-cierre. Única deuda funcional de F8.6 |
-| D-F8.5-D2a-a (I4 sin red) | O-catálogo | Sí, dentro de O-catálogo | Se paga cuando haya formularios de catálogo |
-| D-F8.5-E-b (unicidad profesor-tramo sin red) | O-catálogo | Sí, dentro de O-catálogo | Íd. |
+| D-F8.5-D2a-a (I4 sin red) | O-catálogo | Sí, dentro de O-catálogo | Medido en S101: es de `ProfesorTutoria` (tutoría), NO del CRUD de Profesor. Su activación escrita («otra vía de escritura») NO la cumple un form que escribe por el REST existente. Se paga con el formulario de tutoría (roza O-estructura) |
+| D-F8.5-E-b (unicidad profesor-tramo sin red) | O-catálogo | Sí, dentro de O-catálogo | Medido en S101: es de `ProfesorRestriccionHoraria` (disponibilidad, sub-recurso), NO del CRUD de Profesor. Se paga con el formulario de restricción horaria, no antes |
 | D-F8.5-D2a-b (incoherencia 404/400 FK) | O-catálogo | No bloquea | Se evalúa dentro de O-catálogo |
 | D18 (condiciones necesarias de factibilidad) | O-estructura | No | Ya cubierto en backend (8.4-A); resto en presentación |
 | D-F8.6-ii-a, -iiiB1-c, -iiiB2a-a (superficie de error) | O-ajuste-cierre | No | Se evalúan al abrir; probablemente limitación conocida aceptable |
@@ -222,6 +236,7 @@ asigna categoría, objetivo y disposición.
 |---|---|---|
 | D-F8.6 de cobertura (iiiB1-a, ivB-a-bis, ivD-a, ivA-a, ivA-c, ivB-b, ivB-c, iiiA-b, B-a) | O-ajuste-cierre | Cobertura de la vista de horario. La mayoría se RECLASIFICA a limitación conocida en cuanto O-shell reubique la vista (su contexto de test cambiará). NO se pagan ahora |
 | D-F8.4-A-a, -A-b, -A-c, -B1-a | O-ajuste-cierre | Cobertura de prevalidación |
+| D-S101-num (numeración global de tests colisionada) | O-ajuste-cierre | Detectada S101: la secuencia (N) de la capa componentes/servicios tiene colisiones preexistentes —(27),(28-30),(35-37) con contenidos distintos en dos ficheros— que rompen la atribución por (N) en campañas de mutación. Es superficie de specs de H1 (cerrado). Los specs de O-catálogo la esquivan abriendo secuencia propia por fichero. Arreglarla no bloquea nada (R-terminado): no se paga ahora |
 | D-F8.5-D2b2-a, -D2b2-b (diseño/cosmética) | — | Sin objetivo urgente |
 | D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
