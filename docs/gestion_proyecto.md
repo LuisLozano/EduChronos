@@ -113,6 +113,9 @@ de las Fases 9–12.
   profesor-tramo), que pasan a pagarse DENTRO de este objetivo cuando las
   validaciones importan de verdad. También D26 (nombre de aula) y D31 b/c/d
   (poblaciones a confirmar con el centro, al abrir el CRUD de cada nivel).
+- **Consulta útil:** `INFORME-RECONCILIACION.md` documenta las discrepancias reales
+  entre los horarios de origen (familia D8); las decisiones que tomó son evidencia
+  de qué casos reales deben soportar estos formularios.
 
 #### O-estructura — "Expreso la complejidad real del centro."
 - **Propósito:** configurar currículo/demanda, desdobles, agrupamientos, PDC,
@@ -138,6 +141,12 @@ de las Fases 9–12.
 - **Valor:** prueba de que H2 está terminado.
 - **Absorbe:** D-seed-demo, D-demo-cliente (ambos objetivos disfrazados de deuda),
   y cierra la parte VIVA de D31 (validación de poblaciones con el centro).
+- **Fuentes de datos:** los horarios reales del IES se extrajeron de los PDFs a
+  JSON en una operación previa. Su documentación —`RESUMEN-EXTRACCION.md` (qué se
+  extrajo) e `INFORME-RECONCILIACION.md` (cómo se resolvieron las discrepancias
+  entre el horario por grupo y por aula, familia D8)— es el insumo de este objetivo
+  y el primer paso de su M2: leerlas para saber qué datos hay y en qué estado
+  quedaron.
 
 ### H1 — Ajustar (cierre)
 
