@@ -624,6 +624,36 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
+### Sesión 100 — O-shell (H2): shell de navegación. ABRE Y CIERRA O-shell; primer objetivo del roadmap H2-primero.
+  Primera sesión bajo el mapa Hito→Objetivo→Cambio de `gestion_proyecto.md`. Tipo Configuración/UI:
+  M4 sí (contraste con Claude Code), M3 NO (navegación = binding, sin lógica de dominio). Criterio de
+  terminado de O-shell —«se navega de una landing a cada sección y se vuelve, sin editar la URL»—
+  CUMPLIDO y verificado a mano en localhost:4200 (landing → Configuración → vuelta por la marca →
+  Horario → vuelta), no solo en suite.
+  M2 midió el terreno y CORRIGIÓ el supuesto de partida: el router NO había que crearlo —`app.config.ts`
+  ya proveía `provideRouter(routes)` y el raíz `App` ya pintaba `<router-outlet />`—; lo que faltaba
+  era landing, segunda sección y navegación. Las rutas vivas eran `''→redirectTo horario/1` (secuestraba
+  la raíz) y `horario/:id→HorarioView`. M2-fino fijó convención: CSS por fichero (`styleUrl`), decorador
+  standalone con `imports` explícito, patrón de `confirmar-generacion` como molde.
+  ENTREGADO (11 ficheros: 6 nuevos, 5 sobrescritos): NUEVOS `components/landing/{landing.ts,.html,.css}`
+  (dos `routerLink` a /configuracion y /horario/1) y `components/configuracion/{configuracion.ts,.html,.css}`
+  (placeholder deliberado: sede que O-catálogo rellena, NO deuda). SOBRESCRITOS `app.routes.ts` (tres
+  rutas: ''→Landing, configuracion→Configuracion, horario/:id→HorarioView intacta; fuera el redirectTo),
+  `app.html` (barra persistente con marca-a-landing + nav + outlet), `app.ts` (+RouterLink, RouterLinkActive
+  en imports), `app.css` (estaba vacío; estilos de la barra), `app.spec.ts` (higiene R5: el aserto de
+  cabecera describía el shell viejo). NINGÚN componente de H1 tocado (git status lo confirma).
+  DISCRIMINANCIA VERIFICADA POR MUTACIÓN (no solo afirmada, contraste de Claude Code): el 3er caso de
+  `app.spec.ts` asevera sobre la `href` RESUELTA por el router, no sobre el atributo `routerLink` inerte.
+  Quitando `RouterLink` de los imports del raíz cae 1 test SOLO en `app.spec.ts` (`[null,null]` no
+  incluye `/configuracion`); el aserto viejo (`getAttribute('routerLink')`) habría sobrevivido a esa
+  mutación. Suite frontend 75 → 76 (un `it(` reemplazado, uno neto añadido en app.spec.ts: 2 → 3).
+  DESVÍO DE STACK APRENDIDO: el frontend NO testea con Karma sino con Vitest (builder
+  `@angular/build:unit-test`); `npm test -- --browsers=ChromeHeadless` falla (exige `@vitest/browser-*`
+  no instalado). Invocación correcta: `npm test` a secas. Registrado en Decisiones permanentes (fila UI).
+  D-UI-shell CERRADA (era «objetivo disfrazado de deuda»; se materializó como O-shell). NO se tocó
+  `solver/src/main` ni `modelo_datos_fase1.md`. Commits: código y doc separados, de una línea.
+  Siguiente por dependencias: O-catálogo (CRUD de catálogo sobre el shell). Sin fijar alcance aquí.
+
 ### Sesión 99 — Fase 8, D-F8.6-ivD-b: homogeneización del doble de `bloqueos.listar` a fresco por invocación (CIERRA la deuda).
   Modo híbrido. 1 commit de código (`horario-view.spec.ts` migrado) + doc aparte. ANDAMIO DE TEST,
   no función: la deuda se cierra IMPLEMENTANDO la homogeneización, no añadiendo capacidad al producto.
@@ -660,6 +690,9 @@ nuevo a partir del anterior, modificando solo los cambios.
   D-seed-demo, D-demo-cliente), o deuda de bajo coste con sede futura: D-F8.6-B-a (el genérico que
   miente, en el próximo bloque que toque el camino de soltado) o D-F8.6-iiiA-b (`Totales` sin sede,
   con MOCKUP PREVIO por D-F8.6-a), a decidir al abrir.
+Estado (S100): la planificación pasa a regirse por el mapa Hito→Objetivo→Cambio de `gestion_proyecto.md`.
+  H2 en curso; O-shell CERRADO, O-catálogo es el siguiente objetivo. La antigua «Fase 8» queda subsumida:
+  H1 (ajuste) en PAUSA al 90%; el trabajo vivo es H2. La línea «Fase actual: 8…» de abajo es registro de S99.
 Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloque 8.6-B CERRADO
   en S97, y con él el FRENTE 8.6 ENTERO (AVISO DE OCUPACIÓN AL INICIAR EL ARRASTRE, elegido tras
   CUATRO sesiones nombrado y descartado siempre por el mismo motivo; descartarlo una quinta vez era
@@ -1499,7 +1532,7 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 | Solver | OR-Tools CP-SAT — bindings Java (ortools-java 9.11.4210) |
 | Backend | Spring Boot 4.1.0 (GA) + Java 17. Versión fijada en S45 (Fase 6, Bloque 1) al declarar el módulo app/ |
 | Base de datos | SQLite + Hibernate 7.4.1, dialecto de comunidad org.hibernate.community.dialect.SQLiteDialect (Hibernate no trae dialecto SQLite oficial; el best-effort funciona sobre Hibernate 7.4, verificado en S45). **Esquema vía `schema.sql` + `ddl-auto=none` desde S73** (antes hbm2ddl; reabierto conscientemente el "sin Flyway por ahora" y también descartado hbm2ddl para el esquema, porque el dialecto de comunidad NO emite FK en el DDL, rompe `ddl-auto=validate` y genera la PK `id` sin tipo —inservible como destino de FK en SQLite—; ver Notas técnicas Fase 6 y 8.5-C2a-DDL). Integridad referencial ACTIVA = dos piezas: FK declaradas en `schema.sql` + `PRAGMA foreign_keys=ON` por conexión vía customizer (ni `connection-init-sql` ni el parámetro de URL lo propagan en este stack). Flyway se evaluó y se descartó (peso sin retorno: una BD por centro, esquema casi estático); queda como upgrade futuro si hiciera falta migrar esquemas en caliente. Fichero local, ruta relativa al working dir |
-| UI | Angular |
+| UI | Angular 21 (standalone components, `signal`). Router ya provisto (`provideRouter`). **Tests del frontend con Vitest** (builder `@angular/build:unit-test`), NO Karma: invocación `npm test` a secas; `--browsers=ChromeHeadless` u otros flags de navegador fallan (exigen `@vitest/browser-*` no instalado). Shell de navegación (landing + secciones) desde S100, O-shell |
 | Empaquetado Windows | jpackage app-image (bundle portable, sin instalador) |
 | Estructura del repositorio | Maven multimódulo. Módulo `solver` (POJOs + OR-Tools, sin Spring ni Hibernate) y módulo `app` (Spring Boot, persistencia, REST) introducido en Fase 6. Frontend Angular en directorio adyacente, integrado vía `frontend-maven-plugin` en Fase 7-8 (Sesión 6, decisión 1) |
 | Multi-centro | Descartado. Una BD = un centro. Curso nuevo = duplicación de BD (Fase 10) |

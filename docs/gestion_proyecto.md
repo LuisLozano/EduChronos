@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~0% | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~5% (O-shell hecho, S100; O-catálogo es el siguiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -90,16 +90,21 @@ de las Fases 9–12.
 
 ### H2 — Configurar un centro desde cero
 
-#### O-shell — "La aplicación es navegable."
+#### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
 - **Propósito:** carcasa de aplicación con navegación entre Configuración y
   Horario y una landing.
 - **Terminado cuando:** se navega de una landing a cada sección y se vuelve, sin
-  editar la URL a mano.
+  editar la URL a mano. **CUMPLIDO en S100** (verificado a mano en localhost:4200).
 - **Depende de:** nada.
 - **Valor:** convierte componentes sueltos en aplicación; es donde viven los
   formularios y la vista de horario.
 - **Cambios que agrupa:** layout raíz, router de secciones, landing.
-- **Absorbe:** D-UI-shell (que era un objetivo disfrazado de deuda).
+- **Absorbe:** D-UI-shell (que era un objetivo disfrazado de deuda). **D-UI-shell
+  CERRADA en S100.**
+- **Cierre (S100):** landing + sección Configuración (placeholder que O-catálogo
+  rellenará) + barra de navegación persistente sobre el router ya existente. 11
+  ficheros (6 nuevos, 5 sobrescritos); suite frontend 75 → 76; ningún componente
+  de H1 tocado. Detalle en la cabecera S100 del plan.
 
 #### O-catálogo — "Creo los elementos simples del centro."
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
