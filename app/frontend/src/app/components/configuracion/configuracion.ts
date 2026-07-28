@@ -1,16 +1,22 @@
 import { Component } from '@angular/core';
 
+import { ProfesorLista } from '../profesores/profesor-lista';
+
 /**
- * Sección de Configuración del centro (O-shell). Placeholder deliberado: el
- * shell necesita una ruta a la que navegar y desde la que volver para cumplir
- * su criterio de terminado, pero el contenido real —los formularios CRUD de
- * catálogo— es trabajo de O-catálogo, que rellenará este componente.
+ * Sección de Configuración del centro (O-shell, poblada por O-catálogo). Sigue
+ * siendo presentacional pura y SIN servicios: no carga ni escribe nada por sí
+ * misma, solo compone las secciones de catálogo, y cada una habla con su propio
+ * servicio. Por eso el CRUD de profesores va INLINE aquí y no como ruta hija:
+ * no hay estado que anidar ni URL que enlazar, y evitarlo ahorra el
+ * `<router-outlet>` y el array `children` que el proyecto no usa en ningún sitio
+ * salvo el raíz.
  *
- * <p>Presentacional puro, sin servicios. No representa deuda: es la sede donde
- * O-catálogo montará los formularios, no un cuerpo que haya que rehacer.
+ * <p>Las otras tres entidades de catálogo (aulas, grupos, currículo) se montarán
+ * igual, como hermanas de {@link ProfesorLista}.
  */
 @Component({
   selector: 'app-configuracion',
+  imports: [ProfesorLista],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })

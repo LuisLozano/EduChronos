@@ -1,0 +1,13 @@
+<div class="confirmar-borrado">
+  @for (linea of lineas; track linea) {
+    <p class="confirmar-borrado__linea">{{ linea }}</p>
+  }
+  <div class="confirmar-borrado__acciones">
+    <button type="button" class="confirmar-borrado__cancelar" (click)="cancelar()">
+      Cancelar
+    </button>
+    <button type="button" class="confirmar-borrado__confirmar" (click)="confirmar()">
+      Borrar
+    </button>
+  </div>
+</div>

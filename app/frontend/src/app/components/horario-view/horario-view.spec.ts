@@ -472,7 +472,10 @@ describe('contenedor del horario', () => {
 
   /**
    * Un POST que falla NO pina y su mensaje se DEGRADA cuando el body no trae
-   * `message` ni `error` (hoy `server.error.include-message` está desactivado).
+   * `message` ni `error`. Este test FABRICA ese body vacío, así que no depende
+   * de `server.error.include-message` —activo desde O-catálogo—: mide la rama
+   * del degradado, que sigue siendo alcanzable (un 500 de Tomcat, un corte de
+   * red o un cuerpo no-JSON llegan sin `message` con la clave activa).
    * Se asevera el TEXTO EXACTO, no la mera presencia de `.error`: mata M24
    * (`return cuerpo?.message ?? ''`), que dejaría el aviso vacío.
    *

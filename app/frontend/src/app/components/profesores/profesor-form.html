@@ -1,0 +1,36 @@
+<div class="profesor-form">
+  <h2 class="profesor-form__titulo">
+    {{ esEdicion ? 'Editar profesor' : 'Nuevo profesor' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="profesor-form__campo">
+      <span class="profesor-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="profesor-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="profesor-form__error">El código es obligatorio.</span>
+      }
+    </label>
+
+    <label class="profesor-form__campo">
+      <span class="profesor-form__etiqueta">Nombre completo</span>
+      <input type="text" formControlName="nombreCompleto" class="profesor-form__input" />
+      @if (form.controls.nombreCompleto.touched && form.controls.nombreCompleto.invalid) {
+        <span class="profesor-form__error">El nombre es obligatorio.</span>
+      }
+    </label>
+
+    @if (error()) {
+      <p class="profesor-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+
+    <div class="profesor-form__acciones">
+      <button type="button" class="profesor-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="profesor-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,46 @@
+<div class="profesores">
+  <div class="profesores__cabecera">
+    <h2 class="profesores__titulo">Profesores</h2>
+    <button type="button" class="profesores__nuevo" (click)="nuevo()">
+      Nuevo profesor
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="profesores__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="profesores__cargando">Cargando…</p>
+  } @else if (profesores().length === 0) {
+    <p class="profesores__vacio">
+      No hay profesores todavía. Crea el primero con «Nuevo profesor».
+    </p>
+  } @else {
+    <table class="profesores__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre completo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of profesores(); track p.id) {
+          <tr>
+            <td>{{ p.codigo }}</td>
+            <td>{{ p.nombreCompleto }}</td>
+            <td class="profesores__acciones">
+              <button type="button" class="profesores__editar" (click)="editar(p)">
+                Editar
+              </button>
+              <button type="button" class="profesores__borrar" (click)="borrar(p)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
