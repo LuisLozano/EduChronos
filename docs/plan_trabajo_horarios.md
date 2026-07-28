@@ -683,6 +683,13 @@ nuevo a partir del anterior, modificando solo los cambios.
   secuencia: cada uno abre secuencia propia desde (1), siguiendo el precedente sano de los specs de
   lógica pura de `app/horario/`. Arreglar la global tocaría specs de H1 (cerrado) por algo que no
   bloquea: no se ejecuta (R-terminado).
+  MEJORA DE MÉTODO PENDIENTE (no ejecutada en S101; es sesión Higiene/Método propia): versionar R4 como
+  script en el repo en vez de reescribirlo cada sesión. El guion ad-hoc de S101 salió MAL (prefijo de
+  fichero de `grep -oE`; `grep -F` inflaba tokens cortos; miraba solo 2 de 9 docs); Claude Code lo
+  corrigió y confirmó corpus sano, pero el episodio prueba que un control de higiene reimplementado a mano
+  no es fiable. El script correcto tokeniza con `D-[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*` (admite sufijos
+  compuestos: `D-S101-num` no colapsa a `D-S101`) sobre todos los `docs/*.md`. Es cambio a `metodo.md`,
+  no a O-catálogo: se hace en su sesión (R-terminado).
 
 ### Sesión 100 — O-shell (H2): shell de navegación. ABRE Y CIERRA O-shell; primer objetivo del roadmap H2-primero.
   Primera sesión bajo el mapa Hito→Objetivo→Cambio de `gestion_proyecto.md`. Tipo Configuración/UI:
