@@ -86,7 +86,7 @@ const PROYECCION_VACIA: HorarioProyeccion = {
 describe('contenedor del horario', () => {
   let fixture: ComponentFixture<HorarioView>;
   let sujetoParam: Subject<ParamMap>;
-  let sujetoListar: Subject<Bloqueo[]>;
+  let ultimoListar: Subject<Bloqueo[]>;
   let sujetoProyeccion: Subject<HorarioProyeccion>;
   let sujetoDiagnostico: Subject<Diagnostico>;
   let ultimoGuardar: Subject<Bloqueo>;
@@ -107,14 +107,19 @@ describe('contenedor del horario', () => {
 
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
-    sujetoListar = new Subject<Bloqueo[]>();
     sujetoProyeccion = new Subject<HorarioProyeccion>();
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
     sujetoCerrado = new Subject<boolean | undefined>();
 
     bloqueos = {
-      listar: vi.fn(() => sujetoListar),
+      // FRESCO POR INVOCACIÓN guardado en `ultimoListar`, misma forma que
+      // `guardar` (ver comentario abajo): un Subject compartido cerrado por
+      // `.error()` redispara SÍNCRONAMENTE al re-suscribirse, así que el primer
+      // test que encadene fallo→reintento sobre `cargarPines` (dos emisiones de
+      // ruta) lo encontraría inescribible. Ningún test lo reintenta aún; se
+      // homogeneiza con los otros tres dobles del contenedor (D-F8.6-ivD-b).
+      listar: vi.fn(() => (ultimoListar = new Subject<Bloqueo[]>())),
       // FRESCO POR INVOCACIÓN, no un Subject compartido como los otros dobles: un
       // Subject que ya emitió `.error()` queda CERRADO, y re-suscribirse a él
       // redispara el error de forma SÍNCRONA. El (25) encadena un alta fallida y
@@ -180,7 +185,7 @@ describe('contenedor del horario', () => {
   /** Ruta + índice de pines + proyección, en el orden en que llegan de verdad. */
   async function montar(pines: Bloqueo[]): Promise<HorarioGrid> {
     sujetoParam.next(convertToParamMap({ id: '1' }));
-    sujetoListar.next(pines);
+    ultimoListar.next(pines);
     sujetoProyeccion.next(PROYECCION_VACIA);
     await fixture.whenStable();
     return rejilla();
@@ -287,7 +292,7 @@ describe('contenedor del horario', () => {
     const raiz = fixture.nativeElement as HTMLElement;
     expect(raiz.querySelector('.error')).toBeNull();
 
-    sujetoListar.error(new Error('conexión caída'));
+    ultimoListar.error(new Error('conexión caída'));
     await fixture.whenStable();
 
     const aviso = raiz.querySelector('.error');
@@ -324,7 +329,7 @@ describe('contenedor del horario', () => {
    */
   it('(14) si getDiagnostico falla: la proyección sigue en pie, .error ausente y el aviso propio presente', async () => {
     sujetoParam.next(convertToParamMap({ id: '1' }));
-    sujetoListar.next([]);
+    ultimoListar.next([]);
     sujetoProyeccion.next(PROYECCION_VACIA);
     await fixture.whenStable();
 
@@ -598,7 +603,7 @@ describe('contenedor del horario', () => {
    */
   async function montarConPrevalidacion(avisos: AvisoPrevalidacion[]): Promise<void> {
     sujetoParam.next(convertToParamMap({ id: '1' }));
-    sujetoListar.next([]);
+    ultimoListar.next([]);
     sujetoPrevalidacion.next(avisos);
     sujetoProyeccion.next(PROYECCION_VACIA);
     await fixture.whenStable();
@@ -762,7 +767,7 @@ describe('contenedor del horario', () => {
   it('(34) sin pre-validar: el botón está deshabilitado y el gesto no dispara backend ni diálogo', async () => {
     // Montaje SIN emitir pre-validación: avisosPrevalidacion() queda en null.
     sujetoParam.next(convertToParamMap({ id: '1' }));
-    sujetoListar.next([]);
+    ultimoListar.next([]);
     sujetoProyeccion.next(PROYECCION_VACIA);
     await fixture.whenStable();
 
