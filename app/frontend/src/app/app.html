@@ -1,4 +1,11 @@
-<main class="app">
-  <h1>Educhronos — Horarios</h1>
+<header class="app__barra">
+  <a class="app__marca" routerLink="/">Educhronos</a>
+  <nav class="app__nav">
+    <a routerLink="/configuracion" routerLinkActive="app__nav-activo">Configuración</a>
+    <a routerLink="/horario/1" routerLinkActive="app__nav-activo">Horario</a>
+  </nav>
+</header>
+
+<main class="app__contenido">
   <router-outlet />
 </main>

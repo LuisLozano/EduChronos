@@ -2,12 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { App } from './app';
+import { routes } from './app.routes';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [provideRouter(routes)],
     }).compileComponents();
   });
 
@@ -16,10 +17,21 @@ describe('App', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('pinta la cabecera', async () => {
+  it('pinta la barra con la marca Educhronos', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Educhronos');
+    expect(compiled.querySelector('.app__marca')?.textContent).toContain('Educhronos');
+  });
+
+  it('los enlaces de navegación están vivos (href resuelta por el router)', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const hrefs = Array.from(compiled.querySelectorAll('.app__nav a'))
+      .map((a) => a.getAttribute('href'));
+    expect(hrefs).toContain('/configuracion');
+    expect(hrefs).toContain('/horario/1');
   });
 });

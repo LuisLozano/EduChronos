@@ -1,0 +1,44 @@
+.landing {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.landing__intro {
+  margin: 0 0 1.5rem;
+  color: #555;
+}
+
+.landing__accesos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.landing__acceso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.landing__acceso:hover,
+.landing__acceso:focus-visible {
+  border-color: #2a6fb0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.landing__acceso-titulo {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.landing__acceso-desc {
+  color: #666;
+  font-size: 0.9rem;
+}

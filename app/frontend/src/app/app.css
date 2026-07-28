@@ -1,0 +1,33 @@
+.app__barra {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.app__marca {
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app__nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.app__nav a {
+  text-decoration: none;
+  color: #2a6fb0;
+}
+
+.app__nav-activo {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.app__contenido {
+  padding: 1rem 0;
+}

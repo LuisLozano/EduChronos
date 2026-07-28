@@ -1,0 +1,13 @@
+.configuracion {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.configuracion__titulo {
+  margin: 0 0 0.75rem;
+}
+
+.configuracion__pendiente {
+  color: #666;
+}
