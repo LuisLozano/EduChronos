@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 4 de 4 entidades CRUD — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104) hechos. O-catálogo NO cerrado: falta la 2ª mitad del criterio agregado, el paso UI→solver) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura y O-demo pendientes) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -106,10 +106,13 @@ de las Fases 9–12.
   ficheros (6 nuevos, 5 sobrescritos); suite frontend 75 → 76; ningún componente
   de H1 tocado. Detalle en la cabecera S100 del plan.
 
-#### O-catálogo — "Creo los elementos simples del centro." ● ACTIVO (desde S101)
+#### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
-- **Terminado cuando:** desde la UI se crea un centro mínimo y el solver corre
-  sobre él. Criterio AGREGADO: no lo cierra ninguna entidad suelta.
+- **Terminado cuando:** las 4 entidades de catálogo (Profesor, Aula, Asignatura,
+  Grupo) se crean, listan, editan y borran desde la UI, y su escritura llega
+  correctamente al backend REST existente. **CUMPLIDO en S104** (4/4 CRUD); el
+  criterio se precisó en S106 (ver nota de recorte abajo). Criterio de entidades
+  simples: no incluye currículo, jornada ni estructura, que son O-estructura.
 - **Progreso (S104):** 4 de 4 entidades CRUD. Profesor HECHO (S101, commit `ddc6c48`),
   Aula HECHO (S102, commit `5094462`), Asignatura HECHO (S103, commits `7fa8278`
   entidad + `4f7dded` cableado) y Grupo HECHO (S104). Asignatura fue el CASO PLANO del
@@ -119,11 +122,25 @@ de las Fases 9–12.
   (`contarSubgrupos`+`contarGruposHijos`). El sub-recurso `aulas-compatibles` (S103) y
   `/{id}/tutoria` (S104) quedaron fuera de alcance por el mismo criterio; son Cambio
   propio, no CRUD plano.
-  **4/4 NO cierra O-catálogo.** El criterio es AGREGADO con dos mitades: (1) crear un
-  centro mínimo por UI —cumplido con las 4 entidades— y (2) el solver corre sobre él.
-  La segunda NO existe (M2 de S104: cero e2e UI→solver). El cierre del objetivo es un
-  Cambio propio pendiente (S105+): lanzar el solver sobre un centro creado íntegramente
-  por la interfaz. Es el primer e2e del proyecto y su mayor riesgo abierto en H2.
+  **Recorte de alcance (S106).** El criterio previo era AGREGADO con dos mitades: (1)
+  crear un centro mínimo por UI y (2) el solver corre sobre él. El M2 de S106 midió
+  contra el código que la 2ª mitad NO es alcanzable dentro de O-catálogo: el centro
+  mínimo que pasa prevalidación y produce un solve son 9 filas irreducibles (Nivel,
+  Grupo, Subgrupo, Profesor, Asignatura, Aula, ≥1 TramoSemanal lectivo, Actividad,
+  Plaza; `GenerarHorarioEndpointTest.poblarCatalogoMinimo`), y solo 4 de ellas
+  (Profesor, Aula, Asignatura, Grupo) tienen formulario. Las otras 5 van de "solo
+  listar" (Nivel: existe endpoint, la UI solo hace `listar()`) a "sin controller"
+  (TramoSemanal: bloqueo duro, sin rejilla `tramosLectivos=0` ⇒ PROFESOR/GRUPO
+  SOBRECARGADO ⇒ 422). Subgrupo, Actividad y Plaza (la demanda curricular) solo tienen
+  API. Esas piezas —currículo/demanda y estructura de jornada— son O-estructura por
+  diseño (§3 O-estructura; §4 D22, frontera S103/S104). El criterio agregado se redactó
+  (≤S104) sin haber medido esa dependencia; el recorte lo corrige. Es un cambio
+  localizado en este documento, previsto por §5 ("decisión reversible: si al ejecutar
+  se revela una razón para otro grano, es un cambio localizado, no un rehacer").
+  La verificación e2e "el solver corre sobre un centro creado íntegramente por UI" se
+  reasigna a O-estructura, que es quien construye las piezas que faltan (ver su criterio
+  de terminado). Es el primer e2e del proyecto y su mayor riesgo abierto en H2, pero no
+  puede ejecutarse hasta que exista la UI de estructura.
 - **Depende de:** O-shell.
 - **Valor:** primer centro creado sin SQL.
 - **Cambios que agrupa:** un formulario CRUD por entidad de catálogo. El backend
@@ -166,7 +183,13 @@ de las Fases 9–12.
   tutores desde la UI.
 - **Terminado cuando:** los 8 tipos de sesión del modelo (§6 de
   `modelo_datos_fase1.md`) se pueden expresar por formulario; los casos de
-  validación del §6 se reproducen desde la UI.
+  validación del §6 se reproducen desde la UI; y **un e2e de navegador crea un
+  centro mínimo íntegramente por la UI y el solver corre sobre él** (heredado de
+  O-catálogo en S106: es la prueba de que la UI de estructura funciona de punta a
+  punta, y solo es ejecutable cuando O-estructura ya construye Nivel, Subgrupo,
+  demanda curricular y jornada). Andamiaje Playwright ya instalado en S106
+  (`app/frontend/e2e/`, humo verde); este objetivo lo reutiliza. Sujeto a la
+  política e2e de §6.
 - **Depende de:** O-catálogo.
 - **Valor:** valida el MODELO UNIFICADO contra el usuario real. Es el objetivo de
   mayor riesgo del proyecto (si el modelo Actividad→Plaza→Subgrupo no se puede
@@ -380,6 +403,19 @@ Antes de abrir una sesión hay que poder responder: ¿qué Cambio avanza? ¿qué
 Objetivo avanza? ¿qué Hito acerca? ¿toca trabajo que un objetivo planificado
 invalidará? Si no hay respuesta a las tres primeras, la sesión no se abre. (Vive
 como M0 en `metodo.md`.)
+
+**R-e2e — El e2e de navegador cubre el guion de aceptación, no la lógica.**
+La suite e2e de navegador (Playwright, `app/frontend/e2e/`) verifica ÚNICAMENTE los
+eslabones del guion de aceptación de §1: crear centro por UI → generar → ajustar con
+drag & drop → exportar → duplicar curso. Un e2e por eslabón, no por caso. La lógica
+—casos límite, ramas de error, validaciones, prevalidación— se prueba en la capa
+JVM/unidad (donde ya vive: `GenerarHorarioEndpointTest`, ~35 tests de `SolverHorario`,
+round-trips, MockMvc del controller) o en unidad de frontend (vitest), NUNCA en
+navegador. Un e2e nuevo se justifica solo si verifica un eslabón del guion no cubierto
+ya; no se añade "por si acaso" (análoga a R-deuda). Razón: los e2e de navegador son los
+tests más caros de mantener y más frágiles; sin este techo la suite crece por inercia
+hasta ralentizar el desarrollo. El guion de §1 tiene ~6 eslabones ⇒ la suite tiende a
+~6 tests. Si crece mucho más, es señal de que cubre lógica que no le toca: se recorta.
 
 ---
 
