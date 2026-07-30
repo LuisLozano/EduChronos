@@ -1,0 +1,46 @@
+<div class="asignaturas">
+  <div class="asignaturas__cabecera">
+    <h2 class="asignaturas__titulo">Asignaturas</h2>
+    <button type="button" class="asignaturas__nuevo" (click)="nuevo()">
+      Nueva asignatura
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="asignaturas__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="asignaturas__cargando">Cargando…</p>
+  } @else if (asignaturas().length === 0) {
+    <p class="asignaturas__vacio">
+      No hay asignaturas todavía. Crea la primera con «Nueva asignatura».
+    </p>
+  } @else {
+    <table class="asignaturas__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre completo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (asig of asignaturas(); track asig.id) {
+          <tr>
+            <td>{{ asig.codigo }}</td>
+            <td>{{ asig.nombreCompleto }}</td>
+            <td class="asignaturas__acciones">
+              <button type="button" class="asignaturas__editar" (click)="editar(asig)">
+                Editar
+              </button>
+              <button type="button" class="asignaturas__borrar" (click)="borrar(asig)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,36 @@
+<div class="asignatura-form">
+  <h2 class="asignatura-form__titulo">
+    {{ esEdicion ? 'Editar asignatura' : 'Nueva asignatura' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="asignatura-form__campo">
+      <span class="asignatura-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="asignatura-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="asignatura-form__error">El código es obligatorio.</span>
+      }
+    </label>
+
+    <label class="asignatura-form__campo">
+      <span class="asignatura-form__etiqueta">Nombre completo</span>
+      <input type="text" formControlName="nombreCompleto" class="asignatura-form__input" />
+      @if (form.controls.nombreCompleto.touched && form.controls.nombreCompleto.invalid) {
+        <span class="asignatura-form__error">El nombre es obligatorio.</span>
+      }
+    </label>
+
+    @if (error()) {
+      <p class="asignatura-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+
+    <div class="asignatura-form__acciones">
+      <button type="button" class="asignatura-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="asignatura-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

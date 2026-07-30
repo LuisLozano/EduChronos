@@ -1,0 +1,62 @@
+.asignatura-form {
+  padding: 1.5rem;
+  min-width: 22rem;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.asignatura-form__titulo {
+  margin: 0 0 1rem;
+}
+
+.asignatura-form__campo {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.asignatura-form__etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.asignatura-form__input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.asignatura-form__error {
+  display: block;
+  color: #b00;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.asignatura-form__error-servidor {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.asignatura-form__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.asignatura-form__cancelar,
+.asignatura-form__guardar {
+  padding: 0.5rem 1rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.asignatura-form__guardar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
