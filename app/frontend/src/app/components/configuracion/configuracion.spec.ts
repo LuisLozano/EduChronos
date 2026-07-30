@@ -2,17 +2,21 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { Configuracion } from './configuracion';
+import { AulaService } from '../../services/aula.service';
 import { ProfesorService } from '../../services/profesor.service';
 
 /**
  * CABLEADO, no comportamiento. Lo que este fichero congela es que la sección de
- * Configuración MONTA de verdad el CRUD de profesores; qué hace ese CRUD se mide
- * en `profesor-lista.spec.ts`, que es donde vive su lógica.
+ * Configuración MONTA de verdad cada CRUD de catálogo; qué hace cada uno se mide en
+ * `profesor-lista.spec.ts` / `aula-lista.spec.ts`, que es donde vive su lógica.
  *
- * <p>`ProfesorService` va DOBLADO por `useValue`: `ProfesorLista` pide la lista en
- * su `ngOnInit`, y sin doble ese GET saldría a `HttpClient` de verdad. El doble
- * emite lista vacía —el camino más corto a un render estable—; el contenido de la
- * tabla no se asevera aquí.
+ * <p>Los servicios van DOBLADOS por `useValue`: cada lista pide la suya en su
+ * `ngOnInit`, y sin doble esos GET saldrían a `HttpClient` de verdad. Los dobles
+ * emiten lista vacía —el camino más corto a un render estable—; el contenido de las
+ * tablas no se asevera aquí.
+ *
+ * <p>UN CASO POR SECCIÓN, no uno que las mire todas: así el rojo NOMBRA la sección
+ * desmontada en vez de obligar a leer el aserto para saber cuál cayó.
  *
  * <p>POR QUÉ DOS ASERTOS Y NO SOLO EL `querySelector`. Son dos mutaciones
  * distintas y solo el segundo aserto caza la segunda:
@@ -36,7 +40,10 @@ describe('sección de configuración', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Configuracion],
-      providers: [{ provide: ProfesorService, useValue: { listar: () => of([]) } }],
+      providers: [
+        { provide: ProfesorService, useValue: { listar: () => of([]) } },
+        { provide: AulaService, useValue: { listar: () => of([]) } },
+      ],
     }).compileComponents();
   });
 
@@ -48,5 +55,24 @@ describe('sección de configuración', () => {
 
     expect(raiz.querySelector('app-profesor-lista')).not.toBeNull();
     expect(raiz.textContent).toContain('Nuevo profesor');
+  });
+
+  it('(2) monta el CRUD de aulas dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    expect(raiz.querySelector('app-aula-lista')).not.toBeNull();
+    // El segundo aserto mide que el hijo RENDERIZA, no solo que el tag está: el
+    // botón «Nueva aula» solo existe si el componente se instanció y pintó.
+    //
+    // MATIZ sobre la nota de (1), verificado por mutación en S102: en esta versión
+    // de Angular quitar `AulaLista` del array `imports:` NO deja el tag como
+    // elemento desconocido con los tests verdes —el compilador de plantillas lo
+    // rechaza con NG8001 y NO HAY BUILD—. Esa mutación cae antes de llegar aquí,
+    // así que el aserto de texto se sostiene por la razón de arriba (el hijo pinta),
+    // no por la que el spec de S101 le atribuía.
+    expect(raiz.textContent).toContain('Nueva aula');
   });
 });

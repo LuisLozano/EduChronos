@@ -1,0 +1,46 @@
+/* Calco de profesor-lista.css con el prefijo BEM propio del bloque. */
+.aulas {
+  padding: 1rem;
+}
+
+.aulas__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.aulas__titulo {
+  margin: 0;
+}
+
+.aulas__error {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.aulas__vacio,
+.aulas__cargando {
+  color: #666;
+}
+
+.aulas__tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.aulas__tabla th,
+.aulas__tabla td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.aulas__acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.aulas__borrar {
+  color: #b00;
+}

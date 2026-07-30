@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import { AulaLista } from '../aulas/aula-lista';
 import { ProfesorLista } from '../profesores/profesor-lista';
 
 /**
@@ -11,12 +12,14 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * `<router-outlet>` y el array `children` que el proyecto no usa en ningún sitio
  * salvo el raíz.
  *
- * <p>Las otras tres entidades de catálogo (aulas, grupos, currículo) se montarán
- * igual, como hermanas de {@link ProfesorLista}.
+ * <p>{@link AulaLista} se monta igual, como HERMANA de {@link ProfesorLista}: eso es
+ * lo que valida el molde de S101 —una sección de catálogo se añade aquí con una
+ * línea en `imports:` y una etiqueta en la plantilla, sin tocar la anterior—. Las dos
+ * que faltan (grupos, currículo) entrarán del mismo modo.
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [ProfesorLista],
+  imports: [ProfesorLista, AulaLista],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })

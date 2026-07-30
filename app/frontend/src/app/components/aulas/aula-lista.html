@@ -1,0 +1,54 @@
+<div class="aulas">
+  <div class="aulas__cabecera">
+    <h2 class="aulas__titulo">Aulas</h2>
+    <button type="button" class="aulas__nueva" (click)="nueva()">
+      Nueva aula
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="aulas__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="aulas__cargando">Cargando…</p>
+  } @else if (aulas().length === 0) {
+    <p class="aulas__vacio">
+      No hay aulas todavía. Crea la primera con «Nueva aula».
+    </p>
+  } @else {
+    <table class="aulas__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th>Capacidad</th>
+          <th>Edificio</th>
+          <th>Planta</th>
+          <th>Sector</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of aulas(); track a.id) {
+          <tr>
+            <td>{{ a.codigo }}</td>
+            <td>{{ a.tipo }}</td>
+            <td>{{ a.capacidad ?? '—' }}</td>
+            <td>{{ a.edificio ?? '—' }}</td>
+            <td>{{ a.planta ?? '—' }}</td>
+            <td>{{ a.sector ?? '—' }}</td>
+            <td class="aulas__acciones">
+              <button type="button" class="aulas__editar" (click)="editar(a)">
+                Editar
+              </button>
+              <button type="button" class="aulas__borrar" (click)="borrar(a)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,61 @@
+<div class="aula-form">
+  <h2 class="aula-form__titulo">
+    {{ esEdicion ? 'Editar aula' : 'Nueva aula' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="aula-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="aula-form__error">El código es obligatorio.</span>
+      }
+    </label>
+
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Tipo</span>
+      <select formControlName="tipo" class="aula-form__input">
+        <option value="" disabled>— elige un tipo —</option>
+        @for (t of tipos; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+      @if (form.controls.tipo.touched && form.controls.tipo.invalid) {
+        <span class="aula-form__error">El tipo es obligatorio.</span>
+      }
+    </label>
+
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Capacidad <em>(opcional)</em></span>
+      <input type="number" min="0" formControlName="capacidad" class="aula-form__input" />
+    </label>
+
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Edificio <em>(opcional)</em></span>
+      <input type="text" formControlName="edificio" class="aula-form__input" />
+    </label>
+
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Planta <em>(opcional)</em></span>
+      <input type="number" formControlName="planta" class="aula-form__input" />
+    </label>
+
+    <label class="aula-form__campo">
+      <span class="aula-form__etiqueta">Sector <em>(opcional)</em></span>
+      <input type="text" formControlName="sector" class="aula-form__input" />
+    </label>
+
+    @if (error()) {
+      <p class="aula-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+
+    <div class="aula-form__acciones">
+      <button type="button" class="aula-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="aula-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>
