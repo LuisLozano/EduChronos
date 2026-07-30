@@ -74,7 +74,9 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 - **H4 — Instalar/curso.** Valor: es la condición de entrega. Depende de: todo lo
   anterior estable.
 
-**Orden recomendado: H2 → cierre de H1 → H3 → H4.** Justificación en §5.
+**Orden recomendado: H2 → cierre de H1 → H3 → H4.** Justificación en §5. (El
+acabado visual transversal —O-diseño, §3— va tras cerrar H1, sobre vistas ya
+congeladas; no es un hito funcional.)
 
 ---
 
@@ -230,7 +232,34 @@ de las Fases 9–12.
   familia F8.6 NO entra aquí (ver §4): es cobertura o superficie de error, no
   hueco funcional.
 
-**Lo que NO es un objetivo:** "cobertura de mutación del contenedor de horario".
+#### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ESBOZADO, criterio por definir)
+- **Propósito:** trabajar la maquetación y la identidad visual de la aplicación
+  —sistema de estilos, tipografía, tokens de color, consistencia entre vistas—,
+  transversal a todas las pantallas. NO es maquetar una vista suelta: es el acabado
+  visual del conjunto.
+- **Terminado cuando:** POR DEFINIR (se concreta al abrirlo, con las vistas ya
+  congeladas delante). Candidato: existe un sistema de estilos aplicado de forma
+  coherente a todas las vistas (configuración, horario, exportación) y el aspecto
+  deja de ser el de andamiaje por defecto.
+- **Depende de:** H2 cerrado (O-estructura + O-demo). Razón (R-invalidación): todo
+  lo anterior mueve la ESTRUCTURA de la UI —O-estructura añade los formularios
+  pesados de currículo/desdobles/PDC/tutores/jornada, que reorganizan Configuración
+  entera—; maquetar antes es pulir superficie que se va a reubicar. Se hace una vez,
+  sobre vistas estables.
+- **Valor:** presentabilidad. Hasta aquí los hitos se definen por función; este es
+  el único objetivo puramente de acabado. Registrado en S106 a petición del
+  arquitecto: sin sede propia, la maquetación o no se hace nunca o se cuela a trozos
+  dentro de otros objetivos violando R-terminado ("pulir CSS ya que estoy en esta
+  vista"). Tenerlo como objetivo lo protege por ambos lados.
+- **Salvedad de prioridad:** si hay que ENSEÑAR la app a un cliente o al IES antes
+  de cerrar H2, el aspecto deja de ser estético y pasa a ser presentabilidad de
+  demo, que sí es valor entregable; en ese caso O-diseño (o un subconjunto mínimo)
+  sube de prioridad. Decisión del arquitecto según el escenario real.
+- **Grano abierto:** objetivo propio y separado, NO colgado de O-demo, porque el
+  diseño transversal toca todas las vistas a la vez y no es "parte de" ningún hito
+  funcional. Si al abrirlo resulta grande, se parte (métrica de §7).
+
+
 Fue el motor de las sesiones S84–S99 y no produce avance de producto. Su trabajo
 legítimo (que el ajuste funcione) está en O-ajuste-cierre; su trabajo ilegítimo
 (pulir tests de una vista que el shell reubicará) desaparece por la regla de
@@ -345,7 +374,9 @@ producto: construyó toda la maquinaria de AJUSTAR (H1) antes de tocar la de CRE
 Fase 8, H1 al 90%, H2 al 0%.
 
 **Orden nuevo: O-shell → O-catálogo → O-estructura → O-demo (todo H2), luego
-O-ajuste-cierre (H1), luego H3, luego H4.**
+O-ajuste-cierre (H1), luego O-diseño (acabado visual, con las vistas ya
+congeladas), luego H3, luego H4.** (O-diseño puede adelantarse si una demo a
+cliente/IES lo exige antes de cerrar H2; ver su salvedad de prioridad en §3.)
 
 - **Qué desbloquea:** O-shell desbloquea todo lo demás (formularios y vista
   necesitan carcasa). Hacer H2 primero hace que H1 y H3 operen sobre datos reales
