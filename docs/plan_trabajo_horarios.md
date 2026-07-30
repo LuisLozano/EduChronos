@@ -624,6 +624,68 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
+### Sesión 103 — O-catálogo (H2): CRUD de Asignatura. Tercer Cambio de cuatro (3/4). CASO PLANO del molde. NO cierra el objetivo.
+  Cuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
+  Code por mutación), M3 acotado a la traducción de error (no al binding; la lógica de dominio vive en el
+  backend). Avanza O-catálogo (H2) de 2/4 a 3/4; el criterio de terminado es AGREGADO («desde la UI se
+  crea un centro mínimo y el solver corre sobre él»): esta sesión NO lo cierra, falta grupo. El backend
+  REST de Asignatura ya existía completo: `AsignaturaController` se documenta como PILOTO del patrón CRUD
+  de catálogo (del que descienden Profesor y Aula), 5 operaciones, `codigo` not-null-unique, 409 por
+  referencia entrante vía `ReferenciaEntranteException`. El trabajo de S103 es la capa de presentación
+  Angular: servicio HTTP + modelo + dos componentes.
+  M2 — DECISIÓN DE ALCANCE (raíz sola, con evidencia): O-catálogo elige asignatura antes que grupo por
+  método, no por dependencia técnica (entre las dos restantes no la hay). Asignatura arrastra deuda propia
+  (D-F8.5-C3-b «códigos por currículo») y expone un sub-recurso que Profesor/Aula no tienen:
+  `GET/PUT /api/asignaturas/{id}/aulas-compatibles`. La apertura empujaba a decidir si el CRUD incluía ese
+  sub-recurso. Claude Code inspeccionó el backend ANTES de teclear y midió acoplamiento de contrato NULO:
+  `AsignaturaDTO`/`AsignaturaRequest` son `{id, codigo, nombreCompleto}` byte por byte iguales a Profesor;
+  la entidad no mapea colección de compatibilidades (el lado propietario es `AsignaturaAulaCompatible` con
+  `@ManyToOne`, cascada de borrado por esquema, no JPA); el sub-recurso es un contrato aparte de
+  `List<String>`. CONSECUENCIA: la raíz es un calco LITERAL del molde de Profesor (S101), no de Aula (S102)
+  —sin enumerado, sin opcionales nullable—. El sub-recurso queda FUERA DE ALCANCE (Cambio propio; ver
+  D-S103-compat). Asignatura es, así, el CASO PLANO que valida que el molde se aplica sin estirarlo: donde
+  S102 añadió dos extensiones (enumerado + opcionales), S103 no necesita ninguna.
+  MOLDE (reutilizado, canon desde S102): calco por copia+sustitución de los 8 ficheros de Profesor, hecho
+  por Claude Code sobre los ficheros REALES (no sobre resumen). Lo que el `sed` mecánico no da y hubo que
+  resolver a mano: (1) género —asignatura es femenino, 9 sitios— y la «a» personal del borrado
+  (`¿Borrar a Ana Ruiz?`→`¿Borrar la asignatura Mat?`), unificado a CÓDIGO en confirmación y degradado como
+  Aula; (2) referentes del 409 —el molde heredaba `plaza(s)`+`tutoria(s)` (de Profesor); los de asignatura
+  son `actividad(es)` y `plaza(s)` en ese orden (`AsignaturaService:118-120` + `ReferenciaEntranteException`);
+  (3) un literal de backend en femenino («Ya existe una asignatura con codigo», `AsignaturaService:85`) que
+  el mock heredado ponía en masculino; (4) cabecera del form reescrita: dejó de afirmar «PRIMER formulario,
+  candidato a molde» (heredado de S101, falso) y documenta que es el caso plano.
+  M3/MUTACIÓN — mutaciones cazadas (contraste de Claude Code, no afirmado): `degradado a nombreCompleto`→
+  lista(5); `@for truncado a .slice(0,1)`→lista(1); `quitar <app-asignatura-lista/>`→configuracion(3). El
+  `(409)` en los asertos de lista(5)/(85) NO es adorno: con datos reales `Mat` es prefijo de `Matemáticas`,
+  y sin el status esos asertos dejaban de distinguir código de nombre —justo la decisión (degradado a
+  código) que S103 tomó—. Dos asertos negativos heredados (form:69, lista:85) estaban MUERTOS (pasaban por
+  imposibilidad, no discriminaban) y se reapuntaron al degradado real. La lista se probó con DOS filas
+  (`Mat`, `LCL`) para cubrir el `@for` de verdad. Datos de dominio REALES del catálogo (§4.1 y
+  D-F8.5-C3-b: `Mat`, `LCL`), no inventados: se rechazó `MAT1`/`Matemáticas I` por no existir en el catálogo.
+  ENTREGADO (2 commits de código, árbol limpio): NUEVOS `models/asignatura.model.ts` (espejo de
+  `AsignaturaDTO`/`AsignaturaRequest`), `services/asignatura.service.{ts,spec.ts}` (5 wrappers pelados sobre
+  `/api/asignaturas`), `components/asignaturas/{asignatura-lista,asignatura-form}.{ts,html,css,spec.ts}`
+  (11 ficheros, commit `7fa8278`). MODIFICADOS `configuracion.{ts,html,spec.ts}` (+import y `AsignaturaLista`
+  en `imports`, +`<app-asignatura-lista/>`, caso (3) escueto que remite a (2); corrección de nomenclatura:
+  la cuarta entidad del catálogo es GRUPO, no «currículo» —arrastre de S101, currículo es objeto de
+  O-estructura— con la cita del plan dentro; commit `4f7dded`). Suite frontend 122 → 139 (+17: 16 de los
+  tres specs + el (3) de configuracion). `ConfirmarBorrado` genérico reutilizado sin tocar. NOTA menor: S103
+  usó DOS commits de código (entidad + cableado) donde S101/S102 usaron uno; el commit de docs sigue el
+  patrón de S102.
+  DEUDA: D-S103-compat NUEVA (mejora futura, cuelga del Cambio de compatibilidad; ver sección de deuda
+  viva). D-F8.5-C3-a/-C3-b siguen vivas, ahora con el matiz de que la UI para poblar compatibilidades sigue
+  sin existir. D-S102-spec sin cambios (el (1) conserva la premisa falsa por R-terminado; el (3) de S103
+  remite al (2) de S102, no repite el razonamiento de NG8001).
+  OBSERVACIONES sin deuda formal: (a) No existe script de higiene R4 en el repo (mejora de método pendiente
+  desde S101, ya registrada en S102); R4 se verificó a mano —tokens citados con definición viva; sin
+  ficheros huérfanos, lo prueba el verde de configuracion.spec—. (b) ARCHIVADO (M1-bis) ATRASADO 3 sesiones:
+  el patrón «sesión N archiva la cabecera de N-4» se rompió en S100 (S96 no se archivó), S101 (S97) y S102
+  (S98); el plan arrastra 7 cabeceras vivas en dos formatos y el censo (:1206) sigue diciendo «S96–S99».
+  S103 NO archiva —hacerlo «según patrón» dejaría el hueco S96–S98 en medio y empeoraría el desalineamiento—;
+  saldarlo es sesión de Higiene documental propia (como S95/S98), no trabajo de O-catálogo (R-terminado).
+  Aviso para esa sesión: `bitacora-sesiones.md` (369 KB) corrompe cabeceras al archivar (títulos partidos en
+  dos líneas); ir con sed/Python y verificar por diff del cuerpo.
+
 ### Sesión 102 — O-catálogo (H2): CRUD de Aula. Segundo Cambio de cuatro (2/4). VALIDA el molde de catálogo. NO cierra el objetivo.
   Tercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
   Code por mutación), M3 NO (binding; la lógica de dominio ya vive en el backend de Aula desde S70).
@@ -2522,6 +2584,23 @@ con remisión a la bitácora.
   corrigió el javadoc del caso (1) porque es de otra sesión (S101) y tocarlo por precisión no desbloquea
   nada (R-terminado). Cuelga de O-ajuste-cierre (H1), familia de precisión de specs junto a D-S101-num.
   → corregir el javadoc del caso (1) si alguna vez se abre esa spec por otro motivo.
+
+- **D-S103-compat** (S103, VIVA, mejora futura, no bloqueante) — EL CRUD DE ASIGNATURA NO ALCANZA EL
+  SUB-RECURSO `aulas-compatibles`. `AsignaturaController` expone `GET/PUT /api/asignaturas/{id}/aulas-compatibles`
+  (compatibilidad asignatura↔`TipoAula`, Bloque 8.5-C3), pero el CRUD de S103 se limitó a la entidad raíz
+  `{codigo, nombreCompleto}` por decisión de alcance (acoplamiento de contrato nulo, medido en M2). Poblar
+  compatibilidades es trabajo de USUARIO en la UI —así lo da por hecho D-F8.5-C3-b, que además fija que el
+  catálogo real tiene hoy 0 compatibilidades—, y esa UI no existe. Caso simétrico de D-F8.5-C3-a
+  «CONTENIDA EN UI»: aquí es una capacidad del backend que la UI NO alcanza. NO bloquea O-catálogo: por la
+  semántica de S75 (0 filas ⇒ irrestricta), un centro mínimo creado por UI corre en el solver sin poblar
+  ninguna compatibilidad —cumple el criterio de terminado del objetivo—. Arrastra D-F8.5-C3-a y -C3-b.
+  Pendiente además la NO-ATOMICIDAD POST→PUT: en un alta, el id no existe hasta que el POST responde, así
+  que guardar compatibilidades exige una segunda petición que puede fallar sola (asignatura creada sin sus
+  compatibilidades); decidir entre editar la compatibilidad aparte sobre entidad ya existente (más barato,
+  no inventa transaccionalidad) o encadenar POST→PUT presentando el fallo parcial. Cuelga del Cambio de
+  compatibilidad (tras Grupo, o dentro de O-estructura según se decida al abrirlo). → construir la UI de
+  compatibilidades como Cambio propio; estirar el molde con un sub-recurso es el objeto de esa sesión, no
+  un añadido a un CRUD plano.
 
 ### Deuda consciente CERRADA (histórico)
 

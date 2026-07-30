@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 2 de 4 entidades — Profesor (S101) y Aula (S102) hechos, faltan asignatura/grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 3 de 4 entidades — Profesor (S101), Aula (S102) y Asignatura (S103) hechos, falta grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -110,11 +110,14 @@ de las Fases 9–12.
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
 - **Terminado cuando:** desde la UI se crea un centro mínimo y el solver corre
   sobre él. Criterio AGREGADO: no lo cierra ninguna entidad suelta.
-- **Progreso (S102):** 2 de 4 entidades. Profesor HECHO (S101, commit `ddc6c48`) y
-  Aula HECHO (S102, pendiente de commit al escribir este cierre); faltan asignatura y
-  grupo. Entre las dos restantes NO hay dependencia técnica de creación; la elección
-  es de método (asignatura arrastra D-F8.5-C3-b «códigos por currículo» y la
-  compatibilidad asignatura↔tipo_aula, que conecta con el `tipo` de Aula ya hecho).
+- **Progreso (S103):** 3 de 4 entidades. Profesor HECHO (S101, commit `ddc6c48`),
+  Aula HECHO (S102, commit `5094462`) y Asignatura HECHO (S103, commits `7fa8278`
+  entidad + `4f7dded` cableado); falta grupo. Asignatura entró como CASO PLANO del
+  molde: su backend (`AsignaturaController`, piloto del patrón) es byte por byte el de
+  Profesor, sin las extensiones que Aula necesitó. El sub-recurso `aulas-compatibles`
+  quedó fuera de alcance (acoplamiento de contrato nulo; ver D-S103-compat); poblar
+  compatibilidades por UI es Cambio propio, no parte del CRUD plano. Falta solo grupo
+  para cerrar el objetivo.
 - **Depende de:** O-shell.
 - **Valor:** primer centro creado sin SQL.
 - **Cambios que agrupa:** un formulario CRUD por entidad de catálogo. El backend
@@ -254,7 +257,8 @@ asigna categoría, objetivo y disposición.
 | D-F8.4-A-a, -A-b, -A-c, -B1-a | O-ajuste-cierre | Cobertura de prevalidación |
 | D-S101-num (numeración global de tests colisionada) | O-ajuste-cierre | Detectada S101: la secuencia (N) de la capa componentes/servicios tiene colisiones preexistentes —(27),(28-30),(35-37) con contenidos distintos en dos ficheros— que rompen la atribución por (N) en campañas de mutación. Es superficie de specs de H1 (cerrado). Los specs de O-catálogo la esquivan abriendo secuencia propia por fichero. Arreglarla no bloquea nada (R-terminado): no se paga ahora |
 | D-F8.5-D2b2-a, -D2b2-b (diseño/cosmética) | — | Sin objetivo urgente |
-| D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos. C3-a CONTENIDA en UI desde S102 (COMUN fuera del selector del form de Aula); sigue viva a nivel de esquema |
+| D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos. C3-a CONTENIDA en UI desde S102 (COMUN fuera del selector del form de Aula); sigue viva a nivel de esquema. C3-b: los códigos por currículo (Mat/LCL usados en specs de S103 son reales de este catálogo) siguen sin UI para poblar compatibilidades (ver D-S103-compat) |
+| D-S103-compat (CRUD de asignatura no alcanza `aulas-compatibles`) | Cambio de compatibilidad (tras Grupo, o dentro de O-estructura) | Detectada S103: el backend expone `GET/PUT /{id}/aulas-compatibles` pero el CRUD plano no lo alcanza. NO bloquea O-catálogo (semántica S75: 0 filas ⇒ irrestricta; un centro mínimo corre sin poblar compatibilidades). Incluye decidir la no-atomicidad POST→PUT. Estirar el molde con el sub-recurso es Cambio propio. No se paga ahora |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
