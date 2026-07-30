@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { Configuracion } from './configuracion';
+import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
 import { ProfesorService } from '../../services/profesor.service';
 
@@ -43,6 +44,7 @@ describe('sección de configuración', () => {
       providers: [
         { provide: ProfesorService, useValue: { listar: () => of([]) } },
         { provide: AulaService, useValue: { listar: () => of([]) } },
+        { provide: AsignaturaService, useValue: { listar: () => of([]) } },
       ],
     }).compileComponents();
   });
@@ -74,5 +76,18 @@ describe('sección de configuración', () => {
     // así que el aserto de texto se sostiene por la razón de arriba (el hijo pinta),
     // no por la que el spec de S101 le atribuía.
     expect(raiz.textContent).toContain('Nueva aula');
+  });
+
+  it('(3) monta el CRUD de asignaturas dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    expect(raiz.querySelector('app-asignatura-lista')).not.toBeNull();
+    // Los dos asertos valen aquí por lo que (2) ya razona, sin repetirlo: el texto
+    // mide que el hijo RENDERIZA, y la mutación de `imports:` no llega a este spec
+    // porque revienta antes en build (NG8001).
+    expect(raiz.textContent).toContain('Nueva asignatura');
   });
 });
