@@ -145,6 +145,15 @@ cambio cosmético no tienen mutación que valga: se declara qué se verifica (¿
 ¿el formulario valida? ¿el conflicto se ve?) sin exigir campaña de mutación de
 lógica inexistente (ver §Tipos).
 
+PRECISIÓN — HELPER DE SPEC CON DEPENDENCIA DE RED: si el componente bajo prueba
+dispara una petición en su inicialización (p. ej. poblar un desplegable en
+`ngOnInit`), el helper `montar()` DEBE flushear esa petición antes de devolver el
+fixture, o el `verify()` de cierre tumba TODOS los casos —incluidos los que no
+hablan de esa petición—, no solo el que la prueba. El flush no es decorativo:
+sostiene los casos heredados del molde plano. Es la regla para toda entidad con
+dependencia de red en construcción, que el molde plano (formularios sin carga
+inicial) no necesitaba.
+
 ---
 
 ## M4 — Contraste antes de teclear, y artefactos derivados

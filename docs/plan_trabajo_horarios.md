@@ -624,6 +624,84 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
+### Sesión 104 — O-catálogo (H2): CRUD de Grupo. Cuarto y último Cambio (4/4). NO cierra el objetivo (falta el paso UI→solver).
+  Quinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude Code
+  por mutación), M3 NO (binding; la lógica de dominio —unicidad, 409, resolución de nivel— vive en el
+  backend). Avanza O-catálogo (H2) de 3/4 a 4/4. IMPORTANTE: 4/4 NO es cierre del objetivo. El criterio de
+  terminado es AGREGADO y tiene DOS mitades («desde la UI se crea un centro mínimo Y el solver corre sobre
+  él»): S104 completa la primera (las cuatro entidades de catálogo son creables por UI); la segunda —lanzar
+  el solver sobre un centro construido íntegramente por la interfaz— NO existe hoy (M2 lo confirmó: cero
+  e2e UI→solver, sin Playwright/Cypress ni carpeta e2e; los únicos tests de integración backend siembran en
+  Java, no crean por UI). El cierre real de O-catálogo es el Cambio siguiente (ver M1-ter). El backend REST
+  de Grupo ya existía completo: `GrupoController` en `/api/grupos`, 5 operaciones, más el sub-recurso
+  `GET/PUT /{id}/tutoria` (fuera de alcance, criterio de S103 con `aulas-compatibles`).
+  M2 — MEDICIÓN (Claude Code sobre el backend REAL, antes de teclear): Grupo NO es un tercer caso plano;
+  tiene dos diferencias reales frente a Asignatura, y varias premisas de apertura se corrigieron con la
+  medición. (1) El 409 YA está implementado —no se escribe—: `GrupoService.borrar` consulta `contarSubgrupos`
+  (`subgrupo_grupo.grupo_id`) y `contarGruposHijos` (`grupo_padre_id`), y lanza `ReferenciaEntranteException`
+  → 409; el frontend solo lo consume. (2) `tipo` es lista blanca a ORDINARIO (`GrupoService.validarTipo`
+  rechaza PDC/virtuales con 400): NO es un enumerado elegible como en Aula, es un campo fijo. (3) `nivel`
+  viaja como CÓDIGO string (no id sintético): `GrupoRequest.nivel`/`GrupoDTO.nivel` son el `codigo` de
+  negocio; `GrupoService.resolverNivel` hace `findByCodigo`→400 si no existe. Corrige la premisa de apertura
+  «hay que poblar nivel_id»: NO hay que poblar id. `NivelController` expone CRUD completo en `/api/niveles`
+  (Bloque 8.5-A'); `NivelDTO` es `{id, codigo, orden}`, `listar()` ordena por `orden` (D-1). D31 b/c/d NO
+  cuelgan del CRUD de Grupo (son poblaciones de niveles superiores —4ºESO/1ºBach/2ºBach—, territorio de
+  O-estructura): confirmado en el texto íntegro de D31, no bloquean S104.
+  MOLDE (reutilizado, canon desde S102): Grupo es el CASO PLANO de Asignatura MÁS UNA EXTENSIÓN acotada —el
+  desplegable `nivel` poblado por red—. Ficheros clonados de Asignatura por Claude Code sobre los REALES.
+  EXTENSIÓN DE LECTURA `nivel` (nueva, 3 ficheros): `models/nivel.model.ts` (interface `{id,codigo,orden}`,
+  sin `NivelRequest` —nada escribe niveles en este bloque—), `services/nivel.service.ts` (ALCANCE DELIBERADO:
+  solo `listar()`; el backend expone CRUD completo pero no hay UI de gestión de niveles aquí —añadir wrappers
+  muertos mentiría sobre el alcance; documentado en el javadoc), `services/nivel.service.spec.ts` (1 caso de
+  contrato GET). PRECISIONES DE MOLDE que aporta S104 (extienden el canon en su punto, no lo reabren): (a)
+  HELPER DE SPEC CON FLUSH DE RED —`montar(data, niveles)`: cuando el componente pide en `ngOnInit`
+  (`/api/niveles`), el helper DEBE flushear esa petición antes de devolver el fixture o `http.verify()` tumba
+  TODOS los casos, incluidos los que no hablan de niveles (la mutación «ngOnInit deja de pedir» cae los 9
+  casos del form, demostrado). Es la primera entidad de catálogo con dependencia de red en construcción; el
+  molde plano (Profesor/Asignatura) no lo tenía. (b) PLACEHOLDER de `<select>` `<option value="" disabled>`
+  calcando `aula-form.html` (único precedente de `<select>` del proyecto; el aserto de conteo cuenta el
+  placeholder, `length+1`, y fija la posición 0). (c) CAMPO DE ALCANCE FIJO NO EXPUESTO: `tipo:'ORDINARIO'`
+  se inyecta en `getRawValue()`, no como control deshabilitado (un campo visible que no se puede tocar es
+  ruido); un aserto sobre el cuerpo del POST Y del PUT vigila que no se pierda. (d) COLUMNA OMITIDA por valor
+  constante: la lista pinta Código+Nivel, NO `tipo` (constante en todas las filas = ruido).
+  M3/MUTACIÓN — verificación por mutación (contraste de Claude Code, no afirmado): `quitar tipo:'ORDINARIO'
+  del cuerpo`→form(1 test); `<option [value]="n.id">` en vez de `n.codigo`→form(2 tests); `reintroducir
+  columna tipo`→lista(1); `ngOnInit deja de pedir /api/niveles`→form(9, open request en verify); `quitar
+  <app-grupo-lista/>`→configuracion(1); `tipo se pierde SOLO en la rama de edición`→form(11) —y (9) sigue
+  verde, que es justo el hueco que (11) cubre—; `ngOnInit silencia el error de niveles`→form(10);
+  `el constructor no precarga nivel`→form(8). El caso (8) usa a propósito el SEGUNDO nivel de la lista: con
+  el primero, un `<select>` atascado en su opción inicial daría verde falso. Dos huecos que el propio
+  reporte identificó y se cerraron con los ajustes del arquitecto: (10) error al cargar niveles —`ngOnInit`
+  traduce su error reutilizando `error()`/`mensaje()`, decisión correcta de Claude Code que faltaba cubrir— y
+  (11) cuerpo del PUT con `tipo:'ORDINARIO'` —simétrico al del POST, sin él romper la inyección en edición
+  quedaba verde—.
+  ENTREGADO (árbol de código limpio; costura verificada por Claude Code, no afirmada): 14 ficheros NUEVOS —
+  Nivel (3: `nivel.model.ts`, `nivel.service.ts`, `nivel.service.spec.ts`), Grupo contrato (3:
+  `grupo.model.ts`, `grupo.service.{ts,spec.ts}`), Grupo componentes (8:
+  `components/grupos/{grupo-form,grupo-lista}.{ts,html,css,spec.ts}`)—. 3 MODIFICADOS: `configuracion.ts`
+  (`GrupoLista` en `imports`, docstring a 4/4), `configuracion.html` (`<app-grupo-lista/>` tras asignatura,
+  párrafo `configuracion__pendiente` BORRADO), `configuracion.spec.ts` (doble de `GrupoService` + caso (4)).
+  Suite frontend 139 → 163 (+24: 22 del paquete inicial + 2 de los ajustes). Molde de Profesor/Aula/Asignatura
+  con `git diff` VACÍO (verificado sobre git, no sobre palabra). COSTURA: `git status` = solo lo previsto
+  (14 nuevos + 3 tocados, `configuracion` +26/−13, nada más); frontend 163/163; backend 242/0/0/0 por
+  ejecución real (surefire-reports, no conteo estático); `npm run build` EXIT=0, bundle 460 kB < budget 500 kB.
+  DEUDA/DECISIONES: `tipo=ORDINARIO` limitado a grupos ordinarios es DECISIÓN CONSCIENTE DE ALCANCE (no deuda):
+  el CRUD plano de catálogo crea ordinarios; PDC/virtuales son O-estructura (viven en `/api/grupos/{idPadre}/pdc`
+  desde S76). Registrada en `gestion_proyecto.md` §4 junto a D-S103-compat. `NivelService` solo-`listar()` es
+  limitación conocida documentada (se completa si un bloque futuro da UI de niveles), no deuda. D31 b/c/d
+  intactas en O-estructura.
+  OBSERVACIONES sin deuda formal: (a) Sigue sin existir script de higiene R4/costura en el repo (`scripts/`
+  vacío; mejora de método pendiente desde S101). La costura de S104 se corrió a mano vía Claude Code; nota
+  para cuando se escriba el script: `mvn -q test` silencia el resumen de Surefire —usar `mvn test` o
+  `| grep -E "Tests run|BUILD"` para que el conteo quede en el log. (b) ARCHIVADO (M1-bis) ATRASADO 4 sesiones:
+  el patrón «sesión N archiva N-4» se rompió en S100 (S96), S101 (S97), S102 (S98) y S104 no lo salda (S99);
+  el plan arrastra 5 cabeceras `### Sesión` vivas (99–103) + residuos «Última sesión previa», y el censo de
+  bitácora sigue diciendo «S96–S99». S104 NO archiva —es Configuración/UI, y hacerlo «según patrón» dejaría
+  huecos intermedios y empeoraría el desalineamiento (mismo criterio que S103, R-terminado/M5)—. Saldarlo es
+  sesión de Higiene documental propia, ahora PRIORITARIA (4 sesiones es demasiado; O-catálogo 4/4 es un punto
+  de reposo natural del mapa para hacerla). Aviso heredado: `bitacora-sesiones.md` (369 KB) corrompe cabeceras
+  al archivar (títulos partidos en dos líneas); ir con sed/Python y verificar por diff del cuerpo.
+
 ### Sesión 103 — O-catálogo (H2): CRUD de Asignatura. Tercer Cambio de cuatro (3/4). CASO PLANO del molde. NO cierra el objetivo.
   Cuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
   Code por mutación), M3 acotado a la traducción de error (no al binding; la lógica de dominio vive en el

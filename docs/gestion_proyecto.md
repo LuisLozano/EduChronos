@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 3 de 4 entidades — Profesor (S101), Aula (S102) y Asignatura (S103) hechos, falta grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 4 de 4 entidades CRUD — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104) hechos. O-catálogo NO cerrado: falta la 2ª mitad del criterio agregado, el paso UI→solver) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -110,14 +110,20 @@ de las Fases 9–12.
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
 - **Terminado cuando:** desde la UI se crea un centro mínimo y el solver corre
   sobre él. Criterio AGREGADO: no lo cierra ninguna entidad suelta.
-- **Progreso (S103):** 3 de 4 entidades. Profesor HECHO (S101, commit `ddc6c48`),
-  Aula HECHO (S102, commit `5094462`) y Asignatura HECHO (S103, commits `7fa8278`
-  entidad + `4f7dded` cableado); falta grupo. Asignatura entró como CASO PLANO del
-  molde: su backend (`AsignaturaController`, piloto del patrón) es byte por byte el de
-  Profesor, sin las extensiones que Aula necesitó. El sub-recurso `aulas-compatibles`
-  quedó fuera de alcance (acoplamiento de contrato nulo; ver D-S103-compat); poblar
-  compatibilidades por UI es Cambio propio, no parte del CRUD plano. Falta solo grupo
-  para cerrar el objetivo.
+- **Progreso (S104):** 4 de 4 entidades CRUD. Profesor HECHO (S101, commit `ddc6c48`),
+  Aula HECHO (S102, commit `5094462`), Asignatura HECHO (S103, commits `7fa8278`
+  entidad + `4f7dded` cableado) y Grupo HECHO (S104). Asignatura fue el CASO PLANO del
+  molde (`AsignaturaController` byte por byte el de Profesor). Grupo = caso plano + UNA
+  extensión: el desplegable `nivel` poblado por red (`nivel.model`/`nivel.service` solo-
+  `listar()`); `tipo` fijo a ORDINARIO (decisión consciente §4); 409 ya en backend
+  (`contarSubgrupos`+`contarGruposHijos`). El sub-recurso `aulas-compatibles` (S103) y
+  `/{id}/tutoria` (S104) quedaron fuera de alcance por el mismo criterio; son Cambio
+  propio, no CRUD plano.
+  **4/4 NO cierra O-catálogo.** El criterio es AGREGADO con dos mitades: (1) crear un
+  centro mínimo por UI —cumplido con las 4 entidades— y (2) el solver corre sobre él.
+  La segunda NO existe (M2 de S104: cero e2e UI→solver). El cierre del objetivo es un
+  Cambio propio pendiente (S105+): lanzar el solver sobre un centro creado íntegramente
+  por la interfaz. Es el primer e2e del proyecto y su mayor riesgo abierto en H2.
 - **Depende de:** O-shell.
 - **Valor:** primer centro creado sin SQL.
 - **Cambios que agrupa:** un formulario CRUD por entidad de catálogo. El backend
@@ -269,6 +275,7 @@ asigna categoría, objetivo y disposición.
 | 8.5-D3 | "APLAZADO INDEFINIDAMENTE, decisión explícita" con criterio de reapertura escrito |
 | D-F8.2b-iii-A-a | Decisión consciente de S62 (no refactorizar los 12 repos en un bloque funcional) |
 | D-F8.2b-iv-a | Espejo de validación aceptado conscientemente, con test de contrato que lo vigila |
+| D-S104-tipo (Grupo `tipo` fijo a ORDINARIO en la UI) | Decisión de S104: el CRUD plano de catálogo crea grupos ORDINARIOS. PDC y virtuales de optativa (`DIVERSIFICACION_PDC`/`VIRTUAL_OPTATIVA`) son de O-estructura, no de O-catálogo, y ya tienen vía propia (PDC vive en `/api/grupos/{idPadre}/pdc` desde S76). El backend impone la lista blanca (`validarTipo`→400); la UI no expone el campo y el form inyecta `tipo:'ORDINARIO'` en el cuerpo. No es deuda: es la frontera correcta entre O-catálogo y O-estructura, la misma con que S103 dejó `aulas-compatibles` fuera |
 | Frontera Fase 2→3 en Subgrupo | Corregida en S14; es nota de diseño, no pendiente |
 
 #### Limitación conocida → sale de la cola, se documenta el "no se hará"
