@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S100. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S101. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S100). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S101). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4880,3 +4880,70 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   `solver/src/main` ni `modelo_datos_fase1.md`. Commits: código y doc separados, de una línea.
   Siguiente por dependencias: O-catálogo (CRUD de catálogo sobre el shell). Sin fijar alcance aquí.
 
+
+### Sesión 101 — O-catálogo (H2): CRUD de Profesores. ABRE O-catálogo; primer Cambio de cuatro (profesor/aula/asignatura/grupo). NO lo cierra.
+  Segunda sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
+  Code), M3 SÍ pero ACOTADO a la traducción de error (no al binding). El criterio de terminado de
+  O-catálogo —«desde la UI se crea un centro mínimo y el solver corre sobre él»— es AGREGADO: esta sesión
+  avanza 1 de 4 entidades, no cierra el objetivo.
+  M2 midió el backend y CORRIGIÓ dos supuestos de apertura. (1) Las deudas que `gestion_proyecto.md`
+  cuelga de O-catálogo (D-F8.5-D2a-a «I4 sin red», y la unicidad profesor-tramo) NO son del formulario de
+  Profesor: son de `ProfesorTutoria` (tutoría = O-estructura) y `ProfesorRestriccionHoraria`
+  (disponibilidad, sub-recurso). Su condición de activación escrita —«si aparece otra vía de escritura»—
+  NO la cumple un formulario que escribe por el servicio REST ya existente. Por R-deuda, se pagan cuando
+  se construyan SUS formularios, no aquí. (2) El backend de Profesor está COMPLETO y con red física:
+  `codigo` es `not null unique` en `schema.sql:62` además de en `ProfesorService` (findByCodigo, con
+  exclusión de sí mismo en edición); no había red que añadir. Reclasificado el tipo de Desarrollo a
+  Configuración/UI en consecuencia: la lógica de dominio ya vive en el backend, el trabajo restante es
+  servicio HTTP + modelo + UI = binding.
+  DECISIONES DE MOLDE (candidato «CRUD de catálogo», a VALIDAR en la sesión de aulas; heredadas por las
+  3 entidades restantes): Reactive Forms tipados con `nonNullable` (frontend era campo virgen, cero
+  formularios previos: decisión libre, no patrón heredado); NADA de async validator sobre unicidad (la
+  fuente de verdad es el backend, un async duplicaría con race condition; el 400 se PRESENTA cuando
+  llega); formulario en diálogo CDK + `ConfirmarBorrado` genérico nuevo; dos componentes (lista+form) no
+  uno; CRUD inline en `Configuracion` (NO ruta hija: `app.routes.ts` no tiene `children` ni el proyecto
+  usa `<router-outlet>` anidado salvo el raíz; montar ese andamiaje con UNA sola entidad delante fijaría
+  el molde de navegación con un solo ejemplo — se decide cuando haya ≥2 entidades, en Cambio propio).
+  M3 ACOTADO a la traducción de error, verificado por MUTACIÓN (contraste de Claude Code, no afirmado):
+  `mensaje()` = `cuerpo?.message || cuerpo?.error || degradado(status)`, copiado del patrón de
+  `horario-view.mensaje()` con texto propio, NO extraído a utilidad compartida (extraer tocaría
+  horario-view = D-F8.6, H1 cerrado). Las 5 mutaciones tumbaron exactamente los tests previstos: quitar
+  `message` en lista → cae lista(4); en form → form(3)+(6); invertir precedencia → form(6); `close(true)→
+  close()` → form(5) y confirmar-borrado(2). Punto ciego documentado: la lista NO asevera la precedencia
+  message>error (su 409 usa message, no error); esa precedencia se asevera en form(6).
+  CAMBIO DE BACKEND (1 línea): `server.error.include-message=always` en `app/src/main/resources/
+  application.properties`. Sin ella la UI solo ve el status y no puede decir QUIÉN impide un borrado (el
+  409 rico «referenciada por N plaza(s)…» que compone `ReferenciaEntranteException` en su constructor) ni
+  distinguir un 400 de código duplicado. NO rompe ningún test: los 37 asertos backend `status().reason()`
+  leen `getErrorMessage()` del response, no los error attributes que gobierna la clave; el degradado de
+  `horario-view.spec` fabrica su propio body `{}`. EFECTO REGISTRADO sobre H1 (mejora, sin regresión):
+  `mensaje()` de `horario-view` deja de degradar y empieza a mostrar el `reason` del servidor en las
+  pantallas de pines/generación. Es un cambio observable en territorio de un objetivo CERRADO, ejecutado
+  desde O-catálogo; se registra por trazabilidad, no reabre H1. Comentario de `horario-view.spec.ts:475`
+  reorientado (no borrado): explica que la rama del degradado sigue viva con la clave activa (500 de
+  Tomcat, corte de red, cuerpo no-JSON llegan sin `message`).
+  ENTREGADO (commit `ddc6c48`, 20 ficheros, +946/-9): NUEVOS `models/profesor.model.ts` (espejo del DTO
+  de `app/web/dto`, con nota de la trampa del `ProfesorDto` homónimo del solver, campos `codigo,nombre`),
+  `services/profesor.service.{ts,spec.ts}` (5 wrappers pelados sobre `/api/profesores`),
+  `components/profesores/{profesor-lista,profesor-form}.{ts,html,css,spec.ts}`,
+  `components/confirmar-borrado/*.{ts,html,css,spec.ts}` (diálogo genérico, molde de confirmación de las 4
+  entidades), `components/configuracion/configuracion.spec.ts`. MODIFICADOS `configuracion.ts` (+import
+  y +ProfesorLista en `imports`), `configuracion.html` (placeholder estrechado a «aulas, grupos y
+  currículo…», que siguen pendientes), `horario-view.spec.ts` (comentario :475), `application.properties`.
+  Suite frontend 76 → 96 (+20), backend 242 verde, bundle compila (los tipos validan contra el resto).
+  El borrado de `CLAUDE.md` (ajeno a esta sesión) quedó aislado en su propio commit `45bef5a`, fuera de
+  `ddc6c48`.
+  DEUDA NUEVA (mejora futura, cuelga de O-ajuste-cierre — es superficie de la capa de H1): la numeración
+  (N) de tests de la capa componentes/servicios es una secuencia GLOBAL con COLISIONES preexistentes
+  —(27), (28-30), (35-37) aparecen con contenidos distintos en dos ficheros cada una—, lo que rompe la
+  atribución por (N) durante una campaña de mutación. Los specs nuevos de O-catálogo NO continúan esa
+  secuencia: cada uno abre secuencia propia desde (1), siguiendo el precedente sano de los specs de
+  lógica pura de `app/horario/`. Arreglar la global tocaría specs de H1 (cerrado) por algo que no
+  bloquea: no se ejecuta (R-terminado).
+  MEJORA DE MÉTODO PENDIENTE (no ejecutada en S101; es sesión Higiene/Método propia): versionar R4 como
+  script en el repo en vez de reescribirlo cada sesión. El guion ad-hoc de S101 salió MAL (prefijo de
+  fichero de `grep -oE`; `grep -F` inflaba tokens cortos; miraba solo 2 de 9 docs); Claude Code lo
+  corrigió y confirmó corpus sano, pero el episodio prueba que un control de higiene reimplementado a mano
+  no es fiable. El script correcto tokeniza con `D-[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*` (admite sufijos
+  compuestos: `D-S101-num` no colapsa a `D-S101`) sobre todos los `docs/*.md`. Es cambio a `metodo.md`,
+  no a O-catálogo: se hace en su sesión (R-terminado).

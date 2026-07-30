@@ -624,7 +624,29 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 104 — O-catálogo (H2): CRUD de Grupo. Cuarto y último Cambio (4/4). NO cierra el objetivo (falta el paso UI→solver).
+### Sesión 105 — Higiene documental (M1+R4/R5): salda el archivado M1-bis atrasado 4 sesiones. NO avanza el mapa.
+  Tipo Higiene/Método: sin código, sin M2/M3/M4; solo M1 y verificación R4/costura. Elegida sobre el cierre de
+  O-catálogo (candidato B) por el cierre de S104: prioritaria (4 sesiones de atraso), barata, y O-catálogo 4/4
+  es punto de reposo natural del mapa para hacerla antes de abrir el frente de riesgo del e2e UI→solver.
+  ESTADO MEDIDO AL ABRIR (M2 barato, greps): el plan arrastraba 9 sesiones vivas, no 6 —el grep de `### Sesión`
+  daba 6 porque S96–S98 ya estaban en formato compacto y S99–S104 en `### Sesión`—. Ninguna de S96–S100 estaba
+  aún en la bitácora (acababa en S95). Doble desfase confirmado: los dos censos de la bitácora decían «S95» y la
+  crónica de archivado del plan se cortaba en «S95 en la Sesión 99».
+  EJECUTADO: archivadas S96, S97, S98, S99 y S100 a la bitácora (promovidas a `### Sesión NN`, orden ascendente,
+  cuerpo verificado IDÉNTICO por diff origen→destino); degradadas S101–S103 a prefijo compacto; S104 quedó como
+  única cabecera H3. Corregidos los dos censos de la bitácora (→ S10–S100) y extendida la crónica de archivado
+  del plan con la rotación S96–S100. Restaurada la invariante H3 (`grep -c "^### Sesión" plan` = 1).
+  AVISO HEREDADO ATENDIDO (S103/S104): la bitácora (~370 KB) había corrompido cabeceras al archivar (títulos
+  partidos en dos líneas: S32, S45, S46). Se archivó con Python (no sed) y se verificó por diff de cuerpo; cero
+  cabeceras partidas nuevas. Las tres históricas ya partidas NO se tocaron (histórico de solo lectura).
+  COSTURA: cada sesión S96–S100 en la bitácora 1 vez y 0 en el plan; S101–S104 al revés. Sin duplicados ni
+  pérdidas. Balance de tamaño coherente (plan −42 KB, bitácora +42 KB).
+  DEUDA: saldada la deuda de método M1-bis (archivado atrasado 4 sesiones). No nace deuda nueva.
+  LIMPIEZA (M1.5): sin frentes cerrados acumulados que condensar; el registro queda limpio para abrir el cierre
+  de O-catálogo. R4/costura verificada por grep+diff (el script oficial conviene correrlo en el entorno real).
+  NOTA: el registro de esta S105 se añadió en un segundo paso; el cierre inicial lo omitió (fallo de M1 paso 1).
+  O-catálogo (H2) sigue ACTIVO 4/4, NO cerrado: falta el paso UI→solver. Siguiente: cierre de O-catálogo (ver M1-ter).
+Última sesión registrada (previa): Sesión 104 — O-catálogo (H2): CRUD de Grupo. Cuarto y último Cambio (4/4). NO cierra el objetivo (falta el paso UI→solver).
   Quinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude Code
   por mutación), M3 NO (binding; la lógica de dominio —unicidad, 409, resolución de nivel— vive en el
   backend). Avanza O-catálogo (H2) de 3/4 a 4/4. IMPORTANTE: 4/4 NO es cierre del objetivo. El criterio de
@@ -820,73 +842,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   (tokens citados con definición viva: D-F8.5-C3-a, D-F8.6, D-S101-num la tienen); la otra mitad
   (archivar/condensar) no aplica porque no se tocó `docs/*.md`.
 
-Última sesión registrada (previa): Sesión 101 — O-catálogo (H2): CRUD de Profesores. ABRE O-catálogo; primer Cambio de cuatro (profesor/aula/asignatura/grupo). NO lo cierra.
-  Segunda sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
-  Code), M3 SÍ pero ACOTADO a la traducción de error (no al binding). El criterio de terminado de
-  O-catálogo —«desde la UI se crea un centro mínimo y el solver corre sobre él»— es AGREGADO: esta sesión
-  avanza 1 de 4 entidades, no cierra el objetivo.
-  M2 midió el backend y CORRIGIÓ dos supuestos de apertura. (1) Las deudas que `gestion_proyecto.md`
-  cuelga de O-catálogo (D-F8.5-D2a-a «I4 sin red», y la unicidad profesor-tramo) NO son del formulario de
-  Profesor: son de `ProfesorTutoria` (tutoría = O-estructura) y `ProfesorRestriccionHoraria`
-  (disponibilidad, sub-recurso). Su condición de activación escrita —«si aparece otra vía de escritura»—
-  NO la cumple un formulario que escribe por el servicio REST ya existente. Por R-deuda, se pagan cuando
-  se construyan SUS formularios, no aquí. (2) El backend de Profesor está COMPLETO y con red física:
-  `codigo` es `not null unique` en `schema.sql:62` además de en `ProfesorService` (findByCodigo, con
-  exclusión de sí mismo en edición); no había red que añadir. Reclasificado el tipo de Desarrollo a
-  Configuración/UI en consecuencia: la lógica de dominio ya vive en el backend, el trabajo restante es
-  servicio HTTP + modelo + UI = binding.
-  DECISIONES DE MOLDE (candidato «CRUD de catálogo», a VALIDAR en la sesión de aulas; heredadas por las
-  3 entidades restantes): Reactive Forms tipados con `nonNullable` (frontend era campo virgen, cero
-  formularios previos: decisión libre, no patrón heredado); NADA de async validator sobre unicidad (la
-  fuente de verdad es el backend, un async duplicaría con race condition; el 400 se PRESENTA cuando
-  llega); formulario en diálogo CDK + `ConfirmarBorrado` genérico nuevo; dos componentes (lista+form) no
-  uno; CRUD inline en `Configuracion` (NO ruta hija: `app.routes.ts` no tiene `children` ni el proyecto
-  usa `<router-outlet>` anidado salvo el raíz; montar ese andamiaje con UNA sola entidad delante fijaría
-  el molde de navegación con un solo ejemplo — se decide cuando haya ≥2 entidades, en Cambio propio).
-  M3 ACOTADO a la traducción de error, verificado por MUTACIÓN (contraste de Claude Code, no afirmado):
-  `mensaje()` = `cuerpo?.message || cuerpo?.error || degradado(status)`, copiado del patrón de
-  `horario-view.mensaje()` con texto propio, NO extraído a utilidad compartida (extraer tocaría
-  horario-view = D-F8.6, H1 cerrado). Las 5 mutaciones tumbaron exactamente los tests previstos: quitar
-  `message` en lista → cae lista(4); en form → form(3)+(6); invertir precedencia → form(6); `close(true)→
-  close()` → form(5) y confirmar-borrado(2). Punto ciego documentado: la lista NO asevera la precedencia
-  message>error (su 409 usa message, no error); esa precedencia se asevera en form(6).
-  CAMBIO DE BACKEND (1 línea): `server.error.include-message=always` en `app/src/main/resources/
-  application.properties`. Sin ella la UI solo ve el status y no puede decir QUIÉN impide un borrado (el
-  409 rico «referenciada por N plaza(s)…» que compone `ReferenciaEntranteException` en su constructor) ni
-  distinguir un 400 de código duplicado. NO rompe ningún test: los 37 asertos backend `status().reason()`
-  leen `getErrorMessage()` del response, no los error attributes que gobierna la clave; el degradado de
-  `horario-view.spec` fabrica su propio body `{}`. EFECTO REGISTRADO sobre H1 (mejora, sin regresión):
-  `mensaje()` de `horario-view` deja de degradar y empieza a mostrar el `reason` del servidor en las
-  pantallas de pines/generación. Es un cambio observable en territorio de un objetivo CERRADO, ejecutado
-  desde O-catálogo; se registra por trazabilidad, no reabre H1. Comentario de `horario-view.spec.ts:475`
-  reorientado (no borrado): explica que la rama del degradado sigue viva con la clave activa (500 de
-  Tomcat, corte de red, cuerpo no-JSON llegan sin `message`).
-  ENTREGADO (commit `ddc6c48`, 20 ficheros, +946/-9): NUEVOS `models/profesor.model.ts` (espejo del DTO
-  de `app/web/dto`, con nota de la trampa del `ProfesorDto` homónimo del solver, campos `codigo,nombre`),
-  `services/profesor.service.{ts,spec.ts}` (5 wrappers pelados sobre `/api/profesores`),
-  `components/profesores/{profesor-lista,profesor-form}.{ts,html,css,spec.ts}`,
-  `components/confirmar-borrado/*.{ts,html,css,spec.ts}` (diálogo genérico, molde de confirmación de las 4
-  entidades), `components/configuracion/configuracion.spec.ts`. MODIFICADOS `configuracion.ts` (+import
-  y +ProfesorLista en `imports`), `configuracion.html` (placeholder estrechado a «aulas, grupos y
-  currículo…», que siguen pendientes), `horario-view.spec.ts` (comentario :475), `application.properties`.
-  Suite frontend 76 → 96 (+20), backend 242 verde, bundle compila (los tipos validan contra el resto).
-  El borrado de `CLAUDE.md` (ajeno a esta sesión) quedó aislado en su propio commit `45bef5a`, fuera de
-  `ddc6c48`.
-  DEUDA NUEVA (mejora futura, cuelga de O-ajuste-cierre — es superficie de la capa de H1): la numeración
-  (N) de tests de la capa componentes/servicios es una secuencia GLOBAL con COLISIONES preexistentes
-  —(27), (28-30), (35-37) aparecen con contenidos distintos en dos ficheros cada una—, lo que rompe la
-  atribución por (N) durante una campaña de mutación. Los specs nuevos de O-catálogo NO continúan esa
-  secuencia: cada uno abre secuencia propia desde (1), siguiendo el precedente sano de los specs de
-  lógica pura de `app/horario/`. Arreglar la global tocaría specs de H1 (cerrado) por algo que no
-  bloquea: no se ejecuta (R-terminado).
-  MEJORA DE MÉTODO PENDIENTE (no ejecutada en S101; es sesión Higiene/Método propia): versionar R4 como
-  script en el repo en vez de reescribirlo cada sesión. El guion ad-hoc de S101 salió MAL (prefijo de
-  fichero de `grep -oE`; `grep -F` inflaba tokens cortos; miraba solo 2 de 9 docs); Claude Code lo
-  corrigió y confirmó corpus sano, pero el episodio prueba que un control de higiene reimplementado a mano
-  no es fiable. El script correcto tokeniza con `D-[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*` (admite sufijos
-  compuestos: `D-S101-num` no colapsa a `D-S101`) sobre todos los `docs/*.md`. Es cambio a `metodo.md`,
-  no a O-catálogo: se hace en su sesión (R-terminado).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -898,10 +853,12 @@ S53 y S54 en la Sesión 58, la de S55 en la Sesión 59, la de S56 en la Sesión 
 en la Sesión 61, la de S58 en la Sesión 62, la de S59 en la Sesión 63, la de S60 en la
 Sesión 64, la de S61 en la Sesión 65, la de S62 en la Sesión 66, la de S63 en la Sesión 67, la de S64 en
 la Sesión 68, la de S65 en la Sesión 69, la de S66 en la Sesión 70, la de S67 en la Sesión 71 y la de
-S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95, la de S92 en la Sesión 96, la de S93 en la Sesión 97, la de S94 en la Sesión 98 y la de S95 en la Sesión 99 (misma higiene documental; en S60 se corrigió además una copia
+S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la de S71 en la Sesión 75, la de S72 en la Sesión 76, la de S73 en la Sesión 77, la de S74 en la Sesión 78 la de S75 en la Sesión 79 la de S76 en la Sesión 80, la de S77 en la Sesión 81, la de S78 en la Sesión 82 la de S79 en la Sesión 83 la de S80 en la Sesión 84, la de S81 en la Sesión 85 la de S82 en la Sesión 86 la de S83 en la Sesión 87 la de S84 en la Sesión 88, la de S85 en la Sesión 89, la de S86 en la Sesión 90, la de S87 en la Sesión 91 la de S88 en la Sesión 92, la de S89 en la Sesión 93 la de S90 en la Sesión 94 la de S91 en la Sesión 95, la de S92 en la Sesión 96, la de S93 en la Sesión 97, la de S94 en la Sesión 98 y la de S95 en la Sesión 99, y las de S96, S97, S98, S99, S100 y S101 juntas en la
+Sesión 105 (higiene que saldó el archivado M1-bis atrasado 4 sesiones: S100–S104 no rotaron en su momento, y
+la propia rotación de S105 expulsó además S101) (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas sesiones en su ventana (S101–S104), con S104 como única cabecera H3 viva y S101–S103 en formato
+últimas sesiones en su ventana (S102–S105), con S105 como única cabecera H3 viva y S102–S104 en formato
 compacto. El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
