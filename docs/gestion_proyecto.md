@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 1 de 4 entidades — Profesor hecho, faltan aula/asignatura/grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~10% (O-shell hecho S100; O-catálogo ACTIVO desde S101: 2 de 4 entidades — Profesor (S101) y Aula (S102) hechos, faltan asignatura/grupo) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -110,28 +110,44 @@ de las Fases 9–12.
 - **Propósito:** CRUD con formularios de profesores, aulas, asignaturas, grupos.
 - **Terminado cuando:** desde la UI se crea un centro mínimo y el solver corre
   sobre él. Criterio AGREGADO: no lo cierra ninguna entidad suelta.
-- **Progreso (S101):** 1 de 4 entidades. Profesor HECHO (commit `ddc6c48`); faltan
-  aula, asignatura, grupo. La siguiente entidad (propuesta: aula) VALIDA el molde.
+- **Progreso (S102):** 2 de 4 entidades. Profesor HECHO (S101, commit `ddc6c48`) y
+  Aula HECHO (S102, pendiente de commit al escribir este cierre); faltan asignatura y
+  grupo. Entre las dos restantes NO hay dependencia técnica de creación; la elección
+  es de método (asignatura arrastra D-F8.5-C3-b «códigos por currículo» y la
+  compatibilidad asignatura↔tipo_aula, que conecta con el `tipo` de Aula ya hecho).
 - **Depende de:** O-shell.
 - **Valor:** primer centro creado sin SQL.
 - **Cambios que agrupa:** un formulario CRUD por entidad de catálogo. El backend
   REST ya existe desde la Fase 6; esto es la capa de presentación.
-- **Molde de CRUD de catálogo (candidato de S101, a VALIDAR en aulas):** la primera
-  entidad fija el patrón que heredan las otras tres. Decidido y NO se rediscute:
-  Reactive Forms tipados `nonNullable`; sin async validator de unicidad (el 400 del
-  backend se presenta); form en diálogo CDK + `ConfirmarBorrado` genérico (ya
-  existe); dos componentes lista+form; CRUD inline en `Configuracion` (la decisión
-  ruta-hija vs contenedor se toma con ≥2 entidades, en Cambio propio); servicio =
-  wrappers pelados; traducción de error propia del componente (no compartida:
-  tocaría H1); secuencia de tests propia por spec. La sesión de aulas confirma el
-  molde o lo corrige; hasta entonces es candidato, no canon (un patrón con un solo
-  ejemplo está sin validar).
+- **Molde de CRUD de catálogo (CANON desde S102; era candidato de S101):** la primera
+  entidad fijó el patrón y la segunda (Aula, S102) lo VALIDÓ con correcciones. Decidido
+  y NO se rediscute: Reactive Forms tipados `nonNullable`; sin async validator de
+  unicidad (el 400 del backend se presenta); form en diálogo CDK + `ConfirmarBorrado`
+  genérico (ya existe); dos componentes lista+form; CRUD inline en `Configuracion`;
+  servicio = wrappers pelados; traducción de error propia del componente (no
+  compartida: tocaría H1); secuencia de tests propia por spec desde `(1)` por fichero
+  (evita la global colisionada, D-S101-num). FORMA CANÓNICA precisada por el cotejo de
+  S102 (5 correcciones al candidato de S101): `ConfirmarBorrado` recibe `string[]` (no
+  `{ nombre }`); `DIALOG_DATA` es la entidad directa (`T | null`, no envuelta);
+  estado del componente con signals + miembros `protected` (no campos planos);
+  traducción `mensaje(err, degradado)` con degradado con forma `${texto} (${status}).`;
+  la lista NO ordena en cliente (el `listar()` del backend ya llega ordenado). Además:
+  `imports:` sin `standalone: true` explícito, valores iniciales por `setValue` en
+  constructor, CSS con BEM `<entidad>__*`, runner vitest (`vi.fn()`), no Karma. Nota de
+  molde para entidades con enum de dominio (aprendida en Aula): el selector ofrece solo
+  los valores con semántica y OMITE los indefinidos, pero al EDITAR añade el valor
+  preexistente si cae fuera de la lista, para no borrarlo en silencio.
+  PENDIENTE aún de ≥2 entidades EN PANTALLA a la vez (ahora sí las hay): la decisión
+  ruta-hija vs contenedor para la navegación de `Configuracion`, en Cambio propio.
 - **Absorbe:** las deudas D-F8.5-* de "sin red bajo la aplicación" (I4, unicidad
   profesor-tramo). MATIZ medido en S101: NO son del CRUD de Profesor sino de tutoría
   (`ProfesorTutoria`) y disponibilidad (`ProfesorRestriccionHoraria`); se pagan con
   el formulario de SU entidad, no con cualquier CRUD de catálogo (ver §4). También
-  D26 (nombre de aula) y D31 b/c/d (poblaciones a confirmar con el centro, al abrir
-  el CRUD de cada nivel).
+  D31 b/c/d (poblaciones a confirmar con el centro, al abrir el CRUD de cada nivel).
+  D26 (nombre de aula) fue CERRADA en S102 como no aplicable (el aula se identifica
+  por `codigo`; no hay `nombre` que poblar) — ya no cuelga aquí. D-F8.5-C3-a (COMUN
+  sin semántica) queda CONTENIDA en UI por el form de Aula (COMUN fuera del selector)
+  pero sigue viva a nivel de esquema.
 - **Consulta útil:** `INFORME-RECONCILIACION.md` documenta las discrepancias reales
   entre los horarios de origen (familia D8); las decisiones que tomó son evidencia
   de qué casos reales deben soportar estos formularios.
@@ -238,7 +254,7 @@ asigna categoría, objetivo y disposición.
 | D-F8.4-A-a, -A-b, -A-c, -B1-a | O-ajuste-cierre | Cobertura de prevalidación |
 | D-S101-num (numeración global de tests colisionada) | O-ajuste-cierre | Detectada S101: la secuencia (N) de la capa componentes/servicios tiene colisiones preexistentes —(27),(28-30),(35-37) con contenidos distintos en dos ficheros— que rompen la atribución por (N) en campañas de mutación. Es superficie de specs de H1 (cerrado). Los specs de O-catálogo la esquivan abriendo secuencia propia por fichero. Arreglarla no bloquea nada (R-terminado): no se paga ahora |
 | D-F8.5-D2b2-a, -D2b2-b (diseño/cosmética) | — | Sin objetivo urgente |
-| D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos |
+| D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos. C3-a CONTENIDA en UI desde S102 (COMUN fuera del selector del form de Aula); sigue viva a nivel de esquema |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola

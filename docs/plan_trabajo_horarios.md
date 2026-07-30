@@ -624,6 +624,62 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
+### Sesión 102 — O-catálogo (H2): CRUD de Aula. Segundo Cambio de cuatro (2/4). VALIDA el molde de catálogo. NO cierra el objetivo.
+  Tercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
+  Code por mutación), M3 NO (binding; la lógica de dominio ya vive en el backend de Aula desde S70).
+  Avanza O-catálogo (H2) de 1/4 a 2/4; el criterio de terminado del objetivo es AGREGADO («desde la UI
+  se crea un centro mínimo y el solver corre sobre él»): esta sesión NO lo cierra, faltan asignatura y
+  grupo. El backend REST de Aula ya existía completo y con red desde S70 (Bloque 8.5-A': 5 operaciones,
+  `AulaService`/`AulaController`/`AulaDTO`/`AulaRequest`, `codigo` not-null-unique, `TipoAula` como String
+  en el borde, 4 nullables de verdad, 409 por referencia entrante vía `ReferenciaEntranteException` desde
+  S74). El trabajo de S102 es la capa de presentación Angular: servicio HTTP + modelo + dos componentes.
+  M2 midió el terreno contra la documentación (repo no montado en el Project; DTO reales aportados por el
+  arquitecto) y CORRIGIÓ la nota heredada de S101 en un punto: Aula NO tiene 2 campos como Profesor sino
+  6 —`codigo`+`tipo` obligatorios, `capacidad`/`edificio`/`planta`/`sector` opcionales de verdad (§4.1 +
+  decisión de S70)— y `nombre` NO existe (eso cierra D26, ver abajo). El molde de S101 era "patrón de
+  CRUD", no "plantilla de dos campos": el form de Aula lo confirma con más superficie (selector de tipo +
+  4 opcionales, `planta`/`capacidad` numéricos, `edificio`/`sector` texto).
+  MOLDE PROMOVIDO A CANON (era candidato con un solo ejemplo desde S101; S102 es el segundo). El cotejo
+  del molde REAL de S101 (hecho por Claude Code antes de teclear) corrigió el diseño propuesto en 5
+  puntos, que quedan como forma canónica del CRUD de catálogo: (1) `ConfirmarBorrado` recibe `string[]`
+  (líneas ya compuestas por quien abre), no `{ nombre }`; (2) `DIALOG_DATA` es la entidad directa
+  (`Aula | null`), no `{ aula }`; (3) estado del componente con signals (`error`, `guardando`, `cargando`)
+  y miembros `protected`, no campos planos; (4) traducción de error `mensaje(err, degradado)` con degradado
+  con forma `${texto} (${status}).`; (5) la lista NO ordena en cliente: `AulaService.listar()` ya llega
+  ordenado del backend. Además: `imports:` sin `standalone: true` explícito, valores iniciales por
+  `setValue` en constructor, CSS con BEM `aulas__*`, y el runner es vitest (`vi.fn()`), NO Karma.
+  DECISIÓN DE DISEÑO NUEVA (COMUN al editar): omitir `COMUN` del selector evita CREAR datos sin semántica
+  (D-F8.5-C3-a), pero ocultarlo también en EDICIÓN borraría en silencio el tipo de un aula preexistente
+  que ya lo tuviera (el `<select>` sin opción coincidente + `required` forzaría a reasignar tipo para tocar
+  cualquier otro campo). `AulaForm.tipos` añade el tipo del aula editada si no está entre los ocho.
+  Congelado en los casos (7) y (8) de `aula-form.spec`.
+  M3/MUTACIÓN — 8 mutaciones, una por dimensión, todas cazadas (contraste de Claude Code, no afirmado):
+  `tipos=TIPOS_AULA siempre`→form(8); `vacioANull devuelve s`→form(9); `edición usa crear()`→form(10);
+  `lista ordena en cliente`→lista(9); `abrirForm pasa data:null`→lista(8); `recarga con !== true`→lista(7);
+  `quitar <app-aula-lista />`→configuracion(2); `quitar AulaLista del imports:`→NG8001 (no compila). Los
+  casos form(10) y lista(8) se AÑADIERON sobre el molde de S101 porque este deja sin cazar dos dimensiones
+  (rama alta/edición, y con qué se abre el diálogo).
+  ENTREGADO (SIN COMMITEAR aún — pendiente de este cierre): NUEVOS `models/aula.model.ts` (espejo de
+  `AulaDTO`/`AulaRequest` + constante `TIPOS_AULA` de los 8 tipos con semántica),
+  `services/aula.service.{ts,spec.ts}` (5 wrappers pelados sobre `/api/aulas`),
+  `components/aulas/{aula-lista,aula-form}.{ts,html,css,spec.ts}`. MODIFICADOS `configuracion.ts`
+  (+import y +`AulaLista` en `imports`), `configuracion.html` (+`<app-aula-lista>`, placeholder estrechado
+  a «grupos y currículo…»). Suite frontend 96 → 122 (+26). Backend intacto (242 verde, `git status` solo
+  muestra frontend; no relanzado). `ConfirmarBorrado` genérico reutilizado sin tocar.
+  DEUDA: D26 (nombre de aula) CERRADA como no aplicable (el aula se identifica por `codigo`; lo descriptivo
+  son `edificio`/`planta`/`sector`/`capacidad`, todos en el form; no hay `nombre` que poblar).
+  D-F8.5-C3-a CONTENIDA en UI (COMUN fuera del alta; respetado en edición si preexiste; sigue viva a nivel
+  de esquema). D-S102-spec NUEVA (mejora futura de precisión, cuelga de O-ajuste-cierre): el javadoc del
+  caso (1) de `configuracion.spec.ts` de S101 justifica su doble aserto con una premisa falsa (asume
+  elemento desconocido en verde; en realidad NG8001); no se corrige por R-terminado, se registra. También
+  registrada por fin D-S101-num con su texto íntegro (antes solo vivía en la cabecera de S101).
+  OBSERVACIONES sin deuda formal: (a) Prettier avisa en los 5 ficheros nuevos y en los 5 homólogos de
+  S101 (`.html` y `.spec.ts`); el repo no está formateado y reformatear divergiría del precedente —sería
+  sesión de Higiene sobre todo el frontend, no arreglo suelto—. (b) No existe script de higiene R4 en el
+  repo (sigue siendo la mejora de método pendiente de S101); se verificó a mano la mitad de R4 que aplica
+  (tokens citados con definición viva: D-F8.5-C3-a, D-F8.6, D-S101-num la tienen); la otra mitad
+  (archivar/condensar) no aplica porque no se tocó `docs/*.md`.
+
 ### Sesión 101 — O-catálogo (H2): CRUD de Profesores. ABRE O-catálogo; primer Cambio de cuatro (profesor/aula/asignatura/grupo). NO lo cierra.
   Segunda sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
   Code), M3 SÍ pero ACOTADO a la traducción de error (no al binding). El criterio de terminado de
@@ -1870,7 +1926,8 @@ con remisión a la bitácora.
   inviable con K=8). Siguen en código como mecanismo latente, pero calibrarlas no procede
   hasta un eventual rediseño de la poda; (a)/(b)/(c) de esta deuda aplican solo a los tres
   PESO_* y MAX_CONSECUTIVAS.
-- **D26 (Sesión 47, Fase 6 Bloque 3): `Aula` (JPA) no tiene campo `nombre`.**
+- **D26 (Sesión 47, Fase 6 Bloque 3): `Aula` (JPA) no tiene campo `nombre`. CERRADA
+  (S102) COMO NO APLICABLE.**
   Ni la entidad de catálogo (S46) ni §4.1 de `modelo_datos_fase1.md` definen un
   nombre completo de aula (a diferencia de `Profesor`/`Asignatura`, que sí tienen
   `nombre_completo`). El schema JSON del solver exige `Aula.nombre` no nulo, y
@@ -1880,6 +1937,14 @@ con remisión a la bitácora.
   un nombre descriptivo de aula distinto del código ("Laboratorio de Ciencias"
   vs "A6"), hace falta añadir el campo a la entidad JPA y decidir si el mapper
   deja de derivarlo. Fase 8 (UI) o antes si algún criterio de Fase 6/7 lo exige.
+  CIERRE (S102, form de Aula construido): la condición de pago —«la UI necesita un
+  nombre descriptivo distinto del código»— NO se cumple. El modelo identifica el
+  aula por `codigo` ("A5", "TALL1", "Gim"); lo descriptivo se expresa con los campos
+  de ubicación y aforo que §4.1 ya define (`edificio`, `planta`, `sector`,
+  `capacidad`), TODOS expuestos en el formulario. No hay campo `nombre` que poblar ni
+  rótulo libre que el usuario reclame. Se cierra por decisión de diseño; si un centro
+  real exigiera un rótulo distinto del código, se reabre como mejora futura de
+  O-catálogo. No se añade campo a la entidad JPA.
 - **D27 (Sesión 47, Fase 6 Bloque 3): código de `Tramo` sintetizado por el
   mapper.** `modelo_datos_fase1.md` no define una convención de código legible
   para `TramoSemanal`; `CatalogoMapper.aTramos` sintetiza `"L1".."V6"` (letra de
@@ -1989,6 +2054,14 @@ con remisión a la bitácora.
   de `ORDINARIA`. Conjetura del usuario ("aula compartida con otras actividades") NO confirmada
   con el centro. NO USAR hasta definirlo. Retirarlo del enum tocaría los dos CHECK: coste
   desproporcionado hoy. → definir con el centro (hermana de D31) o retirar en un bloque de esquema.
+  CONTENIDA EN UI (S102, form de Aula): el selector de tipo ofrece los OCHO valores con semántica
+  (`TIPOS_AULA` en `aula.model.ts`) y OMITE `COMUN` — lectura recta de «NO USAR hasta definirlo»:
+  ningún aula con `tipo=COMUN` puede CREARSE desde el formulario. Matiz de edición (casos (7)/(8) de
+  `aula-form.spec`): si un aula PREEXISTENTE ya tuviera `COMUN`, `AulaForm.tipos` lo añade a la lista
+  para no borrarlo en silencio al editar otro campo (el `required` sobre un `<select>` sin opción
+  coincidente forzaría a reasignar tipo). Así se respeta un dato existente sin ofrecer `COMUN` como
+  alta nueva. La deuda SIGUE VIVA a nivel de esquema (enum + dos CHECK intactos); solo queda fuera del
+  alcance de la UI. Cierre pleno = definir su semántica con el centro o retirarla del esquema.
 - **D-F8.5-C3-b** (S75, VIVA, de DOMINIO, no bloqueante) — Los códigos de asignatura del centro
   son POR CURRÍCULO, no por materia: `EF` (EF de ESO) y `EdFís` (EF de Bachillerato) son
   asignaturas DISTINTAS, y lo mismo `Bio`/`Biol`/`BioNu`, `Tec`/`TecIn`, `Mat`/`MatAc`/`MatAp`/`Mate2`.
@@ -2429,6 +2502,26 @@ con remisión a la bitácora.
   costar: un cuarto fallo no tendrá dónde ir sin decidir antes qué es un error de página, uno de
   gesto y uno de dato accesorio. Familia de D-F8.6-ii-a y D-F8.6-iiiB1-c. → decidir la política
   global de errores del frontend antes de añadir el cuarto canal, no después.
+
+- **D-S101-num** (S101, VIVA, mejora futura, no bloqueante) — NUMERACIÓN GLOBAL DE TESTS COLISIONADA
+  EN LA CAPA COMPONENTES/SERVICIOS. La secuencia `(N)` de specs de esa capa es global y arrastra
+  colisiones preexistentes —`(27)`, `(28-30)`, `(35-37)` aparecen con contenidos distintos en dos
+  ficheros cada una—, lo que rompe la atribución por `(N)` durante una campaña de mutación. Es
+  superficie de specs de H1 (cerrado). Mitigación adoptada desde S101: cada spec nuevo de O-catálogo
+  abre secuencia propia desde `(1)` por fichero (precedente sano de los specs de lógica pura de
+  `app/horario/`), así que la deuda NO crece con las entidades nuevas. Arreglar la global tocaría
+  specs de H1 por algo que no bloquea → no se paga (R-terminado). Cuelga de O-ajuste-cierre (H1).
+
+- **D-S102-spec** (S102, VIVA, mejora futura de PRECISIÓN, no bloqueante) — EL JAVADOC DEL CASO (1) DE
+  `configuracion.spec.ts` JUSTIFICA SU DOBLE ASERTO CON UNA PREMISA FALSA. Afirma que quitar `AulaLista`
+  (antes `ProfesorLista`) del `imports:` del componente standalone dejaría el tag como elemento
+  desconocido y el `querySelector` seguiría en verde, motivando un segundo aserto de refuerzo. No es así:
+  en un standalone, quitar el componente del `imports:` es un error de compilación NG8001, no un elemento
+  desconocido tolerado en runtime — el doble aserto no cubre lo que su javadoc dice cubrir. Detectada en
+  S102 al cotejar el molde; el caso (2) nuevo de S102 lleva el matiz correcto en su comentario. NO se
+  corrigió el javadoc del caso (1) porque es de otra sesión (S101) y tocarlo por precisión no desbloquea
+  nada (R-terminado). Cuelga de O-ajuste-cierre (H1), familia de precisión de specs junto a D-S101-num.
+  → corregir el javadoc del caso (1) si alguna vez se abre esa spec por otro motivo.
 
 ### Deuda consciente CERRADA (histórico)
 
