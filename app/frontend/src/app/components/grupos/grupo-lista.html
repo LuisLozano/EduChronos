@@ -1,0 +1,46 @@
+<div class="grupos">
+  <div class="grupos__cabecera">
+    <h2 class="grupos__titulo">Grupos</h2>
+    <button type="button" class="grupos__nuevo" (click)="nuevo()">
+      Nuevo grupo
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="grupos__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="grupos__cargando">Cargando…</p>
+  } @else if (grupos().length === 0) {
+    <p class="grupos__vacio">
+      No hay grupos todavía. Crea el primero con «Nuevo grupo».
+    </p>
+  } @else {
+    <table class="grupos__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nivel</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (grupo of grupos(); track grupo.id) {
+          <tr>
+            <td>{{ grupo.codigo }}</td>
+            <td>{{ grupo.nivel }}</td>
+            <td class="grupos__acciones">
+              <button type="button" class="grupos__editar" (click)="editar(grupo)">
+                Editar
+              </button>
+              <button type="button" class="grupos__borrar" (click)="borrar(grupo)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

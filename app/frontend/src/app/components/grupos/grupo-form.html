@@ -1,0 +1,41 @@
+<div class="grupo-form">
+  <h2 class="grupo-form__titulo">
+    {{ esEdicion ? 'Editar grupo' : 'Nuevo grupo' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="grupo-form__campo">
+      <span class="grupo-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="grupo-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="grupo-form__error">El código es obligatorio.</span>
+      }
+    </label>
+
+    <label class="grupo-form__campo">
+      <span class="grupo-form__etiqueta">Nivel</span>
+      <select formControlName="nivel" class="grupo-form__input">
+        <option value="" disabled>— elige un nivel —</option>
+        @for (n of niveles(); track n.id) {
+          <option [value]="n.codigo">{{ n.codigo }}</option>
+        }
+      </select>
+      @if (form.controls.nivel.touched && form.controls.nivel.invalid) {
+        <span class="grupo-form__error">El nivel es obligatorio.</span>
+      }
+    </label>
+
+    @if (error()) {
+      <p class="grupo-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+
+    <div class="grupo-form__acciones">
+      <button type="button" class="grupo-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="grupo-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

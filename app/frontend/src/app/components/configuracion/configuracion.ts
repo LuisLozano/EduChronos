@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 import { AsignaturaLista } from '../asignaturas/asignatura-lista';
 import { AulaLista } from '../aulas/aula-lista';
+import { GrupoLista } from '../grupos/grupo-lista';
 import { ProfesorLista } from '../profesores/profesor-lista';
 
 /**
@@ -13,21 +14,21 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * `<router-outlet>` y el array `children` que el proyecto no usa en ningún sitio
  * salvo el raíz.
  *
- * <p>{@link AulaLista} y {@link AsignaturaLista} se montan igual, como HERMANAS de
- * {@link ProfesorLista}: eso es lo que valida el molde de S101 —una sección de catálogo
- * se añade aquí con una línea en `imports:` y una etiqueta en la plantilla, sin tocar
- * las anteriores—.
+ * <p>{@link AulaLista}, {@link AsignaturaLista} y {@link GrupoLista} se montan igual,
+ * como HERMANAS de {@link ProfesorLista}: eso es lo que valida el molde de S101 —una
+ * sección de catálogo se añade aquí con una línea en `imports:` y una etiqueta en la
+ * plantilla, sin tocar las anteriores—.
  *
  * <p>Las CUATRO entidades de O-catálogo son profesor, aula, asignatura y grupo
  * (plan de trabajo, S101: «primer Cambio de cuatro (profesor/aula/asignatura/grupo)»).
- * Con asignatura montada esto va 3/4 y falta solo GRUPO, que entrará del mismo modo.
- * El texto anterior nombraba «currículo» como la cuarta: era un arrastre de S101, y
- * currículo es otra cosa en el plan (códigos y compatibilidades POR currículo,
- * D-F8.5-C3-b), no una sección de este catálogo.
+ * Con grupo montado esto va 4/4: O-catálogo queda COMPLETO y el párrafo de pendientes
+ * desaparece de la plantilla. El texto anterior nombraba «currículo» como la cuarta:
+ * era un arrastre de S101, y currículo es otra cosa en el plan (códigos y
+ * compatibilidades POR currículo, D-F8.5-C3-b), no una sección de este catálogo.
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [ProfesorLista, AulaLista, AsignaturaLista],
+  imports: [ProfesorLista, AulaLista, AsignaturaLista, GrupoLista],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })

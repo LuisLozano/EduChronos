@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { Configuracion } from './configuracion';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
+import { GrupoService } from '../../services/grupo.service';
 import { ProfesorService } from '../../services/profesor.service';
 
 /**
@@ -45,6 +46,7 @@ describe('sección de configuración', () => {
         { provide: ProfesorService, useValue: { listar: () => of([]) } },
         { provide: AulaService, useValue: { listar: () => of([]) } },
         { provide: AsignaturaService, useValue: { listar: () => of([]) } },
+        { provide: GrupoService, useValue: { listar: () => of([]) } },
       ],
     }).compileComponents();
   });
@@ -89,5 +91,18 @@ describe('sección de configuración', () => {
     // mide que el hijo RENDERIZA, y la mutación de `imports:` no llega a este spec
     // porque revienta antes en build (NG8001).
     expect(raiz.textContent).toContain('Nueva asignatura');
+  });
+
+  it('(4) monta el CRUD de grupos dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    expect(raiz.querySelector('app-grupo-lista')).not.toBeNull();
+    // Cuarta y última sección de O-catálogo. Solo se dobla `GrupoService`: el que
+    // pide niveles es `GrupoForm`, que vive en un diálogo y no se instancia al
+    // montar la sección.
+    expect(raiz.textContent).toContain('Nuevo grupo');
   });
 });

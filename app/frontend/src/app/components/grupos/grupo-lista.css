@@ -1,0 +1,45 @@
+.grupos {
+  padding: 1rem;
+}
+
+.grupos__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.grupos__titulo {
+  margin: 0;
+}
+
+.grupos__error {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.grupos__vacio,
+.grupos__cargando {
+  color: #666;
+}
+
+.grupos__tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grupos__tabla th,
+.grupos__tabla td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.grupos__acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.grupos__borrar {
+  color: #b00;
+}
