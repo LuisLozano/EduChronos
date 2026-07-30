@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S101. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S102. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S101). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S102). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -4947,3 +4947,60 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   no es fiable. El script correcto tokeniza con `D-[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*` (admite sufijos
   compuestos: `D-S101-num` no colapsa a `D-S101`) sobre todos los `docs/*.md`. Es cambio a `metodo.md`,
   no a O-catálogo: se hace en su sesión (R-terminado).
+
+
+### Sesión 102 — O-catálogo (H2): CRUD de Aula. Segundo Cambio de cuatro (2/4). VALIDA el molde de catálogo. NO cierra el objetivo.
+  Tercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
+  Code por mutación), M3 NO (binding; la lógica de dominio ya vive en el backend de Aula desde S70).
+  Avanza O-catálogo (H2) de 1/4 a 2/4; el criterio de terminado del objetivo es AGREGADO («desde la UI
+  se crea un centro mínimo y el solver corre sobre él»): esta sesión NO lo cierra, faltan asignatura y
+  grupo. El backend REST de Aula ya existía completo y con red desde S70 (Bloque 8.5-A': 5 operaciones,
+  `AulaService`/`AulaController`/`AulaDTO`/`AulaRequest`, `codigo` not-null-unique, `TipoAula` como String
+  en el borde, 4 nullables de verdad, 409 por referencia entrante vía `ReferenciaEntranteException` desde
+  S74). El trabajo de S102 es la capa de presentación Angular: servicio HTTP + modelo + dos componentes.
+  M2 midió el terreno contra la documentación (repo no montado en el Project; DTO reales aportados por el
+  arquitecto) y CORRIGIÓ la nota heredada de S101 en un punto: Aula NO tiene 2 campos como Profesor sino
+  6 —`codigo`+`tipo` obligatorios, `capacidad`/`edificio`/`planta`/`sector` opcionales de verdad (§4.1 +
+  decisión de S70)— y `nombre` NO existe (eso cierra D26, ver abajo). El molde de S101 era "patrón de
+  CRUD", no "plantilla de dos campos": el form de Aula lo confirma con más superficie (selector de tipo +
+  4 opcionales, `planta`/`capacidad` numéricos, `edificio`/`sector` texto).
+  MOLDE PROMOVIDO A CANON (era candidato con un solo ejemplo desde S101; S102 es el segundo). El cotejo
+  del molde REAL de S101 (hecho por Claude Code antes de teclear) corrigió el diseño propuesto en 5
+  puntos, que quedan como forma canónica del CRUD de catálogo: (1) `ConfirmarBorrado` recibe `string[]`
+  (líneas ya compuestas por quien abre), no `{ nombre }`; (2) `DIALOG_DATA` es la entidad directa
+  (`Aula | null`), no `{ aula }`; (3) estado del componente con signals (`error`, `guardando`, `cargando`)
+  y miembros `protected`, no campos planos; (4) traducción de error `mensaje(err, degradado)` con degradado
+  con forma `${texto} (${status}).`; (5) la lista NO ordena en cliente: `AulaService.listar()` ya llega
+  ordenado del backend. Además: `imports:` sin `standalone: true` explícito, valores iniciales por
+  `setValue` en constructor, CSS con BEM `aulas__*`, y el runner es vitest (`vi.fn()`), NO Karma.
+  DECISIÓN DE DISEÑO NUEVA (COMUN al editar): omitir `COMUN` del selector evita CREAR datos sin semántica
+  (D-F8.5-C3-a), pero ocultarlo también en EDICIÓN borraría en silencio el tipo de un aula preexistente
+  que ya lo tuviera (el `<select>` sin opción coincidente + `required` forzaría a reasignar tipo para tocar
+  cualquier otro campo). `AulaForm.tipos` añade el tipo del aula editada si no está entre los ocho.
+  Congelado en los casos (7) y (8) de `aula-form.spec`.
+  M3/MUTACIÓN — 8 mutaciones, una por dimensión, todas cazadas (contraste de Claude Code, no afirmado):
+  `tipos=TIPOS_AULA siempre`→form(8); `vacioANull devuelve s`→form(9); `edición usa crear()`→form(10);
+  `lista ordena en cliente`→lista(9); `abrirForm pasa data:null`→lista(8); `recarga con !== true`→lista(7);
+  `quitar <app-aula-lista />`→configuracion(2); `quitar AulaLista del imports:`→NG8001 (no compila). Los
+  casos form(10) y lista(8) se AÑADIERON sobre el molde de S101 porque este deja sin cazar dos dimensiones
+  (rama alta/edición, y con qué se abre el diálogo).
+  ENTREGADO (commiteado en el cierre de S103; en S102 el árbol quedó listo): NUEVOS `models/aula.model.ts` (espejo de
+  `AulaDTO`/`AulaRequest` + constante `TIPOS_AULA` de los 8 tipos con semántica),
+  `services/aula.service.{ts,spec.ts}` (5 wrappers pelados sobre `/api/aulas`),
+  `components/aulas/{aula-lista,aula-form}.{ts,html,css,spec.ts}`. MODIFICADOS `configuracion.ts`
+  (+import y +`AulaLista` en `imports`), `configuracion.html` (+`<app-aula-lista>`, placeholder estrechado
+  a «grupos y currículo…»). Suite frontend 96 → 122 (+26). Backend intacto (242 verde, `git status` solo
+  muestra frontend; no relanzado). `ConfirmarBorrado` genérico reutilizado sin tocar.
+  DEUDA: D26 (nombre de aula) CERRADA como no aplicable (el aula se identifica por `codigo`; lo descriptivo
+  son `edificio`/`planta`/`sector`/`capacidad`, todos en el form; no hay `nombre` que poblar).
+  D-F8.5-C3-a CONTENIDA en UI (COMUN fuera del alta; respetado en edición si preexiste; sigue viva a nivel
+  de esquema). D-S102-spec NUEVA (mejora futura de precisión, cuelga de O-ajuste-cierre): el javadoc del
+  caso (1) de `configuracion.spec.ts` de S101 justifica su doble aserto con una premisa falsa (asume
+  elemento desconocido en verde; en realidad NG8001); no se corrige por R-terminado, se registra. También
+  registrada por fin D-S101-num con su texto íntegro (antes solo vivía en la cabecera de S101).
+  OBSERVACIONES sin deuda formal: (a) Prettier avisa en los 5 ficheros nuevos y en los 5 homólogos de
+  S101 (`.html` y `.spec.ts`); el repo no está formateado y reformatear divergiría del precedente —sería
+  sesión de Higiene sobre todo el frontend, no arreglo suelto—. (b) No existe script de higiene R4 en el
+  repo (sigue siendo la mejora de método pendiente de S101); se verificó a mano la mitad de R4 que aplica
+  (tokens citados con definición viva: D-F8.5-C3-a, D-F8.6, D-S101-num la tienen); la otra mitad
+  (archivar/condensar) no aplica porque no se tocó `docs/*.md`.

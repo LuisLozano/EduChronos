@@ -624,7 +624,83 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 105 — Higiene documental (M1+R4/R5): salda el archivado M1-bis atrasado 4 sesiones. NO avanza el mapa.
+### Sesión 106 — Cierre de O-catálogo por recorte de alcance (M0+M2+gestión): mide, cierra O-catálogo, reasigna e2e a O-estructura, instala andamiaje Playwright.
+  Sexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO Desarrollo/Método: abrió como Desarrollo
+  (cierre de O-catálogo vía el e2e UI→solver, candidato dominante del cierre de S105), pero su M2 midió
+  que el objetivo estaba MAL ACOTADO y la sesión se convirtió en gestión: recorta el criterio de
+  O-catálogo, lo cierra, reasigna el e2e a O-estructura y añade la regla R-e2e. Produjo además andamiaje
+  Playwright (código real, commiteado). No avanza un Cambio de producto nuevo: corrige el mapa y cierra
+  un objetivo.
+  M0 — apertura verificada contra `gestion_proyecto.md`: Cambio = cierre de O-catálogo (2ª mitad del
+  criterio agregado, el paso UI→solver); Objetivo = O-catálogo (H2); Hito = H2. R-invalidación sin
+  conflicto (el e2e no lo rehace ningún objetivo posterior; O-demo lo hereda). AVISO DE ESTADO corregido
+  al abrir: el prompt de apertura describía la ventana viva como S101–S104 / S104 única cabecera H3; el
+  plan ya reflejaba la rotación de S105 (ventana S102–S105, S105 única H3). Discrepancia de prompt, no de
+  registro; el registro estaba correcto.
+  M2 — MEDICIÓN (Claude Code sobre el backend y el frontend REALES, tres investigaciones encadenadas antes
+  de teclear nada de test). (1) Invocación del solver HOY: `POST /api/horarios` (`HorarioController`) NO
+  recibe id de centro ni JSON —lee el catálogo íntegro de la BD vía `GeneradorHorarioService.cargarProblema()`
+  (`findAll` sobre 11 repos)—; cuerpo `{}` válido, defaults maxSegundos=30/semilla=42/vía=OPTIMIZACION. El
+  frontend ya lo llama (`horario.service.generar()` → POST con `{}`), gateado por prevalidación. Único
+  e2e-navegador previo: NINGUNO (sin Playwright/Cypress ni carpeta e2e). (2) El "centro mínimo" que pasa
+  prevalidación y produce solve son 9 FILAS IRREDUCIBLES (medido sobre `GenerarHorarioEndpointTest.
+  poblarCatalogoMinimo` + las invariantes de `ActividadService`/dominio): Nivel, Grupo, Subgrupo, Profesor,
+  Asignatura, Aula, ≥1 TramoSemanal lectivo, Actividad, Plaza. Las 3 reglas ERROR de `PrevalidacionService`
+  (PROFESOR_SOBRECARGADO, REPETICIONES_EXCEDEN_DIAS, GRUPO_SOBRECARGADO) se satisfacen con holgura a
+  1 tramo/1 repetición; el palomar de aulas no se prevalida (decisión S79, lo caza el solver → 422).
+  (3) CRÍTICO — traducibilidad a UI: de las 9 filas, SOLO 4 tienen formulario (Profesor, Aula, Asignatura,
+  Grupo). Las otras 5 no son clicables hoy: Nivel es bloqueo BLANDO (endpoint existe, la UI solo hace
+  `listar()`, con BD limpia el desplegable de grupo sale vacío); TramoSemanal es bloqueo DURO (NO existe
+  controller REST —sin rejilla `tramosLectivos=0` ⇒ PROFESOR/GRUPO SOBRECARGADO ⇒ 422; los tramos solo
+  los crea `SeedCatalogoRunner` bajo `-Pseed`); Subgrupo, Actividad y Plaza (la demanda curricular) solo
+  tienen API. Conclusión del M2: un e2e "centro creado íntegramente por la UI" es IMPOSIBLE hoy, y no por
+  la herramienta sino porque O-catálogo no construye la mitad del centro mínimo. Esas piezas —currículo/
+  demanda y jornada— son O-estructura por diseño (§3 O-estructura; §4 D22; frontera S103/S104).
+  DECISIÓN DE GESTIÓN (aprobada por el arquitecto): el criterio agregado de O-catálogo se redactó (≤S104)
+  sin haber medido esa dependencia. Se RECORTA a lo que O-catálogo realmente cierra —«las 4 entidades de
+  catálogo se crean, listan, editan y borran desde la UI, y su escritura llega al backend REST»—, CUMPLIDO
+  desde S104. O-catálogo pasa a ✔ TERMINADO. La verificación e2e «el solver corre sobre un centro creado
+  íntegramente por UI» se REASIGNA a O-estructura, como parte de su criterio de terminado (es quien
+  construirá Nivel/Subgrupo/demanda/jornada, y por tanto quien podrá ejecutarla de verdad; O-demo la
+  hereda sobre el IES real). Cambio localizado en `gestion_proyecto.md`, previsto por §5 (decisión
+  reversible de grano). Descartadas: e2e híbrido ahora (sembrar 5/9 por HTTP no prueba «la UI crea el
+  centro», solo la disfraza) y expandir O-catálogo con los formularios que faltan (sería meter medio
+  O-estructura dentro, viola la frontera de §4).
+  R-e2e NUEVA (regla estratégica, `gestion_proyecto.md` §6): la suite e2e de navegador cubre ÚNICAMENTE los
+  ~6 eslabones del guion de aceptación de §1 (crear→generar→ajustar→exportar→duplicar), uno por eslabón; la
+  lógica se prueba en capa JVM/unidad (donde ya vive: `GenerarHorarioEndpointTest`, ~35 de `SolverHorario`,
+  round-trips, MockMvc) o vitest, NUNCA en navegador. Un e2e nuevo se justifica solo si cubre un eslabón no
+  cubierto (análoga a R-deuda). Motivada por el riesgo —planteado por el arquitecto— de que el coste de la
+  suite e2e supere al del desarrollo si crece sin techo.
+  ENTREGADO — andamiaje Playwright (commit `test(e2e): instala andamiaje Playwright con humo verde en
+  app/frontend/e2e`): @playwright/test 1.62.0 (solo chromium), `app/frontend/playwright.config.ts`
+  (`webServer` con dos servidores: backend `mvn -pl app spring-boot:run` sin perfil seed —schema.sql hace
+  drop+create, BD del e2e = `app/educhronos.db`, aislada de la raíz—, frontend `npm start`; readiness por
+  `/api/prevalidacion` y `:4200`), `app/frontend/e2e/humo.spec.ts` (1 test: la landing carga, selector
+  `getByText('Elige por dónde empezar.')` —exclusivo de Landing, no del header del shell—). MODIFICADOS
+  `package.json` (+script `e2e`, +devDep), `package-lock.json`, `.gitignore` del frontend (+4 patrones de
+  artefactos runtime de Playwright). Humo VERDE (1 passed, 11.1s); backend arranca con BD vacía sin error
+  (`GET /api/prevalidacion` → 200 `[]`). Suite vitest INTACTA 163/163 (Playwright no la toca: `testDir ./e2e`
+  queda fuera de `tsconfig.spec.json`); `npm run build` verde. Dos correcciones obligadas por el repo,
+  medidas por Claude Code: el command de backend es `mvn -pl app spring-boot:run` (el pom raíz es agregador
+  sin main class) y la BD limpia es automática (schema.sql), con el filo de que un backend de dev vivo en
+  `:8080` sería REUTILIZADO por `reuseExistingServer` en local —no correr el e2e con el backend de trabajo
+  levantado—.
+  COMMITS (dos, código y doc separados, de una línea): `docs(gestion): recorta O-catálogo a CRUD por UI
+  (TERMINADO S104), reasigna e2e UI→solver a O-estructura y añade R-e2e`; `test(e2e): instala andamiaje
+  Playwright con humo verde en app/frontend/e2e`. La BD de prueba (`app/educhronos.db`) confirmada IGNORADA
+  (no entra en el commit).
+  DEUDA: no nace deuda nueva. El andamiaje Playwright NO es deuda —es trabajo que O-estructura hereda por
+  criterio explícito—. R-terminado respetada: no se pulió nada de O-catálogo más allá de su criterio (de
+  hecho se recortó). El e2e reasignado no es deuda: es criterio de terminado de otro objetivo.
+  LIMPIEZA (M1.5): sin frentes cerrados acumulados que condensar; el recorte de O-catálogo se documentó
+  en su sitio (`gestion_proyecto.md` §2/§3/§6), no en el plan. R4/costura: los dos censos de la bitácora,
+  la crónica de archivado y la frase de ventana actualizados por la rotación de S102 (ver M1-bis abajo);
+  script oficial de R4 sigue sin existir en el repo (mejora de método pendiente desde S101), verificado a
+  mano.
+  O-catálogo (H2) ✔ TERMINADO. Desbloquea O-estructura (siguiente objetivo por dependencias). Siguiente:
+  abrir O-estructura (ver M1-ter).
+Última sesión registrada (previa): Sesión 105 — Higiene documental (M1+R4/R5): salda el archivado M1-bis atrasado 4 sesiones. NO avanza el mapa.
   Tipo Higiene/Método: sin código, sin M2/M3/M4; solo M1 y verificación R4/costura. Elegida sobre el cierre de
   O-catálogo (candidato B) por el cierre de S104: prioritaria (4 sesiones de atraso), barata, y O-catálogo 4/4
   es punto de reposo natural del mapa para hacerla antes de abrir el frente de riesgo del e2e UI→solver.
@@ -786,62 +862,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   Aviso para esa sesión: `bitacora-sesiones.md` (369 KB) corrompe cabeceras al archivar (títulos partidos en
   dos líneas); ir con sed/Python y verificar por diff del cuerpo.
 
-Última sesión registrada (previa): Sesión 102 — O-catálogo (H2): CRUD de Aula. Segundo Cambio de cuatro (2/4). VALIDA el molde de catálogo. NO cierra el objetivo.
-  Tercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
-  Code por mutación), M3 NO (binding; la lógica de dominio ya vive en el backend de Aula desde S70).
-  Avanza O-catálogo (H2) de 1/4 a 2/4; el criterio de terminado del objetivo es AGREGADO («desde la UI
-  se crea un centro mínimo y el solver corre sobre él»): esta sesión NO lo cierra, faltan asignatura y
-  grupo. El backend REST de Aula ya existía completo y con red desde S70 (Bloque 8.5-A': 5 operaciones,
-  `AulaService`/`AulaController`/`AulaDTO`/`AulaRequest`, `codigo` not-null-unique, `TipoAula` como String
-  en el borde, 4 nullables de verdad, 409 por referencia entrante vía `ReferenciaEntranteException` desde
-  S74). El trabajo de S102 es la capa de presentación Angular: servicio HTTP + modelo + dos componentes.
-  M2 midió el terreno contra la documentación (repo no montado en el Project; DTO reales aportados por el
-  arquitecto) y CORRIGIÓ la nota heredada de S101 en un punto: Aula NO tiene 2 campos como Profesor sino
-  6 —`codigo`+`tipo` obligatorios, `capacidad`/`edificio`/`planta`/`sector` opcionales de verdad (§4.1 +
-  decisión de S70)— y `nombre` NO existe (eso cierra D26, ver abajo). El molde de S101 era "patrón de
-  CRUD", no "plantilla de dos campos": el form de Aula lo confirma con más superficie (selector de tipo +
-  4 opcionales, `planta`/`capacidad` numéricos, `edificio`/`sector` texto).
-  MOLDE PROMOVIDO A CANON (era candidato con un solo ejemplo desde S101; S102 es el segundo). El cotejo
-  del molde REAL de S101 (hecho por Claude Code antes de teclear) corrigió el diseño propuesto en 5
-  puntos, que quedan como forma canónica del CRUD de catálogo: (1) `ConfirmarBorrado` recibe `string[]`
-  (líneas ya compuestas por quien abre), no `{ nombre }`; (2) `DIALOG_DATA` es la entidad directa
-  (`Aula | null`), no `{ aula }`; (3) estado del componente con signals (`error`, `guardando`, `cargando`)
-  y miembros `protected`, no campos planos; (4) traducción de error `mensaje(err, degradado)` con degradado
-  con forma `${texto} (${status}).`; (5) la lista NO ordena en cliente: `AulaService.listar()` ya llega
-  ordenado del backend. Además: `imports:` sin `standalone: true` explícito, valores iniciales por
-  `setValue` en constructor, CSS con BEM `aulas__*`, y el runner es vitest (`vi.fn()`), NO Karma.
-  DECISIÓN DE DISEÑO NUEVA (COMUN al editar): omitir `COMUN` del selector evita CREAR datos sin semántica
-  (D-F8.5-C3-a), pero ocultarlo también en EDICIÓN borraría en silencio el tipo de un aula preexistente
-  que ya lo tuviera (el `<select>` sin opción coincidente + `required` forzaría a reasignar tipo para tocar
-  cualquier otro campo). `AulaForm.tipos` añade el tipo del aula editada si no está entre los ocho.
-  Congelado en los casos (7) y (8) de `aula-form.spec`.
-  M3/MUTACIÓN — 8 mutaciones, una por dimensión, todas cazadas (contraste de Claude Code, no afirmado):
-  `tipos=TIPOS_AULA siempre`→form(8); `vacioANull devuelve s`→form(9); `edición usa crear()`→form(10);
-  `lista ordena en cliente`→lista(9); `abrirForm pasa data:null`→lista(8); `recarga con !== true`→lista(7);
-  `quitar <app-aula-lista />`→configuracion(2); `quitar AulaLista del imports:`→NG8001 (no compila). Los
-  casos form(10) y lista(8) se AÑADIERON sobre el molde de S101 porque este deja sin cazar dos dimensiones
-  (rama alta/edición, y con qué se abre el diálogo).
-  ENTREGADO (SIN COMMITEAR aún — pendiente de este cierre): NUEVOS `models/aula.model.ts` (espejo de
-  `AulaDTO`/`AulaRequest` + constante `TIPOS_AULA` de los 8 tipos con semántica),
-  `services/aula.service.{ts,spec.ts}` (5 wrappers pelados sobre `/api/aulas`),
-  `components/aulas/{aula-lista,aula-form}.{ts,html,css,spec.ts}`. MODIFICADOS `configuracion.ts`
-  (+import y +`AulaLista` en `imports`), `configuracion.html` (+`<app-aula-lista>`, placeholder estrechado
-  a «grupos y currículo…»). Suite frontend 96 → 122 (+26). Backend intacto (242 verde, `git status` solo
-  muestra frontend; no relanzado). `ConfirmarBorrado` genérico reutilizado sin tocar.
-  DEUDA: D26 (nombre de aula) CERRADA como no aplicable (el aula se identifica por `codigo`; lo descriptivo
-  son `edificio`/`planta`/`sector`/`capacidad`, todos en el form; no hay `nombre` que poblar).
-  D-F8.5-C3-a CONTENIDA en UI (COMUN fuera del alta; respetado en edición si preexiste; sigue viva a nivel
-  de esquema). D-S102-spec NUEVA (mejora futura de precisión, cuelga de O-ajuste-cierre): el javadoc del
-  caso (1) de `configuracion.spec.ts` de S101 justifica su doble aserto con una premisa falsa (asume
-  elemento desconocido en verde; en realidad NG8001); no se corrige por R-terminado, se registra. También
-  registrada por fin D-S101-num con su texto íntegro (antes solo vivía en la cabecera de S101).
-  OBSERVACIONES sin deuda formal: (a) Prettier avisa en los 5 ficheros nuevos y en los 5 homólogos de
-  S101 (`.html` y `.spec.ts`); el repo no está formateado y reformatear divergiría del precedente —sería
-  sesión de Higiene sobre todo el frontend, no arreglo suelto—. (b) No existe script de higiene R4 en el
-  repo (sigue siendo la mejora de método pendiente de S101); se verificó a mano la mitad de R4 que aplica
-  (tokens citados con definición viva: D-F8.5-C3-a, D-F8.6, D-S101-num la tienen); la otra mitad
-  (archivar/condensar) no aplica porque no se tocó `docs/*.md`.
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -857,8 +877,9 @@ S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la
 Sesión 105 (higiene que saldó el archivado M1-bis atrasado 4 sesiones: S100–S104 no rotaron en su momento, y
 la propia rotación de S105 expulsó además S101) (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
-el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64). El plan conserva las 4
-últimas sesiones en su ventana (S102–S105), con S105 como única cabecera H3 viva y S102–S104 en formato
+el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106.
+El plan conserva las 4
+últimas sesiones en su ventana (S103–S106), con S106 como única cabecera H3 viva y S103–S105 en formato
 compacto. El detalle histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
