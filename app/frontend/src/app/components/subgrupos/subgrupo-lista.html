@@ -1,0 +1,46 @@
+<div class="subgrupos">
+  <div class="subgrupos__cabecera">
+    <h2 class="subgrupos__titulo">Subgrupos</h2>
+    <button type="button" class="subgrupos__nuevo" (click)="nuevo()">
+      Nuevo subgrupo
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="subgrupos__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="subgrupos__cargando">Cargando…</p>
+  } @else if (subgrupos().length === 0) {
+    <p class="subgrupos__vacio">
+      No hay subgrupos todavía. Crea el primero con «Nuevo subgrupo».
+    </p>
+  } @else {
+    <table class="subgrupos__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Grupos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (subgrupo of subgrupos(); track subgrupo.id) {
+          <tr>
+            <td>{{ subgrupo.codigo }}</td>
+            <td>{{ subgrupo.grupos.join(', ') }}</td>
+            <td class="subgrupos__acciones">
+              <button type="button" class="subgrupos__editar" (click)="editar(subgrupo)">
+                Editar
+              </button>
+              <button type="button" class="subgrupos__borrar" (click)="borrar(subgrupo)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
