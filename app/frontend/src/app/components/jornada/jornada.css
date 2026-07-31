@@ -1,0 +1,108 @@
+/* Calco de aula-lista.css con el prefijo BEM propio del bloque. */
+.jornada {
+  padding: 1rem;
+}
+
+.jornada__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.jornada__titulo {
+  margin: 0;
+}
+
+/* La malla llega del servidor sintetizada y nadie la ha guardado todavía. */
+.jornada__badge {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #b8860b;
+  border-radius: 999px;
+  color: #8a6100;
+  background: #fdf6e3;
+  font-size: 0.8rem;
+}
+
+.jornada__ayuda {
+  margin: 0 0 1rem;
+  color: #666;
+}
+
+/* El 409 no es un error de campo: ocupa su propio bloque destacado, con la única
+   salida del modo solo lectura al lado del texto que lo explica. */
+.jornada__conflicto {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid #b00;
+  border-radius: 4px;
+  background: #fff5f5;
+}
+
+.jornada__conflicto-texto {
+  margin: 0 0 0.5rem;
+  color: #b00;
+  font-weight: 600;
+}
+
+.jornada__error {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.jornada__cargando {
+  color: #666;
+}
+
+.jornada__tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.jornada__tabla th,
+.jornada__tabla td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.jornada__col-num {
+  width: 3rem;
+  color: #666;
+}
+
+.jornada__col-recreo {
+  width: 5rem;
+  text-align: center;
+}
+
+/* Las filas de recreo se distinguen del bloque lectivo sin depender solo del toggle. */
+.jornada__fila--recreo {
+  background: #f4f4f4;
+  color: #555;
+  font-style: italic;
+}
+
+.jornada__input {
+  width: 6rem;
+  padding: 0.35rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.jornada__error-campo {
+  display: block;
+  color: #b00;
+  font-size: 0.85rem;
+}
+
+.jornada__acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.jornada__guardar {
+  font-weight: 600;
+}

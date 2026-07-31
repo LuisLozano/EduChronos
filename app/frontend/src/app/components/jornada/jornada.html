@@ -1,0 +1,90 @@
+<div class="jornada">
+  <div class="jornada__cabecera">
+    <h2 class="jornada__titulo">Jornada</h2>
+    @if (!persistida()) {
+      <span class="jornada__badge">Propuesta · sin guardar</span>
+    }
+  </div>
+
+  <p class="jornada__ayuda">
+    Define un día tipo. El horario se aplica igual de lunes a viernes.
+  </p>
+
+  @if (conflicto()) {
+    <div class="jornada__conflicto" role="alert">
+      <p class="jornada__conflicto-texto">{{ conflicto() }}</p>
+      <button type="button" class="jornada__recargar" (click)="recargar()">
+        Volver a cargar la jornada
+      </button>
+    </div>
+  }
+
+  @if (error()) {
+    <p class="jornada__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="jornada__cargando">Cargando…</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <table class="jornada__tabla">
+        <thead>
+          <tr>
+            <th class="jornada__col-num">#</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th class="jornada__col-recreo">Recreo</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="tramos">
+          @for (fila of tramos.controls; track $index) {
+            <tr
+              [formGroupName]="$index"
+              class="jornada__fila"
+              [class.jornada__fila--recreo]="fila.controls.esRecreo.value"
+            >
+              <td class="jornada__col-num">{{ $index + 1 }}</td>
+              <td>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="08:00"
+                  formControlName="horaInicio"
+                  class="jornada__input"
+                />
+                @if (fila.controls.horaInicio.touched && fila.controls.horaInicio.invalid) {
+                  <span class="jornada__error-campo">Usa el formato HH:mm.</span>
+                }
+              </td>
+              <td>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="09:00"
+                  formControlName="horaFin"
+                  class="jornada__input"
+                />
+                @if (fila.controls.horaFin.touched && fila.controls.horaFin.invalid) {
+                  <span class="jornada__error-campo">Usa el formato HH:mm.</span>
+                }
+              </td>
+              <td class="jornada__col-recreo">
+                <input type="checkbox" formControlName="esRecreo" class="jornada__toggle" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="jornada__acciones">
+        <button
+          type="submit"
+          class="jornada__guardar"
+          [disabled]="guardando() || modoSoloLectura()"
+        >
+          Guardar jornada
+        </button>
+      </div>
+    </form>
+  }
+</div>

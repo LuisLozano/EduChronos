@@ -5,6 +5,7 @@ import { Configuracion } from './configuracion';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
 import { GrupoService } from '../../services/grupo.service';
+import { JornadaService } from '../../services/jornada.service';
 import { ProfesorService } from '../../services/profesor.service';
 
 /**
@@ -47,6 +48,12 @@ describe('sección de configuración', () => {
         { provide: AulaService, useValue: { listar: () => of([]) } },
         { provide: AsignaturaService, useValue: { listar: () => of([]) } },
         { provide: GrupoService, useValue: { listar: () => of([]) } },
+        // Jornada no es un CRUD: su doble expone `obtener`, no `listar`. Malla vacía
+        // y persistida=true (el badge de propuesta se mide en jornada.spec.ts).
+        {
+          provide: JornadaService,
+          useValue: { obtener: () => of({ persistida: true, tramos: [] }) },
+        },
       ],
     }).compileComponents();
   });
@@ -104,5 +111,17 @@ describe('sección de configuración', () => {
     // pide niveles es `GrupoForm`, que vive en un diálogo y no se instancia al
     // montar la sección.
     expect(raiz.textContent).toContain('Nuevo grupo');
+  });
+
+  it('(5) monta la jornada dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // NO es una sección de catálogo (singleton de O-estructura), pero se monta con el
+    // mismo gesto que las cuatro anteriores: eso es lo que este caso congela.
+    expect(raiz.querySelector('app-jornada')).not.toBeNull();
+    expect(raiz.textContent).toContain('Guardar jornada');
   });
 });

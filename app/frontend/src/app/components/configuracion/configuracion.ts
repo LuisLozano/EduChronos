@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { AsignaturaLista } from '../asignaturas/asignatura-lista';
 import { AulaLista } from '../aulas/aula-lista';
 import { GrupoLista } from '../grupos/grupo-lista';
+import { Jornada } from '../jornada/jornada';
 import { ProfesorLista } from '../profesores/profesor-lista';
 
 /**
@@ -25,10 +26,18 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * desaparece de la plantilla. El texto anterior nombraba «currículo» como la cuarta:
  * era un arrastre de S101, y currículo es otra cosa en el plan (códigos y
  * compatibilidades POR currículo, D-F8.5-C3-b), no una sección de este catálogo.
+ *
+ * <p>{@link Jornada} (C-jornada M4) se monta igual —una línea en `imports:` y una
+ * etiqueta— pese a NO ser una sección de catálogo: es un singleton sin lista ni alta,
+ * de O-estructura. Va PRIMERA porque la malla horaria es el marco sobre el que se
+ * apoya todo lo demás, y porque su badge de «propuesta · sin guardar» avisa de que el
+ * centro no ha configurado la jornada antes de que el usuario baje a las entidades.
+ * Que encaje aquí sin adaptar nada confirma que el patrón de composición de esta
+ * sección no depende del molde CRUD.
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [ProfesorLista, AulaLista, AsignaturaLista, GrupoLista],
+  imports: [Jornada, ProfesorLista, AulaLista, AsignaturaLista, GrupoLista],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })

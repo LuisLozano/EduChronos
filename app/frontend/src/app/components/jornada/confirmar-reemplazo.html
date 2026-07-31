@@ -1,0 +1,16 @@
+<section class="confirmar-reemplazo">
+  <h2 class="confirmar-reemplazo__titulo">Reemplazar la jornada guardada</h2>
+
+  @for (linea of lineas; track linea) {
+    <p class="confirmar-reemplazo__linea">{{ linea }}</p>
+  }
+
+  <div class="confirmar-reemplazo__acciones">
+    <button type="button" class="confirmar-reemplazo__cancelar" (click)="cancelar()">
+      Cancelar
+    </button>
+    <button type="button" class="confirmar-reemplazo__confirmar" (click)="confirmar()">
+      Reemplazar jornada
+    </button>
+  </div>
+</section>
