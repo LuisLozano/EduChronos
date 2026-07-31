@@ -1,0 +1,42 @@
+<div class="subgrupo-form">
+  <h2 class="subgrupo-form__titulo">
+    {{ esEdicion ? 'Editar subgrupo' : 'Nuevo subgrupo' }}
+  </h2>
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="subgrupo-form__campo">
+      <span class="subgrupo-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="subgrupo-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="subgrupo-form__error">El código es obligatorio.</span>
+      }
+    </label>
+    <label class="subgrupo-form__campo">
+      <span class="subgrupo-form__etiqueta">Grupos</span>
+      <select
+        multiple
+        class="subgrupo-form__input subgrupo-form__multiple"
+        (change)="alSeleccionar($event)"
+      >
+        @for (g of grupos(); track g.id) {
+          <option [value]="g.codigo" [selected]="seleccionados().includes(g.codigo)">
+            {{ g.codigo }}
+          </option>
+        }
+      </select>
+      @if (form.controls.grupos.touched && form.controls.grupos.invalid) {
+        <span class="subgrupo-form__error">Elige al menos un grupo.</span>
+      }
+    </label>
+    @if (error()) {
+      <p class="subgrupo-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+    <div class="subgrupo-form__acciones">
+      <button type="button" class="subgrupo-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="subgrupo-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>
