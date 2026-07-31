@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura y O-demo pendientes) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107 —1ª pieza, C-jornada, hecha: backend REST `/api/jornada` + formulario singleton; entrega la dimensión temporal, prerequisito del solve—; faltan currículo/Actividades, desdobles, PDC, tutores y el e2e UI→solver. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -200,8 +200,21 @@ de las Fases 9–12.
 - **Cambios que agrupa:** editor de demanda curricular, asistente de
   desdoble/agrupamiento (D1, D10), editor de PDC (D7), asignación de tutores,
   configuración de estructura de jornada (D22).
+- **Progreso (S107):** ABIERTO. 1er Cambio HECHO — **C-jornada** (configuración de
+  estructura de jornada, D22): backend REST singleton `GET|PUT /api/jornada`
+  (reemplazo total, guarda 409 ante dependientes, techo conservador ≤6 lectivos/día
+  sin tocar `domain.Tramo`, malla expandida a los 5 días en el backend) + formulario
+  singleton en Configuración (FormArray fijo, propuesta precargada, 409 diferenciado
+  del 400). Retira `SeedCatalogoRunner`. Suite app 242→259, vitest 163→180. Es la
+  pieza del camino crítico del solve (sin ≥1 TramoSemanal lectivo el centro mínimo da
+  422). NO cierra el objetivo: faltan currículo/Actividades (backend CRUD ya existe),
+  desdobles, PDC, tutores y el e2e UI→solver heredado. Medición clave del M2 (S107):
+  de las piezas de estructura solo la jornada carecía de puerta REST; Nivel/Subgrupo/
+  Actividad ya tienen CRUD, Plaza va embebida en Actividad. `DemandaCurricular` y
+  `Particion` NO existen como clases en el repo (divergencia modelo-código, la afronta
+  el Cambio de currículo).
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
-  compartidos.
+  compartidos. D22 en curso de saldarse (C-jornada, S107).
 
 #### O-demo — "El centro real funciona de punta a punta."
 - **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
@@ -317,6 +330,9 @@ asigna categoría, objetivo y disposición.
 | D-F8.5-D2b2-a, -D2b2-b (diseño/cosmética) | — | Sin objetivo urgente |
 | D-F8.5-C3-a, -C3-b, -C2a-a | O-catálogo | Semántica/dominio de catálogo, a resolver con datos. C3-a CONTENIDA en UI desde S102 (COMUN fuera del selector del form de Aula); sigue viva a nivel de esquema. C3-b: los códigos por currículo (Mat/LCL usados en specs de S103 son reales de este catálogo) siguen sin UI para poblar compatibilidades (ver D-S103-compat) |
 | D-S103-compat (CRUD de asignatura no alcanza `aulas-compatibles`) | Cambio de compatibilidad (tras Grupo, o dentro de O-estructura) | Detectada S103: el backend expone `GET/PUT /{id}/aulas-compatibles` pero el CRUD plano no lo alcanza. NO bloquea O-catálogo (semántica S75: 0 filas ⇒ irrestricta; un centro mínimo corre sin poblar compatibilidades). Incluye decidir la no-atomicidad POST→PUT. Estirar el molde con el sub-recurso es Cambio propio. No se paga ahora |
+| D-jornada-msg409 (mensaje del 409 dice «No se puede borrar» al guardar jornada) | O-estructura | Detectada S107: `ReferenciaEntranteException` se escribió para los DELETE de catálogo; su mensaje se reutiliza en el PUT de jornada y el usuario lee «No se puede borrar: referenciada por…» cuando intenta GUARDAR. Cosmético, NO bloquea (el desglose «N sesiones, M restricciones… antes de reconfigurar» sí es correcto). Se corrige con un mensaje propio del caso PUT cuando O-estructura vuelva a tocar el backend de jornada; no se paga ahora (R-terminado, M3 cerrado) |
+| D-jornada-asimetria (contrato GET(35)≠PUT(7 día tipo)) | O-estructura | Detectada S107, consecuencia consciente de «el backend expande»: el GET devuelve la malla completa, el PUT acepta un día tipo. Nota de diseño de API, no deuda bloqueante: la UI convive sin fricción real (pinta un día, manda un día). Reconsiderar `diaTipo` en el GET solo si un futuro cliente lo pide |
+| D-jornada-flush-test (`put_dosVecesLaMismaMalla_idempotente` no discrimina el flush) | O-estructura | Detectada S107: falta `UNIQUE(dia,orden)` en `schema.sql`, así que sin el `flush()` el resultado sería el mismo y el test no lo prueba. El `flush()` es defensivo/preventivo (correcto: fuerza DELETE antes de INSERT). Si algún día se añade la constraint, el test pasa a discriminar. Deuda de test, no de código |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
