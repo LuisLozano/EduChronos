@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { AsignaturaLista } from '../asignaturas/asignatura-lista';
 import { AulaLista } from '../aulas/aula-lista';
 import { GrupoLista } from '../grupos/grupo-lista';
+import { SubgrupoLista } from '../subgrupos/subgrupo-lista';
 import { Jornada } from '../jornada/jornada';
 import { ProfesorLista } from '../profesores/profesor-lista';
 
@@ -37,7 +38,7 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [Jornada, ProfesorLista, AulaLista, AsignaturaLista, GrupoLista],
+  imports: [Jornada, ProfesorLista, AulaLista, AsignaturaLista, GrupoLista, SubgrupoLista],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })

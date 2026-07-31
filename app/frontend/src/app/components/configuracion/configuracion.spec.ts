@@ -7,6 +7,7 @@ import { AulaService } from '../../services/aula.service';
 import { GrupoService } from '../../services/grupo.service';
 import { JornadaService } from '../../services/jornada.service';
 import { ProfesorService } from '../../services/profesor.service';
+import { SubgrupoService } from '../../services/subgrupo.service';
 
 /**
  * CABLEADO, no comportamiento. Lo que este fichero congela es que la sección de
@@ -48,6 +49,7 @@ describe('sección de configuración', () => {
         { provide: AulaService, useValue: { listar: () => of([]) } },
         { provide: AsignaturaService, useValue: { listar: () => of([]) } },
         { provide: GrupoService, useValue: { listar: () => of([]) } },
+        { provide: SubgrupoService, useValue: { listar: () => of([]) } },
         // Jornada no es un CRUD: su doble expone `obtener`, no `listar`. Malla vacía
         // y persistida=true (el badge de propuesta se mide en jornada.spec.ts).
         {
@@ -123,5 +125,18 @@ describe('sección de configuración', () => {
     // mismo gesto que las cuatro anteriores: eso es lo que este caso congela.
     expect(raiz.querySelector('app-jornada')).not.toBeNull();
     expect(raiz.textContent).toContain('Guardar jornada');
+  });
+
+  it('(6) monta el CRUD de subgrupos dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // Sección de O-estructura (C-subgrupos), montada con el mismo gesto que el resto.
+    // Dos asertos como en (2)-(5): el tag presente y el texto que solo existe si el
+    // hijo se instanció y pintó ('Nuevo subgrupo', botón de subgrupo-lista.html).
+    expect(raiz.querySelector('app-subgrupo-lista')).not.toBeNull();
+    expect(raiz.textContent).toContain('Nuevo subgrupo');
   });
 });
