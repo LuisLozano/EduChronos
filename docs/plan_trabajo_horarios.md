@@ -624,7 +624,87 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 107 — O-estructura (H2): C-jornada, primer Cambio. Backend REST de jornada (Desarrollo) + formulario singleton (Config/UI). Abre O-estructura; NO lo cierra.
+### Sesión 108 — O-estructura (H2): C-subgrupos, segundo Cambio. CRUD de subgrupos por UI (Config/UI, M3 en el multiselect). Incluye higiene M1-bis (archiva S103–S106). NO cierra el objetivo.
+  Octava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (el multiselect de
+  grupos), más higiene documental M1-bis al cierre. SEGUNDO Cambio de O-estructura: lo AVANZA, no lo cierra.
+  O-estructura sigue ACTIVO —su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo
+  + e2e UI→solver heredado) exige aún currículo/Actividades (el editor de plazas), desdobles, PDC, tutores y
+  el e2e—. C-subgrupos entrega la pieza que faltaba para que las Plazas de una Actividad puedan referenciar
+  subgrupos creados por UI: sin subgrupos creables, el editor de actividades (siguiente Cambio) no tendría a
+  qué apuntar.
+  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), candidato dominante por
+  dependencias (O-catálogo ✔ S106; O-estructura activo desde S107). Hito = H2. Cambio = currículo, no
+  prenombrado en la doc: el M2 lo acotó a subgrupos (ver abajo). R-invalidación sin conflicto (nada por encima
+  lo rehace: O-diseño depende de H2 cerrado, O-demo de O-estructura). DECISIÓN DE ALCANCE del arquitecto tras
+  el M2: Opción A (currículo = subgrupos + actividades sin materializar Particion), y primer Cambio = subgrupos
+  (dependencia previa de actividades). Particion NO se materializa: el solver no la consume (javadoc de
+  `Subgrupo`, decisión D-a S48; el JSON del solver no transporta particiones) y expresar el §6.1 no la exige;
+  materializarla sería modelo que nadie lee aguas abajo. Reversible si la UX de actividades la reclama.
+  M2 — MEDICIÓN (Claude Code sobre backend y frontend REALES, dos investigaciones encadenadas antes de teclear).
+  (1) Currículo persistido: `Subgrupo` (@Entity, tabla `subgrupo` + `subgrupo_grupo` como @JoinTable @ManyToMany,
+  repo, servicio con validación I6 ≥1 grupo, controller `/api/subgrupos` CRUD 5-endpoints, tests) y `Actividad`
+  (agregado con `Plaza` embebida, cascade+orphanRemoval, controller `/api/actividades`) YA EXISTEN completos en
+  backend. `Particion`/`SubgrupoParticion`/`DemandaCurricular` NO existen como clase, tabla ni repo —Particion
+  por decisión registrada (S48), DemandaCurricular solo vive en el doc de modelo (0 apariciones en código)—.
+  Corrige mi apuesta de apertura: NO falta backend de currículo, falta UI. (2) La Plaza referencia subgrupos por
+  CÓDIGO de subgrupos ya existentes (400 si no resuelve, no alta implícita) ⇒ los subgrupos deben ser creables
+  ANTES que las actividades: dependencia técnica que fija el orden de los dos Cambios. (3) Frontend a cero: ni
+  `subgrupo.model.ts` ni `subgrupo.service.ts` ni `components/subgrupos/`; `app.routes.ts` con 3 rutas, CRUD
+  inline en `Configuracion`. Tipo de sesión que dicta el M2: Config/UI (backend hecho), con M3 en la única
+  desviación real —el multiselect—.
+  DESVIACIÓN DEL MOLDE (el M3): el campo `grupos` es selección MÚLTIPLE, no el `<select>` único de `nivel` en
+  GrupoForm. Tres consecuencias medidas: (a) control `FormControl<string[]>`, no string; (b) `Validators.required`
+  da por válido un array vacío ⇒ validator propio `arrayNoVacio` que replica I6 en cliente; (c) el `<select
+  multiple>` de Reactive Forms NO vincula el array por `formControlName` ni reconcilia la preselección como el
+  `<select>` único: se lee `selectedOptions` en un handler `(change)`→`setValue` y el HTML refleja la selección
+  con `[selected]` por opción. Decisión de producto del arquitecto: `<select multiple>` nativo (mínima desviación
+  del canon), con la UX rica (chips, buscar) APLAZADA a una fase posterior de mejora de UX de subgrupos —mejora
+  planificada, no deuda técnica (ver D-subgrupo-ux-multiselect)—. Riesgo despejado en fase 2: jsdom refleja
+  `[selected]`/`selectedOptions` como un navegador; la cadena handler→control→body pasa sin adaptación.
+  M4 — ENTREGADO (Configuración/UI, frontend, 4 fases con verificación entre cada una, todas verdes). FASE 1
+  (commit `b5d11fa`): `models/subgrupo.model.ts` (par `Subgrupo`/`SubgrupoRequest`, simétricos salvo `id`, molde
+  de `grupo.model` no `nivel.model` porque subgrupo escribe), `services/subgrupo.service.{ts,spec.ts}` (5 wrappers
+  pelados sobre `/api/subgrupos`, spec de contrato 5 casos). FASE 2 (commit `6846c3e`): `components/subgrupos/
+  subgrupo-form.{ts,html,css,spec.ts}` —el multiselect, `arrayNoVacio`, handler `alSeleccionar`, precarga en
+  edición reflejada con `[selected]`; spec 12 casos con la mezcla A1 (DOM real para poblado/preselección de DOS
+  grupos, evita verde falso) + A2 (`setValue` para las ramas de guardado); `.subgrupo-form__multiple` con
+  `min-height` para que el `<select multiple>` no colapse—. FASE 3 (commit `53b46ac`): `subgrupo-lista.
+  {ts,html,css,spec.ts}` —molde plano de lista; única desviación la columna «Grupos» pintada `grupos.join(', ')`;
+  spec 8 casos, hereda de aula-lista el caso de recarga tras guardado (7) y con-qué-se-abre-el-diálogo (8)—.
+  FASE 4 (commit `29f0f84`): cablea `SubgrupoLista` en `Configuracion` (+import, +`imports:`, +`<app-subgrupo-lista
+  />` tras grupo) y su caso (6) en `configuracion.spec.ts` (+doble de `SubgrupoService`). Runner del proyecto:
+  `npx ng test` (no `npx vitest run`, que rompe con «describe is not defined»: el builder de Angular 21 inyecta
+  los globals). Suite frontend 180 → 206 (+26: 5+12+8+1), 30 → 33 ficheros; `ng build` limpio (bundle 469→478 kB,
+  +8.2 kB = la cadena de subgrupo entra en producción, antes fuera por tree-shaking); backend sin tocar. La
+  sección es visible y usable en `/configuracion`, bajo Grupos.
+  DEUDA — nace una, registrada (R-deuda: no bloquea el criterio de C-subgrupos, no se paga ahora):
+  D-subgrupo-ux-multiselect (S108, VIVA, MEJORA PLANIFICADA no bloqueante) — el `<select multiple>` nativo es UX
+  pobre para elegir varios grupos (Ctrl+click no obvio, sin buscar ni chips). Es DECISIÓN CONSCIENTE del
+  arquitecto con fase futura ya prevista, no descuido: cuelga de O-estructura y se aborda en la fase de mejora de
+  UX de subgrupos. NO es deuda técnica (el componente funciona y está testado); es acabado de presentación
+  aplazado, hermano de lo que O-diseño trata a nivel transversal. Arrastradas ya registradas y sin cambio:
+  D-jornada-msg409, D-jornada-asimetria, D-jornada-flush-test (S107, O-estructura); `siguienteInmediato` sin
+  derivar; `Configuracion` tabla huérfana; divergencia modelo-código `DemandaCurricular`/`Particion` —el M2 de
+  S108 la MIDIÓ (Particion decisión S48, DemandaCurricular solo en doc) y confirmó que NO bloquea el currículo:
+  se construye entero sin ella; lo único que no habría sin DemandaCurricular es la validación de cobertura de
+  horas, función pendiente, no bloqueante—.
+  R-terminado RESPETADA: no se pulió fuera de criterio. La UX del multiselect se FRENÓ a deuda planificada en vez
+  de resolverla dentro del Cambio; Particion se descartó por medición, no se materializó «ya que estábamos».
+  HIGIENE (M1-bis, Opción 2 elegida por el arquitecto para dejar la doc limpia): archivadas S103, S104, S105 y
+  S106 a `bitacora-sesiones.md` (promovidas a `### Sesión NN`, orden ascendente tras S102, cuerpo verificado
+  idéntico por diff origen→destino); degradada S107 a «Última sesión previa» compacta; S108 queda como única
+  cabecera H3 viva. Corregidos los dos censos de la bitácora (→ S10–S106) y extendida la crónica de archivado del
+  plan. Restaurada la invariante H3 (`grep -c "^### Sesión" plan` = 1). Salda la deuda de método M1-bis que venía
+  atrasada desde S106. Aviso heredado atendido: la bitácora (~370 KB) había corrompido cabeceras al archivar en
+  el pasado; se archivó con Python y se verificó por diff de cuerpo, cero cabeceras partidas nuevas.
+  R4/costura: script oficial sigue sin existir en el repo (mejora de método pendiente desde S101); verificado a
+  mano que los cuatro commits de código separan por fase y que `app/educhronos.db` sigue ignorada.
+  O-estructura (H2) ACTIVO, 2 piezas hechas (jornada S107, subgrupos S108) de varias. Siguiente: tercer Cambio de
+  O-estructura, C-actividades —el editor de Actividad con Plazas embebidas, backend `/api/actividades` ya existe;
+  es el formulario de mayor riesgo del objetivo (valida si Actividad→Plaza→Subgrupo es configurable por un
+  humano), ahora desbloqueado porque los subgrupos ya son creables por UI—. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 107 — O-estructura (H2): C-jornada, primer Cambio. Backend REST de jornada (Desarrollo) + formulario singleton (Config/UI). Abre O-estructura; NO lo cierra.
   Séptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: M0 largo (descomposición de O-estructura,
   su primer M2 por diseño) + un Cambio completo, C-jornada, de tipo Desarrollo (backend con lógica) y
   Configuración/UI (formulario). PRIMER Cambio de O-estructura: lo ABRE, no lo cierra. O-estructura sigue
@@ -702,243 +782,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   backend/frontend y que `app/educhronos.db` sigue ignorada.
   O-estructura (H2) ABIERTO, 1 pieza (jornada) de varias. Siguiente: segundo Cambio de O-estructura, probable
   currículo/Actividades —backend CRUD ya existe—, pero lo fija su propio M0 (ver M1-ter).
-Última sesión registrada (previa): Sesión 106 — Cierre de O-catálogo por recorte de alcance (M0+M2+gestión): mide, cierra O-catálogo, reasigna e2e a O-estructura, instala andamiaje Playwright.
-  Sexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO Desarrollo/Método: abrió como Desarrollo
-  (cierre de O-catálogo vía el e2e UI→solver, candidato dominante del cierre de S105), pero su M2 midió
-  que el objetivo estaba MAL ACOTADO y la sesión se convirtió en gestión: recorta el criterio de
-  O-catálogo, lo cierra, reasigna el e2e a O-estructura y añade la regla R-e2e. Produjo además andamiaje
-  Playwright (código real, commiteado). No avanza un Cambio de producto nuevo: corrige el mapa y cierra
-  un objetivo.
-  M0 — apertura verificada contra `gestion_proyecto.md`: Cambio = cierre de O-catálogo (2ª mitad del
-  criterio agregado, el paso UI→solver); Objetivo = O-catálogo (H2); Hito = H2. R-invalidación sin
-  conflicto (el e2e no lo rehace ningún objetivo posterior; O-demo lo hereda). AVISO DE ESTADO corregido
-  al abrir: el prompt de apertura describía la ventana viva como S101–S104 / S104 única cabecera H3; el
-  plan ya reflejaba la rotación de S105 (ventana S102–S105, S105 única H3). Discrepancia de prompt, no de
-  registro; el registro estaba correcto.
-  M2 — MEDICIÓN (Claude Code sobre el backend y el frontend REALES, tres investigaciones encadenadas antes
-  de teclear nada de test). (1) Invocación del solver HOY: `POST /api/horarios` (`HorarioController`) NO
-  recibe id de centro ni JSON —lee el catálogo íntegro de la BD vía `GeneradorHorarioService.cargarProblema()`
-  (`findAll` sobre 11 repos)—; cuerpo `{}` válido, defaults maxSegundos=30/semilla=42/vía=OPTIMIZACION. El
-  frontend ya lo llama (`horario.service.generar()` → POST con `{}`), gateado por prevalidación. Único
-  e2e-navegador previo: NINGUNO (sin Playwright/Cypress ni carpeta e2e). (2) El "centro mínimo" que pasa
-  prevalidación y produce solve son 9 FILAS IRREDUCIBLES (medido sobre `GenerarHorarioEndpointTest.
-  poblarCatalogoMinimo` + las invariantes de `ActividadService`/dominio): Nivel, Grupo, Subgrupo, Profesor,
-  Asignatura, Aula, ≥1 TramoSemanal lectivo, Actividad, Plaza. Las 3 reglas ERROR de `PrevalidacionService`
-  (PROFESOR_SOBRECARGADO, REPETICIONES_EXCEDEN_DIAS, GRUPO_SOBRECARGADO) se satisfacen con holgura a
-  1 tramo/1 repetición; el palomar de aulas no se prevalida (decisión S79, lo caza el solver → 422).
-  (3) CRÍTICO — traducibilidad a UI: de las 9 filas, SOLO 4 tienen formulario (Profesor, Aula, Asignatura,
-  Grupo). Las otras 5 no son clicables hoy: Nivel es bloqueo BLANDO (endpoint existe, la UI solo hace
-  `listar()`, con BD limpia el desplegable de grupo sale vacío); TramoSemanal es bloqueo DURO (NO existe
-  controller REST —sin rejilla `tramosLectivos=0` ⇒ PROFESOR/GRUPO SOBRECARGADO ⇒ 422; los tramos solo
-  los crea `SeedCatalogoRunner` bajo `-Pseed`); Subgrupo, Actividad y Plaza (la demanda curricular) solo
-  tienen API. Conclusión del M2: un e2e "centro creado íntegramente por la UI" es IMPOSIBLE hoy, y no por
-  la herramienta sino porque O-catálogo no construye la mitad del centro mínimo. Esas piezas —currículo/
-  demanda y jornada— son O-estructura por diseño (§3 O-estructura; §4 D22; frontera S103/S104).
-  DECISIÓN DE GESTIÓN (aprobada por el arquitecto): el criterio agregado de O-catálogo se redactó (≤S104)
-  sin haber medido esa dependencia. Se RECORTA a lo que O-catálogo realmente cierra —«las 4 entidades de
-  catálogo se crean, listan, editan y borran desde la UI, y su escritura llega al backend REST»—, CUMPLIDO
-  desde S104. O-catálogo pasa a ✔ TERMINADO. La verificación e2e «el solver corre sobre un centro creado
-  íntegramente por UI» se REASIGNA a O-estructura, como parte de su criterio de terminado (es quien
-  construirá Nivel/Subgrupo/demanda/jornada, y por tanto quien podrá ejecutarla de verdad; O-demo la
-  hereda sobre el IES real). Cambio localizado en `gestion_proyecto.md`, previsto por §5 (decisión
-  reversible de grano). Descartadas: e2e híbrido ahora (sembrar 5/9 por HTTP no prueba «la UI crea el
-  centro», solo la disfraza) y expandir O-catálogo con los formularios que faltan (sería meter medio
-  O-estructura dentro, viola la frontera de §4).
-  R-e2e NUEVA (regla estratégica, `gestion_proyecto.md` §6): la suite e2e de navegador cubre ÚNICAMENTE los
-  ~6 eslabones del guion de aceptación de §1 (crear→generar→ajustar→exportar→duplicar), uno por eslabón; la
-  lógica se prueba en capa JVM/unidad (donde ya vive: `GenerarHorarioEndpointTest`, ~35 de `SolverHorario`,
-  round-trips, MockMvc) o vitest, NUNCA en navegador. Un e2e nuevo se justifica solo si cubre un eslabón no
-  cubierto (análoga a R-deuda). Motivada por el riesgo —planteado por el arquitecto— de que el coste de la
-  suite e2e supere al del desarrollo si crece sin techo.
-  ENTREGADO — andamiaje Playwright (commit `test(e2e): instala andamiaje Playwright con humo verde en
-  app/frontend/e2e`): @playwright/test 1.62.0 (solo chromium), `app/frontend/playwright.config.ts`
-  (`webServer` con dos servidores: backend `mvn -pl app spring-boot:run` sin perfil seed —schema.sql hace
-  drop+create, BD del e2e = `app/educhronos.db`, aislada de la raíz—, frontend `npm start`; readiness por
-  `/api/prevalidacion` y `:4200`), `app/frontend/e2e/humo.spec.ts` (1 test: la landing carga, selector
-  `getByText('Elige por dónde empezar.')` —exclusivo de Landing, no del header del shell—). MODIFICADOS
-  `package.json` (+script `e2e`, +devDep), `package-lock.json`, `.gitignore` del frontend (+4 patrones de
-  artefactos runtime de Playwright). Humo VERDE (1 passed, 11.1s); backend arranca con BD vacía sin error
-  (`GET /api/prevalidacion` → 200 `[]`). Suite vitest INTACTA 163/163 (Playwright no la toca: `testDir ./e2e`
-  queda fuera de `tsconfig.spec.json`); `npm run build` verde. Dos correcciones obligadas por el repo,
-  medidas por Claude Code: el command de backend es `mvn -pl app spring-boot:run` (el pom raíz es agregador
-  sin main class) y la BD limpia es automática (schema.sql), con el filo de que un backend de dev vivo en
-  `:8080` sería REUTILIZADO por `reuseExistingServer` en local —no correr el e2e con el backend de trabajo
-  levantado—.
-  COMMITS (dos, código y doc separados, de una línea): `docs(gestion): recorta O-catálogo a CRUD por UI
-  (TERMINADO S104), reasigna e2e UI→solver a O-estructura y añade R-e2e`; `test(e2e): instala andamiaje
-  Playwright con humo verde en app/frontend/e2e`. La BD de prueba (`app/educhronos.db`) confirmada IGNORADA
-  (no entra en el commit).
-  DEUDA: no nace deuda nueva. El andamiaje Playwright NO es deuda —es trabajo que O-estructura hereda por
-  criterio explícito—. R-terminado respetada: no se pulió nada de O-catálogo más allá de su criterio (de
-  hecho se recortó). El e2e reasignado no es deuda: es criterio de terminado de otro objetivo.
-  LIMPIEZA (M1.5): sin frentes cerrados acumulados que condensar; el recorte de O-catálogo se documentó
-  en su sitio (`gestion_proyecto.md` §2/§3/§6), no en el plan. R4/costura: los dos censos de la bitácora,
-  la crónica de archivado y la frase de ventana actualizados por la rotación de S102 (ver M1-bis abajo);
-  script oficial de R4 sigue sin existir en el repo (mejora de método pendiente desde S101), verificado a
-  mano.
-  O-catálogo (H2) ✔ TERMINADO. Desbloquea O-estructura (siguiente objetivo por dependencias). Siguiente:
-  abrir O-estructura (ver M1-ter).
-Última sesión registrada (previa): Sesión 105 — Higiene documental (M1+R4/R5): salda el archivado M1-bis atrasado 4 sesiones. NO avanza el mapa.
-  Tipo Higiene/Método: sin código, sin M2/M3/M4; solo M1 y verificación R4/costura. Elegida sobre el cierre de
-  O-catálogo (candidato B) por el cierre de S104: prioritaria (4 sesiones de atraso), barata, y O-catálogo 4/4
-  es punto de reposo natural del mapa para hacerla antes de abrir el frente de riesgo del e2e UI→solver.
-  ESTADO MEDIDO AL ABRIR (M2 barato, greps): el plan arrastraba 9 sesiones vivas, no 6 —el grep de `### Sesión`
-  daba 6 porque S96–S98 ya estaban en formato compacto y S99–S104 en `### Sesión`—. Ninguna de S96–S100 estaba
-  aún en la bitácora (acababa en S95). Doble desfase confirmado: los dos censos de la bitácora decían «S95» y la
-  crónica de archivado del plan se cortaba en «S95 en la Sesión 99».
-  EJECUTADO: archivadas S96, S97, S98, S99 y S100 a la bitácora (promovidas a `### Sesión NN`, orden ascendente,
-  cuerpo verificado IDÉNTICO por diff origen→destino); degradadas S101–S103 a prefijo compacto; S104 quedó como
-  única cabecera H3. Corregidos los dos censos de la bitácora (→ S10–S100) y extendida la crónica de archivado
-  del plan con la rotación S96–S100. Restaurada la invariante H3 (`grep -c "^### Sesión" plan` = 1).
-  AVISO HEREDADO ATENDIDO (S103/S104): la bitácora (~370 KB) había corrompido cabeceras al archivar (títulos
-  partidos en dos líneas: S32, S45, S46). Se archivó con Python (no sed) y se verificó por diff de cuerpo; cero
-  cabeceras partidas nuevas. Las tres históricas ya partidas NO se tocaron (histórico de solo lectura).
-  COSTURA: cada sesión S96–S100 en la bitácora 1 vez y 0 en el plan; S101–S104 al revés. Sin duplicados ni
-  pérdidas. Balance de tamaño coherente (plan −42 KB, bitácora +42 KB).
-  DEUDA: saldada la deuda de método M1-bis (archivado atrasado 4 sesiones). No nace deuda nueva.
-  LIMPIEZA (M1.5): sin frentes cerrados acumulados que condensar; el registro queda limpio para abrir el cierre
-  de O-catálogo. R4/costura verificada por grep+diff (el script oficial conviene correrlo en el entorno real).
-  NOTA: el registro de esta S105 se añadió en un segundo paso; el cierre inicial lo omitió (fallo de M1 paso 1).
-  O-catálogo (H2) sigue ACTIVO 4/4, NO cerrado: falta el paso UI→solver. Siguiente: cierre de O-catálogo (ver M1-ter).
-Última sesión registrada (previa): Sesión 104 — O-catálogo (H2): CRUD de Grupo. Cuarto y último Cambio (4/4). NO cierra el objetivo (falta el paso UI→solver).
-  Quinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude Code
-  por mutación), M3 NO (binding; la lógica de dominio —unicidad, 409, resolución de nivel— vive en el
-  backend). Avanza O-catálogo (H2) de 3/4 a 4/4. IMPORTANTE: 4/4 NO es cierre del objetivo. El criterio de
-  terminado es AGREGADO y tiene DOS mitades («desde la UI se crea un centro mínimo Y el solver corre sobre
-  él»): S104 completa la primera (las cuatro entidades de catálogo son creables por UI); la segunda —lanzar
-  el solver sobre un centro construido íntegramente por la interfaz— NO existe hoy (M2 lo confirmó: cero
-  e2e UI→solver, sin Playwright/Cypress ni carpeta e2e; los únicos tests de integración backend siembran en
-  Java, no crean por UI). El cierre real de O-catálogo es el Cambio siguiente (ver M1-ter). El backend REST
-  de Grupo ya existía completo: `GrupoController` en `/api/grupos`, 5 operaciones, más el sub-recurso
-  `GET/PUT /{id}/tutoria` (fuera de alcance, criterio de S103 con `aulas-compatibles`).
-  M2 — MEDICIÓN (Claude Code sobre el backend REAL, antes de teclear): Grupo NO es un tercer caso plano;
-  tiene dos diferencias reales frente a Asignatura, y varias premisas de apertura se corrigieron con la
-  medición. (1) El 409 YA está implementado —no se escribe—: `GrupoService.borrar` consulta `contarSubgrupos`
-  (`subgrupo_grupo.grupo_id`) y `contarGruposHijos` (`grupo_padre_id`), y lanza `ReferenciaEntranteException`
-  → 409; el frontend solo lo consume. (2) `tipo` es lista blanca a ORDINARIO (`GrupoService.validarTipo`
-  rechaza PDC/virtuales con 400): NO es un enumerado elegible como en Aula, es un campo fijo. (3) `nivel`
-  viaja como CÓDIGO string (no id sintético): `GrupoRequest.nivel`/`GrupoDTO.nivel` son el `codigo` de
-  negocio; `GrupoService.resolverNivel` hace `findByCodigo`→400 si no existe. Corrige la premisa de apertura
-  «hay que poblar nivel_id»: NO hay que poblar id. `NivelController` expone CRUD completo en `/api/niveles`
-  (Bloque 8.5-A'); `NivelDTO` es `{id, codigo, orden}`, `listar()` ordena por `orden` (D-1). D31 b/c/d NO
-  cuelgan del CRUD de Grupo (son poblaciones de niveles superiores —4ºESO/1ºBach/2ºBach—, territorio de
-  O-estructura): confirmado en el texto íntegro de D31, no bloquean S104.
-  MOLDE (reutilizado, canon desde S102): Grupo es el CASO PLANO de Asignatura MÁS UNA EXTENSIÓN acotada —el
-  desplegable `nivel` poblado por red—. Ficheros clonados de Asignatura por Claude Code sobre los REALES.
-  EXTENSIÓN DE LECTURA `nivel` (nueva, 3 ficheros): `models/nivel.model.ts` (interface `{id,codigo,orden}`,
-  sin `NivelRequest` —nada escribe niveles en este bloque—), `services/nivel.service.ts` (ALCANCE DELIBERADO:
-  solo `listar()`; el backend expone CRUD completo pero no hay UI de gestión de niveles aquí —añadir wrappers
-  muertos mentiría sobre el alcance; documentado en el javadoc), `services/nivel.service.spec.ts` (1 caso de
-  contrato GET). PRECISIONES DE MOLDE que aporta S104 (extienden el canon en su punto, no lo reabren): (a)
-  HELPER DE SPEC CON FLUSH DE RED —`montar(data, niveles)`: cuando el componente pide en `ngOnInit`
-  (`/api/niveles`), el helper DEBE flushear esa petición antes de devolver el fixture o `http.verify()` tumba
-  TODOS los casos, incluidos los que no hablan de niveles (la mutación «ngOnInit deja de pedir» cae los 9
-  casos del form, demostrado). Es la primera entidad de catálogo con dependencia de red en construcción; el
-  molde plano (Profesor/Asignatura) no lo tenía. (b) PLACEHOLDER de `<select>` `<option value="" disabled>`
-  calcando `aula-form.html` (único precedente de `<select>` del proyecto; el aserto de conteo cuenta el
-  placeholder, `length+1`, y fija la posición 0). (c) CAMPO DE ALCANCE FIJO NO EXPUESTO: `tipo:'ORDINARIO'`
-  se inyecta en `getRawValue()`, no como control deshabilitado (un campo visible que no se puede tocar es
-  ruido); un aserto sobre el cuerpo del POST Y del PUT vigila que no se pierda. (d) COLUMNA OMITIDA por valor
-  constante: la lista pinta Código+Nivel, NO `tipo` (constante en todas las filas = ruido).
-  M3/MUTACIÓN — verificación por mutación (contraste de Claude Code, no afirmado): `quitar tipo:'ORDINARIO'
-  del cuerpo`→form(1 test); `<option [value]="n.id">` en vez de `n.codigo`→form(2 tests); `reintroducir
-  columna tipo`→lista(1); `ngOnInit deja de pedir /api/niveles`→form(9, open request en verify); `quitar
-  <app-grupo-lista/>`→configuracion(1); `tipo se pierde SOLO en la rama de edición`→form(11) —y (9) sigue
-  verde, que es justo el hueco que (11) cubre—; `ngOnInit silencia el error de niveles`→form(10);
-  `el constructor no precarga nivel`→form(8). El caso (8) usa a propósito el SEGUNDO nivel de la lista: con
-  el primero, un `<select>` atascado en su opción inicial daría verde falso. Dos huecos que el propio
-  reporte identificó y se cerraron con los ajustes del arquitecto: (10) error al cargar niveles —`ngOnInit`
-  traduce su error reutilizando `error()`/`mensaje()`, decisión correcta de Claude Code que faltaba cubrir— y
-  (11) cuerpo del PUT con `tipo:'ORDINARIO'` —simétrico al del POST, sin él romper la inyección en edición
-  quedaba verde—.
-  ENTREGADO (árbol de código limpio; costura verificada por Claude Code, no afirmada): 14 ficheros NUEVOS —
-  Nivel (3: `nivel.model.ts`, `nivel.service.ts`, `nivel.service.spec.ts`), Grupo contrato (3:
-  `grupo.model.ts`, `grupo.service.{ts,spec.ts}`), Grupo componentes (8:
-  `components/grupos/{grupo-form,grupo-lista}.{ts,html,css,spec.ts}`)—. 3 MODIFICADOS: `configuracion.ts`
-  (`GrupoLista` en `imports`, docstring a 4/4), `configuracion.html` (`<app-grupo-lista/>` tras asignatura,
-  párrafo `configuracion__pendiente` BORRADO), `configuracion.spec.ts` (doble de `GrupoService` + caso (4)).
-  Suite frontend 139 → 163 (+24: 22 del paquete inicial + 2 de los ajustes). Molde de Profesor/Aula/Asignatura
-  con `git diff` VACÍO (verificado sobre git, no sobre palabra). COSTURA: `git status` = solo lo previsto
-  (14 nuevos + 3 tocados, `configuracion` +26/−13, nada más); frontend 163/163; backend 242/0/0/0 por
-  ejecución real (surefire-reports, no conteo estático); `npm run build` EXIT=0, bundle 460 kB < budget 500 kB.
-  DEUDA/DECISIONES: `tipo=ORDINARIO` limitado a grupos ordinarios es DECISIÓN CONSCIENTE DE ALCANCE (no deuda):
-  el CRUD plano de catálogo crea ordinarios; PDC/virtuales son O-estructura (viven en `/api/grupos/{idPadre}/pdc`
-  desde S76). Registrada en `gestion_proyecto.md` §4 junto a D-S103-compat. `NivelService` solo-`listar()` es
-  limitación conocida documentada (se completa si un bloque futuro da UI de niveles), no deuda. D31 b/c/d
-  intactas en O-estructura.
-  OBSERVACIONES sin deuda formal: (a) Sigue sin existir script de higiene R4/costura en el repo (`scripts/`
-  vacío; mejora de método pendiente desde S101). La costura de S104 se corrió a mano vía Claude Code; nota
-  para cuando se escriba el script: `mvn -q test` silencia el resumen de Surefire —usar `mvn test` o
-  `| grep -E "Tests run|BUILD"` para que el conteo quede en el log. (b) ARCHIVADO (M1-bis) ATRASADO 4 sesiones:
-  el patrón «sesión N archiva N-4» se rompió en S100 (S96), S101 (S97), S102 (S98) y S104 no lo salda (S99);
-  el plan arrastra 5 cabeceras `### Sesión` vivas (99–103) + residuos «Última sesión previa», y el censo de
-  bitácora sigue diciendo «S96–S99». S104 NO archiva —es Configuración/UI, y hacerlo «según patrón» dejaría
-  huecos intermedios y empeoraría el desalineamiento (mismo criterio que S103, R-terminado/M5)—. Saldarlo es
-  sesión de Higiene documental propia, ahora PRIORITARIA (4 sesiones es demasiado; O-catálogo 4/4 es un punto
-  de reposo natural del mapa para hacerla). Aviso heredado: `bitacora-sesiones.md` (369 KB) corrompe cabeceras
-  al archivar (títulos partidos en dos líneas); ir con sed/Python y verificar por diff del cuerpo.
-
-Última sesión registrada (previa): Sesión 103 — O-catálogo (H2): CRUD de Asignatura. Tercer Cambio de cuatro (3/4). CASO PLANO del molde. NO cierra el objetivo.
-  Cuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí (contraste con Claude
-  Code por mutación), M3 acotado a la traducción de error (no al binding; la lógica de dominio vive en el
-  backend). Avanza O-catálogo (H2) de 2/4 a 3/4; el criterio de terminado es AGREGADO («desde la UI se
-  crea un centro mínimo y el solver corre sobre él»): esta sesión NO lo cierra, falta grupo. El backend
-  REST de Asignatura ya existía completo: `AsignaturaController` se documenta como PILOTO del patrón CRUD
-  de catálogo (del que descienden Profesor y Aula), 5 operaciones, `codigo` not-null-unique, 409 por
-  referencia entrante vía `ReferenciaEntranteException`. El trabajo de S103 es la capa de presentación
-  Angular: servicio HTTP + modelo + dos componentes.
-  M2 — DECISIÓN DE ALCANCE (raíz sola, con evidencia): O-catálogo elige asignatura antes que grupo por
-  método, no por dependencia técnica (entre las dos restantes no la hay). Asignatura arrastra deuda propia
-  (D-F8.5-C3-b «códigos por currículo») y expone un sub-recurso que Profesor/Aula no tienen:
-  `GET/PUT /api/asignaturas/{id}/aulas-compatibles`. La apertura empujaba a decidir si el CRUD incluía ese
-  sub-recurso. Claude Code inspeccionó el backend ANTES de teclear y midió acoplamiento de contrato NULO:
-  `AsignaturaDTO`/`AsignaturaRequest` son `{id, codigo, nombreCompleto}` byte por byte iguales a Profesor;
-  la entidad no mapea colección de compatibilidades (el lado propietario es `AsignaturaAulaCompatible` con
-  `@ManyToOne`, cascada de borrado por esquema, no JPA); el sub-recurso es un contrato aparte de
-  `List<String>`. CONSECUENCIA: la raíz es un calco LITERAL del molde de Profesor (S101), no de Aula (S102)
-  —sin enumerado, sin opcionales nullable—. El sub-recurso queda FUERA DE ALCANCE (Cambio propio; ver
-  D-S103-compat). Asignatura es, así, el CASO PLANO que valida que el molde se aplica sin estirarlo: donde
-  S102 añadió dos extensiones (enumerado + opcionales), S103 no necesita ninguna.
-  MOLDE (reutilizado, canon desde S102): calco por copia+sustitución de los 8 ficheros de Profesor, hecho
-  por Claude Code sobre los ficheros REALES (no sobre resumen). Lo que el `sed` mecánico no da y hubo que
-  resolver a mano: (1) género —asignatura es femenino, 9 sitios— y la «a» personal del borrado
-  (`¿Borrar a Ana Ruiz?`→`¿Borrar la asignatura Mat?`), unificado a CÓDIGO en confirmación y degradado como
-  Aula; (2) referentes del 409 —el molde heredaba `plaza(s)`+`tutoria(s)` (de Profesor); los de asignatura
-  son `actividad(es)` y `plaza(s)` en ese orden (`AsignaturaService:118-120` + `ReferenciaEntranteException`);
-  (3) un literal de backend en femenino («Ya existe una asignatura con codigo», `AsignaturaService:85`) que
-  el mock heredado ponía en masculino; (4) cabecera del form reescrita: dejó de afirmar «PRIMER formulario,
-  candidato a molde» (heredado de S101, falso) y documenta que es el caso plano.
-  M3/MUTACIÓN — mutaciones cazadas (contraste de Claude Code, no afirmado): `degradado a nombreCompleto`→
-  lista(5); `@for truncado a .slice(0,1)`→lista(1); `quitar <app-asignatura-lista/>`→configuracion(3). El
-  `(409)` en los asertos de lista(5)/(85) NO es adorno: con datos reales `Mat` es prefijo de `Matemáticas`,
-  y sin el status esos asertos dejaban de distinguir código de nombre —justo la decisión (degradado a
-  código) que S103 tomó—. Dos asertos negativos heredados (form:69, lista:85) estaban MUERTOS (pasaban por
-  imposibilidad, no discriminaban) y se reapuntaron al degradado real. La lista se probó con DOS filas
-  (`Mat`, `LCL`) para cubrir el `@for` de verdad. Datos de dominio REALES del catálogo (§4.1 y
-  D-F8.5-C3-b: `Mat`, `LCL`), no inventados: se rechazó `MAT1`/`Matemáticas I` por no existir en el catálogo.
-  ENTREGADO (2 commits de código, árbol limpio): NUEVOS `models/asignatura.model.ts` (espejo de
-  `AsignaturaDTO`/`AsignaturaRequest`), `services/asignatura.service.{ts,spec.ts}` (5 wrappers pelados sobre
-  `/api/asignaturas`), `components/asignaturas/{asignatura-lista,asignatura-form}.{ts,html,css,spec.ts}`
-  (11 ficheros, commit `7fa8278`). MODIFICADOS `configuracion.{ts,html,spec.ts}` (+import y `AsignaturaLista`
-  en `imports`, +`<app-asignatura-lista/>`, caso (3) escueto que remite a (2); corrección de nomenclatura:
-  la cuarta entidad del catálogo es GRUPO, no «currículo» —arrastre de S101, currículo es objeto de
-  O-estructura— con la cita del plan dentro; commit `4f7dded`). Suite frontend 122 → 139 (+17: 16 de los
-  tres specs + el (3) de configuracion). `ConfirmarBorrado` genérico reutilizado sin tocar. NOTA menor: S103
-  usó DOS commits de código (entidad + cableado) donde S101/S102 usaron uno; el commit de docs sigue el
-  patrón de S102.
-  DEUDA: D-S103-compat NUEVA (mejora futura, cuelga del Cambio de compatibilidad; ver sección de deuda
-  viva). D-F8.5-C3-a/-C3-b siguen vivas, ahora con el matiz de que la UI para poblar compatibilidades sigue
-  sin existir. D-S102-spec sin cambios (el (1) conserva la premisa falsa por R-terminado; el (3) de S103
-  remite al (2) de S102, no repite el razonamiento de NG8001).
-  OBSERVACIONES sin deuda formal: (a) No existe script de higiene R4 en el repo (mejora de método pendiente
-  desde S101, ya registrada en S102); R4 se verificó a mano —tokens citados con definición viva; sin
-  ficheros huérfanos, lo prueba el verde de configuracion.spec—. (b) ARCHIVADO (M1-bis) ATRASADO 3 sesiones:
-  el patrón «sesión N archiva la cabecera de N-4» se rompió en S100 (S96 no se archivó), S101 (S97) y S102
-  (S98); el plan arrastra 7 cabeceras vivas en dos formatos y el censo (:1206) sigue diciendo «S96–S99».
-  S103 NO archiva —hacerlo «según patrón» dejaría el hueco S96–S98 en medio y empeoraría el desalineamiento—;
-  saldarlo es sesión de Higiene documental propia (como S95/S98), no trabajo de O-catálogo (R-terminado).
-  Aviso para esa sesión: `bitacora-sesiones.md` (369 KB) corrompe cabeceras al archivar (títulos partidos en
-  dos líneas); ir con sed/Python y verificar por diff del cuerpo.
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -955,10 +798,11 @@ S68 en la Sesión 72, la de S69 en la Sesión 73, la de S70 en la Sesión 74, la
 Sesión 105 (higiene que saldó el archivado M1-bis atrasado 4 sesiones: S100–S104 no rotaron en su momento, y
 la propia rotación de S105 expulsó además S101) (misma higiene documental; en S60 se corrigió además una copia
 truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bitácora; en S69 se corrigió
-el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106.
-El plan conserva las 4
-últimas sesiones en su ventana (S103–S106), con S106 como única cabecera H3 viva y S103–S105 en formato
-compacto. El detalle histórico de cualquier sesión anterior —incluida S42
+el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106,
+y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
+para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo).
+El plan conserva ahora S107 (degradada a formato compacto) y S108 como única cabecera H3 viva. El detalle
+histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
 <!-- Registro detallado de S32–S42 archivado en docs/bitacora-sesiones.md (S44). -->
@@ -2291,6 +2135,20 @@ con remisión a la bitácora.
   compatibilidad (tras Grupo, o dentro de O-estructura según se decida al abrirlo). → construir la UI de
   compatibilidades como Cambio propio; estirar el molde con un sub-recurso es el objeto de esa sesión, no
   un añadido a un CRUD plano.
+
+- **D-subgrupo-ux-multiselect** (S108, VIVA, MEJORA PLANIFICADA, no bloqueante) — EL CAMPO «GRUPOS» DEL
+  FORMULARIO DE SUBGRUPO ES UN `<select multiple>` NATIVO. `subgrupo-form` (C-subgrupos, S108) puebla la
+  población del subgrupo con un `<select multiple>` estándar: para elegir varios grupos el usuario debe usar
+  Ctrl+click (no evidente), no hay búsqueda ni chips ni resumen de lo seleccionado, y con muchos grupos en el
+  catálogo la lista se vuelve incómoda. Es DECISIÓN CONSCIENTE DE ALCANCE del arquitecto, no descuido: se eligió
+  la mínima desviación del molde de catálogo para esta sesión y se dejó la UX rica para una FASE POSTERIOR DE
+  MEJORA DE UX DE SUBGRUPOS ya prevista al abrir el Cambio. NO es deuda técnica —el componente funciona, valida
+  I6 en cliente (`arrayNoVacio`), preselecciona en edición y está cubierto por 12 casos (`subgrupo-form.spec`)—:
+  es acabado de presentación aplazado, hermano de lo que O-diseño trata a nivel transversal. NO bloquea el
+  criterio de O-estructura (los subgrupos se crean, listan, editan y borran; la población se elige, solo que sin
+  comodidad). Cuelga de O-estructura. → construir el selector rico (chips / búsqueda / multiselect con casillas)
+  en la fase de mejora de UX de subgrupos; el `.subgrupo-form__multiple` y el handler `alSeleccionar` son el
+  punto de sustitución. Si O-diseño absorbe el acabado transversal antes, valorar plegarla ahí.
 
 ### Deuda consciente CERRADA (histórico)
 

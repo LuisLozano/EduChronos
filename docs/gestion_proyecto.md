@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107 —1ª pieza, C-jornada, hecha: backend REST `/api/jornada` + formulario singleton; entrega la dimensión temporal, prerequisito del solve—; faltan currículo/Actividades, desdobles, PDC, tutores y el e2e UI→solver. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 2 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve) y C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos; desbloquea el editor de actividades porque las Plazas referencian subgrupos por código); faltan C-actividades (editor de Plazas, backend ya existe), desdobles, PDC, tutores y el e2e UI→solver. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -200,21 +200,34 @@ de las Fases 9–12.
 - **Cambios que agrupa:** editor de demanda curricular, asistente de
   desdoble/agrupamiento (D1, D10), editor de PDC (D7), asignación de tutores,
   configuración de estructura de jornada (D22).
-- **Progreso (S107):** ABIERTO. 1er Cambio HECHO — **C-jornada** (configuración de
-  estructura de jornada, D22): backend REST singleton `GET|PUT /api/jornada`
-  (reemplazo total, guarda 409 ante dependientes, techo conservador ≤6 lectivos/día
-  sin tocar `domain.Tramo`, malla expandida a los 5 días en el backend) + formulario
-  singleton en Configuración (FormArray fijo, propuesta precargada, 409 diferenciado
-  del 400). Retira `SeedCatalogoRunner`. Suite app 242→259, vitest 163→180. Es la
-  pieza del camino crítico del solve (sin ≥1 TramoSemanal lectivo el centro mínimo da
-  422). NO cierra el objetivo: faltan currículo/Actividades (backend CRUD ya existe),
-  desdobles, PDC, tutores y el e2e UI→solver heredado. Medición clave del M2 (S107):
-  de las piezas de estructura solo la jornada carecía de puerta REST; Nivel/Subgrupo/
-  Actividad ya tienen CRUD, Plaza va embebida en Actividad. `DemandaCurricular` y
-  `Particion` NO existen como clases en el repo (divergencia modelo-código, la afronta
-  el Cambio de currículo).
+- **Progreso (S108):** ABIERTO, 2 piezas hechas. **C-jornada** (S107, D22):
+  backend REST singleton `GET|PUT /api/jornada` (reemplazo total, guarda 409 ante
+  dependientes, techo conservador ≤6 lectivos/día sin tocar `domain.Tramo`, malla
+  expandida a los 5 días en el backend) + formulario singleton en Configuración
+  (FormArray fijo, propuesta precargada, 409 diferenciado del 400). Retira
+  `SeedCatalogoRunner`. Es la pieza del camino crítico del solve (sin ≥1 TramoSemanal
+  lectivo el centro mínimo da 422). **C-subgrupos** (S108): CRUD de subgrupos por UI
+  sobre `/api/subgrupos` (backend ya existía completo) —`subgrupo.model`/`service`,
+  `subgrupo-form` con `<select multiple>` de grupos poblado por red (M3 real: control
+  `string[]`, validator `arrayNoVacio` que replica I6, handler `alSeleccionar` +
+  `[selected]` porque el `<select multiple>` no reconcilia el array como el único),
+  `subgrupo-lista`, cableado en Configuración—. Es la pieza que faltaba para que las
+  Plazas de una Actividad puedan referenciar subgrupos creados por UI (la Plaza los
+  referencia por código de subgrupos ya existentes ⇒ deben ser creables antes que las
+  actividades). Suite app sin tocar; vitest 180→206. Decisión de alcance del M2 (S108,
+  medido contra el repo): NO falta backend de currículo, falta UI —`Subgrupo` y
+  `Actividad`→`Plaza` ya existen con CRUD REST; `Particion`/`SubgrupoParticion`/
+  `DemandaCurricular` NO existen (Particion por decisión S48, DemandaCurricular solo en
+  el doc de modelo)—. Se adopta Opción A (currículo = subgrupos + actividades sin
+  materializar Particion): el solver no consume Particion y expresar el §6.1 no la
+  exige. NO cierra el objetivo: falta C-actividades (el editor de Plazas, backend ya
+  existe —siguiente Cambio, mayor riesgo del objetivo—), desdobles, PDC, tutores y el
+  e2e UI→solver heredado.
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
-  compartidos. D22 en curso de saldarse (C-jornada, S107).
+  compartidos. D22 saldada de facto (C-jornada, S107). Nace y cuelga aquí
+  D-subgrupo-ux-multiselect (S108): la UX del `<select multiple>` de subgrupos es
+  mejora PLANIFICADA (fase de mejora de UX de subgrupos), no deuda técnica ni
+  bloqueante (ver §4 y el plan).
 
 #### O-demo — "El centro real funciona de punta a punta."
 - **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
@@ -333,6 +346,7 @@ asigna categoría, objetivo y disposición.
 | D-jornada-msg409 (mensaje del 409 dice «No se puede borrar» al guardar jornada) | O-estructura | Detectada S107: `ReferenciaEntranteException` se escribió para los DELETE de catálogo; su mensaje se reutiliza en el PUT de jornada y el usuario lee «No se puede borrar: referenciada por…» cuando intenta GUARDAR. Cosmético, NO bloquea (el desglose «N sesiones, M restricciones… antes de reconfigurar» sí es correcto). Se corrige con un mensaje propio del caso PUT cuando O-estructura vuelva a tocar el backend de jornada; no se paga ahora (R-terminado, M3 cerrado) |
 | D-jornada-asimetria (contrato GET(35)≠PUT(7 día tipo)) | O-estructura | Detectada S107, consecuencia consciente de «el backend expande»: el GET devuelve la malla completa, el PUT acepta un día tipo. Nota de diseño de API, no deuda bloqueante: la UI convive sin fricción real (pinta un día, manda un día). Reconsiderar `diaTipo` en el GET solo si un futuro cliente lo pide |
 | D-jornada-flush-test (`put_dosVecesLaMismaMalla_idempotente` no discrimina el flush) | O-estructura | Detectada S107: falta `UNIQUE(dia,orden)` en `schema.sql`, así que sin el `flush()` el resultado sería el mismo y el test no lo prueba. El `flush()` es defensivo/preventivo (correcto: fuerza DELETE antes de INSERT). Si algún día se añade la constraint, el test pasa a discriminar. Deuda de test, no de código |
+| D-subgrupo-ux-multiselect (el campo «grupos» del form de subgrupo es un `<select multiple>` nativo) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S108, DECISIÓN CONSCIENTE de alcance: se eligió la mínima desviación del molde (`<select multiple>` nativo) y la UX rica —chips, búsqueda, casillas— se aplaza a una fase de mejora de UX de subgrupos ya prevista al abrir el Cambio. NO es deuda técnica (el componente funciona, valida I6 en cliente, 12 tests) ni bloquea el criterio de O-estructura (la población se elige, solo sin comodidad). El `.subgrupo-form__multiple` y el handler `alSeleccionar` son el punto de sustitución. No se paga ahora |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
