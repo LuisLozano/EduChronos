@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { Configuracion } from './configuracion';
+import { ActividadService } from '../../services/actividad.service';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
 import { GrupoService } from '../../services/grupo.service';
@@ -50,6 +51,7 @@ describe('sección de configuración', () => {
         { provide: AsignaturaService, useValue: { listar: () => of([]) } },
         { provide: GrupoService, useValue: { listar: () => of([]) } },
         { provide: SubgrupoService, useValue: { listar: () => of([]) } },
+        { provide: ActividadService, useValue: { listar: () => of([]) } },
         // Jornada no es un CRUD: su doble expone `obtener`, no `listar`. Malla vacía
         // y persistida=true (el badge de propuesta se mide en jornada.spec.ts).
         {
@@ -138,5 +140,21 @@ describe('sección de configuración', () => {
     // hijo se instanció y pintó ('Nuevo subgrupo', botón de subgrupo-lista.html).
     expect(raiz.querySelector('app-subgrupo-lista')).not.toBeNull();
     expect(raiz.textContent).toContain('Nuevo subgrupo');
+  });
+
+  it('(7) monta la lista de actividades dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // Sección de O-estructura (editor de actividad, trozo A), montada con el mismo gesto
+    // que el resto. Dos asertos como en (2)-(6): el tag presente y el texto que solo
+    // existe si el hijo se instanció y pintó ('Nueva actividad', botón de
+    // actividad-lista.html). Solo se dobla `ActividadService`: los cuatro catálogos que
+    // el formulario pide los pide `ActividadForm`, que vive en un diálogo y no se
+    // instancia al montar la sección.
+    expect(raiz.querySelector('app-actividad-lista')).not.toBeNull();
+    expect(raiz.textContent).toContain('Nueva actividad');
   });
 });

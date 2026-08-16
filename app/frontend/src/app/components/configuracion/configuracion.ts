@@ -4,6 +4,7 @@ import { AsignaturaLista } from '../asignaturas/asignatura-lista';
 import { AulaLista } from '../aulas/aula-lista';
 import { GrupoLista } from '../grupos/grupo-lista';
 import { SubgrupoLista } from '../subgrupos/subgrupo-lista';
+import { ActividadLista } from '../actividades/actividad-lista';
 import { Jornada } from '../jornada/jornada';
 import { ProfesorLista } from '../profesores/profesor-lista';
 
@@ -35,10 +36,24 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * centro no ha configurado la jornada antes de que el usuario baje a las entidades.
  * Que encaje aquí sin adaptar nada confirma que el patrón de composición de esta
  * sección no depende del molde CRUD.
+ *
+ * <p>{@link ActividadLista} (O-estructura) se monta ÚLTIMA y con el mismo gesto. Va
+ * detrás de subgrupos porque una actividad referencia por código a asignaturas,
+ * profesores, aulas y subgrupos: el orden de la página sigue al orden en que hay que
+ * darlos de alta, y quien baje hasta aquí ya tiene arriba todo lo que el formulario le
+ * va a pedir.
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [Jornada, ProfesorLista, AulaLista, AsignaturaLista, GrupoLista, SubgrupoLista],
+  imports: [
+    Jornada,
+    ProfesorLista,
+    AulaLista,
+    AsignaturaLista,
+    GrupoLista,
+    SubgrupoLista,
+    ActividadLista,
+  ],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })
