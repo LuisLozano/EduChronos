@@ -1,0 +1,57 @@
+.actividades {
+  padding: 1rem;
+}
+
+.actividades__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.actividades__titulo {
+  margin: 0;
+}
+
+.actividades__error {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.actividades__vacio,
+.actividades__cargando {
+  color: #666;
+}
+
+.actividades__tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.actividades__tabla th,
+.actividades__tabla td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Explica por qué el botón de editar está apagado, junto al número que lo causa. */
+.actividades__aviso-multiplaza {
+  display: block;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.actividades__acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actividades__editar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.actividades__borrar {
+  color: #b00;
+}

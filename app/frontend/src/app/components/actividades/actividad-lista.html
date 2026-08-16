@@ -1,0 +1,66 @@
+<div class="actividades">
+  <div class="actividades__cabecera">
+    <h2 class="actividades__titulo">Actividades</h2>
+    <button type="button" class="actividades__nuevo" (click)="nuevo()">
+      Nueva actividad
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="actividades__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="actividades__cargando">Cargando…</p>
+  } @else if (actividades().length === 0) {
+    <p class="actividades__vacio">
+      No hay actividades todavía. Crea la primera con «Nueva actividad».
+    </p>
+  } @else {
+    <table class="actividades__tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Asignatura</th>
+          <th>Patrón</th>
+          <th>Duración</th>
+          <th>Repeticiones</th>
+          <th>N.º de plazas</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (actividad of actividades(); track actividad.id) {
+          <tr>
+            <td>{{ actividad.codigo }}</td>
+            <td>{{ asignaturaDe(actividad) }}</td>
+            <td>{{ actividad.patronTemporal }}</td>
+            <td>{{ actividad.duracionTramos }}</td>
+            <td>{{ actividad.repeticionesPorSemana }}</td>
+            <td>
+              {{ actividad.plazas.length }}
+              @if (esMultiplaza(actividad)) {
+                <span class="actividades__aviso-multiplaza">
+                  varias plazas: editable en la próxima versión
+                </span>
+              }
+            </td>
+            <td class="actividades__acciones">
+              <button
+                type="button"
+                class="actividades__editar"
+                [disabled]="esMultiplaza(actividad)"
+                (click)="editar(actividad)"
+              >
+                Editar
+              </button>
+              <button type="button" class="actividades__borrar" (click)="borrar(actividad)">
+                Borrar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
