@@ -21,6 +21,8 @@ import es.yaroki.educhronos.app.service.ActividadService;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.ActividadController;
+import es.yaroki.educhronos.app.web.dto.ActividadRequest;
+import es.yaroki.educhronos.app.web.dto.PlazaRequest;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
@@ -417,16 +419,111 @@ class ActividadEndpointTest {
      */
     @Test
     void borrado_actividadConTravesia_409YDesgloseSinDuplicarAulaBloqueada() throws Exception {
+        Travesia t = montarTravesia();
+
+        // Precondición del desalineado: idAct e idPlaza no colisionan entre sí ni con los ids de
+        // sesion/horario/aula_bloqueada. Si un cambio futuro los realineara, esto cae ruidosamente.
+        assertThat(t.actividad().getId()).isNotEqualTo(t.plaza().getId());
+        assertThat(List.of(t.sesion().getId(), t.horario().getId(), t.aulaBloqueada().getId()))
+                .doesNotContain(t.actividad().getId(), t.plaza().getId());
+
+        // (a) 409, no el 500 del mordisco de las FK RESTRICT sesion.plaza_id / aula_bloqueada.*
+        mockMvc.perform(delete("/api/actividades/" + t.actividad().getId()))
+                .andExpect(status().isConflict());
+
+        // (b) Desglose: la sesion (travesía) y el aula_bloqueada (contado UNA vez pese a las 2 FK).
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(t.actividad().getId()), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias()).containsExactly(
+                new Referencia("sesion(es)", 1L),
+                new Referencia("aula(s) bloqueada(s)", 1L));
+    }
+
+    // ───────────────── la estructura no se edita en caliente (S109)
+
+    /**
+     * S109 (precedente de C-jornada/S107): el PUT sobre una actividad CON dependientes se
+     * rechaza ENTERO con 409 y el desglose, aunque el cuerpo sea válido y el cambio inocuo —el
+     * de aquí solo renombra la actividad de {@code ACT} a {@code ACT-EDITADA}—. La guarda es
+     * roma a propósito. Sin ella este PUT daría 200 y la reconciliación posicional mutaría la
+     * plaza que la {@code Sesion} viva referencia por {@code plaza_id}.
+     *
+     * <p>El desglose se asevera por partida doble: el reason del 409 NOMBRA a los dos referentes
+     * (no basta el status), y la excepción del servicio los expone con sus conteos reales.
+     */
+    @Test
+    void edicion_actividadConTravesia_409YDesglose() throws Exception {
+        Travesia t = montarTravesia();
+
+        mockMvc.perform(put("/api/actividades/" + t.actividad().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ACT-EDITADA", "Mat", "NEUTRA", plazaValidaSobreA5())))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(containsString("1 sesion(es)")))
+                .andExpect(status().reason(containsString("1 aula(s) bloqueada(s)")));
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.editar(t.actividad().getId(),
+                        new ActividadRequest("ACT-EDITADA", "Mat", 1, 1, "NEUTRA", false,
+                                List.of(new PlazaRequest("Mat", "A5", List.of(),
+                                        List.of("MATA"), List.of("1ºA-Completo"))))),
+                ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias()).containsExactly(
+                new Referencia("sesion(es)", 1L),
+                new Referencia("aula(s) bloqueada(s)", 1L));
+        // El verbo del mensaje es el de ESTA acción, no el del borrado.
+        assertThat(error.getMessage()).startsWith("No se puede editar:");
+    }
+
+    /**
+     * DISCRIMINANTE DE ORDEN. Cuerpo INVÁLIDO ({@code patronTemporal} basura, que
+     * {@code validarEscalares}/{@code parsePatron} rechazarían con 400) sobre una actividad CON
+     * dependientes → debe salir 409, NO 400: si la actividad no se puede editar, arreglar el
+     * cuerpo no cambiaría nada, así que el 409 domina. Este test es el que cae si alguien mueve
+     * la guarda detrás de las validaciones.
+     */
+    @Test
+    void edicion_cuerpoInvalidoSobreActividadConTravesia_409NoBadRequest() throws Exception {
+        Travesia t = montarTravesia();
+
+        mockMvc.perform(put("/api/actividades/" + t.actividad().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("ACT", "Mat", "PATRON-BASURA", plazaValidaSobreA5())))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(containsString("1 sesion(es)")));
+    }
+
+    // DISCRIMINANTE DE PRECEDENCIA (el 404 sigue ganando a todo): lo cubre tal cual
+    // edicion_inexistente_404, más arriba. No se duplica aquí: un id inexistente no puede tener
+    // dependientes, así que la guarda —que va DESPUÉS del findById— no le cambia nada, y un
+    // segundo test con el mismo cuerpo no aserveraría nada nuevo.
+
+    /** Los cinco actores del montaje de travesía, para que cada test asevere lo suyo. */
+    private record Travesia(Actividad actividad, Plaza plaza, Sesion sesion,
+            HorarioGenerado horario, AulaBloqueada aulaBloqueada) {
+    }
+
+    /**
+     * Montaje COMPARTIDO de la travesía (lo usan el borrado 409 y los tres tests de edición):
+     * actividad {@code ACT} con 1 plaza sobre el aula {@code A5}, y colgando de esa plaza una
+     * {@link Sesion} (FK RESTRICT {@code sesion.plaza_id}) y una {@link AulaBloqueada} (que
+     * apunta a la actividad por DOS FK a la vez, {@code actividad_id} y {@code plaza_id}).
+     *
+     * <p>DESALINEADO (lección del test 1): una actividad de relleno con {@link #RELLENO_PLAZAS}
+     * plazas empuja el id de la plaza real por encima de los ids (bajos) de
+     * sesion/horario/aula_bloqueada, para que ninguna {@code @Query} que apunte a la columna
+     * equivocada acierte por colisión. La precondición que lo verifica en runtime vive en el
+     * test de borrado, que es de quien es la lección; no se fía de la aritmética.
+     */
+    private Travesia montarTravesia() {
         // Catálogo del setUp reutilizable: la asignatura "Mat" y el aula "A5" ya existen.
         Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
         Aula aula = aulaRepository.findByCodigo("A5").orElseThrow();
         TramoSemanal tramo = tramoRepository.save(
                 new TramoSemanal(Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
 
-        // DESALINEADO (lección del test 1): una actividad de relleno con RELLENO_PLAZAS plazas
-        // empuja el id de la plaza real por encima de los ids (bajos) de sesion/horario/
-        // aula_bloqueada, para que ninguna @Query que apunte a la columna equivocada acierte por
-        // colisión. La precondición de más abajo lo verifica en runtime, no se fía de la aritmética.
         Actividad relleno = new Actividad("RELLENO", mat, 1, 1, PatronTemporal.NEUTRA, false);
         for (int i = 1; i <= RELLENO_PLAZAS; i++) {
             relleno.agregarPlaza("RELLENO-P" + i, mat, aula, Set.of(), Set.of(), Set.of());
@@ -447,23 +544,12 @@ class ActividadEndpointTest {
                 new AulaBloqueada(actividad, 1, plaza, aula));
         entityManager.flush();
 
-        // Precondición del desalineado: idAct e idPlaza no colisionan entre sí ni con los ids de
-        // sesion/horario/aula_bloqueada. Si un cambio futuro los realineara, esto cae ruidosamente.
-        assertThat(actividad.getId()).isNotEqualTo(plaza.getId());
-        assertThat(List.of(sesion.getId(), horario.getId(), aulaBloqueada.getId()))
-                .doesNotContain(actividad.getId(), plaza.getId());
+        return new Travesia(actividad, plaza, sesion, horario, aulaBloqueada);
+    }
 
-        // (a) 409, no el 500 del mordisco de las FK RESTRICT sesion.plaza_id / aula_bloqueada.*
-        mockMvc.perform(delete("/api/actividades/" + actividad.getId()))
-                .andExpect(status().isConflict());
-
-        // (b) Desglose: la sesion (travesía) y el aula_bloqueada (contado UNA vez pese a las 2 FK).
-        ReferenciaEntranteException error = catchThrowableOfType(
-                () -> service.borrar(actividad.getId()), ReferenciaEntranteException.class);
-        assertThat(error).isNotNull();
-        assertThat(error.getReferencias()).containsExactly(
-                new Referencia("sesion(es)", 1L),
-                new Referencia("aula(s) bloqueada(s)", 1L));
+    /** Plaza VÁLIDA sobre el aula A5 de la travesía: cuerpo que pasaría todas las validaciones. */
+    private static String plazaValidaSobreA5() {
+        return plazaJson("Mat", "A5", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
     }
 
     // ───────────────── I3: compatibilidad asignatura↔tipo de aula (§4.7, Bloque 8.5-C3)

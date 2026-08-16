@@ -139,11 +139,28 @@ public class ActividadService {
      * id no existe; {@link IllegalArgumentException} (→ 400) si falla la validación o si el
      * código pisa al de OTRA actividad. Reguardar la propia entidad con su mismo código es
      * válido: la unicidad se excluye a sí misma por id.
+     *
+     * <p><b>La estructura no se edita en caliente</b> (S109, precedente de C-jornada/S107). Si
+     * la actividad tiene CUALQUIER dependiente —horario generado sobre sus plazas, sesiones
+     * bloqueadas, aulas bloqueadas— el PUT se rechaza ENTERO con
+     * {@link ReferenciaEntranteException} (→ 409) y su desglose: el usuario borra el horario y
+     * los bloqueos, y luego reconfigura. La guarda es ROMA a propósito: rechaza también un
+     * cambio inocuo como renombrar la actividad. El motivo es que la reconciliación posicional
+     * MUTA las plazas vivas conservando su id, y {@code Sesion}/{@code AulaBloqueada} apuntan a
+     * {@code plaza_id}, no al código: sin la guarda, quitar una plaza intermedia dejaría una
+     * sesión describiendo una plaza cuyo contenido ha cambiado por completo, en silencio.
+     * Afinar la guarda comparando la "forma" de la lista de plazas es mejora registrada, no
+     * alcance de esta fase.
+     *
+     * <p><b>Orden deliberado:</b> el 404 primero, la guarda DESPUÉS y las validaciones al final.
+     * Si la actividad no se puede editar, ningún arreglo del cuerpo lo cambiaría, así que el
+     * 409 domina sobre cualquier 400.
      */
     @Transactional
     public ActividadDTO editar(Long id, ActividadRequest peticion) {
         Actividad entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe actividad con id " + id));
+        exigirSinDependientes(id, "editar");
         validarEscalares(peticion);
         PatronTemporal patron = parsePatron(peticion.patronTemporal());
         validarPlazas(peticion.plazas());
@@ -160,20 +177,35 @@ public class ActividadService {
         return aDTO(entidad);
     }
 
-    /** Borra una actividad por id. {@link NoSuchElementException} (→ 404) si no existe. El
-     * cascade borra sus plazas; NO se comprueban referencias entrantes (eso es 8.5-C2). */
+    /** Borra una actividad por id. {@link NoSuchElementException} (→ 404) si no existe;
+     * {@link ReferenciaEntranteException} (→ 409) si algo la retiene ({@link
+     * #exigirSinDependientes}). El cascade borra sus plazas. */
     @Transactional
     public void borrar(Long id) {
         Actividad entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe actividad con id " + id));
+        exigirSinDependientes(id, "borrar");
+        repositorio.delete(entidad);
+    }
+
+    /**
+     * GUARDA ÚNICA de dependientes de la actividad, compartida por {@code borrar} y
+     * {@code editar} (S109): consulta el mapa inverso de FK del repositorio —las dos DIRECTAS y
+     * la TRAVESÍA por sus plazas, ver {@link ActividadRepository}— y, si algún referente tiene
+     * filas, lanza {@link ReferenciaEntranteException} (→ 409) con el desglose completo. Es una
+     * sola implementación a propósito: si las dos rutas contaran cosas distintas, el usuario
+     * podría vaciar una actividad por PUT y luego borrarla, o al revés.
+     *
+     * @param accion verbo que nombra lo que se rechaza; entra en el mensaje del 409.
+     */
+    private void exigirSinDependientes(Long id, String accion) {
         List<Referencia> entrantes = List.of(
                 new Referencia("sesion(es) bloqueada(s)", repositorio.contarSesionesBloqueadas(id)),
                 new Referencia("sesion(es)", repositorio.contarSesionesSobreSusPlazas(id)),
                 new Referencia("aula(s) bloqueada(s)", repositorio.contarAulasBloqueadas(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            throw new ReferenciaEntranteException(entrantes, accion);
         }
-        repositorio.delete(entidad);
     }
 
     // ------------------------------------------------------------- validación
@@ -285,8 +317,17 @@ public class ActividadService {
      * -P{N} VIVOS + 1} (puede reusar un hueco dejado por un borrado: es seguro, la unicidad
      * se mantiene en todo instante y ni Sesion ni el solver emparejan por código fuera de su
      * ciclo). Ningún alta reasigna el código de una plaza viva, así que ningún INSERT colisiona
-     * con la UNIQUE: no hace falta flush() explícito. El emparejamiento por posición es una
-     * decisión de UX provisional (roza D-F8.6-a), a confirmar con el formulario de Fase 8.6.
+     * con la UNIQUE: no hace falta flush() explícito.
+     *
+     * <p><b>El emparejamiento por posición queda CONFIRMADO</b> (S109, cierra lo que hasta
+     * ahora era "provisional, a confirmar con el formulario de Fase 8.6"), y es seguro
+     * únicamente PORQUE {@link #editar} exige antes que la actividad no tenga dependientes: si
+     * nadie referencia sus plazas, mutarlas in situ o borrarlas no puede dejar a ningún
+     * referente describiendo otra cosa. Sin esa guarda NO lo sería: {@code Sesion} y
+     * {@code AulaBloqueada} apuntan por {@code plaza_id}, no por código, así que eliminar una
+     * plaza intermedia desplaza el contenido de las siguientes y deja a las sesiones vivas
+     * describiendo una plaza distinta de la que describían, sin error ni aviso. La guarda es la
+     * condición de validez de este algoritmo, no un extra.
      */
     private void reconciliarPlazas(Actividad actividad, List<PlazaRequest> entrantes,
             Map<Long, Set<TipoAula>> cacheI3) {

@@ -28,8 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>Traducciones por TIPO de excepción, no por endpoint:
  * {@link NoSuchElementException} (id inexistente) → {@code 404};
  * {@link IllegalArgumentException} (validación: escalares, patrón, XOR, I7, I2,
- * referencias, unicidad) → {@code 400} con el mensaje en el reason. En el {@code PUT}
- * ambos son posibles y hay que distinguirlos por tipo.
+ * referencias, unicidad) → {@code 400} con el mensaje en el reason;
+ * {@link ReferenciaEntranteException} (la actividad tiene dependientes) → {@code 409} con el
+ * desglose en el reason. En el {@code PUT} los tres son posibles —desde S109 la edición de una
+ * actividad con horario o bloqueos colgando se rechaza entera— y hay que distinguirlos por
+ * tipo; la traducción es la MISMA que en el {@code DELETE}, que es justo lo que significa
+ * traducir por tipo y no por endpoint.
  */
 @RestController
 @RequestMapping("/api/actividades")
@@ -71,6 +75,8 @@ public class ActividadController {
             return service.editar(id, peticion);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ReferenciaEntranteException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

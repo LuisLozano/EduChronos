@@ -16,6 +16,12 @@ import java.util.stream.Collectors;
  * llamar a {@code delete}, y falla con un mensaje que dice QUIÉN lo impide y CUÁNTOS son.
  * El mordisco de la FK queda como red de seguridad de última instancia, no como mecanismo.
  *
+ * <p><b>La acción es un parámetro</b> (S109). El borrado dejó de ser el único uso: la EDICIÓN
+ * de una actividad con dependientes también se rechaza con 409 (la estructura no se edita en
+ * caliente, precedente de C-jornada/S107), y decirle al usuario "no se puede borrar" cuando
+ * lo que ha intentado es un PUT sería falso. El constructor de un solo argumento conserva
+ * {@code "borrar"} y con él el mensaje exacto que hoy ven los DELETE y sus tests.
+ *
  * <p><b>Desglose estructurado.</b> Además del mensaje, expone la lista de
  * {@link Referencia} que lo motivaron ({@link #getReferencias()}), para que los tests
  * aseveren estructura (referente + conteo real) en vez de hacer substring del texto.
@@ -40,7 +46,15 @@ public class ReferenciaEntranteException extends RuntimeException {
      *     conflicto real, y debe reventar aquí y no llegar al usuario como un 409 vacío.
      */
     public ReferenciaEntranteException(List<Referencia> referencias) {
-        super(construirMensaje(referencias));
+        this(referencias, "borrar");
+    }
+
+    /**
+     * Igual que el anterior, nombrando la ACCIÓN que se rechaza ({@code "borrar"},
+     * {@code "editar"}): es el verbo que entra en el mensaje y por tanto en el reason del 409.
+     */
+    public ReferenciaEntranteException(List<Referencia> referencias, String accion) {
+        super(construirMensaje(referencias, accion));
         this.referencias = referencias.stream().filter(r -> r.conteo() > 0).toList();
     }
 
@@ -50,7 +64,7 @@ public class ReferenciaEntranteException extends RuntimeException {
     }
 
     /** {@code "No se puede borrar: referenciada por 2 plaza(s), 1 sesion(es)"}. */
-    private static String construirMensaje(List<Referencia> referencias) {
+    private static String construirMensaje(List<Referencia> referencias, String accion) {
         List<Referencia> vivas = referencias.stream().filter(r -> r.conteo() > 0).toList();
         if (vivas.isEmpty()) {
             throw new IllegalArgumentException(
@@ -58,6 +72,6 @@ public class ReferenciaEntranteException extends RuntimeException {
         }
         return vivas.stream()
                 .map(r -> r.conteo() + " " + r.referente())
-                .collect(Collectors.joining(", ", "No se puede borrar: referenciada por ", ""));
+                .collect(Collectors.joining(", ", "No se puede " + accion + ": referenciada por ", ""));
     }
 }
