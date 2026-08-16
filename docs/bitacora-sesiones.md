@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S106. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S107. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S106). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S107). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -5244,3 +5244,82 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   mano.
   O-catálogo (H2) ✔ TERMINADO. Desbloquea O-estructura (siguiente objetivo por dependencias). Siguiente:
   abrir O-estructura (ver M1-ter).
+
+### Sesión 107 — O-estructura (H2): C-jornada, primer Cambio. Backend REST de jornada (Desarrollo) + formulario singleton (Config/UI). Abre O-estructura; NO lo cierra.
+  Séptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: M0 largo (descomposición de O-estructura,
+  su primer M2 por diseño) + un Cambio completo, C-jornada, de tipo Desarrollo (backend con lógica) y
+  Configuración/UI (formulario). PRIMER Cambio de O-estructura: lo ABRE, no lo cierra. O-estructura sigue
+  ACTIVO — su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo + e2e UI→solver
+  heredado) exige aún currículo/Actividades, desdobles, PDC, tutores y el e2e. C-jornada entrega UNA pieza:
+  la dimensión temporal, que era el prerequisito del solve por camino crítico (sin ≥1 TramoSemanal lectivo
+  el centro mínimo da 422; ninguna otra UI de estructura desbloquea el solve sin ella).
+  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), candidato dominante
+  por dependencias (O-catálogo ✔ S106; O-estructura `depende de O-catálogo`). Hito = H2. Cambio = no
+  prenombrado en la doc: el primer M2 de O-estructura ES descomponerlo, y así se hizo. R-invalidación sin
+  conflicto (nada por encima lo rehace: O-diseño depende de H2 cerrado, O-demo de O-estructura).
+  M2 — MEDICIÓN (Claude Code sobre backend y frontend REALES, cinco investigaciones encadenadas antes de
+  teclear). (1) Censo REST: 11 controllers; de las piezas de estructura, Nivel/Subgrupo/Actividad ya tienen
+  CRUD, Plaza viaja embebida en el agregado Actividad (por diseño), y SOLO la jornada/tramos carece de
+  puerta REST —cero controllers—. Corrige el inventario declarado de O-catálogo (decía Subgrupo/Actividad
+  «solo API» y Nivel «solo listar»: desactualizado). `DemandaCurricular`/`Particion` NO existen como clases
+  en el repo (divergencia modelo-código, registrada). (2) Jornada es el camino crítico del solve y es
+  temporalmente AGNÓSTICA respecto a Actividad (`ActividadRequest` no referencia tramos): un CRUD de jornada
+  no toca Actividad. (3) El hueco real NO es «falta un CRUD»: la clave pública del tramo es posicional y
+  derivada (`(dia, ordenEnDia)`, no persistida, renumerada por `CatalogoMapper.renumerarLectivos`, invertida
+  en 3 servicios); editar la jornada renumeraría en silencio los tramos e invalidaría bloqueos/restricciones
+  por FK. (4) Techo de dominio DURO: `domain.Tramo` valida `diaSemana 1..5`, `ordenEnDia 1..6` en compact
+  constructor → 7 tramos o sábado revientan al montar el problema. (5) El seed puebla 8 repos, todos con
+  puerta salvo TramoSemanal; cero tests atados a `-Pseed` → borrable si M3 entrega el CRUD.
+  DECISIONES DE PRODUCTO (del arquitecto, tras medir): jornada FIJA durante el curso (sin edición en caliente
+  tramo-a-tramo) ⇒ el nudo de renumeración se ESQUIVA por diseño, no se resuelve. Reemplazo TOTAL con guarda
+  409 (si hay cualquier dependiente, el PUT se rechaza; el usuario borra horarios/restricciones y reconfigura;
+  reconciliar-por-id descartado, reintroducía la pregunta de producto ya cerrada). Horas reales visibles.
+  Un recreo, posición elegible. Malla idéntica los 5 días. Techo conservador: la UI topa ≤6 lectivos/día, el
+  dominio NO se toca (M3 conservador; levantar el rango sería tocar el solver, fuera de alcance).
+  M3 — ENTREGADO (Desarrollo, backend). `TramoSemanalRepository` (3 @Query agregadas de conteo de FK
+  entrantes + listado + deleteAll), `JornadaService` (validación pre-BD: techo, horas coherentes sin solape,
+  días; guarda 409 con desglose `Referencia(referente,conteo)` molde `GrupoService.borrar`; reemplazo
+  deleteAll→flush()→insert molde `AsignaturaService`), `JornadaController` (GET|PUT `/api/jornada` singleton,
+  400/409, sin 404), DTOs `JornadaDTO`/`TramoJornadaDTO`/`JornadaRequest`/`TramoJornadaRequest`. GET sintetiza
+  la malla de referencia (la que sabía el seed) con flag `persistida=false` cuando la tabla está vacía
+  (propuesta EFÍMERA, no sembrada: evita jornada-fantasma). `siguienteInmediato` = null (NO derivado: tocar
+  esa FK es semántica del solver, invariante S6, fuera de alcance — frenado 2 veces, deuda registrada).
+  Retirado `SeedCatalogoRunner`. DOS RETOQUES de M3: (a) records anidados → ficheros sueltos (alinear con el
+  precedente del repo, PlazaRequest/AulaPinDTO; suite intacta 351); (b) frontera del PUT movida a «un día
+  tipo, el backend expande a 5 días y numera» (evita un segundo generador de malla en frontend, mantiene la
+  lógica de numeración testada en JVM; suite 351→350 —dos casos de error dejaron de ser representables al
+  salir `dia` del contrato, +1 test de expansión con `orden` continuo cruzando el día; no es pérdida de
+  cobertura). Suite app 242→259, solver 91 intacto, `domain.Tramo`/Actividad/solver sin tocar. Commit:
+  `feat(app): endpoint de jornada REST singleton con reemplazo total y guarda de dependientes (retira SeedCatalogoRunner)`.
+  M4 — ENTREGADO (Configuración/UI, frontend). `jornada.model.ts` (PRIMER modelo del repo con DTO≠Request
+  divergentes de verdad), `jornada.service.ts` (wrappers pelados), componente `jornada` SINGLETON (no par
+  lista/form): GET al init → filtra al primer día → FormArray editable (FIJA: sin añadir/quitar filas, el nº
+  de tramos lo fija la propuesta del GET, no el frontend); recorta a día tipo antes del PUT. 409 y 400 son
+  caminos DISTINTOS: 400 inline («corrige la malla»), 409 aviso rojo + solo lectura («borra tus horarios»,
+  con desglose). Confirmación previa al PUT destructivo. TRES desviaciones del molde, todas justificadas:
+  (a) `ConfirmarReemplazo` nuevo (reutilizar `ConfirmarGeneracion` obligaba a título mentiroso; generalizarlo
+  tocaba horario-view/H1-cerrado); (b) botón «Volver a cargar la jornada» en el aviso 409 —corrige un
+  callejón sin salida del diseño del arquitecto: sin él, salir de solo-lectura exigía recargar el navegador—;
+  (c) FormArray estrenado en el repo (necesita FormGroup contenedor; `disable()/enable()` da solo-lectura y
+  `getRawValue()` lee los deshabilitados). Control `esRecreo` (polaridad de la columna del usuario), invertido
+  a `esLectivo` al salir. FormArray ESTRENA mecanismo (nota de patrón para el próximo componente con listas
+  de campos). Suite vitest 163→180 (30 ficheros), `ng build` limpio; horario-view y backend sin tocar; helper
+  `mensaje()` copiado, no extraído (D-F8.6/H1). Commit:
+  `feat(frontend): configura la jornada del centro por UI (formulario singleton de tramos con horas y recreo)`.
+  DEUDA — nace deuda registrada (R-deuda: ninguna bloquea el criterio de C-jornada, no se pagan ahora):
+  (1) D-jornada-msg409: el mensaje del 409 empieza «No se puede borrar: referenciada por…» (heredado de
+  `ReferenciaEntranteException`, escrita para DELETE de catálogo) y el usuario lo lee al GUARDAR jornada.
+  Cosmético; se corrige con un mensaje propio del caso PUT cuando O-estructura vuelva a tocar el backend de
+  jornada. Cuelga de O-estructura. (2) D-jornada-asimetria: el contrato GET(35 tramos)≠PUT(7, día tipo);
+  nota de diseño de API, no bloquea (la UI convive sin fricción real: pinta y manda un día). (3)
+  D-jornada-flush-test: `put_dosVecesLaMismaMalla_idempotente` no discrimina el `flush()` porque falta
+  `UNIQUE(dia,orden)` en schema.sql; el flush es defensivo/preventivo (correcto), su test es de contrato.
+  Arrastradas ya registradas: `siguienteInmediato` sin derivar (O-estructura), `Configuracion` tabla
+  huérfana, divergencia modelo-código `DemandaCurricular`/`Particion` (la afronta el Cambio de currículo).
+  R-terminado RESPETADA: no se pulió fuera de criterio (frenado `siguienteInmediato` ×2, descartado el
+  constructor-por-parámetros de la UI, NO reabierto M3 por el mensaje cosmético del 409).
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el
+  repo (mejora de método pendiente desde S101); verificado a mano que los dos commits de código separan
+  backend/frontend y que `app/educhronos.db` sigue ignorada.
+  O-estructura (H2) ABIERTO, 1 pieza (jornada) de varias. Siguiente: segundo Cambio de O-estructura, probable
+  currículo/Actividades —backend CRUD ya existe—, pero lo fija su propio M0 (ver M1-ter).
