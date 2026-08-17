@@ -11,14 +11,14 @@ import { ActividadLista } from './actividad-lista';
  * Congela el comportamiento de la lista de actividades. Hereda del molde de
  * `subgrupo-lista` el render, el vacío, el error de carga, las dos caras del 409 y el
  * con-qué-se-abre el diálogo; añade lo propio de esta lista: las SEIS columnas con
- * «varias» para la asignatura nula (6), y la GUARDA DE MULTIPLAZA (7)(8)(9), que es
- * protección de datos y no cosmética.
+ * «varias» para la asignatura nula (6). La GUARDA DE MULTIPLAZA se retiró en el trozo B
+ * —el formulario ya edita N plazas—, así que (12) congela lo contrario: toda actividad es
+ * editable. (9) sigue cubriendo que el borrado avisa de cuántas plazas caen.
  * Secuencia propia desde (1).
  *
- * <p>Los datos discriminan: la primera fila es de UNA plaza y con asignatura propia
- * (editable), la segunda de DOS y con asignatura `null` (no editable, «varias»). Con una
- * sola fila no se distinguiría un botón deshabilitado por la guarda de uno deshabilitado
- * siempre.
+ * <p>Los datos discriminan: la primera fila es de UNA plaza y con asignatura propia, la
+ * segunda de DOS y con asignatura `null` («varias»). Con una sola fila no se distinguiría
+ * un botón habilitado por la retirada de la guarda de uno habilitado siempre.
  */
 describe('ActividadLista', () => {
   let fixture: ComponentFixture<ActividadLista>;
@@ -178,36 +178,25 @@ describe('ActividadLista', () => {
     expect(segunda[5].textContent).toContain('2');
   });
 
-  it('(7) GUARDA: el botón de editar está habilitado con 1 plaza y DESHABILITADO con 2', async () => {
+  it('(12) toda actividad es editable: el botón no se deshabilita con varias plazas y editar() abre el diálogo', async () => {
     flushLista(FILAS);
     await fixture.whenStable();
     const raiz = fixture.nativeElement as HTMLElement;
-
-    const botones = raiz.querySelectorAll<HTMLButtonElement>('.actividades__editar');
-    expect(botones.length).toBe(2);
-    // Las DOS caras: sin la de una plaza, un `[disabled]` fijo quedaría verde.
-    expect(botones[0].disabled).toBe(false);
-    expect(botones[1].disabled).toBe(true);
-
-    // Y la fila DICE por qué está apagado: el usuario no se queda con un botón muerto.
-    const aviso = raiz.querySelector('tbody tr:nth-child(2) .actividades__aviso-multiplaza');
-    expect(aviso).not.toBeNull();
-    expect(aviso!.textContent).toContain('varias plazas');
-    expect(raiz.querySelector('tbody tr:nth-child(1) .actividades__aviso-multiplaza')).toBeNull();
-  });
-
-  it('(8) GUARDA: editar() NO abre el diálogo con una actividad multiplaza', async () => {
-    flushLista(FILAS);
-    await fixture.whenStable();
     const inst = fixture.componentInstance as unknown as Interna;
     dialogoDevuelve(undefined);
 
-    // La puerta real al PUT destructivo está en el método, no solo en el atributo del
-    // botón: llamarlo directo (como haría un click programático) tampoco debe abrir.
-    inst.editar(DOS_PLAZAS);
-    expect(dialog.open).not.toHaveBeenCalled();
+    // La fila de DOS plazas es la que importa; la de una es el contraste.
+    const botones = raiz.querySelectorAll<HTMLButtonElement>('.actividades__editar');
+    expect(botones.length).toBe(2);
+    expect([...botones].some((b) => b.disabled === true)).toBe(false);
 
-    // Contraste en el mismo caso: con una plaza SÍ abre, y con esa actividad.
+    // El aviso de la guarda retirada no puede sobrevivir en ninguna fila.
+    expect(raiz.querySelector('.actividades__aviso-multiplaza')).toBeNull();
+
+    // Y la puerta real al PUT ya no filtra: abre con la actividad que se le pasa.
+    inst.editar(DOS_PLAZAS);
+    expect(dialog.open.mock.calls.at(-1)?.[1]).toEqual({ data: DOS_PLAZAS });
+
     inst.editar(UNA_PLAZA);
     expect(dialog.open.mock.calls.at(-1)?.[1]).toEqual({ data: UNA_PLAZA });
   });
