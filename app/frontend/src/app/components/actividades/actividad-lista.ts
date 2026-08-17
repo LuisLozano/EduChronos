@@ -16,16 +16,14 @@ import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
  * tienen asignaturas distintas), y esa ausencia se pinta como «varias» —el dato dice
  * algo, no falta—.
  *
- * <p><b>GUARDA DE MULTIPLAZA (protección de datos, no cosmética).</b> El formulario de
- * este trozo envía UNA plaza, y la reconciliación del PUT es POSICIONAL sobre el estado
- * deseado completo: mandar una plaza a una actividad que tiene tres BORRARÍA las otras
- * dos sin preguntar. Así que mientras el editor de lista variable de plazas no exista
- * (trozo B), el botón de editar va DESHABILITADO en toda actividad con más de una plaza,
- * y la fila lo dice. El ALTA sigue disponible: nace con una plaza y no destruye nada.
+ * <p><b>La guarda de multiplaza se RETIRÓ en el trozo B.</b> Existió mientras el
+ * formulario enviaba una sola plaza: abrir una actividad de tres y guardar habría borrado
+ * dos por la reconciliación posicional del PUT. Ahora el formulario edita N plazas, así
+ * que toda actividad es editable y el botón no distingue. Lo que protege el PUT
+ * destructivo sigue estando donde importa: el 409 del backend ante sesiones o bloqueos.
  *
- * <p>El BORRADO sí se permite en multiplaza: borrar es íntegro, no parcial —se lleva la
- * actividad con todas sus plazas por cascade, que es exactamente lo que el usuario pide—
- * y el backend lo protege con su propio 409 si alguien las retiene.
+ * <p>El BORRADO se lleva la actividad con todas sus plazas por cascade, y la confirmación
+ * lo dice cuando hay más de una.
  */
 @Component({
   selector: 'app-actividad-lista',
@@ -60,11 +58,8 @@ export class ActividadLista implements OnInit {
     });
   }
 
-  /**
-   * Predicado de la guarda: `true` si la actividad tiene más de una plaza y por tanto no
-   * puede editarse con el formulario de una plaza. La plantilla lo usa para deshabilitar
-   * el botón Y para pintar el aviso de la fila; vive aquí y no duplicado en el HTML.
-   */
+  /** `true` si la actividad tiene más de una plaza. Ya no gobierna la edición: lo usa la
+   *  confirmación de borrado para avisar de cuántas plazas caen. */
   protected esMultiplaza(actividad: Actividad): boolean {
     return actividad.plazas.length > 1;
   }
@@ -78,15 +73,7 @@ export class ActividadLista implements OnInit {
     this.abrirForm(null);
   }
 
-  /**
-   * Abre el formulario de edición. La guarda se comprueba TAMBIÉN aquí y no solo en el
-   * `[disabled]` del botón: el atributo es presentación, y esta es la puerta real por la
-   * que se llega al PUT destructivo.
-   */
   protected editar(actividad: Actividad): void {
-    if (this.esMultiplaza(actividad)) {
-      return;
-    }
     this.abrirForm(actividad);
   }
 

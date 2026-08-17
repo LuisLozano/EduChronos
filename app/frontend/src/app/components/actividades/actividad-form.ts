@@ -20,6 +20,7 @@ import {
   Actividad,
   ActividadRequest,
   PATRONES_TEMPORALES,
+  Plaza,
   PlazaRequest,
 } from '../../models/actividad.model';
 import { Asignatura } from '../../models/asignatura.model';
@@ -35,12 +36,38 @@ function arrayNoVacio(control: AbstractControl): ValidationErrors | null {
   return Array.isArray(v) && v.length > 0 ? null : { arrayVacio: true };
 }
 
+/**
+ * Validator de ARRAY (I2): ningún subgrupo aparece en dos plazas de la misma actividad.
+ * Devuelve el CÓDIGO del primer repetido para que el mensaje pueda nombrarlo.
+ *
+ * <p><b>Replica la semántica del backend, con sus dos rarezas, a propósito.</b>
+ * `ActividadService.validarPlazas` cruza los códigos con un `HashSet<String>`:
+ * (1) NO normaliza mayúsculas —dos códigos que solo difieren en caja son subgrupos
+ * distintos, y así se quedan aquí—; (2) deduplica DENTRO de cada plaza antes de cruzar,
+ * así que un subgrupo repetido en la MISMA plaza no es error (de ahí el `Set` por fila).
+ * Añadir aquí un `toLowerCase()` «por robustez» haría que el formulario rechazara cuerpos
+ * que la API acepta: el mismo error de fondo que D-plaza-sin-subgrupos. El 400 del backend
+ * («el subgrupo X aparece en mas de una plaza de la actividad») sigue siendo la red.
+ */
+function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
+  const vistos = new Set<string>();
+  for (const fila of (array as FormArray).controls) {
+    for (const codigo of new Set(fila.get('subgrupos')!.value as string[])) {
+      if (vistos.has(codigo)) {
+        return { subgrupoRepetido: codigo };
+      }
+      vistos.add(codigo);
+    }
+  }
+  return null;
+}
+
 /** Rama del XOR de aula que el usuario ha elegido. Control de UI: NO viaja al backend. */
 export type ModoAula = 'FIJA' | 'CANDIDATAS';
 
 /**
  * Controles de UNA plaza. Alias al estilo de `FilaTramo` (molde `Jornada`), para que el
- * `FormArray` esté tipado y el trozo B —lista variable— sea un delta y no una reescritura.
+ * `FormArray` esté tipado.
  */
 type PlazaFila = FormGroup<{
   asignatura: FormControl<string>;
@@ -52,43 +79,45 @@ type PlazaFila = FormGroup<{
 }>;
 
 /**
- * Alta y edición de una ACTIVIDAD con UNA plaza, en diálogo. `DIALOG_DATA` es la
- * actividad a editar, o `null` para alta. Cierra con `true` si se guardó (la lista
- * recarga), con `undefined` si se canceló. Molde de `SubgrupoForm` para el multiselect
- * poblado por red y de `Jornada` para el `FormArray` y para el 400/409 por caminos
- * distintos.
+ * Alta y edición de una ACTIVIDAD con N plazas, en diálogo. `DIALOG_DATA` es la actividad
+ * a editar, o `null` para alta. Cierra con `true` si se guardó (la lista recarga), con
+ * `undefined` si se canceló. Molde de `SubgrupoForm` para los multiselects poblados por
+ * red y de `Jornada` para el `FormArray` y para el 400/409 por caminos distintos.
  *
- * <p><b>TROZO A: la lista de plazas tiene longitud FIJA 1.</b> La fila nace DENTRO del
- * `FormArray` desde el principio, con su fábrica {@link #crearPlaza}, aunque hoy no haya
- * botones de añadir ni de eliminar: son el trozo B. Así el trozo B añade botones y quita
- * el tope, sin rehacer el formulario.
+ * <p><b>LISTA DE PLAZAS VARIABLE (trozo B).</b> El usuario añade y quita filas. Toda fila
+ * nace por la fábrica {@link #crearPlaza}, incluidas las de la precarga: no se clona la
+ * anterior ni se reutiliza una existente. El MÍNIMO es una plaza, porque el contrato lo
+ * exige (400 «una actividad necesita al menos una plaza»); no hay máximo, porque el
+ * contrato tampoco lo tiene.
  *
- * <p><b>El XOR de aula se resuelve con un control de UI que no viaja.</b> `modoAula`
- * ('FIJA' | 'CANDIDATAS') es un radio que decide QUÉ RAMA está activa: al cambiar, la
- * rama inactiva se LIMPIA y pierde su validación —si no se limpiara, un aula elegida y
- * luego abandonada seguiría ahí y reaparecería al volver—. {@link #aPlazaRequest} traduce
- * el modo al contrato: FIJA → `aulaFija` con valor y `aulasCandidatas: []`; CANDIDATAS →
- * `aulaFija: null` y ≥1 candidata. Nunca las dos ramas, que es exactamente lo que el
- * backend rechaza con 400.
+ * <p><b>Quitar una fila intermedia mueve contenidos entre plazas vivas.</b> La
+ * reconciliación del PUT es POSICIONAL: el backend empareja la fila i del cuerpo con la
+ * plaza i existente (ordenadas por id), actualiza las comunes, borra las sobrantes por el
+ * final y crea las que falten. Es seguro porque el código de plaza es interno e inestable
+ * Y porque el PUT rechaza con 409 si hay sesiones o bloqueos colgando: cuando se
+ * reconcilia, no hay nadie apuntando por id a esas filas.
  *
- * <p><b>Los subgrupos NO llevan validador, a propósito.</b> El contrato del backend
- * ACEPTA una plaza con cero subgrupos (`validarPlazas` no lo comprueba; solo el I2 cruza
- * los que haya). Exigir aquí ≥1 sería inventar una regla que el contrato no tiene y
- * divergir del servidor: el formulario rechazaría cuerpos que la API acepta. Queda
- * anotado como deuda **D-plaza-sin-subgrupos**: si el dominio decide que una plaza sin
- * población no tiene sentido, la regla se añade EN EL BACKEND y este validador la sigue,
- * no al revés.
+ * <p><b>El XOR de aula se resuelve POR FILA</b> con un control de UI que no viaja.
+ * `modoAula` ('FIJA' | 'CANDIDATAS') decide qué rama está activa; al cambiar, la rama
+ * inactiva se LIMPIA y pierde su validación. La suscripción vive en la fábrica, con la
+ * fila capturada en el closure, para que cada fila gobierne SOLO la suya.
+ *
+ * <p><b>Los subgrupos NO llevan validador de fila, a propósito.</b> El contrato ACEPTA
+ * una plaza con cero subgrupos. Exigir aquí ≥1 sería inventar una regla que el contrato
+ * no tiene. Queda anotado como deuda **D-plaza-sin-subgrupos**: si el dominio decide que
+ * una plaza sin población no tiene sentido, la regla se añade EN EL BACKEND y este
+ * formulario la sigue, no al revés. Lo que sí se valida entre filas es I2, que el backend
+ * sí tiene (ver {@link subgruposDisjuntos}).
  *
  * <p><b>Las aulas NO se filtran por compatibilidad I3.</b> Decisión tomada: el select
- * ofrece todas las aulas y se deja hablar al 400 del backend, que ya nombra asignatura,
- * aula, tipo del aula y tipos compatibles. Replicar la tabla de compatibilidades en
- * cliente sería una segunda fuente de verdad que se desincroniza sola.
+ * ofrece todas las aulas y habla el 400 del backend, que ya nombra asignatura, aula, tipo
+ * del aula y tipos compatibles. Replicar la tabla de compatibilidades en cliente sería
+ * una segunda fuente de verdad que se desincroniza sola.
  *
  * <p><b>400 y 409 son sucesos distintos y van por caminos distintos</b> (molde `Jornada`):
- * el 400 es «corrige el formulario» y va inline con el mensaje accionable del backend; el
- * 409 no se arregla tocando el formulario —hay horario o bloqueos colgando— así que va en
- * aviso rojo aparte, con el desglose y qué hay que borrar antes. El 409 solo puede venir
- * del PUT: un alta no tiene dependientes.
+ * el 400 es «corrige el formulario» y va inline; el 409 no se arregla tocando el
+ * formulario —hay horario o bloqueos colgando— así que va en aviso rojo aparte. El 409
+ * solo puede venir del PUT: un alta no tiene dependientes.
  */
 @Component({
   selector: 'app-actividad-form',
@@ -113,13 +142,6 @@ export class ActividadForm implements OnInit {
   protected readonly conflicto = signal('');
   protected readonly esEdicion = this.editando !== null;
 
-  /**
-   * `true` si llegó una actividad con MÁS de una plaza. La lista ya deshabilita ese
-   * botón, así que esto no debería pasar; si pasa, NO se pinta el formulario a medias
-   * —pintarlo invitaría a guardar una plaza y borrar el resto— sino solo el aviso.
-   */
-  protected readonly multiplaza = signal(false);
-
   /** Opciones de los desplegables, en el orden en que llegan del backend. */
   protected readonly asignaturas = signal<Asignatura[]>([]);
   protected readonly aulas = signal<Aula[]>([]);
@@ -136,7 +158,10 @@ export class ActividadForm implements OnInit {
     repeticionesPorSemana: [1, [Validators.required, Validators.min(1)]],
     patronTemporal: ['NEUTRA', Validators.required],
     requiereTutor: [false],
-    plazas: this.fb.nonNullable.array<PlazaFila>([]),
+    // El validador de I2 se instala EN LA CONSTRUCCIÓN del array: instalarlo después con
+    // setValidators exigiría un updateValueAndValidity explícito y deja una ventana en la
+    // que el array existe sin la regla.
+    plazas: this.fb.nonNullable.array<PlazaFila>([], subgruposDisjuntos),
   });
 
   protected get plazas(): FormArray<PlazaFila> {
@@ -145,24 +170,21 @@ export class ActividadForm implements OnInit {
 
   constructor() {
     const editando = this.editando;
-    if (editando && editando.plazas.length > 1) {
-      this.multiplaza.set(true);
-      return;   // ni fila ni precarga: no hay formulario que pintar.
-    }
-    this.plazas.push(this.crearPlaza());
     if (editando) {
       this.precargar(editando);
+    } else {
+      this.plazas.push(this.crearPlaza());
     }
   }
 
   /**
-   * FÁBRICA de una fila de plaza. Toda fila nace por aquí —hoy una, en el trozo B las que
-   * el usuario pida— con sus validadores en el estado que corresponde al modo inicial
-   * ('FIJA'), y con la suscripción que mantiene el XOR al cambiar de rama.
+   * FÁBRICA de una fila de plaza. TODA fila nace por aquí —el alta, la precarga y el
+   * botón de añadir— con sus validadores en el estado que corresponde al modo inicial
+   * ('FIJA') y con la suscripción que mantiene el XOR al cambiar de rama.
    *
    * <p>La suscripción va en la fábrica y no en un `(change)` de la plantilla para que el
-   * invariante se sostenga también cuando el modo se cambia por código (precarga en
-   * edición, y los tests).
+   * invariante se sostenga también cuando el modo se cambia por código (la precarga, y
+   * los tests), y captura ESTA fila: cada fila gobierna solo la suya.
    */
   private crearPlaza(): PlazaFila {
     const fila = this.fb.nonNullable.group({
@@ -171,7 +193,8 @@ export class ActividadForm implements OnInit {
       aulaFija: ['', Validators.required],
       aulasCandidatas: [[] as string[]],
       profesores: [[] as string[], arrayNoVacio],
-      // subgrupos SIN validador: ver D-plaza-sin-subgrupos en el javadoc de la clase.
+      // subgrupos SIN validador de fila: ver D-plaza-sin-subgrupos en el javadoc de la
+      // clase. La regla que SÍ existe (I2) es del array, no de la fila.
       subgrupos: [[] as string[]],
     }) as PlazaFila;
     fila.controls.modoAula.valueChanges.subscribe(() => this.aplicarModo(fila));
@@ -179,11 +202,18 @@ export class ActividadForm implements OnInit {
   }
 
   /**
-   * Mantiene el XOR vivo en el formulario: la rama ACTIVA exige valor, la INACTIVA se
-   * vacía y deja de validar. Vaciar no es cosmético —sin ello, elegir un aula fija,
-   * cambiar a candidatas y guardar dejaría el aula fija elegida en el control, lista para
-   * reaparecer si el usuario vuelve, y el formulario mostraría dos ramas rellenas cuando
-   * el contrato solo admite una—.
+   * Mantiene el XOR vivo EN SU FILA: la rama ACTIVA exige valor, la INACTIVA se vacía y
+   * deja de validar. Vaciar no es cosmético —sin ello, elegir un aula fija, cambiar a
+   * candidatas y guardar dejaría el aula fija en el control, lista para reaparecer, y el
+   * formulario tendría las dos ramas rellenas cuando el contrato solo admite una—.
+   *
+   * <p><b>Sobre `{ onlySelf: true }` en estos `setValue`.</b> No se usa, aunque en esta
+   * implementación concreta sería inocuo: las dos llamadas siguientes a
+   * `updateValueAndValidity()` van sin opciones y propagan al padre igualmente, así que
+   * el array se revalidaría de todas formas. Se evita porque la inocuidad depende de esas
+   * dos líneas: quien las cambie o las reordene se llevaría por delante la revalidación
+   * de I2 sin que ningún test se entere (medido: la campaña de mutación de S110 no lo
+   * detecta, porque I2 depende de `subgrupos` y este método no lo toca).
    */
   private aplicarModo(fila: PlazaFila): void {
     const fija = fila.controls.modoAula.value === 'FIJA';
@@ -200,11 +230,32 @@ export class ActividadForm implements OnInit {
     fila.controls.aulasCandidatas.updateValueAndValidity();
   }
 
+  /** Añade una fila VACÍA al final. Nace por la fábrica: no hereda nada de la anterior. */
+  protected anadirPlaza(): void {
+    this.plazas.push(this.crearPlaza());
+  }
+
   /**
-   * Vuelca la actividad a editar en el formulario. El `modoAula` se DERIVA del dato: si
-   * la plaza trae `aulaFija`, la rama es FIJA; si no, CANDIDATAS. Se asigna ANTES que las
-   * aulas para que {@link #aplicarModo} haya dejado la rama correcta activa cuando llega
-   * el valor.
+   * Quita la fila indicada. La guarda del mínimo vive AQUÍ además de en el `[disabled]`
+   * del botón: el atributo es presentación, y este método es la puerta real por la que se
+   * llegaría a un cuerpo sin plazas (400 del backend).
+   */
+  protected quitarPlaza(indice: number): void {
+    if (this.plazas.length <= 1) {
+      return;
+    }
+    this.plazas.removeAt(indice);
+  }
+
+  /**
+   * Vuelca la actividad a editar en el formulario, RECONSTRUYENDO el array con una fila
+   * por plaza del dato (molde `Jornada.rellenar`: `clear()` + `push` en bucle).
+   *
+   * <p>Las filas retiradas por `clear()` conservan su suscripción a `modoAula`, y eso NO
+   * fuga: la referencia va de la fila huérfana al componente, nunca al revés, y el array
+   * no las retiene. La condición de que siga siendo así es no guardar punteros a filas
+   * retiradas —un futuro «deshacer quitar plaza» mantendría viva la isla y podría
+   * revalidar el formulario vivo desde fuera—.
    */
   private precargar(actividad: Actividad): void {
     this.form.patchValue({
@@ -215,11 +266,31 @@ export class ActividadForm implements OnInit {
       patronTemporal: actividad.patronTemporal,
       requiereTutor: actividad.requiereTutor,
     });
-    const plaza = actividad.plazas[0];
-    if (!plaza) {
-      return;
+    this.plazas.clear();
+    for (const plaza of actividad.plazas) {
+      const fila = this.crearPlaza();
+      this.plazas.push(fila);
+      this.volcar(fila, plaza);
     }
-    const fila = this.plazas.at(0);
+    if (this.plazas.length === 0) {
+      // El contrato no permite una actividad sin plazas; si llegara, el formulario abre
+      // con una fila vacía en vez de con ninguna, que no sería editable.
+      this.plazas.push(this.crearPlaza());
+    }
+  }
+
+  /**
+   * Vuelca UNA plaza en SU fila. El `modoAula` se DERIVA del dato (si trae `aulaFija`, la
+   * rama es FIJA) y se asigna PRIMERO, por defensa: {@link #aplicarModo} limpia la rama
+   * contraria, y asignarlo al final la limpiaría después de escribirla.
+   *
+   * <p>Con datos que respetan el contrato ese peligro no se materializa —el XOR garantiza
+   * que la rama contraria ya viene vacía, así que limpiarla no borra nada—, y por eso el
+   * orden NO está cubierto por ningún test: mover esta línea al final es un mutante
+   * equivalente, comprobado en la campaña de S110. Se conserva el orden porque deja de ser
+   * equivalente en cuanto el backend devuelva una plaza con las dos ramas llenas.
+   */
+  private volcar(fila: PlazaFila, plaza: Plaza): void {
     fila.controls.modoAula.setValue(plaza.aulaFija !== null ? 'FIJA' : 'CANDIDATAS');
     fila.controls.asignatura.setValue(plaza.asignatura);
     fila.controls.aulaFija.setValue(plaza.aulaFija ?? '');
@@ -231,13 +302,8 @@ export class ActividadForm implements OnInit {
   /**
    * Puebla los CUATRO desplegables. Un fallo en cualquiera se presenta en el mismo hueco
    * que los errores de guardado: sin catálogo el formulario no puede completarse.
-   *
-   * <p>No se piden si llegó una actividad multiplaza: no hay formulario que poblar.
    */
   ngOnInit(): void {
-    if (this.multiplaza()) {
-      return;
-    }
     this.asignaturaService.listar().subscribe({
       next: (lista) => this.asignaturas.set(lista),
       error: (err: HttpErrorResponse) =>
@@ -260,10 +326,15 @@ export class ActividadForm implements OnInit {
     });
   }
 
+  /** Código del subgrupo que I2 ha encontrado repetido, o '' si no hay repetición. */
+  protected get subgrupoRepetido(): string {
+    return (this.plazas.errors?.['subgrupoRepetido'] as string | undefined) ?? '';
+  }
+
   /**
    * Lee la selección de un `<select multiple>` y la vuelca al control indicado de la
    * fila. Sustituye a la vinculación automática que el `<select>` único tiene por
-   * `formControlName` (molde `SubgrupoForm`, extendido para elegir el control).
+   * `formControlName` (molde `SubgrupoForm`, extendido para elegir fila y control).
    */
   protected alSeleccionar(
     event: Event,
@@ -286,10 +357,9 @@ export class ActividadForm implements OnInit {
   }
 
   protected guardar(): void {
-    if (this.multiplaza()) {
-      return;   // no se guarda lo que no se ha pintado.
-    }
     if (this.form.invalid) {
+      // Incluye el error de I2: el validador del array pone `form.invalid` a true, así
+      // que esta misma guarda corta el envío sin comprobación aparte.
       this.form.markAllAsTouched();
       return;
     }
@@ -323,7 +393,8 @@ export class ActividadForm implements OnInit {
    * Traduce el formulario al cuerpo del contrato. AQUÍ se sueltan los controles de UI:
    * `modoAula` NO viaja, y la asignatura vacía de la actividad se traduce a `null` —el
    * contrato distingue «sin asignatura propia» (null) de una cadena vacía, que sería un
-   * código no resoluble y un 400—.
+   * código no resoluble y un 400—. El ORDEN de las plazas es el de la pantalla, y ese
+   * orden es significativo: la reconciliación del PUT es posicional.
    */
   private aRequest(): ActividadRequest {
     const v = this.form.getRawValue();
@@ -363,7 +434,7 @@ export class ActividadForm implements OnInit {
   }
 
   /** Traduce error Http a texto de usuario. Mismo patrón que O-catálogo, copiado con
-   *  texto propio (no compartido: tocaría H1). */
+   *  texto propio (no compartido: tocaría horario-view). */
   private mensaje(err: HttpErrorResponse, degradado: string): string {
     const cuerpo = err?.error as { message?: string; error?: string } | undefined;
     return cuerpo?.message || cuerpo?.error || `${degradado} (${err?.status ?? 'error'}).`;

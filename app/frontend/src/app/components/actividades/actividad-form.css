@@ -90,3 +90,28 @@
   opacity: 0.6;
   cursor: default;
 }
+.actividad-form__plaza-acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.actividad-form__quitar-plaza,
+.actividad-form__anadir-plaza {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+}
+
+.actividad-form__quitar-plaza:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actividad-form__plaza-titulo {
+  font-weight: 600;
+}
+
+.actividad-form__error-i2 {
+  color: #b00020;
+  margin: 0.5rem 0;
+}
