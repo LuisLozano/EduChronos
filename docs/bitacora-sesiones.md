@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S107. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S108. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S107). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S108). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -5323,3 +5323,83 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   backend/frontend y que `app/educhronos.db` sigue ignorada.
   O-estructura (H2) ABIERTO, 1 pieza (jornada) de varias. Siguiente: segundo Cambio de O-estructura, probable
   currículo/Actividades —backend CRUD ya existe—, pero lo fija su propio M0 (ver M1-ter).
+
+### Sesión 108 — O-estructura (H2): C-subgrupos, segundo Cambio. CRUD de subgrupos por UI (Config/UI, M3 en el multiselect). Incluye higiene M1-bis (archiva S103–S106). NO cierra el objetivo.
+  Octava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (el multiselect de
+  grupos), más higiene documental M1-bis al cierre. SEGUNDO Cambio de O-estructura: lo AVANZA, no lo cierra.
+  O-estructura sigue ACTIVO —su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo
+  + e2e UI→solver heredado) exige aún currículo/Actividades (el editor de plazas), desdobles, PDC, tutores y
+  el e2e—. C-subgrupos entrega la pieza que faltaba para que las Plazas de una Actividad puedan referenciar
+  subgrupos creados por UI: sin subgrupos creables, el editor de actividades (siguiente Cambio) no tendría a
+  qué apuntar.
+  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), candidato dominante por
+  dependencias (O-catálogo ✔ S106; O-estructura activo desde S107). Hito = H2. Cambio = currículo, no
+  prenombrado en la doc: el M2 lo acotó a subgrupos (ver abajo). R-invalidación sin conflicto (nada por encima
+  lo rehace: O-diseño depende de H2 cerrado, O-demo de O-estructura). DECISIÓN DE ALCANCE del arquitecto tras
+  el M2: Opción A (currículo = subgrupos + actividades sin materializar Particion), y primer Cambio = subgrupos
+  (dependencia previa de actividades). Particion NO se materializa: el solver no la consume (javadoc de
+  `Subgrupo`, decisión D-a S48; el JSON del solver no transporta particiones) y expresar el §6.1 no la exige;
+  materializarla sería modelo que nadie lee aguas abajo. Reversible si la UX de actividades la reclama.
+  M2 — MEDICIÓN (Claude Code sobre backend y frontend REALES, dos investigaciones encadenadas antes de teclear).
+  (1) Currículo persistido: `Subgrupo` (@Entity, tabla `subgrupo` + `subgrupo_grupo` como @JoinTable @ManyToMany,
+  repo, servicio con validación I6 ≥1 grupo, controller `/api/subgrupos` CRUD 5-endpoints, tests) y `Actividad`
+  (agregado con `Plaza` embebida, cascade+orphanRemoval, controller `/api/actividades`) YA EXISTEN completos en
+  backend. `Particion`/`SubgrupoParticion`/`DemandaCurricular` NO existen como clase, tabla ni repo —Particion
+  por decisión registrada (S48), DemandaCurricular solo vive en el doc de modelo (0 apariciones en código)—.
+  Corrige mi apuesta de apertura: NO falta backend de currículo, falta UI. (2) La Plaza referencia subgrupos por
+  CÓDIGO de subgrupos ya existentes (400 si no resuelve, no alta implícita) ⇒ los subgrupos deben ser creables
+  ANTES que las actividades: dependencia técnica que fija el orden de los dos Cambios. (3) Frontend a cero: ni
+  `subgrupo.model.ts` ni `subgrupo.service.ts` ni `components/subgrupos/`; `app.routes.ts` con 3 rutas, CRUD
+  inline en `Configuracion`. Tipo de sesión que dicta el M2: Config/UI (backend hecho), con M3 en la única
+  desviación real —el multiselect—.
+  DESVIACIÓN DEL MOLDE (el M3): el campo `grupos` es selección MÚLTIPLE, no el `<select>` único de `nivel` en
+  GrupoForm. Tres consecuencias medidas: (a) control `FormControl<string[]>`, no string; (b) `Validators.required`
+  da por válido un array vacío ⇒ validator propio `arrayNoVacio` que replica I6 en cliente; (c) el `<select
+  multiple>` de Reactive Forms NO vincula el array por `formControlName` ni reconcilia la preselección como el
+  `<select>` único: se lee `selectedOptions` en un handler `(change)`→`setValue` y el HTML refleja la selección
+  con `[selected]` por opción. Decisión de producto del arquitecto: `<select multiple>` nativo (mínima desviación
+  del canon), con la UX rica (chips, buscar) APLAZADA a una fase posterior de mejora de UX de subgrupos —mejora
+  planificada, no deuda técnica (ver D-subgrupo-ux-multiselect)—. Riesgo despejado en fase 2: jsdom refleja
+  `[selected]`/`selectedOptions` como un navegador; la cadena handler→control→body pasa sin adaptación.
+  M4 — ENTREGADO (Configuración/UI, frontend, 4 fases con verificación entre cada una, todas verdes). FASE 1
+  (commit `b5d11fa`): `models/subgrupo.model.ts` (par `Subgrupo`/`SubgrupoRequest`, simétricos salvo `id`, molde
+  de `grupo.model` no `nivel.model` porque subgrupo escribe), `services/subgrupo.service.{ts,spec.ts}` (5 wrappers
+  pelados sobre `/api/subgrupos`, spec de contrato 5 casos). FASE 2 (commit `6846c3e`): `components/subgrupos/
+  subgrupo-form.{ts,html,css,spec.ts}` —el multiselect, `arrayNoVacio`, handler `alSeleccionar`, precarga en
+  edición reflejada con `[selected]`; spec 12 casos con la mezcla A1 (DOM real para poblado/preselección de DOS
+  grupos, evita verde falso) + A2 (`setValue` para las ramas de guardado); `.subgrupo-form__multiple` con
+  `min-height` para que el `<select multiple>` no colapse—. FASE 3 (commit `53b46ac`): `subgrupo-lista.
+  {ts,html,css,spec.ts}` —molde plano de lista; única desviación la columna «Grupos» pintada `grupos.join(', ')`;
+  spec 8 casos, hereda de aula-lista el caso de recarga tras guardado (7) y con-qué-se-abre-el-diálogo (8)—.
+  FASE 4 (commit `29f0f84`): cablea `SubgrupoLista` en `Configuracion` (+import, +`imports:`, +`<app-subgrupo-lista
+  />` tras grupo) y su caso (6) en `configuracion.spec.ts` (+doble de `SubgrupoService`). Runner del proyecto:
+  `npx ng test` (no `npx vitest run`, que rompe con «describe is not defined»: el builder de Angular 21 inyecta
+  los globals). Suite frontend 180 → 206 (+26: 5+12+8+1), 30 → 33 ficheros; `ng build` limpio (bundle 469→478 kB,
+  +8.2 kB = la cadena de subgrupo entra en producción, antes fuera por tree-shaking); backend sin tocar. La
+  sección es visible y usable en `/configuracion`, bajo Grupos.
+  DEUDA — nace una, registrada (R-deuda: no bloquea el criterio de C-subgrupos, no se paga ahora):
+  D-subgrupo-ux-multiselect (S108, VIVA, MEJORA PLANIFICADA no bloqueante) — el `<select multiple>` nativo es UX
+  pobre para elegir varios grupos (Ctrl+click no obvio, sin buscar ni chips). Es DECISIÓN CONSCIENTE del
+  arquitecto con fase futura ya prevista, no descuido: cuelga de O-estructura y se aborda en la fase de mejora de
+  UX de subgrupos. NO es deuda técnica (el componente funciona y está testado); es acabado de presentación
+  aplazado, hermano de lo que O-diseño trata a nivel transversal. Arrastradas ya registradas y sin cambio:
+  D-jornada-msg409, D-jornada-asimetria, D-jornada-flush-test (S107, O-estructura); `siguienteInmediato` sin
+  derivar; `Configuracion` tabla huérfana; divergencia modelo-código `DemandaCurricular`/`Particion` —el M2 de
+  S108 la MIDIÓ (Particion decisión S48, DemandaCurricular solo en doc) y confirmó que NO bloquea el currículo:
+  se construye entero sin ella; lo único que no habría sin DemandaCurricular es la validación de cobertura de
+  horas, función pendiente, no bloqueante—.
+  R-terminado RESPETADA: no se pulió fuera de criterio. La UX del multiselect se FRENÓ a deuda planificada en vez
+  de resolverla dentro del Cambio; Particion se descartó por medición, no se materializó «ya que estábamos».
+  HIGIENE (M1-bis, Opción 2 elegida por el arquitecto para dejar la doc limpia): archivadas S103, S104, S105 y
+  S106 a `bitacora-sesiones.md` (promovidas a `### Sesión NN`, orden ascendente tras S102, cuerpo verificado
+  idéntico por diff origen→destino); degradada S107 a «Última sesión previa» compacta; S108 queda como única
+  cabecera H3 viva. Corregidos los dos censos de la bitácora (→ S10–S106) y extendida la crónica de archivado del
+  plan. Restaurada la invariante H3 (`grep -c "^### Sesión" plan` = 1). Salda la deuda de método M1-bis que venía
+  atrasada desde S106. Aviso heredado atendido: la bitácora (~370 KB) había corrompido cabeceras al archivar en
+  el pasado; se archivó con Python y se verificó por diff de cuerpo, cero cabeceras partidas nuevas.
+  R4/costura: script oficial sigue sin existir en el repo (mejora de método pendiente desde S101); verificado a
+  mano que los cuatro commits de código separan por fase y que `app/educhronos.db` sigue ignorada.
+  O-estructura (H2) ACTIVO, 2 piezas hechas (jornada S107, subgrupos S108) de varias. Siguiente: tercer Cambio de
+  O-estructura, C-actividades —el editor de Actividad con Plazas embebidas, backend `/api/actividades` ya existe;
+  es el formulario de mayor riesgo del objetivo (valida si Actividad→Plaza→Subgrupo es configurable por un
+  humano), ahora desbloqueado porque los subgrupos ya son creables por UI—. Lo fija su propio M0 (ver M1-ter).

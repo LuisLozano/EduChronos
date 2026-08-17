@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 3 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos) y C-actividades trozo A (S109, editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque); faltan el trozo B de actividades (lista de plazas variable), C-niveles (hueco medido en S109: sin niveles por UI no hay grupos ni subgrupos, y el e2e es inejecutable), PDC, tutores y el e2e UI→solver. «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 4 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos) y C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—); faltan C-niveles (hueco medido en S109: sin niveles por UI no hay grupos ni subgrupos, y el e2e es inejecutable), PDC, tutores y el e2e UI→solver. «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -200,7 +200,7 @@ de las Fases 9–12.
 - **Cambios que agrupa:** editor de demanda curricular, asistente de
   desdoble/agrupamiento (D1, D10), editor de PDC (D7), asignación de tutores,
   configuración de estructura de jornada (D22).
-- **Progreso (S109):** ABIERTO, 3 piezas hechas. **C-jornada** (S107, D22):
+- **Progreso (S110):** ABIERTO, 4 piezas hechas. **C-jornada** (S107, D22):
   backend REST singleton `GET|PUT /api/jornada` (reemplazo total, guarda 409 ante
   dependientes, techo conservador ≤6 lectivos/día sin tocar `domain.Tramo`, malla
   expandida a los 5 días en el backend) + formulario singleton en Configuración
@@ -235,32 +235,51 @@ de las Fases 9–12.
   el trozo B sea un delta), XOR de aula resuelto con un control de UI que no viaja al
   backend, y tres multiselects molde `subgrupo-form`. La lista BLOQUEA la edición de
   actividades multiplaza: un formulario de una plaza abriendo una de seis borraría las
-  otras cinco. Suite app 259→261, vitest 206→239.
+  otras cinco. Suite app 259→261, vitest 206→239. **C-actividades, trozo B** (S110):
+  cierra el Cambio. El `FormArray` de plazas se abre a alta y baja dirigidas por el
+  usuario (mínimo 1 fila, que es regla del contrato; sin máximo, que el contrato tampoco
+  tiene), `precargar` reconstruye una fila por plaza del dato con el molde
+  `jornada.rellenar`, y entra la validación cruzada I2 en cliente como validador de
+  ARRAY, replicando la semántica del backend con sus dos rarezas —no normaliza mayúsculas
+  y deduplica dentro de la plaza— porque normalizar haría que el formulario rechazara
+  cuerpos que la API acepta. Se retira la guarda de multiplaza de la lista: toda actividad
+  vuelve a ser editable. Frontend puro: el backend ya aceptaba N plazas y sus cuatro tests
+  de reconciliación (crecer, reducir, estabilidad de códigos, reuso de hueco) ya cubrían
+  el PUT. Suite vitest 239→249, backend intacto 261/91. Verificado en navegador real: seis
+  plazas construidas desde cero van y vuelven con su rama del XOR y sus multiselects
+  marcados, y quitar la del medio deja cinco con el desplazamiento posicional previsto.
+  Hallazgo de la campaña de mutación que costó una reescritura: el caso que protegía el
+  `track` del `@for` NO lo protegía —el `@if` del XOR cura el desalineamiento en los nodos
+  que miraba—; los únicos testigos válidos son los nodos fuera de todo `@if` enlazados por
+  `formControlName`.
   **Hallazgo que RECORTA el objetivo** (medido, no supuesto): «desdobles y
   agrupamientos» NO es un Cambio propio. §4.6 del modelo es explícito —no existe campo
   `tipo`, la naturaleza estructural se infiere del contenido— y el test
   `roundTrip_bloqueSeisPlazas` lo confirma: un desdoble ES una actividad multiplaza.
-  Cuando el trozo B abra la lista de plazas, esa capacidad queda entregada; lo que
-  sobrevive del «asistente de desdoble» de la lista de Cambios es un atajo de UX, no
-  una capacidad nueva.
+  Con el trozo B (S110) la lista de plazas está abierta y esa capacidad queda ENTREGADA;
+  lo que sobrevive del «asistente de desdoble» de la lista de Cambios es un atajo de UX,
+  no una capacidad nueva.
   **Hueco descubierto que SÍ añade trabajo: C-niveles.** Con la base de datos vacía no
   se puede crear un Grupo desde la UI —no hay seed, ni `data.sql`, ni migración, ni
   runner, y `nivel.service.ts` solo tiene `listar()`—, luego tampoco Subgrupo, luego
   las plazas se quedan sin población. Eso hace INEJECUTABLE el e2e del criterio de
   terminado. El backend expone el CRUD completo desde S70: es el molde plano de
   catálogo, el más barato del repo. NO se hizo en S109 para no diluir el foco de riesgo.
-  NO cierra el objetivo: faltan el trozo B de actividades, C-niveles, PDC, tutores y el
-  e2e UI→solver heredado.
+  NO cierra el objetivo: faltan C-niveles, PDC, tutores y el e2e UI→solver heredado.
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
   compartidos. D22 saldada de facto (C-jornada, S107). Nace y cuelga aquí
   D-subgrupo-ux-multiselect (S108): la UX del `<select multiple>` de subgrupos es
   mejora PLANIFICADA (fase de mejora de UX de subgrupos), no deuda técnica ni
   bloqueante (ver §4 y el plan). Nacen y cuelgan aquí, en S109,
   D-plaza-sin-subgrupos (técnica real: el backend acepta una plaza sin población) y
-  D-actividad-ux (mejora planificada). Y hereda el daño vivo de D-F8.6-ii-a, que S109
-  midió y amplió: los 400/409 llegan al navegador sin `message`, así que TODOS los
-  formularios de este objetivo —incluido el 409 recién construido— muestran «Bad
-  Request» en vez del motivo.
+  D-actividad-ux (mejora planificada), esta última RECORTADA en S110 al cerrarse su tercer
+  síntoma con la retirada del aviso de multiplaza. Nace y cuelga aquí, en S110,
+  D-i2-dedup-cliente (deuda de test: la deduplicación intra-plaza del validador de I2 no
+  la cubre nadie, y el escenario es inalcanzable desde la UI). Y hereda el daño vivo de
+  D-F8.6-ii-a, que S109 midió y amplió y S110 afinó desde el navegador: el mensaje
+  accionable existe pero viaja como reason phrase y el cuerpo llega sin `message`, así que
+  TODOS los formularios de este objetivo —incluido el 409 construido en S109— muestran
+  «Bad Request» en vez del motivo.
 
 #### O-demo — "El centro real funciona de punta a punta."
 - **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
@@ -366,8 +385,9 @@ asigna categoría, objetivo y disposición.
 | D-F8.5-D2a-b (incoherencia 404/400 FK) | O-catálogo | No bloquea | Se evalúa dentro de O-catálogo |
 | D18 (condiciones necesarias de factibilidad) | O-estructura | No | Ya cubierto en backend (8.4-A); resto en presentación |
 | D-F8.6-iiiB1-c, -iiiB2a-a (superficie de error) | O-ajuste-cierre | No | Se evalúan al abrir; probablemente limitación conocida aceptable |
-| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción |
+| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases) |
 | D-plaza-sin-subgrupos (una plaza con cero subgrupos se acepta) | O-estructura | No | Detectada por el M2 de S109: `validarPlazas` comprueba XOR, I7 e I2, pero acepta `subgrupos` nulo o vacío y devuelve 201. Agujero de dominio (la población de la plaza SON sus subgrupos). DECISIÓN de S109: el formulario refleja el contrato y NO añade el validador solo en cliente; hay un spec que se pondría rojo si alguien lo añadiera. El arreglo es simétrico a I7 (≈10 líneas y un test). No se paga ahora |
+| D-i2-dedup-cliente (la deduplicación intra-plaza del validador I2 no la cubre ningún test) | O-estructura | No | Nace en S110 de la campaña de mutación: quitar el `Set` por fila del validador `subguposDisjuntos` no pone rojo nada. El escenario es INALCANZABLE desde la UI (un `<select multiple>` no repite opción; el GET proyecta desde un `Set`), así que la regla existe por fidelidad con `validarPlazas` y no porque haya camino que la ejercite. Deuda de TEST, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar un estado que el sistema no produce. No se paga ahora |
 
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
@@ -381,7 +401,7 @@ asigna categoría, objetivo y disposición.
 | D-jornada-msg409 (mensaje del 409 dice «No se puede borrar» al guardar jornada) | O-estructura | Detectada S107: `ReferenciaEntranteException` se escribió para los DELETE de catálogo; su mensaje se reutiliza en el PUT de jornada y el usuario lee «No se puede borrar: referenciada por…» cuando intenta GUARDAR. Cosmético, NO bloquea (el desglose «N sesiones, M restricciones… antes de reconfigurar» sí es correcto). Se corrige con un mensaje propio del caso PUT cuando O-estructura vuelva a tocar el backend de jornada; no se paga ahora (R-terminado, M3 cerrado). ACTUALIZADA S109: baja de coste sin cerrarse — la fase 1 de S109 parametrizó el verbo de `ReferenciaEntranteException` (ctor de un argumento delega en «borrar», ctor de dos toma el verbo), así que corregir jornada pasa a ser cambiar de ctor en `JornadaService`, que sigue usando el de un argumento |
 | D-jornada-asimetria (contrato GET(35)≠PUT(7 día tipo)) | O-estructura | Detectada S107, consecuencia consciente de «el backend expande»: el GET devuelve la malla completa, el PUT acepta un día tipo. Nota de diseño de API, no deuda bloqueante: la UI convive sin fricción real (pinta un día, manda un día). Reconsiderar `diaTipo` en el GET solo si un futuro cliente lo pide |
 | D-jornada-flush-test (`put_dosVecesLaMismaMalla_idempotente` no discrimina el flush) | O-estructura | Detectada S107: falta `UNIQUE(dia,orden)` en `schema.sql`, así que sin el `flush()` el resultado sería el mismo y el test no lo prueba. El `flush()` es defensivo/preventivo (correcto: fuerza DELETE antes de INSERT). Si algún día se añade la constraint, el test pasa a discriminar. Deuda de test, no de código |
-| D-actividad-ux (asperezas del editor de Actividad) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S109 al conducir el formulario con Playwright, tres asperezas de presentación: los dos `<select formControlName="asignatura"` del formulario (la de la actividad y la de la plaza) no tienen `id` ni `label for` y se anuncian igual a un lector de pantalla; el error de servidor viejo sigue pintado mientras se muestra un error de campo nuevo (`error()` solo se limpia al empezar una petición); y el aviso de multiplaza vive dentro de la celda del recuento, mezclando dato y aviso. Ninguna impide configurar nada. No se paga ahora |
+| D-actividad-ux (asperezas del editor de Actividad) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S109 al conducir el formulario con Playwright, tres asperezas de presentación: los dos `<select formControlName="asignatura"` del formulario (la de la actividad y la de la plaza) no tienen `id` ni `label for` y se anuncian igual a un lector de pantalla; el error de servidor viejo sigue pintado mientras se muestra un error de campo nuevo (`error()` solo se limpia al empezar una petición); y el aviso de multiplaza vive dentro de la celda del recuento, mezclando dato y aviso. Ninguna impide configurar nada. RECORTADA en S110: el tercer síntoma se CERRÓ de paso al retirar el trozo B la guarda de multiplaza y con ella el aviso; sobreviven los dos primeros. No se paga ahora |
 | D-subgrupo-ux-multiselect (el campo «grupos» del form de subgrupo es un `<select multiple>` nativo) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S108, DECISIÓN CONSCIENTE de alcance: se eligió la mínima desviación del molde (`<select multiple>` nativo) y la UX rica —chips, búsqueda, casillas— se aplaza a una fase de mejora de UX de subgrupos ya prevista al abrir el Cambio. NO es deuda técnica (el componente funciona, valida I6 en cliente, 12 tests) ni bloquea el criterio de O-estructura (la población se elige, solo sin comodidad). El `.subgrupo-form__multiple` y el handler `alSeleccionar` son el punto de sustitución. No se paga ahora |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 

@@ -624,7 +624,178 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 109 — O-estructura (H2): C-actividades, tercer Cambio, entra TROCEADO (trozo A). Suelo de persistencia + guarda 409 del PUT (Desarrollo) + editor de Actividad de una plaza (Config/UI, M3 en XOR y multiselects). NO cierra el objetivo.
+### Sesión 110 — O-estructura (H2): C-actividades, trozo B. CIERRA C-actividades. Lista de plazas variable con alta/baja e I2 en cliente (Config/UI, M3 real). NO cierra el objetivo.
+  Décima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 REAL (alta/baja de filas y
+  validación cruzada I2 son lógica, no binding), UN SOLO MÓDULO (frontend), sin turno previo de medición
+  inter-módulos en M4. CUARTA pieza de O-estructura y CIERRE de C-actividades, que S109 entregó troceado.
+  O-estructura sigue ACTIVO —su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo
+  + e2e UI→solver heredado) exige aún C-niveles, PDC, tutores y el e2e—. Lo que ENTREGA el trozo B: con la
+  lista de plazas abierta, desdobles, agrupamientos y bloques de optativas son construibles por UI, porque el
+  M2 de S109 midió que un desdoble ES una actividad multiplaza (§4.6 del modelo, `roundTrip_bloqueSeisPlazas`);
+  y se retira la guarda que impedía EDITAR toda actividad de más de una plaza, hueco funcional que S109 abrió a
+  sabiendas.
+  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), ACTIVO desde S107 con 3
+  piezas hechas. Hito = H2. Cambio = C-actividades trozo B, nombrado por el M1-ter de S109. R-invalidación sin
+  conflicto (O-diseño depende de H2 cerrado, O-demo de O-estructura); consecuencia práctica registrada: NO se
+  toca el acabado visual del formulario, que es O-diseño. TRES candidatos vivos se pesaron y DOS se descartaron
+  por regla, no por criterio: (a) D-F8.6-ii-a NO abre sesión —R-deuda: su ficha de §4 dice que no bloquea el
+  criterio, solo lo degrada—, aunque queda anotada la grieta de que la 2ª pata del criterio («los casos de
+  validación del §6 se reproducen desde la UI») es discutible si la pantalla dice «Bad Request» en vez del
+  motivo: se reabre cuando llegue ese Cambio o el e2e; (b) C-niveles fuera por la decisión (e) de S109, que la
+  fijó pegada al e2e, y no desbloquea el trozo B (los niveles de prueba se crean por curl). Trozo B gana por
+  tres razones: es la única pieza que ataca la pata 1 del criterio, cierra el hueco funcional de la guarda, y es
+  delta puro sobre el molde recién construido.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL antes de teclear). La sospecha de apertura del arquitecto era
+  que `modoAula` fuera un control global, lo que habría convertido el delta en refactor: DESMENTIDA por
+  medición —`modoAula` vive DENTRO del FormGroup de cada plaza (`actividad-form.ts:47`, `:170`) y la suscripción
+  del XOR se crea POR FILA en `crearPlaza()`, con la fila capturada en el closure—. El trozo A cumplió lo que su
+  javadoc prometía. Lo que la medición SÍ cambió: (1) `precargar` no reconstruía nada —leía `plazas[0]` y escribía
+  sobre `at(0)`—, así que hay que rehacerlo, no ampliarlo, con el molde `jornada.rellenar` (`clear()` + `push` en
+  bucle); (2) NO existe en todo el frontend ningún FormArray con alta/baja dirigida por el usuario: el único array
+  variable (`jornada`) se rehace entero desde el dato y no tiene botones, luego los botones son diseño nuevo, no
+  copia; (3) I2 en el backend (`ActividadService:247-263`) cruza CÓDIGOS con `HashSet<String>` SIN normalizar
+  mayúsculas y DEDUPLICA dentro de cada plaza antes de cruzar (un repetido intra-plaza NO es error), mensaje
+  literal «el subgrupo X aparece en mas de una plaza de la actividad», HTTP 400; (4) el mínimo de 1 plaza SÍ es
+  regla del contrato (400 «una actividad necesita al menos una plaza») y NO existe máximo; (5) backend con CERO
+  trabajo: los cuatro tests de reconciliación (`putReduccion_deSeisADosPlazas`, `putEstabilidad_editarContenidoNoRegeneraCodigos`,
+  `putCrecimiento_deDosACuatro`, `putReusoDeHueco_trasBorrarP3`) ya cubren crecer, reducir y reusar hueco.
+  DECISIÓN derivada de (3): el validador de cliente replica la semántica del backend CON sus dos rarezas —no
+  normaliza caja, deduplica por fila—, porque normalizar haría que el formulario rechazara cuerpos que la API
+  acepta: la misma familia de error que D-plaza-sin-subgrupos.
+  M4 — CONTRASTE ANTES DE TECLEAR (Claude Code, con bancos desechables en /tmp ejecutados y borrados). Tumbó
+  UNA parte del contrato y confirmó el resto. (a) RIESGO PRINCIPAL medido en ejecución: con `track $index` y
+  `removeAt` de una fila intermedia, el DOM sigue mostrando la fila BORRADA y lo que el usuario teclea entra en
+  un FormGroup ya extraído del array —`aRequest()` enviaría contenido viejo, sin error visible—; trackear el
+  CONTROL lo arregla y basta, sin migrar a `[formGroup]="fila"`. (b) TUMBADO: el harness del aserto del track tal
+  como estaba especificado NO es implementable —mutar un FormArray no marca la vista sucia en zoneless, así que
+  `detectChanges()` lanza NG0100 y pone rojo un código correcto, y `whenStable()` a secas no repinta y no
+  discrimina—; la acción tiene que ser por CLICK en el botón, que es el camino real. (c) el validador entra en la
+  CONSTRUCCIÓN del array, no por `setValidators` posterior. (d) NO hay bucle ni fuga: `aplicarModo` nunca escribe
+  `modoAula`; el coste del validador es cuadrático en filas y son 1,5 ms con 6 plazas; las filas que `clear()`
+  deja atrás no fugan porque la referencia va de la huérfana al componente y nunca al revés (condición: no
+  guardar punteros a filas retiradas). (e) el contraste señaló CINCO huecos de aserto: tres entraron como casos
+  propios (26)(27)(28) y dos se absorbieron en (20) y (21). (f) la lista de ficheros del contrato estaba
+  INCOMPLETA en los dos CSS del propio componente.
+  FASE 1 — CÓDIGO (siete ficheros de producción, frontend puro). `actividad-form.ts`: fuera la señal
+  `multiplaza` y sus tres guardas; `precargar` reconstruye el array con una fila por plaza del dato y un
+  `volcar(fila, plaza)` extraído, que asigna `modoAula` PRIMERO porque `aplicarModo` limpia la rama contraria;
+  `anadirPlaza()` y `quitarPlaza(i)` con la guarda del mínimo EN EL MÉTODO además del `[disabled]` (misma
+  doctrina de dos capas que la guarda retirada); validador de array `subguposDisjuntos` hermano de
+  `arrayNoVacio`, instalado en la construcción del array, que devuelve el CÓDIGO del repetido para poder
+  nombrarlo; `aRequest`/`aPlazaRequest` intactos —ya mapeaban `plazas.controls.map(...)`, que es la prueba de
+  que el trozo A dejó el delta preparado—. `actividad-form.html`: `track` por CONTROL manteniendo
+  `[formGroupName]="i"`, `<legend>Plaza {{ i + 1 }}</legend>`, botones de añadir/quitar, y hueco de error de I2
+  condicionado al error CONCRETO (`plazas.errors['subgrupoRepetido']`, vía getter) y NO a `plazas.invalid` —los
+  errores de las filas propagan al array, y con `invalid` el aviso saldría cuando lo que falta es un profesor—.
+  `actividad-lista.{ts,html}`: retiradas las dos capas de la guarda de multiplaza y el aviso de la celda;
+  `esMultiplaza` SE CONSERVA porque lo usa la confirmación de borrado. CSS: mínimo estructural para separar los
+  botones de fila de los del diálogo; el acabado es O-diseño. Commits: `feat(frontend): el editor de actividad
+  admite N plazas con alta, baja y validacion I2 en cliente` (`e609a6c`) y `test(frontend): congela la lista
+  variable de plazas, el track del FormArray y la invariante I2` (`6a38d0d`).
+  FASE 2 — TESTS. Seis casos rotos por la firma del helper (`rellenarPlaza(indice, modo, extra)`), el (13) de la
+  guarda borrado con su helper `montarSinRed`, los (7) y (8) de la lista fundidos en un (12) que congela lo
+  CONTRARIO (toda actividad es editable y el aviso ya no existe), y DOCE casos nuevos (17)-(28). Suite vitest
+  239 → 249; backend intacto 261/91. INCIDENCIA DE ESTRUCTURA cazada antes de mutar: una llave desplazada dejaba
+  los doce casos nuevos ANIDADOS dentro del `it` del caso (1) —la sangría uniforme lo ocultaba—, así que nunca
+  se habían ejecutado; se detectó contando llaves, no por inspección visual, y la hipótesis inicial del
+  arquitecto sobre qué caso los envolvía era errónea.
+  M3 — CAMPAÑA DE MUTACIÓN (14 mutaciones + demostración de suite no vacía, cada una con restauración
+  verificada). NUEVE mutaciones murieron, CINCO sobrevivieron. Discriminan de pleno: M2/M3 (las dos capas del
+  mínimo, cada una matando SU aserto dentro del mismo caso (21)), M4 (`removeAt(0)` → (20) por el DOM y (27)
+  por el cuerpo), M5 (fila clonada → (19)), M6 (normalización `toLowerCase` → (24)), M7 (validador retirado →
+  (22)), M8 (aviso condicionado a `plazas.invalid` → (25)), M9 (precarga degenerada → (17)), M11 (orden de
+  plazas invertido → (18) y (27), la dimensión mejor cubierta y la que más lo necesitaba por ser posicional la
+  reconciliación), M12 (XOR gobernando la fila 0 → (26), que era justo el hueco que el contraste señaló).
+  Caídas por ACOPLAMIENTO declaradas y no maquilladas: (23) bajo M5 y M8, (18) bajo M9, (28) bajo M7 (muere en
+  su precondición), (18) y (27) bajo M12.
+  HALLAZGO CARO DE LA CAMPAÑA: M1 (`track fila` → `track i`) NO tumbaba NADA, y el caso (20) estaba escrito
+  precisamente para protegerlo. La causa, medida con un probe: el `@if` del XOR CURA el desalineamiento —al
+  cambiar el contexto de la fila, la rama se destruye y se recrea, y el `FormControlName` nuevo re-resuelve
+  contra la posición actual—, así que todos los nodos que (20) miraba (aula fija, candidatas, `<span>` de error)
+  son testigos inservibles. Los únicos válidos son los nodos FUERA de todo `@if` enlazados por
+  `formControlName`, cuya directiva persiste con su `[formGroupName]` de siempre. (20) se REESCRIBIÓ sobre el
+  select de asignatura de la plaza, con testigo de LECTURA (el valor pintado) y de ESCRITURA (teclear en la fila
+  visible llega al modelo vivo), más los legends. Re-ejecutadas M1 y la mutación del número de plaza: ahora
+  ambas mueren, y M4 sigue muriendo en su aserto de siempre, sin regresión. IMPORTANTE: el hueco era del TEST,
+  no del componente —el código de producción llevaba el `track` correcto desde el principio—.
+  SUPERVIVIENTES ACEPTADOS, los tres deliberados: M10 (mover `modoAula` al final de `volcar`) es MUTANTE
+  EQUIVALENTE con datos válidos del contrato —el XOR garantiza que la rama contraria ya viene vacía, así que
+  limpiarla no borra nada—; M13 (quitar la deduplicación intra-plaza del validador) no lo mata nadie porque el
+  escenario es INALCANZABLE desde la UI (un `<select multiple>` no selecciona dos veces la misma opción y el GET
+  proyecta desde un `Set`) → nace deuda de test; M14 (`onlySelf` en `aplicarModo`) predicho y confirmado.
+  M4 — VERIFICACIÓN MECÁNICA con Playwright EFÍMERO sobre Chromium REAL (script fuera del repo en `/tmp`,
+  borrado al terminar, árbol verificado limpio: la suite e2e permanente es el Cambio que CIERRA O-estructura,
+  no andamiaje de una sesión; R-e2e respetada). 18 puntos, 17 PASAN y 1 NO MEDIDO. Lo verificado que importa:
+  se construye una actividad de SEIS plazas desde cero con contenido distinto por fila alternando las dos ramas
+  del XOR, el POST sale 201 y el GET devuelve las seis en el MISMO orden con códigos -P1..-P6 y ramas intactas;
+  el VIAJE DE VUELTA pinta las seis filas con su rama derivada del dato y los `<select multiple>` con su
+  selección REALMENTE marcada en el DOM —el punto que costó trabajo en S108 y que ninguna prueba de unidad
+  había visto en un navegador—; el round-trip sin tocar nada devuelve exactamente lo mismo; quitar la plaza del
+  medio deja CINCO con los códigos -P1..-P5 y el desplazamiento previsto (el código -P3 pasa a describir lo que
+  era la plaza 4: la reconciliación posicional funcionando, y la razón de que el PUT exija 409); las dos capas
+  del mínimo sostienen con clic forzado sobre el botón deshabilitado; e I2 avisa nombrando el subgrupo, no emite
+  petición, y el aviso se limpia tanto corrigiendo el subgrupo como quitando la fila culpable. El catálogo de
+  prueba (ASG-A..F, PRF-A..F, AUL-A..C, SBG-A..F) se sembró por curl y SE CONSERVA: es población útil para el
+  e2e ahora que la BD sobrevive al arranque (S109).
+  VERIFICACIÓN DE USABILIDAD (parte no delegable, porque es la pregunta de riesgo de O-estructura): llegar a
+  seis plazas es TOLERABLE; el número de plaza en el `<legend>` se considera útil, no ruido; quitar una fila del
+  medio hace lo esperado sin que el usuario vea códigos ni ids; y el texto del aviso de I2 se entiende sin
+  releerlo. Las DOS imprecisiones que S109 detectó en la definición del arquitecto —decir «grupo» donde el
+  modelo dice SUBGRUPO, y situar el tramo en la Plaza cuando el tiempo lo pone la Actividad— quedan hoy
+  RESUELTAS por la pantalla. La tosquedad visual se declara consciente y aplazada a O-diseño, por el propio
+  arquitecto. CAVEAT REGISTRADO, intacto desde S109: probar la usabilidad con el AUTOR del modelo es evidencia
+  débil; la pregunta «¿es configurable por un humano?» se cierra en O-demo con el IES real. Lo que sí queda
+  demostrado es que el caso MULTIPLAZA —el interesante— se expresa por formulario sin contorsiones.
+  DEUDA — nace UNA, se afina otra y se cierra un tercio de una tercera (R-deuda: ninguna bloquea el criterio,
+  no se pagan ahora):
+  (1) D-i2-dedup-cliente NUEVA (deuda de TEST, no de código): la deduplicación intra-plaza del validador de I2
+  no la cubre ningún caso (M13 superviviente), y el escenario es inalcanzable desde la UI. Molde
+  D-jornada-flush-test. Cuelga de O-estructura.
+  (2) D-F8.6-ii-a AFINADA con la medición E1 de esta sesión, la PRIMERA desde el navegador y no por curl: el
+  mensaje accionable NO se pierde —viaja como REASON PHRASE de la respuesta HTTP— y lo que falta es la clave
+  `message` en el CUERPO. Es más específico que lo que dejó escrito S109. Deja una pista para su M2 (el cliente
+  podría leer `statusText`) que NO es la solución: HTTP/2 no transporta reason phrases.
+  (3) D-actividad-ux RECORTADA: su síntoma (3) —el aviso de multiplaza dentro de la celda del recuento,
+  mezclando dato y aviso— queda CERRADO de paso al retirar la guarda. Sobreviven los dos primeros: los dos
+  `<select formControlName="asignatura"` sin `id` ni `label for`, y el error de servidor viejo que convive con
+  un error de campo nuevo.
+  (4) D-plaza-sin-subgrupos SIN CAMBIO: el trozo B no la toca, y su spec (8) sigue siendo el que se pondría
+  rojo si alguien añadiera el validador solo en cliente.
+  CORRECCIÓN DOCUMENTAL — dos javadoc que la campaña demostró FALSOS se corrigieron en el código, porque un
+  comentario que afirma algo incierto hace que el siguiente lector decida sobre una premisa falsa: (a) el de
+  `aplicarModo` decía que `{ onlySelf: true }` «desactivaría I2 en silencio», y M14 midió que no —los dos
+  `updateValueAndValidity()` siguientes propagan igual—; se conserva la prohibición, pero declarando que la
+  inocuidad DEPENDE de esas dos líneas. (b) el de `volcar` decía que asignar `modoAula` al final borraría el
+  valor recién escrito, y M10 midió que con datos válidos del contrato eso no puede pasar; se conserva el orden
+  declarando que es defensa y que deja de ser equivalente si el backend devolviera las dos ramas llenas.
+  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó el acabado visual (O-diseño, y el arquitecto
+  lo encuadró él mismo), se frenó el arreglo de D-F8.6-ii-a pese a tener su alcance recién medido, se frenó
+  C-niveles, y se frenó escribir un test para el escenario inalcanzable de M13. Lo que SÍ se hizo dentro del
+  Cambio y no era «pulir»: reescribir (20), porque un caso que parece cubrir la dimensión más cara y no la
+  cubre es peor que no tenerlo.
+  HALLAZGO DE MÉTODO (condensado en M3 de `metodo.md`, no añadido como quinta precisión): en una campaña de
+  mutación, la restauración se verifica por DIFF contra una copia previa, NUNCA por el verde de la suite. En
+  esta sesión un `cp` falló en silencio y el `npm test` posterior dio 249 verdes igualmente, porque la mutación
+  era SUPERVIVIENTE: el conteo confirmó una restauración que no había ocurrido.
+  HIGIENE (M1-bis): archivada S108 a `bitacora-sesiones.md` (promovida a `### Sesión 108`, insertada al final en
+  orden ascendente, cuerpo verificado idéntico por diff, 78 líneas); degradada S109 a «Última sesión registrada
+  (previa)» compacta; S110 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora
+  (→ S10–S108), la crónica de archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los dos commits de código separan producción de tests
+  (`git show --stat` de ambos: 6 ficheros sin ningún `.spec.ts` en el primero, los 2 specs solos en el segundo),
+  que documentación y código van en commits distintos, y que el árbol quedó limpio sin ficheros nuevos ni `.db`.
+  NOTA TÉCNICA para quien vuelva a tocar este formulario: el `track` del `@for` de plazas va POR CONTROL y no
+  por índice, y el caso (20) es su único guardián —pero solo si sus testigos siguen siendo nodos FUERA de todo
+  `@if`; reescribirlo mirando el aula fija devolvería el hueco sin que nadie se entere—. Y todo aserto que
+  accione alta/baja de filas debe hacerlo por CLICK: en zoneless, mutar el FormArray por método no marca la
+  vista sucia, y `detectChanges()` sobre un índice desplazado lanza NG0100.
+  O-estructura (H2) ACTIVO, 4 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110) de varias.
+  C-actividades CERRADO. Siguiente: candidatos vivos son C-niveles (el más barato, BLOQUEA el e2e del criterio
+  de terminado), D-F8.6-ii-a (que sigue dejando mudos todos los formularios entregados), PDC y tutores; lo fija
+  su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 109 — O-estructura (H2): C-actividades, tercer Cambio, entra TROCEADO (trozo A). Suelo de persistencia + guarda 409 del PUT (Desarrollo) + editor de Actividad de una plaza (Config/UI, M3 en XOR y multiselects). NO cierra el objetivo.
   Novena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo (fases 0 y 1, backend con lógica)
   + Configuración/UI con M3 real (fase 2, el XOR de aula y los tres multiselects). TERCER Cambio de
   O-estructura: lo AVANZA, no lo cierra. O-estructura sigue ACTIVO —su criterio (8 tipos de sesión
@@ -804,86 +975,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   varias. Siguiente: candidatos vivos son el trozo B de actividades, D-F8.6-ii-a (que dejaría de ser mudo el
   409 recién construido) y C-niveles; lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 108 — O-estructura (H2): C-subgrupos, segundo Cambio. CRUD de subgrupos por UI (Config/UI, M3 en el multiselect). Incluye higiene M1-bis (archiva S103–S106). NO cierra el objetivo.
-  Octava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (el multiselect de
-  grupos), más higiene documental M1-bis al cierre. SEGUNDO Cambio de O-estructura: lo AVANZA, no lo cierra.
-  O-estructura sigue ACTIVO —su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo
-  + e2e UI→solver heredado) exige aún currículo/Actividades (el editor de plazas), desdobles, PDC, tutores y
-  el e2e—. C-subgrupos entrega la pieza que faltaba para que las Plazas de una Actividad puedan referenciar
-  subgrupos creados por UI: sin subgrupos creables, el editor de actividades (siguiente Cambio) no tendría a
-  qué apuntar.
-  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), candidato dominante por
-  dependencias (O-catálogo ✔ S106; O-estructura activo desde S107). Hito = H2. Cambio = currículo, no
-  prenombrado en la doc: el M2 lo acotó a subgrupos (ver abajo). R-invalidación sin conflicto (nada por encima
-  lo rehace: O-diseño depende de H2 cerrado, O-demo de O-estructura). DECISIÓN DE ALCANCE del arquitecto tras
-  el M2: Opción A (currículo = subgrupos + actividades sin materializar Particion), y primer Cambio = subgrupos
-  (dependencia previa de actividades). Particion NO se materializa: el solver no la consume (javadoc de
-  `Subgrupo`, decisión D-a S48; el JSON del solver no transporta particiones) y expresar el §6.1 no la exige;
-  materializarla sería modelo que nadie lee aguas abajo. Reversible si la UX de actividades la reclama.
-  M2 — MEDICIÓN (Claude Code sobre backend y frontend REALES, dos investigaciones encadenadas antes de teclear).
-  (1) Currículo persistido: `Subgrupo` (@Entity, tabla `subgrupo` + `subgrupo_grupo` como @JoinTable @ManyToMany,
-  repo, servicio con validación I6 ≥1 grupo, controller `/api/subgrupos` CRUD 5-endpoints, tests) y `Actividad`
-  (agregado con `Plaza` embebida, cascade+orphanRemoval, controller `/api/actividades`) YA EXISTEN completos en
-  backend. `Particion`/`SubgrupoParticion`/`DemandaCurricular` NO existen como clase, tabla ni repo —Particion
-  por decisión registrada (S48), DemandaCurricular solo vive en el doc de modelo (0 apariciones en código)—.
-  Corrige mi apuesta de apertura: NO falta backend de currículo, falta UI. (2) La Plaza referencia subgrupos por
-  CÓDIGO de subgrupos ya existentes (400 si no resuelve, no alta implícita) ⇒ los subgrupos deben ser creables
-  ANTES que las actividades: dependencia técnica que fija el orden de los dos Cambios. (3) Frontend a cero: ni
-  `subgrupo.model.ts` ni `subgrupo.service.ts` ni `components/subgrupos/`; `app.routes.ts` con 3 rutas, CRUD
-  inline en `Configuracion`. Tipo de sesión que dicta el M2: Config/UI (backend hecho), con M3 en la única
-  desviación real —el multiselect—.
-  DESVIACIÓN DEL MOLDE (el M3): el campo `grupos` es selección MÚLTIPLE, no el `<select>` único de `nivel` en
-  GrupoForm. Tres consecuencias medidas: (a) control `FormControl<string[]>`, no string; (b) `Validators.required`
-  da por válido un array vacío ⇒ validator propio `arrayNoVacio` que replica I6 en cliente; (c) el `<select
-  multiple>` de Reactive Forms NO vincula el array por `formControlName` ni reconcilia la preselección como el
-  `<select>` único: se lee `selectedOptions` en un handler `(change)`→`setValue` y el HTML refleja la selección
-  con `[selected]` por opción. Decisión de producto del arquitecto: `<select multiple>` nativo (mínima desviación
-  del canon), con la UX rica (chips, buscar) APLAZADA a una fase posterior de mejora de UX de subgrupos —mejora
-  planificada, no deuda técnica (ver D-subgrupo-ux-multiselect)—. Riesgo despejado en fase 2: jsdom refleja
-  `[selected]`/`selectedOptions` como un navegador; la cadena handler→control→body pasa sin adaptación.
-  M4 — ENTREGADO (Configuración/UI, frontend, 4 fases con verificación entre cada una, todas verdes). FASE 1
-  (commit `b5d11fa`): `models/subgrupo.model.ts` (par `Subgrupo`/`SubgrupoRequest`, simétricos salvo `id`, molde
-  de `grupo.model` no `nivel.model` porque subgrupo escribe), `services/subgrupo.service.{ts,spec.ts}` (5 wrappers
-  pelados sobre `/api/subgrupos`, spec de contrato 5 casos). FASE 2 (commit `6846c3e`): `components/subgrupos/
-  subgrupo-form.{ts,html,css,spec.ts}` —el multiselect, `arrayNoVacio`, handler `alSeleccionar`, precarga en
-  edición reflejada con `[selected]`; spec 12 casos con la mezcla A1 (DOM real para poblado/preselección de DOS
-  grupos, evita verde falso) + A2 (`setValue` para las ramas de guardado); `.subgrupo-form__multiple` con
-  `min-height` para que el `<select multiple>` no colapse—. FASE 3 (commit `53b46ac`): `subgrupo-lista.
-  {ts,html,css,spec.ts}` —molde plano de lista; única desviación la columna «Grupos» pintada `grupos.join(', ')`;
-  spec 8 casos, hereda de aula-lista el caso de recarga tras guardado (7) y con-qué-se-abre-el-diálogo (8)—.
-  FASE 4 (commit `29f0f84`): cablea `SubgrupoLista` en `Configuracion` (+import, +`imports:`, +`<app-subgrupo-lista
-  />` tras grupo) y su caso (6) en `configuracion.spec.ts` (+doble de `SubgrupoService`). Runner del proyecto:
-  `npx ng test` (no `npx vitest run`, que rompe con «describe is not defined»: el builder de Angular 21 inyecta
-  los globals). Suite frontend 180 → 206 (+26: 5+12+8+1), 30 → 33 ficheros; `ng build` limpio (bundle 469→478 kB,
-  +8.2 kB = la cadena de subgrupo entra en producción, antes fuera por tree-shaking); backend sin tocar. La
-  sección es visible y usable en `/configuracion`, bajo Grupos.
-  DEUDA — nace una, registrada (R-deuda: no bloquea el criterio de C-subgrupos, no se paga ahora):
-  D-subgrupo-ux-multiselect (S108, VIVA, MEJORA PLANIFICADA no bloqueante) — el `<select multiple>` nativo es UX
-  pobre para elegir varios grupos (Ctrl+click no obvio, sin buscar ni chips). Es DECISIÓN CONSCIENTE del
-  arquitecto con fase futura ya prevista, no descuido: cuelga de O-estructura y se aborda en la fase de mejora de
-  UX de subgrupos. NO es deuda técnica (el componente funciona y está testado); es acabado de presentación
-  aplazado, hermano de lo que O-diseño trata a nivel transversal. Arrastradas ya registradas y sin cambio:
-  D-jornada-msg409, D-jornada-asimetria, D-jornada-flush-test (S107, O-estructura); `siguienteInmediato` sin
-  derivar; `Configuracion` tabla huérfana; divergencia modelo-código `DemandaCurricular`/`Particion` —el M2 de
-  S108 la MIDIÓ (Particion decisión S48, DemandaCurricular solo en doc) y confirmó que NO bloquea el currículo:
-  se construye entero sin ella; lo único que no habría sin DemandaCurricular es la validación de cobertura de
-  horas, función pendiente, no bloqueante—.
-  R-terminado RESPETADA: no se pulió fuera de criterio. La UX del multiselect se FRENÓ a deuda planificada en vez
-  de resolverla dentro del Cambio; Particion se descartó por medición, no se materializó «ya que estábamos».
-  HIGIENE (M1-bis, Opción 2 elegida por el arquitecto para dejar la doc limpia): archivadas S103, S104, S105 y
-  S106 a `bitacora-sesiones.md` (promovidas a `### Sesión NN`, orden ascendente tras S102, cuerpo verificado
-  idéntico por diff origen→destino); degradada S107 a «Última sesión previa» compacta; S108 queda como única
-  cabecera H3 viva. Corregidos los dos censos de la bitácora (→ S10–S106) y extendida la crónica de archivado del
-  plan. Restaurada la invariante H3 (`grep -c "^### Sesión" plan` = 1). Salda la deuda de método M1-bis que venía
-  atrasada desde S106. Aviso heredado atendido: la bitácora (~370 KB) había corrompido cabeceras al archivar en
-  el pasado; se archivó con Python y se verificó por diff de cuerpo, cero cabeceras partidas nuevas.
-  R4/costura: script oficial sigue sin existir en el repo (mejora de método pendiente desde S101); verificado a
-  mano que los cuatro commits de código separan por fase y que `app/educhronos.db` sigue ignorada.
-  O-estructura (H2) ACTIVO, 2 piezas hechas (jornada S107, subgrupos S108) de varias. Siguiente: tercer Cambio de
-  O-estructura, C-actividades —el editor de Actividad con Plazas embebidas, backend `/api/actividades` ya existe;
-  es el formulario de mayor riesgo del objetivo (valida si Actividad→Plaza→Subgrupo es configurable por un
-  humano), ahora desbloqueado porque los subgrupos ya son creables por UI—. Lo fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -902,8 +993,8 @@ truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bi
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106,
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
-y la de S107 en la Sesión 109.
-El plan conserva ahora S108 (degradada a formato compacto) y S109 como única cabecera H3 viva. El detalle
+y la de S107 en la Sesión 109, y la de S108 en la Sesión 110.
+El plan conserva ahora S109 (degradada a formato compacto) y S110 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1888,6 +1979,15 @@ con remisión a la bitácora.
   que leer el body, no el reason.
   REASIGNACIÓN: deja de colgar solo de O-ajuste-cierre; su daño vivo está en O-estructura, que es quien está
   entregando formularios hoy.
+  **AFINADA (S110, medido en NAVEGADOR y no por curl, primera vez).** El mensaje accionable NO SE PIERDE: el
+  servicio lo compone y viaja como REASON PHRASE de la respuesta HTTP; lo que falta es la clave `message` en el
+  CUERPO. Evidencia: con código de actividad duplicado el usuario lee «Bad Request» en pantalla mientras el
+  backend responde `{"timestamp":…,"status":400,"error":"Bad Request","path":"/api/actividades"}` y el texto
+  «Ya existe una actividad con codigo …» queda en el reason. Precisa la redacción de S109 («llegan sin
+  `message`»), que era cierta pero no decía dónde estaba el texto. PISTA PARA SU M2, que NO es la solución: el
+  cliente podría leer `err.statusText`, pero HTTP/2 no transporta reason phrases, así que un arreglo por esa vía
+  sería frágil justo donde acabará estando el despliegue. El M2 sigue pendiente y sigue teniendo tres opciones
+  (reactivar la clave, `ProblemDetail`, traducir en cada controlador).
 
 - **D-F8.6-ii-b** (S81, VIVA, HUECO FUNCIONAL, no bloqueante) — NO HAY GESTO DE DESPINAR. El
   arrastre crea pines y el aviso los cuenta, pero la UI no ofrece forma de quitarlos:
@@ -2275,6 +2375,20 @@ con remisión a la bitácora.
   (3) el aviso de multiplaza vive DENTRO de la celda del recuento, de modo que la celda mezcla dato y aviso
   («2 varias plazas: editable en la próxima versión»); quizá esté mejor junto al botón que explica. Ninguna
   impide configurar nada. Candidata a absorberse en O-diseño cuando llegue el acabado transversal.
+  **RECORTADA (S110):** el síntoma (3) queda CERRADO de paso —el trozo B retiró la guarda de multiplaza y con
+  ella el aviso, así que la celda del recuento vuelve a ser solo el dato—. Sobreviven (1) y (2), sin cambio.
+
+- **D-i2-dedup-cliente** (S110, VIVA, DEUDA DE TEST, no bloqueante) — LA DEDUPLICACIÓN INTRA-PLAZA DEL
+  VALIDADOR DE I2 NO LA CUBRE NINGÚN CASO. El validador `subguposDisjuntos` de `actividad-form.ts` recorre los
+  subgrupos de cada fila metiéndolos en un `Set` ANTES de cruzarlos con los de las demás, para replicar la
+  semántica de `ActividadService.validarPlazas`, que deduplica dentro de la plaza (un subgrupo repetido en la
+  MISMA plaza no es error). La campaña de mutación de S110 midió que quitar ese `Set` no pone rojo ningún test:
+  el escenario es INALCANZABLE desde la UI —un `<select multiple>` no permite seleccionar dos veces la misma
+  opción, y el GET del backend proyecta los subgrupos desde un `Set`, así que nunca llegan repetidos—. La regla
+  existe en el código por FIDELIDAD con el contrato, no porque haya un camino que la ejercite. Deuda de test,
+  no de código, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar a mano un estado que el
+  sistema no produce; dejaría de ser inalcanzable si algún día el formulario permitiera teclear códigos.
+  Cuelga de O-estructura. No se paga ahora.
 
 - **D-subgrupo-ux-multiselect** (S108, VIVA, MEJORA PLANIFICADA, no bloqueante) — EL CAMPO «GRUPOS» DEL
   FORMULARIO DE SUBGRUPO ES UN `<select multiple>` NATIVO. `subgrupo-form` (C-subgrupos, S108) puebla la

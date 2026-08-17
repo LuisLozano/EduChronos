@@ -130,8 +130,10 @@ Cuatro precisiones, en el orden en que se aplican:
 
 Un aserto vale lo que vale la mutación que lo pone rojo. Al cerrar un cambio con
 tests se declara la campaña (qué mutaciones, cuál cae y por qué vía) y se demuestra
-la suite NO VACÍA (romper algo → rojo esperado → restaurar → verde). Cuatro
-precisiones:
+la suite NO VACÍA (romper algo → rojo esperado → restaurar → verde). Cada
+restauración se verifica por DIFF contra una copia previa, nunca por el verde de la
+suite: ante un mutante SUPERVIVIENTE el conteo sale idéntico con la mutación puesta
+—en S110 confirmó una restauración que no había ocurrido—. Cuatro precisiones:
 - CAER ante una mutación ≠ DISCRIMINAR la dimensión que ataca: un test puede caer
   por acoplamiento. La tabla de mutaciones NO es matriz de cobertura.
 - Reutilizar una función NO hereda su test: es cobertura fantasma.
