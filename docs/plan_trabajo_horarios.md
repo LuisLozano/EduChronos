@@ -624,7 +624,134 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 111 — O-estructura (H2): C-niveles. CRUD de Nivel por UI + recorrido completo del centro mínimo en navegador (Config/UI, sin M3). NO cierra el objetivo.
+### Sesión 112 — O-estructura (H2): C-e2e. El e2e UI→solver del centro mínimo (Desarrollo + e2e) y el arreglo del hueco de recarga tras la PRIMERA generación. CIERRA la tercera pata del criterio. NO cierra el objetivo.
+  Duodécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo con M3 real (la bifurcación de
+  `lanzarGeneracion`) + el e2e, para el que M3 no aplica y se sustituye por un control de vacuidad de tres
+  escenarios. SEXTA pieza de O-estructura. Lo que ENTREGA: la tercera pata del criterio —«un e2e de navegador
+  crea un centro mínimo íntegramente por la UI y el solver corre sobre él»— queda CUMPLIDA y verificada.
+  O-estructura sigue ACTIVO: su criterio exige aún PDC y tutores (patas 1 y 2).
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 5
+  piezas hechas. Hito = H2. Cambio = C-e2e. R-invalidación sin conflicto. Los CUATRO candidatos vivos se
+  pesaron. Gana el e2e por tres razones, y la primera es la decisiva: PDC y tutores NO lo invalidan —el centro
+  mínimo no tiene PDC, y por R-e2e no se añade un e2e por cada tipo de estructura—, así que escribirlo ahora no
+  crea trabajo que rehacer; (2) el reconocimiento de S111 es PERECEDERO y lo pagó ella para esta sesión; (3) es
+  la única pata sin empezar y la de mayor riesgo. D-F8.6-ii-a fuera por R-deuda, y se CIERRA la grieta que S110
+  dejó anotada: la 2ª pata habla del §6 del MODELO (validación contra los horarios reales del centro), no de la
+  superficie de error de la UI, así que «Bad Request» degrada pero no impide reproducir los casos.
+  HALLAZGO DEL M0 que reordena lo pendiente: PDC no es opcional, es pata 1 Y pata 2 —el §6.2 del modelo ES el
+  caso 3ºADi— y su alta vive en el sub-recurso `/api/grupos/{idPadre}/pdc` (S76), que el CRUD de Grupo por UI no
+  alcanza. Sin ese formulario O-estructura no puede cerrar. Tutores, en cambio, PUEDE estar más cubierto de lo
+  que parece (`requiereTutor` ya es campo del form de Actividad desde S109; lo que no existe es `ProfesorTutoria`):
+  no se afirma, exige su propio M2.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL, dos investigaciones encadenadas antes de teclear; informes
+  consumidos aquí, sin fichero suelto commiteado). Confirmó la apuesta de apertura y destapó lo que decidió la
+  sesión. (1) `schema.sql` tiene CERO `drop`: son 21 `create table if not exists` desde S109. El comentario de
+  `playwright.config.ts` afirmaba literalmente lo contrario —«hace drop table if exists de las 21 tablas»—: una
+  afirmación viva y falsa DENTRO del fichero que gobierna el e2e. Con `reuseExistingServer` en local, el e2e
+  habría corrido contra la BD de trabajo, que ya tiene un horario generado y actividades congeladas por
+  D-horario-irreversible. El andamiaje de S106 se apoyaba en una premisa que S109 invalidó. (2) La prevalidación
+  del centro mínimo devuelve `[]`: las tres reglas (profesor 3/30, repeticiones 3/5, grupo 3/30) pasan holgadas,
+  luego el botón se habilita y `ConfirmarGeneracion` no llega a abrirse. (3) `server.error.include-message=always`
+  SÍ está en `application.properties`, con comentario propio: AFINA D-F8.6-ii-a y desmiente la conclusión de S111
+  (que dio la razón al javadoc de `horario-view`); su M2 debe partir de aquí.
+  HUECO FUNCIONAL DESTAPADO POR EL M4 Y ARREGLADO EN SESIÓN (no estaba registrado como deuda: nace y muere aquí).
+  `provideRouter(routes)` sin features ⇒ `onSameUrlNavigation` = 'ignore' (leído del bundle instalado de
+  @angular/router 21.2.17, no de memoria). Tras el POST, `router.navigate(['/horario', dto.id])` desde
+  `/horario/1` emite `NavigationSkipped`, `paramMap` NO reemite, `cargar()` no vuelve a correr: la rejilla no se
+  refresca y, como la carga inicial dio 404 sobre BD vacía, `error()` gatea el `@else if` y `<app-horario-grid>`
+  ni se monta. Se manifiesta SOLO en la primera generación de una instalación nueva —después el id cambia y la
+  URL difiere—, es decir, exactamente en el criterio 5 de Fase 8 que define H2, y es invisible en el uso manual
+  repetido (por eso S111 no lo vio). DECISIÓN DE ALCANCE del arquitecto: el arreglo ENTRA, porque sin él la
+  pata 3 solo se cumpliría con un `page.reload()` en el test, es decir, con el e2e tapando el agujero que existe
+  para detectar. Vía elegida: bifurcación en el `next` (si el id devuelto es el ya cargado, `cargar()`; si no,
+  navegar). Se DESCARTAN las otras dos: tocar el router es global y no está medido que `paramMap` reemita con el
+  mismo componente y los mismos params; consumir la proyección del POST revertiría la decisión de S93 (rejilla,
+  pines y diagnóstico no pueden pertenecer a horarios distintos), que esta vía conserva intacta al recargar por
+  GET fresco. RECTIFICACIÓN DE MÉTODO EN SESIÓN: el M2 declaró M3 no aplicable «porque no habría lógica de
+  producción»; con el arreglo la hay, y M3 volvió al ritual.
+  M3 — campaña de 2 mutaciones sobre la bifurcación. M-A (navegar siempre, el estado previo) cae SOLO (40), vía
+  `router.navigate` llamado cuando el aserto exige lo contrario. M-B (`cargar` siempre) cae (39) por 0 llamadas
+  a navigate, y ADEMÁS el preexistente (31), que guarda esa misma rama desde antes: segundo guardián legítimo,
+  no acoplamiento entre los nuevos. Cada caso guarda su rama. Restauraciones verificadas por DIFF contra copia
+  previa, nunca por el verde (regla de S110).
+  M4 — el contraste corrigió OCHO puntos del contrato antes de teclear, tres de ellos sobre el aserto: el código
+  de actividad NO se pinta en la rejilla (solo como `aria-label` del candado, y solo si está pinada), así que el
+  contable es `div.instancia`; «celdas» era impreciso (hay 30 `<td>` siempre y `td.ocupado` solo se enciende
+  durante un arrastre); el value es `DISTRIBUIDA`. Y cinco de ejecución: el `orden` del nivel arranca vacío; el
+  orden de creación es requisito duro porque cada diálogo puebla sus desplegables al abrirse; `getByRole` con
+  `exact:true` (el `name` es substring y «Guardar» casaría con «Guardar jornada»); los multiselect por
+  `selectOption`, que dispara el `change` que el handler escucha; y todo aserto con reintento por ZONELESS.
+  BLOQUEO DEL INSTRUMENTO, reportado por Claude Code en el PASO 0 y resuelto con la opción MENOS invasiva: el
+  doble de `getProyeccion` es un Subject COMPARTIDO, así que el 404 inicial del (40) lo cierra y la recarga
+  redispararía el error. Se elige re-stub LOCAL al caso frente a homogeneizar el doble a fresco —eso tocaría los
+  25 casos vigentes que lo consumen, superficie probada que este Cambio no pide (R-terminado)— y frente a quitar
+  el 404 inicial, que habría acomodado el test al instrumento en vez de al problema: el 404 ES el escenario.
+  Dos premisas del arquitecto corregidas por la medición del instrumento: este fichero no tiene `verify()` ni
+  `HttpTestingController`, luego los Subjects pendientes no tumban casos ajenos.
+  HALLAZGO DEL E2E, medido en la corrida y no previsto por nadie: las dos primeras corridas fallaron en pasos
+  DISTINTOS con la misma firma —primer campo del diálogo vacío y `touched`, segundo campo bien—. Es la carrera
+  entre el `fill` y el cableado del ControlValueAccessor: `cdk-dialog-container` entra en el DOM en cuanto el CDK
+  lo crea, el contenido del portal se adjunta un tick después, y un `fill` en esa ventana lo borra el
+  `writeValue('')` de la directiva al registrarse; el `required` bloquea entonces el submit y el diálogo no
+  cierra. Barrera elegida: esperar a que el foco esté DENTRO del diálogo (`:focus`), válida porque el CDK atrapa
+  el foco (`autoFocus: 'first-tabbable'`) solo con el contenido ya adjunto, estrictamente después del cableado.
+  Se descarta `waitForTimeout`: haría lo mismo a ojo y sin declarar de qué depende. Documentado en el javadoc de
+  `abrir()` como hallazgo medido. Tres corridas seguidas en verde después.
+  CONTROL DE VACUIDAD (sustituye a M3 en el e2e, obligatorio): C1 repeticiones 3→2 → rojo en el aserto principal
+  (3 vs 2): mide cantidad, no presencia. C2 omitir la jornada → rojo ANTES del aserto, en la precondición
+  (`.prevalidacion-limpia` ausente): el test recorre la cadena entera. C3, el que importa: revertir el arreglo de
+  `lanzarGeneracion` → rojo, `.instancia` en 0 tras 45 s, con el snapshot mostrando «No se pudo cargar el horario
+  1 (404).» y sin rejilla. Ninguno falló por vía distinta de la prevista; las tres restauraciones por diff, la de
+  C3 además contra HEAD.
+  ENTREGADO en tres commits de código. `test(e2e): aisla el e2e en educhronos-e2e.db y corrige la premisa
+  caducada del andamiaje` (`playwright.config.ts`: `rm -f app/educhronos-e2e.db*` encadenado al command
+  —`shell:true` verificado en el runner—, `-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db`,
+  `reuseExistingServer:false` SOLO en backend, y el párrafo falso reescrito). `5d63fd4` fix(horario)
+  (`idCargado` como campo plano con su porqué, asignado como primera línea de `cargar`, bifurcación en el `next`,
+  javadoc reescrito con las dos ramas y la causa). `88919d2` test(horario) (casos (39) y (40), con el re-stub
+  local y su javadoc, y precondición añadida al (40) —sin ella el tercer aserto podía medir un estado limpio de
+  nacimiento—). `a69734a` test(e2e) (`app/frontend/e2e/centro-minimo.spec.ts`, UN SOLO test por R-e2e).
+  Suites: vitest 269 → 271 (+2); e2e 1 → 2 (humo 298 ms, centro mínimo 2,8 s); backend INTACTO 261/91, no
+  ejecutado (no se tocó `app/src`). `npm run build` verde; el warning de presupuesto (507,66 kB) es PREEXISTENTE
+  —verificado construyendo con los ficheros en stash: HEAD ya daba 507,59 kB—, el cambio aporta 70 bytes.
+  `solver/src/main` NO tocado ⇒ `referencia-codigo-solver.md` NO regenerada. `modelo_datos_fase1.md` NO tocado.
+  AISLAMIENTO VERIFICADO, que es lo que hace repetible el e2e: tras nueve corridas, `app/educhronos.db` conserva
+  mtime y tamaño byte a byte (14:01:08.613238078, 155648), y `app/educhronos-e2e.db` refleja el centro mínimo
+  (1 nivel, 1 grupo, 1 subgrupo, 1 profesor, 1 asignatura, 1 aula, 1 actividad, 1 plaza, 1 horario, 3 sesiones,
+  35 tramos). El `.gitignore` no se tocó: `*.db` ya cubría la BD nueva (medido antes de editar). Matiz anotado y
+  no arreglado: `*.db` no cubre `-journal/-wal/-shm`, hueco PREEXISTENTE e idéntico para la BD de trabajo.
+  DEUDA: nacen CUATRO, ninguna se paga (R-deuda: ninguna bloquea el criterio). D-doble-proyeccion-compartido
+  (de test, cuelga de O-ajuste-cierre), D-e2e-retry-bd, D-e2e-aislamiento y D-props-test-obsoleto (las tres de
+  O-estructura). Y D-F8.6-ii-a se AFINA por tercera sesión consecutiva.
+  R-terminado RESPETADA: no se pagó D-F8.6-ii-a pese a tener un dato nuevo sobre ella, ni D-horario-irreversible
+  (con BD limpia por corrida no muerde), ni D-error-generacion-pin (el `error:` de `lanzarGeneracion` se dejó
+  intacto a propósito), ni se homogeneizó el doble de `getProyeccion`, ni se tocó el hueco del `.gitignore`, ni
+  el acabado visual de ninguna pantalla (O-diseño). Lo único que entró fuera del test es el arreglo del hueco,
+  y entró porque sin él la pata 3 no se cumple.
+  HIGIENE (M1-bis): archivada S110 a `bitacora-sesiones.md` (promovida a `### Sesión 110`, insertada al final en
+  orden ascendente, cuerpo verificado idéntico por diff); degradada S111 a «Última sesión registrada (previa)»
+  compacta; S112 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S110), la
+  crónica de archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los tres commits de código separan andamiaje,
+  producción y tests, que documentación y código van en commits distintos, y que el árbol quedó limpio (ningún
+  `.db` entra: `*.db` los tapa). COSTURA SALDADA que el M0 detectó: `gestion_proyecto.md` §2 y §3 seguían
+  diciendo «4 piezas hechas / faltan C-niveles, PDC, tutores y el e2e», desactualizado desde S111.
+  NOTA TÉCNICA PARA QUIEN ESCRIBA EL PRÓXIMO e2e (sustituye a la de S111, que queda archivada con ella): (1) la
+  BD del e2e es `app/educhronos-e2e.db`, la borra el `command` del `webServer` y NO la demuele `schema.sql`;
+  correr el e2e exige el backend de dev PARADO (`reuseExistingServer:false`). (2) Tras abrir un diálogo del CDK
+  hay que esperar el foco DENTRO de él antes de teclear, o el `writeValue('')` del ControlValueAccessor borra el
+  primer campo en silencio. (3) `getByRole(..., { name })` es SUBSTRING: sin `exact:true`, «Guardar» casa con
+  «Guardar jornada», y el texto del botón de alta se repite en el `<h2>` del diálogo. (4) Los cuatro
+  `<select multiple>` no llevan `formControlName`: van por clase y solo aceptan `selectOption`, que dispara el
+  `change` que el handler escucha. (5) El código de actividad NO se pinta en la rejilla; lo contable es
+  `div.instancia`.
+  O-estructura (H2) ACTIVO, 6 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
+  e2e S112). TERCERA PATA DEL CRITERIO CUMPLIDA. Suites: vitest 271, e2e 2, backend intacto 261/91. Siguiente:
+  PDC es el candidato dominante —única pieza de la que dependen las dos patas restantes—, con tutores detrás y
+  pendiente de medir; lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 111 — O-estructura (H2): C-niveles. CRUD de Nivel por UI + recorrido completo del centro mínimo en navegador (Config/UI, sin M3). NO cierra el objetivo.
   Undécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI SIN M3 (no hay lógica: dos campos y
   binding; la única regla de cliente es un `required`), UN SOLO MÓDULO (frontend), backend con CERO trabajo.
   QUINTA pieza de O-estructura. Lo que ENTREGA: con niveles creables por pantalla, las NUEVE filas del centro
@@ -759,177 +886,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   candidatos vivos son el e2e UI→solver (tercera pata del criterio, ya sin bloqueo y con reconocimiento hecho),
   PDC, tutores y D-F8.6-ii-a; lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 110 — O-estructura (H2): C-actividades, trozo B. CIERRA C-actividades. Lista de plazas variable con alta/baja e I2 en cliente (Config/UI, M3 real). NO cierra el objetivo.
-  Décima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 REAL (alta/baja de filas y
-  validación cruzada I2 son lógica, no binding), UN SOLO MÓDULO (frontend), sin turno previo de medición
-  inter-módulos en M4. CUARTA pieza de O-estructura y CIERRE de C-actividades, que S109 entregó troceado.
-  O-estructura sigue ACTIVO —su criterio (8 tipos de sesión configurables + casos de validación §6 del modelo
-  + e2e UI→solver heredado) exige aún C-niveles, PDC, tutores y el e2e—. Lo que ENTREGA el trozo B: con la
-  lista de plazas abierta, desdobles, agrupamientos y bloques de optativas son construibles por UI, porque el
-  M2 de S109 midió que un desdoble ES una actividad multiplaza (§4.6 del modelo, `roundTrip_bloqueSeisPlazas`);
-  y se retira la guarda que impedía EDITAR toda actividad de más de una plaza, hueco funcional que S109 abrió a
-  sabiendas.
-  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), ACTIVO desde S107 con 3
-  piezas hechas. Hito = H2. Cambio = C-actividades trozo B, nombrado por el M1-ter de S109. R-invalidación sin
-  conflicto (O-diseño depende de H2 cerrado, O-demo de O-estructura); consecuencia práctica registrada: NO se
-  toca el acabado visual del formulario, que es O-diseño. TRES candidatos vivos se pesaron y DOS se descartaron
-  por regla, no por criterio: (a) D-F8.6-ii-a NO abre sesión —R-deuda: su ficha de §4 dice que no bloquea el
-  criterio, solo lo degrada—, aunque queda anotada la grieta de que la 2ª pata del criterio («los casos de
-  validación del §6 se reproducen desde la UI») es discutible si la pantalla dice «Bad Request» en vez del
-  motivo: se reabre cuando llegue ese Cambio o el e2e; (b) C-niveles fuera por la decisión (e) de S109, que la
-  fijó pegada al e2e, y no desbloquea el trozo B (los niveles de prueba se crean por curl). Trozo B gana por
-  tres razones: es la única pieza que ataca la pata 1 del criterio, cierra el hueco funcional de la guarda, y es
-  delta puro sobre el molde recién construido.
-  M2 — MEDICIÓN (Claude Code sobre el repo REAL antes de teclear). La sospecha de apertura del arquitecto era
-  que `modoAula` fuera un control global, lo que habría convertido el delta en refactor: DESMENTIDA por
-  medición —`modoAula` vive DENTRO del FormGroup de cada plaza (`actividad-form.ts:47`, `:170`) y la suscripción
-  del XOR se crea POR FILA en `crearPlaza()`, con la fila capturada en el closure—. El trozo A cumplió lo que su
-  javadoc prometía. Lo que la medición SÍ cambió: (1) `precargar` no reconstruía nada —leía `plazas[0]` y escribía
-  sobre `at(0)`—, así que hay que rehacerlo, no ampliarlo, con el molde `jornada.rellenar` (`clear()` + `push` en
-  bucle); (2) NO existe en todo el frontend ningún FormArray con alta/baja dirigida por el usuario: el único array
-  variable (`jornada`) se rehace entero desde el dato y no tiene botones, luego los botones son diseño nuevo, no
-  copia; (3) I2 en el backend (`ActividadService:247-263`) cruza CÓDIGOS con `HashSet<String>` SIN normalizar
-  mayúsculas y DEDUPLICA dentro de cada plaza antes de cruzar (un repetido intra-plaza NO es error), mensaje
-  literal «el subgrupo X aparece en mas de una plaza de la actividad», HTTP 400; (4) el mínimo de 1 plaza SÍ es
-  regla del contrato (400 «una actividad necesita al menos una plaza») y NO existe máximo; (5) backend con CERO
-  trabajo: los cuatro tests de reconciliación (`putReduccion_deSeisADosPlazas`, `putEstabilidad_editarContenidoNoRegeneraCodigos`,
-  `putCrecimiento_deDosACuatro`, `putReusoDeHueco_trasBorrarP3`) ya cubren crecer, reducir y reusar hueco.
-  DECISIÓN derivada de (3): el validador de cliente replica la semántica del backend CON sus dos rarezas —no
-  normaliza caja, deduplica por fila—, porque normalizar haría que el formulario rechazara cuerpos que la API
-  acepta: la misma familia de error que D-plaza-sin-subgrupos.
-  M4 — CONTRASTE ANTES DE TECLEAR (Claude Code, con bancos desechables en /tmp ejecutados y borrados). Tumbó
-  UNA parte del contrato y confirmó el resto. (a) RIESGO PRINCIPAL medido en ejecución: con `track $index` y
-  `removeAt` de una fila intermedia, el DOM sigue mostrando la fila BORRADA y lo que el usuario teclea entra en
-  un FormGroup ya extraído del array —`aRequest()` enviaría contenido viejo, sin error visible—; trackear el
-  CONTROL lo arregla y basta, sin migrar a `[formGroup]="fila"`. (b) TUMBADO: el harness del aserto del track tal
-  como estaba especificado NO es implementable —mutar un FormArray no marca la vista sucia en zoneless, así que
-  `detectChanges()` lanza NG0100 y pone rojo un código correcto, y `whenStable()` a secas no repinta y no
-  discrimina—; la acción tiene que ser por CLICK en el botón, que es el camino real. (c) el validador entra en la
-  CONSTRUCCIÓN del array, no por `setValidators` posterior. (d) NO hay bucle ni fuga: `aplicarModo` nunca escribe
-  `modoAula`; el coste del validador es cuadrático en filas y son 1,5 ms con 6 plazas; las filas que `clear()`
-  deja atrás no fugan porque la referencia va de la huérfana al componente y nunca al revés (condición: no
-  guardar punteros a filas retiradas). (e) el contraste señaló CINCO huecos de aserto: tres entraron como casos
-  propios (26)(27)(28) y dos se absorbieron en (20) y (21). (f) la lista de ficheros del contrato estaba
-  INCOMPLETA en los dos CSS del propio componente.
-  FASE 1 — CÓDIGO (siete ficheros de producción, frontend puro). `actividad-form.ts`: fuera la señal
-  `multiplaza` y sus tres guardas; `precargar` reconstruye el array con una fila por plaza del dato y un
-  `volcar(fila, plaza)` extraído, que asigna `modoAula` PRIMERO porque `aplicarModo` limpia la rama contraria;
-  `anadirPlaza()` y `quitarPlaza(i)` con la guarda del mínimo EN EL MÉTODO además del `[disabled]` (misma
-  doctrina de dos capas que la guarda retirada); validador de array `subguposDisjuntos` hermano de
-  `arrayNoVacio`, instalado en la construcción del array, que devuelve el CÓDIGO del repetido para poder
-  nombrarlo; `aRequest`/`aPlazaRequest` intactos —ya mapeaban `plazas.controls.map(...)`, que es la prueba de
-  que el trozo A dejó el delta preparado—. `actividad-form.html`: `track` por CONTROL manteniendo
-  `[formGroupName]="i"`, `<legend>Plaza {{ i + 1 }}</legend>`, botones de añadir/quitar, y hueco de error de I2
-  condicionado al error CONCRETO (`plazas.errors['subgrupoRepetido']`, vía getter) y NO a `plazas.invalid` —los
-  errores de las filas propagan al array, y con `invalid` el aviso saldría cuando lo que falta es un profesor—.
-  `actividad-lista.{ts,html}`: retiradas las dos capas de la guarda de multiplaza y el aviso de la celda;
-  `esMultiplaza` SE CONSERVA porque lo usa la confirmación de borrado. CSS: mínimo estructural para separar los
-  botones de fila de los del diálogo; el acabado es O-diseño. Commits: `feat(frontend): el editor de actividad
-  admite N plazas con alta, baja y validacion I2 en cliente` (`e609a6c`) y `test(frontend): congela la lista
-  variable de plazas, el track del FormArray y la invariante I2` (`6a38d0d`).
-  FASE 2 — TESTS. Seis casos rotos por la firma del helper (`rellenarPlaza(indice, modo, extra)`), el (13) de la
-  guarda borrado con su helper `montarSinRed`, los (7) y (8) de la lista fundidos en un (12) que congela lo
-  CONTRARIO (toda actividad es editable y el aviso ya no existe), y DOCE casos nuevos (17)-(28). Suite vitest
-  239 → 249; backend intacto 261/91. INCIDENCIA DE ESTRUCTURA cazada antes de mutar: una llave desplazada dejaba
-  los doce casos nuevos ANIDADOS dentro del `it` del caso (1) —la sangría uniforme lo ocultaba—, así que nunca
-  se habían ejecutado; se detectó contando llaves, no por inspección visual, y la hipótesis inicial del
-  arquitecto sobre qué caso los envolvía era errónea.
-  M3 — CAMPAÑA DE MUTACIÓN (14 mutaciones + demostración de suite no vacía, cada una con restauración
-  verificada). NUEVE mutaciones murieron, CINCO sobrevivieron. Discriminan de pleno: M2/M3 (las dos capas del
-  mínimo, cada una matando SU aserto dentro del mismo caso (21)), M4 (`removeAt(0)` → (20) por el DOM y (27)
-  por el cuerpo), M5 (fila clonada → (19)), M6 (normalización `toLowerCase` → (24)), M7 (validador retirado →
-  (22)), M8 (aviso condicionado a `plazas.invalid` → (25)), M9 (precarga degenerada → (17)), M11 (orden de
-  plazas invertido → (18) y (27), la dimensión mejor cubierta y la que más lo necesitaba por ser posicional la
-  reconciliación), M12 (XOR gobernando la fila 0 → (26), que era justo el hueco que el contraste señaló).
-  Caídas por ACOPLAMIENTO declaradas y no maquilladas: (23) bajo M5 y M8, (18) bajo M9, (28) bajo M7 (muere en
-  su precondición), (18) y (27) bajo M12.
-  HALLAZGO CARO DE LA CAMPAÑA: M1 (`track fila` → `track i`) NO tumbaba NADA, y el caso (20) estaba escrito
-  precisamente para protegerlo. La causa, medida con un probe: el `@if` del XOR CURA el desalineamiento —al
-  cambiar el contexto de la fila, la rama se destruye y se recrea, y el `FormControlName` nuevo re-resuelve
-  contra la posición actual—, así que todos los nodos que (20) miraba (aula fija, candidatas, `<span>` de error)
-  son testigos inservibles. Los únicos válidos son los nodos FUERA de todo `@if` enlazados por
-  `formControlName`, cuya directiva persiste con su `[formGroupName]` de siempre. (20) se REESCRIBIÓ sobre el
-  select de asignatura de la plaza, con testigo de LECTURA (el valor pintado) y de ESCRITURA (teclear en la fila
-  visible llega al modelo vivo), más los legends. Re-ejecutadas M1 y la mutación del número de plaza: ahora
-  ambas mueren, y M4 sigue muriendo en su aserto de siempre, sin regresión. IMPORTANTE: el hueco era del TEST,
-  no del componente —el código de producción llevaba el `track` correcto desde el principio—.
-  SUPERVIVIENTES ACEPTADOS, los tres deliberados: M10 (mover `modoAula` al final de `volcar`) es MUTANTE
-  EQUIVALENTE con datos válidos del contrato —el XOR garantiza que la rama contraria ya viene vacía, así que
-  limpiarla no borra nada—; M13 (quitar la deduplicación intra-plaza del validador) no lo mata nadie porque el
-  escenario es INALCANZABLE desde la UI (un `<select multiple>` no selecciona dos veces la misma opción y el GET
-  proyecta desde un `Set`) → nace deuda de test; M14 (`onlySelf` en `aplicarModo`) predicho y confirmado.
-  M4 — VERIFICACIÓN MECÁNICA con Playwright EFÍMERO sobre Chromium REAL (script fuera del repo en `/tmp`,
-  borrado al terminar, árbol verificado limpio: la suite e2e permanente es el Cambio que CIERRA O-estructura,
-  no andamiaje de una sesión; R-e2e respetada). 18 puntos, 17 PASAN y 1 NO MEDIDO. Lo verificado que importa:
-  se construye una actividad de SEIS plazas desde cero con contenido distinto por fila alternando las dos ramas
-  del XOR, el POST sale 201 y el GET devuelve las seis en el MISMO orden con códigos -P1..-P6 y ramas intactas;
-  el VIAJE DE VUELTA pinta las seis filas con su rama derivada del dato y los `<select multiple>` con su
-  selección REALMENTE marcada en el DOM —el punto que costó trabajo en S108 y que ninguna prueba de unidad
-  había visto en un navegador—; el round-trip sin tocar nada devuelve exactamente lo mismo; quitar la plaza del
-  medio deja CINCO con los códigos -P1..-P5 y el desplazamiento previsto (el código -P3 pasa a describir lo que
-  era la plaza 4: la reconciliación posicional funcionando, y la razón de que el PUT exija 409); las dos capas
-  del mínimo sostienen con clic forzado sobre el botón deshabilitado; e I2 avisa nombrando el subgrupo, no emite
-  petición, y el aviso se limpia tanto corrigiendo el subgrupo como quitando la fila culpable. El catálogo de
-  prueba (ASG-A..F, PRF-A..F, AUL-A..C, SBG-A..F) se sembró por curl y SE CONSERVA: es población útil para el
-  e2e ahora que la BD sobrevive al arranque (S109).
-  VERIFICACIÓN DE USABILIDAD (parte no delegable, porque es la pregunta de riesgo de O-estructura): llegar a
-  seis plazas es TOLERABLE; el número de plaza en el `<legend>` se considera útil, no ruido; quitar una fila del
-  medio hace lo esperado sin que el usuario vea códigos ni ids; y el texto del aviso de I2 se entiende sin
-  releerlo. Las DOS imprecisiones que S109 detectó en la definición del arquitecto —decir «grupo» donde el
-  modelo dice SUBGRUPO, y situar el tramo en la Plaza cuando el tiempo lo pone la Actividad— quedan hoy
-  RESUELTAS por la pantalla. La tosquedad visual se declara consciente y aplazada a O-diseño, por el propio
-  arquitecto. CAVEAT REGISTRADO, intacto desde S109: probar la usabilidad con el AUTOR del modelo es evidencia
-  débil; la pregunta «¿es configurable por un humano?» se cierra en O-demo con el IES real. Lo que sí queda
-  demostrado es que el caso MULTIPLAZA —el interesante— se expresa por formulario sin contorsiones.
-  DEUDA — nace UNA, se afina otra y se cierra un tercio de una tercera (R-deuda: ninguna bloquea el criterio,
-  no se pagan ahora):
-  (1) D-i2-dedup-cliente NUEVA (deuda de TEST, no de código): la deduplicación intra-plaza del validador de I2
-  no la cubre ningún caso (M13 superviviente), y el escenario es inalcanzable desde la UI. Molde
-  D-jornada-flush-test. Cuelga de O-estructura.
-  (2) D-F8.6-ii-a AFINADA con la medición E1 de esta sesión, la PRIMERA desde el navegador y no por curl: el
-  mensaje accionable NO se pierde —viaja como REASON PHRASE de la respuesta HTTP— y lo que falta es la clave
-  `message` en el CUERPO. Es más específico que lo que dejó escrito S109. Deja una pista para su M2 (el cliente
-  podría leer `statusText`) que NO es la solución: HTTP/2 no transporta reason phrases.
-  (3) D-actividad-ux RECORTADA: su síntoma (3) —el aviso de multiplaza dentro de la celda del recuento,
-  mezclando dato y aviso— queda CERRADO de paso al retirar la guarda. Sobreviven los dos primeros: los dos
-  `<select formControlName="asignatura"` sin `id` ni `label for`, y el error de servidor viejo que convive con
-  un error de campo nuevo.
-  (4) D-plaza-sin-subgrupos SIN CAMBIO: el trozo B no la toca, y su spec (8) sigue siendo el que se pondría
-  rojo si alguien añadiera el validador solo en cliente.
-  CORRECCIÓN DOCUMENTAL — dos javadoc que la campaña demostró FALSOS se corrigieron en el código, porque un
-  comentario que afirma algo incierto hace que el siguiente lector decida sobre una premisa falsa: (a) el de
-  `aplicarModo` decía que `{ onlySelf: true }` «desactivaría I2 en silencio», y M14 midió que no —los dos
-  `updateValueAndValidity()` siguientes propagan igual—; se conserva la prohibición, pero declarando que la
-  inocuidad DEPENDE de esas dos líneas. (b) el de `volcar` decía que asignar `modoAula` al final borraría el
-  valor recién escrito, y M10 midió que con datos válidos del contrato eso no puede pasar; se conserva el orden
-  declarando que es defensa y que deja de ser equivalente si el backend devolviera las dos ramas llenas.
-  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó el acabado visual (O-diseño, y el arquitecto
-  lo encuadró él mismo), se frenó el arreglo de D-F8.6-ii-a pese a tener su alcance recién medido, se frenó
-  C-niveles, y se frenó escribir un test para el escenario inalcanzable de M13. Lo que SÍ se hizo dentro del
-  Cambio y no era «pulir»: reescribir (20), porque un caso que parece cubrir la dimensión más cara y no la
-  cubre es peor que no tenerlo.
-  HALLAZGO DE MÉTODO (condensado en M3 de `metodo.md`, no añadido como quinta precisión): en una campaña de
-  mutación, la restauración se verifica por DIFF contra una copia previa, NUNCA por el verde de la suite. En
-  esta sesión un `cp` falló en silencio y el `npm test` posterior dio 249 verdes igualmente, porque la mutación
-  era SUPERVIVIENTE: el conteo confirmó una restauración que no había ocurrido.
-  HIGIENE (M1-bis): archivada S108 a `bitacora-sesiones.md` (promovida a `### Sesión 108`, insertada al final en
-  orden ascendente, cuerpo verificado idéntico por diff, 78 líneas); degradada S109 a «Última sesión registrada
-  (previa)» compacta; S110 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora
-  (→ S10–S108), la crónica de archivado y la frase de ventana del plan.
-  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
-  (mejora de método pendiente desde S101); verificado que los dos commits de código separan producción de tests
-  (`git show --stat` de ambos: 6 ficheros sin ningún `.spec.ts` en el primero, los 2 specs solos en el segundo),
-  que documentación y código van en commits distintos, y que el árbol quedó limpio sin ficheros nuevos ni `.db`.
-  NOTA TÉCNICA para quien vuelva a tocar este formulario: el `track` del `@for` de plazas va POR CONTROL y no
-  por índice, y el caso (20) es su único guardián —pero solo si sus testigos siguen siendo nodos FUERA de todo
-  `@if`; reescribirlo mirando el aula fija devolvería el hueco sin que nadie se entere—. Y todo aserto que
-  accione alta/baja de filas debe hacerlo por CLICK: en zoneless, mutar el FormArray por método no marca la
-  vista sucia, y `detectChanges()` sobre un índice desplazado lanza NG0100.
-  O-estructura (H2) ACTIVO, 4 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110) de varias.
-  C-actividades CERRADO. Siguiente: candidatos vivos son C-niveles (el más barato, BLOQUEA el e2e del criterio
-  de terminado), D-F8.6-ii-a (que sigue dejando mudos todos los formularios entregados), PDC y tutores; lo fija
-  su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -948,8 +904,9 @@ truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bi
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106,
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
-y la de S107 en la Sesión 109, la de S108 en la Sesión 110 y la de S109 en la Sesión 111.
-El plan conserva ahora S110 (degradada a formato compacto) y S111 como única cabecera H3 viva. El detalle
+y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la Sesión 111 y la de S110 en la
+Sesión 112.
+El plan conserva ahora S111 (degradada a formato compacto) y S112 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1943,6 +1900,20 @@ con remisión a la bitácora.
   cliente podría leer `err.statusText`, pero HTTP/2 no transporta reason phrases, así que un arreglo por esa vía
   sería frágil justo donde acabará estando el despliegue. El M2 sigue pendiente y sigue teniendo tres opciones
   (reactivar la clave, `ProblemDetail`, traducir en cada controlador).
+  **AFINADA (S111).** CONTRADICCIÓN DOCUMENTAL en el repo: el javadoc de `asignatura-lista.ts` afirma que
+  `server.error.include-message=always` y el de `horario-view.ts` afirma que está DESACTIVADO. El comportamiento
+  observado en navegador —«Conflict» crudo en el 409 de borrado de nivel— dio la razón al segundo. Confirmada
+  además en el octavo formulario: la lista de niveles nace muda.
+  **AFINADA (S112), y esto DESMIENTE la conclusión anterior: EL PUNTO DE PARTIDA DE SU M2 ES ESTE, NO EL DE
+  S111.** Medido por lectura literal de `app/src/main/resources/application.properties`: la clave
+  `server.error.include-message=always` SÍ ESTÁ PRESENTE, y con un comentario propio que explica por qué se puso
+  («sin esto la UI solo ve el status y no puede decir QUIÉN impide un borrado ni por qué se rechaza un alta») y
+  que declara además por qué los tests no lo notan («status().reason() lee getErrorMessage() del response, no
+  los error attributes que gobierna esta clave»). Es decir: el javadoc de `horario-view.ts` describe bien el
+  SÍNTOMA y mal la CAUSA, y la hipótesis viva pasa a ser que la clave está puesta y NO surte efecto —lo que
+  refuerza la sospecha de cambio de comportamiento en Spring Boot 4, todavía SIN MEDIR—. Su M2 debe EMPEZAR
+  comprobando en ejecución si la clave se aplica, antes de elegir entre las tres opciones: si la respuesta es
+  que no se aplica, la primera opción («reactivar la clave») desaparece del abanico.
 
 - **D-F8.6-ii-b** (S81, VIVA, HUECO FUNCIONAL, no bloqueante) — NO HAY GESTO DE DESPINAR. El
   arrastre crea pines y el aviso los cuenta, pero la UI no ofrece forma de quitarlos:
@@ -2344,6 +2315,55 @@ con remisión a la bitácora.
   no de código, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar a mano un estado que el
   sistema no produce; dejaría de ser inalcanzable si algún día el formulario permitiera teclear códigos.
   Cuelga de O-estructura. No se paga ahora.
+
+- **D-doble-proyeccion-compartido** (S112, VIVA, DEUDA DE TEST, no bloqueante) — EL DOBLE DE `getProyeccion`
+  ES UN SUBJECT COMPARTIDO Y YA ES EL ÚLTIMO. En `horario-view.spec.ts` los dobles de los colaboradores se
+  reparten en dos familias: FRESCOS POR INVOCACIÓN, guardados en una variable (`bloqueos.listar` →
+  `ultimoListar`, migrado en S99 por D-F8.6-ivD-b; `bloqueos.guardar`, `bloqueos.borrar` y `horario.generar`,
+  migrados en S94), y SUBJECT COMPARTIDO creado una vez en el `beforeEach` (`getProyeccion`,
+  `getDiagnostico`, `getPrevalidacion`, `Dialog.open`). La forma compartida tiene una trampa conocida y ya
+  pagada tres veces: un Subject cerrado por `.error()` REDISPARA el error síncronamente al re-suscribirse, así
+  que ningún caso puede encadenar FALLO → RECARGA sobre ese colaborador. En S112 mordió por primera vez en
+  `getProyeccion`: el caso (40) arranca con la proyección en 404 —que es el escenario real: BD vacía— y la
+  recarga posterior recibía el mismo Subject muerto. Se PARCHEÓ con un re-stub LOCAL al caso (un Subject nuevo
+  inyectado con `mockImplementation` dentro del (40), con javadoc que explica por qué existe), y NO
+  homogeneizando el doble, porque migrarlo tocaría los 25 casos vigentes que lo consumen —superficie probada
+  que el Cambio de S112 no pedía (R-terminado)—. Cuelga de O-ajuste-cierre: es superficie de specs de la vista
+  de horario, que es H1. Deja de ser aplazable en cuanto un SEGUNDO caso necesite encadenar fallo→recarga sobre
+  proyección: entonces el parche local se convierte en duplicación y toca migrar. No se paga ahora.
+
+- **D-e2e-retry-bd** (S112, VIVA, TÉCNICA REAL, no bloqueante HOY) — UN REINTENTO DE PLAYWRIGHT CORRERÍA SOBRE
+  LA BD DEL INTENTO FALLIDO. `playwright.config.ts` declara `retries: process.env['CI'] ? 2 : 0`, y el borrado
+  de la base (`rm -f app/educhronos-e2e.db*`) vive en el `command` del `webServer`, que Playwright ejecuta UNA
+  VEZ al arrancar la corrida, no por test ni por reintento. Consecuencia: en CI, un reintento del spec del
+  centro mínimo encontraría el centro ya creado y moriría en el primer alta con un 400 de código duplicado, es
+  decir, por una causa DISTINTA de la que hizo fallar el intento original —que es la peor forma de fallar:
+  esconde el diagnóstico—. En local no aplica (`retries: 0`). Hoy no bloquea nada porque NO HAY CI: la Fase 12
+  (CI/CD con GitHub Actions) está sin abrir. → resolver cuando se abra la Fase 12, y el arreglo natural es
+  mover la limpieza a un punto que corra por intento (un `beforeEach` que trunque las tablas por API, o un
+  `globalSetup` combinado con `retries: 0` para este spec). No se paga ahora.
+
+- **D-e2e-aislamiento** (S112, VIVA, TÉCNICA REAL, no bloqueante HOY) — LA SUITE e2e NO TIENE AISLAMIENTO ENTRE
+  SPECS Y CORRE EN PARALELO. `fullyParallel: true` sin `workers` explícito reparte los ficheros de spec entre
+  varios workers, que atacan el MISMO backend y la MISMA BD (el `webServer` se levanta una sola vez para toda
+  la corrida, no por worker). Hoy es INOCUO y por una razón concreta, no por suerte: de los dos specs, `humo`
+  solo LEE —su aserto es el párrafo de la landing, que no emite ninguna llamada a `/api`— y `centro-minimo` es
+  el único que escribe. El riesgo es futuro y llegará con el TERCER spec: dos writers concurrentes sobre un
+  SQLite único, sin limpieza entre tests, chocarán por los `unique` de código (`nivel.codigo`,
+  `grupo_administrativo.codigo`, …) de forma no determinista, que es la clase de fallo intermitente que
+  desprestigia una suite e2e entera. → decidir al escribir el segundo spec que escriba: o `fullyParallel:
+  false`, o códigos únicos por worker (`test.info().parallelIndex`), o una BD por worker. No se paga ahora.
+
+- **D-props-test-obsoleto** (S112, VIVA, DE DOCUMENTACIÓN, no bloqueante) — EL `application.properties` DE TEST
+  AFIRMA UNA PREMISA FALSA DESDE S109. `app/src/test/resources/application.properties` dice: «schema.sql dropea
+  y recrea, de modo que varios contextos Spring sobre este mismo fichero de test recrean el esquema con FK sin
+  petar». S109 retiró los `DROP` de `schema.sql` (hoy son 21 `create table if not exists`) para que la
+  aplicación dejara de vaciar la BD del usuario en cada arranque, y esa retirada invalidó el comentario sin que
+  nadie lo tocara. Es la MISMA falsedad que S112 corrigió en `playwright.config.ts`; su hermana quedó viva.
+  Riesgo real hoy: bajo pero no nulo —la suite de backend corre sobre `educhronos-test.db`, que sí se limpia por
+  otra vía, así que el efecto es de lectura, no de ejecución—; el daño es que el siguiente lector decida sobre
+  una premisa falsa, exactamente el patrón que ya nos costó una sesión. R5: es estado vivo equivocado.
+  → corregir el comentario la próxima vez que se toque ese fichero. No se paga ahora.
 
 - **D-subgrupo-ux-multiselect** (S108, VIVA, MEJORA PLANIFICADA, no bloqueante) — EL CAMPO «GRUPOS» DEL
   FORMULARIO DE SUBGRUPO ES UN `<select multiple>` NATIVO. `subgrupo-form` (C-subgrupos, S108) puebla la
