@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S108. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S109. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S108). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S109). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -5403,3 +5403,183 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   O-estructura, C-actividades —el editor de Actividad con Plazas embebidas, backend `/api/actividades` ya existe;
   es el formulario de mayor riesgo del objetivo (valida si Actividad→Plaza→Subgrupo es configurable por un
   humano), ahora desbloqueado porque los subgrupos ya son creables por UI—. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 109 — O-estructura (H2): C-actividades, tercer Cambio, entra TROCEADO (trozo A). Suelo de persistencia + guarda 409 del PUT (Desarrollo) + editor de Actividad de una plaza (Config/UI, M3 en XOR y multiselects). NO cierra el objetivo.
+  Novena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo (fases 0 y 1, backend con lógica)
+  + Configuración/UI con M3 real (fase 2, el XOR de aula y los tres multiselects). TERCER Cambio de
+  O-estructura: lo AVANZA, no lo cierra. O-estructura sigue ACTIVO —su criterio (8 tipos de sesión
+  configurables + casos de validación §6 del modelo + e2e UI→solver heredado) exige aún el trozo B de
+  actividades, PDC, tutores, el CRUD de Nivel por UI (hueco descubierto en esta sesión) y el e2e—.
+  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), ACTIVO desde S107 con
+  2 piezas hechas (C-jornada S107, C-subgrupos S108). Hito = H2. Cambio = C-actividades, nombrado por el
+  M1-ter de S108 y correspondiente al «editor de demanda curricular» de §3. R-invalidación sin conflicto
+  (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda: ninguna deuda abre la sesión.
+  DOS AVISOS levantados en el propio M0 y confirmados después por medición: (1) posible hueco de Nivel sin UI
+  con el seed ya retirado; (2) hipótesis de que «desdobles/agrupamientos» no es un Cambio propio sino
+  contenido de una Actividad multiplaza.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL, dos investigaciones encadenadas antes de teclear; informe
+  íntegro consumido y volcado aquí, el fichero suelto `informe-m2-s109.md` NO se commiteó).
+  (1) CONTRATO: `ActividadRequest(codigo, asignatura?, duracionTramos, repeticionesPorSemana, patronTemporal,
+  requiereTutor, plazas[])` y `PlazaRequest(asignatura, aulaFija, aulasCandidatas[], profesores[],
+  subgrupos[])`, todas las referencias por CÓDIGO, `patronTemporal` como String por el patrón de borde D-3.
+  `PlazaRequest` SIN id y SIN codigo a propósito: el código de plaza lo deriva el servicio como
+  `{codigoActividad}-P{n}` y es inestable entre ediciones. 21 validaciones en `ActividadService`, todas
+  medidas con su mensaje literal y su HTTP. 26 tests en `ActividadEndpointTest` = catálogo de lo que el
+  formulario debe poder producir. (2) HUECO REAL DEL CONTRATO: NO existe validación de mínimo de subgrupos —
+  una plaza con cero subgrupos devuelve 201—. (3) `roundTrip_bloqueSeisPlazas` CONFIRMA el aviso (2) del M0:
+  un desdoble/agrupamiento ES una actividad multiplaza, no una entidad ni un campo `tipo` (§4.6 del modelo lo
+  dice explícitamente). (4) HUECO DE NIVEL CONFIRMADO: sin seed, sin `data.sql`, sin migración, sin runner y
+  sin `insert` en `schema.sql`; `nivel.service.ts` solo tiene `listar()`; no existe `components/niveles/`.
+  Con BD vacía NO se puede crear un Grupo por UI ⇒ ni Subgrupo ⇒ las plazas se quedan sin población. Bloquea
+  el e2e, que es la tercera pata del criterio de O-estructura. (5) Los cuatro listados que el formulario
+  necesita (asignaturas, profesores, aulas, subgrupos) ya existen con cliente Angular; no hace falta ningún
+  endpoint nuevo. `aulas-compatibles` devuelve TIPOS de aula, no aulas, y no está cableado. (6) No existe
+  precedente de `FormArray` con alta/baja de filas: el único del repo (`jornada`) es de longitud FIJA.
+  MEDICIÓN EN SEGUNDA VUELTA (tres comprobaciones pedidas tras el primer informe, dos de lectura y una de
+  ejecución): (7) el `PUT /api/actividades/{id}` NO tenía guarda ante dependientes —los tres conteos y el 409
+  solo estaban en `borrar`—; (8) `Sesion` y `AulaBloqueada` referencian a `Plaza` POR ID DE FILA
+  (`sesion.plaza_id`, `aula_bloqueada.plaza_id`, ambas RESTRICT), nunca por código; (9) MEDIDO EN EJECUCIÓN:
+  un nivel creado por API sobrevivía al apagado y DESAPARECÍA en el siguiente arranque — la aplicación vaciaba
+  la BD en cada inicio.
+  DECISIONES DEL ARQUITECTO (tras medir): (a) el corte de C-actividades es en DOS trozos, no tres: trozo A =
+  cadena completa (modelo, servicio, lista, formulario) con `FormArray` de longitud FIJA 1 desde el principio,
+  para que el trozo B sea un delta y no una reescritura; trozo B = abrir el array + I2 en cliente. Se descartó
+  el corte «lista sola primero»: una lista de actividades sin formulario muestra una tabla permanentemente
+  vacía, no es valor utilizable, y rompe el molde del repo (lista y form se han entregado siempre juntos).
+  (b) RECONCILIACIÓN POSICIONAL DEL PUT: primero se aceptó y luego se REVOCÓ al medir (8). El razonamiento
+  inicial —«el código de plaza es interno, nada externo empareja por él»— era cierto e irrelevante: los
+  dependientes emparejan por id de fila, y la reconciliación MUTA las filas vivas conservando id, así que
+  eliminar una plaza intermedia deja una `Sesion` describiendo una plaza cuyo contenido ha cambiado, sin error
+  ni aviso. Se aplica el precedente de C-jornada (S107): guarda 409 ante cualquier dependiente. Reconciliar por
+  identidad (añadir `id` a `PlazaRequest`) DESCARTADO: más trabajo, reabre una pregunta de producto ya cerrada
+  y seguiría necesitando la guarda por las FK RESTRICT. (c) plaza con cero subgrupos: el formulario REFLEJA el
+  contrato y NO añade un validador que el backend no tiene (deuda registrada). (d) no se filtran las aulas por
+  I3 en cliente: habla el 400 del backend, que ya nombra asignatura, aula, tipo y tipos compatibles. (e)
+  C-niveles FUERA de esta sesión: se registra como Cambio de O-estructura y se ejecuta pegado al e2e, que es
+  quien lo necesita; los niveles de prueba se crean por `curl`.
+  FASE 0 — SUELO DE PERSISTENCIA (Desarrollo). `schema.sql` deja de ser idempotente POR DEMOLICIÓN y pasa a
+  serlo por `if not exists`: eliminadas las 21 sentencias `drop table if exists`, las 21 `create table` pasan a
+  `create table if not exists`, cuerpos idénticos byte a byte y en el mismo orden (verificado por diff de los
+  21 cuerpos). Cero índices/vistas/triggers en el fichero, así que no había más DDL que convertir. Corregidos
+  los comentarios de `schema.sql` y de `application.properties` que describían la demolición.
+  `spring.sql.init.mode=always` se CONSERVA (SQLite no se detecta como BD embebida; `never` dejaría sin esquema
+  una instalación limpia). PRECIO CONSCIENTE: la demolición era también el mecanismo de migración de facto; sin
+  ella un cambio de esquema deja de aplicarse solo (borrar el `.db` en desarrollo; la migración real es asunto
+  de H4). Verificado en EJECUCIÓN: dato creado → reinicio → sigue ahí; y con el `.db` apartado, la aplicación
+  levanta y crea el esquema desde cero. Suite verde a la primera (app 259, solver 91): el riesgo anunciado de
+  contaminación entre tests por dejar de dropear NO se materializó (`@DataJpaTest` aísla por transacción).
+  Commit: `fix(app): schema.sql deja de dropear las tablas en cada arranque, la BD ya no se vacia al iniciar`
+  (`d301b64`).
+  FASE 1 — GUARDA 409 EN EL PUT DE ACTIVIDAD (Desarrollo, M3 real). La comprobación de dependientes que vivía
+  inline en `borrar` se EXTRAE a `exigirSinDependientes(id, accion)` y se llama también desde `editar`,
+  INMEDIATAMENTE tras el `findById` que da el 404 y ANTES de cualquier validación: si la actividad no se puede
+  editar, ningún arreglo del cuerpo lo cambia, luego el 409 domina sobre el 400 y el 404 domina sobre todo.
+  `ReferenciaEntranteException` llevaba el verbo «borrar» HARDCODEADO en el mensaje: se parametriza la acción
+  (ctor de un argumento delega en «borrar», mensaje del DELETE intacto y sus tests verdes; ctor de dos toma el
+  verbo), y el PUT emite «No se puede editar: referenciada por…». HUBO QUE TOCAR EL CONTROLADOR: el 409 estaba
+  cableado SOLO en `borrar` mediante try/catch (no hay `@ControllerAdvice`, convención de S74), así que en el
+  PUT la excepción habría escapado como 500. Reescritos los javadoc de `editar` y de `reconciliarPlazas`: el
+  emparejamiento posicional deja de ser «decisión de UX provisional a confirmar en Fase 8.6» y pasa a ser
+  decisión tomada, segura PORQUE la guarda impide que existan referentes cuando se reconcilia. Guarda ROMA a
+  propósito (rechaza también un renombrado inocuo), igual que la de jornada. Suite app 259→261. Commit:
+  `feat(app): el PUT de actividad rechaza con 409 si tiene horario o bloqueos colgando` (`0e716c1`).
+  VERIFICACIÓN POR MUTACIÓN de la fase 1 (contraste de Claude Code, no afirmado): quitar la guarda de `editar`
+  → caen los dos tests nuevos (y el PUT «inocuo» sobre actividad con travesía devolvía 200 mutando la plaza
+  referenciada: el agujero era real, no teórico); mover la guarda al final de las validaciones → cae SOLO el
+  test de orden, que es el que demuestra que la precedencia está protegida; guarda contando solo sesiones →
+  caen dos por el desglose, luego el aserto no es laxo. Desviación consciente y aceptada: no se escribió test
+  nuevo de PUT sobre id inexistente porque `edicion_inexistente_404` ya lo es, y ese caso NO discrimina la
+  posición de la guarda (un id inexistente no tiene dependientes: los conteos darían 0 y el 404 saldría igual).
+  FASE 2 — C-ACTIVIDADES TROZO A (Configuración/UI, M3 en XOR y multiselects). 10 ficheros nuevos:
+  `models/actividad.model.ts` (4 interfaces simétricas a los records Java + `PATRONES_TEMPORALES`),
+  `services/actividad.service.{ts,spec.ts}` (5 wrappers pelados, molde `subgrupo.service.ts`),
+  `components/actividades/actividad-lista.{ts,html,css,spec.ts}` y `actividad-form.{ts,html,css,spec.ts}`.
+  Cabecera con asignatura OPCIONAL (opción vacía → null) y patrón como `<select>` de tres valores. La plaza
+  nace DENTRO de un `FormArray` de longitud fija 1 (molde `jornada`), sin botones de alta/baja: eso es el
+  trozo B. XOR resuelto con un control de UI `modoAula` ('FIJA'|'CANDIDATAS') que NO viaja al backend, decide
+  qué rama valida y limpia la contraria al cambiar; en edición se DERIVA del dato (`aulaFija != null`). Tres
+  multiselects molde `subgrupo-form`: profesores con `arrayNoVacio` (I7), candidatas con `arrayNoVacio` solo
+  en su rama, subgrupos SIN validador (decisión (c)). GUARDA DE MULTIPLAZA en la lista, que es la pieza que
+  hace honesto entregar el trozo A por separado: si `plazas.length > 1` el botón de editar va deshabilitado Y
+  el método `editar()` no abre el diálogo (dos capas), porque un formulario de una plaza que abriera una
+  actividad de seis enviaría una plaza y la reconciliación posicional BORRARÍA las otras cinco. El borrado sí
+  se permite en multiplaza (es íntegro). Cableado en Configuración con una línea en `imports:` y una etiqueta,
+  sin tocar los hermanos. Suite vitest 206→239 (+33: servicio 5, lista 11, formulario 16, configuración 1);
+  backend intacto 261/91. Commits: `feat(frontend): contrato de actividad, modelo y servicio sobre
+  /api/actividades` (`e0e41fe`), `feat(frontend): lista y formulario de actividad de una plaza con XOR de aula
+  y multiselects` (`9ef160f`), `feat(frontend): monta la lista de actividades en la seccion de Configuracion`
+  (`85f93e2`).
+  VERIFICACIÓN POR MUTACIÓN de la fase 2 (siete mutaciones, todas tumbaron tests): quitar `arrayNoVacio` de
+  profesores; enviar siempre ambas ramas del XOR; no limpiar la rama anterior al cambiar de modo; AÑADIR
+  `arrayNoVacio` a subgrupos (cae el caso que demuestra que cero subgrupos es aceptable: la decisión (c) está
+  medida, no solo escrita); quitar la guarda de multiplaza (caen DOS, una por capa); `ngOnInit` deja de pedir
+  `/api/aulas` (caen los 16 del formulario ⇒ el helper de montaje flushea bien las CUATRO peticiones de red).
+  La séptima (perder `requiereTutor` en el PUT) la ataja el TIPO antes de compilar —cobertura del compilador,
+  no del spec, mismo fenómeno que el NG8001 de S102—; la variante que sí compila cae en un test.
+  M4 — VERIFICACIÓN MECÁNICA conducida con Playwright EFÍMERO (script fuera del repo, en /tmp, borrado al
+  terminar y árbol verificado limpio: la suite e2e permanente es el Cambio que CIERRA O-estructura, no
+  andamiaje de una sesión; R-e2e respetada). 18 puntos, 17 PASAN. Lo verificado que importa: el XOR va y
+  vuelve con `aulaFija: null` EXACTO (no cadena vacía) y el `<select multiple>` de candidatas reconcilia el
+  array al reabrir —el punto que costó trabajo en S108—; ningún cuerpo lleva la clave `modoAula`; el clic
+  FORZADO sobre el editar deshabilitado no abre el formulario ni emite petición (las dos capas sostienen); sin
+  profesor NO sale ninguna petición; sin subgrupos SÍ sale y responde 200; y el dato sobrevive al reinicio del
+  backend, que hasta esta sesión era imposible. `repeticiones = 0` lo corta el cliente (`Validators.min(1)`),
+  así que la validación equivalente del backend queda como segunda línea inalcanzable desde la UI.
+  VERIFICACIÓN DE USABILIDAD (la única parte no delegable, porque es la pregunta de riesgo de O-estructura):
+  el arquitecto define «plaza» y entiende duración/repeticiones sin ayuda, y considera soportables los
+  multiselects y útil el aviso de multiplaza. DOS IMPRECISIONES en su definición que señalan dónde la pantalla
+  calla: dijo «grupo» donde el modelo dice SUBGRUPO, y situó el tramo en la Plaza cuando el tiempo lo pone la
+  Actividad. CAVEAT REGISTRADO: probar la usabilidad con el AUTOR del modelo es evidencia débil; la pregunta
+  «¿es configurable por un humano?» no se cierra aquí, se cierra en O-demo con el IES real. Lo que sí queda
+  demostrado es que el modelo SE PUEDE EXPRESAR por formulario sin contorsiones.
+  DEUDA — nace deuda registrada (R-deuda: ninguna bloquea el criterio del trozo A, no se pagan ahora):
+  (1) D-plaza-sin-subgrupos (TÉCNICA REAL, no bloqueante): el backend acepta una plaza con cero subgrupos y
+  devuelve 201; una plaza sin población es una sesión a la que no asiste nadie. Cuelga de O-estructura. Se
+  decidió NO poner el validador solo en cliente: una regla que el contrato no tiene diverge y engaña.
+  (2) D-actividad-ux (MEJORA PLANIFICADA): dos `<select formControlName="asignatura"` en el mismo formulario
+  sin `id` ni `label for` —se anuncian igual a un lector de pantalla y hay que desambiguarlos por ancestro—;
+  el error de servidor viejo convive con un error de campo nuevo (`error()` solo se limpia al empezar una
+  petición); el aviso de multiplaza vive dentro de la celda del recuento. Candidata a absorberse en O-diseño.
+  (3) AMPLIADA D-F8.6-ii-a (ver su texto en la sección de deuda viva): los 400/409 llegan al navegador SIN
+  `message` y la UI pinta «Bad Request». Medido por curl en tres endpoints distintos, fuera de la UI. Afecta a
+  TODOS los formularios existentes y deja MUDO el 409 que esta sesión acaba de construir. La causa (cambio de
+  comportamiento de `server.error.include-message` en Spring Boot 4) es HIPÓTESIS NO MEDIDA. Hallazgo de
+  MÉTODO asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y
+  no el cuerpo que viaja por la red — verde en test, mudo en producción, durante meses.
+  (4) D-jornada-msg409 NO se cierra pero baja de coste: la fase 1 parametrizó el verbo de
+  `ReferenciaEntranteException`, así que corregir el mensaje de jornada pasa a ser cambiar el ctor de uno a
+  dos argumentos. `JornadaService` sigue usando el de un argumento y el usuario sigue leyendo «No se puede
+  borrar» al GUARDAR.
+  (5) NACE C-niveles como Cambio de O-estructura (no deuda): sin UI de niveles no hay grupos, ni subgrupos, ni
+  población para las plazas, y el e2e del criterio de terminado es inejecutable. Backend completo desde S70,
+  molde plano de catálogo, el más barato del repo. NO se metió aquí para no diluir el foco de riesgo.
+  CORRECCIÓN DOCUMENTAL — una sola, y NO las dos que se anunciaron. Se comprobó contra el fichero que el plan
+  YA estaba correcto en las otras dos: la integridad referencial figura ACTIVA desde S73/S74 con
+  `D-F8.5-A-a` CERRADA (la afirmación de que las FK de SQLite estaban apagadas vive solo en la entrada
+  ARCHIVADA de S72, y lo archivado no se corrige), y el conteo del solver que registra el plan (91) es el
+  correcto frente al grep de 97 (que cuenta también los `@Tag("escala")`, fuera del perfil por defecto). La
+  corrección real es la de D-F8.6-ii-a: decía que `server.error.include-message` «no está en
+  `application.properties`», y hoy sí está sin que el mensaje viaje.
+  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó el filtrado I3 en cliente, se frenó el
+  validador de subgrupos, se frenó la guarda 409 «fina» (comparar la forma de la lista de plazas para permitir
+  renombrar con horario vivo), se frenó C-niveles y se frenó el arreglo de D-F8.6-ii-a pese a que degrada el
+  409 recién construido: elegir entre reactivar la clave, `ProblemDetail` o traducir en cada controlador
+  necesita su propio M2. La petición del arquitecto de mejorar el aspecto de la aplicación se remitió a
+  O-diseño (§3), que existe precisamente para que la maquetación no se cuele a trozos dentro de otros
+  objetivos; se le recordó su salvedad de prioridad (si hay demo a cliente o al IES antes de cerrar H2, sube).
+  HIGIENE (M1-bis): archivada S107 a `bitacora-sesiones.md` (promovida a `### Sesión 107`, insertada al final
+  en orden ascendente, cuerpo íntegro); degradada S108 a «Última sesión registrada (previa)» compacta; S109
+  queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S107), la crónica de
+  archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los cinco commits de código separan por fase
+  (`git log --oneline 29f0f84..HEAD`), que documentación y código van en commits distintos y que ningún `.db`
+  ni el `informe-m2-s109.md` suelto entraron en el árbol.
+  NOTA TÉCNICA para el e2e que cerrará O-estructura: la aplicación es ZONELESS (Angular 21 sin
+  `provideZoneChangeDetection` ni polyfill de zone.js), así que el DOM repinta en el frame siguiente al clic;
+  leer el DOM en el mismo tick da falsos rojos. Los asertos deben ser con reintento (`expect(...).toHaveCount()`).
+  Además, `testDir` apuntando a `/tmp` hace que Playwright escanee el directorio entero y muera con EACCES, y
+  no sigue symlinks al descubrir tests.
+  O-estructura (H2) ACTIVO, 3 piezas hechas (jornada S107, subgrupos S108, actividades trozo A S109) de
+  varias. Siguiente: candidatos vivos son el trozo B de actividades, D-F8.6-ii-a (que dejaría de ser mudo el
+  409 recién construido) y C-niveles; lo fija su propio M0 (ver M1-ter).

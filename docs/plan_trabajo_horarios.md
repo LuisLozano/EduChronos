@@ -624,7 +624,142 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 110 — O-estructura (H2): C-actividades, trozo B. CIERRA C-actividades. Lista de plazas variable con alta/baja e I2 en cliente (Config/UI, M3 real). NO cierra el objetivo.
+### Sesión 111 — O-estructura (H2): C-niveles. CRUD de Nivel por UI + recorrido completo del centro mínimo en navegador (Config/UI, sin M3). NO cierra el objetivo.
+  Undécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI SIN M3 (no hay lógica: dos campos y
+  binding; la única regla de cliente es un `required`), UN SOLO MÓDULO (frontend), backend con CERO trabajo.
+  QUINTA pieza de O-estructura. Lo que ENTREGA: con niveles creables por pantalla, las NUEVE filas del centro
+  mínimo —Nivel, Grupo, Subgrupo, Profesor, Asignatura, Aula, ≥1 tramo lectivo, Actividad, Plaza— son
+  construibles por UI y el solver produce horario a partir de ellas. Hasta hoy la cadena se rompía en la
+  PRIMERA fila. O-estructura sigue ACTIVO: su criterio exige aún PDC, tutores y el e2e UI→solver heredado.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 4
+  piezas hechas. Hito = H2. Cambio = C-niveles. R-invalidación sin conflicto (O-diseño depende de H2 cerrado y
+  repinta, no reestructura). Los CUATRO candidatos vivos se pesaron por dependencias: C-niveles gana por ser el
+  ÚNICO del que dependen los demás —el e2e necesita las nueve filas creables y Nivel era la única sin
+  formulario; PDC y tutores no desbloquean nada—. D-F8.6-ii-a queda fuera por R-deuda (su ficha dice que no
+  bloquea el criterio) y no la rescata el e2e, porque R-e2e prohíbe probar ramas de error en navegador.
+  DECISIÓN DE ENCUADRE: se REVISA la decisión (e) de S109, que fijó C-niveles pegada al e2e, y se separan. Tres
+  razones, la primera es dependencia técnica real: (1) el e2e no puede escribirse antes de que exista el
+  formulario cuyos selectores y flujo necesita; (2) perfiles de riesgo opuestos —molde validado cinco veces
+  frente al primer test de navegador del proyecto, con dos trampas ya documentadas—, y pegarlos deja que el
+  desbordamiento del segundo se lleve por delante la entrega del primero; (3) ni juntos cierran el objetivo.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL antes de teclear, informe por bloques A-F). Confirmó lo
+  esperado y afinó lo que decidía el alcance. (1) El CRUD de Nivel es réplica fiel del molde plano de
+  Asignatura y MÁS BARATO: cinco endpoints, 13 casos en `NivelEndpointTest` con servicio real sobre SQLite,
+  guarda 409 en el borrado, y SIN el sub-recurso `aulas-compatibles` que Asignatura arrastra. Backend con cero
+  trabajo. (2) NO hay enum ni lista blanca: el formulario son dos campos, descartado el molde de Aula. (3) UN
+  ÚNICO referente, `grupo_administrativo.nivel_id`, verificado por FK en `schema.sql` y por relación JPA: el 409
+  muestra un solo conteo. (4) DESVIACIÓN REAL DEL MOLDE: `orden` es `int` PRIMITIVO sin ninguna validación de
+  servidor —ni rango, ni positividad, ni unicidad—, así que un cuerpo sin la clave deserializa a 0 EN SILENCIO
+  y nadie lo detecta; el servidor no puede distinguir «ausente» de «cero». (5) `listar()` ordena por `orden`
+  (D-1) en el servicio, no en el repositorio, y el test `listar_ordenaPorOrdenNoPorCodigo` lo blinda con orden
+  numérico cruzado con el alfabético. (6) `nivel.model.ts` y `nivel.service.ts` YA EXISTÍAN con javadoc que
+  declaraba explícitamente que el CRUD no se expone en la UI y que añadir wrappers sería «código muerto».
+  DECISIÓN sobre `orden`, la única de la sesión: el formulario pone `Validators.required` y NADA MÁS —ni `min`,
+  ni rango, ni unicidad—. No contradice la decisión (c) de S109 (el formulario refleja el contrato): lo que
+  aquélla prohíbe es RECHAZAR cuerpos que la API acepta, y `required` no restringe qué valor es válido (0 sigue
+  siendo aceptable), solo impide enviar uno que el usuario no ha elegido. Derivada: el control es
+  `FormControl<number | null>` y NO `nonNullable`, para que el campo NAZCA VACÍO —el equivalente numérico del
+  `''` de un campo de texto es `null`; un inicial de 0 o de 1 sería un orden decidido por el formulario—.
+  DECISIÓN sobre la asimetría PUT/DELETE: el M2 la levantó (el DELETE guarda ante dependientes, el PUT no) y se
+  cierra el juicio en contra de tocarla: renombrar el código de un nivel con grupos colgando NO corrompe nada
+  porque la FK es por id, es lo que un renombrado debe hacer, y el molde comparte la asimetría (Asignatura
+  tampoco guarda en el PUT). No es deuda; es decisión consciente.
+  FASE 1 — MODELO Y SERVICIO. `nivel.model.ts` gana `NivelRequest`; `nivel.service.ts` pasa de un wrapper a los
+  cinco. Los javadoc de AMBOS se reescriben: afirmaban lo contrario de lo que el Cambio entrega, y un
+  comentario falso hace que el siguiente lector decida sobre una premisa falsa (hallazgo aplicado de S110).
+  `nivel.service.spec.ts` de 1 a 5 casos, con el (1) conservando la intención original —congela que el cliente
+  NO reordena— sobre un fixture cuyo orden pedagógico contradice al alfabético. Suite 249 → 253.
+  `grupo-form.spec.ts` intacto en 11: el contrato HTTP no se movió, solo creció la superficie del cliente.
+  Commits `71e5305` (producción) y `be9110f` (tests).
+  FASE 2 — FORMULARIO Y LISTA. Ocho ficheros nuevos en `components/niveles/`, calcados del molde salvo la
+  desviación de `orden`. La lista NO ordena en cliente y aquí no es solo regla de molde: reordenar por `codigo`
+  pondría 1BACH antes que 1ESO y destruiría el único criterio que el campo `orden` existe para expresar. Suite
+  253 → 266. Commits `b6dbd6d` (producción, 6 ficheros sin ningún `.spec.ts`) y `06fb70c` (los 2 specs solos).
+  FASE 3 — CABLEADO. Tres líneas en `Configuracion` (import, entrada en `imports:`, etiqueta) más un caso (8),
+  con la lista de niveles ANTES de la de grupos porque el orden de la plantilla sigue el orden de alta. Salen
+  DOS desviaciones respecto a lo previsto, ambas medidas por Claude Code y no supuestas: (a) `configuracion.ts`
+  tenía un javadoc de 35 líneas que el dictado no incluía —se conservó íntegro y se corrigió por separado—; (b)
+  `configuracion.spec.ts` NO usa `HttpTestingController` ni helper de montaje compartido: dobla los servicios
+  por `useValue` con `of([])`, así que la cascada de `http.verify()` que se anticipó no podía ocurrir. Suite
+  266 → 267. Commits de producción, de test y `docs(frontend)` para el javadoc: TRES commits en vez de los dos
+  del patrón de S110, por haber descubierto el javadoc desfasado después de dictar el fichero.
+  DECISIÓN sobre el javadoc de `Configuracion`: niveles NO es una quinta entidad de O-catálogo. Ese objetivo
+  cerró en S106 con su censo de cuatro y reabrirlo violaría R-terminado; la sección de niveles es un Cambio de
+  O-estructura que resulta tener la misma forma de UI. Por eso las dos frases del javadoc que declaran el censo
+  de cuatro y el 4/4 se conservaron LITERALES y la corrección fue aditiva.
+  M4 — CAMPAÑA DE MUTACIÓN (Claude Code, siete mutaciones, protocolo de restauración verificada por diff).
+  Cuatro mueren: quitar el `required` de `orden` (lo mata el (7) del form, que no aserta ninguna petición y se
+  apoya en el `http.verify()` del `afterEach`), nacer con 0 en vez de null, añadir `min(1)`, y ordenar la lista
+  por `codigo` en cliente. Tres sobreviven, y el análisis de los tres CORRIGE la predicción del arquitecto:
+  (a) M6 —invertir la precedencia de `mensaje()` en la lista— no podía morir por el caso del formulario, porque
+  hay DOS funciones `mensaje()` copiadas a propósito y NO compartidas: son funciones distintas. La premisa
+  falsa venía del javadoc de `asignatura-lista.spec` («cubierto en el form, misma función»), que se propagó sin
+  verificar. Se arregla añadiendo la clave `error` al cuerpo flusheado del caso (4), que pasa a medir texto rico
+  Y precedencia sin caso nuevo; re-verificado por mutación dirigida: muere, y solo ese caso. (b) M5 (`=== true`
+  laxo) y M7 (`track $index`) son MUTACIONES EQUIVALENTES y se dejan vivas con razón escrita en el javadoc del
+  spec: `NivelForm` cierra con `true` o sin argumento, nunca con `false`, y las filas de la lista no tienen
+  estado en el DOM. Matarlas exigiría fabricar escenarios que el sistema no produce —mismo criterio que
+  D-i2-dedup-cliente—. Lo que SÍ se añadió, por laguna de cobertura frente al molde S108 y no por mutación:
+  los casos (6) y (7), que ejercitan `abrirForm`, código que este Cambio entrega y que nadie tocaba. Suite
+  267 → 269. Commit `287c7d1`.
+  HALLAZGO DE MÉTODO: con una mutación que deja peticiones HTTP abiertas, el `afterEach` que lanza deja el
+  TestBed instanciado y CONTAMINA lo que corre después en el mismo worker. La misma mutación dio 44 fallos en 7
+  ficheros en una pasada y 3 en 2 en la siguiente, con baseline verde 3 de 3. Consecuencia: en esa clase de
+  mutación el conteo de fallos NO es reproducible y hay que leer el NOMBRE del caso, no el número.
+  M4-bis — RECORRIDO COMPLETO DEL CENTRO MÍNIMO EN NAVEGADOR (conducido por el arquitecto, no delegable). Se
+  eligió el recorrido completo sobre el corto precisamente para que el reconocimiento del terreno lo pague esta
+  sesión y no la del e2e. RESULTADO: las nueve filas se crean por UI y el solver devuelve horario (tres sesiones
+  de MAT sobre el centro de prueba). Las tres comprobaciones propias de niveles pasan: la tabla lista 1ESO antes
+  que 1BACH (pedagógico, no alfabético), el desplegable de Grupo trae los dos niveles y refleja el código
+  editado, el 409 aparece al borrar un nivel con grupo colgando, y un alta con el orden vacío se detiene en
+  cliente con «El orden es obligatorio» sin llegar al servidor. C-niveles CUMPLE.
+  DATO DE ENTORNO fijado para el e2e: `spring.datasource.url=jdbc:sqlite:educhronos.db` es RELATIVA al
+  directorio desde el que se lanza Spring Boot. La base viva es `app/educhronos.db` (se arranca desde `app/`);
+  la `educhronos.db` de la raíz era un residuo de un arranque de julio. Para partir de cero hay que renombrar o
+  borrar `app/educhronos.db` con la aplicación parada, porque desde S109 `schema.sql` ya no demuele.
+  HALLAZGOS DEL RECORRIDO, ninguno ejecutado en esta sesión (R-deuda y R-terminado: ninguno bloquea el criterio
+  y ninguno es C-niveles). Nacen clasificados en §4: (1) D-horario-irreversible, el más grave —no existe
+  endpoint que borre o reemplace un horario, cada generación ACUMULA, y como el 409 del PUT de actividad cuenta
+  `sesion(es)` entre sus referentes, una actividad usada por un horario queda congelada para PUT y DELETE de
+  forma permanente por la vía UI/API—; (2) D-error-generacion-pin, el degradado de `errorGeneracion` dice «El
+  servidor rechazó el pin» ante un horario infactible porque reutiliza el helper escrito para los pines; (3)
+  D-molde-mensaje-cubierto-en-form, deuda de test heredada de O-catálogo que este M4 destapó; (4) D-log-aplicacion,
+  mejora futura propuesta por el arquitecto (no hay logging estructurado en ninguna de las dos capas).
+  CONTRADICCIÓN DOCUMENTAL medida, que AFINA D-F8.6-ii-a y vale más que su tamaño: el javadoc de
+  `asignatura-lista.ts` afirma que `server.error.include-message=always`, y el de `horario-view.ts` afirma que
+  está DESACTIVADO. El comportamiento observado en navegador —«Conflict» crudo en el 409 de nivel— da la razón
+  al segundo. El M2 de esa deuda debe partir de este dato y no del javadoc de O-catálogo.
+  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó D-F8.6-ii-a con su alcance ya medido dos veces,
+  se frenaron los cuatro hallazgos del recorrido, se frenó arreglar el aserto ambiguo del caso (8) de
+  `Configuracion` (mide lo que le toca y su ambigüedad es del molde, no de niveles), y se frenó tocar los specs
+  de O-catálogo que arrastran el mismo comentario falso destapado por M6.
+  HIGIENE (M1-bis): archivada S109 a `bitacora-sesiones.md` (promovida a `### Sesión 109`, insertada al final en
+  orden ascendente, cuerpo verificado idéntico por diff); degradada S110 a «Última sesión registrada (previa)»
+  compacta; S111 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S109), la
+  crónica de archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los commits de código separan producción de tests en
+  las tres fases, que documentación y código van en commits distintos, y que el árbol quedó limpio —los dos
+  `*.db.pre-s111` del recorrido se borraron y `git status --short` no devuelve nada—.
+  NOTA TÉCNICA PARA EL e2e (amplía la de S109 sobre ZONELESS y `testDir`, medida en esta sesión sobre
+  `horario-view.ts`): (1) el id del horario está CLAVADO a `/horario/1` en el enlace de la landing; no hay
+  endpoint de «último horario» ni lista, así que entrar por la landing lleva siempre al horario 1, exista o no.
+  (2) Con base vacía el GET de proyección da 404 y el frontend lo trata como error FATAL —vacía la rejilla—,
+  pero la pantalla sigue usable porque los controles viven fuera del `@if (error())`: el camino «entrar sin
+  horario → generar el primero → ver la rejilla» funciona. (3) El botón «Generar horario» NACE DESHABILITADO
+  (`avisosPrevalidacion() === null`) y si la prevalidación falla se queda deshabilitado PARA SIEMPRE, sin
+  reintento. (4) El `next` del POST NO consume la proyección devuelta: navega a la ruta del id nuevo y la
+  recarga la dispara la emisión de `paramMap`. Para el e2e eso significa esperar el POST **y** cuatro GET
+  (bloqueos, prevalidación, diagnóstico, proyección, concurrentes y sin orden de llegada garantizado), y usar el
+  CAMBIO DE URL como indicador de éxito, más fiable que el contenido de la rejilla. (5) Dos señales de error
+  distintas comparten la clase `.error` (`error` y `errorPin`): un `locator('.error')` puede resolver a dos
+  nodos. Las otras tres tienen clase propia.
+  O-estructura (H2) ACTIVO, 5 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111).
+  C-niveles CERRADO y con ello el e2e DESBLOQUEADO. Suites: vitest 269, backend intacto 261/91. Siguiente:
+  candidatos vivos son el e2e UI→solver (tercera pata del criterio, ya sin bloqueo y con reconocimiento hecho),
+  PDC, tutores y D-F8.6-ii-a; lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 110 — O-estructura (H2): C-actividades, trozo B. CIERRA C-actividades. Lista de plazas variable con alta/baja e I2 en cliente (Config/UI, M3 real). NO cierra el objetivo.
   Décima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 REAL (alta/baja de filas y
   validación cruzada I2 son lógica, no binding), UN SOLO MÓDULO (frontend), sin turno previo de medición
   inter-módulos en M4. CUARTA pieza de O-estructura y CIERRE de C-actividades, que S109 entregó troceado.
@@ -795,186 +930,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   de terminado), D-F8.6-ii-a (que sigue dejando mudos todos los formularios entregados), PDC y tutores; lo fija
   su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 109 — O-estructura (H2): C-actividades, tercer Cambio, entra TROCEADO (trozo A). Suelo de persistencia + guarda 409 del PUT (Desarrollo) + editor de Actividad de una plaza (Config/UI, M3 en XOR y multiselects). NO cierra el objetivo.
-  Novena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo (fases 0 y 1, backend con lógica)
-  + Configuración/UI con M3 real (fase 2, el XOR de aula y los tres multiselects). TERCER Cambio de
-  O-estructura: lo AVANZA, no lo cierra. O-estructura sigue ACTIVO —su criterio (8 tipos de sesión
-  configurables + casos de validación §6 del modelo + e2e UI→solver heredado) exige aún el trozo B de
-  actividades, PDC, tutores, el CRUD de Nivel por UI (hueco descubierto en esta sesión) y el e2e—.
-  M0 — apertura verificada contra `gestion_proyecto.md`: Objetivo = O-estructura (H2), ACTIVO desde S107 con
-  2 piezas hechas (C-jornada S107, C-subgrupos S108). Hito = H2. Cambio = C-actividades, nombrado por el
-  M1-ter de S108 y correspondiente al «editor de demanda curricular» de §3. R-invalidación sin conflicto
-  (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda: ninguna deuda abre la sesión.
-  DOS AVISOS levantados en el propio M0 y confirmados después por medición: (1) posible hueco de Nivel sin UI
-  con el seed ya retirado; (2) hipótesis de que «desdobles/agrupamientos» no es un Cambio propio sino
-  contenido de una Actividad multiplaza.
-  M2 — MEDICIÓN (Claude Code sobre el repo REAL, dos investigaciones encadenadas antes de teclear; informe
-  íntegro consumido y volcado aquí, el fichero suelto `informe-m2-s109.md` NO se commiteó).
-  (1) CONTRATO: `ActividadRequest(codigo, asignatura?, duracionTramos, repeticionesPorSemana, patronTemporal,
-  requiereTutor, plazas[])` y `PlazaRequest(asignatura, aulaFija, aulasCandidatas[], profesores[],
-  subgrupos[])`, todas las referencias por CÓDIGO, `patronTemporal` como String por el patrón de borde D-3.
-  `PlazaRequest` SIN id y SIN codigo a propósito: el código de plaza lo deriva el servicio como
-  `{codigoActividad}-P{n}` y es inestable entre ediciones. 21 validaciones en `ActividadService`, todas
-  medidas con su mensaje literal y su HTTP. 26 tests en `ActividadEndpointTest` = catálogo de lo que el
-  formulario debe poder producir. (2) HUECO REAL DEL CONTRATO: NO existe validación de mínimo de subgrupos —
-  una plaza con cero subgrupos devuelve 201—. (3) `roundTrip_bloqueSeisPlazas` CONFIRMA el aviso (2) del M0:
-  un desdoble/agrupamiento ES una actividad multiplaza, no una entidad ni un campo `tipo` (§4.6 del modelo lo
-  dice explícitamente). (4) HUECO DE NIVEL CONFIRMADO: sin seed, sin `data.sql`, sin migración, sin runner y
-  sin `insert` en `schema.sql`; `nivel.service.ts` solo tiene `listar()`; no existe `components/niveles/`.
-  Con BD vacía NO se puede crear un Grupo por UI ⇒ ni Subgrupo ⇒ las plazas se quedan sin población. Bloquea
-  el e2e, que es la tercera pata del criterio de O-estructura. (5) Los cuatro listados que el formulario
-  necesita (asignaturas, profesores, aulas, subgrupos) ya existen con cliente Angular; no hace falta ningún
-  endpoint nuevo. `aulas-compatibles` devuelve TIPOS de aula, no aulas, y no está cableado. (6) No existe
-  precedente de `FormArray` con alta/baja de filas: el único del repo (`jornada`) es de longitud FIJA.
-  MEDICIÓN EN SEGUNDA VUELTA (tres comprobaciones pedidas tras el primer informe, dos de lectura y una de
-  ejecución): (7) el `PUT /api/actividades/{id}` NO tenía guarda ante dependientes —los tres conteos y el 409
-  solo estaban en `borrar`—; (8) `Sesion` y `AulaBloqueada` referencian a `Plaza` POR ID DE FILA
-  (`sesion.plaza_id`, `aula_bloqueada.plaza_id`, ambas RESTRICT), nunca por código; (9) MEDIDO EN EJECUCIÓN:
-  un nivel creado por API sobrevivía al apagado y DESAPARECÍA en el siguiente arranque — la aplicación vaciaba
-  la BD en cada inicio.
-  DECISIONES DEL ARQUITECTO (tras medir): (a) el corte de C-actividades es en DOS trozos, no tres: trozo A =
-  cadena completa (modelo, servicio, lista, formulario) con `FormArray` de longitud FIJA 1 desde el principio,
-  para que el trozo B sea un delta y no una reescritura; trozo B = abrir el array + I2 en cliente. Se descartó
-  el corte «lista sola primero»: una lista de actividades sin formulario muestra una tabla permanentemente
-  vacía, no es valor utilizable, y rompe el molde del repo (lista y form se han entregado siempre juntos).
-  (b) RECONCILIACIÓN POSICIONAL DEL PUT: primero se aceptó y luego se REVOCÓ al medir (8). El razonamiento
-  inicial —«el código de plaza es interno, nada externo empareja por él»— era cierto e irrelevante: los
-  dependientes emparejan por id de fila, y la reconciliación MUTA las filas vivas conservando id, así que
-  eliminar una plaza intermedia deja una `Sesion` describiendo una plaza cuyo contenido ha cambiado, sin error
-  ni aviso. Se aplica el precedente de C-jornada (S107): guarda 409 ante cualquier dependiente. Reconciliar por
-  identidad (añadir `id` a `PlazaRequest`) DESCARTADO: más trabajo, reabre una pregunta de producto ya cerrada
-  y seguiría necesitando la guarda por las FK RESTRICT. (c) plaza con cero subgrupos: el formulario REFLEJA el
-  contrato y NO añade un validador que el backend no tiene (deuda registrada). (d) no se filtran las aulas por
-  I3 en cliente: habla el 400 del backend, que ya nombra asignatura, aula, tipo y tipos compatibles. (e)
-  C-niveles FUERA de esta sesión: se registra como Cambio de O-estructura y se ejecuta pegado al e2e, que es
-  quien lo necesita; los niveles de prueba se crean por `curl`.
-  FASE 0 — SUELO DE PERSISTENCIA (Desarrollo). `schema.sql` deja de ser idempotente POR DEMOLICIÓN y pasa a
-  serlo por `if not exists`: eliminadas las 21 sentencias `drop table if exists`, las 21 `create table` pasan a
-  `create table if not exists`, cuerpos idénticos byte a byte y en el mismo orden (verificado por diff de los
-  21 cuerpos). Cero índices/vistas/triggers en el fichero, así que no había más DDL que convertir. Corregidos
-  los comentarios de `schema.sql` y de `application.properties` que describían la demolición.
-  `spring.sql.init.mode=always` se CONSERVA (SQLite no se detecta como BD embebida; `never` dejaría sin esquema
-  una instalación limpia). PRECIO CONSCIENTE: la demolición era también el mecanismo de migración de facto; sin
-  ella un cambio de esquema deja de aplicarse solo (borrar el `.db` en desarrollo; la migración real es asunto
-  de H4). Verificado en EJECUCIÓN: dato creado → reinicio → sigue ahí; y con el `.db` apartado, la aplicación
-  levanta y crea el esquema desde cero. Suite verde a la primera (app 259, solver 91): el riesgo anunciado de
-  contaminación entre tests por dejar de dropear NO se materializó (`@DataJpaTest` aísla por transacción).
-  Commit: `fix(app): schema.sql deja de dropear las tablas en cada arranque, la BD ya no se vacia al iniciar`
-  (`d301b64`).
-  FASE 1 — GUARDA 409 EN EL PUT DE ACTIVIDAD (Desarrollo, M3 real). La comprobación de dependientes que vivía
-  inline en `borrar` se EXTRAE a `exigirSinDependientes(id, accion)` y se llama también desde `editar`,
-  INMEDIATAMENTE tras el `findById` que da el 404 y ANTES de cualquier validación: si la actividad no se puede
-  editar, ningún arreglo del cuerpo lo cambia, luego el 409 domina sobre el 400 y el 404 domina sobre todo.
-  `ReferenciaEntranteException` llevaba el verbo «borrar» HARDCODEADO en el mensaje: se parametriza la acción
-  (ctor de un argumento delega en «borrar», mensaje del DELETE intacto y sus tests verdes; ctor de dos toma el
-  verbo), y el PUT emite «No se puede editar: referenciada por…». HUBO QUE TOCAR EL CONTROLADOR: el 409 estaba
-  cableado SOLO en `borrar` mediante try/catch (no hay `@ControllerAdvice`, convención de S74), así que en el
-  PUT la excepción habría escapado como 500. Reescritos los javadoc de `editar` y de `reconciliarPlazas`: el
-  emparejamiento posicional deja de ser «decisión de UX provisional a confirmar en Fase 8.6» y pasa a ser
-  decisión tomada, segura PORQUE la guarda impide que existan referentes cuando se reconcilia. Guarda ROMA a
-  propósito (rechaza también un renombrado inocuo), igual que la de jornada. Suite app 259→261. Commit:
-  `feat(app): el PUT de actividad rechaza con 409 si tiene horario o bloqueos colgando` (`0e716c1`).
-  VERIFICACIÓN POR MUTACIÓN de la fase 1 (contraste de Claude Code, no afirmado): quitar la guarda de `editar`
-  → caen los dos tests nuevos (y el PUT «inocuo» sobre actividad con travesía devolvía 200 mutando la plaza
-  referenciada: el agujero era real, no teórico); mover la guarda al final de las validaciones → cae SOLO el
-  test de orden, que es el que demuestra que la precedencia está protegida; guarda contando solo sesiones →
-  caen dos por el desglose, luego el aserto no es laxo. Desviación consciente y aceptada: no se escribió test
-  nuevo de PUT sobre id inexistente porque `edicion_inexistente_404` ya lo es, y ese caso NO discrimina la
-  posición de la guarda (un id inexistente no tiene dependientes: los conteos darían 0 y el 404 saldría igual).
-  FASE 2 — C-ACTIVIDADES TROZO A (Configuración/UI, M3 en XOR y multiselects). 10 ficheros nuevos:
-  `models/actividad.model.ts` (4 interfaces simétricas a los records Java + `PATRONES_TEMPORALES`),
-  `services/actividad.service.{ts,spec.ts}` (5 wrappers pelados, molde `subgrupo.service.ts`),
-  `components/actividades/actividad-lista.{ts,html,css,spec.ts}` y `actividad-form.{ts,html,css,spec.ts}`.
-  Cabecera con asignatura OPCIONAL (opción vacía → null) y patrón como `<select>` de tres valores. La plaza
-  nace DENTRO de un `FormArray` de longitud fija 1 (molde `jornada`), sin botones de alta/baja: eso es el
-  trozo B. XOR resuelto con un control de UI `modoAula` ('FIJA'|'CANDIDATAS') que NO viaja al backend, decide
-  qué rama valida y limpia la contraria al cambiar; en edición se DERIVA del dato (`aulaFija != null`). Tres
-  multiselects molde `subgrupo-form`: profesores con `arrayNoVacio` (I7), candidatas con `arrayNoVacio` solo
-  en su rama, subgrupos SIN validador (decisión (c)). GUARDA DE MULTIPLAZA en la lista, que es la pieza que
-  hace honesto entregar el trozo A por separado: si `plazas.length > 1` el botón de editar va deshabilitado Y
-  el método `editar()` no abre el diálogo (dos capas), porque un formulario de una plaza que abriera una
-  actividad de seis enviaría una plaza y la reconciliación posicional BORRARÍA las otras cinco. El borrado sí
-  se permite en multiplaza (es íntegro). Cableado en Configuración con una línea en `imports:` y una etiqueta,
-  sin tocar los hermanos. Suite vitest 206→239 (+33: servicio 5, lista 11, formulario 16, configuración 1);
-  backend intacto 261/91. Commits: `feat(frontend): contrato de actividad, modelo y servicio sobre
-  /api/actividades` (`e0e41fe`), `feat(frontend): lista y formulario de actividad de una plaza con XOR de aula
-  y multiselects` (`9ef160f`), `feat(frontend): monta la lista de actividades en la seccion de Configuracion`
-  (`85f93e2`).
-  VERIFICACIÓN POR MUTACIÓN de la fase 2 (siete mutaciones, todas tumbaron tests): quitar `arrayNoVacio` de
-  profesores; enviar siempre ambas ramas del XOR; no limpiar la rama anterior al cambiar de modo; AÑADIR
-  `arrayNoVacio` a subgrupos (cae el caso que demuestra que cero subgrupos es aceptable: la decisión (c) está
-  medida, no solo escrita); quitar la guarda de multiplaza (caen DOS, una por capa); `ngOnInit` deja de pedir
-  `/api/aulas` (caen los 16 del formulario ⇒ el helper de montaje flushea bien las CUATRO peticiones de red).
-  La séptima (perder `requiereTutor` en el PUT) la ataja el TIPO antes de compilar —cobertura del compilador,
-  no del spec, mismo fenómeno que el NG8001 de S102—; la variante que sí compila cae en un test.
-  M4 — VERIFICACIÓN MECÁNICA conducida con Playwright EFÍMERO (script fuera del repo, en /tmp, borrado al
-  terminar y árbol verificado limpio: la suite e2e permanente es el Cambio que CIERRA O-estructura, no
-  andamiaje de una sesión; R-e2e respetada). 18 puntos, 17 PASAN. Lo verificado que importa: el XOR va y
-  vuelve con `aulaFija: null` EXACTO (no cadena vacía) y el `<select multiple>` de candidatas reconcilia el
-  array al reabrir —el punto que costó trabajo en S108—; ningún cuerpo lleva la clave `modoAula`; el clic
-  FORZADO sobre el editar deshabilitado no abre el formulario ni emite petición (las dos capas sostienen); sin
-  profesor NO sale ninguna petición; sin subgrupos SÍ sale y responde 200; y el dato sobrevive al reinicio del
-  backend, que hasta esta sesión era imposible. `repeticiones = 0` lo corta el cliente (`Validators.min(1)`),
-  así que la validación equivalente del backend queda como segunda línea inalcanzable desde la UI.
-  VERIFICACIÓN DE USABILIDAD (la única parte no delegable, porque es la pregunta de riesgo de O-estructura):
-  el arquitecto define «plaza» y entiende duración/repeticiones sin ayuda, y considera soportables los
-  multiselects y útil el aviso de multiplaza. DOS IMPRECISIONES en su definición que señalan dónde la pantalla
-  calla: dijo «grupo» donde el modelo dice SUBGRUPO, y situó el tramo en la Plaza cuando el tiempo lo pone la
-  Actividad. CAVEAT REGISTRADO: probar la usabilidad con el AUTOR del modelo es evidencia débil; la pregunta
-  «¿es configurable por un humano?» no se cierra aquí, se cierra en O-demo con el IES real. Lo que sí queda
-  demostrado es que el modelo SE PUEDE EXPRESAR por formulario sin contorsiones.
-  DEUDA — nace deuda registrada (R-deuda: ninguna bloquea el criterio del trozo A, no se pagan ahora):
-  (1) D-plaza-sin-subgrupos (TÉCNICA REAL, no bloqueante): el backend acepta una plaza con cero subgrupos y
-  devuelve 201; una plaza sin población es una sesión a la que no asiste nadie. Cuelga de O-estructura. Se
-  decidió NO poner el validador solo en cliente: una regla que el contrato no tiene diverge y engaña.
-  (2) D-actividad-ux (MEJORA PLANIFICADA): dos `<select formControlName="asignatura"` en el mismo formulario
-  sin `id` ni `label for` —se anuncian igual a un lector de pantalla y hay que desambiguarlos por ancestro—;
-  el error de servidor viejo convive con un error de campo nuevo (`error()` solo se limpia al empezar una
-  petición); el aviso de multiplaza vive dentro de la celda del recuento. Candidata a absorberse en O-diseño.
-  (3) AMPLIADA D-F8.6-ii-a (ver su texto en la sección de deuda viva): los 400/409 llegan al navegador SIN
-  `message` y la UI pinta «Bad Request». Medido por curl en tres endpoints distintos, fuera de la UI. Afecta a
-  TODOS los formularios existentes y deja MUDO el 409 que esta sesión acaba de construir. La causa (cambio de
-  comportamiento de `server.error.include-message` en Spring Boot 4) es HIPÓTESIS NO MEDIDA. Hallazgo de
-  MÉTODO asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y
-  no el cuerpo que viaja por la red — verde en test, mudo en producción, durante meses.
-  (4) D-jornada-msg409 NO se cierra pero baja de coste: la fase 1 parametrizó el verbo de
-  `ReferenciaEntranteException`, así que corregir el mensaje de jornada pasa a ser cambiar el ctor de uno a
-  dos argumentos. `JornadaService` sigue usando el de un argumento y el usuario sigue leyendo «No se puede
-  borrar» al GUARDAR.
-  (5) NACE C-niveles como Cambio de O-estructura (no deuda): sin UI de niveles no hay grupos, ni subgrupos, ni
-  población para las plazas, y el e2e del criterio de terminado es inejecutable. Backend completo desde S70,
-  molde plano de catálogo, el más barato del repo. NO se metió aquí para no diluir el foco de riesgo.
-  CORRECCIÓN DOCUMENTAL — una sola, y NO las dos que se anunciaron. Se comprobó contra el fichero que el plan
-  YA estaba correcto en las otras dos: la integridad referencial figura ACTIVA desde S73/S74 con
-  `D-F8.5-A-a` CERRADA (la afirmación de que las FK de SQLite estaban apagadas vive solo en la entrada
-  ARCHIVADA de S72, y lo archivado no se corrige), y el conteo del solver que registra el plan (91) es el
-  correcto frente al grep de 97 (que cuenta también los `@Tag("escala")`, fuera del perfil por defecto). La
-  corrección real es la de D-F8.6-ii-a: decía que `server.error.include-message` «no está en
-  `application.properties`», y hoy sí está sin que el mensaje viaje.
-  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó el filtrado I3 en cliente, se frenó el
-  validador de subgrupos, se frenó la guarda 409 «fina» (comparar la forma de la lista de plazas para permitir
-  renombrar con horario vivo), se frenó C-niveles y se frenó el arreglo de D-F8.6-ii-a pese a que degrada el
-  409 recién construido: elegir entre reactivar la clave, `ProblemDetail` o traducir en cada controlador
-  necesita su propio M2. La petición del arquitecto de mejorar el aspecto de la aplicación se remitió a
-  O-diseño (§3), que existe precisamente para que la maquetación no se cuele a trozos dentro de otros
-  objetivos; se le recordó su salvedad de prioridad (si hay demo a cliente o al IES antes de cerrar H2, sube).
-  HIGIENE (M1-bis): archivada S107 a `bitacora-sesiones.md` (promovida a `### Sesión 107`, insertada al final
-  en orden ascendente, cuerpo íntegro); degradada S108 a «Última sesión registrada (previa)» compacta; S109
-  queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S107), la crónica de
-  archivado y la frase de ventana del plan.
-  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
-  (mejora de método pendiente desde S101); verificado que los cinco commits de código separan por fase
-  (`git log --oneline 29f0f84..HEAD`), que documentación y código van en commits distintos y que ningún `.db`
-  ni el `informe-m2-s109.md` suelto entraron en el árbol.
-  NOTA TÉCNICA para el e2e que cerrará O-estructura: la aplicación es ZONELESS (Angular 21 sin
-  `provideZoneChangeDetection` ni polyfill de zone.js), así que el DOM repinta en el frame siguiente al clic;
-  leer el DOM en el mismo tick da falsos rojos. Los asertos deben ser con reintento (`expect(...).toHaveCount()`).
-  Además, `testDir` apuntando a `/tmp` hace que Playwright escanee el directorio entero y muera con EACCES, y
-  no sigue symlinks al descubrir tests.
-  O-estructura (H2) ACTIVO, 3 piezas hechas (jornada S107, subgrupos S108, actividades trozo A S109) de
-  varias. Siguiente: candidatos vivos son el trozo B de actividades, D-F8.6-ii-a (que dejaría de ser mudo el
-  409 recién construido) y C-niveles; lo fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -993,8 +948,8 @@ truncada y duplicada de S55 que la operación de archivado de S59 dejó en la bi
 el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), y la de S102 en la Sesión 106,
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
-y la de S107 en la Sesión 109, y la de S108 en la Sesión 110.
-El plan conserva ahora S109 (degradada a formato compacto) y S110 como única cabecera H3 viva. El detalle
+y la de S107 en la Sesión 109, la de S108 en la Sesión 110 y la de S109 en la Sesión 111.
+El plan conserva ahora S110 (degradada a formato compacto) y S111 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 

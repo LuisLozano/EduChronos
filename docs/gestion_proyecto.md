@@ -259,13 +259,16 @@ de las Fases 9–12.
   Con el trozo B (S110) la lista de plazas está abierta y esa capacidad queda ENTREGADA;
   lo que sobrevive del «asistente de desdoble» de la lista de Cambios es un atajo de UX,
   no una capacidad nueva.
-  **Hueco descubierto que SÍ añade trabajo: C-niveles.** Con la base de datos vacía no
-  se puede crear un Grupo desde la UI —no hay seed, ni `data.sql`, ni migración, ni
-  runner, y `nivel.service.ts` solo tiene `listar()`—, luego tampoco Subgrupo, luego
-  las plazas se quedan sin población. Eso hace INEJECUTABLE el e2e del criterio de
-  terminado. El backend expone el CRUD completo desde S70: es el molde plano de
-  catálogo, el más barato del repo. NO se hizo en S109 para no diluir el foco de riesgo.
-  NO cierra el objetivo: faltan C-niveles, PDC, tutores y el e2e UI→solver heredado.
+  **Hueco descubierto en S109 y SALDADO en S111: C-niveles.** Con la base de datos vacía
+  no se podía crear un Grupo desde la UI —no había seed, ni `data.sql`, ni migración, ni
+  runner, y `nivel.service.ts` solo tenía `listar()`—, luego tampoco Subgrupo, luego las
+  plazas se quedaban sin población, lo que hacía INEJECUTABLE el e2e del criterio. S111
+  entregó el CRUD por UI sobre el molde plano de catálogo (backend con cero trabajo: ya
+  existía completo desde S70) y lo VERIFICÓ recorriendo el centro mínimo entero en
+  navegador: las nueve filas irreducibles —Nivel, Grupo, Subgrupo, Profesor, Asignatura,
+  Aula, ≥1 tramo lectivo, Actividad, Plaza— se crean por pantalla y el solver produce
+  horario. El e2e queda DESBLOQUEADO.
+  NO cierra el objetivo: faltan PDC, tutores y el e2e UI→solver heredado.
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
   compartidos. D22 saldada de facto (C-jornada, S107). Nace y cuelga aquí
   D-subgrupo-ux-multiselect (S108): la UX del `<select multiple>` de subgrupos es
@@ -275,7 +278,12 @@ de las Fases 9–12.
   D-actividad-ux (mejora planificada), esta última RECORTADA en S110 al cerrarse su tercer
   síntoma con la retirada del aviso de multiplaza. Nace y cuelga aquí, en S110,
   D-i2-dedup-cliente (deuda de test: la deduplicación intra-plaza del validador de I2 no
-  la cubre nadie, y el escenario es inalcanzable desde la UI). Y hereda el daño vivo de
+  la cubre nadie, y el escenario es inalcanzable desde la UI). Nacen y cuelgan aquí, en
+  S111, D-horario-irreversible (técnica real, la más grave del objetivo: no hay forma de
+  borrar un horario generado y eso congela permanentemente las actividades que usa) y
+  D-error-generacion-pin (técnica real menor). Nacen en S111 pero NO cuelgan aquí:
+  D-molde-mensaje-cubierto-en-form es de O-catálogo (cerrado, R-terminado) y
+  D-log-aplicacion es transversal. Y hereda el daño vivo de
   D-F8.6-ii-a, que S109 midió y amplió y S110 afinó desde el navegador: el mensaje
   accionable existe pero viaja como reason phrase y el cuerpo llega sin `message`, así que
   TODOS los formularios de este objetivo —incluido el 409 construido en S109— muestran
@@ -385,9 +393,13 @@ asigna categoría, objetivo y disposición.
 | D-F8.5-D2a-b (incoherencia 404/400 FK) | O-catálogo | No bloquea | Se evalúa dentro de O-catálogo |
 | D18 (condiciones necesarias de factibilidad) | O-estructura | No | Ya cubierto en backend (8.4-A); resto en presentación |
 | D-F8.6-iiiB1-c, -iiiB2a-a (superficie de error) | O-ajuste-cierre | No | Se evalúan al abrir; probablemente limitación conocida aceptable |
-| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases) |
+| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases). AFINADA en S111 con un dato que su M2 debe usar como punto de partida: hay CONTRADICCIÓN DOCUMENTAL en el repo —el javadoc de `asignatura-lista.ts` afirma que `server.error.include-message=always` y el de `horario-view.ts` afirma que está DESACTIVADO—, y el comportamiento observado en navegador (el 409 de borrado de nivel pinta «Conflict» crudo) da la razón al segundo. Confirmada además en el octavo formulario: la lista de niveles nace muda |
 | D-plaza-sin-subgrupos (una plaza con cero subgrupos se acepta) | O-estructura | No | Detectada por el M2 de S109: `validarPlazas` comprueba XOR, I7 e I2, pero acepta `subgrupos` nulo o vacío y devuelve 201. Agujero de dominio (la población de la plaza SON sus subgrupos). DECISIÓN de S109: el formulario refleja el contrato y NO añade el validador solo en cliente; hay un spec que se pondría rojo si alguien lo añadiera. El arreglo es simétrico a I7 (≈10 líneas y un test). No se paga ahora |
 | D-i2-dedup-cliente (la deduplicación intra-plaza del validador I2 no la cubre ningún test) | O-estructura | No | Nace en S110 de la campaña de mutación: quitar el `Set` por fila del validador `subguposDisjuntos` no pone rojo nada. El escenario es INALCANZABLE desde la UI (un `<select multiple>` no repite opción; el GET proyecta desde un `Set`), así que la regla existe por fidelidad con `validarPlazas` y no porque haya camino que la ejercite. Deuda de TEST, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar un estado que el sistema no produce. No se paga ahora |
+| D-horario-irreversible (un horario generado no se puede borrar ni reemplazar) | O-estructura | No bloquea el criterio, pero es un CALLEJÓN SIN SALIDA para el usuario | Nace en S111, medida en navegador y confirmada en código. No existe `DELETE /api/horarios/{id}` ni ningún borrado programático de `sesion`; cada `POST /api/horarios` ACUMULA (alta pura, sin consulta previa ni reemplazo), y el 409 del PUT/DELETE de actividad cuenta `sesion(es)` entre sus referentes. Consecuencia: en cuanto se genera un horario, las actividades que usa quedan congeladas para editar y borrar de forma PERMANENTE por la vía UI/API; la única salida es tocar SQLite a mano. El javadoc de `ActividadService.editar` prescribe «el usuario borra el horario y luego reconfigura», salida que NO existe. El `on delete cascade` de `sesion.horario_id` ya está en el esquema: el mecanismo está preparado y nadie lo dispara. Afecta al e2e solo si éste necesitara rehacer algo tras generar. No se paga ahora |
+| D-error-generacion-pin (un fallo de generación se anuncia como fallo de pin) | O-estructura | No | Nace en S111. `lanzarGeneracion` reutiliza el helper `mensaje()` escrito para los pines, cuyo degradado es «El servidor rechazó el pin (N).»; ante un horario infactible (422) el usuario lee literalmente eso. Hermana de D-F8.6-ii-a: el texto del backend, que sí nombra el recurso culpable, se pierde por configuración y no por diseño del componente, así que las dos primeras ramas del `||` fallan siempre. Arreglo trivial (un degradado propio) pero encuadrado con esa deuda. No se paga ahora |
+| D-molde-mensaje-cubierto-en-form (la precedencia de `mensaje()` en las listas de catálogo no la cubre nadie) | O-catálogo (CERRADO en S106) | No | Nace en S111 al destaparlo la mutación M6. El javadoc de `asignatura-lista.spec` y hermanas afirma que el orden interno de `mensaje()` está «cubierto en el form, misma función»: es FALSO —hay dos funciones copiadas a propósito y no compartidas, así que el caso del formulario no puede cubrir a la de la lista—. En niveles se cerró añadiendo la clave `error` al cuerpo flusheado del caso del 409, sin caso nuevo; las cuatro entidades de O-catálogo siguen con el hueco y con el comentario falso. NO se paga: R-terminado, el objetivo está cerrado. Cuando se toque una de esas listas por otro motivo, es una línea de fixture |
+| D-log-aplicacion (no hay logging estructurado en ninguna de las dos capas) | Transversal, sin objetivo asignado | No | Propuesta del arquitecto en S111 tras el recorrido en navegador, donde diagnosticar un fallo exigió leer código en vez de logs. Backend sin configuración de logging a fichero (solo consola); frontend sin ninguna traza, con `ngx-logger` mencionado como candidato pero NO evaluado. Mejora FUTURA: se registra para que no se pierda, no planifica y no cuelga de ningún objetivo vivo |
 
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
