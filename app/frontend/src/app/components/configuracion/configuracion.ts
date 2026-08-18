@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { AsignaturaLista } from '../asignaturas/asignatura-lista';
 import { AulaLista } from '../aulas/aula-lista';
 import { GrupoLista } from '../grupos/grupo-lista';
+import { NivelLista } from '../niveles/nivel-lista';
 import { SubgrupoLista } from '../subgrupos/subgrupo-lista';
 import { ActividadLista } from '../actividades/actividad-lista';
 import { Jornada } from '../jornada/jornada';
@@ -50,6 +51,7 @@ import { ProfesorLista } from '../profesores/profesor-lista';
     ProfesorLista,
     AulaLista,
     AsignaturaLista,
+    NivelLista,
     GrupoLista,
     SubgrupoLista,
     ActividadLista,
