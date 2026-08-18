@@ -42,18 +42,30 @@ export default defineConfig({
       // Sin perfil `seed`: no se activa ninguno, así que `SeedCatalogoRunner`
       // (@Profile("seed")) no corre y el catálogo queda vacío.
       //
-      // BD limpia por construcción: `schema.sql` hace `drop table if exists` de
-      // las 21 tablas y las recrea en CADA arranque de contexto
-      // (spring.sql.init.mode=always). Con `-pl app` el working dir del proceso
-      // es `app/`, así que la BD es `app/educhronos.db` y NO se toca la
-      // `educhronos.db` de la raíz.
-      command: 'mvn -pl app spring-boot:run',
+      // BD propia y limpia, garantizada por el `rm -f` de este command —NO por
+      // el esquema—. Desde S109 `schema.sql` no demuele nada: son 21
+      // `create table if not exists` y cero DROP (su propia cabecera lo
+      // documenta), así que es idempotente pero conserva las filas que ya
+      // hubiera. Lo único que deja la BD a cero es borrarla antes de arrancar.
+      // El `*` del `rm` arrastra los `-journal`/`-wal`/`-shm` que pudiera haber
+      // dejado una corrida abortada.
+      //
+      // Con `-pl app` el working dir del proceso es `app/`, así que la BD del
+      // e2e es `app/educhronos-e2e.db`, separada de `app/educhronos.db` (la BD
+      // de trabajo del desarrollador, que el e2e no debe tocar).
+      command:
+        'rm -f app/educhronos-e2e.db* && mvn -pl app spring-boot:run -Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db',
       cwd: '../..',
       // GET que ya existe y responde 200 con el catálogo vacío (`[]`).
       url: 'http://localhost:8080/api/prevalidacion',
       // Arranque de Spring + carga de la JVM + compilación Maven: generoso.
       timeout: 120_000,
-      reuseExistingServer: !process.env['CI'],
+      // Nunca reutilizar: si se enganchara a un backend de desarrollo ya
+      // escuchando en :8080, el e2e correría contra `app/educhronos.db` y el
+      // aislamiento no serviría de nada. Consecuencia asumida: para correr el
+      // e2e hay que tener parado el backend de dev, o Playwright aborta por
+      // puerto ocupado.
+      reuseExistingServer: false,
       stdout: 'pipe',
       stderr: 'pipe',
     },
