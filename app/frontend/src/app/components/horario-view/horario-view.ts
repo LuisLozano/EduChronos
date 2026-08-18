@@ -118,6 +118,14 @@ export class HorarioView {
     return p && e ? filtrar(p.sesiones, this.vista(), e) : [];
   });
 
+  /**
+   * Id del horario que {@link cargar} pidió por última vez. Campo PLANO, no
+   * señal: ninguna plantilla lo lee —solo lo consulta {@link lanzarGeneracion}
+   * para decidir entre recargar y navegar—, y una señal que nadie consume en la
+   * vista sería más superficie de estado de la necesaria.
+   */
+  private idCargado: number | null = null;
+
   constructor() {
     this.route.paramMap.subscribe((pm) => this.cargar(Number(pm.get('id'))));
   }
@@ -185,6 +193,7 @@ export class HorarioView {
   }
 
   private cargar(id: number): void {
+    this.idCargado = id;
     this.error.set(null);
     this.cargarPines();
     this.cargarPrevalidacion();
@@ -286,16 +295,36 @@ export class HorarioView {
   }
 
   /**
-   * Lanza el POST y, en el next, navega a la ruta del horario nuevo. La proyección
-   * devuelta NO se consume: la recarga la dispara la emisión de `paramMap` al
-   * cambiar de ruta —igual que cualquier otra entrada a la vista—, no este next.
-   * El error puebla {@link errorGeneracion} (señal propia, no gatea la rejilla).
+   * Lanza el POST y refresca la vista con el horario que devuelve, por una de DOS
+   * ramas según si ese id es el que ya está cargado ({@link idCargado}):
+   *
+   * <p>ID DISTINTO: se navega a `/horario/{id}` y NO se recarga aquí. La recarga la
+   * dispara la emisión de `paramMap` al cambiar de ruta, igual que cualquier otra
+   * entrada a la vista.
+   *
+   * <p>MISMO ID: se llama a {@link cargar} directamente, porque navegar NO serviría
+   * de nada: el router IGNORA la navegación a la URL vigente —`onSameUrlNavigation`
+   * vale `'ignore'` por defecto y `provideRouter(routes)` no pasa
+   * `withRouterConfig`—, así que `paramMap` no reemite y la rejilla se quedaría con
+   * el horario viejo. Se manifiesta en la PRIMERA generación de una instalación
+   * nueva: la landing y el header apuntan a `/horario/1` clavado y el primer
+   * horario recibe id 1, así que origen y destino coinciden.
+   *
+   * <p>En AMBAS ramas la proyección devuelta por el POST se descarta y la recarga es
+   * por GET fresco (S93): rejilla, pines y diagnóstico no pueden pertenecer a
+   * horarios distintos.
+   *
+   * <p>El error puebla {@link errorGeneracion} (señal propia, no gatea la rejilla).
    */
   private lanzarGeneracion(): void {
     this.errorGeneracion.set(null);
     this.service.generar().subscribe({
       next: (dto) => {
-        this.router.navigate(['/horario', dto.id]);
+        if (dto.id === this.idCargado) {
+          this.cargar(dto.id);
+        } else {
+          this.router.navigate(['/horario', dto.id]);
+        }
       },
       error: (err) => this.errorGeneracion.set(this.mensaje(err)),
     });
