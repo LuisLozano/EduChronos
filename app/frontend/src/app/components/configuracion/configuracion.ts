@@ -18,10 +18,10 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * `<router-outlet>` y el array `children` que el proyecto no usa en ningún sitio
  * salvo el raíz.
  *
- * <p>{@link AulaLista}, {@link AsignaturaLista} y {@link GrupoLista} se montan igual,
- * como HERMANAS de {@link ProfesorLista}: eso es lo que valida el molde de S101 —una
- * sección de catálogo se añade aquí con una línea en `imports:` y una etiqueta en la
- * plantilla, sin tocar las anteriores—.
+ * <p>{@link AulaLista}, {@link AsignaturaLista}, {@link NivelLista} y {@link GrupoLista}
+ * se montan igual, como HERMANAS de {@link ProfesorLista}: eso es lo que valida el molde
+ * de S101 —una sección de catálogo se añade aquí con una línea en `imports:` y una
+ * etiqueta en la plantilla, sin tocar las anteriores—.
  *
  * <p>Las CUATRO entidades de O-catálogo son profesor, aula, asignatura y grupo
  * (plan de trabajo, S101: «primer Cambio de cuatro (profesor/aula/asignatura/grupo)»).
@@ -43,6 +43,14 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * profesores, aulas y subgrupos: el orden de la página sigue al orden en que hay que
  * darlos de alta, y quien baje hasta aquí ya tiene arriba todo lo que el formulario le
  * va a pedir.
+ *
+ * <p>La sección monta además {@link NivelLista} desde S111, y eso NO amplía O-catálogo a
+ * cinco entidades: el CRUD de niveles es un Cambio de O-estructura, no de O-catálogo, que
+ * quedó cerrado en S106 con su censo de cuatro. Se monta aquí, y no en otra pantalla,
+ * porque comparte forma (molde plano de catálogo) y porque el orden de alta manda: un
+ * grupo necesita un nivel existente, así que la lista de niveles va antes que la de
+ * grupos. El motivo de que exista es que sin niveles creables por UI no hay grupos, ni
+ * subgrupos, ni población para las plazas del currículo.
  */
 @Component({
   selector: 'app-configuracion',
