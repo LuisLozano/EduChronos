@@ -920,4 +920,96 @@ describe('contenedor del horario', () => {
     // ASERTO C: el gesto ocurrió de verdad.
     expect(comp.entidad()).toBe('1ºA');
   });
+  /**
+   * RAMA DE ID DISTINTO: el horario devuelto no es el cargado, así que se navega y
+   * la recarga NO se hace aquí —la disparará la emisión de `paramMap` al cambiar de
+   * ruta, que en este spec no ocurre porque el `Router` está doblado y no cableado
+   * al `paramMap` (ver cabecero)—. Por eso el segundo aserto puede exigir que
+   * `getProyeccion` siga en la ÚNICA llamada del montaje: cualquier recarga extra
+   * sería del `next`, no de la ruta.
+   *
+   * <p>Es el gemelo exacto del (40) y juntos guardan una rama cada uno: sin este,
+   * la implementación que SIEMPRE recarga (y nunca navega) quedaría verde.
+   */
+  it('(39) generar con id distinto navega a la ruta nueva y no recarga la proyección', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 2 });
+    await fixture.whenStable();
+
+    // (1) se navega al horario devuelto. Array LITERAL, nunca compuesto desde el
+    // dto: componerlo volvería circular el aserto (misma disciplina que el (31)).
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/horario', 2]);
+    // (2) DISCRIMINANTE: no hubo recarga por esta vía. Mata la implementación que
+    // llama a `cargar` pase lo que pase.
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * RAMA DEL MISMO ID: el horario devuelto es el que ya está cargado, así que NO se
+   * navega —el router ignora la navegación a la URL vigente (`onSameUrlNavigation`
+   * en `'ignore'`), `paramMap` no reemitiría y la rejilla se quedaría con el horario
+   * viejo— y se recarga a mano. Escenario REAL: primera generación de una
+   * instalación nueva, con la BD vacía (proyección inicial en 404) y el `/horario/1`
+   * clavado de la landing, así que el id devuelto coincide con el de la ruta.
+   *
+   * <p>RE-STUB DECLARADO de `getProyeccion`: a diferencia de `listar`/`guardar`/
+   * `borrar`/`generar`, su doble devuelve un Subject COMPARTIDO
+   * (`sujetoProyeccion`), y el 404 inicial lo deja CERRADO. Re-suscribirse a un
+   * Subject cerrado redispara el error SÍNCRONAMENTE, así que la segunda carga
+   * nacería fallida y el tercer aserto sería inalcanzable. El `mockImplementation`
+   * le da un sujeto nuevo, con vida propia, SIN perder el contador de llamadas —que
+   * es justo lo que mide el segundo aserto—. Es local a este caso: el `beforeEach`
+   * estrena objeto y `vi.fn()` en cada uno, así que no filtra.
+   *
+   * <p>El tercer aserto es el que ata el caso al síntoma del usuario: sin él, una
+   * recarga que dejase la pantalla en el mensaje de error pasaría igual.
+   */
+  it('(40) generar con el mismo id recarga la proyección sin navegar', async () => {
+    // Montaje del escenario: ruta 1, pre-validación emitida (habilita el botón) y
+    // proyección en 404 —BD vacía, aún no hay horario 1—.
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoPrevalidacion.next([AVISO_NO_ERROR]);
+    sujetoProyeccion.error({ status: 404 });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // PRECONDICIÓN: la pantalla está en el error de carga y sin rejilla. Sin esto,
+    // el tercer aserto mediría un estado que ya era limpio de nacimiento.
+    expect(raiz.querySelector('.error')?.textContent?.trim()).toBe(
+      'No se pudo cargar el horario 1 (404).',
+    );
+    expect(fixture.debugElement.query(By.directive(HorarioGrid))).toBeNull();
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+
+    // Re-stub (ver javadoc): la recarga necesita un sujeto vivo, no el cerrado.
+    const recarga = new Subject<HorarioProyeccion>();
+    horario.getProyeccion.mockImplementation(() => recarga);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 1 });
+    await fixture.whenStable();
+
+    // (1) DISCRIMINANTE: no se navega a la ruta vigente.
+    expect(router.navigate).not.toHaveBeenCalled();
+    // (2) DISCRIMINANTE: hubo una SEGUNDA petición de proyección, con el id 1.
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(2);
+    expect(horario.getProyeccion).toHaveBeenLastCalledWith(1);
+
+    // La recarga responde: es un GET fresco, la proyección del POST se descartó.
+    recarga.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+
+    // (3) DISCRIMINANTE: la pantalla salió del error y la rejilla se pinta.
+    expect(raiz.querySelector('.error')).toBeNull();
+    expect(fixture.debugElement.query(By.directive(HorarioGrid))).not.toBeNull();
+  });
 });
