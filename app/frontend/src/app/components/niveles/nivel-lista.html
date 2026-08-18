@@ -1,0 +1,47 @@
+<div class="niveles">
+  <div class="niveles__cabecera">
+    <h2 class="niveles__titulo">Niveles</h2>
+    <button type="button" class="niveles__nuevo" (click)="nuevo()">
+      Nuevo nivel
+    </button>
+  </div>
+
+  @if (error()) {
+  <p class="niveles__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+  <p class="niveles__cargando">Cargando…</p>
+  } @else if (niveles().length === 0) {
+  <p class="niveles__vacio">
+    No hay niveles todavía. Crea el primero con «Nuevo nivel»: sin niveles no se
+    pueden crear grupos.
+  </p>
+  } @else {
+  <table class="niveles__tabla">
+    <thead>
+    <tr>
+      <th>Código</th>
+      <th>Orden</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (nivel of niveles(); track nivel.id) {
+    <tr>
+      <td>{{ nivel.codigo }}</td>
+      <td>{{ nivel.orden }}</td>
+      <td class="niveles__acciones">
+        <button type="button" class="niveles__editar" (click)="editar(nivel)">
+          Editar
+        </button>
+        <button type="button" class="niveles__borrar" (click)="borrar(nivel)">
+          Borrar
+        </button>
+      </td>
+    </tr>
+    }
+    </tbody>
+  </table>
+  }
+</div>

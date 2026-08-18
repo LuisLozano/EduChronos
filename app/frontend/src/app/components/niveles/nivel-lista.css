@@ -1,0 +1,45 @@
+.niveles {
+  padding: 1rem;
+}
+
+.niveles__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.niveles__titulo {
+  margin: 0;
+}
+
+.niveles__error {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.niveles__vacio,
+.niveles__cargando {
+  color: #666;
+}
+
+.niveles__tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.niveles__tabla th,
+.niveles__tabla td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.niveles__acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.niveles__borrar {
+  color: #b00;
+}

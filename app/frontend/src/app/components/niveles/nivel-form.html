@@ -1,0 +1,39 @@
+<div class="nivel-form">
+  <h2 class="nivel-form__titulo">
+    {{ esEdicion ? 'Editar nivel' : 'Nuevo nivel' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label class="nivel-form__campo">
+      <span class="nivel-form__etiqueta">Código</span>
+      <input type="text" formControlName="codigo" class="nivel-form__input" />
+      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+      <span class="nivel-form__error">El código es obligatorio.</span>
+      }
+    </label>
+
+    <label class="nivel-form__campo">
+      <span class="nivel-form__etiqueta">Orden</span>
+      <input type="number" formControlName="orden" class="nivel-form__input" />
+      <span class="nivel-form__ayuda">
+        Fija el orden en que se listan los niveles (1ESO antes que 2ESO), no el alfabético.
+      </span>
+      @if (form.controls.orden.touched && form.controls.orden.invalid) {
+      <span class="nivel-form__error">El orden es obligatorio.</span>
+      }
+    </label>
+
+    @if (error()) {
+    <p class="nivel-form__error-servidor" role="alert">{{ error() }}</p>
+    }
+
+    <div class="nivel-form__acciones">
+      <button type="button" class="nivel-form__cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="nivel-form__guardar" [disabled]="guardando()">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>
