@@ -7,6 +7,7 @@ import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
 import { GrupoService } from '../../services/grupo.service';
 import { JornadaService } from '../../services/jornada.service';
+import { NivelService } from '../../services/nivel.service';
 import { ProfesorService } from '../../services/profesor.service';
 import { SubgrupoService } from '../../services/subgrupo.service';
 
@@ -49,6 +50,7 @@ describe('sección de configuración', () => {
         { provide: ProfesorService, useValue: { listar: () => of([]) } },
         { provide: AulaService, useValue: { listar: () => of([]) } },
         { provide: AsignaturaService, useValue: { listar: () => of([]) } },
+        { provide: NivelService, useValue: { listar: () => of([]) } },
         { provide: GrupoService, useValue: { listar: () => of([]) } },
         { provide: SubgrupoService, useValue: { listar: () => of([]) } },
         { provide: ActividadService, useValue: { listar: () => of([]) } },
@@ -156,5 +158,21 @@ describe('sección de configuración', () => {
     // instancia al montar la sección.
     expect(raiz.querySelector('app-actividad-lista')).not.toBeNull();
     expect(raiz.textContent).toContain('Nueva actividad');
+  });
+
+  it('(8) monta el CRUD de niveles dentro de la sección', async () => {
+    const fixture = TestBed.createComponent(Configuracion);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    // Sección de catálogo (C-niveles), montada con el mismo gesto que el resto y
+    // ANTES de grupos: un grupo exige un nivel existente para darse de alta, y el
+    // orden de la plantilla sigue al orden de alta. Dos asertos como en (2)-(7): el
+    // tag presente y el texto que solo existe si el hijo se instanció y pintó
+    // ('Nuevo nivel', botón de nivel-lista.html). Solo se dobla `NivelService`: el
+    // formulario vive en un diálogo y no se instancia al montar la sección.
+    expect(raiz.querySelector('app-nivel-lista')).not.toBeNull();
+    expect(raiz.textContent).toContain('Nuevo nivel');
   });
 });
