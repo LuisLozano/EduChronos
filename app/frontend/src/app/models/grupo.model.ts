@@ -37,3 +37,20 @@ export interface GrupoRequest {
   nivel: string;
   tipo: string;
 }
+
+/**
+ * Espejo de `PdcRequest(String codigo)`, el cuerpo del
+ * `POST /api/grupos/{idPadre}/pdc` (Bloque 8.5-D1).
+ *
+ * <p>UN SOLO CAMPO, y los tres que faltan no son un olvido: el PADRE viaja en la
+ * URL, el `nivel` lo HEREDA el backend del padre (I5) y el `tipo` es siempre
+ * `DIVERSIFICACION_PDC`, fijado por el flujo y no por el cliente. Mandar cualquiera
+ * de los tres en el cuerpo no haría nada: el backend no los lee.
+ *
+ * <p>Vive aquí y no en un `pdc.model.ts` aparte porque la RESPUESTA del sub-recurso
+ * es un `GrupoDTO`, o sea {@link Grupo}: separar el request de su response obligaría
+ * a duplicar ese tipo o a reexportarlo desde un segundo sitio.
+ */
+export interface PdcRequest {
+  codigo: string;
+}
