@@ -31,8 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>(c) {@code nivel} resoluble por código vía {@link NivelRepository#findByCodigo}
  *       (D-nueva: la FK viaja como clave natural, no como id);
  *   <li>(d) unicidad de {@code codigo}: en el alta ningún otro registro con ese
- *       código; en la edición ninguno SALVO la propia entidad (exclusión por id).
+ *       código; en la edición ninguno SALVO la propia entidad (exclusión por id);
+ *   <li>(e) SOLO EN LA EDICIÓN: la entidad EXISTENTE es {@code ORDINARIO}. Ver
+ *       {@link #validarEntidadOrdinaria}.
  * </ul>
+ *
+ * <p><b>(b) y (e) miran cosas distintas y las dos hacen falta.</b> (b) valida el tipo
+ * que viene en el REQUEST; (e), el que ya tiene la ENTIDAD en la base. Solo con (b), un
+ * PUT bien formado con {@code tipo:"ORDINARIO"} sobre un grupo PDC pasaba la lista
+ * blanca y lo DEGRADABA a ordinario conservando su {@code grupo_padre_id} —un estado que
+ * ningún alta puede producir y que deja ciego al sub-recurso
+ * {@code /api/grupos/{idPadre}/pdc}, que filtra sus hijos por tipo—. La UI llega por ahí
+ * sin proponérselo: su formulario no expone {@code tipo} e inyecta {@code "ORDINARIO"}
+ * fijo en todo cuerpo que envía.
  *
  * <p>{@code grupoPadre} queda SIEMPRE null en este bloque (los PDC que lo usan son
  * 8.5-D): el ctor lo recibe null y el Request ni lo expone.
@@ -90,14 +101,20 @@ public class GrupoService {
 
     /**
      * Edita un grupo existente. {@link NoSuchElementException} (→ 404) si el id no
-     * existe; {@link IllegalArgumentException} (→ 400) si falla la validación
-     * (a)/(b)/(c) o si el código pisa al de OTRO grupo (d). Reguardar la propia
-     * entidad con su mismo código es válido: la unicidad se excluye a sí misma por id.
+     * existe; {@link IllegalArgumentException} (→ 400) si la entidad existente no es
+     * ordinaria (e), si falla la validación (a)/(b)/(c) o si el código pisa al de OTRO
+     * grupo (d). Reguardar la propia entidad con su mismo código es válido: la unicidad
+     * se excluye a sí misma por id.
+     *
+     * <p>(e) va PRIMERA, antes de mirar el cuerpo: es una precondición del RECURSO, no
+     * del payload, y decirle a quien edita un PDC que "codigo es obligatorio" cuando el
+     * problema es que ese grupo no se edita por aquí sería un 400 que despista.
      */
     @Transactional
     public GrupoDTO editar(Long id, GrupoRequest peticion) {
         GrupoAdministrativo entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe grupo con id " + id));
+        validarEntidadOrdinaria(entidad);
         validarCodigo(peticion);
         TipoGrupo tipo = validarTipo(peticion);
         Nivel nivel = resolverNivel(peticion);
@@ -156,6 +173,27 @@ public class GrupoService {
                     "tipo no permitido en este flujo: " + tipo.name());
         }
         return tipo;
+    }
+
+    /**
+     * Regla (e), SOLO en la edición: la entidad que ya está en la base es
+     * {@code ORDINARIO}. Un 400 que NOMBRA el tipo real del grupo y remite al flujo por
+     * el que sí se gestiona.
+     *
+     * <p>Mira {@code entidad.getTipo()}, NO {@code peticion.tipo()}: son dos preguntas
+     * distintas y {@link #validarTipo} ya responde la otra. Sin esto, el PUT es una vía
+     * de degradación de un PDC a ordinario (ver el Javadoc de clase).
+     *
+     * <p>No hay regla simétrica en el alta y no hace falta: allí el tipo de la entidad
+     * ES el del request, que (b) ya obliga a ser {@code ORDINARIO}.
+     */
+    private static void validarEntidadOrdinaria(GrupoAdministrativo entidad) {
+        if (entidad.getTipo() != TipoGrupo.ORDINARIO) {
+            throw new IllegalArgumentException(
+                    "El grupo " + entidad.getCodigo() + " es de tipo " + entidad.getTipo().name()
+                            + " y no se edita por este flujo: los grupos no ordinarios se"
+                            + " gestionan por el suyo (el PDC, en /api/grupos/{idPadre}/pdc)");
+        }
     }
 
     /**

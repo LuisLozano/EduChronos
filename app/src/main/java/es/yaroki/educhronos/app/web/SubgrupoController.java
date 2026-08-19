@@ -27,8 +27,14 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>Traducciones por TIPO de excepción, no por endpoint:
  * {@link NoSuchElementException} (id inexistente) → {@code 404};
  * {@link IllegalArgumentException} (validación: código, grupos vacíos, grupo
- * inexistente, unicidad) → {@code 400} con el mensaje en el reason. En el {@code PUT}
- * ambos son posibles y hay que distinguirlos por tipo.
+ * inexistente, unicidad, subgrupo mono-Di de un PDC) → {@code 400} con el mensaje en el
+ * reason; {@link ReferenciaEntranteException} (plazas que lo retienen) → {@code 409}.
+ * En el {@code PUT} las dos primeras son posibles y hay que distinguirlas por tipo.
+ *
+ * <p>El {@code DELETE} traduce las TRES. La de validación es la última en llegar (la
+ * añadió la guarda del mono-Di): hasta entonces el borrado solo podía fallar por id
+ * inexistente o por referencia entrante, y sin este {@code catch} un rechazo de
+ * validación se escapaba como 500 en vez de como el 400 que es.
  */
 @RestController
 @RequestMapping("/api/subgrupos")
@@ -82,6 +88,8 @@ public class SubgrupoController {
             service.borrar(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (ReferenciaEntranteException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
