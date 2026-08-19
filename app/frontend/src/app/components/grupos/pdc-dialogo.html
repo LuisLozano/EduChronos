@@ -1,0 +1,84 @@
+<div class="pdc-dialogo">
+  <h2 class="pdc-dialogo__titulo">Diversificación (PDC) de {{ padre.codigo }}</h2>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="pdc-dialogo__cargando">Cargando…</p>
+    }
+
+    @case ('sin-pdc') {
+      <p class="pdc-dialogo__vacio">
+        {{ padre.codigo }} no tiene grupo de diversificación. Dale un código para crearlo.
+      </p>
+
+      <form class="pdc-dialogo__form" [formGroup]="form" (ngSubmit)="guardar()">
+        <label class="pdc-dialogo__campo">
+          <span class="pdc-dialogo__etiqueta">Código del PDC</span>
+          <input type="text" formControlName="codigo" class="pdc-dialogo__input" />
+          @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+            <span class="pdc-dialogo__error">El código es obligatorio.</span>
+          }
+        </label>
+
+        @if (error()) {
+          <p class="pdc-dialogo__error-servidor" role="alert">{{ error() }}</p>
+        }
+
+        <div class="pdc-dialogo__acciones">
+          <button type="button" class="pdc-dialogo__cerrar" (click)="cerrar()">
+            Cancelar
+          </button>
+          <button type="submit" class="pdc-dialogo__guardar" [disabled]="guardando()">
+            Crear PDC
+          </button>
+        </div>
+      </form>
+    }
+
+    @case ('con-pdc') {
+      <dl class="pdc-dialogo__ficha">
+        <dt class="pdc-dialogo__etiqueta">Código</dt>
+        <dd class="pdc-dialogo__valor">{{ pdc()?.codigo }}</dd>
+        <dt class="pdc-dialogo__etiqueta">Nivel</dt>
+        <dd class="pdc-dialogo__valor">{{ pdc()?.nivel }}</dd>
+      </dl>
+
+      @if (error()) {
+        <p class="pdc-dialogo__error-servidor" role="alert">{{ error() }}</p>
+      }
+
+      <div class="pdc-dialogo__acciones">
+        <button type="button" class="pdc-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+        <button
+          type="button"
+          class="pdc-dialogo__borrar"
+          [disabled]="guardando()"
+          (click)="borrar()"
+        >
+          Borrar PDC
+        </button>
+      </div>
+    }
+
+    @case ('error') {
+      <!-- Sin formulario de alta a propósito: no se sabe si hay PDC. Ver el javadoc. -->
+      <p class="pdc-dialogo__error-servidor" role="alert">{{ error() }}</p>
+
+      <div class="pdc-dialogo__acciones">
+        <button type="button" class="pdc-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    }
+  }
+
+  @if (estado() === 'cargando') {
+    <div class="pdc-dialogo__acciones">
+      <button type="button" class="pdc-dialogo__cerrar" (click)="cerrar()">
+        Cancelar
+      </button>
+    </div>
+  }
+</div>

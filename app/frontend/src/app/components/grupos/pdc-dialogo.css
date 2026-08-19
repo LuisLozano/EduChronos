@@ -1,0 +1,86 @@
+/* El CDK no aporta estilos: el diálogo pone los suyos, como grupo-form. */
+.pdc-dialogo {
+  padding: 1.5rem;
+  min-width: 22rem;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.pdc-dialogo__titulo {
+  margin: 0 0 1rem;
+}
+
+.pdc-dialogo__cargando,
+.pdc-dialogo__vacio {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+}
+
+.pdc-dialogo__campo {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.pdc-dialogo__etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.pdc-dialogo__input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.pdc-dialogo__ficha {
+  margin: 0 0 1rem;
+}
+
+.pdc-dialogo__valor {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.pdc-dialogo__error {
+  display: block;
+  color: #b00;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.pdc-dialogo__error-servidor {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.pdc-dialogo__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pdc-dialogo__cerrar,
+.pdc-dialogo__guardar,
+.pdc-dialogo__borrar {
+  padding: 0.5rem 1rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Rojo como el confirmar del molde de borrado: mismo gesto, mismo color. */
+.pdc-dialogo__borrar {
+  border-color: #b00;
+  color: #b00;
+}
+
+.pdc-dialogo__guardar:disabled,
+.pdc-dialogo__borrar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
