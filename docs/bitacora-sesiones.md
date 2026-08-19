@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S110. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S111. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S110). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S111). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -5754,3 +5754,138 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   C-actividades CERRADO. Siguiente: candidatos vivos son C-niveles (el más barato, BLOQUEA el e2e del criterio
   de terminado), D-F8.6-ii-a (que sigue dejando mudos todos los formularios entregados), PDC y tutores; lo fija
   su propio M0 (ver M1-ter).
+
+### Sesión 111 — O-estructura (H2): C-niveles. CRUD de Nivel por UI + recorrido completo del centro mínimo en navegador (Config/UI, sin M3). NO cierra el objetivo.
+  Undécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI SIN M3 (no hay lógica: dos campos y
+  binding; la única regla de cliente es un `required`), UN SOLO MÓDULO (frontend), backend con CERO trabajo.
+  QUINTA pieza de O-estructura. Lo que ENTREGA: con niveles creables por pantalla, las NUEVE filas del centro
+  mínimo —Nivel, Grupo, Subgrupo, Profesor, Asignatura, Aula, ≥1 tramo lectivo, Actividad, Plaza— son
+  construibles por UI y el solver produce horario a partir de ellas. Hasta hoy la cadena se rompía en la
+  PRIMERA fila. O-estructura sigue ACTIVO: su criterio exige aún PDC, tutores y el e2e UI→solver heredado.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 4
+  piezas hechas. Hito = H2. Cambio = C-niveles. R-invalidación sin conflicto (O-diseño depende de H2 cerrado y
+  repinta, no reestructura). Los CUATRO candidatos vivos se pesaron por dependencias: C-niveles gana por ser el
+  ÚNICO del que dependen los demás —el e2e necesita las nueve filas creables y Nivel era la única sin
+  formulario; PDC y tutores no desbloquean nada—. D-F8.6-ii-a queda fuera por R-deuda (su ficha dice que no
+  bloquea el criterio) y no la rescata el e2e, porque R-e2e prohíbe probar ramas de error en navegador.
+  DECISIÓN DE ENCUADRE: se REVISA la decisión (e) de S109, que fijó C-niveles pegada al e2e, y se separan. Tres
+  razones, la primera es dependencia técnica real: (1) el e2e no puede escribirse antes de que exista el
+  formulario cuyos selectores y flujo necesita; (2) perfiles de riesgo opuestos —molde validado cinco veces
+  frente al primer test de navegador del proyecto, con dos trampas ya documentadas—, y pegarlos deja que el
+  desbordamiento del segundo se lleve por delante la entrega del primero; (3) ni juntos cierran el objetivo.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL antes de teclear, informe por bloques A-F). Confirmó lo
+  esperado y afinó lo que decidía el alcance. (1) El CRUD de Nivel es réplica fiel del molde plano de
+  Asignatura y MÁS BARATO: cinco endpoints, 13 casos en `NivelEndpointTest` con servicio real sobre SQLite,
+  guarda 409 en el borrado, y SIN el sub-recurso `aulas-compatibles` que Asignatura arrastra. Backend con cero
+  trabajo. (2) NO hay enum ni lista blanca: el formulario son dos campos, descartado el molde de Aula. (3) UN
+  ÚNICO referente, `grupo_administrativo.nivel_id`, verificado por FK en `schema.sql` y por relación JPA: el 409
+  muestra un solo conteo. (4) DESVIACIÓN REAL DEL MOLDE: `orden` es `int` PRIMITIVO sin ninguna validación de
+  servidor —ni rango, ni positividad, ni unicidad—, así que un cuerpo sin la clave deserializa a 0 EN SILENCIO
+  y nadie lo detecta; el servidor no puede distinguir «ausente» de «cero». (5) `listar()` ordena por `orden`
+  (D-1) en el servicio, no en el repositorio, y el test `listar_ordenaPorOrdenNoPorCodigo` lo blinda con orden
+  numérico cruzado con el alfabético. (6) `nivel.model.ts` y `nivel.service.ts` YA EXISTÍAN con javadoc que
+  declaraba explícitamente que el CRUD no se expone en la UI y que añadir wrappers sería «código muerto».
+  DECISIÓN sobre `orden`, la única de la sesión: el formulario pone `Validators.required` y NADA MÁS —ni `min`,
+  ni rango, ni unicidad—. No contradice la decisión (c) de S109 (el formulario refleja el contrato): lo que
+  aquélla prohíbe es RECHAZAR cuerpos que la API acepta, y `required` no restringe qué valor es válido (0 sigue
+  siendo aceptable), solo impide enviar uno que el usuario no ha elegido. Derivada: el control es
+  `FormControl<number | null>` y NO `nonNullable`, para que el campo NAZCA VACÍO —el equivalente numérico del
+  `''` de un campo de texto es `null`; un inicial de 0 o de 1 sería un orden decidido por el formulario—.
+  DECISIÓN sobre la asimetría PUT/DELETE: el M2 la levantó (el DELETE guarda ante dependientes, el PUT no) y se
+  cierra el juicio en contra de tocarla: renombrar el código de un nivel con grupos colgando NO corrompe nada
+  porque la FK es por id, es lo que un renombrado debe hacer, y el molde comparte la asimetría (Asignatura
+  tampoco guarda en el PUT). No es deuda; es decisión consciente.
+  FASE 1 — MODELO Y SERVICIO. `nivel.model.ts` gana `NivelRequest`; `nivel.service.ts` pasa de un wrapper a los
+  cinco. Los javadoc de AMBOS se reescriben: afirmaban lo contrario de lo que el Cambio entrega, y un
+  comentario falso hace que el siguiente lector decida sobre una premisa falsa (hallazgo aplicado de S110).
+  `nivel.service.spec.ts` de 1 a 5 casos, con el (1) conservando la intención original —congela que el cliente
+  NO reordena— sobre un fixture cuyo orden pedagógico contradice al alfabético. Suite 249 → 253.
+  `grupo-form.spec.ts` intacto en 11: el contrato HTTP no se movió, solo creció la superficie del cliente.
+  Commits `71e5305` (producción) y `be9110f` (tests).
+  FASE 2 — FORMULARIO Y LISTA. Ocho ficheros nuevos en `components/niveles/`, calcados del molde salvo la
+  desviación de `orden`. La lista NO ordena en cliente y aquí no es solo regla de molde: reordenar por `codigo`
+  pondría 1BACH antes que 1ESO y destruiría el único criterio que el campo `orden` existe para expresar. Suite
+  253 → 266. Commits `b6dbd6d` (producción, 6 ficheros sin ningún `.spec.ts`) y `06fb70c` (los 2 specs solos).
+  FASE 3 — CABLEADO. Tres líneas en `Configuracion` (import, entrada en `imports:`, etiqueta) más un caso (8),
+  con la lista de niveles ANTES de la de grupos porque el orden de la plantilla sigue el orden de alta. Salen
+  DOS desviaciones respecto a lo previsto, ambas medidas por Claude Code y no supuestas: (a) `configuracion.ts`
+  tenía un javadoc de 35 líneas que el dictado no incluía —se conservó íntegro y se corrigió por separado—; (b)
+  `configuracion.spec.ts` NO usa `HttpTestingController` ni helper de montaje compartido: dobla los servicios
+  por `useValue` con `of([])`, así que la cascada de `http.verify()` que se anticipó no podía ocurrir. Suite
+  266 → 267. Commits de producción, de test y `docs(frontend)` para el javadoc: TRES commits en vez de los dos
+  del patrón de S110, por haber descubierto el javadoc desfasado después de dictar el fichero.
+  DECISIÓN sobre el javadoc de `Configuracion`: niveles NO es una quinta entidad de O-catálogo. Ese objetivo
+  cerró en S106 con su censo de cuatro y reabrirlo violaría R-terminado; la sección de niveles es un Cambio de
+  O-estructura que resulta tener la misma forma de UI. Por eso las dos frases del javadoc que declaran el censo
+  de cuatro y el 4/4 se conservaron LITERALES y la corrección fue aditiva.
+  M4 — CAMPAÑA DE MUTACIÓN (Claude Code, siete mutaciones, protocolo de restauración verificada por diff).
+  Cuatro mueren: quitar el `required` de `orden` (lo mata el (7) del form, que no aserta ninguna petición y se
+  apoya en el `http.verify()` del `afterEach`), nacer con 0 en vez de null, añadir `min(1)`, y ordenar la lista
+  por `codigo` en cliente. Tres sobreviven, y el análisis de los tres CORRIGE la predicción del arquitecto:
+  (a) M6 —invertir la precedencia de `mensaje()` en la lista— no podía morir por el caso del formulario, porque
+  hay DOS funciones `mensaje()` copiadas a propósito y NO compartidas: son funciones distintas. La premisa
+  falsa venía del javadoc de `asignatura-lista.spec` («cubierto en el form, misma función»), que se propagó sin
+  verificar. Se arregla añadiendo la clave `error` al cuerpo flusheado del caso (4), que pasa a medir texto rico
+  Y precedencia sin caso nuevo; re-verificado por mutación dirigida: muere, y solo ese caso. (b) M5 (`=== true`
+  laxo) y M7 (`track $index`) son MUTACIONES EQUIVALENTES y se dejan vivas con razón escrita en el javadoc del
+  spec: `NivelForm` cierra con `true` o sin argumento, nunca con `false`, y las filas de la lista no tienen
+  estado en el DOM. Matarlas exigiría fabricar escenarios que el sistema no produce —mismo criterio que
+  D-i2-dedup-cliente—. Lo que SÍ se añadió, por laguna de cobertura frente al molde S108 y no por mutación:
+  los casos (6) y (7), que ejercitan `abrirForm`, código que este Cambio entrega y que nadie tocaba. Suite
+  267 → 269. Commit `287c7d1`.
+  HALLAZGO DE MÉTODO: con una mutación que deja peticiones HTTP abiertas, el `afterEach` que lanza deja el
+  TestBed instanciado y CONTAMINA lo que corre después en el mismo worker. La misma mutación dio 44 fallos en 7
+  ficheros en una pasada y 3 en 2 en la siguiente, con baseline verde 3 de 3. Consecuencia: en esa clase de
+  mutación el conteo de fallos NO es reproducible y hay que leer el NOMBRE del caso, no el número.
+  M4-bis — RECORRIDO COMPLETO DEL CENTRO MÍNIMO EN NAVEGADOR (conducido por el arquitecto, no delegable). Se
+  eligió el recorrido completo sobre el corto precisamente para que el reconocimiento del terreno lo pague esta
+  sesión y no la del e2e. RESULTADO: las nueve filas se crean por UI y el solver devuelve horario (tres sesiones
+  de MAT sobre el centro de prueba). Las tres comprobaciones propias de niveles pasan: la tabla lista 1ESO antes
+  que 1BACH (pedagógico, no alfabético), el desplegable de Grupo trae los dos niveles y refleja el código
+  editado, el 409 aparece al borrar un nivel con grupo colgando, y un alta con el orden vacío se detiene en
+  cliente con «El orden es obligatorio» sin llegar al servidor. C-niveles CUMPLE.
+  DATO DE ENTORNO fijado para el e2e: `spring.datasource.url=jdbc:sqlite:educhronos.db` es RELATIVA al
+  directorio desde el que se lanza Spring Boot. La base viva es `app/educhronos.db` (se arranca desde `app/`);
+  la `educhronos.db` de la raíz era un residuo de un arranque de julio. Para partir de cero hay que renombrar o
+  borrar `app/educhronos.db` con la aplicación parada, porque desde S109 `schema.sql` ya no demuele.
+  HALLAZGOS DEL RECORRIDO, ninguno ejecutado en esta sesión (R-deuda y R-terminado: ninguno bloquea el criterio
+  y ninguno es C-niveles). Nacen clasificados en §4: (1) D-horario-irreversible, el más grave —no existe
+  endpoint que borre o reemplace un horario, cada generación ACUMULA, y como el 409 del PUT de actividad cuenta
+  `sesion(es)` entre sus referentes, una actividad usada por un horario queda congelada para PUT y DELETE de
+  forma permanente por la vía UI/API—; (2) D-error-generacion-pin, el degradado de `errorGeneracion` dice «El
+  servidor rechazó el pin» ante un horario infactible porque reutiliza el helper escrito para los pines; (3)
+  D-molde-mensaje-cubierto-en-form, deuda de test heredada de O-catálogo que este M4 destapó; (4) D-log-aplicacion,
+  mejora futura propuesta por el arquitecto (no hay logging estructurado en ninguna de las dos capas).
+  CONTRADICCIÓN DOCUMENTAL medida, que AFINA D-F8.6-ii-a y vale más que su tamaño: el javadoc de
+  `asignatura-lista.ts` afirma que `server.error.include-message=always`, y el de `horario-view.ts` afirma que
+  está DESACTIVADO. El comportamiento observado en navegador —«Conflict» crudo en el 409 de nivel— da la razón
+  al segundo. El M2 de esa deuda debe partir de este dato y no del javadoc de O-catálogo.
+  R-terminado RESPETADA: no se pulió fuera de criterio. Se frenó D-F8.6-ii-a con su alcance ya medido dos veces,
+  se frenaron los cuatro hallazgos del recorrido, se frenó arreglar el aserto ambiguo del caso (8) de
+  `Configuracion` (mide lo que le toca y su ambigüedad es del molde, no de niveles), y se frenó tocar los specs
+  de O-catálogo que arrastran el mismo comentario falso destapado por M6.
+  HIGIENE (M1-bis): archivada S109 a `bitacora-sesiones.md` (promovida a `### Sesión 109`, insertada al final en
+  orden ascendente, cuerpo verificado idéntico por diff); degradada S110 a «Última sesión registrada (previa)»
+  compacta; S111 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S109), la
+  crónica de archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los commits de código separan producción de tests en
+  las tres fases, que documentación y código van en commits distintos, y que el árbol quedó limpio —los dos
+  `*.db.pre-s111` del recorrido se borraron y `git status --short` no devuelve nada—.
+  NOTA TÉCNICA PARA EL e2e (amplía la de S109 sobre ZONELESS y `testDir`, medida en esta sesión sobre
+  `horario-view.ts`): (1) el id del horario está CLAVADO a `/horario/1` en el enlace de la landing; no hay
+  endpoint de «último horario» ni lista, así que entrar por la landing lleva siempre al horario 1, exista o no.
+  (2) Con base vacía el GET de proyección da 404 y el frontend lo trata como error FATAL —vacía la rejilla—,
+  pero la pantalla sigue usable porque los controles viven fuera del `@if (error())`: el camino «entrar sin
+  horario → generar el primero → ver la rejilla» funciona. (3) El botón «Generar horario» NACE DESHABILITADO
+  (`avisosPrevalidacion() === null`) y si la prevalidación falla se queda deshabilitado PARA SIEMPRE, sin
+  reintento. (4) El `next` del POST NO consume la proyección devuelta: navega a la ruta del id nuevo y la
+  recarga la dispara la emisión de `paramMap`. Para el e2e eso significa esperar el POST **y** cuatro GET
+  (bloqueos, prevalidación, diagnóstico, proyección, concurrentes y sin orden de llegada garantizado), y usar el
+  CAMBIO DE URL como indicador de éxito, más fiable que el contenido de la rejilla. (5) Dos señales de error
+  distintas comparten la clase `.error` (`error` y `errorPin`): un `locator('.error')` puede resolver a dos
+  nodos. Las otras tres tienen clase propia.
+  O-estructura (H2) ACTIVO, 5 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111).
+  C-niveles CERRADO y con ello el e2e DESBLOQUEADO. Suites: vitest 269, backend intacto 261/91. Siguiente:
+  candidatos vivos son el e2e UI→solver (tercera pata del criterio, ya sin bloqueo y con reconocimiento hecho),
+  PDC, tutores y D-F8.6-ii-a; lo fija su propio M0 (ver M1-ter).

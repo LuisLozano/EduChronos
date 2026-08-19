@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 6 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación); faltan PDC y tutores. «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil); queda tutores, y su primer trabajo es MEDIR si el criterio lo exige. «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -192,15 +192,27 @@ de las Fases 9–12.
   demanda curricular y jornada). Andamiaje Playwright ya instalado en S106
   (`app/frontend/e2e/`, humo verde); este objetivo lo reutiliza. Sujeto a la
   política e2e de §6. **TERCERA PATA CUMPLIDA en S112** (`e2e/centro-minimo.spec.ts`,
-  un solo test por R-e2e). Quedan vivas la primera y la segunda, y ambas dependen de
-  PDC: el §6.2 del modelo —uno de los casos de validación que la segunda pata exige
-  reproducir desde la UI— ES el caso 3ºADi, y hoy el alta de un grupo PDC vive en el
-  sub-recurso `/api/grupos/{idPadre}/pdc` (S76), que el CRUD de Grupo por UI no
-  alcanza (lista blanca `ORDINARIO` de `GrupoService`). Precisión registrada en S112
-  sobre la segunda pata, que zanja una grieta que S110 dejó anotada: los «casos de
-  validación del §6» son los del MODELO —reproducir por formulario los horarios reales
-  del centro—, no la superficie de error de la UI; que un 400 pinte «Bad Request»
-  (D-F8.6-ii-a) degrada la usabilidad pero no impide reproducir ningún caso.
+  un solo test por R-e2e). Precisión registrada en S112 sobre la segunda pata, que zanja
+  una grieta que S110 dejó anotada: los «casos de validación del §6» son los del MODELO
+  —reproducir por formulario los horarios reales del centro—, no la superficie de error
+  de la UI; que un 400 pinte «Bad Request» (D-F8.6-ii-a) degrada la usabilidad pero no
+  impide reproducir ningún caso. **SEGUNDA PATA DEMOSTRADA EN SU CASO MÁS DIFÍCIL en
+  S113**: el §6.2 del modelo —el caso 3ºADi, y el que exigía el sub-recurso
+  `/api/grupos/{idPadre}/pdc` que el CRUD de Grupo por UI no alcanza (lista blanca
+  `ORDINARIO` de `GrupoService`)— se construyó ÍNTEGRAMENTE por pantalla y el solver
+  produjo horario sobre él, en su versión válida (la Nota de Sesión 23: UN solo grupo Di
+  con padre, subgrupo con `grupos={PDC}`, compartidas que se quedan en el ordinario), sin
+  que nada del caso resultara inexpresable por formulario. RECORTE MEDIDO EN S113 sobre lo
+  que la primera pata todavía exige: `VIRTUAL_OPTATIVA` —el otro tipo que la lista blanca
+  bloquea— NO lo pide ningún caso del §6, no aparece en ninguno de los 44 fixtures del
+  solver y ni siquiera existe como constante en el dominio del solver; no hace falta
+  construir su formulario. Lo que queda por decidir de las dos patas vivas es TUTORES, y
+  esa decisión empieza por una medición pendiente: `requiereTutor` es campo del formulario
+  de Actividad desde S109 y `ProfesorTutoria` existe en JPA desde S77, así que puede estar
+  más cubierto de lo que parece. Nótese que tutores figura en el PROPÓSITO de este objetivo
+  y en sus «Cambios que agrupa», pero NO en el texto del criterio de terminado: si su M2
+  midiera que ningún caso del §6 exige asignar el tutor por UI, lo que procede es CERRAR el
+  objetivo (R-terminado), no construir el formulario por simetría.
 - **Depende de:** O-catálogo.
 - **Valor:** valida el MODELO UNIFICADO contra el usuario real. Es el objetivo de
   mayor riesgo del proyecto (si el modelo Actividad→Plaza→Subgrupo no se puede
@@ -209,7 +221,7 @@ de las Fases 9–12.
 - **Cambios que agrupa:** editor de demanda curricular, asistente de
   desdoble/agrupamiento (D1, D10), editor de PDC (D7), asignación de tutores,
   configuración de estructura de jornada (D22).
-- **Progreso (S112):** ABIERTO, 6 piezas hechas. **C-jornada** (S107, D22):
+- **Progreso (S113):** ABIERTO, 7 piezas hechas. **C-jornada** (S107, D22):
   backend REST singleton `GET|PUT /api/jornada` (reemplazo total, guarda 409 ante
   dependientes, techo conservador ≤6 lectivos/día sin tocar `domain.Tramo`, malla
   expandida a los 5 días en el backend) + formulario singleton en Configuración
@@ -294,6 +306,34 @@ de las Fases 9–12.
   `lanzarGeneracion`, conservando intacta la decisión de S93 de recargar por GET fresco.
   El control de vacuidad del e2e lo demuestra: revertir el arreglo lo pone ROJO.
   NO cierra el objetivo: faltan PDC y tutores, y ambos son patas 1 y 2 del criterio.
+  **C-pdc** (S113, D7): el alta, la consulta y el borrado del grupo PDC por UI, con el que
+  la SEGUNDA PATA queda demostrada en su caso más difícil. Entra en dos mitades y la
+  primera no estaba prevista. (a) DOS GUARDAS DE BACKEND, que este Cambio paga porque este
+  Cambio las abre: el M2 midió CUATRO caminos por los que el usuario destruiría el PDC
+  desde botones que la pantalla ya ofrecía —degradarlo a ORDINARIO abriendo su diálogo de
+  edición y pulsando Guardar (el formulario inyecta `tipo:'ORDINARIO'` fijo y `validarTipo`
+  solo mira el tipo del request); renombrar su subgrupo mono-Di, que deja el DELETE del PDC
+  en 404 permanente porque el vínculo es por código derivado; borrar ese subgrupo, que deja
+  el PDC huérfano y borrable por el CRUD plano; y añadir el grupo padre a la población del
+  mono-Di, que el backend aceptaba y que produce el INFEASIBLE que la regla S23 existe para
+  evitar, sin error visible ni pista alguna—. Los cuatro eran INALCANZABLES antes, porque
+  sin PDC creable por UI no hay fila de PDC ni subgrupo mono-Di en las listas: no son deuda
+  declinada, son un hueco que el propio Cambio abriría. G1 rechaza editar por el CRUD plano
+  una entidad que no sea ORDINARIO; G2 declara que un subgrupo cuya población es EXACTAMENTE
+  UN grupo `DIVERSIFICACION_PDC` pertenece al agregado PDC. El «exactamente uno» se corrigió
+  en sesión: «que incluya un PDC» habría roto el ámbito compartido de 4ºESO, que S29 modeló
+  como un subgrupo con los DOS Di dentro, caso legítimo del §6. Ambas devuelven 400 y no 409,
+  que sigue reservado a `ReferenciaEntranteException`. (b) EL DIÁLOGO, colgado de una tercera
+  acción por fila en la lista de grupos —no de una ruta hija: eso obligaría a resolver aquí la
+  decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio propio, y a fijarla con un solo
+  ejemplo delante—. Sus tres estados los gobierna la RESPUESTA DEL SERVIDOR y no `DIALOG_DATA`,
+  que es lo que lo saca del molde de form de catálogo: 404 es el estado «sin PDC» y no un
+  error, 200 pinta la ficha con su borrado, y el estado inicial es `cargando` porque pintar el
+  alta mientras el GET viaja enseña «este grupo no tiene PDC» a un grupo que sí lo tiene.
+  Vuelve la columna `Tipo` a la lista y las filas de PDC no ofrecen ninguna de las tres
+  acciones, porque las tres fallarían y ninguna capacidad se pierde (el backend no tiene
+  edición de PDC y su borrado vive en el diálogo del padre). Suites: app 261→268, vitest
+  271→290, solver y e2e intactos.
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
   compartidos. D22 saldada de facto (C-jornada, S107). Nace y cuelga aquí
   D-subgrupo-ux-multiselect (S108): la UX del `<select multiple>` de subgrupos es
@@ -313,12 +353,24 @@ de las Fases 9–12.
   D-e2e-aislamiento (la suite e2e corre en paralelo sin aislamiento entre specs; hoy
   inocuo porque solo un spec escribe), más D-props-test-obsoleto (el
   `application.properties` de test repite la premisa caducada que S112 corrigió en el
-  `playwright.config.ts`). Nace en S112 pero NO cuelga aquí: D-doble-proyeccion-compartido
+  `playwright.config.ts`). Nacen y cuelgan aquí, en S113, D-pdc-lista-rancia (técnica real de
+  UX, la más visible del Cambio: el alta de un PDC toca DOS catálogos y solo recarga el que
+  abrió el diálogo, así que la lista de subgrupos no se entera hasta un F5),
+  D-pdc-sin-edicion, D-pdc-vinculo-por-cadena (técnica real: el agregado localiza su subgrupo
+  por convención de código y no por referencia; G2 la CONTIENE, no la resuelve),
+  D-pdc-sufijo-completo y D-monodi-botones-inertes. Nacen en S113 pero NO cuelgan aquí:
+  D-bundle-presupuesto es de O-diseño (el bundle pasa de 507,66 a 514,42 kB frente a un techo
+  de 500) y D-tokens-inexistentes es transversal y de costura R4 (la familia `D-nueva-*` se
+  cita en nueve sitios del código sin tener definición en ningún documento). Nace en S112 pero
+  NO cuelga aquí: D-doble-proyeccion-compartido
   es de O-ajuste-cierre, superficie de specs de la vista de horario. Y hereda el daño vivo de
   D-F8.6-ii-a, que S109 midió y amplió y S110 afinó desde el navegador: el mensaje
   accionable existe pero viaja como reason phrase y el cuerpo llega sin `message`, así que
   TODOS los formularios de este objetivo —incluido el 409 construido en S109— muestran
-  «Bad Request» en vez del motivo.
+  «Bad Request» en vez del motivo. AFINADA por CUARTA vez en S113, que ejecutó la comprobación
+  que la propia ficha reclamaba: la clave está puesta, está compilada y aun así el cuerpo llega
+  sin `message`, luego «reactivar la clave» sale del abanico de arreglos POR MEDICIÓN. Los seis
+  mensajes del flujo del PDC son genéricos («Bad Request» ×5 y «Conflict» ×1).
 
 #### O-demo — "El centro real funciona de punta a punta."
 - **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
@@ -424,7 +476,7 @@ asigna categoría, objetivo y disposición.
 | D-F8.5-D2a-b (incoherencia 404/400 FK) | O-catálogo | No bloquea | Se evalúa dentro de O-catálogo |
 | D18 (condiciones necesarias de factibilidad) | O-estructura | No | Ya cubierto en backend (8.4-A); resto en presentación |
 | D-F8.6-iiiB1-c, -iiiB2a-a (superficie de error) | O-ajuste-cierre | No | Se evalúan al abrir; probablemente limitación conocida aceptable |
-| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases). AFINADA en S111 con un dato que su M2 debe usar como punto de partida: hay CONTRADICCIÓN DOCUMENTAL en el repo —el javadoc de `asignatura-lista.ts` afirma que `server.error.include-message=always` y el de `horario-view.ts` afirma que está DESACTIVADO—, y el comportamiento observado en navegador (el 409 de borrado de nivel pinta «Conflict» crudo) da la razón al segundo. Confirmada además en el octavo formulario: la lista de niveles nace muda. AFINADA en S112, y ESTE es el punto de partida de su M2, no el de S111: medido por lectura literal de `application.properties`, la clave `server.error.include-message=always` SÍ ESTÁ, con comentario propio que explica por qué se puso y por qué los tests no lo notan. El javadoc de `horario-view.ts` describe bien el SÍNTOMA y mal la CAUSA. La hipótesis viva pasa a ser que la clave está puesta y no surte efecto; su M2 debe EMPEZAR comprobando eso en ejecución, porque si se confirma, la opción «reactivar la clave» desaparece del abanico de tres |
+| D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases). AFINADA en S111 con un dato que su M2 debe usar como punto de partida: hay CONTRADICCIÓN DOCUMENTAL en el repo —el javadoc de `asignatura-lista.ts` afirma que `server.error.include-message=always` y el de `horario-view.ts` afirma que está DESACTIVADO—, y el comportamiento observado en navegador (el 409 de borrado de nivel pinta «Conflict» crudo) da la razón al segundo. Confirmada además en el octavo formulario: la lista de niveles nace muda. AFINADA en S112, y ESTE es el punto de partida de su M2, no el de S111: medido por lectura literal de `application.properties`, la clave `server.error.include-message=always` SÍ ESTÁ, con comentario propio que explica por qué se puso y por qué los tests no lo notan. El javadoc de `horario-view.ts` describe bien el SÍNTOMA y mal la CAUSA. La hipótesis viva pasa a ser que la clave está puesta y no surte efecto; su M2 debe EMPEZAR comprobando eso en ejecución, porque si se confirma, la opción «reactivar la clave» desaparece del abanico de tres. **COMPROBADO en S113, y con ello su M2 arranca un paso más adelante:** la clave está en `application.properties` Y en `target/classes`, sigue existiendo en la versión de Boot en uso, y aun así el cuerpo llega sin `message` (evidencia en crudo sobre `POST /api/grupos/{id}/pdc`). «Reactivar la clave» queda DESCARTADA por medición, no por hipótesis; el abanico se reduce a `ProblemDetail` o traducir en cada controlador. Superficie ampliada: los seis mensajes del flujo del PDC son genéricos, cinco «Bad Request» y un «Conflict» que pierde el desglose «referenciada por N plaza(s)». El arreglo es GLOBAL —el CRUD plano se comporta igual—, no del diálogo ni de las guardas de S113 |
 | D-plaza-sin-subgrupos (una plaza con cero subgrupos se acepta) | O-estructura | No | Detectada por el M2 de S109: `validarPlazas` comprueba XOR, I7 e I2, pero acepta `subgrupos` nulo o vacío y devuelve 201. Agujero de dominio (la población de la plaza SON sus subgrupos). DECISIÓN de S109: el formulario refleja el contrato y NO añade el validador solo en cliente; hay un spec que se pondría rojo si alguien lo añadiera. El arreglo es simétrico a I7 (≈10 líneas y un test). No se paga ahora |
 | D-i2-dedup-cliente (la deduplicación intra-plaza del validador I2 no la cubre ningún test) | O-estructura | No | Nace en S110 de la campaña de mutación: quitar el `Set` por fila del validador `subguposDisjuntos` no pone rojo nada. El escenario es INALCANZABLE desde la UI (un `<select multiple>` no repite opción; el GET proyecta desde un `Set`), así que la regla existe por fidelidad con `validarPlazas` y no porque haya camino que la ejercite. Deuda de TEST, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar un estado que el sistema no produce. No se paga ahora |
 | D-horario-irreversible (un horario generado no se puede borrar ni reemplazar) | O-estructura | No bloquea el criterio, pero es un CALLEJÓN SIN SALIDA para el usuario | Nace en S111, medida en navegador y confirmada en código. No existe `DELETE /api/horarios/{id}` ni ningún borrado programático de `sesion`; cada `POST /api/horarios` ACUMULA (alta pura, sin consulta previa ni reemplazo), y el 409 del PUT/DELETE de actividad cuenta `sesion(es)` entre sus referentes. Consecuencia: en cuanto se genera un horario, las actividades que usa quedan congeladas para editar y borrar de forma PERMANENTE por la vía UI/API; la única salida es tocar SQLite a mano. El javadoc de `ActividadService.editar` prescribe «el usuario borra el horario y luego reconfigura», salida que NO existe. El `on delete cascade` de `sesion.horario_id` ya está en el esquema: el mecanismo está preparado y nadie lo dispara. Afecta al e2e solo si éste necesitara rehacer algo tras generar: MEDIDO en S112 y NO le afecta, porque cada corrida parte de una BD borrada y genera una sola vez. Sigue sin pagarse |
@@ -434,6 +486,9 @@ asigna categoría, objetivo y disposición.
 | D-e2e-retry-bd (un reintento de Playwright correría sobre la BD del intento fallido) | O-estructura | No | Nace en S112. `retries: 2` en CI, y el `rm -f app/educhronos-e2e.db*` vive en el `command` del `webServer`, que corre UNA VEZ por corrida, no por test ni por reintento. Un reintento encontraría el centro ya creado y moriría con un 400 de código duplicado, es decir, por causa distinta de la original: esconde el diagnóstico. Hoy no bloquea porque NO HAY CI (Fase 12 sin abrir). Se resuelve al abrirla. No se paga ahora |
 | D-e2e-aislamiento (la suite e2e corre en paralelo sin aislamiento entre specs) | O-estructura | No | Nace en S112. `fullyParallel: true` sin `workers` reparte los specs entre workers que atacan el mismo backend y la misma BD. Inocuo HOY por una razón concreta y no por suerte: `humo` solo lee (la landing no llama a `/api`) y `centro-minimo` es el único que escribe. El riesgo llega con el TERCER spec: dos writers sobre un SQLite único chocarán por los `unique` de código de forma no determinista, que es la clase de fallo intermitente que desprestigia una suite entera. Se decide al escribir el segundo spec que escriba. No se paga ahora |
 | D-props-test-obsoleto (el `application.properties` de test afirma que `schema.sql` dropea) | O-estructura | No | Nace en S112. Dice «schema.sql dropea y recrea, de modo que varios contextos Spring sobre este mismo fichero recrean el esquema con FK sin petar»; falso desde S109. Es la MISMA falsedad que S112 corrigió en `playwright.config.ts`, cuya hermana quedó viva. Efecto de lectura, no de ejecución (la suite de backend se limpia por otra vía), pero por R5 es estado vivo equivocado: hace que el siguiente lector decida sobre una premisa falsa. Se corrige al tocar ese fichero. No se paga ahora |
+| D-pdc-lista-rancia (la lista de subgrupos no se entera del alta ni del borrado de un PDC) | O-estructura | No | Nace en S113 y la abre el propio Cambio: el alta de un PDC toca DOS catálogos (crea el grupo y su subgrupo mono-Di) pero el contrato del molde —«el diálogo cierra con `true` y recarga quien lo abrió»— solo alcanza a `GrupoLista`. MEDIDO en navegador: la sección de subgrupos seguía diciendo «No hay subgrupos todavía» con el subgrupo ya en la BD; simétrico al borrar. NO se paga aquí, con razón escrita: no es del género de las guardas (vista desactualizada, no destrucción de datos), arreglarla exige coordinar componentes hermanos dentro de `Configuracion` —que ES la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio propio— y no bloquea el criterio, cosa que el M4 demuestra: el §6.2 se reprodujo entero con la lista rancia de por medio. Se resuelve en el Cambio que decida la navegación; no se parchea con un `EventEmitter` ad hoc, que fijaría el molde por la puerta de atrás |
+| D-pdc-vinculo-por-cadena (el agregado PDC localiza su subgrupo por código derivado) | O-estructura | No | Nace en S113. `PdcService.borrar` resuelve el mono-Di con `findByCodigo(codigo + "-Completo")`: el agregado que su javadoc dice poseer no estaba protegido fuera de sus tres métodos, y cualquier rename por otra vía dejaba el DELETE del PDC en 404 permanente. G2 CONTIENE la deuda cerrando el único camino que existía (el CRUD plano de subgrupos); vuelve a morder con un tercer camino de escritura hacia `Subgrupo`. Familia de D-F8.5-D2a-a y D-F8.2b-iv-a (validación de aplicación sin espejo en la base). Convertir la convención en referencia real es cambio de ESQUEMA, no una guarda: se evalúa cuando algo más toque `schema.sql` en esta zona. No se paga ahora |
+| D-tokens-inexistentes (la familia `D-nueva-*` se cita en nueve sitios y no existe) | Transversal, sin objetivo asignado | No | Nace en S113 al auditar en R4 los tokens que la sesión introducía. `D-nueva`, `D-nueva-1` … `D-nueva-5` aparecen en `GrupoService`, `GrupoDTO`, `GrupoRequest`, `GrupoEndpointTest`, `grupo-form.ts` y la cabecera de `grupo.model.ts`, y ninguno tiene definición viva en este documento ni en el plan. Incumple R4 en su forma más simple; el daño es que el lector busca el token, no lo encuentra y no sabe si la regla sigue vigente. PREEXISTENTE: S113 corrigió solo el que ella misma introdujo (`D-nueva-2`) y registró el resto, porque mapear nueve citas a sus deudas reales exige leer nueve contextos y es trabajo propio, no un arreglo en caliente. Sesión de Higiene/Método, junto con el script de R4 que falta desde S101 |
 | D-log-aplicacion (no hay logging estructurado en ninguna de las dos capas) | Transversal, sin objetivo asignado | No | Propuesta del arquitecto en S111 tras el recorrido en navegador, donde diagnosticar un fallo exigió leer código en vez de logs. Backend sin configuración de logging a fichero (solo consola); frontend sin ninguna traza, con `ngx-logger` mencionado como candidato pero NO evaluado. Mejora FUTURA: se registra para que no se pierda, no planifica y no cuelga de ningún objetivo vivo |
 
 #### Mejora futura, cuelga y espera
@@ -450,6 +505,10 @@ asigna categoría, objetivo y disposición.
 | D-jornada-flush-test (`put_dosVecesLaMismaMalla_idempotente` no discrimina el flush) | O-estructura | Detectada S107: falta `UNIQUE(dia,orden)` en `schema.sql`, así que sin el `flush()` el resultado sería el mismo y el test no lo prueba. El `flush()` es defensivo/preventivo (correcto: fuerza DELETE antes de INSERT). Si algún día se añade la constraint, el test pasa a discriminar. Deuda de test, no de código |
 | D-actividad-ux (asperezas del editor de Actividad) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S109 al conducir el formulario con Playwright, tres asperezas de presentación: los dos `<select formControlName="asignatura"` del formulario (la de la actividad y la de la plaza) no tienen `id` ni `label for` y se anuncian igual a un lector de pantalla; el error de servidor viejo sigue pintado mientras se muestra un error de campo nuevo (`error()` solo se limpia al empezar una petición); y el aviso de multiplaza vive dentro de la celda del recuento, mezclando dato y aviso. Ninguna impide configurar nada. RECORTADA en S110: el tercer síntoma se CERRÓ de paso al retirar el trozo B la guarda de multiplaza y con ella el aviso; sobreviven los dos primeros. No se paga ahora |
 | D-subgrupo-ux-multiselect (el campo «grupos» del form de subgrupo es un `<select multiple>` nativo) | O-estructura (o O-diseño si absorbe el acabado) | Detectada S108, DECISIÓN CONSCIENTE de alcance: se eligió la mínima desviación del molde (`<select multiple>` nativo) y la UX rica —chips, búsqueda, casillas— se aplaza a una fase de mejora de UX de subgrupos ya prevista al abrir el Cambio. NO es deuda técnica (el componente funciona, valida I6 en cliente, 12 tests) ni bloquea el criterio de O-estructura (la población se elige, solo sin comodidad). El `.subgrupo-form__multiple` y el handler `alSeleccionar` son el punto de sustitución. No se paga ahora |
+| D-pdc-sin-edicion (el sub-recurso PDC no tiene PUT ni PATCH) | O-estructura | Medido en S113: un PDC no se renombra, se borra y se recrea, y si su subgrupo está retenido por una plaza el borrado da 409. El diálogo REFLEJA el contrato y no ofrece «Editar»: exponer un botón sin backend detrás sería que la UI mintiera (mismo criterio que D-F8.5-E-a con `peso`). No bloquea: el §6.2 se reproduce sin renombrar nada y el código lo escribe el usuario en el alta (D1-3, S76). Si se paga, va junto con D-pdc-vinculo-por-cadena: un rename recalcularía mal el código derivado del subgrupo |
+| D-pdc-sufijo-completo (`-Completo` significa lo contrario en el backend y en el modelo) | O-estructura | Medido en S113. El backend deriva el subgrupo del PDC como `codigo + "-Completo"` con población SOLO el PDC (regla S23); en el cuerpo de §6.2 del modelo «3ºA-Completo» es el subgrupo que enlaza el ordinario Y su Di. Dos convenciones incompatibles en un espacio de códigos único. No urgente (el cuerpo de §6.2 está marcado como SUPERADO y la Nota S23 no usa el sufijo), pero es estado vivo confuso (R5). Probablemente se salde con una línea en el modelo, no renombrando la derivación |
+| D-monodi-botones-inertes (el subgrupo mono-Di ofrece Editar y Borrar que siempre fallan) | O-estructura (o O-diseño) | DECISIÓN CONSCIENTE de S113: no se ocultan. Hacerlo exigiría que `SubgrupoDTO` transportara el tipo de los grupos de su población —mover el contrato por comodidad de pintura— y el precio de no hacerlo es acotado, porque con G2 los botones fallan en vez de destruir, que era el problema real. Si se paga, con la información en el DTO y no adivinando por el sufijo del código, que es el acoplamiento que lamenta D-pdc-vinculo-por-cadena |
+| D-bundle-presupuesto (el bundle inicial excede el techo declarado) | O-diseño | Preexistente desde antes de S112 (507,66 kB frente a 500 kB en `angular.json`, verificado sobre HEAD limpio); S113 lo lleva a 514,42 kB al entrar `PdcDialogo` en el grafo de dependencias. NO se toca `angular.json`: subir el techo es configuración de build, no está en el criterio de ningún objetivo vivo, y hacerlo «de paso» convierte un aviso útil en un número que nadie vuelve a mirar. Cuelga de O-diseño, que tendrá delante el bundle completo y las vistas congeladas y podrá elegir entre subir el techo, rutas perezosas o recortar. Hasta entonces, anotar el delta en cada sesión que compile |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
@@ -483,12 +542,16 @@ D-F8.6-ivD-b (S99), D-F8.4-B2-a (S94), D-F8.5-D1-a (S77), D-F8.5-D2b1-a/b (S91),
 D-F8.5-A-a (S73/S74), D-F8.6-iiiA-a (S85), y las condensadas en la sección de
 deuda cerrada del plan. Se conservan como registro con remisión a la bitácora.
 
-**Resultado agregado:** de las ~40 deudas vivas, tras reclasificar, **1 es
-bloqueante ahora** (D-F8.6-ii-b, y solo al abrir O-ajuste-cierre), ~8 son deuda
-técnica real que se paga DENTRO de su objetivo cuando llegue, y el resto (~30)
-sale de la cola de trabajo activo como mejora futura que espera, decisión
-consciente o limitación conocida. La cola de "deudas que me obligan a abrir
-sesión" pasa de ~40 a ~1.
+**Resultado agregado:** de las ~47 deudas vivas (S113 añade siete), tras
+reclasificar, **1 es bloqueante ahora** (D-F8.6-ii-b, y solo al abrir
+O-ajuste-cierre), ~11 son deuda técnica real que se paga DENTRO de su objetivo
+cuando llegue, y el resto (~35) sale de la cola de trabajo activo como mejora
+futura que espera, decisión consciente o limitación conocida. La cola de "deudas
+que me obligan a abrir sesión" sigue en ~1. Nota sobre la tendencia, visible
+desde S109: la cola CRECE sesión a sesión y eso no es alarma por sí solo —el
+crecimiento es casi todo de mejora futura y de deuda registrada al medir, no de
+deuda técnica real acumulándose sin pagarse—; la métrica que sí hay que vigilar
+es "deuda bloqueante abierta" (§7), que lleva en 1 desde que existe el mapa.
 
 **[LAGUNA]** Este documento asigna categoría, objetivo y disposición a cada
 deuda. NO reescribe el texto íntegro de cada una: ese vive en
