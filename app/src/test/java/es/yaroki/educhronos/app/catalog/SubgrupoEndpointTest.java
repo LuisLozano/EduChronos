@@ -14,10 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.service.PdcService;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.service.SubgrupoService;
 import es.yaroki.educhronos.app.web.SubgrupoController;
+import es.yaroki.educhronos.app.web.dto.PdcRequest;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,16 +45,24 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  *   <li>reemplazo total: {@link #edicion_reemplazaGruposTotal_200} — el PUT SUSTITUYE
  *       el set, no lo une;
  *   <li>D-nueva-3 (borrado fuerte): {@link #borrado_limpiaJoinTableYNoBorraGrupos} —
- *       el cascade limpia {@code subgrupo_grupo} (0 filas) y NO borra los grupos.
+ *       el cascade limpia {@code subgrupo_grupo} (0 filas) y NO borra los grupos;
+ *   <li>guarda G2: {@link #edicionDelMonoDiDeUnPdc_400ConCodigoEnMensaje} y sus tres
+ *       compañeros — el subgrupo mono-Di pertenece al agregado PDC, y SOLO él.
  * </ul>
  * Da de alta grupos de apoyo ("G_A", "G_B", "G_C") sobre un nivel en {@link #setUp}.
+ *
+ * <p><b>Importa {@link PdcService}</b> desde la guarda G2: los PDC y sus subgrupos mono-Di
+ * son fixture aquí, no sujeto, y se montan por el alta compuesta real en vez de a mano —un
+ * {@code new Subgrupo(...)} fabricado podría diferir de lo que el sub-recurso produce y
+ * dejar la guarda probada contra una imitación—.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(SubgrupoService.class)
+@Import({SubgrupoService.class, PdcService.class})
 class SubgrupoEndpointTest {
 
     @Autowired private SubgrupoService service;
+    @Autowired private PdcService pdcService;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
     @Autowired private SubgrupoRepository subgrupoRepository;
@@ -289,6 +299,116 @@ class SubgrupoEndpointTest {
         assertThat(error).isNotNull();
         assertThat(error.getReferencias())
                 .containsExactly(new Referencia("plaza(s)", 1L));
+    }
+
+    // ============== GUARDA G2: el mono-Di de un PDC no se edita ni se borra aquí ==============
+
+    /**
+     * (4) PUT sobre el subgrupo mono-Di automático de un PDC → 400 que NOMBRA el subgrupo.
+     *
+     * <p>El cuerpo pide un RENOMBRE, que es el daño concreto que la guarda evita: el agregado
+     * PDC localiza su subgrupo por el código DERIVADO ({@code codigo + "-Completo"}), no por
+     * FK, así que un rename deja el {@code DELETE /api/grupos/{idPadre}/pdc} en 404 para
+     * siempre y el agregado partido en dos mitades que ya no se encuentran.
+     */
+    @Test
+    void edicionDelMonoDiDeUnPdc_400ConCodigoEnMensaje() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+
+        mockMvc.perform(put("/api/subgrupos/" + idMonoDi)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("OTRO_NOMBRE", "G_A_DI")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("G_A_DI-Completo")));
+    }
+
+    /**
+     * (5) DELETE sobre el mismo subgrupo → 400, y sigue ahí.
+     *
+     * <p>400 y no 409 a propósito: no hay ninguna referencia entrante que contar —el mono-Di
+     * recién creado no está en ninguna plaza—, lo que falla es la petición contra el estado
+     * de la propia entidad. El 409 de este endpoint sigue siendo suyo y solo suyo
+     * ({@link #borrado_subgrupoUsadoPorPlaza_409YSoloPlazaComoReferente}).
+     */
+    @Test
+    void borradoDelMonoDiDeUnPdc_400YNoLoBorra() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+
+        mockMvc.perform(delete("/api/subgrupos/" + idMonoDi))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("G_A_DI-Completo")));
+
+        // El rechazo no es cosmético: el subgrupo sigue en la base.
+        assertTrue(subgrupoRepository.findByCodigo("G_A_DI-Completo").isPresent(),
+                "el mono-Di rechazado no debe haberse borrado");
+    }
+
+    /**
+     * (6) DISCRIMINANTE DEL "EXACTAMENTE UNO": un subgrupo cuya población son DOS grupos PDC
+     * se edita con normalidad → 200.
+     *
+     * <p>Es el ámbito COMPARTIDO de los Di (§6.2, Nota S23): los diversificados de varios
+     * grupos cursando juntos su tronco alternativo. No pertenece a ningún agregado PDC —no lo
+     * creó ningún alta compuesta y ningún borrado de PDC lo va a limpiar—, así que este CRUD
+     * es el único sitio desde el que se gestiona.
+     *
+     * <p><b>Este test existe para que nadie relaje el predicado más adelante.</b> La
+     * formulación tentadora —"contiene algún grupo PDC"— deja (4) y (5) igual de verdes y
+     * deja este caso legítimo sin forma de editarse ni borrarse por la API. Aquí es donde se
+     * pone rojo.
+     */
+    @Test
+    void edicionDeSubgrupoConDosGruposPdc_200() throws Exception {
+        crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+        crearPdcYDevolverIdDeSuMonoDi("G_B", "G_B_DI");
+
+        // El ámbito compartido: población = los DOS Di, de dos padres distintos.
+        long idAmbito = crear(body("AMBITO_DI", "G_A_DI", "G_B_DI"));
+
+        mockMvc.perform(put("/api/subgrupos/" + idAmbito)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("AMBITO_DI_BIS", "G_A_DI", "G_B_DI")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("AMBITO_DI_BIS"))
+                .andExpect(jsonPath("$.grupos", containsInAnyOrder("G_A_DI", "G_B_DI")));
+    }
+
+    /**
+     * (7) NO REGRESIÓN: un subgrupo mono-grupo ORDINARIO se sigue editando (200) y borrando
+     * (204). Duplica a propósito lo que ya cubren {@link #edicion_cambiaCodigoManteniendoGrupos_200}
+     * y {@link #borrado_204_yLuego404}: los tiene al lado de la guarda para que el radio de
+     * acción de G2 —mono-grupo sí, pero solo si es PDC— se lea de una vez en este bloque.
+     */
+    @Test
+    void noRegresion_subgrupoDeUnGrupoOrdinario_seEditaYSeBorra() throws Exception {
+        long id = crear(body("SG1", "G_A"));
+
+        mockMvc.perform(put("/api/subgrupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("SG1_BIS", "G_B")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("SG1_BIS"))
+                .andExpect(jsonPath("$.grupos", containsInAnyOrder("G_B")));
+
+        mockMvc.perform(delete("/api/subgrupos/" + id))
+                .andExpect(status().isNoContent());
+    }
+
+    /**
+     * Cuelga un PDC del grupo ordinario indicado por el alta compuesta REAL y devuelve el id
+     * de su subgrupo mono-Di, que el alta deriva como {@code codigoPdc + "-Completo"}.
+     *
+     * <p>El {@code flush + clear} desliga las entidades para que la lectura siguiente vaya a
+     * la BASE y no a la caché L1 de Hibernate (mismo aviso de framework que
+     * {@code PdcEndpointTest}): el sujeto de estos tests es lo que el servicio releerá, no el
+     * objeto que acaba de construir en memoria.
+     */
+    private long crearPdcYDevolverIdDeSuMonoDi(String codigoPadre, String codigoPdc) {
+        long idPadre = grupoRepository.findByCodigo(codigoPadre).orElseThrow().getId();
+        pdcService.crear(idPadre, new PdcRequest(codigoPdc));
+        entityManager.flush();
+        entityManager.clear();
+        return subgrupoRepository.findByCodigo(codigoPdc + "-Completo").orElseThrow().getId();
     }
 
     /**
