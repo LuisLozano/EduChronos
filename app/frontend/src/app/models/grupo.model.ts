@@ -21,7 +21,17 @@ export interface Grupo {
   codigo: string;
   /** CÓDIGO del nivel (p. ej. '1ESO'), no su id. */
   nivel: string;
-  /** Siempre `'ORDINARIO'` en este flujo (lista blanca del backend). */
+  /**
+   * `name()` del `TipoGrupo` del backend. Hoy llegan de verdad `'ORDINARIO'` y
+   * `'DIVERSIFICACION_PDC'`: `GET /api/grupos` hace `findAll()` SIN filtrar por tipo,
+   * así que los PDC creados por `/api/grupos/{idPadre}/pdc` salen en la misma lista.
+   * `'VIRTUAL_OPTATIVA'` existe en el enum pero hoy no lo crea ningún flujo.
+   *
+   * <p>La LISTA BLANCA (D-nueva-2) que solo admite `'ORDINARIO'` gobierna la
+   * ESCRITURA por el CRUD plano —`POST /api/grupos` y `PUT /api/grupos/{id}`—, no la
+   * lectura. Quien consuma este campo no puede dar por hecho un único valor: la lista
+   * de grupos lo usa precisamente para discriminar qué acciones ofrece cada fila.
+   */
   tipo: string;
 }
 

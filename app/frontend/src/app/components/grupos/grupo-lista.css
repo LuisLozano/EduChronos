@@ -35,6 +35,10 @@
   border-bottom: 1px solid #ddd;
 }
 
+.grupos__tipo {
+  color: #666;
+}
+
 .grupos__acciones {
   display: flex;
   gap: 0.5rem;

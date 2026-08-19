@@ -4,19 +4,43 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GrupoService } from '../../services/grupo.service';
 import { Grupo } from '../../models/grupo.model';
 import { GrupoForm } from './grupo-form';
+import { PdcDialogo } from './pdc-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
+
+/** El único tipo que admite acciones en esta pantalla. Ver el javadoc de la clase. */
+const TIPO_ORDINARIO = 'ORDINARIO';
+
+/**
+ * Etiqueta legible por valor del enum. Mapa y no `switch` en plantilla: la plantilla
+ * pinta, no decide. Lo que NO está aquí se pinta crudo, a propósito.
+ */
+const ETIQUETAS_TIPO = new Map<string, string>([
+  [TIPO_ORDINARIO, 'Ordinario'],
+  ['DIVERSIFICACION_PDC', 'PDC'],
+]);
 
 /**
  * Lista del catálogo de grupos administrativos: carga en init, tabla con acciones por
  * fila, alta/edición en diálogo, borrado con confirmación previa. La escritura vive en
  * `GrupoForm` (diálogo); esta lista lo abre y recarga tras un guardado.
  *
- * <p>DOS COLUMNAS, TRES CAMPOS EN EL DTO. La tabla muestra Código y Nivel, y OMITE
- * `tipo`. No es un olvido: el backend restringe este flujo a `ORDINARIO` por lista
- * blanca (D-nueva-2), así que la columna llevaría el mismo valor en todas las filas
- * —ruido que ocupa ancho y no distingue una fila de otra—. Si algún día esta pantalla
- * pasara a listar también PDC o virtuales de optativa, `tipo` volvería a discriminar y
- * la columna tendría sentido; hoy no.
+ * <p>TRES COLUMNAS: Código, Nivel y Tipo. La de `tipo` estuvo omitida mientras la
+ * pantalla solo mostraba ordinarios —una columna con el mismo valor en todas las filas
+ * no distingue nada—, y hoy DISCRIMINA: `GET /api/grupos` hace `findAll()` sin filtrar,
+ * así que los PDC creados por el sub-recurso salen aquí junto a los ordinarios. Se
+ * pinta con etiqueta legible ({@link #etiquetaTipo}), no con la constante cruda; un
+ * valor que no esté en el mapa se muestra TAL CUAL, para que un `VIRTUAL_OPTATIVA`
+ * futuro se vea en vez de desaparecer.
+ *
+ * <p>TRES ACCIONES POR FILA —Editar, Borrar y PDC— Y SOLO EN LAS FILAS ORDINARIAS. Una
+ * fila `DIVERSIFICACION_PDC` no ofrece NINGUNA, porque las tres acabarían en un error
+ * que el usuario no puede resolver: Editar da 400 (la guarda que impide degradar un PDC
+ * a ordinario por el PUT plano), Borrar da 409 (su subgrupo mono-Di lo retiene) y PDC
+ * daría 400 (el sub-recurso exige un padre ORDINARIO; un PDC no cuelga de otro PDC).
+ * No se pierde ninguna capacidad al esconderlas: el backend NO tiene edición de PDC
+ * —el sub-recurso es alta/consulta/borrado— y su borrado vive en el diálogo del PADRE,
+ * que es desde donde se gestiona todo el ciclo. Un tipo DESCONOCIDO se trata como no
+ * ordinario: sin acciones, que es el lado seguro.
  *
  * <p>El 409 de borrado sí es rico aquí: un grupo con subgrupos o con hijos PDC no se
  * borra, y el backend nombra cuántos de cada tipo lo impiden.
@@ -72,6 +96,36 @@ export class GrupoLista implements OnInit {
           this.cargar();
         }
       });
+  }
+
+  /**
+   * Abre el diálogo del PDC de ESTA fila. El `data` es el grupo PADRE completo: el
+   * diálogo saca de él el id para sus tres llamadas y el código para titularse.
+   *
+   * <p>Recarga con la MISMA regla que {@link #abrirForm} y por el mismo motivo: el
+   * diálogo cierra con `true` si hubo alta o borrado del PDC —y entonces la columna
+   * Tipo de la tabla ha cambiado—, y con `false` o `undefined` si el usuario salió sin
+   * escribir. El `=== true` estricto no se relaja: `closed` emite `undefined` al cerrar
+   * por backdrop o Escape, y un `!== undefined` recargaría también en ese caso.
+   */
+  protected pdc(grupo: Grupo): void {
+    this.dialog
+      .open<boolean, Grupo>(PdcDialogo, { data: grupo })
+      .closed.subscribe((cambiado) => {
+        if (cambiado === true) {
+          this.cargar();
+        }
+      });
+  }
+
+  /** ¿Ofrece acciones esta fila? Solo los ordinarios; ver el javadoc de la clase. */
+  protected esOrdinario(grupo: Grupo): boolean {
+    return grupo.tipo === TIPO_ORDINARIO;
+  }
+
+  /** Etiqueta legible del tipo, o el valor crudo si no está en el mapa. */
+  protected etiquetaTipo(tipo: string): string {
+    return ETIQUETAS_TIPO.get(tipo) ?? tipo;
   }
 
   protected borrar(grupo: Grupo): void {

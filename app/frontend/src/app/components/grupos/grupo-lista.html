@@ -22,6 +22,7 @@
         <tr>
           <th>Código</th>
           <th>Nivel</th>
+          <th>Tipo</th>
           <th></th>
         </tr>
       </thead>
@@ -30,13 +31,21 @@
           <tr>
             <td>{{ grupo.codigo }}</td>
             <td>{{ grupo.nivel }}</td>
+            <td class="grupos__tipo">{{ etiquetaTipo(grupo.tipo) }}</td>
             <td class="grupos__acciones">
-              <button type="button" class="grupos__editar" (click)="editar(grupo)">
-                Editar
-              </button>
-              <button type="button" class="grupos__borrar" (click)="borrar(grupo)">
-                Borrar
-              </button>
+              <!-- Solo los ordinarios: sobre un PDC las tres acciones acaban en un
+                   error que el usuario no puede resolver. Ver el javadoc de la clase. -->
+              @if (esOrdinario(grupo)) {
+                <button type="button" class="grupos__editar" (click)="editar(grupo)">
+                  Editar
+                </button>
+                <button type="button" class="grupos__borrar" (click)="borrar(grupo)">
+                  Borrar
+                </button>
+                <button type="button" class="grupos__pdc" (click)="pdc(grupo)">
+                  PDC
+                </button>
+              }
             </td>
           </tr>
         }
