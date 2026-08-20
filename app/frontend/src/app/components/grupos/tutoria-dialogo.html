@@ -1,0 +1,82 @@
+<div class="tutoria-dialogo">
+  <h2 class="tutoria-dialogo__titulo">Tutoría de {{ grupo.codigo }}</h2>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="tutoria-dialogo__cargando">Cargando…</p>
+
+      <div class="tutoria-dialogo__acciones">
+        <button type="button" class="tutoria-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+      </div>
+    }
+
+    @case ('cargado') {
+      <form class="tutoria-dialogo__form" [formGroup]="form" (ngSubmit)="guardar()">
+        <div class="tutoria-dialogo__campo">
+          <!-- `for`/`id` explícitos y no un <label> envolvente: el desplegable se
+               etiqueta por asociación, no por anidamiento (D-actividad-ux). -->
+          <label class="tutoria-dialogo__etiqueta" for="tutoria-principal">
+            Tutor principal
+          </label>
+          <select
+            id="tutoria-principal"
+            formControlName="principal"
+            class="tutoria-dialogo__input"
+          >
+            <!-- SELECCIONABLE y sin `disabled`, al revés que el placeholder de
+                 GrupoForm: aquí '' no es "aún no has elegido", es el valor legítimo
+                 "este grupo no tiene tutor principal", y elegirlo es como se quita. -->
+            <option value="">— sin tutor —</option>
+            @for (p of profesorado(); track p.id) {
+              <!-- El value es el CÓDIGO, nunca el id: el value de un <select> vuelve
+                   como TEXTO, así que un id colado aquí pasaría el compilador y
+                   moriría con un 404 al guardar. -->
+              <option [value]="p.codigo">{{ p.codigo }} — {{ p.nombreCompleto }}</option>
+            }
+          </select>
+        </div>
+
+        @if (coTutores().length > 0) {
+          <div class="tutoria-dialogo__cotutores">
+            <h3 class="tutoria-dialogo__subtitulo">Co-tutores</h3>
+            <ul class="tutoria-dialogo__lista">
+              @for (c of coTutores(); track c.profesor) {
+                <li class="tutoria-dialogo__cotutor">{{ c.profesor }}</li>
+              }
+            </ul>
+            <p class="tutoria-dialogo__nota">
+              Se conservan al guardar. Esta pantalla solo cambia el tutor principal.
+            </p>
+          </div>
+        }
+
+        @if (error()) {
+          <p class="tutoria-dialogo__error-servidor" role="alert">{{ error() }}</p>
+        }
+
+        <div class="tutoria-dialogo__acciones">
+          <button type="button" class="tutoria-dialogo__cerrar" (click)="cerrar()">
+            Cancelar
+          </button>
+          <button type="submit" class="tutoria-dialogo__guardar" [disabled]="guardando()">
+            Guardar
+          </button>
+        </div>
+      </form>
+    }
+
+    @case ('error') {
+      <!-- Sin formulario a propósito: sin profesorado no hay desplegable que ofrecer,
+           y sin tutoría no se sabe qué preseleccionar. Ver el javadoc. -->
+      <p class="tutoria-dialogo__error-servidor" role="alert">{{ error() }}</p>
+
+      <div class="tutoria-dialogo__acciones">
+        <button type="button" class="tutoria-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,90 @@
+/* El CDK no aporta estilos: el diálogo pone los suyos, como pdc-dialogo. */
+.tutoria-dialogo {
+  padding: 1.5rem;
+  min-width: 22rem;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.tutoria-dialogo__titulo {
+  margin: 0 0 1rem;
+}
+
+.tutoria-dialogo__cargando {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+}
+
+.tutoria-dialogo__campo {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.tutoria-dialogo__etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.tutoria-dialogo__input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.tutoria-dialogo__cotutores {
+  margin-bottom: 1rem;
+}
+
+.tutoria-dialogo__subtitulo {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Lista de solo lectura: sin viñeta y sin sangría, para que no se lea como algo
+   sobre lo que se pueda actuar. */
+.tutoria-dialogo__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tutoria-dialogo__cotutor {
+  padding: 0.15rem 0;
+  font-size: 0.95rem;
+}
+
+.tutoria-dialogo__nota {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.tutoria-dialogo__error-servidor {
+  color: #b00;
+  margin: 0.5rem 0;
+}
+
+.tutoria-dialogo__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tutoria-dialogo__cerrar,
+.tutoria-dialogo__guardar {
+  padding: 0.5rem 1rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.tutoria-dialogo__guardar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
