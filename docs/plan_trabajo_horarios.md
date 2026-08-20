@@ -624,7 +624,130 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 113 — O-estructura (H2): C-pdc. Alta/consulta/borrado del grupo PDC por UI desde su padre (Config/UI, M3 real) + dos guardas de backend que impiden que el CRUD plano deshaga el agregado (Desarrollo). SÉPTIMA pieza. NO cierra el objetivo.
+### Sesión 114 — O-estructura (H2): C-tutores. Asignación del tutor del grupo por UI sobre el sub-recurso que existía desde S77 (Config/UI, M3 real). OCTAVA pieza. **CIERRA O-estructura.**
+  Decimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (la conservación de
+  los co-tutores al guardar y la derivación de estados por longitud son lógica, no binding), UN SOLO MÓDULO
+  (frontend; el backend no se toca en toda la sesión), sin e2e nuevo. OCTAVA pieza de O-estructura y CIERRE del
+  objetivo: con ella las TRES PATAS del criterio quedan cumplidas y H2 se queda con O-demo como único objetivo
+  pendiente. Lo que ENTREGA: el vínculo `ProfesorTutoria` —que tres de los seis casos del §6 del modelo
+  registran en su configuración— pasa a ser introducible por pantalla, y con él la invariante S8 se satisface
+  por la vía que el modelo describe, verificado en navegador contra el backend real.
+  M0 — apertura verificada contra `gestion_proyecto.md`, y su primera tarea NO era proponer alcance sino
+  responder si quedaba algo por construir. Objetivo = O-estructura (H2), ACTIVO desde S107 con 7 piezas. Hito =
+  H2. Cambio = C-tutores, la «asignación de tutores» de los «Cambios que agrupa». R-invalidación sin conflicto
+  (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda: ninguna deuda abre la sesión; las siete
+  nacidas en S113 y D-F8.6-ii-a siguen sin bloquear.
+  LA MEDICIÓN QUE DECIDIÓ LA SESIÓN, hecha en el propio M0 sobre el §6 del modelo y no sobre la lista de
+  Cambios: tutores figura en el PROPÓSITO del objetivo y en sus «Cambios que agrupa» pero NO en el texto del
+  criterio, así que por R-terminado la pregunta era si algún caso del §6 lo exige. Lo exige. La PATA 1 no —los
+  ocho tipos de sesión se sustituyen por combinaciones K plazas × N grupos (§1 del modelo) y una tutoría es una
+  actividad de una plaza, expresable desde S109—, pero la PATA 2 sí: §6.1 (GH6 tutor de 1ºESO A), §6.5
+  (`ProfesorTutoria(1ºBach B) = FIL2`, TUTOR_PRINCIPAL) y §6.6 (`ProfesorTutoria(PAU2, 1ºFPB)`) incluyen el
+  registro en su configuración y lo usan en su tabla de verificación para declarar S8 ✅. Reproducir un caso es
+  poder introducir SU CONFIGURACIÓN por formulario, y esa fila no tenía pantalla: mismo razonamiento con que
+  S106 recortó O-catálogo (9 filas irreducibles, 4 con formulario) y con que S113 justificó el PDC. No cae en el
+  recorte de S112, que excluyó la superficie de ERROR de la UI: `ProfesorTutoria` es dato del centro. Segundo
+  argumento, menor pero real: `requiereTutor` está en el form de Actividad desde S109, así que la UI ya dejaba
+  marcar la casilla sin ofrecer forma alguna de satisfacerla. Conclusión del M0: la sesión NO es de cierre de
+  objetivo por vacío, es un Cambio con precedente directo (el sub-recurso de catálogo que estrenó S113) que
+  cierra el objetivo al terminar.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL, cinco investigaciones, con seis premisas declaradas para que
+  la medición las confirmara o las desmintiera; informe consumido aquí, sin fichero suelto commiteado). Cinco
+  confirmadas, una PARCIAL, y el hallazgo importante no estaba en ninguna. (P1) Contrato: `GET|PUT
+  /api/grupos/{id}/tutoria` inline en `GrupoController`, reemplazo total idempotente, DTO `TutoriaDTO(profesor,
+  rol)` con el profesor por CÓDIGO y el grupo en la URL, 17 tests en `TutoriaEndpointTest`. Matiz que corrige la
+  ficha de §4.3: I4 se hace cumplir como «COMO MUCHO un principal», nunca «exactamente uno». Tres detalles que
+  el formulario debía respetar y que no se deducen del molde: el GET de un grupo sin tutoría devuelve 200 con
+  LISTA VACÍA (no 404), no hay DELETE ni PATCH (borrar es PUT con `[]`), y en ESCRITURA un código de profesor
+  inexistente da 404 y no 400, contraintuitivo en un PUT sobre un grupo que sí existe. (P3) CONFIRMADA y
+  DEBILITA un argumento de apertura: S8 no es restricción de scheduling —`ModeloCpSat` no menciona tutorías y
+  `PrevalidacionService` tampoco—, se verifica en `VerificadorSolucion.verificarTutorias` y `verificar()` solo
+  se invoca desde `DiagnosticoService` y el CLI, así que generar devuelve 200 y el `HorarioProyeccionDTO` no
+  transporta violaciones. El usuario, HOY, no ve que falte el tutor: ve un filete rojo indistinguible del de un
+  solape. El argumento del «caso degradado» pierde fuerza; el argumento principal —el dato no es introducible—
+  queda intacto. (P4) CONFIRMADA: `PdcService.java:110` hereda el principal del padre en el alta, solo el
+  principal. (P5) PARCIAL, y la lectura literal es falsa: no hay `tutoria.model`/`service`/componentes, pero el
+  frontend YA escribe `requiereTutor`, YA pinta la violación S8 y YA enseña un 409 que dice «tutoria(s)».
+  ALCANCE FIJADO tras el M2, con cuatro decisiones de diseño y tres recortes. El gesto es botón por fila en
+  `grupo-lista` + diálogo, molde `PdcDialogo`, porque S113 ya midió que no existe vista de detalle donde alojar
+  una sección en la ficha del padre. (1) El diálogo edita el PRINCIPAL pero guarda la LISTA ENTERA: los
+  co-tutores se cargan, se pintan en solo lectura y se reenvían intactos, porque el PUT es reemplazo total y un
+  formulario que solo conociera al principal los borraría en silencio. (2) TRES estados y no cuatro: el molde de
+  S113 deriva el vacío de un 404 y aquí el GET da 200 con `[]`, luego se deriva de `length === 0`. (3) I4 NO se
+  replica en cliente: con un único desplegable el escenario es inalcanzable y el validador sería código muerto
+  (familia D-i2-dedup-cliente). (4) «— sin tutor —» seleccionable y control sin `required`, porque elegirla ES
+  el gesto de quitar el tutor. FUERA por R-terminado: alta/baja de co-tutores (ningún caso del §6 los pide), la
+  columna «Tutor» en la lista (exigiría que `GrupoDTO` transportara la tutoría: mover el contrato por comodidad
+  de pintura, el error que D-monodi-botones-inertes decidió no cometer) y el resalte mudo de S8 en la rejilla
+  (vista de horario, familia 8.6/H1). FUERA por R-e2e: ningún e2e nuevo; la suite de navegador se queda en 2.
+  EJECUCIÓN en cuatro fases, con suite verde y commits separados en cada una. F1 modelo + servicio (vitest
+  290→294): la unión de literales para `RolTutoria` ESTRENA construcción en `models/` —el precedente es `string`
+  pelado— y se documentó como desviación consciente con el argumento que la sostiene y que queda como
+  precedente: campo de LECTURA cuyo enum puede crecer sin avisar → `string`; campo que se ESCRIBE desde un
+  desplegable cerrado → unión de literales. Se descartó un helper privado de URL porque el molde (`PdcService`,
+  `DiagnosticoService`) interpola la plantilla en cada método. F2 el diálogo (294→307). F3 el cableado
+  (307→310). F4 el M4 en navegador.
+  M3 — CAMPAÑA DE MUTACIÓN, y las dos mutaciones que valieron algo fueron las NO pedidas. En el diálogo, las
+  cuatro planificadas murieron (descartar co-tutores al guardar; derivar el vacío de un 404; `[value]="p.id"`;
+  pintar sin esperar al profesorado), pero la quinta SOBREVIVIÓ a los doce casos: cerrar con `close(true)` al
+  CANCELAR. El contrato de cierre es asimétrico —`true` significa «hubo escritura»— y un cancelar mentiroso
+  provocaría una recarga fantasma; se escribió el caso (13), que afirma `close()` sin argumento y niega que se
+  haya llamado a `reemplazar`. En el cableado murieron las tres planificadas y las dos extra, y la segunda extra
+  justifica un aserto que faltaba: el botón «Tutoría» abriendo `PdcDialogo` pasaba entero mientras el aserto
+  solo mirase el DATO y no el COMPONENTE. Nota de cascada: mutar el cableado para que recargue rompe 4 ficheros
+  de test, no 1, por el `verify()` fallido que impide el reset del TestBed (documentado en
+  `bloqueo.service.spec.ts`); el rojo que cuenta es el primero.
+  CORRECCIÓN DE MÉTODO, y la registra el arquitecto contra sí mismo: el guion de F2 afirmaba como MEDIDO que
+  «pintar un `<select>` antes de tener las opciones pierde la preselección». Es falso para el `<select>` único
+  —Angular reconcilia, y `grupo-form.spec.ts:174` lo congela desde S104— y era analogía indebida con el
+  `<select multiple>` de S108, donde el problema sí es real. Claude Code lo desmintió ANTES de escribir, en el
+  paso de medición del guion, y conservó el `forkJoin` por el argumento que sí lo sostiene (el gating de
+  estados, con precedente en `PdcDialogo`) reescribiendo el TSDoc con un párrafo explícito sobre lo que NO
+  arregla. Es exactamente el rendimiento que M2 promete —«una afirmación sobre el estado del repo que no se ha
+  medido se declara como RAZONAMIENTO»— aplicado a una afirmación del arquitecto, no del plan.
+  M4 — VERIFICACIÓN EN NAVEGADOR sobre el centro mínimo creado íntegramente por UI, guion desechable en `/tmp`
+  (R-e2e), nada commiteado. Orden obligatorio y no casual: `requiereTutor` se marca ANTES de la primera
+  generación, porque con un horario ya generado el PUT de la actividad da 409 y D-horario-irreversible dejaría
+  el M4 bloqueado sin salida por UI. EL CONTRASTE, que es la prueba del Cambio: horario #1 generado sin tutor →
+  `TUTORIA_SIN_TUTOR` con `recursoCodigo: "1ESOA"`, `tramoCodigo: null`, las tres celdas y la descripción que
+  nombra la actividad y el grupo; se asigna el tutor por el diálogo; horario #2 → `"violaciones": []`. Verificado
+  además: el diálogo abre en «cargado» y no en error con lista vacía (5a), el desplegable trae los profesores
+  del centro (5b), «— sin tutor —» no está `disabled` (5c), el tutor llega PRESELECCIONADO al reabrir contra el
+  backend real (6), y el gesto de quitar el tutor deja `GET .../tutoria` en `[]` con 200 (11).
+  HALLAZGO DEL M4 que obligó a reformular un paso del guion: el paso 9 —«comprueba que el filete rojo del
+  horario #1 desaparece»— NO era medible como estaba escrito, porque el guion daba por hecho que el diagnóstico
+  es una FOTO del momento de generación y no lo es. `DiagnosticoService` recalcula contra el catálogo VIVO y
+  `verificarTutorias` no mira la solución, así que con el tutor ya asignado el horario #1 —el generado sin
+  tutor— se presenta hoy impecable. Se midió en la única ventana en que es observable, durante el gesto de
+  quitar el tutor, y con los dos horarios a la vez: SIN tutor 3/3 celdas en violación en AMBOS, CON tutor 0/3 en
+  AMBOS. El resalte sigue al catálogo, no al horario que se está mirando. Nace de aquí D-diagnostico-no-es-foto.
+  DEUDA — nacen CINCO y ninguna bloqueaba el criterio, por lo que el objetivo cierra con ellas vivas
+  (R-terminado): D-tutor-pdc-desincronizado (cuelga de O-estructura, cerrado: la herencia del principal al PDC
+  corre solo en el alta, y este Cambio la hace visible por primera vez); D-s8-muda, D-diagnostico-no-es-foto y
+  D-post-horario-sin-sesiones (las tres de O-ajuste-cierre, superficie de la vista de horario, mismo criterio
+  con que S113 dejó fuera D1-8 y D1-10); y D-dialogo-foco-perdido (O-diseño; NO la introduce C-tutores,
+  `PdcDialogo` hace lo mismo desde S113, y arrastra que la barrera `:focus` de `centro-minimo.spec.ts` no sirve
+  en diálogos con estados). D-bundle-presupuesto anotada: 514,42→520,22 kB al entrar `TutoriaDialogo` en el
+  grafo; el techo de 500 kB llevaba desbordado desde antes de la sesión, medido apartando los ficheros nuevos.
+  R-terminado RESPETADA en tres sitios: no se construyó el alta/baja de co-tutores, no se añadió la columna
+  «Tutor» y no se pintó el mensaje de la violación S8, las tres con razón escrita.
+  EL CIERRE, con su parte débil declarada. Las tres patas quedan cumplidas, pero el apoyo de la segunda es un
+  ARGUMENTO ESTRUCTURAL y no una reproducción exhaustiva: los seis casos del §6 no se han tecleado uno a uno.
+  Lo demostrado es que la única fila que faltaba a §6.1/§6.5/§6.6 ya es introducible y que S8 se satisface por
+  la vía del modelo; §6.2 se construyó entero en S113; §6.3 y §6.4 se apoyan en el recorte medido en S113 (usan
+  subgrupos multi-grupo, es decir actividades multiplaza, demostradas en S110). Se propuso al arquitecto con el
+  hueco a la vista, no a pesar de él, y la alternativa —una sesión más construyendo §6.1 completo por UI— se
+  descartó porque no podía descubrir ninguna pieza sin demostrar. Si O-demo destapara un caso inexpresable, es
+  hueco funcional de H2 y se afronta allí.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado a mano que los seis commits de código separan feat de
+  test, que documentación y código van en commits distintos, que el guion desechable del M4 no entró en el árbol
+  y que `app/educhronos-e2e.db` sigue ignorada por `.gitignore`.
+  O-estructura (H2) ✔ TERMINADO, 8 piezas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
+  e2e S112, PDC S113, tutores S114). Desbloquea O-demo, ÚNICO objetivo entre H2 y su cierre. Suites: app 268,
+  solver 91, vitest 310, e2e 2. Siguiente: abrir O-demo (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 113 — O-estructura (H2): C-pdc. Alta/consulta/borrado del grupo PDC por UI desde su padre (Config/UI, M3 real) + dos guardas de backend que impiden que el CRUD plano deshaga el agregado (Desarrollo). SÉPTIMA pieza. NO cierra el objetivo.
   Decimotercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo con M3 real (las dos guardas
   de backend, campaña de 4 mutaciones) + Configuración/UI con M3 real (los tres estados del diálogo, gobernados
   por la respuesta del servidor y no por `DIALOG_DATA`, campaña de 3 mutaciones + 3 en el cableado). SÉPTIMA
@@ -851,132 +974,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   existe en JPA desde S77, así que puede estar más cubierto de lo que parece—; si no lo exige, lo que toca es
   cerrar el objetivo. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 112 — O-estructura (H2): C-e2e. El e2e UI→solver del centro mínimo (Desarrollo + e2e) y el arreglo del hueco de recarga tras la PRIMERA generación. CIERRA la tercera pata del criterio. NO cierra el objetivo.
-  Duodécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo con M3 real (la bifurcación de
-  `lanzarGeneracion`) + el e2e, para el que M3 no aplica y se sustituye por un control de vacuidad de tres
-  escenarios. SEXTA pieza de O-estructura. Lo que ENTREGA: la tercera pata del criterio —«un e2e de navegador
-  crea un centro mínimo íntegramente por la UI y el solver corre sobre él»— queda CUMPLIDA y verificada.
-  O-estructura sigue ACTIVO: su criterio exige aún PDC y tutores (patas 1 y 2).
-  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 5
-  piezas hechas. Hito = H2. Cambio = C-e2e. R-invalidación sin conflicto. Los CUATRO candidatos vivos se
-  pesaron. Gana el e2e por tres razones, y la primera es la decisiva: PDC y tutores NO lo invalidan —el centro
-  mínimo no tiene PDC, y por R-e2e no se añade un e2e por cada tipo de estructura—, así que escribirlo ahora no
-  crea trabajo que rehacer; (2) el reconocimiento de S111 es PERECEDERO y lo pagó ella para esta sesión; (3) es
-  la única pata sin empezar y la de mayor riesgo. D-F8.6-ii-a fuera por R-deuda, y se CIERRA la grieta que S110
-  dejó anotada: la 2ª pata habla del §6 del MODELO (validación contra los horarios reales del centro), no de la
-  superficie de error de la UI, así que «Bad Request» degrada pero no impide reproducir los casos.
-  HALLAZGO DEL M0 que reordena lo pendiente: PDC no es opcional, es pata 1 Y pata 2 —el §6.2 del modelo ES el
-  caso 3ºADi— y su alta vive en el sub-recurso `/api/grupos/{idPadre}/pdc` (S76), que el CRUD de Grupo por UI no
-  alcanza. Sin ese formulario O-estructura no puede cerrar. Tutores, en cambio, PUEDE estar más cubierto de lo
-  que parece (`requiereTutor` ya es campo del form de Actividad desde S109; lo que no existe es `ProfesorTutoria`):
-  no se afirma, exige su propio M2.
-  M2 — MEDICIÓN (Claude Code sobre el repo REAL, dos investigaciones encadenadas antes de teclear; informes
-  consumidos aquí, sin fichero suelto commiteado). Confirmó la apuesta de apertura y destapó lo que decidió la
-  sesión. (1) `schema.sql` tiene CERO `drop`: son 21 `create table if not exists` desde S109. El comentario de
-  `playwright.config.ts` afirmaba literalmente lo contrario —«hace drop table if exists de las 21 tablas»—: una
-  afirmación viva y falsa DENTRO del fichero que gobierna el e2e. Con `reuseExistingServer` en local, el e2e
-  habría corrido contra la BD de trabajo, que ya tiene un horario generado y actividades congeladas por
-  D-horario-irreversible. El andamiaje de S106 se apoyaba en una premisa que S109 invalidó. (2) La prevalidación
-  del centro mínimo devuelve `[]`: las tres reglas (profesor 3/30, repeticiones 3/5, grupo 3/30) pasan holgadas,
-  luego el botón se habilita y `ConfirmarGeneracion` no llega a abrirse. (3) `server.error.include-message=always`
-  SÍ está en `application.properties`, con comentario propio: AFINA D-F8.6-ii-a y desmiente la conclusión de S111
-  (que dio la razón al javadoc de `horario-view`); su M2 debe partir de aquí.
-  HUECO FUNCIONAL DESTAPADO POR EL M4 Y ARREGLADO EN SESIÓN (no estaba registrado como deuda: nace y muere aquí).
-  `provideRouter(routes)` sin features ⇒ `onSameUrlNavigation` = 'ignore' (leído del bundle instalado de
-  @angular/router 21.2.17, no de memoria). Tras el POST, `router.navigate(['/horario', dto.id])` desde
-  `/horario/1` emite `NavigationSkipped`, `paramMap` NO reemite, `cargar()` no vuelve a correr: la rejilla no se
-  refresca y, como la carga inicial dio 404 sobre BD vacía, `error()` gatea el `@else if` y `<app-horario-grid>`
-  ni se monta. Se manifiesta SOLO en la primera generación de una instalación nueva —después el id cambia y la
-  URL difiere—, es decir, exactamente en el criterio 5 de Fase 8 que define H2, y es invisible en el uso manual
-  repetido (por eso S111 no lo vio). DECISIÓN DE ALCANCE del arquitecto: el arreglo ENTRA, porque sin él la
-  pata 3 solo se cumpliría con un `page.reload()` en el test, es decir, con el e2e tapando el agujero que existe
-  para detectar. Vía elegida: bifurcación en el `next` (si el id devuelto es el ya cargado, `cargar()`; si no,
-  navegar). Se DESCARTAN las otras dos: tocar el router es global y no está medido que `paramMap` reemita con el
-  mismo componente y los mismos params; consumir la proyección del POST revertiría la decisión de S93 (rejilla,
-  pines y diagnóstico no pueden pertenecer a horarios distintos), que esta vía conserva intacta al recargar por
-  GET fresco. RECTIFICACIÓN DE MÉTODO EN SESIÓN: el M2 declaró M3 no aplicable «porque no habría lógica de
-  producción»; con el arreglo la hay, y M3 volvió al ritual.
-  M3 — campaña de 2 mutaciones sobre la bifurcación. M-A (navegar siempre, el estado previo) cae SOLO (40), vía
-  `router.navigate` llamado cuando el aserto exige lo contrario. M-B (`cargar` siempre) cae (39) por 0 llamadas
-  a navigate, y ADEMÁS el preexistente (31), que guarda esa misma rama desde antes: segundo guardián legítimo,
-  no acoplamiento entre los nuevos. Cada caso guarda su rama. Restauraciones verificadas por DIFF contra copia
-  previa, nunca por el verde (regla de S110).
-  M4 — el contraste corrigió OCHO puntos del contrato antes de teclear, tres de ellos sobre el aserto: el código
-  de actividad NO se pinta en la rejilla (solo como `aria-label` del candado, y solo si está pinada), así que el
-  contable es `div.instancia`; «celdas» era impreciso (hay 30 `<td>` siempre y `td.ocupado` solo se enciende
-  durante un arrastre); el value es `DISTRIBUIDA`. Y cinco de ejecución: el `orden` del nivel arranca vacío; el
-  orden de creación es requisito duro porque cada diálogo puebla sus desplegables al abrirse; `getByRole` con
-  `exact:true` (el `name` es substring y «Guardar» casaría con «Guardar jornada»); los multiselect por
-  `selectOption`, que dispara el `change` que el handler escucha; y todo aserto con reintento por ZONELESS.
-  BLOQUEO DEL INSTRUMENTO, reportado por Claude Code en el PASO 0 y resuelto con la opción MENOS invasiva: el
-  doble de `getProyeccion` es un Subject COMPARTIDO, así que el 404 inicial del (40) lo cierra y la recarga
-  redispararía el error. Se elige re-stub LOCAL al caso frente a homogeneizar el doble a fresco —eso tocaría los
-  25 casos vigentes que lo consumen, superficie probada que este Cambio no pide (R-terminado)— y frente a quitar
-  el 404 inicial, que habría acomodado el test al instrumento en vez de al problema: el 404 ES el escenario.
-  Dos premisas del arquitecto corregidas por la medición del instrumento: este fichero no tiene `verify()` ni
-  `HttpTestingController`, luego los Subjects pendientes no tumban casos ajenos.
-  HALLAZGO DEL E2E, medido en la corrida y no previsto por nadie: las dos primeras corridas fallaron en pasos
-  DISTINTOS con la misma firma —primer campo del diálogo vacío y `touched`, segundo campo bien—. Es la carrera
-  entre el `fill` y el cableado del ControlValueAccessor: `cdk-dialog-container` entra en el DOM en cuanto el CDK
-  lo crea, el contenido del portal se adjunta un tick después, y un `fill` en esa ventana lo borra el
-  `writeValue('')` de la directiva al registrarse; el `required` bloquea entonces el submit y el diálogo no
-  cierra. Barrera elegida: esperar a que el foco esté DENTRO del diálogo (`:focus`), válida porque el CDK atrapa
-  el foco (`autoFocus: 'first-tabbable'`) solo con el contenido ya adjunto, estrictamente después del cableado.
-  Se descarta `waitForTimeout`: haría lo mismo a ojo y sin declarar de qué depende. Documentado en el javadoc de
-  `abrir()` como hallazgo medido. Tres corridas seguidas en verde después.
-  CONTROL DE VACUIDAD (sustituye a M3 en el e2e, obligatorio): C1 repeticiones 3→2 → rojo en el aserto principal
-  (3 vs 2): mide cantidad, no presencia. C2 omitir la jornada → rojo ANTES del aserto, en la precondición
-  (`.prevalidacion-limpia` ausente): el test recorre la cadena entera. C3, el que importa: revertir el arreglo de
-  `lanzarGeneracion` → rojo, `.instancia` en 0 tras 45 s, con el snapshot mostrando «No se pudo cargar el horario
-  1 (404).» y sin rejilla. Ninguno falló por vía distinta de la prevista; las tres restauraciones por diff, la de
-  C3 además contra HEAD.
-  ENTREGADO en tres commits de código. `test(e2e): aisla el e2e en educhronos-e2e.db y corrige la premisa
-  caducada del andamiaje` (`playwright.config.ts`: `rm -f app/educhronos-e2e.db*` encadenado al command
-  —`shell:true` verificado en el runner—, `-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db`,
-  `reuseExistingServer:false` SOLO en backend, y el párrafo falso reescrito). `5d63fd4` fix(horario)
-  (`idCargado` como campo plano con su porqué, asignado como primera línea de `cargar`, bifurcación en el `next`,
-  javadoc reescrito con las dos ramas y la causa). `88919d2` test(horario) (casos (39) y (40), con el re-stub
-  local y su javadoc, y precondición añadida al (40) —sin ella el tercer aserto podía medir un estado limpio de
-  nacimiento—). `a69734a` test(e2e) (`app/frontend/e2e/centro-minimo.spec.ts`, UN SOLO test por R-e2e).
-  Suites: vitest 269 → 271 (+2); e2e 1 → 2 (humo 298 ms, centro mínimo 2,8 s); backend INTACTO 261/91, no
-  ejecutado (no se tocó `app/src`). `npm run build` verde; el warning de presupuesto (507,66 kB) es PREEXISTENTE
-  —verificado construyendo con los ficheros en stash: HEAD ya daba 507,59 kB—, el cambio aporta 70 bytes.
-  `solver/src/main` NO tocado ⇒ `referencia-codigo-solver.md` NO regenerada. `modelo_datos_fase1.md` NO tocado.
-  AISLAMIENTO VERIFICADO, que es lo que hace repetible el e2e: tras nueve corridas, `app/educhronos.db` conserva
-  mtime y tamaño byte a byte (14:01:08.613238078, 155648), y `app/educhronos-e2e.db` refleja el centro mínimo
-  (1 nivel, 1 grupo, 1 subgrupo, 1 profesor, 1 asignatura, 1 aula, 1 actividad, 1 plaza, 1 horario, 3 sesiones,
-  35 tramos). El `.gitignore` no se tocó: `*.db` ya cubría la BD nueva (medido antes de editar). Matiz anotado y
-  no arreglado: `*.db` no cubre `-journal/-wal/-shm`, hueco PREEXISTENTE e idéntico para la BD de trabajo.
-  DEUDA: nacen CUATRO, ninguna se paga (R-deuda: ninguna bloquea el criterio). D-doble-proyeccion-compartido
-  (de test, cuelga de O-ajuste-cierre), D-e2e-retry-bd, D-e2e-aislamiento y D-props-test-obsoleto (las tres de
-  O-estructura). Y D-F8.6-ii-a se AFINA por tercera sesión consecutiva.
-  R-terminado RESPETADA: no se pagó D-F8.6-ii-a pese a tener un dato nuevo sobre ella, ni D-horario-irreversible
-  (con BD limpia por corrida no muerde), ni D-error-generacion-pin (el `error:` de `lanzarGeneracion` se dejó
-  intacto a propósito), ni se homogeneizó el doble de `getProyeccion`, ni se tocó el hueco del `.gitignore`, ni
-  el acabado visual de ninguna pantalla (O-diseño). Lo único que entró fuera del test es el arreglo del hueco,
-  y entró porque sin él la pata 3 no se cumple.
-  HIGIENE (M1-bis): archivada S110 a `bitacora-sesiones.md` (promovida a `### Sesión 110`, insertada al final en
-  orden ascendente, cuerpo verificado idéntico por diff); degradada S111 a «Última sesión registrada (previa)»
-  compacta; S112 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S110), la
-  crónica de archivado y la frase de ventana del plan.
-  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
-  (mejora de método pendiente desde S101); verificado que los tres commits de código separan andamiaje,
-  producción y tests, que documentación y código van en commits distintos, y que el árbol quedó limpio (ningún
-  `.db` entra: `*.db` los tapa). COSTURA SALDADA que el M0 detectó: `gestion_proyecto.md` §2 y §3 seguían
-  diciendo «4 piezas hechas / faltan C-niveles, PDC, tutores y el e2e», desactualizado desde S111.
-  NOTA TÉCNICA PARA QUIEN ESCRIBA EL PRÓXIMO e2e (sustituye a la de S111, que queda archivada con ella): (1) la
-  BD del e2e es `app/educhronos-e2e.db`, la borra el `command` del `webServer` y NO la demuele `schema.sql`;
-  correr el e2e exige el backend de dev PARADO (`reuseExistingServer:false`). (2) Tras abrir un diálogo del CDK
-  hay que esperar el foco DENTRO de él antes de teclear, o el `writeValue('')` del ControlValueAccessor borra el
-  primer campo en silencio. (3) `getByRole(..., { name })` es SUBSTRING: sin `exact:true`, «Guardar» casa con
-  «Guardar jornada», y el texto del botón de alta se repite en el `<h2>` del diálogo. (4) Los cuatro
-  `<select multiple>` no llevan `formControlName`: van por clase y solo aceptan `selectOption`, que dispara el
-  `change` que el handler escucha. (5) El código de actividad NO se pinta en la rejilla; lo contable es
-  `div.instancia`.
-  O-estructura (H2) ACTIVO, 6 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
-  e2e S112). TERCERA PATA DEL CRITERIO CUMPLIDA. Suites: vitest 271, e2e 2, backend intacto 261/91. Siguiente:
-  PDC es el candidato dominante —única pieza de la que dependen las dos patas restantes—, con tutores detrás y
-  pendiente de medir; lo fija su propio M0 (ver M1-ter).
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -997,7 +994,7 @@ el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), 
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
 y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la Sesión 111, la de S110 en la
-Sesión 112 y la de S111 en la Sesión 113.
+Sesión 112, la de S111 en la Sesión 113 y la de S112 en la Sesión 114.
 El plan conserva ahora S112 (degradada a formato compacto) y S113 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.

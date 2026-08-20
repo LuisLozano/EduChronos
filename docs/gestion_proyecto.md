@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~15% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil); queda tutores, y su primer trabajo es MEDIR si el criterio lo exige. «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. O-demo pendiente) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~70% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil) y C-tutores (S114, la asignación del tutor por UI sobre el sub-recurso que existía desde S77: su M0 midió que SÍ hacía falta —tres casos del §6 registran `ProfesorTutoria` en su configuración— y su M4 verificó en navegador que `TUTORIA_SIN_TUTOR` aparece sin tutor y desaparece con él; con ella las TRES PATAS quedan cumplidas y O-estructura CIERRA). «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. **O-estructura ✔ TERMINADO S114**, 8 piezas; queda SOLO O-demo entre H2 y su cierre) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -180,7 +180,7 @@ de las Fases 9–12.
   entre los horarios de origen (familia D8); las decisiones que tomó son evidencia
   de qué casos reales deben soportar estos formularios.
 
-#### O-estructura — "Expreso la complejidad real del centro."
+#### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
 - **Propósito:** configurar currículo/demanda, desdobles, agrupamientos, PDC,
   tutores desde la UI.
 - **Terminado cuando:** los 8 tipos de sesión del modelo (§6 de
@@ -206,13 +206,31 @@ de las Fases 9–12.
   que la primera pata todavía exige: `VIRTUAL_OPTATIVA` —el otro tipo que la lista blanca
   bloquea— NO lo pide ningún caso del §6, no aparece en ninguno de los 44 fixtures del
   solver y ni siquiera existe como constante en el dominio del solver; no hace falta
-  construir su formulario. Lo que queda por decidir de las dos patas vivas es TUTORES, y
-  esa decisión empieza por una medición pendiente: `requiereTutor` es campo del formulario
-  de Actividad desde S109 y `ProfesorTutoria` existe en JPA desde S77, así que puede estar
-  más cubierto de lo que parece. Nótese que tutores figura en el PROPÓSITO de este objetivo
-  y en sus «Cambios que agrupa», pero NO en el texto del criterio de terminado: si su M2
-  midiera que ningún caso del §6 exige asignar el tutor por UI, lo que procede es CERRAR el
-  objetivo (R-terminado), no construir el formulario por simetría.
+  construir su formulario. **TUTORES RESUELTO EN S114, y la respuesta fue que SÍ hacía
+  falta.** La duda estaba bien planteada —tutores figura en el PROPÓSITO y en los «Cambios
+  que agrupa» pero NO en el texto del criterio, así que por R-terminado no podía construirse
+  por simetría— y su M0 la resolvió MIDIENDO el §6 del modelo, no razonando desde la lista de
+  Cambios: TRES de los seis casos (§6.1 con GH6, §6.5 con FIL2, §6.6 con PAU2) incluyen el
+  registro `ProfesorTutoria` en su configuración y lo usan en su tabla de verificación de
+  invariantes para declarar S8 ✅. Reproducir un caso es poder introducir SU CONFIGURACIÓN por
+  formulario, y esa fila no tenía pantalla: es el mismo razonamiento con que S106 recortó
+  O-catálogo (9 filas irreducibles, 4 con formulario). No cae en el recorte de S112, que
+  excluyó la superficie de ERROR de la UI: `ProfesorTutoria` es dato del centro, contenido del
+  modelo. El M2 lo reforzó por un flanco no previsto: la UI ya sabía CREAR el problema y no
+  RESOLVERLO —`actividad-form` ofrece la casilla «Requiere tutor» desde S109 y no existía vía
+  alguna de asignar el tutor que exige, de modo que marcarla producía un `TUTORIA_SIN_TUTOR`
+  inevitable; `grupo-form.ts:45` tenía el hueco documentado como decisión—. **PRIMERA Y SEGUNDA
+  PATAS CUMPLIDAS en S114**, con el alcance de la prueba declarado sin adornos: lo demostrado en
+  M4 es que la ÚNICA fila que faltaba a esos tres casos ya es introducible y que S8 se satisface
+  por la vía que el modelo describe (contraste medido en navegador: `TUTORIA_SIN_TUTOR` con sus
+  tres celdas y el grupo nombrado antes de asignar el tutor, `violaciones: []` después). Los seis
+  casos del §6 NO se han tecleado uno a uno; §6.3 y §6.4 se apoyan en el recorte medido en S113
+  (usan subgrupos multi-grupo, es decir actividades multiplaza, demostradas en S110). El cierre
+  descansa por tanto en un ARGUMENTO ESTRUCTURAL —cada pieza que esos casos necesitan está
+  demostrada como expresable— y no en una reproducción exhaustiva; se declara así, como
+  inferencia y no como medición, y se aceptó porque una sesión más de tecleo no podía descubrir
+  ninguna pieza sin demostrar. Si O-demo destapara un caso inexpresable, es hueco funcional de
+  H2 y se afronta allí, no reabriendo este objetivo.
 - **Depende de:** O-catálogo.
 - **Valor:** valida el MODELO UNIFICADO contra el usuario real. Es el objetivo de
   mayor riesgo del proyecto (si el modelo Actividad→Plaza→Subgrupo no se puede
@@ -221,7 +239,7 @@ de las Fases 9–12.
 - **Cambios que agrupa:** editor de demanda curricular, asistente de
   desdoble/agrupamiento (D1, D10), editor de PDC (D7), asignación de tutores,
   configuración de estructura de jornada (D22).
-- **Progreso (S113):** ABIERTO, 7 piezas hechas. **C-jornada** (S107, D22):
+- **Progreso (S114):** ✔ CERRADO, 8 piezas. **C-jornada** (S107, D22):
   backend REST singleton `GET|PUT /api/jornada` (reemplazo total, guarda 409 ante
   dependientes, techo conservador ≤6 lectivos/día sin tocar `domain.Tramo`, malla
   expandida a los 5 días en el backend) + formulario singleton en Configuración
@@ -334,6 +352,39 @@ de las Fases 9–12.
   acciones, porque las tres fallarían y ninguna capacidad se pierde (el backend no tiene
   edición de PDC y su borrado vive en el diálogo del padre). Suites: app 261→268, vitest
   271→290, solver y e2e intactos.
+  **C-tutores** (S114): la asignación del tutor por UI, OCTAVA pieza y la que CIERRA el
+  objetivo. Frontend puro —el sub-recurso `GET|PUT /api/grupos/{id}/tutoria` existe completo
+  desde S77 con 17 tests—: `tutoria.model`/`service`, `tutoria-dialogo` colgado de una cuarta
+  acción por fila en la lista de grupos, molde `PdcDialogo`. Cuatro decisiones de diseño, y las
+  dos primeras son las que importan. (1) EL DIÁLOGO EDITA EL PRINCIPAL PERO GUARDA LA LISTA
+  ENTERA: el PUT es reemplazo total, así que los co-tutores se cargan, se pintan en solo lectura
+  y se REENVÍAN INTACTOS; un formulario que solo conociera al principal los borraría en
+  silencio, que es el género de destrucción que S113 previno con G1/G2. El alta y baja de
+  co-tutores queda FUERA por R-terminado (ningún caso del §6 los pide). (2) TRES ESTADOS, NO
+  CUATRO, y aquí el molde de S113 NO se traslada: `PdcDialogo` deriva el vacío de un 404, pero
+  el GET de tutoría devuelve 200 con lista vacía, luego el «sin tutor» se deriva de
+  `length === 0`. (3) I4 en cliente NO se replica: con un único desplegable de principal el
+  escenario de dos principales es inalcanzable y el validador sería código muerto —misma familia
+  que D-i2-dedup-cliente—; la red es el 400 del backend. (4) La opción «— sin tutor —» es
+  seleccionable y el control va sin `required`, porque elegirla ES el gesto de quitar el tutor
+  (PUT con `[]`: el sub-recurso no tiene DELETE). Dos hallazgos de la campaña de mutación, los
+  dos de mutaciones NO pedidas: cerrar el diálogo con `true` al CANCELAR sobrevivía a los doce
+  casos —contrato de cierre asimétrico, `true` significa «hubo escritura», y un cancelar
+  mentiroso provocaría una recarga fantasma—, y el botón «Tutoría» abriendo `PdcDialogo`
+  también, porque el aserto miraba el dato y no el componente. Ambos tapados. Corrección de
+  método registrada: el M2 de esta sesión DESMINTIÓ un hecho que el arquitecto había afirmado
+  como medido —«pintar un `<select>` antes de tener las opciones pierde la preselección»— que
+  era analogía indebida con el `<select multiple>` de S108; Angular reconcilia el select único y
+  hay test que lo congela desde S104 (`grupo-form.spec.ts:174`). El `forkJoin` se conservó por
+  el argumento que sí lo sostiene (el gating de estados) y su TSDoc lleva un párrafo explícito
+  sobre lo que NO arregla. El cableado NO recarga la lista al cerrar, y está documentado por
+  qué: la tabla no muestra ningún dato de tutoría. Añadir una columna «Tutor» exigiría que
+  `GrupoDTO` transportara la tutoría —mover el contrato por comodidad de pintura, el error que
+  D-monodi-botones-inertes decidió no cometer—, así que queda fuera. El botón se pinta en TODAS
+  las filas, incluidas las de PDC, y eso saca las tres acciones existentes del `@if` de
+  ordinarios: un PDC hereda el principal del padre en el alta y puede editarlo después, luego
+  excluirlo dejaría sin editar justo el caso que crea la herencia. Suites: vitest 290→310
+  (3 ficheros nuevos), app/solver/e2e intactos. Bundle 514,42→520,22 kB (D-bundle-presupuesto).
 - **Absorbe:** D1, D7, D10, D22, D30, D-F8.5-D1-b, y las deudas de subgrupos
   compartidos. D22 saldada de facto (C-jornada, S107). Nace y cuelga aquí
   D-subgrupo-ux-multiselect (S108): la UX del `<select multiple>` de subgrupos es
@@ -371,11 +422,23 @@ de las Fases 9–12.
   que la propia ficha reclamaba: la clave está puesta, está compilada y aun así el cuerpo llega
   sin `message`, luego «reactivar la clave» sale del abanico de arreglos POR MEDICIÓN. Los seis
   mensajes del flujo del PDC son genéricos («Bad Request» ×5 y «Conflict» ×1).
+  Nace y cuelga aquí, en S114, D-tutor-pdc-desincronizado (técnica real: la herencia del
+  principal al PDC corre solo en el alta). Nacen en S114 pero NO cuelgan aquí: D-s8-muda,
+  D-diagnostico-no-es-foto y D-post-horario-sin-sesiones son de O-ajuste-cierre (las tres son
+  superficie de la VISTA DE HORARIO, mismo criterio con que S113 dejó fuera D1-8 y D1-10), y
+  D-dialogo-foco-perdido es de O-diseño. Ninguna bloqueaba el criterio, y por eso el objetivo
+  cierra con ellas vivas (R-terminado): el M4 las encontró DESPUÉS de que las dos patas
+  quedaran cumplidas, y ninguna impide expresar ningún caso del §6.
 
 #### O-demo — "El centro real funciona de punta a punta."
 - **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
 - **Terminado cuando:** el guion de aceptación de H2 pasa sobre datos reales.
-- **Depende de:** O-estructura.
+- **Depende de:** O-estructura. **DESBLOQUEADO desde S114** (O-estructura ✔ TERMINADO):
+  es el ÚNICO objetivo que queda entre H2 y su cierre, y por tanto el candidato dominante
+  por dependencias. Aviso para su M0: es también el juez natural del argumento estructural
+  con que se cerró O-estructura —si algún caso del centro real resultara inexpresable por
+  formulario, aparecerá aquí—, y eso es hueco funcional de H2 que se afronta en este
+  objetivo, no reabriendo el anterior.
 - **Valor:** prueba de que H2 está terminado.
 - **Absorbe:** D-seed-demo, D-demo-cliente (ambos objetivos disfrazados de deuda),
   y cierra la parte VIVA de D31 (validación de poblaciones con el centro).
@@ -508,6 +571,11 @@ asigna categoría, objetivo y disposición.
 | D-pdc-sin-edicion (el sub-recurso PDC no tiene PUT ni PATCH) | O-estructura | Medido en S113: un PDC no se renombra, se borra y se recrea, y si su subgrupo está retenido por una plaza el borrado da 409. El diálogo REFLEJA el contrato y no ofrece «Editar»: exponer un botón sin backend detrás sería que la UI mintiera (mismo criterio que D-F8.5-E-a con `peso`). No bloquea: el §6.2 se reproduce sin renombrar nada y el código lo escribe el usuario en el alta (D1-3, S76). Si se paga, va junto con D-pdc-vinculo-por-cadena: un rename recalcularía mal el código derivado del subgrupo |
 | D-pdc-sufijo-completo (`-Completo` significa lo contrario en el backend y en el modelo) | O-estructura | Medido en S113. El backend deriva el subgrupo del PDC como `codigo + "-Completo"` con población SOLO el PDC (regla S23); en el cuerpo de §6.2 del modelo «3ºA-Completo» es el subgrupo que enlaza el ordinario Y su Di. Dos convenciones incompatibles en un espacio de códigos único. No urgente (el cuerpo de §6.2 está marcado como SUPERADO y la Nota S23 no usa el sufijo), pero es estado vivo confuso (R5). Probablemente se salde con una línea en el modelo, no renombrando la derivación |
 | D-monodi-botones-inertes (el subgrupo mono-Di ofrece Editar y Borrar que siempre fallan) | O-estructura (o O-diseño) | DECISIÓN CONSCIENTE de S113: no se ocultan. Hacerlo exigiría que `SubgrupoDTO` transportara el tipo de los grupos de su población —mover el contrato por comodidad de pintura— y el precio de no hacerlo es acotado, porque con G2 los botones fallan en vez de destruir, que era el problema real. Si se paga, con la información en el DTO y no adivinando por el sufijo del código, que es el acoplamiento que lamenta D-pdc-vinculo-por-cadena |
+| D-s8-muda (el resalte de una violación S8 no dice qué falta) | O-ajuste-cierre | Nace en S114, medida en navegador. La `descripcion` del `ViolacionDTO` llega al cliente con el texto exacto («Actividad MAT-1ESOA requiere tutor, pero ningún profesor suyo es TUTOR_PRINCIPAL…») y NO se pinta en ningún sitio: la rejilla solo dibuja un filete rojo de 2px (`horario-grid.css:122`), sin texto, tooltip ni lista. Medido: con la violación activa, el texto de la página no nombra `TUTORIA_SIN_TUTOR` ni la palabra «tutor». Es PEOR que un mensaje genérico por una razón propia de S8: como es la única regla cuyo origen es el CATÁLOGO y no la colocación, el resalte cae sobre celdas perfectamente colocadas y arrastrarlas NO lo quita nunca, así que el usuario intentará moverlas indefinidamente. Es superficie de la vista de horario (familia 8.6/H1), no de O-estructura: mismo criterio con que S113 dejó fuera D1-8 y D1-10. Familia de D-F8.6-ii-a. No se paga ahora |
+| D-diagnostico-no-es-foto (el diagnóstico de un horario recalcula contra el catálogo vivo) | O-ajuste-cierre | Nace en S114 al no poder medirse el paso 9 del M4 como estaba planteado. `DiagnosticoService` verifica contra el catálogo ACTUAL, y `verificarTutorias` no mira la solución (`VerificadorSolucion.java:56`), así que para S8 el diagnóstico responde «¿esto sería válido AHORA?» y no «¿lo era al generar?». Consecuencia medida: el horario #1, generado con la violación real, se presenta hoy impecable; y el #2, generado limpio, se pinta en rojo si alguien quita el tutor después. Afecta solo a S8 (las demás reglas sí leen la solución). No bloquea nada hoy y el registro histórico no existe como requisito en ningún criterio. Se decide al abrir la vista de diagnóstico, junto con D-s8-muda. No se paga ahora |
+| D-post-horario-sin-sesiones (el POST de generación devuelve la proyección sin sesiones) | O-ajuste-cierre | Nace en S114, medido en red. El horario se persiste bien (3 filas en `sesion`) y el `GET /{id}/proyeccion` las devuelve, pero el cuerpo del POST llega con `sesiones: []`. Inocuo HOY por una razón concreta y no por suerte: la UI recarga por `paramMap` y nunca lee el cuerpo del POST (decisión de S93, recargar por GET fresco). Muerde a cualquier cliente futuro que se fíe de la respuesta —incluido un e2e que quisiera asertar sobre ella—. No se paga ahora |
+| D-tutor-pdc-desincronizado (la herencia del tutor al PDC corre solo en el alta) | O-estructura (cerrado) | Nace en S114. `PdcService.heredarTutorPrincipal` se invoca únicamente desde el alta (`PdcService.java:110`): si después se cambia el tutor del padre con el PUT, el PDC conserva el antiguo en silencio. No es un bug del código actual —nadie prometió resincronización— pero C-tutores lo hace VISIBLE por primera vez: se verán dos grupos emparentados con tutores distintos y nada explicará por qué. No bloqueaba el criterio (el §6 no exige reasignar tutores) y por eso el objetivo cierra con ella viva. Arreglarla es decisión de dominio, no una guarda —¿copia o referencia?—, familia de D-pdc-vinculo-por-cadena; se evalúa si O-demo la hace morder con el centro real. No se paga ahora |
+| D-dialogo-foco-perdido (al salir del estado «cargando» el foco cae fuera del diálogo) | O-diseño | Nace en S114, medida en los tres diálogos. El CDK enfoca el botón de la rama `cargando`; cuando el `@switch` cambia de rama ese elemento se destruye y el foco cae a `<body>`, fuera del diálogo. `GrupoForm` (sin estados) conserva el foco dentro; `PdcDialogo` y `TutoriaDialogo` no. NO la introduce C-tutores: `PdcDialogo` hace lo mismo desde S113. Para teclado y lector de pantalla el diálogo queda abierto sin foco dentro. Arrastra una consecuencia de andamio: la barrera `:focus` con que `centro-minimo.spec.ts` evita la carrera del portal no sirve en diálogos con estados, así que si algún e2e futuro abre uno de estos dos habrá que sustituirla por una espera al contenido. Es acabado de interacción, transversal a las vistas: cuelga de O-diseño. No se paga ahora |
 | D-bundle-presupuesto (el bundle inicial excede el techo declarado) | O-diseño | Preexistente desde antes de S112 (507,66 kB frente a 500 kB en `angular.json`, verificado sobre HEAD limpio); S113 lo lleva a 514,42 kB al entrar `PdcDialogo` en el grafo de dependencias. NO se toca `angular.json`: subir el techo es configuración de build, no está en el criterio de ningún objetivo vivo, y hacerlo «de paso» convierte un aviso útil en un número que nadie vuelve a mirar. Cuelga de O-diseño, que tendrá delante el bundle completo y las vistas congeladas y podrá elegir entre subir el techo, rutas perezosas o recortar. Hasta entonces, anotar el delta en cada sesión que compile |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
