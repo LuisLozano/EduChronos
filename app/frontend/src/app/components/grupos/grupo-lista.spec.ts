@@ -6,16 +6,24 @@ import {
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { GrupoLista } from './grupo-lista';
+import { TutoriaDialogo } from './tutoria-dialogo';
 
 /**
  * Congela el comportamiento de la lista de grupos. Hereda del molde los cinco casos
  * (1)-(5) —render, vacío, error de carga y las dos caras del 409—, fija en (6) las TRES
- * columnas de esta tabla, y cubre en (7)-(12) el cableado del diálogo del PDC: qué
+ * columnas de esta tabla, cubre en (7)-(12) el cableado del diálogo del PDC —qué
  * acciones ve cada fila según su `tipo`, con qué dato se abre el diálogo y cuándo
- * recarga la lista al cerrarse. Los diálogos se disparan con `Dialog` espiado, sin
- * overlay real. Secuencia propia desde (1). Fuera de alcance por decisión, no por
- * imposibilidad: estilos, y el orden interno de `mensaje()` (cubierto en el form, misma
- * función).
+ * recarga la lista al cerrarse— y en (13)-(15) el del diálogo de TUTORÍA. Los diálogos
+ * se disparan con `Dialog` espiado, sin overlay real. Secuencia propia desde (1). Fuera
+ * de alcance por decisión, no por imposibilidad: estilos, y el orden interno de
+ * `mensaje()` (cubierto en el form, misma función).
+ *
+ * <p><b>Los dos cableados no comparten regla, y (7)/(8) lo fijan.</b> Las acciones de
+ * ordinario van dentro de un `@if` por tipo; «Tutoría» va fuera y se pinta en TODAS las
+ * filas, porque un PDC hereda el tutor de su padre y tiene que poder editarlo. Por eso
+ * los dos casos afirman la lista COMPLETA de botones de la fila y no la presencia
+ * suelta de uno: es lo único que distingue «Tutoría se pinta siempre» de «el `@if` se
+ * ha caído y ahora todo se pinta siempre».
  *
  * <p>Los datos de prueba están elegidos para que los asertos DISCRIMINEN: el código
  * de un grupo ('1ESOA') tiene como PREFIJO el código de su nivel ('1ESO'), que es
@@ -89,6 +97,20 @@ describe('GrupoLista', () => {
       closed: { subscribe: (fn: (v: boolean | undefined) => void) => fn(cierraCon) },
     });
     const boton = acciones(fila).find((b) => b.textContent!.trim() === 'PDC')!;
+    boton.click();
+  }
+
+  /**
+   * Pulsa el botón «Tutoría» de una fila. El diálogo espiado se cierra con el valor dado
+   * —`true` por defecto, que es lo que emite tras escribir—: el componente NO se suscribe
+   * a `closed`, y devolver el caso más comprometido es lo que permite a (15) medir que
+   * aun así no recarga.
+   */
+  function pulsarTutoria(fila: number, cierraCon: boolean | undefined = true): void {
+    dialog.open.mockReturnValue({
+      closed: { subscribe: (fn: (v: boolean | undefined) => void) => fn(cierraCon) },
+    });
+    const boton = acciones(fila).find((b) => b.textContent!.trim() === 'Tutoría')!;
     boton.click();
   }
 
@@ -169,22 +191,24 @@ describe('GrupoLista', () => {
     expect(raiz.textContent).not.toContain('ORDINARIO');
   });
 
-  it('(7) una fila ORDINARIO ofrece las tres acciones', async () => {
+  it('(7) una fila ORDINARIO ofrece las tres acciones de ordinario MÁS la de tutoría', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
     const textos = acciones(0).map((b) => b.textContent!.trim());
-    expect(textos).toEqual(['Editar', 'Borrar', 'PDC']);
+    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Tutoría']);
   });
 
-  it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC no ofrece NINGUNA acción', async () => {
+  it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC ofrece SOLO la de tutoría', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
-    // Las tres acabarían en un error que el usuario no puede resolver (400/409/400).
-    // Si alguien quita el @if que las oculta, aquí aparecerían tres botones.
-    expect(acciones(1)).toHaveLength(0);
-    // La fila SIGUE pintándose: lo que se oculta son las acciones, no el grupo.
+    // Igualdad de la lista COMPLETA, que mide las dos reglas a la vez: Editar, Borrar y
+    // PDC acabarían aquí en un error que el usuario no puede resolver (400/409/400) y
+    // siguen ocultas —si alguien quita el @if, aparecen y este aserto cae—, mientras que
+    // «Tutoría» SÍ se pinta, porque este PDC pudo heredar el tutor de su padre.
+    expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría']);
+    // La fila SIGUE pintándose: lo que se oculta son tres acciones, no el grupo.
     expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(fixture.nativeElement.textContent).toContain('1ESOADI');
   });
@@ -244,5 +268,57 @@ describe('GrupoLista', () => {
     // Igualdad de la lista completa: fija las DOS traducciones y su orden por fila.
     expect(tipos).toEqual(['Ordinario', 'PDC']);
     expect(raiz.textContent).not.toContain('DIVERSIFICACION_PDC');
+  });
+
+  it('(13) pulsar Tutoría abre TutoriaDialogo con el Grupo DE ESA FILA', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    // La SEGUNDA fila, mismo criterio que (9): con la primera, una plantilla que pasara
+    // siempre el primer elemento del `@for` quedaría verde.
+    pulsarTutoria(1);
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    // El COMPONENTE, no solo el data: es lo que distingue este botón del de PDC, que
+    // vive en la misma celda y se abre igual. Sin este aserto, cablear «Tutoría» al
+    // diálogo equivocado pasaría entero.
+    expect(dialog.open.mock.calls[0][0]).toBe(TutoriaDialogo);
+    // Y la entidad DIRECTA, no envuelta: `{ data: grupo }`, nunca `{ data: { grupo } }`.
+    // El objeto completo por igualdad, así cae también pasar la fila equivocada.
+    expect(dialog.open.mock.calls[0][1]).toEqual({ data: FILAS[1] });
+  });
+
+  it('(14) DISCRIMINANTE: en una fila PDC el botón también abre el diálogo con ESE PDC', async () => {
+    flushLista(FILAS_MIXTAS);
+    await fixture.whenStable();
+
+    // El caso que justifica sacar el botón del `@if`: un PDC hereda el TUTOR_PRINCIPAL
+    // de su padre al crearse, así que es justo la fila que necesita poder editarlo. Si
+    // alguien mete «Tutoría» dentro del filtro por tipo, aquí no hay botón que pulsar y
+    // el helper revienta al clicar sobre `undefined`.
+    pulsarTutoria(1);
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(dialog.open.mock.calls[0][0]).toBe(TutoriaDialogo);
+    // El PDC, no su padre: los dos están en la tabla y comparten prefijo de código
+    // ('1ESOA' es prefijo de '1ESOADI'), que es la confusión posible.
+    expect(dialog.open.mock.calls[0][1]).toEqual({ data: FILAS_MIXTAS[1] });
+  });
+
+  it('(15) al cerrar el diálogo de tutoría la lista NO recarga, ni siquiera con true', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    // `true` es el caso comprometido: es lo que `TutoriaDialogo` emite tras escribir, y
+    // es lo que hace recargar en los otros dos cableados de esta misma clase. Aquí no
+    // debe: la tabla no pinta ningún dato de tutoría, así que el GET no cambiaría un
+    // solo píxel. Quien copie el `.closed.subscribe(...)` de `pdc()` al cablear esto
+    // añade una petición por cada guardado y este `expectNone` lo caza.
+    pulsarTutoria(0, true);
+    http.expectNone('/api/grupos');
+
+    // El diálogo se abrió de verdad: el expectNone mide la ausencia de recarga, no un
+    // botón que no hiciera nada.
+    expect(dialog.open).toHaveBeenCalledTimes(1);
   });
 });
