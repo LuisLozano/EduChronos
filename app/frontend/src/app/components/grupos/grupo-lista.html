@@ -33,7 +33,7 @@
             <td>{{ grupo.nivel }}</td>
             <td class="grupos__tipo">{{ etiquetaTipo(grupo.tipo) }}</td>
             <td class="grupos__acciones">
-              <!-- Solo los ordinarios: sobre un PDC las tres acciones acaban en un
+              <!-- Solo los ordinarios: sobre un PDC estas tres acciones acaban en un
                    error que el usuario no puede resolver. Ver el javadoc de la clase. -->
               @if (esOrdinario(grupo)) {
                 <button type="button" class="grupos__editar" (click)="editar(grupo)">
@@ -46,6 +46,11 @@
                   PDC
                 </button>
               }
+              <!-- FUERA del @if a propósito: un PDC hereda el tutor de su padre al
+                   crearse y tiene que poder editarlo. Ver el javadoc de la clase. -->
+              <button type="button" class="grupos__tutoria" (click)="tutoria(grupo)">
+                Tutoría
+              </button>
             </td>
           </tr>
         }

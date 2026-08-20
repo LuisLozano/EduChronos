@@ -5,6 +5,7 @@ import { GrupoService } from '../../services/grupo.service';
 import { Grupo } from '../../models/grupo.model';
 import { GrupoForm } from './grupo-form';
 import { PdcDialogo } from './pdc-dialogo';
+import { TutoriaDialogo } from './tutoria-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 
 /** El único tipo que admite acciones en esta pantalla. Ver el javadoc de la clase. */
@@ -32,15 +33,24 @@ const ETIQUETAS_TIPO = new Map<string, string>([
  * valor que no esté en el mapa se muestra TAL CUAL, para que un `VIRTUAL_OPTATIVA`
  * futuro se vea en vez de desaparecer.
  *
- * <p>TRES ACCIONES POR FILA —Editar, Borrar y PDC— Y SOLO EN LAS FILAS ORDINARIAS. Una
- * fila `DIVERSIFICACION_PDC` no ofrece NINGUNA, porque las tres acabarían en un error
- * que el usuario no puede resolver: Editar da 400 (la guarda que impide degradar un PDC
- * a ordinario por el PUT plano), Borrar da 409 (su subgrupo mono-Di lo retiene) y PDC
+ * <p>TRES ACCIONES SOLO PARA LOS ORDINARIOS —Editar, Borrar y PDC—. Una fila
+ * `DIVERSIFICACION_PDC` no ofrece ninguna de las tres, porque acabarían en un error que
+ * el usuario no puede resolver: Editar da 400 (la guarda que impide degradar un PDC a
+ * ordinario por el PUT plano), Borrar da 409 (su subgrupo mono-Di lo retiene) y PDC
  * daría 400 (el sub-recurso exige un padre ORDINARIO; un PDC no cuelga de otro PDC).
  * No se pierde ninguna capacidad al esconderlas: el backend NO tiene edición de PDC
  * —el sub-recurso es alta/consulta/borrado— y su borrado vive en el diálogo del PADRE,
  * que es desde donde se gestiona todo el ciclo. Un tipo DESCONOCIDO se trata como no
- * ordinario: sin acciones, que es el lado seguro.
+ * ordinario: sin esas tres acciones, que es el lado seguro.
+ *
+ * <p><b>Y UNA CUARTA, «Tutoría», EN TODAS LAS FILAS SIN EXCEPCIÓN.</b> Es la única que
+ * queda FUERA del filtro por tipo, y no por descuido: un PDC HEREDA el
+ * `TUTOR_PRINCIPAL` de su padre en el alta (`PdcService.java:110`) y puede cambiarlo
+ * después —el sub-recurso `/{id}/tutoria` acepta cualquier grupo, sin exigir que sea
+ * ordinario—. Esconderla en las filas PDC dejaría sin editar justo el caso que la
+ * herencia crea: un grupo con tutor puesto por el sistema y ninguna forma de tocarlo.
+ * Un tipo DESCONOCIDO también la ofrece, por el mismo motivo: la tutoría no depende del
+ * tipo del grupo.
  *
  * <p>El 409 de borrado sí es rico aquí: un grupo con subgrupos o con hijos PDC no se
  * borra, y el backend nombra cuántos de cada tipo lo impiden.
@@ -118,7 +128,29 @@ export class GrupoLista implements OnInit {
       });
   }
 
-  /** ¿Ofrece acciones esta fila? Solo los ordinarios; ver el javadoc de la clase. */
+  /**
+   * Abre el diálogo de tutoría de ESTA fila, con el grupo completo como `data` (mismo
+   * molde que {@link #pdc}: entidad directa, no envuelta; el diálogo saca de ella el id
+   * para sus dos llamadas y el código para titularse).
+   *
+   * <p><b>NO SE SUSCRIBE A `closed`, y por tanto NO RECARGA.</b> Es la diferencia con
+   * {@link #pdc} y {@link #abrirForm}, y es deliberada: esta tabla no pinta NINGÚN dato
+   * de tutoría —sus columnas son Código, Nivel y Tipo—, así que tras guardar no hay nada
+   * que refrescar y un `cargar()` sería un GET cuyo resultado se pintaría idéntico.
+   * `TutoriaDialogo` sí cierra con `true` cuando escribe, porque ese es su contrato con
+   * cualquier consumidor; aquí simplemente no se consume.
+   *
+   * <p>Si algún día la lista muestra el tutor de cada grupo, ESTE es el punto donde
+   * volvería el `.closed.subscribe(...)` con el `=== true` estricto de las otras dos.
+   */
+  protected tutoria(grupo: Grupo): void {
+    this.dialog.open<boolean, Grupo>(TutoriaDialogo, { data: grupo });
+  }
+
+  /**
+   * ¿Ofrece esta fila las acciones de ordinario (Editar, Borrar, PDC)? NO gobierna el
+   * botón de tutoría, que se pinta siempre; ver el javadoc de la clase.
+   */
   protected esOrdinario(grupo: Grupo): boolean {
     return grupo.tipo === TIPO_ORDINARIO;
   }
