@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S111. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S112. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S111). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S112). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -5889,3 +5889,130 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   C-niveles CERRADO y con ello el e2e DESBLOQUEADO. Suites: vitest 269, backend intacto 261/91. Siguiente:
   candidatos vivos son el e2e UI→solver (tercera pata del criterio, ya sin bloqueo y con reconocimiento hecho),
   PDC, tutores y D-F8.6-ii-a; lo fija su propio M0 (ver M1-ter).
+
+### Sesión 112 — O-estructura (H2): C-e2e. El e2e UI→solver del centro mínimo (Desarrollo + e2e) y el arreglo del hueco de recarga tras la PRIMERA generación. CIERRA la tercera pata del criterio. NO cierra el objetivo.
+  Duodécima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo con M3 real (la bifurcación de
+  `lanzarGeneracion`) + el e2e, para el que M3 no aplica y se sustituye por un control de vacuidad de tres
+  escenarios. SEXTA pieza de O-estructura. Lo que ENTREGA: la tercera pata del criterio —«un e2e de navegador
+  crea un centro mínimo íntegramente por la UI y el solver corre sobre él»— queda CUMPLIDA y verificada.
+  O-estructura sigue ACTIVO: su criterio exige aún PDC y tutores (patas 1 y 2).
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 5
+  piezas hechas. Hito = H2. Cambio = C-e2e. R-invalidación sin conflicto. Los CUATRO candidatos vivos se
+  pesaron. Gana el e2e por tres razones, y la primera es la decisiva: PDC y tutores NO lo invalidan —el centro
+  mínimo no tiene PDC, y por R-e2e no se añade un e2e por cada tipo de estructura—, así que escribirlo ahora no
+  crea trabajo que rehacer; (2) el reconocimiento de S111 es PERECEDERO y lo pagó ella para esta sesión; (3) es
+  la única pata sin empezar y la de mayor riesgo. D-F8.6-ii-a fuera por R-deuda, y se CIERRA la grieta que S110
+  dejó anotada: la 2ª pata habla del §6 del MODELO (validación contra los horarios reales del centro), no de la
+  superficie de error de la UI, así que «Bad Request» degrada pero no impide reproducir los casos.
+  HALLAZGO DEL M0 que reordena lo pendiente: PDC no es opcional, es pata 1 Y pata 2 —el §6.2 del modelo ES el
+  caso 3ºADi— y su alta vive en el sub-recurso `/api/grupos/{idPadre}/pdc` (S76), que el CRUD de Grupo por UI no
+  alcanza. Sin ese formulario O-estructura no puede cerrar. Tutores, en cambio, PUEDE estar más cubierto de lo
+  que parece (`requiereTutor` ya es campo del form de Actividad desde S109; lo que no existe es `ProfesorTutoria`):
+  no se afirma, exige su propio M2.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL, dos investigaciones encadenadas antes de teclear; informes
+  consumidos aquí, sin fichero suelto commiteado). Confirmó la apuesta de apertura y destapó lo que decidió la
+  sesión. (1) `schema.sql` tiene CERO `drop`: son 21 `create table if not exists` desde S109. El comentario de
+  `playwright.config.ts` afirmaba literalmente lo contrario —«hace drop table if exists de las 21 tablas»—: una
+  afirmación viva y falsa DENTRO del fichero que gobierna el e2e. Con `reuseExistingServer` en local, el e2e
+  habría corrido contra la BD de trabajo, que ya tiene un horario generado y actividades congeladas por
+  D-horario-irreversible. El andamiaje de S106 se apoyaba en una premisa que S109 invalidó. (2) La prevalidación
+  del centro mínimo devuelve `[]`: las tres reglas (profesor 3/30, repeticiones 3/5, grupo 3/30) pasan holgadas,
+  luego el botón se habilita y `ConfirmarGeneracion` no llega a abrirse. (3) `server.error.include-message=always`
+  SÍ está en `application.properties`, con comentario propio: AFINA D-F8.6-ii-a y desmiente la conclusión de S111
+  (que dio la razón al javadoc de `horario-view`); su M2 debe partir de aquí.
+  HUECO FUNCIONAL DESTAPADO POR EL M4 Y ARREGLADO EN SESIÓN (no estaba registrado como deuda: nace y muere aquí).
+  `provideRouter(routes)` sin features ⇒ `onSameUrlNavigation` = 'ignore' (leído del bundle instalado de
+  @angular/router 21.2.17, no de memoria). Tras el POST, `router.navigate(['/horario', dto.id])` desde
+  `/horario/1` emite `NavigationSkipped`, `paramMap` NO reemite, `cargar()` no vuelve a correr: la rejilla no se
+  refresca y, como la carga inicial dio 404 sobre BD vacía, `error()` gatea el `@else if` y `<app-horario-grid>`
+  ni se monta. Se manifiesta SOLO en la primera generación de una instalación nueva —después el id cambia y la
+  URL difiere—, es decir, exactamente en el criterio 5 de Fase 8 que define H2, y es invisible en el uso manual
+  repetido (por eso S111 no lo vio). DECISIÓN DE ALCANCE del arquitecto: el arreglo ENTRA, porque sin él la
+  pata 3 solo se cumpliría con un `page.reload()` en el test, es decir, con el e2e tapando el agujero que existe
+  para detectar. Vía elegida: bifurcación en el `next` (si el id devuelto es el ya cargado, `cargar()`; si no,
+  navegar). Se DESCARTAN las otras dos: tocar el router es global y no está medido que `paramMap` reemita con el
+  mismo componente y los mismos params; consumir la proyección del POST revertiría la decisión de S93 (rejilla,
+  pines y diagnóstico no pueden pertenecer a horarios distintos), que esta vía conserva intacta al recargar por
+  GET fresco. RECTIFICACIÓN DE MÉTODO EN SESIÓN: el M2 declaró M3 no aplicable «porque no habría lógica de
+  producción»; con el arreglo la hay, y M3 volvió al ritual.
+  M3 — campaña de 2 mutaciones sobre la bifurcación. M-A (navegar siempre, el estado previo) cae SOLO (40), vía
+  `router.navigate` llamado cuando el aserto exige lo contrario. M-B (`cargar` siempre) cae (39) por 0 llamadas
+  a navigate, y ADEMÁS el preexistente (31), que guarda esa misma rama desde antes: segundo guardián legítimo,
+  no acoplamiento entre los nuevos. Cada caso guarda su rama. Restauraciones verificadas por DIFF contra copia
+  previa, nunca por el verde (regla de S110).
+  M4 — el contraste corrigió OCHO puntos del contrato antes de teclear, tres de ellos sobre el aserto: el código
+  de actividad NO se pinta en la rejilla (solo como `aria-label` del candado, y solo si está pinada), así que el
+  contable es `div.instancia`; «celdas» era impreciso (hay 30 `<td>` siempre y `td.ocupado` solo se enciende
+  durante un arrastre); el value es `DISTRIBUIDA`. Y cinco de ejecución: el `orden` del nivel arranca vacío; el
+  orden de creación es requisito duro porque cada diálogo puebla sus desplegables al abrirse; `getByRole` con
+  `exact:true` (el `name` es substring y «Guardar» casaría con «Guardar jornada»); los multiselect por
+  `selectOption`, que dispara el `change` que el handler escucha; y todo aserto con reintento por ZONELESS.
+  BLOQUEO DEL INSTRUMENTO, reportado por Claude Code en el PASO 0 y resuelto con la opción MENOS invasiva: el
+  doble de `getProyeccion` es un Subject COMPARTIDO, así que el 404 inicial del (40) lo cierra y la recarga
+  redispararía el error. Se elige re-stub LOCAL al caso frente a homogeneizar el doble a fresco —eso tocaría los
+  25 casos vigentes que lo consumen, superficie probada que este Cambio no pide (R-terminado)— y frente a quitar
+  el 404 inicial, que habría acomodado el test al instrumento en vez de al problema: el 404 ES el escenario.
+  Dos premisas del arquitecto corregidas por la medición del instrumento: este fichero no tiene `verify()` ni
+  `HttpTestingController`, luego los Subjects pendientes no tumban casos ajenos.
+  HALLAZGO DEL E2E, medido en la corrida y no previsto por nadie: las dos primeras corridas fallaron en pasos
+  DISTINTOS con la misma firma —primer campo del diálogo vacío y `touched`, segundo campo bien—. Es la carrera
+  entre el `fill` y el cableado del ControlValueAccessor: `cdk-dialog-container` entra en el DOM en cuanto el CDK
+  lo crea, el contenido del portal se adjunta un tick después, y un `fill` en esa ventana lo borra el
+  `writeValue('')` de la directiva al registrarse; el `required` bloquea entonces el submit y el diálogo no
+  cierra. Barrera elegida: esperar a que el foco esté DENTRO del diálogo (`:focus`), válida porque el CDK atrapa
+  el foco (`autoFocus: 'first-tabbable'`) solo con el contenido ya adjunto, estrictamente después del cableado.
+  Se descarta `waitForTimeout`: haría lo mismo a ojo y sin declarar de qué depende. Documentado en el javadoc de
+  `abrir()` como hallazgo medido. Tres corridas seguidas en verde después.
+  CONTROL DE VACUIDAD (sustituye a M3 en el e2e, obligatorio): C1 repeticiones 3→2 → rojo en el aserto principal
+  (3 vs 2): mide cantidad, no presencia. C2 omitir la jornada → rojo ANTES del aserto, en la precondición
+  (`.prevalidacion-limpia` ausente): el test recorre la cadena entera. C3, el que importa: revertir el arreglo de
+  `lanzarGeneracion` → rojo, `.instancia` en 0 tras 45 s, con el snapshot mostrando «No se pudo cargar el horario
+  1 (404).» y sin rejilla. Ninguno falló por vía distinta de la prevista; las tres restauraciones por diff, la de
+  C3 además contra HEAD.
+  ENTREGADO en tres commits de código. `test(e2e): aisla el e2e en educhronos-e2e.db y corrige la premisa
+  caducada del andamiaje` (`playwright.config.ts`: `rm -f app/educhronos-e2e.db*` encadenado al command
+  —`shell:true` verificado en el runner—, `-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db`,
+  `reuseExistingServer:false` SOLO en backend, y el párrafo falso reescrito). `5d63fd4` fix(horario)
+  (`idCargado` como campo plano con su porqué, asignado como primera línea de `cargar`, bifurcación en el `next`,
+  javadoc reescrito con las dos ramas y la causa). `88919d2` test(horario) (casos (39) y (40), con el re-stub
+  local y su javadoc, y precondición añadida al (40) —sin ella el tercer aserto podía medir un estado limpio de
+  nacimiento—). `a69734a` test(e2e) (`app/frontend/e2e/centro-minimo.spec.ts`, UN SOLO test por R-e2e).
+  Suites: vitest 269 → 271 (+2); e2e 1 → 2 (humo 298 ms, centro mínimo 2,8 s); backend INTACTO 261/91, no
+  ejecutado (no se tocó `app/src`). `npm run build` verde; el warning de presupuesto (507,66 kB) es PREEXISTENTE
+  —verificado construyendo con los ficheros en stash: HEAD ya daba 507,59 kB—, el cambio aporta 70 bytes.
+  `solver/src/main` NO tocado ⇒ `referencia-codigo-solver.md` NO regenerada. `modelo_datos_fase1.md` NO tocado.
+  AISLAMIENTO VERIFICADO, que es lo que hace repetible el e2e: tras nueve corridas, `app/educhronos.db` conserva
+  mtime y tamaño byte a byte (14:01:08.613238078, 155648), y `app/educhronos-e2e.db` refleja el centro mínimo
+  (1 nivel, 1 grupo, 1 subgrupo, 1 profesor, 1 asignatura, 1 aula, 1 actividad, 1 plaza, 1 horario, 3 sesiones,
+  35 tramos). El `.gitignore` no se tocó: `*.db` ya cubría la BD nueva (medido antes de editar). Matiz anotado y
+  no arreglado: `*.db` no cubre `-journal/-wal/-shm`, hueco PREEXISTENTE e idéntico para la BD de trabajo.
+  DEUDA: nacen CUATRO, ninguna se paga (R-deuda: ninguna bloquea el criterio). D-doble-proyeccion-compartido
+  (de test, cuelga de O-ajuste-cierre), D-e2e-retry-bd, D-e2e-aislamiento y D-props-test-obsoleto (las tres de
+  O-estructura). Y D-F8.6-ii-a se AFINA por tercera sesión consecutiva.
+  R-terminado RESPETADA: no se pagó D-F8.6-ii-a pese a tener un dato nuevo sobre ella, ni D-horario-irreversible
+  (con BD limpia por corrida no muerde), ni D-error-generacion-pin (el `error:` de `lanzarGeneracion` se dejó
+  intacto a propósito), ni se homogeneizó el doble de `getProyeccion`, ni se tocó el hueco del `.gitignore`, ni
+  el acabado visual de ninguna pantalla (O-diseño). Lo único que entró fuera del test es el arreglo del hueco,
+  y entró porque sin él la pata 3 no se cumple.
+  HIGIENE (M1-bis): archivada S110 a `bitacora-sesiones.md` (promovida a `### Sesión 110`, insertada al final en
+  orden ascendente, cuerpo verificado idéntico por diff); degradada S111 a «Última sesión registrada (previa)»
+  compacta; S112 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S110), la
+  crónica de archivado y la frase de ventana del plan.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado que los tres commits de código separan andamiaje,
+  producción y tests, que documentación y código van en commits distintos, y que el árbol quedó limpio (ningún
+  `.db` entra: `*.db` los tapa). COSTURA SALDADA que el M0 detectó: `gestion_proyecto.md` §2 y §3 seguían
+  diciendo «4 piezas hechas / faltan C-niveles, PDC, tutores y el e2e», desactualizado desde S111.
+  NOTA TÉCNICA PARA QUIEN ESCRIBA EL PRÓXIMO e2e (sustituye a la de S111, que queda archivada con ella): (1) la
+  BD del e2e es `app/educhronos-e2e.db`, la borra el `command` del `webServer` y NO la demuele `schema.sql`;
+  correr el e2e exige el backend de dev PARADO (`reuseExistingServer:false`). (2) Tras abrir un diálogo del CDK
+  hay que esperar el foco DENTRO de él antes de teclear, o el `writeValue('')` del ControlValueAccessor borra el
+  primer campo en silencio. (3) `getByRole(..., { name })` es SUBSTRING: sin `exact:true`, «Guardar» casa con
+  «Guardar jornada», y el texto del botón de alta se repite en el `<h2>` del diálogo. (4) Los cuatro
+  `<select multiple>` no llevan `formControlName`: van por clase y solo aceptan `selectOption`, que dispara el
+  `change` que el handler escucha. (5) El código de actividad NO se pinta en la rejilla; lo contable es
+  `div.instancia`.
+  O-estructura (H2) ACTIVO, 6 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
+  e2e S112). TERCERA PATA DEL CRITERIO CUMPLIDA. Suites: vitest 271, e2e 2, backend intacto 261/91. Siguiente:
+  PDC es el candidato dominante —única pieza de la que dependen las dos patas restantes—, con tutores detrás y
+  pendiente de medir; lo fija su propio M0 (ver M1-ter).
