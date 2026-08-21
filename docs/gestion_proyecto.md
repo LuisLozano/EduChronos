@@ -56,7 +56,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 | Hito | El usuario puede… | Estado real | Criterio de terminado |
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** | Ver un horario, moverlo con drag & drop, ver conflictos duros y blandos, bloquear sesiones, relanzar | ~90% | Criterios 1–4 de Fase 8 (drag con conflicto, atribución sobre horario generado, prevalidación, bloqueo). Cumplidos salvo verificación de cadena y el gesto de despinar |
-| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~70% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil) y C-tutores (S114, la asignación del tutor por UI sobre el sub-recurso que existía desde S77: su M0 midió que SÍ hacía falta —tres casos del §6 registran `ProfesorTutoria` en su configuración— y su M4 verificó en navegador que `TUTORIA_SIN_TUTOR` aparece sin tutor y desaparece con él; con ella las TRES PATAS quedan cumplidas y O-estructura CIERRA). «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. **O-estructura ✔ TERMINADO S114**, 8 piezas; queda SOLO O-demo entre H2 y su cierre) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" y "crear grupo nuevo se incorpora a las particiones" |
+| **H2 — Configurar un centro desde cero** | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~70% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil) y C-tutores (S114, la asignación del tutor por UI sobre el sub-recurso que existía desde S77: su M0 midió que SÍ hacía falta —tres casos del §6 registran `ProfesorTutoria` en su configuración— y su M4 verificó en navegador que `TUTORIA_SIN_TUTOR` aparece sin tutor y desaparece con él; con ella las TRES PATAS quedan cumplidas y O-estructura CIERRA). «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. **O-estructura ✔ TERMINADO S114**, 8 piezas. **O-demo ABIERTO S115** y descompuesto en cinco Cambios (C-derivación hecho); la misma sesión midió que el criterio 6 de Fase 8 no tiene constructor y lo sacó a objetivo propio, **O-particiones**, así que H2 pasa a cerrar con DOS objetivos por delante y no uno) | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" (O-demo) y "crear grupo nuevo se incorpora a las particiones" (O-particiones, §3). NOTA DE ALCANCE (S115): con la carga del centro real entrando por la API REST, el criterio 5 queda demostrado por UI a escala del centro mínimo (e2e de S112) y no a escala real; ver la nota escrita en la ficha de O-demo |
 | **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
 | **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
 
@@ -430,24 +430,124 @@ de las Fases 9–12.
   cierra con ellas vivas (R-terminado): el M4 las encontró DESPUÉS de que las dos patas
   quedaran cumplidas, y ninguna impide expresar ningún caso del §6.
 
-#### O-demo — "El centro real funciona de punta a punta."
-- **Propósito:** cargar el IES de Sevilla por la UI y generar su horario.
-- **Terminado cuando:** el guion de aceptación de H2 pasa sobre datos reales.
-- **Depende de:** O-estructura. **DESBLOQUEADO desde S114** (O-estructura ✔ TERMINADO):
-  es el ÚNICO objetivo que queda entre H2 y su cierre, y por tanto el candidato dominante
-  por dependencias. Aviso para su M0: es también el juez natural del argumento estructural
-  con que se cerró O-estructura —si algún caso del centro real resultara inexpresable por
-  formulario, aparecerá aquí—, y eso es hueco funcional de H2 que se afronta en este
-  objetivo, no reabriendo el anterior.
-- **Valor:** prueba de que H2 está terminado.
+#### O-demo — "El centro real funciona de punta a punta." (ABIERTO S115)
+- **Propósito:** cargar el IES de Sevilla completo y generar su horario.
+- **Terminado cuando:** el criterio 5 de Fase 8 —«configurar un centro desde cero y llegar
+  a un horario válido»— pasa sobre los datos reales del IES: el centro entero está en la
+  base creado por las vías legítimas del producto, el solver produce un horario válido
+  sobre él y el resultado es presentable al centro. PRECISADO en S115 en dos puntos: (1) el
+  criterio 6 de Fase 8 NO forma parte de este objetivo (ver O-particiones); (2) «datos
+  reales» significa el IES COMPLETO —28 grupos— y no una rebanada representativa, decisión
+  del arquitecto en S115 motivada por la demo al centro.
+- **Depende de:** O-estructura. **DESBLOQUEADO desde S114**. Es el juez natural del
+  argumento estructural con que se cerró O-estructura: si algún caso del centro real
+  resultara inexpresable por formulario, es hueco funcional de H2 y se afronta AQUÍ, no
+  reabriendo el objetivo anterior. **EXAMEN PASADO en S115**, y este es el resultado que
+  más pesa del Cambio: la derivación contrastó el catálogo completo contra la UI existente
+  y todo cabe —asignatura NULL, plaza con dos profesores, actividad de 6 plazas, plaza con
+  subgrupos de seis grupos, `duracionTramos > 1`, PDC con padre, recreo no lectivo—. El
+  único candidato a inexpresable (11 plazas de FPB sin aula, rechazadas por
+  `ActividadService.validarXor`) NO lo es: la plaza sin aula es configuración inválida por
+  diseño y el dato falta en la FUENTE, no en el formulario.
+- **Valor:** prueba de que H2 funciona sobre el centro para el que se construye.
+- **Cambios que agrupa** (nombrados en el M0 de S115; la ficha no los tenía, y crearlos fue
+  trabajo de esa apertura, como el M0 de S107 con O-estructura):
+  - **C-derivación** ✔ HECHO (S115) — de los volcados al catálogo de entrada. Entregables
+    `docs/horario-referencia/ESPECIFICACION-CATALOGO.md` y `catalogo-derivado.json`.
+  - **C-cargador** — el script que lee el catálogo derivado y puebla el centro por la API
+    REST. BLOQUEADO hasta que el centro responda las aulas de FPB.
+  - **C-generación** — solve sobre el IES real: factibilidad, tiempo y contraste con el
+    horario del PDF. El contraste NO exige igualdad, exige validez (ver la nota de
+    restricciones abajo).
+  - **C-hueco-\*** — cada caso que resulte inexpresable. No se planifican: se abren cuando
+    aparecen. Tras S115 no hay ninguno conocido.
+  - **C-carga-manual-1eso** — PROPUESTO, pendiente de decisión: teclear 1º ESO completo por
+    la interfaz (~80–100 envíos) para cerrar a escala la nota de alcance del criterio 5.
+    Contiene el bloque de seis plazas del §6.1 y la co-docencia de LCL, que es lo más
+    difícil del centro.
+  - **C-borrado-horario** — RETIRADO del camino crítico en S115: con la carga por API la
+    base se rehace en minutos y D-horario-irreversible deja de ser callejón sin salida.
+  - **C-configuracion-navegable** — RETIRADO del camino crítico en S115 por medición: el
+    riesgo que lo justificaba exige subgrupos multi-grupo y los 334 derivados son todos
+    mono-grupo. Pasa a D-configuracion-monolitica (§4).
+- **La vía de carga es la API REST, decidido en S115 y no se rediscute.** La alternativa
+  —un script de INSERT contra SQLite— se descartó con argumento: las invariantes I1–I7 viven
+  ENTERAS en la capa de aplicación y el esquema no las replica (D-F8.2b-iv-a), así que un
+  INSERT no comprueba I2, I7, I5 ni el XOR del aula; con 219 actividades derivadas por
+  inferencia, los errores no aparecerían al insertar sino como INFEASIBLE opaco o como un
+  horario válido y equivocado. Precedente escrito: `SeedCatalogoRunner`, que D-seed-demo
+  declara muerto por poblar por debajo de la aplicación. Efecto lateral útil: un cliente HTTP
+  lee el motivo del rechazo aunque el navegador no (D-F8.6-ii-a viaja como reason phrase).
+- **NOTA DE ALCANCE (S115), escrita para que no viva en la memoria de nadie:** con la carga
+  por API, el criterio 5 de Fase 8 no queda demostrado a escala real POR LA INTERFAZ. Lo
+  demostrado por UI es el centro mínimo (e2e de S112). C-carga-manual-1eso existe para
+  cerrar esa distancia; si se decide no hacerlo, la distancia se declara y no se disimula.
+- **El centro real, medido (S115):** 815 envíos de formulario equivalentes —jornada 1,
+  niveles 8, asignaturas 100, profesores 59, aulas 43, grupos 23, PDC 5, tutores 28,
+  subgrupos 329, actividades 219—; 334 subgrupos (28 completos + 306 parciales, TODOS
+  mono-grupo); 219 actividades con 316 plazas que describen 632 sesiones y cubren los 840
+  slots del horario real sin huecos ni solapes, S9 verificada.
+- **Orden de carga condicionado (S115):** los tutores de los grupos ORDINARIOS se asignan
+  ANTES de crear sus PDC, o cada PDC se queda sin tutor. `PdcService.heredarTutorPrincipal`
+  corre SOLO en el alta (medido en S114, `PdcService.java:110`), así que un PDC creado antes
+  de que su padre tenga tutor no hereda nada y nadie lo resincroniza después: es
+  D-tutor-pdc-desincronizado mordiendo por primera vez, tal como su ficha preveía. El centro
+  real tiene cinco PDC y S8 exige tutor donde `requiereTutor`.
+- **Lo que los volcados NO contienen y hay que asumir:** ninguna disponibilidad ni
+  restricción horaria de profesor (medido en S115; un horario ya resuelto no puede contener
+  las restricciones que lo produjeron). El backend sí modela `ProfesorRestriccionHoraria`,
+  pero los datos no la alimentan. Consecuencia asumida por el arquitecto: el horario generado
+  será válido en el modelo y distinto del que usa el centro. La demo entrega un horario
+  válido, no un parecido.
 - **Absorbe:** D-seed-demo, D-demo-cliente (ambos objetivos disfrazados de deuda),
-  y cierra la parte VIVA de D31 (validación de poblaciones con el centro).
+  y cierra la parte VIVA de D31 (validación de poblaciones con el centro). D31 tiene por
+  primera vez PREGUNTAS CONCRETAS y no dudas genéricas, y son las tres de la consulta
+  pendiente al jefe de estudios: las aulas reales de las 11 plazas de FPB (lo único que
+  BLOQUEA), los tutores reales (la heurística «tutor = quien imparte TUT» saca a FIL2 como
+  principal de cinco grupos: implausible, aunque no viola I4) y los itinerarios de 4º ESO,
+  1º Bach y 2º Bach, que deciden si un subgrupo se reutiliza entre bloques por I6 y que son
+  exactamente D31 (b), (c) y (d).
 - **Fuentes de datos:** los horarios reales del IES se extrajeron de los PDFs a
-  JSON en una operación previa. Su documentación —`RESUMEN-EXTRACCION.md` (qué se
-  extrajo) e `INFORME-RECONCILIACION.md` (cómo se resolvieron las discrepancias
-  entre el horario por grupo y por aula, familia D8)— es el insumo de este objetivo
-  y el primer paso de su M2: leerlas para saber qué datos hay y en qué estado
-  quedaron.
+  JSON en una operación previa. Su documentación —`RESUMEN-EXTRACCION.md` e
+  `INFORME-RECONCILIACION.md`— fue el insumo de C-derivación. Dos correcciones registradas en
+  S115 sobre ellas: la «correspondencia incierta» de `3º ESO PDC` queda CERRADA (es el PDC de
+  3ºC, por tres vías independientes) y FOPP no colisiona profesor↔asignatura (el único código
+  que es las dos cosas es ECO). Hallazgo de reutilización: los volcados sirven además como
+  ORÁCULO DE REGRESIÓN —cero inconsistencias internas medidas—, contra el que C-generación
+  puede cruzar lo que produzca el solver.
+
+#### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
+- **Propósito:** cumplir el criterio 6 de Fase 8, que hoy no tiene constructor: crear un
+  grupo dentro del curso lo incorpora automáticamente a las particiones existentes de su
+  nivel.
+- **Terminado cuando:** con el centro real cargado, crear un grupo nuevo lo deja
+  incorporado a las particiones de su nivel sin edición manual subgrupo a subgrupo. El
+  gesto de prueba lo propuso el arquitecto en S115: cargar el centro y meter después un
+  grupo que participe en particiones reales del nivel (un 1º ESO o un 4º ESO; NO un FPB,
+  que no comparte partición con nadie y haría pasar la prueba sin probar nada).
+- **Depende de:** O-demo (necesita un centro real con particiones densas delante). Cuidado
+  de ORDEN: la prueba se hace ANTES de generar, o después de que exista un borrado de
+  horario; ampliar la población de un subgrupo toca actividades que quizá ya tengan
+  sesiones, y `ActividadService.exigirSinDependientes` las bloquea con 409.
+- **Valor:** es el segundo de los dos criterios que cierran H2. Sin él, H2 no termina.
+- **Por qué es objetivo y no un Cambio de O-demo (medido en S115):** exige materializar
+  `Particion`, que NO existe por decisión explícita (D-a, S48; declarado en el javadoc de
+  `Subgrupo.java:29`). Hoy `GrupoService.crear` no importa siquiera `SubgrupoRepository`, la
+  relación grupo↔subgrupo vive solo del lado del subgrupo (`subgrupo_grupo`) y el grupo no
+  tiene lado inverso: no hay nada que un grupo nuevo pueda heredar. Toca dominio,
+  persistencia (migración de `schema.sql`), servicio, API y frontend. Y el coste real no es
+  el código sino cuatro preguntas de dominio abiertas: (1) a qué subgrupo de un bloque de 6
+  vías va el grupo entrante —RefMt tiene 3 vías simultáneas y elegir una al azar es tan
+  malo como meterlo en las tres—; (2) qué es «la partición del nivel» cuando hay actividades
+  multi-grupo que cruzan grupos y niveles; (3) qué pasa con plazas y actividades que ya
+  tienen sesiones; (4) si el automatismo es reversible, cuando hoy `GrupoService.borrar`
+  rechaza con 409 un grupo que esté en algún subgrupo. Meterlo dentro de O-demo habría hecho
+  que H2 no cerrara hasta resolverlo y que O-demo dejara de ser lo que es.
+- **Absorbe:** D1 (generación automática de subgrupos por plantilla), que O-estructura
+  declaraba absorber y cerró sin construirla —correctamente, porque no estaba en el texto de
+  su criterio (R-terminado)—. También la invariante de población de D31: hoy I1 no la hace
+  cumplir ningún componente, y materializar `Particion` es la sede natural para decidir si
+  eso cambia.
 
 ### H1 — Ajustar (cierre)
 
@@ -473,20 +573,28 @@ de las Fases 9–12.
   congeladas delante). Candidato: existe un sistema de estilos aplicado de forma
   coherente a todas las vistas (configuración, horario, exportación) y el aspecto
   deja de ser el de andamiaje por defecto.
-- **Depende de:** H2 cerrado (O-estructura + O-demo). Razón (R-invalidación): todo
-  lo anterior mueve la ESTRUCTURA de la UI —O-estructura añade los formularios
-  pesados de currículo/desdobles/PDC/tutores/jornada, que reorganizan Configuración
-  entera—; maquetar antes es pulir superficie que se va a reubicar. Se hace una vez,
-  sobre vistas estables.
+- **Depende de:** O-demo. **RAZÓN REVISADA en S115, y el cambio importa.** La dependencia
+  escrita era «H2 cerrado» por R-invalidación: O-estructura añadía los formularios pesados de
+  currículo/desdobles/PDC/tutores/jornada, que reorganizan Configuración entera, y maquetar
+  antes era pulir superficie que se va a reubicar. **Esa razón se consumió al cerrar
+  O-estructura en S114:** las vistas están congeladas. Lo que queda de dependencia es más
+  estrecho: O-DEMO, porque es quien puede destapar un caso inexpresable y con él un formulario
+  nuevo que habría que maquetar después. NO depende de O-particiones ni, por tanto, del cierre
+  formal de H2.
 - **Valor:** presentabilidad. Hasta aquí los hitos se definen por función; este es
   el único objetivo puramente de acabado. Registrado en S106 a petición del
   arquitecto: sin sede propia, la maquetación o no se hace nunca o se cuela a trozos
   dentro de otros objetivos violando R-terminado ("pulir CSS ya que estoy en esta
   vista"). Tenerlo como objetivo lo protege por ambos lados.
-- **Salvedad de prioridad:** si hay que ENSEÑAR la app a un cliente o al IES antes
-  de cerrar H2, el aspecto deja de ser estético y pasa a ser presentabilidad de
-  demo, que sí es valor entregable; en ese caso O-diseño (o un subconjunto mínimo)
-  sube de prioridad. Decisión del arquitecto según el escenario real.
+- **Salvedad de prioridad: ACTIVADA en S115.** Decía que si hay que ENSEÑAR la app a un
+  cliente o al IES antes de cerrar H2, el aspecto deja de ser estético y pasa a ser
+  presentabilidad de demo, que sí es valor entregable. El arquitecto confirmó en S115 que HAY
+  demo al centro en el horizonte, sin fecha fija y previsiblemente antes de la Fase 9. Orden
+  resultante: **O-demo → O-diseño → demo → O-particiones → cierre de H2.** La demo NO espera
+  al cierre formal de H2. Razón de que O-diseño vaya detrás de O-demo y no delante: sin fecha
+  que apriete, maquetar antes de saber si la UI está completa es apostar a que O-demo no
+  destapa ningún formulario nuevo. Si apareciera una fecha corta, lo racional es invertir el
+  orden y aceptar retocar lo que salga.
 - **Grano abierto:** objetivo propio y separado, NO colgado de O-demo, porque el
   diseño transversal toca todas las vistas a la vez y no es "parte de" ningún hito
   funcional. Si al abrirlo resulta grande, se parte (métrica de §7).
@@ -542,7 +650,7 @@ asigna categoría, objetivo y disposición.
 | D-F8.6-ii-a (el `reason` de los 400/409 no llega al navegador) | O-estructura (reasignada en S109; era O-ajuste-cierre) | No bloquea el criterio, pero DEGRADA todo lo entregado | AMPLIADA y RECLASIFICADA en S109 a técnica real TRANSVERSAL. La redacción de S81 decía que `server.error.include-message` no estaba en `application.properties`: hoy SÍ está y aun así el cuerpo llega sin `message` (medido por curl en tres endpoints, fuera de la UI). Todos los formularios pintan «Bad Request» en vez del motivo, y el 409 del PUT de actividad construido en S109 queda mudo. La causa (cambio de comportamiento en Spring Boot 4) es HIPÓTESIS no medida, y elegir el arreglo —reactivar la clave, `ProblemDetail`, o traducir en cada controlador— exige su propio M2: por eso no se pagó en S109. Hallazgo de método asociado: los tests de endpoint asertan `status().reason()`, que lee el `MockHttpServletResponse` y no el cuerpo de red — verde en test, mudo en producción. AFINADA en S110, medido en NAVEGADOR: el mensaje accionable NO se pierde —viaja como REASON PHRASE— y lo que falta es la clave `message` en el cuerpo; leer `statusText` en cliente NO es la solución (HTTP/2 no transporta reason phrases). AFINADA en S111 con un dato que su M2 debe usar como punto de partida: hay CONTRADICCIÓN DOCUMENTAL en el repo —el javadoc de `asignatura-lista.ts` afirma que `server.error.include-message=always` y el de `horario-view.ts` afirma que está DESACTIVADO—, y el comportamiento observado en navegador (el 409 de borrado de nivel pinta «Conflict» crudo) da la razón al segundo. Confirmada además en el octavo formulario: la lista de niveles nace muda. AFINADA en S112, y ESTE es el punto de partida de su M2, no el de S111: medido por lectura literal de `application.properties`, la clave `server.error.include-message=always` SÍ ESTÁ, con comentario propio que explica por qué se puso y por qué los tests no lo notan. El javadoc de `horario-view.ts` describe bien el SÍNTOMA y mal la CAUSA. La hipótesis viva pasa a ser que la clave está puesta y no surte efecto; su M2 debe EMPEZAR comprobando eso en ejecución, porque si se confirma, la opción «reactivar la clave» desaparece del abanico de tres. **COMPROBADO en S113, y con ello su M2 arranca un paso más adelante:** la clave está en `application.properties` Y en `target/classes`, sigue existiendo en la versión de Boot en uso, y aun así el cuerpo llega sin `message` (evidencia en crudo sobre `POST /api/grupos/{id}/pdc`). «Reactivar la clave» queda DESCARTADA por medición, no por hipótesis; el abanico se reduce a `ProblemDetail` o traducir en cada controlador. Superficie ampliada: los seis mensajes del flujo del PDC son genéricos, cinco «Bad Request» y un «Conflict» que pierde el desglose «referenciada por N plaza(s)». El arreglo es GLOBAL —el CRUD plano se comporta igual—, no del diálogo ni de las guardas de S113 |
 | D-plaza-sin-subgrupos (una plaza con cero subgrupos se acepta) | O-estructura | No | Detectada por el M2 de S109: `validarPlazas` comprueba XOR, I7 e I2, pero acepta `subgrupos` nulo o vacío y devuelve 201. Agujero de dominio (la población de la plaza SON sus subgrupos). DECISIÓN de S109: el formulario refleja el contrato y NO añade el validador solo en cliente; hay un spec que se pondría rojo si alguien lo añadiera. El arreglo es simétrico a I7 (≈10 líneas y un test). No se paga ahora |
 | D-i2-dedup-cliente (la deduplicación intra-plaza del validador I2 no la cubre ningún test) | O-estructura | No | Nace en S110 de la campaña de mutación: quitar el `Set` por fila del validador `subguposDisjuntos` no pone rojo nada. El escenario es INALCANZABLE desde la UI (un `<select multiple>` no repite opción; el GET proyecta desde un `Set`), así que la regla existe por fidelidad con `validarPlazas` y no porque haya camino que la ejercite. Deuda de TEST, hermana de D-jornada-flush-test. Escribir el caso exigiría fabricar un estado que el sistema no produce. No se paga ahora |
-| D-horario-irreversible (un horario generado no se puede borrar ni reemplazar) | O-estructura | No bloquea el criterio, pero es un CALLEJÓN SIN SALIDA para el usuario | Nace en S111, medida en navegador y confirmada en código. No existe `DELETE /api/horarios/{id}` ni ningún borrado programático de `sesion`; cada `POST /api/horarios` ACUMULA (alta pura, sin consulta previa ni reemplazo), y el 409 del PUT/DELETE de actividad cuenta `sesion(es)` entre sus referentes. Consecuencia: en cuanto se genera un horario, las actividades que usa quedan congeladas para editar y borrar de forma PERMANENTE por la vía UI/API; la única salida es tocar SQLite a mano. El javadoc de `ActividadService.editar` prescribe «el usuario borra el horario y luego reconfigura», salida que NO existe. El `on delete cascade` de `sesion.horario_id` ya está en el esquema: el mecanismo está preparado y nadie lo dispara. Afecta al e2e solo si éste necesitara rehacer algo tras generar: MEDIDO en S112 y NO le afecta, porque cada corrida parte de una BD borrada y genera una sola vez. Sigue sin pagarse |
+| D-horario-irreversible (un horario generado no se puede borrar ni reemplazar) | O-estructura | No bloquea el criterio, pero es un CALLEJÓN SIN SALIDA para el usuario | Nace en S111, medida en navegador y confirmada en código. No existe `DELETE /api/horarios/{id}` ni ningún borrado programático de `sesion`; cada `POST /api/horarios` ACUMULA (alta pura, sin consulta previa ni reemplazo), y el 409 del PUT/DELETE de actividad cuenta `sesion(es)` entre sus referentes. Consecuencia: en cuanto se genera un horario, las actividades que usa quedan congeladas para editar y borrar de forma PERMANENTE por la vía UI/API; la única salida es tocar SQLite a mano. El javadoc de `ActividadService.editar` prescribe «el usuario borra el horario y luego reconfigura», salida que NO existe. El `on delete cascade` de `sesion.horario_id` ya está en el esquema: el mecanismo está preparado y nadie lo dispara. Afecta al e2e solo si éste necesitara rehacer algo tras generar: MEDIDO en S112 y NO le afecta, porque cada corrida parte de una BD borrada y genera una sola vez. REEVALUADA en S115 y BAJA de presión sin cerrarse: la carga del centro real entra por script contra la API, así que la base se rehace en minutos y la congelación deja de ser callejón sin salida. C-borrado-horario sale del camino crítico de O-demo. Vuelve a subir si algún día la carga deja de ser repetible. La estimación de S115 queda escrita por si se paga: el `on delete cascade` de `sesion.horario_id` ya está y el diálogo `confirmar-borrado` es reutilizable, pero NO existe `GET /api/horarios`, así que un botón de borrar solo alcanzaría al horario que se está viendo. Sigue sin pagarse |
 | D-error-generacion-pin (un fallo de generación se anuncia como fallo de pin) | O-estructura | No | Nace en S111. `lanzarGeneracion` reutiliza el helper `mensaje()` escrito para los pines, cuyo degradado es «El servidor rechazó el pin (N).»; ante un horario infactible (422) el usuario lee literalmente eso. Hermana de D-F8.6-ii-a: el texto del backend, que sí nombra el recurso culpable, se pierde por configuración y no por diseño del componente, así que las dos primeras ramas del `||` fallan siempre. Arreglo trivial (un degradado propio) pero encuadrado con esa deuda. No se paga ahora |
 | D-molde-mensaje-cubierto-en-form (la precedencia de `mensaje()` en las listas de catálogo no la cubre nadie) | O-catálogo (CERRADO en S106) | No | Nace en S111 al destaparlo la mutación M6. El javadoc de `asignatura-lista.spec` y hermanas afirma que el orden interno de `mensaje()` está «cubierto en el form, misma función»: es FALSO —hay dos funciones copiadas a propósito y no compartidas, así que el caso del formulario no puede cubrir a la de la lista—. En niveles se cerró añadiendo la clave `error` al cuerpo flusheado del caso del 409, sin caso nuevo; las cuatro entidades de O-catálogo siguen con el hueco y con el comentario falso. NO se paga: R-terminado, el objetivo está cerrado. Cuando se toque una de esas listas por otro motivo, es una línea de fixture |
 | D-doble-proyeccion-compartido (el doble de `getProyeccion` es un Subject compartido) | O-ajuste-cierre | No | Nace en S112. Es el ÚLTIMO doble compartido de `horario-view.spec.ts`: sus tres hermanos de escritura (`guardar`, `borrar`, `generar`) migraron a fresco por invocación en S94, y `bloqueos.listar` en S99. La forma compartida impide encadenar FALLO → RECARGA, porque un Subject cerrado por `.error()` redispara al re-suscribirse. Mordió en el caso (40), que arranca con la proyección en 404 —el escenario real de BD vacía—. Parcheado con re-stub LOCAL al caso, no homogeneizando el doble: migrarlo tocaría los 25 casos vigentes que lo consumen (R-terminado). Deja de ser aplazable con el segundo caso que necesite lo mismo. No se paga ahora |
@@ -574,9 +682,11 @@ asigna categoría, objetivo y disposición.
 | D-s8-muda (el resalte de una violación S8 no dice qué falta) | O-ajuste-cierre | Nace en S114, medida en navegador. La `descripcion` del `ViolacionDTO` llega al cliente con el texto exacto («Actividad MAT-1ESOA requiere tutor, pero ningún profesor suyo es TUTOR_PRINCIPAL…») y NO se pinta en ningún sitio: la rejilla solo dibuja un filete rojo de 2px (`horario-grid.css:122`), sin texto, tooltip ni lista. Medido: con la violación activa, el texto de la página no nombra `TUTORIA_SIN_TUTOR` ni la palabra «tutor». Es PEOR que un mensaje genérico por una razón propia de S8: como es la única regla cuyo origen es el CATÁLOGO y no la colocación, el resalte cae sobre celdas perfectamente colocadas y arrastrarlas NO lo quita nunca, así que el usuario intentará moverlas indefinidamente. Es superficie de la vista de horario (familia 8.6/H1), no de O-estructura: mismo criterio con que S113 dejó fuera D1-8 y D1-10. Familia de D-F8.6-ii-a. No se paga ahora |
 | D-diagnostico-no-es-foto (el diagnóstico de un horario recalcula contra el catálogo vivo) | O-ajuste-cierre | Nace en S114 al no poder medirse el paso 9 del M4 como estaba planteado. `DiagnosticoService` verifica contra el catálogo ACTUAL, y `verificarTutorias` no mira la solución (`VerificadorSolucion.java:56`), así que para S8 el diagnóstico responde «¿esto sería válido AHORA?» y no «¿lo era al generar?». Consecuencia medida: el horario #1, generado con la violación real, se presenta hoy impecable; y el #2, generado limpio, se pinta en rojo si alguien quita el tutor después. Afecta solo a S8 (las demás reglas sí leen la solución). No bloquea nada hoy y el registro histórico no existe como requisito en ningún criterio. Se decide al abrir la vista de diagnóstico, junto con D-s8-muda. No se paga ahora |
 | D-post-horario-sin-sesiones (el POST de generación devuelve la proyección sin sesiones) | O-ajuste-cierre | Nace en S114, medido en red. El horario se persiste bien (3 filas en `sesion`) y el `GET /{id}/proyeccion` las devuelve, pero el cuerpo del POST llega con `sesiones: []`. Inocuo HOY por una razón concreta y no por suerte: la UI recarga por `paramMap` y nunca lee el cuerpo del POST (decisión de S93, recargar por GET fresco). Muerde a cualquier cliente futuro que se fíe de la respuesta —incluido un e2e que quisiera asertar sobre ella—. No se paga ahora |
-| D-tutor-pdc-desincronizado (la herencia del tutor al PDC corre solo en el alta) | O-estructura (cerrado) | Nace en S114. `PdcService.heredarTutorPrincipal` se invoca únicamente desde el alta (`PdcService.java:110`): si después se cambia el tutor del padre con el PUT, el PDC conserva el antiguo en silencio. No es un bug del código actual —nadie prometió resincronización— pero C-tutores lo hace VISIBLE por primera vez: se verán dos grupos emparentados con tutores distintos y nada explicará por qué. No bloqueaba el criterio (el §6 no exige reasignar tutores) y por eso el objetivo cierra con ella viva. Arreglarla es decisión de dominio, no una guarda —¿copia o referencia?—, familia de D-pdc-vinculo-por-cadena; se evalúa si O-demo la hace morder con el centro real. No se paga ahora |
+| D-tutor-pdc-desincronizado (la herencia del tutor al PDC corre solo en el alta) | O-estructura (cerrado) | Nace en S114. `PdcService.heredarTutorPrincipal` se invoca únicamente desde el alta (`PdcService.java:110`): si después se cambia el tutor del padre con el PUT, el PDC conserva el antiguo en silencio. No es un bug del código actual —nadie prometió resincronización— pero C-tutores lo hace VISIBLE por primera vez: se verán dos grupos emparentados con tutores distintos y nada explicará por qué. No bloqueaba el criterio (el §6 no exige reasignar tutores) y por eso el objetivo cierra con ella viva. Arreglarla es decisión de dominio, no una guarda —¿copia o referencia?—, familia de D-pdc-vinculo-por-cadena. **MUERDE en O-demo, confirmado en S115:** el centro real tiene cinco PDC y el orden natural de carga (grupos → PDC → tutores) los dejaría a todos sin tutor, porque `heredarTutorPrincipal` corre solo en el alta y nada resincroniza después. CONTENIDA sin pagarla, invirtiendo el orden de carga —los tutores de los padres se asignan antes de crear sus PDC— o asignando el tutor a cada PDC por el sub-recurso, que acepta cualquier grupo. La deuda sigue viva: el arreglo real es decidir copia o referencia. No se paga ahora |
 | D-dialogo-foco-perdido (al salir del estado «cargando» el foco cae fuera del diálogo) | O-diseño | Nace en S114, medida en los tres diálogos. El CDK enfoca el botón de la rama `cargando`; cuando el `@switch` cambia de rama ese elemento se destruye y el foco cae a `<body>`, fuera del diálogo. `GrupoForm` (sin estados) conserva el foco dentro; `PdcDialogo` y `TutoriaDialogo` no. NO la introduce C-tutores: `PdcDialogo` hace lo mismo desde S113. Para teclado y lector de pantalla el diálogo queda abierto sin foco dentro. Arrastra una consecuencia de andamio: la barrera `:focus` con que `centro-minimo.spec.ts` evita la carrera del portal no sirve en diálogos con estados, así que si algún e2e futuro abre uno de estos dos habrá que sustituirla por una espera al contenido. Es acabado de interacción, transversal a las vistas: cuelga de O-diseño. No se paga ahora |
 | D-bundle-presupuesto (el bundle inicial excede el techo declarado) | O-diseño | Preexistente desde antes de S112 (507,66 kB frente a 500 kB en `angular.json`, verificado sobre HEAD limpio); S113 lo lleva a 514,42 kB al entrar `PdcDialogo` en el grafo de dependencias. NO se toca `angular.json`: subir el techo es configuración de build, no está en el criterio de ningún objetivo vivo, y hacerlo «de paso» convierte un aviso útil en un número que nadie vuelve a mirar. Cuelga de O-diseño, que tendrá delante el bundle completo y las vistas congeladas y podrá elegir entre subir el techo, rutas perezosas o recortar. Hasta entonces, anotar el delta en cada sesión que compile |
+| D-gh6-tutor-contradictorio (el modelo se contradice sobre de qué grupo es tutor GH6) | O-demo | No | Nace en S115 al derivar las tutorías del centro real. `modelo_datos_fase1.md` §6.1 registra `ProfesorTutoria(GH6, 1ºESO A)` y el Hallazgo E del mismo documento dice que GH6 es tutor de 1º Bach A; las dos derivaciones son correctas contra los volcados (GH6 imparte tutoría en ambos grupos) y la contradicción es del TEXTO del modelo, no de los datos. No viola I4, que acota los principales por grupo y no los grupos por profesor. Claude Code hizo bien en no resolverla: fijar uno de los dos por criterio propio sería inventar un dato del centro. Se cierra con la respuesta del jefe de estudios sobre los tutores reales, en la misma consulta que la ambigüedad A5 de `ESPECIFICACION-CATALOGO.md`. Hermana de D31: deuda de REQUISITOS |
+| D-configuracion-monolitica (la pantalla de configuración es un solo scroll con ocho listas) | O-diseño, o el Cambio que decida la navegación | No | Nace en S115 del recorrido de la UI contra el tamaño del centro real: 59 profesores, 100 asignaturas, 43 aulas, 334 subgrupos y 219 actividades en un único componente, sin pestañas, sin filtro y sin búsqueda. ACOTADA en la misma sesión y por eso NO abre Cambio: la carga es append-only, así que localizar filas solo duele al corregir; y el riesgo grave que se le atribuyó al proponerla —el clic sin Ctrl del `<select multiple>` de subgrupos, que reemplaza la población entera— es INALCANZABLE con estos datos, porque los 334 subgrupos derivados son todos mono-grupo. Se resuelve donde ya espera D-pdc-lista-rancia: en el Cambio que decida ruta-hija-vs-contenedor, aplazado desde S101. No se paga ahora |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
@@ -610,7 +720,7 @@ D-F8.6-ivD-b (S99), D-F8.4-B2-a (S94), D-F8.5-D1-a (S77), D-F8.5-D2b1-a/b (S91),
 D-F8.5-A-a (S73/S74), D-F8.6-iiiA-a (S85), y las condensadas en la sección de
 deuda cerrada del plan. Se conservan como registro con remisión a la bitácora.
 
-**Resultado agregado:** de las ~47 deudas vivas (S113 añade siete), tras
+**Resultado agregado:** de las ~54 deudas vivas (S113 añade siete, S114 cinco y S115 dos), tras
 reclasificar, **1 es bloqueante ahora** (D-F8.6-ii-b, y solo al abrir
 O-ajuste-cierre), ~11 son deuda técnica real que se paga DENTRO de su objetivo
 cuando llegue, y el resto (~35) sale de la cola de trabajo activo como mejora
@@ -619,7 +729,7 @@ que me obligan a abrir sesión" sigue en ~1. Nota sobre la tendencia, visible
 desde S109: la cola CRECE sesión a sesión y eso no es alarma por sí solo —el
 crecimiento es casi todo de mejora futura y de deuda registrada al medir, no de
 deuda técnica real acumulándose sin pagarse—; la métrica que sí hay que vigilar
-es "deuda bloqueante abierta" (§7), que lleva en 1 desde que existe el mapa.
+es "deuda bloqueante abierta" (§7), que lleva en 1 desde que existe el mapa. Confirmado en S115: de las dos deudas que podían morder por primera vez en O-demo, una BAJA de presión (D-horario-irreversible, por la carga repetible) y la otra se CONTIENE con el orden de carga (D-tutor-pdc-desincronizado); ninguna abre sesión.
 
 **[LAGUNA]** Este documento asigna categoría, objetivo y disposición a cada
 deuda. NO reescribe el texto íntegro de cada una: ese vive en
@@ -637,10 +747,17 @@ producto: construyó toda la maquinaria de AJUSTAR (H1) antes de tocar la de CRE
 (H2), cuando crear es el prerequisito de valor. Resultado medido: ~43 sesiones en
 Fase 8, H1 al 90%, H2 al 0%.
 
-**Orden nuevo: O-shell → O-catálogo → O-estructura → O-demo (todo H2), luego
-O-ajuste-cierre (H1), luego O-diseño (acabado visual, con las vistas ya
-congeladas), luego H3, luego H4.** (O-diseño puede adelantarse si una demo a
-cliente/IES lo exige antes de cerrar H2; ver su salvedad de prioridad en §3.)
+**Orden nuevo: O-shell → O-catálogo → O-estructura → O-demo → O-particiones (todo H2),
+luego O-ajuste-cierre (H1), luego O-diseño (acabado visual, con las vistas ya
+congeladas), luego H3, luego H4.**
+
+**REVISADO en S115**, con dos cambios que no alteran el argumento de fondo. (1) Nace
+O-particiones: el criterio 6 de Fase 8 se midió y no tenía constructor, así que H2 cierra
+con dos objetivos por delante y no con uno. (2) La salvedad de prioridad de O-diseño se
+ACTIVA (hay demo al centro), y su dependencia se estrecha de «H2 cerrado» a «O-demo»,
+porque la razón original —O-estructura reorganiza Configuración entera— se consumió al
+cerrar O-estructura en S114. Orden operativo hacia la demo: **O-demo → O-diseño → demo →
+O-particiones → cierre de H2.**
 
 - **Qué desbloquea:** O-shell desbloquea todo lo demás (formularios y vista
   necesitan carcasa). Hacer H2 primero hace que H1 y H3 operen sobre datos reales
