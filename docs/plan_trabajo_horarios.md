@@ -624,7 +624,128 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 114 — O-estructura (H2): C-tutores. Asignación del tutor del grupo por UI sobre el sub-recurso que existía desde S77 (Config/UI, M3 real). OCTAVA pieza. **CIERRA O-estructura.**
+### Sesión 115 — O-demo (H2): C-derivación. Descomposición del objetivo y derivación del catálogo del IES real desde los volcados (M0 + M2, entregable documental). ABRE O-demo; NO lo cierra.
+  Decimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo SIN ENCAJE EXACTO en los cuatro de
+  `metodo.md`, y se dice en vez de forzar la etiqueta: ritual M0 + M2 completo + M1, sin M3 ni M4, porque
+  no hay código que mutar ni contrato de UI que contrastar. Ningún fichero de `app/` ni de `solver/` se
+  toca en toda la sesión; las cuatro suites quedan intactas. Lo que ENTREGA: O-demo pasa de ficha sin
+  descomponer a objetivo con Cambios nombrados y con el catálogo del centro real derivado, medido y
+  escrito, y de paso el argumento estructural con que cerró O-estructura recibe su primera prueba
+  externa.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), único objetivo entre H2
+  y su cierre desde S114. Hito = H2. Cambio = C-derivación, y AQUÍ EL M0 TUVO QUE CREARLO: la ficha de
+  O-demo no tenía «Cambios que agrupa», así que el Cambio no podía leerse de la documentación y
+  descomponer el objetivo era trabajo de la apertura, como el M0 de S107 con O-estructura. R-invalidación
+  sin conflicto. R-deuda: ninguna deuda abre la sesión; D-horario-irreversible y D-tutor-pdc-desincronizado
+  se nombran como candidatas a morder por primera vez y se miden, no se presuponen.
+  TRES DECISIONES DE ALCANCE, tomadas por el arquitecto con las consecuencias delante. (1) IES COMPLETO y
+  no rebanada representativa, porque hay demo al centro en el horizonte; con ello la salvedad de prioridad
+  de O-diseño queda ACTIVADA (ver §3 de `gestion_proyecto.md`). (2) El CRITERIO 6 de Fase 8 SALE de
+  O-demo a objetivo propio —O-particiones— después de que el M2 midiera su tamaño; el motivo está en su
+  ficha y no es de comodidad: exige materializar `Particion`, aplazada por decisión explícita (D-a, S48).
+  (3) La carga de datos entra por la API REST y NO por SQL contra la base. La opción de script contra la
+  BD la propuso el arquitecto y se descartó con argumento: las invariantes I1–I7 viven ENTERAS en la capa
+  de aplicación y el esquema no las replica (D-F8.2b-iv-a), así que un INSERT no comprueba I2, I7, I5 ni
+  el XOR del aula; con 219 actividades derivadas por inferencia, los errores no aparecerían al insertar
+  sino como INFEASIBLE opaco o —peor— como horario válido y equivocado. Precedente escrito:
+  `SeedCatalogoRunner`, el intento anterior de poblar por debajo de la aplicación, que D-seed-demo declara
+  muerto. Por la API cada invariante se comprueba una a una y el error llega identificado y en el momento.
+  M2 — MEDICIÓN EN DOS PASADAS (Claude Code sobre el repo real; informes consumidos aquí, sin fichero
+  suelto commiteado en la primera). PRIMERA PASADA, con seis premisas declaradas: cinco confirmadas y una
+  DESMENTIDA. P1 (el `3º ESO PDC` de los volcados es el PDC de 3ºC) CONFIRMADA por tres vías
+  independientes: cruce 31/31 exacto contra `3ºCDi`, correspondencia forzosa 5-a-5 entre códigos `*Di` y
+  páginas `* PDC`, 9 celdas idénticas con 3ºC y 0 con A y B, y aula secundaria B03 = aula base de 3ºC. La
+  duda que el INFORME-RECONCILIACION dejaba abierta como «correspondencia incierta» queda cerrada por
+  medición y no hay que preguntarla al centro. P3, P4, P5 y P6 confirmadas (ver abajo). P2 DESMENTIDA: la
+  dicotomía «co-docencia u optativa» no cubre 81 de los 208 slots múltiples —hay 12 slots con misma
+  asignatura, profesores distintos y DOS AULAS FÍSICAS distintas, que son desdoble y no co-docencia, y 69
+  slots mixtos con asignaturas distintas y a la vez una asignatura repetida en varias vías—.
+  CORRECCIÓN DEL ARQUITECTO A LA PRIMERA PASADA, y es lo que salvó la derivación: la unidad de carga que
+  usó Claude Code —agrupar por `(asignatura, profesor, conjunto de grupos)`, 308 «actividades»— mide
+  CLASES, y la unidad del modelo es la ACTIVIDAD. Lo impone S9 (§5.2 del modelo): dos sesiones del mismo
+  tramo no pueden tocar el mismo grupo, así que las K vías simultáneas de un bloque tienen que ser UNA
+  actividad con K plazas; como K actividades, S9 les prohibiría coincidir en tramo y la demanda semanal
+  del grupo se dispararía muy por encima de sus 30 slots, infactible por construcción. Y el «cuarto patrón
+  desconocido» de los 69 slots mixtos NO era desconocido: es literalmente el caso §6.1 de
+  `modelo_datos_fase1.md`, escrito con estos mismos datos (bloque CyR/OyD/RefMt, seis plazas, subgrupos
+  `1ºA-CyR-Tec`, `1ºA-RefMt-MAT6`…). La segunda pasada se guionizó con §5 y §6.1 como referencia normativa
+  obligatoria y con once reglas de derivación explícitas, entre ellas la de tres cláusulas que separa
+  desdoble de co-docencia por el AULA y no por la asignatura (aulas distintas y no nulas ⇒ desdoble; una
+  nombrada y otra nula con celda hermana ⇒ co-docencia; nula sin hermana ⇒ aula DESCONOCIDA, los 49 casos
+  de FPB).
+  ENTREGABLES de la segunda pasada, dos ficheros nuevos y dos commits, nada existente tocado:
+  `docs/horario-referencia/ESPECIFICACION-CATALOGO.md` (el centro en orden de tecleo, con las ambigüedades
+  numeradas) y `docs/horario-referencia/catalogo-derivado.json` (los mismos datos legibles por máquina).
+  LAS CIFRAS DEL CENTRO REAL, que son las que dimensionan el resto de O-demo: 815 envíos de formulario en
+  total —jornada 1, niveles 8, asignaturas 100, profesores 59, aulas 43, grupos 23, PDC 5, tutores 28,
+  subgrupos 329 y actividades 219—, de los que subgrupos y actividades son 548, el 67 %. 334 subgrupos
+  (28 `{grupo}-Completo` + 306 parciales), de los que 329 se teclean porque el alta de cada PDC crea el
+  suyo sola. 219 actividades con 316 plazas, que describen 632 sesiones semanales y CUBREN LOS 840 SLOTS
+  del horario real (28 grupos × 30 tramos) sin huecos ni solapes, con S9 verificada. 38 actividades con
+  `asignatura = NULL`, 59 multi-grupo, 4 plazas de co-docencia y 37 plazas con aulas candidatas.
+  VERIFICACIÓN CONTRA §6.1, y es el resultado que más vale de la sesión: coincidencia estructural
+  COMPLETA, sin ninguna divergencia. El bloque CyR/OyD/RefMt sale como una actividad de 6 plazas, rep=2,
+  24 subgrupos, con los seis conjuntos de aulas candidatas idénticos a los escritos en el modelo; el
+  bloque Fr2/ALCT sale como cuatro actividades independientes con los profesores, aulas y tramos no
+  coincidentes de §6.1 y del Hallazgo K, es decir el criterio de derivación REPRODUCE el hallazgo sin
+  ayuda; y 1º ESO A da 30 sesiones/semana, igual que el modelo. Las dos únicas diferencias son
+  ortográficas o de preferencia blanda.
+  EL CASO «INEXPRESABLE» NO LO ERA, y el arquitecto lo corrigió en sesión. `ActividadService.validarXor`
+  rechaza con 400 toda plaza sin aula fija ni candidatas, y las 11 plazas de FPB derivadas no se pueden
+  teclear; pero eso no es hueco funcional de H2: la plaza sin aula es configuración inválida por diseño y
+  el dato falta en la FUENTE (el horario por aulas no cubre los talleres de FPB, ya registrado en
+  INFORME-RECONCILIACION §1). No se toca `validarXor` ni el formulario; se pregunta al centro. TODO LO
+  DEMÁS CABE, comprobado uno a uno contra la UI existente: asignatura NULL, plaza con dos profesores,
+  actividad de 6 plazas, plaza con subgrupos de seis grupos, `duracionTramos > 1`, PDC con padre y recreo
+  no lectivo. Con esto, el argumento estructural con que O-estructura cerró en S114 —«cada pieza que los
+  casos del §6 necesitan está demostrada como expresable»— pasa su examen contra el centro real, que era
+  el juez natural que la propia ficha de O-demo le señalaba.
+  RECLASIFICACIÓN de la ambigüedad A1 del informe («la población real de los 306 subgrupos parciales no es
+  derivable»): NO es ambigüedad, es la limitación conocida que D31 registra desde S63 —el dominio modela
+  SUBGRUPOS, no ALUMNOS, y que un subgrupo sea partición real disjunta y exhaustiva no lo verifica ningún
+  componente, por diseño—. Los volcados no pueden decir qué alumno va a qué vía y el modelo no lo pide. Lo
+  que sí importa es que la estructura cuadre, y cuadra: 632 sesiones cubren 840 slots sin huecos ni
+  solapes. Sale de la lista de preguntas al centro.
+  RETIRADA DEL CAMINO CRÍTICO de un Cambio que el propio arquitecto había propuesto en esta sesión:
+  C-configuracion-navegable. El argumento con que lo propuso —el clic sin Ctrl en el `<select multiple>`
+  de subgrupos borra la población entera y el PUT lo acepta— exige un subgrupo MULTI-GRUPO que editar, y
+  la derivación mide que los 334 subgrupos son TODOS mono-grupo. El riesgo no existe con estos datos.
+  Queda la fricción de una página con ocho listas y sin búsqueda, pero la carga es append-only y localizar
+  filas solo duele al corregir: pasa a mejora futura (D-configuracion-monolitica), no a camino crítico.
+  Es el segundo autoengaño que la medición desmonta en esta sesión.
+  DEUDA — nace UNA y ninguna abre sesión: D-gh6-tutor-contradictorio (documental: §6.1 del modelo dice que
+  GH6 es tutor de 1ºESO A y el Hallazgo E dice que lo es de 1º Bach A; las dos derivaciones son correctas
+  contra el volcado y la contradicción es del modelo, no de los datos). Nace también, del hallazgo (f) de
+  la primera pasada, D-configuracion-monolitica (mejora futura). Dos deudas vivas cambian de presión sin
+  cerrarse: D-horario-irreversible BAJA de prioridad —con la carga por API la base se rehace en minutos,
+  así que la congelación de actividades deja de ser callejón sin salida y C-borrado-horario sale del
+  camino crítico— y D-F8.6-ii-a NO muerde al cargador, porque el motivo del rechazo viaja como reason
+  phrase y un cliente HTTP lo lee aunque el navegador no.
+  NOTA DE ALCANCE QUE QUEDA ESCRITA, no en la memoria de nadie: con la carga por API, el criterio 5 de
+  Fase 8 —«configurar un centro desde cero POR LA INTERFAZ»— no queda demostrado a escala real. El e2e de
+  S112 lo demuestra sobre el centro mínimo, y la propuesta abierta para cerrarlo a escala es teclear 1º ESO
+  completo a mano (cuatro grupos, ~80–100 envíos, contiene el bloque de seis plazas del §6.1 y la
+  co-docencia de LCL, es decir lo más difícil del centro). PENDIENTE de decisión del arquitecto al abrir
+  la siguiente sesión.
+  LO QUE HAY QUE PREGUNTAR AL CENTRO antes de la carga completa, y es la primera vez que D31 tiene
+  preguntas concretas en vez de dudas genéricas: (1) las aulas reales de las 11 plazas de FPB —lo único
+  que BLOQUEA—; (2) los tutores reales, porque la heurística «tutor = quien imparte TUT» saca a FIL2 como
+  principal de cinco grupos, cosa que no viola I4 (que acota principales por grupo, no grupos por profesor)
+  pero es implausible: lo probable es que imparta la tutoría lectiva de grupos de los que no es tutor; y
+  (3) los itinerarios de 4º ESO, 1º Bach y 2º Bach, que deciden si un subgrupo se reutiliza entre bloques
+  (I6) y que son exactamente D31 (b), (c) y (d), vivas desde S28/S32/S36.
+  LIMPIEZA (M1-bis): archivada S113 a `bitacora-sesiones.md` (promovida a `### Sesión 113`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S114 a «Última sesión registrada (previa)»
+  compacta; S115 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S113),
+  la crónica de archivado y la frase de ventana del plan. R4/costura: script oficial sigue sin existir en
+  el repo (mejora de método pendiente desde S101); verificado a mano que los dos commits de esta sesión
+  son de documentación y que ningún fichero de código entró en el árbol.
+  O-demo (H2) ACTIVO desde esta sesión, 1 pieza (C-derivación). Suites INTACTAS, ningún módulo tocado: app
+  268, solver 91, vitest 310, e2e 2. Siguiente: C-cargador, el script que lee `catalogo-derivado.json` y
+  puebla el centro por la API REST, condicionado a que el centro responda las aulas de FPB; y la decisión
+  pendiente sobre 1º ESO a mano. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 114 — O-estructura (H2): C-tutores. Asignación del tutor del grupo por UI sobre el sub-recurso que existía desde S77 (Config/UI, M3 real). OCTAVA pieza. **CIERRA O-estructura.**
   Decimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (la conservación de
   los co-tutores al guardar y la derivación de estados por longitud son lógica, no binding), UN SOLO MÓDULO
   (frontend; el backend no se toca en toda la sesión), sin e2e nuevo. OCTAVA pieza de O-estructura y CIERRE del
@@ -747,233 +868,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   e2e S112, PDC S113, tutores S114). Desbloquea O-demo, ÚNICO objetivo entre H2 y su cierre. Suites: app 268,
   solver 91, vitest 310, e2e 2. Siguiente: abrir O-demo (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 113 — O-estructura (H2): C-pdc. Alta/consulta/borrado del grupo PDC por UI desde su padre (Config/UI, M3 real) + dos guardas de backend que impiden que el CRUD plano deshaga el agregado (Desarrollo). SÉPTIMA pieza. NO cierra el objetivo.
-  Decimotercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo MIXTO: Desarrollo con M3 real (las dos guardas
-  de backend, campaña de 4 mutaciones) + Configuración/UI con M3 real (los tres estados del diálogo, gobernados
-  por la respuesta del servidor y no por `DIALOG_DATA`, campaña de 3 mutaciones + 3 en el cableado). SÉPTIMA
-  pieza de O-estructura. Lo que ENTREGA, y es lo que importa del Cambio: el caso §6.2 del modelo —en su versión
-  válida, la Nota (Sesión 23)— se construye ÍNTEGRAMENTE por pantalla y el solver produce horario sobre él.
-  Con eso la SEGUNDA PATA del criterio queda demostrada en su caso más difícil. O-estructura sigue ACTIVO:
-  falta cerrar tutores, cuya exigencia por el criterio NO está medida (ver M0).
-  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-estructura (H2), ACTIVO desde S107 con 6
-  piezas hechas. Hito = H2. Cambio = C-pdc, que es el «editor de PDC (D7)» de la lista de Cambios que agrupa el
-  objetivo. R-invalidación sin conflicto (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda:
-  ninguna deuda abre la sesión; las cuatro nacidas en S112 y D-F8.6-ii-a siguen sin bloquear el criterio.
-  DECISIÓN DE ORDEN, contra el empate aparente de los dos candidatos: PDC no compite con tutores. §3 dice
-  literalmente que las dos patas vivas dependen de PDC; tutores aparece en el PROPÓSITO del objetivo y en sus
-  «Cambios que agrupa», pero NO en el criterio de terminado, así que por R-terminado no puede decidir el orden.
-  Tutores tendrá su propio M0 y su propio M2. DOS AVISOS levantados en el M0 y ambos resueltos por la medición:
-  (1) la ficha de S69 anunciaba MOCKUP PREVIO para la creación del PDC «por depender de cómo se gesticula» —
-  VERIFICADO que ya no aplica: S76 dibujó ese mockup y cerró sus decisiones gestuales (D1-7 ruta única desde el
-  padre, D1-9 sección y no pestaña, D1-8 marcado de celda), y su propia cabecera dice «el mockup NO se versiona;
-  sobreviven sus decisiones»—; (2) la lista blanca de `GrupoService` bloquea DOS tipos, no uno, así que se
-  levantó la duda de si la pata 2 exige además crear grupos `VIRTUAL_OPTATIVA`.
-  ALCANCE FIJADO EN M0, con dos recortes explícitos. DENTRO: alta, consulta y borrado del PDC por UI desde su
-  grupo padre, hasta reproducir el §6.2 por formulario en su versión VÁLIDA —la Nota (Sesión 23), no el cuerpo
-  de la sección, marcado como superado: UN solo grupo Di con padre, subgrupo con `grupos={PDC}`, compartidas
-  que se quedan en el ordinario—. FUERA por R-terminado: el marcado de celda heredada (D1-8), el resumen «N
-  propias · M heredadas» (D1-10) y la derivación de sesiones compartidas en cliente (D1-1), las tres VISTA DE
-  HORARIO (familia 8.6/H1) y no criterio de O-estructura. FUERA por R-e2e: ningún e2e nuevo; la suite de
-  navegador se queda en 2.
-  M2 — MEDICIÓN (Claude Code sobre el repo REAL, cinco investigaciones encadenadas antes de teclear, con las
-  cinco premisas de partida declaradas para que la medición las confirmara o las desmintiera; informe consumido
-  aquí, sin fichero suelto commiteado). Dos premisas desmentidas, y una de ellas CAMBIÓ el tipo de sesión.
-  (P4) CONFIRMADA y RECORTA el alcance: ningún caso del §6 exige `VIRTUAL_OPTATIVA`. Tres medidas
-  independientes coinciden —la cadena no aparece ni una vez en todo el §6 del modelo; los 44 fixtures del
-  solver declaran 0 grupos de ese tipo; y estructuralmente no podrían, porque `solver.domain.TipoGrupo` no
-  tiene la constante y `CatalogoMapper` lanza si se la encuentra—. Los casos que uno esperaría que la
-  necesitaran (§6.3, §6.4) están modelados con subgrupos multi-grupo, no con grupos virtuales. La constante
-  del enum de `app` está hoy SIN NINGÚN CONSUMIDOR. Consecuencia: la pata 2 no necesita ese formulario.
-  (P2) CONFIRMADA sin matices: no hay ninguna vista de detalle de entidad de catálogo donde alojar la «sección
-  en la ficha del padre» que decidió D1-9. `app.routes.ts` tiene tres rutas planas sin `children`, las ocho
-  secciones de `Configuracion` son lista + diálogo, y la única ruta con id es `horario/:id`.
-  (P1) DESMENTIDA EN PARTE: el sub-recurso está bien construido —alta/consulta/borrado transaccionales, con las
-  cinco validaciones en un solo sitio, el subgrupo mono-Di con población `{PDC}` por la regla S23, la herencia
-  del TUTOR_PRINCIPAL del padre, cascada explícita en el borrado y 11 tests de endpoint—, pero (a) NO EXISTE
-  EDICIÓN (`PdcController` no tiene PUT ni PATCH: un PDC no se renombra, se borra y se recrea) y (b) el vínculo
-  PDC↔subgrupo mono-Di es una CONVENCIÓN DE CADENA, no una referencia: `PdcService.borrar` localiza el subgrupo
-  por `pdc.getCodigo() + "-Completo"`.
-  (P3) DESMENTIDA, con matiz que sí importa: ya hay dos llamadas vivas a sub-recursos anidados
-  (`/api/horarios/{id}/proyeccion` y `/{id}/diagnostico`), así que el molde de cliente EXISTE y se copia. Lo que
-  PDC estrena es otra cosa: es el primer sub-recurso de CATÁLOGO, el primero con ESCRITURA y el primero cuyo id
-  sale de una fila elegida en una lista. Los dos sub-recursos de catálogo con backend (`/{id}/tutoria`,
-  `/{id}/aulas-compatibles`) siguen sin cablear y declarados fuera de alcance en el propio código.
-  (P5) DESMENTIDA, y es el hallazgo que decidió la sesión. Construible sí es —ningún selector filtra: el
-  subgrupo del PDC aparece en el multiselect de plaza, el grupo PDC aparece en el de `subgrupo-form`—, pero el
-  PDC creado conviviría con DOS listas de catálogo que no saben que existe y que pueden deshacerlo por CUATRO
-  caminos, todos con los botones que la pantalla ya ofrece: (1) la fila del PDC en la lista de grupos trae
-  «Editar», y basta abrir el diálogo y pulsar Guardar sin tocar nada para degradarlo a ORDINARIO —el formulario
-  inyecta `tipo:'ORDINARIO'` fijo, `validarTipo` solo mira el tipo del REQUEST y `entidad.actualizar` conserva
-  `grupoPadre`—, quedando un grupo ordinario con padre, invisible para el sub-recurso; (2) renombrar el
-  subgrupo mono-Di deja el DELETE del PDC en 404 PERMANENTE (convención de cadena); (3) borrarlo deja el PDC
-  huérfano y, de rebote, borrable por el CRUD plano porque `contarSubgrupos` cae a 0; (4) añadir el grupo padre
-  a la población del mono-Di es ACEPTADO por el backend y produce el INFEASIBLE que la regla S23 existe para
-  evitar (52 h en 30 tramos) — y es el peor de los cuatro porque no rompe nada visible: el catálogo queda
-  coherente y lo único que pasa es que el solve deja de tener solución, sin una sola pista. HALLAZGO MENOR
-  derivado de (1), medido: con el hijo degradado, la guarda «un PDC por padre» deja de verlo, se puede crear un
-  segundo hijo, y entonces `findByGrupoPadre_Id` (que devuelve `Optional`) revienta con 500 en vez de 400.
-  DECISIÓN DE ALCANCE tras el M2, la única de peso de la sesión: las dos guardas ENTRAN, y NO se registran como
-  deuda. Razón: R-deuda protege lo que ya existía, y los cuatro caminos son HOY INALCANZABLES por UI —sin PDC
-  creado por pantalla no hay fila de PDC en la lista de grupos ni subgrupo mono-Di en la de subgrupos—. Los
-  abre este Cambio, luego los tapa este Cambio. Sede: BACKEND, no cliente, siguiendo la decisión de S109 (una
-  regla que el contrato no tiene diverge y engaña). El tipo de sesión pasó de Configuración/UI a MIXTO por esto.
-  FASE 0 — LAS DOS GUARDAS. **G1** (`GrupoService.editar`): rechaza con 400 si LA ENTIDAD EXISTENTE no es
-  ORDINARIO, comprobación sobre la entidad cargada y no sobre el request, que es justo la dimensión que
-  `validarTipo` no cubría. **G2** (`SubgrupoService`, helper `esMonoDiDePdc` invocado desde `editar` y desde
-  `borrar`): un subgrupo cuya población es EXACTAMENTE UN grupo `DIVERSIFICACION_PDC` pertenece al agregado PDC
-  y no se toca por el CRUD plano. El «exactamente uno» NO es detalle de implementación y se corrigió en
-  sesión: la primera formulación del arquitecto era «población que INCLUYA un grupo PDC», y habría roto el
-  ámbito compartido de 4ºESO que S29 modeló como un subgrupo con los DOS Di dentro, caso legítimo del §6 que el
-  criterio exige poder construir. Código 400 y NO 409: 409 está reservado en todo el proyecto a
-  `ReferenciaEntranteException`, y esto es validación de entrada (misma corrección que S76 aplicó a «un PDC por
-  padre»). DESVIACIÓN NECESARIA detectada por Claude Code y no dictada: el DELETE de `SubgrupoController` solo
-  traducía `NoSuchElementException` y `ReferenciaEntranteException`, así que G2 en borrado se escapaba como 500;
-  se añadió el `catch (IllegalArgumentException)` del patrón del PUT, antes del de referencia entrante (que
-  extiende `RuntimeException`, no `IllegalArgumentException`, así que el orden no captura de más). NO se tocó
-  `GrupoService.borrar`: su 409 «por accidente afortunado» deja de serlo con G2 puesta, porque el mono-Di ya no
-  se puede borrar y el conteo nunca cae a 0; lo único defectuoso es el TEXTO del 409, cosmético → deuda.
-  M3 DE BACKEND — 4 mutaciones, una por dimensión, todas cazadas y ninguna arrastrando tests ajenos: quitar G1
-  cae (1) y (2) y nada más; quitar G2 de `editar` cae solo (4); quitarla de `borrar` cae solo (5); y relajar el
-  predicado a «contiene algún PDC» cae SOLO el caso del ámbito compartido, que es exactamente su cometido. Dos
-  decisiones de los tests que cambian lo que miden: (1) manda `tipo:"ORDINARIO"` en el cuerpo, que es lo que
-  manda la UI —un test que enviara `DIVERSIFICACION_PDC` seguiría verde con G1 quitada, lo pararía la lista
-  blanca de siempre y no discriminaría nada—; y (3) edita también EL PADRE de un PDC, mejora sobre lo dictado
-  (se pidió «un ordinario suelto»): es ahí donde se pone roja una G1 mal formulada sobre la RELACIÓN
-  («tiene hijos») en vez de sobre el TIPO, que bloquearía renombrar 3ºA tras darle su Di, justo lo que §6.2
-  pide poder hacer. Suite app 261 → 268. Commits `d32c14b` (producción) y `8e9e64a` (tests).
-  FASE 1 — MODELO Y SERVICIO. Se DESCARTA `pdc.model.ts`, anunciado en el plan de fases y corregido antes de
-  teclear: el sub-recurso devuelve `GrupoDTO`, luego su tipo de cliente es `Grupo`, que ya existe; un fichero
-  aparte obligaría a duplicarlo o reexportarlo. `PdcRequest` (un solo campo, `codigo`) vive en `grupo.model.ts`.
-  `pdc.service.ts` SÍ es propio, y no por simetría: el precedente exacto son `horario.service` y
-  `diagnostico.service`, dos servicios separados para dos sub-recursos de `/api/horarios`. Tres wrappers
-  pelados. DECISIÓN: el servicio NO traduce el 404 de `obtener` —es un ESTADO legítimo («este padre no tiene
-  PDC»), pero traducirlo aquí sacaría la lógica del componente que la va a probar—; escrita en el javadoc con
-  su motivo y congelada por el caso (2). AMBIGÜEDAD ASUMIDA A CONCIENCIA: el backend devuelve 404 tanto para
-  «no tiene PDC» como para «el padre no existe», indistinguibles desde el cliente; con el padre recién listado
-  en pantalla el segundo caso exige que lo borren en otra pestaña, y no se inventa una distinción que el
-  contrato no da. Suite vitest 271 → 275. Commits `a3083b3` y `c5f91b9`.
-  FASE 2 — EL DIÁLOGO, donde está el M3 de la parte de UI. `pdc-dialogo` recibe como `DIALOG_DATA` el GRUPO
-  PADRE y deriva su estado de la RESPUESTA DEL SERVIDOR, que es lo que lo saca del molde de form de catálogo:
-  el molde tiene dos ramas gobernadas por el dato de entrada (alta si `null`, edición si viene entidad) y aquí
-  la segunda rama no es un formulario sino una ficha con un botón de borrar, porque el backend no tiene
-  edición. Se reutiliza todo lo demás (diálogo CDK, `ConfirmarBorrado`, signals `protected`, `mensaje()`
-  propio, cierre con `true`). TRES ESTADOS Y NO DOS: además de `sin-pdc` (404) y `con-pdc` (200) está
-  `cargando`, y es estado INICIAL a propósito —con la app zoneless y una petición en vuelo, pintar el alta
-  mientras el GET viaja enseña «este grupo no tiene PDC» a un grupo que sí lo tiene: un parpadeo que miente—.
-  Cuarto estado `error` para cualquier status que no sea 404, que NO ofrece el formulario de alta (no se sabe
-  si hay PDC, y ofrecerlo llevaría a un 400 confuso). Modelado con un tipo unión `EstadoPdc` y UN signal, no
-  con booleanos: cuatro booleanos independientes admiten 16 combinaciones de las que 12 son imposibles, y el
-  spec tendría que enumerar las que no deben darse en vez de afirmar una igualdad; la plantilla usa `@switch`,
-  así que las ramas son excluyentes por construcción y no por disciplina. DECISIÓN sobre el aviso de borrado:
-  NO nombra `{codigo}-Completo`. Ese sufijo es una derivación del backend (`PdcService.SUFIJO_SUBGRUPO`) y
-  reproducirlo en la UI sería una segunda fuente de verdad que se desincroniza sola; el texto dice qué se
-  borra sin escribir la convención. M3 — 3 mutaciones, las tres cazadas: estado inicial `sin-pdc` cae (2);
-  discriminar por `err` en vez de `err.status === 404` cae (5); cerrar con `true` cuando el alta falla cae (7).
-  DESVIACIÓN DE MOLDE JUSTIFICADA: el spec dobla `PdcService` con `vi.fn()` en vez de usar
-  `HttpTestingController` como `grupo-form.spec`, porque el escenario de (2) exige un observable PENDIENTE
-  (`Subject` que nunca emite) y con un `flush` no se puede montar «la petición aún no ha respondido». Suite
-  vitest 275 → 284. Commits `dff0283` y `4a7a87b`.
-  FASE 3 — CABLEADO. Vuelve la columna `Tipo` a la lista de grupos (pintada legible: «Ordinario» / «PDC», con
-  el valor crudo si llega uno desconocido) y entra la tercera acción por fila. DECISIÓN sobre el punto de
-  entrada, tomada en M2 y ejecutada aquí: acción por fila que abre un diálogo, NO ruta hija. Una ruta
-  `/grupos/:id` obligaría a resolver aquí la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio propio
-  —y a fijarla con un solo ejemplo delante, exactamente lo que aquella sesión se negó a hacer—. La acción por
-  fila es el molde canónico sin estirar y cumple D1-7 y D1-9 en su intención (entrada única colgada del padre,
-  sin ocupar sitio permanente en los 23 de 28 grupos sin PDC): la «ficha» de S76 era el envase que el mockup
-  tenía a mano, no el requisito. Las filas de PDC no ofrecen NINGUNA de las tres acciones, porque las tres
-  fallarían (Editar → 400 de G1; Borrar → 409 del mono-Di; PDC → 400, el sub-recurso exige padre ORDINARIO) y
-  no se pierde capacidad: no hay edición en backend y el borrado vive en el diálogo del padre. Tipo desconocido
-  → sin acciones, el lado seguro. Corregidos además DOS COMENTARIOS QUE HOY SON FALSOS —el de `grupo.model.ts`
-  («siempre ORDINARIO en este flujo») y el de `grupo-lista.ts` («si algún día esta pantalla pasara a listar
-  también PDC…»)—: no es pulcritud, es el hallazgo aplicado de S110 (un comentario falso hace que el siguiente
-  lector decida sobre una premisa falsa). Suite vitest 284 → 290. Commits `c278202` y `d9a0d6a`.
-  HALLAZGO DE MÉTODO EN LA CAMPAÑA DE LA FASE 3, reportado por Claude Code en vez de darse por bueno: la
-  mutación M3 (`cambiado !== undefined` en lugar de `=== true`) NO puso rojo NADA en el primer intento, y era
-  culpa del test, que cerraba el diálogo con `undefined`. El valor que separa las dos formulaciones es `false`,
-  justo el que emite el botón de cerrar del propio diálogo. El caso se REHIZO —no se maquilló— ejerciendo los
-  dos valores de salida sin escritura (`false` y `undefined`), con `toHaveBeenCalledTimes(2)` para que un botón
-  inerte no dé el mismo verde; de paso cubre la relajación simétrica (`!== false`), que la versión original
-  tampoco cazaba. Mismo género que el hallazgo de S111 sobre M6: un caso que parece cubrir una dimensión y no
-  la cubre es peor que no tenerlo.
-  M4 — VERIFICACIÓN EN NAVEGADOR con Playwright EFÍMERO (andamiaje en `/tmp/m4-s113/`, NO en
-  `app/frontend/e2e/`; backend contra una BD dedicada fuera del repo; borrado al terminar y árbol verificado
-  limpio — R-e2e respetada, la suite permanente sigue en 2). Cuatro bloques.
-  (B1) EL CASO §6.2, CONSTRUIDO ÍNTEGRAMENTE POR LA UI. 16 entidades por formulario más las 2 que el backend
-  crea por su cuenta: jornada, nivel 3ESO, grupos 3A/3B/3C, el PDC 3PDC creado por el diálogo desde la fila de
-  3C (que arrastra `3PDC-Completo` con población `{3PDC}`), subgrupos No-Di, profesores, asignaturas, aulas, y
-  las actividades del tronco alternativo sobre el subgrupo del Di más UNA compartida que se queda en el
-  ordinario, que es el punto 3 de la Nota S23. El horario SALE: prevalidación limpia y 8 sesiones, con el
-  tronco entero en 3PDC y la compartida en 3C — exactamente el reparto que decide la Nota. NADA DEL CASO
-  RESULTÓ INEXPRESABLE POR FORMULARIO. Esto es la segunda pata del criterio, demostrada en su caso más difícil.
-  (B2) Los tres estados del diálogo, confirmados en navegador, incluido que un SEGUNDO PDC sobre el mismo padre
-  no es alcanzable por UI (en `con-pdc` el diálogo no pinta ni un `<input>`: la guarda de backend existe pero
-  la pantalla no puede provocarla).
-  (B3) LAS DOS GUARDAS, desde el navegador: la fila del PDC pinta 0 botones y la del padre 3; el mono-Di sigue
-  ofreciendo Editar y Borrar en su lista y AMBOS son rechazados sin destruir nada; el DISCRIMINANTE de G2
-  —añadir el grupo padre a la población del mono-Di— queda rechazado, que era el camino que dejaba el catálogo
-  coherente y el solve sin solución; y el CASO LEGÍTIMO sigue vivo (un subgrupo de dos grupos no PDC se edita
-  con normalidad). (B4) El borrado del PDC se lleva el grupo Y su subgrupo, y falla sin destruir nada cuando
-  una plaza retiene al mono-Di.
-  DEUDA — nacen SEIS, ninguna se paga (R-deuda: ninguna bloquea el criterio), más una AMPLIACIÓN.
-  D-pdc-lista-rancia (técnica real de UX, la más visible: la lista de subgrupos no se entera del alta ni del
-  borrado de un PDC), D-pdc-sin-edicion, D-pdc-vinculo-por-cadena, D-pdc-sufijo-completo, D-monodi-botones-inertes
-  y D-bundle-presupuesto. Nace además D-tokens-inexistentes, que NO cuelga de O-estructura: es transversal y de
-  costura (ver R4). Y D-F8.6-ii-a se AFINA por CUARTA sesión consecutiva, esta vez con la medición que su propia
-  ficha pedía por adelantado.
-  POR QUÉ D-pdc-lista-rancia NO SE PAGA, aunque la abra este Cambio (el razonamiento importa más que la deuda):
-  no es del mismo género que las guardas —aquéllas cerraban destrucción silenciosa de datos, ésta es una vista
-  desactualizada que F5 resuelve, sin nada corrupto en la BD—; arreglarla exige coordinar componentes hermanos
-  dentro de `Configuracion`, que ES la decisión de navegación que S101 aplazó a Cambio propio, y resolverla de
-  paso dentro de una sesión de PDC es justo lo que aquella decisión existe para impedir; y no bloquea el
-  criterio, cosa que B1 demuestra (el §6.2 se reprodujo entero con la lista rancia de por medio). Mismo
-  razonamiento que S112 aplicó a D-F8.6-ii-a.
-  MEDICIÓN DE D-F8.6-ii-a QUE SU M2 YA NO TENDRÁ QUE HACER: la ficha de S112 decía que su M2 debía EMPEZAR
-  comprobando en ejecución si `server.error.include-message=always` surte efecto. Comprobado aquí sin gastar una
-  sesión: la clave ESTÁ en `application.properties` y en `target/classes`, sigue existiendo en la versión de Boot
-  en uso, y AUN ASÍ el cuerpo del 400 llega sin `message`. Seis textos literales capturados en pantalla, cinco de
-  ellos «Bad Request» o «Conflict». Consecuencia registrada: la primera de las tres opciones del abanico
-  («reactivar la clave») queda DESCARTADA por medición, no por hipótesis.
-  R-terminado RESPETADA: se frenó D-F8.6-ii-a pese a tener medición fresca; se frenó el arreglo de la lista
-  rancia; se frenó tocar `angular.json` por el presupuesto de bundle; se frenó dar edición al PDC (no está en el
-  criterio y no hay backend); se frenaron el marcado de celda heredada, el resumen «N propias · M heredadas» y la
-  derivación de compartidas, los tres de la vista de horario; y se frenó corregir los nueve `D-nueva-*`
-  preexistentes, que se registran en vez de arreglarse en caliente.
-  ENTREGADO en NUEVE commits de código (producción y tests separados en las cuatro fases, más `fef6fd9` de
-  corrección) y documentación aparte. Suites: app 261 → 268 (+7), vitest 271 → 290 (+19), solver 91 INTACTO,
-  e2e 2 INTACTA. `ng build` limpio; el warning de presupuesto pasa de 507,66 kB a 514,42 kB: el cableado suma
-  6,76 kB, que es lo que pesa `PdcDialogo` al entrar por fin en el grafo de dependencias (hasta ahora el
-  tree-shaking lo descartaba por no estar importado). `solver/src/main` NO tocado ⇒ `referencia-codigo-solver.md`
-  NO regenerada. `modelo_datos_fase1.md` NO tocado (ni entidad ni invariante nueva; el §6.2 se REPRODUJO, no se
-  modificó).
-  HIGIENE (M1-bis): archivada S111 a `bitacora-sesiones.md` (promovida a `### Sesión 111`, insertada al final en
-  orden ascendente, cuerpo íntegro); degradada S112 a «Última sesión registrada (previa)» compacta; S113 queda
-  como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S111), la crónica de archivado
-  y la frase de ventana del plan.
-  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
-  (mejora de método pendiente desde S101); verificado que los commits de código separan producción de tests en
-  las cuatro fases, que documentación y código van en commits distintos y que el árbol quedó limpio (ningún
-  `.db` nuevo, ningún informe suelto, `git status --porcelain` vacío). COSTURA DETECTADA Y NO SALDADA EN
-  CALIENTE: la familia de tokens `D-nueva`, `D-nueva-1` … `D-nueva-5` se cita en NUEVE sitios de `src` sin
-  tener definición en ninguno de los dos documentos de gestión. Es incumplimiento de R4 (todo token citado
-  tiene definición viva), PREEXISTENTE y ajeno a este Cambio; se registra como D-tokens-inexistentes en vez de
-  corregirse a ojo, porque decidir a qué deuda real corresponde cada cita exige leer los nueve contextos. Lo
-  que SÍ se corrigió en sesión es el único token inventado que introdujo esta sesión (`D-nueva-2`, en el
-  comentario nuevo de `grupo.model.ts`), sustituido por la regla nombrada en prosa.
-  NOTA TÉCNICA PARA QUIEN TOQUE EL AGREGADO PDC: (1) el vínculo PDC↔subgrupo mono-Di es por CÓDIGO DERIVADO
-  (`codigo + "-Completo"`), no por FK; G2 tapa hoy el único camino de rename que había, pero un tercer camino de
-  escritura hacia `Subgrupo` volvería a morder. (2) El sufijo `-Completo` significa en el backend lo CONTRARIO
-  que en el cuerpo de §6.2 del modelo (allí «3ºA-Completo» es ordinario + Di juntos; aquí es SOLO el Di): dos
-  convenciones incompatibles en el mismo espacio de códigos. (3) `VIRTUAL_OPTATIVA` existe en el enum de `app`,
-  está bloqueado por la misma lista blanca que el PDC y NO tiene ningún consumidor: no lo pide el §6, no aparece
-  en ningún fixture y el dominio del solver ni siquiera tiene la constante. (4) El sub-recurso NO tiene edición.
-  O-estructura (H2) ACTIVO, 7 piezas hechas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
-  e2e S112, PDC S113). TERCERA PATA CUMPLIDA (S112) y SEGUNDA PATA demostrada en su caso más difícil (S113, el
-  §6.2 por UI con horario generado). Suites: app 268, solver 91, vitest 290, e2e 2. Siguiente: tutores es el
-  único candidato de Cambio que queda nombrado en el objetivo, y lo primero que debe hacer su M0 es MEDIR si el
-  criterio de terminado lo exige —`requiereTutor` es campo del form de Actividad desde S109 y `ProfesorTutoria`
-  existe en JPA desde S77, así que puede estar más cubierto de lo que parece—; si no lo exige, lo que toca es
-  cerrar el objetivo. Lo fija su propio M0 (ver M1-ter).
-
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -994,8 +888,9 @@ el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), 
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
 y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la Sesión 111, la de S110 en la
-Sesión 112, la de S111 en la Sesión 113 y la de S112 en la Sesión 114.
-El plan conserva ahora S112 (degradada a formato compacto) y S113 como única cabecera H3 viva. El detalle
+Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114 y la de S113 en la
+Sesión 115.
+El plan conserva ahora S114 (degradada a formato compacto) y S115 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1526,6 +1421,31 @@ las simplificaciones registradas en Fase 1 (D1-D12), cuya descripción completa 
 en `modelo_datos_fase1.md` sección 8, y la deuda surgida en fases posteriores,
 descrita aquí. La deuda ya CERRADA se archiva condensada en la sección siguiente,
 con remisión a la bitácora.
+
+- **D-gh6-tutor-contradictorio** (S115, VIVA, DOCUMENTAL, no bloqueante) — EL MODELO SE CONTRADICE
+  SOBRE DE QUÉ GRUPO ES TUTOR GH6. `modelo_datos_fase1.md` §6.1 registra `ProfesorTutoria(GH6,
+  1ºESO A)` en la configuración del caso, y el Hallazgo E del mismo documento dice que GH6 es tutor
+  de 1º Bach A. Las dos derivaciones son CORRECTAS contra los volcados —GH6 imparte hora de tutoría
+  en ambos grupos— y la contradicción es del texto del modelo, no de los datos: nada la resuelve sin
+  preguntar al centro. No viola I4, que acota los principales POR GRUPO y no los grupos por profesor.
+  Detectada por la derivación de S115 y NO resuelta por ella a propósito: fijar uno de los dos por
+  criterio propio sería inventar un dato del centro. → se cierra con la respuesta del jefe de
+  estudios sobre los tutores reales (misma consulta que la ambigüedad A5 de
+  `ESPECIFICACION-CATALOGO.md`), corrigiendo el lado que resulte falso. Hermana de D31: es deuda de
+  REQUISITOS, no de código.
+
+- **D-configuracion-monolitica** (S115, VIVA, MEJORA FUTURA, no bloqueante) — LA PANTALLA DE
+  CONFIGURACIÓN ES UN SOLO SCROLL CON OCHO LISTAS APILADAS. `configuracion.html` monta jornada,
+  profesores, aulas, asignaturas, niveles, grupos, subgrupos y actividades en un único componente,
+  sin pestañas, sin filtro y sin búsqueda en ninguna tabla. Con el centro real —59 profesores, 100
+  asignaturas, 43 aulas, 334 subgrupos y 219 actividades— localizar una fila concreta es trabajo
+  manual de scroll. MEDIDO en S115 y ACOTADO en la misma sesión: NO bloquea la carga, porque la
+  carga es append-only («Nuevo» → rellenar → guardar) y localizar filas solo duele al CORREGIR;
+  y el riesgo que se le atribuyó al proponerla —el clic sin Ctrl del `<select multiple>` de subgrupos
+  que borra la población entera— NO existe con estos datos, porque los 334 subgrupos derivados son
+  todos MONO-GRUPO. → se resuelve en el Cambio que decida la navegación de `Configuracion` (la
+  decisión ruta-hija-vs-contenedor aplazada desde S101, que también espera D-pdc-lista-rancia) o
+  dentro de O-diseño si absorbe el acabado. No se paga ahora.
 
 - **D1**: Generación automática de subgrupos por plantilla → Fase 8 (UI)
 - **D2**: Versionado intra-BD de cursos académicos → Fase 10 (si se requiere)
