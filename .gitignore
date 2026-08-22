@@ -36,3 +36,6 @@ Thumbs.db
 # Documentacion extra
 docs_extra
 *_bck.md
+
+# Bytecode de los scripts de carga (tools/)
+tools/carga-centro/__pycache__/
