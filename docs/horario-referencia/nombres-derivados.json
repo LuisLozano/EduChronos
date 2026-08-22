@@ -1,0 +1,818 @@
+{
+  "_meta": {
+    "fuente": "Horarios de grupos.pdf",
+    "generadoPor": "tools/carga-centro/extraer-nombres.py",
+    "reglaDeEleccion": "prefijo > diacriticos > lexicografico; conflicto marcado",
+    "avisoTruncamiento": "heuristica por ancho de corte y por corte de palabra; tiene falsos negativos",
+    "resumen": {
+      "profesores": 59,
+      "asignaturas": 100,
+      "truncados": 39,
+      "conflictos": 1
+    }
+  },
+  "profesores": {
+    "BYG1": {
+      "nombreCompleto": "Macías Magro, Sonia",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "BYG2": {
+      "nombreCompleto": "Afán Herencia, María Trinidad",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "BYG3": {
+      "nombreCompleto": "Crespo Saborido, Ana María",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "CLA1": {
+      "nombreCompleto": "Sacramento Trujillo, Dan",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "DIB1": {
+      "nombreCompleto": "Ruiz del Castillo, María",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "DIB2": {
+      "nombreCompleto": "Téllez Martínez, Olga",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ECO": {
+      "nombreCompleto": "Fuentes Lucas Torres, Sa",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "EFI1": {
+      "nombreCompleto": "Sierra Naranjo, Rubén",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EFI2": {
+      "nombreCompleto": "García Granados, José Antonio",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "EFI3": {
+      "nombreCompleto": "Pérez Reyes, Ramón",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FIL1": {
+      "nombreCompleto": "Montes García, Antonio",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FIL2": {
+      "nombreCompleto": "Mejías Márquez, Manuela",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FIL3": {
+      "nombreCompleto": "Solís Vázquez, José Davi",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "FIS1": {
+      "nombreCompleto": "Romero Quiles, Aguas San",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "FIS2": {
+      "nombreCompleto": "Domínguez González, Mari",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "FIS3": {
+      "nombreCompleto": "Marín Rodríguez, Rafael",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FIS4": {
+      "nombreCompleto": "Carrasco López, Héctor",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FOL2": {
+      "nombreCompleto": "García-Baquero Vega, Jos",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "FOL3": {
+      "nombreCompleto": "Borrero Santiago, Salomé",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "FRA1": {
+      "nombreCompleto": "Pino Travieso, Soraya de",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "GH1": {
+      "nombreCompleto": "Rosales Jiménez, Fco. Ja",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "GH2": {
+      "nombreCompleto": "Torres Cubillo, Mariano José",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "GH3": {
+      "nombreCompleto": "Vela Montero, José Anton",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "GH4": {
+      "nombreCompleto": "Fedriani Freixinet, María del Mar",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "GH5": {
+      "nombreCompleto": "López Escudero, Raquel",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "GH6": {
+      "nombreCompleto": "Jiménez Montes, María de los Ángele",
+      "procedencia": "tutor",
+      "truncado": true
+    },
+    "INF1": {
+      "nombreCompleto": "Barba Riquel, María Carm",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "ING1": {
+      "nombreCompleto": "Doña Alcaide, Jesús",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ING2": {
+      "nombreCompleto": "Velázquez Barba, Trinida",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "ING3": {
+      "nombreCompleto": "Painta Lesiak, Bárbara A",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "ING4": {
+      "nombreCompleto": "Torres Bravo, Adoración",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ING5": {
+      "nombreCompleto": "Rodríguez Cobo, Lizbeth",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ING6": {
+      "nombreCompleto": "Jiménez Morgaz, Elena María",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "LEN1": {
+      "nombreCompleto": "Moreno Araujo, Fco. Javi",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LEN2": {
+      "nombreCompleto": "García Gómez, Ana Belén",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "LEN3": {
+      "nombreCompleto": "García Bernal, María Ter",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LEN4": {
+      "nombreCompleto": "Dorador de los Santos, M",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LEN5": {
+      "nombreCompleto": "Torres Villar, Myriam",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "LEN6": {
+      "nombreCompleto": "García Rodríguez, Lina María",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "LEN7": {
+      "nombreCompleto": "Moreno Mesa, Juan Manuel",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LEN8": {
+      "nombreCompleto": "Rodríguez Illana, Manuel",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LEN9": {
+      "nombreCompleto": "García Quintana, Consuelo",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "MAT1": {
+      "nombreCompleto": "Ríos Palomo, María del Carmen",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "MAT2": {
+      "nombreCompleto": "Mesa Guarnido, Eva María",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "MAT3": {
+      "nombreCompleto": "Pérez Morales, Cristina",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MAT4": {
+      "nombreCompleto": "Fernández García, Felipe",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "MAT5": {
+      "nombreCompleto": "López Ruiz, Paloma",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MAT6": {
+      "nombreCompleto": "Gutiérrez Sánchez, Carlos Alberto",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "MAT7": {
+      "nombreCompleto": "Carbonell Coronado, Carm",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "MAT8": {
+      "nombreCompleto": "Campanario Canales, Fco. Javier",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "MUS1": {
+      "nombreCompleto": "Andrade Montesino, Juan",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ORI1": {
+      "nombreCompleto": "Guerrero Serrano, Pilar",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "PAU1": {
+      "nombreCompleto": "Martínez Martínez, Enrique",
+      "procedencia": "tutor",
+      "truncado": false
+    },
+    "PAU2": {
+      "nombreCompleto": "Millán Erencia, Antonio",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "REL1": {
+      "nombreCompleto": "Rivas Prieto, Carmen",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "REV": {
+      "nombreCompleto": "Religión Evangélica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TEC1": {
+      "nombreCompleto": "Jiméez López, Juan",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TEC2": {
+      "nombreCompleto": "Redondo Ceballos, María",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TEC3": {
+      "nombreCompleto": "Baena Martín, José María",
+      "procedencia": "leyenda",
+      "truncado": true
+    }
+  },
+  "asignaturas": {
+    "AFAVS": {
+      "nombreCompleto": "Actividad Física y Hábit",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "ALCT": {
+      "nombreCompleto": "ALCT",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "AMO": {
+      "nombreCompleto": "Amovibles",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ANAP": {
+      "nombreCompleto": "Anatomía",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ATED": {
+      "nombreCompleto": "Atención Educativa",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ATEDU": {
+      "nombreCompleto": "Atención Educativa",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "AmbCT": {
+      "nombreCompleto": "Ámbito Científico-Tecnol",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "AmbSL": {
+      "nombreCompleto": "Ámbito Social-Lingüístic",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "BIOL": {
+      "nombreCompleto": "Biología",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Bio": {
+      "nombreCompleto": "Biología y Geología y Ci",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "BioNu": {
+      "nombreCompleto": "Bioquímica y Nutrición",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Biol": {
+      "nombreCompleto": "Biología y Geología",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ByG": {
+      "nombreCompleto": "Biología y Geología",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CA": {
+      "nombreCompleto": "Ciencias Aplicadas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CE": {
+      "nombreCompleto": "Cultura Emprendedora",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CS": {
+      "nombreCompleto": "Comunicación y Sociedad",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CT": {
+      "nombreCompleto": "Comentario de texto",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CeH": {
+      "nombreCompleto": "Cine e Historia",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CyR": {
+      "nombreCompleto": "Computación y Robótica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "CyS": {
+      "nombreCompleto": "Comunicación y Sociedad",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "DA": {
+      "nombreCompleto": "Dibujo Artístico",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "DIG": {
+      "nombreCompleto": "Digitalización",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "DT": {
+      "nombreCompleto": "Dibujo Técnico",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "DTec": {
+      "nombreCompleto": "Dib. Técnico",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ECO": {
+      "nombreCompleto": "Economía",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EF": {
+      "nombreCompleto": "Ed.Física",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EFis": {
+      "nombreCompleto": "Ed. Fisica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EFís": {
+      "nombreCompleto": "Ed.Física",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ELE": {
+      "nombreCompleto": "Electricidad",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EPVA": {
+      "nombreCompleto": "Ed. Plástica y Visual",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EST": {
+      "nombreCompleto": "Estadística",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EXPRE": {
+      "nombreCompleto": "Expresión Artística",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Econ": {
+      "nombreCompleto": "Economía Org Empresas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "EdFís": {
+      "nombreCompleto": "Ed. Física",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FOPP": {
+      "nombreCompleto": "FOPP",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "FQ": {
+      "nombreCompleto": "Física y Química",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Filos": {
+      "nombreCompleto": "Filosofía",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Fr2": {
+      "nombreCompleto": "Francés 2",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "FyQ": {
+      "nombreCompleto": "Física y Química",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Físic": {
+      "nombreCompleto": "Física",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "GRI": {
+      "nombreCompleto": "Griego",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "GeH": {
+      "nombreCompleto": "Geografía e Historia",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Geo": {
+      "nombreCompleto": "Geografía e Historia",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Geogr": {
+      "nombreCompleto": "Geografía e Historia",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Gri2": {
+      "nombreCompleto": "Griego",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "HART": {
+      "nombreCompleto": "Historia del Arte",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "HESP": {
+      "nombreCompleto": "Historia de España",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "HFIL": {
+      "nombreCompleto": "Filosofía",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "HMC": {
+      "nombreCompleto": "Hist Mundo Cont.",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "IPE": {
+      "nombreCompleto": "IPE",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "Ing": {
+      "nombreCompleto": "Inglés",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Ing1": {
+      "nombreCompleto": "Inglés",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "IngDi": {
+      "nombreCompleto": "Inglés diversificación",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Ingl": {
+      "nombreCompleto": "Inglés",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "LAT": {
+      "nombreCompleto": "Latín",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "LCL": {
+      "nombreCompleto": "Lengua Castellana y Lite",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "LU": {
+      "nombreCompleto": "Literatura Universal",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Lab": {
+      "nombreCompleto": "Laboratorio",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Lat2": {
+      "nombreCompleto": "Latín",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Latín": {
+      "nombreCompleto": "Latín",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "MCCSS": {
+      "nombreCompleto": "Mat. Apl.C. Sociales",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MEC": {
+      "nombreCompleto": "Mecánica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MECSO": {
+      "nombreCompleto": "Mecanizado y Soldadura",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MIT": {
+      "nombreCompleto": "Mitología",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MaCSa": {
+      "nombreCompleto": "Mat. Apl.C. Sociales A",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "Mat": {
+      "nombreCompleto": "Matemáticas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MatAc": {
+      "nombreCompleto": "Matemáticas Académicas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "MatAp": {
+      "nombreCompleto": "Matemáticas Aplicadas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Mate2": {
+      "nombreCompleto": "Matemáticas II",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Matem": {
+      "nombreCompleto": "Matemáticas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Mús": {
+      "nombreCompleto": "Música",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "OyD": {
+      "nombreCompleto": "Oratoria y Debate",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "PEPA": {
+      "nombreCompleto": "PEPA",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "PI": {
+      "nombreCompleto": "Proyecto Intermodular",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "PLAS": {
+      "nombreCompleto": "Plástica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "PS": {
+      "nombreCompleto": "Preparación de superfici",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "PTEV": {
+      "nombreCompleto": "PTEV",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "PTVE": {
+      "nombreCompleto": "Proyecto Transversal en",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "Pat": {
+      "nombreCompleto": "Patrimonio",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "QUI": {
+      "nombreCompleto": "Química",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "RefLe": {
+      "nombreCompleto": "Refuerzo Lengua",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "RefMt": {
+      "nombreCompleto": "Refuerzo Matemáticas",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Rel": {
+      "nombreCompleto": "Religión y Moral Católic",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "RelEV": {
+      "nombreCompleto": "Religión Evangélica",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Relig": {
+      "nombreCompleto": "Religión y Moral Católic",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "TEC": {
+      "nombreCompleto": "Tecnología",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TEst2": {
+      "nombreCompleto": "Técnicas de estudio II",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TEstI": {
+      "nombreCompleto": "Técnicas de estudio I",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TICO": {
+      "nombreCompleto": "TICO",
+      "procedencia": "codigo",
+      "truncado": false
+    },
+    "TPMAR": {
+      "nombreCompleto": "Tutoría Orientación",
+      "procedencia": "leyenda",
+      "truncado": false,
+      "conflicto": true,
+      "variantes": [
+        "Tutoría Orientación",
+        "Tutoría diversificación"
+      ]
+    },
+    "TUT1": {
+      "nombreCompleto": "Tutoría alumnos",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "TUT2": {
+      "nombreCompleto": "Tutoría alumnos (2º ESO)",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "TUT3": {
+      "nombreCompleto": "Tutoría alumnos (3º ESO)",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "TUT4": {
+      "nombreCompleto": "Tutoría alumnos (4º ESO)",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "Tec": {
+      "nombreCompleto": "Tecnología y Digitalizac",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "TecIn": {
+      "nombreCompleto": "Tecnología e Ingeniería",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "Tut": {
+      "nombreCompleto": "Tutoría",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "VEtic": {
+      "nombreCompleto": "Valores Éticos",
+      "procedencia": "leyenda",
+      "truncado": false
+    },
+    "ÁmbCM": {
+      "nombreCompleto": "Ámb. Científico-Matemáti",
+      "procedencia": "leyenda",
+      "truncado": true
+    },
+    "ÁmbSL": {
+      "nombreCompleto": "Ámb. Sociolingüístico",
+      "procedencia": "leyenda",
+      "truncado": false
+    }
+  }
+}
