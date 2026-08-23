@@ -624,7 +624,234 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 115 — O-demo (H2): C-derivación. Descomposición del objetivo y derivación del catálogo del IES real desde los volcados (M0 + M2, entregable documental). ABRE O-demo; NO lo cierra.
+### Sesión 116 — O-demo (H2): C-cargador. El centro real del IES entra en la base por la API REST (M0 + M2 + M4 + implementación + ejecución; M3 sustituido por la corrida). SEGUNDA pieza. NO cierra O-demo.
+  Decimosexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo DESARROLLO con una salvedad declarada en vez de
+  forzar la etiqueta: M3 NO aplica en su forma canónica porque el entregable es utillaje de un solo uso, no
+  producto, y su lógica —orden de dependencias, mapeo código→id, idempotencia— queda verificada por la CORRIDA
+  REAL contra el backend, instrumento más fuerte y más barato que una campaña de mutación sobre un script.
+  Lo verificado en su lugar quedó declarado por adelantado: los conteos leídos POR LA API al terminar coinciden
+  con el catálogo derivado. M2 y M4 completos. Ningún fichero de `app/`, `solver/` ni `app/frontend/` se toca
+  en toda la sesión; las cuatro suites quedan intactas. Lo que ENTREGA: el IES de Sevilla completo está en la
+  base creado por las vías legítimas del producto, y —fuera del alcance previsto, por iniciativa del
+  arquitecto— la primera prueba de que ese centro GENERA horario.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), ABIERTO en S115 con 1 pieza.
+  Hito = H2. Cambio = C-cargador, leído de los «Cambios que agrupa» que S115 creó. R-invalidación sin
+  conflicto, y el sentido importa: O-particiones va DESPUÉS y necesita el centro cargado delante, así que el
+  cargador es INSUMO suyo y no algo que vaya a rehacer. R-deuda: ninguna deuda abre la sesión.
+  EL M0 CORRIGIÓ LA FICHA. C-cargador constaba «BLOQUEADO hasta que el centro responda las aulas de FPB», y la
+  medición contra las propias cifras de la ficha demostró que el bloqueo es PARCIAL: de los 815 envíos, 596 no
+  dependen del dato (jornada, niveles, asignaturas, profesores, aulas, grupos, PDC, tutores, subgrupos) y de
+  las 219 actividades solo caen las que contienen las 11 plazas sin aula. Como `Plaza` es sub-recurso EMBEBIDO
+  en `POST /api/actividades` (no existe `/api/plazas`), la unidad de rechazo es la actividad entera, luego el
+  techo era 11 actividades y el suelo cargable 804/815 = 98,7 %. Lo que la respuesta del centro bloquea es
+  declarar el centro COMPLETO, requisito de C-generación, NO construir ni ejecutar el cargador. La sesión se
+  abrió con alcance «carga completa menos FPB».
+  DECISIÓN APLAZADA CON ARGUMENTO: C-carga-manual-1eso no se decide en esta sesión. Se creyó que exigía
+  decidirse antes para no duplicar datos, y no es cierto: la base se reconstruye en minutos y el ejercicio
+  manual puede correr sobre una base de usar y tirar. Al no haber coste por esperar, se decide DESPUÉS de la
+  primera corrida, que puede destapar un C-hueco-* y cambiar qué trozo merece teclearse. La nota de alcance
+  del criterio 5 sigue escrita y declarada mientras tanto.
+  M2 — medición del repo por Claude Code, seis frentes, toda de solo lectura. (1) Las 11 plazas sin aula están
+  en 11 ACTIVIDADES distintas (una mala por actividad), todas de 1FPB y 2FPB: AMO-1FPB, CA-1FPB, CA-2FPB,
+  ELE-2FPB, IPE-1FPB, MEC-2FPB, MECSO-1FPB, PI-2FPB, PS-1FPB, Tut-1FPB, Tut-2FPB. El techo del M0 se confirma
+  exacto. (2) NO existe utillaje HTTP reutilizable en el repo: cero scripts, cero clientes Java, y el e2e
+  `centro-minimo.spec.ts` va íntegro por UI sin un solo helper de API; `SeedCatalogoRunner` está BORRADO del
+  árbol y solo sobrevive citado como difunto. El cargador se escribe desde cero. (3) Los ocho POST de creación
+  devuelven 201 CON cuerpo y el `id` como primer campo del record, así que el encadenamiento código→id es
+  directo; `PUT /api/grupos/{id}/tutoria` y `PUT /api/jornada` no devuelven id (tabla de unión y singleton).
+  (4) NO existe NINGUNA anotación de validación de Jakarta en `app/src/main` (cero `@NotNull`, cero
+  `jakarta.validation`, sin `spring-boot-starter-validation` en ningún pom): toda la validación es imperativa
+  dentro de los `*Service`. (5) Todos los duplicados dan 400, NUNCA 409; el 409 solo lo produce
+  `ReferenciaEntranteException` en los DELETE, el PUT de actividad y el PUT de jornada. (6) La BD NO se vacía
+  al arrancar, comprobado por cuatro vías (sin runners ni `@PostConstruct`, sin `data.sql`, `schema.sql` con
+  21 `create table if not exists` y cero DROP desde S109, `ddl-auto=none`): la carga puede correr por partes y
+  reanudarse. Esta sexta pregunta NO estaba en el plan de la sesión y se añadió a propósito: es barata de
+  medir y cara de descubrir tarde, porque un vaciado al arranque evaporaría 815 envíos.
+  M2 DESMINTIÓ EL M0 EN UN PUNTO MAYOR QUE EL BLOQUEO DE FPB. `AsignaturaService.java:201-205` y
+  `ProfesorService.java:121,:124` exigen `nombreCompleto` no nulo, y el catálogo derivado trae los 100 y los
+  59 a `null`: 159 envíos que fallarían con 400 seguro contra 11 por FPB, y en el PRIMER eslabón de la carga.
+  El dato falta en la FUENTE igual que las aulas de FPB, así que no es hueco funcional de H2, pero exigía
+  decisión antes de escribir una línea. El arquitecto aportó el camino: los nombres están en las leyendas del
+  PDF de grupos. Verificado además que los volcados JSON NO los contienen —`RESUMEN-EXTRACCION.md` explica que
+  la leyenda se usó como «vocabulario autorizado» para clasificar tokens, pero el esquema de `celdas` solo
+  guarda códigos—, luego el PDF es la única fuente y no hay atajo.
+  SALVEDAD MEDIDA SOBRE LOS NOMBRES, que acota lo que se puede prometer: el PDF los trae TRUNCADOS y el
+  truncamiento está EN EL ORIGEN, no en la extracción; ninguna técnica de lectura los recupera. Cortes
+  medidos: 24 caracteres en la leyenda a dos columnas, 35 en la línea `Tutor:`. Dos hallazgos que sí ayudan:
+  la línea `Tutor:` da más texto que la leyenda para los 17 profesores que son tutores (GH6 pasa de «Jiménez
+  Montes, María de» a «…María de los Ángele»), y el ancho de corte NO es constante entre páginas (`GeH` sale
+  «Geografía e Historia» en 4ºESO B y «Geografía e Hist» en 4ºESO D), luego cruzar las 28 páginas recupera
+  texto real. Lo que no recupera nadie: los códigos cuya leyenda es el propio código.
+  M4 — contraste del contrato ANTES de escribir código, con el contrato viajando dentro del guion para que
+  Claude Code intentara FALSARLO y no confirmarlo. CINCO puntos cayeron, y el primero era una afirmación que
+  la documentación daba por buena desde S110.
+  M4 (1) — **LA AFIRMACIÓN DEL REASON PHRASE ES FALSA, MEDIDA EN EJECUCIÓN.** `gestion_proyecto.md` y la
+  ficha de O-demo afirmaban que el motivo del rechazo «viaja como REASON PHRASE» y que un cliente HTTP lo lee
+  aunque el navegador no. Medido con `curl --http1.1 -v -i` sobre tres rechazos distintos (nombreCompleto
+  nulo, nivel duplicado, XOR de aula roto): la línea de estado llega literalmente `HTTP/1.1 400 ` con la
+  cadena VACÍA, y el cuerpo trae exactamente cuatro claves —`timestamp`, `status`, `error`, `path`— sin
+  `message`. `error` es solo el texto canónico del código, idéntico en los tres. Ninguna información distingue
+  «ya existe» de «payload inválido» desde el cliente. La cuestión del HTTP/2 es irrelevante: Tomcat sirvió
+  HTTP/1.1, donde el reason phrase SÍ existe en el protocolo, y aun así llega vacío. Corregido en las tres
+  sedes vivas (ficha de D-F8.6-ii-a en §4, ficha de O-demo, y esta cabecera); lo archivado no se toca.
+  M4 (1-bis) — POR QUÉ ESO NO ABRE SESIÓN NI PAGA LA DEUDA, que es la decisión estratégica de la sesión. El
+  hecho en que se apoyaba la ficha es falso, pero su CONCLUSIÓN —«no muerde al cargador»— se sostiene por otro
+  argumento y más fuerte: la prevalidación en seco del catálogo da EXACTAMENTE 11 violaciones, todas del XOR
+  de FPB y todas omitidas por diseño, luego un cargador que respete el orden de dependencias y salte lo ya
+  existente por listado previo NO DEBERÍA RECIBIR NI UN SOLO 400. Un 400 deja de ser un caso a clasificar y
+  pasa a ser un bug del cargador. De ahí la regla que entra en el contrato: cualquier respuesta no-2xx es
+  FATAL, el cargador para en seco y vuelca petición y respuesta. R-deuda se aplica en su literalidad: la deuda
+  no bloquea el criterio del objetivo activo y hay camino alternativo, así que no se paga aquí.
+  M4 (2) y (3) — LA REGLA DE NOMBRES DEL CONTRATO SE SUSTITUYE ENTERA. «La variante más larga» resultó (a) NO
+  DETERMINISTA en empate —`CyR` tiene dos variantes de 22 caracteres exactos y el ganador cambiaba entre
+  ejecuciones por la aleatorización de hash de Python, demostrado en 6 corridas—, inaceptable en un fichero
+  que se versiona; y (b) PREMIA LA PÉRDIDA DE TILDES: `EF` elegía «Ed. Fisica» (10, sin tilde) sobre
+  «Ed.Física» (9, con tilde) porque el espacio suma uno. Regla nueva, sobre variantes NORMALIZADAS
+  (minúsculas, sin diacríticos, espacios colapsados, sin espacio junto a puntuación): prefijo gana a prefijado
+  (el truncamiento), luego más diacríticos, luego orden lexicográfico, y si ninguna es prefijo de otra es
+  CONFLICTO REAL, se elige lexicográficamente y se MARCA.
+  M4 (4) — LA CLÁUSULA DEL TUTOR NO DECÍA CÓMO EMPAREJAR nombre con código, y el PDF da el tutor sin código.
+  Especificada: casa si la normalizada de la leyenda es PREFIJO de la línea `Tutor:` y el emparejamiento es
+  ÚNICO; si casan dos, no se empareja y se marca. Es donde se juega la corrección de 13 nombres.
+  M4 (5) — «CAMPO A CAMPO PORQUE EL JSON NO SE PUEDE REENVIAR»: la premisa no se sostiene. Jackson IGNORA
+  todos los campos extra en primer nivel y anidados (`_meta`, `_referencia`, `_aulaDesconocida`, `_nota`,
+  `orden`, `tramoVolcado`, `creadoAutomaticamentePorPDC`), medido con POST reales. Se conserva la práctica por
+  control explícito del payload; cambia la JUSTIFICACIÓN, no el diseño.
+  M4 (6) — LA FASE DE IDEMPOTENCIA SE SIMPLIFICA. El contraste señalaba 8 listados + 51 GET individuales
+  (tutorías y PDC no tienen listado, y `GrupoDTO` no expone `grupoPadre`). Se resolvió a 8 listados y CERO GET
+  sueltos: las 28 tutorías se envían SIEMPRE porque el PUT es reemplazo total idempotente y el estado final no
+  depende de lo anterior (verificado: dos PUT iguales y un tercero distinto, sin residuo), y los PDC se
+  detectan por su propio código en `GET /api/grupos`.
+  M4 (7) — EL ORDEN «TUTORÍAS DESPUÉS DE PDC» ES SEGURO PERO SU RAZÓN NO APLICA AQUÍ. Verificado que la
+  herencia solo ocurre si el padre YA tiene tutor en el instante del alta del PDC, y medido que los 5 PDC del
+  catálogo tienen EL MISMO tutor que su padre (3ºADi/MAT6, 3ºBDi/BYG2, 3ºCDi/BYG3, 4ºADi/ING6, 4ºDDi/EFI3):
+  no hay nada que sobreescribir. Con esto D-tutor-pdc-desincronizado deja de ser condición de orden para esta
+  carga. Verificado también que el sub-recurso de tutoría ACEPTA grupos PDC (no hay lista blanca de tipo como
+  en `POST /api/grupos`; `TutoriaService.java:92-93` solo hace `findById`).
+  M4 (8) y (9) — La base `educhronos-demo.db` a secas nace DENTRO del repo, junto a la base de trabajo, porque
+  la ruta es relativa al working directory y con `-pl app` ése es `app/`; se pasa a ruta ABSOLUTA. Y la
+  bandera de truncamiento es HEURÍSTICA con falsos negativos: `PTVE | Proyecto Transversal en` está cortado
+  por palabra y el ancho no lo detecta. Queda declarado en el propio fichero.
+  M4 — LO QUE SÍ SE SOSTUVO, verificado: cobertura 59/59 profesores y 100/100 asignaturas en el PDF de grupos;
+  prevalidación en seco con 11 violaciones y ninguna otra familia; coincidencia EXACTA entre la marca
+  `_aulaDesconocida` y la regla XOR (mismo conjunto, cero diferencias); los 5 subgrupos automáticos con el
+  código y la población que `PdcService.java:100-109` genera; la jornada encajando sin más transformación que
+  descartar campos (7 tramos entran, 35 salen, recreo con `ordenEnDia: null`); encoding intacto de ida y
+  vuelta con tildes, `º`, espacios y `+`; y el PDF de aulas PRESCINDIBLE por medición (subconjunto estricto:
+  cero códigos nuevos, cero variantes más largas, cero líneas `Tutor:`).
+  DECISIÓN DE FUENTE, con argumento propio: `Distribución materias ESO.pdf` se miró y NO se incorporó. De los
+  15 nombres truncados solo 1 quedaría completo, y es normativa LOMCE de 2016 cuya nomenclatura ya no es la
+  del centro. Un nombre truncado REAL vale más que uno completo de otra fuente. `Prematrículas Borrador
+  2025.pdf` no se abrió: puede contener datos de alumnos.
+  IMPLEMENTACIÓN — `tools/` NACE en esta sesión (no existía; ubicación elegida por el arquitecto).
+  `tools/carga-centro/extraer-nombres.py` produce `docs/horario-referencia/nombres-derivados.json`, fichero
+  SEPARADO y no parche sobre `catalogo-derivado.json`, por dos razones escritas: ése es el entregable
+  commiteado de C-derivación y no conviene ensuciar su diff, y sobre todo la PROCEDENCIA es distinta (el
+  catálogo se derivó de la rejilla por geometría; los nombres salen de la leyenda, que es el dato de peor
+  calidad). Mezclarlos borraría esa frontera. `tools/carga-centro/cargar-centro.py` hace el join por código.
+  EXTRACCIÓN, resultados medidos: 59/59 y 100/100, claves idénticas a las del catálogo. Determinismo
+  verificado por md5 en TRES corridas idénticas. Seis códigos con más de una variante y todos resueltos por la
+  regla nueva: `CyR`→«Computación y Robótica» (diacríticos), `EF`→«Ed.Física» (diacríticos), `GeH` y `Geogr`→
+  «Geografía e Historia» (prefijo), `Tec`→«Tecnología y Digitalizac» (prefijo), y `TPMAR` como ÚNICO conflicto
+  real —«Tutoría Orientación» vs «Tutoría diversificación»—, que NO es truncamiento sino el centro usando un
+  código con dos rótulos según el nivel; queda marcado, no resuelto. 13 profesores mejoran por la línea
+  `Tutor:`, cero ambiguos. 7 asignaturas caen en la cláusula final (ALCT, FOPP, IPE, Latín, PEPA, PTEV, TICO).
+  39 marcados como truncados. Erratas conservadas tal cual: `TEC1 | Jiméez López, Juan`. Dato de otra
+  naturaleza, señalado y transcrito igual: `REV | Religión Evangélica`, un código de profesor cuya leyenda es
+  el nombre de una materia.
+  ADVERTENCIA DE MANTENIMIENTO sobre la regla: el caso `EF` sale bien por un mecanismo algo accidental —«Ed.
+  Fisica» y «Ed.Física» normalizan igual SOLO porque la regla elimina el espacio junto a la puntuación, y de
+  ahí el paso de diacríticos rescata la tilde—. Funciona, pero si alguien toca la normalización ese caso
+  cambia de rama sin avisar.
+  CARGA — ejecutada contra base nueva. Prevalidación en seco: 11 violaciones, todas XOR de FPB, ninguna otra.
+  Informe final leído POR GET, esperado vs. leído, diez familias en verde: niveles 8, asignaturas 100,
+  profesores 59, aulas 43, grupos 28, subgrupos 334 (329 enviados + 5 creados por el alta de los PDC),
+  actividades 208, plazas 305, tutorías 28, escrituras HTTP 804. Cero errores en el stdout de la aplicación.
+  Omitidos y registrados: los 5 subgrupos `*-Completo` de los PDC y las 11 actividades de FPB. Consecuencia
+  declarada de la omisión, no error: quedan cargados y SIN USO 9 asignaturas (AMO, CA, ELE, IPE, MEC, MECSO,
+  PI, PS, Tut) y 3 profesores (PAU1, PAU2, TEC1). **C-cargador CUMPLE su criterio.**
+  IDEMPOTENCIA VERIFICADA, y no estaba en el guion: Claude Code corrió `--cargar` dos veces más a propósito.
+  La segunda corrida envía 0 altas y solo los 28 PUT de tutoría, con estado final idéntico. Sin eso la
+  propiedad estaba diseñada pero no probada.
+  HALLAZGO FUERA DE ALCANCE, por iniciativa del arquitecto y contra el consejo del arquitecto senior: pulsó
+  generar. **EL IES REAL GENERA HORARIO.** El mayor riesgo abierto de O-demo —que el centro completo no fuera
+  resoluble— queda DESPEJADO. El camino hasta ahí destapó lo demás.
+  EL 422, DIAGNOSTICADO. `POST /api/horarios` con cuerpo `{}` respondía 422 sin mensaje alguno en pantalla.
+  Motivo medido: el solver AGOTA su presupuesto por defecto de 30 s (`GeneradorHorarioService.java:201`) sin
+  encontrar solución, y `SolverHorario.java:117-125` traduce cualquier estado distinto de OPTIMAL/FEASIBLE a
+  `HorarioInfactibleException` → 422. Evidencia que descarta la rama de prevalidación y sostiene la del
+  solver: el tiempo de respuesta ESCALA con el presupuesto (5 s → 5,7 s → 422; 30 s → 31,1 s → 422; 600 s →
+  601 s → **200**, `estadoSolver: FEASIBLE`, objetivo 188.0, cota inferior 0.0, 770 sesiones en la base). Como
+  el solver agota el tiempo en vez de terminar antes, el estado NO es INFEASIBLE sino UNKNOWN: **el problema
+  es factible y solo necesita más tiempo**; llamarlo infactible es una afirmación FALSA sobre el problema.
+  NO ES DEL CATÁLOGO, Y NO TIENE NADA QUE VER CON FPB —descartado con medición, no con hipótesis—. No existe
+  ninguna restricción de cobertura total de tramos (`ModeloCpSat.java:166-173`; el único `addExactlyOne`,
+  `:938`, elige un aula por plaza, no cubre slots), así que dejar huecos está permitido; y `GRUPO_SOBRECARGADO`
+  dispara con demanda > tramos lectivos, muy lejos de FPB. Las entidades sin plaza no generan variable ni
+  restricción. El dato de las aulas de FPB SIGUE siendo «bloquea el criterio 5 al completo» y NO asciende a
+  «bloquea cualquier generación».
+  LA DIFICULTAD REAL, medida, y es dato de primer orden para C-generación: **26 de los 28 grupos deben llenar
+  sus 30 tramos EXACTOS, holgura cero.** Es un empaquetado perfecto, y no viene del recorte de FPB —1FPB y
+  2FPB son justamente los dos únicos con holgura, +24 y +25—, viene de que el catálogo es un horario REAL
+  donde cada grupo tiene la semana completa. Aviso metodológico registrado por Claude Code: la demanda debe
+  contarse DEDUPLICADA POR ACTIVIDAD, como hace el no-solape (`ModeloCpSat.java:1046`); sumar por plaza da
+  40–73 tramos por grupo y es la sobrestimación que el propio código advierte en
+  `PrevalidacionService.java:253-256`.
+  POR QUÉ LA PANTALLA NO DIJO NADA. El código SÍ contempla la rama de error y SÍ la pinta
+  (`horario-view.ts:329`, `horario-view.html:30-32`), y D-error-generacion-pin NO se cumple en este camino: el
+  cuerpo trae `"error":"Unprocessable Content"`, así que `mensaje()` (`horario-view.ts:267`) mostraría ese
+  texto y no «El servidor rechazó el pin». La explicación es OTRA y se declara como RAZONAMIENTO, no medición:
+  durante los ~30 s del POST la pantalla no cambia en absoluto —sin spinner, sin estado «generando», botón
+  habilitado (`horario-view.html:23` solo lo deshabilita si no se ha prevalidado)—, así que lo más probable es
+  que se mirara antes de que llegara la respuesta.
+  EL MOTIVO NO ESTÁ EN NINGUNA PARTE, y esto CONTRADICE la premisa con que se escribió el guion de
+  diagnóstico. El mensaje se construye correctamente en `SolverHorario.java:124` con el estado de CP-SAT
+  dentro, y se pierde ENTERO: no viaja en el cuerpo, no viaja en la línea de estado y NO SE REGISTRA EN EL
+  LOG (cero coincidencias de `horario|solver|infactib|INFEASIBLE|cp-sat|ortools|422` en el stdout completo
+  durante la petición). El arquitecto senior había afirmado que el motivo estaría en el stdout, apoyándose en
+  que la carga se validó leyendo ese log; eso solo demostraba ausencia de errores, no que un 422 se registre.
+  Corrección registrada. Comprobado además que NO es específico del 422: un 400 con mensaje conocido
+  (`maxSegundos: -1`) tampoco lleva `message`, luego afecta a TODAS las traducciones vía
+  `ResponseStatusException`, y `server.error.include-message=always` sigue puesto y sin surtir efecto.
+  REENCUADRE DE D-log-aplicacion, con evidencia y no con intuición. El arquitecto propuso una sesión dedicada
+  a introducir logging; el arquitecto senior argumentó que instrumentar antes de diagnosticar es instrumentar
+  a ciegas y que había instrumentos gratis (pestaña Red del navegador, stdout). Los gratis BASTARON esta vez,
+  pero solo porque el tiempo de respuesta era medible desde fuera y permitía descartar ramas; con un fallo
+  menos obliging no habrían bastado. La deuda pasa de «propuesta razonable» a deuda CON EVIDENCIA DETRÁS. Se
+  registra la distinción que ordena el asunto: **los logs son para nosotros; los mensajes en pantalla son para
+  el usuario**, y delante del jefe de estudios ningún log salva —lo que hace falta es que el motivo se lea en
+  la pantalla, y eso es D-F8.6-ii-a, no D-log-aplicacion—. Ninguna de las dos abre sesión hoy.
+  M5 — DOS COSAS QUE NO SE HICIERON, y por qué. (1) `GET /api/prevalidacion` contra el centro cargado es de
+  solo lectura y no congela nada, pero es la primera medición del M2 de C-generación: adelantarla habría sido
+  empezar el siguiente Cambio con el ritual del anterior. (Acabó midiéndose de todas formas al diagnosticar el
+  422, y dio `[]`.) (2) Subir el presupuesto de 30 s es un arreglo de un minuto y una decisión SIN MEDIR: no
+  se sabe si bastan 90 o 200, ni cuánto mejora el objetivo con más tiempo. Es el M2 de C-generación, que ahora
+  arranca con una pregunta concreta en vez de un frente abierto.
+  PREGUNTA ABIERTA, declarada como tal y no como anomalía: el catálogo describe 632 sesiones semanales para
+  219 actividades y la corrida de 600 s dejó **770 filas en `sesion`** con 208 actividades. No está medido
+  cómo mapea una fila de `sesion` (¿por actividad y repetición? ¿por plaza y repetición?), así que no puede
+  decirse si 770 está bien o mal. Es exactamente la cifra que hay que reconciliar contra los volcados usados
+  como ORÁCULO DE REGRESIÓN, y es trabajo de C-generación.
+  D-post-horario-sin-sesiones CONFIRMADA A ESCALA REAL: el POST devolvió `sesiones: []` con 770 sesiones en la
+  base. Su ficha lo predecía desde S114; ya no es hipótesis.
+  D-horario-irreversible NO MUERDE en el estado final: la corrida de 600 s sí generó y creó 770 sesiones, y
+  Claude Code RESTAURÓ la copia limpia, así que la base queda con `horario_generado 0` y `sesion 0` y
+  O-particiones conserva su punto de partida sin generar. La salvaguarda previa al diagnóstico fue lo que lo
+  hizo posible.
+  LIMPIEZA (M1-bis): archivada S114 a `bitacora-sesiones.md` (promovida a `### Sesión 114`, insertada al final
+  en orden ascendente, cuerpo íntegro); degradada S115 a «Última sesión registrada (previa)» compacta; S116
+  queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S114), la crónica de
+  archivado y la frase de ventana del plan. R4/costura: script oficial SIGUE sin existir en el repo (mejora de
+  método pendiente desde S101); verificado a mano que los dos commits de código y datos van separados
+  (`a440331` feat(tools) y `f3d772b` docs(horario-referencia)), que ningún guion desechable entró en el árbol
+  y que `git status` quedó limpio salvo el punto de abajo.
+  O-demo (H2) ACTIVO, 2 piezas (C-derivación S115, C-cargador S116). Suites INTACTAS, ningún módulo tocado:
+  app 268, solver 91, vitest 310, e2e 2. Siguiente: C-generación, que arranca con tres preguntas ya
+  formuladas —qué presupuesto de tiempo necesita de verdad el centro real, cómo se reconcilian las 770
+  sesiones contra las 632 del catálogo, y qué dice el contraste con el horario del PDF— y con dos deudas
+  nuevas nacidas en su terreno. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 115 — O-demo (H2): C-derivación. Descomposición del objetivo y derivación del catálogo del IES real desde los volcados (M0 + M2, entregable documental). ABRE O-demo; NO lo cierra.
   Decimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo SIN ENCAJE EXACTO en los cuatro de
   `metodo.md`, y se dice en vez de forzar la etiqueta: ritual M0 + M2 completo + M1, sin M3 ni M4, porque
   no hay código que mutar ni contrato de UI que contrastar. Ningún fichero de `app/` ni de `solver/` se
@@ -745,129 +972,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   puebla el centro por la API REST, condicionado a que el centro responda las aulas de FPB; y la decisión
   pendiente sobre 1º ESO a mano. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 114 — O-estructura (H2): C-tutores. Asignación del tutor del grupo por UI sobre el sub-recurso que existía desde S77 (Config/UI, M3 real). OCTAVA pieza. **CIERRA O-estructura.**
-  Decimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (la conservación de
-  los co-tutores al guardar y la derivación de estados por longitud son lógica, no binding), UN SOLO MÓDULO
-  (frontend; el backend no se toca en toda la sesión), sin e2e nuevo. OCTAVA pieza de O-estructura y CIERRE del
-  objetivo: con ella las TRES PATAS del criterio quedan cumplidas y H2 se queda con O-demo como único objetivo
-  pendiente. Lo que ENTREGA: el vínculo `ProfesorTutoria` —que tres de los seis casos del §6 del modelo
-  registran en su configuración— pasa a ser introducible por pantalla, y con él la invariante S8 se satisface
-  por la vía que el modelo describe, verificado en navegador contra el backend real.
-  M0 — apertura verificada contra `gestion_proyecto.md`, y su primera tarea NO era proponer alcance sino
-  responder si quedaba algo por construir. Objetivo = O-estructura (H2), ACTIVO desde S107 con 7 piezas. Hito =
-  H2. Cambio = C-tutores, la «asignación de tutores» de los «Cambios que agrupa». R-invalidación sin conflicto
-  (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda: ninguna deuda abre la sesión; las siete
-  nacidas en S113 y D-F8.6-ii-a siguen sin bloquear.
-  LA MEDICIÓN QUE DECIDIÓ LA SESIÓN, hecha en el propio M0 sobre el §6 del modelo y no sobre la lista de
-  Cambios: tutores figura en el PROPÓSITO del objetivo y en sus «Cambios que agrupa» pero NO en el texto del
-  criterio, así que por R-terminado la pregunta era si algún caso del §6 lo exige. Lo exige. La PATA 1 no —los
-  ocho tipos de sesión se sustituyen por combinaciones K plazas × N grupos (§1 del modelo) y una tutoría es una
-  actividad de una plaza, expresable desde S109—, pero la PATA 2 sí: §6.1 (GH6 tutor de 1ºESO A), §6.5
-  (`ProfesorTutoria(1ºBach B) = FIL2`, TUTOR_PRINCIPAL) y §6.6 (`ProfesorTutoria(PAU2, 1ºFPB)`) incluyen el
-  registro en su configuración y lo usan en su tabla de verificación para declarar S8 ✅. Reproducir un caso es
-  poder introducir SU CONFIGURACIÓN por formulario, y esa fila no tenía pantalla: mismo razonamiento con que
-  S106 recortó O-catálogo (9 filas irreducibles, 4 con formulario) y con que S113 justificó el PDC. No cae en el
-  recorte de S112, que excluyó la superficie de ERROR de la UI: `ProfesorTutoria` es dato del centro. Segundo
-  argumento, menor pero real: `requiereTutor` está en el form de Actividad desde S109, así que la UI ya dejaba
-  marcar la casilla sin ofrecer forma alguna de satisfacerla. Conclusión del M0: la sesión NO es de cierre de
-  objetivo por vacío, es un Cambio con precedente directo (el sub-recurso de catálogo que estrenó S113) que
-  cierra el objetivo al terminar.
-  M2 — MEDICIÓN (Claude Code sobre el repo REAL, cinco investigaciones, con seis premisas declaradas para que
-  la medición las confirmara o las desmintiera; informe consumido aquí, sin fichero suelto commiteado). Cinco
-  confirmadas, una PARCIAL, y el hallazgo importante no estaba en ninguna. (P1) Contrato: `GET|PUT
-  /api/grupos/{id}/tutoria` inline en `GrupoController`, reemplazo total idempotente, DTO `TutoriaDTO(profesor,
-  rol)` con el profesor por CÓDIGO y el grupo en la URL, 17 tests en `TutoriaEndpointTest`. Matiz que corrige la
-  ficha de §4.3: I4 se hace cumplir como «COMO MUCHO un principal», nunca «exactamente uno». Tres detalles que
-  el formulario debía respetar y que no se deducen del molde: el GET de un grupo sin tutoría devuelve 200 con
-  LISTA VACÍA (no 404), no hay DELETE ni PATCH (borrar es PUT con `[]`), y en ESCRITURA un código de profesor
-  inexistente da 404 y no 400, contraintuitivo en un PUT sobre un grupo que sí existe. (P3) CONFIRMADA y
-  DEBILITA un argumento de apertura: S8 no es restricción de scheduling —`ModeloCpSat` no menciona tutorías y
-  `PrevalidacionService` tampoco—, se verifica en `VerificadorSolucion.verificarTutorias` y `verificar()` solo
-  se invoca desde `DiagnosticoService` y el CLI, así que generar devuelve 200 y el `HorarioProyeccionDTO` no
-  transporta violaciones. El usuario, HOY, no ve que falte el tutor: ve un filete rojo indistinguible del de un
-  solape. El argumento del «caso degradado» pierde fuerza; el argumento principal —el dato no es introducible—
-  queda intacto. (P4) CONFIRMADA: `PdcService.java:110` hereda el principal del padre en el alta, solo el
-  principal. (P5) PARCIAL, y la lectura literal es falsa: no hay `tutoria.model`/`service`/componentes, pero el
-  frontend YA escribe `requiereTutor`, YA pinta la violación S8 y YA enseña un 409 que dice «tutoria(s)».
-  ALCANCE FIJADO tras el M2, con cuatro decisiones de diseño y tres recortes. El gesto es botón por fila en
-  `grupo-lista` + diálogo, molde `PdcDialogo`, porque S113 ya midió que no existe vista de detalle donde alojar
-  una sección en la ficha del padre. (1) El diálogo edita el PRINCIPAL pero guarda la LISTA ENTERA: los
-  co-tutores se cargan, se pintan en solo lectura y se reenvían intactos, porque el PUT es reemplazo total y un
-  formulario que solo conociera al principal los borraría en silencio. (2) TRES estados y no cuatro: el molde de
-  S113 deriva el vacío de un 404 y aquí el GET da 200 con `[]`, luego se deriva de `length === 0`. (3) I4 NO se
-  replica en cliente: con un único desplegable el escenario es inalcanzable y el validador sería código muerto
-  (familia D-i2-dedup-cliente). (4) «— sin tutor —» seleccionable y control sin `required`, porque elegirla ES
-  el gesto de quitar el tutor. FUERA por R-terminado: alta/baja de co-tutores (ningún caso del §6 los pide), la
-  columna «Tutor» en la lista (exigiría que `GrupoDTO` transportara la tutoría: mover el contrato por comodidad
-  de pintura, el error que D-monodi-botones-inertes decidió no cometer) y el resalte mudo de S8 en la rejilla
-  (vista de horario, familia 8.6/H1). FUERA por R-e2e: ningún e2e nuevo; la suite de navegador se queda en 2.
-  EJECUCIÓN en cuatro fases, con suite verde y commits separados en cada una. F1 modelo + servicio (vitest
-  290→294): la unión de literales para `RolTutoria` ESTRENA construcción en `models/` —el precedente es `string`
-  pelado— y se documentó como desviación consciente con el argumento que la sostiene y que queda como
-  precedente: campo de LECTURA cuyo enum puede crecer sin avisar → `string`; campo que se ESCRIBE desde un
-  desplegable cerrado → unión de literales. Se descartó un helper privado de URL porque el molde (`PdcService`,
-  `DiagnosticoService`) interpola la plantilla en cada método. F2 el diálogo (294→307). F3 el cableado
-  (307→310). F4 el M4 en navegador.
-  M3 — CAMPAÑA DE MUTACIÓN, y las dos mutaciones que valieron algo fueron las NO pedidas. En el diálogo, las
-  cuatro planificadas murieron (descartar co-tutores al guardar; derivar el vacío de un 404; `[value]="p.id"`;
-  pintar sin esperar al profesorado), pero la quinta SOBREVIVIÓ a los doce casos: cerrar con `close(true)` al
-  CANCELAR. El contrato de cierre es asimétrico —`true` significa «hubo escritura»— y un cancelar mentiroso
-  provocaría una recarga fantasma; se escribió el caso (13), que afirma `close()` sin argumento y niega que se
-  haya llamado a `reemplazar`. En el cableado murieron las tres planificadas y las dos extra, y la segunda extra
-  justifica un aserto que faltaba: el botón «Tutoría» abriendo `PdcDialogo` pasaba entero mientras el aserto
-  solo mirase el DATO y no el COMPONENTE. Nota de cascada: mutar el cableado para que recargue rompe 4 ficheros
-  de test, no 1, por el `verify()` fallido que impide el reset del TestBed (documentado en
-  `bloqueo.service.spec.ts`); el rojo que cuenta es el primero.
-  CORRECCIÓN DE MÉTODO, y la registra el arquitecto contra sí mismo: el guion de F2 afirmaba como MEDIDO que
-  «pintar un `<select>` antes de tener las opciones pierde la preselección». Es falso para el `<select>` único
-  —Angular reconcilia, y `grupo-form.spec.ts:174` lo congela desde S104— y era analogía indebida con el
-  `<select multiple>` de S108, donde el problema sí es real. Claude Code lo desmintió ANTES de escribir, en el
-  paso de medición del guion, y conservó el `forkJoin` por el argumento que sí lo sostiene (el gating de
-  estados, con precedente en `PdcDialogo`) reescribiendo el TSDoc con un párrafo explícito sobre lo que NO
-  arregla. Es exactamente el rendimiento que M2 promete —«una afirmación sobre el estado del repo que no se ha
-  medido se declara como RAZONAMIENTO»— aplicado a una afirmación del arquitecto, no del plan.
-  M4 — VERIFICACIÓN EN NAVEGADOR sobre el centro mínimo creado íntegramente por UI, guion desechable en `/tmp`
-  (R-e2e), nada commiteado. Orden obligatorio y no casual: `requiereTutor` se marca ANTES de la primera
-  generación, porque con un horario ya generado el PUT de la actividad da 409 y D-horario-irreversible dejaría
-  el M4 bloqueado sin salida por UI. EL CONTRASTE, que es la prueba del Cambio: horario #1 generado sin tutor →
-  `TUTORIA_SIN_TUTOR` con `recursoCodigo: "1ESOA"`, `tramoCodigo: null`, las tres celdas y la descripción que
-  nombra la actividad y el grupo; se asigna el tutor por el diálogo; horario #2 → `"violaciones": []`. Verificado
-  además: el diálogo abre en «cargado» y no en error con lista vacía (5a), el desplegable trae los profesores
-  del centro (5b), «— sin tutor —» no está `disabled` (5c), el tutor llega PRESELECCIONADO al reabrir contra el
-  backend real (6), y el gesto de quitar el tutor deja `GET .../tutoria` en `[]` con 200 (11).
-  HALLAZGO DEL M4 que obligó a reformular un paso del guion: el paso 9 —«comprueba que el filete rojo del
-  horario #1 desaparece»— NO era medible como estaba escrito, porque el guion daba por hecho que el diagnóstico
-  es una FOTO del momento de generación y no lo es. `DiagnosticoService` recalcula contra el catálogo VIVO y
-  `verificarTutorias` no mira la solución, así que con el tutor ya asignado el horario #1 —el generado sin
-  tutor— se presenta hoy impecable. Se midió en la única ventana en que es observable, durante el gesto de
-  quitar el tutor, y con los dos horarios a la vez: SIN tutor 3/3 celdas en violación en AMBOS, CON tutor 0/3 en
-  AMBOS. El resalte sigue al catálogo, no al horario que se está mirando. Nace de aquí D-diagnostico-no-es-foto.
-  DEUDA — nacen CINCO y ninguna bloqueaba el criterio, por lo que el objetivo cierra con ellas vivas
-  (R-terminado): D-tutor-pdc-desincronizado (cuelga de O-estructura, cerrado: la herencia del principal al PDC
-  corre solo en el alta, y este Cambio la hace visible por primera vez); D-s8-muda, D-diagnostico-no-es-foto y
-  D-post-horario-sin-sesiones (las tres de O-ajuste-cierre, superficie de la vista de horario, mismo criterio
-  con que S113 dejó fuera D1-8 y D1-10); y D-dialogo-foco-perdido (O-diseño; NO la introduce C-tutores,
-  `PdcDialogo` hace lo mismo desde S113, y arrastra que la barrera `:focus` de `centro-minimo.spec.ts` no sirve
-  en diálogos con estados). D-bundle-presupuesto anotada: 514,42→520,22 kB al entrar `TutoriaDialogo` en el
-  grafo; el techo de 500 kB llevaba desbordado desde antes de la sesión, medido apartando los ficheros nuevos.
-  R-terminado RESPETADA en tres sitios: no se construyó el alta/baja de co-tutores, no se añadió la columna
-  «Tutor» y no se pintó el mensaje de la violación S8, las tres con razón escrita.
-  EL CIERRE, con su parte débil declarada. Las tres patas quedan cumplidas, pero el apoyo de la segunda es un
-  ARGUMENTO ESTRUCTURAL y no una reproducción exhaustiva: los seis casos del §6 no se han tecleado uno a uno.
-  Lo demostrado es que la única fila que faltaba a §6.1/§6.5/§6.6 ya es introducible y que S8 se satisface por
-  la vía del modelo; §6.2 se construyó entero en S113; §6.3 y §6.4 se apoyan en el recorte medido en S113 (usan
-  subgrupos multi-grupo, es decir actividades multiplaza, demostradas en S110). Se propuso al arquitecto con el
-  hueco a la vista, no a pesar de él, y la alternativa —una sesión más construyendo §6.1 completo por UI— se
-  descartó porque no podía descubrir ninguna pieza sin demostrar. Si O-demo destapara un caso inexpresable, es
-  hueco funcional de H2 y se afronta allí.
-  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
-  (mejora de método pendiente desde S101); verificado a mano que los seis commits de código separan feat de
-  test, que documentación y código van en commits distintos, que el guion desechable del M4 no entró en el árbol
-  y que `app/educhronos-e2e.db` sigue ignorada por `.gitignore`.
-  O-estructura (H2) ✔ TERMINADO, 8 piezas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
-  e2e S112, PDC S113, tutores S114). Desbloquea O-demo, ÚNICO objetivo entre H2 y su cierre. Suites: app 268,
-  solver 91, vitest 310, e2e 2. Siguiente: abrir O-demo (ver M1-ter).
-
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -888,9 +992,9 @@ el censo de la bitácora, que S68 había dejado en S63 pese a contener ya S64), 
 y las de S103, S104, S105 y S106 juntas en la Sesión 108 (higiene M1-bis, Opción 2 elegida por el arquitecto
 para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la ventana entera de O-catálogo),
 y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la Sesión 111, la de S110 en la
-Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114 y la de S113 en la
-Sesión 115.
-El plan conserva ahora S114 (degradada a formato compacto) y S115 como única cabecera H3 viva. El detalle
+Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
+Sesión 115 y la de S114 en la Sesión 116.
+El plan conserva ahora S115 (degradada a formato compacto) y S116 como única cabecera H3 viva. El detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
@@ -1942,6 +2046,25 @@ con remisión a la bitácora.
   y degradan); lo que falla es que el backend no lo manda. Nota de alcance para quien la pague: NO es del
   diálogo del PDC ni de las guardas de S113 —el CRUD plano tiene el mismo comportamiento con un POST duplicado—,
   así que el arreglo es global y debe verificarse con al menos un formulario de catálogo y uno de sub-recurso.
+  **CORRECCIÓN MAYOR (S116): LA AFIRMACIÓN DE S110 SOBRE EL REASON PHRASE ES FALSA, MEDIDA EN EJECUCIÓN.** S110
+  escribió, «medido en NAVEGADOR», que el mensaje accionable NO se pierde porque «viaja como REASON PHRASE», y
+  esa frase se propagó a `gestion_proyecto.md` y a la ficha de O-demo, donde fundamentaba que la deuda no
+  mordiera al cargador. S116 la contrastó con `curl --http1.1 -v -i` sobre TRES rechazos distintos
+  (`nombreCompleto` nulo en asignaturas, nivel duplicado, XOR de aula roto): la línea de estado llega
+  literalmente `HTTP/1.1 400 ` con la cadena VACÍA, y el cuerpo trae exactamente cuatro claves —`timestamp`,
+  `status`, `error`, `path`— sin `message`, con `error` conteniendo solo el texto canónico del código HTTP,
+  idéntico en los tres casos. NINGUNA información distingue «ya existe» de «payload inválido» desde el cliente.
+  La salvedad del HTTP/2 que S110 anotaba es IRRELEVANTE: Tomcat sirvió HTTP/1.1 en todas las peticiones,
+  donde el reason phrase SÍ existe en el protocolo, y aun así llega vacío. SUPERFICIE AMPLIADA en la misma
+  medición: tampoco llega en un 400 de mensaje conocido (`{"maxSegundos":-1}` sobre `POST /api/horarios`, cuyo
+  `IllegalArgumentException` nombra el campo y el valor recibido), luego afecta a TODAS las traducciones vía
+  `ResponseStatusException` y no solo al CRUD. `server.error.include-message=always` sigue en
+  `application.properties` y en `target/classes`, y sigue sin surtir efecto: la hipótesis viva desde S112 se
+  confirma una vez más. NO SE PAGA EN S116, con argumento de R-deuda y no por comodidad: la prevalidación en
+  seco del catálogo real da exactamente 11 violaciones conocidas y todas omitidas, luego un cargador con
+  listado previo no debería recibir ningún 400, y la regla «cualquier no-2xx es FATAL» resuelve el Cambio
+  activo sin la deuda. Lo que S116 sí cambia es su ALCANCE: hasta ahora degradaba formularios; con el 422 de
+  generación degrada la operación central del producto delante del usuario final.
 
 - **D-F8.6-ii-b** (S81, VIVA, HUECO FUNCIONAL, no bloqueante) — NO HAY GESTO DE DESPINAR. El
   arrastre crea pines y el aviso los cuenta, pero la UI no ofrece forma de quitarlos:
@@ -2494,6 +2617,56 @@ con remisión a la bitácora.
   → sesión de Higiene/Método: leer los nueve contextos, mapear cada cita a la deuda real que le corresponda (o
   borrarla si describe una decisión ya cerrada) y, si aparece un patrón, valorar por fin el script de R4 que
   falta desde S101.
+
+- **D-timeout-como-infactible** (S116, VIVA, TÉCNICA REAL, no bloqueante pero MIENTE) — UN AGOTAMIENTO DE
+  TIEMPO DEL SOLVER SE COMUNICA COMO «NO HAY HORARIO FACTIBLE». `SolverHorario.java:117-125` devuelve el
+  resultado si el estado de CP-SAT es OPTIMAL o FEASIBLE y, en cualquier otro caso, lanza
+  `HorarioInfactibleException("El solver no encontró un horario factible (modo optimización). Estado CP-SAT: "
+  + estado)`, que `HorarioController.java:65` traduce a 422. El estado UNKNOWN —se acabó el presupuesto sin
+  encontrar nada— cae por esa rama junto a INFEASIBLE, así que el sistema AFIRMA algo falso sobre el problema:
+  no es que no exista solución, es que no le dio tiempo a encontrarla. MEDIDO en S116 sobre el centro real: con
+  el presupuesto por defecto de 30 s (`GeneradorHorarioService.java:201`) responde 422 en 31,1 s; con 5 s
+  responde 422 en 5,7 s; con 600 s responde **200** con `estadoSolver: FEASIBLE`, objetivo 188.0 y cota
+  inferior 0.0. Que el tiempo escale con el presupuesto en vez de terminar antes es lo que demuestra que el
+  estado es UNKNOWN y no INFEASIBLE, porque la infactibilidad se prueba y se devuelve al detectarla. Agravante:
+  el estado concreto NO se registra en ningún sitio (ver D-motivo-rechazo-sin-registro), así que el usuario ni
+  siquiera puede sospecharlo. → cuelga de C-generación (O-demo). Tres piezas SEPARABLES, y conviene no
+  confundirlas: (1) calibrar o exponer el presupuesto, que es DECISIÓN A MEDIR y no un número a subir a ojo
+  —600 s funcionan, pero nadie ha medido si bastan 90 o 200 ni cuánto mejora el objetivo con más tiempo—;
+  (2) distinguir UNKNOWN de INFEASIBLE en `SolverHorario` para no llamar infactible a un timeout, que es el
+  arreglo de esta deuda en sentido estricto; (3) que el motivo llegue al cliente, que es D-F8.6-ii-a. No se
+  paga ahora: es el M2 de C-generación.
+
+- **D-motivo-rechazo-sin-registro** (S116, VIVA, TÉCNICA REAL, no bloqueante) — EL MOTIVO DE UN RECHAZO NO SE
+  ESCRIBE EN NINGUNA PARTE, NI SIQUIERA EN EL LOG. Hermana de D-F8.6-ii-a y descubierta al diagnosticar el 422
+  de generación. El mensaje se construye CORRECTAMENTE en `SolverHorario.java:124`, con el estado de CP-SAT
+  dentro, y se pierde entero: no viaja en el cuerpo (cuatro claves, sin `message`), no viaja en la línea de
+  estado (reason phrase vacío) y NO SE REGISTRA en el stdout de la aplicación. Medido: durante la petición que
+  devuelve 422, `grep -inE "horario|solver|infactib|INFEASIBLE|cp-sat|ortools|422|Unprocessable"` sobre el log
+  completo devuelve CERO coincidencias; el fichero se queda en las líneas del arranque. Consecuencia práctica:
+  diagnosticar el fallo central del producto exigió deducirlo por el TIEMPO DE RESPUESTA desde fuera —único
+  canal observable— y leer código; con un fallo cuyo síntoma externo no variase, no habría habido forma. Es la
+  evidencia que reencuadra D-log-aplicacion: hasta S116 esa deuda se apoyaba en una impresión de S111, ahora
+  tiene un caso medido. Distinción que ordena el asunto y que conviene no perder: los logs son para el
+  DESARROLLADOR y los mensajes en pantalla para el USUARIO; delante del centro ningún log salva. → se decide
+  junto a D-F8.6-ii-a y D-log-aplicacion; el arreglo mínimo y barato (un `log.warn` con el estado antes de
+  lanzar la excepción) NO sustituye a ninguna de las dos. No se paga ahora.
+
+- **D-generacion-sin-indicador** (S116, VIVA, TÉCNICA REAL de UX, no bloqueante, PARCIALMENTE RAZONADA) —
+  DURANTE LA GENERACIÓN LA PANTALLA NO CAMBIA. `POST /api/horarios` tarda por diseño lo que dure el
+  presupuesto del solver —30 s por defecto, y sobre el centro real ese presupuesto se AGOTA siempre— y en todo
+  ese tiempo la vista no ofrece ninguna señal: no hay spinner ni estado «generando», el botón sigue habilitado
+  (`horario-view.html:23` solo lo deshabilita si la prevalidación no se ha ejecutado) y el `<p>Cargando…</p>`
+  de `horario-view.html:61` es el estado por defecto de la rejilla, no un indicador de la generación. MEDIDO
+  en código; la parte RAZONADA y no medida es la explicación de por qué el arquitecto no vio mensaje alguno al
+  pulsar generar: lo más probable es que mirase antes de que llegara la respuesta. Nota que corrige una
+  predicción escrita: en este camino D-error-generacion-pin NO se cumple —el cuerpo trae
+  `"error":"Unprocessable Content"`, así que `mensaje()` (`horario-view.ts:267`) mostraría ese texto y no «El
+  servidor rechazó el pin (N)», porque el degradado solo actúa si faltan `message` Y `error`—. La deuda del
+  pin sigue viva para los casos en que el cuerpo no traiga ninguna de las dos claves. → cuelga de O-diseño o
+  del Cambio que toque la vista de horario; es acabado de interacción, no lógica. Importa más de lo que su
+  categoría sugiere porque muerde EN LA DEMO: una espera de 30 s sin señal se lee como «no funciona». No se
+  paga ahora.
 
 ### Deuda consciente CERRADA (histórico)
 
