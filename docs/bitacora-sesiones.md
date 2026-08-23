@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S113. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S114. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S113). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S114). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -6243,3 +6243,126 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   criterio de terminado lo exige —`requiereTutor` es campo del form de Actividad desde S109 y `ProfesorTutoria`
   existe en JPA desde S77, así que puede estar más cubierto de lo que parece—; si no lo exige, lo que toca es
   cerrar el objetivo. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 114 — O-estructura (H2): C-tutores. Asignación del tutor del grupo por UI sobre el sub-recurso que existía desde S77 (Config/UI, M3 real). OCTAVA pieza. **CIERRA O-estructura.**
+  Decimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI con M3 real (la conservación de
+  los co-tutores al guardar y la derivación de estados por longitud son lógica, no binding), UN SOLO MÓDULO
+  (frontend; el backend no se toca en toda la sesión), sin e2e nuevo. OCTAVA pieza de O-estructura y CIERRE del
+  objetivo: con ella las TRES PATAS del criterio quedan cumplidas y H2 se queda con O-demo como único objetivo
+  pendiente. Lo que ENTREGA: el vínculo `ProfesorTutoria` —que tres de los seis casos del §6 del modelo
+  registran en su configuración— pasa a ser introducible por pantalla, y con él la invariante S8 se satisface
+  por la vía que el modelo describe, verificado en navegador contra el backend real.
+  M0 — apertura verificada contra `gestion_proyecto.md`, y su primera tarea NO era proponer alcance sino
+  responder si quedaba algo por construir. Objetivo = O-estructura (H2), ACTIVO desde S107 con 7 piezas. Hito =
+  H2. Cambio = C-tutores, la «asignación de tutores» de los «Cambios que agrupa». R-invalidación sin conflicto
+  (O-diseño depende de H2 cerrado, O-demo de O-estructura). R-deuda: ninguna deuda abre la sesión; las siete
+  nacidas en S113 y D-F8.6-ii-a siguen sin bloquear.
+  LA MEDICIÓN QUE DECIDIÓ LA SESIÓN, hecha en el propio M0 sobre el §6 del modelo y no sobre la lista de
+  Cambios: tutores figura en el PROPÓSITO del objetivo y en sus «Cambios que agrupa» pero NO en el texto del
+  criterio, así que por R-terminado la pregunta era si algún caso del §6 lo exige. Lo exige. La PATA 1 no —los
+  ocho tipos de sesión se sustituyen por combinaciones K plazas × N grupos (§1 del modelo) y una tutoría es una
+  actividad de una plaza, expresable desde S109—, pero la PATA 2 sí: §6.1 (GH6 tutor de 1ºESO A), §6.5
+  (`ProfesorTutoria(1ºBach B) = FIL2`, TUTOR_PRINCIPAL) y §6.6 (`ProfesorTutoria(PAU2, 1ºFPB)`) incluyen el
+  registro en su configuración y lo usan en su tabla de verificación para declarar S8 ✅. Reproducir un caso es
+  poder introducir SU CONFIGURACIÓN por formulario, y esa fila no tenía pantalla: mismo razonamiento con que
+  S106 recortó O-catálogo (9 filas irreducibles, 4 con formulario) y con que S113 justificó el PDC. No cae en el
+  recorte de S112, que excluyó la superficie de ERROR de la UI: `ProfesorTutoria` es dato del centro. Segundo
+  argumento, menor pero real: `requiereTutor` está en el form de Actividad desde S109, así que la UI ya dejaba
+  marcar la casilla sin ofrecer forma alguna de satisfacerla. Conclusión del M0: la sesión NO es de cierre de
+  objetivo por vacío, es un Cambio con precedente directo (el sub-recurso de catálogo que estrenó S113) que
+  cierra el objetivo al terminar.
+  M2 — MEDICIÓN (Claude Code sobre el repo REAL, cinco investigaciones, con seis premisas declaradas para que
+  la medición las confirmara o las desmintiera; informe consumido aquí, sin fichero suelto commiteado). Cinco
+  confirmadas, una PARCIAL, y el hallazgo importante no estaba en ninguna. (P1) Contrato: `GET|PUT
+  /api/grupos/{id}/tutoria` inline en `GrupoController`, reemplazo total idempotente, DTO `TutoriaDTO(profesor,
+  rol)` con el profesor por CÓDIGO y el grupo en la URL, 17 tests en `TutoriaEndpointTest`. Matiz que corrige la
+  ficha de §4.3: I4 se hace cumplir como «COMO MUCHO un principal», nunca «exactamente uno». Tres detalles que
+  el formulario debía respetar y que no se deducen del molde: el GET de un grupo sin tutoría devuelve 200 con
+  LISTA VACÍA (no 404), no hay DELETE ni PATCH (borrar es PUT con `[]`), y en ESCRITURA un código de profesor
+  inexistente da 404 y no 400, contraintuitivo en un PUT sobre un grupo que sí existe. (P3) CONFIRMADA y
+  DEBILITA un argumento de apertura: S8 no es restricción de scheduling —`ModeloCpSat` no menciona tutorías y
+  `PrevalidacionService` tampoco—, se verifica en `VerificadorSolucion.verificarTutorias` y `verificar()` solo
+  se invoca desde `DiagnosticoService` y el CLI, así que generar devuelve 200 y el `HorarioProyeccionDTO` no
+  transporta violaciones. El usuario, HOY, no ve que falte el tutor: ve un filete rojo indistinguible del de un
+  solape. El argumento del «caso degradado» pierde fuerza; el argumento principal —el dato no es introducible—
+  queda intacto. (P4) CONFIRMADA: `PdcService.java:110` hereda el principal del padre en el alta, solo el
+  principal. (P5) PARCIAL, y la lectura literal es falsa: no hay `tutoria.model`/`service`/componentes, pero el
+  frontend YA escribe `requiereTutor`, YA pinta la violación S8 y YA enseña un 409 que dice «tutoria(s)».
+  ALCANCE FIJADO tras el M2, con cuatro decisiones de diseño y tres recortes. El gesto es botón por fila en
+  `grupo-lista` + diálogo, molde `PdcDialogo`, porque S113 ya midió que no existe vista de detalle donde alojar
+  una sección en la ficha del padre. (1) El diálogo edita el PRINCIPAL pero guarda la LISTA ENTERA: los
+  co-tutores se cargan, se pintan en solo lectura y se reenvían intactos, porque el PUT es reemplazo total y un
+  formulario que solo conociera al principal los borraría en silencio. (2) TRES estados y no cuatro: el molde de
+  S113 deriva el vacío de un 404 y aquí el GET da 200 con `[]`, luego se deriva de `length === 0`. (3) I4 NO se
+  replica en cliente: con un único desplegable el escenario es inalcanzable y el validador sería código muerto
+  (familia D-i2-dedup-cliente). (4) «— sin tutor —» seleccionable y control sin `required`, porque elegirla ES
+  el gesto de quitar el tutor. FUERA por R-terminado: alta/baja de co-tutores (ningún caso del §6 los pide), la
+  columna «Tutor» en la lista (exigiría que `GrupoDTO` transportara la tutoría: mover el contrato por comodidad
+  de pintura, el error que D-monodi-botones-inertes decidió no cometer) y el resalte mudo de S8 en la rejilla
+  (vista de horario, familia 8.6/H1). FUERA por R-e2e: ningún e2e nuevo; la suite de navegador se queda en 2.
+  EJECUCIÓN en cuatro fases, con suite verde y commits separados en cada una. F1 modelo + servicio (vitest
+  290→294): la unión de literales para `RolTutoria` ESTRENA construcción en `models/` —el precedente es `string`
+  pelado— y se documentó como desviación consciente con el argumento que la sostiene y que queda como
+  precedente: campo de LECTURA cuyo enum puede crecer sin avisar → `string`; campo que se ESCRIBE desde un
+  desplegable cerrado → unión de literales. Se descartó un helper privado de URL porque el molde (`PdcService`,
+  `DiagnosticoService`) interpola la plantilla en cada método. F2 el diálogo (294→307). F3 el cableado
+  (307→310). F4 el M4 en navegador.
+  M3 — CAMPAÑA DE MUTACIÓN, y las dos mutaciones que valieron algo fueron las NO pedidas. En el diálogo, las
+  cuatro planificadas murieron (descartar co-tutores al guardar; derivar el vacío de un 404; `[value]="p.id"`;
+  pintar sin esperar al profesorado), pero la quinta SOBREVIVIÓ a los doce casos: cerrar con `close(true)` al
+  CANCELAR. El contrato de cierre es asimétrico —`true` significa «hubo escritura»— y un cancelar mentiroso
+  provocaría una recarga fantasma; se escribió el caso (13), que afirma `close()` sin argumento y niega que se
+  haya llamado a `reemplazar`. En el cableado murieron las tres planificadas y las dos extra, y la segunda extra
+  justifica un aserto que faltaba: el botón «Tutoría» abriendo `PdcDialogo` pasaba entero mientras el aserto
+  solo mirase el DATO y no el COMPONENTE. Nota de cascada: mutar el cableado para que recargue rompe 4 ficheros
+  de test, no 1, por el `verify()` fallido que impide el reset del TestBed (documentado en
+  `bloqueo.service.spec.ts`); el rojo que cuenta es el primero.
+  CORRECCIÓN DE MÉTODO, y la registra el arquitecto contra sí mismo: el guion de F2 afirmaba como MEDIDO que
+  «pintar un `<select>` antes de tener las opciones pierde la preselección». Es falso para el `<select>` único
+  —Angular reconcilia, y `grupo-form.spec.ts:174` lo congela desde S104— y era analogía indebida con el
+  `<select multiple>` de S108, donde el problema sí es real. Claude Code lo desmintió ANTES de escribir, en el
+  paso de medición del guion, y conservó el `forkJoin` por el argumento que sí lo sostiene (el gating de
+  estados, con precedente en `PdcDialogo`) reescribiendo el TSDoc con un párrafo explícito sobre lo que NO
+  arregla. Es exactamente el rendimiento que M2 promete —«una afirmación sobre el estado del repo que no se ha
+  medido se declara como RAZONAMIENTO»— aplicado a una afirmación del arquitecto, no del plan.
+  M4 — VERIFICACIÓN EN NAVEGADOR sobre el centro mínimo creado íntegramente por UI, guion desechable en `/tmp`
+  (R-e2e), nada commiteado. Orden obligatorio y no casual: `requiereTutor` se marca ANTES de la primera
+  generación, porque con un horario ya generado el PUT de la actividad da 409 y D-horario-irreversible dejaría
+  el M4 bloqueado sin salida por UI. EL CONTRASTE, que es la prueba del Cambio: horario #1 generado sin tutor →
+  `TUTORIA_SIN_TUTOR` con `recursoCodigo: "1ESOA"`, `tramoCodigo: null`, las tres celdas y la descripción que
+  nombra la actividad y el grupo; se asigna el tutor por el diálogo; horario #2 → `"violaciones": []`. Verificado
+  además: el diálogo abre en «cargado» y no en error con lista vacía (5a), el desplegable trae los profesores
+  del centro (5b), «— sin tutor —» no está `disabled` (5c), el tutor llega PRESELECCIONADO al reabrir contra el
+  backend real (6), y el gesto de quitar el tutor deja `GET .../tutoria` en `[]` con 200 (11).
+  HALLAZGO DEL M4 que obligó a reformular un paso del guion: el paso 9 —«comprueba que el filete rojo del
+  horario #1 desaparece»— NO era medible como estaba escrito, porque el guion daba por hecho que el diagnóstico
+  es una FOTO del momento de generación y no lo es. `DiagnosticoService` recalcula contra el catálogo VIVO y
+  `verificarTutorias` no mira la solución, así que con el tutor ya asignado el horario #1 —el generado sin
+  tutor— se presenta hoy impecable. Se midió en la única ventana en que es observable, durante el gesto de
+  quitar el tutor, y con los dos horarios a la vez: SIN tutor 3/3 celdas en violación en AMBOS, CON tutor 0/3 en
+  AMBOS. El resalte sigue al catálogo, no al horario que se está mirando. Nace de aquí D-diagnostico-no-es-foto.
+  DEUDA — nacen CINCO y ninguna bloqueaba el criterio, por lo que el objetivo cierra con ellas vivas
+  (R-terminado): D-tutor-pdc-desincronizado (cuelga de O-estructura, cerrado: la herencia del principal al PDC
+  corre solo en el alta, y este Cambio la hace visible por primera vez); D-s8-muda, D-diagnostico-no-es-foto y
+  D-post-horario-sin-sesiones (las tres de O-ajuste-cierre, superficie de la vista de horario, mismo criterio
+  con que S113 dejó fuera D1-8 y D1-10); y D-dialogo-foco-perdido (O-diseño; NO la introduce C-tutores,
+  `PdcDialogo` hace lo mismo desde S113, y arrastra que la barrera `:focus` de `centro-minimo.spec.ts` no sirve
+  en diálogos con estados). D-bundle-presupuesto anotada: 514,42→520,22 kB al entrar `TutoriaDialogo` en el
+  grafo; el techo de 500 kB llevaba desbordado desde antes de la sesión, medido apartando los ficheros nuevos.
+  R-terminado RESPETADA en tres sitios: no se construyó el alta/baja de co-tutores, no se añadió la columna
+  «Tutor» y no se pintó el mensaje de la violación S8, las tres con razón escrita.
+  EL CIERRE, con su parte débil declarada. Las tres patas quedan cumplidas, pero el apoyo de la segunda es un
+  ARGUMENTO ESTRUCTURAL y no una reproducción exhaustiva: los seis casos del §6 no se han tecleado uno a uno.
+  Lo demostrado es que la única fila que faltaba a §6.1/§6.5/§6.6 ya es introducible y que S8 se satisface por
+  la vía del modelo; §6.2 se construyó entero en S113; §6.3 y §6.4 se apoyan en el recorte medido en S113 (usan
+  subgrupos multi-grupo, es decir actividades multiplaza, demostradas en S110). Se propuso al arquitecto con el
+  hueco a la vista, no a pesar de él, y la alternativa —una sesión más construyendo §6.1 completo por UI— se
+  descartó porque no podía descubrir ninguna pieza sin demostrar. Si O-demo destapara un caso inexpresable, es
+  hueco funcional de H2 y se afronta allí.
+  LIMPIEZA (M1.5): sin frentes cerrados que condensar. R4/costura: script oficial sigue sin existir en el repo
+  (mejora de método pendiente desde S101); verificado a mano que los seis commits de código separan feat de
+  test, que documentación y código van en commits distintos, que el guion desechable del M4 no entró en el árbol
+  y que `app/educhronos-e2e.db` sigue ignorada por `.gitignore`.
+  O-estructura (H2) ✔ TERMINADO, 8 piezas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
+  e2e S112, PDC S113, tutores S114). Desbloquea O-demo, ÚNICO objetivo entre H2 y su cierre. Suites: app 268,
+  solver 91, vitest 310, e2e 2. Siguiente: abrir O-demo (ver M1-ter).
