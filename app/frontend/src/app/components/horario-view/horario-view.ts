@@ -82,6 +82,27 @@ export class HorarioView {
   protected readonly errorGeneracion = signal<string | null>(null);
 
   /**
+   * Un POST de generación está EN VUELO. `true` al lanzarlo, `false` en éxito y en
+   * error —las dos ramas, o un fallo dejaría el botón muerto para siempre—.
+   *
+   * <p>Existe porque la generación tarda MINUTOS y hasta S118 la vista no lo decía:
+   * el botón seguía pulsable y la pantalla no cambiaba, así que una espera normal era
+   * indistinguible de un cuelgue, y volver a pulsar lanzaba un segundo solve encima
+   * del primero.
+   */
+  protected readonly generando = signal(false);
+
+  /**
+   * Minutos que se anuncian durante la espera. ESPEJO del presupuesto por defecto del
+   * backend (`educhronos.solver.max-segundos`, hoy 600 s): el servidor no lo publica
+   * en ningún endpoint, así que esto es una copia y puede desincronizarse en silencio
+   * si allí se cambia el valor sin tocar aquí. Es una cota anunciada, no una promesa;
+   * se prefiere a no decir nada, porque un número —aunque sea aproximado— es lo que
+   * distingue "está trabajando" de "se ha colgado".
+   */
+  private readonly MINUTOS_ANUNCIADOS = 10;
+
+  /**
    * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
    * lista para el input de la rejilla. La agregación es LÓGICA PURA
    * ({@link sumaDeltasPorInstancia}); este contenedor NO suma, igual que no filtra
@@ -318,16 +339,58 @@ export class HorarioView {
    */
   private lanzarGeneracion(): void {
     this.errorGeneracion.set(null);
+    this.generando.set(true);
     this.service.generar().subscribe({
       next: (dto) => {
+        this.generando.set(false);
         if (dto.id === this.idCargado) {
           this.cargar(dto.id);
         } else {
           this.router.navigate(['/horario', dto.id]);
         }
       },
-      error: (err) => this.errorGeneracion.set(this.mensaje(err)),
+      error: (err) => {
+        this.generando.set(false);
+        this.errorGeneracion.set(this.mensajeGeneracion(err));
+      },
     });
+  }
+
+  /**
+   * Texto para un fallo de generación, decidido por el STATUS y la `causa` del
+   * cuerpo (S118) — NUNCA por la prosa del servidor, que es un mensaje de log en
+   * bruto ("Estado CP-SAT: UNKNOWN") y no algo que enseñar a quien hace horarios.
+   *
+   * <p>Los cuatro textos existen para que cada uno diga qué HACER, y por eso no
+   * pueden colapsarse en uno: ante un presupuesto agotado la acción es reintentar,
+   * ante un catálogo infactible reintentar NO sirve —el resultado será idéntico— y
+   * ante una jornada sin definir el sitio donde ir es otro. Un mensaje único
+   * mandaría a esperar en balde a dos de cada tres.
+   *
+   * <p>La `causa` manda sobre el status cuando viene; el status es el respaldo para
+   * un cuerpo que no la traiga (un proxy que lo recorte, una versión previa del
+   * backend). Sin ninguno de los dos, el genérico con el número.
+   */
+  private mensajeGeneracion(err: {
+    status?: number;
+    error?: { causa?: string };
+  }): string {
+    const causa = err?.error?.causa;
+    if (causa === 'PRESUPUESTO_AGOTADO' || err?.status === 503) {
+      return 'Se agotó el tiempo de cálculo. Vuelve a intentarlo.';
+    }
+    if (causa === 'CONFIGURACION_INCOMPLETA') {
+      return 'Falta configurar la jornada antes de generar un horario.';
+    }
+    if (causa === 'CATALOGO_INFACTIBLE' || err?.status === 422) {
+      return 'Esta configuración no tiene solución. Revisa el catálogo.';
+    }
+    return `El servidor no pudo generar el horario (${err?.status ?? 'error'}).`;
+  }
+
+  /** Texto de la espera. Con los minutos, para que una espera larga no parezca un cuelgue. */
+  protected textoGenerando(): string {
+    return `Generando horario… puede tardar hasta ${this.MINUTOS_ANUNCIADOS} minutos.`;
   }
 
   protected cambiarVista(v: Vista): void {

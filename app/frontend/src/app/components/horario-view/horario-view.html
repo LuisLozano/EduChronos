@@ -20,12 +20,21 @@
   <button
     type="button"
     class="generar"
-    [disabled]="avisosPrevalidacion() === null"
+    [disabled]="avisosPrevalidacion() === null || generando()"
     (click)="generar()"
   >
     Generar horario
   </button>
 </section>
+
+<!--
+  Estado de espera (S118). MARCADO MÍNIMO Y SIN ESTILO a propósito: O-diseño
+  rehará el aspecto, no el estado (R-invalidación), así que aquí no hay spinner,
+  ni animación, ni clase nueva que luego haya que desmontar. Un <p> con su texto.
+-->
+@if (generando()) {
+  <p class="generando">{{ textoGenerando() }}</p>
+}
 
 @if (errorGeneracion(); as msg) {
   <p class="error-generacion">{{ msg }}</p>

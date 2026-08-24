@@ -728,6 +728,14 @@ describe('contenedor del horario', () => {
    * (S92). Se comprueba a la vez que `.error` (error/errorPin) sigue ausente: el
    * fallo de generación no se confunde con los otros. El body va `{}` para forzar
    * el degradado de `mensaje()`.
+   *
+   * <p>S118: este test YA NO fija el TEXTO del aviso. Lo fijaba —el degradado
+   * `'El servidor rechazó el pin (422).'`, heredado de compartir `mensaje()` con la
+   * vía de pines y equivocado en esta vía, que no habla de ningún pin—, y desde el
+   * (42) el texto del 422 de generación se asevera allí, donde su pareja (41) lo
+   * hace discriminante frente al 503. Aquí queda lo que este test mide de verdad:
+   * QUÉ señal se puebla y qué NO se toca. Que el aviso lleve texto sigue aseverado
+   * (un `.error-generacion` vacío no distinguiría "falló" de "no falló").
    */
   it('(32) un POST de generación fallido puebla su aviso propio y no vacía la rejilla', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
@@ -741,10 +749,10 @@ describe('contenedor del horario', () => {
     const raiz = fixture.nativeElement as HTMLElement;
     // (1) la rejilla sigue en pie: la proyección no se tocó.
     expect(fixture.debugElement.query(By.directive(HorarioGrid))).not.toBeNull();
-    // (2) su aviso propio, con su clase y su texto degradado.
+    // (2) su aviso propio, con su clase y con algún texto (cuál, lo fija el (42)).
     const aviso = raiz.querySelector('.error-generacion');
     expect(aviso).not.toBeNull();
-    expect(aviso!.textContent?.trim()).toBe('El servidor rechazó el pin (422).');
+    expect(aviso!.textContent?.trim()).not.toBe('');
     // (3) NO se confunde con error/errorPin (comparten `.error`).
     expect(raiz.querySelector('.error')).toBeNull();
   });
@@ -1011,5 +1019,159 @@ describe('contenedor del horario', () => {
     // (3) DISCRIMINANTE: la pantalla salió del error y la rejilla se pinta.
     expect(raiz.querySelector('.error')).toBeNull();
     expect(fixture.debugElement.query(By.directive(HorarioGrid))).not.toBeNull();
+  });
+  /**
+   * S118 · el 503 del presupuesto agotado. Que CP-SAT se quede sin tiempo NO
+   * demuestra que el horario sea imposible, solo que no dio tiempo a decidirlo, y
+   * el usuario tiene una acción útil: volver a intentarlo. El mensaje debe ofrecer
+   * esa acción.
+   *
+   * <p>Va EMPAREJADO con el (42): son la misma pregunta —¿la vista distingue el
+   * status?— con las dos respuestas, y por eso no se puede pasar uno solo con un
+   * mensaje fijo. El body va `{}` a propósito: si el texto saliera del cuerpo del
+   * error y no del status, ambos degradarían al mismo sitio y el par caería.
+   */
+  it('(41) un 503 de generación ofrece reintentar, no declara el horario imposible', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({ status: 503, error: {} });
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe(
+      'Se agotó el tiempo de cálculo. Vuelve a intentarlo.',
+    );
+  });
+
+  /**
+   * S118 · el 422 del catálogo imposible. Aquí reintentar NO sirve de nada —el
+   * resultado será idéntico— y proponerlo mandaría al usuario a esperar en balde.
+   * El mensaje señala la configuración, que es lo único que puede cambiar.
+   *
+   * <p>Pareja del (41): mismo gesto, mismo body vacío, distinto status, distinto
+   * texto. Una implementación con un único mensaje para todo fallo de generación
+   * —la de hoy— no puede pasar los dos.
+   */
+  it('(42) un 422 de generación señala la configuración, no ofrece reintentar', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({ status: 422, error: {} });
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe(
+      'Esta configuración no tiene solución. Revisa el catálogo.',
+    );
+  });
+  /**
+   * S118 · el estado de espera, mitad "durante". Los TRES asertos atacan mecanismos
+   * distintos y por eso van juntos —borrar uno solo debe poner el test rojo—:
+   *
+   * <p>(a) el botón se cierra mientras el POST vuela. Sin esto, la generación tarda
+   * minutos con el botón pulsable y un segundo clic lanza otro solve encima del
+   * primero. El `|| generando()` se AÑADE al `avisosPrevalidacion() === null` que ya
+   * estaba: el (34) sigue midiendo esa otra mitad y ninguno de los dos basta solo.
+   *
+   * <p>(b) el texto de espera aparece; (c) con los minutos dentro. El número es lo
+   * que distingue "está trabajando" de "se ha colgado" en una espera de diez minutos,
+   * así que un texto sin él no cumple el propósito y el aserto lo exige.
+   *
+   * <p>El Subject NO se emite: la fase "en vuelo" es justamente la que se mide, y
+   * cualquier emisión la cerraría.
+   */
+  it('(43) mientras el POST vuela: botón cerrado y aviso de espera con los minutos', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const boton = raiz.querySelector('button.generar') as HTMLButtonElement;
+    expect(boton.disabled).toBe(true);
+
+    const espera = raiz.querySelector('.generando');
+    expect(espera).not.toBeNull();
+    expect(espera!.textContent).toContain('10 minutos');
+  });
+
+  /**
+   * S118 · el estado de espera, mitad "después por ÉXITO". Es la pareja imprescindible
+   * del (43): con `generando` puesto a `true` y nunca a `false`, el (43) pasa y la
+   * aplicación queda con el botón muerto para siempre. Este test es el único que lo
+   * caza por la rama de éxito.
+   *
+   * <p>Se emite un id DISTINTO del cargado para salir por la rama de navegación, que
+   * no recarga la proyección (ver (39)): así el aserto mide el cierre del vuelo y no
+   * se enreda con el ciclo de recarga.
+   */
+  it('(44) tras el 200 el botón se rehabilita y el aviso de espera desaparece', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 2 });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
+    expect(raiz.querySelector('.generando')).toBeNull();
+  });
+
+  /**
+   * S118 · el estado de espera, mitad "después por ERROR". La rama que más fácil se
+   * olvida: poner `generando` a `false` solo en `next` deja la pantalla bloqueada
+   * justo cuando el usuario necesita reintentar, y el (44) no lo caza porque nunca
+   * pasa por el error.
+   *
+   * <p>Se comprueba a la vez que el aviso de error SÍ está: el fin de la espera y la
+   * aparición del mensaje son dos efectos del mismo `error`, y separarlos permitiría
+   * una implementación que limpiara el estado sin decir qué pasó.
+   */
+  it('(45) tras un fallo el botón se rehabilita, el aviso de espera se va y el de error llega', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({ status: 503, error: { causa: 'PRESUPUESTO_AGOTADO' } });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
+    expect(raiz.querySelector('.generando')).toBeNull();
+    expect(raiz.querySelector('.error-generacion')).not.toBeNull();
+  });
+
+  /**
+   * S118 · la `causa` manda sobre el status. Un 422 con causa CONFIGURACION_INCOMPLETA
+   * —catálogo sin jornada, la excepción sin solve— NO dice lo mismo que el 422 del
+   * (42), que comparte status y significa otra cosa.
+   *
+   * <p>Es lo que impide que la vista decida solo por el número: con una implementación
+   * que mire únicamente el status, este test y el (42) piden textos distintos para el
+   * mismo 422 y uno de los dos cae.
+   */
+  it('(46) un 422 con causa CONFIGURACION_INCOMPLETA manda a configurar la jornada', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({ status: 422, error: { causa: 'CONFIGURACION_INCOMPLETA' } });
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso!.textContent?.trim()).toBe(
+      'Falta configurar la jornada antes de generar un horario.',
+    );
   });
 });
