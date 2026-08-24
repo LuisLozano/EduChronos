@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,7 +156,8 @@ public class GeneradorHorarioService {
      * transacción de escritura al final. Envolver el solve en una transacción
      * mantendría abierta la conexión SQLite durante la búsqueda (ver nota de clase).
      *
-     * <p>Todos los parámetros son opcionales: {@code maxSegundos} cae a 30 s y
+     * <p>Todos los parámetros son opcionales: {@code maxSegundos} cae al valor de
+     * {@code educhronos.solver.max-segundos} (ver {@link #presupuestoSegundos}) y
      * {@code semilla} a 42 cuando faltan (defaults de la capa de aplicación,
      * D-F8.1-3: acotan una petición síncrona sin depender del techo de 120 s del
      * constructor por defecto del solver); {@code via} a {@link ViaSolver#OPTIMIZACION}
@@ -195,10 +197,10 @@ public class GeneradorHorarioService {
             throw new PrevalidacionFallidaException(avisos);
         }
 
-        // Defaults de la capa de aplicación (D-F8.1-3): 30 s de presupuesto y semilla
-        // 42 cuando el body no los especifica. NO se delega en el constructor por
-        // defecto del solver (120 s), demasiado alto para una petición síncrona.
-        int seg = maxSegundos != null ? maxSegundos : 30;
+        // Defaults de la capa de aplicación (D-F8.1-3): presupuesto configurable y
+        // semilla 42 cuando el body no los especifica. NO se delega en el constructor
+        // por defecto del solver (120 s), que no lo gobierna nadie desde fuera.
+        int seg = presupuestoSegundos(maxSegundos);
         int sem = semilla != null ? semilla : 42;
         SolverHorario solver = new SolverHorario(seg, sem);
 
@@ -207,6 +209,34 @@ public class GeneradorHorarioService {
         };
 
         return guardar(resultado, problema, nombreEfectivo);
+    }
+
+    /**
+     * Presupuesto de solve en segundos cuando la petición no lo especifica. Property
+     * {@code educhronos.solver.max-segundos}, con 600 como valor de respaldo si la
+     * clave falta del entorno (ver {@code application.properties}, que la declara y
+     * documenta de dónde sale el número). No es {@code final}: lo inyecta Spring por
+     * campo, que es lo que permite sobreescribirlo en el arranque sin recompilar.
+     */
+    @Value("${educhronos.solver.max-segundos:600}")
+    int maxSegundosDefecto;
+
+    /**
+     * Resuelve el presupuesto EFECTIVO: lo solicitado si viene, el defecto configurado
+     * si no. Extraído de {@link #generar} para poder aseverarlo sin montar un solve
+     * —la vía de {@code generar} solo lo deja observar interceptando el constructor de
+     * {@code SolverHorario}, que mide el resultado pero no la regla—.
+     *
+     * <p>NO valida: la guarda de {@code <= 0} sigue en {@link #generar}, antes de
+     * cargar el catálogo, porque su traducción es un 400 y ese es un hecho del
+     * borde HTTP, no de esta regla. Aquí un solicitado no positivo ya no puede
+     * llegar.
+     *
+     * @param solicitado el {@code maxSegundos} del cuerpo de la petición, o null.
+     * @return el presupuesto en segundos que recibirá el solver.
+     */
+    int presupuestoSegundos(Integer solicitado) {
+        return solicitado != null ? solicitado : maxSegundosDefecto;
     }
 
     /**

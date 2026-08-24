@@ -51,7 +51,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * suite rápida): los catálogos son mínimos y se resuelven —o se prueban
  * infactibles— en milisegundos. El caso 200 usa cuerpo vacío ({@code {}}, todos
  * los parámetros por defecto) porque el problema trivial demuestra optimalidad al
- * instante; el caso 422 acota además con {@code maxSegundos} pequeño.
+ * instante; el caso 422 acota además con {@code maxSegundos} pequeño. Desde S118 el
+ * defecto sale de {@code educhronos.solver.max-segundos} (5 s en la suite), no de un
+ * literal.
  *
  * <p><b>Nota sobre transacciones.</b> {@code @DataJpaTest} envuelve el test en UNA
  * transacción (rollback al final, y con {@code replace = NONE} eso evita ensuciar
@@ -126,6 +128,15 @@ class GenerarHorarioEndpointTest {
      * una regla nueva de pre-validación cubriera este caso, el test seguiría verde
      * afirmando algo falso sobre el solver. El fixture anterior ({@code (2, 1)}) cayó
      * justamente en eso al entrar 8.4-A: lo capturaban (a) y (d) antes del solve.
+     *
+     * <p><b>S118: cómo se comprueba esa causa.</b> Antes se leía
+     * {@code getResolvedException()}, porque el 422 del solver llegaba lanzando un
+     * {@code ResponseStatusException}. Ahora esa rama devuelve un {@code ResponseEntity}
+     * —para que el cuerpo viaje de verdad por la red— y no hay excepción resuelta que
+     * inspeccionar. El sustituto es MÁS fuerte, no un apaño: {@code $.causa} distingue
+     * las dos vías POR EL CUERPO QUE VE EL CLIENTE, mientras que la pre-validación
+     * sigue saliendo por {@code ResponseStatusException} y no produce ningún
+     * {@code $.causa}. Un 422 de pre-validación no puede pasar este aserto.
      */
     @Test
     void post_conCatalogoInfactible_devuelve422DelSolver() throws Exception {
@@ -136,12 +147,23 @@ class GenerarHorarioEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"maxSegundos\":5}"))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(resultado -> assertThat(resultado.getResolvedException())
-                        .hasCauseInstanceOf(HorarioInfactibleException.class));
+                .andExpect(jsonPath("$.causa").value("CATALOGO_INFACTIBLE"))
+                .andExpect(jsonPath("$.estado").value("INFEASIBLE"));
     }
 
+    /**
+     * S118: el presupuesto por defecto ya no es un literal en el servicio sino la
+     * property {@code educhronos.solver.max-segundos}, que en la suite vale 5 (en
+     * producción, 600). Este test seguía asertando el 30 que desapareció del código;
+     * el aserto se actualiza al valor VIGENTE EN TEST, no al de producción, porque lo
+     * que se mide es qué recibe el solver en ESTA corrida.
+     *
+     * <p>Sigue siendo el único punto que aserta el defecto por la vía real (el POST),
+     * y por eso no se borra en favor de {@code PresupuestoSolverTest}: aquel mide la
+     * regla aislada, este que la regla esté ENCHUFADA al constructor del solver.
+     */
     @Test
-    void post_conBodyPorDefecto_acotaElSolveA30sYsemilla42() throws Exception {
+    void post_conBodyPorDefecto_acotaElSolveAlPresupuestoConfiguradoYsemilla42() throws Exception {
         poblarCatalogoMinimo(1, 5);
         entityManager.flush();
 
@@ -166,8 +188,44 @@ class GenerarHorarioEndpointTest {
                     .content("{}"));
         }
 
-        // D-F8.1-3: body por defecto ⇒ 30 s (no el techo de 120 del solver) y semilla 42.
-        assertThat(argsConstructor).containsExactly(30.0, 42);
+        // D-F8.1-3 + S118: body por defecto ⇒ el presupuesto de la property (5 s en la
+        // suite; NO el techo de 120 del constructor sin argumentos) y semilla 42.
+        assertThat(argsConstructor).containsExactly(5.0, 42);
+    }
+
+    /**
+     * La guarda de {@code maxSegundos <= 0} (S118). Existía desde 8.1 y NO la ejercía
+     * ningún test: los 400 de la suite eran todos de endpoints de catálogo.
+     *
+     * <p>Va aquí y no en {@code MapeoFalloEndpointTest} —donde el M3 pedía juntarlo—
+     * porque allí el servicio es un MOCK y la guarda vive en el servicio REAL: un
+     * mock no la tiene, así que el test pasaría con la guarda borrada, que es
+     * exactamente lo que no debe ocurrir. Este fichero monta el servicio de verdad.
+     *
+     * <p>Sin fixture a propósito: la guarda es lo PRIMERO de {@code generar}, antes
+     * de cargar el catálogo. Que un catálogo vacío dé 400 y no otra cosa es parte de
+     * lo aseverado —prueba que se rechazó por el argumento y no por falta de datos—.
+     */
+    @Test
+    void post_conMaxSegundosCero_devuelve400() throws Exception {
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":0}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * El otro lado de la guarda. Cero y negativo van SEPARADOS porque discriminan
+     * mutaciones distintas: con la guarda relajada a {@code < 0} el cero se cuela y
+     * este test sigue verde; solo el de arriba lo caza. Y un presupuesto de 0 s no es
+     * un caso de laboratorio: es lo que teclea quien quiere "sin límite".
+     */
+    @Test
+    void post_conMaxSegundosNegativo_devuelve400() throws Exception {
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":-1}"))
+                .andExpect(status().isBadRequest());
     }
 
     /**

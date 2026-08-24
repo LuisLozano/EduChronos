@@ -5,10 +5,13 @@ import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
+import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,12 +28,13 @@ import org.springframework.web.server.ResponseStatusException;
  * global; cada controlador traduce las suyas, patrón de 7A).
  *
  * <p>Traducciones: {@code IllegalArgumentException} de {@link GeneradorHorarioService#proyectar}
- * (id inexistente) → {@code 404}; {@code HorarioInfactibleException} → {@code 422}
- * (problema bien formado sin solución); {@link PrevalidacionFallidaException} →
- * {@code 422} TAMBIÉN (Bloque 8.4-A): es el mismo hecho —no hay horario posible—
- * detectado ANTES del solve y con el recurso culpable nombrado, así que comparte
- * status; {@code IllegalArgumentException} de la generación (p. ej. {@code maxSegundos}
- * no positivo) → {@code 400}. El resto (errores de integridad del catálogo) se deja
+ * (id inexistente) → {@code 404}; {@code HorarioInfactibleException} → lo que diga
+ * {@link MapeoFalloSolver} según el veredicto CP-SAT (S118: {@code 422}, {@code 503}
+ * o {@code 500}, ya no un 422 único); {@link PrevalidacionFallidaException} →
+ * {@code 422} (Bloque 8.4-A): es un hecho detectado ANTES del solve y con el recurso
+ * culpable nombrado, y NO pasa por el mapeo —no hay veredicto que mapear—;
+ * {@code IllegalArgumentException} de la generación (p. ej. {@code maxSegundos} no
+ * positivo) → {@code 400}. El resto (errores de integridad del catálogo) se deja
  * propagar.
  */
 @RestController
@@ -51,21 +55,47 @@ public class HorarioController {
      * a sus valores por defecto (ver {@link GenerarHorarioRequest}).
      */
     @PostMapping
-    public HorarioProyeccionDTO generar(@RequestBody(required = false) GenerarHorarioRequest peticion) {
+    public ResponseEntity<Object> generar(@RequestBody(required = false) GenerarHorarioRequest peticion) {
         GenerarHorarioRequest req = peticion != null
                 ? peticion
                 : new GenerarHorarioRequest(null, null, null, null);
         try {
             HorarioGenerado horario =
                     service.generar(req.maxSegundos(), req.semilla(), req.via(), req.nombre());
-            return service.proyectar(horario.getId());
+            return ResponseEntity.ok(service.proyectar(horario.getId()));
         } catch (PrevalidacionFallidaException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         } catch (HorarioInfactibleException e) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+            return respuestaDeFallo(e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    /**
+     * Traduce un fallo del solver a su respuesta, con el cuerpo que verá el navegador.
+     *
+     * <p>NO lanza {@code ResponseStatusException} como las otras ramas: esa vía deja
+     * el cuerpo en manos del mecanismo de error de Spring, que aquí está medido como
+     * mudo (D-F8.6-ii-a, ver {@link FalloGeneracionDTO}). Un {@code ResponseEntity}
+     * es lo único que garantiza que la causa llegue por la red.
+     */
+    private ResponseEntity<Object> respuestaDeFallo(HorarioInfactibleException e) {
+        MapeoFalloSolver.RespuestaFallo fallo = MapeoFalloSolver.mapear(e.estado());
+        FalloGeneracionDTO cuerpo = new FalloGeneracionDTO(
+                fallo.causa(), e.getMessage(), e.estado(), e.segundos());
+
+        ResponseEntity.BodyBuilder respuesta = ResponseEntity.status(fallo.status());
+        if (fallo.status() == HttpStatus.SERVICE_UNAVAILABLE) {
+            // Retry-After: 0 — "reintenta YA", y el 0 es deliberado, no un descuido.
+            // No hay cola que drenar ni servicio que se recupere con el tiempo: lo que
+            // faltó fue presupuesto. Y cada corrida es una tirada INDEPENDIENTE
+            // (D-generacion-no-reproducible), así que esperar no mejora las
+            // probabilidades del siguiente intento ni un ápice. Cualquier número mayor
+            // que 0 le mentiría al cliente sobre por qué debe esperar.
+            respuesta = respuesta.header(HttpHeaders.RETRY_AFTER, "0");
+        }
+        return respuesta.body(cuerpo);
     }
 
     @GetMapping("/{id}/proyeccion")
