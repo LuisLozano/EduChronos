@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S116. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S117. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S116). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S117). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -6714,3 +6714,218 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   formuladas —qué presupuesto de tiempo necesita de verdad el centro real, cómo se reconcilian las 770
   sesiones contra las 632 del catálogo, y qué dice el contraste con el horario del PDF— y con dos deudas
   nuevas nacidas en su terreno. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 117 — O-demo (H2): C-generación, primera parte. Caracterización del solve sobre el IES real: reconciliación de `sesion` y barrido de presupuesto en cuatro pasadas (M0 + M2 completo, sin M3 ni M4 canónicos). TERCERA pieza EN CURSO. NO cierra el Cambio ni el objetivo.
+  Decimoséptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo SIN ENCAJE EXACTO en los cuatro de
+  `metodo.md`, y se dice en vez de forzar la etiqueta: ritual M0 + M2 completo + M1, sin M3 ni M4 canónicos,
+  porque la sesión entera es MEDICIÓN sobre un catálogo ya cargado y no se escribió ni una línea de producto.
+  Ningún fichero de `app/src/main`, `solver/src/main` ni `app/frontend` se toca; las cuatro suites quedan
+  intactas (app 268, solver 91, vitest 310, e2e 2). Lo que ENTREGA: las dos primeras de las tres preguntas
+  que C-generación heredaba de S116 quedan RESUELTAS, y la respuesta a la segunda no es un número sino un
+  cambio de forma de la pregunta.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), 2 piezas hechas. Hito = H2.
+  Cambio = C-generación, leído de los «Cambios que agrupa» de la ficha, con su enunciado propio
+  —factibilidad, tiempo y contraste con el PDF— y sus tres preguntas ya escritas. No había otro candidato:
+  C-hueco-* no se planifica y no hay ninguno conocido, C-borrado-horario y C-configuracion-navegable están
+  retirados del camino crítico, y C-carga-manual-1eso es una decisión y no la siguiente porción por
+  dependencias.
+  EL M0 REGISTRÓ UN HUECO DOCUMENTAL DE S116 Y LO CORRIGE ESTA SESIÓN. La cabecera de S116 cerraba su R4 con
+  «`git status` quedó limpio salvo el punto de abajo» y ese punto NO EXISTÍA en el documento: el referente se
+  perdió al redactar. La higiene que describía —`application.properties` modificado sin commitear apuntando a
+  la base de demo, y varias bases sueltas— vivía solo en el prompt de apertura, es decir, en la memoria de
+  alguien. Es incumplimiento de R4 en su forma más simple y se corrige en la cabecera degradada de S116, que
+  sigue siendo sede viva.
+  ALCANCE FIJADO EN LA APERTURA, con una pregunta dejada fuera a propósito: entran la reconciliación
+  770↔632 y la calibración del presupuesto; SALE el contraste con el horario del PDF, porque exige decidir
+  antes qué se asevera como «válido» y es Cambio de sesión propia. Se declaró además que O-demo NO PUEDE
+  CERRAR en esta sesión pase lo que pase: su criterio exige el centro ENTERO y siguen faltando las 11
+  actividades de FPB a la espera de la respuesta del centro (D31-a).
+  R-invalidación con una condición de orden que la ficha de O-particiones nombra y que se respetó: su prueba
+  se hace ANTES de generar o después de que exista un borrado de horario, porque `ActividadService.exigirSinDependientes`
+  bloquea con 409 las actividades que ya tengan sesiones. Toda la medición corrió sobre COPIA y sin llamar
+  nunca a `guardar(...)`; verificado al cerrar cada pasada: `horario_generado 0` y `sesion 0` en la copia de
+  trabajo, y md5 intacto de las dos bases canónicas. O-particiones conserva su punto de partida.
+  R-deuda: ninguna deuda abre la sesión. Las dos nacidas en el terreno del Cambio (D-timeout-como-infactible
+  y D-motivo-rechazo-sin-registro) se encuadran sin darlas por pagadas y NINGUNA bloquea el criterio, con
+  argumento medido y no de comodidad (ver más abajo, «lo que la medición decidió sobre la deuda»).
+  LA HIGIENE HEREDADA, MEDIDA Y RESUELTA, y con una corrección al estado que traía la apertura. El arquitecto
+  saldó el `application.properties` modificado con `git restore`, lo que dejó el árbol limpio y —efecto no
+  buscado— la aplicación apuntando otra vez a la base de juguete: `spring.datasource.url=jdbc:sqlite:educhronos.db`
+  es relativa al working dir y resuelve a `app/educhronos.db`, que tiene 1 grupo y 1 actividad. Medido además
+  que son CINCO bases y no cuatro, y que NINGUNA está trackeada por git (las cinco caen bajo `*.db` de
+  `.gitignore:12`), luego la consolidación nunca fue problema de repositorio sino de orden en disco:
+  `educhronos.db` (juguete), `educhronos-demo.db` y `educhronos-demo-pruebas.db` (las dos con el centro real),
+  `educhronos-e2e.db` (Playwright) y `educhronos-test.db` (vacía, la que declara el `application.properties`
+  de test). Las dos del centro real tienen el VOLCADO SQL IDÉNTICO byte a byte —el md5 difiere solo en el
+  contador de páginas de la cabecera SQLite, byte 28— y ambas cuadran con el estado final de S116
+  (8/100/59/43/28/334/208/305/28, `sesion` 0). **DECISIÓN: `educhronos-demo.db` es la base CANÓNICA del
+  centro real; `educhronos-demo-pruebas.db` se conserva sin borrar y sin uso.** Y decisión de método asociada:
+  la apuntada a una base distinta NO se hace editando `application.properties` —así fue como el fichero acabó
+  modificado sin commitear—, sino sobreescribiendo la propiedad en el arranque o, como aquí, con `properties`
+  inline del arnés. La apuntada vive en el guion, queda escrita y no puede colarse en un commit.
+  M2 — MEDICIÓN EN CUATRO PASADAS, todas por Claude Code, todas sobre copia y sin persistir. La primera es de
+  solo lectura sobre el repo; las tres siguientes ejecutan el solver. El instrumento se decidió CON DATOS y
+  no a priori (ver «el instrumento»).
+  M2 (1) — QUÉ ES UNA FILA DE `sesion`, Y CON ELLO LA PREGUNTA 770 vs 632 QUEDA CERRADA. Una fila es una
+  PLAZA de una INSTANCIA en un tramo, leído del anidamiento de `SolucionMapper.aSesiones`: `for actividad`
+  (:113) × `for indice = 1..repeticionesPorSemana` (:114) × `for plaza : actividad.plazas()` (:129), con el
+  `add` en el cuerpo del bucle más interno (:149). El tramo se resuelve UNA vez por instancia (:117, fuera
+  del bucle de plazas), así que todas las plazas de una instancia comparten `tramo_inicio_id` y lo que las
+  distingue es `plaza_id`; la clave única `(horario_id, plaza_id, indice)` lo confirma. El javadoc de
+  `Sesion.java` ya lo decía —«una fila por plaza, no por instancia»— y nadie lo había cruzado con las cifras.
+  **Fórmula: filas = Σ (repeticionesPorSemana × nº de plazas).** `duracionTramos` NO multiplica (solo se
+  escribe el tramo de INICIO) y además todas las actividades del catálogo tienen `duracionTramos: 1`.
+  Resultados sobre `catalogo-derivado.json`: **770 filas con las 208 actividades cargadas y 819 con las 219
+  del catálogo completo.** Y **632 es OTRA MAGNITUD**: es Σ repeticionesPorSemana sobre las 219, es decir el
+  número de INSTANCIAS semanales, idéntico a Σ |instanciasEnElHorarioReal| (las celdas del PDF), que es de
+  donde se derivó. La diferencia 819 − 632 = 187 son las plazas adicionales de las actividades multiplaza
+  —bloques de optativas, desdobles, agrupamientos—, que producen varias filas en el mismo tramo. **Nunca hubo
+  discrepancia: había dos números midiendo cosas distintas y nadie lo había escrito.** La cifra 632 está
+  GRABADA como dato en `catalogo-derivado.json` (`_meta.resumen.sesionesSemanales`) y no la calcula ningún
+  script del repo.
+  SALVEDAD SOBRE LO QUE 770 DEMUESTRA, para no darle un valor que no tiene: `aSesiones` LANZA excepción si
+  alguna instancia no está colocada (:118-121), luego un `guardar` que termina bien implica colocación total
+  por construcción. El número confirma que el guardado fue COMPLETO; no dice nada sobre la CALIDAD del
+  horario. Eso lo dirá el contraste, que es la tercera pregunta y sigue fuera.
+  LO QUE QUEDA COMO ACTIVO: **819 es el oráculo aritmético para cuando lleguen las aulas de FPB.** Si ese día
+  el conteo no da 819 exactos, hay fallo de carga o de colocación, y se detecta con un `SELECT count(*)`.
+  M2 (2) — EL INSTRUMENTO DEL BARRIDO, decidido con la medición delante y no a ojo. NO existía ningún
+  instrumento capaz de resolver el catálogo real sin persistir: cero runners, y los cuatro `@Tag("escala")`
+  del solver cargan fixtures JSON, no la base (su fixture son 26 grupos/229 actividades, que NO es este
+  centro). Pero las tres piezas están SEPARADAS en el código —`cargarProblema()` es público y de solo lectura,
+  `resolverOptimizandoConDetalle()` no toca JPA, y `guardar()` es método aparte—, así que encadenar las dos
+  primeras sin la tercera es un solve sin escribir una fila. Se descartó la vía HTTP con
+  `--spring.datasource.url` por tres razones acumulativas: cada corrida con éxito escribe 770 filas y congela
+  actividades (D-horario-irreversible), obligando a restaurar y reiniciar ENTRE cada punto de medida; cada
+  422 devuelve solo texto; y el `ProblemaHorario` se recarga en cada petición. Arnés DESECHABLE en
+  `app/src/test`, con dos salvaguardas: corre sobre COPIA (porque `spring.sql.init.mode=always` abre la base
+  en escritura, aunque `schema.sql` solo tenga `create table if not exists` desde S109) y NO entra en el
+  árbol. Detalle que resultó ser el que evita el accidente: la clase se llamó `BarridoPresupuestoS117`, SIN
+  sufijo `Test`, de modo que ninguna convención de Surefire la recoge y solo corre con `-Dtest=` explícito.
+  GUARDA DE CATÁLOGO en el arnés, y es lo que hace la medición defendible: aserta `actividades == 208` antes
+  de medir nada. Las cuatro pasadas la superaron con 208/28/305/334 y **30 tramos, no 35**: `CatalogoMapper`
+  filtra los no lectivos (los cinco recreos), que es la renumeración documentada en D30 y cuadra con los 30
+  tramos del fixture de escala. Pre-validación **ERROR=0 y también AVISO=0** en las cuatro pasadas.
+  M2 (3) — PASADA 1, SEIS PUNTOS A n=1, Y LA LECTURA QUE HUBO QUE RETIRAR. Vía OPTIMIZACION, semilla 42:
+  60 s→312.0, 90 s→279.0, 120 s→258.0, 180 s→247.0, 300 s→217.0, 600 s→208.0, todas FEASIBLE, todas con cota
+  0.0 y todas excediendo el presupuesto en 0,6–1,7 s. Se leyó como una curva presupuesto→calidad. **No lo era.**
+  La grieta la abrió el contraste con la documentación: S116 midió objetivo **188.0** con 600 s y esta pasada
+  da **208.0** con 600 s, mismo catálogo, mismo presupuesto y misma semilla —la 42 es el defecto de la capa de
+  aplicación, así que el POST de S116 usó exactamente la misma—. Veinte puntos de diferencia entre dos
+  corridas que deberían ser idénticas.
+  M2 (4) — PASADA 2, Y LA CAUSA. Repeticiones con la misma semilla, no semillas distintas: medir sensibilidad
+  a la semilla antes de saber si dos corridas iguales coinciden es medir la segunda pregunta primero.
+  Resultado: **1 éxito en 17 corridas** (30 s ×3, 40 s ×3, 45 s ×3, 50 s ×3, 60 s ×5; el único éxito a 45 s
+  con objetivo 386.0). La causa está en un grep que salió VACÍO: no hay `num_search_workers`, ni
+  `setNumSearchWorkers`, ni `MaxDeterministicTime` en `solver/src/main` ni en `app/src/main`; las únicas
+  llamadas a `getParameters()` son `setMaxTimeInSeconds` y `setRandomSeed`. **Sin fijar el paralelismo,
+  CP-SAT corre en todos los núcleos (8 en esta máquina) y corta por RELOJ DE PARED, así que `setRandomSeed(42)`
+  no hace la ejecución reproducible.** Las seis filas de la pasada 1 son seis muestras únicas de una variable
+  aleatoria, no una curva; el 312.0 de 60 s era una tirada afortunada.
+  M2 (5) — PASADA 3, TRES BLOQUES EN TRES JVM SEPARADAS, para neutralizar un confundido que se detectó a
+  tiempo: las cinco corridas de 60 s de la pasada 2 fueron las ÚLTIMAS de 17 solves en un mismo proceso, y la
+  de la pasada 1 la PRIMERA de seis, así que un efecto de secuencia (heap, GC, memoria nativa de OR-Tools)
+  habría sido indistinguible del solver. **Bloque A** (60 s ×3, primeras corridas de una JVM nueva): 0 de 3.
+  El efecto de secuencia queda DESCARTADO y la no-reproducibilidad confirmada. **Bloque C** (120 s ×3 → fallo,
+  286.0, 240.0; 180 s ×3 → fallo, 222.0, 262.0): los rangos se solapan por completo, luego entre 120 s y 180 s
+  no hay diferencia de calidad distinguible. Lo que cambia con el presupuesto NO es la calidad, es la TASA DE
+  ÉXITO.
+  M2 (6) — BLOQUE B: LA HIPÓTESIS DEL ARQUITECTO SENIOR, FALSADA, Y ES EL HALLAZGO ESTRUCTURAL DE LA SESIÓN.
+  Se pidió medir la vía de FACTIBILIDAD PURA (`SolverHorario.resolver`, modelo sin objetivo) con el argumento
+  de que si lo caro es la primera solución, quitar el objetivo debería devolver antes; y con la expectativa
+  declarada de que sería rápida. Resultado: **0 de 6** (30 s ×3, 60 s ×3), todas UNKNOWN y todas consumiendo
+  el presupuesto ENTERO, ni una terminó antes. **El cuello de botella de este catálogo es SATISFACER LAS
+  RESTRICCIONES DURAS, no optimizar**, lo que es coherente con los 26 grupos de 28 que empaquetan sus 30
+  tramos exactos. Quitar el objetivo no acelera nada.
+  M2 (7) — PASADA 4: EL CRONÓMETRO, Y LA RESPUESTA. Todas las corridas anteriores agotaban el reloj por
+  diseño, así que nunca se había visto cuánto tarda DE VERDAD en aparecer la primera solución; la vía sin
+  objetivo sí devuelve en cuanto la encuentra, luego con presupuesto largo deja de ser semáforo y pasa a ser
+  cronómetro. Factibilidad pura, 900 s, 5 repeticiones: **5 de 5 con solución, en 844–872 s.** Rango de 28 s
+  sobre una media de 860: dispersión del 3,3 %, el resultado más limpio de las cuatro pasadas. **El catálogo
+  del centro real TIENE solución factible y el solver la encuentra de forma FIABLE; el tiempo de primera
+  solución de este modelo está en torno a los 14,3 minutos.** El desenlace malo —«el centro real está en el
+  límite de lo que este solver resuelve tal como está modelado»— queda DESCARTADO.
+  PRECISIÓN QUE EVITA UNA CONCLUSIÓN FALSA, y corrige la lectura natural del informe de la pasada 4: los 860 s
+  NO son «el tiempo de primera solución» a secas y las corridas de las dos vías NO son muestras de una misma
+  distribución. `resolver` construye el modelo SIN objetivo (`construir()`) y `resolverOptimizandoConDetalle`
+  construye otro CON objetivo (`construirConObjetivo()`): son dos modelos distintos resueltos por dos
+  búsquedas distintas. Los 860 s describen el primero y no dicen nada sobre el segundo. Puestos uno al lado
+  del otro, el resultado va en la dirección CONTRARIA a la esperada: la vía con objetivo da solución 2 de 3
+  veces a 120 s, y la vía sin objetivo 0 de 6 a 30 y 60 s. No se afirma que la factibilidad pura sea MÁS
+  lenta —no está medida a 120–180 s—; lo que se afirma es que **no es la vía barata a una semilla**, que era
+  la hipótesis con que se pidió.
+  TASA DE ÉXITO ACUMULADA POR LA VÍA DE PRODUCCIÓN (OPTIMIZACION, único valor de `ViaSolver` y lo único
+  expuesto por la API), sumando S116 y las tres pasadas de S117: **5 s 0/1 · 30 s 0/4 · 40 s 0/3 · 45 s 1/3 ·
+  50 s 0/3 · 60 s 1/9 · 90 s 1/1 · 120 s 3/4 · 180 s 3/4 · 300 s 1/1 · 600 s 2/2.** Total 35 corridas de
+  optimización más 11 de factibilidad pura.
+  CONCLUSIÓN SOBRE EL PRESUPUESTO, que es la respuesta a la pregunta (1) que S116 dejó formulada: **el
+  presupuesto no es la variable que gobierna la calidad, sino la PROBABILIDAD de obtener horario.** El defecto
+  de producción de 30 s (`GeneradorHorarioService.java:201`) es INDEFENDIBLE: 0 de 4, y no por mala suerte
+  sino porque nunca tuvo ocasión. Por debajo de 120 s el sistema es una moneda al aire. Lo defendible con
+  estos datos es **600 s**, único punto sin ningún fallo observado, con la salvedad honesta de que son 2
+  corridas, una sola máquina de 8 núcleos y una sola semilla. Y ahí la pregunta deja de ser un número: 600 s
+  son diez minutos de pantalla inmóvil delante del jefe de estudios (D-generacion-sin-indicador), y una
+  corrida que caiga en la cola mala dice «no hay horario factible», que es FALSO (D-timeout-como-infactible).
+  LO QUE LA MEDICIÓN DECIDIÓ SOBRE LA DEUDA, y es la decisión estratégica de la sesión. **Ninguna de las dos
+  se paga y ninguna bloquea el criterio**, pero el fundamento cambia. D-motivo-rechazo-sin-registro se
+  descartó como instrumento POR MEDICIÓN y no por regla: el mensaje de `HorarioInfactibleException` lleva el
+  estado de CP-SAT DENTRO del texto (`SolverHorario.java:124-126`) y el arnés lo recibe como excepción y no
+  como cuerpo HTTP, así que la deuda muerde al usuario final, no a esta medición. De regalo, eso convirtió en
+  MEDICIÓN lo que era inferencia: **27 rechazos observados, 27 UNKNOWN, CERO INFEASIBLE**, es decir el
+  catálogo no se demostró imposible ni una sola vez y el sistema dijo veintisiete veces que no había horario
+  factible. D-timeout-como-infactible pasa de RAZONADA a MEDIDA sin pagar nada.
+  LO QUE SE PIERDE Y QUEDA DECLARADO: en el instante del rechazo (`SolverHorario.java:124`) el objeto
+  `CpSolver` está vivo y completo —`objectiveValue`, `bestObjectiveBound`, `wallTime`, `responseStats`— y el
+  `throw` conserva solo el nombre del estado interpolado en el texto. En un fallo no hay solución, luego el
+  objetivo no significa nada, pero la COTA diría cuánto había avanzado CP-SAT. No se recupera sin tocar el
+  solver, y tocarlo es el arreglo de la deuda.
+  **C-GENERACIÓN NO CIERRA, y es decisión con argumento y no falta de tiempo.** Su enunciado incluye
+  «tiempo», y declararlo terminado dejando el defecto en 30 s sería declarar terminado justo lo que la
+  sesión ha demostrado que está mal. Le queda una pieza de PRODUCTO, pequeña y localizada, con las tres
+  ediciones en el mismo camino de fallo: calibrar el defecto de presupuesto, distinguir UNKNOWN de INFEASIBLE
+  en `SolverHorario`, y dar señal durante la espera. Matiz de R-deuda que conviene no perder: si el Cambio
+  toca `GeneradorHorarioService:201`, distinguir UNKNOWN de INFEASIBLE cae en el mismo camino y la deuda se
+  cubre DE PASO; eso no es abrir una sesión para una deuda, es encontrársela. El contraste con el PDF sigue
+  fuera y es la tercera pregunta, intacta.
+  DEUDA — nacen TRES y ninguna abre sesión. **D-generacion-no-reproducible** (técnica real, la más relevante
+  del Cambio): sin fijar el paralelismo, dos generaciones idénticas dan resultados distintos y a veces
+  ninguna. **D-prevalidacion-ciega-a-holgura-cero** (técnica real menor): con 26 grupos a 30/30 la
+  prevalidación da ERROR=0 y AVISO=0, porque `GRUPO_SOBRECARGADO` exige demanda MAYOR que los tramos; el
+  usuario recibe vía libre justo ante el caso más difícil que el sistema puede plantearse, y no hay ninguna
+  otra señal que corrija esa lectura. **D-guion-exit-enmascarado** (de método): un guion cuyo `EXIT=$?` mide
+  el `echo` y no el `mvn` anunció como éxito un BUILD FAILURE; detectado y corregido por Claude Code dentro
+  de la sesión, pero la plantilla es la de sesiones anteriores. Se AFINAN dos vivas: D-timeout-como-infactible
+  (de razonada a medida) y D-generacion-sin-indicador (su gravedad sube: el presupuesto viable está en
+  cientos de segundos, no en decenas). Y se matiza D23 sin reabrirla: el arranque en caliente
+  (`resolverOptimizandoConSemilla`, :156) toma como parámetro una `SolucionHorario`, no un entero, y su
+  javadoc espera obtenerla de `resolver`, que cuesta ~860 s; el warm start no es palanca aplicable tal cual
+  en este catálogo salvo que la semilla se cachee, y eso es objetivo propio, no palanca.
+  NO SE MIDIÓ, y se dice: el arranque en caliente sembrado con la solución de 860 s, que es lo único que
+  podría convertir el esquema en dos fases (una lenta cacheada, otra rápida) en algo operativo. Queda fuera
+  por R-terminado: el criterio de O-demo pide horario VÁLIDO, no bueno.
+  HIPÓTESIS PLAUSIBLE PERO NO ESTABLECIDA, anotada para que no se pierda ni se ascienda a hecho: si cada
+  corrida es una tirada independiente, tres intentos de 120 s podrían batir a uno de 360 s. Comparar 3/4
+  contra n=1 no es comparar; queda como opción de diseño con la forma de medirla escrita.
+  LÍMITES DE TODO LO MEDIDO, declarados de una vez: una sola máquina de 8 núcleos, una sola semilla
+  aleatoria, y n pequeño en cada punto (n=3 o menos salvo en la pasada 4). Cualquier presupuesto por defecto
+  que acabe en producción llevará margen explícito sobre el umbral medido y la máquina nombrada; un «bastan
+  N segundos» sin esa salvedad es una promesa que el portátil del centro puede desmentir.
+  C-CARGA-MANUAL-1ESO: recomendación registrada, decisión NO tomada. El arquitecto senior recomendó hacerlo
+  RECORTADO —el bloque de seis plazas del §6.1 y la co-docencia de LCL sobre una base de usar y tirar, en vez
+  de 1º ESO entero— porque ahí está todo el valor probatorio y los ~80-100 envíos completos añaden volumen y
+  no evidencia; y hacerlo DESPUÉS de C-generación, que no lo bloquea. El arquitecto confirmó el alcance de la
+  sesión sin pronunciarse sobre esto, así que el Cambio sigue PROPUESTO y la nota de alcance del criterio 5
+  sigue escrita y declarada.
+  LIMPIEZA (M1-bis): archivada S115 a `bitacora-sesiones.md` (promovida a `### Sesión 115`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S116 a «Última sesión registrada (previa)» compacta y
+  CORREGIDA en su frase de R4 (el «punto de abajo» inexistente); S117 queda como única cabecera H3 viva.
+  Actualizados los dos censos de la bitácora (→ S10–S115), la crónica de archivado y la frase de ventana del
+  plan. R4/costura: el script oficial SIGUE sin existir en el repo (mejora de método pendiente desde S101, y
+  D-guion-exit-enmascarado le añade un caso); verificado a mano que el árbol quedó limpio, que no hay restos
+  del arnés (`.java` borrado y también el `.class` de `app/target/test-classes/`, que aun estando bajo
+  `target/` permitiría que un `-Dtest=` futuro lo ejecutara) y que ninguna de las cinco bases está trackeada.
+  Esta sesión NO produce commits de código: solo documentación.
+  O-demo (H2) ACTIVO, 3 piezas (C-derivación S115, C-cargador S116, C-generación S117 EN CURSO). Suites
+  INTACTAS, ningún módulo tocado: app 268, solver 91, vitest 310, e2e 2. Siguiente: cerrar C-generación con
+  su pieza de producto —presupuesto por defecto, UNKNOWN vs INFEASIBLE y señal de espera—, o el contraste con
+  el PDF, que es la tercera pregunta y no ha empezado. Lo fija su propio M0 (ver M1-ter).
