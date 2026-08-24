@@ -21,6 +21,15 @@ El horario por grupos titula las páginas con forma larga (`1º ESO A`) y el hor
 - Solo en horario por **aulas**: `3ºCDi` → **31** celdas
 - Solo en horario por **grupos**: `3ºPDC` → **31** celdas
 
+> **NOTA POSTERIOR (añadida en S119; el cuerpo del informe NO se reescribe).** La «correspondencia incierta»
+> de `3º ESO PDC` quedó **CERRADA en S115**: es el PDC de 3ºC (`3ºCDi`), confirmado por tres vías
+> independientes —cruce 31/31 exacto, correspondencia forzosa 5-a-5 entre los códigos `*Di`, y tutor
+> compartido con el grupo padre—. Ver `gestion_proyecto.md` (ficha de O-demo) y `bitacora-sesiones.md` (S115).
+> S119 lo verificó de nuevo por una cuarta vía al derivar el mapa de códigos: `3º ESO PDC` resuelve a `3ºCDi`
+> con solapamiento 1.00 y sin competidor. Este informe conserva su texto original porque es el entregable de
+> una extracción determinista y su cuerpo no se reescribe; lo que cambia es que la incertidumbre ya no existe.
+> Las 31 + 31 celdas siguen excluidas de los cruces §2 y §3 de ESTE documento, que se calcularon antes.
+
 > Nota: los demás grupos PDC (`3º ESO A/B PDC`, `4º ESO A/D PDC`) **sí** mapean a `3ºADi`, `3ºBDi`, `4ºADi`, `4ºDDi` y entran en los cruces con normalidad.
 
 ## 1. Celdas con aula OMITIDA en el horario por grupos
