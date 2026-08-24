@@ -241,3 +241,9 @@ Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
 
 El script solo reporta; el arquitecto lee su salida. Su cobertura se valida una vez
 contra un cierre hecho a mano (el de S99 sirve de test de oro).
+
+**Regla de guion (S117):** un guion que comprueba el resultado de un comando captura
+su código de salida INMEDIATAMENTE y sin nada en medio. Un `EXIT=$?` colocado tras un
+`echo` mide el `echo` —siempre 0— y convierte un fallo en éxito anunciado
+(D-guion-exit-enmascarado). Es la misma familia que el hallazgo de S109 sobre los
+tests de endpoint: un instrumento que mide otra cosa distinta de la que se cree.
