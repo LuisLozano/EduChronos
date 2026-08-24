@@ -36,6 +36,12 @@ public final class SolverHorario {
         Loader.loadNativeLibraries();
     }
 
+    /**
+     * Presupuesto en segundos. Es {@code double} porque lo es el parámetro de
+     * CP-SAT ({@code setMaxTimeInSeconds}); al viajar en la excepción se trunca a
+     * {@code int}, que es el tipo con que lo pide la capa de aplicación y el único
+     * que tiene sentido enseñar a un usuario.
+     */
     private final double maxSegundos;
     private final int semilla;
 
@@ -69,7 +75,8 @@ public final class SolverHorario {
             return modelo.extraerSolucion(solver);
         }
         throw new HorarioInfactibleException(
-                "El solver no encontró un horario factible. Estado CP-SAT: " + estado);
+                "El solver no encontró un horario factible. Estado CP-SAT: " + estado,
+                estado.name(), (int) maxSegundos);
     }
 
     /**
@@ -123,7 +130,8 @@ public final class SolverHorario {
         }
         throw new HorarioInfactibleException(
                 "El solver no encontró un horario factible (modo optimización). "
-                        + "Estado CP-SAT: " + estado);
+                        + "Estado CP-SAT: " + estado,
+                estado.name(), (int) maxSegundos);
     }
 
     /**
@@ -174,6 +182,7 @@ public final class SolverHorario {
         }
         throw new HorarioInfactibleException(
                 "El solver no encontró un horario factible (modo optimización con semilla). "
-                        + "Estado CP-SAT: " + estado);
+                        + "Estado CP-SAT: " + estado,
+                estado.name(), (int) maxSegundos);
     }
 }
