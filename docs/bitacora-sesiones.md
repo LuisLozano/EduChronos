@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S114. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S115. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S114). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S115). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -6366,3 +6366,124 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   O-estructura (H2) ✔ TERMINADO, 8 piezas (jornada S107, subgrupos S108, actividades S109+S110, niveles S111,
   e2e S112, PDC S113, tutores S114). Desbloquea O-demo, ÚNICO objetivo entre H2 y su cierre. Suites: app 268,
   solver 91, vitest 310, e2e 2. Siguiente: abrir O-demo (ver M1-ter).
+
+### Sesión 115 — O-demo (H2): C-derivación. Descomposición del objetivo y derivación del catálogo del IES real desde los volcados (M0 + M2, entregable documental). ABRE O-demo; NO lo cierra.
+  Decimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo SIN ENCAJE EXACTO en los cuatro de
+  `metodo.md`, y se dice en vez de forzar la etiqueta: ritual M0 + M2 completo + M1, sin M3 ni M4, porque
+  no hay código que mutar ni contrato de UI que contrastar. Ningún fichero de `app/` ni de `solver/` se
+  toca en toda la sesión; las cuatro suites quedan intactas. Lo que ENTREGA: O-demo pasa de ficha sin
+  descomponer a objetivo con Cambios nombrados y con el catálogo del centro real derivado, medido y
+  escrito, y de paso el argumento estructural con que cerró O-estructura recibe su primera prueba
+  externa.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), único objetivo entre H2
+  y su cierre desde S114. Hito = H2. Cambio = C-derivación, y AQUÍ EL M0 TUVO QUE CREARLO: la ficha de
+  O-demo no tenía «Cambios que agrupa», así que el Cambio no podía leerse de la documentación y
+  descomponer el objetivo era trabajo de la apertura, como el M0 de S107 con O-estructura. R-invalidación
+  sin conflicto. R-deuda: ninguna deuda abre la sesión; D-horario-irreversible y D-tutor-pdc-desincronizado
+  se nombran como candidatas a morder por primera vez y se miden, no se presuponen.
+  TRES DECISIONES DE ALCANCE, tomadas por el arquitecto con las consecuencias delante. (1) IES COMPLETO y
+  no rebanada representativa, porque hay demo al centro en el horizonte; con ello la salvedad de prioridad
+  de O-diseño queda ACTIVADA (ver §3 de `gestion_proyecto.md`). (2) El CRITERIO 6 de Fase 8 SALE de
+  O-demo a objetivo propio —O-particiones— después de que el M2 midiera su tamaño; el motivo está en su
+  ficha y no es de comodidad: exige materializar `Particion`, aplazada por decisión explícita (D-a, S48).
+  (3) La carga de datos entra por la API REST y NO por SQL contra la base. La opción de script contra la
+  BD la propuso el arquitecto y se descartó con argumento: las invariantes I1–I7 viven ENTERAS en la capa
+  de aplicación y el esquema no las replica (D-F8.2b-iv-a), así que un INSERT no comprueba I2, I7, I5 ni
+  el XOR del aula; con 219 actividades derivadas por inferencia, los errores no aparecerían al insertar
+  sino como INFEASIBLE opaco o —peor— como horario válido y equivocado. Precedente escrito:
+  `SeedCatalogoRunner`, el intento anterior de poblar por debajo de la aplicación, que D-seed-demo declara
+  muerto. Por la API cada invariante se comprueba una a una y el error llega identificado y en el momento.
+  M2 — MEDICIÓN EN DOS PASADAS (Claude Code sobre el repo real; informes consumidos aquí, sin fichero
+  suelto commiteado en la primera). PRIMERA PASADA, con seis premisas declaradas: cinco confirmadas y una
+  DESMENTIDA. P1 (el `3º ESO PDC` de los volcados es el PDC de 3ºC) CONFIRMADA por tres vías
+  independientes: cruce 31/31 exacto contra `3ºCDi`, correspondencia forzosa 5-a-5 entre códigos `*Di` y
+  páginas `* PDC`, 9 celdas idénticas con 3ºC y 0 con A y B, y aula secundaria B03 = aula base de 3ºC. La
+  duda que el INFORME-RECONCILIACION dejaba abierta como «correspondencia incierta» queda cerrada por
+  medición y no hay que preguntarla al centro. P3, P4, P5 y P6 confirmadas (ver abajo). P2 DESMENTIDA: la
+  dicotomía «co-docencia u optativa» no cubre 81 de los 208 slots múltiples —hay 12 slots con misma
+  asignatura, profesores distintos y DOS AULAS FÍSICAS distintas, que son desdoble y no co-docencia, y 69
+  slots mixtos con asignaturas distintas y a la vez una asignatura repetida en varias vías—.
+  CORRECCIÓN DEL ARQUITECTO A LA PRIMERA PASADA, y es lo que salvó la derivación: la unidad de carga que
+  usó Claude Code —agrupar por `(asignatura, profesor, conjunto de grupos)`, 308 «actividades»— mide
+  CLASES, y la unidad del modelo es la ACTIVIDAD. Lo impone S9 (§5.2 del modelo): dos sesiones del mismo
+  tramo no pueden tocar el mismo grupo, así que las K vías simultáneas de un bloque tienen que ser UNA
+  actividad con K plazas; como K actividades, S9 les prohibiría coincidir en tramo y la demanda semanal
+  del grupo se dispararía muy por encima de sus 30 slots, infactible por construcción. Y el «cuarto patrón
+  desconocido» de los 69 slots mixtos NO era desconocido: es literalmente el caso §6.1 de
+  `modelo_datos_fase1.md`, escrito con estos mismos datos (bloque CyR/OyD/RefMt, seis plazas, subgrupos
+  `1ºA-CyR-Tec`, `1ºA-RefMt-MAT6`…). La segunda pasada se guionizó con §5 y §6.1 como referencia normativa
+  obligatoria y con once reglas de derivación explícitas, entre ellas la de tres cláusulas que separa
+  desdoble de co-docencia por el AULA y no por la asignatura (aulas distintas y no nulas ⇒ desdoble; una
+  nombrada y otra nula con celda hermana ⇒ co-docencia; nula sin hermana ⇒ aula DESCONOCIDA, los 49 casos
+  de FPB).
+  ENTREGABLES de la segunda pasada, dos ficheros nuevos y dos commits, nada existente tocado:
+  `docs/horario-referencia/ESPECIFICACION-CATALOGO.md` (el centro en orden de tecleo, con las ambigüedades
+  numeradas) y `docs/horario-referencia/catalogo-derivado.json` (los mismos datos legibles por máquina).
+  LAS CIFRAS DEL CENTRO REAL, que son las que dimensionan el resto de O-demo: 815 envíos de formulario en
+  total —jornada 1, niveles 8, asignaturas 100, profesores 59, aulas 43, grupos 23, PDC 5, tutores 28,
+  subgrupos 329 y actividades 219—, de los que subgrupos y actividades son 548, el 67 %. 334 subgrupos
+  (28 `{grupo}-Completo` + 306 parciales), de los que 329 se teclean porque el alta de cada PDC crea el
+  suyo sola. 219 actividades con 316 plazas, que describen 632 sesiones semanales y CUBREN LOS 840 SLOTS
+  del horario real (28 grupos × 30 tramos) sin huecos ni solapes, con S9 verificada. 38 actividades con
+  `asignatura = NULL`, 59 multi-grupo, 4 plazas de co-docencia y 37 plazas con aulas candidatas.
+  VERIFICACIÓN CONTRA §6.1, y es el resultado que más vale de la sesión: coincidencia estructural
+  COMPLETA, sin ninguna divergencia. El bloque CyR/OyD/RefMt sale como una actividad de 6 plazas, rep=2,
+  24 subgrupos, con los seis conjuntos de aulas candidatas idénticos a los escritos en el modelo; el
+  bloque Fr2/ALCT sale como cuatro actividades independientes con los profesores, aulas y tramos no
+  coincidentes de §6.1 y del Hallazgo K, es decir el criterio de derivación REPRODUCE el hallazgo sin
+  ayuda; y 1º ESO A da 30 sesiones/semana, igual que el modelo. Las dos únicas diferencias son
+  ortográficas o de preferencia blanda.
+  EL CASO «INEXPRESABLE» NO LO ERA, y el arquitecto lo corrigió en sesión. `ActividadService.validarXor`
+  rechaza con 400 toda plaza sin aula fija ni candidatas, y las 11 plazas de FPB derivadas no se pueden
+  teclear; pero eso no es hueco funcional de H2: la plaza sin aula es configuración inválida por diseño y
+  el dato falta en la FUENTE (el horario por aulas no cubre los talleres de FPB, ya registrado en
+  INFORME-RECONCILIACION §1). No se toca `validarXor` ni el formulario; se pregunta al centro. TODO LO
+  DEMÁS CABE, comprobado uno a uno contra la UI existente: asignatura NULL, plaza con dos profesores,
+  actividad de 6 plazas, plaza con subgrupos de seis grupos, `duracionTramos > 1`, PDC con padre y recreo
+  no lectivo. Con esto, el argumento estructural con que O-estructura cerró en S114 —«cada pieza que los
+  casos del §6 necesitan está demostrada como expresable»— pasa su examen contra el centro real, que era
+  el juez natural que la propia ficha de O-demo le señalaba.
+  RECLASIFICACIÓN de la ambigüedad A1 del informe («la población real de los 306 subgrupos parciales no es
+  derivable»): NO es ambigüedad, es la limitación conocida que D31 registra desde S63 —el dominio modela
+  SUBGRUPOS, no ALUMNOS, y que un subgrupo sea partición real disjunta y exhaustiva no lo verifica ningún
+  componente, por diseño—. Los volcados no pueden decir qué alumno va a qué vía y el modelo no lo pide. Lo
+  que sí importa es que la estructura cuadre, y cuadra: 632 sesiones cubren 840 slots sin huecos ni
+  solapes. Sale de la lista de preguntas al centro.
+  RETIRADA DEL CAMINO CRÍTICO de un Cambio que el propio arquitecto había propuesto en esta sesión:
+  C-configuracion-navegable. El argumento con que lo propuso —el clic sin Ctrl en el `<select multiple>`
+  de subgrupos borra la población entera y el PUT lo acepta— exige un subgrupo MULTI-GRUPO que editar, y
+  la derivación mide que los 334 subgrupos son TODOS mono-grupo. El riesgo no existe con estos datos.
+  Queda la fricción de una página con ocho listas y sin búsqueda, pero la carga es append-only y localizar
+  filas solo duele al corregir: pasa a mejora futura (D-configuracion-monolitica), no a camino crítico.
+  Es el segundo autoengaño que la medición desmonta en esta sesión.
+  DEUDA — nace UNA y ninguna abre sesión: D-gh6-tutor-contradictorio (documental: §6.1 del modelo dice que
+  GH6 es tutor de 1ºESO A y el Hallazgo E dice que lo es de 1º Bach A; las dos derivaciones son correctas
+  contra el volcado y la contradicción es del modelo, no de los datos). Nace también, del hallazgo (f) de
+  la primera pasada, D-configuracion-monolitica (mejora futura). Dos deudas vivas cambian de presión sin
+  cerrarse: D-horario-irreversible BAJA de prioridad —con la carga por API la base se rehace en minutos,
+  así que la congelación de actividades deja de ser callejón sin salida y C-borrado-horario sale del
+  camino crítico— y D-F8.6-ii-a NO muerde al cargador, porque el motivo del rechazo viaja como reason
+  phrase y un cliente HTTP lo lee aunque el navegador no.
+  NOTA DE ALCANCE QUE QUEDA ESCRITA, no en la memoria de nadie: con la carga por API, el criterio 5 de
+  Fase 8 —«configurar un centro desde cero POR LA INTERFAZ»— no queda demostrado a escala real. El e2e de
+  S112 lo demuestra sobre el centro mínimo, y la propuesta abierta para cerrarlo a escala es teclear 1º ESO
+  completo a mano (cuatro grupos, ~80–100 envíos, contiene el bloque de seis plazas del §6.1 y la
+  co-docencia de LCL, es decir lo más difícil del centro). PENDIENTE de decisión del arquitecto al abrir
+  la siguiente sesión.
+  LO QUE HAY QUE PREGUNTAR AL CENTRO antes de la carga completa, y es la primera vez que D31 tiene
+  preguntas concretas en vez de dudas genéricas: (1) las aulas reales de las 11 plazas de FPB —lo único
+  que BLOQUEA—; (2) los tutores reales, porque la heurística «tutor = quien imparte TUT» saca a FIL2 como
+  principal de cinco grupos, cosa que no viola I4 (que acota principales por grupo, no grupos por profesor)
+  pero es implausible: lo probable es que imparta la tutoría lectiva de grupos de los que no es tutor; y
+  (3) los itinerarios de 4º ESO, 1º Bach y 2º Bach, que deciden si un subgrupo se reutiliza entre bloques
+  (I6) y que son exactamente D31 (b), (c) y (d), vivas desde S28/S32/S36.
+  LIMPIEZA (M1-bis): archivada S113 a `bitacora-sesiones.md` (promovida a `### Sesión 113`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S114 a «Última sesión registrada (previa)»
+  compacta; S115 queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S113),
+  la crónica de archivado y la frase de ventana del plan. R4/costura: script oficial sigue sin existir en
+  el repo (mejora de método pendiente desde S101); verificado a mano que los dos commits de esta sesión
+  son de documentación y que ningún fichero de código entró en el árbol.
+  O-demo (H2) ACTIVO desde esta sesión, 1 pieza (C-derivación). Suites INTACTAS, ningún módulo tocado: app
+  268, solver 91, vitest 310, e2e 2. Siguiente: C-cargador, el script que lee `catalogo-derivado.json` y
+  puebla el centro por la API REST, condicionado a que el centro responda las aulas de FPB; y la decisión
+  pendiente sobre 1º ESO a mano. Lo fija su propio M0 (ver M1-ter).
