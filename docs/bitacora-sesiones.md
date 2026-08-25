@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S118. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S119. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -7141,3 +7141,187 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   O-demo (H2) ACTIVO, 3 piezas (C-derivación S115, C-cargador S116, C-generación S117+S118 EN CURSO). Suites:
   **app 282, solver 91, vitest 316, e2e 2**. Siguiente: el contraste con el horario del PDF, única pregunta
   viva de C-generación, que exige decidir antes qué se asevera como «válido». Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 119 — O-demo (H2): C-generación, tercera parte y CIERRE del Cambio. El contraste con el horario del PDF: definición de «válido» en tres capas y medición de las tres sobre el horario de S118 (M0 + M2 en cuatro pasadas + M1, sin M3 ni M4 canónicos). TERCERA pieza CERRADA. NO cierra el objetivo.
+  Decimonovena sesión bajo el mapa Hito→Objetivo→Cambio, y del mismo tipo SIN ENCAJE EXACTO que S117: ritual
+  M0 + M2 completo + M1, sin M3 ni M4 canónicos, porque la sesión entera es MEDICIÓN sobre un artefacto ya
+  producido y no se escribe una línea de producto. Ningún fichero de `app/src/main`, `solver/src/main` ni
+  `app/frontend` se toca; las cuatro suites quedan intactas (app 282, solver 91, vitest 316, e2e 2). Lo que
+  ENTREGA: la tercera y última pregunta de C-generación queda RESUELTA y **el Cambio CIERRA**, con la
+  aserción de validez del horario del centro real medida por tres vías independientes.
+  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), 3 piezas. Hito = H2.
+  Cambio = C-generación, EN CURSO desde S117, con una sola pregunta viva: la (3), el contraste con el PDF.
+  **EL TRABAJO REAL DEL M0 FUE ENCUADRAR QUÉ SE ASEVERA COMO «VÁLIDO», que era lo que S117 dejó escrito como
+  condición previa y nadie había tomado.** La decisión, y es la que gobierna toda la sesión: **el PDF NO puede
+  juzgar la validez del horario generado.** Los dos horarios son distintos POR DISEÑO —los volcados no
+  contienen ninguna disponibilidad de profesor (medido en S115) y el centro sí las tuvo al construir el
+  suyo—, así que comparar colocaciones solo puede producir diferencias, y todas esperadas. Lo que el PDF SÍ
+  es, como registró S115, es un ORÁCULO DE CONTENIDO. De ahí que «válido» se parta en TRES CAPAS con oráculos
+  distintos:
+  **CAPA 1 — validez formal contra el modelo:** cero violaciones de las ocho `ReglaDura`. Oráculo:
+  `VerificadorSolucion`, que ya existe (reutilización, no validador nuevo). Reserva declarada por adelantado:
+  verificar la solución EN MEMORIA sería parcialmente circular, porque CP-SAT impuso esas mismas
+  restricciones; el valor está en verificar RELEYENDO las 770 filas persistidas, porque `SolucionMapper` no
+  está bajo el modelo.
+  **CAPA 2 — conservación de la carga contra el PDF:** para cada grupo, los pares (asignatura, profesor) y su
+  número de tramos semanales coinciden con lo que imprime `grupo-*.json`, descontadas las 11 actividades de
+  FPB no cargadas. Es lo único que el PDF puede adjudicar, y prueba la cadena entera: PDF → volcados →
+  catálogo derivado → carga por API → problema → solución → `sesion`. Declarado también su límite: lo que
+  esta capa ejercita de verdad es C-derivación, no el solver —dado un catálogo correcto, la conservación se
+  sigue de que `aSesiones` lanza si alguna instancia no está colocada—, y no debe venderse como validación
+  del solver.
+  **CAPA 3 — calidad: SE MIDE Y NO SE CORRIGE.** El objetivo 192.0 con cota 0.0 no dice qué lleva dentro.
+  Se descompone con instrumentos que ya existen. Justificación frente a R-terminado, que la regla resiste:
+  el criterio de O-demo contiene la cláusula «presentable al centro», y medir no es mejorar; si sale mal, es
+  información para el cierre de O-demo, no trabajo de esta sesión.
+  DIVERGENCIAS ESPERADAS, DECLARADAS ANTES DE MEDIR para que un desajuste fuera hallazgo y una coincidencia no
+  fuera racionalización: día/tramo distintos (sin disponibilidades); aulas no comparables (el PDF omite 65
+  celdas y el solver elige libremente); tutorías heredando la heurística implausible de D31-b; y el déficit
+  exacto de las 11 plazas de FPB. Y una coincidencia numérica marcada para NO leerla como cuadre: el PDF de
+  aulas tiene 770 entradas y `sesion` tiene 770 filas; son magnitudes distintas.
+  R-invalidación, con tres condiciones reales y no formularias: (a) O-particiones necesita la canónica con
+  `sesion 0`, así que todo corre sobre COPIA y al cerrar se verifica md5 + `sesion 0`; (b) H3 construirá la
+  exportación del horario, así que todo volcado de esta sesión es ARNÉS DESECHABLE y no producto; (c)
+  O-diseño rehará la vista, así que no se toca frontend.
+  R-deuda: ninguna deuda abre la sesión, y el argumento no es de comodidad en ninguna de las cuatro que el
+  prompt de apertura puso sobre la mesa. **D-generacion-no-reproducible** afecta a la PROBABILIDAD de volver a
+  obtener un horario, no a la validez del que ya está obtenido: muerde en el coste de la sesión, no en la
+  aserción. **D-prevalidacion-ciega-a-holgura-cero** es una advertencia ANTES de generar y no interviene en
+  juzgar lo generado. **D-presupuesto-anunciado-espejo** es texto de pantalla, ajeno al contraste.
+  **D-F8.6-ii-a** es de una línea y aun así fuera de alcance: esta sesión no toca ningún camino de fallo
+  (mismo criterio que S118, barato no es en alcance). La única bloqueante sigue siendo **D31-a**, que bloquea
+  O-demo y no C-generación; declarado por adelantado, como en S117 y S118: **esta sesión no podía cerrar
+  O-demo pase lo que pase.**
+  M2 — CUATRO PASADAS, todas por Claude Code, todas de solo lectura o sobre copia, ninguna con JVM salvo la
+  cuarta.
+  M2 (1) — INVENTARIO. **El horario de S118 SOBREVIVE**: `app/educhronos-demo-m4.db` (24 ago 17:47) con
+  `horario_generado 1` FEASIBLE, objetivo 192.0, cota 0.0, `sesion` **770**, 305 `plaza_id` distintas —las 305
+  de la base, todas colocadas— y cero FK nulas. Con eso la sesión no necesita solver y no paga los diez
+  minutos ni la tirada de 3/4. Medido además que el lector inverso YA EXISTE y no hay que construirlo:
+  `SolucionMapper.aSolucionHorario` (:191, documentado en :157 como inverso de `aSesiones`, con la
+  correspondencia de tramos tomada de `indiceTramos` y NO recalculada), y `DiagnosticoService.diagnosticar`
+  ya encadena `cargarProblema()` → `cargarHorario(id)` → `aSolucionHorario` → `verificar` + `atribuirBlandas`
+  + los tres contadores, anotado `@Transactional(readOnly = true)` y expuesto en
+  `GET /api/horarios/{id}/diagnostico` (`HorarioController:115`). **Consecuencia: la capa 1 y la capa 3 se
+  hacen POR LA VÍA DE PRODUCCIÓN y el arnés desechable que se había previsto se RETIRA por reutilización.**
+  DOS CORRECCIONES DEL ARQUITECTO SENIOR AL INFORME DE ESA PASADA, y conviene que consten porque las dos
+  habrían torcido la capa 2. (1) El hueco 219/208 se registró como «11 actividades por explicar»: NO es
+  incógnita. Son las 11 de FPB cuya plaza no tiene aula, el dato falta EN LA FUENTE (el PDF de aulas no cubre
+  los talleres: `Taller 2`, `Taller 4`… salen con `celdas: []`), `ActividadService.validarXor` las rechaza por
+  diseño y el cargador de S116 las OMITIÓ A PROPÓSITO —prevalidación en seco con exactamente 11 violaciones,
+  todas XOR de FPB, y coincidencia EXACTA entre la marca `_aulaDesconocida` y la regla XOR—. Es D31-a.
+  (2) «770 sesiones, una por instancia» contradice lo que S117 midió: una fila es una PLAZA de una INSTANCIA,
+  `filas = Σ (repeticiones × plazas)`, y que haya 305 `plaza_id` distintas en 770 filas ya lo demuestra.
+  Importa porque es la trampa de unidades sobre la que se construye la capa 2.
+  M2 (2) — CAPA 2, SIN JVM. Unidad de comparación fijada de antemano para disolver los dos desajustes de
+  unidades: **entrada = (grupo, día, tramo, asignatura, profesor)** —lo que imprime una línea del PDF y lo que
+  se obtiene expandiendo una fila de `sesion` por `plaza_subgrupo → subgrupo_grupo` y por `plaza_profesor`,
+  que es como el PDF imprime la co-docencia de LCL—, y **el agregado comparado es (grupo, asignatura,
+  profesor) → nº de entradas semanales**, sin día ni tramo. El lado izquierdo sale de la BASE m4, no del
+  catálogo derivado: comparar catálogo contra PDF solo re-examinaría C-derivación.
+  SUPUESTOS COMPROBADOS EN VEZ DE ASUMIDOS: `duracion_tramos` es 1 en TODAS las actividades de la base (lo que
+  S117 midió sobre el catálogo queda medido ahora sobre lo cargado), luego celda y sesión son la misma unidad
+  y la expansión por duración es vacía AQUÍ; cero plazas sin asignatura, sin profesor o sin subgrupo, luego
+  ningún JOIN perdió filas en silencio; 30 tramos lectivos y 5 no lectivos.
+  **RESULTADO DE LA CAPA 2: 526 claves (grupo, asignatura, profesor), 11 divergentes, TODAS en FPB, CERO
+  divergentes fuera de FPB, delta total 1301 − 1252 = 49.** Y las 11 son, una a una y con la repetición
+  exacta, las 11 que el guion había marcado como `_aulaDesconocida` ANTES de mirar el lado generado:
+  AMO/PAU2 6 · CA/TEC1 4 · IPE/FOL3 3 · MECSO/PAU2 5 · PS/PAU2 5 · Tut/PAU2 1 (1FPB) — CA/FIS3 4 · ELE/PAU1 7 ·
+  MEC/PAU1 11 · PI/FOL3 2 · Tut/PAU1 1 (2FPB). Suma 49. **Predicción independiente y observación coinciden al
+  entero.** Segunda medida por otra vía que apunta al mismo agujero: 26 grupos con 30/30 slots ocupados, 1FPB
+  con 6 y 2FPB con 5, y 30−24=6 y 30−25=5 cuadran con el déficit por grupo.
+  **LA CIRCULARIDAD DEL MAPA DE CÓDIGOS, DETECTADA Y ELIMINADA, y es el control metodológico que más vale de
+  esta sesión.** Los dos universos no emparejan literalmente (`1º ESO A` ↔ `1ºA`, `1ºBACH A` ↔ `1B-A`,
+  `3º ESO A PDC` ↔ `3ºADi`) y Claude Code derivó el mapa maximizando el solapamiento de (asignatura,
+  profesor) —que es EXACTAMENTE el dato que luego se comparaba—. Circularidad de grado bajo pero real, y peor
+  justo donde menos evidencia había: 1FPB y 2FPB emparejaban con 0.14 y 0.17 y son los dos grupos donde vive
+  toda la divergencia. Se disolvió barato porque el mapa ya estaba escrito de forma determinista y ajena a la
+  medición: la tabla de normalización de `INFORME-RECONCILIACION.md` más el caso `3º ESO PDC`→`3ºCDi` que
+  S115 cerró aparte. **Aplicada esa regla sin que el código mirase ni una vez la lista de
+  `grupo_administrativo`: los 28 códigos tienen regla aplicable, CERO diferencias frente al mapa por
+  solapamiento, regla inyectiva e imagen coincidente con la base en los dos sentidos.** El déficit de 49 no
+  descansa sobre un mapa ajustado a posteriori.
+  M2 (3) — INVENTARIO DE LA CADENA DE LA CAPA 1 y verificación del mapa. Registró además un hueco documental:
+  `docs/horario-referencia/INFORME-RECONCILIACION.md` sigue diciendo «`NºPDC` (sin letra; correspondencia
+  incierta)» y excluyendo esas 31 celdas de los cruces, cuando S115 CERRÓ la correspondencia por tres vías
+  independientes. Es estado vivo equivocado (R5) en la fuente que un lector consultaría primero. Se corrige en
+  este M1 añadiendo la remisión, sin tocar el cuerpo del volcado —es el entregable de una extracción
+  determinista y su cuerpo no se reescribe—.
+  M2 (4) — CAPAS 1 y 3 POR LA VÍA DE PRODUCCIÓN, sobre copia de la m4 y con la aplicación arrancada de
+  verdad. La copia se inyectó por línea de órdenes con RUTA ABSOLUTA y no editando `application.properties`
+  (regla de S117), y el arranque se blindó publicando antes el solver en `~/.m2` (trampa medida en S118).
+  Comprobado ANTES de diagnosticar que la proyección devolvía 770 sesiones y que el log nombraba la base
+  correcta, para que un 404 o un verde sobre una base vacía no pudiera pasar por resultado.
+  **CAPA 1: CERO VIOLACIONES DE REGLA DURA sobre las 770 sesiones**, `GET /api/horarios/1/diagnostico` en HTTP
+  200. **El horario del centro real generado en S118 por la vía de producción desde la interfaz es VÁLIDO a
+  escala real.** Lo que esto añade sobre `DiagnosticoRoundTripTest` es la ESCALA y no la propiedad: el test ya
+  prueba el ida y vuelta, la fidelidad de `aulasElegidas`, la guarda de corrupción de `aulaFija` y el
+  cross-check de ventanas, pero sobre 2 actividades, 5 tramos y un grupo; aquí la misma cadena atraviesa 208
+  actividades, 305 plazas, 28 grupos y 30 tramos sin romperse ni delatar una sola dura.
+  **CAPA 3: ventanas 174, consecutivas 18, indisponibilidad blanda 0.** Y el hallazgo que convierte la
+  medición en un tercer cotejo independiente: los tres pesos valen 1 (`ModeloCpSat.java:69,80,104`) y el
+  objetivo es su suma minimizada (`:301`), luego **174 + 0 + 18 = 192, exactamente el `objetivo` 192.0 que
+  CP-SAT escribió en `horario_generado`**. `VerificadorSolucion` recompone el objetivo desde la solución
+  RECONSTRUIDA, con código distinto del que construyó el modelo, y da la misma cifra sin residuo.
+  **ADVERTENCIA SOBRE EL `indispBlanda = 0`, que hay que blindar por escrito porque invita a la lectura
+  contraria:** `profesor_restriccion_horaria` y `sesion_bloqueada` están VACÍAS. Es el cero de «no había nada
+  que incumplir», no el de «no se incumplió», y no informa de nada sobre las preferencias del profesorado. Es
+  la misma limitación que O-demo declara desde S115; lo nuevo es que ahora existe una cifra citable.
+  SEGUNDA ADVERTENCIA, sobre las 465 filas de `penalizaciones`: el DTO las documenta como CONTRAFACTUALES por
+  celda («qué pasaría si»), no como descomposición del total. Su suma de deltas es −73, que no cuadra con 192
+  ni debe cuadrar. Sirven para señalar dónde apretar (`Bloque-DT_EST_MIT-2BACH` +5, `LCL-3ºB` +3, `Tec-2ºB`
+  +3…), no para reconstruir el objetivo.
+  INTEGRIDAD: la copia conserva su md5 tras el paso de Hibernate, luego el `@Transactional(readOnly = true)`
+  se sostiene en la práctica y no solo en la anotación; la canónica sigue en `f5b542eb…` con `sesion 0`;
+  árbol limpio, proceso parado, puerto cerrado.
+  **LO QUE SE ASEVERA, con las palabras exactas: el horario del centro real generado en S118 por la vía de
+  producción desde la interfaz es VÁLIDO —cero violaciones de las ocho reglas duras sobre 770 sesiones— y
+  CONSERVA LA CARGA del horario que el centro imparte —526 claves, 11 divergentes, todas FPB, delta 49
+  idéntico al déficit calculado de antemano—. CON ESO, C-GENERACIÓN CIERRA.**
+  LÍMITES DE LA ASERCIÓN, declarados de una vez: **n = 1** —un solo horario, y no se generó un segundo porque
+  cuesta diez minutos, tiene un cuarto de probabilidad de fallo (D-generacion-no-reproducible) y añade poco:
+  la capa 2 es aritmética e invariante entre corridas y la capa 1 verifica un conjunto fijo de restricciones
+  sobre una colocación concreta—; **`FEASIBLE` con cota inferior 0.0**, sin óptimo demostrado, y el criterio
+  pide válido y no bueno (R-terminado); la comparación es de MULTICONJUNTOS y no dice nada sobre la
+  colocación, que difiere por diseño; y no cubre aula ni las blandas más allá de medirlas.
+  **O-DEMO NO CIERRA.** Siguen faltando las 11 actividades de FPB a la espera de la respuesta del centro
+  (D31-a) y la nota de alcance del criterio 5 sigue escrita y declarada.
+  DECISIÓN DEL ARQUITECTO SOBRE LAS BASES EN DISCO, hermana de la de S117 sobre la canónica:
+  **`app/educhronos-demo-m4.db` queda declarada HORARIO DE REFERENCIA DE S118** y no es un residuo temporal —es
+  el único horario del centro real que existe y rehacerlo cuesta diez minutos con un cuarto de probabilidad de
+  fallo—. Se borran `educhronos-demo-m4-capa1.db` y `educhronos-demo-m4-vacia.db`, reproducibles en segundos.
+  Ninguna está trackeada (`.gitignore:12`).
+  DEUDA — NO NACE NINGUNA, y ninguna se paga. Nada de lo medido es «algo mal hecho»: el hueco 219/208 es
+  D31-a ya registrada, el `0` vacuo es limitación de datos ya declarada y el resto son hallazgos. **AFINADA
+  D-diagnostico-no-es-foto**, y a la baja: esta sesión usó `DiagnosticoService` como instrumento de la capa 1
+  y la deuda resultó VACUA aquí, porque la m4 no se ha tocado desde el 24 de agosto a las 17:47 y el catálogo
+  vivo ES el del momento de generar. Queda escrito para que nadie lea el verde de la capa 1 como si la deuda
+  no existiera: sobre una base que sí hubiera cambiado, el mismo diagnóstico respondería a otra pregunta.
+  NOTAS DE MÉTODO PARA EL SACO QUE ESPERA CON EL SCRIPT DE R4 (pendiente desde S101) Y
+  D-guion-exit-enmascarado, sin token nuevo (lección de D-tokens-inexistentes): un `pkill -f "spring-boot:run"`
+  mata también al guion que lo invoca, porque su propia línea de órdenes contiene la cadena —usar
+  `kill "$APP_PID"` y `wait`—; y un bucle de espera con `sleep` no sirve en este entorno, donde funciona
+  `curl --retry N --retry-delay M --retry-connrefused`. Y un fallo de redacción del arquitecto senior,
+  registrado porque es del mismo género que los anteriores: un guion titulado «capas 1 y 3» cuyo cuerpo solo
+  inventariaba, porque los pasos de ejecución se escribieron en prosa FUERA del bloque copiable. Claude Code
+  hizo bien en señalarlo en vez de improvisar el arranque.
+  **INCUMPLIMIENTO DE R4 DE S118, DETECTADO EN ESTE M1 Y CORREGIDO AQUÍ:** la cabecera de S118 afirma haber
+  actualizado «la frase de ventana del plan» y no lo hizo —seguía diciendo «el plan conserva ahora S116
+  (degradada) y S117 como única cabecera H3 viva» con la ventana viva en S118—. La crónica de archivado sí se
+  actualizó; la frase de ventana no. Misma familia que el «punto de abajo» inexistente de S116 que corrigió
+  S117: una afirmación de higiene que el documento no sostiene.
+  C-CARGA-MANUAL-1ESO: SIGUE SIN DECIDIRSE, y es la TERCERA sesión consecutiva (S117, S118, S119). Se registra
+  como patrón, no como reproche: con C-generación cerrado es lo único que puede avanzar O-demo mientras el
+  centro no responda lo de FPB, así que el objetivo queda esperando un correo si no se decide. La
+  recomendación de S117 sigue en pie —versión RECORTADA: el bloque de seis plazas del §6.1 y la co-docencia de
+  LCL sobre base de usar y tirar, en vez de 1º ESO entero, porque ahí está todo el valor probatorio—.
+  LIMPIEZA (M1-bis): archivada S117 a `bitacora-sesiones.md` (promovida a `### Sesión 117`, insertada al final
+  en orden ascendente, cuerpo íntegro); degradada S118 a «Última sesión registrada (previa)» compacta; S119
+  queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S117), la crónica de
+  archivado y la frase de ventana del plan —esta última CORREGIDA, ver arriba—. R4/costura: el script oficial
+  SIGUE sin existir en el repo; verificado que el árbol quedó limpio, que ninguna de las bases está trackeada,
+  que la canónica conserva su md5 y que esta sesión NO produce commits de código: solo documentación.
+  O-demo (H2) ACTIVO, 3 piezas: C-derivación (S115), C-cargador (S116) y **C-generación (S117+S118+S119)
+  CERRADA**. Suites INTACTAS, ningún módulo tocado: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: no
+  hay Cambio en curso. Los candidatos vivos son C-carga-manual-1eso (propuesto, sin decidir desde S117) y la
+  respuesta del centro sobre las aulas de FPB, sin la cual O-demo no cierra. Lo fija su propio M0 (ver M1-ter).

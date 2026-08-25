@@ -624,7 +624,141 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 120 — O-demo (H2): C-carga-manual-1eso en su versión RECORTADA POR ANCHO, y CIERRE del Cambio. El caso §6.1 tecleado A MANO por la interfaz sobre base vacía —dos grupos, 38 envíos, horario válido en 1 s— (M0 + M2 por Claude Code + M4 en navegador + M1, sin M3; cero líneas de producto). CUARTA pieza CERRADA. NO cierra el objetivo.
+### Sesión 121 — O-diseño (transversal): APERTURA del objetivo, definición de su criterio de terminado y sus cuatro Cambios; C-tokens y C-sustitución HECHOS. Todo el color y el tamaño del frontend pasa a una capa de tokens en `styles.css`, con paleta azul institucional elegida por el jefe de estudios (M0 + M2 + C-tokens + C-sustitución en dos tandas + M4 en navegador + M1, sin M3). DOS de cuatro piezas. NO cierra el objetivo.
+  Vigesimoprimera sesión bajo el mapa Hito→Objetivo→Cambio, y la primera de tipo Configuración/UI del mapa:
+  M4 sí, M3 no, porque no hay lógica que mutar —la sesión reescribe CSS y no toca una línea de TypeScript ni
+  de Java—. Las cuatro suites quedan intactas (app 282, solver 91, vitest 316, e2e 2); vitest se corre porque
+  el frontend cambia, y pasa sin tocar un solo test.
+  M0 — LA APERTURA, que es el trabajo de verdad de esta sesión. **O-diseño ABRE** con O-demo todavía ABIERTO,
+  primera vez que dos objetivos conviven en el mapa; se declara expresamente que no es una pausa por
+  conveniencia sino un bloqueo externo (D31-a espera un correo al centro) y que nada del método lo prohíbe.
+  La dependencia «O-demo puede destapar un caso inexpresable» se verifica CONSUMIDA por tres vías y no por
+  una: S115 (catálogo completo contra la UI, por lectura), S116 (804 escrituras por los mismos servicios que
+  respaldan los formularios) y S120 (el caso más difícil tecleado a mano). Lo que le falta a O-demo son 11
+  actividades de FPB con aula, de la misma forma que las 208 ya cargadas. Las dos alternativas se descartan
+  con argumento escrito: la Higiene/Método del script de R4 pierde por TERCERA vez —no puede nombrar los tres
+  términos y R-deuda excluye sus casos— y O-particiones no se adelanta —la demo no lo necesita y arrastra
+  cuatro preguntas de dominio sin resolver—.
+  M0 (2) — EL CRITERIO DE TERMINADO, que la ficha tenía POR DEFINIR desde S106. Cuatro cláusulas, tres
+  verificables por grep y una de juicio del arquitecto (ver `gestion_proyecto.md` §3). **La decisión de
+  diseño que gobierna todo lo demás: el criterio se define como SISTEMA y no como maquetación vista a
+  vista**, y la razón es de invalidación, no de gusto: la ficha de O-particiones dice que toca frontend, así
+  que si O-diseño maqueta a mano, la UI que traiga O-particiones invalida ese trabajo —exactamente el riesgo
+  que motivó la dependencia sobre O-demo—. Con el criterio como sistema, la UI nueva nace aplicándolo. Ésa
+  fue la alternativa a invertir el orden de §5, y se eligió por ser más barata y menos arriesgada.
+  M0 (3) — LO QUE QUEDA FUERA, decidido expresamente para que el objetivo pueda terminar. Las seis deudas de
+  UX que la tabla §4 le cuelga (D-selectores-sin-busqueda, D-actividad-forma-implicita,
+  D-configuracion-monolitica, D-actividad-ux, D-subgrupo-ux-multiselect, D-monodi-botones-inertes) más
+  D-dialogo-foco-perdido: si entran, el acabado se convierte en rehacer la UI. Fuera también el responsive
+  (nace D-sin-puntos-de-ruptura) y **D-vista-horario-sin-horario, que era la decisión que S120 dejó
+  encargada al M0 de esta sesión**: queda FUERA por el corte comportamiento/aspecto, sigue colgando de
+  O-demo y se anota como candidata a Cambio corto antes de la demo, haciendo constar que su clasificación
+  «No bloquea» es discutible en lectura estricta de la cláusula «presentable al centro».
+  M2 — INVENTARIO DE LA SUPERFICIE VISUAL, por Claude Code y de solo lectura, porque el criterio no se podía
+  escribir desde la documentación: no había en ningún documento un censo de la superficie. Medido: 26
+  componentes, 1.346 líneas de HTML y 1.541 de CSS en 26 hojas; **uniformidad total** —los 26 con
+  `templateUrl` + `styleUrl` externos, cero plantillas inline, cero estilos inline, cero `style=` en
+  plantillas—, así que no había nada que desenredar antes de tocar el aspecto. **CERO tokens**: ni una
+  definición `--x:` ni un `var(--x)` en todo `src`; el `styles.css` global eran 5 líneas y solo servía para
+  importar el `overlay-prebuilt.css` del CDK. 26 hex distintos, dominados por `#b00` (48 usos) y `#666` (36);
+  cinco grises casi indistinguibles conviviendo. **Ningún `font-family` en ninguna parte** —se heredaba el
+  default del navegador— y 10 tamaños distintos. **Cero `@media`.** Sin librería de UI (solo `@angular/cdk`
+  para el diálogo). Lo único sólido de partida: la convención BEM, 230 de 252 selectores con prefijo por
+  componente y sin colisiones. Bundle de partida: 522,11 kB, con el aviso de budget YA encendido.
+  ELECCIÓN DE PALETA. Se descartó Claude Design y se descartó buscar referencias fuera: se entregó un HTML
+  autocontenido y desechable (NO entra en el repo) con las mismas piezas reales de producto —cabecera, lista
+  de configuración, formulario de actividad con multiselect y campo en error, los cinco tipos de aviso,
+  rejilla 6×5 con co-docencia, bloque de seis destinos, celda en conflicto y celda fijada, y un diálogo—
+  conmutables entre paletas. El asistente recomendó «oliva y cobre» por una razón práctica (deja el rojo
+  entero libre para el error y el ámbar libre para el aviso); **el arquitecto eligió AZUL INSTITUCIONAL
+  porque lo prefiere el jefe de estudios**, y el asistente registró que no hay objeción técnica: el azul
+  cumple la misma propiedad que motivaba su recomendación. Se ofreció una quinta variante (azul sobre papel
+  cálido) para reconciliar el «prefiero cálidos» del arquitecto con el azul del cliente; se rechazó. Manda
+  el cliente, y queda escrito.
+  **C-TOKENS HECHO.** `styles.css` pasa de 5 a ~90 líneas con la capa completa: 17 tokens de color, la
+  tipografía (**fuente del sistema, NO web font autohospedada: decisión tomada por el asistente y
+  justificada por H4 —el bundle debe funcionar en un Windows limpio y sin red—**), la escala de tamaños, el
+  espaciado, los radios y la sombra. Restricción de CSS respetada y documentada en el propio fichero: **el
+  `@import` del CDK debe seguir siendo la PRIMERA regla**, o el navegador lo descarta y el diálogo pierde
+  centrado y fondo. Se paga de paso **D-bundle-presupuesto** (`maximumWarning` 500 → 550 kB, error intacto
+  en 1 MB): no bloqueaba, pero su sede era O-diseño y el hecho nuevo lo justificaba —el aviso ya estaba
+  encendido antes de tocar nada, luego era ruido y no señal—. Delta de la sesión: **522,11 → 524,94 kB**,
+  ~25 kB de margen; el comprimido incluso BAJA (118,11 → 118,01 kB) porque los `var(--color-*)` repetidos
+  comprimen mejor que hex variados.
+  **C-SUSTITUCIÓN HECHO, en dos tandas por decisión de riesgo.** Tanda 1: los 22 ficheros de chasis
+  (formularios, listas, diálogos), 145 líneas sustituidas, mecánicas y con el mismo patrón. Tanda 2: los
+  cuatro ficheros donde vive la semántica (`horario-grid`, `horario-view`, `panel-prevalidacion`,
+  `jornada`), 47 sustituciones ancladas LÍNEA A LÍNEA con guarda que aborta si el fichero no está como el
+  mapa dice, porque ahí el mismo hex significa cosas distintas según dónde esté. Resultado: **cero literales
+  de color y cero `font-size` sin token fuera de `styles.css`**, que es la cláusula 1 del criterio.
+  LAS TRES DECISIONES DE MAPEO QUE NO ERAN MECÁNICAS, con su argumento, porque son las que se podrían
+  querer revisar. **(1)** `#b00` (44 usos), `#b00020` y `#c33` colapsan todos en `--color-error`: la
+  distinción que justificaría un `--color-peligro` aparte —error de validación frente a acción
+  destructiva— no existía en el CSS, los dos usaban el mismo hex, y un segundo token sin diferencia visual
+  confunde más de lo que aclara. Efecto visible: el rojo se oscurece de `#bb0000` a `#a32014` en 44 sitios.
+  **(2)** `#666` se DESDOBLA según la propiedad: en `border` va a `--color-borde`, en `color` va a
+  `--color-tinta-suave`. Es el cambio visual más grande de la sesión —los bordes de todos los inputs se
+  aclaran de golpe— y se declaró por adelantado antes de aplicarlo. **(3)** El mismo `#4a7` va a DOS tokens
+  distintos en el mismo fichero, y es intencional: en `.cdk-drop-list-dragging` es un veredicto («aquí
+  puedes soltar») y va a `--color-ok`; en `.entrada` es la barra estructural que llevan TODAS las tarjetas
+  y va a `--color-acento`, porque mandarla a `--color-ok` le daría un significado que no tiene y un horario
+  entero de barras verdes se leería como «todo validado», arruinando además la señal cuando algo SÍ esté
+  correcto. Que compartieran hex era el accidente que el objetivo venía a deshacer.
+  EL BADGE MORADO: el par `#ece4f4`/`#402a52` de `horario-grid` era la única familia sin token equivalente,
+  y se le da uno propio (`--color-marca` / `--color-marca-fondo`) CONSERVANDO el morado exacto, en vez de
+  colapsarlo en acento. Razón: la línea 100 ya manda la barra de `.entrada` a `--color-acento`, así que un
+  badge azul pondría dos señales distintas del mismo color a diez píxeles una de otra. **QUEDA SIN SABER
+  QUÉ NUMERAN el `1` y el `-1` del badge**; no está en la documentación y el asistente se negó a
+  inventarlo. Si resulta que significan algo que el jefe de estudios debe entender, es material de
+  C-identidad.
+  AMPLIACIÓN DE `:root` DURANTE EL TRABAJO, cuatro tokens que el inventario no podía prever y la
+  sustitución destapó: `--color-superficie-tenue` (la capa 1 de `.entrada`, que NO puede ir a
+  `--color-superficie-alt` sin aplanar la señal de `td.ocupado` —lo advertía el propio comentario de
+  `horario-grid.css:119` sobre las dos capas de `background` ocupadas—), `--sombra-suave`, `--tam-xxs`
+  (0,6875rem, para que los `0.65rem` y `0.7rem` de la rejilla no engorden subiendo a `--tam-xs`) y el par
+  `--color-marca`. Se rechazó ampliar más: los seis literales ámbar de la tanda 2 son SEIS TONOS PARA UNA
+  IDEA, acumulados por sesiones sin coordinación, y colapsarlos es el objetivo, no forzar el mapa. **Un
+  token existe porque hay un significado distinto, no porque haya un hex distinto.**
+  M4 EN NAVEGADOR, sobre COPIA de `educhronos-demo-m4.db` en `/tmp` y no sobre la base de referencia, con
+  md5 verificado antes y después. Las tres capturas pasan: en la rejilla el badge morado, la barra azul y el
+  fondo de pinada siguen distinguiéndose entre sí; en el formulario el rojo nuevo se lee bien y los bordes
+  claros mejoran; en jornada la fila de recreo sigue distinguiéndose con `--color-superficie-alt`, que era
+  el riesgo de aplanar cuatro grises en uno. Ninguna señal se comió a otra. **Lo que el M4 NO pudo ver, y se
+  registra en vez de disimularse:** el panel de prevalidación con hallazgos, porque nadie —ni la
+  documentación ni el asistente— sabe qué dispara un AVISO o un ERROR, y se rechazó mandar al arquitecto a
+  probar a ciegas. Nace D-prevalidacion-contraste-sin-ver, con sede en C-revisión.
+  CINCO CASOS NUEVOS DE DEUDAS DE MÉTODO, **todos detectados por Claude Code revisando guiones del asistente,
+  y ninguno sufrido**. Cuarto y quinto de D-guion-exit-enmascarado: un comprobador del `@import` cuyo patrón
+  casaba con líneas de continuación de comentario (verde sin medir nada) y un recuento de cierre que incluía
+  `styles.css`, donde los literales DEBEN vivir, haciendo su objetivo inalcanzable por construcción. El más
+  importante de los cinco no llegó a fallar: **`var(--token-inexistente)` NO rompe el build** —la
+  declaración se descarta en el navegador—, así que un build en verde no prueba nada sobre los tokens. De
+  ahí sale el **comprobador de cuatro vías** que queda vivo para el resto de O-diseño (literales,
+  `font-size` sin `var()`, `var(` mal formado, y tokens referenciados contra los definidos, quitando
+  comentarios antes de buscar). Tercer hecho de D-arranque-no-literal, y éste sí es un error del asistente:
+  pidió los `git add` del cierre dando por hecho un árbol sin commitear que había RECONSTRUIDO de un turno
+  anterior en vez de leerlo, y produjo dos commits cuyos mensajes no describían su contenido. Nada se perdió
+  y se corrigió con `reword` antes de pushear. La lección es la misma de siempre: **el estado se lee, no se
+  reconstruye.**
+  LIMPIEZA (M1-bis): archivada S119 a `bitacora-sesiones.md` (promovida a `### Sesión 119`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S120 a «Última sesión registrada (previa)»; S121
+  queda como única cabecera H3 viva. R4/costura: el script oficial SIGUE sin existir en el repo (mejora de
+  método pendiente desde S101, y esta sesión le añade dos casos más); verificado que los tokens nuevos de
+  esta sesión tienen definición viva en este plan y citante vivo en `gestion_proyecto.md` §4 (lección de
+  D-tokens-inexistentes), y se registra que el comentario de `horario-grid.css:119` se actualizó porque
+  citaba un literal que ya no existe —un comentario que cita algo inexistente es la misma familia que
+  D-tokens-inexistentes, luego era costura R4 y no cosmética—.
+  O-diseño (transversal, abierto en S121) ACTIVO, 4 Cambios: **C-tokens (S121) HECHO**, **C-sustitución
+  (S121) HECHO**, C-identidad PENDIENTE, C-revisión PENDIENTE. O-demo (H2) sigue ABIERTO y sin trabajo
+  ejecutable. Suites INTACTAS: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: **C-identidad**, que es
+  donde está lo que más se nota en una demo —la cabecera, la marca, la landing, el aspecto de los estados
+  transversales y el título del horario, que hoy pinta un timestamp ISO con nanosegundos crudo
+  (`Horario 2026-08-24T15:37:39.317184258Z — grupo: 1B-A`)—, y después C-revisión. Se decidió NO empezar
+  C-identidad en S121 con el presupuesto de contexto a la mitad: no es trabajo mecánico, exige enseñar
+  capturas y discutirlas, y dejarlo a medias obliga a reconstruir contexto en la sesión siguiente. Lo fija
+  su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 120 — O-demo (H2): C-carga-manual-1eso en su versión RECORTADA POR ANCHO, y CIERRE del Cambio. El caso §6.1 tecleado A MANO por la interfaz sobre base vacía —dos grupos, 38 envíos, horario válido en 1 s— (M0 + M2 por Claude Code + M4 en navegador + M1, sin M3; cero líneas de producto). CUARTA pieza CERRADA. NO cierra el objetivo.
   Vigésima sesión bajo el mapa Hito→Objetivo→Cambio, y del mismo tipo SIN ENCAJE EXACTO que S117 y S119 en un
   punto —no escribe una línea de producto— pero distinta de las dos en otro: aquí SÍ hay M4, y el M4 ES la
   sesión. Ritual M0 + M2 (una pasada de solo lectura por Claude Code) + M4 (tecleo en navegador por el
@@ -768,190 +902,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y cuya dependencia sobre O-demo
   —«que O-demo destape un caso inexpresable»— queda consumida por esta sesión. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 119 — O-demo (H2): C-generación, tercera parte y CIERRE del Cambio. El contraste con el horario del PDF: definición de «válido» en tres capas y medición de las tres sobre el horario de S118 (M0 + M2 en cuatro pasadas + M1, sin M3 ni M4 canónicos). TERCERA pieza CERRADA. NO cierra el objetivo.
-  Decimonovena sesión bajo el mapa Hito→Objetivo→Cambio, y del mismo tipo SIN ENCAJE EXACTO que S117: ritual
-  M0 + M2 completo + M1, sin M3 ni M4 canónicos, porque la sesión entera es MEDICIÓN sobre un artefacto ya
-  producido y no se escribe una línea de producto. Ningún fichero de `app/src/main`, `solver/src/main` ni
-  `app/frontend` se toca; las cuatro suites quedan intactas (app 282, solver 91, vitest 316, e2e 2). Lo que
-  ENTREGA: la tercera y última pregunta de C-generación queda RESUELTA y **el Cambio CIERRA**, con la
-  aserción de validez del horario del centro real medida por tres vías independientes.
-  M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), 3 piezas. Hito = H2.
-  Cambio = C-generación, EN CURSO desde S117, con una sola pregunta viva: la (3), el contraste con el PDF.
-  **EL TRABAJO REAL DEL M0 FUE ENCUADRAR QUÉ SE ASEVERA COMO «VÁLIDO», que era lo que S117 dejó escrito como
-  condición previa y nadie había tomado.** La decisión, y es la que gobierna toda la sesión: **el PDF NO puede
-  juzgar la validez del horario generado.** Los dos horarios son distintos POR DISEÑO —los volcados no
-  contienen ninguna disponibilidad de profesor (medido en S115) y el centro sí las tuvo al construir el
-  suyo—, así que comparar colocaciones solo puede producir diferencias, y todas esperadas. Lo que el PDF SÍ
-  es, como registró S115, es un ORÁCULO DE CONTENIDO. De ahí que «válido» se parta en TRES CAPAS con oráculos
-  distintos:
-  **CAPA 1 — validez formal contra el modelo:** cero violaciones de las ocho `ReglaDura`. Oráculo:
-  `VerificadorSolucion`, que ya existe (reutilización, no validador nuevo). Reserva declarada por adelantado:
-  verificar la solución EN MEMORIA sería parcialmente circular, porque CP-SAT impuso esas mismas
-  restricciones; el valor está en verificar RELEYENDO las 770 filas persistidas, porque `SolucionMapper` no
-  está bajo el modelo.
-  **CAPA 2 — conservación de la carga contra el PDF:** para cada grupo, los pares (asignatura, profesor) y su
-  número de tramos semanales coinciden con lo que imprime `grupo-*.json`, descontadas las 11 actividades de
-  FPB no cargadas. Es lo único que el PDF puede adjudicar, y prueba la cadena entera: PDF → volcados →
-  catálogo derivado → carga por API → problema → solución → `sesion`. Declarado también su límite: lo que
-  esta capa ejercita de verdad es C-derivación, no el solver —dado un catálogo correcto, la conservación se
-  sigue de que `aSesiones` lanza si alguna instancia no está colocada—, y no debe venderse como validación
-  del solver.
-  **CAPA 3 — calidad: SE MIDE Y NO SE CORRIGE.** El objetivo 192.0 con cota 0.0 no dice qué lleva dentro.
-  Se descompone con instrumentos que ya existen. Justificación frente a R-terminado, que la regla resiste:
-  el criterio de O-demo contiene la cláusula «presentable al centro», y medir no es mejorar; si sale mal, es
-  información para el cierre de O-demo, no trabajo de esta sesión.
-  DIVERGENCIAS ESPERADAS, DECLARADAS ANTES DE MEDIR para que un desajuste fuera hallazgo y una coincidencia no
-  fuera racionalización: día/tramo distintos (sin disponibilidades); aulas no comparables (el PDF omite 65
-  celdas y el solver elige libremente); tutorías heredando la heurística implausible de D31-b; y el déficit
-  exacto de las 11 plazas de FPB. Y una coincidencia numérica marcada para NO leerla como cuadre: el PDF de
-  aulas tiene 770 entradas y `sesion` tiene 770 filas; son magnitudes distintas.
-  R-invalidación, con tres condiciones reales y no formularias: (a) O-particiones necesita la canónica con
-  `sesion 0`, así que todo corre sobre COPIA y al cerrar se verifica md5 + `sesion 0`; (b) H3 construirá la
-  exportación del horario, así que todo volcado de esta sesión es ARNÉS DESECHABLE y no producto; (c)
-  O-diseño rehará la vista, así que no se toca frontend.
-  R-deuda: ninguna deuda abre la sesión, y el argumento no es de comodidad en ninguna de las cuatro que el
-  prompt de apertura puso sobre la mesa. **D-generacion-no-reproducible** afecta a la PROBABILIDAD de volver a
-  obtener un horario, no a la validez del que ya está obtenido: muerde en el coste de la sesión, no en la
-  aserción. **D-prevalidacion-ciega-a-holgura-cero** es una advertencia ANTES de generar y no interviene en
-  juzgar lo generado. **D-presupuesto-anunciado-espejo** es texto de pantalla, ajeno al contraste.
-  **D-F8.6-ii-a** es de una línea y aun así fuera de alcance: esta sesión no toca ningún camino de fallo
-  (mismo criterio que S118, barato no es en alcance). La única bloqueante sigue siendo **D31-a**, que bloquea
-  O-demo y no C-generación; declarado por adelantado, como en S117 y S118: **esta sesión no podía cerrar
-  O-demo pase lo que pase.**
-  M2 — CUATRO PASADAS, todas por Claude Code, todas de solo lectura o sobre copia, ninguna con JVM salvo la
-  cuarta.
-  M2 (1) — INVENTARIO. **El horario de S118 SOBREVIVE**: `app/educhronos-demo-m4.db` (24 ago 17:47) con
-  `horario_generado 1` FEASIBLE, objetivo 192.0, cota 0.0, `sesion` **770**, 305 `plaza_id` distintas —las 305
-  de la base, todas colocadas— y cero FK nulas. Con eso la sesión no necesita solver y no paga los diez
-  minutos ni la tirada de 3/4. Medido además que el lector inverso YA EXISTE y no hay que construirlo:
-  `SolucionMapper.aSolucionHorario` (:191, documentado en :157 como inverso de `aSesiones`, con la
-  correspondencia de tramos tomada de `indiceTramos` y NO recalculada), y `DiagnosticoService.diagnosticar`
-  ya encadena `cargarProblema()` → `cargarHorario(id)` → `aSolucionHorario` → `verificar` + `atribuirBlandas`
-  + los tres contadores, anotado `@Transactional(readOnly = true)` y expuesto en
-  `GET /api/horarios/{id}/diagnostico` (`HorarioController:115`). **Consecuencia: la capa 1 y la capa 3 se
-  hacen POR LA VÍA DE PRODUCCIÓN y el arnés desechable que se había previsto se RETIRA por reutilización.**
-  DOS CORRECCIONES DEL ARQUITECTO SENIOR AL INFORME DE ESA PASADA, y conviene que consten porque las dos
-  habrían torcido la capa 2. (1) El hueco 219/208 se registró como «11 actividades por explicar»: NO es
-  incógnita. Son las 11 de FPB cuya plaza no tiene aula, el dato falta EN LA FUENTE (el PDF de aulas no cubre
-  los talleres: `Taller 2`, `Taller 4`… salen con `celdas: []`), `ActividadService.validarXor` las rechaza por
-  diseño y el cargador de S116 las OMITIÓ A PROPÓSITO —prevalidación en seco con exactamente 11 violaciones,
-  todas XOR de FPB, y coincidencia EXACTA entre la marca `_aulaDesconocida` y la regla XOR—. Es D31-a.
-  (2) «770 sesiones, una por instancia» contradice lo que S117 midió: una fila es una PLAZA de una INSTANCIA,
-  `filas = Σ (repeticiones × plazas)`, y que haya 305 `plaza_id` distintas en 770 filas ya lo demuestra.
-  Importa porque es la trampa de unidades sobre la que se construye la capa 2.
-  M2 (2) — CAPA 2, SIN JVM. Unidad de comparación fijada de antemano para disolver los dos desajustes de
-  unidades: **entrada = (grupo, día, tramo, asignatura, profesor)** —lo que imprime una línea del PDF y lo que
-  se obtiene expandiendo una fila de `sesion` por `plaza_subgrupo → subgrupo_grupo` y por `plaza_profesor`,
-  que es como el PDF imprime la co-docencia de LCL—, y **el agregado comparado es (grupo, asignatura,
-  profesor) → nº de entradas semanales**, sin día ni tramo. El lado izquierdo sale de la BASE m4, no del
-  catálogo derivado: comparar catálogo contra PDF solo re-examinaría C-derivación.
-  SUPUESTOS COMPROBADOS EN VEZ DE ASUMIDOS: `duracion_tramos` es 1 en TODAS las actividades de la base (lo que
-  S117 midió sobre el catálogo queda medido ahora sobre lo cargado), luego celda y sesión son la misma unidad
-  y la expansión por duración es vacía AQUÍ; cero plazas sin asignatura, sin profesor o sin subgrupo, luego
-  ningún JOIN perdió filas en silencio; 30 tramos lectivos y 5 no lectivos.
-  **RESULTADO DE LA CAPA 2: 526 claves (grupo, asignatura, profesor), 11 divergentes, TODAS en FPB, CERO
-  divergentes fuera de FPB, delta total 1301 − 1252 = 49.** Y las 11 son, una a una y con la repetición
-  exacta, las 11 que el guion había marcado como `_aulaDesconocida` ANTES de mirar el lado generado:
-  AMO/PAU2 6 · CA/TEC1 4 · IPE/FOL3 3 · MECSO/PAU2 5 · PS/PAU2 5 · Tut/PAU2 1 (1FPB) — CA/FIS3 4 · ELE/PAU1 7 ·
-  MEC/PAU1 11 · PI/FOL3 2 · Tut/PAU1 1 (2FPB). Suma 49. **Predicción independiente y observación coinciden al
-  entero.** Segunda medida por otra vía que apunta al mismo agujero: 26 grupos con 30/30 slots ocupados, 1FPB
-  con 6 y 2FPB con 5, y 30−24=6 y 30−25=5 cuadran con el déficit por grupo.
-  **LA CIRCULARIDAD DEL MAPA DE CÓDIGOS, DETECTADA Y ELIMINADA, y es el control metodológico que más vale de
-  esta sesión.** Los dos universos no emparejan literalmente (`1º ESO A` ↔ `1ºA`, `1ºBACH A` ↔ `1B-A`,
-  `3º ESO A PDC` ↔ `3ºADi`) y Claude Code derivó el mapa maximizando el solapamiento de (asignatura,
-  profesor) —que es EXACTAMENTE el dato que luego se comparaba—. Circularidad de grado bajo pero real, y peor
-  justo donde menos evidencia había: 1FPB y 2FPB emparejaban con 0.14 y 0.17 y son los dos grupos donde vive
-  toda la divergencia. Se disolvió barato porque el mapa ya estaba escrito de forma determinista y ajena a la
-  medición: la tabla de normalización de `INFORME-RECONCILIACION.md` más el caso `3º ESO PDC`→`3ºCDi` que
-  S115 cerró aparte. **Aplicada esa regla sin que el código mirase ni una vez la lista de
-  `grupo_administrativo`: los 28 códigos tienen regla aplicable, CERO diferencias frente al mapa por
-  solapamiento, regla inyectiva e imagen coincidente con la base en los dos sentidos.** El déficit de 49 no
-  descansa sobre un mapa ajustado a posteriori.
-  M2 (3) — INVENTARIO DE LA CADENA DE LA CAPA 1 y verificación del mapa. Registró además un hueco documental:
-  `docs/horario-referencia/INFORME-RECONCILIACION.md` sigue diciendo «`NºPDC` (sin letra; correspondencia
-  incierta)» y excluyendo esas 31 celdas de los cruces, cuando S115 CERRÓ la correspondencia por tres vías
-  independientes. Es estado vivo equivocado (R5) en la fuente que un lector consultaría primero. Se corrige en
-  este M1 añadiendo la remisión, sin tocar el cuerpo del volcado —es el entregable de una extracción
-  determinista y su cuerpo no se reescribe—.
-  M2 (4) — CAPAS 1 y 3 POR LA VÍA DE PRODUCCIÓN, sobre copia de la m4 y con la aplicación arrancada de
-  verdad. La copia se inyectó por línea de órdenes con RUTA ABSOLUTA y no editando `application.properties`
-  (regla de S117), y el arranque se blindó publicando antes el solver en `~/.m2` (trampa medida en S118).
-  Comprobado ANTES de diagnosticar que la proyección devolvía 770 sesiones y que el log nombraba la base
-  correcta, para que un 404 o un verde sobre una base vacía no pudiera pasar por resultado.
-  **CAPA 1: CERO VIOLACIONES DE REGLA DURA sobre las 770 sesiones**, `GET /api/horarios/1/diagnostico` en HTTP
-  200. **El horario del centro real generado en S118 por la vía de producción desde la interfaz es VÁLIDO a
-  escala real.** Lo que esto añade sobre `DiagnosticoRoundTripTest` es la ESCALA y no la propiedad: el test ya
-  prueba el ida y vuelta, la fidelidad de `aulasElegidas`, la guarda de corrupción de `aulaFija` y el
-  cross-check de ventanas, pero sobre 2 actividades, 5 tramos y un grupo; aquí la misma cadena atraviesa 208
-  actividades, 305 plazas, 28 grupos y 30 tramos sin romperse ni delatar una sola dura.
-  **CAPA 3: ventanas 174, consecutivas 18, indisponibilidad blanda 0.** Y el hallazgo que convierte la
-  medición en un tercer cotejo independiente: los tres pesos valen 1 (`ModeloCpSat.java:69,80,104`) y el
-  objetivo es su suma minimizada (`:301`), luego **174 + 0 + 18 = 192, exactamente el `objetivo` 192.0 que
-  CP-SAT escribió en `horario_generado`**. `VerificadorSolucion` recompone el objetivo desde la solución
-  RECONSTRUIDA, con código distinto del que construyó el modelo, y da la misma cifra sin residuo.
-  **ADVERTENCIA SOBRE EL `indispBlanda = 0`, que hay que blindar por escrito porque invita a la lectura
-  contraria:** `profesor_restriccion_horaria` y `sesion_bloqueada` están VACÍAS. Es el cero de «no había nada
-  que incumplir», no el de «no se incumplió», y no informa de nada sobre las preferencias del profesorado. Es
-  la misma limitación que O-demo declara desde S115; lo nuevo es que ahora existe una cifra citable.
-  SEGUNDA ADVERTENCIA, sobre las 465 filas de `penalizaciones`: el DTO las documenta como CONTRAFACTUALES por
-  celda («qué pasaría si»), no como descomposición del total. Su suma de deltas es −73, que no cuadra con 192
-  ni debe cuadrar. Sirven para señalar dónde apretar (`Bloque-DT_EST_MIT-2BACH` +5, `LCL-3ºB` +3, `Tec-2ºB`
-  +3…), no para reconstruir el objetivo.
-  INTEGRIDAD: la copia conserva su md5 tras el paso de Hibernate, luego el `@Transactional(readOnly = true)`
-  se sostiene en la práctica y no solo en la anotación; la canónica sigue en `f5b542eb…` con `sesion 0`;
-  árbol limpio, proceso parado, puerto cerrado.
-  **LO QUE SE ASEVERA, con las palabras exactas: el horario del centro real generado en S118 por la vía de
-  producción desde la interfaz es VÁLIDO —cero violaciones de las ocho reglas duras sobre 770 sesiones— y
-  CONSERVA LA CARGA del horario que el centro imparte —526 claves, 11 divergentes, todas FPB, delta 49
-  idéntico al déficit calculado de antemano—. CON ESO, C-GENERACIÓN CIERRA.**
-  LÍMITES DE LA ASERCIÓN, declarados de una vez: **n = 1** —un solo horario, y no se generó un segundo porque
-  cuesta diez minutos, tiene un cuarto de probabilidad de fallo (D-generacion-no-reproducible) y añade poco:
-  la capa 2 es aritmética e invariante entre corridas y la capa 1 verifica un conjunto fijo de restricciones
-  sobre una colocación concreta—; **`FEASIBLE` con cota inferior 0.0**, sin óptimo demostrado, y el criterio
-  pide válido y no bueno (R-terminado); la comparación es de MULTICONJUNTOS y no dice nada sobre la
-  colocación, que difiere por diseño; y no cubre aula ni las blandas más allá de medirlas.
-  **O-DEMO NO CIERRA.** Siguen faltando las 11 actividades de FPB a la espera de la respuesta del centro
-  (D31-a) y la nota de alcance del criterio 5 sigue escrita y declarada.
-  DECISIÓN DEL ARQUITECTO SOBRE LAS BASES EN DISCO, hermana de la de S117 sobre la canónica:
-  **`app/educhronos-demo-m4.db` queda declarada HORARIO DE REFERENCIA DE S118** y no es un residuo temporal —es
-  el único horario del centro real que existe y rehacerlo cuesta diez minutos con un cuarto de probabilidad de
-  fallo—. Se borran `educhronos-demo-m4-capa1.db` y `educhronos-demo-m4-vacia.db`, reproducibles en segundos.
-  Ninguna está trackeada (`.gitignore:12`).
-  DEUDA — NO NACE NINGUNA, y ninguna se paga. Nada de lo medido es «algo mal hecho»: el hueco 219/208 es
-  D31-a ya registrada, el `0` vacuo es limitación de datos ya declarada y el resto son hallazgos. **AFINADA
-  D-diagnostico-no-es-foto**, y a la baja: esta sesión usó `DiagnosticoService` como instrumento de la capa 1
-  y la deuda resultó VACUA aquí, porque la m4 no se ha tocado desde el 24 de agosto a las 17:47 y el catálogo
-  vivo ES el del momento de generar. Queda escrito para que nadie lea el verde de la capa 1 como si la deuda
-  no existiera: sobre una base que sí hubiera cambiado, el mismo diagnóstico respondería a otra pregunta.
-  NOTAS DE MÉTODO PARA EL SACO QUE ESPERA CON EL SCRIPT DE R4 (pendiente desde S101) Y
-  D-guion-exit-enmascarado, sin token nuevo (lección de D-tokens-inexistentes): un `pkill -f "spring-boot:run"`
-  mata también al guion que lo invoca, porque su propia línea de órdenes contiene la cadena —usar
-  `kill "$APP_PID"` y `wait`—; y un bucle de espera con `sleep` no sirve en este entorno, donde funciona
-  `curl --retry N --retry-delay M --retry-connrefused`. Y un fallo de redacción del arquitecto senior,
-  registrado porque es del mismo género que los anteriores: un guion titulado «capas 1 y 3» cuyo cuerpo solo
-  inventariaba, porque los pasos de ejecución se escribieron en prosa FUERA del bloque copiable. Claude Code
-  hizo bien en señalarlo en vez de improvisar el arranque.
-  **INCUMPLIMIENTO DE R4 DE S118, DETECTADO EN ESTE M1 Y CORREGIDO AQUÍ:** la cabecera de S118 afirma haber
-  actualizado «la frase de ventana del plan» y no lo hizo —seguía diciendo «el plan conserva ahora S116
-  (degradada) y S117 como única cabecera H3 viva» con la ventana viva en S118—. La crónica de archivado sí se
-  actualizó; la frase de ventana no. Misma familia que el «punto de abajo» inexistente de S116 que corrigió
-  S117: una afirmación de higiene que el documento no sostiene.
-  C-CARGA-MANUAL-1ESO: SIGUE SIN DECIDIRSE, y es la TERCERA sesión consecutiva (S117, S118, S119). Se registra
-  como patrón, no como reproche: con C-generación cerrado es lo único que puede avanzar O-demo mientras el
-  centro no responda lo de FPB, así que el objetivo queda esperando un correo si no se decide. La
-  recomendación de S117 sigue en pie —versión RECORTADA: el bloque de seis plazas del §6.1 y la co-docencia de
-  LCL sobre base de usar y tirar, en vez de 1º ESO entero, porque ahí está todo el valor probatorio—.
-  LIMPIEZA (M1-bis): archivada S117 a `bitacora-sesiones.md` (promovida a `### Sesión 117`, insertada al final
-  en orden ascendente, cuerpo íntegro); degradada S118 a «Última sesión registrada (previa)» compacta; S119
-  queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S117), la crónica de
-  archivado y la frase de ventana del plan —esta última CORREGIDA, ver arriba—. R4/costura: el script oficial
-  SIGUE sin existir en el repo; verificado que el árbol quedó limpio, que ninguna de las bases está trackeada,
-  que la canónica conserva su md5 y que esta sesión NO produce commits de código: solo documentación.
-  O-demo (H2) ACTIVO, 3 piezas: C-derivación (S115), C-cargador (S116) y **C-generación (S117+S118+S119)
-  CERRADA**. Suites INTACTAS, ningún módulo tocado: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: no
-  hay Cambio en curso. Los candidatos vivos son C-carga-manual-1eso (propuesto, sin decidir desde S117) y la
-  respuesta del centro sobre las aulas de FPB, sin la cual O-demo no cierra. Lo fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -973,8 +923,8 @@ para dejar la doc limpia: saldó el archivado atrasado desde S106 y expulsó la 
 y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la Sesión 111, la de S110 en la
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
-S117 en la Sesión 119 y la de S118 en la Sesión 120.
-El plan conserva ahora S119 (degradada a formato compacto) y S120 como única cabecera H3 viva. (Esta frase
+S117 en la Sesión 119, la de S118 en la Sesión 120 y la de S119 en la Sesión 121.
+El plan conserva ahora S120 (degradada a formato compacto) y S121 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, y verificada
 de nuevo contra el fichero en S120.) El detalle
@@ -2609,7 +2559,18 @@ con remisión a la bitácora.
   mientras siga siendo aviso: cada Cambio de UI que entre lo empujará más. Cuelga de O-diseño, que es quien
   tendrá delante el bundle completo y las vistas congeladas, y quien puede decidir con criterio entre subir el
   techo, dividir en rutas perezosas o recortar. → revisar al abrir O-diseño; hasta entonces, anotar el delta en
-  cada sesión que compile, como se viene haciendo desde S112.
+  cada sesión que compile, como se viene haciendo desde S112. **SALDADA Y CERRADA EN S121**, dentro de
+  C-tokens, de paso y sin abrir sesión: no bloqueaba (el `maximumError` está en 1 MB y ningún trabajo de
+  color puede romper el build), pero O-diseño era su sede designada y caía en el camino del Cambio. El
+  hecho nuevo que justifica pagarla ahora es que **el aviso YA estaba encendido antes de tocar nada**
+  —521,03 kB contra 500—, luego el techo no era red de seguridad sino ruido permanente: exactamente lo que
+  esta ficha temía en S113 al negarse a subirlo («un número que nadie vuelve a mirar»). De las tres salidas
+  que la ficha preveía se elige la primera, subir el techo, y no las rutas perezosas ni el recorte, porque
+  el exceso no es de CSS: el bundle de estilos son 1,71 kB y Angular embebe el CSS de componente en
+  `main.js`. `maximumWarning` 500 → 550 kB, `maximumError` intacto en 1 MB. Delta de S121: **522,11 →
+  524,94 kB** (+2,06 por C-tokens y la tanda 1, +0,77 por la tanda 2), ~25 kB de margen; el crecimiento son
+  los nombres de token, más largos que los hex, y el comprimido incluso BAJA de 118,11 a 118,01 kB porque
+  los `var(--color-*)` repetidos comprimen mejor que hex variados. **CERRADA.**
 
 - **D-tokens-inexistentes** (S113, VIVA, DE DOCUMENTACIÓN / COSTURA R4, no bloqueante) — LA FAMILIA `D-nueva-*`
   SE CITA EN NUEVE SITIOS DEL CÓDIGO Y NO EXISTE EN NINGÚN DOCUMENTO. Detectada en el R4 de S113 al auditar los
@@ -2845,7 +2806,39 @@ con remisión a la bitácora.
   es `mvn -pl app spring-boot:run "-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:<ruta
   absoluta>"`. → sesión de Higiene/Método, junto al script de R4 pendiente desde S101 y a
   D-guion-exit-enmascarado, al que esta deuda añade un tercer caso: el literal que funciona se escribe, no se
-  describe. No se paga ahora.
+  describe. No se paga ahora. **TERCER HECHO en S121, de la misma familia aunque no sea de arranque:** el
+  asistente pidió los `git add` del cierre dando por hecho un árbol sin commitear que había RECONSTRUIDO de
+  un turno anterior en vez de leerlo, y produjo dos commits cuyos mensajes no describían su contenido —uno
+  duplicaba palabra por palabra el asunto de otro anterior—. Lo detectó Claude Code, nada se perdió y se
+  corrigió con `reword` antes de pushear. Misma lección: **el estado se lee, no se reconstruye.**
+
+- **D-sin-puntos-de-ruptura** (S121, VIVA, MEJORA FUTURA de UX, no bloqueante) — NO HAY UN SOLO `@media` EN
+  TODO EL FRONTEND. Medido en el M2 de S121 al inventariar la superficie visual: cero media queries en `src`,
+  luego la aplicación no es responsive por CSS en absoluto. Se DEJA FUERA del criterio de O-diseño con
+  argumento y no por olvido: añadir puntos de ruptura duplica el trabajo del objetivo y no sirve al producto
+  real —bundle de escritorio (H4), jefe de estudios en portátil, rejilla 6×5 y tablas de configuración sin
+  diseño móvil pensado—. El criterio pide en su lugar que las vistas no se rompan en UNA resolución
+  declarada, la de la demo, verificada además al 125 % de zoom. Si algún día hay uso en tableta, ésta es la
+  sede. → O-diseño como mejora futura. No se paga ahora.
+
+- **D-select-nativo-desparejo** (S121, VIVA, DE ACABADO, no bloqueante) — LOS `<select>` SALEN CON EL ESTILO
+  NATIVO DEL NAVEGADOR Y NO CASAN CON LOS `<input>`. Visto en el M4 de S121 sobre el formulario de actividad:
+  en la misma columna los `<input>` quedan blancos con borde de token y los `<select>` grises azulados por
+  estilo de agente de usuario, porque hoy nadie los estila. **NO es regresión de C-sustitución**: era así
+  antes, solo que con bordes `#666` la diferencia se notaba menos. Cae DENTRO del criterio de O-diseño
+  (cláusula 3, coherencia entre vistas) y por tanto no es mejora futura sino trabajo pendiente del objetivo
+  activo. → O-diseño, C-revisión.
+
+- **D-prevalidacion-contraste-sin-ver** (S121, VIVA, RIESGO NO CERRADO, no bloqueante) — AVISO Y ERROR DEL
+  PANEL DE PREVALIDACIÓN SE DISTINGUEN SOLO POR COLOR DE TEXTO, Y NO SE HAN VISTO JUNTOS. C-sustitución
+  colapsó cuatro ámbares (`#c80`, `#a60`, `#b8860b`, `#8a6100`) en `--color-aviso` (#8A5A00) y tres rojos
+  (`#b00`, `#b00020`, `#c33`) en `--color-error` (#A32014). En `panel-prevalidacion` los mensajes de
+  severidad se distinguen únicamente por `color:`, sin fondo que los separe, y ambos tokens son tonos
+  oscuros y saturados. Para verlos juntos hay que provocar un hallazgo, y **ni la documentación del proyecto
+  ni el asistente saben qué lo dispara**: se registró como NO SABIDO en vez de mandar al arquitecto a probar
+  a ciegas, y el M4 de S121 se cerró con este punto declarado pendiente. Se verifica en C-revisión leyendo
+  antes el componente. Si se confunden, el arreglo es un cambio de valor en `:root` y se propaga solo, que
+  es exactamente lo que C-tokens compró. → O-diseño, C-revisión.
 
 ### Deuda consciente CERRADA (histórico)
 
