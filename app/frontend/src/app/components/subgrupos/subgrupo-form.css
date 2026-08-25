@@ -1,7 +1,7 @@
 .subgrupo-form {
   padding: 1.5rem;
   min-width: 22rem;
-  background: #fff;
+  background: var(--color-superficie);
   border-radius: 4px;
 }
 .subgrupo-form__titulo {
@@ -14,12 +14,12 @@
 .subgrupo-form__etiqueta {
   display: block;
   margin-bottom: 0.25rem;
-  font-size: 0.9rem;
+  font-size: var(--tam-s);
 }
 .subgrupo-form__input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #666;
+  border: 1px solid var(--color-borde);
   border-radius: 4px;
   box-sizing: border-box;
 }
@@ -31,12 +31,12 @@
 }
 .subgrupo-form__error {
   display: block;
-  color: #b00;
-  font-size: 0.85rem;
+  color: var(--color-error);
+  font-size: var(--tam-s);
   margin-top: 0.25rem;
 }
 .subgrupo-form__error-servidor {
-  color: #b00;
+  color: var(--color-error);
   margin: 0.5rem 0;
 }
 .subgrupo-form__acciones {
@@ -48,9 +48,9 @@
 .subgrupo-form__cancelar,
 .subgrupo-form__guardar {
   padding: 0.5rem 1rem;
-  border: 1px solid #666;
+  border: 1px solid var(--color-borde);
   border-radius: 4px;
-  background: #fff;
+  background: var(--color-superficie);
   cursor: pointer;
 }
 .subgrupo-form__guardar:disabled {

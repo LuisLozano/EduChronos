@@ -6,7 +6,7 @@
 
 .landing__intro {
   margin: 0 0 1.5rem;
-  color: #555;
+  color: var(--color-tinta-suave);
 }
 
 .landing__accesos {
@@ -20,7 +20,7 @@
   flex-direction: column;
   gap: 0.4rem;
   padding: 1.25rem;
-  border: 1px solid #d0d0d0;
+  border: 1px solid var(--color-borde);
   border-radius: 0.5rem;
   text-decoration: none;
   color: inherit;
@@ -29,16 +29,16 @@
 
 .landing__acceso:hover,
 .landing__acceso:focus-visible {
-  border-color: #2a6fb0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-acento);
+  box-shadow: var(--sombra-suave);
 }
 
 .landing__acceso-titulo {
-  font-size: 1.15rem;
+  font-size: var(--tam-l);
   font-weight: 600;
 }
 
 .landing__acceso-desc {
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--color-tinta-suave);
+  font-size: var(--tam-s);
 }

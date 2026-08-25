@@ -34,6 +34,7 @@
   --color-info-fondo: #EDF1F6;
 
   --sombra-dialogo: 0 8px 28px rgba(27, 36, 46, 0.22);
+  --sombra-suave: 0 1px 4px rgba(27, 36, 46, 0.10);
 
   /* ---------------- Tipografía ----------------
      Fuente del sistema, no autohospedada: el bundle de H4 debe funcionar en un
@@ -41,6 +42,7 @@
   --fuente-base: system-ui, "Segoe UI", Roboto, sans-serif;
   --fuente-datos: ui-monospace, "Cascadia Mono", "Consolas", monospace;
 
+  --tam-xxs: 0.6875rem;
   --tam-xs: 0.75rem;
   --tam-s: 0.875rem;
   --tam-m: 1rem;

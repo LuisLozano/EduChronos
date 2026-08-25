@@ -14,13 +14,13 @@
 }
 
 .asignaturas__error {
-  color: #b00;
+  color: var(--color-error);
   margin: 0.5rem 0;
 }
 
 .asignaturas__vacio,
 .asignaturas__cargando {
-  color: #666;
+  color: var(--color-tinta-suave);
 }
 
 .asignaturas__tabla {
@@ -32,7 +32,7 @@
 .asignaturas__tabla td {
   text-align: left;
   padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-borde-suave);
 }
 
 .asignaturas__acciones {
@@ -41,5 +41,5 @@
 }
 
 .asignaturas__borrar {
-  color: #b00;
+  color: var(--color-error);
 }

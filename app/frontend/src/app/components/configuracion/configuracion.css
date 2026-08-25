@@ -9,5 +9,5 @@
 }
 
 .configuracion__pendiente {
-  color: #666;
+  color: var(--color-tinta-suave);
 }

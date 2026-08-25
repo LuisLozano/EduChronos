@@ -3,11 +3,11 @@
   align-items: center;
   gap: 2rem;
   padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid #d0d0d0;
+  border-bottom: 1px solid var(--color-borde);
 }
 
 .app__marca {
-  font-size: 1.2rem;
+  font-size: var(--tam-l);
   font-weight: 700;
   text-decoration: none;
   color: inherit;
@@ -20,7 +20,7 @@
 
 .app__nav a {
   text-decoration: none;
-  color: #2a6fb0;
+  color: var(--color-acento);
 }
 
 .app__nav-activo {

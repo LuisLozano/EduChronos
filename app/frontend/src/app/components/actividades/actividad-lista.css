@@ -14,13 +14,13 @@
 }
 
 .actividades__error {
-  color: #b00;
+  color: var(--color-error);
   margin: 0.5rem 0;
 }
 
 .actividades__vacio,
 .actividades__cargando {
-  color: #666;
+  color: var(--color-tinta-suave);
 }
 
 .actividades__tabla {
@@ -32,7 +32,7 @@
 .actividades__tabla td {
   text-align: left;
   padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-borde-suave);
 }
 
 .actividades__acciones {
@@ -41,5 +41,5 @@
 }
 
 .actividades__borrar {
-  color: #b00;
+  color: var(--color-error);
 }
