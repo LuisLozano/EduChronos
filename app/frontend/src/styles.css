@@ -1,5 +1,81 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globales de Educhronos.
+   Este fichero es la ÚNICA fuente de verdad del color, la tipografía y el
+   espaciado. El CSS de componente no define colores ni tamaños literales:
+   consume los tokens de :root con var(--x). */
 
-/* Posicionado y backdrop del overlay del CDK (@angular/cdk/dialog). El CDK no
+/* El @import debe ser la PRIMERA regla del fichero (requisito de CSS): si
+   alguna regla lo precede, el navegador lo descarta.
+   Posicionado y backdrop del overlay del CDK (@angular/cdk/dialog). El CDK no
    inyecta este CSS: sin él el diálogo se monta pero queda sin centrar ni fondo. */
 @import '@angular/cdk/overlay-prebuilt.css';
+
+:root {
+  /* ---------------- Color: superficies y tinta ---------------- */
+  --color-fondo: #F6F8FB;
+  --color-superficie: #FFFFFF;
+  --color-superficie-alt: #E9EEF5;
+  --color-borde: #C3CFDE;
+  --color-borde-suave: #DCE4EE;
+  --color-tinta: #1B242E;
+  --color-tinta-suave: #5A6673;
+
+  /* ---------------- Color: acento ---------------- */
+  --color-acento: #1E4E79;
+  --color-acento-fuerte: #143A5C;
+  --color-acento-suave: #DCE8F4;
+
+  /* ---------------- Color: estados ---------------- */
+  --color-error: #A32014;
+  --color-error-fondo: #FAE7E4;
+  --color-aviso: #8A5A00;
+  --color-aviso-fondo: #FCF2DC;
+  --color-ok: #2F6446;
+  --color-ok-fondo: #E5F0EA;
+  --color-info-fondo: #EDF1F6;
+
+  --sombra-dialogo: 0 8px 28px rgba(27, 36, 46, 0.22);
+
+  /* ---------------- Tipografía ----------------
+     Fuente del sistema, no autohospedada: el bundle de H4 debe funcionar en un
+     Windows limpio y sin red. */
+  --fuente-base: system-ui, "Segoe UI", Roboto, sans-serif;
+  --fuente-datos: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+
+  --tam-xs: 0.75rem;
+  --tam-s: 0.875rem;
+  --tam-m: 1rem;
+  --tam-l: 1.125rem;
+  --tam-xl: 1.5rem;
+
+  --peso-normal: 400;
+  --peso-medio: 600;
+  --peso-fuerte: 700;
+
+  --lh-apretado: 1.25;
+  --lh-normal: 1.5;
+
+  /* ---------------- Espaciado, bordes y radios ---------------- */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+
+  --borde-fino: 1px;
+  --radio-s: 3px;
+  --radio-m: 6px;
+}
+
+/* Base mínima. No se añade box-sizing global aquí a propósito: cambiaría el
+   cálculo de anchos de las 26 hojas de componente a la vez y mezclaría un
+   cambio de layout con un cambio de color. Si hace falta, entra en la revisión
+   final, con verificación visual vista a vista. */
+body {
+  margin: 0;
+  font-family: var(--fuente-base);
+  font-size: var(--tam-m);
+  line-height: var(--lh-normal);
+  color: var(--color-tinta);
+  background: var(--color-fondo);
+}
