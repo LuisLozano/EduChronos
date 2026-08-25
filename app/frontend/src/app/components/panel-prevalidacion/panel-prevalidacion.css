@@ -1,17 +1,17 @@
 /* Fallo de la carga: rojo fuerte, misma señal que `.error` de horario-view. */
 .prevalidacion-error {
-  color: #b00;
+  color: var(--color-error);
   font-weight: 600;
 }
 
 /* NO ejecutado todavía: gris apagado, sin peso —no es un resultado, es su ausencia. */
 .prevalidacion-pendiente {
-  color: #888;
+  color: var(--color-tinta-suave);
 }
 
 /* Ejecutado y sano: verde, distinguible por DOM de la rama pendiente. */
 .prevalidacion-limpia {
-  color: #4a7;
+  color: var(--color-ok);
   font-weight: 600;
 }
 
@@ -19,8 +19,8 @@
 .prevalidacion-panel {
   padding: 0.4rem 0.6rem;
   margin-bottom: 0.6rem;
-  border-left: 4px solid #c80;
-  background: #fff8ec;
+  border-left: 4px solid var(--color-aviso);
+  background: var(--color-aviso-fondo);
 }
 
 .cabecera {
@@ -31,12 +31,12 @@
 
 .contador-errores {
   font-weight: 700;
-  color: #b00;
+  color: var(--color-error);
 }
 
 .contador-avisos {
   font-weight: 700;
-  color: #a60;
+  color: var(--color-aviso);
 }
 
 .lista {
@@ -56,5 +56,5 @@
 /* Adicional, SOLO en las entradas ERROR: refuerza la severidad sin sustituir a
    la fila —.aviso-entrada sigue estando en las dos—. */
 .aviso-entrada.es-error {
-  color: #b00;
+  color: var(--color-error);
 }

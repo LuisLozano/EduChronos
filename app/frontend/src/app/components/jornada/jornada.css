@@ -17,16 +17,16 @@
 /* La malla llega del servidor sintetizada y nadie la ha guardado todavía. */
 .jornada__badge {
   padding: 0.15rem 0.5rem;
-  border: 1px solid #b8860b;
+  border: 1px solid var(--color-aviso);
   border-radius: 999px;
-  color: #8a6100;
-  background: #fdf6e3;
-  font-size: 0.8rem;
+  color: var(--color-aviso);
+  background: var(--color-aviso-fondo);
+  font-size: var(--tam-xs);
 }
 
 .jornada__ayuda {
   margin: 0 0 1rem;
-  color: #666;
+  color: var(--color-tinta-suave);
 }
 
 /* El 409 no es un error de campo: ocupa su propio bloque destacado, con la única
@@ -34,24 +34,24 @@
 .jornada__conflicto {
   margin: 0 0 1rem;
   padding: 0.75rem;
-  border: 1px solid #b00;
+  border: 1px solid var(--color-error);
   border-radius: 4px;
-  background: #fff5f5;
+  background: var(--color-error-fondo);
 }
 
 .jornada__conflicto-texto {
   margin: 0 0 0.5rem;
-  color: #b00;
+  color: var(--color-error);
   font-weight: 600;
 }
 
 .jornada__error {
-  color: #b00;
+  color: var(--color-error);
   margin: 0.5rem 0;
 }
 
 .jornada__cargando {
-  color: #666;
+  color: var(--color-tinta-suave);
 }
 
 .jornada__tabla {
@@ -63,12 +63,12 @@
 .jornada__tabla td {
   text-align: left;
   padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-borde-suave);
 }
 
 .jornada__col-num {
   width: 3rem;
-  color: #666;
+  color: var(--color-tinta-suave);
 }
 
 .jornada__col-recreo {
@@ -78,23 +78,23 @@
 
 /* Las filas de recreo se distinguen del bloque lectivo sin depender solo del toggle. */
 .jornada__fila--recreo {
-  background: #f4f4f4;
-  color: #555;
+  background: var(--color-superficie-alt);
+  color: var(--color-tinta-suave);
   font-style: italic;
 }
 
 .jornada__input {
   width: 6rem;
   padding: 0.35rem;
-  border: 1px solid #666;
+  border: 1px solid var(--color-borde);
   border-radius: 4px;
   box-sizing: border-box;
 }
 
 .jornada__error-campo {
   display: block;
-  color: #b00;
-  font-size: 0.85rem;
+  color: var(--color-error);
+  font-size: var(--tam-s);
 }
 
 .jornada__acciones {

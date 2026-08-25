@@ -2,19 +2,19 @@
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-  font-size: 0.85rem;
+  font-size: var(--tam-s);
 }
 
 .rejilla th,
 .rejilla td {
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-borde);
   padding: 0.25rem;
   vertical-align: top;
 }
 
 .rejilla thead th,
 .tramo {
-  background: #f2f2f2;
+  background: var(--color-superficie-alt);
   text-align: center;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .instancia.pinada .entrada {
-  background: #fff8ec;
+  background: var(--color-aviso-fondo);
 }
 
 /* Solo el BADGE reserva hueco (C5): lleva texto y solaparía la primera entrada.
@@ -59,18 +59,18 @@
 }
 
 .badge {
-  font-size: 0.65rem;
+  font-size: var(--tam-xxs);
   font-weight: 700;
   padding: 0 0.2rem;
   border-radius: 0.2rem;
-  background: #ece4f4;
-  color: #402a52;
+  background: var(--color-marca-fondo);
+  color: var(--color-marca);
 }
 
 /* Botón desde 8.6-iii-B1: el reset lo deja como el glifo que era. Ya NO se
    posiciona solo —vive dentro de .adornos (flex)— desde 8.6-iii-B2-a. */
 .candado {
-  font-size: 0.7rem;
+  font-size: var(--tam-xxs);
   line-height: 1;
   padding: 0;
   border: 0;
@@ -80,7 +80,7 @@
 
 /* Estados del CDK: el original se atenúa y el hueco de destino se marca. */
 .cdk-drag-preview .entrada {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px var(--sombra-dialogo);
 }
 
 .cdk-drag-placeholder {
@@ -88,7 +88,7 @@
 }
 
 .cdk-drop-list-dragging {
-  outline: 2px dashed #4a7;
+  outline: 2px dashed var(--color-ok);
   outline-offset: -2px;
 }
 
@@ -97,8 +97,8 @@
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.2rem;
-  border-left: 3px solid #4a7;
-  background: #fafafa;
+  border-left: 3px solid var(--color-acento);
+  background: var(--color-superficie-tenue);
 }
 
 .asig {
@@ -108,24 +108,24 @@
 .prof,
 .aula,
 .grupos {
-  color: #555;
+  color: var(--color-tinta-suave);
 }
 
 .vacio {
-  color: #ddd;
+  color: var(--color-borde);
 }
 
 /* Resalte de violación DURA (8.6-iii-B2-b). outline y NO border-left (ocupado:
-   3px #4a7 estructural) ni background (ocupado en dos capas, la segunda es la
+   3px var(--color-acento) estructural) ni background (ocupado en dos capas, la segunda es la
    señal de pinada). outline no ocupa layout, así que las dos granularidades de
    D15 se leen anidadas —instancia entera y sub-entrada— sin desmontar la celda. */
 .instancia.en-violacion {
-  outline: 2px solid #c33;
+  outline: 2px solid var(--color-error);
   outline-offset: -1px;
 }
 
 .entrada.en-violacion {
-  outline: 2px solid #c33;
+  outline: 2px solid var(--color-error);
   outline-offset: -1px;
 }
 
@@ -133,5 +133,5 @@
    vista actual", no un veredicto. Coexiste a propósito con el outline verde de
    .cdk-drop-list-dragging, que sigue siendo la señal de sobrevuelo. */
 .rejilla td.ocupado {
-  background: #eef2f6;
+  background: var(--color-superficie-alt);
 }

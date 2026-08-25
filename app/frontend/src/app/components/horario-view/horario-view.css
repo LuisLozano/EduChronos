@@ -13,21 +13,21 @@
 }
 
 .error {
-  color: #b00;
+  color: var(--color-error);
   font-weight: 600;
 }
 
 /* Fallo NO fatal: el diagnóstico no cargó, pero la rejilla sigue en pie. Clase
    PROPIA (no .error) para que la señal sea distinguible por DOM de error/errorPin. */
 .error-diagnostico {
-  color: #a60;
+  color: var(--color-aviso);
   font-weight: 600;
 }
 
 /* Fallo del POST de generación. Clase PROPIA (no .error), misma razón que
    .error-diagnostico: distinguible por DOM y sin vaciar la rejilla vigente. */
 .error-generacion {
-  color: #b00;
+  color: var(--color-error);
   font-weight: 600;
 }
 
@@ -35,7 +35,7 @@
 .aviso {
   padding: 0.4rem 0.6rem;
   margin-bottom: 0.6rem;
-  border-left: 4px solid #c80;
-  background: #fff8ec;
+  border-left: 4px solid var(--color-aviso);
+  background: var(--color-aviso-fondo);
   font-weight: 600;
 }
