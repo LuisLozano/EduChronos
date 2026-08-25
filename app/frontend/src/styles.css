@@ -14,6 +14,7 @@
   --color-fondo: #F6F8FB;
   --color-superficie: #FFFFFF;
   --color-superficie-alt: #E9EEF5;
+  --color-superficie-tenue: #FAFBFC;
   --color-borde: #C3CFDE;
   --color-borde-suave: #DCE4EE;
   --color-tinta: #1B242E;
@@ -32,6 +33,8 @@
   --color-ok: #2F6446;
   --color-ok-fondo: #E5F0EA;
   --color-info-fondo: #EDF1F6;
+  --color-marca: #402A52;
+  --color-marca-fondo: #ECE4F4;
 
   --sombra-dialogo: 0 8px 28px rgba(27, 36, 46, 0.22);
   --sombra-suave: 0 1px 4px rgba(27, 36, 46, 0.10);
