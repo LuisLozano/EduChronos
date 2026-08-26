@@ -414,37 +414,60 @@ pidió: el ancho de la barra se reparte una vez.
 
 ## 6. Lección de método de esta sesión
 
-**El contador de celdas recortadas dio 0 durante dos iteraciones sobre un caso que sí
-desbordaba.** Lo cazó el ojo del arquitecto viendo aparecer un scroll vertical, no el
-instrumento. La causa: el detector comparaba `scrollHeight` con `clientHeight` sobre el
-`<td>`, y un `<td>` crece con su contenido, así que **jamás podía desbordar**. El
-medidor sólo sabía devolver «todo bien».
+**El mismo error apareció TRES veces**, y dos de ellas fueron dentro del acto de
+corregir la anterior. Por eso esta sección no es una anécdota de sesión.
 
-Dos cosas que llevarse, y la segunda importa más que la primera:
+**Episodio 1 — el contador que no podía saltar.** El contador de celdas recortadas dio
+0 durante dos iteraciones sobre un caso que sí desbordaba. Lo cazó el ojo del arquitecto
+viendo aparecer un scroll vertical, no el instrumento. Causa: comparaba `scrollHeight`
+con `clientHeight` sobre el `<td>`, y un `<td>` crece con su contenido, así que **jamás
+podía desbordar**. El medidor sólo sabía devolver «todo bien».
+
+**Episodio 2 — la anotación no es el test.** Para dar la cifra de `solver` se contaron
+las anotaciones `@Test`/`@ParameterizedTest` del fuente: 97, frente a las 91 de la
+referencia, y se registró como «discrepancia a contrastar». No había discrepancia: un
+`@ParameterizedTest` es una anotación y varios tests, y un `@Disabled` es una anotación
+y ninguno. Ejecutada la suite, son **91**, y la referencia era correcta.
+
+**Episodio 3 — el directorio no es la corrida.** Para dar la cifra «ejecutada» de `app`
+se sumaron los `TEST-*.xml` de `app/target/surefire-reports`. Total: 283, publicado como
+«una más que la referencia». Falso: 41 informes eran de la corrida de ese día y **el
+42.º era un huérfano del 24 de agosto**, `BarridoPresupuestoS117` —un arnés desechable de
+S117, nunca trackeado en git, cuyo fuente ya no existe—, que seguía en `target/` con su
+caso de 4306 s. `app` son **282**, y la referencia también era correcta. Se comprobó la
+fecha de dos ficheros con un `tail -2` y se dio por buena la del resto.
+
+**La forma común, que es lo que hay que llevarse.** En los tres, el instrumento se apoyó
+en algo que **se parece al conjunto medido y no lo es**: el `<td>` se parece a la caja
+acotada, la anotación se parece al test, el directorio se parece a la corrida. Y en los
+tres el error era invisible desde dentro, porque el instrumento devolvía un número
+plausible. De ahí las dos reglas:
+
 1. En una tabla, `height` sobre `tr` o `td` es un mínimo. Para acotar de verdad hace
-   falta un envoltorio con `max-height` (D2).
+   falta un envoltorio con `max-height` (D2). Y `target/` no se limpia entre sesiones:
+   filtrar por fecha, o `mvn clean test`, no es una precaución sino un requisito.
 2. **Un medidor que sólo puede devolver un resultado no es un medidor.** Antes de
-   apoyarse en un contador hay que forzarle un caso que DEBA hacerlo saltar; es la
-   campaña de mutación de M3 aplicada al instrumento de medida, y aquí no se hizo.
+   apoyarse en un contador hay que forzarle un caso que DEBA hacerlo saltar: es la
+   campaña de mutación de M3 aplicada al instrumento de medida.
 
-**Desenlace, y confirma que la lección valía la pena.** El hueco se cerró POR CÁLCULO y
-no por observación: un contador que deriva la altura de las reglas CSS decididas y de
-los datos reales de los 28 grupos (`/tmp/maqueta/calcular-recortes.py`), sometido antes
-a cinco mutaciones que debía superar —alto de 1 px: todas recortadas; alto de 10 000 px:
+**Cómo se cerró el hueco de D11, ya con la regla aplicada.** Por CÁLCULO y no por
+observación: un contador que deriva la altura de las reglas CSS decididas y de los datos
+reales de los 28 grupos (`scripts/calcular-recortes.py`), sometido ANTES a cinco
+mutaciones que debía superar —alto de 1 px: todas recortadas; alto de 10 000 px:
 ninguna; una celda sintética de doce plazas: recortada; monotonía al bajar el alto;
-`alto(6) > alto(5) > alto(1)`—. Las cinco saltaron.
+`alto(6) > alto(5) > alto(1)`—. Las cinco saltaron, y sólo entonces se leyó el número.
 
-**El resultado fue 22 de 791, no 0** (D11). Es decir: el contador de DOM no se equivocó
-sólo en 1ºA por casualidad, sino que habría dado cero sobre un centro con 22 celdas
-recortadas en 11 grupos. La observación en navegador habría confirmado un diseño que
-pierde clases.
+**El resultado fue 22 de 791, no 0** (D11). El contador de DOM no se equivocó sólo en
+1ºA por casualidad: habría dado cero sobre un centro con 22 celdas recortadas en 11
+grupos. La observación en navegador habría confirmado un diseño que pierde clases.
 
-Todas las alturas del cálculo son exactas por construcción: salen de `line-height`
-NUMÉRICO por `font-size` —un múltiplo del tamaño, independiente de la fuente— y de
-paddings en `rem`, y no hay ajuste de línea porque `.ln` y `.entrada--fila` llevan
-`white-space: nowrap`. La única magnitud no calculable es el cromo de la vista, que
-depende de la altura que el navegador dé a `<select>` y `<button>` nativos: por eso
-entra como parámetro y se barre en un rango, en vez de fingir un número.
+Nota sobre el determinismo de ese cálculo: todas las alturas son exactas por
+construcción —salen de `line-height` NUMÉRICO por `font-size`, un múltiplo del tamaño
+independiente de la fuente, y de paddings en `rem`— y no hay ajuste de línea, porque
+`.ln` y `.entrada--fila` llevan `white-space: nowrap`. La única magnitud no calculable
+es el cromo de la vista, que depende de la altura que el navegador dé a `<select>` y
+`<button>` nativos: por eso entra como parámetro y se barre en un rango, en vez de
+fingir un número.
 
 ---
 
@@ -490,9 +513,13 @@ Cifras **EJECUTADAS en esta sesión**, no contadas por grep. `mvn test` desde la
 | Suite | Referencia | **Ejecutado hoy** | Comentario |
 |---|---|---|---|
 | vitest | 316 | **316** en 42 ficheros | Cuadra |
-| app (JUnit) | 282 | **283** | Uno MÁS que la referencia. La cifra del encargo se ha quedado corta en algún momento; conviene actualizarla donde esté escrita |
-| solver (JUnit) | 91 | **91** | Cuadra. La referencia era correcta |
+| app (JUnit) | 282 | **282** en 41 clases | Cuadra |
+| solver (JUnit) | 91 | **91** en 34 clases | Cuadra |
 | e2e | 2 | 2 (no ejecutado) | No se corre: levanta backend y reescribe `educhronos-e2e.db`. La cifra es trivial de verificar en fuente |
+
+**Las cuatro cifras de referencia del proyecto son correctas.** Una versión anterior de
+este documento afirmó que `app` daba 283 y que la referencia se había quedado corta:
+era falso, y la causa está en §6.
 
 Queda anulada la «discrepancia del solver» que este documento registró en su primera
 versión: **97 anotaciones y 91 tests no son la misma métrica.** Un
@@ -517,10 +544,12 @@ este diseño no toca backend. Si se mueven, algo se ha tocado que no tocaba.
 - `/tmp/maqueta/index.html` — maqueta en vivo, con los tokens de `styles.css` copiados
   literalmente y las piezas reales de producto. **Desechable** (M-doc-2): vive fuera del
   repo y no se conserva.
-- `/tmp/maqueta/calcular-recortes.py` — el contador por cálculo de D11, con su autoprueba
-  de cinco mutaciones. Es el único artefacto de la sesión que quizá convenga conservar:
-  quien implemente D11 necesitará volver a correrlo cuando cambie la geometría de la
-  celda, y rehacerlo cuesta más que guardarlo. Decisión del arquitecto.
+- `scripts/calcular-recortes.py` — el contador por cálculo de D11, con su autoprueba de
+  cinco mutaciones dentro del propio fichero. **Es el único artefacto de la sesión que se
+  CONSERVA en el repo**, por decisión del arquitecto en el cierre: quien implemente D11
+  tendrá que volver a correrlo en cuanto cambie la geometría de la celda, y rehacerlo
+  cuesta más que guardarlo. Es además el ejemplar de referencia de la precisión de M2
+  que esta sesión añade a `metodo.md`.
 
 El diseño de este documento se validó en navegador contra 1B-A y 1ºA, y por cálculo
 contra los 28 grupos del centro. No hay capturas a propósito: lo de arriba debe poder leerse en una sesión futura
