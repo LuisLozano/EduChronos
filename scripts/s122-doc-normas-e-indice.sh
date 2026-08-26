@@ -24,6 +24,17 @@ cp "$MET" "$GES" "$PLA" "/tmp/s122-backup-$STAMP/"; CP=$?
 [ $CP -eq 0 ] || { echo "ABORTA: fallo al copiar backup"; exit 1; }
 echo "Backup en /tmp/s122-backup-$STAMP"
 
+# --- GUARDA DE UN SOLO USO (añadida en el cierre de S122) ---------------------
+# Este guion NO es reejecutable: inserta las normas M-doc en metodo.md y una
+# segunda pasada las DUPLICA. Ocurrió en el propio cierre de S122. Se conserva
+# como registro de lo que hizo, no como herramienta.
+# Para regenerar los índices en cada cierre: scripts/regenerar-indice.py
+if grep -qF '## M-doc — Cómo se entrega' "$MET"; then
+  echo "ABORTA: las normas M-doc YA están en $MET. Este guion es de un solo uso."
+  echo "Para regenerar los índices usa: python3 scripts/regenerar-indice.py"
+  exit 1
+fi
+
 # --- 3. Insertar normas y generar índices ---
 python3 - "$MET" "$GES" "$PLA" <<'PYEOF'
 import sys, re
