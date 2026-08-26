@@ -209,6 +209,56 @@ dato, con qué advertencia se pinta), conviene un mockup previo aunque invierta 
 orden de M2 (diseñar antes de medir). Es defendible solo si la sesión se dedica a
 diseño; se declara como inversión consciente de M2.
 
+La maqueta se escribe en disco y se abre en el navegador (M-doc-2);
+no se vuelca en la conversación.
+
+---
+
+## M-doc — Cómo se entrega la documentación (S122)
+
+Los documentos de gestión los EDITA Claude Code sobre el repo. El modelo principal
+entrega el TEXTO nuevo y su punto de inserción; NO devuelve el fichero completo.
+
+Razón, medida en S122: `gestion_proyecto.md` (144 kB) y `plan_trabajo_horarios.md`
+(264 kB) devueltos enteros son del orden de cien mil tokens de salida por cierre,
+en sesiones cuyo trabajo real cabe en una fracción de eso. La norma anterior
+—«pide los ficheros, modifícalos y devuélvelos enteros»— nació para evitar
+instrucciones de edición que se aplican mal al copiar y pegar; que las aplique
+quien tiene los ficheros delante cumple esa garantía mejor, no peor.
+
+1. Toda edición de `.md` va en un guion autocontenido para Claude Code, con rutas
+   ABSOLUTAS y con GUARDA: cada inserción se ancla a una cadena que debe aparecer
+   EXACTAMENTE UNA VEZ en el fichero; si no aparece una sola vez, el guion aborta
+   sin tocar nada.
+2. El guion hace copia de seguridad antes de escribir y VERIFICA después, por grep
+   y contra el fichero, que el texto quedó donde debía. Los códigos de salida se
+   capturan inmediatamente (regla de guion de S117).
+3. El modelo principal no pide los ficheros para devolverlos. Si necesita leer,
+   lee del Project o encarga a Claude Code una lectura acotada.
+4. Los mensajes de commit los sigue entregando el modelo principal, de una línea.
+
+---
+
+## M-doc-2 — Maquetas y artefactos desechables (S122)
+
+Una maqueta de M-mockup la ESCRIBE EN DISCO Claude Code y se abre en el navegador.
+Nunca se vuelca en la conversación: es un fichero grande de un solo uso. Vive fuera
+del repo (`/tmp`) salvo decisión expresa de conservarla.
+
+---
+
+## M-doc-3 — Índice generado (S122)
+
+`gestion_proyecto.md` y `plan_trabajo_horarios.md` llevan al principio un índice
+GENERADO, delimitado por `<!-- INDICE:INICIO -->` y `<!-- INDICE:FIN -->`, con cada
+encabezado y su línea. Existe para poder leer por secciones en la apertura en vez
+de leer el documento entero.
+
+Los números de línea son INDICATIVOS: se regeneran en el cierre (ver §Automatización
+del cierre). Si no cuadran, manda el TEXTO del encabezado, que es lo que se busca
+por grep. Un índice que se cree exacto y no lo sea es la familia de
+D-tokens-inexistentes: estado vivo equivocado.
+
 ---
 
 ## Tipos de sesión
@@ -238,6 +288,8 @@ Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
   tiene definición viva Y citante vivo.
 - Coherencia de los dos censos de la bitácora entre sí y con la crónica.
 - Diff de costura: que las regiones tocadas sean solo las previstas.
+- Regenerar el índice de `gestion_proyecto.md` y `plan_trabajo_horarios.md`
+  (M-doc-3): los números de línea caducan en cada cierre.
 
 El script solo reporta; el arquitecto lee su salida. Su cobertura se valida una vez
 contra un cierre hecho a mano (el de S99 sirve de test de oro).

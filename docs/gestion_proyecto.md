@@ -1,4 +1,36 @@
 # Sistema de gestión del proyecto — Educhronos
+<!-- INDICE:INICIO -->
+<!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
+
+- L55 — ## 1. Estado final del proyecto
+- L81 — ## 2. Hitos
+- L95 — ### Hitos: valor, dependencias, orden
+- L118 — ## 3. Objetivos técnicos
+- L128 — ### H2 — Configurar un centro desde cero
+- L130 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L146 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L218 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L468 — #### O-demo — "El centro real funciona de punta a punta." (ABIERTO S115)
+- L724 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
+- L757 — ### H1 — Ajustar (cierre)
+- L759 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
+- L772 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
+- L858 — ## 4. Clasificación del trabajo pendiente
+- L876 — ### Clasificación de las deudas vivas actuales
+- L882 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L889 — #### Deuda técnica real, colgada de su objetivo
+- L927 — #### Mejora futura, cuelga y espera
+- L954 — #### Decisión arquitectónica consciente → sale de la cola
+- L965 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L973 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L980 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1013 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1067 — ## 6. Reglas estratégicas
+- L1114 — ## 7. Métricas del sistema
+- L1135 — ## 8. El sistema respondiendo a las preguntas clave
+
+<!-- INDICE:FIN -->
+
 
 Este documento gobierna **qué se hace y por qué**. Responde a: ¿por qué se abre
 esta sesión? ¿qué objetivo avanza? ¿qué hito acerca? ¿cuándo se deja de refinar

@@ -1,4 +1,76 @@
 # Plan de Trabajo — Aplicación de Horarios Escolares
+<!-- INDICE:INICIO -->
+<!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
+
+- L75 — ## Cómo usar este documento en el Project de Claude
+- L95 — ## Principios de avance
+- L116 — ## FASE 0 — Decisión de stack tecnológico
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
+- L135 — ## FASE 1 — Modelo de datos validado en papel
+- L139 — ### Entregable
+- L144 — ### Criterios de verificación
+- L162 — ### Señal de que está mal
+- L166 — ### Resultado de la fase
+- L174 — ## FASE 2 — Solver MVP: problema mínimo
+- L181 — ### Subconjunto de datos
+- L187 — ### Entregable
+- L194 — ### Criterios de verificación
+- L207 — ### Señal de que está mal
+- L210 — ### Decisiones tácticas
+- L284 — ### Criterios de verificación por bloque
+- L326 — ## FASE 3 — Solver: desdobles y agrupamientos
+- L329 — ### Lo que se añade
+- L334 — ### Criterios de verificación
+- L351 — ### Señal de que está mal
+- L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
+- L360 — ### Lo que se añade
+- L364 — ### Criterios de verificación
+- L374 — ## FASE 5 — Solver: instituto completo
+- L420 — ### Lo que se añade
+- L426 — ### Criterios de verificación
+- L493 — ### Señal de que está mal
+- L500 — ## FASE 6 — Persistencia de datos
+- L504 — ### Entregable
+- L517 — ### Criterios de verificación
+- L545 — ## FASE 7 — UI: visualización de horarios
+- L548 — ### Entregable
+- L551 — ### Criterios de verificación
+- L563 — ### Bloques de Fase 7
+- L602 — ## FASE 8 — UI: configuración y ajuste manual
+- L613 — ### Entregable
+- L619 — ### Criterios de verificación
+- L640 — ## FASE 9 — Exportación
+- L643 — ### Criterios de verificación
+- L651 — ## FASE 10 — Gestión de cursos académicos
+- L660 — ### Entregable
+- L666 — ### Criterios de verificación
+- L675 — ## FASE 11 — Empaquetado y distribución Windows
+- L678 — ### Criterios de verificación
+- L687 — ## FASE 12 — CI/CD con GitHub Actions
+- L690 — ### Criterios de verificación
+- L697 — ## Registro de progreso
+- L699 — ### Sesión 121 — O-diseño (transversal): APERTURA del objetivo, definición de su criterio de terminado y sus cuatro Cambios; C-tokens y C-sustitución HECHOS. Todo el color y el tamaño del frontend pasa a una capa de tokens en `styles.css`, con paleta azul institucional elegida por el jefe de estudios (M0 + M2 + C-tokens + C-sustitución en dos tandas + M4 en navegador + M1, sin M3). DOS de cuatro piezas. NO cierra el objetivo.
+- L1008 — ### Bloques de Fase 2
+- L1016 — ### Bloques de Fase 5
+- L1039 — ### Bloques de Fase 6
+- L1084 — ### Bloques de Fase 8
+- L1293 — ### Fases completadas
+- L1397 — ### Cierre del modelo — Sesión 8
+- L1445 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1491 — ### Método de trabajo (procedimiento vigente)
+- L1524 — ### Deuda consciente VIVA
+- L2915 — ### Deuda consciente CERRADA (histórico)
+- L2943 — ### Notas técnicas validadas en Fase 0
+- L2953 — ### Notas técnicas validadas en Fase 6
+- L2987 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2996 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3023 — ### Registro detallado de sesiones S10–S31
+- L3032 — ## Señales globales de alerta
+
+<!-- INDICE:FIN -->
+
 
 ## Cómo usar este documento en el Project de Claude
 
