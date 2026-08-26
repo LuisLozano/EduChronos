@@ -116,6 +116,18 @@ Cuatro precisiones, en el orden en que se aplican:
   bitácora NO se corrige: es histórico de solo lectura.
 - UNA CONCLUSIÓN DE MEDICIÓN DECLARA QUÉ SE MIDIÓ, no solo qué se concluye. Una
   conclusión que enumera su evidencia deja el hueco visible sin que nadie lo pise.
+  Y EL INSTRUMENTO SE VERIFICA ANTES DE CREERLE: se le fuerza un caso que DEBA
+  hacerlo fallar. Un medidor que solo sabe devolver «todo bien» no es un medidor, y
+  su número es plausible justo hasta que alguien lo mira por otra vía. Tres
+  precedentes: S117, un `EXIT=$?` colocado tras un `echo`, que medía el `echo` y no
+  el comando; S121, la vía que comprobaba que un `var(--token-inexistente)` NO rompe
+  el build —cierta y ciega, incapaz por construcción de distinguir un token vivo de
+  uno muerto—; S122, el contador de desbordes que devolvió 0 sobre un caso que sí
+  desbordaba, porque medía el `<td>`, que crece con su contenido. La forma es la
+  misma en los tres: el instrumento se apoya en algo que SE PARECE al conjunto
+  medido y no lo es. Ejemplar de referencia: `scripts/calcular-recortes.py`, cuyas
+  cinco mutaciones viven en `autoprueba()`, corren siempre antes de dar ningún
+  número y abortan si alguna no salta.
 - UN TIPO COMPARTIDO SE MIDE EN TODOS LOS MÓDULOS QUE LO TOCAN. La pregunta es
   «¿quién más CONSTRUYE o CONSUME este tipo?», no «¿cuántos call sites tiene aquí?».
   Corolario: `referencia-codigo-solver.md` lista FIRMAS, no quién las usa; cuando el
