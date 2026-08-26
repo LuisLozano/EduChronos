@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S119. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S120. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S118). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S120). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -7325,3 +7325,148 @@ Fase actual: 8 — UI: configuración y ajuste manual (EN CURSO desde S57). Bloq
   CERRADA**. Suites INTACTAS, ningún módulo tocado: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: no
   hay Cambio en curso. Los candidatos vivos son C-carga-manual-1eso (propuesto, sin decidir desde S117) y la
   respuesta del centro sobre las aulas de FPB, sin la cual O-demo no cierra. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 120 — O-demo (H2): C-carga-manual-1eso en su versión RECORTADA POR ANCHO, y CIERRE del Cambio. El caso §6.1 tecleado A MANO por la interfaz sobre base vacía —dos grupos, 38 envíos, horario válido en 1 s— (M0 + M2 por Claude Code + M4 en navegador + M1, sin M3; cero líneas de producto). CUARTA pieza CERRADA. NO cierra el objetivo.
+
+Vigésima sesión bajo el mapa Hito→Objetivo→Cambio, y del mismo tipo SIN ENCAJE EXACTO que S117 y S119 en un
+punto —no escribe una línea de producto— pero distinta de las dos en otro: aquí SÍ hay M4, y el M4 ES la
+sesión. Ritual M0 + M2 (una pasada de solo lectura por Claude Code) + M4 (tecleo en navegador por el
+arquitecto) + M1, sin M3 porque no hay lógica que mutar. Ningún fichero de `app/src/main`,
+`solver/src/main` ni `app/frontend` se toca; las cuatro suites quedan intactas (app 282, solver 91,
+vitest 316, e2e 2). Lo que ENTREGA: la única distancia que O-demo tenía DECLARADA POR ESCRITO desde S115
+queda cerrada en su parte difícil, y con ella el último Cambio ejecutable del objetivo.
+M0 — apertura verificada contra `gestion_proyecto.md`. Objetivo = O-demo (H2), 3 piezas hechas al abrir.
+Hito = H2. Cambio = C-carga-manual-1eso, PROPUESTO desde S115 y SIN DECIDIR durante tres sesiones
+consecutivas (S117, S118, S119). No había Cambio en curso.
+**EL M0 CORRIGIÓ EL PROMPT DE APERTURA en el punto que gobierna lo que la sesión puede prometer.** El prompt
+afirmaba que C-carga-manual-1eso «es lo único que puede avanzar O-demo». Es más estrecho: el criterio de
+terminado de O-demo pide el centro creado por las VÍAS LEGÍTIMAS DEL PRODUCTO, y S115 declaró la API REST
+como vía legítima y no rediscutible. Lo que este Cambio cierra NO es el criterio de O-demo: es la NOTA DE
+ALCANCE de S115 —la distancia entre lo demostrado y el paso 2 del guion de aceptación de §1, que exige
+«crear un centro desde cero POR LA INTERFAZ»—. Consecuencia declarada por adelantado y cumplida: esta
+sesión, saliendo perfecta, NO cierra O-demo.
+LA ELECCIÓN, entre las dos que el prompt puso sobre la mesa (este Cambio o una sesión de Higiene/Método por
+el script de R4 pendiente desde S101). Se eligió el Cambio, con cuatro argumentos y uno decide: **(1)** es
+el único de los dos que puede nombrar los tres términos de R-apertura; **(2)** R-deuda excluye al otro
+—ni D-guion-exit-enmascarado ni D-tokens-inexistentes bloquean el criterio del objetivo activo, y el
+«Siguiente» que S119 dejó escrito no pide sesión de higiene—; **(3)** el que decide: teclear por UI es lo
+único que puede DESTAPAR un hueco funcional de H2 a escala, y ése es exactamente el contenido de la
+dependencia que O-diseño tiene sobre O-demo; si O-demo cerrara sin esto, esa comprobación no la haría ya
+nadie, porque el e2e de S112 cubre nueve filas y el centro real entró por script; **(4)** la versión
+recortada es barata. CONTRAARGUMENTO REGISTRADO Y PERDEDOR, para que conste que se pesó: el script de R4
+tiene el mejor caso que ha tenido nunca, porque S119 midió que la verificación manual YA FALLÓ una vez (la
+cabecera de S118 afirmaba una higiene que no hizo). Perdió por no bloquear.
+DECISIÓN DE ALCANCE DEL ARQUITECTO SENIOR, y no es la que S117 recomendaba: **el bloque se teclea con DOS
+grupos, 1ºA y 1ºB, no con uno ni con los cuatro.** Razón medida sobre el catálogo: cada una de las seis
+plazas del bloque referencia CUATRO subgrupos, uno por grupo; con 1ºA solo, cada plaza se quedaría con UN
+subgrupo y desaparecería el caso de «plaza que agrega subgrupos de varios grupos», que es la interacción de
+UI más difícil y uno de los casos que S115 declaró expresable LEYENDO. Con los cuatro grupos serían
+dieciocho altas más de lo mismo: volumen, no evidencia. Se recorta el ANCHO, no la cadena.
+R-invalidación, dos condiciones reales: (a) todo corre sobre base de USAR Y TIRAR
+(`app/educhronos-s120-manual.db`), porque la canónica debe conservar `sesion 0` para O-particiones y
+`educhronos-demo-m4.db` es el único horario del centro real que existe; (b) O-diseño rehará el ASPECTO de
+las vistas, no su comportamiento, así que ninguna mejora visual que aparezca se ejecuta aquí (R-terminado).
+R-deuda: ninguna deuda abre la sesión. La única bloqueante sigue siendo D31-a, que bloquea O-demo y no este
+Cambio; declarado por adelantado como en S117, S118 y S119.
+M2 — UNA PASADA DE SOLO LECTURA POR CLAUDE CODE, sin arrancar nada y sin abrir ninguna `.db`. Su encargo NO
+era ejecutar el ejercicio sino reunir los datos exactos para que no se tecleara un solo dato inventado.
+Entregó `/tmp/m2-s120-informe.md` (740 líneas) con los códigos literales, los campos obligatorios de cada
+servicio, el orden de creación y las huellas de las nueve bases en disco. TRES RESULTADOS QUE CAMBIARON EL
+GUION: **(1)** la nomenclatura real de los subgrupos de CyR es `1ºA-CyR-INF1` / `1ºA-CyR-TEC3` (sufijo =
+código del profesor) y NO `-Inf` / `-Tec` como escribe `modelo_datos_fase1.md` §6.1; manda el catálogo
+derivado, que es lo que se cargó en la base real. **(2)** Seis de los ocho profesores y la asignatura `LCL`
+vienen TRUNCADOS del PDF de origen y se teclean truncados, o dejan de coincidir con la base real. **(3)** El
+código del aula de informática es literalmente `A12 Informática`, con espacio y con tilde.
+**EL M2 CORRIGIÓ TAMBIÉN LA ESTIMACIÓN DEL ARQUITECTO SENIOR, dos veces y las dos a la baja**: 38 envíos y no
+los «45-60» anunciados —no hacen falta tutorías, porque ninguna de las dos actividades pide tutor, ni ningún
+PDC—, y veinte minutos y no «una a dos horas». La segunda falla importa más que la primera: **el coste
+percibido era lo que llevaba tres sesiones frenando esta decisión.**
+M4 — EL TECLEO. Base vacía creada por el arranque (21 tablas, cero filas), aplicación en `localhost:4200`,
+38 envíos en el orden de dependencias: jornada (1), nivel (1), asignaturas (4), profesores (8), aulas (7),
+grupos (2), subgrupos (13), actividades (2). Y generación al final.
+**RESULTADO: NINGÚN CASO RESULTÓ INEXPRESABLE POR LA INTERFAZ.** El bloque de seis destinos alternativos se
+construyó como UNA actividad de seis plazas, con dos subgrupos por plaza (multiselect por ctrl+clic), una
+plaza con aula fija y cinco con candidatas; la co-docencia de LCL se construyó como UNA plaza con DOS
+profesores. Los dos casos a la primera. El horario se generó en **1 segundo**.
+**VERIFICACIÓN INDEPENDIENTE DEL HORARIO por el arquitecto senior, sobre las capturas y no sobre el «salió
+bien»:** repeticiones correctas (LCL cuatro veces en cuatro días distintos, bloque dos veces en dos días,
+las dos actividades DISTRIBUIDA); el bloque cae ENTERO en un solo tramo con sus seis plazas simultáneas y
+seis aulas distintas (A12/A5/A11/A10/A3/A14 el jueves, A12/B07/A5/A14/A11/A3 el viernes); cada plaza dentro
+de su lista de candidatas declarada; LCL pintando `LEN2, LEN8` en la misma celda; 1ºA sin dos cosas a la vez;
+y la aritmética de S117 cuadrando a esta escala, **2 × 6 + 4 × 1 = 16 filas de `sesion`**.
+**EL RIESGO QUE NO SE LE DIJO AL ARQUITECTO PARA NO DIRIGIR SU RESPUESTA, y que resultó ser el hallazgo
+técnico de la sesión:** `1ºA-Completo` CONTIENE a los seis subgrupos del bloque, así que si LCL y el bloque
+hubieran caído en el mismo tramo los alumnos estarían en dos sitios a la vez. No ocurrió, y se comprobó que
+**no fue suerte**: el solver tiene regla dura propia de solape por grupo (`SOLAPE_GRUPO`, con
+`RestriccionNoSolapeGrupo` y su test `mismoGrupoEnUnUnicoTramoEsInfactible`, más el de regresión
+`desdobleNoSeReportaComoSolapeDeGrupo`). Dato de valor: **con el centro completo esa regla no se ejercita**,
+porque los 26 grupos van a 30/30 y no queda hueco donde el conflicto pueda darse; este horario de juguete la
+ejercita de verdad. Es evidencia que S119 no podía producir.
+LO QUE SE ASEVERA, con las palabras exactas: **el caso más difícil del centro real —bloque de seis destinos
+alternativos con subgrupos de dos grupos, y co-docencia— es CONSTRUIBLE A MANO POR LA INTERFAZ sobre una
+base vacía, en 38 envíos y veinte minutos, y el solver produce horario válido sobre él.**
+LÍMITES DE LA ASERCIÓN, declarados de una vez y sin adornar: **el guion decía QUÉ construir.** Que el bloque
+de seis destinos es UNA actividad con seis plazas y no seis actividades, el arquitecto lo sabía porque se lo
+dieron hecho. Lo demostrado es que **los formularios EXPRESAN el caso**, no que un usuario averigüe cómo
+MODELARLO; esa segunda mitad sigue sin demostrar y no la demuestra ningún ejercicio cuyo guion escriba el
+arquitecto senior. Además: n = 1 persona, y esa persona conoce el modelo; dos grupos de cuatro; 38 envíos de
+los 815 del centro completo; sin PDC, sin tutorías y sin currículo ordinario. **La nota de alcance de S115 se
+ESTRECHA, no desaparece**: lo demostrado por UI a escala real sigue sin estarlo.
+HALLAZGOS DE PRODUCTO, los cinco. **(1) LA VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS
+MENSAJES DE ERROR** —«No se pudo cargar el diagnóstico» y «No se pudo cargar el horario 1 (404)»— cuando lo
+correcto es que todavía no haya horario. Nace D-vista-horario-sin-horario, y muerde en la cláusula
+«presentable al centro» del criterio de O-demo: es literalmente lo primero que vería el jefe de estudios tras
+configurar. Hermana del hallazgo de S118 sobre la prevalidación ciega al centro recién instalado.
+**(2)** Los selectores de subgrupos, profesores y aulas son multiselect nativo por ctrl+clic, sin buscador ni
+filtro: con 13 subgrupos va bien y con los 334 del centro real no (D-selectores-sin-busqueda, mejora futura).
+**(3)** La etiqueta «— varias (una por plaza) —» se encontró pero resultó CONFUSA, y en el punto más difícil
+del formulario; y la co-docencia no se declara, se deduce de poner dos profesores. Las dos son la misma cosa
+—la forma de la actividad es implícita— y nace D-actividad-forma-implicita (mejora futura).
+**(4)** Con seis plazas rellenas la pantalla del formulario queda «regular» de legible; se registra dentro de
+la anterior y no se abre token propio. **(5)** Tras guardar la jornada, la pantalla sigue mostrando el DÍA
+TIPO y no la semana expandida; no bloqueó nada y queda como observación, no como deuda: no se ha leído el
+componente y afirmar que está mal sería suponer.
+DOS ERRORES DEL ARQUITECTO SENIOR EN EL GUION, registrados porque son del mismo género que los de S119.
+**(1)** El paso 10 mandaba «prevalidar y luego generar»: **ese botón no existe**. Se extrapoló de la nota de
+la ficha de D-generacion-sin-indicador que dice que el botón de generar se deshabilita si no se ha
+prevalidado. El mensaje «Catálogo sano» aparece solo. Queda ABIERTO si la prevalidación corre al cargar la
+vista o si la nota está desfasada: NO se ha leído `horario-view.ts` y no se afirma.
+**(2)** La orden de arranque que el guion daba llevaba DOS argumentos separados por coma dentro del mismo
+`-Dspring-boot.run.arguments=`, tal como `plan:859` describe el mecanismo, y **la coma no separó nada**: la
+base se creó con el nombre literal `educhronos-s120-manual.db,--educhronos.solver.max-segundos=60`. Se
+rehízo con un solo argumento y el presupuesto se dejó en su defecto de 600 s, irrelevante para un problema
+de 16 sesiones. Nace D-arranque-no-literal (de método).
+R-DEUDA, RATIFICADA UNA VEZ MÁS Y POR EL LADO MÁS FÁCIL DE TODOS: nacen tres deudas y una mejora, y ninguna
+se paga. Ninguna bloquea el criterio de O-demo. La sesión NO tocó ningún camino de fallo, así que tampoco
+hubo nada que pagar DE PASO —a diferencia de S118—. Deuda bloqueante abierta: sigue en 1 (D31-a).
+PREDICCIONES DECLARADAS ANTES DE TECLEAR, y su desenlace honesto. Se cumplieron la (2) —el paso de trece
+subgrupos fue tedioso y funcionó, tres minutos—, la (3) —la plaza de `A12 Informática` no dio problema de
+compatibilidad, como preveía el M2 por la rama `compatibles.isEmpty()`— y la (5) —generación instantánea—.
+La (4) no se ejercitó: el orden se respetó. **LA (1) QUEDA EJERCITADA PERO NO OBSERVADA, y así se registra
+en vez de darla por confirmada:** hubo uno o dos rechazos, el arquitecto los atribuye a erratas propias
+—saltarse un paso por descuido mientras atendía otra tarea— y NO se anotó si la pantalla decía por qué. La
+deuda D-F8.6-ii-a no gana ni pierde evidencia en esta sesión.
+DECISIÓN SOBRE LA BASE DEL EJERCICIO: `app/educhronos-s120-manual.db` es DE USAR Y TIRAR y se borra al
+cerrar, a diferencia de `educhronos-demo-m4.db` (declarada horario de referencia en S119). Rehacerla cuesta
+veinte minutos de tecleo, pero no contiene nada que no esté en este registro y en el guion. Se borra también
+la base con el nombre corrupto del intento fallido. Ninguna está trackeada (`.gitignore:12`).
+INTEGRIDAD: la canónica `app/educhronos-demo.db` sigue en `f5b542ebeef40144f448bb24245a4b2d` con `sesion 0`
+—huella tomada por el M2 ANTES de teclear y verificada al cerrar— y `educhronos-demo-m4.db` en
+`ea1a70a0337831dddccdbcd322f48e9b`. Ninguna de las dos se abrió en toda la sesión.
+**C-CARGA-MANUAL-1ESO CIERRA** en su versión recortada por ancho, que es la que S117 recomendó y la que S120
+ejecutó con la corrección de los dos grupos. **O-DEMO NO CIERRA**: sigue esperando las 11 actividades de FPB
+(D31-a). Con este Cambio cerrado, **O-demo se queda SIN TRABAJO EJECUTABLE**: los cinco Cambios de su ficha
+están hechos o retirados y lo único pendiente es un correo al centro.
+LIMPIEZA (M1-bis): archivada S118 a `bitacora-sesiones.md` (promovida a `### Sesión 118`, insertada al final
+en orden ascendente, cuerpo íntegro); degradada S119 a «Última sesión registrada (previa)» compacta; S120
+queda como única cabecera H3 viva. Actualizados los dos censos de la bitácora (→ S10–S118), la crónica de
+archivado y la frase de ventana del plan. R4/costura: el script oficial SIGUE sin existir en el repo (mejora
+de método pendiente desde S101, y esta sesión le añade un tercer caso concreto, D-arranque-no-literal);
+verificado que los cuatro tokens nuevos tienen definición viva en este plan y citante vivo en
+`gestion_proyecto.md` §4 (lección de D-tokens-inexistentes), que el árbol queda limpio, que ninguna base está
+trackeada y que esta sesión NO produce commits de código: solo documentación.
+O-demo (H2) ACTIVO, 4 piezas: C-derivación (S115), C-cargador (S116), C-generación (S117+S118+S119) y
+**C-carga-manual-1eso (S120) CERRADA**. Suites INTACTAS, ningún módulo tocado: **app 282, solver 91,
+vitest 316, e2e 2**. Siguiente: O-demo no tiene trabajo ejecutable hasta que el centro responda, así que lo
+que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y cuya dependencia sobre O-demo
+—«que O-demo destape un caso inexpresable»— queda consumida por esta sesión. Lo fija su propio M0 (ver M1-ter).
