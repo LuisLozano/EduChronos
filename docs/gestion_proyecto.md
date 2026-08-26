@@ -2,32 +2,33 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L55 — ## 1. Estado final del proyecto
-- L81 — ## 2. Hitos
-- L95 — ### Hitos: valor, dependencias, orden
-- L118 — ## 3. Objetivos técnicos
-- L128 — ### H2 — Configurar un centro desde cero
-- L130 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L146 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L218 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L468 — #### O-demo — "El centro real funciona de punta a punta." (ABIERTO S115)
-- L724 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
-- L757 — ### H1 — Ajustar (cierre)
-- L759 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
-- L772 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
-- L858 — ## 4. Clasificación del trabajo pendiente
-- L876 — ### Clasificación de las deudas vivas actuales
-- L882 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L889 — #### Deuda técnica real, colgada de su objetivo
-- L927 — #### Mejora futura, cuelga y espera
-- L954 — #### Decisión arquitectónica consciente → sale de la cola
-- L965 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L973 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L980 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1013 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1067 — ## 6. Reglas estratégicas
-- L1114 — ## 7. Métricas del sistema
-- L1135 — ## 8. El sistema respondiendo a las preguntas clave
+- L56 — ## 1. Estado final del proyecto
+- L82 — ## 2. Hitos
+- L96 — ### Hitos: valor, dependencias, orden
+- L119 — ## 3. Objetivos técnicos
+- L129 — ### H2 — Configurar un centro desde cero
+- L131 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L147 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L219 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L469 — #### O-demo — "El centro real funciona de punta a punta." (ABIERTO S115)
+- L725 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
+- L758 — ### H1 — Ajustar (cierre)
+- L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
+- L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
+- L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
+- L945 — ## 4. Clasificación del trabajo pendiente
+- L963 — ### Clasificación de las deudas vivas actuales
+- L969 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L976 — #### Deuda técnica real, colgada de su objetivo
+- L1016 — #### Mejora futura, cuelga y espera
+- L1043 — #### Decisión arquitectónica consciente → sale de la cola
+- L1055 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1063 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1070 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1103 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1157 — ## 6. Reglas estratégicas
+- L1204 — ## 7. Métricas del sistema
+- L1225 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -843,10 +844,96 @@ de las Fases 9–12.
   que apriete, maquetar antes de saber si la UI está completa es apostar a que O-demo no
   destapa ningún formulario nuevo. Si apareciera una fecha corta, lo racional es invertir el
   orden y aceptar retocar lo que salga.
+- **Registrado en el cierre de S122, sin cambiar el criterio:**
+  - **La decisión 3 de las seis (densidad/espaciado) SIGUE SIN SEDE.** El espaciado NO
+    está tokenizado: C-sustitución cubrió color y `font-size`, que es lo que el criterio 1
+    verifica por grep, y nada más. La prueba es `padding-top: 16px` en
+    `horario-grid.css:43-45`, un literal que sobrevivió entero a la pasada. Los tokens
+    `--e1..--e6` existen en `styles.css:63-68` y no gobiernan el CSS de componente.
+    Decidir su sede —C-identidad o un Cambio propio de tokenización— queda pendiente.
+  - **La pregunta que S121 dejó abierta sobre las insignias `1`/`-1` ESTÁ RESUELTA:** son
+    la suma CON SIGNO del coste blando de la instancia, calculada por el contenedor a
+    partir de `GET /api/horarios/{id}/diagnostico` (medición y evidencia en
+    `docs/diseno-navegacion.md` §A1). `>0` significa que mover la instancia mejora; `<0`,
+    que tapa un hueco. **Su leyenda —tooltip y etiqueta accesible, como las del candado—
+    es material de C-identidad**; nace `D-insignia-sin-leyenda`.
+  - **La «resolución declarada» que este criterio invoca se declaró en S122: 1920×1080.**
+    Hasta entonces la ficha la exigía sin que nadie la hubiera fijado en ningún documento.
+    La resolución del portátil queda como PARÁMETRO SIN FIJAR.
+
 - **Grano abierto:** objetivo propio y separado, NO colgado de O-demo, porque el
   diseño transversal toca todas las vistas a la vez y no es "parte de" ningún hito
   funcional. Si al abrirlo resulta grande, se parte (métrica de §7).
 
+
+#### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
+- **Propósito:** que la aplicación se recorra sin pelearse con ella —enrutado, densidad
+  de la rejilla y listas del tamaño del centro real—, no que se vea mejor. Es transversal,
+  como O-diseño, y hermano suyo: uno hace el ACABADO y el otro el MANEJO. Lo funda
+  `docs/diseno-navegacion.md`, la medición de S122 sobre el horario del centro real y sus
+  28 grupos.
+- **Terminado cuando:**
+  1. Barra superior con Configuración y Horario, entrada activa distinguible, y sitio
+     reservado para el selector de curso activo de Fase 10 sin rehacerla. (Nota: la barra
+     YA EXISTE; lo que falta es estilo, y eso es C-identidad.)
+  2. Configuración se navega por rutas hijas con `router-outlet`: los ocho destinos se
+     alcanzan en un gesto, cada uno con URL enlazable. `/configuracion` redirige a
+     `jornada`. Añadir un noveno destino es una entrada nueva, no una reforma.
+     `loadComponent` queda APLAZADO, no descartado: se añade si se mide que hace falta.
+  3. Con la base del centro real, ninguna lista obliga a recorrer el scroll hasta el
+     final. Lo medido en S122 fue FILTRO más lista desplazable dentro del destino, no un
+     paginador; el criterio admite cualquiera de los dos, pero el que tiene evidencia es
+     el primero. Casos duros: Actividades (208) y Subgrupos (334). Frontera con
+     `D-selectores-sin-busqueda`: esa deuda habla de los `<select multiple>` de los
+     FORMULARIOS; el filtro de este criterio actúa sobre las LISTAS de un destino. Son
+     sitios distintos y no se saldan la una con la otra.
+  4. El horario de un grupo cabe en 1920×1080 sin scroll vertical, con el mecanismo de
+     expansión activo. Las 22 celdas de seis plazas (11 grupos de 28, 2,8 % de 791) se
+     muestran colapsadas Y con forma visible de expandirlas: recortar sin expansión es
+     perder una clase, no una explicación. La resolución de portátil queda como PARÁMETRO
+     SIN FIJAR del que depende todo el cálculo de altura.
+  5. Ninguna escritura nueva. Se admite composición de solo lectura (enseñar en un destino
+     lo que cuelga de él, con enlace). Crear o editar desde un sitio que hoy no lo hace
+     queda fuera: eso es O-particiones.
+  6. Sin regresión: suites verdes salvo las que el cambio de plantillas obligue a tocar,
+     declarado ANTES y no descubierto en rojo. Previstos: los 8 de `configuracion.spec.ts`
+     y dos puntos de `centro-minimo.spec.ts`.
+- **Deudas que absorbe:** `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que
+  llevaban desde S115 y S113 remitiendo las dos, con esas palabras, a «el Cambio que
+  decida la navegación» y a «la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio
+  propio». **Esa decisión se toma aquí y es el criterio 2.** `D-pdc-lista-rancia` no se
+  paga con un parche: al cargar cada destino al entrar deja de existir, que es justo lo que
+  su ficha pedía («no se parchea con un `EventEmitter` ad hoc, que fijaría el molde por la
+  puerta de atrás»). La deuda aplazada de S101 se cierra al cumplirse el criterio 2. Cierra
+  además el hilo de **C-configuracion-navegable**, el Cambio de O-demo que S115 RETIRÓ del
+  camino crítico por medición y derivó precisamente a `D-configuracion-monolitica`: lo que allí
+  se aplazó por no ser urgente para la demo reaparece aquí como criterio de un objetivo propio,
+  que es donde debía estar.
+- **Fuera del criterio, por R-terminado:** `D-selectores-sin-busqueda` (habla de otro
+  sitio: ver la frontera escrita en el criterio 3), `D-actividad-forma-implicita` y
+  `D-actividad-ux` (son el formulario de actividad, no la navegación),
+  `D-vista-horario-sin-horario` (es comportamiento y sigue en O-demo),
+  `D-insignia-sin-leyenda` (es C-identidad) y el responsive (`D-sin-puntos-de-ruptura`,
+  decisión escrita de S121). Fuera también tokenizar el espaciado: es la decisión 3 de
+  identidad de O-diseño y sigue sin sede.
+- **Cambios que agrupa — PROPUESTOS en S122, a ratificar en la apertura:** **C-rutas-hijas**
+  (criterio 2, y con él las dos deudas absorbidas), **C-listas-paginadas** (criterio 3, los
+  casos duros son Subgrupos y Actividades) y **C-rejilla-densidad** (criterio 4, la
+  geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11). El
+  criterio 1 no abre Cambio: la barra existe y lo que le falta es estilo. Salen uno a uno de
+  los criterios 2, 3 y 4, y tenerlos escritos convierte el M0 siguiente en ratificar en vez
+  de deliberar.
+- **No cuelga de ningún hito funcional.** Igual que O-diseño, **acerca la demo**: es manejo,
+  no función nueva, y ninguna de las dos cosas que hace —enrutar y acotar altura— añade
+  capacidad al producto. No depende de O-particiones ni del cierre formal de H2. Sí conviene
+  que vaya ANTES de C-identidad y C-revisión, porque esos dos juzgan el aspecto de la UI
+  definitiva y esta la cambia.
+- **Orden resultante, que sustituye al de la ficha de O-diseño:** sistema (hecho) →
+  **O-navegación** → C-identidad y C-revisión sobre la UI definitiva → demo.
+- **Grano abierto:** objetivo propio y NO Cambio de O-diseño, por decisión del arquitecto
+  en S122, con razón escrita: esto toca enrutado, paginación y densidad de rejilla, arrastra
+  la decisión aplazada desde S101 y rompe un e2e de criterio. **Un Cambio que rompe un e2e
+  de criterio no es un Cambio.** Si al abrirlo resulta grande, se parte (métrica de §7).
 
 Fue el motor de las sesiones S84–S99 y no produce avance de producto. Su trabajo
 legítimo (que el ajuste funcione) está en O-ajuste-cierre; su trabajo ilegítimo
@@ -889,6 +976,8 @@ asigna categoría, objetivo y disposición.
 #### Deuda técnica real, colgada de su objetivo
 | Deuda | Objetivo | ¿Bloquea? | Disposición |
 |---|---|---|---|
+| D-insignia-sin-leyenda (la insignia de coste blando se pinta como un número desnudo con signo) | O-diseño, en C-identidad | No | Nace en S122 al medir qué son las insignias `1`/`-1` de la rejilla (`docs/diseno-navegacion.md` §A1, §3-H-1). El `<span class="badge">` de `horario-grid.html:34` no lleva `title` ni `aria-label`, a diferencia del candado, que sí los lleva dos líneas más abajo (`horario-grid.html:40-41`). El usuario ve un `-1` en la esquina de una celda y no tiene forma de saber que significa «esta clase está tapando un hueco»: es el dato más denso de la rejilla y el único sin rótulo. Arreglo natural: el mismo par tooltip + etiqueta accesible que ya usa el candado. NO se paga en S122, que no toca `app/`. Cuidado al redactar el texto: el número es un delta CONTRAFACTUAL con signo y no tiene por qué cuadrar con `Totales` (`models/diagnostico.model.ts:58-65`), así que la leyenda no debe prometer que sea un coste absoluto |
+| D-asignatura-sin-nivel (una asignatura no sabe a qué nivel pertenece) | Sin sede | No | Nace en S122 al leer el catálogo para la maqueta. `Asignatura` es `(id, codigo, nombre_completo)` y nada más: la relación asignatura↔nivel solo se DEDUCE recorriendo Actividad→Plaza→Subgrupo→Grupo→Nivel, es decir, existe únicamente para las asignaturas que ya están usadas en alguna actividad. Consecuencia en la UI: el selector de asignatura del formulario de actividad de un grupo de 1ºESO ofrece las 100 asignaturas del centro, incluidas las de 3º y 4º, sin forma de acotarlas. Emparenta con `D-selectores-sin-busqueda` (que es de ESCALA) pero no es la misma: aquí falta el DATO con el que filtrar, no el filtro. Sin sede porque el arreglo natural toca modelo y esquema, y eso no cae en O-navegación ni en O-diseño. No se paga ahora |
 | D-F8.6-ii-b (no hay gesto de despinar) | O-ajuste-cierre | SÍ | Se paga al abrir O-ajuste-cierre. Única deuda funcional de F8.6 |
 | D-F8.5-D2a-a (I4 sin red) | O-catálogo | Sí, dentro de O-catálogo | Medido en S101: es de `ProfesorTutoria` (tutoría), NO del CRUD de Profesor. Su activación escrita («otra vía de escritura») NO la cumple un form que escribe por el REST existente. Se paga con el formulario de tutoría (roza O-estructura) |
 | D-F8.5-E-b (unicidad profesor-tramo sin red) | O-catálogo | Sí, dentro de O-catálogo | Medido en S101: es de `ProfesorRestriccionHoraria` (disponibilidad, sub-recurso), NO del CRUD de Profesor. Se paga con el formulario de restricción horaria, no antes |
@@ -954,6 +1043,7 @@ asigna categoría, objetivo y disposición.
 #### Decisión arquitectónica consciente → sale de la cola
 | Deuda | Razón (ya escrita en el plan) |
 |---|---|
+| Las tres palancas de altura de celda medidas en S122 y NO aplicadas | Nacen y mueren en el mismo sitio: D11 de `docs/diseno-navegacion.md`. Para que una celda de seis plazas dejara de recortarse haría falta bajar de 154,2 px, y hay tres formas medidas de conseguirlo, cada una a cambio de retirar algo: **(a)** la banda del badge, 16 px fijos por instancia —retira el sitio del badge y del rótulo de bloque—; **(b)** el `padding` y el `margin-bottom` de cada plaza de bloque, ~4,2 px por plaza, 25 px en una celda de seis —retira separación entre plazas simultáneas—; **(c)** bajar `.asig` de `--tam-s` a `--tam-xs` en modo bloque, 15 px —retira jerarquía tipográfica justo en la celda más densa—. **NO se aplica ninguna**, y la razón es que la pregunta caducó: perseguir cero recortes dejó de tener sentido en cuanto el mecanismo de expansión se hizo OBLIGATORIO (criterio 4 de O-navegación). Con expansión, recortar 22 celdas de 791 es densidad; sin ella era pérdida de información. Quedan registradas por si al implementar C-rejilla-densidad se busca holgura: son opciones MEDIDAS, no ideas |
 | D-F8.6-B-b | "ACEPTADA POR DISEÑO": el aviso de ocupación es ciego a propósito |
 | D-F8.2b-4B | "condicional, inerte": la poda que defendería está muerta en todo camino vivo |
 | 8.5-D3 | "APLAZADO INDEFINIDAMENTE, decisión explícita" con criterio de reapertura escrito |
