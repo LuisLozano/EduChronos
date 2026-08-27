@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S120. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S121. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S120). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S121). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -7470,3 +7470,139 @@ O-demo (H2) ACTIVO, 4 piezas: C-derivación (S115), C-cargador (S116), C-generac
 vitest 316, e2e 2**. Siguiente: O-demo no tiene trabajo ejecutable hasta que el centro responda, así que lo
 que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y cuya dependencia sobre O-demo
 —«que O-demo destape un caso inexpresable»— queda consumida por esta sesión. Lo fija su propio M0 (ver M1-ter).
+
+---
+
+### Sesión 121 — O-diseño (transversal): APERTURA del objetivo, definición de su criterio de terminado y sus cuatro Cambios; C-tokens y C-sustitución HECHOS. Todo el color y el tamaño del frontend pasa a una capa de tokens en `styles.css`, con paleta azul institucional elegida por el jefe de estudios (M0 + M2 + C-tokens + C-sustitución en dos tandas + M4 en navegador + M1, sin M3). DOS de cuatro piezas. NO cierra el objetivo.
+  Vigesimoprimera sesión bajo el mapa Hito→Objetivo→Cambio, y la primera de tipo Configuración/UI del mapa:
+  M4 sí, M3 no, porque no hay lógica que mutar —la sesión reescribe CSS y no toca una línea de TypeScript ni
+  de Java—. Las cuatro suites quedan intactas (app 282, solver 91, vitest 316, e2e 2); vitest se corre porque
+  el frontend cambia, y pasa sin tocar un solo test.
+  M0 — LA APERTURA, que es el trabajo de verdad de esta sesión. **O-diseño ABRE** con O-demo todavía ABIERTO,
+  primera vez que dos objetivos conviven en el mapa; se declara expresamente que no es una pausa por
+  conveniencia sino un bloqueo externo (D31-a espera un correo al centro) y que nada del método lo prohíbe.
+  La dependencia «O-demo puede destapar un caso inexpresable» se verifica CONSUMIDA por tres vías y no por
+  una: S115 (catálogo completo contra la UI, por lectura), S116 (804 escrituras por los mismos servicios que
+  respaldan los formularios) y S120 (el caso más difícil tecleado a mano). Lo que le falta a O-demo son 11
+  actividades de FPB con aula, de la misma forma que las 208 ya cargadas. Las dos alternativas se descartan
+  con argumento escrito: la Higiene/Método del script de R4 pierde por TERCERA vez —no puede nombrar los tres
+  términos y R-deuda excluye sus casos— y O-particiones no se adelanta —la demo no lo necesita y arrastra
+  cuatro preguntas de dominio sin resolver—.
+  M0 (2) — EL CRITERIO DE TERMINADO, que la ficha tenía POR DEFINIR desde S106. Cuatro cláusulas, tres
+  verificables por grep y una de juicio del arquitecto (ver `gestion_proyecto.md` §3). **La decisión de
+  diseño que gobierna todo lo demás: el criterio se define como SISTEMA y no como maquetación vista a
+  vista**, y la razón es de invalidación, no de gusto: la ficha de O-particiones dice que toca frontend, así
+  que si O-diseño maqueta a mano, la UI que traiga O-particiones invalida ese trabajo —exactamente el riesgo
+  que motivó la dependencia sobre O-demo—. Con el criterio como sistema, la UI nueva nace aplicándolo. Ésa
+  fue la alternativa a invertir el orden de §5, y se eligió por ser más barata y menos arriesgada.
+  M0 (3) — LO QUE QUEDA FUERA, decidido expresamente para que el objetivo pueda terminar. Las seis deudas de
+  UX que la tabla §4 le cuelga (D-selectores-sin-busqueda, D-actividad-forma-implicita,
+  D-configuracion-monolitica, D-actividad-ux, D-subgrupo-ux-multiselect, D-monodi-botones-inertes) más
+  D-dialogo-foco-perdido: si entran, el acabado se convierte en rehacer la UI. Fuera también el responsive
+  (nace D-sin-puntos-de-ruptura) y **D-vista-horario-sin-horario, que era la decisión que S120 dejó
+  encargada al M0 de esta sesión**: queda FUERA por el corte comportamiento/aspecto, sigue colgando de
+  O-demo y se anota como candidata a Cambio corto antes de la demo, haciendo constar que su clasificación
+  «No bloquea» es discutible en lectura estricta de la cláusula «presentable al centro».
+  M2 — INVENTARIO DE LA SUPERFICIE VISUAL, por Claude Code y de solo lectura, porque el criterio no se podía
+  escribir desde la documentación: no había en ningún documento un censo de la superficie. Medido: 26
+  componentes, 1.346 líneas de HTML y 1.541 de CSS en 26 hojas; **uniformidad total** —los 26 con
+  `templateUrl` + `styleUrl` externos, cero plantillas inline, cero estilos inline, cero `style=` en
+  plantillas—, así que no había nada que desenredar antes de tocar el aspecto. **CERO tokens**: ni una
+  definición `--x:` ni un `var(--x)` en todo `src`; el `styles.css` global eran 5 líneas y solo servía para
+  importar el `overlay-prebuilt.css` del CDK. 26 hex distintos, dominados por `#b00` (48 usos) y `#666` (36);
+  cinco grises casi indistinguibles conviviendo. **Ningún `font-family` en ninguna parte** —se heredaba el
+  default del navegador— y 10 tamaños distintos. **Cero `@media`.** Sin librería de UI (solo `@angular/cdk`
+  para el diálogo). Lo único sólido de partida: la convención BEM, 230 de 252 selectores con prefijo por
+  componente y sin colisiones. Bundle de partida: 522,11 kB, con el aviso de budget YA encendido.
+  ELECCIÓN DE PALETA. Se descartó Claude Design y se descartó buscar referencias fuera: se entregó un HTML
+  autocontenido y desechable (NO entra en el repo) con las mismas piezas reales de producto —cabecera, lista
+  de configuración, formulario de actividad con multiselect y campo en error, los cinco tipos de aviso,
+  rejilla 6×5 con co-docencia, bloque de seis destinos, celda en conflicto y celda fijada, y un diálogo—
+  conmutables entre paletas. El asistente recomendó «oliva y cobre» por una razón práctica (deja el rojo
+  entero libre para el error y el ámbar libre para el aviso); **el arquitecto eligió AZUL INSTITUCIONAL
+  porque lo prefiere el jefe de estudios**, y el asistente registró que no hay objeción técnica: el azul
+  cumple la misma propiedad que motivaba su recomendación. Se ofreció una quinta variante (azul sobre papel
+  cálido) para reconciliar el «prefiero cálidos» del arquitecto con el azul del cliente; se rechazó. Manda
+  el cliente, y queda escrito.
+  **C-TOKENS HECHO.** `styles.css` pasa de 5 a ~90 líneas con la capa completa: 17 tokens de color, la
+  tipografía (**fuente del sistema, NO web font autohospedada: decisión tomada por el asistente y
+  justificada por H4 —el bundle debe funcionar en un Windows limpio y sin red—**), la escala de tamaños, el
+  espaciado, los radios y la sombra. Restricción de CSS respetada y documentada en el propio fichero: **el
+  `@import` del CDK debe seguir siendo la PRIMERA regla**, o el navegador lo descarta y el diálogo pierde
+  centrado y fondo. Se paga de paso **D-bundle-presupuesto** (`maximumWarning` 500 → 550 kB, error intacto
+  en 1 MB): no bloqueaba, pero su sede era O-diseño y el hecho nuevo lo justificaba —el aviso ya estaba
+  encendido antes de tocar nada, luego era ruido y no señal—. Delta de la sesión: **522,11 → 524,94 kB**,
+  ~25 kB de margen; el comprimido incluso BAJA (118,11 → 118,01 kB) porque los `var(--color-*)` repetidos
+  comprimen mejor que hex variados.
+  **C-SUSTITUCIÓN HECHO, en dos tandas por decisión de riesgo.** Tanda 1: los 22 ficheros de chasis
+  (formularios, listas, diálogos), 145 líneas sustituidas, mecánicas y con el mismo patrón. Tanda 2: los
+  cuatro ficheros donde vive la semántica (`horario-grid`, `horario-view`, `panel-prevalidacion`,
+  `jornada`), 47 sustituciones ancladas LÍNEA A LÍNEA con guarda que aborta si el fichero no está como el
+  mapa dice, porque ahí el mismo hex significa cosas distintas según dónde esté. Resultado: **cero literales
+  de color y cero `font-size` sin token fuera de `styles.css`**, que es la cláusula 1 del criterio.
+  LAS TRES DECISIONES DE MAPEO QUE NO ERAN MECÁNICAS, con su argumento, porque son las que se podrían
+  querer revisar. **(1)** `#b00` (44 usos), `#b00020` y `#c33` colapsan todos en `--color-error`: la
+  distinción que justificaría un `--color-peligro` aparte —error de validación frente a acción
+  destructiva— no existía en el CSS, los dos usaban el mismo hex, y un segundo token sin diferencia visual
+  confunde más de lo que aclara. Efecto visible: el rojo se oscurece de `#bb0000` a `#a32014` en 44 sitios.
+  **(2)** `#666` se DESDOBLA según la propiedad: en `border` va a `--color-borde`, en `color` va a
+  `--color-tinta-suave`. Es el cambio visual más grande de la sesión —los bordes de todos los inputs se
+  aclaran de golpe— y se declaró por adelantado antes de aplicarlo. **(3)** El mismo `#4a7` va a DOS tokens
+  distintos en el mismo fichero, y es intencional: en `.cdk-drop-list-dragging` es un veredicto («aquí
+  puedes soltar») y va a `--color-ok`; en `.entrada` es la barra estructural que llevan TODAS las tarjetas
+  y va a `--color-acento`, porque mandarla a `--color-ok` le daría un significado que no tiene y un horario
+  entero de barras verdes se leería como «todo validado», arruinando además la señal cuando algo SÍ esté
+  correcto. Que compartieran hex era el accidente que el objetivo venía a deshacer.
+  EL BADGE MORADO: el par `#ece4f4`/`#402a52` de `horario-grid` era la única familia sin token equivalente,
+  y se le da uno propio (`--color-marca` / `--color-marca-fondo`) CONSERVANDO el morado exacto, en vez de
+  colapsarlo en acento. Razón: la línea 100 ya manda la barra de `.entrada` a `--color-acento`, así que un
+  badge azul pondría dos señales distintas del mismo color a diez píxeles una de otra. **QUEDA SIN SABER
+  QUÉ NUMERAN el `1` y el `-1` del badge**; no está en la documentación y el asistente se negó a
+  inventarlo. Si resulta que significan algo que el jefe de estudios debe entender, es material de
+  C-identidad.
+  AMPLIACIÓN DE `:root` DURANTE EL TRABAJO, cuatro tokens que el inventario no podía prever y la
+  sustitución destapó: `--color-superficie-tenue` (la capa 1 de `.entrada`, que NO puede ir a
+  `--color-superficie-alt` sin aplanar la señal de `td.ocupado` —lo advertía el propio comentario de
+  `horario-grid.css:119` sobre las dos capas de `background` ocupadas—), `--sombra-suave`, `--tam-xxs`
+  (0,6875rem, para que los `0.65rem` y `0.7rem` de la rejilla no engorden subiendo a `--tam-xs`) y el par
+  `--color-marca`. Se rechazó ampliar más: los seis literales ámbar de la tanda 2 son SEIS TONOS PARA UNA
+  IDEA, acumulados por sesiones sin coordinación, y colapsarlos es el objetivo, no forzar el mapa. **Un
+  token existe porque hay un significado distinto, no porque haya un hex distinto.**
+  M4 EN NAVEGADOR, sobre COPIA de `educhronos-demo-m4.db` en `/tmp` y no sobre la base de referencia, con
+  md5 verificado antes y después. Las tres capturas pasan: en la rejilla el badge morado, la barra azul y el
+  fondo de pinada siguen distinguiéndose entre sí; en el formulario el rojo nuevo se lee bien y los bordes
+  claros mejoran; en jornada la fila de recreo sigue distinguiéndose con `--color-superficie-alt`, que era
+  el riesgo de aplanar cuatro grises en uno. Ninguna señal se comió a otra. **Lo que el M4 NO pudo ver, y se
+  registra en vez de disimularse:** el panel de prevalidación con hallazgos, porque nadie —ni la
+  documentación ni el asistente— sabe qué dispara un AVISO o un ERROR, y se rechazó mandar al arquitecto a
+  probar a ciegas. Nace D-prevalidacion-contraste-sin-ver, con sede en C-revisión.
+  CINCO CASOS NUEVOS DE DEUDAS DE MÉTODO, **todos detectados por Claude Code revisando guiones del asistente,
+  y ninguno sufrido**. Cuarto y quinto de D-guion-exit-enmascarado: un comprobador del `@import` cuyo patrón
+  casaba con líneas de continuación de comentario (verde sin medir nada) y un recuento de cierre que incluía
+  `styles.css`, donde los literales DEBEN vivir, haciendo su objetivo inalcanzable por construcción. El más
+  importante de los cinco no llegó a fallar: **`var(--token-inexistente)` NO rompe el build** —la
+  declaración se descarta en el navegador—, así que un build en verde no prueba nada sobre los tokens. De
+  ahí sale el **comprobador de cuatro vías** que queda vivo para el resto de O-diseño (literales,
+  `font-size` sin `var()`, `var(` mal formado, y tokens referenciados contra los definidos, quitando
+  comentarios antes de buscar). Tercer hecho de D-arranque-no-literal, y éste sí es un error del asistente:
+  pidió los `git add` del cierre dando por hecho un árbol sin commitear que había RECONSTRUIDO de un turno
+  anterior en vez de leerlo, y produjo dos commits cuyos mensajes no describían su contenido. Nada se perdió
+  y se corrigió con `reword` antes de pushear. La lección es la misma de siempre: **el estado se lee, no se
+  reconstruye.**
+  LIMPIEZA (M1-bis): archivada S119 a `bitacora-sesiones.md` (promovida a `### Sesión 119`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S120 a «Última sesión registrada (previa)»; S121
+  queda como única cabecera H3 viva. R4/costura: el script oficial SIGUE sin existir en el repo (mejora de
+  método pendiente desde S101, y esta sesión le añade dos casos más); verificado que los tokens nuevos de
+  esta sesión tienen definición viva en este plan y citante vivo en `gestion_proyecto.md` §4 (lección de
+  D-tokens-inexistentes), y se registra que el comentario de `horario-grid.css:119` se actualizó porque
+  citaba un literal que ya no existe —un comentario que cita algo inexistente es la misma familia que
+  D-tokens-inexistentes, luego era costura R4 y no cosmética—.
+  O-diseño (transversal, abierto en S121) ACTIVO, 4 Cambios: **C-tokens (S121) HECHO**, **C-sustitución
+  (S121) HECHO**, C-identidad PENDIENTE, C-revisión PENDIENTE. O-demo (H2) sigue ABIERTO y sin trabajo
+  ejecutable. Suites INTACTAS: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: **C-identidad**, que es
+  donde está lo que más se nota en una demo —la cabecera, la marca, la landing, el aspecto de los estados
+  transversales y el título del horario, que hoy pinta un timestamp ISO con nanosegundos crudo
+  (`Horario 2026-08-24T15:37:39.317184258Z — grupo: 1B-A`)—, y después C-revisión. Se decidió NO empezar
+  C-identidad en S121 con el presupuesto de contexto a la mitad: no es trabajo mecánico, exige enseñar
+  capturas y discutirlas, y dejarlo a medias obliga a reconstruir contexto en la sesión siguiente. Lo fija
+  su propio M0 (ver M1-ter).

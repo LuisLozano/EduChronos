@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 122 — O-navegación (transversal): FUNDACIÓN del objetivo por medición sobre el centro real y diseño de la navegación en maqueta viva. Configuración pasa a rutas hijas, la rejilla a altura de fila constante y el recreo se hace visible; 18 decisiones escritas con su alternativa descartada (M0 + M2 sobre la base del centro + M4 en navegador iterando maqueta + M1, sin M3). Cero líneas de producto. NO cierra el objetivo: lo ABRE.
-- L950 — ### Bloques de Fase 2
-- L958 — ### Bloques de Fase 5
-- L981 — ### Bloques de Fase 6
-- L1026 — ### Bloques de Fase 8
-- L1235 — ### Fases completadas
-- L1339 — ### Cierre del modelo — Sesión 8
-- L1387 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1433 — ### Método de trabajo (procedimiento vigente)
-- L1466 — ### Deuda consciente VIVA
-- L2857 — ### Deuda consciente CERRADA (histórico)
-- L2885 — ### Notas técnicas validadas en Fase 0
-- L2895 — ### Notas técnicas validadas en Fase 6
-- L2929 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2938 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2965 — ### Registro detallado de sesiones S10–S31
-- L2974 — ## Señales globales de alerta
+- L699 — ### Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
+- L924 — ### Bloques de Fase 2
+- L932 — ### Bloques de Fase 5
+- L955 — ### Bloques de Fase 6
+- L1000 — ### Bloques de Fase 8
+- L1209 — ### Fases completadas
+- L1313 — ### Cierre del modelo — Sesión 8
+- L1361 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1407 — ### Método de trabajo (procedimiento vigente)
+- L1440 — ### Deuda consciente VIVA
+- L2831 — ### Deuda consciente CERRADA (histórico)
+- L2859 — ### Notas técnicas validadas en Fase 0
+- L2869 — ### Notas técnicas validadas en Fase 6
+- L2903 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2912 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2939 — ### Registro detallado de sesiones S10–S31
+- L2948 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,115 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 122 — O-navegación (transversal): FUNDACIÓN del objetivo por medición sobre el centro real y diseño de la navegación en maqueta viva. Configuración pasa a rutas hijas, la rejilla a altura de fila constante y el recreo se hace visible; 18 decisiones escritas con su alternativa descartada (M0 + M2 sobre la base del centro + M4 en navegador iterando maqueta + M1, sin M3). Cero líneas de producto. NO cierra el objetivo: lo ABRE.
+### Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
+  Vigesimotercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí, M3 no —enrutado y
+  binding, sin lógica que mutar—. Suites: **app 282, solver 91, vitest 314, e2e 2**. vitest BAJA de 316:
+  mueren los 8 casos de `configuracion.spec.ts` y entran 6 nuevos; app y solver no se tocan.
+  M0 — LA APERTURA RATIFICA, NO DELIBERA. Los tres Cambios de la ficha salen uno a uno de los criterios 2, 3
+  y 4 y se ratifican los tres. **`C-listas-paginadas` se RENOMBRA a `C-listas-filtradas`**: el criterio 3
+  admite paginador o filtro, pero el que tiene evidencia medida es el segundo, y D16 no diseña paginador
+  ninguno. Un nombre que apunta a la opción sin evidencia acaba construyéndola. El token viejo se conserva
+  vivo por equivalencia en la ficha de §3, porque el cuerpo de S122 en el plan sigue citándolo y el registro
+  histórico no se reescribe. Se empieza por **C-rutas-hijas** por dependencia estructural: el filtro del
+  criterio 3 actúa sobre las listas DE UN DESTINO, y los destinos no existen hasta que este Cambio los crea;
+  filtrar antes sería construir contra el monolito y rehacerlo (R-invalidación).
+  LA MEDICIÓN QUE LO CAMBIA TODO. `OBJETIVO.alto` no era 1080. El portátil del jefe de estudios tiene panel
+  1920×1080 **con escala de Windows al 150 %**, y Chrome maximizado reporta un viewport de **1280×585**
+  (`devicePixelRatio` 1.5, escritorio 1280×720). No es «1080 menos un poco»: es la mitad. Es la misma forma
+  de error que S122 llevó a M2 —el instrumento apoyado en algo que SE PARECE al conjunto medido—: «1920×1080»
+  se parece a la altura disponible y no lo es.
+  EL INSTRUMENTO CONFIRMA EL DAÑO. `scripts/calcular-recortes.py`, conservado en S122 para esto, corrido con
+  su autoprueba y con **escenario de control**: a 945 px (escala 100 %) reproduce clavado lo que S122
+  escribió —22 celdas de 791, 2,8 %, solo las de seis plazas—, lo que valida el instrumento antes de creerle.
+  A **585 px son 109 de 791, el 13,8 %**, y alcanzan a todas las celdas de tres plazas o más; a 720 px
+  (escala 125 %) son 72, el 9,1 %. Se cae con ello el argumento escrito de D11: al 14 % el colapso deja de
+  ser «el caso excepcional» y pasa a ser la interacción habitual.
+  Y LAS PALANCAS NO LLEGAN, ni son tres. Sumadas las tres medidas en S122 —badge 16 px, padding y margen de
+  plaza 25,2 px, `.asig` a `--tam-xs` 15 px— la celda de seis baja de 154,20 a 98,00 px, contra un alto de
+  fila de 87,73: **faltan 10,27 px**. Además la palanca (a) **choca con D4**, que pone el rótulo común del
+  bloque en la banda que el badge reservaba: aplicarla borra a la vez el badge de coste blando y el rótulo, y
+  eso es eliminar una señal existente, que es justo lo que la invariante del encargo prohíbe y por lo que D6
+  rechazó borrar la cuarta línea. **Son dos palancas disponibles, no tres.**
+  HALLAZGO, con sus palabras: **el diseño de §4 de S122 es correcto, y lo es SOLO a escala 100 %**. No estaba
+  mal medido; estaba medido sobre un supuesto de escalado que nadie declaró. La medición no invalida S122:
+  acota dónde vale.
+  DECISIÓN — el portátil SALE del criterio 4. D0-1 declaró 1920×1080 como la resolución de LA DEMO, y la demo
+  se enseña en un ordenador de sobremesa, verificado con el jefe de estudios en esta sesión. El criterio 4 se
+  verifica donde se juzga el producto. **D0-2 queda CERRADO por medición y exclusión**, no diferido: deja de
+  ser «parámetro sin fijar» y pasa a «medido en 1280×585 con escala 150 %; excluido del criterio». Descartada
+  la alternativa de forzar el portátil a 100 % (texto del sistema a ~11-12 px físicos: decisión sobre la
+  vista del usuario, no sobre CSS) y la de rediseñar la celda con la mitad de presupuesto (sesión de
+  medición completa, y ningún criterio la exige). Pendiente antes de C-rejilla-densidad: MEDIR el sobremesa,
+  no suponerlo.
+  C-rutas-hijas — HECHO, criterio 2 CUMPLIDO. Ocho destinos con URL enlazable bajo `/configuracion`,
+  `redirectTo` a jornada, índice VERTICAL **derivado de `routeConfig.children`** y no de un array aparte —el
+  rótulo vive en `data.titulo` de cada ruta, de modo que un noveno destino es una entrada nueva y no dos
+  ediciones—, cabecera fija por `sticky` y contador inline en las siete listas CRUD. Jornada queda sin
+  contador ni cabecera fija: es singleton y su «Guardar jornada» va al pie, así que clavar su cabecera
+  dejaría el guardar fuera (D17 otra vez). Cerrada la decisión **ruta-hija-vs-contenedor aplazada desde
+  S101**, veintidós sesiones.
+  DEUDAS CERRADAS. **D-configuracion-monolitica**: la página ya no hace scroll; cada destino se desplaza
+  dentro de su panel con la cabecera clavada. **D-pdc-lista-rancia**, por construcción y no con parche: el
+  bug existía y queda localizado —`grupo-lista.ts:121-128` recarga solo grupos tras el alta de PDC y nadie
+  avisa a `SubgrupoLista`—; con destino propio, entrar en subgrupos remonta y recarga. Su ficha desaconsejaba
+  expresamente el `EventEmitter` ad hoc, y no se ha escrito ninguno.
+  DECISIÓN CON SEDE AQUÍ, y va más allá del Cambio: el scroll pasa del documento a `.app__contenido` en TODA
+  la aplicación, con la barra permanentemente visible también en landing y horario. Era inevitable —no hay
+  forma de quitarle el scroll a la página sin gobernar el shell— y se acepta por lo que devuelve: con la
+  barra fuera del flujo, **`OBJETIVO.alto` de D1 pasa a ser derivable en CSS** (`100dvh` menos la barra, con
+  cadena flex y sin un solo literal de píxeles) en vez de un número que alguien tenía que medir y escribir.
+  DEUDAS NUEVAS (R-deuda: se registran, no se planifican). **D-cabecera-lista-duplicada** (mejora futura): al
+  descartar el componente de cabecera compartido, las siete reglas `__contador` se suman a los siete CSS ya
+  duplicados. Deliberado: el filtro de C-listas-filtradas es quien conoce la forma que la cabecera necesita, y
+  extraerla antes sería diseñarla a ciegas; su sede es ese Cambio, donde la extracción devuelve más. Se
+  registra como **LIMITACIÓN CONOCIDA** que el horario del centro real no cabe sin scroll en el portátil a
+  escala 150 %, con criterio de reapertura escrito: reabre si el uso diario pasa a ese equipo o si se fija su
+  escala al 100 %. NO se abre deuda por el contador dentro del `h2` —«Subgrupos 334» sin separación para
+  lector de pantalla—: el barrido de accesibilidad de C-identidad ya está convocado por
+  `D-insignia-sin-leyenda` y pasará por esta cabecera; queda dicho aquí y no como token.
+  COSTURA CERRADA: `diseno-navegacion.md` §5 lista las palancas como SIN DECIDIR y `gestion_proyecto.md` §4
+  las clasifica como decisión consciente FUERA de la cola. Manda la segunda —es la autoridad de planificación
+  y es posterior—, y la corrección de «tres palancas» a dos se aplica en §4.
+  MÉTODO — la precisión de M2 de S122 funcionando cuatro veces en una sesión, y las cuatro autodetectadas por
+  el ejecutor: dos sondas de navegador que leían la URL antes de que el router la actualizara y que probaban
+  el `sticky` con el relleno como hermano en vez de dentro; una banda de oclusión de altura cero que contaba
+  como intrusa cualquier fila que cruzase la línea; y la búsqueda de «la primera fila enteramente por debajo»,
+  que medía el resto de la fila tapada y no un hueco. Ninguna era defecto del código. Se resolvieron con
+  oclusión real por `elementFromPoint`. **No se añade nada a `metodo.md`**: la regla ya está escrita y esta
+  sesión es su evidencia de uso, no una regla nueva.
+  HALLAZGO DE GUION, para todo cierre futuro: **desde que S122 introdujo el índice de M-doc-3, ninguna ancla
+  sobre una cabecera es única en los documentos grandes** —el índice la duplica—. Un `replace(..., 1)` habría
+  degradado la entrada del índice y dejado viva la cabecera real: dos H3 vivas y un índice mentiroso, sin
+  error visible. Lo detectó la guarda de conteo del guion de cierre en su ensayo en seco. Regla que hereda el
+  guion de la próxima sesión: acotar toda búsqueda de cuerpo a partir de `<!-- INDICE:FIN -->`.
+  PRUEBA DE MUTACIÓN, como parte del contrato del test. El caso (3) del `configuracion.spec.ts` nuevo —el que
+  afirma que el índice se deriva de las rutas— se validó rompiendo a propósito la derivación: caen (3) y (4)
+  y **siguen verdes (1), (2), (5) y (6)**, que son los que un array copiado a mano engañaría. Mutación
+  deshecha con md5 idéntico. Un test que no se pone rojo cuando rompes lo que dice proteger es decoración; el
+  criterio 2 queda vigilado por uno que sí.
+  E2E: siete navegaciones intercaladas **por clic en el índice y no por `goto`**, porque con `goto` el e2e
+  nunca tocaría el índice y su rotura no pondría nada rojo. Helpers `abrir`/`guardar`, localizadores de
+  formulario y diálogos intactos. Aparece una colisión que no estaba prevista y sí importa: **«Grupos» casa
+  dos entradas del índice sin `exact`, por estar contenido en «Subgrupos»** —aviso directo para el filtro por
+  subcadena de C-listas-filtradas—. El enlace «Horario» no colisionaba, medido y no supuesto: 11 enlaces en
+  la página y una sola coincidencia. Bases verificadas antes y después: `educhronos-demo-m4.db` intacta en
+  `ea1a70a0…f48e9b`, `educhronos-e2e.db` reescrita como debía.
+  ERRORES DEL ARQUITECTO EN ESTA SESIÓN, registrados porque son los mismos que la sesión caza: afirmé que no
+  había precedente de `provideRouter` en ningún spec y sí lo hay (`app.spec.ts:11`, `horario-view.spec.ts:38`)
+  —extendí un dato medido sobre `children` a algo que no se había medido—; estimé el alto de fila a 585 px en
+  ~73 px cuando el instrumento da 87,73, acertando el recuento por el camino equivocado; y escribí de memoria
+  tres anclas del guion de cierre que el fichero desmintió en el ensayo en seco.
+  LIMPIEZA (M1-bis): archivada S121 a `bitacora-sesiones.md` (promovida a `### Sesión 121`, insertada al final
+  en orden ascendente, cuerpo íntegro verificado por comparación); degradada S122 a «Última sesión registrada
+  (previa)»; S123 queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S120 a S121.
+  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas HECHO**, C-listas-filtradas y
+  C-rejilla-densidad PENDIENTES. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS,
+  C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo
+  ejecutable, bloqueado por el correo al centro. Siguiente: **C-listas-filtradas**, el criterio 3, con el
+  hueco del filtro ya montado en las siete cabeceras y la frontera con este Cambio ya cortada. Lo fija su
+  propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 122 — O-navegación (transversal): FUNDACIÓN del objetivo por medición sobre el centro real y diseño de la navegación en maqueta viva. Configuración pasa a rutas hijas, la rejilla a altura de fila constante y el recreo se hace visible; 18 decisiones escritas con su alternativa descartada (M0 + M2 sobre la base del centro + M4 en navegador iterando maqueta + M1, sin M3). Cero líneas de producto. NO cierra el objetivo: lo ABRE.
   Vigesimosegunda sesión bajo el mapa Hito→Objetivo→Cambio, y la segunda —tras S120— cuyo M4 ES la sesión.
   Ritual M0 + M2 (medición por Claude Code sobre `app/educhronos-demo-m4.db` en SOLO LECTURA) + M4 (siete
   iteraciones de maqueta en navegador, juzgadas por el arquitecto) + M1, sin M3 porque no hay lógica que
@@ -778,140 +886,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   deliberarlos —salen uno a uno de los criterios 2, 3 y 4— y elige por cuál empezar. Lo fija su propio M0
   (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 121 — O-diseño (transversal): APERTURA del objetivo, definición de su criterio de terminado y sus cuatro Cambios; C-tokens y C-sustitución HECHOS. Todo el color y el tamaño del frontend pasa a una capa de tokens en `styles.css`, con paleta azul institucional elegida por el jefe de estudios (M0 + M2 + C-tokens + C-sustitución en dos tandas + M4 en navegador + M1, sin M3). DOS de cuatro piezas. NO cierra el objetivo.
-  Vigesimoprimera sesión bajo el mapa Hito→Objetivo→Cambio, y la primera de tipo Configuración/UI del mapa:
-  M4 sí, M3 no, porque no hay lógica que mutar —la sesión reescribe CSS y no toca una línea de TypeScript ni
-  de Java—. Las cuatro suites quedan intactas (app 282, solver 91, vitest 316, e2e 2); vitest se corre porque
-  el frontend cambia, y pasa sin tocar un solo test.
-  M0 — LA APERTURA, que es el trabajo de verdad de esta sesión. **O-diseño ABRE** con O-demo todavía ABIERTO,
-  primera vez que dos objetivos conviven en el mapa; se declara expresamente que no es una pausa por
-  conveniencia sino un bloqueo externo (D31-a espera un correo al centro) y que nada del método lo prohíbe.
-  La dependencia «O-demo puede destapar un caso inexpresable» se verifica CONSUMIDA por tres vías y no por
-  una: S115 (catálogo completo contra la UI, por lectura), S116 (804 escrituras por los mismos servicios que
-  respaldan los formularios) y S120 (el caso más difícil tecleado a mano). Lo que le falta a O-demo son 11
-  actividades de FPB con aula, de la misma forma que las 208 ya cargadas. Las dos alternativas se descartan
-  con argumento escrito: la Higiene/Método del script de R4 pierde por TERCERA vez —no puede nombrar los tres
-  términos y R-deuda excluye sus casos— y O-particiones no se adelanta —la demo no lo necesita y arrastra
-  cuatro preguntas de dominio sin resolver—.
-  M0 (2) — EL CRITERIO DE TERMINADO, que la ficha tenía POR DEFINIR desde S106. Cuatro cláusulas, tres
-  verificables por grep y una de juicio del arquitecto (ver `gestion_proyecto.md` §3). **La decisión de
-  diseño que gobierna todo lo demás: el criterio se define como SISTEMA y no como maquetación vista a
-  vista**, y la razón es de invalidación, no de gusto: la ficha de O-particiones dice que toca frontend, así
-  que si O-diseño maqueta a mano, la UI que traiga O-particiones invalida ese trabajo —exactamente el riesgo
-  que motivó la dependencia sobre O-demo—. Con el criterio como sistema, la UI nueva nace aplicándolo. Ésa
-  fue la alternativa a invertir el orden de §5, y se eligió por ser más barata y menos arriesgada.
-  M0 (3) — LO QUE QUEDA FUERA, decidido expresamente para que el objetivo pueda terminar. Las seis deudas de
-  UX que la tabla §4 le cuelga (D-selectores-sin-busqueda, D-actividad-forma-implicita,
-  D-configuracion-monolitica, D-actividad-ux, D-subgrupo-ux-multiselect, D-monodi-botones-inertes) más
-  D-dialogo-foco-perdido: si entran, el acabado se convierte en rehacer la UI. Fuera también el responsive
-  (nace D-sin-puntos-de-ruptura) y **D-vista-horario-sin-horario, que era la decisión que S120 dejó
-  encargada al M0 de esta sesión**: queda FUERA por el corte comportamiento/aspecto, sigue colgando de
-  O-demo y se anota como candidata a Cambio corto antes de la demo, haciendo constar que su clasificación
-  «No bloquea» es discutible en lectura estricta de la cláusula «presentable al centro».
-  M2 — INVENTARIO DE LA SUPERFICIE VISUAL, por Claude Code y de solo lectura, porque el criterio no se podía
-  escribir desde la documentación: no había en ningún documento un censo de la superficie. Medido: 26
-  componentes, 1.346 líneas de HTML y 1.541 de CSS en 26 hojas; **uniformidad total** —los 26 con
-  `templateUrl` + `styleUrl` externos, cero plantillas inline, cero estilos inline, cero `style=` en
-  plantillas—, así que no había nada que desenredar antes de tocar el aspecto. **CERO tokens**: ni una
-  definición `--x:` ni un `var(--x)` en todo `src`; el `styles.css` global eran 5 líneas y solo servía para
-  importar el `overlay-prebuilt.css` del CDK. 26 hex distintos, dominados por `#b00` (48 usos) y `#666` (36);
-  cinco grises casi indistinguibles conviviendo. **Ningún `font-family` en ninguna parte** —se heredaba el
-  default del navegador— y 10 tamaños distintos. **Cero `@media`.** Sin librería de UI (solo `@angular/cdk`
-  para el diálogo). Lo único sólido de partida: la convención BEM, 230 de 252 selectores con prefijo por
-  componente y sin colisiones. Bundle de partida: 522,11 kB, con el aviso de budget YA encendido.
-  ELECCIÓN DE PALETA. Se descartó Claude Design y se descartó buscar referencias fuera: se entregó un HTML
-  autocontenido y desechable (NO entra en el repo) con las mismas piezas reales de producto —cabecera, lista
-  de configuración, formulario de actividad con multiselect y campo en error, los cinco tipos de aviso,
-  rejilla 6×5 con co-docencia, bloque de seis destinos, celda en conflicto y celda fijada, y un diálogo—
-  conmutables entre paletas. El asistente recomendó «oliva y cobre» por una razón práctica (deja el rojo
-  entero libre para el error y el ámbar libre para el aviso); **el arquitecto eligió AZUL INSTITUCIONAL
-  porque lo prefiere el jefe de estudios**, y el asistente registró que no hay objeción técnica: el azul
-  cumple la misma propiedad que motivaba su recomendación. Se ofreció una quinta variante (azul sobre papel
-  cálido) para reconciliar el «prefiero cálidos» del arquitecto con el azul del cliente; se rechazó. Manda
-  el cliente, y queda escrito.
-  **C-TOKENS HECHO.** `styles.css` pasa de 5 a ~90 líneas con la capa completa: 17 tokens de color, la
-  tipografía (**fuente del sistema, NO web font autohospedada: decisión tomada por el asistente y
-  justificada por H4 —el bundle debe funcionar en un Windows limpio y sin red—**), la escala de tamaños, el
-  espaciado, los radios y la sombra. Restricción de CSS respetada y documentada en el propio fichero: **el
-  `@import` del CDK debe seguir siendo la PRIMERA regla**, o el navegador lo descarta y el diálogo pierde
-  centrado y fondo. Se paga de paso **D-bundle-presupuesto** (`maximumWarning` 500 → 550 kB, error intacto
-  en 1 MB): no bloqueaba, pero su sede era O-diseño y el hecho nuevo lo justificaba —el aviso ya estaba
-  encendido antes de tocar nada, luego era ruido y no señal—. Delta de la sesión: **522,11 → 524,94 kB**,
-  ~25 kB de margen; el comprimido incluso BAJA (118,11 → 118,01 kB) porque los `var(--color-*)` repetidos
-  comprimen mejor que hex variados.
-  **C-SUSTITUCIÓN HECHO, en dos tandas por decisión de riesgo.** Tanda 1: los 22 ficheros de chasis
-  (formularios, listas, diálogos), 145 líneas sustituidas, mecánicas y con el mismo patrón. Tanda 2: los
-  cuatro ficheros donde vive la semántica (`horario-grid`, `horario-view`, `panel-prevalidacion`,
-  `jornada`), 47 sustituciones ancladas LÍNEA A LÍNEA con guarda que aborta si el fichero no está como el
-  mapa dice, porque ahí el mismo hex significa cosas distintas según dónde esté. Resultado: **cero literales
-  de color y cero `font-size` sin token fuera de `styles.css`**, que es la cláusula 1 del criterio.
-  LAS TRES DECISIONES DE MAPEO QUE NO ERAN MECÁNICAS, con su argumento, porque son las que se podrían
-  querer revisar. **(1)** `#b00` (44 usos), `#b00020` y `#c33` colapsan todos en `--color-error`: la
-  distinción que justificaría un `--color-peligro` aparte —error de validación frente a acción
-  destructiva— no existía en el CSS, los dos usaban el mismo hex, y un segundo token sin diferencia visual
-  confunde más de lo que aclara. Efecto visible: el rojo se oscurece de `#bb0000` a `#a32014` en 44 sitios.
-  **(2)** `#666` se DESDOBLA según la propiedad: en `border` va a `--color-borde`, en `color` va a
-  `--color-tinta-suave`. Es el cambio visual más grande de la sesión —los bordes de todos los inputs se
-  aclaran de golpe— y se declaró por adelantado antes de aplicarlo. **(3)** El mismo `#4a7` va a DOS tokens
-  distintos en el mismo fichero, y es intencional: en `.cdk-drop-list-dragging` es un veredicto («aquí
-  puedes soltar») y va a `--color-ok`; en `.entrada` es la barra estructural que llevan TODAS las tarjetas
-  y va a `--color-acento`, porque mandarla a `--color-ok` le daría un significado que no tiene y un horario
-  entero de barras verdes se leería como «todo validado», arruinando además la señal cuando algo SÍ esté
-  correcto. Que compartieran hex era el accidente que el objetivo venía a deshacer.
-  EL BADGE MORADO: el par `#ece4f4`/`#402a52` de `horario-grid` era la única familia sin token equivalente,
-  y se le da uno propio (`--color-marca` / `--color-marca-fondo`) CONSERVANDO el morado exacto, en vez de
-  colapsarlo en acento. Razón: la línea 100 ya manda la barra de `.entrada` a `--color-acento`, así que un
-  badge azul pondría dos señales distintas del mismo color a diez píxeles una de otra. **QUEDA SIN SABER
-  QUÉ NUMERAN el `1` y el `-1` del badge**; no está en la documentación y el asistente se negó a
-  inventarlo. Si resulta que significan algo que el jefe de estudios debe entender, es material de
-  C-identidad.
-  AMPLIACIÓN DE `:root` DURANTE EL TRABAJO, cuatro tokens que el inventario no podía prever y la
-  sustitución destapó: `--color-superficie-tenue` (la capa 1 de `.entrada`, que NO puede ir a
-  `--color-superficie-alt` sin aplanar la señal de `td.ocupado` —lo advertía el propio comentario de
-  `horario-grid.css:119` sobre las dos capas de `background` ocupadas—), `--sombra-suave`, `--tam-xxs`
-  (0,6875rem, para que los `0.65rem` y `0.7rem` de la rejilla no engorden subiendo a `--tam-xs`) y el par
-  `--color-marca`. Se rechazó ampliar más: los seis literales ámbar de la tanda 2 son SEIS TONOS PARA UNA
-  IDEA, acumulados por sesiones sin coordinación, y colapsarlos es el objetivo, no forzar el mapa. **Un
-  token existe porque hay un significado distinto, no porque haya un hex distinto.**
-  M4 EN NAVEGADOR, sobre COPIA de `educhronos-demo-m4.db` en `/tmp` y no sobre la base de referencia, con
-  md5 verificado antes y después. Las tres capturas pasan: en la rejilla el badge morado, la barra azul y el
-  fondo de pinada siguen distinguiéndose entre sí; en el formulario el rojo nuevo se lee bien y los bordes
-  claros mejoran; en jornada la fila de recreo sigue distinguiéndose con `--color-superficie-alt`, que era
-  el riesgo de aplanar cuatro grises en uno. Ninguna señal se comió a otra. **Lo que el M4 NO pudo ver, y se
-  registra en vez de disimularse:** el panel de prevalidación con hallazgos, porque nadie —ni la
-  documentación ni el asistente— sabe qué dispara un AVISO o un ERROR, y se rechazó mandar al arquitecto a
-  probar a ciegas. Nace D-prevalidacion-contraste-sin-ver, con sede en C-revisión.
-  CINCO CASOS NUEVOS DE DEUDAS DE MÉTODO, **todos detectados por Claude Code revisando guiones del asistente,
-  y ninguno sufrido**. Cuarto y quinto de D-guion-exit-enmascarado: un comprobador del `@import` cuyo patrón
-  casaba con líneas de continuación de comentario (verde sin medir nada) y un recuento de cierre que incluía
-  `styles.css`, donde los literales DEBEN vivir, haciendo su objetivo inalcanzable por construcción. El más
-  importante de los cinco no llegó a fallar: **`var(--token-inexistente)` NO rompe el build** —la
-  declaración se descarta en el navegador—, así que un build en verde no prueba nada sobre los tokens. De
-  ahí sale el **comprobador de cuatro vías** que queda vivo para el resto de O-diseño (literales,
-  `font-size` sin `var()`, `var(` mal formado, y tokens referenciados contra los definidos, quitando
-  comentarios antes de buscar). Tercer hecho de D-arranque-no-literal, y éste sí es un error del asistente:
-  pidió los `git add` del cierre dando por hecho un árbol sin commitear que había RECONSTRUIDO de un turno
-  anterior en vez de leerlo, y produjo dos commits cuyos mensajes no describían su contenido. Nada se perdió
-  y se corrigió con `reword` antes de pushear. La lección es la misma de siempre: **el estado se lee, no se
-  reconstruye.**
-  LIMPIEZA (M1-bis): archivada S119 a `bitacora-sesiones.md` (promovida a `### Sesión 119`, insertada al
-  final en orden ascendente, cuerpo íntegro); degradada S120 a «Última sesión registrada (previa)»; S121
-  queda como única cabecera H3 viva. R4/costura: el script oficial SIGUE sin existir en el repo (mejora de
-  método pendiente desde S101, y esta sesión le añade dos casos más); verificado que los tokens nuevos de
-  esta sesión tienen definición viva en este plan y citante vivo en `gestion_proyecto.md` §4 (lección de
-  D-tokens-inexistentes), y se registra que el comentario de `horario-grid.css:119` se actualizó porque
-  citaba un literal que ya no existe —un comentario que cita algo inexistente es la misma familia que
-  D-tokens-inexistentes, luego era costura R4 y no cosmética—.
-  O-diseño (transversal, abierto en S121) ACTIVO, 4 Cambios: **C-tokens (S121) HECHO**, **C-sustitución
-  (S121) HECHO**, C-identidad PENDIENTE, C-revisión PENDIENTE. O-demo (H2) sigue ABIERTO y sin trabajo
-  ejecutable. Suites INTACTAS: **app 282, solver 91, vitest 316, e2e 2**. Siguiente: **C-identidad**, que es
-  donde está lo que más se nota en una demo —la cabecera, la marca, la landing, el aspecto de los estados
-  transversales y el título del horario, que hoy pinta un timestamp ISO con nanosegundos crudo
-  (`Horario 2026-08-24T15:37:39.317184258Z — grupo: 1B-A`)—, y después C-revisión. Se decidió NO empezar
-  C-identidad en S121 con el presupuesto de contexto a la mitad: no es trabajo mecánico, exige enseñar
-  capturas y discutirlas, y dejarlo a medias obliga a reconstruir contexto en la sesión siguiente. Lo fija
-  su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -934,8 +908,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122.
-El plan conserva ahora S121 (degradada a formato compacto) y S122 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123.
+El plan conserva ahora S122 (degradada a formato compacto) y S123 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
