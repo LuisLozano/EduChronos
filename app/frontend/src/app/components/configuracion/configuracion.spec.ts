@@ -1,178 +1,207 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Router, Routes, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 
 import { Configuracion } from './configuracion';
-import { ActividadService } from '../../services/actividad.service';
-import { AsignaturaService } from '../../services/asignatura.service';
-import { AulaService } from '../../services/aula.service';
-import { GrupoService } from '../../services/grupo.service';
+import { ProfesorLista } from '../profesores/profesor-lista';
 import { JornadaService } from '../../services/jornada.service';
-import { NivelService } from '../../services/nivel.service';
 import { ProfesorService } from '../../services/profesor.service';
-import { SubgrupoService } from '../../services/subgrupo.service';
+import { routes } from '../../app.routes';
 
 /**
- * CABLEADO, no comportamiento. Lo que este fichero congela es que la sección de
- * Configuración MONTA de verdad cada CRUD de catálogo; qué hace cada uno se mide en
- * `profesor-lista.spec.ts` / `aula-lista.spec.ts`, que es donde vive su lógica.
+ * ENRUTADO, no composición. Lo que este fichero congela desde S123 (C-rutas-hijas) es el
+ * criterio 2 de O-navegación: que Configuración es un índice más `<router-outlet>` con
+ * una URL por destino, y que ese índice SE DERIVA de `app.routes.ts`.
  *
- * <p>Los servicios van DOBLADOS por `useValue`: cada lista pide la suya en su
- * `ngOnInit`, y sin doble esos GET saldrían a `HttpClient` de verdad. Los dobles
- * emiten lista vacía —el camino más corto a un render estable—; el contenido de las
- * tablas no se asevera aquí.
+ * <p>QUÉ DEJÓ DE SER SU RESPONSABILIDAD. Los ocho casos anteriores aseveraban que la
+ * sección MONTABA cada una de las ocho listas, porque las componía como hermanas en su
+ * plantilla. Ya no las compone: las monta el router, y qué hace cada lista se mide en su
+ * propio spec (`profesor-lista.spec.ts`, `jornada.spec.ts`…). Reponer aquí un caso por
+ * destino recrearía justo el acoplamiento que este Cambio deshace: ocho razones para
+ * tocar este fichero cada vez que se añade una sección.
  *
- * <p>UN CASO POR SECCIÓN, no uno que las mire todas: así el rojo NOMBRA la sección
- * desmontada en vez de obligar a leer el aserto para saber cuál cayó.
- *
- * <p>POR QUÉ DOS ASERTOS Y NO SOLO EL `querySelector`. Son dos mutaciones
- * distintas y solo el segundo aserto caza la segunda:
- *
+ * <p>LO QUE PROTEGE CADA CASO:
  * <ul>
- *   <li>quitar `<app-profesor-lista />` de `configuracion.html` → el elemento
- *       desaparece del DOM y caen LOS DOS;
- *   <li>quitar `ProfesorLista` del array `imports:` de `configuracion.ts` → Angular
- *       deja el tag en el DOM como ELEMENTO DESCONOCIDO, sin instanciar el
- *       componente. `querySelector('app-profesor-lista')` SIGUE devolviéndolo y ese
- *       aserto quedaría verde con el cableado roto. Solo el texto que pinta el hijo
- *       —el botón «Nuevo profesor», que únicamente existe si el componente se
- *       instanció— pone rojo esa mutación.
+ *   <li>(1) la entrada por defecto: `/configuracion` no es una página en blanco, redirige
+ *       a `jornada`, que es la primera por el orden de alta;
+ *   <li>(2) el índice pinta los OCHO rótulos de `data.titulo`, en el orden declarado, y
+ *       cada uno enlaza a su segmento. Es el aserto que se pondría rojo si alguien
+ *       reordenara `children` sin querer;
+ *   <li>(3) y (4) LA DERIVACIÓN, que es la razón de ser de este spec. Ver abajo;
+ *   <li>(5) navegar a un destino cambia la URL y lo monta en el outlet: el cableado
+ *       router→outlet, una vez y con la configuración real;
+ *   <li>(6) `routerLinkActive` marca la entrada del destino actual y SOLO esa.
  * </ul>
  *
- * <p>El texto elegido es del HIJO, no de `configuracion.html`: un aserto sobre
- * «Configuración» o sobre el párrafo de pendientes mediría la plantilla propia y
- * no distinguiría el hijo montado del hijo ausente.
+ * <p><b>POR QUÉ EXISTEN (3) Y (4), QUE ES LO MENOS OBVIO.</b> El índice podría pintarse
+ * con un array de destinos escrito a mano en el componente, y los casos (1), (2), (5) y
+ * (6) seguirían VERDES con esa implementación: los rótulos coincidirían porque alguien
+ * los habría copiado bien. Lo que ese diseño rompe no es el render de hoy, es la promesa
+ * de que un noveno destino sea UNA entrada nueva en `app.routes.ts` y no dos ediciones
+ * que se desincronizan. Por eso (3) configura en el TestBed un conjunto de rutas hijas
+ * DISTINTO del real —tres destinos inventados, con rótulos que no existen en el
+ * producto— y exige que el índice pinte ESE conjunto. Un array fijo pintaría los ocho de
+ * siempre y (3) se pondría rojo mientras todos los demás siguen verdes. (4) cubre el
+ * otro extremo de la misma derivación: la ruta de redirección, que no tiene `titulo`, no
+ * debe generar entrada de índice.
+ *
+ * <p>SOBRE LA NOTA DE S101/S102 QUE ESTE SPEC HEREDA. El spec viejo razonaba que hacían
+ * falta DOS asertos por caso —el tag y un texto del hijo— porque quitar un componente
+ * del array `imports:` dejaría el tag en el DOM como elemento desconocido y el
+ * `querySelector` seguiría verde. S102 lo corrigió por mutación: en esta versión de
+ * Angular esa mutación NO llega al test, porque el compilador de plantillas la rechaza
+ * con NG8001 y no hay build. Ese hecho SIGUE SIENDO CIERTO y sigue mandando aquí, solo
+ * que sobre otras piezas: `Configuracion` importa hoy `RouterOutlet`, `RouterLink` y
+ * `RouterLinkActive`, y quitar cualquiera de las tres rompe el build igual. Por eso este
+ * spec no gasta ningún caso en vigilar el array `imports:`: esa mutación no es
+ * observable desde un test, la caza el compilador. El doble aserto que aquella nota
+ * justificaba ya no aplica, y no se conserva.
+ *
+ * <p>INSTRUMENTAL. `RouterTestingHarness` (`@angular/router/testing`, API pública en
+ * 21.2) en vez de `TestBed.createComponent`: `Configuracion` inyecta `ActivatedRoute` y
+ * lee su `routeConfig`, así que fuera de una navegación real no hay nada que leer —es la
+ * causa del NG0201 con el que los ocho casos viejos murieron—. `provideRouter(routes)`
+ * con las rutas REALES sigue el precedente de `app.spec.ts`. De los ocho dobles de
+ * servicio del spec viejo quedan DOS, los de los únicos destinos que alguna navegación
+ * de este fichero llega a montar; el resto sobra porque el router no los instancia.
  */
 describe('sección de configuración', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Configuracion],
-      providers: [
-        { provide: ProfesorService, useValue: { listar: () => of([]) } },
-        { provide: AulaService, useValue: { listar: () => of([]) } },
-        { provide: AsignaturaService, useValue: { listar: () => of([]) } },
-        { provide: NivelService, useValue: { listar: () => of([]) } },
-        { provide: GrupoService, useValue: { listar: () => of([]) } },
-        { provide: SubgrupoService, useValue: { listar: () => of([]) } },
-        { provide: ActividadService, useValue: { listar: () => of([]) } },
-        // Jornada no es un CRUD: su doble expone `obtener`, no `listar`. Malla vacía
-        // y persistida=true (el badge de propuesta se mide en jornada.spec.ts).
-        {
-          provide: JornadaService,
-          useValue: { obtener: () => of({ persistida: true, tramos: [] }) },
-        },
-      ],
-    }).compileComponents();
+  /** Rótulos y segmentos que `app.routes.ts` declara, en su orden de alta. */
+  const DESTINOS: ReadonlyArray<readonly [string, string]> = [
+    ['Jornada', 'jornada'],
+    ['Profesores', 'profesores'],
+    ['Aulas', 'aulas'],
+    ['Asignaturas', 'asignaturas'],
+    ['Niveles', 'niveles'],
+    ['Grupos', 'grupos'],
+    ['Subgrupos', 'subgrupos'],
+    ['Actividades', 'actividades'],
+  ];
+
+  /** Los rótulos que pinta el índice, sin espacios de plantilla. */
+  function rotulos(raiz: HTMLElement): string[] {
+    return Array.from(raiz.querySelectorAll('.configuracion__destino')).map(
+      (a) => a.textContent!.trim(),
+    );
+  }
+
+  describe('sobre la configuración de rutas REAL', () => {
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        providers: [
+          provideRouter(routes),
+          // Solo los dos destinos que las navegaciones de este fichero montan: la
+          // jornada (a la que redirige `/configuracion`) y profesores (el destino de
+          // (5) y (6)). Los otros seis no se instancian, y doblarlos sería atrezo.
+          { provide: JornadaService, useValue: { obtener: () => of({ persistida: true, tramos: [] }) } },
+          { provide: ProfesorService, useValue: { listar: () => of([]) } },
+        ],
+      });
+    });
+
+    it('(1) /configuracion redirige a /configuracion/jornada', async () => {
+      await RouterTestingHarness.create('/configuracion');
+
+      expect(TestBed.inject(Router).url).toBe('/configuracion/jornada');
+    });
+
+    it('(2) el índice pinta los ocho destinos, con su rótulo y en el orden de las rutas', async () => {
+      const harness = await RouterTestingHarness.create('/configuracion');
+      const raiz = harness.routeNativeElement!;
+
+      expect(rotulos(raiz)).toEqual(DESTINOS.map(([titulo]) => titulo));
+
+      // Y cada entrada enlaza a SU segmento: sin esto, ocho rótulos correctos podrían
+      // apuntar todos al mismo sitio.
+      const hrefs = Array.from(raiz.querySelectorAll('.configuracion__destino')).map((a) =>
+        a.getAttribute('href'),
+      );
+      expect(hrefs).toEqual(DESTINOS.map(([, ruta]) => `/configuracion/${ruta}`));
+    });
+
+    it('(5) navegar a un destino cambia la URL y lo monta en el outlet', async () => {
+      const harness = await RouterTestingHarness.create('/configuracion/jornada');
+      expect(harness.routeNativeElement!.querySelector('app-profesor-lista')).toBeNull();
+
+      await harness.navigateByUrl('/configuracion/profesores', Configuracion);
+
+      // El destino REAL, no un doble: lo que se mide es que la configuración de
+      // producción navega y activa el componente que declara, con su servicio doblado
+      // para que el `ngOnInit` de la lista no salga a la red.
+      expect(TestBed.inject(Router).url).toBe('/configuracion/profesores');
+      expect(
+        harness.routeNativeElement!.querySelector('.configuracion__panel app-profesor-lista'),
+      ).not.toBeNull();
+      expect(TestBed.inject(Router).routerState.root.firstChild?.firstChild?.component).toBe(
+        ProfesorLista,
+      );
+    });
+
+    it('(6) routerLinkActive marca la entrada del destino actual, y solo esa', async () => {
+      const harness = await RouterTestingHarness.create('/configuracion/subgrupos');
+      const raiz = harness.routeNativeElement!;
+
+      const activos = Array.from(raiz.querySelectorAll('.configuracion__destino--activo')).map(
+        (a) => a.textContent!.trim(),
+      );
+
+      expect(activos).toEqual(['Subgrupos']);
+    });
   });
 
-  it('(1) monta el CRUD de profesores dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
+  /**
+   * El conjunto de rutas de estos dos casos NO es el de producción a propósito: son tres
+   * destinos inventados cuyos rótulos no existen en `app.routes.ts`. Si el índice
+   * dejara de derivarse y volviera a un array escrito en el componente, aquí se verían
+   * los ocho de siempre en vez de estos tres, y (3) caería.
+   */
+  describe('derivación del índice desde las rutas', () => {
+    @Component({ selector: 'app-destino-alfa', template: 'alfa' })
+    class DestinoAlfa {}
 
-    const raiz = fixture.nativeElement as HTMLElement;
+    @Component({ selector: 'app-destino-beta', template: 'beta' })
+    class DestinoBeta {}
 
-    expect(raiz.querySelector('app-profesor-lista')).not.toBeNull();
-    expect(raiz.textContent).toContain('Nuevo profesor');
-  });
+    @Component({ selector: 'app-destino-gamma', template: 'gamma' })
+    class DestinoGamma {}
 
-  it('(2) monta el CRUD de aulas dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
+    /** Destinos de prueba, no listas reales: aquí no se mide ninguna lista. */
+    const RUTAS_INVENTADAS: Routes = [
+      {
+        path: 'configuracion',
+        component: Configuracion,
+        children: [
+          { path: '', redirectTo: 'alfa', pathMatch: 'full' },
+          { path: 'alfa', component: DestinoAlfa, data: { titulo: 'Alfa' } },
+          { path: 'beta', component: DestinoBeta, data: { titulo: 'Beta' } },
+          { path: 'gamma', component: DestinoGamma, data: { titulo: 'Gamma' } },
+        ],
+      },
+    ];
 
-    const raiz = fixture.nativeElement as HTMLElement;
+    beforeEach(() => {
+      TestBed.configureTestingModule({ providers: [provideRouter(RUTAS_INVENTADAS)] });
+    });
 
-    expect(raiz.querySelector('app-aula-lista')).not.toBeNull();
-    // El segundo aserto mide que el hijo RENDERIZA, no solo que el tag está: el
-    // botón «Nueva aula» solo existe si el componente se instanció y pintó.
-    //
-    // MATIZ sobre la nota de (1), verificado por mutación en S102: en esta versión
-    // de Angular quitar `AulaLista` del array `imports:` NO deja el tag como
-    // elemento desconocido con los tests verdes —el compilador de plantillas lo
-    // rechaza con NG8001 y NO HAY BUILD—. Esa mutación cae antes de llegar aquí,
-    // así que el aserto de texto se sostiene por la razón de arriba (el hijo pinta),
-    // no por la que el spec de S101 le atribuía.
-    expect(raiz.textContent).toContain('Nueva aula');
-  });
+    it('(3) el índice pinta los destinos que declaran las rutas, no una lista propia', async () => {
+      const harness = await RouterTestingHarness.create('/configuracion');
+      const raiz = harness.routeNativeElement!;
 
-  it('(3) monta el CRUD de asignaturas dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
+      expect(rotulos(raiz)).toEqual(['Alfa', 'Beta', 'Gamma']);
+      // Explícito, porque es la mutación que este caso existe para cazar: si el
+      // componente volviera a un array fijo, aquí aparecerían los rótulos reales.
+      expect(rotulos(raiz)).not.toContain('Jornada');
+    });
 
-    const raiz = fixture.nativeElement as HTMLElement;
+    it('(4) la ruta de redirección por defecto no genera entrada de índice', async () => {
+      const harness = await RouterTestingHarness.create('/configuracion');
 
-    expect(raiz.querySelector('app-asignatura-lista')).not.toBeNull();
-    // Los dos asertos valen aquí por lo que (2) ya razona, sin repetirlo: el texto
-    // mide que el hijo RENDERIZA, y la mutación de `imports:` no llega a este spec
-    // porque revienta antes en build (NG8001).
-    expect(raiz.textContent).toContain('Nueva asignatura');
-  });
-
-  it('(4) monta el CRUD de grupos dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
-
-    const raiz = fixture.nativeElement as HTMLElement;
-
-    expect(raiz.querySelector('app-grupo-lista')).not.toBeNull();
-    // Cuarta y última sección de O-catálogo. Solo se dobla `GrupoService`: el que
-    // pide niveles es `GrupoForm`, que vive en un diálogo y no se instancia al
-    // montar la sección.
-    expect(raiz.textContent).toContain('Nuevo grupo');
-  });
-
-  it('(5) monta la jornada dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
-
-    const raiz = fixture.nativeElement as HTMLElement;
-
-    // NO es una sección de catálogo (singleton de O-estructura), pero se monta con el
-    // mismo gesto que las cuatro anteriores: eso es lo que este caso congela.
-    expect(raiz.querySelector('app-jornada')).not.toBeNull();
-    expect(raiz.textContent).toContain('Guardar jornada');
-  });
-
-  it('(6) monta el CRUD de subgrupos dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
-
-    const raiz = fixture.nativeElement as HTMLElement;
-
-    // Sección de O-estructura (C-subgrupos), montada con el mismo gesto que el resto.
-    // Dos asertos como en (2)-(5): el tag presente y el texto que solo existe si el
-    // hijo se instanció y pintó ('Nuevo subgrupo', botón de subgrupo-lista.html).
-    expect(raiz.querySelector('app-subgrupo-lista')).not.toBeNull();
-    expect(raiz.textContent).toContain('Nuevo subgrupo');
-  });
-
-  it('(7) monta la lista de actividades dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
-
-    const raiz = fixture.nativeElement as HTMLElement;
-
-    // Sección de O-estructura (editor de actividad, trozo A), montada con el mismo gesto
-    // que el resto. Dos asertos como en (2)-(6): el tag presente y el texto que solo
-    // existe si el hijo se instanció y pintó ('Nueva actividad', botón de
-    // actividad-lista.html). Solo se dobla `ActividadService`: los cuatro catálogos que
-    // el formulario pide los pide `ActividadForm`, que vive en un diálogo y no se
-    // instancia al montar la sección.
-    expect(raiz.querySelector('app-actividad-lista')).not.toBeNull();
-    expect(raiz.textContent).toContain('Nueva actividad');
-  });
-
-  it('(8) monta el CRUD de niveles dentro de la sección', async () => {
-    const fixture = TestBed.createComponent(Configuracion);
-    await fixture.whenStable();
-
-    const raiz = fixture.nativeElement as HTMLElement;
-
-    // Sección de catálogo (C-niveles), montada con el mismo gesto que el resto y
-    // ANTES de grupos: un grupo exige un nivel existente para darse de alta, y el
-    // orden de la plantilla sigue al orden de alta. Dos asertos como en (2)-(7): el
-    // tag presente y el texto que solo existe si el hijo se instanció y pintó
-    // ('Nuevo nivel', botón de nivel-lista.html). Solo se dobla `NivelService`: el
-    // formulario vive en un diálogo y no se instancia al montar la sección.
-    expect(raiz.querySelector('app-nivel-lista')).not.toBeNull();
-    expect(raiz.textContent).toContain('Nuevo nivel');
+      // Cuatro hijas configuradas, tres entradas: la de `path: ''` es la entrada por
+      // defecto, no un destino, y no tiene `titulo` que pintar.
+      expect(rotulos(harness.routeNativeElement!)).toHaveLength(3);
+      expect(TestBed.inject(Router).url).toBe('/configuracion/alfa');
+    });
   });
 });

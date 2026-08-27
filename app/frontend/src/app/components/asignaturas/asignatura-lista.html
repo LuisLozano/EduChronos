@@ -1,6 +1,11 @@
 <div class="asignaturas">
-  <div class="asignaturas__cabecera">
-    <h2 class="asignaturas__titulo">Asignaturas</h2>
+  <div class="asignaturas__cabecera cabecera-lista-fija">
+    <h2 class="asignaturas__titulo">
+      Asignaturas
+      @if (!cargando() && !error()) {
+        <span class="asignaturas__contador">{{ asignaturas().length }}</span>
+      }
+    </h2>
     <button type="button" class="asignaturas__nuevo" (click)="nuevo()">
       Nueva asignatura
     </button>

@@ -1,11 +1,24 @@
 <section class="configuracion">
-  <h2 class="configuracion__titulo">Configuración</h2>
-  <app-jornada />
-  <app-profesor-lista />
-  <app-aula-lista />
-  <app-asignatura-lista />
-  <app-nivel-lista />
-  <app-grupo-lista />
-  <app-subgrupo-lista />
-  <app-actividad-lista />
+  <nav class="configuracion__indice" aria-label="Secciones de configuración">
+    <h2 class="configuracion__titulo">Configuración</h2>
+    <ul class="configuracion__destinos">
+      @for (destino of destinos; track destino.ruta) {
+        <li>
+          <a
+            class="configuracion__destino"
+            [routerLink]="destino.ruta"
+            routerLinkActive="configuracion__destino--activo"
+          >
+            {{ destino.titulo }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="configuracion__panel">
+    <div class="configuracion__contenido">
+      <router-outlet />
+    </div>
+  </div>
 </section>

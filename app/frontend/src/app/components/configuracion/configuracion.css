@@ -1,13 +1,76 @@
+/* Marco de la sección: índice fijo a la izquierda, panel del destino a la derecha.
+   La ALTURA NO SE CABLEA. Sale de la cadena flex que `styles.css` abre en `body`
+   (100dvh) y que atraviesa `app-root` y `.app__contenido`: la barra de `app.html` es
+   un ítem flex de tamaño automático y se lleva lo que ocupe, y este marco recibe el
+   resto con `height: 100%`. Por eso aquí no hay ni un literal de píxeles de altura y
+   cambiar el alto de la barra no obliga a tocar nada. */
 .configuracion {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 2rem 1rem;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* El marco SALE del límite de 60rem: ocupa el ancho disponible. Las 60rem se
+   conservan, pero para el CONTENIDO de cada destino (`.configuracion__contenido`). */
+.configuracion__indice {
+  flex: 0 0 auto;
+  width: 14rem;
+  box-sizing: border-box;
+  padding: 1.5rem 1rem;
+  border-right: var(--borde-fino) solid var(--color-borde);
+  /* Si algún día los destinos no caben de alto, se desplaza el índice, no la página. */
+  overflow-y: auto;
 }
 
 .configuracion__titulo {
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
+  font-size: var(--tam-l);
 }
 
-.configuracion__pendiente {
-  color: var(--color-tinta-suave);
+.configuracion__destinos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.configuracion__destino {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radio-m);
+  text-decoration: none;
+  color: var(--color-acento);
+}
+
+.configuracion__destino:hover {
+  background: var(--color-superficie-alt);
+}
+
+.configuracion__destino--activo {
+  background: var(--color-acento-suave);
+  color: var(--color-acento-fuerte);
+  font-weight: var(--peso-medio);
+}
+
+/* AQUÍ vive el scroll de la sección, y en ningún otro sitio: la página no se
+   desplaza (`body` mide 100dvh), se desplaza el panel del destino. */
+.configuracion__panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* El límite de ancho heredado de la pantalla única, ahora donde corresponde: el
+   contenido del destino. Sin padding vertical a propósito —cada lista trae el suyo—,
+   para que una cabecera `.cabecera-lista-fija` quede pegada al borde del panel sin
+   dejar una franja por la que se vea pasar el contenido. */
+.configuracion__contenido {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }

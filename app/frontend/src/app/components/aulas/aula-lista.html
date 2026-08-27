@@ -1,6 +1,11 @@
 <div class="aulas">
-  <div class="aulas__cabecera">
-    <h2 class="aulas__titulo">Aulas</h2>
+  <div class="aulas__cabecera cabecera-lista-fija">
+    <h2 class="aulas__titulo">
+      Aulas
+      @if (!cargando() && !error()) {
+        <span class="aulas__contador">{{ aulas().length }}</span>
+      }
+    </h2>
     <button type="button" class="aulas__nueva" (click)="nueva()">
       Nueva aula
     </button>

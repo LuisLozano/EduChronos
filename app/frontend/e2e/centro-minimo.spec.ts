@@ -42,6 +42,17 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  * existe DOS veces —la asignatura de la actividad y la de la plaza—: ahí el
  * localizador se acota primero al `<fieldset class="actividad-form__plaza">`.
  *
+ * <p><b>MATIZ DE S123 sobre el párrafo anterior, porque la predicción no se
+ * cumplió entera.</b> Elegir `formControlName` protegió de lo que decía —del
+ * ASPECTO— y no costó una sola línea cuando C-rutas-hijas rehízo Configuración:
+ * ni un localizador de campo, ni `abrir`, ni `guardar` se tocaron, porque los
+ * diálogos son los mismos. Lo que NO protegió, ni podía, es la NAVEGACIÓN: las
+ * ocho listas dejaron de vivir en una página y cada botón de alta solo existe ya
+ * dentro de su destino, así que este guion necesitó siete navegaciones nuevas
+ * (ver {@link irA}). La lección que queda escrita: un localizador funcional
+ * sobrevive a que la pantalla cambie de aspecto, no a que el elemento cambie de
+ * sitio. Son dos ejes distintos y el segundo no tiene localizador que lo salve.
+ *
  * <p><b>PUNTO DÉBIL CONOCIDO: los cuatro `<select multiple>`.</b> No tienen
  * `formControlName` —leen `(change)` → `selectedOptions` → `setValue`—, así que
  * hay que localizarlos por clase (`.subgrupo-form__multiple`,
@@ -103,15 +114,50 @@ async function guardar(page: Page): Promise<void> {
   await expect(dialogo(page)).toHaveCount(0);
 }
 
+/**
+ * Va a un destino de Configuración POR CLIC EN EL ÍNDICE (S123, C-rutas-hijas).
+ *
+ * <p><b>Por clic y no por `goto`, a propósito.</b> Un `page.goto('/configuracion/niveles')`
+ * dejaría este guion igual de verde y NUNCA tocaría el índice, que es la pieza que este
+ * Cambio estrena: si alguien rompiera la derivación de destinos, o los `routerLink`, o el
+ * marco que los pinta, la suite de navegador no se enteraría. El criterio de O-navegación
+ * promete que los ocho destinos se alcanzan en UN GESTO, y un e2e que no hace el gesto no
+ * mide la promesa. El precio es que este helper depende del índice: si el índice cae,
+ * caen las siete navegaciones a la vez, y eso es exactamente lo que se quiere.
+ *
+ * <p>El `exact: true` del enlace NO es adorno: `name` es substring por defecto en
+ * Playwright 1.62 y «Grupos» está contenido en «Subgrupos», así que sin él la navegación
+ * a grupos casaría dos entradas del índice y moriría por strict mode.
+ *
+ * <p>Espera a DOS cosas y a ninguna por tiempo: a que la URL sea la del destino —que es
+ * lo que hace enlazable la sección— y a que el componente de ese destino esté montado en
+ * el outlet. Con solo la URL, el aserto pasaría antes de que el panel hubiera repintado y
+ * el `abrir()` siguiente buscaría su botón en el destino anterior.
+ */
+async function irA(page: Page, rotulo: string, lista: string): Promise<void> {
+  await page.getByRole('link', { name: rotulo, exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/configuracion/${rotulo.toLowerCase()}$`));
+  await expect(page.locator(`.configuracion__panel ${lista}`)).toHaveCount(1);
+}
+
 test('crea un centro mínimo por la UI y el solver produce horario', async ({ page }) => {
   await page.goto('/configuracion');
+
+  // 0. La entrada por /configuracion se conserva, y desde S123 mide una cosa más: que
+  //    la sección redirige a su primer destino en vez de quedarse en blanco. Sin este
+  //    aserto la redirección podría romperse y el guion seguiría verde, porque el paso
+  //    1 encontraría la jornada igual si alguien la pusiera de vuelta en la raíz.
+  await expect(page).toHaveURL(/\/configuracion\/jornada$/);
 
   // 1. Jornada: se guarda la propuesta por defecto TAL CUAL. El badge «Propuesta ·
   //    sin guardar» solo se pinta con `persistida()` false, así que su desaparición
   //    es la prueba de que el PUT llegó —y de que no se abrió ConfirmarReemplazo—.
+  //    NO lleva `irA`: es el destino al que se acaba de redirigir.
   await expect(page.locator('.jornada__badge')).toBeVisible();
   await page.getByRole('button', { name: 'Guardar jornada', exact: true }).click();
   await expect(page.locator('.jornada__badge')).toHaveCount(0);
+
+  await irA(page, 'Niveles', 'app-nivel-lista');
 
   // 2. Nivel. El input de orden nace VACÍO (el de duración/repeticiones de la
   //    actividad no: ver paso 8), así que hay que teclearlo o el `required` bloquea.
@@ -120,6 +166,8 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   await nivel.locator('[formControlName="orden"]').fill('1');
   await guardar(page);
 
+  await irA(page, 'Grupos', 'app-grupo-lista');
+
   // 3. Grupo. `selectOption` espera a que la opción EXISTA, que es justo la espera
   //    que necesita el desplegable poblado por red al abrirse el diálogo.
   const grupo = await abrir(page, 'Nuevo grupo');
@@ -127,11 +175,15 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   await grupo.locator('[formControlName="nivel"]').selectOption('1ESO');
   await guardar(page);
 
+  await irA(page, 'Subgrupos', 'app-subgrupo-lista');
+
   // 4. Subgrupo. Primer `<select multiple>` sin formControlName: por clase.
   const subgrupo = await abrir(page, 'Nuevo subgrupo');
   await subgrupo.locator('[formControlName="codigo"]').fill('1ESOA-TODO');
   await subgrupo.locator('.subgrupo-form__multiple').selectOption(['1ESOA']);
   await guardar(page);
+
+  await irA(page, 'Profesores', 'app-profesor-lista');
 
   // 5. Profesor.
   const profesor = await abrir(page, 'Nuevo profesor');
@@ -139,11 +191,15 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   await profesor.locator('[formControlName="nombreCompleto"]').fill('Profesor de Matemáticas');
   await guardar(page);
 
+  await irA(page, 'Asignaturas', 'app-asignatura-lista');
+
   // 6. Asignatura.
   const asignatura = await abrir(page, 'Nueva asignatura');
   await asignatura.locator('[formControlName="codigo"]').fill('MAT');
   await asignatura.locator('[formControlName="nombreCompleto"]').fill('Matemáticas');
   await guardar(page);
+
+  await irA(page, 'Aulas', 'app-aula-lista');
 
   // 7. Aula. El tipo arranca en '' (opción disabled «— elige un tipo —»), así que
   //    hay que seleccionarlo. ORDINARIA es compatible con una asignatura sin
@@ -152,6 +208,8 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   await aula.locator('[formControlName="codigo"]').fill('A1');
   await aula.locator('[formControlName="tipo"]').selectOption('ORDINARIA');
   await guardar(page);
+
+  await irA(page, 'Actividades', 'app-actividad-lista');
 
   // 8. Actividad, la única alta con estructura anidada.
   const actividad = await abrir(page, 'Nueva actividad');
@@ -180,6 +238,13 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   //    landing sería ambiguo, porque allí «Horario» aparece además como tarjeta de
   //    la página (es el motivo por el que humo.spec.ts no lo usa como ancla).
   //    El destino es /horario/1, clavado en `app.html`.
+  //
+  //    REVERIFICADO EN S123, porque C-rutas-hijas metió ocho enlaces nuevos en esta
+  //    página: los ocho del índice de destinos. La afirmación de arriba SIGUE SIENDO
+  //    EXACTA —ninguno se llama «Horario», y medido son 11 enlaces con una sola
+  //    coincidencia, incluso sin `exact`—. Lo que el índice sí estrenó es la
+  //    colisión simétrica dentro de sí mismo: «Grupos» casa DOS entradas sin `exact`,
+  //    porque está contenido en «Subgrupos». Por eso `irA` lo lleva y esto no.
   await page.getByRole('link', { name: 'Horario', exact: true }).click();
   await expect(page).toHaveURL(/\/horario\/1$/);
 

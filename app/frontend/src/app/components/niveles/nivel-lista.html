@@ -1,6 +1,11 @@
 <div class="niveles">
-  <div class="niveles__cabecera">
-    <h2 class="niveles__titulo">Niveles</h2>
+  <div class="niveles__cabecera cabecera-lista-fija">
+    <h2 class="niveles__titulo">
+      Niveles
+      @if (!cargando() && !error()) {
+        <span class="niveles__contador">{{ niveles().length }}</span>
+      }
+    </h2>
     <button type="button" class="niveles__nuevo" (click)="nuevo()">
       Nuevo nivel
     </button>

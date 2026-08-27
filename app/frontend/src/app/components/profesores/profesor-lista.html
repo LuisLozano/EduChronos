@@ -1,6 +1,11 @@
 <div class="profesores">
-  <div class="profesores__cabecera">
-    <h2 class="profesores__titulo">Profesores</h2>
+  <div class="profesores__cabecera cabecera-lista-fija">
+    <h2 class="profesores__titulo">
+      Profesores
+      @if (!cargando() && !error()) {
+        <span class="profesores__contador">{{ profesores().length }}</span>
+      }
+    </h2>
     <button type="button" class="profesores__nuevo" (click)="nuevo()">
       Nuevo profesor
     </button>

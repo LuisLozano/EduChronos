@@ -1,34 +1,41 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { AsignaturaLista } from '../asignaturas/asignatura-lista';
-import { AulaLista } from '../aulas/aula-lista';
-import { GrupoLista } from '../grupos/grupo-lista';
-import { NivelLista } from '../niveles/nivel-lista';
-import { SubgrupoLista } from '../subgrupos/subgrupo-lista';
-import { ActividadLista } from '../actividades/actividad-lista';
-import { Jornada } from '../jornada/jornada';
-import { ProfesorLista } from '../profesores/profesor-lista';
+/** Una entrada del índice, derivada de una ruta hija. Solo rótulo y segmento. */
+interface Destino {
+  readonly ruta: string;
+  readonly titulo: string;
+}
 
 /**
- * Sección de Configuración del centro (O-shell, poblada por O-catálogo). Sigue
- * siendo presentacional pura y SIN servicios: no carga ni escribe nada por sí
- * misma, solo compone las secciones de catálogo, y cada una habla con su propio
- * servicio. Por eso el CRUD de profesores va INLINE aquí y no como ruta hija:
- * no hay estado que anidar ni URL que enlazar, y evitarlo ahorra el
- * `<router-outlet>` y el array `children` que el proyecto no usa en ningún sitio
- * salvo el raíz.
+ * Sección de Configuración del centro (O-shell, poblada por O-catálogo). Sigue siendo
+ * presentacional pura y SIN servicios de dominio: no carga ni escribe nada por sí misma;
+ * cada destino habla con su propio servicio. Lo que cambia en S123 (C-rutas-hijas) es
+ * CÓMO se llega a cada uno: un índice vertical más `<router-outlet>` con ocho rutas
+ * hijas, en vez de las ocho listas compuestas como hermanas en una sola pantalla.
  *
- * <p>{@link AulaLista}, {@link AsignaturaLista}, {@link NivelLista} y {@link GrupoLista}
- * se montan igual, como HERMANAS de {@link ProfesorLista}: eso es lo que valida el molde
- * de S101 —una sección de catálogo se añade aquí con una línea en `imports:` y una
- * etiqueta en la plantilla, sin tocar las anteriores—.
+ * <p>LA RAZÓN VIEJA ERA BUENA, Y SE APOYABA EN DOS HECHOS QUE YA NO SE DAN. Mientras las
+ * ocho listas cabían en una pantalla, anidar rutas no compraba nada: no había estado que
+ * anidar —este componente era la clase vacía que sigue siendo casi— ni URL que enlazar,
+ * porque el destino de un enlace habría sido siempre la misma página, y evitarlo ahorraba
+ * el `<router-outlet>` y el array `children` que el proyecto no usaba en ningún sitio
+ * salvo el raíz. Con un centro de juguete eso era cierto.
  *
- * <p>Las CUATRO entidades de O-catálogo son profesor, aula, asignatura y grupo
- * (plan de trabajo, S101: «primer Cambio de cuatro (profesor/aula/asignatura/grupo)»).
- * Con grupo montado esto va 4/4: O-catálogo queda COMPLETO y el párrafo de pendientes
- * desaparece de la plantilla. El texto anterior nombraba «currículo» como la cuarta:
- * era un arrastre de S101, y currículo es otra cosa en el plan (códigos y
- * compatibilidades POR currículo, D-F8.5-C3-b), no una sección de este catálogo.
+ * <p>DEJA DE SERLO POR DOS MEDIDAS, no por gusto. La primera es el TAMAÑO del centro
+ * real: 334 subgrupos y 208 actividades (`docs/diseno-navegacion.md`). Ocho listas de ese
+ * tamaño apiladas en un documento no son una pantalla, son un scroll en el que las
+ * actividades quedan a varias pantallas de la jornada y no hay forma de ir a una sección
+ * salvo desplazarse hasta ella. La segunda es la exigencia de O-navegación: una URL
+ * ENLAZABLE por destino (`/configuracion/subgrupos`), que es la que hace que el botón
+ * Atrás funcione, que un enlace pueda mandarse, y que recargar deje al usuario donde
+ * estaba. Ninguna de las dos se resuelve componiendo hermanas, y las dos son exactamente
+ * lo que `children` resuelve.
+ *
+ * <p>El coste que la razón vieja temía no se ha materializado: no había estado compartido
+ * entre las ocho —cada lista carga el suyo en su `ngOnInit`—, así que montar por ruta no
+ * pierde nada. Y gana un refresco que antes faltaba: dar de alta un PDC desde grupos
+ * dejaba rancia la lista de subgrupos, porque nadie la avisaba; ahora entrar en subgrupos
+ * la remonta y la recarga.
  *
  * <p>{@link Jornada} (C-jornada M4) se monta igual —una línea en `imports:` y una
  * etiqueta— pese a NO ser una sección de catálogo: es un singleton sin lista ni alta,
@@ -51,20 +58,31 @@ import { ProfesorLista } from '../profesores/profesor-lista';
  * grupo necesita un nivel existente, así que la lista de niveles va antes que la de
  * grupos. El motivo de que exista es que sin niveles creables por UI no hay grupos, ni
  * subgrupos, ni población para las plazas del currículo.
+ *
+ * <p>Los dos párrafos anteriores sobreviven al Cambio sin tocarse porque su argumento no
+ * era sobre la plantilla sino sobre el ORDEN, y el orden sigue mandando: es el del índice
+ * y el del array `children` de `app.routes.ts`, que lo declara una sola vez.
  */
 @Component({
   selector: 'app-configuracion',
-  imports: [
-    Jornada,
-    ProfesorLista,
-    AulaLista,
-    AsignaturaLista,
-    NivelLista,
-    GrupoLista,
-    SubgrupoLista,
-    ActividadLista,
-  ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })
-export class Configuracion {}
+export class Configuracion {
+  private readonly ruta = inject(ActivatedRoute);
+
+  /**
+   * El índice, DERIVADO de las rutas hijas de esta misma ruta: rótulo de `data.titulo`
+   * y segmento de `path`. No hay array de destinos que mantener en paralelo, así que un
+   * destino nuevo se añade en `app.routes.ts` y aparece aquí solo.
+   *
+   * <p>Se lee de `routeConfig` y no de `children` observables porque la configuración es
+   * estática: no cambia mientras la vista vive, y un `signal` sugeriría lo contrario.
+   * El filtro descarta la redirección `path: ''` → `jornada`, que no es un destino sino
+   * la entrada por defecto: no tiene `titulo` y no debe pintar entrada de índice.
+   */
+  protected readonly destinos: readonly Destino[] = (this.ruta.routeConfig?.children ?? [])
+    .filter((hija) => !!hija.path && typeof hija.data?.['titulo'] === 'string')
+    .map((hija) => ({ ruta: hija.path!, titulo: hija.data!['titulo'] as string }));
+}

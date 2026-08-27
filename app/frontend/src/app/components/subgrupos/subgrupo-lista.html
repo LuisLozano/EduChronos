@@ -1,6 +1,11 @@
 <div class="subgrupos">
-  <div class="subgrupos__cabecera">
-    <h2 class="subgrupos__titulo">Subgrupos</h2>
+  <div class="subgrupos__cabecera cabecera-lista-fija">
+    <h2 class="subgrupos__titulo">
+      Subgrupos
+      @if (!cargando() && !error()) {
+        <span class="subgrupos__contador">{{ subgrupos().length }}</span>
+      }
+    </h2>
     <button type="button" class="subgrupos__nuevo" (click)="nuevo()">
       Nuevo subgrupo
     </button>

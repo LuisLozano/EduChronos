@@ -84,3 +84,69 @@ body {
   color: var(--color-tinta);
   background: var(--color-fondo);
 }
+
+/* ---------------- Marco de aplicación (S123, C-rutas-hijas) ----------------
+   La altura de las vistas se DERIVA, no se escribe. `body` mide exactamente el
+   viewport (100dvh) y es una columna flex; la barra de `app.html` es un ítem de
+   tamaño automático —se lleva lo que ocupe, sin que nadie tenga que saber cuánto—
+   y `.app__contenido` se lleva el resto con `flex: 1`. Una vista puede entonces
+   pedir `height: 100%` y recibir «viewport menos barra» sin un solo literal de
+   píxeles: si la barra cambia de alto, el reparto se rehace solo.
+
+   `min-height: 0` en cada eslabón no es adorno: sin él un ítem flex no baja de su
+   tamaño de contenido y el scroll interior del hijo nunca aparece, porque el que
+   desborda es el contenedor.
+
+   `overflow-y: auto` en `.app__contenido` es lo que quita el scroll a la PÁGINA y
+   se lo da al contenido. Efecto sobre las otras dos rutas (landing y horario), que
+   este Cambio no toca: siguen desplazándose igual, pero dentro de `<main>`, con la
+   barra superior siempre a la vista. Configuración no llega a usarlo: su marco mide
+   justo 100% y desplaza su propio panel.
+
+   Estas tres reglas NO chocan con `app.css`, que sobre `.app__contenido` solo
+   declara `padding`; se añaden aquí, y no allí, para que el marco se lea entero en
+   un sitio. `box-sizing` se fija sobre este elemento en concreto, no en global: la
+   nota de arriba sobre no cambiar el cálculo de anchos de las 26 hojas sigue en pie. */
+body {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+app-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__contenido {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Los destinos que el `<router-outlet>` de Configuración monta son elementos propios
+   (`app-jornada`, `app-profesor-lista`…) y nacen `display: inline`. La regla vive aquí
+   y no en `configuracion.css` porque el encapsulado de componente no alcanza a los
+   elementos que crea el router, que no llevan su atributo de contenido. */
+.configuracion__contenido > * {
+  display: block;
+}
+
+/* Cabecera de lista que se queda a la vista mientras el panel del destino se
+   desplaza. Definida en S123 y LISTA PARA USAR, pero todavía SIN APLICAR: la ponen
+   las siete plantillas de lista en el paso 3, una línea por lista, junto a su clase
+   `*__cabecera`. Global y no de componente porque la comparten siete hojas distintas,
+   y compartir el marcado de cabecera se descartó explícitamente.
+
+   El fondo es opaco y del color de la página porque ninguna lista pinta fondo propio:
+   sin él, las filas se verían pasar por debajo del texto de la cabecera. El contexto
+   de desplazamiento al que se pega es `.configuracion__panel`. */
+.cabecera-lista-fija {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-fondo);
+}

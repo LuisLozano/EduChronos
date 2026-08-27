@@ -6,11 +6,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  /* El hueco hasta la tabla va DENTRO de la caja, no como margen: con
+     `.cabecera-lista-fija` el margen quedaría fuera del fondo pintado y se
+     vería pasar una fila por esa franja de 1rem al desplazar el panel (S123,
+     medido: 1 fila visible en la banda). Separación idéntica sin pegar. */
+  padding-bottom: 1rem;
 }
 
 .subgrupos__titulo {
   margin: 0;
+}
+
+.subgrupos__contador {
+  margin-left: 0.5rem;
+  font-size: var(--tam-s);
+  font-weight: var(--peso-normal);
+  color: var(--color-tinta-suave);
 }
 
 .subgrupos__error {

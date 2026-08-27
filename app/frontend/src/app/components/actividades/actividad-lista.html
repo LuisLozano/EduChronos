@@ -1,6 +1,11 @@
 <div class="actividades">
-  <div class="actividades__cabecera">
-    <h2 class="actividades__titulo">Actividades</h2>
+  <div class="actividades__cabecera cabecera-lista-fija">
+    <h2 class="actividades__titulo">
+      Actividades
+      @if (!cargando() && !error()) {
+        <span class="actividades__contador">{{ actividades().length }}</span>
+      }
+    </h2>
     <button type="button" class="actividades__nuevo" (click)="nuevo()">
       Nueva actividad
     </button>
