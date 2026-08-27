@@ -16,19 +16,19 @@
 - L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
 - L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
 - L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
-- L945 — ## 4. Clasificación del trabajo pendiente
-- L963 — ### Clasificación de las deudas vivas actuales
-- L969 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L976 — #### Deuda técnica real, colgada de su objetivo
-- L1016 — #### Mejora futura, cuelga y espera
-- L1043 — #### Decisión arquitectónica consciente → sale de la cola
-- L1055 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1063 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1070 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1103 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1157 — ## 6. Reglas estratégicas
-- L1204 — ## 7. Métricas del sistema
-- L1225 — ## 8. El sistema respondiendo a las preguntas clave
+- L962 — ## 4. Clasificación del trabajo pendiente
+- L980 — ### Clasificación de las deudas vivas actuales
+- L986 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L993 — #### Deuda técnica real, colgada de su objetivo
+- L1033 — #### Mejora futura, cuelga y espera
+- L1061 — #### Decisión arquitectónica consciente → sale de la cola
+- L1073 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1082 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1089 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1122 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1176 — ## 6. Reglas estratégicas
+- L1223 — ## 7. Métricas del sistema
+- L1244 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -880,6 +880,8 @@ de las Fases 9–12.
      alcanzan en un gesto, cada uno con URL enlazable. `/configuracion` redirige a
      `jornada`. Añadir un noveno destino es una entrada nueva, no una reforma.
      `loadComponent` queda APLAZADO, no descartado: se añade si se mide que hace falta.
+     **CUMPLIDO en S123** por C-rutas-hijas, con el índice derivado de `routeConfig.children` y un test de
+     mutación que lo vigila. `loadComponent` sigue aplazado: no se midió, y no se promete lo que no se mide.
   3. Con la base del centro real, ninguna lista obliga a recorrer el scroll hasta el
      final. Lo medido en S122 fue FILTRO más lista desplazable dentro del destino, no un
      paginador; el criterio admite cualquiera de los dos, pero el que tiene evidencia es
@@ -890,14 +892,20 @@ de las Fases 9–12.
   4. El horario de un grupo cabe en 1920×1080 sin scroll vertical, con el mecanismo de
      expansión activo. Las 22 celdas de seis plazas (11 grupos de 28, 2,8 % de 791) se
      muestran colapsadas Y con forma visible de expandirlas: recortar sin expansión es
-     perder una clase, no una explicación. La resolución de portátil queda como PARÁMETRO
-     SIN FIJAR del que depende todo el cálculo de altura.
+     perder una clase, no una explicación. El criterio se verifica sobre VIEWPORT CSS, no sobre
+     especificación de panel: ~1920×945 con escala al 100 %, que es lo que el instrumento reproduce con
+     22 recortes. Escribir «1920×1080» a secas fue lo que dejó pasar el error que S123 descubrió; un panel
+     no es un presupuesto de altura. La resolución del portátil queda MEDIDA y CERRADA en S123 —1280×585
+     con escala 150 %— y EXCLUIDA del criterio: la demo se enseña en un ordenador de sobremesa. Pendiente
+     antes de abrir C-rejilla-densidad: medir ese sobremesa con `innerWidth/innerHeight`, no suponerlo.
   5. Ninguna escritura nueva. Se admite composición de solo lectura (enseñar en un destino
      lo que cuelga de él, con enlace). Crear o editar desde un sitio que hoy no lo hace
      queda fuera: eso es O-particiones.
   6. Sin regresión: suites verdes salvo las que el cambio de plantillas obligue a tocar,
-     declarado ANTES y no descubierto en rojo. Previstos: los 8 de `configuracion.spec.ts`
-     y dos puntos de `centro-minimo.spec.ts`.
+     declarado ANTES y no descubierto en rojo. Previstos y confirmados: los 8 de `configuracion.spec.ts`,
+     que MUEREN y se sustituyen por 6 de enrutado, y `centro-minimo.spec.ts:107-180`, que es reescritura
+     de media suite y no «dos puntos» —el otro punto, `:213`, es de C-rejilla-densidad por D6—. Suites
+     tras S123: app 282, solver 91, vitest 314, e2e 2.
 - **Deudas que absorbe:** `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que
   llevaban desde S115 y S113 remitiendo las dos, con esas palabras, a «el Cambio que
   decida la navegación» y a «la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio
@@ -916,13 +924,22 @@ de las Fases 9–12.
   `D-insignia-sin-leyenda` (es C-identidad) y el responsive (`D-sin-puntos-de-ruptura`,
   decisión escrita de S121). Fuera también tokenizar el espaciado: es la decisión 3 de
   identidad de O-diseño y sigue sin sede.
-- **Cambios que agrupa — PROPUESTOS en S122, a ratificar en la apertura:** **C-rutas-hijas**
-  (criterio 2, y con él las dos deudas absorbidas), **C-listas-paginadas** (criterio 3, los
-  casos duros son Subgrupos y Actividades) y **C-rejilla-densidad** (criterio 4, la
-  geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11). El
-  criterio 1 no abre Cambio: la barra existe y lo que le falta es estilo. Salen uno a uno de
-  los criterios 2, 3 y 4, y tenerlos escritos convierte el M0 siguiente en ratificar en vez
-  de deliberar.
+- **Cambios que agrupa — PROPUESTOS en S122, RATIFICADOS los tres en S123:** **C-rutas-hijas**
+  (criterio 2, y con él las dos deudas absorbidas) — **HECHO en S123**; **C-listas-filtradas**
+  (criterio 3, los casos duros son Subgrupos y Actividades) — PENDIENTE; y **C-rejilla-densidad**
+  (criterio 4, la geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11)
+  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. El criterio 1 no abre Cambio: la barra
+  existe y lo que le falta es estilo. Salen uno a uno de los criterios 2, 3 y 4, y tenerlos escritos
+  convirtió el M0 de S123 en ratificar en vez de deliberar.
+  **RENOMBRADO en S123: `C-listas-filtradas` se llamaba `C-listas-paginadas`.** Los dos nombres designan
+  el mismo Cambio; el viejo sobrevive en el cuerpo de S122 del plan, que no se reescribe. El motivo es
+  que el criterio 3 admite paginador o filtro pero solo el filtro tiene evidencia medida, y D16 no diseña
+  paginador alguno: un nombre que apunta a la opción sin evidencia acaba construyéndola.
+  FRONTERA entre los dos primeros, cortada en S123: la cabecera fija y el scroll dentro del destino son
+  consecuencia estructural de tener destino propio y fueron a C-rutas-hijas, con el hueco del filtro
+  montado y vacío; el filtro, el componente de cabecera compartido y los contadores en el índice van
+  íntegros a C-listas-filtradas. Aviso medido para ese Cambio: «Grupos» casa dos entradas del índice por
+  subcadena, al estar contenido en «Subgrupos».
 - **No cuelga de ningún hito funcional.** Igual que O-diseño, **acerca la demo**: es manejo,
   no función nueva, y ninguna de las dos cosas que hace —enrutar y acotar altura— añade
   capacidad al producto. No depende de O-particiones ni del cierre formal de H2. Sí conviene
@@ -994,7 +1011,7 @@ asigna categoría, objetivo y disposición.
 | D-e2e-retry-bd (un reintento de Playwright correría sobre la BD del intento fallido) | O-estructura | No | Nace en S112. `retries: 2` en CI, y el `rm -f app/educhronos-e2e.db*` vive en el `command` del `webServer`, que corre UNA VEZ por corrida, no por test ni por reintento. Un reintento encontraría el centro ya creado y moriría con un 400 de código duplicado, es decir, por causa distinta de la original: esconde el diagnóstico. Hoy no bloquea porque NO HAY CI (Fase 12 sin abrir). Se resuelve al abrirla. No se paga ahora |
 | D-e2e-aislamiento (la suite e2e corre en paralelo sin aislamiento entre specs) | O-estructura | No | Nace en S112. `fullyParallel: true` sin `workers` reparte los specs entre workers que atacan el mismo backend y la misma BD. Inocuo HOY por una razón concreta y no por suerte: `humo` solo lee (la landing no llama a `/api`) y `centro-minimo` es el único que escribe. El riesgo llega con el TERCER spec: dos writers sobre un SQLite único chocarán por los `unique` de código de forma no determinista, que es la clase de fallo intermitente que desprestigia una suite entera. Se decide al escribir el segundo spec que escriba. No se paga ahora |
 | D-props-test-obsoleto (el `application.properties` de test afirma que `schema.sql` dropea) | O-estructura | No | Nace en S112. Dice «schema.sql dropea y recrea, de modo que varios contextos Spring sobre este mismo fichero recrean el esquema con FK sin petar»; falso desde S109. Es la MISMA falsedad que S112 corrigió en `playwright.config.ts`, cuya hermana quedó viva. Efecto de lectura, no de ejecución (la suite de backend se limpia por otra vía), pero por R5 es estado vivo equivocado: hace que el siguiente lector decida sobre una premisa falsa. Se corrige al tocar ese fichero. No se paga ahora |
-| D-pdc-lista-rancia (la lista de subgrupos no se entera del alta ni del borrado de un PDC) | O-estructura | No | Nace en S113 y la abre el propio Cambio: el alta de un PDC toca DOS catálogos (crea el grupo y su subgrupo mono-Di) pero el contrato del molde —«el diálogo cierra con `true` y recarga quien lo abrió»— solo alcanza a `GrupoLista`. MEDIDO en navegador: la sección de subgrupos seguía diciendo «No hay subgrupos todavía» con el subgrupo ya en la BD; simétrico al borrar. NO se paga aquí, con razón escrita: no es del género de las guardas (vista desactualizada, no destrucción de datos), arreglarla exige coordinar componentes hermanos dentro de `Configuracion` —que ES la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio propio— y no bloquea el criterio, cosa que el M4 demuestra: el §6.2 se reprodujo entero con la lista rancia de por medio. Se resuelve en el Cambio que decida la navegación; no se parchea con un `EventEmitter` ad hoc, que fijaría el molde por la puerta de atrás |
+| D-pdc-lista-rancia (la lista de subgrupos no se entera del alta ni del borrado de un PDC) | O-estructura | No | Nace en S113 y la abre el propio Cambio: el alta de un PDC toca DOS catálogos (crea el grupo y su subgrupo mono-Di) pero el contrato del molde —«el diálogo cierra con `true` y recarga quien lo abrió»— solo alcanza a `GrupoLista`. MEDIDO en navegador: la sección de subgrupos seguía diciendo «No hay subgrupos todavía» con el subgrupo ya en la BD; simétrico al borrar. NO se paga aquí, con razón escrita: no es del género de las guardas (vista desactualizada, no destrucción de datos), arreglarla exige coordinar componentes hermanos dentro de `Configuracion` —que ES la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio propio— y no bloquea el criterio, cosa que el M4 demuestra: el §6.2 se reprodujo entero con la lista rancia de por medio. Se resuelve en el Cambio que decida la navegación; no se parchea con un `EventEmitter` ad hoc, que fijaría el molde por la puerta de atrás. **CERRADA en S123 por C-rutas-hijas, y por construcción.** El bug quedó localizado —`grupo-lista.ts:121-128` recarga solo grupos tras el alta de PDC y nadie avisa a `SubgrupoLista`—; con destino propio, entrar en subgrupos remonta el componente y su `ngOnInit` recarga. No se escribió ningún `EventEmitter` |
 | D-pdc-vinculo-por-cadena (el agregado PDC localiza su subgrupo por código derivado) | O-estructura | No | Nace en S113. `PdcService.borrar` resuelve el mono-Di con `findByCodigo(codigo + "-Completo")`: el agregado que su javadoc dice poseer no estaba protegido fuera de sus tres métodos, y cualquier rename por otra vía dejaba el DELETE del PDC en 404 permanente. G2 CONTIENE la deuda cerrando el único camino que existía (el CRUD plano de subgrupos); vuelve a morder con un tercer camino de escritura hacia `Subgrupo`. Familia de D-F8.5-D2a-a y D-F8.2b-iv-a (validación de aplicación sin espejo en la base). Convertir la convención en referencia real es cambio de ESQUEMA, no una guarda: se evalúa cuando algo más toque `schema.sql` en esta zona. No se paga ahora |
 | D-tokens-inexistentes (la familia `D-nueva-*` se cita en nueve sitios y no existe) | Transversal, sin objetivo asignado | No | Nace en S113 al auditar en R4 los tokens que la sesión introducía. `D-nueva`, `D-nueva-1` … `D-nueva-5` aparecen en `GrupoService`, `GrupoDTO`, `GrupoRequest`, `GrupoEndpointTest`, `grupo-form.ts` y la cabecera de `grupo.model.ts`, y ninguno tiene definición viva en este documento ni en el plan. Incumple R4 en su forma más simple; el daño es que el lector busca el token, no lo encuentra y no sabe si la regla sigue vigente. PREEXISTENTE: S113 corrigió solo el que ella misma introdujo (`D-nueva-2`) y registró el resto, porque mapear nueve citas a sus deudas reales exige leer nueve contextos y es trabajo propio, no un arreglo en caliente. Sesión de Higiene/Método, junto con el script de R4 que falta desde S101 |
 | D-log-aplicacion (no hay logging estructurado en ninguna de las dos capas) | Transversal, sin objetivo asignado | No | Propuesta del arquitecto en S111 tras el recorrido en navegador, donde diagnosticar un fallo exigió leer código en vez de logs. Backend sin configuración de logging a fichero (solo consola); frontend sin ninguna traza, con `ngx-logger` mencionado como candidato pero NO evaluado. Mejora FUTURA: se registra para que no se pierda, no planifica y no cuelga de ningún objetivo vivo. **REENCUADRADA en S116, con evidencia y no con impresión.** El arquitecto propuso una sesión dedicada a introducir logging; se argumentó en contra que instrumentar antes de diagnosticar es instrumentar a ciegas y que había instrumentos gratis (pestaña Red, stdout). Los gratis BASTARON, pero solo porque el tiempo de respuesta era observable desde fuera y permitía descartar ramas; medido en la misma sesión que el motivo del 422 no se registra en NINGUNA parte (ver D-motivo-rechazo-sin-registro), luego con un fallo cuyo síntoma externo no variase no habría habido forma de diagnosticar sin leer código. Pasa de propuesta razonable a deuda con un caso medido detrás. Sigue sin abrir sesión por R-deuda. Distinción que ordena el asunto y que conviene no perder: los logs son para el DESARROLLADOR y los mensajes en pantalla para el USUARIO; lo que hace falta delante del centro es D-F8.6-ii-a, no ésta |
@@ -1037,13 +1054,14 @@ asigna categoría, objetivo y disposición.
 | D-dialogo-foco-perdido (al salir del estado «cargando» el foco cae fuera del diálogo) | O-diseño | Nace en S114, medida en los tres diálogos. El CDK enfoca el botón de la rama `cargando`; cuando el `@switch` cambia de rama ese elemento se destruye y el foco cae a `<body>`, fuera del diálogo. `GrupoForm` (sin estados) conserva el foco dentro; `PdcDialogo` y `TutoriaDialogo` no. NO la introduce C-tutores: `PdcDialogo` hace lo mismo desde S113. Para teclado y lector de pantalla el diálogo queda abierto sin foco dentro. Arrastra una consecuencia de andamio: la barrera `:focus` con que `centro-minimo.spec.ts` evita la carrera del portal no sirve en diálogos con estados, así que si algún e2e futuro abre uno de estos dos habrá que sustituirla por una espera al contenido. Es acabado de interacción, transversal a las vistas: cuelga de O-diseño. No se paga ahora |
 | D-bundle-presupuesto (el bundle inicial excede el techo declarado) | O-diseño | Preexistente desde antes de S112 (507,66 kB frente a 500 kB en `angular.json`, verificado sobre HEAD limpio); S113 lo lleva a 514,42 kB al entrar `PdcDialogo` en el grafo de dependencias. NO se toca `angular.json`: subir el techo es configuración de build, no está en el criterio de ningún objetivo vivo, y hacerlo «de paso» convierte un aviso útil en un número que nadie vuelve a mirar. Cuelga de O-diseño, que tendrá delante el bundle completo y las vistas congeladas y podrá elegir entre subir el techo, rutas perezosas o recortar. Hasta entonces, anotar el delta en cada sesión que compile. **SALDADA EN S121 dentro de C-tokens, de paso y no por sesión propia.** No bloqueaba (el `maximumError` está en 1 MB y ningún trabajo de color puede romper el build), pero O-diseño era su sede designada y caía en el camino. Se midió que el aviso YA estaba encendido antes de tocar nada —521,03 kB contra 500—, así que no era señal sino ruido permanente: un aviso que nadie vuelve a mirar es exactamente lo que la ficha temía al negarse a subir el techo en S113. El pago es subir `maximumWarning` a 550 kB dejando el error en 1 MB, con lo que un aviso nuevo vuelve a significar algo. Delta de la sesión: 521,03 → 524,94 kB (+2,06 kB por C-tokens y la tanda 1, +0,77 kB por la tanda 2; el crecimiento son los nombres de token, más largos que los hex, y el comprimido incluso BAJA de 118,11 a 118,01 kB porque los `var(--color-*)` repetidos comprimen mejor). Margen restante: ~25 kB. **CERRADA** |
 | D-gh6-tutor-contradictorio (el modelo se contradice sobre de qué grupo es tutor GH6) | O-demo | No | Nace en S115 al derivar las tutorías del centro real. `modelo_datos_fase1.md` §6.1 registra `ProfesorTutoria(GH6, 1ºESO A)` y el Hallazgo E del mismo documento dice que GH6 es tutor de 1º Bach A; las dos derivaciones son correctas contra los volcados (GH6 imparte tutoría en ambos grupos) y la contradicción es del TEXTO del modelo, no de los datos. No viola I4, que acota los principales por grupo y no los grupos por profesor. Claude Code hizo bien en no resolverla: fijar uno de los dos por criterio propio sería inventar un dato del centro. Se cierra con la respuesta del jefe de estudios sobre los tutores reales, en la misma consulta que la ambigüedad A5 de `ESPECIFICACION-CATALOGO.md`. Hermana de D31: deuda de REQUISITOS |
-| D-configuracion-monolitica (la pantalla de configuración es un solo scroll con ocho listas) | O-diseño, o el Cambio que decida la navegación | No | Nace en S115 del recorrido de la UI contra el tamaño del centro real: 59 profesores, 100 asignaturas, 43 aulas, 334 subgrupos y 219 actividades en un único componente, sin pestañas, sin filtro y sin búsqueda. ACOTADA en la misma sesión y por eso NO abre Cambio: la carga es append-only, así que localizar filas solo duele al corregir; y el riesgo grave que se le atribuyó al proponerla —el clic sin Ctrl del `<select multiple>` de subgrupos, que reemplaza la población entera— es INALCANZABLE con estos datos, porque los 334 subgrupos derivados son todos mono-grupo. Se resuelve donde ya espera D-pdc-lista-rancia: en el Cambio que decida ruta-hija-vs-contenedor, aplazado desde S101. No se paga ahora |
+| D-configuracion-monolitica (la pantalla de configuración es un solo scroll con ocho listas) | O-diseño, o el Cambio que decida la navegación | No | Nace en S115 del recorrido de la UI contra el tamaño del centro real: 59 profesores, 100 asignaturas, 43 aulas, 334 subgrupos y 219 actividades en un único componente, sin pestañas, sin filtro y sin búsqueda. ACOTADA en la misma sesión y por eso NO abre Cambio: la carga es append-only, así que localizar filas solo duele al corregir; y el riesgo grave que se le atribuyó al proponerla —el clic sin Ctrl del `<select multiple>` de subgrupos, que reemplaza la población entera— es INALCANZABLE con estos datos, porque los 334 subgrupos derivados son todos mono-grupo. Se resuelve donde ya espera D-pdc-lista-rancia: en el Cambio que decida ruta-hija-vs-contenedor, aplazado desde S101. No se paga ahora. **CERRADA en S123 por C-rutas-hijas.** Ocho destinos con URL propia bajo `/configuracion`, índice vertical derivado de las rutas, la página sin scroll y cada lista desplazándose dentro de su panel con la cabecera clavada. Queda para C-listas-filtradas lo que esta deuda también nombraba —el filtro y la búsqueda—, que es el criterio 3 |
+| D-cabecera-lista-duplicada (las siete cabeceras de lista repiten marcado y CSS, ahora también el contador) | C-listas-filtradas | Nace en S123 al descartar deliberadamente el componente de cabecera compartido dentro de C-rutas-hijas: extraerlo antes de conocer al filtro habría sido diseñarlo a ciegas, porque no se sabe si necesita `debounce`, recuento «12 de 334» o limpieza. Son siete `.X__cabecera` con marcado idéntico salvo prefijo BEM, siete CSS de ~45 líneas y ahora siete reglas `__contador` más. Su sede es C-listas-filtradas, que toca esas siete plantillas de todos modos |
 | D5, D6, D9, D11, D16, D17, D21, D27, D29 | Fase 5/8 según su asignación en el plan | Deuda de solver/dominio ya asignada; se reevalúa al abrir su objetivo |
 
 #### Decisión arquitectónica consciente → sale de la cola
 | Deuda | Razón (ya escrita en el plan) |
 |---|---|
-| Las tres palancas de altura de celda medidas en S122 y NO aplicadas | Nacen y mueren en el mismo sitio: D11 de `docs/diseno-navegacion.md`. Para que una celda de seis plazas dejara de recortarse haría falta bajar de 154,2 px, y hay tres formas medidas de conseguirlo, cada una a cambio de retirar algo: **(a)** la banda del badge, 16 px fijos por instancia —retira el sitio del badge y del rótulo de bloque—; **(b)** el `padding` y el `margin-bottom` de cada plaza de bloque, ~4,2 px por plaza, 25 px en una celda de seis —retira separación entre plazas simultáneas—; **(c)** bajar `.asig` de `--tam-s` a `--tam-xs` en modo bloque, 15 px —retira jerarquía tipográfica justo en la celda más densa—. **NO se aplica ninguna**, y la razón es que la pregunta caducó: perseguir cero recortes dejó de tener sentido en cuanto el mecanismo de expansión se hizo OBLIGATORIO (criterio 4 de O-navegación). Con expansión, recortar 22 celdas de 791 es densidad; sin ella era pérdida de información. Quedan registradas por si al implementar C-rejilla-densidad se busca holgura: son opciones MEDIDAS, no ideas |
+| Las tres palancas de altura de celda medidas en S122 y NO aplicadas | Nacen y mueren en el mismo sitio: D11 de `docs/diseno-navegacion.md`. Para que una celda de seis plazas dejara de recortarse haría falta bajar de 154,2 px, y hay tres formas medidas de conseguirlo, cada una a cambio de retirar algo: **(a)** la banda del badge, 16 px fijos por instancia —retira el sitio del badge y del rótulo de bloque—; **(b)** el `padding` y el `margin-bottom` de cada plaza de bloque, ~4,2 px por plaza, 25 px en una celda de seis —retira separación entre plazas simultáneas—; **(c)** bajar `.asig` de `--tam-s` a `--tam-xs` en modo bloque, 15 px —retira jerarquía tipográfica justo en la celda más densa—. **NO se aplica ninguna**, y la razón es que la pregunta caducó: perseguir cero recortes dejó de tener sentido en cuanto el mecanismo de expansión se hizo OBLIGATORIO (criterio 4 de O-navegación). Con expansión, recortar 22 celdas de 791 es densidad; sin ella era pérdida de información. Quedan registradas por si al implementar C-rejilla-densidad se busca holgura: son opciones MEDIDAS, no ideas. **Corrección de S123: son DOS palancas disponibles, no tres.** La (a) choca con D4, que pone el rótulo común del bloque en la banda que el badge reservaba: aplicarla borra a la vez el badge de coste blando y el rótulo, y eso es retirar una señal existente, que es exactamente lo que la invariante del encargo prohíbe y por lo que D6 rechazó borrar la cuarta línea. El razonamiento de «no se aplica ninguna» SIGUE EN PIE: con el portátil fuera del criterio (S123), el criterio se verifica a escala 100 %, donde los recortes siguen siendo 22 de 791. Queda registrado, por si alguna vez se reabre la limitación del portátil, que a 585 px las tres juntas NO bastarían: la celda de seis baja a 98,00 px contra un alto de fila de 87,73. `diseno-navegacion.md` §5 lista esta cuestión como SIN DECIDIR; manda esta tabla |
 | D-F8.6-B-b | "ACEPTADA POR DISEÑO": el aviso de ocupación es ciego a propósito |
 | D-F8.2b-4B | "condicional, inerte": la poda que defendería está muerta en todo camino vivo |
 | 8.5-D3 | "APLAZADO INDEFINIDAMENTE, decisión explícita" con criterio de reapertura escrito |
@@ -1055,6 +1073,7 @@ asigna categoría, objetivo y disposición.
 #### Limitación conocida → sale de la cola, se documenta el "no se hará"
 | Deuda | Razón |
 |---|---|
+| El horario del centro real no cabe sin scroll en el portátil del jefe de estudios (S123) | MEDIDO: panel 1920×1080 con escala de Windows al 150 %, viewport CSS de 1280×585. `scripts/calcular-recortes.py` da 87,73 px de alto de fila y **109 celdas recortadas de 791 (13,8 %)** frente a las 22 (2,8 %) del escenario de criterio; alcanzan a toda celda de tres plazas o más. Las tres palancas de S122 juntas no lo salvan: faltan 10,27 px. DECISIÓN CONSCIENTE de S123: el portátil sale del criterio 4, que se verifica sobre el sobremesa donde se enseña la demo. REABRE si el uso diario pasa a ese equipo, o si se fija su escala al 100 % —que lo resolvería entero, a cambio de texto del sistema a ~11-12 px físicos— |
 | D-F8.5-E-c | "de FRAMEWORK": el dialecto de comunidad no clasifica los fallos; depende de Hibernate |
 | D-F8.5-E-a | `peso` es superficie muerta en tres capas; no se activa hasta que el solver lo lea |
 | D2, D3, D8, D12, D22(parcial) | Simplificaciones de Fase 1 condicionadas a datos reales o a fases futuras concretas |
