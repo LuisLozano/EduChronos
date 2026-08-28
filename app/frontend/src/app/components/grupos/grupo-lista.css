@@ -2,34 +2,13 @@
   padding: 1rem;
 }
 
-.grupos__cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* El hueco hasta la tabla va DENTRO de la caja, no como margen: con
-     `.cabecera-lista-fija` el margen quedaría fuera del fondo pintado y se
-     vería pasar una fila por esa franja de 1rem al desplazar el panel (S123,
-     medido: 1 fila visible en la banda). Separación idéntica sin pegar. */
-  padding-bottom: 1rem;
-}
-
-.grupos__titulo {
-  margin: 0;
-}
-
-.grupos__contador {
-  margin-left: 0.5rem;
-  font-size: var(--tam-s);
-  font-weight: var(--peso-normal);
-  color: var(--color-tinta-suave);
-}
-
 .grupos__error {
   color: var(--color-error);
   margin: 0.5rem 0;
 }
 
 .grupos__vacio,
+.grupos__sin-resultados,
 .grupos__cargando {
   color: var(--color-tinta-suave);
 }

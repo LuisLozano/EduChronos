@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SubgrupoService } from '../../services/subgrupo.service';
 import { Subgrupo } from '../../models/subgrupo.model';
 import { SubgrupoForm } from './subgrupo-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
+import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { coincide } from '../../catalogo/busqueda';
 
 /**
  * Lista del catálogo de subgrupos de alumnos: carga en init, tabla con acciones por
@@ -21,6 +23,7 @@ import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
  */
 @Component({
   selector: 'app-subgrupo-lista',
+  imports: [CabeceraLista],
   templateUrl: './subgrupo-lista.html',
   styleUrl: './subgrupo-lista.css',
 })
@@ -32,6 +35,33 @@ export class SubgrupoLista implements OnInit {
   protected readonly cargando = signal(false);
   /** Error de la última operación de lista o borrado. Vacío = sin error. */
   protected readonly error = signal('');
+
+  /** Texto escrito en la caja de la cabecera. Vacío = se ven todas las filas. */
+  protected readonly busqueda = signal('');
+
+  /**
+   * Texto de UNA fila para buscar en él, compuesto con los campos QUE LA TABLA
+   * PINTA y con las mismas expresiones que usa la plantilla. La regla es esa: si
+   * la fila lo enseña, la búsqueda lo encuentra; si no lo enseña, no.
+   *
+   * <p><b>Nada vigila que siga a la plantilla.</b> Añadir una columna a la tabla y
+   * olvidarla aquí no rompe ningún test ni da error de compilación: deja una
+   * columna visible por la que no se puede buscar, en silencio. Es la limitación
+   * ACEPTADA del Cambio (S124), y el sitio donde mirar cuando alguien diga que la
+   * búsqueda «no encuentra» algo que está en pantalla.
+   */
+  protected textoFila(subgrupo: Subgrupo): string {
+    return [subgrupo.codigo, subgrupo.grupos.join(', ')].join(' ');
+  }
+
+  /**
+   * Filas que casan con la consulta. `filter` es el método del array, no un
+   * nombre nuestro. Con la búsqueda vacía devuelve todas —{@link coincide} da
+   * `true` sin consulta—, así que la lista arranca completa.
+   */
+  protected readonly visibles = computed(() =>
+    this.subgrupos().filter((f) => coincide(this.textoFila(f), this.busqueda())),
+  );
 
   ngOnInit(): void {
     this.cargar();

@@ -135,15 +135,12 @@ app-root {
   display: block;
 }
 
-/* Cabecera de lista que se queda a la vista mientras el panel del destino se
-   desplaza. Definida en S123 y LISTA PARA USAR, pero todavía SIN APLICAR: la ponen
-   las siete plantillas de lista en el paso 3, una línea por lista, junto a su clase
-   `*__cabecera`. Global y no de componente porque la comparten siete hojas distintas,
-   y compartir el marcado de cabecera se descartó explícitamente.
-
-   El fondo es opaco y del color de la página porque ninguna lista pinta fondo propio:
-   sin él, las filas se verían pasar por debajo del texto de la cabecera. El contexto
-   de desplazamiento al que se pega es `.configuracion__panel`. */
+/* Cabecera pegada al borde superior del panel de destino (D16).
+   Global y no del componente porque su contexto de pegado —el scroll de
+   .configuracion__panel— es ajeno a la cabecera: es el panel quien define
+   respecto a qué se pega. La aplica app-cabecera-lista (S124), que sustituyó
+   a las siete cabeceras duplicadas de S123, y la pone en su host: en el div
+   interno rompe el sticky (el host acota el contenedor de bloque). */
 .cabecera-lista-fija {
   position: sticky;
   top: 0;

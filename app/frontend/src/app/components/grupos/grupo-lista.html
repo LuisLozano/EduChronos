@@ -1,15 +1,13 @@
 <div class="grupos">
-  <div class="grupos__cabecera cabecera-lista-fija">
-    <h2 class="grupos__titulo">
-      Grupos
-      @if (!cargando() && !error()) {
-        <span class="grupos__contador">{{ grupos().length }}</span>
-      }
-    </h2>
-    <button type="button" class="grupos__nuevo" (click)="nuevo()">
-      Nuevo grupo
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Grupos"
+    [total]="grupos().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nuevo grupo"
+    (alta)="nuevo()"
+  />
 
   @if (error()) {
     <p class="grupos__error" role="alert">{{ error() }}</p>
@@ -20,6 +18,10 @@
   } @else if (grupos().length === 0) {
     <p class="grupos__vacio">
       No hay grupos todavía. Crea el primero con «Nuevo grupo».
+    </p>
+  } @else if (visibles().length === 0) {
+    <p class="grupos__sin-resultados">
+      Ningún resultado para «{{ busqueda() }}».
     </p>
   } @else {
     <table class="grupos__tabla">
@@ -32,7 +34,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (grupo of grupos(); track grupo.id) {
+        @for (grupo of visibles(); track grupo.id) {
           <tr>
             <td>{{ grupo.codigo }}</td>
             <td>{{ grupo.nivel }}</td>

@@ -1,15 +1,13 @@
 <div class="aulas">
-  <div class="aulas__cabecera cabecera-lista-fija">
-    <h2 class="aulas__titulo">
-      Aulas
-      @if (!cargando() && !error()) {
-        <span class="aulas__contador">{{ aulas().length }}</span>
-      }
-    </h2>
-    <button type="button" class="aulas__nueva" (click)="nueva()">
-      Nueva aula
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Aulas"
+    [total]="aulas().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nueva aula"
+    (alta)="nueva()"
+  />
 
   @if (error()) {
     <p class="aulas__error" role="alert">{{ error() }}</p>
@@ -20,6 +18,10 @@
   } @else if (aulas().length === 0) {
     <p class="aulas__vacio">
       No hay aulas todavía. Crea la primera con «Nueva aula».
+    </p>
+  } @else if (visibles().length === 0) {
+    <p class="aulas__sin-resultados">
+      Ningún resultado para «{{ busqueda() }}».
     </p>
   } @else {
     <table class="aulas__tabla">
@@ -35,7 +37,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (a of aulas(); track a.id) {
+        @for (a of visibles(); track a.id) {
           <tr>
             <td>{{ a.codigo }}</td>
             <td>{{ a.tipo }}</td>

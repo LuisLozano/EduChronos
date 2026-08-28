@@ -1,15 +1,13 @@
 <div class="subgrupos">
-  <div class="subgrupos__cabecera cabecera-lista-fija">
-    <h2 class="subgrupos__titulo">
-      Subgrupos
-      @if (!cargando() && !error()) {
-        <span class="subgrupos__contador">{{ subgrupos().length }}</span>
-      }
-    </h2>
-    <button type="button" class="subgrupos__nuevo" (click)="nuevo()">
-      Nuevo subgrupo
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Subgrupos"
+    [total]="subgrupos().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nuevo subgrupo"
+    (alta)="nuevo()"
+  />
 
   @if (error()) {
     <p class="subgrupos__error" role="alert">{{ error() }}</p>
@@ -21,6 +19,10 @@
     <p class="subgrupos__vacio">
       No hay subgrupos todavía. Crea el primero con «Nuevo subgrupo».
     </p>
+  } @else if (visibles().length === 0) {
+    <p class="subgrupos__sin-resultados">
+      Ningún resultado para «{{ busqueda() }}».
+    </p>
   } @else {
     <table class="subgrupos__tabla">
       <thead>
@@ -31,7 +33,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (subgrupo of subgrupos(); track subgrupo.id) {
+        @for (subgrupo of visibles(); track subgrupo.id) {
           <tr>
             <td>{{ subgrupo.codigo }}</td>
             <td>{{ subgrupo.grupos.join(', ') }}</td>

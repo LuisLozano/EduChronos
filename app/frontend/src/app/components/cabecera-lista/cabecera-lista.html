@@ -1,0 +1,19 @@
+<div class="cabecera-lista">
+  <h2 class="cabecera-lista__titulo">
+    {{ titulo() }}
+    @if (mostrarContador()) {
+      <span class="cabecera-lista__contador">{{ textoContador() }}</span>
+    }
+  </h2>
+  <input
+    type="search"
+    class="cabecera-lista__busqueda"
+    aria-label="Buscar en la lista"
+    placeholder="Buscar…"
+    [value]="busqueda()"
+    (input)="busqueda.set($any($event.target).value)"
+  />
+  <button type="button" class="cabecera-lista__nuevo" (click)="alta.emit()">
+    {{ rotuloAlta() }}
+  </button>
+</div>

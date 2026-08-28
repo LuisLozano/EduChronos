@@ -321,4 +321,69 @@ describe('GrupoLista', () => {
     // botón que no hiciera nada.
     expect(dialog.open).toHaveBeenCalledTimes(1);
   });
+
+  /**
+   * La cabecera compartida está MONTADA y con SUS rótulos (S124). Los dos asertos
+   * son distintos a propósito: el del `<h2>` caza un `titulo` mal cableado, y el
+   * del botón caza el género —«Nuevo grupo» no se deriva de «Grupos»— que es lo
+   * que el e2e localiza por texto exacto. Un `<app-cabecera-lista>` presente pero
+   * sin inputs pasaría un `querySelector` a secas y falla estos dos.
+   */
+  it('(16) monta la cabecera compartida con su rótulo y su texto de alta', async () => {
+    flushLista([]);
+    await fixture.whenStable();
+    const cabecera = fixture.nativeElement.querySelector('app-cabecera-lista');
+    expect(cabecera).toBeTruthy();
+    expect(cabecera.querySelector('.cabecera-lista__titulo').textContent).toContain('Grupos');
+    expect(cabecera.querySelector('.cabecera-lista__nuevo').textContent.trim()).toBe('Nuevo grupo');
+  });
+
+  /** Teclea en la caja de la cabecera como una persona, y deja repintar. */
+  async function buscar(texto: string): Promise<void> {
+    const caja = fixture.nativeElement.querySelector('.cabecera-lista__busqueda');
+    caja.value = texto;
+    caja.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  }
+
+  /**
+   * La búsqueda recorta la tabla y el contador lo dice (el código de nivel casa aunque se teclee en minúsculas).
+   * Los tres asertos van juntos a propósito: el conteo de filas mide el `@for`
+   * sobre `visibles()`, el texto que SOBREVIVE y el que DESAPARECE miden que
+   * recorta la correcta —no «una cualquiera»—, y el contador ata el cableado de
+   * la cabecera, que recibe `coincidencias` por separado de `total`.
+   */
+  it('(17) al buscar se ve solo la fila que casa, y el contador dice «1 de 2»', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(2);
+
+    await buscar('2eso');
+
+    expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(1);
+    expect(fixture.nativeElement.textContent).toContain('2ESOB');
+    expect(fixture.nativeElement.textContent).not.toContain('1ESOA');
+    expect(
+      fixture.nativeElement.querySelector('.cabecera-lista__contador').textContent.trim(),
+    ).toBe('1 de 2');
+  });
+
+  /**
+   * El SEGUNDO estado vacío, que no es el de catálogo sin filas. Se asevera que
+   * aparece el mensaje nuevo CON el texto tecleado, que NO aparece el de
+   * «no hay … todavía» —son dos mensajes distintos y confundirlos es el error
+   * fácil— y que la tabla se va entera.
+   */
+  it('(18) una búsqueda sin resultados da su propio mensaje, no el de catálogo vacío', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    await buscar('zzz');
+
+    const sinResultados = fixture.nativeElement.querySelector('.grupos__sin-resultados');
+    expect(sinResultados).toBeTruthy();
+    expect(sinResultados.textContent).toContain('zzz');
+    expect(fixture.nativeElement.querySelector('.grupos__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
 });

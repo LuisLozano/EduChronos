@@ -1,15 +1,13 @@
 <div class="actividades">
-  <div class="actividades__cabecera cabecera-lista-fija">
-    <h2 class="actividades__titulo">
-      Actividades
-      @if (!cargando() && !error()) {
-        <span class="actividades__contador">{{ actividades().length }}</span>
-      }
-    </h2>
-    <button type="button" class="actividades__nuevo" (click)="nuevo()">
-      Nueva actividad
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Actividades"
+    [total]="actividades().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nueva actividad"
+    (alta)="nuevo()"
+  />
 
   @if (error()) {
   <p class="actividades__error" role="alert">{{ error() }}</p>
@@ -20,6 +18,10 @@
   } @else if (actividades().length === 0) {
   <p class="actividades__vacio">
     No hay actividades todavía. Crea la primera con «Nueva actividad».
+  </p>
+  } @else if (visibles().length === 0) {
+  <p class="actividades__sin-resultados">
+    Ningún resultado para «{{ busqueda() }}».
   </p>
   } @else {
   <table class="actividades__tabla">
@@ -35,7 +37,7 @@
     </tr>
     </thead>
     <tbody>
-    @for (actividad of actividades(); track actividad.id) {
+    @for (actividad of visibles(); track actividad.id) {
     <tr>
       <td>{{ actividad.codigo }}</td>
       <td>{{ asignaturaDe(actividad) }}</td>

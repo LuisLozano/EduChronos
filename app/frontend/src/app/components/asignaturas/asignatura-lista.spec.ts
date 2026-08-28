@@ -108,4 +108,71 @@ describe('AsignaturaLista', () => {
     // y este aserto caería, que es justo lo que debe discriminar.
     expect(err).toContain('No se pudo borrar la asignatura Mat (409)');
   });
+
+  /**
+   * La cabecera compartida está MONTADA y con SUS rótulos (S124). Los dos asertos
+   * son distintos a propósito: el del `<h2>` caza un `titulo` mal cableado, y el
+   * del botón caza el género —«Nueva asignatura» no se deriva de «Asignaturas»— que es lo
+   * que el e2e localiza por texto exacto. Un `<app-cabecera-lista>` presente pero
+   * sin inputs pasaría un `querySelector` a secas y falla estos dos.
+   */
+  it('(6) monta la cabecera compartida con su rótulo y su texto de alta', async () => {
+    flushLista([]);
+    await fixture.whenStable();
+    const cabecera = fixture.nativeElement.querySelector('app-cabecera-lista');
+    expect(cabecera).toBeTruthy();
+    expect(cabecera.querySelector('.cabecera-lista__titulo').textContent).toContain('Asignaturas');
+    expect(cabecera.querySelector('.cabecera-lista__nuevo').textContent.trim()).toBe('Nueva asignatura');
+  });
+
+  /** Teclea en la caja de la cabecera como una persona, y deja repintar. */
+  async function buscar(texto: string): Promise<void> {
+    const caja = fixture.nativeElement.querySelector('.cabecera-lista__busqueda');
+    caja.value = texto;
+    caja.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  }
+
+  /**
+   * La búsqueda recorta la tabla y el contador lo dice (busca por el nombre completo, no solo por el código).
+   * Los tres asertos van juntos a propósito: el conteo de filas mide el `@for`
+   * sobre `visibles()`, el texto que SOBREVIVE y el que DESAPARECE miden que
+   * recorta la correcta —no «una cualquiera»—, y el contador ata el cableado de
+   * la cabecera, que recibe `coincidencias` por separado de `total`.
+   */
+  it('(7) al buscar se ve solo la fila que casa, y el contador dice «1 de 2»', async () => {
+    flushLista([{ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
+      { id: 8, codigo: 'LCL', nombreCompleto: 'Lengua Castellana y Literatura' }]);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(2);
+
+    await buscar('lengua');
+
+    expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(1);
+    expect(fixture.nativeElement.textContent).toContain('LCL');
+    expect(fixture.nativeElement.textContent).not.toContain('Mat');
+    expect(
+      fixture.nativeElement.querySelector('.cabecera-lista__contador').textContent.trim(),
+    ).toBe('1 de 2');
+  });
+
+  /**
+   * El SEGUNDO estado vacío, que no es el de catálogo sin filas. Se asevera que
+   * aparece el mensaje nuevo CON el texto tecleado, que NO aparece el de
+   * «no hay … todavía» —son dos mensajes distintos y confundirlos es el error
+   * fácil— y que la tabla se va entera.
+   */
+  it('(8) una búsqueda sin resultados da su propio mensaje, no el de catálogo vacío', async () => {
+    flushLista([{ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
+      { id: 8, codigo: 'LCL', nombreCompleto: 'Lengua Castellana y Literatura' }]);
+    await fixture.whenStable();
+
+    await buscar('zzz');
+
+    const sinResultados = fixture.nativeElement.querySelector('.asignaturas__sin-resultados');
+    expect(sinResultados).toBeTruthy();
+    expect(sinResultados.textContent).toContain('zzz');
+    expect(fixture.nativeElement.querySelector('.asignaturas__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
 });

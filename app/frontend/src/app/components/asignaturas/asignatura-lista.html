@@ -1,15 +1,13 @@
 <div class="asignaturas">
-  <div class="asignaturas__cabecera cabecera-lista-fija">
-    <h2 class="asignaturas__titulo">
-      Asignaturas
-      @if (!cargando() && !error()) {
-        <span class="asignaturas__contador">{{ asignaturas().length }}</span>
-      }
-    </h2>
-    <button type="button" class="asignaturas__nuevo" (click)="nuevo()">
-      Nueva asignatura
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Asignaturas"
+    [total]="asignaturas().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nueva asignatura"
+    (alta)="nuevo()"
+  />
 
   @if (error()) {
     <p class="asignaturas__error" role="alert">{{ error() }}</p>
@@ -21,6 +19,10 @@
     <p class="asignaturas__vacio">
       No hay asignaturas todavía. Crea la primera con «Nueva asignatura».
     </p>
+  } @else if (visibles().length === 0) {
+    <p class="asignaturas__sin-resultados">
+      Ningún resultado para «{{ busqueda() }}».
+    </p>
   } @else {
     <table class="asignaturas__tabla">
       <thead>
@@ -31,7 +33,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (asig of asignaturas(); track asig.id) {
+        @for (asig of visibles(); track asig.id) {
           <tr>
             <td>{{ asig.codigo }}</td>
             <td>{{ asig.nombreCompleto }}</td>

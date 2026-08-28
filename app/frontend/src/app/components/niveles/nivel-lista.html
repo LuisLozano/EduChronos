@@ -1,15 +1,13 @@
 <div class="niveles">
-  <div class="niveles__cabecera cabecera-lista-fija">
-    <h2 class="niveles__titulo">
-      Niveles
-      @if (!cargando() && !error()) {
-        <span class="niveles__contador">{{ niveles().length }}</span>
-      }
-    </h2>
-    <button type="button" class="niveles__nuevo" (click)="nuevo()">
-      Nuevo nivel
-    </button>
-  </div>
+  <app-cabecera-lista
+    titulo="Niveles"
+    [total]="niveles().length"
+    [coincidencias]="visibles().length"
+    [mostrarContador]="!cargando() && !error()"
+    [(busqueda)]="busqueda"
+    rotuloAlta="Nuevo nivel"
+    (alta)="nuevo()"
+  />
 
   @if (error()) {
   <p class="niveles__error" role="alert">{{ error() }}</p>
@@ -22,6 +20,10 @@
     No hay niveles todavía. Crea el primero con «Nuevo nivel»: sin niveles no se
     pueden crear grupos.
   </p>
+  } @else if (visibles().length === 0) {
+  <p class="niveles__sin-resultados">
+    Ningún resultado para «{{ busqueda() }}».
+  </p>
   } @else {
   <table class="niveles__tabla">
     <thead>
@@ -32,7 +34,7 @@
     </tr>
     </thead>
     <tbody>
-    @for (nivel of niveles(); track nivel.id) {
+    @for (nivel of visibles(); track nivel.id) {
     <tr>
       <td>{{ nivel.codigo }}</td>
       <td>{{ nivel.orden }}</td>
