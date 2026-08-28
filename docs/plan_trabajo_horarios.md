@@ -52,22 +52,22 @@
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
 - L699 — ### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
-- L952 — ### Bloques de Fase 2
-- L960 — ### Bloques de Fase 5
-- L983 — ### Bloques de Fase 6
-- L1028 — ### Bloques de Fase 8
-- L1237 — ### Fases completadas
-- L1341 — ### Cierre del modelo — Sesión 8
-- L1389 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1435 — ### Método de trabajo (procedimiento vigente)
-- L1468 — ### Deuda consciente VIVA
-- L2859 — ### Deuda consciente CERRADA (histórico)
-- L2887 — ### Notas técnicas validadas en Fase 0
-- L2897 — ### Notas técnicas validadas en Fase 6
-- L2931 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2940 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2967 — ### Registro detallado de sesiones S10–S31
-- L2976 — ## Señales globales de alerta
+- L961 — ### Bloques de Fase 2
+- L969 — ### Bloques de Fase 5
+- L992 — ### Bloques de Fase 6
+- L1037 — ### Bloques de Fase 8
+- L1246 — ### Fases completadas
+- L1350 — ### Cierre del modelo — Sesión 8
+- L1398 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1444 — ### Método de trabajo (procedimiento vigente)
+- L1477 — ### Deuda consciente VIVA
+- L2868 — ### Deuda consciente CERRADA (histórico)
+- L2896 — ### Notas técnicas validadas en Fase 0
+- L2906 — ### Notas técnicas validadas en Fase 6
+- L2940 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2949 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2976 — ### Registro detallado de sesiones S10–S31
+- L2985 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -787,6 +787,15 @@ nuevo a partir del anterior, modificando solo los cambios.
   cerrada era una tabla cuando es prosa; y prometí «cuatro suites verdes» como garantía del paso 1 cuando la
   propia medición decía que ningún test ve la cabecera. Esa última es la peor: era una garantía vacía y la
   corrigió la medición, no yo.
+  Y TRES MÁS EN EL PROPIO M1, que son la misma familia y la razón de que esta nota exista. El guion de
+  cierre abortó tres veces por anclas mal acotadas: `find('<!-- INDICE:FIN -->')` casaba una mención entre
+  backticks en `metodo.md`, que no tiene índice generado; `### Sesión 123 — ` casaba TAMBIÉN su entrada del
+  índice, y el `replace(..., 1)` habría insertado las 109 líneas de S124 dentro del índice; y
+  `split('### Sesión ')[-1]` tomaba la última MENCIÓN y no la última cabecera (129 frente a 111). Lo grave
+  no es el fallo: es que S123 dejó escrita la regla —acotar el cuerpo a partir de `INDICE:FIN`— y la
+  mitigación que construí sobre ella estaba rota. **Regla que hereda el guion de la próxima sesión, y que
+  esta vez no depende del fichero: anclar a principio de línea con `re.M`, y pasar TODA ancla por la guarda
+  de unicidad antes de escribir, incluidas las que van a `replace(..., 1)`.**
   ERRORES DEL EJECUTOR, todos autodetectados y reportados: dos asertos del paseo mal calibrados (ancho contra
   el panel en vez de contra `.subgrupos` menos su padding; desplazamiento cero cuando `sticky` debe subir los
   16 px del padding), un diagnóstico falso por bundle rancio de `ng serve` que se corrigió tras reiniciar, y
