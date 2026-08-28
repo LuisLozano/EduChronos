@@ -149,8 +149,18 @@ suite: ante un mutante SUPERVIVIENTE el conteo sale idéntico con la mutación p
 - CAER ante una mutación ≠ DISCRIMINAR la dimensión que ataca: un test puede caer
   por acoplamiento. La tabla de mutaciones NO es matriz de cobertura.
 - Reutilizar una función NO hereda su test: es cobertura fantasma.
-- Una mutación que no compila NO es una mutación. En TypeScript hay que declarar el
-  cast que la hace expresable, o el compilador tapa el hueco.
+- Una mutación que no compila —o que no altera el comportamiento— NO es una mutación.
+  En TypeScript hay que declarar el cast que la hace expresable, o el compilador tapa
+  el hueco. **Ampliado en S124 con dos casos medidos, condensados aquí y no como
+  precisión nueva.** (i) Una mutación puede compilar, ser sintácticamente válida y aun
+  así no mutar nada: se apuntó a `\p{Sk}` creyendo que el signo de grado era símbolo
+  modificador, cuando es `\p{So}`; la clase quedó vacía y el verde parecía cobertura.
+  (ii) Si la mutación SÍ muta y nada se pone rojo, la causa no es siempre un test
+  decoración: puede ser código INERTE. En la misma sesión, quitar un `replace` de
+  marcas diacríticas no rompía nada porque el barrido posterior ya se las llevaba. La
+  respuesta correcta fue BORRAR el paso, no blindarlo con un test: un paso muerto es
+  peor que uno ausente, porque enseña que ahí vive una lógica que no vive ahí. Antes de
+  arreglar el test, comprobar cuál de los dos casos es.
 - Leer el spec ANTES de calibrar la campaña: el instrumento tiene sus propias
   trampas.
 

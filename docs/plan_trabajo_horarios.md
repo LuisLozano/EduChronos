@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
-- L924 — ### Bloques de Fase 2
-- L932 — ### Bloques de Fase 5
-- L955 — ### Bloques de Fase 6
-- L1000 — ### Bloques de Fase 8
-- L1209 — ### Fases completadas
-- L1313 — ### Cierre del modelo — Sesión 8
-- L1361 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1407 — ### Método de trabajo (procedimiento vigente)
-- L1440 — ### Deuda consciente VIVA
-- L2831 — ### Deuda consciente CERRADA (histórico)
-- L2859 — ### Notas técnicas validadas en Fase 0
-- L2869 — ### Notas técnicas validadas en Fase 6
-- L2903 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2912 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2939 — ### Registro detallado de sesiones S10–S31
-- L2948 — ## Señales globales de alerta
+- L699 — ### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
+- L952 — ### Bloques de Fase 2
+- L960 — ### Bloques de Fase 5
+- L983 — ### Bloques de Fase 6
+- L1028 — ### Bloques de Fase 8
+- L1237 — ### Fases completadas
+- L1341 — ### Cierre del modelo — Sesión 8
+- L1389 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1435 — ### Método de trabajo (procedimiento vigente)
+- L1468 — ### Deuda consciente VIVA
+- L2859 — ### Deuda consciente CERRADA (histórico)
+- L2887 — ### Notas técnicas validadas en Fase 0
+- L2897 — ### Notas técnicas validadas en Fase 6
+- L2931 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2940 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2967 — ### Registro detallado de sesiones S10–S31
+- L2976 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,117 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
+### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
+  Vigesimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI **con M3**, y ahí está la
+  diferencia con S123: allí era enrutado y binding y M3 no tocaba; aquí hay un predicado de casado, que es
+  lógica real, y `metodo.md` lo dice con esas palabras. Suites: **app 282, solver 91, vitest 356, e2e 2**.
+  vitest sube de 314 a 356 (+42) sin que se modifique NI UN aserto preexistente; app y solver intactos, y el
+  e2e se corre —única suite sin correr en toda la sesión— y pasa sin tocarse.
+  M0 — LA APERTURA RATIFICA. El Cambio salía del criterio 3 y la frontera se había cortado en S123. El
+  tercer término del mapa se responde con lo que la ficha ya dice: **no hay hito**; O-navegación es
+  transversal, acerca la demo y va antes de C-identidad y C-revisión. La apertura resolvió las cuatro
+  preguntas que dejó S123 y CORRIGIÓ una premisa del arquitecto: la colisión «Grupos»/«Subgrupos» medida en
+  S123 es un defecto de LOCALIZADOR, no de filtro. Un localizador que casa dos elementos está roto; un filtro
+  que devuelve un superconjunto funciona bien. Lo que sí hereda el Cambio es la trampa en sus propios tests
+  —de ahí el placeholder genérico «Buscar…», idéntico en las siete— y un argumento más para no filtrar el
+  índice. El problema real de la subcadena con datos reales resultó ser otro: la NORMALIZACIÓN.
+  D16, PEDIDO DOS VECES Y MENOS DECISIVO DE LO ESPERADO. El arquitecto insistió en leer la fuente primaria
+  antes de diseñar la cabecera. D16 resultó ser una decisión de COLOCACIÓN —la caja va dentro de la cabecera
+  fija, junto al contador y al botón de alta— y no de diseño: no dice nada de semántica del contador, casado
+  ni normalización. Confirmó el contrato del componente y descartó que el filtro fuera suelto bajo la
+  cabecera, que era variante real; pero §5 tampoco lista esas tres cosas entre lo SIN DECIDIR, así que el
+  diseño no las resolvió: no las vio. Se registra como error de apertura, no como pérdida: la fuente primaria
+  se pide siempre, y lo que se calibró mal fue cuánto iba a decidir.
+  MEDICIÓN (M2), y lo que decidió. Las siete cabeceras son molde EXACTO salvo rótulo, prefijo BEM y texto de
+  botón —más la concordancia de género de aulas, `__nueva`/`nueva()`—, y los siete CSS son copias byte a
+  byte, con el comentario de cuatro líneas de S123 repetido palabra por palabra siete veces. **Cero cobertura
+  unitaria de la cabecera entera**: ni `__contador`, ni `__cabecera`, ni `__titulo`, ni `__nuevo` aparecen en
+  los siete specs. La extracción no podía romper ningún test, y eso NO era una vía libre sino el riesgo:
+  «suites verdes» no probaba nada, así que el componente nació con su spec y con un aserto por lista. Sin
+  virtualización ni paginación en ninguna de las siete: las 334 filas de Subgrupos ya se montan enteras,
+  luego filtrar en memoria es despreciable y **`debounce` queda descartado por medición**, que era una de las
+  tres incógnitas por las que S123 aplazó la extracción. Con datos reales: una consulta de una letra acota
+  poco (`A` deja 184 de 334 en Subgrupos), pero NO se pone longitud mínima —no reaccionar a la primera
+  pulsación se lee como roto—; el contador es quien informa de que hay que seguir escribiendo.
+  DECISIONES DEL CAMBIO. Casado por subcadena, sin `exact` ni límites de palabra: arrastrar el padre con sus
+  hijos (`3ºA` trae `3ºA` y `3ºADi-Completo`) es lo correcto, porque el usuario acota, no selecciona.
+  Normalización que se come tildes, caja, ordinales y **todo lo que no sea letra o dígito**: la lista a
+  medida se rompe sola —comer espacios pero no guiones deja `3ºA Di` sin encontrar `3ºADi-Completo`—.
+  Consulta partida por espacios con casado de TODAS las partes, que es lo que salva `mat 1eso` de morir al
+  comerse los espacios. El texto de fila se compone de lo que **la plantilla pinta**, no de lo que el modelo
+  tiene: `grupos` busca por «Ordinario»/«PDC» y no por `DIVERSIFICACION_PDC`. Limitación aceptada y escrita
+  en el javadoc de las siete: nada vigila que la composición siga a la plantilla, y no se encontró forma
+  barata de vigilarlo.
+  **LA COSTURA: los contadores en el índice se CAEN.** La frontera de S123 se los asignaba «íntegros» a este
+  Cambio. La medición dice que `Configuracion` es presentacional pura y sin servicios de dominio, con esa
+  invariante declarada en su javadoc y protegida por su spec, y que ocho contadores le obligarían a consultar
+  los ocho servicios al entrar —deshaciendo las ocho cargas que C-rutas-hijas acababa de separar—. Leído
+  después `diseno-navegacion.md` entero: no los diseña en ningún sitio. No se declaran fuera de alcance ni
+  pasan a deuda; **se corrige la frase de §3**, porque no tenía respaldo. Un token nuevo para algo que nadie
+  va a construir sólo ensucia el censo de R4.
+  VOCABULARIO OCUPADO. «Filtro por tipo» ya significa otra cosa en `grupos/`: es el `@if (esOrdinario(grupo))`
+  que decide qué botones se pintan por fila. El ejecutor lo detectó al desmentir una afirmación suya previa.
+  El código nuevo no usa un solo token `filtr*`: `busqueda.ts`, `normaliza()`, `coincide()`, señal `busqueda`,
+  lista `visibles()`, clase `cabecera-lista__busqueda`. «Filtro» se queda en la planificación y en D16.
+  CUATRO PASOS, cada uno verificado antes del siguiente. (1) Extraer `cabecera-lista` sin filtro, con las
+  suites verdes y el paseo visual por los siete destinos, que es lo único que ve el CSS. (2) El predicado
+  puro con M3 y mutación, sin tocar una línea de UI. (3) Cablearlo en las siete, con el contador de dos
+  estados y el estado de «ningún resultado», que es mensaje NUEVO y distinto del de lista vacía. (4)
+  Revertir y cerrar. El paso 1 obligó a mover la clase `cabecera-lista-fija` al **host**: un
+  `:host { display: block }` bienintencionado dejaba el recorrido del `sticky` en cero (medido: y 84 → −1416),
+  porque el host acotaba el contenedor de bloque. Lo sujeta el caso (8), que es lo único que impide devolver
+  la clase al `div` sin enterarse.
+  EL ENCADENADO DEL ERROR, INTRODUCIDO Y REVERTIDO. El paso 3 encadenó `@if (error())` con el resto de ramas
+  y eso arreglaba un defecto real —error y «No hay aulas todavía» conviviendo—, pero el ejecutor MIDIÓ la
+  otra cara en vez de suponerla: con un 409 de borrado la tabla entera desaparecía (8 filas → 0). Es un
+  camino de uso normal que S113 introdujo a propósito, frente a un fallo de carga que es raro. Se revierte en
+  el paso 4 y se comprueba en navegador: con 43 aulas y un 409, el error se pinta, la tabla sigue entera y
+  la búsqueda sigue viva bajo el error. El defecto preexistente que el encadenado tapaba queda registrado
+  como deuda con sede en C-revisión y su arreglo ya escrito. **R-terminado en su caso incómodo: es una línea
+  y aun así no se paga**, misma forma que el arreglo de una línea de D-F8.6-ii-a que S118 midió y no pagó.
+  MÉTODO — el hallazgo de la sesión, que va a `metodo.md` condensado y no como precisión nueva (lo prohíbe la
+  nota de acumulación de M2). Dos formas de mutación engañosa, las dos medidas aquí: una mutación puede
+  compilar y no mutar nada (se apuntó a `\p{Sk}` creyendo que el signo de grado era símbolo modificador,
+  cuando es `\p{So}`); y una mutación que SÍ muta y no pone nada rojo puede estar delatando código INERTE en
+  vez de un test decoración. Ese fue el caso de `normaliza()`: un `replace` de marcas diacríticas que no
+  hacía nada porque el barrido posterior ya se las llevaba. Se BORRÓ el paso en vez de blindarlo con un test,
+  y se ancló en su lugar el `normalize('NFD')`, que es donde vive de verdad la mitad que faltaba.
+  UBICACIÓN, mejorada por el ejecutor. El arquitecto propuso `components/cabecera-lista/busqueda.ts` como
+  respaldo; el ejecutor midió que el repo ya tiene el patrón —`horario/` con funciones puras sueltas y su
+  spec al lado— y colocó el módulo en `catalogo/`, hermano suyo y nombrado como el backend ya nombra a estas
+  siete entidades (`app.catalog.*`). Evita que siete componentes importen de la carpeta de un octavo.
+  DEUDAS. **CERRADA: `D-cabecera-lista-duplicada`**, en su sede escrita, saldada de paso y sin abrir sesión.
+  NUEVA: `D-vacio-miente-con-error` (mejora futura, sede C-revisión). `D-guion-exit-enmascarado` recibe su
+  TERCERA instancia, esta vez por el reverso: guardas que miden el vacío y no la corrección. Deuda bloqueante
+  abierta: sigue en 1 (D31-a, las aulas de FPB).
+  ERRORES DEL ARQUITECTO, registrados porque son la clase que esta sesión persigue: supuse marcadores
+  `INDICE:INICIO/FIN` en `diseno-navegacion.md` extendiendo un dato medido sobre otros dos ficheros; calibré
+  mal el peso de D16 y lo pedí dos veces esperando que decidiera lo que no decide; inventé la ruta
+  `components/grupo-lista.html` sin el directorio de entidad; escribí un `grep -v '^\s*//'` que nunca podía
+  casar, porque `grep -rn` antepone `fichero:num:` y el ancla `^` no llega; supuse que la sección de deuda
+  cerrada era una tabla cuando es prosa; y prometí «cuatro suites verdes» como garantía del paso 1 cuando la
+  propia medición decía que ningún test ve la cabecera. Esa última es la peor: era una garantía vacía y la
+  corrigió la medición, no yo.
+  ERRORES DEL EJECUTOR, todos autodetectados y reportados: dos asertos del paseo mal calibrados (ancho contra
+  el panel en vez de contra `.subgrupos` menos su padding; desplazamiento cero cuando `sticky` debe subir los
+  16 px del padding), un diagnóstico falso por bundle rancio de `ng serve` que se corrigió tras reiniciar, y
+  una afirmación desmentida por él mismo («grupo-lista ya tiene un filtro por tipo»). Nota operativa que
+  merece sobrevivir: una tanda de mutación que hace `rm -rf` del árbol de fuentes se lleva el watcher, así
+  que toda comprobación visual posterior exige reiniciar `ng serve` primero.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después;
+  `educhronos-e2e.db` reescrita por el e2e, como debía.
+  LIMPIEZA (M1-bis): archivada S122 a `bitacora-sesiones.md` (promovida a `### Sesión 122`, insertada al
+  final en orden ascendente, cuerpo íntegro verificado por comparación); degradada S123 a «Última sesión
+  registrada (previa)»; S124 queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S121
+  a S122.
+  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS**,
+  C-rejilla-densidad PENDIENTE. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS,
+  C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo
+  ejecutable, bloqueado por el correo al centro. Siguiente: **C-rejilla-densidad**, el criterio 4, que NO se
+  abre sin MEDIR antes el sobremesa con `innerWidth/innerHeight` —pendiente desde S123 y no supuesto—. Lo
+  fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
   Vigesimotercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí, M3 no —enrutado y
   binding, sin lógica que mutar—. Suites: **app 282, solver 91, vitest 314, e2e 2**. vitest BAJA de 316:
   mueren los 8 casos de `configuracion.spec.ts` y entran 6 nuevos; app y solver no se tocan.
@@ -804,88 +914,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   hueco del filtro ya montado en las siete cabeceras y la frontera con este Cambio ya cortada. Lo fija su
   propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 122 — O-navegación (transversal): FUNDACIÓN del objetivo por medición sobre el centro real y diseño de la navegación en maqueta viva. Configuración pasa a rutas hijas, la rejilla a altura de fila constante y el recreo se hace visible; 18 decisiones escritas con su alternativa descartada (M0 + M2 sobre la base del centro + M4 en navegador iterando maqueta + M1, sin M3). Cero líneas de producto. NO cierra el objetivo: lo ABRE.
-  Vigesimosegunda sesión bajo el mapa Hito→Objetivo→Cambio, y la segunda —tras S120— cuyo M4 ES la sesión.
-  Ritual M0 + M2 (medición por Claude Code sobre `app/educhronos-demo-m4.db` en SOLO LECTURA) + M4 (siete
-  iteraciones de maqueta en navegador, juzgadas por el arquitecto) + M1, sin M3 porque no hay lógica que
-  mutar: **no se toca un solo fichero de `app/`**. Las cuatro suites se EJECUTAN —no se declaran intactas de
-  memoria— y salen verdes: **app 282, solver 91, vitest 316, e2e 2** (e2e no se corre: levanta backend y
-  reescribe `educhronos-e2e.db`; su cifra es trivial de verificar en fuente). Integridad: la base de
-  referencia queda en `ea1a70a0337831dddccdbcd322f48e9b`, idéntico antes y después.
-  LO QUE ENTREGA: `docs/diseno-navegacion.md`, la medición que FUNDA **O-navegación**, objetivo nuevo y
-  transversal, hermano de O-diseño —uno hace el ACABADO, el otro el MANEJO—. Su ficha entra en
-  `gestion_proyecto.md` §3 con criterio de seis puntos y tres Cambios PROPUESTOS a ratificar en la apertura
-  (C-rutas-hijas, C-listas-paginadas, C-rejilla-densidad). Con él se toma por fin **la decisión
-  ruta-hija-vs-contenedor aplazada desde S101**: rutas hijas con `router-outlet`, ocho destinos con URL
-  enlazable, `/configuracion` redirige a `jornada` y `loadComponent` queda APLAZADO, no descartado. Absorbe
-  `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que llevaban desde S115 y S113 remitiendo las dos a
-  «el Cambio que decida la navegación»; la segunda muere por construcción, sin el `EventEmitter` ad hoc que
-  su ficha desaconsejaba.
-  MEDICIÓN (M2), y lo que desmintió. Las insignias `1`/`-1` de la rejilla son la **suma CON SIGNO del coste
-  blando de la INSTANCIA** —`horario-grid.ts:50-57`, `horario/diagnostico.ts:76-89`—, no un contador de
-  entradas: `>0` mover mejora, `<0` tapa un hueco. Queda RESUELTA la pregunta que S121 dejó abierta. La
-  vista de horario no pinta el recreo porque la proyección numera 1..6 con recreos EXCLUIDOS
-  (`SesionVistaDTO.java:11`), aunque el dato ya viaja en `GET /api/jornada`. Y **tres premisas del encargo
-  cayeron**: 1B-A tiene celdas de CINCO sub-entradas y no de cuatro; el peor caso del centro no está en
-  1B-A sino en **1ºA**, el grupo que el arquitecto había descartado por fácil, con una celda de SEIS; y
-  `D-generacion-sin-indicador` está CERRADA desde S118, no viva.
-  DISEÑO (M4). La palanca que más devuelve es comprimir la sub-entrada de cuatro líneas a dos, no el
-  colapso; después, altura de fila CONSTANTE derivada del presupuesto de 1920×1080, con la densidad
-  moviéndose DENTRO de la celda —una clase suelta a dos líneas, un bloque a una línea por plaza bajo un
-  rótulo común—. El recreo entra como fila propia, sin hora de reloj: en `tramo_semanal` las horas son
-  enteros cuya zona no se ha verificado, y no se inventa una. La cuarta línea (`grupos`) se condensa en una
-  marca `+N` consultable, medido que repetía el grupo que ya se está mirando en 23 de 51 sub-entradas de
-  1B-A. Título y controles se funden en una fila, que fue lo que eliminó el último resto de scroll.
-  **D11 SE INVIRTIÓ, y ése es el hallazgo caro de la sesión.** El mecanismo de expansión iba a NO
-  construirse porque el contador daba 0 celdas recortadas. Calculado sobre los 28 grupos y sus 791 celdas,
-  son **22 de 791** —las de seis plazas, en 11 grupos de 28, dos por grupo, producidas por cinco bloques de
-  optativas—, y no se arregla con presupuesto: cero recortes exigiría 154,2 px de fila y dejaría 96,2 px de
-  cromo total, inalcanzable. Que 1ºA «cupiera sin scroll» no probaba que cupiese: cabía **porque el
-  prototipo la recortaba**. El mecanismo pasa a OBLIGATORIO (criterio 4). Las tres palancas que bajarían de
-  154,2 px quedan registradas como decisión consciente, medidas y NO aplicadas: la pregunta caducó al
-  hacerse obligatorio el mecanismo.
-  LECCIÓN DE MÉTODO, que se lleva a `metodo.md`. El mismo error apareció TRES veces en esta sesión, dos de
-  ellas al corregir la anterior: el contador de desbordes medía el `<td>`, que crece con su contenido y
-  jamás desborda; el recuento de tests del solver contaba ANOTACIONES (97) creyendo contar tests (91); y la
-  cifra «ejecutada» de `app` dio 283 al sumar `target/surefire-reports` sin ver que un informe era un
-  huérfano del 24-ago (`BarridoPresupuestoS117`, arnés desechable cuyo fuente ya no existe) — **app son
-  282 y las cuatro cifras de referencia del proyecto eran correctas**. La forma es siempre la misma: el
-  instrumento se apoya en algo que SE PARECE al conjunto medido y no lo es. La regla se CONDENSA en la
-  segunda precisión de M2 (no se añade una quinta: lo prohíbe su propia nota de acumulación), citando los
-  tres precedentes S117/S121/S122, con `scripts/calcular-recortes.py` y sus cinco mutaciones como ejemplar.
-  DEUDAS NUEVAS (R-deuda: se registran, no se planifican): **D-insignia-sin-leyenda** (la insignia de coste
-  blando es un número desnudo con signo, sin `title` ni `aria-label`, a diferencia del candado; sede
-  C-identidad) y **D-asignatura-sin-nivel** (`Asignatura` no tiene nivel; la relación solo se deduce por
-  Actividad→Plaza→Subgrupo→Grupo→Nivel, y el selector de asignatura de una actividad de 1ºESO ofrece las de
-  3º y 4º; sin sede, toca modelo). Se registra además que la decisión 3 de las seis de O-diseño
-  —densidad/espaciado— **SIGUE SIN SEDE**: el espaciado no está tokenizado y `padding-top: 16px` en
-  `horario-grid.css:43-45` sobrevivió entero a C-sustitución, que solo cubrió color y `font-size`.
-  DECLARACIONES NUEVAS: la **resolución objetivo se fija en 1920×1080**, valor que el criterio de O-diseño
-  venía exigiendo desde S121 sin que nadie lo hubiera escrito en ningún documento; la del portátil queda
-  como PARÁMETRO SIN FIJAR del que depende todo el cálculo de altura.
-  COSTURA CERRADA: las tres normas de documentación que este cierre empujó al método —**M-doc**, **M-doc-2**
-  y **M-doc-3**— se titulan «(S122)» y esta cabecera es la sesión que las respalda. La anotación que quedó
-  al empujarlas, con S122 aún sin existir en el registro, se salda aquí.
-  LIMPIEZA (M1-bis): archivada S120 a `bitacora-sesiones.md` (promovida a `### Sesión 120`, insertada al
-  final en orden ascendente, cuerpo íntegro); degradada S121 a «Última sesión registrada (previa)»; S122
-  queda como única cabecera H3 viva. **Los DOS censos de la bitácora estaban descuadrados ENTRE SÍ al
-  empezar** —cabecera en S119 y línea de orden en S118—: S121 actualizó uno y no el otro. Los dos pasan
-  ahora a S120, y el script nuevo los compara, que es la razón de que se detectara.
-  R4/R5: **el script oficial de cierre YA EXISTE**, por fin, tras estar pendiente desde S101 y haber sido
-  registrado como ausente en S121: `scripts/verificar-cierre.py`, con las cuatro comprobaciones de
-  §Automatización del cierre y con AUTOPRUEBA propia (se le inyectan cuatro defectos que debe detectar y
-  aborta si no los ve; sería incoherente escribir la precisión de M2 y saltársela en el mismo cierre).
-  Reporta, no corrige. Censo R4: 178 tokens vivos, 28 con una sola aparición en el corpus vivo; los nuevos
-  de esta sesión quedan con definición y citante, y los históricos se reportan sin tocar.
-  O-navegación (transversal, ABIERTO en S122) con 3 Cambios PROPUESTOS y ninguno hecho. O-diseño
-  (transversal, abierto en S121) ACTIVO: C-tokens y C-sustitución HECHOS, C-identidad y C-revisión
-  PENDIENTES. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Orden
-  nuevo, que sustituye al de la ficha de O-diseño: sistema (hecho) → **O-navegación** → C-identidad y
-  C-revisión sobre la UI definitiva → demo. Suites INTACTAS y EJECUTADAS: **app 282, solver 91, vitest 316,
-  e2e 2**. Siguiente: la APERTURA de O-navegación, donde el M0 ratifica los tres Cambios en vez de
-  deliberarlos —salen uno a uno de los criterios 2, 3 y 4— y elige por cuál empezar. Lo fija su propio M0
-  (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -908,8 +936,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123.
-El plan conserva ahora S122 (degradada a formato compacto) y S123 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124.
+El plan conserva ahora S123 (degradada a formato compacto) y S124 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
