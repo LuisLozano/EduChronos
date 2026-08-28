@@ -52,22 +52,22 @@
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
 - L699 — ### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
-- L961 — ### Bloques de Fase 2
-- L969 — ### Bloques de Fase 5
-- L992 — ### Bloques de Fase 6
-- L1037 — ### Bloques de Fase 8
-- L1246 — ### Fases completadas
-- L1350 — ### Cierre del modelo — Sesión 8
-- L1398 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1444 — ### Método de trabajo (procedimiento vigente)
-- L1477 — ### Deuda consciente VIVA
-- L2868 — ### Deuda consciente CERRADA (histórico)
-- L2896 — ### Notas técnicas validadas en Fase 0
-- L2906 — ### Notas técnicas validadas en Fase 6
-- L2940 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2949 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2976 — ### Registro detallado de sesiones S10–S31
-- L2985 — ## Señales globales de alerta
+- L965 — ### Bloques de Fase 2
+- L973 — ### Bloques de Fase 5
+- L996 — ### Bloques de Fase 6
+- L1041 — ### Bloques de Fase 8
+- L1250 — ### Fases completadas
+- L1354 — ### Cierre del modelo — Sesión 8
+- L1402 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1448 — ### Método de trabajo (procedimiento vigente)
+- L1481 — ### Deuda consciente VIVA
+- L2872 — ### Deuda consciente CERRADA (histórico)
+- L2900 — ### Notas técnicas validadas en Fase 0
+- L2910 — ### Notas técnicas validadas en Fase 6
+- L2944 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2953 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2980 — ### Registro detallado de sesiones S10–S31
+- L2989 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -796,6 +796,10 @@ nuevo a partir del anterior, modificando solo los cambios.
   mitigación que construí sobre ella estaba rota. **Regla que hereda el guion de la próxima sesión, y que
   esta vez no depende del fichero: anclar a principio de línea con `re.M`, y pasar TODA ancla por la guarda
   de unicidad antes de escribir, incluidas las que van a `replace(..., 1)`.**
+  **CUARTA instancia, en el guion que escribía esa misma nota:** un ancla con dos espacios de sangría
+  PARECÍA de principio de línea y no lo era —iba en mitad de la línea 788— y no pasó por la guarda de
+  unicidad. Cortó antes de escribir, que es lo único que funcionó. Precisión que hereda la regla: la
+  sangría no hace que un ancla empiece línea; si no se ha verificado con `re.M`, no lo es.
   ERRORES DEL EJECUTOR, todos autodetectados y reportados: dos asertos del paseo mal calibrados (ancho contra
   el panel en vez de contra `.subgrupos` menos su padding; desplazamiento cero cuando `sticky` debe subir los
   16 px del padding), un diagnóstico falso por bundle rancio de `ng serve` que se corrigió tras reiniciar, y
