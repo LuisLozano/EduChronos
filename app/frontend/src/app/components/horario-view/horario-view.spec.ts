@@ -1174,4 +1174,101 @@ describe('contenedor del horario', () => {
       'Falta configurar la jornada antes de generar un horario.',
     );
   });
+
+  /**
+   * D9, la mitad que importa: la cabecera vive FUERA de la cadena `@if`, así que
+   * sobrevive al arranque con 404 —proyección que no existe todavía, que es el
+   * estado real de una instalación nueva antes de la primera generación—.
+   *
+   * <p>Discriminante de la DIRECCIÓN de la fusión. Fundir título y controles admite
+   * dos: subir el `<h2>` a `.controles`, o bajar `.controles` a la rama
+   * `@else if (proyeccion())` donde el `<h2>` vivía. La segunda deja este escenario
+   * sin botón «Generar» —y sin él no hay forma de salir del 404, porque generar es
+   * justo lo que falta—, y la tira este caso junto al (40).
+   */
+  it('(47) arranque con 404: el título y el botón siguen en la cabecera, sin rejilla', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.error({ status: 404 });
+    await fixture.whenStable();
+
+    const controles = (fixture.nativeElement as HTMLElement).querySelector('.controles');
+    expect(controles).not.toBeNull();
+
+    // Los dos DENTRO de la fila: es lo que la fusión promete, y lo que se pierde si
+    // la cabecera se baja a la rama de proyección.
+    expect(controles!.querySelector('.titulo')?.textContent?.trim()).toBe('Horario');
+    expect(controles!.querySelector('button.generar')).not.toBeNull();
+
+    // PRECONDICIÓN del escenario: no hay proyección, así que no hay rejilla. Sin
+    // esto el caso podría estar midiendo una pantalla cargada con normalidad.
+    expect(fixture.debugElement.query(By.directive(HorarioGrid))).toBeNull();
+  });
+
+  /**
+   * D10: el título dice CUÁNDO se generó el horario, no qué grupo estás mirando —eso
+   * lo dice el selector, que desde D9 está a diez centímetros en la misma fila— ni el
+   * instante crudo del backend.
+   *
+   * <p>El nombre se emite aquí en su forma REAL (`"Horario " + Instant`, la que pone
+   * `GeneradorHorarioService` cuando el POST no manda nombre, que es siempre) y no se
+   * usa `PROYECCION_VACIA`: su nombre de fixture no lleva ese prefijo y cae en el
+   * degradado, que es otro comportamiento y se mide aparte, abajo.
+   */
+  it('(48) el título acorta el instante del backend y no repite lo que dicen los selectores', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next({ ...PROYECCION_VACIA, nombre: 'Horario 2026-08-24T15:37:39.317184258Z' });
+    await fixture.whenStable();
+
+    const titulo = (fixture.nativeElement as HTMLElement).querySelector('.titulo')!.textContent!.trim();
+
+    expect(titulo.startsWith('Horario ')).toBe(true);
+    // (a) el instante crudo NO se pinta: son 38 caracteres que no caben en la fila.
+    expect(titulo).not.toContain('2026-08-24T15:37:39.317184258Z');
+    expect(titulo.length).toBeLessThan('Horario 2026-08-24T15:37:39.317184258Z'.length);
+    // (b) y no repite lo que ya dicen los dos selectores de su misma fila.
+    expect(titulo).not.toContain('grupo');
+    expect(titulo).not.toContain('Proyección de prueba');
+  });
+
+  /**
+   * El degradado de D10, con el fixture tal cual: un nombre que NO es del backend se
+   * respeta entero. Un título feo se lee; uno vacío no dice qué horario miras.
+   */
+  it('(48b) un nombre puesto a mano se pinta tal cual', async () => {
+    await montar([]);
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.titulo')?.textContent?.trim())
+      .toBe('Proyección de prueba');
+  });
+
+  /**
+   * D6, la CAUSA. El e2e afirma la consecuencia —que `.grupos` no se pinta cuando el
+   * único grupo es el de la vista— pero nadie afirmaba que la vista transmita su
+   * entidad a la rejilla, que es de donde sale esa consecuencia.
+   *
+   * <p>Se observa por el input público de la hija, como el resto del fichero: el DOM
+   * de la celda ya lo miden los cuatro casos de `horario-grid.spec.ts`, y duplicarlo
+   * aquí ataría este spec al marcado de un componente que no es el suyo.
+   *
+   * <p>Se compara con `''` y no con un código de grupo: con `sesiones: []` no hay
+   * entidades que derivar y `entidad()` se queda en su valor inicial. Lo que se mide
+   * es que la vista TRANSMITE su entidad, no cuál es —eso ya lo miden los casos de
+   * `entidadesDeVista`—. El discriminante está en la segunda mitad: en vista de
+   * profesor NO hay grupo implícito y el input tiene que pasar a `null`, o la rejilla
+   * condensaría la lista de grupos en la única vista donde esa lista informa.
+   */
+  it('(49) grupoActual llega a la rejilla en vista de grupo, y es null en las otras', async () => {
+    const grid = await montar([]);
+
+    expect(grid.grupoActual()).toBe('');
+
+    (fixture.componentInstance as unknown as { cambiarVista(v: 'profesor'): void }).cambiarVista(
+      'profesor',
+    );
+    await fixture.whenStable();
+
+    expect(grid.grupoActual()).toBeNull();
+  });
 });

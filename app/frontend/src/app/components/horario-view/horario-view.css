@@ -1,8 +1,30 @@
+/* Cabecera de la vista en UNA fila (D9): título a la izquierda, controles a la
+   derecha. Antes eran DOS franjas horizontales —el <h2> con su línea a 1.5em más
+   dos márgenes de 0.83em, y esta sección con su margin-bottom— para seis palabras
+   y tres controles. Fundidas, el presupuesto recupera esa banda entera y D1 la
+   reparte entre los seis tramos: es el alto que faltaba para quitar el scroll.
+
+   `margin-bottom` baja de 1rem a 0.25rem, el mínimo que separa la fila de la
+   tabla sin volver a regalar la franja. `flex-wrap` es la salvaguarda de que la
+   fusión no se pague en ancho: si algún día no cupieran, vuelven a dos líneas en
+   vez de desbordar la vista. */
 .controles {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
   align-items: center;
+}
+
+/* El <h2> pierde los márgenes que el navegador le da por defecto —son justo la
+   franja que D9 recupera— y empuja los controles a la derecha con `margin-right:
+   auto`, sin necesidad de un contenedor extra. `--tam-l` es el mismo tamaño que la
+   marca de la barra superior (`app.css`), así que las dos cabeceras de la pantalla
+   se leen a la misma escala. */
+.titulo {
+  margin: 0 auto 0 0;
+  font-size: var(--tam-l);
+  font-weight: 600;
 }
 
 .controles label {

@@ -269,11 +269,22 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // montado y el test debe morir aquí, no atravesarlo confirmando a ciegas.
   await expect(page.locator('.confirmar-generacion')).toHaveCount(0);
 
-  // Contenido de la primera instancia: los cuatro campos que la rejilla pinta por
-  // sesión. Sin esto, tres celdas vacías contarían igual que tres sesiones reales.
+  // Contenido de la primera instancia: los campos que la rejilla pinta por sesión.
+  // Sin esto, tres celdas vacías contarían igual que tres sesiones reales.
   const primera = page.locator('.instancia').first();
   await expect(primera.locator('.asig')).toHaveText('MAT');
   await expect(primera.locator('.prof')).toHaveText('MAT1');
   await expect(primera.locator('.aula')).toHaveText('A1');
-  await expect(primera.locator('.grupos')).toHaveText('1ESOA');
+
+  // D6, en el navegador de verdad: la vista es la del grupo 1ESOA y la sesión no
+  // pertenece a ningún otro, así que la marca de grupos NO se pinta —repetir el
+  // grupo que ya estás mirando era casi la mitad de los casos del centro real—.
+  // Esto es lo que D6 promete y lo que el aserto anterior (`.grupos` = '1ESOA')
+  // impedía: la condensación sólo se puede comprobar por su AUSENCIA.
+  await expect(primera.locator('.grupos')).toHaveCount(0);
+
+  // Guarda del degradado: la marca desaparece porque se condensó, NO porque la
+  // sub-entrada se haya quedado sin pintar. La línea que la aloja sigue ahí con el
+  // profesor dentro.
+  await expect(primera.locator('.linea--sec')).toHaveCount(1);
 });

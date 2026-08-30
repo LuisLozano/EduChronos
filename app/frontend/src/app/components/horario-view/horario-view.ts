@@ -11,6 +11,7 @@ import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
 import { clavePin, indicePines } from '../../horario/pines';
+import { tituloHorario } from '../../horario/titulo';
 import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
@@ -127,6 +128,18 @@ export class HorarioView {
     const d = this.diagnostico();
     return d ? indiceViolaciones(d.violaciones) : new Map<string, readonly ViolacionEnCelda[]>();
   });
+
+  /**
+   * Título de la fila de cabecera (D9/D10). Se delega en la función pura
+   * {@link tituloHorario}: este contenedor no formatea, igual que no filtra ni suma.
+   *
+   * <p>Vale también con `proyeccion()` en null —dice `Horario` a secas—, y eso no es
+   * un detalle: desde D9 el título vive FUERA de la cadena `@if`, en la misma fila que
+   * los controles, así que se pinta también mientras la proyección carga y cuando su
+   * carga falla. Bajar la fila a la rama `@else if` dejaría al usuario sin botón
+   * «Generar» justo en el arranque con 404, que es cuando más falta hace.
+   */
+  protected readonly titulo = computed(() => tituloHorario(this.proyeccion()?.nombre));
 
   protected readonly entidades = computed(() => {
     const p = this.proyeccion();

@@ -1,4 +1,6 @@
 <section class="controles">
+  <h2 class="titulo">{{ titulo() }}</h2>
+
   <label>
     Vista
     <select (change)="cambiarVista($any($event.target).value)">
@@ -56,10 +58,10 @@
 
 @if (error(); as msg) {
   <p class="error">{{ msg }}</p>
-} @else if (proyeccion(); as p) {
-  <h2>{{ p.nombre }} <small>— {{ vista() }}: {{ entidad() }}</small></h2>
+} @else if (proyeccion()) {
   <app-horario-grid
     [sesiones]="sesionesFiltradas()"
+    [grupoActual]="vista() === 'grupo' ? entidad() : null"
     [pinadas]="pinadas()"
     [badges]="badges()"
     [violaciones]="violaciones()"
