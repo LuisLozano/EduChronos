@@ -17,47 +17,68 @@
             (cdkDropListDropped)="alSoltar($event, i + 1, t)"
             [class.ocupado]="slotsOcupados().has(claveSlot(i + 1, t))"
           >
-            @for (inst of instancias(i + 1, t); track clave(inst)) {
-              <div
-                class="instancia"
-                [class.pinada]="estaPinada(inst)"
-                [class.con-badge]="tieneBadge(inst)"
-                [class.en-violacion]="tieneViolacionInstancia(inst)"
-                cdkDrag
-                [cdkDragData]="inst"
-                (cdkDragStarted)="alIniciarArrastre(inst)"
-                (cdkDragEnded)="alTerminarArrastre()"
-              >
-                @if (tieneBadge(inst) || estaPinada(inst)) {
-                  <span class="adornos">
-                    @if (tieneBadge(inst)) {
-                      <span class="badge">{{ badge(inst) }}</span>
-                    }
-                    @if (estaPinada(inst)) {
-                      <button
-                        type="button"
-                        class="candado"
-                        title="Quitar pin"
-                        [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
-                        (click)="alDespinar(inst, $event)"
-                      >
-                        &#128274;
-                      </button>
-                    }
-                  </span>
-                }
-                @for (e of inst.entradas; track e.sesionId) {
-                  <div class="entrada" [class.en-violacion]="tieneViolacionAula(inst, e)">
-                    <span class="asig">{{ e.asignaturaCodigo }}</span>
-                    <span class="prof">{{ e.profesores.join(', ') }}</span>
-                    <span class="aula">{{ e.aulaCodigo }}</span>
-                    <span class="grupos">{{ e.grupos.join(', ') }}</span>
-                  </div>
-                }
-              </div>
-            } @empty {
-              <span class="vacio">·</span>
-            }
+            <!-- Envoltorio de altura (D2): en una tabla, `height` sobre `tr` o
+                 `td` es un MÍNIMO y el contenido la estira igualmente, así que el
+                 tope tiene que vivir DENTRO de la celda. Sin `--alto-celda`
+                 definida no recorta: el defecto `none` deja la rejilla como
+                 estaba hasta que la vista fije el presupuesto (D1). -->
+            <div class="celda">
+              @for (inst of instancias(i + 1, t); track clave(inst)) {
+                <div
+                  class="instancia"
+                  [class.pinada]="estaPinada(inst)"
+                  [class.con-badge]="tieneBadge(inst)"
+                  [class.bloque]="esBloque(inst)"
+                  [class.en-violacion]="tieneViolacionInstancia(inst)"
+                  cdkDrag
+                  [cdkDragData]="inst"
+                  (cdkDragStarted)="alIniciarArrastre(inst)"
+                  (cdkDragEnded)="alTerminarArrastre()"
+                >
+                  @if (esBloque(inst)) {
+                    <span class="rotulo" [title]="inst.actividadCodigo">{{ inst.entradas.length }} simultáneas</span>
+                  }
+                  @if (tieneBadge(inst) || estaPinada(inst)) {
+                    <span class="adornos">
+                      @if (tieneBadge(inst)) {
+                        <span class="badge">{{ badge(inst) }}</span>
+                      }
+                      @if (estaPinada(inst)) {
+                        <button
+                          type="button"
+                          class="candado"
+                          title="Quitar pin"
+                          [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
+                          (click)="alDespinar(inst, $event)"
+                        >
+                          &#128274;
+                        </button>
+                      }
+                    </span>
+                  }
+                  @for (e of inst.entradas; track e.sesionId) {
+                    <div
+                      class="entrada"
+                      [class.entrada--fila]="esBloque(inst)"
+                      [class.en-violacion]="tieneViolacionAula(inst, e)"
+                    >
+                      <span class="linea">
+                        <span class="asig">{{ e.asignaturaCodigo }}</span>
+                        <span class="aula">{{ e.aulaCodigo }}</span>
+                      </span>
+                      <span class="linea linea--sec">
+                        <span class="prof">{{ e.profesores.join(', ') }}</span>
+                        @if (marcaGrupos(e); as marca) {
+                          <span class="grupos" [title]="e.grupos.join(', ')">{{ marca }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              } @empty {
+                <span class="vacio">·</span>
+              }
+            </div>
           </td>
         }
       </tr>

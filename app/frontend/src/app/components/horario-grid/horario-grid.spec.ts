@@ -134,6 +134,11 @@ function tdDe(fixture: ComponentFixture<HorarioGrid>, dia: number, tramo: number
   return fila.querySelectorAll('td')[dia - 1] as HTMLTableCellElement;
 }
 
+/** Cambia la lista de grupos de una sesión sin tocar el helper base {@link sesion}. */
+function conGrupos(s: SesionVista, grupos: readonly string[]): SesionVista {
+  return { ...s, grupos: [...grupos] };
+}
+
 /** Reubica una sesión en otro (dia, tramo) sin tocar el helper base {@link sesion}. */
 function enSlot(s: SesionVista, dia: number, tramo: number): SesionVista {
   return { ...s, dia, tramo };
@@ -360,5 +365,77 @@ describe('rejilla de horario', () => {
     await fixture.whenStable();
 
     expect(raiz.querySelectorAll('td.ocupado').length).toBe(0);
+  });
+
+  /**
+   * Modo bloque (D4). El desdoble es UNA instancia con DOS plazas, que es
+   * exactamente el umbral: `2 simultáneas` distingue este render de una
+   * implementación que contara `entradas.length - 1` (diría `1`) o que fijara el
+   * rótulo a mano.
+   */
+  it('(20) instancia de varias plazas: rótulo común, banda reservada y una fila por plaza', async () => {
+    fixture.componentRef.setInput('sesiones', DESDOBLE);
+    await fixture.whenStable();
+
+    const inst = instanciaDe(fixture, 'Mat');
+    expect(inst.classList).toContain('bloque');
+
+    const rotulo = inst.querySelector('.rotulo');
+    expect(rotulo?.textContent?.trim()).toBe('2 simultáneas');
+    // El código completo no cabe en la celda y vive en el title, no en el texto.
+    expect(rotulo?.getAttribute('title')).toBe('Mat-1ºA');
+
+    const entradas = inst.querySelectorAll('.entrada');
+    expect(entradas.length).toBe(2);
+    expect(entradas[0].classList).toContain('entrada--fila');
+    expect(entradas[1].classList).toContain('entrada--fila');
+  });
+
+  /**
+   * Contrapunto del (20) en el MISMO fixture del beforeEach: dos instancias de
+   * una plaza compartiendo slot. Sin este caso, "es bloque" podría ser cierto
+   * siempre y el (20) seguiría verde.
+   */
+  it('(21) instancia de una plaza: ni bloque ni rótulo, y su entrada no es fila', () => {
+    for (const asignatura of ['Mat', 'LCL']) {
+      const inst = instanciaDe(fixture, asignatura);
+      expect(inst.classList).not.toContain('bloque');
+      expect(inst.querySelector('.rotulo')).toBeNull();
+      expect(inst.querySelector('.entrada')!.classList).not.toContain('entrada--fila');
+    }
+  });
+
+  /**
+   * La marca de grupos con grupo implícito (D6). Tres grupos y no dos: `+2` sólo
+   * cuadra contando los OTROS, así que una implementación que pintara
+   * `grupos.length` diría `+3` y caería aquí. La segunda mitad —LCL, cuyo único
+   * grupo ES el de la vista— es la que mide la condensación: sin ella, "pintar
+   * siempre la marca" pasaría el test.
+   */
+  it('(22) con grupo actual: la marca cuenta los OTROS grupos y el detalle va en el title', async () => {
+    fixture.componentRef.setInput('sesiones', [conGrupos(MAT_PINADA, ['1ºA', '1ºB', '1ºC']), LCL_SIN_PIN]);
+    fixture.componentRef.setInput('grupoActual', '1ºA');
+    await fixture.whenStable();
+
+    const marca = instanciaDe(fixture, 'Mat').querySelector('.grupos');
+    expect(marca?.textContent?.trim()).toBe('+2');
+    expect(marca?.getAttribute('title')).toBe('1ºA, 1ºB, 1ºC');
+
+    // El grupo que ya estás mirando no se repite: sin otros grupos, no hay marca.
+    expect(instanciaDe(fixture, 'LCL').querySelector('.grupos')).toBeNull();
+  });
+
+  /**
+   * Vistas de profesor y de aula: no hay grupo implícito, así que la lista NO se
+   * condensa. `grupoActual` se queda en su defecto (null) a propósito: es el
+   * estado en que la rejilla se monta si nadie le dice de qué grupo habla, y
+   * condensar ahí borraría el único sitio donde el grupo aparece.
+   */
+  it('(23) sin grupo actual: se pinta la lista de grupos, no la marca', async () => {
+    fixture.componentRef.setInput('sesiones', [conGrupos(MAT_PINADA, ['1ºA', '1ºB']), LCL_SIN_PIN]);
+    await fixture.whenStable();
+
+    expect(instanciaDe(fixture, 'Mat').querySelector('.grupos')?.textContent?.trim()).toBe('1ºA, 1ºB');
+    expect(instanciaDe(fixture, 'LCL').querySelector('.grupos')?.textContent?.trim()).toBe('1ºA');
   });
 });

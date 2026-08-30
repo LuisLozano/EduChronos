@@ -17,9 +17,14 @@ export interface SueltaInstancia {
 /**
  * Rejilla reutilizable de 5 días × 6 tramos. Recibe una lista de `SesionVista`
  * YA filtrada (por grupo, profesor o aula) y la agrupa por `(dia, tramo)` y, ya
- * dentro del slot, por instancia. Cada sub-entrada muestra asignatura,
- * profesores (lista), aula y grupos (lista): no asume cardinalidad 1 en
+ * dentro del slot, por instancia. Cada sub-entrada muestra asignatura, aula,
+ * profesores (lista) y una marca con los grupos: no asume cardinalidad 1 en
  * profesores ni en grupos.
+ *
+ * <p>Dos modos de pintado, por número de plazas de la instancia (D4): una plaza
+ * se pinta en DOS líneas; varias plazas se pintan como UN bloque —un rótulo
+ * común y una línea por plaza—. La diferencia es de disposición, no de
+ * contenido: el DOM es el mismo y el modificador `--fila` gira el eje.
  *
  * <p>La unidad arrastrable es la INSTANCIA, nunca la sub-entrada (D-F8.6-A-2):
  * las 6 plazas de un bloque comparten tramo y se mueven juntas. La rejilla NO
@@ -69,6 +74,19 @@ export class HorarioGrid {
   readonly violaciones = input<ReadonlyMap<string, readonly ViolacionEnCelda[]>>(
     new Map<string, readonly ViolacionEnCelda[]>(),
   );
+
+  /**
+   * Código del grupo que la vista está mostrando, o `null` en las vistas de
+   * profesor y de aula, donde no hay ninguno implícito. Gobierna la marca de
+   * grupos (D6): con grupo actual, la lista se condensa porque repite lo que ya
+   * estás mirando —medido: en 23 de 51 sub-entradas de 1B-A `grupos` vale
+   * exactamente el grupo de la vista—; sin él, la lista se pinta entera, porque
+   * ahí sí informa y condensarla sería retirar una señal existente.
+   *
+   * <p>La densidad sólo se juega en la vista por grupo (A5): las otras dos tienen
+   * una sub-entrada por celda y no necesitan la altura que esto ahorra.
+   */
+  readonly grupoActual = input<string | null>(null);
 
   readonly soltar = output<SueltaInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
@@ -175,6 +193,36 @@ export class HorarioGrid {
    */
   protected tieneViolacionAula(inst: InstanciaCelda, e: SesionVista): boolean {
     return (this.violaciones().get(this.clave(inst)) ?? []).some((v) => v.plazaCodigo === e.plazaCodigo);
+  }
+
+  /**
+   * Una instancia se pinta en modo bloque cuando tiene MÁS DE UNA plaza en el
+   * mismo tramo (D4): un bloque es una instancia con N plazas, no N clases
+   * sueltas, y ésa es también la razón de que sea la unidad arrastrable. El
+   * umbral se mide sobre `entradas`, que es lo que la celda pinta, y no sobre la
+   * actividad: dos repeticiones de la misma actividad en tramos distintos son dos
+   * instancias de una plaza, no un bloque de dos.
+   */
+  protected esBloque(inst: InstanciaCelda): boolean {
+    return inst.entradas.length > 1;
+  }
+
+  /**
+   * Texto de la marca de grupos (D6), o `null` si no hay nada que decir. Con
+   * {@link grupoActual} fijado se cuentan los OTROS grupos —los que comparten la
+   * plaza— y el detalle completo queda en el `title`: la cuarta línea se condensa,
+   * no se elimina. Sin grupo actual se devuelve la lista tal cual.
+   *
+   * <p>Devuelve `null` y no cadena vacía porque la plantilla decide con ello si
+   * pinta el elemento: una marca vacía seguiría ocupando su sitio en la línea.
+   */
+  protected marcaGrupos(e: SesionVista): string | null {
+    const actual = this.grupoActual();
+    if (actual === null) {
+      return e.grupos.length === 0 ? null : e.grupos.join(', ');
+    }
+    const otros = e.grupos.filter((g) => g !== actual).length;
+    return otros === 0 ? null : `+${otros}`;
   }
 
   /**

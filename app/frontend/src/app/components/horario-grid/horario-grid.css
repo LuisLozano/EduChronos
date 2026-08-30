@@ -22,6 +22,16 @@
   width: 3rem;
 }
 
+/* Envoltorio de altura de D2. El tope llega por variable desde la vista, que es
+   la única capa que conoce el presupuesto (D1); aquí el defecto `none` significa
+   "sin recorte", así que la rejilla se comporta como antes mientras nadie la
+   defina. `overflow: hidden` es el recorte que D11 vendrá a explicar: hasta
+   entonces esta celda no colapsa nada porque no hay tope que rebasar. */
+.celda {
+  max-height: var(--alto-celda, none);
+  overflow: hidden;
+}
+
 /* La INSTANCIA es la unidad arrastrable (D-F8.6-A-2), no la sub-entrada. */
 .instancia {
   position: relative;
@@ -42,6 +52,27 @@
    el render de las celdas pin-only. */
 .instancia.con-badge {
   padding-top: 16px;
+}
+
+/* D4: el bloque reserva LA MISMA banda para su rótulo común, y por eso no cuesta
+   un píxel nuevo. Clase aparte y no `con-badge`: esa clase significa "tiene
+   badge" y hay un test que lo afirma sobre una instancia pinada sin badge. Que
+   las dos escriban el mismo `padding-top` no las hace la misma cosa. */
+.instancia.bloque {
+  padding-top: 16px;
+}
+
+/* Rótulo común del bloque (D4). Absoluto dentro de la banda, como .adornos: el
+   hueco ya lo reservó .bloque y este elemento no debe empujar nada. El código
+   completo de la actividad va en el `title` porque
+   `Bloque-CE_DTec_Lab_Pat_TEst2-1BACH` no cabe ni debe. */
+.rotulo {
+  position: absolute;
+  top: 0;
+  left: 0.1rem;
+  font-size: var(--tam-xxs);
+  line-height: 1;
+  color: var(--color-tinta-suave);
 }
 
 /* Wrapper de adornos en la esquina sup-dcha, fila flex por dentro (badge +
@@ -92,13 +123,57 @@
   outline-offset: -2px;
 }
 
+/* La sub-entrada son DOS líneas (D3), no cuatro. El `line-height` apretado y el
+   `--tam-xs` de la línea 2 NO son aseo: son parte de la geometría con la que se
+   midió el presupuesto (`scripts/calcular-recortes.py`, LN1 = --tam-s × 1.25,
+   LN2 = --tam-xs × 1.25). Heredando el 1.5 del body la celda de cuatro plazas
+   pasa de 110,8 a 124,8 px y entra en recorte a cualquier cromo: el acantilado
+   se cruza por aquí, no por el ancho de la cabecera.
+   Sin `gap`: el modelo no lo cobra y con dos líneas no hace falta. */
 .entrada {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
   padding: 0.2rem;
+  line-height: var(--lh-apretado);
   border-left: 3px solid var(--color-acento);
   background: var(--color-superficie-tenue);
+}
+
+/* Modo bloque (D4/D5): `.entrada` se CONSERVA como clase base y `--fila` es un
+   modificador, no un sustituto —hay dos tests que cuentan `.entrada` dentro de
+   una instancia y este diseño no tiene ninguna necesidad de romperlos—. El
+   modificador NO cambia el DOM: gira el eje, y las dos líneas pasan a ir una al
+   lado de otra. La altura cae de dos líneas a una sin una sola rama en la
+   plantilla. Padding y margen son los del modelo (3,2 y 1,0 px). */
+.entrada--fila {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.1rem;
+  margin-bottom: 1px;
+}
+
+/* Cada línea reparte sus dos extremos. `nowrap` es premisa MEDIDA del modelo de
+   altura, no precaución: la peor línea 1 del centro son 27 caracteres (~190 px)
+   contra los ~374 px de columna a 1920. Si alguna línea envolviera, el
+   presupuesto entero deja de valer. */
+.linea {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.entrada--fila .linea {
+  flex: 0 1 auto;
+  justify-content: flex-start;
+}
+
+.linea--sec {
+  font-size: var(--tam-xs);
 }
 
 .asig {
