@@ -16,19 +16,19 @@
 - L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
 - L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
 - L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
-- L974 — ## 4. Clasificación del trabajo pendiente
-- L992 — ### Clasificación de las deudas vivas actuales
-- L998 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1005 — #### Deuda técnica real, colgada de su objetivo
-- L1045 — #### Mejora futura, cuelga y espera
-- L1073 — #### Decisión arquitectónica consciente → sale de la cola
-- L1085 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1094 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1101 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1134 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1188 — ## 6. Reglas estratégicas
-- L1235 — ## 7. Métricas del sistema
-- L1256 — ## 8. El sistema respondiendo a las preguntas clave
+- L999 — ## 4. Clasificación del trabajo pendiente
+- L1017 — ### Clasificación de las deudas vivas actuales
+- L1023 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1030 — #### Deuda técnica real, colgada de su objetivo
+- L1070 — #### Mejora futura, cuelga y espera
+- L1098 — #### Decisión arquitectónica consciente → sale de la cola
+- L1110 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1119 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1126 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1159 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1213 — ## 6. Reglas estratégicas
+- L1260 — ## 7. Métricas del sistema
+- L1281 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -895,15 +895,40 @@ de las Fases 9–12.
      `3ºA` deja 17 de 334 y `3ºA Di` deja 5. Sin paginador, sin `debounce` —medido que las siete
      listas ya montan todas sus filas— y sin longitud mínima de consulta, que se descartó porque
      no reaccionar a la primera letra se lee como roto.
-  4. El horario de un grupo cabe en 1920×1080 sin scroll vertical, con el mecanismo de
-     expansión activo. Las 22 celdas de seis plazas (11 grupos de 28, 2,8 % de 791) se
-     muestran colapsadas Y con forma visible de expandirlas: recortar sin expansión es
-     perder una clase, no una explicación. El criterio se verifica sobre VIEWPORT CSS, no sobre
-     especificación de panel: ~1920×945 con escala al 100 %, que es lo que el instrumento reproduce con
-     22 recortes. Escribir «1920×1080» a secas fue lo que dejó pasar el error que S123 descubrió; un panel
-     no es un presupuesto de altura. La resolución del portátil queda MEDIDA y CERRADA en S123 —1280×585
-     con escala 150 %— y EXCLUIDA del criterio: la demo se enseña en un ordenador de sobremesa. Pendiente
-     antes de abrir C-rejilla-densidad: medir ese sobremesa con `innerWidth/innerHeight`, no suponerlo.
+  4. El horario de un grupo cabe sin scroll vertical en el VIEWPORT DE VERIFICACIÓN,
+     con el mecanismo de expansión activo. Las celdas que no caben se muestran colapsadas
+     Y con forma visible de expandirlas: recortar sin expansión es perder una clase, no una
+     explicación. El criterio se verifica sobre VIEWPORT CSS, no sobre especificación de
+     panel: escribir «1920×1080» a secas fue el error que S123 descubrió, y **«~1920×945»
+     se usaba mal**: S125 midió que ese número se manejaba con el cromo a CERO, es decir
+     suponiendo barra de aplicación y cabecera de vista de altura nula, cuando la barra mide
+     52 px medidos. El número no era falso —Chrome da 946 de viewport, clavado— pero se
+     comparaba un VIEWPORT contra un presupuesto que exige CONTENIDO NETO.
+     **SUPERFICIE DE VERIFICACIÓN (S125): el equipo de desarrollo, medido en viewport CSS
+     1920×887 con `devicePixelRatio` 1, Firefox maximizado (no F11) con barra de marcadores
+     visible, del que la barra de la aplicación descuenta 52 px y deja 835 de contenido.**
+     NO se mide el sobremesa del centro: no hay uno solo, la aplicación correrá en varias
+     máquinas y D11 absorbe la variación —un viewport menor colapsa más celdas, no rompe
+     nada—. Se nombra Firefox por ser el PEOR CASO de los dos navegadores medidos (149 px de
+     cromo frente a los 90 de Chrome, que da viewport 946 y contenido 894) —y los dos NO dan
+     el mismo veredicto: en el eje común, el presupuesto para barra más cabecera de vista es
+     33,4 px en Firefox y 92,4 en Chrome, así que con la barra en 52 px **Firefox se queda
+     18,6 px corto aun con cabecera de altura cero y da 50 recortes, mientras Chrome mantiene
+     las 22 si la cabecera de D9 cabe en 40,4 px**. Verificar en el peor caso es lo que
+     convierte el número en un SUELO y lo que permite prescindir de medir las máquinas del
+     centro; fijarlo en Chrome haría el criterio dependiente del navegador—.
+     RECORTE MEDIDO sobre esa superficie: **50 de 791, el 6,3 %** —las 22 celdas de seis
+     plazas y las 28 de cinco—. CUMPLE: lo que el criterio exige es que quepa sin scroll con
+     expansión activa; el «22 de 791 / 2,8 %» era descripción de lo medido en S122, no un
+     tope. Umbral de reapertura, heredado del argumento de S123 (a 585 px eran 109, el
+     13,8 %, «al 14 % el colapso deja de ser el caso excepcional»): si el recorte supera
+     el ~10 %, el criterio se rediscute.
+     RESTRICCIÓN DE DISEÑO DERIVADA Y MEDIDA, que hereda C-rejilla-densidad: **la fila única
+     de D9 (título + controles) con su padding debe caber en 111 px.** El escalón de las
+     celdas de cuatro plazas cae en cromo de vista 111,6; por encima entran 22 celdas más y
+     el recorte salta a 72 de 791, el 9,1 %.
+     La resolución del portátil queda MEDIDA y CERRADA en S123 —1280×585 con escala 150 %— y
+     EXCLUIDA del criterio.
   5. Ninguna escritura nueva. Se admite composición de solo lectura (enseñar en un destino
      lo que cuelga de él, con enlace). Crear o editar desde un sitio que hoy no lo hace
      queda fuera: eso es O-particiones.
@@ -911,7 +936,7 @@ de las Fases 9–12.
      declarado ANTES y no descubierto en rojo. Previstos y confirmados: los 8 de `configuracion.spec.ts`,
      que MUEREN y se sustituyen por 6 de enrutado, y `centro-minimo.spec.ts:107-180`, que es reescritura
      de media suite y no «dos puntos» —el otro punto, `:213`, es de C-rejilla-densidad por D6—. Suites
-     tras S123: app 282, solver 91, vitest 314, e2e 2.
+     tras S124: app 282, solver 91, vitest 356, e2e 2.
 - **Deudas que absorbe:** `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que
   llevaban desde S115 y S113 remitiendo las dos, con esas palabras, a «el Cambio que
   decida la navegación» y a «la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio
@@ -934,7 +959,7 @@ de las Fases 9–12.
   (criterio 2, y con él las dos deudas absorbidas) — **HECHO en S123**; **C-listas-filtradas**
   (criterio 3, los casos duros son Subgrupos y Actividades) — **HECHO en S124**; y **C-rejilla-densidad**
   (criterio 4, la geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11)
-  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. El criterio 1 no abre Cambio: la barra
+  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. **PARTIDO EN DOS TRAMOS en S125**, por dependencia real y no por tamaño: **tramo 1 — geometría y presupuesto** (D1-D6, D7, D8, D9, D10: todo lo que CONSUME altura, con la verificación en navegador de que da 50 de 791) y **tramo 2 — el mecanismo de expansión** (D11, lo único interactivo y lo único que hoy no existe en ninguna forma; va después porque no se puede verificar «colapsada Y con forma visible de expandirla» hasta que algo colapse). El criterio 1 no abre Cambio: la barra
   existe y lo que le falta es estilo. Salen uno a uno de los criterios 2, 3 y 4, y tenerlos escritos
   convirtió el M0 de S123 en ratificar en vez de deliberar.
   **RENOMBRADO en S123: `C-listas-filtradas` se llamaba `C-listas-paginadas`.** Los dos nombres designan
