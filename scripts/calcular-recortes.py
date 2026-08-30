@@ -18,6 +18,7 @@ La ÚNICA magnitud no calculable es el cromo de la vista (barra + cabecera), que
 depende de la altura que el navegador dé a `<select>` y `<button>` nativos: entra
 como PARÁMETRO y se barre en un rango.
 """
+import argparse
 import json
 import sys
 
@@ -41,7 +42,9 @@ PAD_CELDA = 0.25 * REM * 2                   # .celda padding 0.25rem
 
 ALTO_THEAD = 0.25 * REM * 2 + TAM_S * 1.5 + 2    # th + line-height normal + bordes
 ALTO_RECREO = 1.35 * REM + 2                     # tr.recreo height + bordes
-TRAMOS = 6
+TRAMOS = 6                                       # defecto de --tramos
+ALTO_DEFECTO = 1080                              # defecto de --alto (pantalla fisica)
+CROMOS_DEFECTO = (100, 120, 140, 160, 180, 200, 220)   # defecto de --cromos
 
 
 def alto_instancia(n_entradas):
@@ -82,6 +85,30 @@ def recortes(grupos, alto_fila):
                 if peor is None or req > peor[0]:
                     peor = (req, g, slot, inst)
     return malas, total, peor
+
+
+def plazas_de_celda(inst):
+    """Tamaño con que se nombra una celda: el de su instancia mayor."""
+    return max(inst) if inst else 0
+
+
+def desglose(grupos, alto_fila):
+    """{n_plazas: [recortadas, totales]} en todo el centro, a ese alto de fila."""
+    d = {}
+    for sesiones in grupos.values():
+        for inst in celdas_de(sesiones).values():
+            n = plazas_de_celda(inst)
+            fila = d.setdefault(n, [0, 0])
+            fila[1] += 1
+            if alto_celda(inst) > alto_fila + 0.01:
+                fila[0] += 1
+    return d
+
+
+def texto_desglose(d):
+    """'6:22/22 5:0/57 ...' sólo con los tamaños que tienen alguna recortada."""
+    trozos = ["%dp:%d/%d" % (n, d[n][0], d[n][1]) for n in sorted(d, reverse=True) if d[n][0]]
+    return " ".join(trozos) if trozos else "-"
 
 
 # ---------------------------------------------------------------------------
@@ -139,17 +166,50 @@ def autoprueba(grupos):
     print()
 
 
-def main():
-    ruta = sys.argv[1] if len(sys.argv) > 1 else "/tmp/datos-maqueta.json"
+def parsear(argv):
+    ap = argparse.ArgumentParser(
+        description="Cuenta por cálculo las celdas que el diseño de D11 recortaría.",
+        epilog="Sin banderas reproduce la pasada original de S122 (alto 1080, "
+               "cromos 100..220, 6 tramos).")
+    ap.add_argument("ruta", nargs="?", default="/tmp/datos-maqueta.json",
+                    help="volcado JSON de sesiones por grupo (defecto: %(default)s)")
+    ap.add_argument("--alto", type=float, default=ALTO_DEFECTO,
+                    help="altura de la que se resta el cromo, en px. OJO: es alto de "
+                         "PANTALLA si los cromos incluyen el del navegador, y alto de "
+                         "VIEWPORT CSS si no (defecto: %(default)s)")
+    ap.add_argument("--cromos", default=",".join(str(c) for c in CROMOS_DEFECTO),
+                    help="lista separada por comas del cromo a barrer, en px "
+                         "(defecto: %(default)s)")
+    ap.add_argument("--tramos", type=int, default=TRAMOS,
+                    help="filas lectivas de la tabla (defecto: %(default)s)")
+    a = ap.parse_args(argv)
     try:
-        datos = json.load(open(ruta, encoding="utf-8"))
+        a.cromos = [float(c) for c in a.cromos.split(",") if c.strip() != ""]
+    except ValueError:
+        ap.error("--cromos: se esperaba una lista de números separada por comas")
+    if not a.cromos:
+        ap.error("--cromos: lista vacía")
+    if a.tramos < 1:
+        ap.error("--tramos: debe ser >= 1")
+    return a
+
+
+def alto_fila_de(alto, cromo, tramos):
+    """El presupuesto por fila: se descuentan cabecera, recreo y bordes."""
+    return (alto - cromo - ALTO_THEAD - ALTO_RECREO - 4) / tramos
+
+
+def main(argv=None):
+    a = parsear(sys.argv[1:] if argv is None else argv)
+    try:
+        datos = json.load(open(a.ruta, encoding="utf-8"))
     except FileNotFoundError:
         raise SystemExit(
             "No existe %s.\n"
             "Este guion necesita el volcado de sesiones por grupo que produjo S122 desde\n"
             "app/educhronos-demo-m4.db en SOLO LECTURA. Formato: {\"grupos\": {codigo: [sesion, ...]}},\n"
             "donde cada sesion lleva dia, tramo, actividadCodigo e indice.\n"
-            "Uso: %s [ruta-del-json]" % (ruta, sys.argv[0]))
+            "Uso: %s [ruta-del-json]" % (a.ruta, sys.argv[0]))
     grupos = datos["grupos"]
     autoprueba(grupos)
 
@@ -174,26 +234,27 @@ def main():
 
     necesario = peores[0][0]
     print("ALTO DE FILA NECESARIO PARA CERO RECORTES EN TODO EL CENTRO: %.1f px" % necesario)
-    alto_tabla = ALTO_THEAD + ALTO_RECREO + TRAMOS * necesario
-    print("  -> tabla completa: %.1f + %.1f + 6 x %.1f = %.1f px"
-          % (ALTO_THEAD, ALTO_RECREO, necesario, alto_tabla))
+    alto_tabla = ALTO_THEAD + ALTO_RECREO + a.tramos * necesario
+    print("  -> tabla completa: %.1f + %.1f + %d x %.1f = %.1f px"
+          % (ALTO_THEAD, ALTO_RECREO, a.tramos, necesario, alto_tabla))
     print()
 
-    print("--- ¿CABE EN 1920x1080? El cromo de la vista es el parámetro ---")
-    print("  util = 1080 - cromo_navegador; presupuesto de tabla = util - cromo_vista")
+    print("--- ¿CABE EN %.0f px de alto? El cromo es el parámetro ---" % a.alto)
+    print("  util = %.0f - cromo; presupuesto de tabla = util - cabecera - recreo - bordes" % a.alto)
     print()
-    print("  %-14s %-10s %-12s %s" % ("cromo total", "util tabla", "alto/fila", "celdas recortadas"))
-    for cromo in (100, 120, 140, 160, 180, 200, 220):
-        util = 1080 - cromo
-        disponible = util - ALTO_THEAD - ALTO_RECREO - 4
-        af = disponible / TRAMOS
+    print("  %-12s %-10s %-12s %-18s %s"
+          % ("cromo", "util", "alto/fila", "celdas recortadas", "desglose por plazas"))
+    for cromo in a.cromos:
+        af = alto_fila_de(a.alto, cromo, a.tramos)
         m, t, _ = recortes(grupos, af)
         marca = "  <-- CERO" if m == 0 else ""
-        print("  %-14s %-10.0f %-12.1f %d de %d%s" % (cromo, util, af, m, t, marca))
+        print("  %-12g %-10.0f %-12.2f %-18s %s%s"
+              % (cromo, a.alto - cromo, af, "%d de %d" % (m, t),
+                 texto_desglose(desglose(grupos, af)), marca))
     print()
-    cromo_max = 1080 - (ALTO_THEAD + ALTO_RECREO + 4 + TRAMOS * necesario)
+    cromo_max = a.alto - (ALTO_THEAD + ALTO_RECREO + 4 + a.tramos * necesario)
     print("CROMO MÁXIMO ADMISIBLE para cero recortes: %.1f px" % cromo_max)
-    print("  (barra superior + padding + cabecera de vista + cromo del navegador)")
+    print("  (barra superior + padding + cabecera de vista + cromo del navegador si --alto es la pantalla)")
 
 
 if __name__ == "__main__":
