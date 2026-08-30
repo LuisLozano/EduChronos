@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
-- L965 — ### Bloques de Fase 2
-- L973 — ### Bloques de Fase 5
-- L996 — ### Bloques de Fase 6
-- L1041 — ### Bloques de Fase 8
-- L1250 — ### Fases completadas
-- L1354 — ### Cierre del modelo — Sesión 8
-- L1402 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1448 — ### Método de trabajo (procedimiento vigente)
-- L1481 — ### Deuda consciente VIVA
-- L2872 — ### Deuda consciente CERRADA (histórico)
-- L2900 — ### Notas técnicas validadas en Fase 0
-- L2910 — ### Notas técnicas validadas en Fase 6
-- L2944 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2953 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2980 — ### Registro detallado de sesiones S10–S31
-- L2989 — ## Señales globales de alerta
+- L699 — ### Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
+- L981 — ### Bloques de Fase 2
+- L989 — ### Bloques de Fase 5
+- L1012 — ### Bloques de Fase 6
+- L1057 — ### Bloques de Fase 8
+- L1266 — ### Fases completadas
+- L1370 — ### Cierre del modelo — Sesión 8
+- L1418 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1464 — ### Método de trabajo (procedimiento vigente)
+- L1497 — ### Deuda consciente VIVA
+- L2888 — ### Deuda consciente CERRADA (histórico)
+- L2916 — ### Notas técnicas validadas en Fase 0
+- L2926 — ### Notas técnicas validadas en Fase 6
+- L2960 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2969 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2996 — ### Registro detallado de sesiones S10–S31
+- L3005 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,131 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
+### Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
+  Vigesimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo apertura/medición: sin M3 ni M4 porque no se
+  toca un solo fichero de `app/`. **Las suites NO se ejecutan y no se declaran verdes de memoria**: se hereda
+  la cifra de S124 —app 282, solver 91, vitest 356, e2e 2— y la PRIMERA acción del tramo 1 es correrlas.
+  M0 — EL MAPA, y una premisa del arquitecto que la apertura acepta con dos precisiones. Cambio:
+  C-rejilla-densidad, criterio 4, el último con trabajo ejecutable del objetivo (el criterio 1 no abre Cambio:
+  la barra existe y lo que le falta es estilo). Hito: NINGUNO funcional, y ésa es la respuesta escrita en la
+  ficha, no un hueco. R-invalidación limpio y en la dirección buena: la ficha manda que O-navegación vaya
+  ANTES de C-identidad y C-revisión, así que el riesgo es adelantar trabajo de ésos, no que ésos rehagan éste.
+  **CAMBIO DE PREMISA ACEPTADO: no se mide el sobremesa del centro.** No hay uno solo, la aplicación correrá
+  en varias máquinas y D11 absorbe la variación. Las dos precisiones que la apertura le añade: (1) el criterio
+  carga el NÚMERO, no el nombre de la máquina —«se verifica en el equipo de desarrollo» es un panel, mismo
+  vicio que «1920×1080»—; y (2) «D11 absorbe» es cierto hasta un umbral ya medido, el 13,8 % de S123, que
+  queda escrito como criterio de reapertura en el ~10 %.
+  LA MEDICIÓN, en tres intentos y dos navegadores. Las dos primeras lecturas dieron **394** con DevTools
+  acoplado; el diagnóstico fue aritmético y no de inspección: `outerHeight − innerHeight` = 642 px, contra los
+  ~90 que cuesta el cromo de un navegador. La anchura salía intacta (1920) porque el panel estaba abajo, que
+  es justo lo que enmascara el problema. Se resolvió con un snippet **diferido 10 s que vuelca el resultado
+  sobre la página y en el `document.title`**, medido con DevTools CERRADO, y con un campo `limpio` que hace
+  saltar el propio caso que se estaba sufriendo. Resultados: **Firefox 1920×887, cromo 149, contenido 835;
+  Chrome 1920×946, cromo 90, contenido 894**; los dos con `devicePixelRatio` 1, `availHeight` 1036 (1080
+  físicos menos ~44 de barra de tareas) y ventana maximizada, no F11.
+  **DATO DURO NUEVO: la barra de la aplicación mide 52 px**, idéntica en los dos navegadores (946−894 y
+  887−835). Es la magnitud que faltaba y la que desmonta el uso del presupuesto heredado.
+  HALLAZGO 1 — **el «~1920×945» del criterio 4 se manejaba con el cromo a CERO.** Reconstruida la pasada de
+  S123 desde el 87,73 registrado: `(585 − 31,0 − 23,6 − 4)/6` sale exacto sólo con cromo 0. Es decir, el
+  control de 945 supone barra de aplicación y cabecera de vista de altura NULA, y la barra mide 52 px
+  medidos. El número no era falso —Chrome da 946 de viewport, clavado— pero su uso sí lo era: se comparaba
+  un VIEWPORT contra un presupuesto que exige CONTENIDO NETO. Misma familia que el error que S123 descubrió,
+  un escalón más abajo.
+  INFERENCIA FALSA DEL ARQUITECTO, registrada porque se marcó como hipótesis y salió falsa. Deduje que «945
+  no era un viewport sino `util`», y que por tanto ninguna máquina real con Windows y navegador podría
+  alcanzarlo. **Chrome lo desmiente: 946 de viewport CSS, clavado.** 945 SÍ era un viewport; lo que estaba
+  mal era el cromo a cero, no la magnitud. La inferencia iba etiquetada como no verificada y la dirimió la
+  medición, que es como debía ser.
+  HALLAZGO 2 — **el escalón, y dónde cae en cada navegador.** Censo del centro por plazas de la instancia:
+  1→599 (62,9 px), 2→83 (67,4), 3→37 (89,1), 4→22 (110,8), 5→28 (132,5), 6→22 (154,2). Las de cinco exigen
+  **853,6 px de alto neto**. En el eje común —el viewport— el presupuesto disponible para barra MÁS cabecera
+  de vista es `887 − 853,6 = 33,4` px en Firefox y `946 − 853,6 = 92,4` en Chrome. Con la barra medida en 52:
+  **Firefox se queda 18,6 px corto aun con cabecera de altura cero y cae a 50 de 791, el 6,3 %; Chrome se
+  queda 40,4 px por encima y mantiene las 22, el 2,8 %, mientras la cabecera de D9 quepa en esos 40,4 px.**
+  Los dos navegadores NO dan el mismo veredicto, y su diferencia es de **59 px** (946−887 y 894−835), no de
+  52 —52 es la barra de la aplicación, que es otra magnitud—. Lo que sí es común: la frontera no se cruza
+  afinando el número de entrada, se cruza con presupuesto de celda.
+  DECISIÓN — **Firefox es la superficie de verificación, por ser el peor caso medido, y sobre ella el 6,3 %
+  CUMPLE el criterio 4.** El «22 de 791 / 2,8 %» era descripción de lo medido en S122, no un tope; lo que el
+  criterio exige es que quepa sin scroll con la expansión activa, y una celda de cada dieciséis sigue siendo
+  densidad. El umbral contrario está medido en el 13,8 % (S123, «al 14 % el colapso deja de ser el caso
+  excepcional») y no estamos cerca. El 2,8 % sigue siendo alcanzable en Chrome bajo condición, y NO se
+  persigue: verificar en el peor caso disponible es lo que convierte el número en un SUELO y lo que sostiene
+  el cambio de premisa de esta sesión —prescindir de medir las máquinas del centro—. Fijarlo en Chrome haría
+  el criterio dependiente del navegador y frágil.
+  **PRESUPUESTO NUEVO QUE HEREDA EL CAMBIO: la fila única de D9 debe caber en 111 px.** El escalón de las
+  celdas de cuatro plazas cae en cromo de vista 111,6; por encima entran 22 celdas más y el recorte salta a
+  72 de 791, el 9,1 %. D9 deja de ser una decisión de aseo: es lo que impide ese salto.
+  LAS PALANCAS AHORA SÍ LLEGARÍAN, Y NO SE APLICAN. A 835 neto faltan 18,6 px y las dos disponibles suman
+  ~40 (padding y margen de plaza ~25,2; `.asig` a `--tam-xs` 15; la del badge la anuló D4 en S123) — a
+  diferencia del portátil, donde faltaban 10,27 px incluso con las tres. No se aplican: retiran señales
+  existentes, que es lo que la invariante del encargo prohíbe y por lo que D6 rechazó borrar la cuarta línea;
+  y gastarlas para bajar de 6,3 % a 2,8 % persigue un número que el criterio no pide (R-terminado). Quedan
+  como holgura medida por si el tramo 1 la necesita.
+  EL INSTRUMENTO, validado antes de creerle y parametrizado. `scripts/calcular-recortes.py` **no tenía
+  interfaz**: la altura estaba empotrada como literal 1080 (`:187`, `:194`), `TRAMOS = 6` en `:44` y la lista
+  de cromos en `:186`; `--help` no era bandera, se interpretaba como ruta y el `FileNotFoundError` imprimía
+  el uso por accidente. Parametrizado con `--alto`, `--cromos` y `--tramos`, **con los valores actuales como
+  defectos y verificado por diff: ninguna invocación previa cambia de salida**. Su autoprueba de cinco
+  mutaciones se lanza sola en `main()` y aborta; no se puede saltar. **DOS CONTROLES HISTÓRICOS
+  INDEPENDIENTES antes de la pasada real**: a `--alto 945 --cromos 0` da 147,73 y **22 de 791, 6p:22/22**
+  (reproduce S122); a `--alto 835 --cromos 250` —585 neto— da 87,73 y **109 de 791, 3p:37 4p:22 5p:28
+  6p:22** (reproduce S123 y su frase «toda celda de tres plazas o más»). El instrumento y el volcado quedan
+  validados contra dos pasadas históricas antes de que se les crea una sola cifra nueva.
+  VOLCADO. `/tmp/datos-maqueta.json` **no existía**: artefacto desechable de S122, declarado fuera del repo
+  en `diseno-navegacion.md:540`. Regenerado como `/tmp/volcado-s125.json` en SOLO LECTURA
+  (`file:...?mode=ro`): **28 grupos y 791 celdas**, por `sesion → plaza → plaza_subgrupo → subgrupo_grupo →
+  grupo_administrativo`, con `tramo_semanal` mapeado a día 1-5 y tramo lectivo 1-6 —los cinco recreos
+  (`es_lectivo=0`, posición 4 de cada día) quedan fuera, de ahí `TRAMOS=6` más una fila de recreo— y todas
+  las actividades de un solo tramo, así que no hay sesiones a caballo de dos celdas.
+  D11 CONFIRMADO POR MEDICIÓN, y por más margen del que suponía. Su texto estima la barra en ~56 px y el
+  cromo del navegador en ~100 para concluir que el cromo máximo admisible de 96,2 px «es inalcanzable».
+  Medido: barra 52, cromo 90 en Chrome y 149 en Firefox. La conclusión se sostiene con holgura.
+  ALCANCE FIJADO — dos tramos, por dependencia real. **Tramo 1, geometría y presupuesto** (D1-D6, D7, D8,
+  D9, D10): todo lo que consume altura, verificado en navegador contra 50 de 791 y no en hoja de cálculo;
+  hay lógica que mutar (la marca `+N`, la clasificación de instancia a modo bloque), así que M3 aplica, y
+  aquí cae `centro-minimo.spec.ts:213` por D6. **Tramo 2, el mecanismo de expansión** (D11). FUERA por
+  R-terminado: las palancas de altura, la leyenda de la insignia (C-identidad), tokenizar el espaciado (H-2,
+  sin sede) y la hora de reloj del recreo (D8 declara el hueco y no lo rellena).
+  POR QUÉ NO SE EMPIEZA EL TRAMO 1 AQUÍ. Precedente de S121, que decidió no abrir C-identidad con el
+  presupuesto de contexto a la mitad: toca siete ficheros, no es trabajo mecánico y dejarlo a medias obliga
+  a reconstruir contexto. Decisión del arquitecto sobre recomendación del asistente.
+  COSTURAS CERRADAS. §5 de `diseno-navegacion.md` listaba como SIN DECIDIR dos cosas ya decididas —la
+  resolución del portátil (D0-2, cerrado en S123) y qué señal se sacrifica de las palancas (§4 de
+  `gestion_proyecto.md` decidió «ninguna»)—; se corrigen las dos filas. El criterio 6 de la ficha llevaba
+  «vitest 314» de S123 y son 356 desde S124; corregido.
+  EL ERROR GRAVE DEL ARQUITECTO, y dónde apareció: **mezclé ejes**, en la simulación del propio M1 que
+  registra esta familia de errores, y lo detectó el ejecutor. Escribí que los dos navegadores daban el mismo
+  veredicto «salvo que el cromo de la aplicación sea ≤33,4 px (Firefox) o ≤40,4 (Chrome)», pero el 33,4 está
+  calculado sobre el VIEWPORT de Firefox —barra más cabecera— y el 40,4 sobre el CONTENIDO de Chrome, que ya
+  lleva la barra descontada. No son comparables; en el eje común son 33,4 y 92,4, y la conclusión se
+  invierte: Chrome da 22, no 50. De ahí salió además reutilizar los 52 px de la barra como diferencia entre
+  navegadores, que son 59. Es exactamente la forma que la precisión de M2 persigue —un número que se parece
+  a la magnitud y no lo es— cometida al redactar el registro de esa misma forma. La decisión de la sesión no
+  cae: se REFUERZA, porque si los navegadores dieran lo mismo, elegir el peor caso no compraría nada.
+  OTROS ERRORES DEL ARQUITECTO. La inferencia falsa de «945 es `util`», ya descrita —el acierto fue
+  etiquetarla como hipótesis, no haberla hecho—. Los cuatro textos normativos del guion de cierre se
+  escribieron SIN TILDES para documentos acentuados, y los habría degradado visiblemente. El `re.sub` de
+  líneas en blanco era global y tocaba dos sitios ajenos al punto de corte. Y el guion no llamaba a
+  `regenerar-indice.py`, con lo que la sesión habría cerrado con el índice del plan descuadrado y el
+  verificador diciendo OK, que es literalmente la deuda que esta misma entrada registra. Las cuatro las
+  detectó el ejecutor en simulación, antes de escribir.
+  NOTA OPERATIVA que merece sobrevivir: la protección antiautopega de DevTools en Chrome exige teclear
+  «permitir pegado» antes de aceptar un snippet; se lee como fallo del código y no lo es.
+  DEUDA. **Ninguna nueva.** `D-guion-exit-enmascarado` sigue viva y el §4 de `verificar-cierre.py` sigue
+  imprimiendo las descuadradas del índice sin sumarlas al EXIT: se lee su salida, no su código de salida.
+  Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después.
+  LIMPIEZA (M1-bis): archivada S123 a `bitacora-sesiones.md` (promovida a `### Sesión 123`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S124 a «Última sesión registrada (previa)»; S125
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S122 a S123.
+  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS**,
+  C-rejilla-densidad PENDIENTE y partido en dos tramos, con su criterio 4 ya corregido y su presupuesto
+  medido. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS, C-identidad y C-revisión
+  PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el
+  correo al centro. Siguiente: **el TRAMO 1 de C-rejilla-densidad**. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
   Vigesimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI **con M3**, y ahí está la
   diferencia con S123: allí era enrutado y binding y M3 no tocaba; aquí hay un predicado de casado, que es
   lógica real, y `metodo.md` lo dice con esas palabras. Suites: **app 282, solver 91, vitest 356, e2e 2**.
@@ -819,114 +943,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   abre sin MEDIR antes el sobremesa con `innerWidth/innerHeight` —pendiente desde S123 y no supuesto—. Lo
   fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 123 — O-navegación (transversal): APERTURA del objetivo y C-rutas-hijas HECHO. Configuración pasa de una pantalla con ocho listas apiladas a ocho destinos con URL propia, índice vertical derivado de las rutas, cabecera fija y contador inline; la medición del portátil real desmiente el presupuesto de altura de S122 y lo saca del criterio (M0 + M2 con el instrumento de S122 + M4 en navegador + M1, sin M3). UNO de tres Cambios. NO cierra el objetivo.
-  Vigesimotercera sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI: M4 sí, M3 no —enrutado y
-  binding, sin lógica que mutar—. Suites: **app 282, solver 91, vitest 314, e2e 2**. vitest BAJA de 316:
-  mueren los 8 casos de `configuracion.spec.ts` y entran 6 nuevos; app y solver no se tocan.
-  M0 — LA APERTURA RATIFICA, NO DELIBERA. Los tres Cambios de la ficha salen uno a uno de los criterios 2, 3
-  y 4 y se ratifican los tres. **`C-listas-paginadas` se RENOMBRA a `C-listas-filtradas`**: el criterio 3
-  admite paginador o filtro, pero el que tiene evidencia medida es el segundo, y D16 no diseña paginador
-  ninguno. Un nombre que apunta a la opción sin evidencia acaba construyéndola. El token viejo se conserva
-  vivo por equivalencia en la ficha de §3, porque el cuerpo de S122 en el plan sigue citándolo y el registro
-  histórico no se reescribe. Se empieza por **C-rutas-hijas** por dependencia estructural: el filtro del
-  criterio 3 actúa sobre las listas DE UN DESTINO, y los destinos no existen hasta que este Cambio los crea;
-  filtrar antes sería construir contra el monolito y rehacerlo (R-invalidación).
-  LA MEDICIÓN QUE LO CAMBIA TODO. `OBJETIVO.alto` no era 1080. El portátil del jefe de estudios tiene panel
-  1920×1080 **con escala de Windows al 150 %**, y Chrome maximizado reporta un viewport de **1280×585**
-  (`devicePixelRatio` 1.5, escritorio 1280×720). No es «1080 menos un poco»: es la mitad. Es la misma forma
-  de error que S122 llevó a M2 —el instrumento apoyado en algo que SE PARECE al conjunto medido—: «1920×1080»
-  se parece a la altura disponible y no lo es.
-  EL INSTRUMENTO CONFIRMA EL DAÑO. `scripts/calcular-recortes.py`, conservado en S122 para esto, corrido con
-  su autoprueba y con **escenario de control**: a 945 px (escala 100 %) reproduce clavado lo que S122
-  escribió —22 celdas de 791, 2,8 %, solo las de seis plazas—, lo que valida el instrumento antes de creerle.
-  A **585 px son 109 de 791, el 13,8 %**, y alcanzan a todas las celdas de tres plazas o más; a 720 px
-  (escala 125 %) son 72, el 9,1 %. Se cae con ello el argumento escrito de D11: al 14 % el colapso deja de
-  ser «el caso excepcional» y pasa a ser la interacción habitual.
-  Y LAS PALANCAS NO LLEGAN, ni son tres. Sumadas las tres medidas en S122 —badge 16 px, padding y margen de
-  plaza 25,2 px, `.asig` a `--tam-xs` 15 px— la celda de seis baja de 154,20 a 98,00 px, contra un alto de
-  fila de 87,73: **faltan 10,27 px**. Además la palanca (a) **choca con D4**, que pone el rótulo común del
-  bloque en la banda que el badge reservaba: aplicarla borra a la vez el badge de coste blando y el rótulo, y
-  eso es eliminar una señal existente, que es justo lo que la invariante del encargo prohíbe y por lo que D6
-  rechazó borrar la cuarta línea. **Son dos palancas disponibles, no tres.**
-  HALLAZGO, con sus palabras: **el diseño de §4 de S122 es correcto, y lo es SOLO a escala 100 %**. No estaba
-  mal medido; estaba medido sobre un supuesto de escalado que nadie declaró. La medición no invalida S122:
-  acota dónde vale.
-  DECISIÓN — el portátil SALE del criterio 4. D0-1 declaró 1920×1080 como la resolución de LA DEMO, y la demo
-  se enseña en un ordenador de sobremesa, verificado con el jefe de estudios en esta sesión. El criterio 4 se
-  verifica donde se juzga el producto. **D0-2 queda CERRADO por medición y exclusión**, no diferido: deja de
-  ser «parámetro sin fijar» y pasa a «medido en 1280×585 con escala 150 %; excluido del criterio». Descartada
-  la alternativa de forzar el portátil a 100 % (texto del sistema a ~11-12 px físicos: decisión sobre la
-  vista del usuario, no sobre CSS) y la de rediseñar la celda con la mitad de presupuesto (sesión de
-  medición completa, y ningún criterio la exige). Pendiente antes de C-rejilla-densidad: MEDIR el sobremesa,
-  no suponerlo.
-  C-rutas-hijas — HECHO, criterio 2 CUMPLIDO. Ocho destinos con URL enlazable bajo `/configuracion`,
-  `redirectTo` a jornada, índice VERTICAL **derivado de `routeConfig.children`** y no de un array aparte —el
-  rótulo vive en `data.titulo` de cada ruta, de modo que un noveno destino es una entrada nueva y no dos
-  ediciones—, cabecera fija por `sticky` y contador inline en las siete listas CRUD. Jornada queda sin
-  contador ni cabecera fija: es singleton y su «Guardar jornada» va al pie, así que clavar su cabecera
-  dejaría el guardar fuera (D17 otra vez). Cerrada la decisión **ruta-hija-vs-contenedor aplazada desde
-  S101**, veintidós sesiones.
-  DEUDAS CERRADAS. **D-configuracion-monolitica**: la página ya no hace scroll; cada destino se desplaza
-  dentro de su panel con la cabecera clavada. **D-pdc-lista-rancia**, por construcción y no con parche: el
-  bug existía y queda localizado —`grupo-lista.ts:121-128` recarga solo grupos tras el alta de PDC y nadie
-  avisa a `SubgrupoLista`—; con destino propio, entrar en subgrupos remonta y recarga. Su ficha desaconsejaba
-  expresamente el `EventEmitter` ad hoc, y no se ha escrito ninguno.
-  DECISIÓN CON SEDE AQUÍ, y va más allá del Cambio: el scroll pasa del documento a `.app__contenido` en TODA
-  la aplicación, con la barra permanentemente visible también en landing y horario. Era inevitable —no hay
-  forma de quitarle el scroll a la página sin gobernar el shell— y se acepta por lo que devuelve: con la
-  barra fuera del flujo, **`OBJETIVO.alto` de D1 pasa a ser derivable en CSS** (`100dvh` menos la barra, con
-  cadena flex y sin un solo literal de píxeles) en vez de un número que alguien tenía que medir y escribir.
-  DEUDAS NUEVAS (R-deuda: se registran, no se planifican). **D-cabecera-lista-duplicada** (mejora futura): al
-  descartar el componente de cabecera compartido, las siete reglas `__contador` se suman a los siete CSS ya
-  duplicados. Deliberado: el filtro de C-listas-filtradas es quien conoce la forma que la cabecera necesita, y
-  extraerla antes sería diseñarla a ciegas; su sede es ese Cambio, donde la extracción devuelve más. Se
-  registra como **LIMITACIÓN CONOCIDA** que el horario del centro real no cabe sin scroll en el portátil a
-  escala 150 %, con criterio de reapertura escrito: reabre si el uso diario pasa a ese equipo o si se fija su
-  escala al 100 %. NO se abre deuda por el contador dentro del `h2` —«Subgrupos 334» sin separación para
-  lector de pantalla—: el barrido de accesibilidad de C-identidad ya está convocado por
-  `D-insignia-sin-leyenda` y pasará por esta cabecera; queda dicho aquí y no como token.
-  COSTURA CERRADA: `diseno-navegacion.md` §5 lista las palancas como SIN DECIDIR y `gestion_proyecto.md` §4
-  las clasifica como decisión consciente FUERA de la cola. Manda la segunda —es la autoridad de planificación
-  y es posterior—, y la corrección de «tres palancas» a dos se aplica en §4.
-  MÉTODO — la precisión de M2 de S122 funcionando cuatro veces en una sesión, y las cuatro autodetectadas por
-  el ejecutor: dos sondas de navegador que leían la URL antes de que el router la actualizara y que probaban
-  el `sticky` con el relleno como hermano en vez de dentro; una banda de oclusión de altura cero que contaba
-  como intrusa cualquier fila que cruzase la línea; y la búsqueda de «la primera fila enteramente por debajo»,
-  que medía el resto de la fila tapada y no un hueco. Ninguna era defecto del código. Se resolvieron con
-  oclusión real por `elementFromPoint`. **No se añade nada a `metodo.md`**: la regla ya está escrita y esta
-  sesión es su evidencia de uso, no una regla nueva.
-  HALLAZGO DE GUION, para todo cierre futuro: **desde que S122 introdujo el índice de M-doc-3, ninguna ancla
-  sobre una cabecera es única en los documentos grandes** —el índice la duplica—. Un `replace(..., 1)` habría
-  degradado la entrada del índice y dejado viva la cabecera real: dos H3 vivas y un índice mentiroso, sin
-  error visible. Lo detectó la guarda de conteo del guion de cierre en su ensayo en seco. Regla que hereda el
-  guion de la próxima sesión: acotar toda búsqueda de cuerpo a partir de `<!-- INDICE:FIN -->`.
-  PRUEBA DE MUTACIÓN, como parte del contrato del test. El caso (3) del `configuracion.spec.ts` nuevo —el que
-  afirma que el índice se deriva de las rutas— se validó rompiendo a propósito la derivación: caen (3) y (4)
-  y **siguen verdes (1), (2), (5) y (6)**, que son los que un array copiado a mano engañaría. Mutación
-  deshecha con md5 idéntico. Un test que no se pone rojo cuando rompes lo que dice proteger es decoración; el
-  criterio 2 queda vigilado por uno que sí.
-  E2E: siete navegaciones intercaladas **por clic en el índice y no por `goto`**, porque con `goto` el e2e
-  nunca tocaría el índice y su rotura no pondría nada rojo. Helpers `abrir`/`guardar`, localizadores de
-  formulario y diálogos intactos. Aparece una colisión que no estaba prevista y sí importa: **«Grupos» casa
-  dos entradas del índice sin `exact`, por estar contenido en «Subgrupos»** —aviso directo para el filtro por
-  subcadena de C-listas-filtradas—. El enlace «Horario» no colisionaba, medido y no supuesto: 11 enlaces en
-  la página y una sola coincidencia. Bases verificadas antes y después: `educhronos-demo-m4.db` intacta en
-  `ea1a70a0…f48e9b`, `educhronos-e2e.db` reescrita como debía.
-  ERRORES DEL ARQUITECTO EN ESTA SESIÓN, registrados porque son los mismos que la sesión caza: afirmé que no
-  había precedente de `provideRouter` en ningún spec y sí lo hay (`app.spec.ts:11`, `horario-view.spec.ts:38`)
-  —extendí un dato medido sobre `children` a algo que no se había medido—; estimé el alto de fila a 585 px en
-  ~73 px cuando el instrumento da 87,73, acertando el recuento por el camino equivocado; y escribí de memoria
-  tres anclas del guion de cierre que el fichero desmintió en el ensayo en seco.
-  LIMPIEZA (M1-bis): archivada S121 a `bitacora-sesiones.md` (promovida a `### Sesión 121`, insertada al final
-  en orden ascendente, cuerpo íntegro verificado por comparación); degradada S122 a «Última sesión registrada
-  (previa)»; S123 queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S120 a S121.
-  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas HECHO**, C-listas-filtradas y
-  C-rejilla-densidad PENDIENTES. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS,
-  C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo
-  ejecutable, bloqueado por el correo al centro. Siguiente: **C-listas-filtradas**, el criterio 3, con el
-  hueco del filtro ya montado en las siete cabeceras y la frontera con este Cambio ya cortada. Lo fija su
-  propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -949,8 +965,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124.
-El plan conserva ahora S123 (degradada a formato compacto) y S124 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125.
+El plan conserva ahora S124 (degradada a formato compacto) y S125 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
