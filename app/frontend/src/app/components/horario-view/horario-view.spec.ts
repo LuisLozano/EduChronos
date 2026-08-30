@@ -11,10 +11,12 @@ import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
+import { JornadaService } from '../../services/jornada.service';
 import { Bloqueo } from '../../models/bloqueo.model';
 import { HorarioProyeccion } from '../../models/horario.model';
 import { Diagnostico } from '../../models/diagnostico.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
+import { JornadaDTO } from '../../models/jornada.model';
 
 /**
  * COORDINACIÓN del contenedor, no transporte: los tres colaboradores son dobles
@@ -101,6 +103,8 @@ describe('contenedor del horario', () => {
   let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
   let sujetoPrevalidacion: Subject<AvisoPrevalidacion[]>;
   let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
+  let sujetoJornada: Subject<JornadaDTO>;
+  let jornadas: { obtener: ReturnType<typeof vi.fn> };
   let sujetoCerrado: Subject<boolean | undefined>;
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
@@ -110,6 +114,7 @@ describe('contenedor del horario', () => {
     sujetoProyeccion = new Subject<HorarioProyeccion>();
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
+    sujetoJornada = new Subject<JornadaDTO>();
     sujetoCerrado = new Subject<boolean | undefined>();
 
     bloqueos = {
@@ -155,6 +160,10 @@ describe('contenedor del horario', () => {
     // asertos no lo hacen emitir; su sujeto queda pendiente (el panel muestra la
     // rama pendiente, que no colisiona por DOM con .error/.error-diagnostico/.aviso).
     prevalidaciones = { getPrevalidacion: vi.fn(() => sujetoPrevalidacion) };
+    // Doble por `useValue`, como el resto. SIN doble, el contenedor construiría el
+    // JornadaService real, que inyecta HttpClient y no está en este TestBed: caerían
+    // los 49 casos del fichero en el beforeEach, no uno.
+    jornadas = { obtener: vi.fn(() => sujetoJornada) };
 
     await TestBed.configureTestingModule({
       imports: [HorarioView],
@@ -166,6 +175,7 @@ describe('contenedor del horario', () => {
         { provide: BloqueoService, useValue: bloqueos },
         { provide: DiagnosticoService, useValue: diagnosticos },
         { provide: PrevalidacionService, useValue: prevalidaciones },
+        { provide: JornadaService, useValue: jornadas },
       ],
     }).compileComponents();
 
@@ -1270,5 +1280,29 @@ describe('contenedor del horario', () => {
     await fixture.whenStable();
 
     expect(grid.grupoActual()).toBeNull();
+  });
+
+  /**
+   * D7 · la vista deriva la posición del recreo de la jornada y se la pasa a la
+   * rejilla. La mitad "antes" es la que discrimina: hasta que la jornada llega, el
+   * input es null y la rejilla no inventa ninguna fila.
+   */
+  it('(50) la posición del recreo llega a la rejilla cuando llega la jornada', async () => {
+    const grid = await montar([]);
+    expect(grid.recreoTras()).toBeNull();
+
+    sujetoJornada.next({
+      persistida: true,
+      tramos: [
+        { dia: 'LUNES', orden: 1, esLectivo: true, ordenEnDia: 1, horaInicio: '08:00', horaFin: '09:00' },
+        { dia: 'LUNES', orden: 2, esLectivo: true, ordenEnDia: 2, horaInicio: '09:00', horaFin: '10:00' },
+        { dia: 'LUNES', orden: 3, esLectivo: true, ordenEnDia: 3, horaInicio: '10:00', horaFin: '11:00' },
+        { dia: 'LUNES', orden: 4, esLectivo: false, ordenEnDia: null, horaInicio: '11:00', horaFin: '11:30' },
+        { dia: 'LUNES', orden: 5, esLectivo: true, ordenEnDia: 4, horaInicio: '11:30', horaFin: '12:30' },
+      ],
+    });
+    await fixture.whenStable();
+
+    expect(grid.recreoTras()).toBe(3);
   });
 });

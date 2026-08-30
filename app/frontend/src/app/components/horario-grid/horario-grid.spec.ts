@@ -438,4 +438,32 @@ describe('rejilla de horario', () => {
     expect(instanciaDe(fixture, 'Mat').querySelector('.grupos')?.textContent?.trim()).toBe('1ºA, 1ºB');
     expect(instanciaDe(fixture, 'LCL').querySelector('.grupos')?.textContent?.trim()).toBe('1ºA');
   });
+
+  /**
+   * D7 · la fila de recreo va DONDE dice el input, no en un sitio fijo. Se afirma
+   * la posición contando filas: la de recreo es la cuarta del tbody cuando va tras
+   * el tramo 3, y eso distingue "se pintó" de "se pintó en su sitio".
+   */
+  it('(24) con recreoTras, se pinta UNA fila de recreo tras ese tramo, sin hora', async () => {
+    fixture.componentRef.setInput('recreoTras', 3);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const recreos = raiz.querySelectorAll('tr.recreo');
+    expect(recreos.length).toBe(1);
+
+    const filas = Array.from(raiz.querySelectorAll('tbody tr'));
+    expect(filas.indexOf(recreos[0] as HTMLElement)).toBe(3);
+
+    const celda = recreos[0].querySelector('td')!;
+    expect(celda.textContent?.trim()).toBe('Recreo');
+    // D8: el hueco de la hora está declarado y no se rellena.
+    expect(celda.textContent).not.toMatch(/\d/);
+    expect(celda.getAttribute('colspan')).toBe('5');
+  });
+
+  it('(25) sin recreoTras no se pinta ninguna fila de recreo', () => {
+    // El defecto del input: sin jornada cargada la rejilla no inventa un recreo.
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('tr.recreo').length).toBe(0);
+  });
 });

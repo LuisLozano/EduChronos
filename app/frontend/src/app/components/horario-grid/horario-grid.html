@@ -82,6 +82,18 @@
           </td>
         }
       </tr>
+      <!--
+        Fila de recreo (D7). SIN hora de reloj (D8): las horas que sirve la API
+        salen de leer un entero en la zona del proceso del servidor, así que son
+        correctas en esta máquina y no necesariamente en otra. El hueco está
+        declarado y no se rellena.
+      -->
+      @if (recreoTras() === t) {
+        <tr class="recreo">
+          <th class="tramo"></th>
+          <td [attr.colspan]="dias.length">Recreo</td>
+        </tr>
+      }
     }
   </tbody>
 </table>

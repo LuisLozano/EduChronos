@@ -88,6 +88,16 @@ export class HorarioGrid {
    */
   readonly grupoActual = input<string | null>(null);
 
+  /**
+   * Tras qué tramo lectivo va la fila de recreo (D7), o `null` para no pintarla.
+   * La rejilla recibe una POSICIÓN ya derivada y no sabe qué es una jornada, igual
+   * que no sabe qué es un bloqueo: quien la calcula es {@link recreoTrasTramo}.
+   *
+   * <p>El defecto `null` importa: sin jornada cargada la rejilla NO inventa un
+   * recreo. Una fila de recreo en el sitio equivocado es peor que ninguna.
+   */
+  readonly recreoTras = input<number | null>(null);
+
   readonly soltar = output<SueltaInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
   readonly despinar = output<string>();

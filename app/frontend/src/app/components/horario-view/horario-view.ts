@@ -5,13 +5,16 @@ import { Dialog } from '@angular/cdk/dialog';
 import { HorarioProyeccion } from '../../models/horario.model';
 import { Diagnostico } from '../../models/diagnostico.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
+import { TramoJornadaDTO } from '../../models/jornada.model';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
+import { JornadaService } from '../../services/jornada.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
 import { clavePin, indicePines } from '../../horario/pines';
 import { tituloHorario } from '../../horario/titulo';
+import { recreoTrasTramo } from '../../horario/recreo';
 import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
 import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
@@ -44,6 +47,7 @@ export class HorarioView {
   private readonly bloqueos = inject(BloqueoService);
   private readonly diagnosticos = inject(DiagnosticoService);
   private readonly prevalidacion = inject(PrevalidacionService);
+  private readonly jornadas = inject(JornadaService);
 
   protected readonly proyeccion = signal<HorarioProyeccion | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -153,6 +157,17 @@ export class HorarioView {
   });
 
   /**
+   * Tras qué tramo lectivo va la fila de recreo (D7); `null` mientras la jornada
+   * no llega o si su carga falla. SIN señal de error visible, y es la única de
+   * esta vista que rompe esa disciplina a propósito: un séptimo bloque
+   * condicional para anunciar que no se pudo pintar una banda le robaría altura a
+   * la tabla justo donde D1 la reparte. La degradación es la ausencia de la fila.
+   */
+  private readonly tramosJornada = signal<readonly TramoJornadaDTO[]>([]);
+
+  protected readonly recreoTras = computed(() => recreoTrasTramo(this.tramosJornada()));
+
+  /**
    * Id del horario que {@link cargar} pidió por última vez. Campo PLANO, no
    * señal: ninguna plantilla lo lee —solo lo consulta {@link lanzarGeneracion}
    * para decidir entre recargar y navegar—, y una señal que nadie consume en la
@@ -226,10 +241,25 @@ export class HorarioView {
     });
   }
 
+  /**
+   * Carga la jornada del centro. SIN parámetro `id` y desde {@link cargar}, como
+   * {@link cargarPines} y {@link cargarPrevalidacion}: la jornada es del CENTRO, no
+   * de un horario. El endpoint nunca da 404 —con la tabla vacía sintetiza la malla
+   * de referencia—, así que el error es de transporte y su único efecto es que no
+   * haya fila de recreo.
+   */
+  private cargarJornada(): void {
+    this.jornadas.obtener().subscribe({
+      next: (j) => this.tramosJornada.set(j.tramos),
+      error: () => this.tramosJornada.set([]),
+    });
+  }
+
   private cargar(id: number): void {
     this.idCargado = id;
     this.error.set(null);
     this.cargarPines();
+    this.cargarJornada();
     this.cargarPrevalidacion();
     this.cargarDiagnostico(id);
     this.service.getProyeccion(id).subscribe({

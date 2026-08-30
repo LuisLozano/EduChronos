@@ -62,6 +62,7 @@
   <app-horario-grid
     [sesiones]="sesionesFiltradas()"
     [grupoActual]="vista() === 'grupo' ? entidad() : null"
+    [recreoTras]="recreoTras()"
     [pinadas]="pinadas()"
     [badges]="badges()"
     [violaciones]="violaciones()"

@@ -22,6 +22,17 @@
   width: 3rem;
 }
 
+/* Fila de recreo (D7): estrecha a propósito. Su alto entra en el presupuesto de
+   D1 como ALTO_RECREO, así que la tipografía de aquí NO es aseo, igual que la de
+   la sub-entrada. Sin hora de reloj (D8). */
+.recreo td {
+  text-align: center;
+  font-size: var(--tam-xs);
+  line-height: var(--lh-apretado);
+  color: var(--color-tinta-suave);
+  background: var(--color-superficie-alt);
+}
+
 /* Envoltorio de altura de D2. El tope llega por variable desde la vista, que es
    la única capa que conoce el presupuesto (D1); aquí el defecto `none` significa
    "sin recorte", así que la rejilla se comporta como antes mientras nadie la
