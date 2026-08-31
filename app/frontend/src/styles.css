@@ -20,10 +20,17 @@
   --color-tinta: #1B242E;
   --color-tinta-suave: #5A6673;
 
-  /* ---------------- Color: acento ---------------- */
+  /* ---------------- Color: acento ----------------
+     `--color-sobre-acento` y su variante tenue nacen en C-identidad (S128), al
+     hacerse la barra de aplicación de acento pleno: hasta entonces no había
+     ninguna superficie oscura y no hacía falta declarar qué tinta va encima.
+     Contraste medido contra `--color-acento` (#1E4E79): 8,7:1 la plena y 5,8:1
+     la tenue, las dos por encima del 4,5:1 de texto normal. */
   --color-acento: #1E4E79;
   --color-acento-fuerte: #143A5C;
   --color-acento-suave: #DCE8F4;
+  --color-sobre-acento: #FFFFFF;
+  --color-sobre-acento-tenue: #C6D4E4;
 
   /* ---------------- Color: estados ---------------- */
   --color-error: #A32014;
@@ -59,7 +66,25 @@
   --lh-apretado: 1.25;
   --lh-normal: 1.5;
 
-  /* ---------------- Espaciado, bordes y radios ---------------- */
+  /* ---------------- Espaciado, bordes y radios ----------------
+     DECISIÓN 3 DE IDENTIDAD — densidad y espaciado (C-identidad, S128). La
+     escala existía desde C-tokens (S121) sin regla de uso, y sin regla una
+     escala no gobierna nada: cada hoja seguía eligiendo su literal. Regla:
+
+       --e1  separación dentro de una línea (icono y texto, número y rótulo)
+       --e2  entre elementos de un mismo bloque
+       --e3  padding vertical de barras y controles
+       --e4  padding de bloque y separación entre bloques hermanos
+       --e5  padding de tarjetas y contenedores; separación de navegación
+       --e6  separación entre secciones
+
+     EXCLUSIÓN EXPRESA: la geometría de `horario-grid.css` NO se tokeniza. Sus
+     valores son presupuesto de altura MEDIDO contra el criterio 4 de
+     O-navegación (`diseno-navegacion.md` §4) y no elecciones de densidad;
+     sustituirlos por escalones convertiría un número medido en uno elegido, y
+     el reparto vive a 0,8 px de un escalón de recorte. Un literal que no caiga
+     en un escalón se redondea al más cercano y el cambio se DECLARA. El resto
+     del CSS de componente se pasa a la escala en C-revisión, no aquí. */
   --e1: 4px;
   --e2: 8px;
   --e3: 12px;
@@ -92,6 +117,11 @@ body {
    y `.app__contenido` se lleva el resto con `flex: 1`. Una vista puede entonces
    pedir `height: 100%` y recibir «viewport menos barra» sin un solo literal de
    píxeles: si la barra cambia de alto, el reparto se rehace solo.
+
+   AVISO AÑADIDO EN S128: «se rehace solo» describe el LAYOUT, no el CRITERIO.
+   Que el reparto no rompa nada no significa que sea gratis: lo que la barra
+   engorda sale del hueco de la rejilla, y ese hueco es el presupuesto del
+   criterio 4 de O-navegación. Ver la restricción escrita en `app.css`.
 
    `min-height: 0` en cada eslabón no es adorno: sin él un ítem flex no baja de su
    tamaño de contenido y el scroll interior del hijo nunca aparece, porque el que
