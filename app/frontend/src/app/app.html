@@ -1,9 +1,15 @@
 <header class="app__barra">
   <a class="app__marca" routerLink="/">Educhronos</a>
   <nav class="app__nav">
-    <a routerLink="/configuracion" routerLinkActive="app__nav-activo">Configuración</a>
-    <a routerLink="/horario/1" routerLinkActive="app__nav-activo">Horario</a>
+    <a routerLink="/configuracion" routerLinkActive="app__nav-activo" ariaCurrentWhenActive="page">Configuración</a>
+    <a routerLink="/horario/1" routerLinkActive="app__nav-activo" ariaCurrentWhenActive="page">Horario</a>
   </nav>
+  <!-- Sitio reservado para el selector de curso activo de Fase 10 (criterio 1 de
+       O-navegación). Va vacío A PROPÓSITO: pintar un selector inerte sería que la
+       UI prometiera algo que no existe. Lo que reserva no es «espacio a la
+       derecha» sino una ALTURA medida —ver `.app__curso` en app.css—, que es la
+       parte del criterio que dice «sin rehacerla». -->
+  <div class="app__curso"></div>
 </header>
 
 <main class="app__contenido">

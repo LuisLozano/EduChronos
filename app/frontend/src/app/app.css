@@ -1,33 +1,98 @@
+/* Barra de aplicación — C-identidad (S128).
+   Fondo de acento pleno: es el único elemento presente en todas las pantallas,
+   así que es donde la identidad se ve una vez y no se repite en cada vista. El
+   `border-bottom` de 1 px DESAPARECE: con relleno de acento la separación la
+   hace el contraste, y quitarlo devuelve ese píxel al contenido en vez de
+   gastarlo.
+
+   RESTRICCIÓN HEREDADA, y es la que gobierna este fichero: LA BARRA PUEDE
+   ENCOGER, NO CRECER. Su alto entra en el presupuesto de altura del criterio 4
+   de O-navegación. El reparto en runtime dejó `alto-celda` a 0,8 px del escalón
+   de las celdas de cuatro plazas (S126), y esas 22 celdas se pasan hoy 1,23 px
+   sin llegar a marcarse (S127). Cada ~7 px que engorde la barra bajan
+   `alto-celda` ~1 px: al cruzar 1,23 empiezan a marcarse y las 50 marcas pasan
+   a 72, que es regresión visible sobre un criterio cerrado. El alto NO se
+   declara —no hay `height` aquí ni lo habrá—: sale de padding más interlineado
+   de la marca, y el marco flex de `styles.css` reparte el resto. Medido en la
+   superficie de verificación: 12 + 27 + 12 = 51 px, uno menos que los 52 de
+   antes. Si esta regla cambia, se recuentan las marcas de 1B-A, 4ºA y 2B-B
+   (4 / 3 / 0) antes de darlo por bueno. */
 .app__barra {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--color-borde);
+  gap: var(--e6);
+  padding: var(--e3) var(--e5);
+  background: var(--color-acento);
+  color: var(--color-sobre-acento);
 }
 
+/* La marca es hoy SOLO TIPOGRÁFICA: no hay logo. Se monta como flex con `gap`
+   para que el logo, cuando exista, entre delante del texto sin reescribir esta
+   regla. Su alto máximo es el de la línea de texto (27 px): un logo más alto
+   engorda la barra, y eso lo prohíbe la restricción de arriba. */
 .app__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
   font-size: var(--tam-l);
-  font-weight: 700;
+  font-weight: var(--peso-fuerte);
+  line-height: var(--lh-normal);
   text-decoration: none;
   color: inherit;
 }
 
 .app__nav {
   display: flex;
-  gap: 1.25rem;
+  gap: var(--e5);
 }
 
 .app__nav a {
   text-decoration: none;
-  color: var(--color-acento);
+  color: var(--color-sobre-acento-tenue);
 }
 
+.app__nav a:hover {
+  color: var(--color-sobre-acento);
+}
+
+/* La entrada activa se distingue por TRES vías, no por una: color pleno, peso y
+   subrayado. El subrayado se conserva a propósito —el color por sí solo no
+   sirve a quien no lo distingue—. El cuarto canal, `aria-current="page"`, va en
+   la plantilla: es lo que faltaba para que «entrada activa distinguible» valga
+   también para un lector de pantalla, que es la mitad que la salvedad del
+   criterio 1 de O-navegación dejó sin verificar en S127. */
 .app__nav-activo {
-  font-weight: 600;
+  color: var(--color-sobre-acento);
+  font-weight: var(--peso-medio);
   text-decoration: underline;
+  text-underline-offset: var(--e1);
 }
 
+/* Sitio del selector de curso de Fase 10. `margin-left: auto` lo manda al borde
+   derecho sin que nadie declare anchos, y `min-height` iguala la caja de la
+   marca: un control de 27 px o menos entra SIN mover el alto de la barra. Un
+   control más alto sí la engorda —un `<select>` con borde y padding ronda los
+   30—, y en ese caso Fase 10 recuenta las marcas antes de darlo por bueno. Lo
+   que se reserva es una altura conocida, no una promesa de que todo quepa. */
+.app__curso {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--tam-l) * var(--lh-normal));
+}
+
+/* HALLAZGO S128 — estos 32 px (16 arriba + 16 abajo) son la CAUSA CANDIDATA de
+   la diferencia que S126 dejó abierta y S127 confirmó en el navegador del
+   arquitecto: 748 px calculados contra 716 medidos de hueco para la rejilla.
+   Coinciden exactamente, y este elemento es el contenedor de la vista, que las
+   mediciones de S126 y S127 no miraron por estar hechas dentro de
+   `horario-grid`. Se declara CANDIDATA y no probada: la coincidencia numérica
+   es exacta pero no es una demostración.
+   NO SE TOCA. Quitarlos devolvería 32 px al hueco y subiría `alto-celda` ~4,5
+   px, lo que cambia el recorte de un criterio ya cumplido sin que ningún
+   criterio lo pida (R-terminado). Lo que S128 hace es EXPLICARLOS, que es lo
+   que quedaba pendiente como higiene. El flex y el `overflow-y` de este mismo
+   selector viven en `styles.css`; aquí solo el padding. */
 .app__contenido {
-  padding: 1rem 0;
+  padding: var(--e4) 0;
 }
