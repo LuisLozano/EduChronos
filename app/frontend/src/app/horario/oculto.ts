@@ -67,3 +67,43 @@ export function plazasOcultas(
   }
   return ocultas;
 }
+
+/**
+ * Rectángulo vertical, con la forma mínima que esta capa necesita. `DOMRect` lo
+ * cumple, así que la rejilla pasa el resultado de `getBoundingClientRect` tal
+ * cual, sin construir un objeto intermedio.
+ */
+export interface RectanguloVertical {
+  readonly top: number;
+  readonly bottom: number;
+}
+
+/**
+ * Adaptador entre el DOM y {@link plazasOcultas}: traduce rectángulos de página a
+ * coordenadas RELATIVAS al borde superior de la celda, que es lo que la regla
+ * espera.
+ *
+ * <p>Existe como función propia y no como tres líneas dentro del componente por
+ * una razón medida: en jsdom `getBoundingClientRect` devuelve ceros, así que la
+ * lectura del DOM no la prueba ninguna suite y sólo la verifica M4 en navegador.
+ * Todo lo que SÍ es comprobable —la resta, la relatividad a la celda, el alto
+ * disponible— vive aquí, donde una mutación puede tumbarlo.
+ *
+ * <p>La asimetría de la que sale la cuenta: `.celda` lleva `max-height` y
+ * `overflow: hidden`, así que SU rectángulo es la zona visible; los rectángulos
+ * de las plazas NO se recortan —`getBoundingClientRect` informa de la posición
+ * real, esté dentro del recorte o fuera—.
+ *
+ * @param celda rectángulo de `.celda`, ya recortado.
+ * @param plazas rectángulos de las líneas de plaza, en orden de pintado.
+ */
+export function ocultasEnCelda(
+  celda: RectanguloVertical,
+  plazas: readonly RectanguloVertical[],
+): number | null {
+  const lineas: LineaDePlaza[] = plazas.map((p) => ({
+    arriba: p.top - celda.top,
+    abajo: p.bottom - celda.top,
+  }));
+  return plazasOcultas(lineas, celda.bottom - celda.top);
+}
