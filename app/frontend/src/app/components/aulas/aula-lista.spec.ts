@@ -248,4 +248,21 @@ describe('AulaLista', () => {
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
+
+  /**
+   * Centinela del `textoVacio` que viaja por `input`, como el (11) de
+   * `nivel-lista.spec.ts` y por el mismo motivo: el caso (3) de
+   * `estado-lista.spec.ts` prueba que el componente pinta lo que recibe, no que
+   * la lista mande lo correcto. Aulas discrimina por el GÉNERO —«Crea la primera
+   * con «Nueva aula»», femenino—: cinco de las siete listas dicen «el primero»,
+   * así que un texto copiado de la lista de al lado, o derivado del rótulo, cae
+   * aquí. Cadena entera con `toBe`, que es lo que hace visible la concordancia.
+   */
+  it('(13) con el catálogo vacío pinta el texto propio de aulas, en femenino', async () => {
+    flushLista([]);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')?.textContent?.trim()).toBe(
+      'No hay aulas todavía. Crea la primera con «Nueva aula».',
+    );
+  });
 });

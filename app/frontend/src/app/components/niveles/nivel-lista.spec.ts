@@ -230,4 +230,23 @@ describe('NivelLista', () => {
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
+
+  /**
+   * El texto del catálogo vacío viaja por `input` desde ESTA lista hasta
+   * `app-estado-lista`, y desde el cableado de S128 nadie más lo vigila: el caso
+   * (3) de `estado-lista.spec.ts` prueba que el componente pinta LO QUE RECIBE,
+   * no que la lista mande lo correcto. Niveles es uno de los dos centinelas
+   * porque su texto es el único que NO sigue el molde de las otras seis: añade
+   * una segunda frase sobre la dependencia con Grupos. Se compara la cadena
+   * ENTERA con `toBe`, no con `toContain`: un `toContain` del primer tramo
+   * seguiría verde si alguien «normalizara» el texto borrando esa segunda frase,
+   * que es justo la mutación que este caso existe para cazar.
+   */
+  it('(11) con el catálogo vacío pinta el texto propio de niveles, con su frase sobre grupos', async () => {
+    flushLista([]);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')?.textContent?.trim()).toBe(
+      'No hay niveles todavía. Crea el primero con «Nuevo nivel»: sin niveles no se pueden crear grupos.',
+    );
+  });
 });
