@@ -222,3 +222,14 @@
 .rejilla td.ocupado {
   background: var(--color-superficie-alt);
 }
+
+/* Marca de recorte (D11). Vive DENTRO de .rotulo, que ya es absolute sobre la
+   banda que .instancia.bloque reserva: no ocupa alto y por eso no puede
+   realimentar la medición que la produce. Molde `+N` de D6, con el detalle en
+   el `title`. El aspecto definitivo es C-identidad; aquí sólo tiene que
+   distinguirse del rótulo que lo precede. */
+.oculta {
+  margin-left: 0.25rem;
+  font-weight: 700;
+  color: var(--color-marca);
+}

@@ -4,6 +4,7 @@ import {
   DestroyRef,
   ElementRef,
   afterNextRender,
+  afterRenderEffect,
   computed,
   inject,
   input,
@@ -15,6 +16,7 @@ import { SesionVista } from '../../models/horario.model';
 import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
 import { clavePin } from '../../horario/pines';
 import { altoDeCelda } from '../../horario/reparto';
+import { ocultasEnCelda } from '../../horario/oculto';
 import { ViolacionEnCelda } from '../../horario/diagnostico';
 
 /** Instancia soltada en un slot destino, en coordenadas de `TramoRef`. */
@@ -129,6 +131,24 @@ export class HorarioGrid {
   private altoPublicado: number | null = null;
 
   /**
+   * Espejo en SEÑAL del tope publicado. No es la fuente de verdad —el estilo lo
+   * sigue escribiendo `setProperty`— sino el DISPARADOR que le faltaba a D11:
+   * `repartirAltura` corre desde el `ResizeObserver`, fuera del ciclo de render,
+   * así que fijar `--alto-celda` no agenda ninguna pasada. Sin este espejo, en el
+   * primer pintado se mide la celda ANTES de que tenga tope y no se marca nada.
+   */
+  private readonly altoCelda = signal<number | null>(null);
+
+  /**
+   * Plazas ocultas por instancia (clave de {@link clavePin}), medidas sobre el
+   * DOM ya pintado. Sólo lleva las instancias con al menos una oculta.
+   */
+  protected readonly ocultas = signal<ReadonlyMap<string, number>>(new Map<string, number>());
+
+  /** Copia sin señal del último mapa, para comparar sin crearse una dependencia. */
+  private ultimasOcultas: ReadonlyMap<string, number> = new Map<string, number>();
+
+  /**
    * Reparto de altura (D1). Se mide el hueco que el flex deja a este componente
    * —que ya lleva descontado todo lo que la vista pinta encima— y se reparte entre
    * los seis tramos, descontando `thead` y la fila de recreo.
@@ -155,6 +175,7 @@ export class HorarioGrid {
       return;
     }
     this.altoPublicado = alto;
+    this.altoCelda.set(alto);
     if (alto === null) {
       raiz.style.removeProperty('--alto-celda');
     } else {
@@ -162,7 +183,110 @@ export class HorarioGrid {
     }
   }
 
+  /**
+   * Mide qué plazas esconde el recorte (D11) y publica el resultado.
+   *
+   * <p>Va en la fase `read` de {@link afterRenderEffect} y no en el
+   * `ResizeObserver`: ese observador sólo despierta con cambios de TAMAÑO, y
+   * cambiar de grupo repinta la rejilla sin mover un píxel —`table-layout: fixed`
+   * y seis filas—, así que las marcas del grupo anterior sobrevivirían.
+   *
+   * <p>NO hay bucle, y la razón es estructural: la marca vive en la banda
+   * `position: absolute` que `.instancia.bloque` ya reserva, luego no cambia
+   * ninguna medida. La segunda pasada mide lo mismo, el mapa es igual y la guarda
+   * no reescribe.
+   *
+   * <p>VERIFICADO en el M4 de S127: Firefox maximizado, viewport 1920x887, dpr 1,
+   * hueco 716 px, `--alto-celda` 101 px. La consola no dio UN SOLO aviso de
+   * «ResizeObserver loop», que es como se habría manifestado la realimentación que
+   * el párrafo anterior descarta por construcción.
+   *
+   * <p>Las marcas se contaron en tres grupos y cuadran con el cálculo sobre el
+   * volcado de la BD demo: 1B-A 4, 4ºA 3 —dos `+2` de seis plazas y un `+1` de
+   * cinco— y 2B-B 0 sobre seis celdas de CUATRO plazas. El caso que decide es 4ºA:
+   * en la misma pantalla conviven las tres marcadas y tres celdas de cuatro plazas
+   * SIN marcar, así que la regla de la mitad discrimina justo donde se juega —esas
+   * cuatro plazas se pasan 1,23 px del hueco y se ven al 94 %—. Al cambiar de grupo
+   * y volver, las marcas siguen al grupo pintado: es lo que compra estar en la fase
+   * `read` y no en el `ResizeObserver`.
+   *
+   * <p>Y la prueba de que D1 compró algo real, no una constante disfrazada: con el
+   * aviso «1 pines sin aplicar» en pantalla el hueco encoge, y la celda de seis
+   * plazas pasa a `+3` —medido en 1ºA— SIN que reaparezca el scroll. Con un reparto
+   * de constantes, esos 62 px de aviso habrían devuelto la barra.
+   *
+   * <p>La cadena completa —medir, poblar el mapa, pintar la marca— SÍ se prueba en
+   * jsdom, con `getBoundingClientRect` stubeado a la geometría de S126: casos (28)
+   * y (29) del spec. Lo que jsdom no puede dar son los rectángulos de verdad —los
+   * suyos son ceros—, y ÉSO es lo que aporta M4: que el navegador real produzca la
+   * geometría que el stub supone.
+   *
+   * <p>El mapa recorre TODAS las instancias, incluidas las de una plaza, pero la
+   * marca sólo se pinta dentro del `@if (esBloque(inst))`. Las claves de instancias
+   * de una plaza entran en el mapa y no las lee nadie: es inocuo y coherente con la
+   * limitación de abajo, pero el mapa NO es una proyección fiel de lo que se ve.
+   *
+   * <p>LIMITACIÓN DECLARADA: sólo se marca lo que tiene banda —modo bloque o
+   * badge—. Una instancia de UNA plaza no la tiene, y dársela cambiaría su altura,
+   * que es justo la realimentación que esto evita. Hoy no se recorta ninguna (62,9
+   * px contra ~110 disponibles), pero es propiedad de estos datos, no del modelo.
+   */
+  private medirOcultas(): void {
+    // `inject(ElementRef)` devuelve `ElementRef<any>` —el `<HTMLElement>` de la
+    // declaración es el token, no el genérico—, y sobre `any` la inferencia de
+    // `Array.from` cae a `unknown`. Se ancla el tipo aquí, una vez.
+    const raiz: HTMLElement = this.host.nativeElement;
+    const nuevas = new Map<string, number>();
+    for (const celda of raiz.querySelectorAll<HTMLElement>('.celda')) {
+      const rectCelda = celda.getBoundingClientRect();
+      for (const instancia of celda.querySelectorAll<HTMLElement>('.instancia')) {
+        const clave = instancia.getAttribute('data-clave');
+        if (clave === null) {
+          continue;
+        }
+        const plazas = Array.from(
+          instancia.querySelectorAll<HTMLElement>('.entrada'),
+          (e: HTMLElement) => e.getBoundingClientRect(),
+        );
+        const n = ocultasEnCelda(rectCelda, plazas);
+        if (n !== null && n > 0) {
+          nuevas.set(clave, n);
+        }
+      }
+    }
+    const previo = this.ultimasOcultas;
+    const igual =
+      previo.size === nuevas.size &&
+      [...nuevas].every(([k, v]) => previo.get(k) === v);
+    if (igual) {
+      return;
+    }
+    this.ultimasOcultas = nuevas;
+    this.ocultas.set(nuevas);
+  }
+
+  /** Detalle de todas las plazas, para el `title` de la marca de D11. */
+  protected detalleInstancia(inst: InstanciaCelda): string {
+    return inst.entradas.map((e) => `${e.asignaturaCodigo} (${e.aulaCodigo})`).join(', ');
+  }
+
+  /** Plazas ocultas de una instancia, o `null` si no esconde ninguna (D11). */
+  protected marcaOcultas(inst: InstanciaCelda): number | null {
+    return this.ocultas().get(this.clave(inst)) ?? null;
+  }
+
   constructor() {
+    afterRenderEffect({
+      read: () => {
+        // Dependencias EXPLÍCITAS: el contenido y el tope. Las lee aquí y no
+        // dentro de medirOcultas para que el disparo no dependa de por dónde
+        // pase el recorrido del DOM.
+        this.celdas();
+        this.altoCelda();
+        this.medirOcultas();
+      },
+    });
+
     afterNextRender(() => {
       const observador = new ResizeObserver(() => this.repartirAltura());
       // El host, para el hueco; la tabla, porque la fila de recreo aparece DESPUÉS

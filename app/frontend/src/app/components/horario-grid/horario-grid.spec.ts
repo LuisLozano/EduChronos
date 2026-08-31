@@ -144,6 +144,71 @@ function enSlot(s: SesionVista, dia: number, tramo: number): SesionVista {
   return { ...s, dia, tramo };
 }
 
+/**
+ * Instancia de SEIS plazas: seis sub-entradas de la MISMA instancia
+ * (`Bloque-1ºA`, índice 3) en el mismo slot, con asignaturas y plazas distintas.
+ * Es la celda peor del centro real —22 de las 791 lo son— y la única forma de
+ * que el recorte esconda más de una plaza.
+ *
+ * <p>Asignaturas distintas a propósito: el `title` de la marca lista TODAS las
+ * plazas, y con seis «Mat» ese aserto no distinguiría una implementación que
+ * repitiera la primera. El índice 3 sigue el criterio del fichero de no usar 1,
+ * que una implementación podría fijar a mano.
+ */
+const ASIGS_BLOQUE = ['Mat', 'LCL', 'ING', 'FIS', 'QUI', 'BIO'] as const;
+const BLOQUE_6: readonly SesionVista[] = ASIGS_BLOQUE.map((a, i) =>
+  sesion(100 + i, 'Bloque-1ºA', 3, a, `Bloque-1ºA-P${i + 1}`),
+);
+
+/** Geometría de S126, la misma que usan (12)-(14) de `horario/oculto.spec.ts`. */
+const PASO_PX = 21.7;
+const ALTO_DEL_MODELO: Readonly<Record<number, number>> = { 4: 110.8, 5: 132.5, 6: 154.2 };
+/** Hueco por fila medido en S126: 716 útiles entre seis tramos. */
+const DISPONIBLE_PX = 109.57;
+
+/** Original guardado UNA vez, para que el `afterEach` pueda restaurarlo siempre. */
+const RECT_ORIGINAL = Element.prototype.getBoundingClientRect;
+
+function rectDe(top: number, bottom: number): DOMRect {
+  return new DOMRect(0, top, 0, bottom - top);
+}
+
+/**
+ * Sustituye `getBoundingClientRect` por la geometría del modelo. En jsdom el
+ * original devuelve ceros SIEMPRE —medido en el sondeo de S127—, así que sin esto
+ * `ocultasEnCelda` devuelve `null` y no hay nada que afirmar (caso 27).
+ *
+ * <p>Discrimina por `classList`, NUNCA por orden de llamada: el recorrido de
+ * {@link HorarioGrid} visita el DOM en un orden que la plantilla puede cambiar, y
+ * un stub que contara llamadas convertiría cualquier reordenación en un fallo
+ * falso. El índice de cada plaza se saca de su posición ENTRE SUS HERMANAS, que
+ * es un hecho del DOM y no del recorrido.
+ *
+ * <p>Se instala DENTRO del test que lo usa y jamás en un `beforeEach` global: la
+ * marca vive dentro de `.rotulo`, así que una instancia marcada haría que el
+ * `textContent` del rótulo fuese `'2 simultáneas+2'` y tumbaría al caso (20),
+ * que es ajeno a D11.
+ */
+function instalarStubDeRects(): void {
+  Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+    if (this.classList.contains('celda')) {
+      return rectDe(0, DISPONIBLE_PX);
+    }
+    if (this.classList.contains('entrada')) {
+      const hermanas = Array.from(this.parentElement?.querySelectorAll('.entrada') ?? []);
+      const i = hermanas.indexOf(this);
+      const n = hermanas.length;
+      const fin = ALTO_DEL_MODELO[n];
+      if (i < 0 || fin === undefined) {
+        return rectDe(0, 0);
+      }
+      const bottom = fin - (n - 1 - i) * PASO_PX;
+      return rectDe(bottom - PASO_PX, bottom);
+    }
+    return rectDe(0, 0);
+  };
+}
+
 describe('rejilla de horario', () => {
   let fixture: ComponentFixture<HorarioGrid>;
 
@@ -156,6 +221,15 @@ describe('rejilla de horario', () => {
     fixture.componentRef.setInput('sesiones', SESIONES);
     fixture.componentRef.setInput('pinadas', PINADAS);
     await fixture.whenStable();
+  });
+
+  /**
+   * Restaura el original aunque el test haya fallado: `afterEach` corre igual, y
+   * dejar el stub puesto contaminaría a TODO el fichero (empezando por el caso
+   * 20). Es idempotente, así que corre también tras los tests que no lo instalan.
+   */
+  afterEach(() => {
+    Element.prototype.getBoundingClientRect = RECT_ORIGINAL;
   });
 
   /**
@@ -465,5 +539,86 @@ describe('rejilla de horario', () => {
   it('(25) sin recreoTras no se pinta ninguna fila de recreo', () => {
     // El defecto del input: sin jornada cargada la rejilla no inventa un recreo.
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('tr.recreo').length).toBe(0);
+  });
+
+  /**
+   * D11 · el atributo por el que la medición indexa cada instancia. Vive en el
+   * DOM porque `medirOcultas` recorre elementos, no el modelo: sin él, el mapa de
+   * ocultas no puede casarse con la instancia que lo pintó.
+   *
+   * <p>Se afirman los DOS valores literales, como en (6): el índice 2 de `Mat` es
+   * lo único que distingue una implementación que fijara `|1` a mano, y el `|1` de
+   * `LCL` es lo único que distingue una que fijara `|2`.
+   */
+  it('(26) cada instancia lleva data-clave con la CLAVE de clavePin', () => {
+    expect(instanciaDe(fixture, 'Mat').getAttribute('data-clave')).toBe('Mat-1ºA|2');
+    expect(instanciaDe(fixture, 'LCL').getAttribute('data-clave')).toBe('LCL-1ºA|1');
+  });
+
+  /**
+   * D11 · POR QUÉ el resto de la suite no ve el cableado. Este caso no mata
+   * ninguna mutación y no pretende hacerlo: fija en un aserto lo que hasta ahora
+   * sólo decía un comentario. En jsdom `getBoundingClientRect` devuelve ceros
+   * —medido en el sondeo de S127—, luego el alto de la celda es 0,
+   * `ocultasEnCelda` devuelve `null` y no se marca nada. Sin los stubs de (28) y
+   * (29) el cableado es INVISIBLE para los tests, y eso es un hecho de la
+   * herramienta, no un descuido.
+   */
+  it('(27) sin stub, en jsdom los rects son ceros y no se marca ninguna instancia', async () => {
+    fixture.componentRef.setInput('sesiones', DESDOBLE);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // La instancia SÍ se pintó: sin esto, "no hay marca" podría ser "no hay nada".
+    expect(raiz.querySelectorAll('div.instancia').length).toBe(1);
+    expect(raiz.querySelectorAll('.oculta').length).toBe(0);
+  });
+
+  /**
+   * D11 · la cadena entera, de rectángulo a píxel pintado: el effect mide, el mapa
+   * se puebla y la plantilla marca. Es el único caso que recorre todo el camino.
+   *
+   * <p>El `+2` NO es una elección: con el hueco de S126 (109,57 px) y el escalón de
+   * 21,7, la cuarta plaza se ve al 94 % y la regla de la mitad NO la cuenta;
+   * la quinta y la sexta quedan enteras fuera. Cambiar el umbral a «cualquier
+   * parte oculta cuenta» daría +3 y este aserto caería, que es justo su trabajo.
+   *
+   * <p>El `title` lista LAS SEIS plazas, no sólo las ocultas: mismo criterio que
+   * D6 con los grupos —la marca condensa, el title conserva—.
+   */
+  it('(28) con rectángulos stubeados, la instancia de seis plazas marca +2', async () => {
+    instalarStubDeRects();
+    fixture.componentRef.setInput('sesiones', BLOQUE_6);
+    await fixture.whenStable();
+
+    const marca = instanciaDe(fixture, 'Mat').querySelector('.oculta');
+    expect(marca).not.toBeNull();
+    expect(marca!.textContent?.trim()).toBe('+2');
+
+    const title = marca!.getAttribute('title') ?? '';
+    for (const asignatura of ASIGS_BLOQUE) {
+      expect(title).toContain(asignatura);
+    }
+  });
+
+  /**
+   * D11 · la marca vive DENTRO de la banda del rótulo, que `.instancia.bloque` ya
+   * reserva y es `absolute`. De ahí sale la garantía de que no realimenta la
+   * medición: si colgara de la instancia ocuparía alto, cambiaría los rectángulos
+   * y la siguiente pasada mediría otra cosa.
+   *
+   * <p>El segundo aserto protege a D4: el `title` del rótulo es el ÚNICO sitio
+   * donde se lee el código completo de la actividad, y la marca trae el suyo
+   * propio en vez de robárselo.
+   */
+  it('(29) la marca está dentro del rótulo, y el rótulo conserva su propio title', async () => {
+    instalarStubDeRects();
+    fixture.componentRef.setInput('sesiones', BLOQUE_6);
+    await fixture.whenStable();
+
+    const rotulo = instanciaDe(fixture, 'Mat').querySelector('.rotulo');
+    expect(rotulo).not.toBeNull();
+    expect(rotulo!.querySelector('.oculta')).not.toBeNull();
+    expect(rotulo!.getAttribute('title')).toBe('Bloque-1ºA');
   });
 });

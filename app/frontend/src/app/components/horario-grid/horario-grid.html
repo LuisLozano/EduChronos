@@ -26,6 +26,7 @@
               @for (inst of instancias(i + 1, t); track clave(inst)) {
                 <div
                   class="instancia"
+                  [attr.data-clave]="clave(inst)"
                   [class.pinada]="estaPinada(inst)"
                   [class.con-badge]="tieneBadge(inst)"
                   [class.bloque]="esBloque(inst)"
@@ -36,7 +37,19 @@
                   (cdkDragEnded)="alTerminarArrastre()"
                 >
                   @if (esBloque(inst)) {
-                    <span class="rotulo" [title]="inst.actividadCodigo">{{ inst.entradas.length }} simultáneas</span>
+                    <!-- D11: la marca de recorte va DENTRO de la banda del rótulo, que
+                         `.instancia.bloque` ya reserva y es `absolute`: no cuesta un píxel
+                         de alto, y por eso no puede realimentar la medición. `title`
+                         propio para NO robarle a D4 el suyo, que es el único sitio donde
+                         se lee el código completo de la actividad. Lista entera en el
+                         title, como hace D6 con los grupos. -->
+                    <span class="rotulo" [title]="inst.actividadCodigo"
+                      >{{ inst.entradas.length }} simultáneas@if (marcaOcultas(inst); as n) {<span
+                        class="oculta"
+                        [title]="'No caben: ' + inst.entradas.length + ' plazas — ' + detalleInstancia(inst)"
+                        >+{{ n }}</span
+                      >}</span
+                    >
                   }
                   @if (tieneBadge(inst) || estaPinada(inst)) {
                     <span class="adornos">
