@@ -1,3 +1,10 @@
+<!--
+  Envoltorio de altura (D1). MISMO patrón que `configuracion.css`: `height: 100%`
+  resuelve contra `.app__contenido`, que sí tiene altura por flex, y el host
+  inline del componente se atraviesa sin declarar `:host` —que sería un segundo
+  patrón de altura conviviendo con el único que el proyecto tiene—.
+-->
+<section class="horario">
 <section class="controles">
   <h2 class="titulo">{{ titulo() }}</h2>
 
@@ -72,3 +79,4 @@
 } @else {
   <p>Cargando…</p>
 }
+</section>

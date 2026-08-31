@@ -1,9 +1,20 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { Component, computed, input, output, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 import { SesionVista } from '../../models/horario.model';
 import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
 import { clavePin } from '../../horario/pines';
+import { altoDeCelda } from '../../horario/reparto';
 import { ViolacionEnCelda } from '../../horario/diagnostico';
 
 /** Instancia soltada en un slot destino, en coordenadas de `TramoRef`. */
@@ -106,6 +117,64 @@ export class HorarioGrid {
   protected readonly tramos = TRAMOS;
   /** Espejo de la función pura para que la plantilla la invoque (como {@link dias}). */
   protected readonly claveSlot = claveSlot;
+
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Último tope publicado, para NO reescribir la variable con el mismo valor.
+   * Esa guarda es lo que corta el bucle del observador: reescribir dispara una
+   * notificación más aunque el número no cambie.
+   */
+  private altoPublicado: number | null = null;
+
+  /**
+   * Reparto de altura (D1). Se mide el hueco que el flex deja a este componente
+   * —que ya lleva descontado todo lo que la vista pinta encima— y se reparte entre
+   * los seis tramos, descontando `thead` y la fila de recreo.
+   *
+   * <p>NO hay bucle: el resultado depende del hueco, del `thead` y del recreo, y de
+   * NINGUNA medida de la tabla. Un cambio de la tabla puede disparar el observador,
+   * pero recalcula el mismo número, no se reescribe nada y ahí acaba.
+   *
+   * <p>Se observa el HOST y no un elemento interno porque el host es lo único que la
+   * tabla no puede estirar: `flex: 1 1 0` con `min-height: 0` lo ata al hueco
+   * disponible. Observar algo que el contenido pueda agrandar sí sería un bucle.
+   */
+  private repartirAltura(): void {
+    const raiz = this.host.nativeElement;
+    const thead = raiz.querySelector('thead');
+    const recreo = raiz.querySelector('tr.recreo');
+    const alto = altoDeCelda(
+      raiz.clientHeight,
+      thead?.getBoundingClientRect().height ?? 0,
+      recreo?.getBoundingClientRect().height ?? 0,
+      this.tramos.length,
+    );
+    if (alto === this.altoPublicado) {
+      return;
+    }
+    this.altoPublicado = alto;
+    if (alto === null) {
+      raiz.style.removeProperty('--alto-celda');
+    } else {
+      raiz.style.setProperty('--alto-celda', `${alto}px`);
+    }
+  }
+
+  constructor() {
+    afterNextRender(() => {
+      const observador = new ResizeObserver(() => this.repartirAltura());
+      // El host, para el hueco; la tabla, porque la fila de recreo aparece DESPUÉS
+      // (la jornada llega por HTTP) y cambia el reparto sin cambiar el hueco.
+      observador.observe(this.host.nativeElement);
+      const tabla = this.host.nativeElement.querySelector('table');
+      if (tabla) {
+        observador.observe(tabla);
+      }
+      this.destroyRef.onDestroy(() => observador.disconnect());
+    });
+  }
 
   private readonly celdas = computed(() => agruparPorActividad(this.sesiones()));
 

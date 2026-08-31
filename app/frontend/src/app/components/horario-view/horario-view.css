@@ -61,3 +61,27 @@
   background: var(--color-aviso-fondo);
   font-weight: 600;
 }
+
+/* D1 · la vista se lleva el alto que le queda al contenido y lo reparte. El
+   `min-height: 0` no es adorno: sin él, un ítem flexible NUNCA encoge por debajo
+   de su contenido, la rejilla empuja la columna y vuelve el scroll de
+   `.app__contenido`, que es justo lo que este cambio viene a quitar. */
+.horario {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* La rejilla es el ítem que absorbe el sobrante: TODO lo que aparezca por encima
+   —un aviso de pines, un error de generación— le resta alto automáticamente, y su
+   observador de tamaño vuelve a repartir. Por eso el presupuesto no se enumera en
+   ningún sitio.
+   `display: block` porque el elemento a medida es inline por defecto y un inline no
+   puede ser ítem flexible con altura propia. */
+app-horario-grid {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}

@@ -33,11 +33,12 @@
   background: var(--color-superficie-alt);
 }
 
-/* Envoltorio de altura de D2. El tope llega por variable desde la vista, que es
-   la única capa que conoce el presupuesto (D1); aquí el defecto `none` significa
-   "sin recorte", así que la rejilla se comporta como antes mientras nadie la
-   defina. `overflow: hidden` es el recorte que D11 vendrá a explicar: hasta
-   entonces esta celda no colapsa nada porque no hay tope que rebasar. */
+/* Envoltorio de altura de D2. El tope lo publica el propio componente sobre su
+   host, midiendo el hueco que el flex le deja (D1): la VISTA no lo calcula, porque
+   no necesita enumerar su propio cromo —el flex ya se lo ha descontado—. Sin medida
+   útil (jsdom, o el componente fuera de una cadena de altura) el defecto `none`
+   significa "sin recorte" y la rejilla se comporta como antes de D1.
+   `overflow: hidden` es el recorte que D11 vendrá a explicar. */
 .celda {
   max-height: var(--alto-celda, none);
   overflow: hidden;
