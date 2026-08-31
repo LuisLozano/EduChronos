@@ -15,20 +15,20 @@
 - L758 — ### H1 — Ajustar (cierre)
 - L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
 - L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
-- L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
-- L1011 — ## 4. Clasificación del trabajo pendiente
-- L1029 — ### Clasificación de las deudas vivas actuales
-- L1035 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1042 — #### Deuda técnica real, colgada de su objetivo
-- L1082 — #### Mejora futura, cuelga y espera
-- L1112 — #### Decisión arquitectónica consciente → sale de la cola
-- L1124 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1133 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1140 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1173 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1227 — ## 6. Reglas estratégicas
-- L1274 — ## 7. Métricas del sistema
-- L1295 — ## 8. El sistema respondiendo a las preguntas clave
+- L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1043 — ## 4. Clasificación del trabajo pendiente
+- L1061 — ### Clasificación de las deudas vivas actuales
+- L1067 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1074 — #### Deuda técnica real, colgada de su objetivo
+- L1116 — #### Mejora futura, cuelga y espera
+- L1146 — #### Decisión arquitectónica consciente → sale de la cola
+- L1158 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1167 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1174 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1207 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1261 — ## 6. Reglas estratégicas
+- L1308 — ## 7. Métricas del sistema
+- L1329 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -866,7 +866,7 @@ de las Fases 9–12.
   funcional. Si al abrirlo resulta grande, se parte (métrica de §7).
 
 
-#### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
+#### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
 - **Propósito:** que la aplicación se recorra sin pelearse con ella —enrutado, densidad
   de la rejilla y listas del tamaño del centro real—, no que se vea mejor. Es transversal,
   como O-diseño, y hermano suyo: uno hace el ACABADO y el otro el MANEJO. Lo funda
@@ -876,6 +876,12 @@ de las Fases 9–12.
   1. Barra superior con Configuración y Horario, entrada activa distinguible, y sitio
      reservado para el selector de curso activo de Fase 10 sin rehacerla. (Nota: la barra
      YA EXISTE; lo que falta es estilo, y eso es C-identidad.)
+     **CERRADO en S127 sobre esa decisión escrita, con la salvedad registrada:** este criterio
+     nunca abrió Cambio y nunca se verificó formalmente. La barra existe y en las capturas del M4
+     la entrada activa se distingue, pero eso es lectura de unas capturas tomadas para otra cosa,
+     no una verificación. **C-identidad reestila esta barra**, así que es allí donde «entrada
+     activa distinguible» y el sitio reservado para el selector de curso de Fase 10 se comprueban
+     de verdad. Se deja dicho para que nadie lo lea como verificado.
   2. Configuración se navega por rutas hijas con `router-outlet`: los ocho destinos se
      alcanzan en un gesto, cada uno con URL enlazable. `/configuracion` redirige a
      `jornada`. Añadir un noveno destino es una entrada nueva, no una reforma.
@@ -937,6 +943,24 @@ de las Fases 9–12.
      Y no se arregla afinando: el aviso de pines cuesta 62 px de hueco (~10 px por fila), así que con un
      aviso en pantalla 72 es inevitable a esta geometría. El instrumento sale VALIDADO del contraste con el
      navegador —cinco tamaños de celda, ninguna desviación mayor de 1 px— y no se toca.
+     **CUMPLIDO EN S127 (tramo 2), y con ello el criterio ENTERO.** La otra mitad —«colapsadas Y
+     con forma visible de expandirlas»— la cierra la marca `+N` en la banda del rótulo con el
+     detalle en el `title` (`diseno-navegacion.md` §4, «Decisiones de S127»). La marca NO se
+     dispara por número de plazas sino por desbordamiento medido con una FRACCIÓN —una plaza
+     cuenta como oculta si se ve menos de la mitad—, así que **se marcan 50 de las 72 recortadas**:
+     las 22 de cuatro plazas se pasan 1,23 px y no esconden nada legible, y marcarlas habría sido
+     poner una señal falsa al lado de la marca verdadera de D6. Verificado en la superficie del
+     criterio (Firefox del arquitecto, 1920×887, dpr 1, hueco 716, `--alto-celda` 101): 1B-A 4
+     marcas, 4ºA 3 —dos `+2` y un `+1`— con sus tres celdas de cuatro plazas SIN marcar en la misma
+     pantalla, y 2B-B 0 sobre seis celdas de cuatro plazas. Las marcas siguen al grupo al cambiar
+     de vista y volver. **El 9,1 % de recorte no se toca y sigue sin rediscutirse**: lo que cambia
+     no es cuántas celdas se recortan, sino que ya no lo hacen en silencio.
+     Confirmación colateral que vale por sí sola: con el aviso «1 pines sin aplicar» en pantalla la
+     celda de seis pasa a `+3` y **el scroll no reaparece** —los 62 px que S126 midió, absorbidos en
+     caliente—. Es la prueba de que el reparto en runtime de D1 compró algo real.
+     El hueco de 716 px queda además CONFIRMADO en el navegador del arquitecto y no sólo en el de
+     Playwright; los 32 px contra los 748 calculados siguen sin explicar, pero ya no son sospechosos
+     de ser artefacto del entorno de prueba.
      La resolución del portátil queda MEDIDA y CERRADA en S123 —1280×585 con escala 150 %— y
      EXCLUIDA del criterio.
   5. Ninguna escritura nueva. Se admite composición de solo lectura (enseñar en un destino
@@ -949,6 +973,9 @@ de las Fases 9–12.
      tras S124: app 282, solver 91, vitest 356, e2e 2. **Tras S126: app 282, solver 91, vitest 381, e2e 2**,
      con la única baja declarada del tramo 1 —`centro-minimo.spec.ts`, el aserto sobre `.grupos`— sustituida
      por su contraria, que es lo que D6 promete y antes no verificaba nadie.
+     **CUMPLIDO. Tras S127: app 282, solver 91, vitest 403, e2e 2.** vitest sube +22 y **ni uno solo de
+     los 381 heredados se modifica**: el tramo 2 sólo añade. Las bajas previstas del objetivo se
+     consumaron todas en S123 y S126; el tramo 2 no rompió ninguna.
 - **Deudas que absorbe:** `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que
   llevaban desde S115 y S113 remitiendo las dos, con esas palabras, a «el Cambio que
   decida la navegación» y a «la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio
@@ -971,7 +998,7 @@ de las Fases 9–12.
   (criterio 2, y con él las dos deudas absorbidas) — **HECHO en S123**; **C-listas-filtradas**
   (criterio 3, los casos duros son Subgrupos y Actividades) — **HECHO en S124**; y **C-rejilla-densidad**
   (criterio 4, la geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11)
-  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. **PARTIDO EN DOS TRAMOS en S125**, por dependencia real y no por tamaño: **tramo 1 — geometría y presupuesto** (D1-D6, D7, D8, D9, D10: todo lo que CONSUME altura, con la verificación en navegador de que da 50 de 791) y **tramo 2 — el mecanismo de expansión** (D11, lo único interactivo y lo único que hoy no existe en ninguna forma; va después porque no se puede verificar «colapsada Y con forma visible de expandirla» hasta que algo colapse). **TRAMO 1 HECHO en S126** (seis commits: geometría de celda, cabecera fundida, fila de recreo y reparto de altura), con el criterio 4 cumplido en su mitad medible —ausencia de scroll— y PENDIENTE en la otra: la expansión. **CONDICIÓN DE SALIDA que hereda el tramo 2: el repositorio queda ocultando 72 celdas de 791 sin marca ni forma de verlas.** Es el estado intermedio que la partición aceptó, no una entrega, y sólo lo cierra D11. El criterio 1 no abre Cambio: la barra
+  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. **PARTIDO EN DOS TRAMOS en S125**, por dependencia real y no por tamaño: **tramo 1 — geometría y presupuesto** (D1-D6, D7, D8, D9, D10: todo lo que CONSUME altura, con la verificación en navegador de que da 50 de 791) y **tramo 2 — el mecanismo de expansión** (D11, lo único interactivo y lo único que hoy no existe en ninguna forma; va después porque no se puede verificar «colapsada Y con forma visible de expandirla» hasta que algo colapse). **TRAMO 1 HECHO en S126** (seis commits: geometría de celda, cabecera fundida, fila de recreo y reparto de altura), con el criterio 4 cumplido en su mitad medible —ausencia de scroll— y PENDIENTE en la otra: la expansión. La CONDICIÓN DE SALIDA que heredó el tramo 2 —el repositorio ocultando 72 celdas de 791 sin marca ni forma de verlas— queda **DESCARGADA en S127**. **TRAMO 2 HECHO en S127** (tres commits: la regla pura, el adaptador DOM→regla y el cableado con la marca), y con él el criterio 4 cumplido entero. La partición de S125 sale VALIDADA: la dependencia era real —no se puede verificar «colapsada y con forma visible de expandirla» hasta que algo colapse— y el tramo 2 se apoyó en la geometría del tramo 1 en cada medida, incluida la que decidió el umbral. El criterio 1 no abre Cambio: la barra
   existe y lo que le falta es estilo. Salen uno a uno de los criterios 2, 3 y 4, y tenerlos escritos
   convirtió el M0 de S123 en ratificar en vez de deliberar.
   **RENOMBRADO en S123: `C-listas-filtradas` se llamaba `C-listas-paginadas`.** Los dos nombres designan
@@ -996,6 +1023,11 @@ de las Fases 9–12.
   definitiva y esta la cambia.
 - **Orden resultante, que sustituye al de la ficha de O-diseño:** sistema (hecho) →
   **O-navegación** → C-identidad y C-revisión sobre la UI definitiva → demo.
+- **TERMINADO en S127.** Los seis criterios cumplidos: el 2 en S123, el 3 en S124, el 4 en S126 (sin
+  scroll) y S127 (colapso con marca), el 5 sin una sola escritura nueva —D11 no añade ninguna—, el 6 con
+  403 verdes y ninguna baja imprevista, y el 1 sobre la decisión escrita de la ficha, con la salvedad
+  anotada en su propio texto. **Siguiente por el orden escrito desde S122: C-identidad**, de O-diseño,
+  sobre la UI definitiva que este objetivo acaba de fijar.
 - **Grano abierto:** objetivo propio y NO Cambio de O-diseño, por decisión del arquitecto
   en S122, con razón escrita: esto toca enrutado, paginación y densidad de rejilla, arrastra
   la decisión aplazada desde S101 y rompe un e2e de criterio. **Un Cambio que rompe un e2e
@@ -1071,6 +1103,8 @@ asigna categoría, objetivo y disposición.
 | D-prevalidacion-ciega-a-holgura-cero (la prevalidación da vía libre ante el caso más difícil) | O-demo (C-generación) | No | Nace en S117. Sobre el catálogo real la prevalidación devuelve **ERROR=0 y AVISO=0**, y sin embargo 26 de los 28 grupos deben llenar sus 30 tramos EXACTOS. La causa es de diseño: `GRUPO_SOBRECARGADO` exige demanda MAYOR que los tramos disponibles, y 30 sobre 30 no lo supera. Distingue «imposible» de «posible», pero no «cómodo» de «al límite», que es la distinción que gobierna si habrá solución en el presupuesto dado. Se registra por su efecto COMBINADO: vía libre → generar → sin señal durante la espera (D-generacion-sin-indicador) → «no hay horario factible» que es falso (D-timeout-como-infactible). El arreglo natural es un AVISO cuando la holgura de un grupo es cero, y su valor depende de que alguien lo lea: se decide junto con la señal de espera. **AFINADA en S118 por dos vías.** (1) FOTOGRAFIADA: la generación que el arquitecto lanzó desde el navegador mostraba «Catálogo sano: sin hallazgos de pre-validación» sobre el centro donde 26 de 28 grupos van a 30/30; deja de ser dato de arnés y pasa a ser lo que el usuario lee. (2) SUPERFICIE AMPLIADA: sobre el catálogo VACÍO la prevalidación también devuelve `[]` y solo lo caza `ModeloCpSat` al construir el modelo, luego no es ciega solo a la holgura cero, es ciega al centro recién instalado. S118 resolvió el DESENLACE de ese caso (422 CONFIGURACION_INCOMPLETA en vez de un 500 accidental), no el aviso. La mitad del «efecto combinado» que la ficha registraba se ha deshecho: sus dos hermanas están CERRADAS. No se paga ahora |
 | D-presupuesto-anunciado-espejo (la espera anunciada en pantalla es un espejo manual del presupuesto real) | O-demo | No | Nace en S118 como precio honesto de haber hecho el presupuesto configurable. El texto del estado de espera dice «puede tardar hasta 10 minutos» y esos minutos salen de una constante `MINUTOS_ANUNCIADOS` del componente, no del backend: no existe ningún endpoint que publique `educhronos.solver.max-segundos`. Basta arrancar con `--educhronos.solver.max-segundos=N` para que la pantalla mienta EN SILENCIO, sin que nada falle ni ningún test se ponga rojo; medido en el propio M4, donde la corrida de 30 s anunciaba diez minutos. Documentado en el código como COTA ANUNCIADA y no como promesa. El arreglo —exponer el presupuesto por API y que la vista lo lea— es superficie NUEVA, no un ajuste. No se paga ahora |
 | D-guion-exit-enmascarado (un guion anunció como éxito un BUILD FAILURE) | Transversal, con el script de R4 pendiente desde S101 | No | Nace en S117 y la corrigió Claude Code dentro de la sesión: la plantilla capturaba `EXIT=$?` después de un `echo`, midiendo el código de salida del `echo` y no el del comando. El daño no fue más allá porque la salida se leyó entera, pero la plantilla viene de sesiones anteriores y nadie ha auditado cuáles la usaron. Misma familia que el hallazgo de S109 (los tests de endpoint asertaban sobre `MockHttpServletResponse` y no sobre el cuerpo de red): un instrumento que mide otra cosa distinta de la que se cree. → sesión de Higiene/Método, junto al script de R4, al que añade un caso concreto. No se paga ahora  **CUARTO Y QUINTO CASO en S121, los dos detectados por Claude Code y no por el asistente que escribió los guiones.** (4) Un comprobador de «el `@import` del CDK sigue siendo la primera regla» usaba `^\s*[@.:a-zA-Z*]`, que casa con las líneas de continuación de un comentario `/* */`: daba verde sin medir nada. (5) El recuento de cierre de C-sustitución contaba `src/**/*.css` incluido `styles.css`, donde los literales DEBEN vivir, así que su objetivo declarado («0 al terminar») era inalcanzable por construcción. Se añade el caso más peligroso de la familia, señalado por Claude Code y no sufrido: **`var(--token-inexistente)` NO rompe el build** —la declaración se descarta en el navegador—, así que un build en verde no prueba que los tokens referenciados existan. De ahí sale el comprobador de cuatro vías que S121 deja vivo para el resto de O-diseño (literales, `font-size` sin `var()`, `var(` mal formado, y tokens referenciados contra los definidos en `styles.css`, quitando comentarios antes de buscar). **SEGUNDA INSTANCIA, hallada en S123 durante el propio M1 que el script certifica:** `scripts/verificar-cierre.py:171-173` imprime las entradas de índice descuadradas pero NO las suma a `problemas`, y el `return` de la 178 solo mira esa variable; el script salió con 0 teniendo 30 entradas rotas entre los dos documentos. Quien encadene `verificar-cierre.py && commit` se lo traga. Detectada leyendo el fuente del verificador, no confiando en su código de salida. NO se corrige en S123 (R-deuda: no bloquea el criterio de O-navegación) y la corrección no es de dos líneas: subir §4 a fallo duro exige comprobar antes que los documentos pasan ese listón, y eso es cambio de método. → misma sesión de Higiene/Método. **TERCERA instancia en S124, y por el reverso:** no un EXIT que enmascara un fallo, sino guardas que miden lo que no toca. Un volcado salió VACÍO con EXIT=0 por suponer marcadores `INDICE:INICIO/FIN` en `diseno-navegacion.md`, que no los tiene; y otro imprimió números de línea RELATIVOS al fragmento tubado, que leídos como absolutos habrían editado la ficha equivocada. La guarda de vacío añadida después sí disparó, y disparó bien. Lección: la guarda mide el vacío, no la corrección. Sigue viva |
+| D-resize-observer-jsdom (el `ResizeObserver` de la rejilla lanza `ReferenceError` en cada fixture, en silencio) | Transversal, con la sesión de Higiene/Método | No | Nace en S127, destapada al leer la sección `stderr` de una corrida CON FALLOS: jsdom no define `ResizeObserver`, así que el callback de `afterNextRender` de `horario-grid.ts` revienta en TODOS los fixtures de la rejilla. Es PREEXISTENTE —viene de S126, `git show` lo sitúa en la línea 167 del fichero de entonces— y es invisible en verde, porque vitest sólo imprime `stderr` cuando algo falla. Daño real y acotado: `repartirAltura()` nunca corre en tests, luego `altoCelda` nunca se fija y **el disparador por `altoCelda` del `afterRenderEffect` de D11 está muerto en jsdom**. Los casos (28) y (29) pasan por el OTRO disparador, `celdas()`, así que de los dos caminos que el cableado declara la suite sólo ejercita uno; el que compensa que el `ResizeObserver` corra fuera del ciclo de render lo verificó M4 y nada más. Arreglo natural: un doble de `ResizeObserver` en el setup de tests, que además haría comprobable ese segundo camino. NO se paga en S127 por R-terminado —no bloquea el criterio 4, y su verificación la aporta M4—, y tocar el setup global de tests dentro de un Cambio sin cerrar añade riesgo a cambio de nada que el objetivo pida. Es de la familia de `D-guion-exit-enmascarado`: un instrumento que no mide lo que se cree que mide |
+| D-pin-ocupada-no-persiste (el mismo gesto de arrastre persiste el pin sobre celda vacía y no sobre celda ocupada) | O-ajuste-cierre | No | Nace en S127 de una DISCREPANCIA entre las dos pasadas de su M4, y se registra sin diagnóstico porque no lo hay. Primera pasada, arrastre sobre celda OCUPADA: la interfaz mostró «1 pines sin aplicar — regenerar» y la base no tenía ni una fila nueva —`sesion_bloqueada` y `aula_bloqueada` a 0, y la comparación tabla por tabla contra el original no encontró ninguna diferencia de contenido en las 21 tablas; el md5 sí cambió, pero sólo por el `change_counter` de la cabecera SQLite, 883 → 885, dos transacciones que no escribieron ninguna fila—. Segunda pasada, arrastre sobre celda VACÍA en 1FPB: el aviso **sobrevive al F5 y al cambio de grupo**, luego ahí sí está persistido en el servidor. Las dos explicaciones plausibles —que el primer drop no llegara a completarse, o que ocupada y vacía se comporten distinto— NO se han medido, y elegir una sería inventar. Lo establecido son los dos hechos. Es comportamiento del ajuste manual, no de la navegación, así que su sede es O-ajuste-cierre y no O-navegación (R-terminado). Quien la pague empieza por reproducir la primera pasada con la pestaña Red abierta |
 | D-vista-horario-sin-horario (la vista de horario recibe a un centro recién configurado con dos mensajes de error) | O-demo | No bloquea, pero MUERDE EN LA DEMO | Nace en S120, medida en navegador sobre una base recién poblada a mano por la interfaz: antes de generar nada la vista pinta «No se pudo cargar el diagnóstico.» y «No se pudo cargar el horario 1 (404).» junto al mensaje correcto de prevalidación. El 404 es la respuesta CORRECTA del backend —no hay horario todavía— y lo que está mal es que el cliente trate «aún no hay horario» como fallo en vez de como estado inicial. Cae de lleno en la cláusula «presentable al centro» del criterio de O-demo: es lo primero que ve un usuario que acaba de configurar su centro, y por tanto lo primero que vería el jefe de estudios en la demo. Hermana del hallazgo de S118 sobre D-prevalidacion-ciega-a-holgura-cero, que tampoco distingue el centro recién instalado. Arreglo natural: distinguir 404 de error y pintar estado vacío. Es COMPORTAMIENTO y no aspecto, así que O-diseño no lo cubre (mismo criterio que S118 aplicó al estado de espera). No se paga en S120: no bloquea el criterio y la sesión no escribió producto. **DECIDIDO EXPRESAMENTE en el M0 de S121, como pedía el encuadre de S120: queda FUERA del criterio de O-diseño** y sigue colgando de O-demo, por el corte comportamiento/aspecto que la propia ficha ya establecía. Se registra el incómodo que eso deja: O-demo está bloqueado por un correo, así que si nadie la mueve la demo se hace con dos mensajes de error en la primera pantalla. Queda anotada como CANDIDATA A CAMBIO CORTO DE O-DEMO antes de la demo, y se hace constar que su clasificación «No bloquea» es discutible en lectura estricta del texto del criterio («presentable al centro»); reclasificarla es decisión del arquitecto y en S121 no se reclasifica |
 | D-selectores-sin-busqueda (los selectores de entidades son multiselect nativo sin buscador ni filtro) | O-diseño, o el objetivo que rehaga el formulario de actividad | No | Nace en S120 al construir a mano la actividad de seis plazas: poner dos subgrupos en una plaza se hace con ctrl+clic sobre una lista plana, igual que profesores y aulas. Con los 13 subgrupos del ejercicio funciona sin fricción y el arquitecto lo resolvió sin dudar; el problema es de ESCALA y está cuantificado: el centro real tiene 334 subgrupos, 59 profesores y 43 aulas. No es hueco funcional —todo se puede construir— y por eso NO abrió un C-hueco-*. Mejora futura; no se paga (R-terminado: no cambia el criterio de O-demo) |
 | D-actividad-forma-implicita (la forma de una actividad se deduce en vez de declararse) | O-diseño | No | Nace en S120 de dos observaciones del mismo formulario que son la misma cosa. (1) La opción «— varias (una por plaza) —» del selector de asignatura se ENCONTRÓ pero resultó CONFUSA, y es lo que distingue un bloque de destinos alternativos de una actividad ordinaria. (2) La co-docencia no se declara: se obtiene poniendo dos profesores en una plaza y nada nombra el concepto. La propuesta del arquitecto (un check explícito que, apagado, limite el selector a un profesor) queda registrada como una opción entre varias, no como diseño decidido. Absorbe la tercera observación del mismo paso: con seis plazas rellenas la legibilidad baja a «regular». Mejora futura; no se paga |

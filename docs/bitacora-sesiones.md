@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S124. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S125. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S124). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S125). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -7919,3 +7919,127 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   ejecutable, bloqueado por el correo al centro. Siguiente: **C-rejilla-densidad**, el criterio 4, que NO se
   abre sin MEDIR antes el sobremesa con `innerWidth/innerHeight` —pendiente desde S123 y no supuesto—. Lo
   fija su propio M0 (ver M1-ter).
+
+### Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
+  Vigesimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo apertura/medición: sin M3 ni M4 porque no se
+  toca un solo fichero de `app/`. **Las suites NO se ejecutan y no se declaran verdes de memoria**: se hereda
+  la cifra de S124 —app 282, solver 91, vitest 356, e2e 2— y la PRIMERA acción del tramo 1 es correrlas.
+  M0 — EL MAPA, y una premisa del arquitecto que la apertura acepta con dos precisiones. Cambio:
+  C-rejilla-densidad, criterio 4, el último con trabajo ejecutable del objetivo (el criterio 1 no abre Cambio:
+  la barra existe y lo que le falta es estilo). Hito: NINGUNO funcional, y ésa es la respuesta escrita en la
+  ficha, no un hueco. R-invalidación limpio y en la dirección buena: la ficha manda que O-navegación vaya
+  ANTES de C-identidad y C-revisión, así que el riesgo es adelantar trabajo de ésos, no que ésos rehagan éste.
+  **CAMBIO DE PREMISA ACEPTADO: no se mide el sobremesa del centro.** No hay uno solo, la aplicación correrá
+  en varias máquinas y D11 absorbe la variación. Las dos precisiones que la apertura le añade: (1) el criterio
+  carga el NÚMERO, no el nombre de la máquina —«se verifica en el equipo de desarrollo» es un panel, mismo
+  vicio que «1920×1080»—; y (2) «D11 absorbe» es cierto hasta un umbral ya medido, el 13,8 % de S123, que
+  queda escrito como criterio de reapertura en el ~10 %.
+  LA MEDICIÓN, en tres intentos y dos navegadores. Las dos primeras lecturas dieron **394** con DevTools
+  acoplado; el diagnóstico fue aritmético y no de inspección: `outerHeight − innerHeight` = 642 px, contra los
+  ~90 que cuesta el cromo de un navegador. La anchura salía intacta (1920) porque el panel estaba abajo, que
+  es justo lo que enmascara el problema. Se resolvió con un snippet **diferido 10 s que vuelca el resultado
+  sobre la página y en el `document.title`**, medido con DevTools CERRADO, y con un campo `limpio` que hace
+  saltar el propio caso que se estaba sufriendo. Resultados: **Firefox 1920×887, cromo 149, contenido 835;
+  Chrome 1920×946, cromo 90, contenido 894**; los dos con `devicePixelRatio` 1, `availHeight` 1036 (1080
+  físicos menos ~44 de barra de tareas) y ventana maximizada, no F11.
+  **DATO DURO NUEVO: la barra de la aplicación mide 52 px**, idéntica en los dos navegadores (946−894 y
+  887−835). Es la magnitud que faltaba y la que desmonta el uso del presupuesto heredado.
+  HALLAZGO 1 — **el «~1920×945» del criterio 4 se manejaba con el cromo a CERO.** Reconstruida la pasada de
+  S123 desde el 87,73 registrado: `(585 − 31,0 − 23,6 − 4)/6` sale exacto sólo con cromo 0. Es decir, el
+  control de 945 supone barra de aplicación y cabecera de vista de altura NULA, y la barra mide 52 px
+  medidos. El número no era falso —Chrome da 946 de viewport, clavado— pero su uso sí lo era: se comparaba
+  un VIEWPORT contra un presupuesto que exige CONTENIDO NETO. Misma familia que el error que S123 descubrió,
+  un escalón más abajo.
+  INFERENCIA FALSA DEL ARQUITECTO, registrada porque se marcó como hipótesis y salió falsa. Deduje que «945
+  no era un viewport sino `util`», y que por tanto ninguna máquina real con Windows y navegador podría
+  alcanzarlo. **Chrome lo desmiente: 946 de viewport CSS, clavado.** 945 SÍ era un viewport; lo que estaba
+  mal era el cromo a cero, no la magnitud. La inferencia iba etiquetada como no verificada y la dirimió la
+  medición, que es como debía ser.
+  HALLAZGO 2 — **el escalón, y dónde cae en cada navegador.** Censo del centro por plazas de la instancia:
+  1→599 (62,9 px), 2→83 (67,4), 3→37 (89,1), 4→22 (110,8), 5→28 (132,5), 6→22 (154,2). Las de cinco exigen
+  **853,6 px de alto neto**. En el eje común —el viewport— el presupuesto disponible para barra MÁS cabecera
+  de vista es `887 − 853,6 = 33,4` px en Firefox y `946 − 853,6 = 92,4` en Chrome. Con la barra medida en 52:
+  **Firefox se queda 18,6 px corto aun con cabecera de altura cero y cae a 50 de 791, el 6,3 %; Chrome se
+  queda 40,4 px por encima y mantiene las 22, el 2,8 %, mientras la cabecera de D9 quepa en esos 40,4 px.**
+  Los dos navegadores NO dan el mismo veredicto, y su diferencia es de **59 px** (946−887 y 894−835), no de
+  52 —52 es la barra de la aplicación, que es otra magnitud—. Lo que sí es común: la frontera no se cruza
+  afinando el número de entrada, se cruza con presupuesto de celda.
+  DECISIÓN — **Firefox es la superficie de verificación, por ser el peor caso medido, y sobre ella el 6,3 %
+  CUMPLE el criterio 4.** El «22 de 791 / 2,8 %» era descripción de lo medido en S122, no un tope; lo que el
+  criterio exige es que quepa sin scroll con la expansión activa, y una celda de cada dieciséis sigue siendo
+  densidad. El umbral contrario está medido en el 13,8 % (S123, «al 14 % el colapso deja de ser el caso
+  excepcional») y no estamos cerca. El 2,8 % sigue siendo alcanzable en Chrome bajo condición, y NO se
+  persigue: verificar en el peor caso disponible es lo que convierte el número en un SUELO y lo que sostiene
+  el cambio de premisa de esta sesión —prescindir de medir las máquinas del centro—. Fijarlo en Chrome haría
+  el criterio dependiente del navegador y frágil.
+  **PRESUPUESTO NUEVO QUE HEREDA EL CAMBIO: la fila única de D9 debe caber en 111 px.** El escalón de las
+  celdas de cuatro plazas cae en cromo de vista 111,6; por encima entran 22 celdas más y el recorte salta a
+  72 de 791, el 9,1 %. D9 deja de ser una decisión de aseo: es lo que impide ese salto.
+  LAS PALANCAS AHORA SÍ LLEGARÍAN, Y NO SE APLICAN. A 835 neto faltan 18,6 px y las dos disponibles suman
+  ~40 (padding y margen de plaza ~25,2; `.asig` a `--tam-xs` 15; la del badge la anuló D4 en S123) — a
+  diferencia del portátil, donde faltaban 10,27 px incluso con las tres. No se aplican: retiran señales
+  existentes, que es lo que la invariante del encargo prohíbe y por lo que D6 rechazó borrar la cuarta línea;
+  y gastarlas para bajar de 6,3 % a 2,8 % persigue un número que el criterio no pide (R-terminado). Quedan
+  como holgura medida por si el tramo 1 la necesita.
+  EL INSTRUMENTO, validado antes de creerle y parametrizado. `scripts/calcular-recortes.py` **no tenía
+  interfaz**: la altura estaba empotrada como literal 1080 (`:187`, `:194`), `TRAMOS = 6` en `:44` y la lista
+  de cromos en `:186`; `--help` no era bandera, se interpretaba como ruta y el `FileNotFoundError` imprimía
+  el uso por accidente. Parametrizado con `--alto`, `--cromos` y `--tramos`, **con los valores actuales como
+  defectos y verificado por diff: ninguna invocación previa cambia de salida**. Su autoprueba de cinco
+  mutaciones se lanza sola en `main()` y aborta; no se puede saltar. **DOS CONTROLES HISTÓRICOS
+  INDEPENDIENTES antes de la pasada real**: a `--alto 945 --cromos 0` da 147,73 y **22 de 791, 6p:22/22**
+  (reproduce S122); a `--alto 835 --cromos 250` —585 neto— da 87,73 y **109 de 791, 3p:37 4p:22 5p:28
+  6p:22** (reproduce S123 y su frase «toda celda de tres plazas o más»). El instrumento y el volcado quedan
+  validados contra dos pasadas históricas antes de que se les crea una sola cifra nueva.
+  VOLCADO. `/tmp/datos-maqueta.json` **no existía**: artefacto desechable de S122, declarado fuera del repo
+  en `diseno-navegacion.md:540`. Regenerado como `/tmp/volcado-s125.json` en SOLO LECTURA
+  (`file:...?mode=ro`): **28 grupos y 791 celdas**, por `sesion → plaza → plaza_subgrupo → subgrupo_grupo →
+  grupo_administrativo`, con `tramo_semanal` mapeado a día 1-5 y tramo lectivo 1-6 —los cinco recreos
+  (`es_lectivo=0`, posición 4 de cada día) quedan fuera, de ahí `TRAMOS=6` más una fila de recreo— y todas
+  las actividades de un solo tramo, así que no hay sesiones a caballo de dos celdas.
+  D11 CONFIRMADO POR MEDICIÓN, y por más margen del que suponía. Su texto estima la barra en ~56 px y el
+  cromo del navegador en ~100 para concluir que el cromo máximo admisible de 96,2 px «es inalcanzable».
+  Medido: barra 52, cromo 90 en Chrome y 149 en Firefox. La conclusión se sostiene con holgura.
+  ALCANCE FIJADO — dos tramos, por dependencia real. **Tramo 1, geometría y presupuesto** (D1-D6, D7, D8,
+  D9, D10): todo lo que consume altura, verificado en navegador contra 50 de 791 y no en hoja de cálculo;
+  hay lógica que mutar (la marca `+N`, la clasificación de instancia a modo bloque), así que M3 aplica, y
+  aquí cae `centro-minimo.spec.ts:213` por D6. **Tramo 2, el mecanismo de expansión** (D11). FUERA por
+  R-terminado: las palancas de altura, la leyenda de la insignia (C-identidad), tokenizar el espaciado (H-2,
+  sin sede) y la hora de reloj del recreo (D8 declara el hueco y no lo rellena).
+  POR QUÉ NO SE EMPIEZA EL TRAMO 1 AQUÍ. Precedente de S121, que decidió no abrir C-identidad con el
+  presupuesto de contexto a la mitad: toca siete ficheros, no es trabajo mecánico y dejarlo a medias obliga
+  a reconstruir contexto. Decisión del arquitecto sobre recomendación del asistente.
+  COSTURAS CERRADAS. §5 de `diseno-navegacion.md` listaba como SIN DECIDIR dos cosas ya decididas —la
+  resolución del portátil (D0-2, cerrado en S123) y qué señal se sacrifica de las palancas (§4 de
+  `gestion_proyecto.md` decidió «ninguna»)—; se corrigen las dos filas. El criterio 6 de la ficha llevaba
+  «vitest 314» de S123 y son 356 desde S124; corregido.
+  EL ERROR GRAVE DEL ARQUITECTO, y dónde apareció: **mezclé ejes**, en la simulación del propio M1 que
+  registra esta familia de errores, y lo detectó el ejecutor. Escribí que los dos navegadores daban el mismo
+  veredicto «salvo que el cromo de la aplicación sea ≤33,4 px (Firefox) o ≤40,4 (Chrome)», pero el 33,4 está
+  calculado sobre el VIEWPORT de Firefox —barra más cabecera— y el 40,4 sobre el CONTENIDO de Chrome, que ya
+  lleva la barra descontada. No son comparables; en el eje común son 33,4 y 92,4, y la conclusión se
+  invierte: Chrome da 22, no 50. De ahí salió además reutilizar los 52 px de la barra como diferencia entre
+  navegadores, que son 59. Es exactamente la forma que la precisión de M2 persigue —un número que se parece
+  a la magnitud y no lo es— cometida al redactar el registro de esa misma forma. La decisión de la sesión no
+  cae: se REFUERZA, porque si los navegadores dieran lo mismo, elegir el peor caso no compraría nada.
+  OTROS ERRORES DEL ARQUITECTO. La inferencia falsa de «945 es `util`», ya descrita —el acierto fue
+  etiquetarla como hipótesis, no haberla hecho—. Los cuatro textos normativos del guion de cierre se
+  escribieron SIN TILDES para documentos acentuados, y los habría degradado visiblemente. El `re.sub` de
+  líneas en blanco era global y tocaba dos sitios ajenos al punto de corte. Y el guion no llamaba a
+  `regenerar-indice.py`, con lo que la sesión habría cerrado con el índice del plan descuadrado y el
+  verificador diciendo OK, que es literalmente la deuda que esta misma entrada registra. Las cuatro las
+  detectó el ejecutor en simulación, antes de escribir.
+  NOTA OPERATIVA que merece sobrevivir: la protección antiautopega de DevTools en Chrome exige teclear
+  «permitir pegado» antes de aceptar un snippet; se lee como fallo del código y no lo es.
+  DEUDA. **Ninguna nueva.** `D-guion-exit-enmascarado` sigue viva y el §4 de `verificar-cierre.py` sigue
+  imprimiendo las descuadradas del índice sin sumarlas al EXIT: se lee su salida, no su código de salida.
+  Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después.
+  LIMPIEZA (M1-bis): archivada S123 a `bitacora-sesiones.md` (promovida a `### Sesión 123`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S124 a «Última sesión registrada (previa)»; S125
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S122 a S123.
+  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS**,
+  C-rejilla-densidad PENDIENTE y partido en dos tramos, con su criterio 4 ya corregido y su presupuesto
+  medido. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS, C-identidad y C-revisión
+  PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el
+  correo al centro. Siguiente: **el TRAMO 1 de C-rejilla-densidad**. Lo fija su propio M0 (ver M1-ter).

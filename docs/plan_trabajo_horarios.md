@@ -9,65 +9,65 @@
 - L123 — ### Criterios de verificación
 - L130 — ### Señal de que está mal
 - L135 — ## FASE 1 — Modelo de datos validado en papel
-- L139 — ### Entregable
-- L144 — ### Criterios de verificación
-- L162 — ### Señal de que está mal
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
 - L166 — ### Resultado de la fase
 - L174 — ## FASE 2 — Solver MVP: problema mínimo
 - L181 — ### Subconjunto de datos
-- L187 — ### Entregable
-- L194 — ### Criterios de verificación
-- L207 — ### Señal de que está mal
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
 - L210 — ### Decisiones tácticas
 - L284 — ### Criterios de verificación por bloque
 - L326 — ## FASE 3 — Solver: desdobles y agrupamientos
 - L329 — ### Lo que se añade
-- L334 — ### Criterios de verificación
-- L351 — ### Señal de que está mal
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
 - L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
-- L360 — ### Lo que se añade
-- L364 — ### Criterios de verificación
+- L329 — ### Lo que se añade
+- L123 — ### Criterios de verificación
 - L374 — ## FASE 5 — Solver: instituto completo
-- L420 — ### Lo que se añade
-- L426 — ### Criterios de verificación
-- L493 — ### Señal de que está mal
+- L329 — ### Lo que se añade
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
 - L500 — ## FASE 6 — Persistencia de datos
-- L504 — ### Entregable
-- L517 — ### Criterios de verificación
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
 - L545 — ## FASE 7 — UI: visualización de horarios
-- L548 — ### Entregable
-- L551 — ### Criterios de verificación
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
 - L563 — ### Bloques de Fase 7
 - L602 — ## FASE 8 — UI: configuración y ajuste manual
-- L613 — ### Entregable
-- L619 — ### Criterios de verificación
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
 - L640 — ## FASE 9 — Exportación
-- L643 — ### Criterios de verificación
+- L123 — ### Criterios de verificación
 - L651 — ## FASE 10 — Gestión de cursos académicos
-- L660 — ### Entregable
-- L666 — ### Criterios de verificación
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
 - L675 — ## FASE 11 — Empaquetado y distribución Windows
-- L678 — ### Criterios de verificación
+- L123 — ### Criterios de verificación
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
-- L690 — ### Criterios de verificación
+- L123 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
-- L953 — ### Bloques de Fase 2
-- L961 — ### Bloques de Fase 5
-- L984 — ### Bloques de Fase 6
-- L1029 — ### Bloques de Fase 8
-- L1238 — ### Fases completadas
-- L1342 — ### Cierre del modelo — Sesión 8
-- L1390 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1436 — ### Método de trabajo (procedimiento vigente)
-- L1469 — ### Deuda consciente VIVA
-- L2883 — ### Deuda consciente CERRADA (histórico)
-- L2911 — ### Notas técnicas validadas en Fase 0
-- L2921 — ### Notas técnicas validadas en Fase 6
-- L2955 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2964 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2991 — ### Registro detallado de sesiones S10–S31
-- L3000 — ## Señales globales de alerta
+- L699 — ### Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
+- L966 — ### Bloques de Fase 2
+- L974 — ### Bloques de Fase 5
+- L997 — ### Bloques de Fase 6
+- L1042 — ### Bloques de Fase 8
+- L1251 — ### Fases completadas
+- L1355 — ### Cierre del modelo — Sesión 8
+- L1403 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1449 — ### Método de trabajo (procedimiento vigente)
+- L1482 — ### Deuda consciente VIVA
+- L2927 — ### Deuda consciente CERRADA (histórico)
+- L2955 — ### Notas técnicas validadas en Fase 0
+- L2965 — ### Notas técnicas validadas en Fase 6
+- L2999 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3008 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3035 — ### Registro detallado de sesiones S10–S31
+- L3044 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,144 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
+### Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
+  Vigesimoséptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
+  línea base heredada de S126 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 381, e2e 2);
+  al cerrar, **app 282, solver 91, vitest 403, e2e 2**. vitest sube +22 y **ni uno de los 381 heredados se
+  modifica**: el tramo 2 sólo añade.
+  M0 — EL MAPA. Cambio: C-rejilla-densidad, tramo 2. Objetivo: O-navegación, criterio 4 en su mitad
+  pendiente, y de paso el criterio 6. Hito: ninguno funcional, que es la respuesta escrita en la ficha.
+  R-invalidación limpio y en la dirección buena: C-identidad y C-revisión van DESPUÉS, así que el riesgo era
+  adelantar su trabajo puliendo el aspecto de la marca, no que ellos rehagan éste.
+  **LA COSTURA QUE EL M0 DESTAPÓ: D11 exigía el mecanismo y NO DECÍA CUÁL ERA.** Leídos §4 entero y §5 de
+  `diseno-navegacion.md`: D11 decide que el mecanismo es obligatorio y descarta «recortar sin expansión», pero
+  no elige entre expansión en sitio, popover, fila que crece o gesto alguno; y §5 no lo listaba como
+  pendiente. La frase de la ficha «ya sin parámetros abiertos tras cerrarse D0-2» habla de la GEOMETRÍA, no
+  del mecanismo. La única decisión de bulto del tramo 2 no tenía sede escrita; se cierra escribiéndola.
+  **SEGUNDA COSTURA: D11 está redactado contra 22 celdas y la realidad son 72.** Su nota de proporción dice
+  explícitamente que la proporción «cambia qué clase de mecanismo hace falta», y la corrección 1 de S126 la
+  había movido al 9,1 % sin volver sobre el texto de D11. Quien lo lea sin la corrección diseña para el caso
+  equivocado.
+  LA DECISIÓN — MARCA `+N` CON EL DETALLE EN EL `title`, y no se estrena patrón. Medido en el repo antes de
+  diseñar nada: cero `<details>`, cero popover propio, cero tooltip propio; lo único que existe es `title`
+  nativo, y D4 y D6 ya lo usan **para exactamente esto** —condensar y dar forma de recuperar—. Descartada la
+  expansión en sitio porque en una tabla crecer una celda estira su fila y devuelve el scroll que el tramo 1
+  acaba de quitar; descartado el overlay del CDK por estrenar patrón para el caso que el propio diseño llama
+  excepcional; descartado `MatDialog` por modal.
+  **LA MARCA VA DENTRO DE LA BANDA DEL RÓTULO, Y NO ES ESTÉTICA: ES LO QUE IMPIDE EL BUCLE.** `.instancia.bloque`
+  reserva `padding-top: 16px` y `.rotulo` es `position: absolute` dentro, así que la marca no ocupa un píxel de
+  alto. Importa porque la medición que la produce depende del alto disponible: una marca que ocupara alto
+  oscilaría —aparece, empuja, la última plaza deja de estar oculta, desaparece, vuelve a estarlo— y **la guarda
+  `altoPublicado` NO la detendría**, porque sólo impide reescribir el MISMO valor y esto son valores distintos
+  alternándose. La marca lleva `title` propio: el de `.rotulo` es el único sitio donde se lee el código completo
+  de la actividad y ocuparlo habría retirado una señal existente.
+  **LA REGLA ES UNA FRACCIÓN, NO UN UMBRAL EN PÍXELES, Y ESO ES LO QUE DECIDE 50 EN VEZ DE 72.** Con la fila en
+  109,57 px el déficit no es homogéneo: la de cuatro plazas pide 110,8 y se pasa **1,23 px** (se ve el 94 % de su
+  última línea); la de cinco esconde una línea entera y la de seis, dos. Marcar las 72 habría puesto una señal
+  que miente en 22 celdas, al lado de la marca `+N` verdadera de D6: familia de `D-vacio-miente-con-error`. La
+  fracción y no la constante, por la misma razón por la que D1 deriva la altura en vez de escribirla. Que el 50
+  coincida con la predicción de S125 es casualidad aritmética: aquel 50 salía de otro reparto.
+  **EL DISPARADOR: `afterRenderEffect` con fase `read`, y NO el `ResizeObserver` que ya existía.** Ese observador
+  sólo despierta con cambios de TAMAÑO, y con `table-layout: fixed` y seis filas cambiar de grupo repinta la
+  rejilla sin mover un píxel: las marcas del grupo anterior habrían sobrevivido al cambio. Estrena patrón —no
+  había ningún `afterRenderEffect` ni `effect()` en producción— y se asume, porque reutilizar el observador
+  habría sido reutilizar el disparador equivocado. Verificado ANTES de escribirlo, con una sonda desechable, que
+  la fase corre en jsdom y se re-dispara al cambiar una señal leída dentro (1 → 2). Efecto lateral que obligó a
+  una línea más: `repartirAltura` publica `--alto-celda` con `setProperty` desde FUERA del ciclo de render, así
+  que sin un espejo en señal del tope el primer pintado mide la celda antes de que tenga tope y no marca nada.
+  El espejo es disparador, no fuente de verdad.
+  **LA PARTICIÓN DE S125 SALE VALIDADA.** La dependencia era real y se notó en cada medida: el umbral de la
+  marca se decidió contra la geometría que el tramo 1 había dejado, no contra la prevista.
+  M3 — TRES CAPAS Y CADA UNA CON SU RED. `horario/oculto.ts`, hermano de `reparto.ts`, `recreo.ts` y `titulo.ts`:
+  `plazasOcultas` (la regla) y `ocultasEnCelda` (el adaptador DOM→regla). Diez casos para la primera y ocho para
+  el segundo, más cuatro en el spec del componente. **El barrido destapó tres tests que no discriminaban nada y
+  se corrigieron los tres antes de commitear**: (5) y (6) construían su entrada como `20 * FRACCION_VISIBLE_MINIMA`,
+  o sea derivada de la constante que pretendían proteger —con el umbral a 1 seguían pasando—, y pasan a literales;
+  el `Math.max(0, visible)` era INERTE (el umbral es positivo, una fracción negativa y una de 0 dan el mismo
+  veredicto) y **se borró en vez de blindarlo**, mismo criterio que S124 aplicó a `normaliza()`; y el nombre de
+  (10) prometía comprobar el negativo y afirmaba otra cosa.
+  **UNA GUARDA QUE SOBREVIVE A TODA MUTACIÓN Y SE CONSERVA A PROPÓSITO**, con eso escrito en el código: `alto <= 0`
+  no la discrimina ninguna entrada, porque sin ella una línea de alto 0 daría `0/0 = NaN` y `NaN < 0.5` es `false`.
+  No es redundancia: es que la corrección dependería de cómo compara `NaN`. Se documenta como intención y **no se
+  le escribe un test que aparente sujetarla**, que habría sido cobertura fingida.
+  EL CASO QUE HACE EL TRABAJO, y es de la lección de S126: el aserto (15) del adaptador, que sitúa la celda a 3000
+  px de la página. Las tres mutaciones de relativización son INDISTINGUIBLES del código bueno con la celda en el
+  origen; sin ese caso, siete de los ocho tests darían idéntico. Y (18) —el conteo no depende del orden— no es
+  tautológico: detiene la optimización razonable de «las plazas vienen en orden, corto en la primera que se sale».
+  M4 — LO QUE SE MIDIÓ EN EL FIREFOX DEL ARQUITECTO, no en el de Playwright. Viewport 1920×887, dpr 1, hueco **716**,
+  `--alto-celda` 101. Marcas contra el cálculo del volcado y CUADRAN: 1B-A 4, 4ºA 3 —dos `+2` de seis plazas y un
+  `+1` de cinco—, 2B-B 0 sobre seis celdas de cuatro plazas. **4ºA es el caso que decide**, porque sus tres marcadas
+  y sus tres sin marcar conviven en la misma pantalla. Marcas correctas al cambiar de grupo y volver. **Consola sin
+  un solo aviso de `ResizeObserver loop`**, que es la forma exacta en que se habría manifestado la realimentación que
+  el diseño descarta por construcción.
+  **CONFIRMACIÓN COLATERAL QUE VALE POR SÍ SOLA:** con el aviso «1 pines sin aplicar» en pantalla la celda de seis
+  pasa a `+3` y **el scroll no reaparece**. Son los 62 px que S126 midió, absorbidos en caliente: la prueba de que el
+  reparto en runtime de D1 compró algo real, porque con la fórmula de constantes que S126 retiró dos veces aquí habría
+  vuelto la barra.
+  **DOS PENDIENTES DE S126 CERRADOS DE PASO.** (1) El hueco de 716 px queda confirmado en el navegador del arquitecto;
+  los 32 px contra los 748 calculados siguen SIN EXPLICAR, pero ya no son sospechosos de ser artefacto del entorno de
+  prueba. (2) **El arrastre sobre celda VACÍA funciona**, verificado en 1FPB. No se había probado porque no había dónde:
+  medido ahora, las 49 celdas libres de las 840 posibles están TODAS en 1FPB (24) y 2FPB (25), y ninguno de esos dos
+  grupos tiene una sola celda de cinco o seis plazas, así que **no existe un grupo donde verificar marcas y hueco vacío
+  de una sola pasada**.
+  DATO DE ESTRUCTURA, medido y no supuesto: **las 791 celdas del centro tienen exactamente UNA instancia cada una**. Es
+  propiedad de estos datos y no del modelo —`agruparPorActividad` devuelve una lista y `slotsOcupados` cuenta instancias
+  precisamente porque puede haber varias—, así que la implementación mide por instancia contra su celda, que funciona
+  igual si algún día hay dos apiladas. Queda escrito en el código como limitación declarada, no descubierta después.
+  R-TERMINADO, aplicado dos veces. No se arregla el `ResizeObserver` de jsdom pese a ser una línea en el setup de tests
+  y desbloquear cobertura real: no bloquea el criterio y tocar el setup global dentro de un Cambio sin cerrar añade
+  riesgo a cambio de nada que el objetivo pida. Y no se persigue el aspecto de la marca: existe y se ve, y que se vea
+  bonita es C-identidad.
+  MÉTODO — EL COMMIT ESPERA AL JUEZ. El javadoc del cableado afirmaba «Verificado en navegador (M4)» antes de que M4
+  existiera, y **el commit se retuvo hasta que la afirmación fue cierta**, en vez de escribir «se espera» para
+  reescribirlo después. Cuando la suite no puede probar algo y el único juez es el navegador, el commit va detrás del
+  navegador. El texto final no promete: enumera viewport, hueco, `--alto-celda`, los tres recuentos y la ausencia del
+  aviso de bucle.
+  MÉTODO — EL LÍMITE DE LOS TESTS, DICHO EN UN ASERTO Y NO EN UN COMENTARIO. Que en jsdom `getBoundingClientRect`
+  devuelva ceros explicaba por qué no se podía probar la MEDICIÓN, y se había extendido indebidamente a que tampoco se
+  podía probar el BINDING. Dos mutaciones lo desmintieron: borrar `[attr.data-clave]` entero o la marca completa dejaba
+  la suite en 399 verdes. El caso (27) afirma ahora esa invariante —sin stub no hay marca— en vez de dejarla en prosa.
+  ERRORES DEL ARQUITECTO, la familia de siempre. **Afirmé que la medición «cuelga de la pasada que ya existe» y era
+  falso**: `repartirAltura` sólo corre desde el `ResizeObserver`, que no ve cambios de contenido; hizo falta un
+  disparador nuevo. **Afirmé que la superficie del tramo 2 no rompía la invariante de no-bucle del javadoc de
+  `repartirAltura`, y sí la rompe**: la marca se mide sobre la tabla y se pinta dentro de la tabla, que es observada;
+  lo que corta no es la invariante vieja sino que la marca no ocupe alto. Registré la deuda del pin como «avisa sin
+  persistir» **cuando la propia medición del arquitecto la había desmentido** —sobrevive al F5—; corregido antes de
+  escribirla. Y le puse a la deuda sede O-demo cuando el ajuste manual tiene objetivo propio, O-ajuste-cierre.
+  **Y UNA SÉPTIMA INSTANCIA DE LA FAMILIA DE ANCLAS DE S124, cometida por el asistente al escribir el propio M1:** un
+  ancla de sustitución copiada con CUATRO espacios de sangría donde el fichero tiene cinco. La guarda de unicidad la
+  cazó y el guion murió sin escribir. Precisión que se suma a la regla: **la sangría copiada a ojo no es la sangría del
+  fichero; si el ancla la incluye, hay que anclar sin ella.**
+  ERRORES DEL EJECUTOR, todos autodetectados y reportados. Un `TS18046` por `inject(ElementRef<HTMLElement>)`, que tipa
+  el TOKEN y no el genérico: devuelve `ElementRef<any>` y sobre `any` la inferencia de `Array.from` cae a `unknown`.
+  Resuelto anclando el tipo UNA vez. Es exactamente la forma que este proyecto persigue: algo que se parece a un tipo y
+  no lo es. Y un heurístico que se auto-bloqueó —buscaba una constante «después de `describe`» y la encontró en el
+  comentario que el propio guion acababa de insertar—, **sexta instancia**: un ancla que se cumple sobre texto que el
+  guion mismo introdujo.
+  DEUDA. **DOS NUEVAS**: `D-resize-observer-jsdom` (técnica real, transversal, → sesión de Higiene/Método) y
+  `D-pin-ocupada-no-persiste` (técnica real, → O-ajuste-cierre), esta última registrada SIN diagnóstico porque no lo hay:
+  se escriben los dos hechos y se dice que elegir entre las dos explicaciones plausibles sería inventar.
+  `D-guion-exit-enmascarado` y `D-vacio-miente-con-error` siguen vivas y sin pagarse. Deuda bloqueante abierta: sigue en
+  1 (D31-a, las aulas de FPB).
+  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar (`describe is not defined`): la suite corre
+  bajo el builder `@angular/build:unit-test` y hay que lanzar `npx ng test --watch=false` entera y filtrar por grep.
+  **Corolario nuevo y con precio: un barrido de mutación hecho con `npx vitest run` no mide nada** —hay que comprobar que
+  la base pasa antes de creerse un mutante caído—. `mvn test` sin `clean` deja informes huérfanos de surefire; con `clean`
+  el conteo de `app` da 282 y no 283. `@angular/core` instalado 21.2.17, CDK 21.2.14: `afterRenderEffect` es `@publicApi`,
+  no developer preview, y sus tipos viven en `node_modules/@angular/core/types/core.d.ts`, no en un `index.d.ts`.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después, incluido el M4, que corrió
+  contra una copia porque el arrastre escribe un bloqueo. Copia borrada sin residuos `-wal`, `-shm` ni `-journal`.
+  LIMPIEZA (M1-bis): archivada S125 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al final en orden
+  ascendente, cuerpo íntegro); degradada S126 a «Última sesión registrada (previa):»; S127 queda como única cabecera H3
+  viva. Los dos censos de la bitácora pasan de S124 a S125.
+  **O-navegación (transversal, abierto en S122) TERMINADO**: C-rutas-hijas (S123), C-listas-filtradas (S124) y
+  C-rejilla-densidad en sus dos tramos (S126 y S127). Sus seis criterios cumplidos, con la salvedad escrita en el criterio
+  1: nunca abrió Cambio y su verificación real cae en C-identidad, que reestila esa barra. O-diseño (transversal, abierto
+  en S121): C-tokens y C-sustitución HECHOS, **C-identidad y C-revisión PENDIENTES y ya sin nada delante**. O-demo (H2)
+  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **C-identidad**, sobre la UI
+  definitiva que O-navegación acaba de fijar. Lo fija su propio M0.
+
+Última sesión registrada (previa): Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
   Vigesimosexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
   línea base heredada de S124 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 356, y el
   e2e 2, que era la única sin línea base propia y se corrió también); al cerrar, **app 282, solver 91,
@@ -791,130 +928,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
   C-rejilla-densidad**, que es lo único que cierra la condición de salida. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
-  Vigesimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo apertura/medición: sin M3 ni M4 porque no se
-  toca un solo fichero de `app/`. **Las suites NO se ejecutan y no se declaran verdes de memoria**: se hereda
-  la cifra de S124 —app 282, solver 91, vitest 356, e2e 2— y la PRIMERA acción del tramo 1 es correrlas.
-  M0 — EL MAPA, y una premisa del arquitecto que la apertura acepta con dos precisiones. Cambio:
-  C-rejilla-densidad, criterio 4, el último con trabajo ejecutable del objetivo (el criterio 1 no abre Cambio:
-  la barra existe y lo que le falta es estilo). Hito: NINGUNO funcional, y ésa es la respuesta escrita en la
-  ficha, no un hueco. R-invalidación limpio y en la dirección buena: la ficha manda que O-navegación vaya
-  ANTES de C-identidad y C-revisión, así que el riesgo es adelantar trabajo de ésos, no que ésos rehagan éste.
-  **CAMBIO DE PREMISA ACEPTADO: no se mide el sobremesa del centro.** No hay uno solo, la aplicación correrá
-  en varias máquinas y D11 absorbe la variación. Las dos precisiones que la apertura le añade: (1) el criterio
-  carga el NÚMERO, no el nombre de la máquina —«se verifica en el equipo de desarrollo» es un panel, mismo
-  vicio que «1920×1080»—; y (2) «D11 absorbe» es cierto hasta un umbral ya medido, el 13,8 % de S123, que
-  queda escrito como criterio de reapertura en el ~10 %.
-  LA MEDICIÓN, en tres intentos y dos navegadores. Las dos primeras lecturas dieron **394** con DevTools
-  acoplado; el diagnóstico fue aritmético y no de inspección: `outerHeight − innerHeight` = 642 px, contra los
-  ~90 que cuesta el cromo de un navegador. La anchura salía intacta (1920) porque el panel estaba abajo, que
-  es justo lo que enmascara el problema. Se resolvió con un snippet **diferido 10 s que vuelca el resultado
-  sobre la página y en el `document.title`**, medido con DevTools CERRADO, y con un campo `limpio` que hace
-  saltar el propio caso que se estaba sufriendo. Resultados: **Firefox 1920×887, cromo 149, contenido 835;
-  Chrome 1920×946, cromo 90, contenido 894**; los dos con `devicePixelRatio` 1, `availHeight` 1036 (1080
-  físicos menos ~44 de barra de tareas) y ventana maximizada, no F11.
-  **DATO DURO NUEVO: la barra de la aplicación mide 52 px**, idéntica en los dos navegadores (946−894 y
-  887−835). Es la magnitud que faltaba y la que desmonta el uso del presupuesto heredado.
-  HALLAZGO 1 — **el «~1920×945» del criterio 4 se manejaba con el cromo a CERO.** Reconstruida la pasada de
-  S123 desde el 87,73 registrado: `(585 − 31,0 − 23,6 − 4)/6` sale exacto sólo con cromo 0. Es decir, el
-  control de 945 supone barra de aplicación y cabecera de vista de altura NULA, y la barra mide 52 px
-  medidos. El número no era falso —Chrome da 946 de viewport, clavado— pero su uso sí lo era: se comparaba
-  un VIEWPORT contra un presupuesto que exige CONTENIDO NETO. Misma familia que el error que S123 descubrió,
-  un escalón más abajo.
-  INFERENCIA FALSA DEL ARQUITECTO, registrada porque se marcó como hipótesis y salió falsa. Deduje que «945
-  no era un viewport sino `util`», y que por tanto ninguna máquina real con Windows y navegador podría
-  alcanzarlo. **Chrome lo desmiente: 946 de viewport CSS, clavado.** 945 SÍ era un viewport; lo que estaba
-  mal era el cromo a cero, no la magnitud. La inferencia iba etiquetada como no verificada y la dirimió la
-  medición, que es como debía ser.
-  HALLAZGO 2 — **el escalón, y dónde cae en cada navegador.** Censo del centro por plazas de la instancia:
-  1→599 (62,9 px), 2→83 (67,4), 3→37 (89,1), 4→22 (110,8), 5→28 (132,5), 6→22 (154,2). Las de cinco exigen
-  **853,6 px de alto neto**. En el eje común —el viewport— el presupuesto disponible para barra MÁS cabecera
-  de vista es `887 − 853,6 = 33,4` px en Firefox y `946 − 853,6 = 92,4` en Chrome. Con la barra medida en 52:
-  **Firefox se queda 18,6 px corto aun con cabecera de altura cero y cae a 50 de 791, el 6,3 %; Chrome se
-  queda 40,4 px por encima y mantiene las 22, el 2,8 %, mientras la cabecera de D9 quepa en esos 40,4 px.**
-  Los dos navegadores NO dan el mismo veredicto, y su diferencia es de **59 px** (946−887 y 894−835), no de
-  52 —52 es la barra de la aplicación, que es otra magnitud—. Lo que sí es común: la frontera no se cruza
-  afinando el número de entrada, se cruza con presupuesto de celda.
-  DECISIÓN — **Firefox es la superficie de verificación, por ser el peor caso medido, y sobre ella el 6,3 %
-  CUMPLE el criterio 4.** El «22 de 791 / 2,8 %» era descripción de lo medido en S122, no un tope; lo que el
-  criterio exige es que quepa sin scroll con la expansión activa, y una celda de cada dieciséis sigue siendo
-  densidad. El umbral contrario está medido en el 13,8 % (S123, «al 14 % el colapso deja de ser el caso
-  excepcional») y no estamos cerca. El 2,8 % sigue siendo alcanzable en Chrome bajo condición, y NO se
-  persigue: verificar en el peor caso disponible es lo que convierte el número en un SUELO y lo que sostiene
-  el cambio de premisa de esta sesión —prescindir de medir las máquinas del centro—. Fijarlo en Chrome haría
-  el criterio dependiente del navegador y frágil.
-  **PRESUPUESTO NUEVO QUE HEREDA EL CAMBIO: la fila única de D9 debe caber en 111 px.** El escalón de las
-  celdas de cuatro plazas cae en cromo de vista 111,6; por encima entran 22 celdas más y el recorte salta a
-  72 de 791, el 9,1 %. D9 deja de ser una decisión de aseo: es lo que impide ese salto.
-  LAS PALANCAS AHORA SÍ LLEGARÍAN, Y NO SE APLICAN. A 835 neto faltan 18,6 px y las dos disponibles suman
-  ~40 (padding y margen de plaza ~25,2; `.asig` a `--tam-xs` 15; la del badge la anuló D4 en S123) — a
-  diferencia del portátil, donde faltaban 10,27 px incluso con las tres. No se aplican: retiran señales
-  existentes, que es lo que la invariante del encargo prohíbe y por lo que D6 rechazó borrar la cuarta línea;
-  y gastarlas para bajar de 6,3 % a 2,8 % persigue un número que el criterio no pide (R-terminado). Quedan
-  como holgura medida por si el tramo 1 la necesita.
-  EL INSTRUMENTO, validado antes de creerle y parametrizado. `scripts/calcular-recortes.py` **no tenía
-  interfaz**: la altura estaba empotrada como literal 1080 (`:187`, `:194`), `TRAMOS = 6` en `:44` y la lista
-  de cromos en `:186`; `--help` no era bandera, se interpretaba como ruta y el `FileNotFoundError` imprimía
-  el uso por accidente. Parametrizado con `--alto`, `--cromos` y `--tramos`, **con los valores actuales como
-  defectos y verificado por diff: ninguna invocación previa cambia de salida**. Su autoprueba de cinco
-  mutaciones se lanza sola en `main()` y aborta; no se puede saltar. **DOS CONTROLES HISTÓRICOS
-  INDEPENDIENTES antes de la pasada real**: a `--alto 945 --cromos 0` da 147,73 y **22 de 791, 6p:22/22**
-  (reproduce S122); a `--alto 835 --cromos 250` —585 neto— da 87,73 y **109 de 791, 3p:37 4p:22 5p:28
-  6p:22** (reproduce S123 y su frase «toda celda de tres plazas o más»). El instrumento y el volcado quedan
-  validados contra dos pasadas históricas antes de que se les crea una sola cifra nueva.
-  VOLCADO. `/tmp/datos-maqueta.json` **no existía**: artefacto desechable de S122, declarado fuera del repo
-  en `diseno-navegacion.md:540`. Regenerado como `/tmp/volcado-s125.json` en SOLO LECTURA
-  (`file:...?mode=ro`): **28 grupos y 791 celdas**, por `sesion → plaza → plaza_subgrupo → subgrupo_grupo →
-  grupo_administrativo`, con `tramo_semanal` mapeado a día 1-5 y tramo lectivo 1-6 —los cinco recreos
-  (`es_lectivo=0`, posición 4 de cada día) quedan fuera, de ahí `TRAMOS=6` más una fila de recreo— y todas
-  las actividades de un solo tramo, así que no hay sesiones a caballo de dos celdas.
-  D11 CONFIRMADO POR MEDICIÓN, y por más margen del que suponía. Su texto estima la barra en ~56 px y el
-  cromo del navegador en ~100 para concluir que el cromo máximo admisible de 96,2 px «es inalcanzable».
-  Medido: barra 52, cromo 90 en Chrome y 149 en Firefox. La conclusión se sostiene con holgura.
-  ALCANCE FIJADO — dos tramos, por dependencia real. **Tramo 1, geometría y presupuesto** (D1-D6, D7, D8,
-  D9, D10): todo lo que consume altura, verificado en navegador contra 50 de 791 y no en hoja de cálculo;
-  hay lógica que mutar (la marca `+N`, la clasificación de instancia a modo bloque), así que M3 aplica, y
-  aquí cae `centro-minimo.spec.ts:213` por D6. **Tramo 2, el mecanismo de expansión** (D11). FUERA por
-  R-terminado: las palancas de altura, la leyenda de la insignia (C-identidad), tokenizar el espaciado (H-2,
-  sin sede) y la hora de reloj del recreo (D8 declara el hueco y no lo rellena).
-  POR QUÉ NO SE EMPIEZA EL TRAMO 1 AQUÍ. Precedente de S121, que decidió no abrir C-identidad con el
-  presupuesto de contexto a la mitad: toca siete ficheros, no es trabajo mecánico y dejarlo a medias obliga
-  a reconstruir contexto. Decisión del arquitecto sobre recomendación del asistente.
-  COSTURAS CERRADAS. §5 de `diseno-navegacion.md` listaba como SIN DECIDIR dos cosas ya decididas —la
-  resolución del portátil (D0-2, cerrado en S123) y qué señal se sacrifica de las palancas (§4 de
-  `gestion_proyecto.md` decidió «ninguna»)—; se corrigen las dos filas. El criterio 6 de la ficha llevaba
-  «vitest 314» de S123 y son 356 desde S124; corregido.
-  EL ERROR GRAVE DEL ARQUITECTO, y dónde apareció: **mezclé ejes**, en la simulación del propio M1 que
-  registra esta familia de errores, y lo detectó el ejecutor. Escribí que los dos navegadores daban el mismo
-  veredicto «salvo que el cromo de la aplicación sea ≤33,4 px (Firefox) o ≤40,4 (Chrome)», pero el 33,4 está
-  calculado sobre el VIEWPORT de Firefox —barra más cabecera— y el 40,4 sobre el CONTENIDO de Chrome, que ya
-  lleva la barra descontada. No son comparables; en el eje común son 33,4 y 92,4, y la conclusión se
-  invierte: Chrome da 22, no 50. De ahí salió además reutilizar los 52 px de la barra como diferencia entre
-  navegadores, que son 59. Es exactamente la forma que la precisión de M2 persigue —un número que se parece
-  a la magnitud y no lo es— cometida al redactar el registro de esa misma forma. La decisión de la sesión no
-  cae: se REFUERZA, porque si los navegadores dieran lo mismo, elegir el peor caso no compraría nada.
-  OTROS ERRORES DEL ARQUITECTO. La inferencia falsa de «945 es `util`», ya descrita —el acierto fue
-  etiquetarla como hipótesis, no haberla hecho—. Los cuatro textos normativos del guion de cierre se
-  escribieron SIN TILDES para documentos acentuados, y los habría degradado visiblemente. El `re.sub` de
-  líneas en blanco era global y tocaba dos sitios ajenos al punto de corte. Y el guion no llamaba a
-  `regenerar-indice.py`, con lo que la sesión habría cerrado con el índice del plan descuadrado y el
-  verificador diciendo OK, que es literalmente la deuda que esta misma entrada registra. Las cuatro las
-  detectó el ejecutor en simulación, antes de escribir.
-  NOTA OPERATIVA que merece sobrevivir: la protección antiautopega de DevTools en Chrome exige teclear
-  «permitir pegado» antes de aceptar un snippet; se lee como fallo del código y no lo es.
-  DEUDA. **Ninguna nueva.** `D-guion-exit-enmascarado` sigue viva y el §4 de `verificar-cierre.py` sigue
-  imprimiendo las descuadradas del índice sin sumarlas al EXIT: se lee su salida, no su código de salida.
-  Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
-  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después.
-  LIMPIEZA (M1-bis): archivada S123 a `bitacora-sesiones.md` (promovida a `### Sesión 123`, insertada al
-  final en orden ascendente, cuerpo íntegro); degradada S124 a «Última sesión registrada (previa)»; S125
-  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S122 a S123.
-  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS**,
-  C-rejilla-densidad PENDIENTE y partido en dos tramos, con su criterio 4 ya corregido y su presupuesto
-  medido. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS, C-identidad y C-revisión
-  PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el
-  correo al centro. Siguiente: **el TRAMO 1 de C-rejilla-densidad**. Lo fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -937,8 +950,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126.
-El plan conserva ahora S125 (degradada a formato compacto) y S126 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127.
+El plan conserva ahora S126 (degradada a formato compacto) y S127 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2879,6 +2892,37 @@ con remisión a la bitácora.
   razón por la que D8 sigue sin pintar la hora en la fila de recreo, y esa razón NO es la que `§4-D8`
   escribió —allí era «no sabemos si la conversión es correcta»; aquí es «lo es, pero por el despliegue»—.
   → O-demo.
+
+- **D-resize-observer-jsdom** (S127, VIVA, TÉCNICA REAL, no bloqueante) — EL `ResizeObserver` DE LA REJILLA
+  LANZA `ReferenceError` EN CADA FIXTURE, EN SILENCIO. jsdom no define `ResizeObserver`, así que el callback
+  de `afterNextRender` de `horario-grid.ts` revienta en TODOS los fixtures de la rejilla:
+  `ReferenceError: ResizeObserver is not defined`. Es PREEXISTENTE —viene de S126, `git show` la sitúa en la
+  línea 167 del fichero de entonces— y **es invisible en verde**, porque vitest sólo imprime la sección
+  `stderr` cuando algo falla; la destapó una corrida CON fallos del barrido de mutación de S127. El daño es
+  real y acotado: `repartirAltura()` nunca corre en tests, luego la señal `altoCelda` nunca se fija y **el
+  disparador por `altoCelda` del `afterRenderEffect` de D11 está muerto en jsdom**. Los casos (28) y (29)
+  pasan por el OTRO disparador, `celdas()`, así que de los dos caminos que el cableado declara la suite sólo
+  ejercita uno; el que compensa que el `ResizeObserver` corra fuera del ciclo de render lo verificó el M4 de
+  S127 y nada más. Arreglo natural: un doble de `ResizeObserver` en el setup de tests, que además haría
+  comprobable ese segundo camino. NO se paga en S127 por R-terminado —no bloquea el criterio 4 y su
+  verificación la aporta M4—, y tocar el setup global de tests dentro de un Cambio sin cerrar añade riesgo a
+  cambio de nada que el objetivo pida. Familia de `D-guion-exit-enmascarado`: un instrumento que no mide lo
+  que se cree que mide. → Transversal, sesión de Higiene/Método.
+
+- **D-pin-ocupada-no-persiste** (S127, VIVA, TÉCNICA REAL, no bloqueante) — EL MISMO GESTO DE ARRASTRE
+  PERSISTE EL PIN SOBRE CELDA VACÍA Y NO SOBRE CELDA OCUPADA. Se registra **sin diagnóstico, porque no lo
+  hay**: lo establecido son dos hechos de las dos pasadas del M4 de S127. (1) Arrastre sobre celda OCUPADA:
+  la interfaz mostró «1 pines sin aplicar — regenerar» y la base no tenía ni una fila nueva —`sesion_bloqueada`
+  y `aula_bloqueada` a 0 filas, y la comparación tabla por tabla contra el original no encontró ninguna
+  diferencia de contenido en las 21 tablas; el md5 sí había cambiado, pero **sólo por el `change_counter` de
+  la cabecera SQLite, 883 → 885**, dos transacciones que no escribieron ninguna fila, lo típico del
+  `schema.sql` idempotente al arrancar—. (2) Arrastre sobre celda VACÍA en 1FPB: el aviso **sobrevive al F5 y
+  al cambio de grupo**, luego ahí sí está persistido en el servidor. Las dos explicaciones plausibles —que el
+  primer drop no llegara a completarse, o que ocupada y vacía se comporten distinto— NO se han medido, y
+  elegir una sería inventar. Quien la pague empieza por reproducir la primera pasada con la pestaña Red
+  abierta. Es comportamiento del ajuste manual y no de la navegación, así que **su sede es O-ajuste-cierre y
+  no O-navegación ni O-demo** (el asistente la encuadró primero en O-demo y se corrigió en el mismo M1).
+  → O-ajuste-cierre.
 
 ### Deuda consciente CERRADA (histórico)
 

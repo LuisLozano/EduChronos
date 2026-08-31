@@ -385,6 +385,105 @@ grupo que ya estás mirando— sólo vale en la vista por grupo; en las de profe
 hay grupo implícito y condensar la lista retiraría la única señal que lo nombra. La rejilla
 recibe `grupoActual`, con defecto `null`, y con `null` pinta la lista entera.
 
+### Decisiones de S127, al implementar el tramo 2 (D11)
+
+El tramo 1 dejó el repositorio ocultando 72 celdas de 791 sin marca y sin forma de
+verlas. Esto lo cierra. **D11 decidía que el mecanismo era OBLIGATORIO y no decía cuál
+era**, y §5 tampoco lo listaba como pendiente: era una costura del documento, y se cierra
+aquí escribiéndola.
+
+**D11-a — El mecanismo es una MARCA `+N` con el detalle en el `title`, no una expansión.**
+Lo que el criterio 4 exige es «colapsada Y con forma visible de expandirlas», y la palabra
+que manda es *visible*: lo que no puede pasar es que el recorte sea mudo. La marca es la
+parte visible; el `title` es la forma de verlas.
+Y no se estrena patrón: **D4 y D6 ya establecieron esta convención**. D4 condensa el código
+de la actividad y lo recupera por `title`; D6 condensa la lista de grupos en `+N` y la
+recupera por `title`. D11 condensa unas plazas y hace lo mismo. Medido al implementar: en
+el frontend no hay un solo `<details>`, ni popover propio, ni tooltip propio; lo único que
+existe es `title` nativo, en esos dos sitios y los dos como binding.
+*Descartado — expansión en sitio:* en una tabla, crecer una celda estira su fila y reflota
+la rejilla; el desbordamiento devuelve el scroll vertical que el tramo 1 acaba de quitar.
+Gastar el tramo 2 en reintroducir el síntoma del tramo 1 no se sostiene.
+*Descartado — overlay del CDK:* técnicamente barato (el CDK ya está) pero es un patrón
+nuevo en el repo para lo que el propio diseño llama el caso excepcional. Queda como salida
+si algún día se mide que el `title` no basta.
+*Descartado — `MatDialog`:* existe y se usa, pero es modal. Para asomarse a dos clases
+taparía el horario que se está mirando.
+
+**D11-b — La marca vive DENTRO de la banda del rótulo de D4, y eso no es coherencia
+estética: es lo que impide el bucle.** `.instancia.bloque` reserva `padding-top: 16px` y
+`.rotulo` es `position: absolute` dentro de esa banda, así que escribir ahí **no ocupa un
+píxel de alto**. Importa porque la medición que produce la marca depende del alto
+disponible: si la marca ocupara alto, aparecería → empujaría el contenido → la última plaza
+dejaría de estar oculta → la marca desaparecería → volvería a estar oculta. Es una
+OSCILACIÓN entre valores distintos, y la guarda de igualdad que corta el bucle de
+`repartirAltura` no la detendría, porque esa guarda sólo impide reescribir el MISMO valor.
+La marca lleva `title` PROPIO y no reutiliza el de `.rotulo`: ese `title` es el único sitio
+donde se lee `Bloque-CE_DTec_Lab_Pat_TEst2-1BACH` entero, y ocuparlo sería retirar una
+señal existente, que es lo que la invariante del encargo prohíbe.
+
+**D11-c — La marca NO se dispara por número de plazas, sino por desbordamiento medido con
+una FRACCIÓN: una plaza cuenta como oculta si se ve menos de la mitad.** Es la corrección
+que la corrección 1 de S126 hacía inevitable y que nadie había sacado. Con la fila en 109,57
+px el déficit no es homogéneo: la celda de cuatro plazas pide 110,8 y **se pasa 1,23 px**
+—se ve el 94 % de su última línea—, la de cinco esconde una línea entera (21,7 px) y la de
+seis, dos. Marcar las 72 pondría una señal que miente en 22 celdas, justo al lado de la
+marca `+N` verdadera de D6; es la familia de `D-vacio-miente-con-error`.
+**Marcadas: 50 de 791.** Las 28 de cinco plazas y las 22 de seis. Que el número coincida con
+la predicción de S125 es casualidad aritmética, no confirmación: aquel 50 salía de otro
+reparto de altura.
+La regla es una fracción y no un umbral en píxeles por la misma razón por la que D1 deriva
+la altura en vez de escribirla: una constante literal hay que reajustarla a mano en cuanto
+cambien tipografía o padding, y por ahí ya se cruzó el acantilado una vez.
+
+**D11-d — La medición corre en la fase `read` de `afterRenderEffect`, NO colgada del
+`ResizeObserver` que ya existía.** El observador sólo despierta con cambios de TAMAÑO, y su
+javadoc declara —correctamente— que no hay bucle porque el reparto no depende de ninguna
+medida de la tabla. La marca sí depende del contenido: cambiar de grupo repinta la rejilla
+sin mover un píxel (`table-layout: fixed`, seis filas), el observador no se dispara y las
+marcas del grupo anterior sobrevivirían al cambio. Estrena patrón en el repo —no había
+ningún `afterRenderEffect` ni `effect()` en producción— y se asume: reutilizar el observador
+habría sido reutilizar el disparador equivocado.
+Efecto lateral que obligó a una línea más: `repartirAltura` publica `--alto-celda` con
+`setProperty` desde fuera del ciclo de render, así que fijarlo no agenda ninguna pasada. Sin
+un espejo en señal del tope, en el primer pintado se mide la celda ANTES de que tenga tope y
+no se marca nada. El espejo es DISPARADOR, no fuente de verdad: el estilo lo sigue
+escribiendo `setProperty`.
+
+**LIMITACIÓN DECLARADA, no descubierta después: sólo se marca lo que tiene banda** —modo
+bloque o badge—. Una instancia de una plaza no la tiene, y dársela cambiaría su altura, que
+es exactamente la realimentación que D11-b evita. Hoy no muerde: una celda de una plaza mide
+62,9 px contra ~110 disponibles y no se recorta nunca. Es propiedad de estos datos, no del
+modelo. Lo mismo vale para el supuesto «celda ≡ instancia»: medido sobre el volcado, **las
+791 celdas del centro tienen exactamente una instancia cada una**, pero `agruparPorActividad`
+devuelve una lista y `slotsOcupados` cuenta instancias precisamente porque puede haber
+varias. La implementación mide por instancia contra su celda, que funciona igual si algún día
+hay dos apiladas; lo que se rompería entonces es que la banda de la segunda caiga dentro de
+la zona recortada, y ahí la marca estaría tan oculta como lo que anuncia.
+
+**VERIFICADO EN NAVEGADOR (M4 de S127), en la superficie del criterio 4:** Firefox del
+arquitecto maximizado, viewport 1920×887, `devicePixelRatio` 1, hueco 716 px, `--alto-celda`
+101 px. Recuentos contra el cálculo del volcado, y cuadran: **1B-A 4, 4ºA 3 —dos `+2` de seis
+plazas y un `+1` de cinco—, 2B-B 0 sobre seis celdas de cuatro plazas.** 4ºA es el caso que
+decide, porque sus tres celdas marcadas y sus tres sin marcar conviven en la misma pantalla.
+Al cambiar de grupo y volver, las marcas siguen al grupo pintado. **Consola sin un solo aviso
+de `ResizeObserver loop`**, que es exactamente la forma en que se habría manifestado la
+realimentación que D11-b descarta por construcción.
+
+**Y UNA CONFIRMACIÓN QUE VALE POR SÍ SOLA: con el aviso «1 pines sin aplicar» en pantalla, la
+celda de seis pasa a `+3` y el scroll NO reaparece** (medido en 1ºA). Esos son los 62 px que
+S126 midió, absorbidos en caliente. Es la prueba de que el reparto en runtime de D1 compró
+algo real: con la fórmula de constantes que S126 retiró dos veces, aquí habría vuelto la barra
+de scroll.
+
+**Dos pendientes de S126 cerrados de paso, porque el M4 los tenía delante:** el hueco de 716
+px queda confirmado en el navegador del arquitecto y no sólo en el de Playwright —los 32 px
+de diferencia contra los 748 calculados siguen SIN EXPLICAR, pero ya no cabe atribuirlos al
+entorno de prueba—; y el **arrastre sobre celda VACÍA funciona**, verificado en 1FPB, que es
+uno de los dos únicos grupos del centro con huecos: las 49 celdas libres de las 840 posibles
+están todas en 1FPB (24) y 2FPB (25), y ninguno de los dos tiene una sola celda de cinco o
+seis plazas, así que no existe un grupo donde verificar marcas y hueco de una sola pasada.
+
 ### Bloque configuración
 
 **D12 — Configuración se navega por destinos, con RUTAS HIJAS y `<router-outlet>`.**
@@ -443,6 +542,7 @@ pidió: el ancho de la barra se reparte una vez.
 |---|---|
 | ~~Qué señal se sacrifica para bajar de 154,2 px de celda (D11)~~ **RESUELTO: ninguna** | Decidido en `gestion_proyecto.md` §4 y RATIFICADO en S125. Las tres palancas eran dos (la del badge choca con D4, S123). A 835 px de contenido faltan 18,6 px para salvar las celdas de cinco y las dos palancas disponibles (~25,2 + 15 px) SÍ llegarían —a diferencia del portátil de S123, donde faltaban 10,27 px incluso con las tres—, y aun así NO se aplican: retiran señales existentes (separación entre plazas simultáneas, jerarquía tipográfica en la celda más densa), que es lo que la invariante del encargo prohíbe y por lo que D6 rechazó borrar la cuarta línea. Gastarlas para bajar de 6,3 % a 2,8 % persigue un número que el criterio no pide (R-terminado). Quedan como holgura medida |
 | ~~Resolución del portátil (D0-2)~~ **CERRADO** | Medido en S123: 1280×585 con escala de Windows al 150 %, `devicePixelRatio` 1.5. EXCLUIDO del criterio 4: la demo no se enseña ahí. D0-2 deja de ser «parámetro sin fijar». S125 añade que la superficie de verificación tampoco es el sobremesa del centro sino el equipo de desarrollo (1920×887, Firefox), por ser el peor caso disponible y por tanto un suelo |
+| ~~Qué FORMA tiene el mecanismo de expansión (D11)~~ **RESUELTO en S127: marca `+N` con el detalle en el `title`** | Costura del documento, registrada al cerrarla: D11 decidía que el mecanismo era obligatorio y NO decía cuál era, y esta tabla no lo listaba como pendiente, así que la única decisión de bulto del tramo 2 no tenía sede escrita. Se decide en «Decisiones de S127» de §4, por coherencia con la convención que D4 y D6 ya habían establecido y porque cualquier mecanismo que ocupe alto realimenta la medición que lo produce |
 | Hora de reloj del recreo (D8) | Verificar la interpretación de zona de `LocalTime` en el dialecto de comunidad, o leer `GET /api/jornada` con el backend en marcha |
 | Badges y violaciones reales sobre 1B-A/1ºA | No están en la base: los calcula `GET /api/horarios/1/diagnostico`. La maqueta reservó su sitio y NO inventó valores. Hace falta levantar el backend contra una copia de la base |
 | Búsqueda en los selectores de formulario (`D-selectores-sin-busqueda`) | Sigue viva y fuera de este diseño. El filtro de D16 es de la LISTA de un destino, no de los `<select multiple>` de los formularios, que es lo que esa deuda nombra |
