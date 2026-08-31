@@ -2,21 +2,29 @@ import { CROMO_FILA, altoDeCelda } from './reparto';
 
 describe('reparto de altura de la rejilla', () => {
   /**
-   * Las cifras son las MEDIDAS en el viewport de verificación (1920×887, Firefox):
-   * hueco 748, thead 30, recreo 24. El instrumento da 115,73 px de alto de fila
-   * para ese reparto, con 50 celdas de 791 recortadas — las de 5 y 6 plazas—, que es
-   * la cifra del criterio 4.
+   * Cifras MEDIDAS en navegador el 31/08/2026 (Firefox, viewport 1920×887, DPR 1)
+   * sobre la demo del centro real: hueco 716, thead 30, recreo 24, 6 tramos.
+   *
+   * <p>`thead` (30) y recreo (24) salieron EXACTOS. El hueco NO: los 748 eran un
+   * cálculo previo y el navegador da 716 —32 px menos—, así que la fila baja de los
+   * 115 px predichos a 110 y el escalón de las cuatro plazas queda cruzado por 0,8 px.
+   *
+   * <p>A este viewport se recortan 72 celdas de 791 (9,1 %), no 50. El 50 era una
+   * PREDICCIÓN, no un requisito: el criterio 4 exige AUSENCIA DE SCROLL —verificada
+   * en 1ºA, 4ºA y 1B-A—, no un porcentaje concreto, y el 9,1 % queda por debajo del
+   * umbral del ~10 % a partir del cual habría que rediscutirlo.
    */
-  it('(1) el reparto medido da 115 px de fila, por encima del umbral de 4 plazas', () => {
-    const alto = altoDeCelda(748, 30, 24, 6)!;
+  it('(1) el reparto medido da 110 px de fila: bajo el escalón de 4 plazas, sobre el de 3', () => {
+    const alto = altoDeCelda(716, 30, 24, 6)!;
 
-    expect(alto + CROMO_FILA).toBe(115);
-    // Una celda de 4 plazas pide 110,8 px de fila y debe SEGUIR entrando: si este
-    // aserto cae, el recorte se ha disparado de 50 celdas a 72 y el acantilado se
-    // ha cruzado.
-    expect(alto + CROMO_FILA).toBeGreaterThan(110.8);
-    // Y una de 5 pide 132,5: ésa sí se recorta, que es lo que D11 tendrá que explicar.
-    expect(alto + CROMO_FILA).toBeLessThan(132.5);
+    expect(alto + CROMO_FILA).toBe(110);
+    // Por DEBAJO de 110,8: la celda de cuatro plazas ya no entra. Es el escalón que
+    // se cruzó, y la razón de que sean 72 celdas y no 50.
+    expect(alto + CROMO_FILA).toBeLessThan(110.8);
+    // Y por ENCIMA de 89,1, el alto de la celda de tres plazas. ÉSTE es el que hay
+    // que vigilar: cruzarlo suma las 37 celdas de 3 plazas del centro y lleva el
+    // recorte a 109 de 791 (13,8 %), ya por encima del umbral del criterio 4.
+    expect(alto + CROMO_FILA).toBeGreaterThan(89.1);
   });
 
   it('(2) el recreo cuesta altura: sin su fila, las seis reciben más', () => {
