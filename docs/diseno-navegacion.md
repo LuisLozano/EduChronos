@@ -479,7 +479,17 @@ de scroll.
 **Dos pendientes de S126 cerrados de paso, porque el M4 los tenía delante:** el hueco de 716
 px queda confirmado en el navegador del arquitecto y no sólo en el de Playwright —los 32 px
 de diferencia contra los 748 calculados siguen SIN EXPLICAR, pero ya no cabe atribuirlos al
-entorno de prueba—; y el **arrastre sobre celda VACÍA funciona**, verificado en 1FPB, que es
+entorno de prueba—; **CAUSA CANDIDATA HALLADA EN S128, y NO se corrige: `.app__contenido`
+declara `padding: 1rem 0` en `app.css`, es decir 16 + 16 = 32 px exactos, en el CONTENEDOR DE LA
+VISTA —el elemento que ni S126 ni S127 miraron, por estar los dos midiendo dentro de
+`horario-grid`—. Coincide al píxel con la diferencia, pero se declara CANDIDATA y no probada por
+una razón honesta: la derivación de los 748 no está escrita en ningún documento del repo (el plan
+dice «los 748 que el arquitecto había calculado»), así que la hipótesis no se puede confirmar ni
+refutar contra documentación, y reconstruirla desde el viewport no cuadra. Nace
+`D-748-sin-derivacion`. Los 32 px NO se reclaman, por R-terminado: devolverlos subiría
+`--alto-celda` ~4,5 px y cambiaría el recorte de un criterio ya cumplido sin que ningún criterio
+lo pida. Lo que S128 aporta es que dejan de ser «32 px sin explicar» y pasan a ser «32 px con
+causa candidata, escrita en el fichero donde viven»**; y el **arrastre sobre celda VACÍA funciona**, verificado en 1FPB, que es
 uno de los dos únicos grupos del centro con huecos: las 49 celdas libres de las 840 posibles
 están todas en 1FPB (24) y 2FPB (25), y ninguno de los dos tiene una sola celda de cinco o
 seis plazas, así que no existe un grupo donde verificar marcas y hueco de una sola pasada.

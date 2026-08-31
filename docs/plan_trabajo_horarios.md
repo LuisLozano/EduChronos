@@ -9,65 +9,65 @@
 - L123 — ### Criterios de verificación
 - L130 — ### Señal de que está mal
 - L135 — ## FASE 1 — Modelo de datos validado en papel
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
+- L139 — ### Entregable
+- L144 — ### Criterios de verificación
+- L162 — ### Señal de que está mal
 - L166 — ### Resultado de la fase
 - L174 — ## FASE 2 — Solver MVP: problema mínimo
 - L181 — ### Subconjunto de datos
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
+- L187 — ### Entregable
+- L194 — ### Criterios de verificación
+- L207 — ### Señal de que está mal
 - L210 — ### Decisiones tácticas
 - L284 — ### Criterios de verificación por bloque
 - L326 — ## FASE 3 — Solver: desdobles y agrupamientos
 - L329 — ### Lo que se añade
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
+- L334 — ### Criterios de verificación
+- L351 — ### Señal de que está mal
 - L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
-- L329 — ### Lo que se añade
-- L123 — ### Criterios de verificación
+- L360 — ### Lo que se añade
+- L364 — ### Criterios de verificación
 - L374 — ## FASE 5 — Solver: instituto completo
-- L329 — ### Lo que se añade
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
+- L420 — ### Lo que se añade
+- L426 — ### Criterios de verificación
+- L493 — ### Señal de que está mal
 - L500 — ## FASE 6 — Persistencia de datos
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
+- L504 — ### Entregable
+- L517 — ### Criterios de verificación
 - L545 — ## FASE 7 — UI: visualización de horarios
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
+- L548 — ### Entregable
+- L551 — ### Criterios de verificación
 - L563 — ### Bloques de Fase 7
 - L602 — ## FASE 8 — UI: configuración y ajuste manual
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
+- L613 — ### Entregable
+- L619 — ### Criterios de verificación
 - L640 — ## FASE 9 — Exportación
-- L123 — ### Criterios de verificación
+- L643 — ### Criterios de verificación
 - L651 — ## FASE 10 — Gestión de cursos académicos
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
+- L660 — ### Entregable
+- L666 — ### Criterios de verificación
 - L675 — ## FASE 11 — Empaquetado y distribución Windows
-- L123 — ### Criterios de verificación
+- L678 — ### Criterios de verificación
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
-- L123 — ### Criterios de verificación
+- L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
-- L966 — ### Bloques de Fase 2
-- L974 — ### Bloques de Fase 5
-- L997 — ### Bloques de Fase 6
-- L1042 — ### Bloques de Fase 8
-- L1251 — ### Fases completadas
-- L1355 — ### Cierre del modelo — Sesión 8
-- L1403 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1449 — ### Método de trabajo (procedimiento vigente)
-- L1482 — ### Deuda consciente VIVA
-- L2927 — ### Deuda consciente CERRADA (histórico)
-- L2955 — ### Notas técnicas validadas en Fase 0
-- L2965 — ### Notas técnicas validadas en Fase 6
-- L2999 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3008 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3035 — ### Registro detallado de sesiones S10–S31
-- L3044 — ## Señales globales de alerta
+- L699 — ### Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
+- L999 — ### Bloques de Fase 2
+- L1007 — ### Bloques de Fase 5
+- L1030 — ### Bloques de Fase 6
+- L1075 — ### Bloques de Fase 8
+- L1284 — ### Fases completadas
+- L1388 — ### Cierre del modelo — Sesión 8
+- L1436 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1482 — ### Método de trabajo (procedimiento vigente)
+- L1515 — ### Deuda consciente VIVA
+- L3003 — ### Deuda consciente CERRADA (histórico)
+- L3051 — ### Notas técnicas validadas en Fase 0
+- L3061 — ### Notas técnicas validadas en Fase 6
+- L3095 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3104 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3131 — ### Registro detallado de sesiones S10–S31
+- L3140 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,135 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
+### Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
+  Vigesimoctava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
+  donde hubo lógica real (la precedencia de ramas del bloque 2; el bloque 1 no tocó ni un `.ts`). Suites:
+  línea base heredada de S127 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 403); al
+  cerrar, **app 282, solver 91, vitest 414, e2e 2**. vitest sube +11 (9 del componente nuevo, 2 de los asertos
+  de texto) y de los 403 heredados sólo se REESCRIBEN 40 selectores, ninguno de contenido. Bundle de
+  producción 540,71 → **542,03 kB crudos / 121,81 transferidos**, con el aviso en 550: margen 8 kB.
+  M0 — EL MAPA, Y LA PRIMERA APERTURA EN CINCO SESIONES QUE ELIGE EN VEZ DE CONTINUAR. Cambio: C-identidad.
+  Objetivo: O-diseño, criterio 4 (decisiones de identidad) y preparación del 3. Hito: ninguno funcional, que
+  es la respuesta escrita en la ficha —O-diseño es el único objetivo puramente de acabado—; lo que acerca es
+  la DEMO. R-invalidación limpio: O-particiones tocará frontend, y por eso el criterio se definió como
+  SISTEMA; Fase 10 traerá el selector de curso, y reservarle sitio no es refinar lo que se rehará sino lo que
+  el criterio 1 pide. Los tres candidatos vivos se encuadraron uno a uno: O-demo bloqueado por un correo
+  externo y sin trabajo ejecutable; O-ajuste-cierre habría abierto objetivo nuevo con dos Cambios pendientes
+  sin nada delante; la sesión de Higiene/Método vuelve a perder por R-deuda, y van ocho.
+  **LA DECISIÓN QUE EL M0 TENÍA QUE TOMAR: la sede de la decisión 3 (densidad/espaciado), sin sede desde
+  S122.** Se resuelve escribiéndola en `styles.css` —la escala `--e1..--e6` existía desde C-tokens sin regla
+  de uso, y sin regla una escala no gobierna nada— y aplicándola sólo donde C-identidad y C-revisión tocan.
+  **NO se abre un Cambio de tokenización de espaciado**, con argumento medido: el color tenía equivalencia
+  exacta (`#666` → `var(--color-borde)`, mismo valor) y el espaciado no —tokenizar `padding: 13px` obliga a
+  elegir escalón y mueve píxeles—, y hay una zona donde mover píxeles rompe algo medido. De ahí la
+  **EXCLUSIÓN EXPRESA de la geometría de `horario-grid.css`**, que es presupuesto medido contra el criterio 4
+  de O-navegación y no elección de densidad. Los tres literales que no caían en un escalón se redondearon y se
+  declararon; ninguno toca altura de rejilla.
+  **LA RESTRICCIÓN QUE GOBIERNA EL BLOQUE 1, Y NO ESTABA ESCRITA EN NINGUNA PARTE: LA BARRA PUEDE ENCOGER, NO
+  CRECER.** El javadoc del marco flex de `styles.css` promete que «si la barra cambia de alto, el reparto se
+  rehace solo», y eso describe el LAYOUT y no el CRITERIO: `.app__contenido` lleva `flex: 1`, así que lo que
+  la barra engorda sale del hueco de la rejilla, que es el presupuesto del criterio 4. El reparto quedó a 110
+  px de fila contra los 110,8 de una celda de cuatro plazas (S126) y esas 22 celdas se pasan hoy 1,23 px sin
+  llegar a marcarse (S127): cada ~7 px de barra bajan `alto-celda` ~1 px, y al cruzar 1,23 las 50 marcas
+  pasan a 72, que es regresión visible sobre un criterio cerrado. La barra NO declara `height` ni lo hará: su
+  alto sale de padding más interlineado de la marca. Medido, **51 px, uno menos que los 52 de partida**, y el
+  contenido ganó ese píxel. El aviso queda escrito en `app.css` y en `styles.css`, junto al javadoc que lo
+  invitaba a leerse mal.
+  **LOS 32 PX DE S126 TIENEN CAUSA CANDIDATA, Y NO SE TOCAN.** `.app__contenido` declara `padding: 1rem 0`, es
+  decir 16 + 16 = 32 px exactos, en el contenedor de la vista, que ni S126 ni S127 miraron por estar midiendo
+  dentro de `horario-grid`. Coincide al píxel con la diferencia entre los 748 calculados y los 716 medidos. Se
+  declara **CANDIDATA y no probada**, y la razón es honesta: **la derivación de los 748 no está escrita en
+  ningún documento del repo** —el plan dice «los 748 que el arquitecto había calculado»—, así que la hipótesis
+  no se puede confirmar ni refutar contra documentación, y reconstruirla desde el viewport no cuadra. Hallazgo
+  de método asociado: un número que gobernó una pregunta abierta durante tres sesiones nunca se escribió con
+  su derivación al lado, misma familia que `D-arranque-no-literal`. NO se reclaman por R-terminado: devolverlos
+  subiría `alto-celda` ~4,5 px y cambiaría el recorte de un criterio cumplido sin que ningún criterio lo pida.
+  **LA SALVEDAD DEL CRITERIO 1 DE O-NAVEGACIÓN QUEDA VERIFICADA, y era trabajo, no nota al pie.** S127 cerró
+  ese criterio sobre una decisión escrita, sin Cambio y sin verificación formal. Aquí se comprueban sus dos
+  mitades: (1) **entrada activa distinguible** —por CUATRO canales: color pleno, peso, subrayado y
+  `aria-current="page"`, que es el que faltaba y el que la hacía indistinguible para un lector de pantalla;
+  medido en navegador, `page` en la activa y `null` en la otra—; y (2) **sitio reservado para el selector de
+  curso de Fase 10**, que hasta hoy era 1.500 px de barra vacía y ahora es `.app__curso` con `margin-left:
+  auto` y un `min-height` igual a la caja de la marca. Lo que se reserva es una ALTURA CONOCIDA, no una
+  promesa de que todo quepa: un control de 27 px o menos entra sin mover la barra; uno mayor la engorda y
+  obliga a Fase 10 a recontar las marcas.
+  BLOQUE 2 — **EL `<ng-content>` DENTRO DE UN `@if` NO ES PEREZOSO, Y ESO CAMBIÓ EL DISEÑO.** La primera forma
+  propuesta era que el componente absorbiera también la tabla por proyección. Se midió con una sonda
+  desechable en vitest: con la rama apagada, el constructor del contenido proyectado **corre igual**
+  (`construido=1`, `dom=""`). El contenido lo crea el PADRE en su sitio de declaración y el `@if` del hijo
+  sólo decide si lo inserta. Proyectar la tabla habría evaluado su `@for` mientras carga y tras un error, en
+  estados donde hoy ni existe. La alternativa —`ngTemplateOutlet`— se descartó por ser un mecanismo
+  estructural sin precedente en el repo, con el mismo criterio con que `styles.css` se niega a introducir un
+  `:host` que sería «un segundo patrón conviviendo con el único que hay», y porque su pereza real tampoco
+  estaba medida. **La tabla se queda en la lista**, con el complemento exacto de la cadena escrito idéntico en
+  las siete y verificable por grep.
+  **EL COMPLEMENTO NO LLEVA `!error()`, Y ESA ES LA MITAD DEL TRABAJO.** El instinto —encadenar el error como
+  primera rama— es exactamente lo que S124 probó y REVIRTIÓ midiendo que un 409 de borrado hacía desaparecer
+  la tabla entera, 8 filas → 0, siendo ese 409 camino de uso normal desde S113. El arreglo escrito de
+  `D-vacio-miente-con-error` es más estrecho: sólo el VACÍO lleva `&& !error()`. Y escrito tal cual en un
+  `@else if` deja una trampa nueva: el caso cae al hermano siguiente, `coincidencias === 0`, que también es
+  cierto, y el vacío deja de mentir para que mienta «Ningún resultado para «»». Por eso la precedencia vive en
+  un `computed` que devuelve UNA cadena con un `'ninguno'` explícito, no en cuatro ramas de plantilla —mismo
+  argumento que `cabecera-lista` escribe para `textoContador`—.
+  M3 — CAMPAÑA DE MUTACIÓN SOBRE LA PRECEDENCIA, cinco mutantes, **los cinco muertos** y cada uno en el caso
+  que le tocaba, con la base verde comprobada antes de creerse nada (la lección que S127 pagó con `npx vitest
+  run`). La más informativa es la que adelanta `sin-resultados` a `vacio`: tira TRES casos y uno de ellos es
+  el que también mata la mutación del error, lo que dice que precedencia del error y orden vacío/sin-resultados
+  son las dos mitades del mismo argumento. Se anota el precio del caso (9), que cae con tres mutaciones
+  distintas por ser de transición: si algún día falla, su nombre no dirá cuál de las tres se rompió.
+  **EL CABLEADO CREA UNA SUPERFICIE DE MUTACIÓN QUE ANTES NO EXISTÍA**, y se cubre. Las siete listas aseveran
+  la PRESENCIA del nodo y nunca su contenido: mientras el texto vivía en la plantilla no podía viajar mal, y
+  desde que viaja por `input` nadie vigila el trayecto. Se añaden DOS asertos de texto y no siete —cinco
+  copias del mismo caso no discriminan nada—: **niveles**, porque rompe el molde con una segunda frase sobre
+  la dependencia con Grupos, y **aulas**, por el femenino. Los dos con `toBe` sobre la cadena entera; con
+  `toContain` ninguna de las dos mutaciones se habría visto, y se mutaron para comprobarlo.
+  M4 — EN NAVEGADOR, y el caso que importa NO lo cubre ninguna suite. (1) Lista normal, tabla y contador. (2)
+  Consulta sin coincidencias: «Ningún resultado para «zzz».» y la tabla desaparece. (3) **409 de borrado en
+  Asignaturas: el error se pinta Y LA TABLA SIGUE ENTERA** —la reversión de S124, ahora protegida por
+  construcción en un sitio en vez de siete veces a mano—. (4) Error de carga (500) con el catálogo lleno: el
+  mensaje aparece SIN «No hay asignaturas todavía» al lado, que es `D-vacio-miente-con-error` vista en la
+  pantalla donde nació.
+  R-TERMINADO, aplicado cuatro veces. No se reclaman los 32 px. No se generaliza el ancho de 60 rem de la
+  landing a las demás vistas (eso exige verlas todas: es C-revisión). No se arregla el `/horario/1` a fuego.
+  Y no se tokeniza el espaciado de las 27 hojas.
+  ERRORES DEL ARQUITECTO, CUATRO, Y TODOS DE LA MISMA FAMILIA. (1) Una ruta inventada —
+  `components/horario/horario-grid.html`, que no existe— que sobrevivió tres turnos **porque el guion que
+  debía leerla llevaba un `|| find …`: el `sed` falló, el `find` salvó la salida y el volcado se vio bien**.
+  La detuvo Claude Code en el `git add`. (2) Un `grep -rl … --include=*-lista.ts` que casa con
+  `estado-lista.ts`: el componente se contaba a sí mismo, así que el «1» significaba cero. (3) Los contrastes
+  de `--color-sobre-acento` se escribieron en el javadoc **antes de medirlos** (resultaron correctos: 8,67:1 y
+  5,76:1, medidos después). (4) Se afirmó que `<ng-content>` dentro de `@if` era perezoso y que por tanto el
+  componente TENÍA que absorber la tabla; la sonda lo refutó. Las dos primeras son instancias nuevas de
+  `D-guion-exit-enmascarado` —un instrumento que mide otra cosa distinta de la que se cree—; la tercera y la
+  cuarta son la misma lección de `D-arranque-no-literal` por el lado del mecanismo: lo que no se mide, no se
+  afirma. Corolario operativo escrito: **fallback silencioso en un guion de lectura, nunca**.
+  DEUDA. **TRES NUEVAS**: `D-horario-id-a-fuego` (O-demo), `D-contador-se-apaga-con-error` (C-revisión) y
+  `D-748-sin-derivacion` (Higiene/Método). **DOS CERRADAS**: `D-insignia-sin-leyenda`, pagada en su sede
+  escrita y con un argumento que su ficha no podía tener —desde S127 esa esquina tiene DOS números con signo,
+  el `+N` de desbordamiento y el coste blando, con significados sin relación y sólo uno con explicación—; y
+  `D-vacio-miente-con-error`, muerta POR CONSTRUCCIÓN al centralizar la precedencia, igual que
+  `D-pdc-lista-rancia` murió en S123 sin que nadie escribiera un `EventEmitter`. Deuda bloqueante abierta:
+  sigue en 1 (D31-a, las aulas de FPB).
+  SIN CONDICIÓN DE SALIDA. Los seis commits son coherentes uno a uno; se rehízo con `--soft` un reparto que
+  dejaba el primero en rojo por su cuenta, porque un commit intermedio que no compila rompe `git bisect`.
+  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar (`describe is not defined`);
+  la suite corre bajo `@angular/build:unit-test` y se lanza entera con `npx ng test --watch=false`. `mvn test`
+  sin `clean` deja informes huérfanos de surefire y da 283 en vez de 282. **El bundle de `ng test` NO sirve
+  para juzgar `D-bundle-presupuesto`**: dio 705 y luego 709,51 kB cuando el de producción estaba en 540,71;
+  el delta real de la sesión es +1,32 kB crudos. Los componentes son standalone, así que un componente nuevo
+  exige entrar en el `imports` de cada consumidor: el bloque 2 rompió el build por olvidarlo, y una receta
+  escrita en prosa no es un paso ejecutado.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b`; el M4 corrió contra una copia.
+  LIMPIEZA (M1-bis): archivada S126 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S127 a «Última sesión registrada (previa):»; S128
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S125 a S126.
+  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
+  PENDIENTE y es el último Cambio del objetivo**. O-navegación TERMINADO en S127, y su criterio 1 deja de
+  llevar salvedad. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro.
+  Siguiente: **C-revisión**, la pasada por las tres vistas y los tres diálogos con el arquitecto como juez.
+  Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
   Vigesimoséptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
   línea base heredada de S126 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 381, e2e 2);
   al cerrar, **app 282, solver 91, vitest 403, e2e 2**. vitest sube +22 y **ni uno de los 381 heredados se
@@ -833,101 +961,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **C-identidad**, sobre la UI
   definitiva que O-navegación acaba de fijar. Lo fija su propio M0.
 
-Última sesión registrada (previa): Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
-  Vigesimosexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
-  línea base heredada de S124 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 356, y el
-  e2e 2, que era la única sin línea base propia y se corrió también); al cerrar, **app 282, solver 91,
-  vitest 381, e2e 2**. vitest sube +25 y ni uno de los 356 heredados se modifica.
-  M0 — EL MAPA, Y UNA COSTURA DEL SISTEMA DE TRES DOCUMENTOS. Cambio: C-rejilla-densidad, tramo 1. Objetivo:
-  O-navegación, criterio 4. Hito: ninguno funcional, que es la respuesta escrita en la ficha. R-invalidación
-  limpio y en la dirección buena. **La apertura se bloqueó**: `docs/diseno-navegacion.md`, que es la AUTORIDAD
-  de D1–D11, no estaba en el Project. Se pidió antes de afirmar nada en vez de reconstruir los diseños de
-  memoria. Queda anotado: el sistema de tres documentos remite a un cuarto que no viajaba con ellos.
-  LA ARITMÉTICA DEL PRESUPUESTO, RECONSTRUIDA Y CUADRADA. `alto_de_fila = (neto − thead 31,0 − recreo 23,6 −
-  4) / 6`. El «cromo de vista» de esa fórmula es la fila de D9 con su padding y **NO incluye la barra de la
-  aplicación**, que ya está descontada en los 835. De ahí sale el techo de 111 px del criterio 4: es el último
-  entero por encima del umbral, y el acantilado está entre 110,00 y 110,83 px de fila.
-  **D3 LLEVABA DOS CAMBIOS PRESENTADOS COMO UNO.** El texto dice «de cuatro líneas a dos»; su geometría medida
-  incluye además `--lh-apretado` y `--tam-xs` en la línea 2, que el texto no menciona. Sin ese apretón la celda
-  de cuatro plazas nace en 124,8 px en vez de 110,8 y el acantilado se cruza sin que nadie lo note. Quien lea
-  D3 sin correr el instrumento implementa la mitad y no se entera.
-  DECISIONES DEL TRAMO. **D6 sólo condensa donde hay grupo implícito**: la rejilla recibe `grupoActual`
-  (defecto `null`) y en las vistas de profesor y aula pinta la lista entera, porque ahí el grupo es la única
-  señal que lo nombra y condensarlo sería retirar información existente —A5 ya había medido que la densidad
-  sólo se juega en la vista por grupo—. **`.bloque` es clase aparte de `.con-badge`** aunque escriban el mismo
-  `padding-top`: hay un test que afirma que una instancia pinada sin badge no lleva esa clase, y reutilizarla
-  habría dejado su comentario mintiendo. **`.entrada--fila` no cambia el DOM**: gira el eje, y las dos líneas
-  pasan a ir una al lado de otra, así que el modo bloque no duplica plantilla. **El título sale de
-  `fechaGeneracion`**, no de parsear el nombre. **El recreo no lleva hora** (D8).
-  **D9 ADMITÍA DOS DIRECCIONES Y UNA ROMPE EL PRODUCTO.** El documento no dice cuál. Medidas las dos por
-  mutación: bajar los controles a la rama `@else if (proyeccion())` tira el caso (40) y deja al usuario sin
-  botón «Generar» en el arranque real —base sin horario, proyección en 404—, que es justo donde hace falta. Se
-  implementa subiendo el `<h2>`. El caso (47), nuevo, sujeta esa dirección para siempre.
-  **D1 SE MIDE EN RUNTIME, Y EL ARQUITECTO SE EQUIVOCÓ DOS VECES ANTES DE ACERTAR.** Primera propuesta: un
-  `calc(100dvh − constantes)`. RETIRADA al saber que entre la cabecera y la tabla cuelgan seis bloques
-  condicionales: con constantes, la fórmula es correcta sólo en el caso feliz y silenciosamente falsa en
-  cuanto aparece un aviso. Segunda: que midiera la vista. RETIRADA también: la rejilla es el ítem flexible que
-  absorbe el sobrante, así que su propio hueco ya lleva descontado todo lo de arriba y nadie necesita enumerar
-  el cromo. Lo publica el componente sobre su host con `ResizeObserver`, y **no hay bucle** porque el cálculo
-  depende del hueco, del `thead` y del recreo, nunca de lo que mide la tabla. Verificado en navegador: cero
-  avisos de `ResizeObserver loop` y la cadena de altura copia el patrón de `configuracion.css` (envoltorio con
-  `height: 100%`), sin introducir un `:host` que sería un segundo patrón conviviendo con el único que hay.
-  **DOS VECES SE DESCRIBIÓ MAL EL FALLO DEL REPARTO ESTÁTICO, Y LAS DOS SE CORRIGIÓ.** «Se recorta una fila
-  más» es falso: si el presupuesto se calcula una vez y luego aparece un aviso, `--alto-celda` no cambia, el
-  hueco encoge y lo que vuelve es el SCROLL. La segunda vez el error venía con un número al lado (4,9 px de
-  margen), que es lo que lo hacía convincente: esos 4,9 px son la distancia al siguiente umbral de recorte, no
-  margen contra el scroll.
-  M4 — LO QUE LA MEDICIÓN DESMINTIÓ. `thead` 30 y `tr.recreo` 24, exactos, desviación 0. **El hueco es 716, no
-  los 748 que el arquitecto había calculado**, y esos 32 px SIGUEN SIN EXPLICACIÓN. El reparto cae a 110 px de
-  fila contra los 110,8 que pide una celda de cuatro plazas: **el acantilado se cruza por 0,8 px** y el recorte
-  es 72 de 791 (9,1 %) en vez de 50 (6,3 %). El criterio 4 NO se rediscute: su exigencia es ausencia de scroll
-  —verificada en 1ºA, 4ºA (que desbordaba 71 px) y 1B-A— y su umbral de reapertura es el ~10 %. El 50 era una
-  predicción, no un requisito. Perseguir los 32 px es higiene y no rescate: el aviso de pines cuesta 62 px de
-  hueco (~10 px por fila), así que con un aviso en pantalla 72 es inevitable a esta geometría.
-  **EL INSTRUMENTO SALE VALIDADO Y NO SE TOCA.** Recalibrado contra el navegador en cinco tamaños de celda
-  (63,0 / 67,0 / 111,0 / 132–133 / 154–155 frente a 62,9 / 67,4 / 110,8 / 132,5 / 154,2): **ninguna desviación
-  supera 1 px**, sobre cientos de muestras. Sesgo conocido y conservador: cobra la banda del badge a todas las
-  instancias, y 303 de las 599 celdas de una plaza no la llevan. `scripts/volcar-sesiones-por-grupo.py` se
-  COMMITEA: el volcado se había perdido dos veces (S125 y S126) y un instrumento sin su entrada no es
-  reproducible, es un ritual.
-  MÉTODO — EL HALLAZGO DE LA SESIÓN. **Una mutación tiene que AISLAR el aserto que se quiere medir, no sólo
-  poner el test en rojo.** Al verificar el test de reparto, la mutación canónica lo tumbaba por el `toBe`, que
-  se evalúa primero y aborta antes de llegar a la cota nueva: «el test cae» no demostraba que la cota
-  discriminara. Hicieron falta dos mutaciones más, ajustando el `toBe` al valor mutado, para exponer cada cota.
-  ERRORES DEL ARQUITECTO, ADEMÁS DE LOS DOS DE D1. Un ancla inventada (`tituloDeProyeccion`) sobre un fichero
-  que no había leído —la escribió un encargo abierto, no un guion, y sólo la guarda de unicidad evitó el
-  destrozo—. Un test cuyo comentario prometía cazar una mutación que no cazaba (el (2) del recreo: mover el
-  recreo desplaza también su `orden`, y lo que rompe la confusión es que el día no empiece en 1). Y el aserto
-  (1) de `reparto.spec.ts`, que documentaba como MEDIDAS unas cifras que el navegador desmintió; corregido en
-  commit propio, y ahora documenta el acantilado cruzado en vez de negarlo.
-  R-TERMINADO, aplicado tres veces. No se abren las palancas de altura (ratificadas dos veces ya). No se paga
-  la hora de reloj del recreo pese a que la medición de la API la puso al alcance. Y no se manda un nombre
-  legible en el POST del horario, que arreglaría el título en origen, porque es una escritura nueva y el
-  criterio 5 las excluye.
-  DEUDA. **DOS NUEVAS**, las dos con sede en O-demo: `D-nombre-horario-instante` (mejora futura) y
-  `D-jornada-zona-servidor` (limitación conocida). `D-guion-exit-enmascarado` y `D-vacio-miente-con-error`
-  siguen vivas y sin pagarse. Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
-  **CONDICIÓN DE SALIDA, EXPLÍCITA: el repositorio queda ocultando 72 celdas de 791 sin marca y sin forma de
-  verlas.** Es el estado intermedio que S125 aceptó al partir el Cambio, no una entrega, y **sólo lo cierra el
-  tramo 2 (D11)**. Va en la primera línea del prompt siguiente.
-  NOTAS TÉCNICAS QUE SOBREVIVEN. `mvn test` sin `clean` no borra informes huérfanos de surefire:
-  `TEST-…BarridoPresupuestoS117.xml` sigue en `app/target` y hace que sumar los XML dé 283 en vez de 282.
-  `npx vitest run <fichero>` NO funciona en este repo (`describe is not defined`): la suite corre bajo el
-  builder `@angular/build:unit-test` y hay que lanzar `npx ng test --watch=false` entera (~11 s) y filtrar por
-  grep. Sin cubrir: el arrastre sobre celda VACÍA (4ºA tiene el horario lleno) y los 32 px de hueco. La
-  verificación de M4 se hizo con el Firefox de Playwright, no con el del arquitecto; el recalibrado coincide,
-  pero el hueco conviene confirmarlo una vez en el navegador propio.
-  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después, incluido el e2e
-  y el M4 (que corrió contra una copia, porque el arrastre escribe un bloqueo).
-  LIMPIEZA (M1-bis): archivada S124 a `bitacora-sesiones.md` (promovida a `### Sesión 124`, insertada al final
-  en orden ascendente, cuerpo íntegro); degradada S125 a «Última sesión registrada (previa):»; S126 queda como
-  única cabecera H3 viva. Los dos censos de la bitácora pasan de S123 a S124.
-  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS, y
-  C-rejilla-densidad con su TRAMO 1 HECHO**; queda el tramo 2. O-diseño (transversal, abierto en S121):
-  C-tokens y C-sustitución HECHOS, C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2)
-  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
-  C-rejilla-densidad**, que es lo único que cierra la condición de salida. Lo fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -950,8 +983,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127.
-El plan conserva ahora S126 (degradada a formato compacto) y S127 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128.
+El plan conserva ahora S127 (degradada a formato compacto) y S128 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2784,7 +2817,16 @@ con remisión a la bitácora.
   asertaban sobre el `MockHttpServletResponse` y no sobre el cuerpo de red): un instrumento que mide otra cosa
   distinta de la que se cree. → sesión de Higiene/Método, junto al script de R4 que falta desde S101, al que
   esta deuda añade un caso concreto: comprobar el código de salida del COMANDO, inmediatamente y sin nada en
-  medio. No se paga ahora.
+  medio. **CUARTA Y QUINTA INSTANCIA en S128, las dos del arquitecto y las dos en guiones de LECTURA, que es
+  variante nueva.** (4) Un volcado de inventario pedía `sed -n '40,80p' ruta-inexistente || find … -exec sed …`:
+  el `sed` falló, **el `||` salvó la salida** y el volcado se vio bien, así que la ruta falsa
+  (`components/horario/`, cuando el fichero vive en `components/horario-grid/`) sobrevivió tres turnos hasta
+  que reventó en un `git add` —donde Claude Code la paró en vez de parchearla en silencio—. (5) La guarda del
+  cableado del bloque 2, `grep -rl "EstadoLista" --include=*-lista.ts | wc -l`, **casa con `estado-lista.ts`**:
+  el componente se contaba a sí mismo, así que el «1» que devolvió significaba CERO listas cableadas. Las dos
+  son la misma forma que las tres anteriores —un instrumento que mide otra cosa distinta de la que se cree—
+  con un corolario operativo nuevo que se escribe aquí: **fallback silencioso en un guion de lectura, nunca**;
+  si un `sed` no encuentra su fichero, tiene que petar. No se paga ahora.
 
 - **D-vista-horario-sin-horario** (S120, VIVA, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
   VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
@@ -2924,11 +2966,65 @@ con remisión a la bitácora.
   no O-navegación ni O-demo** (el asistente la encuadró primero en O-demo y se corrigió en el mismo M1).
   → O-ajuste-cierre.
 
+- **D-horario-id-a-fuego** (S128, VIVA, TÉCNICA REAL, no bloqueante) — LA BARRA Y LA LANDING ENLAZAN
+  `/horario/1` CON EL ID LITERAL. Leído en `app.html:5` y `landing.html:8` al reestilar la barra en
+  C-identidad. Dos consecuencias, y la segunda no se había visto: (1) en cuanto se genera un segundo horario
+  el enlace sigue apuntando al primero, y (2) **sobre `/horario/2` el `routerLinkActive` tampoco marca
+  «Horario»**, porque el prefijo no casa, así que el id a fuego no sólo enlaza mal sino que apaga el indicador
+  de sección que el criterio 1 de O-navegación acaba de verificar. NO se arregla en S128 y la razón es de
+  contrato, no de alcance: `D-horario-irreversible` ya midió que **no existe `GET /api/horarios`**, luego no
+  hay forma de que el cliente sepa cuál es el horario vigente. Cualquier arreglo empieza por ese endpoint. Se
+  paga en O-demo, que es donde se bautizan y se listan horarios de verdad. No se paga ahora.
+
+- **D-contador-se-apaga-con-error** (S128, VIVA, TÉCNICA REAL de UX, no bloqueante) — EL CONTADOR DE LA
+  CABECERA DESAPARECE ANTE UN ERROR DE BORRADO, CON LA TABLA LLENA DEBAJO. Visto en el M4 de S128 sobre
+  Asignaturas: con el 409 de borrado en pantalla y las 100 filas cargadas, el rótulo pierde su número. La
+  causa es `[mostrarContador]="!cargando() && !error()"`, que viene de S124 y que C-identidad NO tocó: **es la
+  misma mentira que S124 revirtió en la tabla, viva en el contador**. No la introduce el cableado de
+  `app-estado-lista` —es preexistente— y no se paga aquí porque el arreglo exige distinguir error de CARGA de
+  error de ACCIÓN, y eso cambia el contrato de `app-cabecera-lista` (dos señales en vez de una), que está
+  fuera del alcance declarado de C-identidad. Su sede es **C-revisión**, que repasa esta UI y donde un dato
+  que se esconde sin motivo es exactamente lo que toca mirar. Hermana de `D-vacio-miente-con-error`, cerrada
+  en la misma sesión por el mismo argumento aplicado a otro elemento. No se paga ahora.
+
+- **D-748-sin-derivacion** (S128, VIVA, DE MÉTODO, no bloqueante) — EL NÚMERO QUE GOBERNÓ UNA PREGUNTA
+  ABIERTA DURANTE TRES SESIONES NUNCA SE ESCRIBIÓ CON SU DERIVACIÓN. Los «748 px calculados» contra los 716
+  medidos abrieron en S126 un pendiente que S127 confirmó en el navegador del arquitecto y que S128 intentó
+  cerrar: `.app__contenido` declara `padding: 1rem 0`, es decir 32 px exactos en el contenedor de la vista, y
+  coincide al píxel con la diferencia. **La hipótesis queda CANDIDATA y no probada, y la razón es que no hay
+  contra qué contrastarla**: el plan dice «los 748 que el arquitecto había calculado» y en ningún documento
+  del repo consta cómo se calcularon; reconstruirlos desde el viewport no cuadra. Es la misma lección de
+  `D-arranque-no-literal` por el lado del número: lo que se describe y no se cita, no se puede verificar
+  después. El arreglo es de una línea —escribir la fórmula al lado del número la próxima vez que se calcule
+  un presupuesto— y su sede es la sesión de Higiene/Método, junto al script de R4. La causa candidata queda
+  escrita en `app.css` donde vive el padding, con la decisión de NO reclamar esos 32 px (R-terminado:
+  devolverlos subiría `alto-celda` ~4,5 px y cambiaría el recorte de un criterio cumplido). No se paga ahora.
+
 ### Deuda consciente CERRADA (histórico)
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
 
+- **D-insignia-sin-leyenda** (S122 → CERRADA S128) — la insignia de coste blando se pintaba como un número
+  desnudo con signo, sin `title` ni `aria-label`, a diferencia del candado que los lleva dos líneas más abajo
+  en el mismo fichero. CERRADA en C-identidad, su sede escrita, con el mismo par tooltip + etiqueta accesible
+  que usa el candado y con una leyenda que NO promete que el número sea un coste absoluto —es un delta
+  CONTRAFACTUAL con signo y no tiene por qué cuadrar con `Totales`—, que es la trampa que su ficha avisaba. El
+  argumento que decidió pagarla aquí no lo podía tener la ficha de S122: **desde S127 esa esquina de la celda
+  tiene DOS números con signo** —el `+N` de desbordamiento en la banda del rótulo y el coste blando— con
+  significados sin relación, y sólo uno llevaba explicación; dejó de ser «un dato sin rótulo» y pasó a ser
+  ambigüedad activa creada por el Cambio anterior. Coste en altura: cero (es un atributo). Detalle: S128.
+- **D-vacio-miente-con-error** (S124 → CERRADA S128) — cuando fallaba la CARGA de una lista convivían el
+  mensaje de error y «No hay X todavía», que era falso. CERRADA POR CONSTRUCCIÓN al fundir las cuatro ramas de
+  estado de las siete listas en `app-estado-lista`, igual que `D-pdc-lista-rancia` murió en S123 sin que nadie
+  escribiera un `EventEmitter`. El arreglo NO es el encadenado general: S124 ya probó eso y lo revirtió
+  midiendo que un 409 de borrado hacía desaparecer la tabla entera (8 filas → 0), y ese 409 es camino de uso
+  normal desde S113. Sólo el VACÍO se condiciona al error, y la precedencia vive en un `computed` con un
+  `'ninguno'` explícito y no en un `@else if`, porque escrito como rama el caso caía al hermano siguiente
+  —`coincidencias === 0`, también cierto— y el vacío dejaba de mentir para que mintiera «Ningún resultado para
+  «»». Verificada en navegador sobre el error de carga y sobre el 409 de borrado. **Nota de costura: ninguna de
+  estas dos deudas llegó a tener ficha viva en esta sección** —vivían sólo en la tabla §4 de
+  `gestion_proyecto.md`, que se declara asignación y no fuente—; se registra aquí al cerrarlas. Detalle: S128.
 - **D-F8.6-ivB-a** — `alSoltar` y tres ramas más del contenedor sin red. NÚCLEO CUBIERTO en S89 (8.6-iv-C) por (21)-(26): las cuatro ramas de `alSoltar` —`aulas: []` y `tramo` sin permutar (21); la clave desde la RESPUESTA y no desde la suelta (22), la dimensión más peligrosa; el ERROR no puebla el Map y `mensaje()` degrada (23)/(24); `getProyeccion` sigue en 1 llamada tras pinar (25a)—, más el `errorPin.set(null)` de reintento de `alSoltar` (25b) y la preservación del índice previo (26), que la deuda no nombraba y destapó el contraste. La rama `error:` de `alDespinar` NO sobrevivió: invoca el MISMO `mensaje()` que (24) cubre y duplicar el aserto sería cobertura fingida. PUNTO (a) —el `errorPin.set(null)` de reintento de `alDespinar`, en `horario-view.ts:236`— CERRADO en S94 por (36), junto a su gemela D-F8.4-B2-a. PUNTO (b) y último resto —el invariante del TSDoc de `cargarPines` (125-132) de que el índice NO se recarga al cambiar de vista ni de entidad— CERRADO en S96 por (37) y (38), que aseveran `bloqueos.listar` en 1 llamada tras `cambiarVista` y tras `cambiarEntidad`: el aserto va sobre el COLABORADOR y no sobre `pinadas`, porque un doble que devuelve la misma lista la deja idéntica y la mutación quedaría verde. El invariante se sostiene sobre una AUSENCIA de llamada (un solo call site de `cargarPines`, l.189 en `cargar`), luego la campaña fue POR ADICIÓN. Detalle: bitácora S84, S89, S94 y S96 (futura).
 
 - **D-F8.4-B2-a** — el `errorGeneracion.set(null)` con que `lanzarGeneracion` limpia el error previo al reintentar no lo ejercitaba nadie: con una sola generación por test, borrarlo quedaba verde. CERRADA en S94 por el test (35) de `horario-view.spec.ts`, que encadena fallo → reintento y asevera la fase INTERMEDIA —el aviso de error desaparece ANTES de que el segundo Subject responda—, única que discrimina el `set`; la versión débil (`toHaveBeenCalledTimes(2)`) sigue dando 2 con el `set` borrado y se descartó por eso. Exigió migrar el doble de `horario.generar` de Subject compartido a FRESCO POR INVOCACIÓN: uno ya cerrado por `.error()` redispara síncronamente al re-suscribirse y hace la fase inobservable. Se cerró JUNTO con su gemela —el punto (a) de D-F8.6-ivB-a, mismo mecanismo en `alDespinar`— como S93 exigía. Detalle: bitácora S94.
