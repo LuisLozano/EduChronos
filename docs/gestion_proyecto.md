@@ -16,19 +16,19 @@
 - L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
 - L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
 - L869 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." (ABIERTO en S122)
-- L999 — ## 4. Clasificación del trabajo pendiente
-- L1017 — ### Clasificación de las deudas vivas actuales
-- L1023 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1030 — #### Deuda técnica real, colgada de su objetivo
-- L1070 — #### Mejora futura, cuelga y espera
-- L1098 — #### Decisión arquitectónica consciente → sale de la cola
-- L1110 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1119 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1126 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1159 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1213 — ## 6. Reglas estratégicas
-- L1260 — ## 7. Métricas del sistema
-- L1281 — ## 8. El sistema respondiendo a las preguntas clave
+- L1011 — ## 4. Clasificación del trabajo pendiente
+- L1029 — ### Clasificación de las deudas vivas actuales
+- L1035 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1042 — #### Deuda técnica real, colgada de su objetivo
+- L1082 — #### Mejora futura, cuelga y espera
+- L1112 — #### Decisión arquitectónica consciente → sale de la cola
+- L1124 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1133 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1140 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1173 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1227 — ## 6. Reglas estratégicas
+- L1274 — ## 7. Métricas del sistema
+- L1295 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -927,6 +927,16 @@ de las Fases 9–12.
      de D9 (título + controles) con su padding debe caber en 111 px.** El escalón de las
      celdas de cuatro plazas cae en cromo de vista 111,6; por encima entran 22 celdas más y
      el recorte salta a 72 de 791, el 9,1 %.
+     **VERIFICADO EN S126 (tramo 1), y el resultado es 72, no 50.** Lo que el criterio exige SÍ se cumple:
+     el scroll vertical desaparece, medido en 1ºA, 4ºA —que desbordaba 71 px— y 1B-A. La cabecera de D9
+     quedó en 27 px, muy por debajo del techo de 111, pero el hueco real que el flex deja a la rejilla es
+     **716 px y no los 748 calculados**, y esos 32 px de diferencia SIGUEN SIN EXPLICAR. El reparto cae a
+     110 px de fila contra los 110,8 que pide una celda de cuatro plazas: el acantilado se cruza por 0,8 px
+     y entran las 22 celdas de cuatro plazas. **72 de 791 = 9,1 %, por debajo del umbral de reapertura del
+     ~10 %, así que el criterio NO se rediscute**; el «50 de 791» era la predicción de S125, no un requisito.
+     Y no se arregla afinando: el aviso de pines cuesta 62 px de hueco (~10 px por fila), así que con un
+     aviso en pantalla 72 es inevitable a esta geometría. El instrumento sale VALIDADO del contraste con el
+     navegador —cinco tamaños de celda, ninguna desviación mayor de 1 px— y no se toca.
      La resolución del portátil queda MEDIDA y CERRADA en S123 —1280×585 con escala 150 %— y
      EXCLUIDA del criterio.
   5. Ninguna escritura nueva. Se admite composición de solo lectura (enseñar en un destino
@@ -936,7 +946,9 @@ de las Fases 9–12.
      declarado ANTES y no descubierto en rojo. Previstos y confirmados: los 8 de `configuracion.spec.ts`,
      que MUEREN y se sustituyen por 6 de enrutado, y `centro-minimo.spec.ts:107-180`, que es reescritura
      de media suite y no «dos puntos» —el otro punto, `:213`, es de C-rejilla-densidad por D6—. Suites
-     tras S124: app 282, solver 91, vitest 356, e2e 2.
+     tras S124: app 282, solver 91, vitest 356, e2e 2. **Tras S126: app 282, solver 91, vitest 381, e2e 2**,
+     con la única baja declarada del tramo 1 —`centro-minimo.spec.ts`, el aserto sobre `.grupos`— sustituida
+     por su contraria, que es lo que D6 promete y antes no verificaba nadie.
 - **Deudas que absorbe:** `D-configuracion-monolitica` y `D-pdc-lista-rancia`, que
   llevaban desde S115 y S113 remitiendo las dos, con esas palabras, a «el Cambio que
   decida la navegación» y a «la decisión ruta-hija-vs-contenedor que S101 aplazó a Cambio
@@ -959,7 +971,7 @@ de las Fases 9–12.
   (criterio 2, y con él las dos deudas absorbidas) — **HECHO en S123**; **C-listas-filtradas**
   (criterio 3, los casos duros son Subgrupos y Actividades) — **HECHO en S124**; y **C-rejilla-densidad**
   (criterio 4, la geometría de celda de `diseno-navegacion.md` §4 más el mecanismo de expansión de D11)
-  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. **PARTIDO EN DOS TRAMOS en S125**, por dependencia real y no por tamaño: **tramo 1 — geometría y presupuesto** (D1-D6, D7, D8, D9, D10: todo lo que CONSUME altura, con la verificación en navegador de que da 50 de 791) y **tramo 2 — el mecanismo de expansión** (D11, lo único interactivo y lo único que hoy no existe en ninguna forma; va después porque no se puede verificar «colapsada Y con forma visible de expandirla» hasta que algo colapse). El criterio 1 no abre Cambio: la barra
+  — PENDIENTE, y ya sin parámetros abiertos tras cerrarse D0-2. **PARTIDO EN DOS TRAMOS en S125**, por dependencia real y no por tamaño: **tramo 1 — geometría y presupuesto** (D1-D6, D7, D8, D9, D10: todo lo que CONSUME altura, con la verificación en navegador de que da 50 de 791) y **tramo 2 — el mecanismo de expansión** (D11, lo único interactivo y lo único que hoy no existe en ninguna forma; va después porque no se puede verificar «colapsada Y con forma visible de expandirla» hasta que algo colapse). **TRAMO 1 HECHO en S126** (seis commits: geometría de celda, cabecera fundida, fila de recreo y reparto de altura), con el criterio 4 cumplido en su mitad medible —ausencia de scroll— y PENDIENTE en la otra: la expansión. **CONDICIÓN DE SALIDA que hereda el tramo 2: el repositorio queda ocultando 72 celdas de 791 sin marca ni forma de verlas.** Es el estado intermedio que la partición aceptó, no una entrega, y sólo lo cierra D11. El criterio 1 no abre Cambio: la barra
   existe y lo que le falta es estilo. Salen uno a uno de los criterios 2, 3 y 4, y tenerlos escritos
   convirtió el M0 de S123 en ratificar en vez de deliberar.
   **RENOMBRADO en S123: `C-listas-filtradas` se llamaba `C-listas-paginadas`.** Los dos nombres designan
@@ -1070,6 +1082,8 @@ asigna categoría, objetivo y disposición.
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
 |---|---|---|
+| D-nombre-horario-instante (el horario se llama `"Horario " + Instant.now()`, 38 caracteres con nanosegundos) | O-demo | Nace en S126 al fundir el título con los controles (D9): el nombre que el backend pone por defecto (`GeneradorHorarioService.java:187-188`, porque el POST del frontend va con cuerpo vacío) no cabe en una fila junto a dos selectores y un botón, y además no es un nombre sino una marca de tiempo. CONTENIDA en la pintura: `horario/titulo.ts` compone el rótulo desde `fechaGeneracion` y cae al nombre crudo si la fecha no parsea. El arreglo REAL es mandar un nombre legible en el POST, que `HorarioController.java:64` ya acepta, y no se hace porque es una escritura nueva y el criterio 5 de O-navegación las excluye. Se paga en O-demo, que es donde se bautizan horarios de verdad |
+| D-jornada-zona-servidor (las horas de la jornada dependen de la zona del proceso del servidor) | O-demo | MEDIDA en S126 contra el backend real: `tramo_semanal` guarda 25200000 ms (7:00) y `GET /api/jornada` devuelve `08:00`. El resultado es correcto en este equipo y su corrección viene de cómo el driver lee el entero, luego depende del despliegue: en UTC la jornada entera se mostraría una hora antes. Es la razón por la que D8 sigue sin pintar la hora en la fila de recreo, y NO es la razón que `diseno-navegacion.md` §4-D8 escribió: allí el hueco era «no sabemos si la conversión es correcta»; aquí es «lo es, pero por el despliegue». No la introduce S126 y no la puede arreglar el frontend, que pinta la cadena que le dan. Se decide donde se despliega para el centro |
 | D-vacio-miente-con-error (cuando falla la CARGA de una lista conviven el mensaje de error y «No hay X todavía», que es falso) | C-revisión | Nace en S124 al medir las dos caras del encadenado de ramas. S124 probó encadenar `error()` con el resto y lo REVIRTIÓ: encadenado, un 409 de borrado hacía desaparecer la tabla entera (medido: 8 filas → 0), y eso es un camino de uso normal que S113 introdujo a propósito, mientras que el fallo de carga es raro. El defecto es PREEXISTENTE, no lo introdujo S124. Arreglo ya escrito: condicionar la rama del vacío a `x().length === 0 && !error()`. No se paga (R-terminado: no cambia el criterio 3); su sede es C-revisión, que va a repasar esta UI y donde un mensaje que miente es exactamente lo que toca mirar |
 | D-F8.6 de cobertura (iiiB1-a, ivB-a-bis, ivD-a, ivA-a, ivA-c, ivB-b, ivB-c, iiiA-b, B-a) | O-ajuste-cierre | Cobertura de la vista de horario. La mayoría se RECLASIFICA a limitación conocida en cuanto O-shell reubique la vista (su contexto de test cambiará). NO se pagan ahora |
 | D-F8.4-A-a, -A-b, -A-c, -B1-a | O-ajuste-cierre | Cobertura de prevalidación |

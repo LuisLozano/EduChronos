@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
-- L981 — ### Bloques de Fase 2
-- L989 — ### Bloques de Fase 5
-- L1012 — ### Bloques de Fase 6
-- L1057 — ### Bloques de Fase 8
-- L1266 — ### Fases completadas
-- L1370 — ### Cierre del modelo — Sesión 8
-- L1418 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1464 — ### Método de trabajo (procedimiento vigente)
-- L1497 — ### Deuda consciente VIVA
-- L2888 — ### Deuda consciente CERRADA (histórico)
-- L2916 — ### Notas técnicas validadas en Fase 0
-- L2926 — ### Notas técnicas validadas en Fase 6
-- L2960 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L2969 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L2996 — ### Registro detallado de sesiones S10–S31
-- L3005 — ## Señales globales de alerta
+- L699 — ### Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
+- L953 — ### Bloques de Fase 2
+- L961 — ### Bloques de Fase 5
+- L984 — ### Bloques de Fase 6
+- L1029 — ### Bloques de Fase 8
+- L1238 — ### Fases completadas
+- L1342 — ### Cierre del modelo — Sesión 8
+- L1390 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1436 — ### Método de trabajo (procedimiento vigente)
+- L1469 — ### Deuda consciente VIVA
+- L2883 — ### Deuda consciente CERRADA (histórico)
+- L2911 — ### Notas técnicas validadas en Fase 0
+- L2921 — ### Notas técnicas validadas en Fase 6
+- L2955 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L2964 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L2991 — ### Registro detallado de sesiones S10–S31
+- L3000 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,102 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
+### Sesión 126 — O-navegación (transversal): C-rejilla-densidad, TRAMO 1 HECHO. La celda pasa a dos líneas con modo bloque y marca `+N`, el título se funde con los controles, la fila de recreo se deriva de la jornada y la altura se reparte MIDIENDO el hueco en runtime: el scroll vertical desaparece en los tres grupos verificados y el recorte medido es 72 de 791, el 9,1 %, bajo el umbral de reapertura del ~10 % (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. El criterio 4 queda A MEDIAS POR DISEÑO: la expansión es el tramo 2. NO cierra el objetivo.
+  Vigesimosexta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
+  línea base heredada de S124 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 356, y el
+  e2e 2, que era la única sin línea base propia y se corrió también); al cerrar, **app 282, solver 91,
+  vitest 381, e2e 2**. vitest sube +25 y ni uno de los 356 heredados se modifica.
+  M0 — EL MAPA, Y UNA COSTURA DEL SISTEMA DE TRES DOCUMENTOS. Cambio: C-rejilla-densidad, tramo 1. Objetivo:
+  O-navegación, criterio 4. Hito: ninguno funcional, que es la respuesta escrita en la ficha. R-invalidación
+  limpio y en la dirección buena. **La apertura se bloqueó**: `docs/diseno-navegacion.md`, que es la AUTORIDAD
+  de D1–D11, no estaba en el Project. Se pidió antes de afirmar nada en vez de reconstruir los diseños de
+  memoria. Queda anotado: el sistema de tres documentos remite a un cuarto que no viajaba con ellos.
+  LA ARITMÉTICA DEL PRESUPUESTO, RECONSTRUIDA Y CUADRADA. `alto_de_fila = (neto − thead 31,0 − recreo 23,6 −
+  4) / 6`. El «cromo de vista» de esa fórmula es la fila de D9 con su padding y **NO incluye la barra de la
+  aplicación**, que ya está descontada en los 835. De ahí sale el techo de 111 px del criterio 4: es el último
+  entero por encima del umbral, y el acantilado está entre 110,00 y 110,83 px de fila.
+  **D3 LLEVABA DOS CAMBIOS PRESENTADOS COMO UNO.** El texto dice «de cuatro líneas a dos»; su geometría medida
+  incluye además `--lh-apretado` y `--tam-xs` en la línea 2, que el texto no menciona. Sin ese apretón la celda
+  de cuatro plazas nace en 124,8 px en vez de 110,8 y el acantilado se cruza sin que nadie lo note. Quien lea
+  D3 sin correr el instrumento implementa la mitad y no se entera.
+  DECISIONES DEL TRAMO. **D6 sólo condensa donde hay grupo implícito**: la rejilla recibe `grupoActual`
+  (defecto `null`) y en las vistas de profesor y aula pinta la lista entera, porque ahí el grupo es la única
+  señal que lo nombra y condensarlo sería retirar información existente —A5 ya había medido que la densidad
+  sólo se juega en la vista por grupo—. **`.bloque` es clase aparte de `.con-badge`** aunque escriban el mismo
+  `padding-top`: hay un test que afirma que una instancia pinada sin badge no lleva esa clase, y reutilizarla
+  habría dejado su comentario mintiendo. **`.entrada--fila` no cambia el DOM**: gira el eje, y las dos líneas
+  pasan a ir una al lado de otra, así que el modo bloque no duplica plantilla. **El título sale de
+  `fechaGeneracion`**, no de parsear el nombre. **El recreo no lleva hora** (D8).
+  **D9 ADMITÍA DOS DIRECCIONES Y UNA ROMPE EL PRODUCTO.** El documento no dice cuál. Medidas las dos por
+  mutación: bajar los controles a la rama `@else if (proyeccion())` tira el caso (40) y deja al usuario sin
+  botón «Generar» en el arranque real —base sin horario, proyección en 404—, que es justo donde hace falta. Se
+  implementa subiendo el `<h2>`. El caso (47), nuevo, sujeta esa dirección para siempre.
+  **D1 SE MIDE EN RUNTIME, Y EL ARQUITECTO SE EQUIVOCÓ DOS VECES ANTES DE ACERTAR.** Primera propuesta: un
+  `calc(100dvh − constantes)`. RETIRADA al saber que entre la cabecera y la tabla cuelgan seis bloques
+  condicionales: con constantes, la fórmula es correcta sólo en el caso feliz y silenciosamente falsa en
+  cuanto aparece un aviso. Segunda: que midiera la vista. RETIRADA también: la rejilla es el ítem flexible que
+  absorbe el sobrante, así que su propio hueco ya lleva descontado todo lo de arriba y nadie necesita enumerar
+  el cromo. Lo publica el componente sobre su host con `ResizeObserver`, y **no hay bucle** porque el cálculo
+  depende del hueco, del `thead` y del recreo, nunca de lo que mide la tabla. Verificado en navegador: cero
+  avisos de `ResizeObserver loop` y la cadena de altura copia el patrón de `configuracion.css` (envoltorio con
+  `height: 100%`), sin introducir un `:host` que sería un segundo patrón conviviendo con el único que hay.
+  **DOS VECES SE DESCRIBIÓ MAL EL FALLO DEL REPARTO ESTÁTICO, Y LAS DOS SE CORRIGIÓ.** «Se recorta una fila
+  más» es falso: si el presupuesto se calcula una vez y luego aparece un aviso, `--alto-celda` no cambia, el
+  hueco encoge y lo que vuelve es el SCROLL. La segunda vez el error venía con un número al lado (4,9 px de
+  margen), que es lo que lo hacía convincente: esos 4,9 px son la distancia al siguiente umbral de recorte, no
+  margen contra el scroll.
+  M4 — LO QUE LA MEDICIÓN DESMINTIÓ. `thead` 30 y `tr.recreo` 24, exactos, desviación 0. **El hueco es 716, no
+  los 748 que el arquitecto había calculado**, y esos 32 px SIGUEN SIN EXPLICACIÓN. El reparto cae a 110 px de
+  fila contra los 110,8 que pide una celda de cuatro plazas: **el acantilado se cruza por 0,8 px** y el recorte
+  es 72 de 791 (9,1 %) en vez de 50 (6,3 %). El criterio 4 NO se rediscute: su exigencia es ausencia de scroll
+  —verificada en 1ºA, 4ºA (que desbordaba 71 px) y 1B-A— y su umbral de reapertura es el ~10 %. El 50 era una
+  predicción, no un requisito. Perseguir los 32 px es higiene y no rescate: el aviso de pines cuesta 62 px de
+  hueco (~10 px por fila), así que con un aviso en pantalla 72 es inevitable a esta geometría.
+  **EL INSTRUMENTO SALE VALIDADO Y NO SE TOCA.** Recalibrado contra el navegador en cinco tamaños de celda
+  (63,0 / 67,0 / 111,0 / 132–133 / 154–155 frente a 62,9 / 67,4 / 110,8 / 132,5 / 154,2): **ninguna desviación
+  supera 1 px**, sobre cientos de muestras. Sesgo conocido y conservador: cobra la banda del badge a todas las
+  instancias, y 303 de las 599 celdas de una plaza no la llevan. `scripts/volcar-sesiones-por-grupo.py` se
+  COMMITEA: el volcado se había perdido dos veces (S125 y S126) y un instrumento sin su entrada no es
+  reproducible, es un ritual.
+  MÉTODO — EL HALLAZGO DE LA SESIÓN. **Una mutación tiene que AISLAR el aserto que se quiere medir, no sólo
+  poner el test en rojo.** Al verificar el test de reparto, la mutación canónica lo tumbaba por el `toBe`, que
+  se evalúa primero y aborta antes de llegar a la cota nueva: «el test cae» no demostraba que la cota
+  discriminara. Hicieron falta dos mutaciones más, ajustando el `toBe` al valor mutado, para exponer cada cota.
+  ERRORES DEL ARQUITECTO, ADEMÁS DE LOS DOS DE D1. Un ancla inventada (`tituloDeProyeccion`) sobre un fichero
+  que no había leído —la escribió un encargo abierto, no un guion, y sólo la guarda de unicidad evitó el
+  destrozo—. Un test cuyo comentario prometía cazar una mutación que no cazaba (el (2) del recreo: mover el
+  recreo desplaza también su `orden`, y lo que rompe la confusión es que el día no empiece en 1). Y el aserto
+  (1) de `reparto.spec.ts`, que documentaba como MEDIDAS unas cifras que el navegador desmintió; corregido en
+  commit propio, y ahora documenta el acantilado cruzado en vez de negarlo.
+  R-TERMINADO, aplicado tres veces. No se abren las palancas de altura (ratificadas dos veces ya). No se paga
+  la hora de reloj del recreo pese a que la medición de la API la puso al alcance. Y no se manda un nombre
+  legible en el POST del horario, que arreglaría el título en origen, porque es una escritura nueva y el
+  criterio 5 las excluye.
+  DEUDA. **DOS NUEVAS**, las dos con sede en O-demo: `D-nombre-horario-instante` (mejora futura) y
+  `D-jornada-zona-servidor` (limitación conocida). `D-guion-exit-enmascarado` y `D-vacio-miente-con-error`
+  siguen vivas y sin pagarse. Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
+  **CONDICIÓN DE SALIDA, EXPLÍCITA: el repositorio queda ocultando 72 celdas de 791 sin marca y sin forma de
+  verlas.** Es el estado intermedio que S125 aceptó al partir el Cambio, no una entrega, y **sólo lo cierra el
+  tramo 2 (D11)**. Va en la primera línea del prompt siguiente.
+  NOTAS TÉCNICAS QUE SOBREVIVEN. `mvn test` sin `clean` no borra informes huérfanos de surefire:
+  `TEST-…BarridoPresupuestoS117.xml` sigue en `app/target` y hace que sumar los XML dé 283 en vez de 282.
+  `npx vitest run <fichero>` NO funciona en este repo (`describe is not defined`): la suite corre bajo el
+  builder `@angular/build:unit-test` y hay que lanzar `npx ng test --watch=false` entera (~11 s) y filtrar por
+  grep. Sin cubrir: el arrastre sobre celda VACÍA (4ºA tiene el horario lleno) y los 32 px de hueco. La
+  verificación de M4 se hizo con el Firefox de Playwright, no con el del arquitecto; el recalibrado coincide,
+  pero el hueco conviene confirmarlo una vez en el navegador propio.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después, incluido el e2e
+  y el M4 (que corrió contra una copia, porque el arrastre escribe un bloqueo).
+  LIMPIEZA (M1-bis): archivada S124 a `bitacora-sesiones.md` (promovida a `### Sesión 124`, insertada al final
+  en orden ascendente, cuerpo íntegro); degradada S125 a «Última sesión registrada (previa):»; S126 queda como
+  única cabecera H3 viva. Los dos censos de la bitácora pasan de S123 a S124.
+  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS, y
+  C-rejilla-densidad con su TRAMO 1 HECHO**; queda el tramo 2. O-diseño (transversal, abierto en S121):
+  C-tokens y C-sustitución HECHOS, C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2)
+  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
+  C-rejilla-densidad**, que es lo único que cierra la condición de salida. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 125 — O-navegación (transversal): APERTURA de C-rejilla-densidad y MEDICIÓN del presupuesto de altura. La superficie de verificación del criterio 4 pasa del sobremesa del centro al equipo de desarrollo y se fija en Firefox por ser el peor caso (viewport 1920×887): el recorte es 50 de 791, el 6,3 %, y CUMPLE, mientras Chrome mantendría 22 bajo condición; el «~1920×945» heredado se manejaba con la barra de la aplicación a cero (M0 + M2 con el instrumento parametrizado + M1, sin M3 ni M4). Cero líneas de producto. NO abre el tramo 1.
   Vigesimoquinta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo apertura/medición: sin M3 ni M4 porque no se
   toca un solo fichero de `app/`. **Las suites NO se ejecutan y no se declaran verdes de memoria**: se hereda
   la cifra de S124 —app 282, solver 91, vitest 356, e2e 2— y la PRIMERA acción del tramo 1 es correrlas.
@@ -820,129 +915,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el
   correo al centro. Siguiente: **el TRAMO 1 de C-rejilla-densidad**. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 124 — O-navegación (transversal): C-listas-filtradas HECHO, criterio 3 CUMPLIDO. Las siete listas de Configuración estrenan búsqueda normalizada con contador «n de N» y estado propio de «sin resultados», sobre una cabecera compartida que sustituye a las siete duplicadas de S123 (M0 + M2 + M3 con mutación + M4 en navegador + M1). DOS de tres Cambios. NO cierra el objetivo.
-  Vigesimocuarta sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI **con M3**, y ahí está la
-  diferencia con S123: allí era enrutado y binding y M3 no tocaba; aquí hay un predicado de casado, que es
-  lógica real, y `metodo.md` lo dice con esas palabras. Suites: **app 282, solver 91, vitest 356, e2e 2**.
-  vitest sube de 314 a 356 (+42) sin que se modifique NI UN aserto preexistente; app y solver intactos, y el
-  e2e se corre —única suite sin correr en toda la sesión— y pasa sin tocarse.
-  M0 — LA APERTURA RATIFICA. El Cambio salía del criterio 3 y la frontera se había cortado en S123. El
-  tercer término del mapa se responde con lo que la ficha ya dice: **no hay hito**; O-navegación es
-  transversal, acerca la demo y va antes de C-identidad y C-revisión. La apertura resolvió las cuatro
-  preguntas que dejó S123 y CORRIGIÓ una premisa del arquitecto: la colisión «Grupos»/«Subgrupos» medida en
-  S123 es un defecto de LOCALIZADOR, no de filtro. Un localizador que casa dos elementos está roto; un filtro
-  que devuelve un superconjunto funciona bien. Lo que sí hereda el Cambio es la trampa en sus propios tests
-  —de ahí el placeholder genérico «Buscar…», idéntico en las siete— y un argumento más para no filtrar el
-  índice. El problema real de la subcadena con datos reales resultó ser otro: la NORMALIZACIÓN.
-  D16, PEDIDO DOS VECES Y MENOS DECISIVO DE LO ESPERADO. El arquitecto insistió en leer la fuente primaria
-  antes de diseñar la cabecera. D16 resultó ser una decisión de COLOCACIÓN —la caja va dentro de la cabecera
-  fija, junto al contador y al botón de alta— y no de diseño: no dice nada de semántica del contador, casado
-  ni normalización. Confirmó el contrato del componente y descartó que el filtro fuera suelto bajo la
-  cabecera, que era variante real; pero §5 tampoco lista esas tres cosas entre lo SIN DECIDIR, así que el
-  diseño no las resolvió: no las vio. Se registra como error de apertura, no como pérdida: la fuente primaria
-  se pide siempre, y lo que se calibró mal fue cuánto iba a decidir.
-  MEDICIÓN (M2), y lo que decidió. Las siete cabeceras son molde EXACTO salvo rótulo, prefijo BEM y texto de
-  botón —más la concordancia de género de aulas, `__nueva`/`nueva()`—, y los siete CSS son copias byte a
-  byte, con el comentario de cuatro líneas de S123 repetido palabra por palabra siete veces. **Cero cobertura
-  unitaria de la cabecera entera**: ni `__contador`, ni `__cabecera`, ni `__titulo`, ni `__nuevo` aparecen en
-  los siete specs. La extracción no podía romper ningún test, y eso NO era una vía libre sino el riesgo:
-  «suites verdes» no probaba nada, así que el componente nació con su spec y con un aserto por lista. Sin
-  virtualización ni paginación en ninguna de las siete: las 334 filas de Subgrupos ya se montan enteras,
-  luego filtrar en memoria es despreciable y **`debounce` queda descartado por medición**, que era una de las
-  tres incógnitas por las que S123 aplazó la extracción. Con datos reales: una consulta de una letra acota
-  poco (`A` deja 184 de 334 en Subgrupos), pero NO se pone longitud mínima —no reaccionar a la primera
-  pulsación se lee como roto—; el contador es quien informa de que hay que seguir escribiendo.
-  DECISIONES DEL CAMBIO. Casado por subcadena, sin `exact` ni límites de palabra: arrastrar el padre con sus
-  hijos (`3ºA` trae `3ºA` y `3ºADi-Completo`) es lo correcto, porque el usuario acota, no selecciona.
-  Normalización que se come tildes, caja, ordinales y **todo lo que no sea letra o dígito**: la lista a
-  medida se rompe sola —comer espacios pero no guiones deja `3ºA Di` sin encontrar `3ºADi-Completo`—.
-  Consulta partida por espacios con casado de TODAS las partes, que es lo que salva `mat 1eso` de morir al
-  comerse los espacios. El texto de fila se compone de lo que **la plantilla pinta**, no de lo que el modelo
-  tiene: `grupos` busca por «Ordinario»/«PDC» y no por `DIVERSIFICACION_PDC`. Limitación aceptada y escrita
-  en el javadoc de las siete: nada vigila que la composición siga a la plantilla, y no se encontró forma
-  barata de vigilarlo.
-  **LA COSTURA: los contadores en el índice se CAEN.** La frontera de S123 se los asignaba «íntegros» a este
-  Cambio. La medición dice que `Configuracion` es presentacional pura y sin servicios de dominio, con esa
-  invariante declarada en su javadoc y protegida por su spec, y que ocho contadores le obligarían a consultar
-  los ocho servicios al entrar —deshaciendo las ocho cargas que C-rutas-hijas acababa de separar—. Leído
-  después `diseno-navegacion.md` entero: no los diseña en ningún sitio. No se declaran fuera de alcance ni
-  pasan a deuda; **se corrige la frase de §3**, porque no tenía respaldo. Un token nuevo para algo que nadie
-  va a construir sólo ensucia el censo de R4.
-  VOCABULARIO OCUPADO. «Filtro por tipo» ya significa otra cosa en `grupos/`: es el `@if (esOrdinario(grupo))`
-  que decide qué botones se pintan por fila. El ejecutor lo detectó al desmentir una afirmación suya previa.
-  El código nuevo no usa un solo token `filtr*`: `busqueda.ts`, `normaliza()`, `coincide()`, señal `busqueda`,
-  lista `visibles()`, clase `cabecera-lista__busqueda`. «Filtro» se queda en la planificación y en D16.
-  CUATRO PASOS, cada uno verificado antes del siguiente. (1) Extraer `cabecera-lista` sin filtro, con las
-  suites verdes y el paseo visual por los siete destinos, que es lo único que ve el CSS. (2) El predicado
-  puro con M3 y mutación, sin tocar una línea de UI. (3) Cablearlo en las siete, con el contador de dos
-  estados y el estado de «ningún resultado», que es mensaje NUEVO y distinto del de lista vacía. (4)
-  Revertir y cerrar. El paso 1 obligó a mover la clase `cabecera-lista-fija` al **host**: un
-  `:host { display: block }` bienintencionado dejaba el recorrido del `sticky` en cero (medido: y 84 → −1416),
-  porque el host acotaba el contenedor de bloque. Lo sujeta el caso (8), que es lo único que impide devolver
-  la clase al `div` sin enterarse.
-  EL ENCADENADO DEL ERROR, INTRODUCIDO Y REVERTIDO. El paso 3 encadenó `@if (error())` con el resto de ramas
-  y eso arreglaba un defecto real —error y «No hay aulas todavía» conviviendo—, pero el ejecutor MIDIÓ la
-  otra cara en vez de suponerla: con un 409 de borrado la tabla entera desaparecía (8 filas → 0). Es un
-  camino de uso normal que S113 introdujo a propósito, frente a un fallo de carga que es raro. Se revierte en
-  el paso 4 y se comprueba en navegador: con 43 aulas y un 409, el error se pinta, la tabla sigue entera y
-  la búsqueda sigue viva bajo el error. El defecto preexistente que el encadenado tapaba queda registrado
-  como deuda con sede en C-revisión y su arreglo ya escrito. **R-terminado en su caso incómodo: es una línea
-  y aun así no se paga**, misma forma que el arreglo de una línea de D-F8.6-ii-a que S118 midió y no pagó.
-  MÉTODO — el hallazgo de la sesión, que va a `metodo.md` condensado y no como precisión nueva (lo prohíbe la
-  nota de acumulación de M2). Dos formas de mutación engañosa, las dos medidas aquí: una mutación puede
-  compilar y no mutar nada (se apuntó a `\p{Sk}` creyendo que el signo de grado era símbolo modificador,
-  cuando es `\p{So}`); y una mutación que SÍ muta y no pone nada rojo puede estar delatando código INERTE en
-  vez de un test decoración. Ese fue el caso de `normaliza()`: un `replace` de marcas diacríticas que no
-  hacía nada porque el barrido posterior ya se las llevaba. Se BORRÓ el paso en vez de blindarlo con un test,
-  y se ancló en su lugar el `normalize('NFD')`, que es donde vive de verdad la mitad que faltaba.
-  UBICACIÓN, mejorada por el ejecutor. El arquitecto propuso `components/cabecera-lista/busqueda.ts` como
-  respaldo; el ejecutor midió que el repo ya tiene el patrón —`horario/` con funciones puras sueltas y su
-  spec al lado— y colocó el módulo en `catalogo/`, hermano suyo y nombrado como el backend ya nombra a estas
-  siete entidades (`app.catalog.*`). Evita que siete componentes importen de la carpeta de un octavo.
-  DEUDAS. **CERRADA: `D-cabecera-lista-duplicada`**, en su sede escrita, saldada de paso y sin abrir sesión.
-  NUEVA: `D-vacio-miente-con-error` (mejora futura, sede C-revisión). `D-guion-exit-enmascarado` recibe su
-  TERCERA instancia, esta vez por el reverso: guardas que miden el vacío y no la corrección. Deuda bloqueante
-  abierta: sigue en 1 (D31-a, las aulas de FPB).
-  ERRORES DEL ARQUITECTO, registrados porque son la clase que esta sesión persigue: supuse marcadores
-  `INDICE:INICIO/FIN` en `diseno-navegacion.md` extendiendo un dato medido sobre otros dos ficheros; calibré
-  mal el peso de D16 y lo pedí dos veces esperando que decidiera lo que no decide; inventé la ruta
-  `components/grupo-lista.html` sin el directorio de entidad; escribí un `grep -v '^\s*//'` que nunca podía
-  casar, porque `grep -rn` antepone `fichero:num:` y el ancla `^` no llega; supuse que la sección de deuda
-  cerrada era una tabla cuando es prosa; y prometí «cuatro suites verdes» como garantía del paso 1 cuando la
-  propia medición decía que ningún test ve la cabecera. Esa última es la peor: era una garantía vacía y la
-  corrigió la medición, no yo.
-  Y TRES MÁS EN EL PROPIO M1, que son la misma familia y la razón de que esta nota exista. El guion de
-  cierre abortó tres veces por anclas mal acotadas: `find('<!-- INDICE:FIN -->')` casaba una mención entre
-  backticks en `metodo.md`, que no tiene índice generado; `### Sesión 123 — ` casaba TAMBIÉN su entrada del
-  índice, y el `replace(..., 1)` habría insertado las 109 líneas de S124 dentro del índice; y
-  `split('### Sesión ')[-1]` tomaba la última MENCIÓN y no la última cabecera (129 frente a 111). Lo grave
-  no es el fallo: es que S123 dejó escrita la regla —acotar el cuerpo a partir de `INDICE:FIN`— y la
-  mitigación que construí sobre ella estaba rota. **Regla que hereda el guion de la próxima sesión, y que
-  esta vez no depende del fichero: anclar a principio de línea con `re.M`, y pasar TODA ancla por la guarda
-  de unicidad antes de escribir, incluidas las que van a `replace(..., 1)`.**
-  **CUARTA instancia, en el guion que escribía esa misma nota:** un ancla con dos espacios de sangría
-  PARECÍA de principio de línea y no lo era —iba en mitad de la línea 788— y no pasó por la guarda de
-  unicidad. Cortó antes de escribir, que es lo único que funcionó. Precisión que hereda la regla: la
-  sangría no hace que un ancla empiece línea; si no se ha verificado con `re.M`, no lo es.
-  ERRORES DEL EJECUTOR, todos autodetectados y reportados: dos asertos del paseo mal calibrados (ancho contra
-  el panel en vez de contra `.subgrupos` menos su padding; desplazamiento cero cuando `sticky` debe subir los
-  16 px del padding), un diagnóstico falso por bundle rancio de `ng serve` que se corrigió tras reiniciar, y
-  una afirmación desmentida por él mismo («grupo-lista ya tiene un filtro por tipo»). Nota operativa que
-  merece sobrevivir: una tanda de mutación que hace `rm -rf` del árbol de fuentes se lleva el watcher, así
-  que toda comprobación visual posterior exige reiniciar `ng serve` primero.
-  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después;
-  `educhronos-e2e.db` reescrita por el e2e, como debía.
-  LIMPIEZA (M1-bis): archivada S122 a `bitacora-sesiones.md` (promovida a `### Sesión 122`, insertada al
-  final en orden ascendente, cuerpo íntegro verificado por comparación); degradada S123 a «Última sesión
-  registrada (previa)»; S124 queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S121
-  a S122.
-  O-navegación (transversal, abierto en S122) ACTIVO: **C-rutas-hijas y C-listas-filtradas HECHOS**,
-  C-rejilla-densidad PENDIENTE. O-diseño (transversal, abierto en S121): C-tokens y C-sustitución HECHOS,
-  C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2) sigue ABIERTO y sin trabajo
-  ejecutable, bloqueado por el correo al centro. Siguiente: **C-rejilla-densidad**, el criterio 4, que NO se
-  abre sin MEDIR antes el sobremesa con `innerWidth/innerHeight` —pendiente desde S123 y no supuesto—. Lo
-  fija su propio M0 (ver M1-ter).
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -965,8 +937,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125.
-El plan conserva ahora S124 (degradada a formato compacto) y S125 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126.
+El plan conserva ahora S125 (degradada a formato compacto) y S126 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2884,6 +2856,29 @@ con remisión a la bitácora.
   a ciegas, y el M4 de S121 se cerró con este punto declarado pendiente. Se verifica en C-revisión leyendo
   antes el componente. Si se confunden, el arreglo es un cambio de valor en `:root` y se propaga solo, que
   es exactamente lo que C-tokens compró. → O-diseño, C-revisión.
+
+- **D-nombre-horario-instante** (S126, VIVA, MEJORA FUTURA, no bloqueante) — EL HORARIO SE LLAMA
+  COMO UN `Instant`. `HorarioService.generar()` hace `POST /api/horarios` con cuerpo vacío, así que el
+  backend aplica su defecto (`GeneradorHorarioService.java:187-188`): `"Horario " + Instant.now()`. El
+  valor real en la base demo es `Horario 2026-08-24T15:37:39.317184258Z` — 38 caracteres con precisión
+  de nanosegundo, mostrados a quien hace horarios. S126 lo CONTIENE en la pintura, no en el origen: el
+  `<h2>` de la vista compone su rótulo desde `fechaGeneracion` (`horario/titulo.ts`), que es el campo que
+  lleva el dato de verdad, y cae al nombre crudo si la fecha no parsea. El arreglo REAL es mandar un
+  nombre legible en el POST, cosa que `HorarioController.java:64` ya acepta, y NO se hizo aquí porque es
+  una escritura nueva y el criterio 5 de O-navegación las excluye. Consecuencia viva mientras no se pague:
+  cualquier sitio que muestre el nombre crudo hereda el problema, y el degradado de `titulo.ts` deja de
+  ser un caso raro en cuanto alguien bautice un horario a mano. → O-demo.
+- **D-jornada-zona-servidor** (S126, VIVA, LIMITACIÓN CONOCIDA, no bloqueante) — LAS HORAS DE LA
+  JORNADA DEPENDEN DE LA ZONA DEL PROCESO. Medido en S126 levantando el backend contra una copia de la
+  base demo: `tramo_semanal` guarda enteros (25200000 ms = 7:00) y `GET /api/jornada` devuelve `08:00`,
+  o sea hay un desplazamiento de una hora entre el entero y lo que sale por la API. El resultado es
+  correcto en este equipo —la jornada sale 08:00–14:30 con recreo de 11:00 a 11:30, que es plausible— pero
+  esa corrección viene de cómo el driver lee el entero, luego depende de la zona del proceso del servidor:
+  desplegado en UTC, la jornada entera se mostraría una hora antes en todas partes. NO es asunto del
+  frontend, que pinta la cadena `"HH:mm"` que le dan (regla escrita en `jornada.model.ts:29`). Es la
+  razón por la que D8 sigue sin pintar la hora en la fila de recreo, y esa razón NO es la que `§4-D8`
+  escribió —allí era «no sabemos si la conversión es correcta»; aquí es «lo es, pero por el despliegue»—.
+  → O-demo.
 
 ### Deuda consciente CERRADA (histórico)
 

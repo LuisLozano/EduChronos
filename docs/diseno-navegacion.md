@@ -346,6 +346,45 @@ Nota de proporción, porque cambia qué clase de mecanismo hace falta: 22 de 791
 sigue siendo el **caso excepcional** que el arquitecto quería y no la interacción
 principal de la vista; lo que no puede es no existir.
 
+### Correcciones de S126, al implementar el tramo 1
+
+Nada de lo anterior se borra: se fecha. La tabla de alturas por plaza (62,9 … 154,2 px)
+sale VALIDADA del contraste con el navegador —cinco tamaños medidos sobre cientos de
+celdas, ninguna desviación mayor de 1 px—. Lo que caducó es el presupuesto contra el que
+se comparaban, y estas cinco cosas:
+
+1. **El «22 de 791 / 2,8 %» de la nota de proporción se midió a 1080 px de pantalla y 135
+   de cromo.** A viewport real (1920×887, Firefox) las 28 celdas de cinco plazas caen
+   también: 50 de 791, el 6,3 %. Y con la geometría YA IMPLEMENTADA el hueco real de la
+   rejilla resultó ser 716 px, con lo que entran además las 22 de cuatro plazas: **72 de
+   791, el 9,1 %**. D11 no cambia de sentido —sigue siendo obligatorio— pero el caso
+   excepcional pasa del 2,8 % al 9,1 %, y en los grupos afectados ya no son 2 de 30.
+2. **D3 lleva dos cambios y sólo nombra uno.** Además de bajar de cuatro líneas a dos, su
+   geometría medida exige `line-height: var(--lh-apretado)` y `--tam-xs` en la línea 2.
+   Heredando el 1.5 del `body`, la celda de cuatro plazas nace en 124,8 px en vez de 110,8
+   y el acantilado se cruza sin que nadie lo note. Quien lea D3 sin correr el instrumento
+   implementa la mitad.
+3. **D9 admite dos direcciones de fusión y una rompe el producto.** El texto no dice cuál.
+   Medido por mutación en S126: bajar los controles a la rama `@else if (proyeccion())`
+   tira el caso (40) de `horario-view.spec.ts` y deja al usuario sin botón «Generar» en el
+   arranque real —base sin horario, proyección en 404—, que es exactamente donde hace
+   falta. **Se implementa subiendo el `<h2>` a la fila de controles, nunca al revés.**
+4. **D8 conserva su decisión y cambia su razón.** El hueco declarado era «la zona de los
+   enteros de `tramo_semanal` no se ha verificado». S126 la verificó levantando el backend:
+   la API devuelve `08:00`–`14:30` con recreo de 11:00 a 11:30, correcto. Pero esa
+   corrección depende de la zona del proceso del servidor, así que en otro despliegue sería
+   falsa. Sigue sin pintarse la hora, por una razón distinta y registrada como
+   `D-jornada-zona-servidor`.
+5. **D2 describe un `overflow: hidden` que no existía en el producto.** Era de la maqueta
+   v8. Hoy el `td` crece y la página hace scroll: no había recorte silencioso que retirar,
+   había uno que nunca se puso. D2 es trabajo NUEVO, no modificación.
+
+Y una decisión que el bloque no contemplaba, tomada en S126 dentro de D6: la marca `+N`
+**sólo se aplica cuando hay grupo implícito**. El argumento de D6 —que `grupos` repite el
+grupo que ya estás mirando— sólo vale en la vista por grupo; en las de profesor y aula no
+hay grupo implícito y condensar la lista retiraría la única señal que lo nombra. La rejilla
+recibe `grupoActual`, con defecto `null`, y con `null` pinta la lista entera.
+
 ### Bloque configuración
 
 **D12 — Configuración se navega por destinos, con RUTAS HIJAS y `<router-outlet>`.**
@@ -484,6 +523,19 @@ fingir un número.
 | `horario-grid.ts` | Entrada nueva para la jornada (los tramos no lectivos), que hoy no recibe |
 | `horario-view.html` / `.css` | Cabecera de vista fundida (D9, D10) y consumo de `GET /api/jornada` |
 | `styles.css` | Sólo si se decide tokenizar el espaciado (H-2). Este diseño no lo exige |
+
+**Corrección de S126.** Esta tabla mezcla los tres Cambios del objetivo. Las tres primeras
+filas son C-rutas-hijas y quedaron HECHAS en S123, así que la predicción sobre
+`configuracion.spec.ts` ya se consumó allí. El tramo 1 de C-rejilla-densidad toca sólo las
+cuatro últimas, más dos ficheros que la tabla no previó: `horario-view.ts` (que estrena el
+título compuesto y el consumo de la jornada) y tres módulos puros nuevos en `horario/`
+—`titulo.ts`, `recreo.ts` y `reparto.ts`, cada uno con su spec—. `styles.css` no se toca.
+
+**Corrección de S126 a las referencias.** La cifra de vitest de esta sección (316) es de
+S122; en S126 la suite parte de 356 y cierra en 381. Y el aserto del e2e que D6 tira no
+está en `centro-minimo.spec.ts:213` sino en `:278`; sus tres vecinas (`.asig`, `.prof`,
+`.aula`, en `:275-277`) NO caen, por decisión: D3 reordena la celda sin renombrar esos tres
+`<span>`, que es el mismo razonamiento de D5 aplicado a los otros tres selectores.
 
 ### Tests que previsiblemente caen
 
