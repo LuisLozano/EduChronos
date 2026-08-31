@@ -54,7 +54,23 @@
                   @if (tieneBadge(inst) || estaPinada(inst)) {
                     <span class="adornos">
                       @if (tieneBadge(inst)) {
-                        <span class="badge">{{ badge(inst) }}</span>
+                        <!-- D-insignia-sin-leyenda (S128). El número es un delta
+                             CONTRAFACTUAL con signo y NO un coste absoluto, así que
+                             la leyenda no puede prometer que cuadre con `Totales`.
+                             Mismo par `title` + `aria-label` que el candado de más
+                             abajo. Motivo por el que se paga AQUÍ y no en C-revisión:
+                             desde S127 esta esquina tiene DOS números con signo —el
+                             `+N` de desbordamiento en la banda del rótulo y este— con
+                             significados sin relación, y solo uno llevaba explicación.
+                             El texto del `title` es de LEYENDA y no de lectura por
+                             instancia: no depende del signo, luego no hay que ampliar
+                             la API del componente ni añadir lógica. Coste en altura: 0. -->
+                        <span
+                          class="badge"
+                          title="Coste blando de esta clase. Positivo: moverla a otro hueco mejoraría el horario. Negativo: está tapando un hueco y moverla lo empeoraría."
+                          [attr.aria-label]="'Coste blando ' + badge(inst) + '. Positivo: moverla mejoraría el horario; negativo: está tapando un hueco.'"
+                          >{{ badge(inst) }}</span
+                        >
                       }
                       @if (estaPinada(inst)) {
                         <button
