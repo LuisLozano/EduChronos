@@ -1,27 +1,49 @@
 .landing {
   max-width: 60rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: var(--e6) var(--e4);
+}
+
+/* La landing es la única pantalla donde la marca se lee COMO MARCA y no como
+   enlace de vuelta, así que es donde el `h1` tiene sitio. Hasta S128 la
+   aplicación no tenía ni un `h1` en ninguna vista; esta es la primera. El resto
+   de la jerarquía de encabezados es de C-revisión, no de aquí.
+   El ancho de 60 rem NO se generaliza en este Cambio: hoy la landing se centra
+   y las demás vistas ocupan el ancho entero, y decidir un contenedor de
+   proyecto exige verlas todas, que es literalmente lo que C-revisión hace. */
+.landing__cabecera {
+  margin-bottom: var(--e5);
+}
+
+.landing__titulo {
+  margin: 0;
+  font-size: var(--tam-xl);
+  font-weight: var(--peso-fuerte);
+  line-height: var(--lh-apretado);
+  color: var(--color-acento);
 }
 
 .landing__intro {
-  margin: 0 0 1.5rem;
+  margin: var(--e1) 0 0;
   color: var(--color-tinta-suave);
 }
 
 .landing__accesos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 1rem;
+  gap: var(--e4);
 }
 
+/* Las tarjetas pasan a superficie blanca sobre el fondo `--color-fondo`: hasta
+   ahora eran del mismo color que la página y solo las delataba el borde. */
 .landing__acceso {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  padding: 1.25rem;
-  border: 1px solid var(--color-borde);
-  border-radius: 0.5rem;
+  gap: var(--e2);
+  padding: var(--e5);
+  background: var(--color-superficie);
+  border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-m);
   text-decoration: none;
   color: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -35,7 +57,8 @@
 
 .landing__acceso-titulo {
   font-size: var(--tam-l);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
+  color: var(--color-acento);
 }
 
 .landing__acceso-desc {
