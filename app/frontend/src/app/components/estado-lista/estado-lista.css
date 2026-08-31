@@ -1,0 +1,23 @@
+/* El elemento del componente nace `display: inline` (mismo motivo que documenta
+   `styles.css` para los destinos del router, y que `cabecera-lista.css` para
+   ella misma: es nieta de `.configuracion__contenido` y aquella regla solo
+   alcanza a los hijos). Aquí el daño no es un `sticky` que no pega sino un
+   párrafo de bloque dentro de una caja inline, que parte el flujo en tres. */
+:host {
+  display: block;
+}
+
+/* Estas cuatro reglas son las que se BORRAN de las siete hojas de lista: cinco
+   de ellas eran ya byte a byte la misma (medido en el M2). El `--e2` sustituye
+   al `0.5rem` literal y vale exactamente lo mismo, 8 px: la decisión 3 no mueve
+   un píxel aquí. */
+.estado-lista__error {
+  color: var(--color-error);
+  margin: var(--e2) 0;
+}
+
+.estado-lista__cargando,
+.estado-lista__vacio,
+.estado-lista__sin-resultados {
+  color: var(--color-tinta-suave);
+}

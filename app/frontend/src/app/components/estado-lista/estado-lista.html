@@ -1,0 +1,17 @@
+<!-- El error va FUERA de la cadena, no como su primera rama: encadenado, un 409
+     de borrado se llevaría por delante la tabla (medido en S124, 8 filas → 0). -->
+@if (error(); as texto) {
+<p class="estado-lista__error" role="alert">{{ texto }}</p>
+}
+
+@switch (estado()) {
+@case ('cargando') {
+<p class="estado-lista__cargando">Cargando…</p>
+}
+@case ('vacio') {
+<p class="estado-lista__vacio">{{ textoVacio() }}</p>
+}
+@case ('sin-resultados') {
+<p class="estado-lista__sin-resultados">Ningún resultado para «{{ busqueda() }}».</p>
+}
+}
