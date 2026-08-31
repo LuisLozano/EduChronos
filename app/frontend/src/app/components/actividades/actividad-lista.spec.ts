@@ -110,14 +110,14 @@ describe('ActividadLista', () => {
   it('(2) lista vacía muestra la invitación a crear la primera', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.actividades__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/actividades').flush('', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.actividades__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
     expect(err).toContain('500');
   });
@@ -132,7 +132,7 @@ describe('ActividadLista', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.actividades__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('referenciada por 3 sesion(es)');
     expect(err).not.toContain('No se pudo borrar la actividad Mat-1ºA (409)');
   });
@@ -144,7 +144,7 @@ describe('ActividadLista', () => {
 
     http.expectOne('/api/actividades/5').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.actividades__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo borrar la actividad Mat-1ºA (409)');
   });
 
@@ -304,10 +304,10 @@ describe('ActividadLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.actividades__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.actividades__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

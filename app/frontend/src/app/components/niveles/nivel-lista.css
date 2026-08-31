@@ -2,17 +2,6 @@
   padding: 1rem;
 }
 
-.niveles__error {
-  color: var(--color-error);
-  margin: 0.5rem 0;
-}
-
-.niveles__vacio,
-.niveles__sin-resultados,
-.niveles__cargando {
-  color: var(--color-tinta-suave);
-}
-
 .niveles__tabla {
   width: 100%;
   border-collapse: collapse;

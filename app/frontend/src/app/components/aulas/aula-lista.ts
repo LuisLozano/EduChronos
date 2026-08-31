@@ -6,6 +6,7 @@ import { Aula } from '../../models/aula.model';
 import { AulaForm } from './aula-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -22,7 +23,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-aula-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './aula-lista.html',
   styleUrl: './aula-lista.css',
 })

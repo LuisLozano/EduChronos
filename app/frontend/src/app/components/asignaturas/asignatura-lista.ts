@@ -6,6 +6,7 @@ import { Asignatura } from '../../models/asignatura.model';
 import { AsignaturaForm } from './asignatura-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -15,7 +16,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-asignatura-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './asignatura-lista.html',
   styleUrl: './asignatura-lista.css',
 })

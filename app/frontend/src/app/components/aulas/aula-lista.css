@@ -1,17 +1,5 @@
-/* Calco de profesor-lista.css con el prefijo BEM propio del bloque. */
 .aulas {
   padding: 1rem;
-}
-
-.aulas__error {
-  color: var(--color-error);
-  margin: 0.5rem 0;
-}
-
-.aulas__vacio,
-.aulas__sin-resultados,
-.aulas__cargando {
-  color: var(--color-tinta-suave);
 }
 
 .aulas__tabla {

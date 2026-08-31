@@ -8,6 +8,7 @@ import { PdcDialogo } from './pdc-dialogo';
 import { TutoriaDialogo } from './tutoria-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /** El único tipo que admite acciones en esta pantalla. Ver el javadoc de la clase. */
@@ -59,7 +60,7 @@ const ETIQUETAS_TIPO = new Map<string, string>([
  */
 @Component({
   selector: 'app-grupo-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './grupo-lista.html',
   styleUrl: './grupo-lista.css',
 })

@@ -9,21 +9,20 @@
     (alta)="nuevo()"
   />
 
-  @if (error()) {
-  <p class="actividades__error" role="alert">{{ error() }}</p>
-  }
+  <app-estado-lista
+    [cargando]="cargando()"
+    [error]="error()"
+    [total]="actividades().length"
+    [coincidencias]="visibles().length"
+    [busqueda]="busqueda()"
+    textoVacio="No hay actividades todavía. Crea la primera con «Nueva actividad»."
+  />
 
-  @if (cargando()) {
-  <p class="actividades__cargando">Cargando…</p>
-  } @else if (actividades().length === 0) {
-  <p class="actividades__vacio">
-    No hay actividades todavía. Crea la primera con «Nueva actividad».
-  </p>
-  } @else if (visibles().length === 0) {
-  <p class="actividades__sin-resultados">
-    Ningún resultado para «{{ busqueda() }}».
-  </p>
-  } @else {
+  <!-- Complemento EXACTO de la cadena de `app-estado-lista`, escrito idéntico en
+       las siete listas y verificable por grep (7 coincidencias). No lleva
+       `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
+       la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (!cargando() && visibles().length > 0) {
   <table class="actividades__tabla">
     <thead>
     <tr>

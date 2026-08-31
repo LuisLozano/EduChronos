@@ -128,14 +128,14 @@ describe('GrupoLista', () => {
   it('(2) lista vacía muestra la invitación a crear el primero', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.grupos__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/grupos').flush('', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.grupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
     expect(err).toContain('500');
   });
@@ -150,7 +150,7 @@ describe('GrupoLista', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.grupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('referenciada por 2 subgrupo(s)');
     // discriminante: NO cae al degradado. El `(409)` no es adorno: sin él, '1ESO' es
     // prefijo de '1ESOA' y el aserto dejaría de distinguir nivel de código.
@@ -164,7 +164,7 @@ describe('GrupoLista', () => {
 
     http.expectOne('/api/grupos/7').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.grupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     // el `(409)` corta el prefijo: si el degradado nombrara el NIVEL en vez del código
     // sería '…el grupo 1ESO (409)' y este aserto caería, que es lo que debe discriminar.
     expect(err).toContain('No se pudo borrar el grupo 1ESOA (409)');
@@ -380,10 +380,10 @@ describe('GrupoLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.grupos__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.grupos__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

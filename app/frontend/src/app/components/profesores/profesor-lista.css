@@ -2,17 +2,6 @@
   padding: 1rem;
 }
 
-.profesores__error {
-  color: var(--color-error);
-  margin: 0.5rem 0;
-}
-
-.profesores__vacio,
-.profesores__sin-resultados,
-.profesores__cargando {
-  color: var(--color-tinta-suave);
-}
-
 .profesores__tabla {
   width: 100%;
   border-collapse: collapse;

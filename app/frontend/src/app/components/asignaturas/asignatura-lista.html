@@ -9,21 +9,20 @@
     (alta)="nuevo()"
   />
 
-  @if (error()) {
-    <p class="asignaturas__error" role="alert">{{ error() }}</p>
-  }
+  <app-estado-lista
+    [cargando]="cargando()"
+    [error]="error()"
+    [total]="asignaturas().length"
+    [coincidencias]="visibles().length"
+    [busqueda]="busqueda()"
+    textoVacio="No hay asignaturas todavía. Crea la primera con «Nueva asignatura»."
+  />
 
-  @if (cargando()) {
-    <p class="asignaturas__cargando">Cargando…</p>
-  } @else if (asignaturas().length === 0) {
-    <p class="asignaturas__vacio">
-      No hay asignaturas todavía. Crea la primera con «Nueva asignatura».
-    </p>
-  } @else if (visibles().length === 0) {
-    <p class="asignaturas__sin-resultados">
-      Ningún resultado para «{{ busqueda() }}».
-    </p>
-  } @else {
+  <!-- Complemento EXACTO de la cadena de `app-estado-lista`, escrito idéntico en
+       las siete listas y verificable por grep (7 coincidencias). No lleva
+       `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
+       la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (!cargando() && visibles().length > 0) {
     <table class="asignaturas__tabla">
       <thead>
         <tr>

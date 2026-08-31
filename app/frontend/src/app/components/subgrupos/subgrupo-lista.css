@@ -2,17 +2,6 @@
   padding: 1rem;
 }
 
-.subgrupos__error {
-  color: var(--color-error);
-  margin: 0.5rem 0;
-}
-
-.subgrupos__vacio,
-.subgrupos__sin-resultados,
-.subgrupos__cargando {
-  color: var(--color-tinta-suave);
-}
-
 .subgrupos__tabla {
   width: 100%;
   border-collapse: collapse;

@@ -9,21 +9,20 @@
     (alta)="nuevo()"
   />
 
-  @if (error()) {
-    <p class="grupos__error" role="alert">{{ error() }}</p>
-  }
+  <app-estado-lista
+    [cargando]="cargando()"
+    [error]="error()"
+    [total]="grupos().length"
+    [coincidencias]="visibles().length"
+    [busqueda]="busqueda()"
+    textoVacio="No hay grupos todavía. Crea el primero con «Nuevo grupo»."
+  />
 
-  @if (cargando()) {
-    <p class="grupos__cargando">Cargando…</p>
-  } @else if (grupos().length === 0) {
-    <p class="grupos__vacio">
-      No hay grupos todavía. Crea el primero con «Nuevo grupo».
-    </p>
-  } @else if (visibles().length === 0) {
-    <p class="grupos__sin-resultados">
-      Ningún resultado para «{{ busqueda() }}».
-    </p>
-  } @else {
+  <!-- Complemento EXACTO de la cadena de `app-estado-lista`, escrito idéntico en
+       las siete listas y verificable por grep (7 coincidencias). No lleva
+       `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
+       la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (!cargando() && visibles().length > 0) {
     <table class="grupos__tabla">
       <thead>
         <tr>

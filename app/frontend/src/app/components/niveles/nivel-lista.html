@@ -9,22 +9,20 @@
     (alta)="nuevo()"
   />
 
-  @if (error()) {
-  <p class="niveles__error" role="alert">{{ error() }}</p>
-  }
+  <app-estado-lista
+    [cargando]="cargando()"
+    [error]="error()"
+    [total]="niveles().length"
+    [coincidencias]="visibles().length"
+    [busqueda]="busqueda()"
+    textoVacio="No hay niveles todavía. Crea el primero con «Nuevo nivel»: sin niveles no se pueden crear grupos."
+  />
 
-  @if (cargando()) {
-  <p class="niveles__cargando">Cargando…</p>
-  } @else if (niveles().length === 0) {
-  <p class="niveles__vacio">
-    No hay niveles todavía. Crea el primero con «Nuevo nivel»: sin niveles no se
-    pueden crear grupos.
-  </p>
-  } @else if (visibles().length === 0) {
-  <p class="niveles__sin-resultados">
-    Ningún resultado para «{{ busqueda() }}».
-  </p>
-  } @else {
+  <!-- Complemento EXACTO de la cadena de `app-estado-lista`, escrito idéntico en
+       las siete listas y verificable por grep (7 coincidencias). No lleva
+       `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
+       la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (!cargando() && visibles().length > 0) {
   <table class="niveles__tabla">
     <thead>
     <tr>

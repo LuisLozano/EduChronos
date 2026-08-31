@@ -6,6 +6,7 @@ import { Profesor } from '../../models/profesor.model';
 import { ProfesorForm } from './profesor-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -15,7 +16,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-profesor-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './profesor-lista.html',
   styleUrl: './profesor-lista.css',
 })

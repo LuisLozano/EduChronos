@@ -93,14 +93,14 @@ describe('NivelLista', () => {
   it('(2) lista vacía muestra la invitación a crear el primero', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.niveles__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/niveles').flush('', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.niveles__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
     expect(err).toContain('500');
   });
@@ -118,7 +118,7 @@ describe('NivelLista', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.niveles__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('referenciada por 4 grupo(s)');
     expect(err).not.toContain('Conflict');
     // discriminante: NO cae al degradado, que es lo único que lleva el status.
@@ -132,7 +132,7 @@ describe('NivelLista', () => {
 
     http.expectOne('/api/niveles/3').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.niveles__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo borrar el nivel 1ESO (409)');
   });
 
@@ -224,10 +224,10 @@ describe('NivelLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.niveles__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.niveles__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

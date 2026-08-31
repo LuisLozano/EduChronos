@@ -73,7 +73,7 @@ describe('AulaLista', () => {
   }
 
   function textoError(): string {
-    return fixture.nativeElement.querySelector('.aulas__error').textContent;
+    return fixture.nativeElement.querySelector('.estado-lista__error').textContent;
   }
 
   it('(1) carga la lista en init y la pinta', async () => {
@@ -88,7 +88,7 @@ describe('AulaLista', () => {
   it('(2) lista vacía muestra la invitación a crear la primera', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.aulas__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
@@ -242,10 +242,10 @@ describe('AulaLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.aulas__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.aulas__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

@@ -52,14 +52,14 @@ describe('ProfesorLista', () => {
   it('(2) lista vacía muestra la invitación a crear el primero', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.profesores__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush('', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.profesores__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
     expect(err).toContain('500');
   });
@@ -79,7 +79,7 @@ describe('ProfesorLista', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.profesores__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('referenciada por 2 plaza(s)');
     // discriminante: NO cae al degradado
     expect(err).not.toContain('No se pudo borrar a Ana Ruiz (409)');
@@ -96,7 +96,7 @@ describe('ProfesorLista', () => {
 
     http.expectOne('/api/profesores/7').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.profesores__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo borrar a Ana Ruiz');
     expect(err).toContain('409');
   });
@@ -161,10 +161,10 @@ describe('ProfesorLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.profesores__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.profesores__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

@@ -2,17 +2,6 @@
   padding: 1rem;
 }
 
-.actividades__error {
-  color: var(--color-error);
-  margin: 0.5rem 0;
-}
-
-.actividades__vacio,
-.actividades__sin-resultados,
-.actividades__cargando {
-  color: var(--color-tinta-suave);
-}
-
 .actividades__tabla {
   width: 100%;
   border-collapse: collapse;

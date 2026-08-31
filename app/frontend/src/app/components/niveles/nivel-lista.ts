@@ -6,6 +6,7 @@ import { Nivel } from '../../models/nivel.model';
 import { NivelForm } from './nivel-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -20,7 +21,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-nivel-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './nivel-lista.html',
   styleUrl: './nivel-lista.css',
 })

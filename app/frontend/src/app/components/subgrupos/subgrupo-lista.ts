@@ -6,6 +6,7 @@ import { Subgrupo } from '../../models/subgrupo.model';
 import { SubgrupoForm } from './subgrupo-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -23,7 +24,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-subgrupo-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './subgrupo-lista.html',
   styleUrl: './subgrupo-lista.css',
 })

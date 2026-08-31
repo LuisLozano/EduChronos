@@ -80,14 +80,14 @@ describe('SubgrupoLista', () => {
   it('(2) lista vacía muestra la invitación a crear el primero', async () => {
     flushLista([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('.subgrupos__vacio')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeTruthy();
   });
 
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/subgrupos').flush('', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.subgrupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
     expect(err).toContain('500');
   });
@@ -102,7 +102,7 @@ describe('SubgrupoLista', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.subgrupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('referenciada por 3 plaza(s)');
     expect(err).not.toContain('No se pudo borrar el subgrupo CyR-Tec (409)');
   });
@@ -114,7 +114,7 @@ describe('SubgrupoLista', () => {
 
     http.expectOne('/api/subgrupos/5').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
-    const err = fixture.nativeElement.querySelector('.subgrupos__error').textContent;
+    const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo borrar el subgrupo CyR-Tec (409)');
   });
 
@@ -221,10 +221,10 @@ describe('SubgrupoLista', () => {
 
     await buscar('zzz');
 
-    const sinResultados = fixture.nativeElement.querySelector('.subgrupos__sin-resultados');
+    const sinResultados = fixture.nativeElement.querySelector('.estado-lista__sin-resultados');
     expect(sinResultados).toBeTruthy();
     expect(sinResultados.textContent).toContain('zzz');
-    expect(fixture.nativeElement.querySelector('.subgrupos__vacio')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
   });
 });

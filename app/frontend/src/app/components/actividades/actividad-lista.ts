@@ -6,6 +6,7 @@ import { Actividad } from '../../models/actividad.model';
 import { ActividadForm } from './actividad-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
+import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
 
 /**
@@ -29,7 +30,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-actividad-lista',
-  imports: [CabeceraLista],
+  imports: [CabeceraLista, EstadoLista],
   templateUrl: './actividad-lista.html',
   styleUrl: './actividad-lista.css',
 })
