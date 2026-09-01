@@ -5,10 +5,35 @@
 } @else if (avisos()!.length === 0) {
   <p class="prevalidacion-limpia">Catálogo sano: sin hallazgos de pre-validación.</p>
 } @else {
-  <section class="prevalidacion-panel">
+  <section class="prevalidacion-panel" [class.es-error]="hayError()">
     <header class="cabecera">
-      <span class="contador-errores">{{ numErrores() }}</span>
-      <span class="contador-avisos">{{ numAvisos() }}</span>
+      <!-- Los dos contadores llevan RÓTULO VISIBLE, y no sólo `title` (S129,
+           `D-prevalidacion-contraste-sin-ver`). Medido: `--color-error` y
+           `--color-aviso` tienen 1,28:1 ENTRE SÍ, y a un elemento no textual
+           portador de información se le piden 3:1. Sin rótulo, en el estado
+           colapsado —el habitual: sin ERROR el panel arranca cerrado— los dos
+           números son lo único en pantalla y el color ES la información.
+           El rótulo va FUERA del `<span>` del número a propósito: los asertos
+           de la suite leen el `textContent` de `.contador-errores`.
+           NO se añade `aria-label`: el molde de la insignia (`horario-grid`)
+           es para un número SIN texto, y aquí el rótulo visible ya da el
+           nombre accesible correcto; un `aria-label` sobre un `<span>` sin rol
+           no se anuncia de forma fiable. El `title` lleva la precisión que el
+           rótulo corto no cabe. -->
+      <span class="contador" title="Hallazgos de severidad ERROR.">
+        <span class="contador-errores">{{ numErrores() }}</span>
+        <span class="contador-rotulo">errores</span>
+      </span>
+      <!-- «otros hallazgos» y no «avisos»: `numAvisos` cuenta el RESTO
+           (`severidad !== 'ERROR'`), y el modelo deja `severidad` como `string`
+           para que un tercer valor futuro degrade en vez de romper el parseo.
+           Prometer «avisos» mentiría el día que el enum crezca. Mismo criterio
+           con que S128 se negó a que la leyenda de la insignia prometiera
+           cuadrar con `Totales`. -->
+      <span class="contador" title="Hallazgos de severidad distinta de ERROR.">
+        <span class="contador-avisos">{{ numAvisos() }}</span>
+        <span class="contador-rotulo">otros hallazgos</span>
+      </span>
       <button type="button" (click)="alternar()">
         {{ colapsado() ? 'Mostrar detalle' : 'Ocultar detalle' }}
       </button>
@@ -18,6 +43,13 @@
       <ul class="lista">
         @for (a of avisos()!; track $index) {
           <li class="aviso-entrada" [class.es-error]="a.severidad === 'ERROR'">
+            <!-- La severidad se pinta COMO TEXTO y sin traducir. `.es-error`
+                 sólo cambia el color, así que sin esto un ERROR y un AVISO son
+                 la misma fila para quien no distinga rojo de ámbar. Se pinta el
+                 valor crudo del enum a propósito: un tercer valor futuro
+                 mostraría su nombre en vez de disfrazarse de AVISO, que es
+                 justo lo que `[class.es-error]` hace hoy. -->
+            <span class="severidad">{{ a.severidad }}</span>
             <span class="regla">{{ a.regla }}</span>
             <span class="entidad">{{ a.entidadCodigo }}</span>
             <span class="cuenta">{{ a.demanda }} / {{ a.disponible }}</span>

@@ -23,10 +23,40 @@
   background: var(--color-aviso-fondo);
 }
 
+/* El marco toma la severidad MÁXIMA del panel (S129). La regla de arriba
+   cubría la rama «hay hallazgos» ENTERA, así que un catálogo con tres ERROR se
+   presentaba en caja de aviso: el componente ya sabía distinguirlo
+   —`hayError()` gobierna el colapso— y esa señal no llegaba al contenedor.
+   Incumplía la decisión 5 («ha fallado» y «hay avisos» son tratamientos
+   distintos).
+   Contrastes MEDIDOS sobre `--color-error-fondo` (#FAE7E4), con la fórmula
+   WCAG que styles.css usa para el acento: `--color-error` 6,35:1,
+   `--color-aviso` 4,97:1 y `--color-tinta` 13,16:1; los tres por encima del
+   4,5:1 de texto normal, así que el fondo puede cambiar y no sólo el borde. */
+.prevalidacion-panel.es-error {
+  border-left-color: var(--color-error);
+  background: var(--color-error-fondo);
+}
+
 .cabecera {
   display: flex;
   gap: 0.6rem;
   align-items: center;
+}
+
+/* Mantiene el número pegado a su rótulo dentro del `gap` mayor de la cabecera.
+   Escala de la decisión 3: `--e1` es separación DENTRO de una línea. */
+.contador {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e1);
+}
+
+/* El rótulo no compite con el número: es tinta normal y tamaño auxiliar. El
+   dato es la cifra; el rótulo sólo dice de qué. */
+.contador-rotulo {
+  font-size: var(--tam-xs);
+  color: var(--color-tinta);
 }
 
 .contador-errores {
@@ -49,12 +79,23 @@
   gap: 0.5rem;
 }
 
+/* Ancho fijo para que las reglas queden alineadas en columna pese a que
+   ERROR y AVISO tienen distinta longitud. No se pone `text-transform`: el
+   valor se pinta tal como llega, que es la promesa del modelo. */
+.aviso-entrada .severidad {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  font-size: var(--tam-xs);
+  font-weight: var(--peso-medio);
+}
+
 .aviso-entrada .regla {
   font-weight: var(--peso-medio);
 }
 
 /* Adicional, SOLO en las entradas ERROR: refuerza la severidad sin sustituir a
-   la fila —.aviso-entrada sigue estando en las dos—. */
+   la fila —.aviso-entrada sigue estando en las dos—. Desde S129 el refuerzo ya
+   no es la única señal: la severidad viaja como texto en la propia fila. */
 .aviso-entrada.es-error {
   color: var(--color-error);
 }
