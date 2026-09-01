@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S126. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S127. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S126). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S127). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -8138,3 +8138,140 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   C-tokens y C-sustitución HECHOS, C-identidad y C-revisión PENDIENTES, DESPUÉS de O-navegación. O-demo (H2)
   sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
   C-rejilla-densidad**, que es lo único que cierra la condición de salida. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
+  Vigesimoséptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
+  línea base heredada de S126 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 381, e2e 2);
+  al cerrar, **app 282, solver 91, vitest 403, e2e 2**. vitest sube +22 y **ni uno de los 381 heredados se
+  modifica**: el tramo 2 sólo añade.
+  M0 — EL MAPA. Cambio: C-rejilla-densidad, tramo 2. Objetivo: O-navegación, criterio 4 en su mitad
+  pendiente, y de paso el criterio 6. Hito: ninguno funcional, que es la respuesta escrita en la ficha.
+  R-invalidación limpio y en la dirección buena: C-identidad y C-revisión van DESPUÉS, así que el riesgo era
+  adelantar su trabajo puliendo el aspecto de la marca, no que ellos rehagan éste.
+  **LA COSTURA QUE EL M0 DESTAPÓ: D11 exigía el mecanismo y NO DECÍA CUÁL ERA.** Leídos §4 entero y §5 de
+  `diseno-navegacion.md`: D11 decide que el mecanismo es obligatorio y descarta «recortar sin expansión», pero
+  no elige entre expansión en sitio, popover, fila que crece o gesto alguno; y §5 no lo listaba como
+  pendiente. La frase de la ficha «ya sin parámetros abiertos tras cerrarse D0-2» habla de la GEOMETRÍA, no
+  del mecanismo. La única decisión de bulto del tramo 2 no tenía sede escrita; se cierra escribiéndola.
+  **SEGUNDA COSTURA: D11 está redactado contra 22 celdas y la realidad son 72.** Su nota de proporción dice
+  explícitamente que la proporción «cambia qué clase de mecanismo hace falta», y la corrección 1 de S126 la
+  había movido al 9,1 % sin volver sobre el texto de D11. Quien lo lea sin la corrección diseña para el caso
+  equivocado.
+  LA DECISIÓN — MARCA `+N` CON EL DETALLE EN EL `title`, y no se estrena patrón. Medido en el repo antes de
+  diseñar nada: cero `<details>`, cero popover propio, cero tooltip propio; lo único que existe es `title`
+  nativo, y D4 y D6 ya lo usan **para exactamente esto** —condensar y dar forma de recuperar—. Descartada la
+  expansión en sitio porque en una tabla crecer una celda estira su fila y devuelve el scroll que el tramo 1
+  acaba de quitar; descartado el overlay del CDK por estrenar patrón para el caso que el propio diseño llama
+  excepcional; descartado `MatDialog` por modal.
+  **LA MARCA VA DENTRO DE LA BANDA DEL RÓTULO, Y NO ES ESTÉTICA: ES LO QUE IMPIDE EL BUCLE.** `.instancia.bloque`
+  reserva `padding-top: 16px` y `.rotulo` es `position: absolute` dentro, así que la marca no ocupa un píxel de
+  alto. Importa porque la medición que la produce depende del alto disponible: una marca que ocupara alto
+  oscilaría —aparece, empuja, la última plaza deja de estar oculta, desaparece, vuelve a estarlo— y **la guarda
+  `altoPublicado` NO la detendría**, porque sólo impide reescribir el MISMO valor y esto son valores distintos
+  alternándose. La marca lleva `title` propio: el de `.rotulo` es el único sitio donde se lee el código completo
+  de la actividad y ocuparlo habría retirado una señal existente.
+  **LA REGLA ES UNA FRACCIÓN, NO UN UMBRAL EN PÍXELES, Y ESO ES LO QUE DECIDE 50 EN VEZ DE 72.** Con la fila en
+  109,57 px el déficit no es homogéneo: la de cuatro plazas pide 110,8 y se pasa **1,23 px** (se ve el 94 % de su
+  última línea); la de cinco esconde una línea entera y la de seis, dos. Marcar las 72 habría puesto una señal
+  que miente en 22 celdas, al lado de la marca `+N` verdadera de D6: familia de `D-vacio-miente-con-error`. La
+  fracción y no la constante, por la misma razón por la que D1 deriva la altura en vez de escribirla. Que el 50
+  coincida con la predicción de S125 es casualidad aritmética: aquel 50 salía de otro reparto.
+  **EL DISPARADOR: `afterRenderEffect` con fase `read`, y NO el `ResizeObserver` que ya existía.** Ese observador
+  sólo despierta con cambios de TAMAÑO, y con `table-layout: fixed` y seis filas cambiar de grupo repinta la
+  rejilla sin mover un píxel: las marcas del grupo anterior habrían sobrevivido al cambio. Estrena patrón —no
+  había ningún `afterRenderEffect` ni `effect()` en producción— y se asume, porque reutilizar el observador
+  habría sido reutilizar el disparador equivocado. Verificado ANTES de escribirlo, con una sonda desechable, que
+  la fase corre en jsdom y se re-dispara al cambiar una señal leída dentro (1 → 2). Efecto lateral que obligó a
+  una línea más: `repartirAltura` publica `--alto-celda` con `setProperty` desde FUERA del ciclo de render, así
+  que sin un espejo en señal del tope el primer pintado mide la celda antes de que tenga tope y no marca nada.
+  El espejo es disparador, no fuente de verdad.
+  **LA PARTICIÓN DE S125 SALE VALIDADA.** La dependencia era real y se notó en cada medida: el umbral de la
+  marca se decidió contra la geometría que el tramo 1 había dejado, no contra la prevista.
+  M3 — TRES CAPAS Y CADA UNA CON SU RED. `horario/oculto.ts`, hermano de `reparto.ts`, `recreo.ts` y `titulo.ts`:
+  `plazasOcultas` (la regla) y `ocultasEnCelda` (el adaptador DOM→regla). Diez casos para la primera y ocho para
+  el segundo, más cuatro en el spec del componente. **El barrido destapó tres tests que no discriminaban nada y
+  se corrigieron los tres antes de commitear**: (5) y (6) construían su entrada como `20 * FRACCION_VISIBLE_MINIMA`,
+  o sea derivada de la constante que pretendían proteger —con el umbral a 1 seguían pasando—, y pasan a literales;
+  el `Math.max(0, visible)` era INERTE (el umbral es positivo, una fracción negativa y una de 0 dan el mismo
+  veredicto) y **se borró en vez de blindarlo**, mismo criterio que S124 aplicó a `normaliza()`; y el nombre de
+  (10) prometía comprobar el negativo y afirmaba otra cosa.
+  **UNA GUARDA QUE SOBREVIVE A TODA MUTACIÓN Y SE CONSERVA A PROPÓSITO**, con eso escrito en el código: `alto <= 0`
+  no la discrimina ninguna entrada, porque sin ella una línea de alto 0 daría `0/0 = NaN` y `NaN < 0.5` es `false`.
+  No es redundancia: es que la corrección dependería de cómo compara `NaN`. Se documenta como intención y **no se
+  le escribe un test que aparente sujetarla**, que habría sido cobertura fingida.
+  EL CASO QUE HACE EL TRABAJO, y es de la lección de S126: el aserto (15) del adaptador, que sitúa la celda a 3000
+  px de la página. Las tres mutaciones de relativización son INDISTINGUIBLES del código bueno con la celda en el
+  origen; sin ese caso, siete de los ocho tests darían idéntico. Y (18) —el conteo no depende del orden— no es
+  tautológico: detiene la optimización razonable de «las plazas vienen en orden, corto en la primera que se sale».
+  M4 — LO QUE SE MIDIÓ EN EL FIREFOX DEL ARQUITECTO, no en el de Playwright. Viewport 1920×887, dpr 1, hueco **716**,
+  `--alto-celda` 101. Marcas contra el cálculo del volcado y CUADRAN: 1B-A 4, 4ºA 3 —dos `+2` de seis plazas y un
+  `+1` de cinco—, 2B-B 0 sobre seis celdas de cuatro plazas. **4ºA es el caso que decide**, porque sus tres marcadas
+  y sus tres sin marcar conviven en la misma pantalla. Marcas correctas al cambiar de grupo y volver. **Consola sin
+  un solo aviso de `ResizeObserver loop`**, que es la forma exacta en que se habría manifestado la realimentación que
+  el diseño descarta por construcción.
+  **CONFIRMACIÓN COLATERAL QUE VALE POR SÍ SOLA:** con el aviso «1 pines sin aplicar» en pantalla la celda de seis
+  pasa a `+3` y **el scroll no reaparece**. Son los 62 px que S126 midió, absorbidos en caliente: la prueba de que el
+  reparto en runtime de D1 compró algo real, porque con la fórmula de constantes que S126 retiró dos veces aquí habría
+  vuelto la barra.
+  **DOS PENDIENTES DE S126 CERRADOS DE PASO.** (1) El hueco de 716 px queda confirmado en el navegador del arquitecto;
+  los 32 px contra los 748 calculados siguen SIN EXPLICAR, pero ya no son sospechosos de ser artefacto del entorno de
+  prueba. (2) **El arrastre sobre celda VACÍA funciona**, verificado en 1FPB. No se había probado porque no había dónde:
+  medido ahora, las 49 celdas libres de las 840 posibles están TODAS en 1FPB (24) y 2FPB (25), y ninguno de esos dos
+  grupos tiene una sola celda de cinco o seis plazas, así que **no existe un grupo donde verificar marcas y hueco vacío
+  de una sola pasada**.
+  DATO DE ESTRUCTURA, medido y no supuesto: **las 791 celdas del centro tienen exactamente UNA instancia cada una**. Es
+  propiedad de estos datos y no del modelo —`agruparPorActividad` devuelve una lista y `slotsOcupados` cuenta instancias
+  precisamente porque puede haber varias—, así que la implementación mide por instancia contra su celda, que funciona
+  igual si algún día hay dos apiladas. Queda escrito en el código como limitación declarada, no descubierta después.
+  R-TERMINADO, aplicado dos veces. No se arregla el `ResizeObserver` de jsdom pese a ser una línea en el setup de tests
+  y desbloquear cobertura real: no bloquea el criterio y tocar el setup global dentro de un Cambio sin cerrar añade
+  riesgo a cambio de nada que el objetivo pida. Y no se persigue el aspecto de la marca: existe y se ve, y que se vea
+  bonita es C-identidad.
+  MÉTODO — EL COMMIT ESPERA AL JUEZ. El javadoc del cableado afirmaba «Verificado en navegador (M4)» antes de que M4
+  existiera, y **el commit se retuvo hasta que la afirmación fue cierta**, en vez de escribir «se espera» para
+  reescribirlo después. Cuando la suite no puede probar algo y el único juez es el navegador, el commit va detrás del
+  navegador. El texto final no promete: enumera viewport, hueco, `--alto-celda`, los tres recuentos y la ausencia del
+  aviso de bucle.
+  MÉTODO — EL LÍMITE DE LOS TESTS, DICHO EN UN ASERTO Y NO EN UN COMENTARIO. Que en jsdom `getBoundingClientRect`
+  devuelva ceros explicaba por qué no se podía probar la MEDICIÓN, y se había extendido indebidamente a que tampoco se
+  podía probar el BINDING. Dos mutaciones lo desmintieron: borrar `[attr.data-clave]` entero o la marca completa dejaba
+  la suite en 399 verdes. El caso (27) afirma ahora esa invariante —sin stub no hay marca— en vez de dejarla en prosa.
+  ERRORES DEL ARQUITECTO, la familia de siempre. **Afirmé que la medición «cuelga de la pasada que ya existe» y era
+  falso**: `repartirAltura` sólo corre desde el `ResizeObserver`, que no ve cambios de contenido; hizo falta un
+  disparador nuevo. **Afirmé que la superficie del tramo 2 no rompía la invariante de no-bucle del javadoc de
+  `repartirAltura`, y sí la rompe**: la marca se mide sobre la tabla y se pinta dentro de la tabla, que es observada;
+  lo que corta no es la invariante vieja sino que la marca no ocupe alto. Registré la deuda del pin como «avisa sin
+  persistir» **cuando la propia medición del arquitecto la había desmentido** —sobrevive al F5—; corregido antes de
+  escribirla. Y le puse a la deuda sede O-demo cuando el ajuste manual tiene objetivo propio, O-ajuste-cierre.
+  **Y UNA SÉPTIMA INSTANCIA DE LA FAMILIA DE ANCLAS DE S124, cometida por el asistente al escribir el propio M1:** un
+  ancla de sustitución copiada con CUATRO espacios de sangría donde el fichero tiene cinco. La guarda de unicidad la
+  cazó y el guion murió sin escribir. Precisión que se suma a la regla: **la sangría copiada a ojo no es la sangría del
+  fichero; si el ancla la incluye, hay que anclar sin ella.**
+  ERRORES DEL EJECUTOR, todos autodetectados y reportados. Un `TS18046` por `inject(ElementRef<HTMLElement>)`, que tipa
+  el TOKEN y no el genérico: devuelve `ElementRef<any>` y sobre `any` la inferencia de `Array.from` cae a `unknown`.
+  Resuelto anclando el tipo UNA vez. Es exactamente la forma que este proyecto persigue: algo que se parece a un tipo y
+  no lo es. Y un heurístico que se auto-bloqueó —buscaba una constante «después de `describe`» y la encontró en el
+  comentario que el propio guion acababa de insertar—, **sexta instancia**: un ancla que se cumple sobre texto que el
+  guion mismo introdujo.
+  DEUDA. **DOS NUEVAS**: `D-resize-observer-jsdom` (técnica real, transversal, → sesión de Higiene/Método) y
+  `D-pin-ocupada-no-persiste` (técnica real, → O-ajuste-cierre), esta última registrada SIN diagnóstico porque no lo hay:
+  se escriben los dos hechos y se dice que elegir entre las dos explicaciones plausibles sería inventar.
+  `D-guion-exit-enmascarado` y `D-vacio-miente-con-error` siguen vivas y sin pagarse. Deuda bloqueante abierta: sigue en
+  1 (D31-a, las aulas de FPB).
+  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar (`describe is not defined`): la suite corre
+  bajo el builder `@angular/build:unit-test` y hay que lanzar `npx ng test --watch=false` entera y filtrar por grep.
+  **Corolario nuevo y con precio: un barrido de mutación hecho con `npx vitest run` no mide nada** —hay que comprobar que
+  la base pasa antes de creerse un mutante caído—. `mvn test` sin `clean` deja informes huérfanos de surefire; con `clean`
+  el conteo de `app` da 282 y no 283. `@angular/core` instalado 21.2.17, CDK 21.2.14: `afterRenderEffect` es `@publicApi`,
+  no developer preview, y sus tipos viven en `node_modules/@angular/core/types/core.d.ts`, no en un `index.d.ts`.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después, incluido el M4, que corrió
+  contra una copia porque el arrastre escribe un bloqueo. Copia borrada sin residuos `-wal`, `-shm` ni `-journal`.
+  LIMPIEZA (M1-bis): archivada S125 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al final en orden
+  ascendente, cuerpo íntegro); degradada S126 a «Última sesión registrada (previa):»; S127 queda como única cabecera H3
+  viva. Los dos censos de la bitácora pasan de S124 a S125.
+  **O-navegación (transversal, abierto en S122) TERMINADO**: C-rutas-hijas (S123), C-listas-filtradas (S124) y
+  C-rejilla-densidad en sus dos tramos (S126 y S127). Sus seis criterios cumplidos, con la salvedad escrita en el criterio
+  1: nunca abrió Cambio y su verificación real cae en C-identidad, que reestila esa barra. O-diseño (transversal, abierto
+  en S121): C-tokens y C-sustitución HECHOS, **C-identidad y C-revisión PENDIENTES y ya sin nada delante**. O-demo (H2)
+  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **C-identidad**, sobre la UI
+  definitiva que O-navegación acaba de fijar. Lo fija su propio M0.

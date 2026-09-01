@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
-- L999 — ### Bloques de Fase 2
-- L1007 — ### Bloques de Fase 5
-- L1030 — ### Bloques de Fase 6
-- L1075 — ### Bloques de Fase 8
-- L1284 — ### Fases completadas
-- L1388 — ### Cierre del modelo — Sesión 8
-- L1436 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1482 — ### Método de trabajo (procedimiento vigente)
-- L1515 — ### Deuda consciente VIVA
-- L3003 — ### Deuda consciente CERRADA (histórico)
-- L3051 — ### Notas técnicas validadas en Fase 0
-- L3061 — ### Notas técnicas validadas en Fase 6
-- L3095 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3104 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3131 — ### Registro detallado de sesiones S10–S31
-- L3140 — ## Señales globales de alerta
+- L699 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
+- L1075 — ### Bloques de Fase 2
+- L1083 — ### Bloques de Fase 5
+- L1106 — ### Bloques de Fase 6
+- L1151 — ### Bloques de Fase 8
+- L1360 — ### Fases completadas
+- L1464 — ### Cierre del modelo — Sesión 8
+- L1512 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1558 — ### Método de trabajo (procedimiento vigente)
+- L1591 — ### Deuda consciente VIVA
+- L3111 — ### Deuda consciente CERRADA (histórico)
+- L3199 — ### Notas técnicas validadas en Fase 0
+- L3209 — ### Notas técnicas validadas en Fase 6
+- L3243 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3252 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3279 — ### Registro detallado de sesiones S10–S31
+- L3288 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,220 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
+### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
+  Vigesimonovena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
+  donde hubo lógica real (la condición del contador; las cuatro decisiones y la tokenización de pesos no tocan
+  un `.ts`). Suites: línea base heredada de S128 **corrida antes de tocar nada y verde** (app 282, solver 91,
+  vitest 414, e2e 2); al cerrar, **vitest 419**. Se hace constar que `mvn clean test` NO se volvió a correr al
+  cerrar —la sesión no toca una línea de Java— y que la e2e tampoco: los 282, los 91 y los 2 son la medición de
+  apertura, no la de cierre. vitest sube +5 (dos del panel, uno de la rejilla, dos del contador) y de los 414
+  heredados **ni uno se modifica**; sólo el caso (8) de `asignatura-lista.spec.ts` gana un aserto.
+  M0 — EL MAPA. Cambio: C-revisión. Objetivo: O-diseño, criterios 3 y 4. Hito: ninguno funcional, que es la
+  respuesta escrita en la ficha; lo que acerca es la DEMO. R-invalidación limpio por el mismo argumento de
+  S121: el criterio se definió como SISTEMA para que la UI que traiga O-particiones nazca aplicándolo. Los dos
+  candidatos rivales caen solos: O-demo sigue bloqueado por el correo al centro y O-ajuste-cierre abriría
+  objetivo nuevo con O-diseño a un Cambio de cerrar. La sesión de Higiene/Método pierde por NOVENA vez.
+  **LAS DOS DECISIONES QUE EL M0 TUVO QUE TOMAR, y ninguna estaba en la ficha.**
+  (1) **«Las tres vistas» del criterio 3 es un recuento CADUCADO desde S123.** Cuando se escribió, Configuración
+  era una pantalla; hoy son ocho destinos con URL propia, más la landing y la vista de horario con sus tres
+  modos. Los tres diálogos siguen siendo tres. No se reinterpreta el criterio: se registra que el número está
+  obsoleto y se lee la cláusula por lo que pide —cobertura transversal—, que es lo que el criterio 1 ya
+  verifica por grep sobre las hojas enteras.
+  (2) **C-REVISIÓN NO ERA UNA PASADA DE JUICIO, y tratarla como tal habría dejado el criterio 4 sin cumplir.**
+  El M2 midió que de las seis decisiones de identidad sólo UNA estaba escrita y rotulada (la 3, de S128), una
+  escrita fuera de `styles.css` sin rótulo (la 4, en `app.css`), una a medias (la 2: la familia sí, la regla de
+  uso de la escala no) y **tres sin constancia en ninguna parte** (1 paleta, 5 estados, 6 tablas y rejilla).
+  Eso no es documentación pendiente: es el criterio 4 sin cumplir. De ahí la partición.
+  **C-REVISIÓN SE PARTE EN TRES TRAMOS, por dependencia real y no por tamaño.** *Tramo 1 (esta sesión):* el
+  criterio 4 —las cuatro decisiones que faltaban, escritas y aplicadas donde su escritura destapa una
+  incoherencia— más las tres deudas que son su aplicación. *Tramo 2:* el criterio 3 —los 195 valores de
+  espaciado, el radio de los once controles y `D-select-nativo-desparejo`—, gobernado por decisiones ya
+  escritas. *Tramo 3:* el juicio del arquitecto sobre las once pantallas y los tres diálogos, que cierra el
+  objetivo. La dependencia es la misma que validó la partición de S125: **no se puede juzgar el acabado de algo
+  que todavía no se ha aplicado**, y el veredicto del juez genera trabajo. Queda escrito que si el tramo 2
+  resulta tan mecánico como promete el 88 % de exactos, los tramos 2 y 3 pueden fundirse —el M4 de la
+  aplicación ES el recorrido por todas las pantallas—; lo decide su propio M0 con la UI aplicada delante.
+  M2 — EL CENSO, por Claude Code y de solo lectura, y es lo que dimensionó los tres tramos. **29 hojas CSS**
+  (28 de componente más `styles.css`), no las 28 que la ficha esperaba: `estado-lista.css` nació en S128 y el
+  recuento era anterior. **192 literales reales de espaciado** repartidos por 26 hojas, de los que **171 de 195
+  (88 %) caen EXACTOS en un escalón** —65 en `--e4`, 65 en `--e2`, 22 en `--e1`, 11 en `--e5`, 8 en `--e3`— y
+  24 exigen redondeo declarado. Ese dato matiza a la baja el argumento de S128 que se negó a abrir un Cambio de
+  tokenización («el espaciado no tiene equivalencia exacta»): la tiene en el 88 % de los casos. **NO se reabre
+  la decisión de sede**, que sigue siendo correcta; lo que baja es el riesgo del tramo 2. Y un riesgo se retira
+  solo: `app.css` ya está limpia, así que el espaciado no toca la barra.
+  PIEZA 1 — **LAS CUATRO DECISIONES QUE FALTABAN, ESCRITAS.** No son cuatro del mismo género, y esa distinción
+  gobernó el trabajo. La **1 (paleta)** era transcripción: la decisión existía desde S121 —azul institucional
+  elegido por el jefe de estudios sobre maqueta viva, con la alternativa descartada— y lo que faltaba era que
+  viviera donde gobierna; se escribe con la regla **UN COLOR, UN TRABAJO** y el papel de los 22 tokens (no 17:
+  esa cifra es anterior a C-identidad). La **2 (tipografía)** era casi transcripción: faltaba la regla de uso
+  de la escala. La **5 (estados)** fue PROMOCIÓN y no invención: el criterio ya existía escrito pero LOCAL a
+  `panel-prevalidacion.css` —rojo fuerte para el fallo, gris apagado para lo no ejecutado, verde para lo sano,
+  caja de aviso para los hallazgos— y se sube a sistema tal cual. La **6 (tablas y rejilla)** era la única que
+  había que decidir de verdad, y se resuelve declarando lo que ya es cierto: censadas, **OCHO hojas repiten el
+  molde de tabla carácter a carácter** y sólo `grupo-lista` añade un gris de columna, sin rayado alterno, sin
+  realce al pasar el ratón y sin fondo de cabecera; la rejilla usa otra gramática y se declara excepción
+  correcta con su razón. **Cero reglas CSS cambian**: `styles.css` pasa de 179 a ~285 líneas, todas comentario.
+  **LA JERARQUÍA DE ACCIONES SE DECLARA DE PASO, y resuelve una pregunta del arquitecto.** Preguntado si el
+  verde debía pasar a ser el color de guardar, se argumentó en contra: el verde significa VERIFICADO y es la
+  señal de la prevalidación sana y del destino válido de un arrastre; extenderlo a guardar dejaría la decisión
+  5 sin color para «hecho y correcto» y obligaría a repintar ocho formularios y tres diálogos. La captura de
+  los cuatro botones reales lo zanjó mejor que el argumento: la jerarquía ya está resuelta **por relleno y no
+  por color** —principal en acento pleno, secundaria en superficie con borde, destructiva con tinta de error,
+  en curso en acento apagado—, y eso estaba aplicado sin estar escrito. Se declara. El arquitecto eligió que el
+  verde se quede en verificado.
+  **UN CENSO DE TOKENS QUE EL GUION NO BUSCABA: cuatro están MUERTOS.** `--radio-s`, `--fuente-datos`,
+  `--color-ok-fondo` y `--color-info-fondo` no los usa nadie. Se marcan como sin uso y **no se retiran**:
+  borrar es un cambio sin criterio detrás. El de `--radio-s` cierra además una pregunta abierta del censo: las
+  diez reglas `__input` repiten `border-radius: 4px` LITERAL, que no es `--radio-s` (3) ni `--radio-m` (6), y
+  por eso `.cabecera-lista__busqueda` —la única que usa el token— es hoy el único control con las esquinas
+  distintas a los otros diez. Se unifica en el tramo 2, en `--radio-m` por decisión del arquitecto
+  («la mayor uniformidad posible»): el infractor es el literal, no el token.
+  PIEZA 2 — **LOS 23 LITERALES DE `font-weight` PASAN A LA ESCALA.** 19 de `600` y 4 de `700`, con equivalencia
+  EXACTA y cero píxeles movidos, en 9 hojas. El guion mide antes de tocar y aborta si el mapa no cuadra
+  (patrón de la tanda 2 de S121); vigila además dos casos que el recuento no cubría —el atajo `font:` con el
+  peso dentro, y valores como `bold` o `500`— y no había ninguno. Reparto resultante: **22 `--peso-medio`, 6
+  `--peso-fuerte`, 1 `--peso-normal`**. Hallazgo de método asociado: **el 79 % de los usos de peso ignoraba la
+  escala y la verificación binaria del criterio 1 no lo detecta**, porque sólo mira color y `font-size`; el
+  comprobador de cuatro vías de S121 gana una quinta —peso literal—. Los tres `line-height: 1` de la rejilla no
+  son sustituibles (no hay escalón de valor 1) y su exclusión queda declarada.
+  PIEZA 3 — **LA SEVERIDAD DE LA PREVALIDACIÓN DEJA DE VIAJAR SÓLO POR COLOR, y la deuda tenía DOS caras.** La
+  conocida son los contadores; la que S121 no vio son las filas, donde `[class.es-error]` sólo cambia el color.
+  **El dato que convierte la mejora en defecto medido: `--color-error` y `--color-aviso` tienen 1,28:1 ENTRE
+  SÍ**, cuando a un elemento no textual portador de información se le piden 3:1. Individualmente los dos pasan
+  sobre el fondo del panel (6,80:1 y 5,33:1); el problema es que no se distinguen uno de otro. Y en el estado
+  habitual —sin ERROR el panel arranca colapsado— los dos números son lo ÚNICO en pantalla, luego el color no
+  es redundante: **es la información**. Arreglo en tres partes. (a) Rótulo VISIBLE junto a cada número, no sólo
+  `title`, y **fuera** del `<span>` del número para no tumbar el aserto que lee su `textContent`. (b) La
+  severidad se pinta **como texto** en la fila, con el valor CRUDO del enum: un tercer valor futuro mostraría
+  su nombre en vez de disfrazarse de AVISO, que es lo que `[class.es-error]` hace hoy. (c) El marco del panel
+  toma la severidad MÁXIMA, con contrastes medidos sobre `--color-error-fondo` antes de escribirlos (6,35:1,
+  4,97:1 y 13,16:1, los tres sobre 4,5:1).
+  **EL RÓTULO NO PUEDE DECIR «AVISOS», y la razón es de contrato.** `numAvisos` cuenta el RESTO
+  (`severidad !== 'ERROR'`), y `prevalidacion.model.ts` deja `severidad` como `string` a propósito para que un
+  tercer valor futuro degrade en vez de romper el parseo. Prometer «avisos» mentiría el día que el enum crezca,
+  así que el rótulo es **«otros hallazgos»**, más torpe de leer y honesto. Es el mismo razonamiento con que
+  S128 se negó a que la leyenda de la insignia prometiera cuadrar con `Totales`.
+  **NO SE DECLARA QUE UN ERROR ABORTE LA GENERACIÓN EN LOS `title`.** Se dijo en el análisis y no estaba
+  verificado desde el cliente (`horario-view.html:23` sólo deshabilita el botón si no se ha prevalidado), así
+  que los `title` dicen qué severidad cuenta cada número y nada más.
+  PIEZA 4 — **LAS DOS MARCAS DE LA REJILLA DEJAN DE SER MUDAS.** `.oculta` —la marca `+N` que S127 construyó
+  para que las plazas ocultas dejaran de serlo— llevaba `[title]` y ninguna etiqueta accesible, a quince líneas
+  de la insignia que S128 sí dotó del par completo: un lector de pantalla oía «más 4» y nada más. El
+  `aria-label` **repite el `title` LITERALMENTE y no mejora su redacción**, porque la cadena es de S127 y
+  cambiarla aquí sería afirmar algo nuevo sobre lo que devuelven `marcaOcultas` y `detalleInstancia`. A
+  propuesta del asistente y por decisión del arquitecto entra también `.grupos`, que tiene el mismo defecto en
+  el mismo fichero: dejar la mitad arreglada obliga a volver. Coste en altura: cero, son atributos.
+  PIEZA 5 — **EL CONTADOR DEJA DE APAGARSE ANTE UN ERROR DE ACCIÓN, y la ficha de la deuda pedía un arreglo más
+  caro del necesario.** Decía «dos señales en vez de una» (error de carga frente a error de acción); el M2
+  midió que basta cambiar el CRITERIO: `!cargando() && <entidad>().length > 0` en lugar de
+  `!cargando() && !error()`. Se eligió **A** —el criterio en las siete plantillas— frente a **B** —mover la
+  decisión dentro de `cabecera-lista`—, y el argumento es cuál de las dos cosas está mal: lo que falla es el
+  criterio, no dónde vive. B derogaría un javadoc deliberado (`cabecera-lista.ts:9-13`: «no decide cuándo se ve
+  el contador») para arreglar otra cosa, y sería exactamente lo que S128 declaró fuera de alcance al negarse a
+  tocar ese contrato. La centralización no se pierde: la regla vive UNA vez en la decisión 5 de `styles.css`, y
+  siete plantillas que la aplican no son siete decisiones.
+  **LA CONDICIÓN VA SOBRE LA LISTA CARGADA Y NO SOBRE `visibles()`, y esa es la mitad no obvia.** La simetría
+  con la tabla es atractiva y equivocada: con `visibles()`, una búsqueda sin resultados escondería el contador
+  —hoy dice «0 de N»— e inutilizaría el instrumento en el único momento en que hace falta leerlo. Sería además
+  una REGRESIÓN de comportamiento existente disfrazada de arreglo, porque hoy ese caso sí se ve. La propiedad
+  que el javadoc temía sigue cubierta: si la carga falla desde vacío el array está vacío y no se pinta ningún
+  «0». Efecto declarado y aceptado: un catálogo vacío bien cargado deja de mostrar el «0» junto al título.
+  M3 — CAMPAÑA DE MUTACIÓN SOBRE LA CONDICIÓN DEL CONTADOR, con la base verde comprobada antes de creerse nada.
+  Cuatro mutantes: `"true"`, volver a `!error()`, usar `visibles()` y cambiar `> 0` por `>= 0`. **Tres mueren y
+  UNO SOBREVIVE**, y el que sobrevive es precisamente la decisión que el comentario nuevo argumenta: nadie
+  ejercía el camino de `visibles()` porque el caso (8) hace la búsqueda sin resultados y no mira el contador.
+  **La supervivencia se PREDIJO antes de correr la campaña**, no se descubrió al leerla. Se cierra con un
+  ASERTO —no un caso— en el (8), que ya monta el escenario: tras `buscar('zzz')`, el contador dice «0 de 2».
+  Con él mueren los cuatro. Las otras seis listas quedan cubiertas por grep de la línea 6, que es el mecanismo
+  que el comentario de la tabla ya usa.
+  M4 — EN NAVEGADOR, sobre COPIA de la base demo, y con el disparador que S121 dio por desconocido. **La
+  verificación que `D-prevalidacion-contraste-sin-ver` pedía desde S121 —ver un error y un aviso juntos— no era
+  difícil: es IMPOSIBLE.** Medido en el backend: `Severidad` tiene dos valores y las tres reglas de
+  `PrevalidacionService` emiten `ERROR`; **nadie emite `AVISO` ni en `main` ni en los tests**, y el propio enum
+  documenta que se conserva por contrato y como candidato natural del palomar de aulas si algún día entra. La
+  deuda cierra POR CONSTRUCCIÓN —la severidad ya viaja como texto— y no por medición del contraste.
+  **EL DISPARADOR DE HALLAZGOS ESTABA ESCRITO, en la ficha de una deuda hermana.** S121 lo registró como NO
+  SABIDO; la respuesta llevaba desde S117 en `D-prevalidacion-ciega-a-holgura-cero`: `GRUPO_SOBRECARGADO` salta
+  cuando la demanda supera los tramos. En la práctica se usó la regla hermana, más barata: una actividad
+  `DISTRIBUIDA` con 7 repeticiones y 5 días lectivos dispara `REPETICIONES_EXCEDEN_DIAS` ella sola, sin tocar
+  la demanda de ningún grupo, porque el formulario no conoce los días lectivos y la acepta sin protestar.
+  **LAS CINCO COMPROBACIONES.** (1) Rejilla intacta antes de tocar: 1B-A / 4ºA / 2B-B en **4 / 3 / 0** marcas
+  `+N`, los números de S128. (2) Contador con 409 de borrado en Asignaturas: el error en pantalla, las 100
+  filas debajo y el rótulo **conservando su número**; y con `zzz` en el buscador, **«0 de 100»**. (3)
+  Prevalidación con hallazgos: panel **en rojo** y no en ámbar, «2 errores» y «0 otros hallazgos» con sus
+  rótulos, y `ERROR` como primera columna de cada fila. (4) **El panel NO cuesta altura**: 1B-A sigue en 4
+  marcas con el detalle desplegado Y plegado, tres estados medidos sobre la misma ventana. (5) La sospecha del
+  `:host { display: block }` **no se reproduce** y se archiva.
+  **UN HALLAZGO QUE EL M4 NO BUSCABA:** `GRUPO_SOBRECARGADO` reportó `1B-A 37 / 30`, luego la actividad nueva
+  sumó 7 tramos sobre un grupo que estaba EXACTAMENTE en 30. Es evidencia directa y fotografiada de lo que
+  `D-prevalidacion-ciega-a-holgura-cero` afirmaba por conteo. Integridad: `educhronos-demo-m4.db` en
+  `ea1a70a0337831dddccdbcd322f48e9b` antes y después; el M4 corrió sobre `educhronos-s129-m4.db`, desechable.
+  R-TERMINADO, aplicado cinco veces. No se funden las nueve reglas `__input` idénticas —la fusión de S128
+  estaba dentro de una de las seis decisiones y «tratamiento de controles de formulario» no es ninguna—. No se
+  maquetan los cuatro ganchos sin regla de `panel-prevalidacion` ni su botón sin clase. No se estrena
+  `--fuente-datos` en `.cuenta` pese a ser el candidato natural: dar uso a un token muerto en UN sitio es peor
+  que dejarlo sin uso, y esa decisión es del tramo 3. No se unifican las cuatro convenciones de nombre de
+  clases de estado: la decisión 5 decide el TRATAMIENTO, no la nomenclatura. Y no se abre caso para el
+  `!cargando()`, que la sesión no cambia.
+  ERRORES DEL ARQUITECTO, SIETE, Y TODOS DE LA MISMA FAMILIA: patrones y rangos escritos **de memoria** teniendo
+  el fichero que los define a tres secciones de distancia. (1) En el censo, `grep -rn -- '--e[1-6]' --include=…`:
+  el `--` convirtió el patrón en operando, `grep` devolvió 2, `pipefail` lo propagó y el `||` imprimió «cero
+  usos fuera de styles.css» **justo debajo de los quince usos que acababa de listar**. Es la variante peor de la
+  familia: no enmascara un fallo, PUBLICA UNA CONCLUSIÓN FALSA. (2) En el mismo censo, un `echo` que afirmaba
+  «NADIE estila select» antes de medirlo, y era falso. (3) Buscar `--(peso|linea)` cuando los tokens se llaman
+  `--lh-*`: la sección informó los pesos y **calló el interlineado sin decir que no lo había buscado**. (4) Un
+  patrón `(signal|computed)[^;]*(cargando|error…)` con el orden invertido respecto a como se escribe
+  TypeScript, que devolvió siete «cero coincidencias» falsos. (5) Buscar `title=` literal, perdiendo `[title]`
+  y `[attr.aria-label]`, que es justo donde vivía el molde que se buscaba. (6) Los rangos de línea de
+  `PrevalidacionService` dados a ojo y cruzados: lo rotulado «regla (c)» era la (d) y viceversa. (7) Una regex
+  para sustituir el comentario del contador que casaba también el comentario de la tabla y **borró cinco líneas
+  de más en las siete plantillas**; lo cazó Claude Code en el diff, no la suite, porque ese borrado no ponía
+  rojo nada. Se añade además el error de haber metido un dato ajeno sin verificar dentro de un mensaje de
+  aborto («el censo decía once», cuando eran nueve). Corolario operativo nuevo: **un guion de lectura no busca
+  por nombres recordados; los deriva de lo que él mismo acaba de volcar, o el volcado va primero y el patrón se
+  escribe después.**
+  **UNA REINCIDENCIA QUE MERECE NOMBRE PROPIO:** el `grep` sin coincidencias bajo `pipefail` matando el proceso
+  volvió a ocurrir en el guion de la campaña de mutación, dos guiones después de que el asistente lo
+  diagnosticara en el censo. La lección escrita no basta si el siguiente guion se escribe sin releerla.
+  DEUDA. **TRES CERRADAS**: `D-contador-se-apaga-con-error` (S128 → S129) en su sede escrita y con un arreglo
+  más barato que el que su ficha proponía; `D-prevalidacion-contraste-sin-ver` (S121 → S129) por construcción,
+  con la corrección de que su verificación pendiente era imposible y no difícil; y
+  `D-desbordamiento-sin-etiqueta`, que **nace y muere en la misma sesión**, ampliada de una marca a las dos.
+  **UNA NUEVA**: `D-tokens-sin-uso`, sede C-revisión tramo 3. `D-select-nativo-desparejo` se AMPLÍA y se
+  CORRIGE: su texto era falso. Deuda bloqueante abierta: sigue en 1 (D31-a, las aulas de FPB).
+  SIN CONDICIÓN DE SALIDA. Los siete commits son coherentes uno a uno y con los asuntos todos distintos,
+  verificado en el cierre. Dos incidentes de historia, los dos
+  corregidos antes de publicar: un commit del spec que **no compilaba** —un `});` adelantado que sacaba dos
+  casos del `describe`, culpa de un ancla ambigua del asistente— se enmendó tras verificar los 416, porque un
+  intermedio roto rompe `git bisect`; y tres asuntos casi idénticos consecutivos se fundieron en uno. Es la
+  misma disciplina que S128 aplicó con `--soft`.
+  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar; la suite se lanza entera con
+  `npx ng test --watch=false`. `mvn clean test` sin `clean` sigue dando 283 en vez de 282. **La orden de
+  arranque contra otra base, LITERAL y probada en esta sesión** (paga el corolario de `D-arranque-no-literal`
+  sin abrir su sesión): `mvn -pl solver install -DskipTests` primero —o se compila contra el jar de `~/.m2`— y
+  después `mvn -pl app spring-boot:run "-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:/home/luis/desarrollo/educhronos/app/educhronos-s129-m4.db"`,
+  con UN solo argumento. Los comentarios de CSS global se minifican fuera del artefacto: `styles.css` conservó
+  su hash tras +189 líneas de comentario, lo que **también significa que un hash idéntico no prueba que el
+  fichero haya cambiado** —el asistente leyó esa igualdad como evidencia de minificación cuando la explicación
+  simple era que el fichero aún no estaba escrito—. El esquema real llama `grupo_administrativo` a la tabla de
+  grupos y `sesion` enlaza por `plaza_id`, no por `actividad_id`.
+  **CORRECCIÓN AL BUNDLE REGISTRADO, y es de la familia de `D-748-sin-derivacion`.** `plan:705` anotaba 542,03
+  kB crudos; medido sobre HEAD limpio en `94b97df` son **539,86 kB / 121,68 transferidos**, con margen de 10,14
+  kB hasta el aviso de 550. La hipótesis de que aquella cifra se tomó en un punto intermedio del bloque de S128
+  es razonable y **no está probada**, y no se reconstruye. Tras la tokenización de pesos: **540,18 kB / 121,77**
+  (+0,32 kB crudos, exactamente los 23 nombres de token más largos que los literales), margen 9,82 kB. Se hace
+  constar el hueco: **las piezas 3, 4 y 5 no se volvieron a medir**; añaden comentarios y atributos, así que el
+  delta esperado es pequeño, pero no está medido. Lección tomada: un número de bundle se anota con el commit
+  sobre el que se midió.
+  LIMPIEZA (M1-bis): archivada S127 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S128 a «Última sesión registrada (previa):»; S129
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S126 a S127.
+  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
+  PARTIDO EN TRES TRAMOS, con el TRAMO 1 HECHO**. Criterios 1, 2 y 4 CUMPLIDOS; el 3 es el tramo 2. O-demo (H2)
+  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
+  C-revisión**, el espaciado y los radios sobre decisiones ya escritas. Lo fija su propio M0 (ver M1-ter).
+
+Última sesión registrada (previa): Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
   Vigesimoctava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
   donde hubo lógica real (la precedencia de ramas del bloque 2; el bloque 1 no tocó ni un `.ts`). Suites:
   línea base heredada de S127 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 403); al
@@ -824,143 +1037,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   Siguiente: **C-revisión**, la pasada por las tres vistas y los tres diálogos con el arquitecto como juez.
   Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 127 — O-navegación (transversal): C-rejilla-densidad, TRAMO 2 (D11) HECHO, criterio 4 CUMPLIDO y **OBJETIVO TERMINADO**. Las 72 celdas que el tramo 1 recortaba en silencio dejan de ser mudas: marca `+N` en la banda del rótulo con el detalle en el `title`, y la regla es una FRACCIÓN —una plaza cuenta como oculta si se ve menos de la mitad—, así que se marcan 50 y las 22 que sólo se pasan 1,23 px no mienten (M0 + M2 + M3 con mutación + M4 en navegador + M1). Tres commits. Cierra el objetivo y descarga la condición de salida de S126.
-  Vigesimoséptima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Desarrollo, con M3 y M4 completos. Suites:
-  línea base heredada de S126 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 381, e2e 2);
-  al cerrar, **app 282, solver 91, vitest 403, e2e 2**. vitest sube +22 y **ni uno de los 381 heredados se
-  modifica**: el tramo 2 sólo añade.
-  M0 — EL MAPA. Cambio: C-rejilla-densidad, tramo 2. Objetivo: O-navegación, criterio 4 en su mitad
-  pendiente, y de paso el criterio 6. Hito: ninguno funcional, que es la respuesta escrita en la ficha.
-  R-invalidación limpio y en la dirección buena: C-identidad y C-revisión van DESPUÉS, así que el riesgo era
-  adelantar su trabajo puliendo el aspecto de la marca, no que ellos rehagan éste.
-  **LA COSTURA QUE EL M0 DESTAPÓ: D11 exigía el mecanismo y NO DECÍA CUÁL ERA.** Leídos §4 entero y §5 de
-  `diseno-navegacion.md`: D11 decide que el mecanismo es obligatorio y descarta «recortar sin expansión», pero
-  no elige entre expansión en sitio, popover, fila que crece o gesto alguno; y §5 no lo listaba como
-  pendiente. La frase de la ficha «ya sin parámetros abiertos tras cerrarse D0-2» habla de la GEOMETRÍA, no
-  del mecanismo. La única decisión de bulto del tramo 2 no tenía sede escrita; se cierra escribiéndola.
-  **SEGUNDA COSTURA: D11 está redactado contra 22 celdas y la realidad son 72.** Su nota de proporción dice
-  explícitamente que la proporción «cambia qué clase de mecanismo hace falta», y la corrección 1 de S126 la
-  había movido al 9,1 % sin volver sobre el texto de D11. Quien lo lea sin la corrección diseña para el caso
-  equivocado.
-  LA DECISIÓN — MARCA `+N` CON EL DETALLE EN EL `title`, y no se estrena patrón. Medido en el repo antes de
-  diseñar nada: cero `<details>`, cero popover propio, cero tooltip propio; lo único que existe es `title`
-  nativo, y D4 y D6 ya lo usan **para exactamente esto** —condensar y dar forma de recuperar—. Descartada la
-  expansión en sitio porque en una tabla crecer una celda estira su fila y devuelve el scroll que el tramo 1
-  acaba de quitar; descartado el overlay del CDK por estrenar patrón para el caso que el propio diseño llama
-  excepcional; descartado `MatDialog` por modal.
-  **LA MARCA VA DENTRO DE LA BANDA DEL RÓTULO, Y NO ES ESTÉTICA: ES LO QUE IMPIDE EL BUCLE.** `.instancia.bloque`
-  reserva `padding-top: 16px` y `.rotulo` es `position: absolute` dentro, así que la marca no ocupa un píxel de
-  alto. Importa porque la medición que la produce depende del alto disponible: una marca que ocupara alto
-  oscilaría —aparece, empuja, la última plaza deja de estar oculta, desaparece, vuelve a estarlo— y **la guarda
-  `altoPublicado` NO la detendría**, porque sólo impide reescribir el MISMO valor y esto son valores distintos
-  alternándose. La marca lleva `title` propio: el de `.rotulo` es el único sitio donde se lee el código completo
-  de la actividad y ocuparlo habría retirado una señal existente.
-  **LA REGLA ES UNA FRACCIÓN, NO UN UMBRAL EN PÍXELES, Y ESO ES LO QUE DECIDE 50 EN VEZ DE 72.** Con la fila en
-  109,57 px el déficit no es homogéneo: la de cuatro plazas pide 110,8 y se pasa **1,23 px** (se ve el 94 % de su
-  última línea); la de cinco esconde una línea entera y la de seis, dos. Marcar las 72 habría puesto una señal
-  que miente en 22 celdas, al lado de la marca `+N` verdadera de D6: familia de `D-vacio-miente-con-error`. La
-  fracción y no la constante, por la misma razón por la que D1 deriva la altura en vez de escribirla. Que el 50
-  coincida con la predicción de S125 es casualidad aritmética: aquel 50 salía de otro reparto.
-  **EL DISPARADOR: `afterRenderEffect` con fase `read`, y NO el `ResizeObserver` que ya existía.** Ese observador
-  sólo despierta con cambios de TAMAÑO, y con `table-layout: fixed` y seis filas cambiar de grupo repinta la
-  rejilla sin mover un píxel: las marcas del grupo anterior habrían sobrevivido al cambio. Estrena patrón —no
-  había ningún `afterRenderEffect` ni `effect()` en producción— y se asume, porque reutilizar el observador
-  habría sido reutilizar el disparador equivocado. Verificado ANTES de escribirlo, con una sonda desechable, que
-  la fase corre en jsdom y se re-dispara al cambiar una señal leída dentro (1 → 2). Efecto lateral que obligó a
-  una línea más: `repartirAltura` publica `--alto-celda` con `setProperty` desde FUERA del ciclo de render, así
-  que sin un espejo en señal del tope el primer pintado mide la celda antes de que tenga tope y no marca nada.
-  El espejo es disparador, no fuente de verdad.
-  **LA PARTICIÓN DE S125 SALE VALIDADA.** La dependencia era real y se notó en cada medida: el umbral de la
-  marca se decidió contra la geometría que el tramo 1 había dejado, no contra la prevista.
-  M3 — TRES CAPAS Y CADA UNA CON SU RED. `horario/oculto.ts`, hermano de `reparto.ts`, `recreo.ts` y `titulo.ts`:
-  `plazasOcultas` (la regla) y `ocultasEnCelda` (el adaptador DOM→regla). Diez casos para la primera y ocho para
-  el segundo, más cuatro en el spec del componente. **El barrido destapó tres tests que no discriminaban nada y
-  se corrigieron los tres antes de commitear**: (5) y (6) construían su entrada como `20 * FRACCION_VISIBLE_MINIMA`,
-  o sea derivada de la constante que pretendían proteger —con el umbral a 1 seguían pasando—, y pasan a literales;
-  el `Math.max(0, visible)` era INERTE (el umbral es positivo, una fracción negativa y una de 0 dan el mismo
-  veredicto) y **se borró en vez de blindarlo**, mismo criterio que S124 aplicó a `normaliza()`; y el nombre de
-  (10) prometía comprobar el negativo y afirmaba otra cosa.
-  **UNA GUARDA QUE SOBREVIVE A TODA MUTACIÓN Y SE CONSERVA A PROPÓSITO**, con eso escrito en el código: `alto <= 0`
-  no la discrimina ninguna entrada, porque sin ella una línea de alto 0 daría `0/0 = NaN` y `NaN < 0.5` es `false`.
-  No es redundancia: es que la corrección dependería de cómo compara `NaN`. Se documenta como intención y **no se
-  le escribe un test que aparente sujetarla**, que habría sido cobertura fingida.
-  EL CASO QUE HACE EL TRABAJO, y es de la lección de S126: el aserto (15) del adaptador, que sitúa la celda a 3000
-  px de la página. Las tres mutaciones de relativización son INDISTINGUIBLES del código bueno con la celda en el
-  origen; sin ese caso, siete de los ocho tests darían idéntico. Y (18) —el conteo no depende del orden— no es
-  tautológico: detiene la optimización razonable de «las plazas vienen en orden, corto en la primera que se sale».
-  M4 — LO QUE SE MIDIÓ EN EL FIREFOX DEL ARQUITECTO, no en el de Playwright. Viewport 1920×887, dpr 1, hueco **716**,
-  `--alto-celda` 101. Marcas contra el cálculo del volcado y CUADRAN: 1B-A 4, 4ºA 3 —dos `+2` de seis plazas y un
-  `+1` de cinco—, 2B-B 0 sobre seis celdas de cuatro plazas. **4ºA es el caso que decide**, porque sus tres marcadas
-  y sus tres sin marcar conviven en la misma pantalla. Marcas correctas al cambiar de grupo y volver. **Consola sin
-  un solo aviso de `ResizeObserver loop`**, que es la forma exacta en que se habría manifestado la realimentación que
-  el diseño descarta por construcción.
-  **CONFIRMACIÓN COLATERAL QUE VALE POR SÍ SOLA:** con el aviso «1 pines sin aplicar» en pantalla la celda de seis
-  pasa a `+3` y **el scroll no reaparece**. Son los 62 px que S126 midió, absorbidos en caliente: la prueba de que el
-  reparto en runtime de D1 compró algo real, porque con la fórmula de constantes que S126 retiró dos veces aquí habría
-  vuelto la barra.
-  **DOS PENDIENTES DE S126 CERRADOS DE PASO.** (1) El hueco de 716 px queda confirmado en el navegador del arquitecto;
-  los 32 px contra los 748 calculados siguen SIN EXPLICAR, pero ya no son sospechosos de ser artefacto del entorno de
-  prueba. (2) **El arrastre sobre celda VACÍA funciona**, verificado en 1FPB. No se había probado porque no había dónde:
-  medido ahora, las 49 celdas libres de las 840 posibles están TODAS en 1FPB (24) y 2FPB (25), y ninguno de esos dos
-  grupos tiene una sola celda de cinco o seis plazas, así que **no existe un grupo donde verificar marcas y hueco vacío
-  de una sola pasada**.
-  DATO DE ESTRUCTURA, medido y no supuesto: **las 791 celdas del centro tienen exactamente UNA instancia cada una**. Es
-  propiedad de estos datos y no del modelo —`agruparPorActividad` devuelve una lista y `slotsOcupados` cuenta instancias
-  precisamente porque puede haber varias—, así que la implementación mide por instancia contra su celda, que funciona
-  igual si algún día hay dos apiladas. Queda escrito en el código como limitación declarada, no descubierta después.
-  R-TERMINADO, aplicado dos veces. No se arregla el `ResizeObserver` de jsdom pese a ser una línea en el setup de tests
-  y desbloquear cobertura real: no bloquea el criterio y tocar el setup global dentro de un Cambio sin cerrar añade
-  riesgo a cambio de nada que el objetivo pida. Y no se persigue el aspecto de la marca: existe y se ve, y que se vea
-  bonita es C-identidad.
-  MÉTODO — EL COMMIT ESPERA AL JUEZ. El javadoc del cableado afirmaba «Verificado en navegador (M4)» antes de que M4
-  existiera, y **el commit se retuvo hasta que la afirmación fue cierta**, en vez de escribir «se espera» para
-  reescribirlo después. Cuando la suite no puede probar algo y el único juez es el navegador, el commit va detrás del
-  navegador. El texto final no promete: enumera viewport, hueco, `--alto-celda`, los tres recuentos y la ausencia del
-  aviso de bucle.
-  MÉTODO — EL LÍMITE DE LOS TESTS, DICHO EN UN ASERTO Y NO EN UN COMENTARIO. Que en jsdom `getBoundingClientRect`
-  devuelva ceros explicaba por qué no se podía probar la MEDICIÓN, y se había extendido indebidamente a que tampoco se
-  podía probar el BINDING. Dos mutaciones lo desmintieron: borrar `[attr.data-clave]` entero o la marca completa dejaba
-  la suite en 399 verdes. El caso (27) afirma ahora esa invariante —sin stub no hay marca— en vez de dejarla en prosa.
-  ERRORES DEL ARQUITECTO, la familia de siempre. **Afirmé que la medición «cuelga de la pasada que ya existe» y era
-  falso**: `repartirAltura` sólo corre desde el `ResizeObserver`, que no ve cambios de contenido; hizo falta un
-  disparador nuevo. **Afirmé que la superficie del tramo 2 no rompía la invariante de no-bucle del javadoc de
-  `repartirAltura`, y sí la rompe**: la marca se mide sobre la tabla y se pinta dentro de la tabla, que es observada;
-  lo que corta no es la invariante vieja sino que la marca no ocupe alto. Registré la deuda del pin como «avisa sin
-  persistir» **cuando la propia medición del arquitecto la había desmentido** —sobrevive al F5—; corregido antes de
-  escribirla. Y le puse a la deuda sede O-demo cuando el ajuste manual tiene objetivo propio, O-ajuste-cierre.
-  **Y UNA SÉPTIMA INSTANCIA DE LA FAMILIA DE ANCLAS DE S124, cometida por el asistente al escribir el propio M1:** un
-  ancla de sustitución copiada con CUATRO espacios de sangría donde el fichero tiene cinco. La guarda de unicidad la
-  cazó y el guion murió sin escribir. Precisión que se suma a la regla: **la sangría copiada a ojo no es la sangría del
-  fichero; si el ancla la incluye, hay que anclar sin ella.**
-  ERRORES DEL EJECUTOR, todos autodetectados y reportados. Un `TS18046` por `inject(ElementRef<HTMLElement>)`, que tipa
-  el TOKEN y no el genérico: devuelve `ElementRef<any>` y sobre `any` la inferencia de `Array.from` cae a `unknown`.
-  Resuelto anclando el tipo UNA vez. Es exactamente la forma que este proyecto persigue: algo que se parece a un tipo y
-  no lo es. Y un heurístico que se auto-bloqueó —buscaba una constante «después de `describe`» y la encontró en el
-  comentario que el propio guion acababa de insertar—, **sexta instancia**: un ancla que se cumple sobre texto que el
-  guion mismo introdujo.
-  DEUDA. **DOS NUEVAS**: `D-resize-observer-jsdom` (técnica real, transversal, → sesión de Higiene/Método) y
-  `D-pin-ocupada-no-persiste` (técnica real, → O-ajuste-cierre), esta última registrada SIN diagnóstico porque no lo hay:
-  se escriben los dos hechos y se dice que elegir entre las dos explicaciones plausibles sería inventar.
-  `D-guion-exit-enmascarado` y `D-vacio-miente-con-error` siguen vivas y sin pagarse. Deuda bloqueante abierta: sigue en
-  1 (D31-a, las aulas de FPB).
-  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar (`describe is not defined`): la suite corre
-  bajo el builder `@angular/build:unit-test` y hay que lanzar `npx ng test --watch=false` entera y filtrar por grep.
-  **Corolario nuevo y con precio: un barrido de mutación hecho con `npx vitest run` no mide nada** —hay que comprobar que
-  la base pasa antes de creerse un mutante caído—. `mvn test` sin `clean` deja informes huérfanos de surefire; con `clean`
-  el conteo de `app` da 282 y no 283. `@angular/core` instalado 21.2.17, CDK 21.2.14: `afterRenderEffect` es `@publicApi`,
-  no developer preview, y sus tipos viven en `node_modules/@angular/core/types/core.d.ts`, no en un `index.d.ts`.
-  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` antes y después, incluido el M4, que corrió
-  contra una copia porque el arrastre escribe un bloqueo. Copia borrada sin residuos `-wal`, `-shm` ni `-journal`.
-  LIMPIEZA (M1-bis): archivada S125 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al final en orden
-  ascendente, cuerpo íntegro); degradada S126 a «Última sesión registrada (previa):»; S127 queda como única cabecera H3
-  viva. Los dos censos de la bitácora pasan de S124 a S125.
-  **O-navegación (transversal, abierto en S122) TERMINADO**: C-rutas-hijas (S123), C-listas-filtradas (S124) y
-  C-rejilla-densidad en sus dos tramos (S126 y S127). Sus seis criterios cumplidos, con la salvedad escrita en el criterio
-  1: nunca abrió Cambio y su verificación real cae en C-identidad, que reestila esa barra. O-diseño (transversal, abierto
-  en S121): C-tokens y C-sustitución HECHOS, **C-identidad y C-revisión PENDIENTES y ya sin nada delante**. O-demo (H2)
-  sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **C-identidad**, sobre la UI
-  definitiva que O-navegación acaba de fijar. Lo fija su propio M0.
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -983,8 +1059,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128.
-El plan conserva ahora S127 (degradada a formato compacto) y S128 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129.
+El plan conserva ahora S128 (degradada a formato compacto) y S129 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2826,7 +2902,29 @@ con remisión a la bitácora.
   el componente se contaba a sí mismo, así que el «1» que devolvió significaba CERO listas cableadas. Las dos
   son la misma forma que las tres anteriores —un instrumento que mide otra cosa distinta de la que se cree—
   con un corolario operativo nuevo que se escribe aquí: **fallback silencioso en un guion de lectura, nunca**;
-  si un `sed` no encuentra su fichero, tiene que petar. No se paga ahora.
+  si un `sed` no encuentra su fichero, tiene que petar. **SIETE INSTANCIAS MÁS en S129 —de la (6) a la (12)—, todas del
+  arquitecto y todas con la MISMA causa raíz, que aquí se nombra por primera vez: patrones y rangos escritos DE
+  MEMORIA teniendo a tres secciones de distancia el fichero que los define.** (6) `grep -rn -- '--e[1-6]'
+  --include='*.css'`: el `--` desactiva el parseo de opciones, así que `--include` pasó a ser operando, `grep`
+  devolvió 2, `pipefail` lo propagó y el `||` imprimió «(cero usos fuera de styles.css)» **justo debajo de los
+  quince usos que acababa de listar**. Es la variante PEOR de la familia: no enmascara un fallo, publica una
+  conclusión falsa, y quien lea la última línea se lleva lo contrario de la verdad. (7) Un `echo` de conclusión
+  —«NADIE estila select: confirma la deuda»— escrito ANTES de medir, y falso: 12 de los 14 `<select>` llevan la
+  misma clase que los inputs. (8) Buscar `--(peso|linea)` cuando los tokens de interlineado se llaman
+  `--lh-apretado` y `--lh-normal`: la sección informó los tres pesos y **calló el interlineado entero sin decir
+  que no lo había buscado**. (9) `(signal|computed)[^;]*(cargando|error…)` con el orden invertido respecto a
+  como se escribe TypeScript (`readonly cargando = signal(false)`), que produjo siete «cero coincidencias»
+  falsos. (10) Buscar `title=` literal, perdiendo `[title]` y `[attr.aria-label]`, que es exactamente donde
+  vivía el molde que el guion buscaba. (11) Una regex para sustituir el comentario del contador que buscaba un
+  bloque conteniendo `!error()` —cadena que el comentario de la TABLA también contiene—: **borró cinco líneas de
+  más en las siete plantillas**, y lo cazó Claude Code leyendo el diff, no la suite, porque ese borrado no ponía
+  rojo nada. (12) **REINCIDENCIA:** el `grep` sin coincidencias bajo `pipefail` matando el proceso volvió a
+  ocurrir en el guion de la campaña de mutación, DOS guiones después de que el asistente diagnosticara esa misma
+  causa en (6). Se añade además un caso menor de la familia de `D-arranque-no-literal`: un dato ajeno metido sin
+  verificar dentro de un mensaje de aborto («el censo decía once», cuando eran nueve). **SEGUNDO COROLARIO
+  OPERATIVO, que se escribe aquí:** un guion de lectura no busca por nombres recordados; los deriva de lo que él
+  mismo acaba de volcar, o el volcado va primero y el patrón se escribe después. Y la lección de (12): una
+  lección escrita no basta si el siguiente guion se escribe sin releerla. No se paga ahora.
 
 - **D-vista-horario-sin-horario** (S120, VIVA, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
   VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
@@ -2882,7 +2980,14 @@ con remisión a la bitácora.
   asistente pidió los `git add` del cierre dando por hecho un árbol sin commitear que había RECONSTRUIDO de
   un turno anterior en vez de leerlo, y produjo dos commits cuyos mensajes no describían su contenido —uno
   duplicaba palabra por palabra el asunto de otro anterior—. Lo detectó Claude Code, nada se perdió y se
-  corrigió con `reword` antes de pushear. Misma lección: **el estado se lee, no se reconstruye.**
+  corrigió con `reword` antes de pushear. Misma lección: **el estado se lee, no se reconstruye.** **CUARTO
+  HECHO en S129, y el primero que PAGA el corolario aunque no cierre la deuda:** el grep confirmó los dos hechos
+  de S120 —no existe ningún `.sh` ni bloque ejecutable con la orden, y la única cita del plan (`plan:2878`) sigue
+  llevando un `<ruta …>` en el hueco—, así que la reconstrucción volvió a hacerse por quinta sesión consecutiva.
+  Esta vez la orden se PROBÓ y se ESCRIBIÓ literal en la entrada de S129, con su prerrequisito
+  (`mvn -pl solver install -DskipTests`, o se compila contra el jar de `~/.m2`). Escribir el literal no cierra la
+  deuda —su arreglo es un `.sh` versionado, y crear superficie nueva estaba fuera del alcance del tramo—, pero
+  deja de obligar a la sexta reconstrucción. No se paga ahora.
 
 - **D-sin-puntos-de-ruptura** (S121, VIVA, MEJORA FUTURA de UX, no bloqueante) — NO HAY UN SOLO `@media` EN
   TODO EL FRONTEND. Medido en el M2 de S121 al inventariar la superficie visual: cero media queries en `src`,
@@ -2899,18 +3004,18 @@ con remisión a la bitácora.
   estilo de agente de usuario, porque hoy nadie los estila. **NO es regresión de C-sustitución**: era así
   antes, solo que con bordes `#666` la diferencia se notaba menos. Cae DENTRO del criterio de O-diseño
   (cláusula 3, coherencia entre vistas) y por tanto no es mejora futura sino trabajo pendiente del objetivo
-  activo. → O-diseño, C-revisión.
-
-- **D-prevalidacion-contraste-sin-ver** (S121, VIVA, RIESGO NO CERRADO, no bloqueante) — AVISO Y ERROR DEL
-  PANEL DE PREVALIDACIÓN SE DISTINGUEN SOLO POR COLOR DE TEXTO, Y NO SE HAN VISTO JUNTOS. C-sustitución
-  colapsó cuatro ámbares (`#c80`, `#a60`, `#b8860b`, `#8a6100`) en `--color-aviso` (#8A5A00) y tres rojos
-  (`#b00`, `#b00020`, `#c33`) en `--color-error` (#A32014). En `panel-prevalidacion` los mensajes de
-  severidad se distinguen únicamente por `color:`, sin fondo que los separe, y ambos tokens son tonos
-  oscuros y saturados. Para verlos juntos hay que provocar un hallazgo, y **ni la documentación del proyecto
-  ni el asistente saben qué lo dispara**: se registró como NO SABIDO en vez de mandar al arquitecto a probar
-  a ciegas, y el M4 de S121 se cerró con este punto declarado pendiente. Se verifica en C-revisión leyendo
-  antes el componente. Si se confunden, el arreglo es un cambio de valor en `:root` y se propaga solo, que
-  es exactamente lo que C-tokens compró. → O-diseño, C-revisión.
+  activo. **CORREGIDA Y AMPLIADA en S129, y su texto de S121 era FALSO.** Censado: **12 de los 14
+  `<select>` llevan `class="*-form__input"`, la misma que los `<input>` de texto de su formulario**, así que
+  «nadie los estila» no describe el código. Lo que sí es cierto y no se había visto: (a) los dos `<select>` de
+  `horario-view.html:13` y `:22` —Vista y entidad— no llevan clase ninguna y son nativos crudos; (b) el `<button>`
+  de «Mostrar detalle» de `panel-prevalidacion` tampoco, y es el único control de ese panel; y (c) el desparejo
+  GRANDE es otro: las diez reglas `__input` son NUEVE VECES byte a byte idénticas y las diez llevan
+  `border-radius: 4px` LITERAL, que no es `--radio-s` (3px) ni `--radio-m` (6px), de modo que
+  `.cabecera-lista__busqueda` —la única que usa el token— es hoy el ÚNICO control de la aplicación con las
+  esquinas distintas a los demás. Queda PENDIENTE de medir si un `<select>` con la clase de un `<input>` sigue
+  pintando su flecha y su fondo nativos —nadie estila el elemento `select` en ninguna hoja—, cosa que decidiría si
+  la deuda alcanza a los 14 o sólo a los 2; se registra como NO SABIDO en vez de suponerlo. Radio elegido por el
+  arquitecto: `--radio-m`, porque el infractor es el literal y no el token. → O-diseño, C-revisión, TRAMO 2.
 
 - **D-nombre-horario-instante** (S126, VIVA, MEJORA FUTURA, no bloqueante) — EL HORARIO SE LLAMA
   COMO UN `Instant`. `HorarioService.generar()` hace `POST /api/horarios` con cuerpo vacío, así que el
@@ -2976,16 +3081,19 @@ con remisión a la bitácora.
   hay forma de que el cliente sepa cuál es el horario vigente. Cualquier arreglo empieza por ese endpoint. Se
   paga en O-demo, que es donde se bautizan y se listan horarios de verdad. No se paga ahora.
 
-- **D-contador-se-apaga-con-error** (S128, VIVA, TÉCNICA REAL de UX, no bloqueante) — EL CONTADOR DE LA
-  CABECERA DESAPARECE ANTE UN ERROR DE BORRADO, CON LA TABLA LLENA DEBAJO. Visto en el M4 de S128 sobre
-  Asignaturas: con el 409 de borrado en pantalla y las 100 filas cargadas, el rótulo pierde su número. La
-  causa es `[mostrarContador]="!cargando() && !error()"`, que viene de S124 y que C-identidad NO tocó: **es la
-  misma mentira que S124 revirtió en la tabla, viva en el contador**. No la introduce el cableado de
-  `app-estado-lista` —es preexistente— y no se paga aquí porque el arreglo exige distinguir error de CARGA de
-  error de ACCIÓN, y eso cambia el contrato de `app-cabecera-lista` (dos señales en vez de una), que está
-  fuera del alcance declarado de C-identidad. Su sede es **C-revisión**, que repasa esta UI y donde un dato
-  que se esconde sin motivo es exactamente lo que toca mirar. Hermana de `D-vacio-miente-con-error`, cerrada
-  en la misma sesión por el mismo argumento aplicado a otro elemento. No se paga ahora.
+- **D-tokens-sin-uso** (S129, VIVA, DE ACABADO, no bloqueante) — CUATRO TOKENS DE `styles.css` NO LOS USA
+  NADIE. Censados uno a uno en el M2 de S129 recorriendo los 46 tokens de `:root`: `--radio-s` (3px),
+  `--fuente-datos` (la familia monoespaciada declarada «para datos», que ninguna tabla ni celda de horario
+  consume), `--color-ok-fondo` y `--color-info-fondo`. **NO se retiran en S129**, y la razón es de método:
+  borrar es un cambio sin criterio detrás, y dos de ellos completan parejas de la tabla de la decisión 1
+  —`ok` tiene la tinta viva y el fondo muerto, `info` sólo tiene fondo—. Se marcan en el fichero como «sin uso
+  hoy», que es estado vivo correcto (R5): un token sin uso no es un defecto, pero tampoco es una regla vigente.
+  El caso más tentador y el que hay que decidir con cuidado es `--fuente-datos`: `.cuenta` de
+  `panel-prevalidacion` —que pinta `{{ demanda }} / {{ disponible }}`— es su candidato natural, y estrenarla ahí
+  EN SOLITARIO dejaría el proyecto con una familia tipográfica que aparece una sola vez en toda la aplicación,
+  que es peor que no usarla. La decisión es binaria y no se toma de paso: o se usa donde toca —todos los códigos
+  y horas— o se retira. `--radio-s` se decide junto con `D-select-nativo-desparejo`, cuyo censo lo destapó.
+  → O-diseño, C-revisión, TRAMO 3 (el juicio del arquitecto). No se paga ahora.
 
 - **D-748-sin-derivacion** (S128, VIVA, DE MÉTODO, no bloqueante) — EL NÚMERO QUE GOBERNÓ UNA PREGUNTA
   ABIERTA DURANTE TRES SESIONES NUNCA SE ESCRIBIÓ CON SU DERIVACIÓN. Los «748 px calculados» contra los 716
@@ -3004,6 +3112,46 @@ con remisión a la bitácora.
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
+
+- **D-contador-se-apaga-con-error** (S128 → CERRADA S129) — el contador de la cabecera desaparecía ante un
+  error de BORRADO con la tabla llena debajo, por `[mostrarContador]="!cargando() && !error()"`: la misma
+  mentira que S124 revirtió en la tabla, viva en el contador. CERRADA en C-revisión, su sede escrita, y con un
+  arreglo MÁS BARATO que el que su propia ficha proponía: no hacen falta «dos señales en vez de una», basta
+  cambiar el CRITERIO a `!cargando() && <entidad>().length > 0`. De las dos opciones se eligió cambiar las siete
+  plantillas y no mover la decisión dentro de `cabecera-lista`, porque lo que estaba mal era el criterio y no
+  dónde vive: la alternativa habría derogado un javadoc deliberado para arreglar otra cosa. La condición va
+  sobre la lista CARGADA y NO sobre `visibles()` —con la filtrada, una búsqueda sin resultados escondería el
+  contador en vez de decir «0 de N», que es regresión de comportamiento existente—, y esa mitad la destapó la
+  campaña de mutación: el mutante `visibles()` SOBREVIVIÓ y se cerró con un aserto en el caso (8). Verificada en
+  navegador sobre las 100 asignaturas con el 409 en pantalla. **CERRADA**
+
+- **D-prevalidacion-contraste-sin-ver** (S121 → CERRADA S129) — aviso y error del panel de prevalidación se
+  distinguían SOLO por color de texto y nunca se habían visto juntos. CERRADA en C-revisión POR CONSTRUCCIÓN, y
+  con dos correcciones a su propia ficha. **(1) La verificación que pedía no era difícil: era IMPOSIBLE.** S121
+  la registró como «nadie sabe qué dispara un hallazgo»; medido en S129, `Severidad` tiene dos valores y las
+  tres reglas de `PrevalidacionService` emiten `ERROR`, así que **nadie emite `AVISO`** ni en `main` ni en los
+  tests —el enum lo documenta: se conserva por contrato y como candidato del palomar de aulas—. Los dos colores
+  no se pueden fotografiar juntos porque no coexisten. **(2) La deuda tenía DOS caras y la ficha sólo veía
+  una.** Además de las filas, los dos contadores de la cabecera eran números desnudos y consecutivos cuya única
+  distinción era la tinta; **medido con la fórmula WCAG, `--color-error` y `--color-aviso` tienen 1,28:1 ENTRE
+  SÍ**, cuando a un elemento no textual portador de información se le piden 3:1, y en el estado colapsado —el
+  habitual— eran lo único en pantalla. Arreglo: rótulo VISIBLE junto a cada número, la severidad pintada como
+  TEXTO en cada fila con el valor crudo del enum, y el marco del panel tomando la severidad máxima con
+  contrastes medidos antes de escribirlos. Como el color deja de ser el único canal, la verificación imposible
+  deja de ser condición para cerrarla: mismo mecanismo que mató a `D-vacio-miente-con-error` en S128.
+  **CERRADA**
+
+- **D-desbordamiento-sin-etiqueta** (S129 → CERRADA S129) — las dos marcas condensadas de la rejilla llevaban
+  `[title]` y ninguna etiqueta accesible. Nace y muere en la misma sesión, destapada por el censo de S129 al
+  buscar el molde de `D-insignia-sin-leyenda` para reutilizarlo: la marca `+N` de plazas ocultas —el mecanismo
+  que S127 construyó precisamente para que esas plazas dejaran de ser mudas— vivía a quince líneas de la
+  insignia que S128 sí dotó del par completo, y un lector de pantalla sólo oía «más N». Ampliada por decisión
+  del arquitecto a `.grupos`, que tiene el mismo defecto en el mismo fichero: dejar la mitad arreglada obligaba
+  a volver. El `aria-label` REPITE el `title` literalmente y no mejora su redacción —las cadenas son de S127 y
+  de D6, y cambiarlas habría sido afirmar algo nuevo sobre lo que devuelven `marcaOcultas`, `detalleInstancia` y
+  `marcaGrupos`—. Cubierta por el caso (30) de `horario-grid.spec.ts`, que asevera la IGUALDAD con el `title` y
+  no un literal, con comprobación de no-nulo previa porque borrar los dos atributos dejaría `null === null` en
+  verde. Coste en altura: cero. **CERRADA**
 
 - **D-insignia-sin-leyenda** (S122 → CERRADA S128) — la insignia de coste blando se pintaba como un número
   desnudo con signo, sin `title` ni `aria-label`, a diferencia del candado que los lleva dos líneas más abajo
