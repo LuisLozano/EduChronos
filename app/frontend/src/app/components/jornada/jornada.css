@@ -42,7 +42,7 @@
 .jornada__conflicto-texto {
   margin: 0 0 0.5rem;
   color: var(--color-error);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 .jornada__error {
@@ -104,5 +104,5 @@
 }
 
 .jornada__guardar {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }

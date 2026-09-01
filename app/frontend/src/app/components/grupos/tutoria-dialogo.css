@@ -41,7 +41,7 @@
 .tutoria-dialogo__subtitulo {
   margin: 0 0 0.25rem;
   font-size: var(--tam-s);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 /* Lista de solo lectura: sin viñeta y sin sangría, para que no se lea como algo

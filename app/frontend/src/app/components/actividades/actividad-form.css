@@ -70,7 +70,7 @@
   border-radius: 4px;
   background: var(--color-error-fondo);
   color: var(--color-error);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 .actividad-form__acciones {
   display: flex;
@@ -108,7 +108,7 @@
 }
 
 .actividad-form__plaza-titulo {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 .actividad-form__error-i2 {

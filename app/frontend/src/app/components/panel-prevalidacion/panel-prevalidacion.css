@@ -1,7 +1,7 @@
 /* Fallo de la carga: rojo fuerte, misma señal que `.error` de horario-view. */
 .prevalidacion-error {
   color: var(--color-error);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 /* NO ejecutado todavía: gris apagado, sin peso —no es un resultado, es su ausencia. */
@@ -12,7 +12,7 @@
 /* Ejecutado y sano: verde, distinguible por DOM de la rama pendiente. */
 .prevalidacion-limpia {
   color: var(--color-ok);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 /* Hay hallazgos: caja de aviso, mismo lenguaje visual que `.aviso` de horario-view. */
@@ -30,12 +30,12 @@
 }
 
 .contador-errores {
-  font-weight: 700;
+  font-weight: var(--peso-fuerte);
   color: var(--color-error);
 }
 
 .contador-avisos {
-  font-weight: 700;
+  font-weight: var(--peso-fuerte);
   color: var(--color-aviso);
 }
 
@@ -50,7 +50,7 @@
 }
 
 .aviso-entrada .regla {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 /* Adicional, SOLO en las entradas ERROR: refuerza la severidad sin sustituir a

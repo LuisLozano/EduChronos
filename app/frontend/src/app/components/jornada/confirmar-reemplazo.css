@@ -25,5 +25,5 @@
 }
 
 .confirmar-reemplazo__confirmar {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }

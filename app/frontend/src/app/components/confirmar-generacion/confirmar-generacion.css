@@ -18,7 +18,7 @@
 /* Mismo rojo de aviso que el resto de errores de severidad ERROR (panel y vista). */
 .advertencia {
   color: var(--color-error);
-  font-weight: 600;
+  font-weight: var(--peso-medio);
   margin: 0 0 0.6rem;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .error-entrada .regla {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 .acciones {
@@ -44,5 +44,5 @@
 }
 
 .acciones .confirmar {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }

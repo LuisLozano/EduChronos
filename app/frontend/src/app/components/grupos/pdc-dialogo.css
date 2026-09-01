@@ -41,7 +41,7 @@
 
 .pdc-dialogo__valor {
   margin: 0 0 0.75rem;
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 .pdc-dialogo__error {

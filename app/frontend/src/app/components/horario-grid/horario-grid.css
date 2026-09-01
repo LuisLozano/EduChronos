@@ -103,7 +103,7 @@
 
 .badge {
   font-size: var(--tam-xxs);
-  font-weight: 700;
+  font-weight: var(--peso-fuerte);
   padding: 0 0.2rem;
   border-radius: 0.2rem;
   background: var(--color-marca-fondo);
@@ -189,7 +189,7 @@
 }
 
 .asig {
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 
 .prof,
@@ -230,6 +230,6 @@
    distinguirse del rótulo que lo precede. */
 .oculta {
   margin-left: 0.25rem;
-  font-weight: 700;
+  font-weight: var(--peso-fuerte);
   color: var(--color-marca);
 }
