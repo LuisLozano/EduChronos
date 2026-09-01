@@ -1,4 +1,9 @@
-/* Barra de aplicación — C-identidad (S128).
+/* DECISIÓN 4 DE IDENTIDAD — cabecera y marca (C-identidad, S128).
+   Vive aquí y no en `styles.css` —donde están las otras cinco— porque la
+   restricción de altura que la gobierna sólo tiene sentido junto al elemento
+   que la sufre. El índice de `styles.css` remite a este punto.
+
+   Barra de aplicación — C-identidad (S128).
    Fondo de acento pleno: es el único elemento presente en todas las pantallas,
    así que es donde la identidad se ve una vez y no se repite en cada vista. El
    `border-bottom` de 1 px DESAPARECE: con relleno de acento la separación la
