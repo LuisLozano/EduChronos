@@ -621,4 +621,42 @@ describe('rejilla de horario', () => {
     expect(rotulo!.querySelector('.oculta')).not.toBeNull();
     expect(rotulo!.getAttribute('title')).toBe('Bloque-1ºA');
   });
+
+  /**
+   * D-desbordamiento-sin-etiqueta (S129) · las dos marcas de la rejilla dejan de
+   * ser mudas para un lector de pantalla. Las dos llevaban `title` y nada más, a
+   * quince líneas de la insignia que S128 dotó del par completo: de la de
+   * ocultas se oía «más 2» sin decir de qué, y de la de grupos la marca
+   * condensada sin los grupos que condensa.
+   *
+   * <p>Se asevera la IGUALDAD con el `title` y no un texto literal, porque la
+   * decisión escrita es que el `aria-label` REPITA la cadena original sin
+   * mejorarla: un aserto con el texto a mano permitiría que las dos cadenas
+   * divergieran sin que nadie se enterase, que es la mitad que importa.
+   *
+   * <p>La comprobación de no-nulo va ANTES y no es defensiva: sin ella, borrar
+   * los DOS atributos deja `null === null` y el caso pasa en verde, que es el
+   * caso que este test existe para cazar.
+   *
+   * <p>Las dos marcas van en UN caso y no en dos: es el mismo defecto con el
+   * mismo arreglo, y un caso gemelo no discriminaría nada. El precio, anotado
+   * por si algún día falla: su nombre no dirá cuál de las dos se rompió.
+   */
+  it('(30) las marcas de ocultas y de grupos llevan aria-label igual a su title', async () => {
+    instalarStubDeRects();
+    fixture.componentRef.setInput('sesiones', BLOQUE_6);
+    await fixture.whenStable();
+
+    const instancia = instanciaDe(fixture, 'Mat');
+
+    const ocultas = instancia.querySelector('.oculta');
+    expect(ocultas).not.toBeNull();
+    expect(ocultas!.getAttribute('aria-label')).not.toBeNull();
+    expect(ocultas!.getAttribute('aria-label')).toBe(ocultas!.getAttribute('title'));
+
+    const grupos = instancia.querySelector('.grupos');
+    expect(grupos).not.toBeNull();
+    expect(grupos!.getAttribute('aria-label')).not.toBeNull();
+    expect(grupos!.getAttribute('aria-label')).toBe(grupos!.getAttribute('title'));
+  });
 });

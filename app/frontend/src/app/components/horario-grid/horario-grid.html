@@ -43,10 +43,20 @@
                          propio para NO robarle a D4 el suyo, que es el único sitio donde
                          se lee el código completo de la actividad. Lista entera en el
                          title, como hace D6 con los grupos. -->
+                    <!-- D-desbordamiento-sin-etiqueta (S129). La marca `+N` llevaba
+                         `title` y NADA más, a quince líneas de la insignia que S128
+                         dotó del par completo: el mecanismo que S127 construyó para
+                         que las plazas ocultas dejaran de ser mudas era mudo para un
+                         lector de pantalla, que sólo oía «más 4». El `aria-label`
+                         repite el `title` LITERALMENTE y no mejora su redacción: la
+                         cadena es de S127 y cambiarla aquí sería afirmar algo nuevo
+                         sobre lo que devuelven `marcaOcultas` y `detalleInstancia`.
+                         Coste en altura: cero, es un atributo. -->
                     <span class="rotulo" [title]="inst.actividadCodigo"
                       >{{ inst.entradas.length }} simultáneas@if (marcaOcultas(inst); as n) {<span
                         class="oculta"
                         [title]="'No caben: ' + inst.entradas.length + ' plazas — ' + detalleInstancia(inst)"
+                        [attr.aria-label]="'No caben: ' + inst.entradas.length + ' plazas — ' + detalleInstancia(inst)"
                         >+{{ n }}</span
                       >}</span
                     >
@@ -98,7 +108,16 @@
                       <span class="linea linea--sec">
                         <span class="prof">{{ e.profesores.join(', ') }}</span>
                         @if (marcaGrupos(e); as marca) {
-                          <span class="grupos" [title]="e.grupos.join(', ')">{{ marca }}</span>
+                          <!-- Mismo caso que la marca de ocultas (S129): `title` sin
+                               etiqueta accesible. Aquí se oía sólo la marca condensada
+                               —«+2»— sin los grupos que condensa. El `aria-label`
+                               repite el `title` literalmente, por la misma razón: la
+                               cadena es de D6 y no se mejora de paso. -->
+                          <span
+                            class="grupos"
+                            [title]="e.grupos.join(', ')"
+                            [attr.aria-label]="e.grupos.join(', ')"
+                            >{{ marca }}</span>
                         }
                       </span>
                     </div>
