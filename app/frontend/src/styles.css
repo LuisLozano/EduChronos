@@ -1,7 +1,16 @@
 /* Estilos globales de Educhronos.
    Este fichero es la ÚNICA fuente de verdad del color, la tipografía y el
    espaciado. El CSS de componente no define colores ni tamaños literales:
-   consume los tokens de :root con var(--x). */
+   consume los tokens de :root con var(--x).
+
+   LAS SEIS DECISIONES DE IDENTIDAD (criterio 4 de O-diseño). Cinco viven aquí;
+   la cuarta vive donde gobierna:
+     1  paleta                  este fichero, sección Color
+     2  tipografía              este fichero, sección Tipografía
+     3  densidad y espaciado    este fichero, sección Espaciado
+     4  cabecera y marca        `app/app.css:1-19` y `:29-32`
+     5  estados                 este fichero, tras :root
+     6  tablas y rejilla        este fichero, tras :root */
 
 /* El @import debe ser la PRIMERA regla del fichero (requisito de CSS): si
    alguna regla lo precede, el navegador lo descarta.
@@ -10,7 +19,59 @@
 @import '@angular/cdk/overlay-prebuilt.css';
 
 :root {
-  /* ---------------- Color: superficies y tinta ---------------- */
+  /* ---------------- Color ----------------
+     DECISIÓN 1 DE IDENTIDAD — paleta (C-revisión, S129; la elección es de S121).
+
+     AZUL INSTITUCIONAL, elegido por el jefe de estudios sobre maqueta viva con
+     piezas reales del producto, frente a oliva/cobre, terracota y azul sobre
+     papel cálido. La recomendación del asistente era oliva y cobre, por dejar
+     el rojo y el ámbar enteros para error y aviso; el azul cumple esa misma
+     propiedad, así que no hubo objeción técnica. Manda el cliente.
+
+     REGLA: UN COLOR, UN TRABAJO. Ningún color de señal se usa por gusto ni por
+     jerarquía. El motivo es que una señal repetida deja de serlo: el mismo
+     argumento con que S121 se negó a mandar la barra de `.entrada` a
+     `--color-ok` —un horario entero de barras verdes se lee como «todo
+     validado» y arruina la señal cuando algo SÍ lo esté—.
+
+       acento (+ fuerte/suave)   la aplicación: barra, marca, sección activa,
+                                 acción principal
+       sobre-acento (+ tenue)    la tinta que va ENCIMA del acento pleno; no se
+                                 usa en ningún otro sitio. Contrastes medidos
+                                 en S128: 8,7:1 y 5,8:1
+       error (+ fondo)           algo ha fallado, y la acción destructiva
+       aviso (+ fondo)           mírelo, pero puede seguir
+       ok (+ fondo)              VEREDICTO FAVORABLE. Cubre dos usos vivos y no
+                                 son dos trabajos: el resultado sano de la
+                                 prevalidación y el destino válido de un
+                                 arrastre, que S121 declaró veredicto («aquí
+                                 puedes soltar»). NO es «guardar»
+       marca (+ fondo)           la insignia de coste blando de la rejilla, y
+                                 nada más. Tiene token propio, y no acento,
+                                 porque a diez píxeles vive la barra de
+                                 `.entrada`, que sí es acento: dos señales
+                                 distintas del mismo color, no
+       info-fondo                fondo neutro de un bloque sin veredicto
+       fondo / superficie(+alt,  el papel. Nunca señal
+         tenue) / borde(+suave)
+       tinta / tinta-suave       el texto. Nunca señal
+
+     JERARQUÍA DE ACCIONES, por relleno y no por color (aplicado, se declara):
+     principal = acento pleno con tinta `sobre-acento`; secundaria = superficie
+     con borde; destructiva = superficie con borde y tinta de error; inactiva o
+     en curso = acento apagado. Un botón no cambia de COLOR para decir su
+     importancia; cambia de RELLENO. Por eso guardar no necesita verde.
+
+     Un color nuevo entra sólo si su trabajo no lo hace ninguno de los de
+     arriba. Cambiar un valor de esta lista se propaga solo: es lo que compró
+     C-tokens.
+
+     TOKENS SIN USO HOY, censados en S129 y NO retirados: `--color-ok-fondo` y
+     `--color-info-fondo`. Se conservan porque completan dos parejas de la
+     tabla de arriba; que no tengan uso no es un defecto, pero tampoco son una
+     regla vigente. */
+
+  /* Superficies y tinta */
   --color-fondo: #F6F8FB;
   --color-superficie: #FFFFFF;
   --color-superficie-alt: #E9EEF5;
@@ -20,7 +81,7 @@
   --color-tinta: #1B242E;
   --color-tinta-suave: #5A6673;
 
-  /* ---------------- Color: acento ----------------
+  /* Acento.
      `--color-sobre-acento` y su variante tenue nacen en C-identidad (S128), al
      hacerse la barra de aplicación de acento pleno: hasta entonces no había
      ninguna superficie oscura y no hacía falta declarar qué tinta va encima.
@@ -32,14 +93,14 @@
   --color-sobre-acento: #FFFFFF;
   --color-sobre-acento-tenue: #C6D4E4;
 
-  /* ---------------- Color: estados ---------------- */
+  /* Estados */
   --color-error: #A32014;
   --color-error-fondo: #FAE7E4;
   --color-aviso: #8A5A00;
   --color-aviso-fondo: #FCF2DC;
   --color-ok: #2F6446;
-  --color-ok-fondo: #E5F0EA;
-  --color-info-fondo: #EDF1F6;
+  --color-ok-fondo: #E5F0EA;      /* sin uso hoy */
+  --color-info-fondo: #EDF1F6;    /* sin uso hoy */
   --color-marca: #402A52;
   --color-marca-fondo: #ECE4F4;
 
@@ -47,8 +108,48 @@
   --sombra-suave: 0 1px 4px rgba(27, 36, 46, 0.10);
 
   /* ---------------- Tipografía ----------------
+     DECISIÓN 2 DE IDENTIDAD — tipografía (C-revisión, S129; la familia es de
+     S121).
+
      Fuente del sistema, no autohospedada: el bundle de H4 debe funcionar en un
-     Windows limpio y sin red. */
+     Windows limpio y sin red.
+
+     La escala de TAMAÑOS gobierna desde S121: cero `font-size` literal fuera de
+     este fichero (criterio 1 de O-diseño, verificable por grep). Las de PESO e
+     INTERLINEADO no gobernaban: censado en S129, 23 de 29 usos de peso
+     escribían el número a mano. Se pasan a la escala en C-revisión, con
+     equivalencia exacta —`--peso-medio` vale 600 y `--peso-fuerte` 700— y sin
+     mover un píxel.
+
+       --tam-xxs   apenas legible a propósito: datos densos de la rejilla
+       --tam-xs    texto auxiliar: leyendas, notas al pie de un campo
+       --tam-s     el tamaño de trabajo de la interfaz: tablas, controles,
+                   listas. Se lleva 26 de los 46 usos, y es MENOR que la base
+                   del documento: la interfaz es densa a propósito
+       --tam-m     base del documento (`body`) y texto corrido
+       --tam-l     título de sección dentro de una pantalla
+       --tam-xl    título de página. Uno por pantalla; hoy sólo la landing
+
+       --peso-normal   todo el texto
+       --peso-medio    lo que encabeza o rotula algo
+       --peso-fuerte   título de página, y poco más
+       El grueso no es una señal: no se usa para destacar un dato. La cabecera
+       de las tablas de catálogo NO declara peso: toma la negrita propia de
+       `th` (ver decisión 6).
+
+       --lh-normal     texto que se lee en líneas
+       --lh-apretado   texto que se lee de un vistazo: rótulos, celdas, botones
+
+     CUIDADO, Y NO ES TIPOGRÁFICO: `app.css:81` reserva la altura del selector
+     de curso con `calc(var(--tam-l) * var(--lh-normal))`. Cambiar `--tam-l` o
+     `--lh-normal` MUEVE EL ALTO DE LA BARRA, y eso sale del presupuesto del
+     criterio 4 de O-navegación. Ver la restricción escrita en `app.css`.
+
+     EXCLUSIÓN: los tres `line-height: 1` de `horario-grid.css` no se tokenizan.
+     No hay escalón de valor 1, y esa hoja está excluida por la decisión 3.
+
+     SIN USO HOY: `--fuente-datos`. Se declaró para códigos y horas y ninguna
+     tabla ni celda la consume. No gobierna nada; no se retira. */
   --fuente-base: system-ui, "Segoe UI", Roboto, sans-serif;
   --fuente-datos: ui-monospace, "Cascadia Mono", "Consolas", monospace;
 
@@ -84,7 +185,13 @@
      sustituirlos por escalones convertiría un número medido en uno elegido, y
      el reparto vive a 0,8 px de un escalón de recorte. Un literal que no caiga
      en un escalón se redondea al más cercano y el cambio se DECLARA. El resto
-     del CSS de componente se pasa a la escala en C-revisión, no aquí. */
+     del CSS de componente se pasa a la escala en C-revisión, no aquí.
+
+     RADIOS, censados en S129 y PENDIENTES: `--radio-s` no lo usa nadie,
+     `--radio-m` lo usan tres sitios, y las diez reglas `__input` repiten
+     `border-radius: 4px` literal, que no es ninguno de los dos. Consecuencia:
+     el buscador de las listas es hoy el único control con las esquinas
+     distintas a los demás. Se unifica en C-revisión, no aquí. */
   --e1: 4px;
   --e2: 8px;
   --e3: 12px;
@@ -93,12 +200,83 @@
   --e6: 32px;
 
   --borde-fino: 1px;
-  --radio-s: 3px;
+  --radio-s: 3px;    /* sin uso hoy */
   --radio-m: 6px;
 }
 
+/* ---------------- Estados ----------------
+   DECISIÓN 5 DE IDENTIDAD — error, vacío, cargando (C-revisión, S129).
+
+   El criterio ya existía escrito, pero LOCAL a `panel-prevalidacion.css`. Se
+   promueve a sistema tal cual: es el único tratamiento razonado del proyecto y
+   describe lo que las demás piezas ya hacen. No añade reglas CSS aquí: gobierna
+   el CSS de componente.
+
+     ha fallado          `--color-error`, visible, con el motivo si se conoce
+     no ejecutado aún    gris apagado, sin peso: no es un resultado, es su
+                         ausencia
+     hecho y correcto    `--color-ok`
+     hecho, con avisos   caja de `--color-aviso-fondo`
+     cargando            texto neutro, sin color de señal: todavía no hay
+                         veredicto
+     no hay nada         mensaje propio de la pieza
+
+   DOS REGLAS QUE NO SON DE COLOR, y son las que evitan que la pantalla mienta:
+
+   (1) EL VACÍO NUNCA CONVIVE CON EL ERROR. Si la carga ha fallado no sabemos si
+   está vacío, así que decir «no hay nada» es afirmar lo que no se sabe
+   (`D-vacio-miente-con-error`, S124→S128). Un contador se rige por la misma
+   pregunta: se pinta si HAY datos, no si no hay error —un 409 de borrado no
+   invalida un total ya conocido, y la tabla lo sigue enseñando debajo—.
+
+   (2) LA SEVERIDAD NO VIAJA SÓLO POR COLOR. Un error y un aviso deben
+   distinguirse por texto o por etiqueta accesible, no únicamente por la tinta.
+   Regla nueva en S129, generalizada de `D-insignia-sin-leyenda` (S128): quien no
+   distinga rojo de ámbar —o use un lector de pantalla— no debe perder el dato.
+   Molde: `title` estático de leyenda y `[attr.aria-label]` dinámico con el
+   valor, como el candado y la insignia de `horario-grid.html`.
+
+   FUERA DE ESTA DECISIÓN: los nombres de las clases. Conviven cuatro
+   convenciones (`estado-lista__*`, `cabecera-lista__*`, `prevalidacion-*` y las
+   sueltas de `horario-view`); unificarlas movería plantillas y specs sin que
+   ningún criterio lo pida (R-terminado). Esto decide el TRATAMIENTO. */
+
+/* ---------------- Tablas y rejilla ----------------
+   DECISIÓN 6 DE IDENTIDAD — tablas y rejilla (C-revisión, S129).
+
+   Dos moldes, y la diferencia es deliberada. No añade reglas CSS aquí: gobierna
+   el CSS de componente.
+
+   TABLA DE CATÁLOGO (las siete listas de Configuración y `jornada`). Se declara
+   lo que ya es cierto: censadas en S129, las OCHO hojas repiten el molde
+   carácter a carácter, y sólo `grupo-lista` añade un gris de columna. Molde:
+
+     alineación a la izquierda, también en las cabeceras
+     `--e2` de aire alrededor del texto
+     línea fina de `--color-borde-suave` BAJO cada fila
+     SIN líneas verticales, SIN rayado alterno y SIN realce al pasar el ratón
+     la cabecera se distingue por la negrita propia de `th`, y no se le añade
+       fondo ni peso declarado
+
+   El motivo de la ausencia de verticales y de rayado es de densidad: son tablas
+   de pocas columnas anchas, y la retícula completa añade ruido sin ayudar a
+   seguir la fila. Una tabla nueva copia este molde.
+
+   REJILLA DE HORARIO (`horario-grid.css`). Otra gramática, y es la excepción
+   correcta: retícula COMPLETA en vez de línea inferior, `border-collapse` con
+   `table-layout: fixed`, y cabecera centrada y con fondo de
+   `--color-superficie-alt`. Es un calendario: la posición dentro de la
+   cuadrícula ES el dato, la vista se recorre en dos ejes y las columnas deben
+   medir todas lo mismo.
+
+   Sus medidas NO son elección de densidad: son presupuesto de altura MEDIDO
+   contra el criterio 4 de O-navegación, y el reparto vive a 0,8 px de un
+   escalón de recorte. Por eso está excluida de la escala de espaciado
+   (decisión 3) y por eso no se le aplica el molde de arriba. Quien la toque
+   recuenta las marcas `+N` antes de darlo por bueno. */
+
 /* Base mínima. No se añade box-sizing global aquí a propósito: cambiaría el
-   cálculo de anchos de las 26 hojas de componente a la vez y mezclaría un
+   cálculo de anchos de las 28 hojas de componente a la vez y mezclaría un
    cambio de layout con un cambio de color. Si hace falta, entra en la revisión
    final, con verificación visual vista a vista. */
 body {
@@ -136,7 +314,7 @@ body {
    Estas tres reglas NO chocan con `app.css`, que sobre `.app__contenido` solo
    declara `padding`; se añaden aquí, y no allí, para que el marco se lea entero en
    un sitio. `box-sizing` se fija sobre este elemento en concreto, no en global: la
-   nota de arriba sobre no cambiar el cálculo de anchos de las 26 hojas sigue en pie. */
+   nota de arriba sobre no cambiar el cálculo de anchos de las 28 hojas sigue en pie. */
 body {
   height: 100dvh;
   display: flex;
