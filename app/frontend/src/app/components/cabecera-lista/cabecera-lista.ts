@@ -45,9 +45,16 @@ export class CabeceraLista {
    * dos números solo aparece cuando hay algo escrito.
    */
   readonly coincidencias = input.required<number>();
-  /**
-   * Si el contador se pinta. Lo decide la LISTA (`!cargando() && !error()`): un
-   * «0» mientras carga o tras fallar mentiría diciendo que el catálogo está vacío.
+    /**
+   * Si el contador se pinta. Lo decide la LISTA, no este componente: es quien
+   * sabe si está cargando y si tiene datos.
+   *
+   * <p>El criterio es `!cargando() && <entidad>().length > 0` (S129). Decía
+   * `!cargando() && !error()`, y eso apagaba el contador ante un 409 de borrado
+   * con la tabla llena debajo, justo cuando el total es indiscutible
+   * (`D-contador-se-apaga-con-error`). Lo que aquel criterio protegía sigue
+   * cubierto por el nuevo: si la carga falla desde vacío el array está vacío, así
+   * que tampoco se pinta el «0» que mentiría diciendo que el catálogo lo está.
    */
   readonly mostrarContador = input.required<boolean>();
   /** Texto exacto del botón de alta, con su género: «Nueva aula», «Nuevo grupo». */

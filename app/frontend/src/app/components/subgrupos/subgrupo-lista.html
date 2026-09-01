@@ -1,9 +1,14 @@
 <div class="subgrupos">
+  <!-- NO lleva `!error()` (S129, `D-contador-se-apaga-con-error`): un 409 de
+       borrado con la tabla llena hacía desaparecer el total. Y la condición va
+       sobre la lista CARGADA, no sobre `visibles()`: con `visibles()`, una
+       búsqueda sin resultados escondería el contador en vez de decir «0 de N».
+       La regla vive en la decisión 5 de `styles.css`. Idéntico en las siete. -->
   <app-cabecera-lista
     titulo="Subgrupos"
     [total]="subgrupos().length"
     [coincidencias]="visibles().length"
-    [mostrarContador]="!cargando() && !error()"
+    [mostrarContador]="!cargando() && subgrupos().length > 0"
     [(busqueda)]="busqueda"
     rotuloAlta="Nuevo subgrupo"
     (alta)="nuevo()"

@@ -161,6 +161,8 @@ describe('AsignaturaLista', () => {
    * aparece el mensaje nuevo CON el texto tecleado, que NO aparece el de
    * «no hay … todavía» —son dos mensajes distintos y confundirlos es el error
    * fácil— y que la tabla se va entera.
+   * <p>AMPLIADO EN S129: asevera además el contador, que es lo único que
+   * distingue una condición sobre la lista CARGADA de una sobre `visibles()`.*
    */
   it('(8) una búsqueda sin resultados da su propio mensaje, no el de catálogo vacío', async () => {
     flushLista([{ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
@@ -174,5 +176,76 @@ describe('AsignaturaLista', () => {
     expect(sinResultados.textContent).toContain('zzz');
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+    // El contador SOBREVIVE a una búsqueda sin resultados y dice «0 de 2»: es
+    // la mitad de la condición que ninguna otra cosa mide. Con `visibles()` en
+    // vez de la lista cargada, el contador desaparecería aquí —mutación M3 de
+    // S129, que sin este aserto sobrevive en verde— y el instrumento se
+    // apagaría en el único momento en que hace falta leerlo.
+    expect(
+      fixture.nativeElement.querySelector('.cabecera-lista__contador').textContent.trim(),
+    ).toBe('0 de 2');
+  });
+
+  /**
+   * `D-contador-se-apaga-con-error` (S129), MITAD NEGATIVA: la propiedad que el
+   * javadoc de `cabecera-lista.ts:49-51` defiende y que el arreglo NO debe
+   * romper. Si la carga falla desde vacío no sabemos cuántas filas hay, así que
+   * un «0» mentiría; con la condición sobre la lista cargada el array está
+   * vacío y el contador no se pinta.
+   *
+   * <p>Se asevera además que el ERROR sí está en pantalla: sin ese aserto,
+   * «no hay contador» podría ser «no hay nada» y el caso quedaría verde ante
+   * una plantilla rota entera. Mata la mutación de mostrar el contador siempre
+   * y la de cambiar `> 0` por `>= 0`.
+   *
+   * <p>Va en un caso propio y no junto a la mitad positiva porque las dos
+   * necesitan cargas incompatibles —una que falla y otra que no— y `ngOnInit`
+   * corre una vez por fixture.
+   */
+  it('(9) si la carga falla desde vacío, no se pinta contador', async () => {
+    fixture.detectChanges();
+    http.expectOne('/api/asignaturas').flush('', { status: 500, statusText: 'Server Error' });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.estado-lista__error')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.cabecera-lista__contador')).toBeNull();
+  });
+
+  /**
+   * `D-contador-se-apaga-con-error` (S129), MITAD POSITIVA: la regresión
+   * concreta, y la única que hoy fallaría con `!error()`. Con las filas
+   * cargadas y un 409 de borrado en pantalla, el total es indiscutible —la
+   * tabla lo sigue enseñando debajo— y el rótulo perdía su número.
+   *
+   * <p>Se compara el texto ANTES y DESPUÉS en vez de aseverar un literal: la
+   * propiedad es que el error de ACCIÓN no toca el contador, y un literal
+   * ataría el caso al formato de `textoContador`, que es asunto de
+   * `cabecera-lista` y no de esta lista.
+   *
+   * <p>El tercer aserto es la propiedad hermana que S124 midió (8 filas → 0) y
+   * que S128 protegió en la tabla: contador y tabla no se separan. Atarlas en
+   * un caso evita que cada una quede defendida por su lado y que una
+   * reversión parcial pase inadvertida.
+   */
+  it('(10) un 409 de borrado no apaga el contador ni vacía la tabla', async () => {
+    flushLista([{ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' }]);
+    await fixture.whenStable();
+
+    const antes = fixture.nativeElement
+      .querySelector('.cabecera-lista__contador')
+      .textContent.trim();
+
+    dialog.open.mockReturnValue({ closed: { subscribe: (fn: (v: boolean) => void) => fn(true) } });
+    (fixture.componentInstance as unknown as { borrar: (asig: unknown) => void }).borrar({
+      id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas',
+    });
+    http.expectOne('/api/asignaturas/7').flush({}, { status: 409, statusText: 'Conflict' });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.estado-lista__error')).toBeTruthy();
+    const contador = fixture.nativeElement.querySelector('.cabecera-lista__contador');
+    expect(contador).not.toBeNull();
+    expect(contador.textContent.trim()).toBe(antes);
+    expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(1);
   });
 });
