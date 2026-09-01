@@ -83,4 +83,52 @@ describe('panel de pre-validación', () => {
     expect(entradas[0].classList.contains('es-error')).toBe(true);
     expect(entradas[1].classList.contains('es-error')).toBe(false);
   });
+  /**
+   * La severidad como TEXTO, y el caso que lo justifica es el TERCER valor.
+   * `.es-error` solo se aplica a `severidad === 'ERROR'`, así que un valor
+   * nuevo del enum —que el modelo admite a propósito: `severidad` es `string`
+   * para que degrade en vez de romper el parseo— se pinta HOY exactamente
+   * igual que un AVISO. El fixture mete los tres para que el aserto discrimine:
+   * con dos valores, «texto presente» y «texto correcto» no se distinguen.
+   *
+   * <p>Mata la mutación de borrar el `<span class="severidad">` (la fila vuelve
+   * a distinguirse solo por color) y la de traducir el valor a un rótulo fijo
+   * —«Aviso» para todo lo que no sea ERROR—, que es precisamente lo que el
+   * modelo promete que NO se haga: el tercer valor perdería su nombre.
+   */
+  it('(31) la severidad se pinta como texto, incluido un valor no previsto', async () => {
+    fixture.componentRef.setInput('avisos', [
+      aviso('ERROR', 'R1'),
+      aviso('AVISO', 'R2'),
+      aviso('CRITICO', 'R3'),
+    ]);
+    await fixture.whenStable();
+
+    const textos = Array.from(raiz.querySelectorAll('.aviso-entrada .severidad')).map((e) =>
+      e.textContent!.trim(),
+    );
+    expect(textos).toEqual(['ERROR', 'AVISO', 'CRITICO']);
+
+    // El tercer valor NO lleva `.es-error`: sin la columna de texto sería
+    // indistinguible del AVISO, que es la razón de ser de este caso.
+    const entradas = raiz.querySelectorAll('.aviso-entrada');
+    expect(entradas[2].classList.contains('es-error')).toBe(false);
+  });
+
+  /**
+   * El marco del panel toma la severidad MÁXIMA. Se asevera sobre las DOS
+   * mitades —presencia con ERROR, AUSENCIA sin él—, misma disciplina que (28) y
+   * (30): una mutación que ponga `.es-error` siempre, o nunca, solo muere por
+   * una de las dos. Hasta S129 la rama «hay hallazgos» entera se pintaba en
+   * caja de aviso, errores incluidos.
+   */
+  it('(32) el marco del panel es de error solo si hay algún ERROR', async () => {
+    fixture.componentRef.setInput('avisos', [aviso('AVISO', 'R1')]);
+    await fixture.whenStable();
+    expect(raiz.querySelector('.prevalidacion-panel')!.classList.contains('es-error')).toBe(false);
+
+    fixture.componentRef.setInput('avisos', [aviso('AVISO', 'R1'), aviso('ERROR', 'R2')]);
+    await fixture.whenStable();
+    expect(raiz.querySelector('.prevalidacion-panel')!.classList.contains('es-error')).toBe(true);
+  });
 });
