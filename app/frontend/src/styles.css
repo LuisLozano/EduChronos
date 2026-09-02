@@ -74,10 +74,28 @@
      único literal de color fuera de esta lista; si el token cambia, ese hay que
      cambiarlo a mano.
 
-     TOKENS SIN USO HOY, censados en S129 y NO retirados: `--color-ok-fondo` y
-     `--color-info-fondo`. Se conservan porque completan dos parejas de la
-     tabla de arriba; que no tengan uso no es un defecto, pero tampoco son una
-     regla vigente. */
+     `--color-ok-fondo` Y `--color-info-fondo` SIGUEN SIN CONSUMIDOR, y en S132
+     eso pasa de ser un estado pendiente a ser una decisión tomada. No se
+     retiran, y el criterio no es «completan la pareja» —que es una razón de
+     simetría de tabla, no de producto— sino éste:
+
+       `--color-ok-fondo` no tiene trabajo porque la decisión 5 ya se lo dio a
+       otro: el veredicto sano es TINTA (`--color-ok`) y sólo el de avisos es
+       CAJA. La asimetría es deliberada —un fondo verde a ancho completo cada
+       vez que la prevalidación sale limpia es la señal gastada contra la que
+       argumenta la regla «un color, un trabajo»—, así que darle uso exigiría
+       CAMBIAR la decisión 5, y ningún criterio lo pide (R-terminado).
+
+       `--color-info-fondo` nombra un trabajo que hoy no existe: no hay ningún
+       «bloque sin veredicto» con fondo propio. El estado «cargando» de la
+       decisión 5 es texto neutro y sin caja a propósito.
+
+     Los dos se quedan porque el token es BARATO y la alternativa —borrarlos y
+     volver a elegir el valor el día que aparezca el caso— es más cara y peor:
+     reabre una elección de paleta ya hecha. Lo que no se sostenía era llamarlos
+     «sin uso hoy» sesión tras sesión sin decidir nada. Decidido: se conservan y
+     NO son regla vigente; el que estrene uno de los dos escribe aquí su trabajo
+     antes de usarlo. */
 
   /* Superficies y tinta */
   --color-fondo: #F6F8FB;
@@ -156,8 +174,41 @@
      EXCLUSIÓN: los tres `line-height: 1` de `horario-grid.css` no se tokenizan.
      No hay escalón de valor 1, y esa hoja está excluida por la decisión 3.
 
-     SIN USO HOY: `--fuente-datos`. Se declaró para códigos y horas y ninguna
-     tabla ni celda la consume. No gobierna nada; no se retira. */
+     `--fuente-datos` GOBIERNA DESDE S132, y con una frontera medida. Se declaró
+     en S121 para «códigos y horas» y estuvo tres decenas de sesiones sin un solo
+     consumidor. Se estrena con la clase `.dato`, en nueve sitios:
+
+       la columna `Código` de las siete listas de catálogo
+       `horaInicio` y `horaFin` de la jornada
+
+     Y NO EN LA REJILLA DEL HORARIO, que es la excepción y el motivo por el que
+     esto es una decisión y no un retoque. La ficha de `D-tokens-sin-uso` planteó
+     el caso como BINARIO —«o se usa donde toca, todos los códigos y horas, o se
+     retira»—, y el binario se rompe a propósito, con el número delante: la
+     monoespaciada es ~20 % más ancha (`Ing1` pasa de 28,0 a 33,6 px) y la línea
+     de una sub-entrada se recorta contra `.linea`, que es `nowrap` con
+     `overflow: hidden`. Medido sobre la aplicación real, cuatro grupos, contando
+     líneas cuyo contenido no cabe en su caja:
+
+       ancho     con la rejilla en monoespaciada     sin ella
+       1920-1600            0                            0
+       1500                14                            0
+       1440 y abajo        18                            0 hasta 1280
+
+     La víctima es siempre la misma, y es un DATO, no un adorno: «Taller 1 Aula
+     Plástica» se lee «Taller 1 Aula Plásti». El motivo de la excepción no es de
+     gusto: la rejilla ya vive contra un presupuesto y esconder en silencio el
+     aula de una clase es la familia de `D-vacio-miente-con-error`, la pantalla
+     que afirma lo que no sabe.
+
+     Lo que la ficha temía —«estrenarla EN SOLITARIO deja una familia tipográfica
+     que aparece una sola vez, peor que no usarla»— no se da: son nueve sitios en
+     ocho plantillas, no uno.
+
+     EL RECUENTO DE MARCAS `+N` NO SIRVE PARA ESTO. Es el instrumento del criterio
+     4 y sólo mide ALTURA: da el mismo número con y sin monoespaciada mientras el
+     texto se pierde de lado. Quien toque el ancho de la rejilla cuenta líneas
+     cortadas, no marcas. */
   --fuente-base: system-ui, "Segoe UI", Roboto, sans-serif;
   --fuente-datos: ui-monospace, "Cascadia Mono", "Consolas", monospace;
 
@@ -228,6 +279,17 @@
   --borde-fino: 1px;
   --radio-s: 4px;    /* controles */
   --radio-m: 6px;    /* lo que los contiene */
+}
+
+/* ---------------- Fuente de datos ----------------
+   Ejecuta lo que la decisión 2 declara ahí arriba para `--fuente-datos`. La regla
+   de USO —qué es un dato y qué no— vive con la decisión; aquí sólo la aplicación.
+
+   Se pone en el elemento y no en la hoja de cada componente por lo mismo que la
+   jerarquía de acciones: son nueve sitios en ocho plantillas, y un molde repetido
+   nueve veces son nueve sitios donde puede dejar de cumplirse. */
+.dato {
+  font-family: var(--fuente-datos);
 }
 
 /* ---------------- Jerarquía de acciones ----------------

@@ -40,7 +40,7 @@
       <tbody>
         @for (grupo of visibles(); track grupo.id) {
           <tr>
-            <td>{{ grupo.codigo }}</td>
+            <td class="dato">{{ grupo.codigo }}</td>
             <td>{{ grupo.nivel }}</td>
             <td class="grupos__tipo">{{ etiquetaTipo(grupo.tipo) }}</td>
             <td class="grupos__acciones">

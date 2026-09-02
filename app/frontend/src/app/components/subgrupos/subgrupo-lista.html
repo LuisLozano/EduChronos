@@ -39,7 +39,7 @@
       <tbody>
         @for (subgrupo of visibles(); track subgrupo.id) {
           <tr>
-            <td>{{ subgrupo.codigo }}</td>
+            <td class="dato">{{ subgrupo.codigo }}</td>
             <td>{{ subgrupo.grupos.join(', ') }}</td>
             <td class="subgrupos__acciones">
               <button type="button" class="subgrupos__editar accion-compacta" (click)="editar(subgrupo)">

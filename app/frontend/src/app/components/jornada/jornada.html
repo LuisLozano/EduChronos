@@ -50,7 +50,7 @@
                   inputmode="numeric"
                   placeholder="08:00"
                   formControlName="horaInicio"
-                  class="jornada__input"
+                  class="jornada__input dato"
                 />
                 @if (fila.controls.horaInicio.touched && fila.controls.horaInicio.invalid) {
                   <span class="jornada__error-campo">Usa el formato HH:mm.</span>
@@ -62,7 +62,7 @@
                   inputmode="numeric"
                   placeholder="09:00"
                   formControlName="horaFin"
-                  class="jornada__input"
+                  class="jornada__input dato"
                 />
                 @if (fila.controls.horaFin.touched && fila.controls.horaFin.invalid) {
                   <span class="jornada__error-campo">Usa el formato HH:mm.</span>

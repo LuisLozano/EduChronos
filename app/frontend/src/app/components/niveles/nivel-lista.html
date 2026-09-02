@@ -39,7 +39,7 @@
     <tbody>
     @for (nivel of visibles(); track nivel.id) {
     <tr>
-      <td>{{ nivel.codigo }}</td>
+      <td class="dato">{{ nivel.codigo }}</td>
       <td>{{ nivel.orden }}</td>
       <td class="niveles__acciones">
         <button type="button" class="niveles__editar accion-compacta" (click)="editar(nivel)">

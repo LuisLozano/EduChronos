@@ -39,7 +39,7 @@
     <tbody>
     @for (p of visibles(); track p.id) {
     <tr>
-      <td>{{ p.codigo }}</td>
+      <td class="dato">{{ p.codigo }}</td>
       <td>{{ p.nombreCompleto }}</td>
       <td class="profesores__acciones">
         <button type="button" class="profesores__editar accion-compacta" (click)="editar(p)">
