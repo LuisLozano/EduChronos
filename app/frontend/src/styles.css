@@ -67,7 +67,12 @@
 
      Un color nuevo entra sólo si su trabajo no lo hace ninguno de los de
      arriba. Cambiar un valor de esta lista se propaga solo: es lo que compró
-     C-tokens.
+     C-tokens, CON UNA EXCEPCIÓN ANOTADA AQUÍ para que no se descubra tarde: el
+     galón del `<select>` (sección «Controles nativos») lleva `#5A6673` escrito
+     a mano dentro del SVG, porque `currentColor` no resuelve dentro de una
+     `url()` de `background-image`. Es el valor de `--color-tinta-suave` y el
+     único literal de color fuera de esta lista; si el token cambia, ese hay que
+     cambiarlo a mano.
 
      TOKENS SIN USO HOY, censados en S129 y NO retirados: `--color-ok-fondo` y
      `--color-info-fondo`. Se conservan porque completan dos parejas de la
@@ -318,6 +323,94 @@ button:disabled {
   border-color: var(--color-acento-suave);
   background: var(--color-acento-suave);
   color: var(--color-tinta-suave);
+}
+
+/* ---------------- Controles nativos ----------------
+   `D-controles-nativos-sin-neutralizar`, pagada en S132. Censo previo: 13
+   `<select>`, 5 `input[type=number]`, 2 radio y 2 checkbox salían con el dibujo
+   del sistema operativo, ajenos a las seis decisiones de identidad. Un campo de
+   texto con `--radio-s` al lado de un `<select>` gris del sistema no es una
+   interfaz con paleta: es una interfaz con paleta en la mitad de sus piezas.
+
+   NO SE ARREGLA CON `border-radius`, que es lo que el navegador ignora en un
+   control con adorno propio. Hace falta `appearance: none` y volver a dibujar lo
+   que se quita, y por eso cada regla de aquí abajo APAGA y REPONE en el mismo
+   sitio.
+
+   NO TOCA LAS DIEZ REGLAS `__input`, que siguen donde estaban: esto es
+   `select`, `input[type=number]` y los dos tipos con casilla, no una fusión del
+   molde de campo (fuera de alcance por decisión de S132).
+
+   `<select>` — el galón se dibuja como `background-image` con un SVG en línea, y
+   NO con un `::after` sobre un envoltorio nuevo: un `<select>` es un elemento
+   reemplazado y no admite pseudo-elementos, así que la vía del adorno habría
+   costado un `<span>` en las trece plantillas. El color del trazo va escrito
+   dentro del SVG porque `currentColor` no resuelve dentro de una `url()` de
+   `background-image`: es el ÚNICO literal de color fuera de la paleta de este
+   fichero, y es `--color-tinta-suave` (#5A6673) copiado a mano. Si cambia el
+   token, cambia aquí; está anotado en la decisión 1.
+
+   RADIO Y CASILLA — `accent-color`, y no `appearance: none` con la marca
+   redibujada. Medido contra la premisa con que entró el punto en el acta: una
+   sola propiedad lleva los cuatro controles a la paleta CONSERVANDO el dibujo
+   nativo del sistema, que es el que el usuario ya sabe leer y el que trae gratis
+   el foco y el estado indeterminado. Redibujar la marca habría costado
+   pseudo-elementos sobre un elemento reemplazado —el mismo problema del
+   `<select>`— sin comprar nada que la paleta no dé ya.
+
+   `input[type=number]` — se retira la flecha doble. No es una decisión de
+   aspecto sino de dato: son `orden`, `capacidad`, `planta` y las dos de plazas,
+   valores que se teclean, no que se recorren de uno en uno. El campo queda
+   idéntico a uno de texto, que es lo que la decisión 6 pide para una columna de
+   dato.
+
+   ANCHO: no se declara aquí. Lo fijan las diez reglas `__input` con su
+   `width: 100%`, y los dos `<select>` de la barra de `horario-view` no llevan
+   ninguna, así que miden lo que su contenido: un `width: 100%` global los habría
+   estirado al ancho de su `<label>`.
+
+   ALTURA: el `<select>` crece de la altura del sistema a la del molde de campo, y
+   dos de los trece viven en la barra de controles de `horario-view`, que come del
+   presupuesto del criterio 4. Comprobado por el recuento de marcas `+N`, que no
+   cambia. */
+select {
+  appearance: none;
+  font-family: inherit;
+  font-size: var(--tam-s);
+  padding: var(--e2);
+  padding-right: var(--e5);
+  border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-s);
+  background-color: var(--color-superficie);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%235A6673' stroke-width='1.5' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--e2) center;
+  color: var(--color-tinta);
+}
+
+/* El `multiple` no lleva galón —despliega en vertical, no en menú— y su alto lo
+   fijan las hojas que lo usan con `min-height`. */
+select[multiple] {
+  background-image: none;
+  padding-right: var(--e2);
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  accent-color: var(--color-acento);
+}
+
+/* `appearance: textfield` es lo que retira la flecha doble en los motores que la
+   ponen fuera; la regla `::-webkit-*` hace lo propio en los de Blink y WebKit, y
+   las dos hacen falta. */
+input[type='number'] {
+  appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 /* ---------------- Estados ----------------
