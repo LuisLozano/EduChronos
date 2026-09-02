@@ -20,15 +20,15 @@
 - L1195 — ### Clasificación de las deudas vivas actuales
 - L1201 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
 - L1208 — #### Deuda técnica real, colgada de su objetivo
-- L1258 — #### Mejora futura, cuelga y espera
-- L1288 — #### Decisión arquitectónica consciente → sale de la cola
-- L1300 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1309 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1316 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1376 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1430 — ## 6. Reglas estratégicas
-- L1477 — ## 7. Métricas del sistema
-- L1498 — ## 8. El sistema respondiendo a las preguntas clave
+- L1259 — #### Mejora futura, cuelga y espera
+- L1289 — #### Decisión arquitectónica consciente → sale de la cola
+- L1301 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1310 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1317 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1377 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1431 — ## 6. Reglas estratégicas
+- L1478 — ## 7. Métricas del sistema
+- L1499 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -1208,6 +1208,7 @@ asigna categoría, objetivo y disposición.
 #### Deuda técnica real, colgada de su objetivo
 | Deuda | Objetivo | ¿Bloquea? | Disposición |
 |---|---|---|---|
+| D-plan-duplicado (copia caducada de `plan_trabajo_horarios.md` en `docs_extra/old/`) | Transversal, sesión de Higiene/Método | No | Descubierta en el cierre de S131 al localizar rutas en vez de suponerlas. El documento vivo es `docs/`, que es el que leen `verificar-cierre.py` y `regenerar-indice.py`; la copia de `docs_extra/old/` no se actualiza desde hace sesiones y ningún guion la mantiene. Riesgo real y barato de materializar: un `grep -r` sobre el repo la lee igual que a la viva, y una afirmación de estado vivo tomada de ahí es falsa sin que nada avise. Decidir en su sesión si se borra o se marca como archivo histórico; borrar sin criterio no es la opción por defecto |
 | ~~D-insignia-sin-leyenda~~ (la insignia de coste blando se pintaba como un número desnudo con signo) **CERRADA S128** | O-diseño, en C-identidad | — | Nace en S122 al medir qué son las insignias `1`/`-1` de la rejilla (`docs/diseno-navegacion.md` §A1, §3-H-1). El `<span class="badge">` de `horario-grid.html:34` no lleva `title` ni `aria-label`, a diferencia del candado, que sí los lleva dos líneas más abajo (`horario-grid.html:40-41`). El usuario ve un `-1` en la esquina de una celda y no tiene forma de saber que significa «esta clase está tapando un hueco»: es el dato más denso de la rejilla y el único sin rótulo. Arreglo natural: el mismo par tooltip + etiqueta accesible que ya usa el candado. NO se paga en S122, que no toca `app/`. Cuidado al redactar el texto: el número es un delta CONTRAFACTUAL con signo y no tiene por qué cuadrar con `Totales` (`models/diagnostico.model.ts:58-65`), así que la leyenda no debe prometer que sea un coste absoluto. **PAGADA Y CERRADA en S128**, en su sede escrita, con el mismo par `title` + `aria-label` del candado y una leyenda que dice qué significa el signo sin prometer que cuadre con `Totales`. El argumento que decidió pagarla aquí no lo tenía la ficha de S122: desde S127 esa esquina tiene DOS números con signo —el `+N` de desbordamiento y el coste blando— con significados sin relación y sólo uno con explicación, así que dejó de ser «un dato sin rótulo» y pasó a ser ambigüedad activa creada por el Cambio anterior. Coste en altura: cero. **CERRADA** |
 | D-asignatura-sin-nivel (una asignatura no sabe a qué nivel pertenece) | Sin sede | No | Nace en S122 al leer el catálogo para la maqueta. `Asignatura` es `(id, codigo, nombre_completo)` y nada más: la relación asignatura↔nivel solo se DEDUCE recorriendo Actividad→Plaza→Subgrupo→Grupo→Nivel, es decir, existe únicamente para las asignaturas que ya están usadas en alguna actividad. Consecuencia en la UI: el selector de asignatura del formulario de actividad de un grupo de 1ºESO ofrece las 100 asignaturas del centro, incluidas las de 3º y 4º, sin forma de acotarlas. Emparenta con `D-selectores-sin-busqueda` (que es de ESCALA) pero no es la misma: aquí falta el DATO con el que filtrar, no el filtro. Sin sede porque el arreglo natural toca modelo y esquema, y eso no cae en O-navegación ni en O-diseño. No se paga ahora |
 | D-F8.6-ii-b (no hay gesto de despinar) | O-ajuste-cierre | SÍ | Se paga al abrir O-ajuste-cierre. Única deuda funcional de F8.6 |

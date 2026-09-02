@@ -52,22 +52,22 @@
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
 - L699 — ### Sesión 131 — Higiene/Método: **el bucle de acabado visual pasa a Claude Code**. Nacen `M-respuesta` —el turno del modelo principal empieza por la decisión y el reparto, y si hay varios pasos por lado el reparto va como FLUJO NUMERADO en orden de ejecución— y `M-visual` —la sesión de acabado arranca en Claude Code con acta CERRADA, itera sobre `ng serve`, registra en `styles.css` y vuelve con un traspaso—, y M1-ter gana su primera excepción: para ese tipo de sesión el prompt SÍ lleva alcance, TRANSCRITO del registro y no decidido en el cierre. NO avanza el mapa: `docs/metodo.md` 323 → 413 líneas y ni un fichero de `app/` o `solver/` tocado. Dos commits, los dos de documentación.
-- L988 — ### Bloques de Fase 2
-- L996 — ### Bloques de Fase 5
-- L1019 — ### Bloques de Fase 6
-- L1064 — ### Bloques de Fase 8
-- L1273 — ### Fases completadas
-- L1377 — ### Cierre del modelo — Sesión 8
-- L1425 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1471 — ### Método de trabajo (procedimiento vigente)
-- L1504 — ### Deuda consciente VIVA
-- L3024 — ### Deuda consciente CERRADA (histórico)
-- L3112 — ### Notas técnicas validadas en Fase 0
-- L3122 — ### Notas técnicas validadas en Fase 6
-- L3156 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3165 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3192 — ### Registro detallado de sesiones S10–S31
-- L3201 — ## Señales globales de alerta
+- L993 — ### Bloques de Fase 2
+- L1001 — ### Bloques de Fase 5
+- L1024 — ### Bloques de Fase 6
+- L1069 — ### Bloques de Fase 8
+- L1278 — ### Fases completadas
+- L1382 — ### Cierre del modelo — Sesión 8
+- L1430 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1476 — ### Método de trabajo (procedimiento vigente)
+- L1509 — ### Deuda consciente VIVA
+- L3029 — ### Deuda consciente CERRADA (histórico)
+- L3117 — ### Notas técnicas validadas en Fase 0
+- L3127 — ### Notas técnicas validadas en Fase 6
+- L3161 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3170 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3197 — ### Registro detallado de sesiones S10–S31
+- L3206 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -740,6 +740,11 @@ nuevo a partir del anterior, modificando solo los cambios.
   DEUDA: ninguna nueva de producto. O-diseño sigue ACTIVO con el tramo 3 de C-revisión a medias y
   `D-jerarquia-declarada-sin-aplicar` bloqueando su criterio 3; la deuda bloqueante del proyecto sigue en 2 con
   `D31-a`. La próxima sesión es la primera de Acabado visual y estrena M-visual sobre ese tramo.
+  DEUDA NUEVA, y la encontró el propio guion de cierre al exigir que las rutas se localizaran en vez de
+  suponerse: existen DOS `plan_trabajo_horarios.md`, el vivo en `docs/` y una copia antigua en `docs_extra/old/`.
+  El M1-bis trabajó sobre el vivo —el que leen `verificar-cierre.py` y `regenerar-indice.py`— y la copia sigue
+  con contenido caducado. Nace `D-plan-duplicado`: no bloquea nada, pero un `grep -r` no distingue una de otra
+  y afirmar estado vivo desde la copia rancia es la familia de `D-tokens-inexistentes`.
 
 Última sesión registrada (previa): Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. El M4 en navegador destapa que la jerarquía de acciones que `styles.css` declara «aplicada» NO lo está (M0 + M2 + M4 en navegador + M1, sin M3: el tramo no toca un solo `.ts`). Cinco commits. **NO cierra O-diseño**: el tramo 3 queda a medias y su trabajo restante pasa a S131.
   Trigésima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y sin M3: el
