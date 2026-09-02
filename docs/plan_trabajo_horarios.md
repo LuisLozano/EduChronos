@@ -2,72 +2,73 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L75 — ## Cómo usar este documento en el Project de Claude
-- L95 — ## Principios de avance
-- L116 — ## FASE 0 — Decisión de stack tecnológico
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
-- L135 — ## FASE 1 — Modelo de datos validado en papel
-- L139 — ### Entregable
-- L144 — ### Criterios de verificación
-- L162 — ### Señal de que está mal
-- L166 — ### Resultado de la fase
-- L174 — ## FASE 2 — Solver MVP: problema mínimo
-- L181 — ### Subconjunto de datos
-- L187 — ### Entregable
-- L194 — ### Criterios de verificación
-- L207 — ### Señal de que está mal
-- L210 — ### Decisiones tácticas
-- L284 — ### Criterios de verificación por bloque
-- L326 — ## FASE 3 — Solver: desdobles y agrupamientos
-- L329 — ### Lo que se añade
-- L334 — ### Criterios de verificación
-- L351 — ### Señal de que está mal
-- L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
-- L360 — ### Lo que se añade
-- L364 — ### Criterios de verificación
-- L374 — ## FASE 5 — Solver: instituto completo
-- L420 — ### Lo que se añade
-- L426 — ### Criterios de verificación
-- L493 — ### Señal de que está mal
-- L500 — ## FASE 6 — Persistencia de datos
-- L504 — ### Entregable
-- L517 — ### Criterios de verificación
-- L545 — ## FASE 7 — UI: visualización de horarios
-- L548 — ### Entregable
-- L551 — ### Criterios de verificación
-- L563 — ### Bloques de Fase 7
-- L602 — ## FASE 8 — UI: configuración y ajuste manual
-- L613 — ### Entregable
-- L619 — ### Criterios de verificación
-- L640 — ## FASE 9 — Exportación
-- L643 — ### Criterios de verificación
-- L651 — ## FASE 10 — Gestión de cursos académicos
-- L660 — ### Entregable
-- L666 — ### Criterios de verificación
-- L675 — ## FASE 11 — Empaquetado y distribución Windows
-- L678 — ### Criterios de verificación
-- L687 — ## FASE 12 — CI/CD con GitHub Actions
-- L690 — ### Criterios de verificación
-- L697 — ## Registro de progreso
-- L699 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
-- L1084 — ### Bloques de Fase 2
-- L1092 — ### Bloques de Fase 5
-- L1115 — ### Bloques de Fase 6
-- L1160 — ### Bloques de Fase 8
-- L1369 — ### Fases completadas
-- L1473 — ### Cierre del modelo — Sesión 8
-- L1521 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1567 — ### Método de trabajo (procedimiento vigente)
-- L1600 — ### Deuda consciente VIVA
-- L3120 — ### Deuda consciente CERRADA (histórico)
-- L3208 — ### Notas técnicas validadas en Fase 0
-- L3218 — ### Notas técnicas validadas en Fase 6
-- L3252 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3261 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3288 — ### Registro detallado de sesiones S10–S31
-- L3297 — ## Señales globales de alerta
+- L76 — ## Cómo usar este documento en el Project de Claude
+- L96 — ## Principios de avance
+- L117 — ## FASE 0 — Decisión de stack tecnológico
+- L120 — ### Entregable
+- L124 — ### Criterios de verificación
+- L131 — ### Señal de que está mal
+- L136 — ## FASE 1 — Modelo de datos validado en papel
+- L140 — ### Entregable
+- L145 — ### Criterios de verificación
+- L163 — ### Señal de que está mal
+- L167 — ### Resultado de la fase
+- L175 — ## FASE 2 — Solver MVP: problema mínimo
+- L182 — ### Subconjunto de datos
+- L188 — ### Entregable
+- L195 — ### Criterios de verificación
+- L208 — ### Señal de que está mal
+- L211 — ### Decisiones tácticas
+- L285 — ### Criterios de verificación por bloque
+- L327 — ## FASE 3 — Solver: desdobles y agrupamientos
+- L330 — ### Lo que se añade
+- L335 — ### Criterios de verificación
+- L352 — ### Señal de que está mal
+- L358 — ## FASE 4 — Solver: grupos PDC/Diversificación
+- L361 — ### Lo que se añade
+- L365 — ### Criterios de verificación
+- L375 — ## FASE 5 — Solver: instituto completo
+- L421 — ### Lo que se añade
+- L427 — ### Criterios de verificación
+- L494 — ### Señal de que está mal
+- L501 — ## FASE 6 — Persistencia de datos
+- L505 — ### Entregable
+- L518 — ### Criterios de verificación
+- L546 — ## FASE 7 — UI: visualización de horarios
+- L549 — ### Entregable
+- L552 — ### Criterios de verificación
+- L564 — ### Bloques de Fase 7
+- L603 — ## FASE 8 — UI: configuración y ajuste manual
+- L614 — ### Entregable
+- L620 — ### Criterios de verificación
+- L641 — ## FASE 9 — Exportación
+- L644 — ### Criterios de verificación
+- L652 — ## FASE 10 — Gestión de cursos académicos
+- L661 — ### Entregable
+- L667 — ### Criterios de verificación
+- L676 — ## FASE 11 — Empaquetado y distribución Windows
+- L679 — ### Criterios de verificación
+- L688 — ## FASE 12 — CI/CD con GitHub Actions
+- L691 — ### Criterios de verificación
+- L698 — ## Registro de progreso
+- L700 — ### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. **EN CURSO: faltan el tramo 3 (el juicio), el M4 en navegador y el e2e.**
+- L789 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
+- L1174 — ### Bloques de Fase 2
+- L1182 — ### Bloques de Fase 5
+- L1205 — ### Bloques de Fase 6
+- L1250 — ### Bloques de Fase 8
+- L1459 — ### Fases completadas
+- L1563 — ### Cierre del modelo — Sesión 8
+- L1611 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1657 — ### Método de trabajo (procedimiento vigente)
+- L1690 — ### Deuda consciente VIVA
+- L3210 — ### Deuda consciente CERRADA (histórico)
+- L3298 — ### Notas técnicas validadas en Fase 0
+- L3308 — ### Notas técnicas validadas en Fase 6
+- L3342 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3351 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3378 — ### Registro detallado de sesiones S10–S31
+- L3387 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -695,6 +696,95 @@ nuevo a partir del anterior, modificando solo los cambios.
 ---
 
 ## Registro de progreso
+
+### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. **EN CURSO: faltan el tramo 3 (el juicio), el M4 en navegador y el e2e.**
+  Trigésima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y sin M3: el
+  tramo 2 no toca un solo `.ts`. Suites: línea base heredada de S129 **corrida antes de tocar nada y verde**
+  (solver 91, app 282, vitest 419 en 49 ficheros); tras aplicar, **solver 91, app 282, vitest 419**, sin un
+  solo caso reescrito. Que no se reescribiera ninguno se PREDIJO antes de aplicar y no se descubrió al
+  correr: el único `__input` que un spec consume es `jornada.spec.ts:104` y la sustitución no cambia ningún
+  nombre de clase. **e2e NO corrido todavía.**
+  BUNDLE, atado a su commit como manda la lección de S129, y medido en worktree aparte para poder AISLAR el
+  tramo. Base `0e45c9b`: **541,21 kB crudos / 121,89 transferidos**. Tras el tramo 2, `ffdf966`: **542,39 /
+  121,84**. El tramo cuesta **+1,18 kB crudos y −0,05 transferidos**: repetir `var(--e2)` comprime mejor que
+  una dispersión de literales, así que la métrica que llega al usuario MEJORA mientras el crudo sube. Margen
+  hasta el aviso de 550: **7,61 kB**. Todo el crecimiento está en `main-*.js`, donde Angular incrusta el CSS
+  de componente; `styles-*.css` se queda clavado en 3,33 kB. De paso se tapa el hueco que S129 declaró
+  abierto —sus piezas 3, 4 y 5 nunca se remidieron sobre los 540,18 de media sesión—: costaron **+1,03 kB**.
+  **LOS 24 REDONDEOS DEL TRAMO 2, DECLARADOS UNO A UNO.** Reparten en 21 líneas de 8 hojas —tres
+  líneas llevan dos redondeos, una por valor—; las otras 16 hojas tocadas caen exactas y no
+  necesitan declaración. Los números de línea son válidos ANTES y DESPUÉS: la sustitución es
+  línea a línea y no mueve ninguna. Ninguno toca `horario-grid.css` (excluida expresamente) ni
+  `app.css` (ya limpia de literales de espaciado, luego el trabajo NO tocó la barra y la
+  restricción heredada de S128 no llegó a gobernar nada; verificado, no supuesto).
+  *actividades/actividad-form.css:102* `padding: 0.2rem 0.6rem` → `var(--e1) var(--e2)` (+0,8 / −1,6).
+  *cabecera-lista/cabecera-lista.css:39* `padding: 0.375rem 0.5rem` → `var(--e1) var(--e2)` (−2,0; el
+  segundo valor ya era exacto).
+  *confirmar-generacion/confirmar-generacion.css:6* `padding: 1rem 1.2rem` → `var(--e4) var(--e4)` (−3,2);
+  *:14* y *:22* `margin: 0 0 0.6rem` → `var(--e2)` (−1,6 cada una); *:26* `margin: 0 0 0.8rem` →
+  `var(--e3)` (−0,8); *:42* `gap: 0.6rem` → `var(--e2)` (−1,6).
+  *grupos/tutoria-dialogo.css:56* `padding: 0.15rem 0` → `var(--e1) 0` (+1,6).
+  *horario-view/horario-view.css:32* `gap: 0.4rem` → `var(--e2)` (+1,6); *:58* `padding: 0.4rem 0.6rem`
+  → `var(--e2) var(--e2)` (+1,6 / −1,6); *:59* `margin-bottom: 0.6rem` → `var(--e2)` (−1,6).
+  *jornada/confirmar-reemplazo.css:5* `padding: 1rem 1.2rem` → `var(--e4) var(--e4)` (−3,2); *:13* y *:18*
+  `margin: 0 0 0.6rem` → `var(--e2)` (−1,6 cada una); *:23* `gap: 0.6rem` → `var(--e2)` (−1,6).
+  *jornada/jornada.css:19* `padding: 0.15rem 0.5rem` → `var(--e1) var(--e2)` (+1,6); *:88*
+  `padding: 0.35rem` → `var(--e1)` (−1,6).
+  *panel-prevalidacion/panel-prevalidacion.css:20* `padding: 0.4rem 0.6rem` → `var(--e2) var(--e2)`
+  (+1,6 / −1,6); *:21* `margin-bottom: 0.6rem` → `var(--e2)` (−1,6); *:43* `gap: 0.6rem` → `var(--e2)`
+  (−1,6); *:73* `margin: 0.4rem 0 0` → `var(--e2) 0 0` (+1,6).
+  **REPARTO POR MAGNITUD:** 19 de los 24 se mueven 1,6 px; dos menos de 1 px (+0,8 en
+  `actividad-form:102`, −0,8 en `confirmar-generacion:26`); uno 2,0 px (el padding del buscador de
+  las listas); y dos 3,2 px (el padding de las dos cajas de confirmación).
+  **CUATRO REDONDEOS CAMBIAN LA FORMA, NO SÓLO EL TAMAÑO, y por eso se destacan aparte:** en
+  `confirmar-generacion:6`, `confirmar-reemplazo:5`, `horario-view:58` y `panel-prevalidacion:20` los
+  dos valores del padding eran DISTINTOS —`1rem 1.2rem` y `0.4rem 0.6rem`— y caen los dos en el mismo
+  escalón, así que el padding pasa de asimétrico a simétrico. Quedan escritos `var(--e4) var(--e4)` y
+  `var(--e2) var(--e2)`, redundantes a propósito: colapsarlos a un solo valor borraría del código la
+  huella de que ahí hubo un redondeo. Son los cuatro primeros sitios que hay que mirar en el M4.
+  **EL RADIO SE UNIFICA EN DOS NIVELES, y el censo de S129 que lo describía se quedaba en la mitad.** La
+  ficha hablaba de «las diez reglas `__input`» y del buscador; medido en el tramo 2, el literal
+  `border-radius: 4px` estaba en **35 reglas**, doce de ellas en contenedores. Unificar sólo las once habría
+  dejado el diálogo contenedor a 4 px junto a un control a 6 px: la incoherencia se mueve, no se cierra. Se
+  aplica una regla de dos niveles —`--radio-s` en controles (campos, botones, buscador), `--radio-m` en lo
+  que los contiene (formularios, diálogos, el marco de plaza y los bloques de mensaje)— sobre **36 sitios:
+  21 controles y 15 contenedores**. `--radio-s` sube de 3 a 4 px A PROPÓSITO, para que los 20 controles que
+  ya estaban en 4 px literal NO se muevan: **el único píxel de radio que cambia en toda la aplicación es el
+  buscador de las listas, de 6 a 4 px**, que es justo el síntoma que la deuda describía. Consecuencia sobre
+  `D-tokens-sin-uso`: baja de cuatro tokens a **tres** y pierde su parte de radio, que era su única sede
+  compartida con el tramo 3.
+  **LA DECLARACIÓN DE S128 NO EXISTÍA, Y SU RECUENTO ERA FALSO.** La regla de `styles.css` exige que un
+  redondeo se DECLARE; S128 afirma DOS VECES haberlo hecho —ficha y plan— y no hay artefacto en ninguna de
+  las cuatro sedes posibles: ni lista en `styles.css`, ni en los documentos, ni en el mensaje de commit,
+  que además no era sede posible porque **ningún commit del repo tiene cuerpo**. Reconstruidos desde
+  `cd6b43f..94b97df` con un derivador validado antes contra los 24 de este tramo —reprodujo 24 de 24—,
+  resultaron **CUATRO y no tres**, verificados línea a línea sobre los blobs. Nace
+  `D-declarado-sin-artefacto`, tercera de la familia junto a `D-arranque-no-literal` y
+  `D-748-sin-derivacion`. La afirmación de S128 de que ninguno tocaba la altura de la rejilla SÍ era cierta
+  —el vertical de la barra cae exacto en `--e3`—, pero no era comprobable por nadie.
+  D-GUION-EXIT-ENMASCARADO, **SIETE INSTANCIAS**, seis del arquitecto y **una del asistente**: (1) `^Results:`
+  no casa nunca porque Maven prefija `[INFO] `, y la sección omitió el recuento sin decir que no había
+  encontrado nada; (2) `^| $D` no casa las filas tachadas, y dos deudas CERRADAS en S129 se informaron como
+  «NO APARECE en §4»; (3) el patrón de espaciado sin la exclusión que la propia ficha ordena, que dio 214 y
+  parecía contradecir los 195 de S129; (4) la lista de redondeos recortada por un `sed` justo antes del
+  `ABORTA` que la explicaba, publicando un encabezado con cero líneas debajo; (5) un delimitador `^### ` que
+  volcó S129, S128 y el bloque de fases bajo el rótulo «REGISTRO REAL DE S129, ÍNTEGRO»; (6) una bandera
+  `--listar-redondeos` que el transformador no tiene, cuyo `||` de respaldo dumpeó las hojas enteras bajo el
+  rótulo de la lista; y (7) **del asistente**, un `grep -E` con retrorreferencia `\2` que `ugrep` no soporta,
+  cuyo error se fue a la salida y cuyo `||` publicó «ninguna» cuando había cuatro.
+  R-TERMINADO. No se colapsan a un solo valor los cuatro `padding` que el redondeo dejó simétricos: la
+  redundancia es la huella de que ahí hubo un redondeo. No se toca `.confirmar-reemplazo__confirmar` ni los
+  botones de `confirmar-generacion`, que no declaran `border-radius` y pintan con el del navegador: el tramo
+  2 SUSTITUYE literales, y añadir una declaración donde no había ninguna es otra cosa; van a la lista del
+  tramo 3. No se retira `--radio-s` ni ningún otro token: esa decisión es del tramo 3.
+  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` verificado antes de copiar; el
+  M4 correrá sobre `educhronos-s130-m4.db`, copia con el mismo md5.
+  PENDIENTE AL ESCRIBIR ESTA ENTRADA: el M4 en navegador —cuyos cuatro primeros sitios son los `padding`
+  que cambiaron de forma, y el quinto el buscador, que se lleva a la vez −2 px de padding y −2 px de
+  radio—, el e2e, la pregunta de navegador que `D-select-nativo-desparejo` deja viva (si un `<select>` con
+  clase de `<input>` sigue pintando su flecha nativa, que decide si alcanza a 13 controles o sólo a 2), y la
+  decisión de si los tramos 2 y 3 se funden, que la ficha reserva al M0 del tramo 2 «con la UI aplicada
+  delante».
 
 ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
   Vigesimonovena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
