@@ -52,23 +52,23 @@
 - L691 — ### Criterios de verificación
 - L698 — ## Registro de progreso
 - L700 — ### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. **EN CURSO: faltan el tramo 3 (el juicio), el M4 en navegador y el e2e.**
-- L789 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
-- L1174 — ### Bloques de Fase 2
-- L1182 — ### Bloques de Fase 5
-- L1205 — ### Bloques de Fase 6
-- L1250 — ### Bloques de Fase 8
-- L1459 — ### Fases completadas
-- L1563 — ### Cierre del modelo — Sesión 8
-- L1611 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1657 — ### Método de trabajo (procedimiento vigente)
-- L1690 — ### Deuda consciente VIVA
-- L3210 — ### Deuda consciente CERRADA (histórico)
-- L3298 — ### Notas técnicas validadas en Fase 0
-- L3308 — ### Notas técnicas validadas en Fase 6
-- L3342 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3351 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3378 — ### Registro detallado de sesiones S10–S31
-- L3387 — ## Señales globales de alerta
+- L829 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
+- L1214 — ### Bloques de Fase 2
+- L1222 — ### Bloques de Fase 5
+- L1245 — ### Bloques de Fase 6
+- L1290 — ### Bloques de Fase 8
+- L1499 — ### Fases completadas
+- L1603 — ### Cierre del modelo — Sesión 8
+- L1651 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1697 — ### Método de trabajo (procedimiento vigente)
+- L1730 — ### Deuda consciente VIVA
+- L3250 — ### Deuda consciente CERRADA (histórico)
+- L3338 — ### Notas técnicas validadas en Fase 0
+- L3348 — ### Notas técnicas validadas en Fase 6
+- L3382 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3391 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3418 — ### Registro detallado de sesiones S10–S31
+- L3427 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -779,6 +779,46 @@ nuevo a partir del anterior, modificando solo los cambios.
   tramo 3. No se retira `--radio-s` ni ningún otro token: esa decisión es del tramo 3.
   INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b` verificado antes de copiar; el
   M4 correrá sobre `educhronos-s130-m4.db`, copia con el mismo md5.
+  HALLAZGOS DEL M4, EN CRUDO. Medidos y anotados sin veredicto: el juicio es del tramo 3.
+  **(a) LA JERARQUÍA DE ACCIONES DE `styles.css:59-63` SE DECLARA «aplicado, se declara» Y NO LO
+  ESTÁ.** Lo escrito: principal = acento pleno con tinta `sobre-acento`; secundaria = superficie con
+  borde; destructiva = superficie con borde y tinta de error; inactiva o en curso = acento apagado.
+  Medido contra el CSS, cuatro discrepancias: (1) `__guardar` lleva `background:
+  var(--color-superficie)`, que es el relleno que la regla asigna a la SECUNDARIA; (2) `__cancelar` y
+  `__guardar` comparten UNA SOLA regla agrupada en los siete formularios, luego son indistinguibles;
+  (3) los siete `__borrar` de fila de lista llevan sólo `color: var(--color-error)`, sin superficie y
+  sin borde; (4) en `pdc-dialogo`, `__guardar` y `__borrar` comparten regla, luego principal y
+  destructiva se pintan igual. El dato que cierra la medición: en toda la aplicación hay **un solo
+  `background: var(--color-acento)`, y es la barra** (`app.css:25`); ningún botón lleva relleno de
+  acento. `styles.css` no estila los elementos `button`, `input`, `select` ni `textarea` —cero reglas
+  de elemento—, así que no hay una capa base que lo aporte. La jerarquía se declaró en S129 al zanjar
+  la pregunta del verde con el argumento de que «ya se resuelve por relleno y no por color».
+  **(b) CENSO DE BOTONES: 10 CON CAJA, 9 SIN RADIO, 8 SIN NINGUNA REGLA.** Con caja: las diez reglas
+  agrupadas `__cancelar, __guardar` de siete formularios y tres diálogos, byte a byte iguales entre
+  sí y ahora en `--radio-s`. Sin radio y con una sola propiedad: los siete `__borrar` de fila
+  (`color: var(--color-error)`), `.confirmar-reemplazo__confirmar` y `.jornada__guardar` (sólo
+  `font-weight`). Sin NINGUNA regla CSS, luego pintando con el estilo de agente de usuario: los siete
+  `__editar` de fila y `.cabecera-lista__nuevo`; `.confirmar-reemplazo__cancelar` tampoco tiene
+  regla. El tramo 2 unificó el radio de los controles que YA tenían caja; esta segunda familia nunca
+  la tuvo y no cabía en el tramo 2, que SUSTITUYE literales y no crea declaraciones.
+  **(c) `D-select-nativo-desparejo` QUEDA CERRADA DE RADIO Y ABIERTA DE FLECHA.** Alcance remedido:
+  14 coincidencias de `<select`, de las que UNA es una mención dentro de un comentario HTML
+  (`grupos/tutoria-dialogo.html:33`), luego **13 elementos reales**: 11 con la clase `__input` de su
+  formulario y 2 sin clase ninguna (`horario-view/horario-view.html:13` y `:22`). Sigue NO SABIDO si
+  un `<select>` con clase de `<input>` pinta su flecha nativa. **El censo de S129 no contemplaba una
+  familia con el mismo problema: los cinco `input[type="number"]`** (`aula-form.html:30` y `:40`,
+  `actividad-form.html:32` y `:45`, `nivel-form.html:17`), que SÍ llevan la clase del formulario y
+  tienen adorno nativo propio —las flechas del contador—, exactamente el caso de la flecha del
+  `<select>`. Tampoco contemplaba los dos `type="radio"` sin clase de `actividad-form.html` ni los
+  dos `type="checkbox"` (uno sin clase en `actividad-form.html`, otro con `jornada__toggle`).
+  **(d) EL PADDING LATERAL DE `.app__contenido` NO CRUZA EL CRITERIO 4.** La regla es `padding:
+  var(--e4) 0`; el cero lateral es PREEXISTENTE —era `1rem 0`, que cae exacto en `--e4`, así que el
+  tramo 2 no movió ahí ningún píxel— y contrasta con los `var(--e5)` laterales de la barra.
+  `horario-grid.css` no declara ningún ancho absoluto: `width: 100%` en la tabla, `width: 3rem` en la
+  columna de horas, `min-width: 0`. Y `diseno-navegacion.md:132` deja escrito que «el ancho **no**
+  era el problema: `.rejilla { width:100%; table-layout:fixed }`»: el presupuesto MEDIDO del criterio
+  4 es de altura, no de anchura. Dato adyacente que se anota sin conclusión: `diseno-navegacion.md:162`
+  registra cinco aulas de nombre largo como «agravante de ancho no previsto».
   PENDIENTE AL ESCRIBIR ESTA ENTRADA: el M4 en navegador —cuyos cuatro primeros sitios son los `padding`
   que cambiaron de forma, y el quinto el buscador, que se lleva a la vez −2 px de padding y −2 px de
   radio—, el e2e, la pregunta de navegador que `D-select-nativo-desparejo` deja viva (si un `<select>` con
