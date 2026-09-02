@@ -1,5 +1,5 @@
 .aulas {
-  padding: 1rem;
+  padding: var(--e4);
 }
 
 .aulas__tabla {
@@ -10,13 +10,13 @@
 .aulas__tabla th,
 .aulas__tabla td {
   text-align: left;
-  padding: 0.5rem;
+  padding: var(--e2);
   border-bottom: 1px solid var(--color-borde-suave);
 }
 
 .aulas__acciones {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--e2);
 }
 
 .aulas__borrar {

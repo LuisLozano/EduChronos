@@ -1,5 +1,5 @@
 .niveles {
-  padding: 1rem;
+  padding: var(--e4);
 }
 
 .niveles__tabla {
@@ -10,13 +10,13 @@
 .niveles__tabla th,
 .niveles__tabla td {
   text-align: left;
-  padding: 0.5rem;
+  padding: var(--e2);
   border-bottom: 1px solid var(--color-borde-suave);
 }
 
 .niveles__acciones {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--e2);
 }
 
 .niveles__borrar {

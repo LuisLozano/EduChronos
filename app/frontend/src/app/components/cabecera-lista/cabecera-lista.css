@@ -10,12 +10,12 @@
 .cabecera-lista {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--e3);
   /* El hueco hasta la tabla va DENTRO de la caja, no como margen: con
      `.cabecera-lista-fija` el margen quedaría fuera del fondo pintado y se
      vería pasar una fila por esa franja de 1rem al desplazar el panel (S123,
      medido: 1 fila visible en la banda). Separación idéntica sin pegar. */
-  padding-bottom: 1rem;
+  padding-bottom: var(--e4);
 }
 
 .cabecera-lista__titulo {
@@ -23,7 +23,7 @@
 }
 
 .cabecera-lista__contador {
-  margin-left: 0.5rem;
+  margin-left: var(--e2);
   font-size: var(--tam-s);
   font-weight: var(--peso-normal);
   color: var(--color-tinta-suave);
@@ -36,9 +36,9 @@
 .cabecera-lista__busqueda {
   margin-left: auto;
   width: 14rem;
-  padding: 0.375rem 0.5rem;
+  padding: var(--e1) var(--e2);
   border: 1px solid var(--color-borde);
-  border-radius: var(--radio-m);
+  border-radius: var(--radio-s);
   box-sizing: border-box;
   font-size: var(--tam-s);
 }

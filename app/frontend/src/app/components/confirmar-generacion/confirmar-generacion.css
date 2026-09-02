@@ -3,15 +3,15 @@
    lista de errores no se estire sin fin. */
 .confirmar-generacion {
   max-width: 34rem;
-  padding: 1rem 1.2rem;
+  padding: var(--e4) var(--e4);
   background: var(--color-superficie);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra-dialogo);
 }
 
 .confirmar-generacion h2 {
-  margin: 0 0 0.6rem;
+  margin: 0 0 var(--e2);
   font-size: var(--tam-l);
 }
 
@@ -19,17 +19,17 @@
 .advertencia {
   color: var(--color-error);
   font-weight: var(--peso-medio);
-  margin: 0 0 0.6rem;
+  margin: 0 0 var(--e2);
 }
 
 .errores {
-  margin: 0 0 0.8rem;
-  padding-left: 1rem;
+  margin: 0 0 var(--e3);
+  padding-left: var(--e4);
 }
 
 .error-entrada {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--e2);
   color: var(--color-error);
 }
 
@@ -39,7 +39,7 @@
 
 .acciones {
   display: flex;
-  gap: 0.6rem;
+  gap: var(--e2);
   justify-content: flex-end;
 }
 

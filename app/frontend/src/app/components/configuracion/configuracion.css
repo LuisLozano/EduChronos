@@ -17,14 +17,14 @@
   flex: 0 0 auto;
   width: 14rem;
   box-sizing: border-box;
-  padding: 1.5rem 1rem;
+  padding: var(--e5) var(--e4);
   border-right: var(--borde-fino) solid var(--color-borde);
   /* Si algún día los destinos no caben de alto, se desplaza el índice, no la página. */
   overflow-y: auto;
 }
 
 .configuracion__titulo {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--e4);
   font-size: var(--tam-l);
 }
 
@@ -39,7 +39,7 @@
 
 .configuracion__destino {
   display: block;
-  padding: 0.5rem 0.75rem;
+  padding: var(--e2) var(--e3);
   border-radius: var(--radio-m);
   text-decoration: none;
   color: var(--color-acento);
@@ -71,6 +71,6 @@
 .configuracion__contenido {
   max-width: 60rem;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 var(--e4);
   box-sizing: border-box;
 }

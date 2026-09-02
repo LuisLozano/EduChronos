@@ -11,8 +11,8 @@
 .controles {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 0.25rem;
+  gap: var(--e4);
+  margin-bottom: var(--e1);
   align-items: center;
 }
 
@@ -29,7 +29,7 @@
 
 .controles label {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--e2);
   align-items: center;
   text-transform: capitalize;
 }
@@ -55,8 +55,8 @@
 
 /* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
 .aviso {
-  padding: 0.4rem 0.6rem;
-  margin-bottom: 0.6rem;
+  padding: var(--e2) var(--e2);
+  margin-bottom: var(--e2);
   border-left: 4px solid var(--color-aviso);
   background: var(--color-aviso-fondo);
   font-weight: var(--peso-medio);

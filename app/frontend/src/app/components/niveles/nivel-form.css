@@ -1,30 +1,30 @@
 .nivel-form {
-  padding: 1.5rem;
+  padding: var(--e5);
   min-width: 22rem;
   background: var(--color-superficie);
-  border-radius: 4px;
+  border-radius: var(--radio-m);
 }
 
 .nivel-form__titulo {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--e4);
 }
 
 .nivel-form__campo {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--e4);
 }
 
 .nivel-form__etiqueta {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--e1);
   font-size: var(--tam-s);
 }
 
 .nivel-form__input {
   width: 100%;
-  padding: 0.5rem;
+  padding: var(--e2);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-s);
   box-sizing: border-box;
 }
 
@@ -32,33 +32,33 @@
   display: block;
   color: var(--color-tinta-suave);
   font-size: var(--tam-xs);
-  margin-top: 0.25rem;
+  margin-top: var(--e1);
 }
 
 .nivel-form__error {
   display: block;
   color: var(--color-error);
   font-size: var(--tam-s);
-  margin-top: 0.25rem;
+  margin-top: var(--e1);
 }
 
 .nivel-form__error-servidor {
   color: var(--color-error);
-  margin: 0.5rem 0;
+  margin: var(--e2) 0;
 }
 
 .nivel-form__acciones {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--e2);
+  margin-top: var(--e4);
 }
 
 .nivel-form__cancelar,
 .nivel-form__guardar {
-  padding: 0.5rem 1rem;
+  padding: var(--e2) var(--e4);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-s);
   background: var(--color-superficie);
   cursor: pointer;
 }

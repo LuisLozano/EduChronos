@@ -1,28 +1,28 @@
 /* El CDK no aporta estilos: el diálogo pone los suyos, como confirmar-generacion. */
 .confirmar-borrado {
-  padding: 1.5rem;
+  padding: var(--e5);
   min-width: 20rem;
   background: var(--color-superficie);
-  border-radius: 4px;
+  border-radius: var(--radio-m);
 }
 
 .confirmar-borrado__linea {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--e3);
   font-size: var(--tam-m);
 }
 
 .confirmar-borrado__acciones {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--e2);
+  margin-top: var(--e4);
 }
 
 .confirmar-borrado__cancelar,
 .confirmar-borrado__confirmar {
-  padding: 0.5rem 1rem;
+  padding: var(--e2) var(--e4);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-s);
   background: var(--color-superficie);
   cursor: pointer;
 }

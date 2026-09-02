@@ -1,45 +1,45 @@
 /* El CDK no aporta estilos: el diálogo pone los suyos, como pdc-dialogo. */
 .tutoria-dialogo {
-  padding: 1.5rem;
+  padding: var(--e5);
   min-width: 22rem;
   background: var(--color-superficie);
-  border-radius: 4px;
+  border-radius: var(--radio-m);
 }
 
 .tutoria-dialogo__titulo {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--e4);
 }
 
 .tutoria-dialogo__cargando {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--e4);
   font-size: var(--tam-m);
 }
 
 .tutoria-dialogo__campo {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--e4);
 }
 
 .tutoria-dialogo__etiqueta {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--e1);
   font-size: var(--tam-s);
 }
 
 .tutoria-dialogo__input {
   width: 100%;
-  padding: 0.5rem;
+  padding: var(--e2);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-s);
   box-sizing: border-box;
 }
 
 .tutoria-dialogo__cotutores {
-  margin-bottom: 1rem;
+  margin-bottom: var(--e4);
 }
 
 .tutoria-dialogo__subtitulo {
-  margin: 0 0 0.25rem;
+  margin: 0 0 var(--e1);
   font-size: var(--tam-s);
   font-weight: var(--peso-medio);
 }
@@ -53,33 +53,33 @@
 }
 
 .tutoria-dialogo__cotutor {
-  padding: 0.15rem 0;
+  padding: var(--e1) 0;
   font-size: var(--tam-m);
 }
 
 .tutoria-dialogo__nota {
-  margin: 0.25rem 0 0;
+  margin: var(--e1) 0 0;
   font-size: var(--tam-s);
   color: var(--color-tinta-suave);
 }
 
 .tutoria-dialogo__error-servidor {
   color: var(--color-error);
-  margin: 0.5rem 0;
+  margin: var(--e2) 0;
 }
 
 .tutoria-dialogo__acciones {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--e2);
+  margin-top: var(--e4);
 }
 
 .tutoria-dialogo__cerrar,
 .tutoria-dialogo__guardar {
-  padding: 0.5rem 1rem;
+  padding: var(--e2) var(--e4);
   border: 1px solid var(--color-borde);
-  border-radius: 4px;
+  border-radius: var(--radio-s);
   background: var(--color-superficie);
   cursor: pointer;
 }

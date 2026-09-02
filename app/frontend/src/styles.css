@@ -187,11 +187,21 @@
      en un escalón se redondea al más cercano y el cambio se DECLARA. El resto
      del CSS de componente se pasa a la escala en C-revisión, no aquí.
 
-     RADIOS, censados en S129 y PENDIENTES: `--radio-s` no lo usa nadie,
-     `--radio-m` lo usan tres sitios, y las diez reglas `__input` repiten
-     `border-radius: 4px` literal, que no es ninguno de los dos. Consecuencia:
-     el buscador de las listas es hoy el único control con las esquinas
-     distintas a los demás. Se unifica en C-revisión, no aquí. */
+     RADIOS, unificados en C-revisión tramo 2 (S130) con una regla de dos
+     niveles: `--radio-s` en los controles (campos, botones, buscador) y
+     `--radio-m` en lo que los contiene (formularios, diálogos, el marco de
+     plaza y los bloques de mensaje). El literal `border-radius: 4px` —que
+     S129 situó en las diez reglas `__input`, y que el censo del tramo 2 midió
+     en 35, doce de ellas en contenedores— desaparece: era el hecho que
+     sostenía la decisión de un solo nivel, y al medirlo dejó de sostenerla.
+
+     `--radio-s` sube de 3 px a 4 px A PROPÓSITO: así los 20 controles que ya
+     estaban en 4 px literal no se mueven, y el único cambio visible del
+     tramo es el buscador de las listas, que baja de 6 px a 4 px y deja de
+     ser el control con las esquinas distintas a los demás.
+
+     `--radio-s` vale ahora lo mismo que `--e1` por coincidencia, no por
+     parentesco: uno es radio y el otro separación, y no se fusionan. */
   --e1: 4px;
   --e2: 8px;
   --e3: 12px;
@@ -200,8 +210,8 @@
   --e6: 32px;
 
   --borde-fino: 1px;
-  --radio-s: 3px;    /* sin uso hoy */
-  --radio-m: 6px;
+  --radio-s: 4px;    /* controles */
+  --radio-m: 6px;    /* lo que los contiene */
 }
 
 /* ---------------- Estados ----------------
