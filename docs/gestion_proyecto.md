@@ -15,20 +15,20 @@
 - L758 — ### H1 — Ajustar (cierre)
 - L760 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
 - L773 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." (ABIERTO en S121)
-- L962 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1146 — ## 4. Clasificación del trabajo pendiente
-- L1164 — ### Clasificación de las deudas vivas actuales
-- L1170 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1177 — #### Deuda técnica real, colgada de su objetivo
-- L1224 — #### Mejora futura, cuelga y espera
-- L1254 — #### Decisión arquitectónica consciente → sale de la cola
-- L1266 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1275 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1282 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1342 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1396 — ## 6. Reglas estratégicas
-- L1443 — ## 7. Métricas del sistema
-- L1464 — ## 8. El sistema respondiendo a las preguntas clave
+- L972 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1156 — ## 4. Clasificación del trabajo pendiente
+- L1174 — ### Clasificación de las deudas vivas actuales
+- L1180 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1187 — #### Deuda técnica real, colgada de su objetivo
+- L1235 — #### Mejora futura, cuelga y espera
+- L1265 — #### Decisión arquitectónica consciente → sale de la cola
+- L1277 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1286 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1293 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1353 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1407 — ## 6. Reglas estratégicas
+- L1454 — ## 7. Métricas del sistema
+- L1475 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -894,12 +894,22 @@ de las Fases 9–12.
     gobernar nada— y se APLICA sólo donde C-identidad y C-revisión tocan. **No se abre un Cambio de
     tokenización de espaciado**, con argumento y no por comodidad: C-sustitución fue viable porque
     el color tiene equivalencia EXACTA (`#666` → `var(--color-borde)`, mismo valor), y el
-    espaciado no —tokenizar obliga a elegir escalón y mueve píxeles—. Los tres literales que no
-    caían en un escalón se redondearon y se declararon. **EXCLUSIÓN EXPRESA: la geometría de
-    `horario-grid.css` no se tokeniza**, porque sus valores son presupuesto MEDIDO contra el
-    criterio 4 de O-navegación (`diseno-navegacion.md` §4) y no elecciones de densidad; el reparto
-    vive a 0,8 px de un escalón de recorte, así que sustituir un número medido por uno elegido es
-    riesgo puro. Lo que quede de las 27 hojas se pasa en C-revisión.
+    espaciado no —tokenizar obliga a elegir escalón y mueve píxeles—. Los **cuatro** literales que
+    no caían en un escalón se redondearon; su declaración **no llegó a escribirse en S128** y se
+    recupera en S130 desde el diff `cd6b43f..94b97df`, verificada línea a línea sobre los blobs:
+    `app.css` `padding: 0.75rem 1.25rem` → `var(--e3) var(--e5)` (+4 px, sólo el horizontal),
+    `app.css` `gap: 1.25rem` → `var(--e5)` (+4 px), `landing.css` `gap: 0.4rem` → `var(--e2)`
+    (+1,6 px) y `landing.css` `padding: 1.25rem` → `var(--e5)` (+4 px). El «tres» que esta ficha
+    afirmó durante dos sesiones era falso, y lo era porque nadie enumeró; la afirmación de S128 de
+    que ninguno tocaba la altura de la rejilla SÍ era cierta —el vertical de la barra cae exacto en
+    `--e3`— pero no era comprobable. Nace `D-declarado-sin-artefacto`. **Los 24 redondeos del tramo
+    2 (S130) están medidos y reproducidos por dos derivaciones independientes, y quedan PENDIENTES
+    DE ENUMERAR en la entrada de S130 del plan; mientras esa lista no exista, no se consideran
+    declarados.** **EXCLUSIÓN EXPRESA: la geometría de `horario-grid.css` no se tokeniza**, porque
+    sus valores son presupuesto MEDIDO contra el criterio 4 de O-navegación (`diseno-navegacion.md`
+    §4) y no elecciones de densidad; el reparto vive a 0,8 px de un escalón de recorte, así que
+    sustituir un número medido por uno elegido es riesgo puro. Lo que quede de las 27 hojas se pasa
+    en C-revisión.
   - **RESTRICCIÓN QUE C-IDENTIDAD DESCUBRIÓ Y QUE C-REVISIÓN HEREDA: la barra de la aplicación
     puede ENCOGER, NO CRECER.** El javadoc del marco flex de `styles.css` dice que «si la barra
     cambia de alto, el reparto se rehace solo», y eso describe el LAYOUT y no el CRITERIO: con
@@ -1219,6 +1229,7 @@ asigna categoría, objetivo y disposición.
 | ~~D-desbordamiento-sin-etiqueta~~ (las dos marcas condensadas de la rejilla llevaban `title` y ninguna etiqueta accesible) **NACE Y CIERRA EN S129** | O-diseño, C-revisión (tramo 1) | — | Destapada por el censo de S129 al buscar el molde de `D-insignia-sin-leyenda` para reutilizarlo: la marca `+N` de plazas ocultas —el mecanismo que S127 construyó precisamente para que esas plazas dejaran de ser mudas— vivía a quince líneas de la insignia que S128 sí dotó del par completo, y un lector de pantalla sólo oía «más N». Ampliada por decisión del arquitecto a `.grupos`, mismo defecto en el mismo fichero: dejar la mitad arreglada obligaba a volver. El `aria-label` REPITE el `title` literalmente y no mejora su redacción —las cadenas son de S127 y de D6, y cambiarlas habría sido afirmar algo nuevo sobre lo que devuelven `marcaOcultas`, `detalleInstancia` y `marcaGrupos`—. Cubierta por el caso (30) de `horario-grid.spec.ts`, que asevera la IGUALDAD con el `title` y no un literal, con no-nulo previo porque borrar los dos atributos dejaría `null === null` en verde. Coste en altura: cero. **CERRADA** |
 | D-tokens-sin-uso (cuatro tokens de `styles.css` no los usa nadie) | O-diseño, C-revisión (tramo 3) | No | Nace en el M2 de S129 al recorrer los 46 tokens de `:root` uno a uno: `--radio-s`, `--fuente-datos`, `--color-ok-fondo` y `--color-info-fondo` no tienen un solo consumidor. NO se retiran, y la razón es de método: borrar es un cambio sin criterio detrás, y dos de ellos completan parejas de la tabla de la decisión 1 —`ok` tiene la tinta viva y el fondo muerto, `info` sólo tiene fondo—. Se marcan en el fichero como «sin uso hoy», que es estado vivo correcto (R5). El caso que hay que decidir con cuidado es `--fuente-datos`: `.cuenta` de `panel-prevalidacion` es su candidato natural, y estrenarla ahí EN SOLITARIO dejaría una familia tipográfica que aparece una sola vez en toda la aplicación, peor que no usarla. La decisión es binaria y no se toma de paso: o se usa donde toca —todos los códigos y horas— o se retira. `--radio-s` se decide junto con `D-select-nativo-desparejo`, cuyo censo lo destapó. No se paga ahora |
 | D-748-sin-derivacion (el número que gobernó una pregunta abierta durante tres sesiones nunca se escribió con su derivación) | Transversal, con la sesión de Higiene/Método | No | Nace en S128 al intentar cerrar los «32 px sin explicar» de S126. La causa candidata está medida —`.app__contenido` declara `padding: 1rem 0`, 32 px exactos, en el contenedor de la vista que ni S126 ni S127 miraron— y coincide al píxel, pero **no hay contra qué contrastarla**: el plan dice «los 748 que el arquitecto había calculado» y en ningún documento del repo consta cómo se calcularon; reconstruirlos desde el viewport no cuadra. Misma lección que `D-arranque-no-literal` por el lado del número: lo que se describe y no se cita, no se puede verificar después. Arreglo de una línea —escribir la fórmula al lado del número la próxima vez que se calcule un presupuesto—. Los 32 px NO se reclaman (R-terminado: subiría `--alto-celda` ~4,5 px y cambiaría el recorte de un criterio cumplido) |
+| D-declarado-sin-artefacto (un documento afirma haber declarado algo que no está escrito en ninguna parte) | Transversal, con la sesión de Higiene/Método | No | Nace en S130 al buscar el precedente de declaración de redondeos de S128. La regla escrita en `styles.css` exige que un redondeo se DECLARE; el único precedente dice DOS VECES que la cumplió —esta ficha y `plan_trabajo_horarios.md`— y no existe el artefacto: ninguna lista en `styles.css`, ninguna en los documentos, y ningún commit del repo tiene cuerpo, así que el mensaje de commit tampoco era sede posible. El coste NO es teórico: al reconstruirlos desde `cd6b43f..94b97df` resultaron ser CUATRO y no tres, un dato falso que sobrevivió dos sesiones porque nadie podía contarlo. Tercera de la familia junto a `D-arranque-no-literal` (el literal que se describe y no se cita) y `D-748-sin-derivacion` (el número sin su derivación). Arreglo de una línea de método: «se DECLARA» significa que existe una lista enumerada con fichero, propiedad, literal y delta, no una frase que diga que se declaró |
 | ~~D-prevalidacion-contraste-sin-ver~~ (aviso y error del panel se distinguían SOLO por color de texto, y no se habían visto juntos) **CERRADA S129** | O-diseño, C-revisión (tramo 1) | — | Nace en el M4 de S121 por un riesgo que la sesión NO pudo cerrar. C-sustitución colapsó cuatro ámbares (`#c80`, `#a60`, `#b8860b`, `#8a6100`) en `--color-aviso` (#8A5A00) y tres rojos (`#b00`, `#b00020`, `#c33`) en `--color-error` (#A32014), y en `panel-prevalidacion` los mensajes de severidad se distinguen solo por `color:`, sin fondo. Para verlos juntos hay que provocar un hallazgo, y ni la documentación del proyecto ni el asistente saben qué lo dispara: se registró como NO SABIDO en vez de mandar a probar a ciegas. Se verifica en C-revisión leyendo el componente antes. Si se confunden, el arreglo es un cambio de valor en `:root` y se propaga solo, que es justo lo que C-tokens compró. **CERRADA en S129 POR CONSTRUCCIÓN, con dos correcciones a esta ficha.** (1) **La verificación que pedía no era difícil: es IMPOSIBLE.** Medido en el backend: `Severidad` tiene dos valores y las tres reglas de `PrevalidacionService` emiten `ERROR`; **nadie emite `AVISO`**, ni en `main` ni en los tests, y el propio enum documenta que se conserva por contrato y como candidato del palomar de aulas. Los dos colores no coexisten, así que no se pueden ver juntos. (2) **Tenía DOS caras y la ficha sólo veía una:** además de las filas, los dos contadores de la cabecera eran números desnudos y consecutivos distinguidos sólo por la tinta, y **medido con la fórmula WCAG los dos tokens tienen 1,28:1 ENTRE SÍ** cuando a un elemento no textual portador de información se le piden 3:1; en el estado colapsado —el habitual— eran lo único en pantalla, luego el color no era redundante, era la información. El arreglo NO fue el cambio de valor en `:root` que esta ficha preveía: rótulo VISIBLE junto a cada número, severidad pintada como TEXTO en cada fila con el valor crudo del enum, y marco del panel tomando la severidad máxima con contrastes medidos antes de escribirlos (6,35:1 / 4,97:1 / 13,16:1 sobre `--color-error-fondo`). Al dejar el color de ser el único canal, la verificación imposible deja de ser condición para cerrarla: mismo mecanismo que mató a `D-vacio-miente-con-error` en S128. **CERRADA** |
 
 #### Mejora futura, cuelga y espera

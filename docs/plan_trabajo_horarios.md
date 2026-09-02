@@ -52,22 +52,22 @@
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
 - L699 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
-- L1075 — ### Bloques de Fase 2
-- L1083 — ### Bloques de Fase 5
-- L1106 — ### Bloques de Fase 6
-- L1151 — ### Bloques de Fase 8
-- L1360 — ### Fases completadas
-- L1464 — ### Cierre del modelo — Sesión 8
-- L1512 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1558 — ### Método de trabajo (procedimiento vigente)
-- L1591 — ### Deuda consciente VIVA
-- L3111 — ### Deuda consciente CERRADA (histórico)
-- L3199 — ### Notas técnicas validadas en Fase 0
-- L3209 — ### Notas técnicas validadas en Fase 6
-- L3243 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3252 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3279 — ### Registro detallado de sesiones S10–S31
-- L3288 — ## Señales globales de alerta
+- L1084 — ### Bloques de Fase 2
+- L1092 — ### Bloques de Fase 5
+- L1115 — ### Bloques de Fase 6
+- L1160 — ### Bloques de Fase 8
+- L1369 — ### Fases completadas
+- L1473 — ### Cierre del modelo — Sesión 8
+- L1521 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1567 — ### Método de trabajo (procedimiento vigente)
+- L1600 — ### Deuda consciente VIVA
+- L3120 — ### Deuda consciente CERRADA (histórico)
+- L3208 — ### Notas técnicas validadas en Fase 0
+- L3218 — ### Notas técnicas validadas en Fase 6
+- L3252 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3261 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3288 — ### Registro detallado de sesiones S10–S31
+- L3297 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -931,8 +931,17 @@ nuevo a partir del anterior, modificando solo los cambios.
   exacta (`#666` → `var(--color-borde)`, mismo valor) y el espaciado no —tokenizar `padding: 13px` obliga a
   elegir escalón y mueve píxeles—, y hay una zona donde mover píxeles rompe algo medido. De ahí la
   **EXCLUSIÓN EXPRESA de la geometría de `horario-grid.css`**, que es presupuesto medido contra el criterio 4
-  de O-navegación y no elección de densidad. Los tres literales que no caían en un escalón se redondearon y se
-  declararon; ninguno toca altura de rejilla.
+  de O-navegación y no elección de densidad. Los **cuatro** literales que no caían en un escalón se
+  redondearon; su declaración **no llegó a escribirse en S128** y se recupera en S130 desde el diff
+  `cd6b43f..94b97df`, verificada línea a línea sobre los blobs: `app.css` `padding: 0.75rem 1.25rem`
+  → `var(--e3) var(--e5)` (+4 px, sólo el horizontal), `app.css` `gap: 1.25rem` → `var(--e5)` (+4 px),
+  `landing.css` `gap: 0.4rem` → `var(--e2)` (+1,6 px) y `landing.css` `padding: 1.25rem` →
+  `var(--e5)` (+4 px). El «tres» que este registro afirmó durante dos sesiones era falso, y lo era
+  porque nadie enumeró; la afirmación de S128 de que ninguno tocaba la altura de la rejilla SÍ era
+  cierta —el vertical de la barra cae exacto en `--e3`— pero no era comprobable. Nace
+  `D-declarado-sin-artefacto`. **Los 24 redondeos del tramo 2 (S130) están medidos y reproducidos por
+  dos derivaciones independientes, y quedan PENDIENTES DE ENUMERAR en la entrada de S130 del plan;
+  mientras esa lista no exista, no se consideran declarados.**
   **LA RESTRICCIÓN QUE GOBIERNA EL BLOQUE 1, Y NO ESTABA ESCRITA EN NINGUNA PARTE: LA BARRA PUEDE ENCOGER, NO
   CRECER.** El javadoc del marco flex de `styles.css` promete que «si la barra cambia de alto, el reparto se
   rehace solo», y eso describe el LAYOUT y no el CRITERIO: `.app__contenido` lleva `flex: 1`, así que lo que
