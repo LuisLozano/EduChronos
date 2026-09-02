@@ -2,73 +2,72 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L76 — ## Cómo usar este documento en el Project de Claude
-- L96 — ## Principios de avance
-- L117 — ## FASE 0 — Decisión de stack tecnológico
-- L120 — ### Entregable
-- L124 — ### Criterios de verificación
-- L131 — ### Señal de que está mal
-- L136 — ## FASE 1 — Modelo de datos validado en papel
-- L140 — ### Entregable
-- L145 — ### Criterios de verificación
-- L163 — ### Señal de que está mal
-- L167 — ### Resultado de la fase
-- L175 — ## FASE 2 — Solver MVP: problema mínimo
-- L182 — ### Subconjunto de datos
-- L188 — ### Entregable
-- L195 — ### Criterios de verificación
-- L208 — ### Señal de que está mal
-- L211 — ### Decisiones tácticas
-- L285 — ### Criterios de verificación por bloque
-- L327 — ## FASE 3 — Solver: desdobles y agrupamientos
-- L330 — ### Lo que se añade
-- L335 — ### Criterios de verificación
-- L352 — ### Señal de que está mal
-- L358 — ## FASE 4 — Solver: grupos PDC/Diversificación
-- L361 — ### Lo que se añade
-- L365 — ### Criterios de verificación
-- L375 — ## FASE 5 — Solver: instituto completo
-- L421 — ### Lo que se añade
-- L427 — ### Criterios de verificación
-- L494 — ### Señal de que está mal
-- L501 — ## FASE 6 — Persistencia de datos
-- L505 — ### Entregable
-- L518 — ### Criterios de verificación
-- L546 — ## FASE 7 — UI: visualización de horarios
-- L549 — ### Entregable
-- L552 — ### Criterios de verificación
-- L564 — ### Bloques de Fase 7
-- L603 — ## FASE 8 — UI: configuración y ajuste manual
-- L614 — ### Entregable
-- L620 — ### Criterios de verificación
-- L641 — ## FASE 9 — Exportación
-- L644 — ### Criterios de verificación
-- L652 — ## FASE 10 — Gestión de cursos académicos
-- L661 — ### Entregable
-- L667 — ### Criterios de verificación
-- L676 — ## FASE 11 — Empaquetado y distribución Windows
-- L679 — ### Criterios de verificación
-- L688 — ## FASE 12 — CI/CD con GitHub Actions
-- L691 — ### Criterios de verificación
-- L698 — ## Registro de progreso
-- L700 — ### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. **EN CURSO: faltan el tramo 3 (el juicio), el M4 en navegador y el e2e.**
-- L829 — ### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
-- L1214 — ### Bloques de Fase 2
-- L1222 — ### Bloques de Fase 5
-- L1245 — ### Bloques de Fase 6
-- L1290 — ### Bloques de Fase 8
-- L1499 — ### Fases completadas
-- L1603 — ### Cierre del modelo — Sesión 8
-- L1651 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1697 — ### Método de trabajo (procedimiento vigente)
-- L1730 — ### Deuda consciente VIVA
-- L3250 — ### Deuda consciente CERRADA (histórico)
-- L3338 — ### Notas técnicas validadas en Fase 0
-- L3348 — ### Notas técnicas validadas en Fase 6
-- L3382 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3391 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3418 — ### Registro detallado de sesiones S10–S31
-- L3427 — ## Señales globales de alerta
+- L75 — ## Cómo usar este documento en el Project de Claude
+- L95 — ## Principios de avance
+- L116 — ## FASE 0 — Decisión de stack tecnológico
+- L119 — ### Entregable
+- L123 — ### Criterios de verificación
+- L130 — ### Señal de que está mal
+- L135 — ## FASE 1 — Modelo de datos validado en papel
+- L139 — ### Entregable
+- L144 — ### Criterios de verificación
+- L162 — ### Señal de que está mal
+- L166 — ### Resultado de la fase
+- L174 — ## FASE 2 — Solver MVP: problema mínimo
+- L181 — ### Subconjunto de datos
+- L187 — ### Entregable
+- L194 — ### Criterios de verificación
+- L207 — ### Señal de que está mal
+- L210 — ### Decisiones tácticas
+- L284 — ### Criterios de verificación por bloque
+- L326 — ## FASE 3 — Solver: desdobles y agrupamientos
+- L329 — ### Lo que se añade
+- L334 — ### Criterios de verificación
+- L351 — ### Señal de que está mal
+- L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
+- L360 — ### Lo que se añade
+- L364 — ### Criterios de verificación
+- L374 — ## FASE 5 — Solver: instituto completo
+- L420 — ### Lo que se añade
+- L426 — ### Criterios de verificación
+- L493 — ### Señal de que está mal
+- L500 — ## FASE 6 — Persistencia de datos
+- L504 — ### Entregable
+- L517 — ### Criterios de verificación
+- L545 — ## FASE 7 — UI: visualización de horarios
+- L548 — ### Entregable
+- L551 — ### Criterios de verificación
+- L563 — ### Bloques de Fase 7
+- L602 — ## FASE 8 — UI: configuración y ajuste manual
+- L613 — ### Entregable
+- L619 — ### Criterios de verificación
+- L640 — ## FASE 9 — Exportación
+- L643 — ### Criterios de verificación
+- L651 — ## FASE 10 — Gestión de cursos académicos
+- L660 — ### Entregable
+- L666 — ### Criterios de verificación
+- L675 — ## FASE 11 — Empaquetado y distribución Windows
+- L678 — ### Criterios de verificación
+- L687 — ## FASE 12 — CI/CD con GitHub Actions
+- L690 — ### Criterios de verificación
+- L697 — ## Registro de progreso
+- L699 — ### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. El M4 en navegador destapa que la jerarquía de acciones que `styles.css` declara «aplicada» NO lo está (M0 + M2 + M4 en navegador + M1, sin M3: el tramo no toca un solo `.ts`). Cinco commits. **NO cierra O-diseño**: el tramo 3 queda a medias y su trabajo restante pasa a S131.
+- L1156 — ### Bloques de Fase 2
+- L1164 — ### Bloques de Fase 5
+- L1187 — ### Bloques de Fase 6
+- L1232 — ### Bloques de Fase 8
+- L1441 — ### Fases completadas
+- L1545 — ### Cierre del modelo — Sesión 8
+- L1593 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1639 — ### Método de trabajo (procedimiento vigente)
+- L1672 — ### Deuda consciente VIVA
+- L3192 — ### Deuda consciente CERRADA (histórico)
+- L3280 — ### Notas técnicas validadas en Fase 0
+- L3290 — ### Notas técnicas validadas en Fase 6
+- L3324 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3333 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3360 — ### Registro detallado de sesiones S10–S31
+- L3369 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -697,7 +696,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. **EN CURSO: faltan el tramo 3 (el juicio), el M4 en navegador y el e2e.**
+### Sesión 130 — O-diseño (transversal): **C-revisión, TRAMO 2 APLICADO**. Los 195 valores de espaciado de las hojas de componente pasan a la escala `--e1..--e6` con los 24 redondeos DECLARADOS uno a uno, y el radio se unifica en dos niveles sobre 36 reglas: `--radio-s` sube de 3 a 4 px y estrena 21 usos, `--radio-m` cubre los 15 contenedores. Al buscar el precedente de declaración de S128 resulta que NO EXISTE y que su recuento era falso: nace `D-declarado-sin-artefacto`. El M4 en navegador destapa que la jerarquía de acciones que `styles.css` declara «aplicada» NO lo está (M0 + M2 + M4 en navegador + M1, sin M3: el tramo no toca un solo `.ts`). Cinco commits. **NO cierra O-diseño**: el tramo 3 queda a medias y su trabajo restante pasa a S131.
   Trigésima sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y sin M3: el
   tramo 2 no toca un solo `.ts`. Suites: línea base heredada de S129 **corrida antes de tocar nada y verde**
   (solver 91, app 282, vitest 419 en 49 ficheros); tras aplicar, **solver 91, app 282, vitest 419**, sin un
@@ -819,14 +818,94 @@ nuevo a partir del anterior, modificando solo los cambios.
   era el problema: `.rejilla { width:100%; table-layout:fixed }`»: el presupuesto MEDIDO del criterio
   4 es de altura, no de anchura. Dato adyacente que se anota sin conclusión: `diseno-navegacion.md:162`
   registra cinco aulas de nombre largo como «agravante de ancho no previsto».
-  PENDIENTE AL ESCRIBIR ESTA ENTRADA: el M4 en navegador —cuyos cuatro primeros sitios son los `padding`
-  que cambiaron de forma, y el quinto el buscador, que se lleva a la vez −2 px de padding y −2 px de
-  radio—, el e2e, la pregunta de navegador que `D-select-nativo-desparejo` deja viva (si un `<select>` con
-  clase de `<input>` sigue pintando su flecha nativa, que decide si alcanza a 13 controles o sólo a 2), y la
-  decisión de si los tramos 2 y 3 se funden, que la ficha reserva al M0 del tramo 2 «con la UI aplicada
-  delante».
+  EL M4 EN NAVEGADOR, Y SU VEREDICTO. Recorrido sobre `educhronos-s130-m4.db`, copia de la demo, con la UI
+  del tramo 2 servida y VERIFICADA en el artefacto y no sólo en el fuente: el bundle de `static/` contiene 21
+  `var(--radio-s)`, 17 `var(--radio-m)` y CERO `border-radius:4px`, los mismos números que el transformador
+  midió sobre las hojas. Veredicto por parada: (1) las dos cajas de diálogo y las dos de aviso aguantan el
+  `padding` simétrico, y el riesgo real —romper una simetría deliberada entre hermanas— no se materializó,
+  porque cada pareja partía del mismo literal y cae en el mismo token, así que siguen siendo idénticas entre
+  sí; (2) el buscador de las listas NO desentona: comparte borde, radio y `box-sizing` con las diez `__input`,
+  y sus dos diferencias —`padding: var(--e1) var(--e2)` frente a `var(--e2)`, y `font-size: var(--tam-s)`— son
+  deliberadas, para caber en la cabecera. El arquitecto lo ve «un poco más pequeño» y PREFIERE ese tamaño; se
+  deja como está, porque igualarlos borraría una intención igual que la habría borrado colapsar los cuatro
+  `padding` asimétricos; (3) `D-select-nativo-desparejo` queda MEDIDA por fin, y la respuesta es que SÍ: en
+  «Editar aula» y «Editar actividad» los `<select>` con la clase de su formulario salen grises con la flecha
+  nativa al lado de `<input>` blancos de la misma columna. Alcanza a los 13, no a los 2.
+  LO QUE EL M4 DESTAPÓ Y NADIE BUSCABA, que es el hallazgo de la sesión: `styles.css:59-63` declara la
+  jerarquía de acciones como «aplicado, se declara» y NO lo está. Un solo `background: var(--color-acento)` en
+  toda la aplicación, y es la barra. Esto no es una deuda de acabado pendiente: es el criterio 3 declarado
+  cumplido sobre un hecho falso, y arrastra algo peor —S129 zanjó la pregunta del verde con el argumento de que
+  «la jerarquía ya se resuelve por relleno»; el argumento sigue siendo bueno, el hecho no era cierto, luego esa
+  pregunta no está resuelta sino cerrada—. Tercera vez en esta sesión que una afirmación escrita no tiene
+  detrás lo que dice tener, y la primera en que lo que falta no es el registro sino el PRODUCTO.
+  R-TERMINADO, CON LO QUE SE DEJA FUERA Y POR QUÉ. (a) Rediseñar los avisos del horario como un botón con
+  icono de estado que abra el detalle en un panel aparte —propuesta del arquitecto en el M4, con buen
+  argumento: liberaría espacio para la rejilla—. Cambia la INTERACCIÓN, no el acabado, y O-particiones toca
+  frontend después: R-terminado y R-invalidación a la vez. Nace `D-avisos-como-bloque-fijo`. (b) Igualar el
+  tamaño de todos los controles, descartado por la medición y no por la regla: el buscador no es incoherente,
+  es denso a propósito. (c) El `padding` lateral cero de `.app__contenido`: NO lo causó el tramo 2 —era
+  `1rem 0`, que cae exacto en `--e4`—, pero el M4 lo desbloquea, porque `horario-grid.css` no declara ningún
+  ancho absoluto y `diseno-navegacion.md:132` deja escrito que el presupuesto medido del criterio 4 es de
+  ALTURA y no de anchura. Entra en el tramo 3, no en el tramo 2, porque crear una declaración no es sustituir
+  un literal.
+  LO QUE ENTRA EN EL TRAMO 3 Y SE EJECUTA EN S131, y la razón de que quepa en O-diseño: aplicar la jerarquía
+  de acciones a los 34 botones y darle padding lateral a la vista NO es diseñar. Los tres tokens existen, la
+  regla está escrita en la decisión 1 desde S129 y sólo falta ejecutarla; y el criterio 3 no puede darse por
+  cumplido mientras `styles.css` afirme «aplicado» sobre algo que no lo está. Cabe en el objetivo; no cabía en
+  esta sesión, y eso se dijo antes de intentarlo en vez de trocearlo mal para que entrase.
+  DEUDA NUEVA, cuatro altas y una instancia: `D-declarado-sin-artefacto` (§4), `D-jerarquia-declarada-sin-aplicar`,
+  `D-avisos-como-bloque-fijo`, la ampliación de `D-select-nativo-desparejo` a los cinco `input[type=number]`,
+  los dos radio y los dos checkbox —su título se le ha quedado corto: lo común no es la clase que falta, es que
+  NINGÚN control con adorno nativo se ha neutralizado—, y una instancia nueva de `D-arranque-no-literal`: la
+  orden literal del plan levanta el backend SIN frontend desde un árbol recién limpiado, porque los cuatro
+  plugins que construyen el bundle cuelgan de `prepare-package` y `spring-boot:run` para en `test-compile`. En
+  S129 funcionó porque `static/` estaba poblado por casualidad de esa misma sesión. La orden corregida son TRES
+  pasos, y está escrita más abajo, probada hoy.
+  D-GUION-EXIT-ENMASCARADO: SIETE INSTANCIAS EN UNA SOLA SESIÓN, SEIS DEL ARQUITECTO. Tres en el M0 (`^Results:`
+  contra un Maven que prefija `[INFO]`; `^| $D` contra filas tachadas; un patrón de espaciado que ignoraba la
+  exclusión que la propia ficha declara, y cuyo 214 pareció una regresión hasta aplicarla), una por recortar
+  con `sed` la lista de redondeos justo antes del `ABORTA` que explicaba el vacío, una por delimitar la entrada
+  de S129 con `^### ` sin ver que la anterior no tiene cabecera, una por escribir `S129` teniendo delante un
+  documento que dice «Sesión 129», y un `||` de rescate en un guion de lectura —el corolario que esta misma
+  sesión llevaba citando desde el M0—. Es el peor dato que la deuda tiene desde que nació, y el que importa no
+  es el siete: es que el `||` se escribió DESPUÉS de haber contado cinco. Dos errores de medición de Claude
+  Code, los dos declarados por él antes de que nadie los viese: un `grep -E` con retrorreferencia que `ugrep`
+  no soporta y cuyo error se fue a la salida bajo un `||`, y un `(cond and A or B)[k]=1` con `A` vacío, que es
+  falsy, mandando los 30 botones al cubo equivocado. R-deuda aguanta por décima vez: no bloquea el criterio.
+  UNA AFIRMACIÓN NO MEDIDA, PROPAGADA POR LOS DOS. Se dijo «cuatro commits locales sin pushear» y era falso —el
+  push había ocurrido entre turnos, `origin/main` estaba en `05abdb6`—, y el arquitecto lo repitió y dio una
+  orden encima sin verificarlo. La misma familia que el resto de la sesión, en su forma más barata: repetir un
+  número que otro afirmó.
+  ARRANQUE DEL M4, LITERAL Y PROBADO HOY, que sustituye al de la entrada de S129: `mvn -pl solver install
+  -DskipTests`, luego `mvn -pl app package -DskipTests` (este paso FALTABA y es el que dispara `npm ci`,
+  `ng build` y la copia a `target/classes/static`), y luego `mvn -pl app spring-boot:run
+  "-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:/home/luis/desarrollo/educhronos/app/educhronos-s130-m4.db"`,
+  con UN SOLO argumento, que es donde S120 se estrelló. Corolario: `spring-boot:run` NO reconstruye el
+  frontend, así que tocar CSS durante un M4 obliga a repetir el `package` o el navegador seguirá viendo lo
+  anterior.
+  R4 / COSTURA. `scripts/verificar-cierre.py` daba un fallo duro al escribir esta entrada —dos cabeceras
+  `### Sesión` vivas—, consecuencia directa de abrir S130 con S129 todavía viva, y lo descarga el M1-bis de
+  aquí abajo. Los 27 sospechosos restantes son preexistentes (identificadores `D-B*`, `D-F7*`, `D-F8.*` que
+  aparecen una sola vez); ninguno lo introdujo esta sesión. **e2e NO CORRIDO**: Playwright levanta su propio
+  servidor y el puerto 8080 estaba ocupado por la aplicación del M4, que además corre contra la base de la
+  sesión, así que `reuseExistingServer` habría contaminado el recorrido. Es lo PRIMERO que hace S131, con la
+  aplicación parada.
+  DEUDA BLOQUEANTE ABIERTA: pasa de 1 a 2. Sigue `D31-a` (las aulas de FPB) y entra
+  `D-jerarquia-declarada-sin-aplicar`, que bloquea el criterio 3 de O-diseño por una razón sencilla: el
+  criterio no puede darse por cumplido mientras `styles.css` afirme «aplicado» sobre algo que la medición
+  desmiente.
+  LIMPIEZA (M1-bis): archivada S128 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S129 a «Última sesión registrada (previa):»; S130
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S127 a S128.
+  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
+  con el TRAMO 1 y el TRAMO 2 HECHOS y el TRAMO 3 A MEDIAS**. Criterios 1, 2 y 4 CUMPLIDOS; el 3 tiene la
+  aplicación hecha y el juicio a medias. Los tramos 2 y 3 SE FUNDIERON, y la fusión se cumplió —el M4 de la
+  aplicación fue el recorrido—; lo que no se cumplió fue su previsión, porque el recorrido encontró trabajo que
+  no contemplaba. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro.
+  Siguiente: **el resto del TRAMO 3**, sobre decisiones ya escritas y no sobre diseño nuevo. Lo fija su propio
+  M0 (ver M1-ter).
 
-### Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
+Última sesión registrada (previa): Sesión 129 — O-diseño (transversal): **C-revisión, TRAMO 1 HECHO y criterio 4 CUMPLIDO**. Las seis decisiones de identidad pasan de estar aplicadas a estar ESCRITAS —cuatro nacen en esta sesión—, los 23 literales de peso entran en la escala, y tres deudas de «el color es la única señal» mueren juntas: la severidad de la prevalidación viaja como texto, las dos marcas de la rejilla dejan de ser mudas para un lector de pantalla y el contador deja de apagarse ante un error de acción (M0 + M2 + M3 con mutación + M4 en navegador + M1). Siete commits. **NO cierra O-diseño**: C-revisión resultó del tamaño de un objetivo pequeño y se PARTE EN TRES TRAMOS.
   Vigesimonovena sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
   donde hubo lógica real (la condición del contador; las cuatro decisiones y la tokenización de pesos no tocan
   un `.ts`). Suites: línea base heredada de S128 **corrida antes de tocar nada y verde** (app 282, solver 91,
@@ -1038,143 +1117,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   PARTIDO EN TRES TRAMOS, con el TRAMO 1 HECHO**. Criterios 1, 2 y 4 CUMPLIDOS; el 3 es el tramo 2. O-demo (H2)
   sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro. Siguiente: **el TRAMO 2 de
   C-revisión**, el espaciado y los radios sobre decisiones ya escritas. Lo fija su propio M0 (ver M1-ter).
-
-Última sesión registrada (previa): Sesión 128 — O-diseño (transversal): **C-identidad HECHO**. La barra pasa a fondo de acento con el sitio del selector de curso de Fase 10 reservado y medido, la landing estrena el primer `<h1>` del proyecto, la insignia de coste blando deja de ser el único adorno mudo de la celda, y las cuatro ramas de estado que las siete listas repetían carácter a carácter se funden en `app-estado-lista` (M0 + M2 + M3 con mutación + M4 en navegador + M1). Seis commits. Cierra la salvedad del criterio 1 de O-navegación, `D-insignia-sin-leyenda` y `D-vacio-miente-con-error`. Queda C-revisión.
-  Vigesimoctava sesión bajo el mapa Hito→Objetivo→Cambio. Tipo Configuración/UI, con M4 obligatorio y M3 sólo
-  donde hubo lógica real (la precedencia de ramas del bloque 2; el bloque 1 no tocó ni un `.ts`). Suites:
-  línea base heredada de S127 **corrida antes de tocar nada y verde** (app 282, solver 91, vitest 403); al
-  cerrar, **app 282, solver 91, vitest 414, e2e 2**. vitest sube +11 (9 del componente nuevo, 2 de los asertos
-  de texto) y de los 403 heredados sólo se REESCRIBEN 40 selectores, ninguno de contenido. Bundle de
-  producción 540,71 → **542,03 kB crudos / 121,81 transferidos**, con el aviso en 550: margen 8 kB.
-  M0 — EL MAPA, Y LA PRIMERA APERTURA EN CINCO SESIONES QUE ELIGE EN VEZ DE CONTINUAR. Cambio: C-identidad.
-  Objetivo: O-diseño, criterio 4 (decisiones de identidad) y preparación del 3. Hito: ninguno funcional, que
-  es la respuesta escrita en la ficha —O-diseño es el único objetivo puramente de acabado—; lo que acerca es
-  la DEMO. R-invalidación limpio: O-particiones tocará frontend, y por eso el criterio se definió como
-  SISTEMA; Fase 10 traerá el selector de curso, y reservarle sitio no es refinar lo que se rehará sino lo que
-  el criterio 1 pide. Los tres candidatos vivos se encuadraron uno a uno: O-demo bloqueado por un correo
-  externo y sin trabajo ejecutable; O-ajuste-cierre habría abierto objetivo nuevo con dos Cambios pendientes
-  sin nada delante; la sesión de Higiene/Método vuelve a perder por R-deuda, y van ocho.
-  **LA DECISIÓN QUE EL M0 TENÍA QUE TOMAR: la sede de la decisión 3 (densidad/espaciado), sin sede desde
-  S122.** Se resuelve escribiéndola en `styles.css` —la escala `--e1..--e6` existía desde C-tokens sin regla
-  de uso, y sin regla una escala no gobierna nada— y aplicándola sólo donde C-identidad y C-revisión tocan.
-  **NO se abre un Cambio de tokenización de espaciado**, con argumento medido: el color tenía equivalencia
-  exacta (`#666` → `var(--color-borde)`, mismo valor) y el espaciado no —tokenizar `padding: 13px` obliga a
-  elegir escalón y mueve píxeles—, y hay una zona donde mover píxeles rompe algo medido. De ahí la
-  **EXCLUSIÓN EXPRESA de la geometría de `horario-grid.css`**, que es presupuesto medido contra el criterio 4
-  de O-navegación y no elección de densidad. Los **cuatro** literales que no caían en un escalón se
-  redondearon; su declaración **no llegó a escribirse en S128** y se recupera en S130 desde el diff
-  `cd6b43f..94b97df`, verificada línea a línea sobre los blobs: `app.css` `padding: 0.75rem 1.25rem`
-  → `var(--e3) var(--e5)` (+4 px, sólo el horizontal), `app.css` `gap: 1.25rem` → `var(--e5)` (+4 px),
-  `landing.css` `gap: 0.4rem` → `var(--e2)` (+1,6 px) y `landing.css` `padding: 1.25rem` →
-  `var(--e5)` (+4 px). El «tres» que este registro afirmó durante dos sesiones era falso, y lo era
-  porque nadie enumeró; la afirmación de S128 de que ninguno tocaba la altura de la rejilla SÍ era
-  cierta —el vertical de la barra cae exacto en `--e3`— pero no era comprobable. Nace
-  `D-declarado-sin-artefacto`. **Los 24 redondeos del tramo 2 (S130) están medidos y reproducidos por
-  dos derivaciones independientes, y quedan PENDIENTES DE ENUMERAR en la entrada de S130 del plan;
-  mientras esa lista no exista, no se consideran declarados.**
-  **LA RESTRICCIÓN QUE GOBIERNA EL BLOQUE 1, Y NO ESTABA ESCRITA EN NINGUNA PARTE: LA BARRA PUEDE ENCOGER, NO
-  CRECER.** El javadoc del marco flex de `styles.css` promete que «si la barra cambia de alto, el reparto se
-  rehace solo», y eso describe el LAYOUT y no el CRITERIO: `.app__contenido` lleva `flex: 1`, así que lo que
-  la barra engorda sale del hueco de la rejilla, que es el presupuesto del criterio 4. El reparto quedó a 110
-  px de fila contra los 110,8 de una celda de cuatro plazas (S126) y esas 22 celdas se pasan hoy 1,23 px sin
-  llegar a marcarse (S127): cada ~7 px de barra bajan `alto-celda` ~1 px, y al cruzar 1,23 las 50 marcas
-  pasan a 72, que es regresión visible sobre un criterio cerrado. La barra NO declara `height` ni lo hará: su
-  alto sale de padding más interlineado de la marca. Medido, **51 px, uno menos que los 52 de partida**, y el
-  contenido ganó ese píxel. El aviso queda escrito en `app.css` y en `styles.css`, junto al javadoc que lo
-  invitaba a leerse mal.
-  **LOS 32 PX DE S126 TIENEN CAUSA CANDIDATA, Y NO SE TOCAN.** `.app__contenido` declara `padding: 1rem 0`, es
-  decir 16 + 16 = 32 px exactos, en el contenedor de la vista, que ni S126 ni S127 miraron por estar midiendo
-  dentro de `horario-grid`. Coincide al píxel con la diferencia entre los 748 calculados y los 716 medidos. Se
-  declara **CANDIDATA y no probada**, y la razón es honesta: **la derivación de los 748 no está escrita en
-  ningún documento del repo** —el plan dice «los 748 que el arquitecto había calculado»—, así que la hipótesis
-  no se puede confirmar ni refutar contra documentación, y reconstruirla desde el viewport no cuadra. Hallazgo
-  de método asociado: un número que gobernó una pregunta abierta durante tres sesiones nunca se escribió con
-  su derivación al lado, misma familia que `D-arranque-no-literal`. NO se reclaman por R-terminado: devolverlos
-  subiría `alto-celda` ~4,5 px y cambiaría el recorte de un criterio cumplido sin que ningún criterio lo pida.
-  **LA SALVEDAD DEL CRITERIO 1 DE O-NAVEGACIÓN QUEDA VERIFICADA, y era trabajo, no nota al pie.** S127 cerró
-  ese criterio sobre una decisión escrita, sin Cambio y sin verificación formal. Aquí se comprueban sus dos
-  mitades: (1) **entrada activa distinguible** —por CUATRO canales: color pleno, peso, subrayado y
-  `aria-current="page"`, que es el que faltaba y el que la hacía indistinguible para un lector de pantalla;
-  medido en navegador, `page` en la activa y `null` en la otra—; y (2) **sitio reservado para el selector de
-  curso de Fase 10**, que hasta hoy era 1.500 px de barra vacía y ahora es `.app__curso` con `margin-left:
-  auto` y un `min-height` igual a la caja de la marca. Lo que se reserva es una ALTURA CONOCIDA, no una
-  promesa de que todo quepa: un control de 27 px o menos entra sin mover la barra; uno mayor la engorda y
-  obliga a Fase 10 a recontar las marcas.
-  BLOQUE 2 — **EL `<ng-content>` DENTRO DE UN `@if` NO ES PEREZOSO, Y ESO CAMBIÓ EL DISEÑO.** La primera forma
-  propuesta era que el componente absorbiera también la tabla por proyección. Se midió con una sonda
-  desechable en vitest: con la rama apagada, el constructor del contenido proyectado **corre igual**
-  (`construido=1`, `dom=""`). El contenido lo crea el PADRE en su sitio de declaración y el `@if` del hijo
-  sólo decide si lo inserta. Proyectar la tabla habría evaluado su `@for` mientras carga y tras un error, en
-  estados donde hoy ni existe. La alternativa —`ngTemplateOutlet`— se descartó por ser un mecanismo
-  estructural sin precedente en el repo, con el mismo criterio con que `styles.css` se niega a introducir un
-  `:host` que sería «un segundo patrón conviviendo con el único que hay», y porque su pereza real tampoco
-  estaba medida. **La tabla se queda en la lista**, con el complemento exacto de la cadena escrito idéntico en
-  las siete y verificable por grep.
-  **EL COMPLEMENTO NO LLEVA `!error()`, Y ESA ES LA MITAD DEL TRABAJO.** El instinto —encadenar el error como
-  primera rama— es exactamente lo que S124 probó y REVIRTIÓ midiendo que un 409 de borrado hacía desaparecer
-  la tabla entera, 8 filas → 0, siendo ese 409 camino de uso normal desde S113. El arreglo escrito de
-  `D-vacio-miente-con-error` es más estrecho: sólo el VACÍO lleva `&& !error()`. Y escrito tal cual en un
-  `@else if` deja una trampa nueva: el caso cae al hermano siguiente, `coincidencias === 0`, que también es
-  cierto, y el vacío deja de mentir para que mienta «Ningún resultado para «»». Por eso la precedencia vive en
-  un `computed` que devuelve UNA cadena con un `'ninguno'` explícito, no en cuatro ramas de plantilla —mismo
-  argumento que `cabecera-lista` escribe para `textoContador`—.
-  M3 — CAMPAÑA DE MUTACIÓN SOBRE LA PRECEDENCIA, cinco mutantes, **los cinco muertos** y cada uno en el caso
-  que le tocaba, con la base verde comprobada antes de creerse nada (la lección que S127 pagó con `npx vitest
-  run`). La más informativa es la que adelanta `sin-resultados` a `vacio`: tira TRES casos y uno de ellos es
-  el que también mata la mutación del error, lo que dice que precedencia del error y orden vacío/sin-resultados
-  son las dos mitades del mismo argumento. Se anota el precio del caso (9), que cae con tres mutaciones
-  distintas por ser de transición: si algún día falla, su nombre no dirá cuál de las tres se rompió.
-  **EL CABLEADO CREA UNA SUPERFICIE DE MUTACIÓN QUE ANTES NO EXISTÍA**, y se cubre. Las siete listas aseveran
-  la PRESENCIA del nodo y nunca su contenido: mientras el texto vivía en la plantilla no podía viajar mal, y
-  desde que viaja por `input` nadie vigila el trayecto. Se añaden DOS asertos de texto y no siete —cinco
-  copias del mismo caso no discriminan nada—: **niveles**, porque rompe el molde con una segunda frase sobre
-  la dependencia con Grupos, y **aulas**, por el femenino. Los dos con `toBe` sobre la cadena entera; con
-  `toContain` ninguna de las dos mutaciones se habría visto, y se mutaron para comprobarlo.
-  M4 — EN NAVEGADOR, y el caso que importa NO lo cubre ninguna suite. (1) Lista normal, tabla y contador. (2)
-  Consulta sin coincidencias: «Ningún resultado para «zzz».» y la tabla desaparece. (3) **409 de borrado en
-  Asignaturas: el error se pinta Y LA TABLA SIGUE ENTERA** —la reversión de S124, ahora protegida por
-  construcción en un sitio en vez de siete veces a mano—. (4) Error de carga (500) con el catálogo lleno: el
-  mensaje aparece SIN «No hay asignaturas todavía» al lado, que es `D-vacio-miente-con-error` vista en la
-  pantalla donde nació.
-  R-TERMINADO, aplicado cuatro veces. No se reclaman los 32 px. No se generaliza el ancho de 60 rem de la
-  landing a las demás vistas (eso exige verlas todas: es C-revisión). No se arregla el `/horario/1` a fuego.
-  Y no se tokeniza el espaciado de las 27 hojas.
-  ERRORES DEL ARQUITECTO, CUATRO, Y TODOS DE LA MISMA FAMILIA. (1) Una ruta inventada —
-  `components/horario/horario-grid.html`, que no existe— que sobrevivió tres turnos **porque el guion que
-  debía leerla llevaba un `|| find …`: el `sed` falló, el `find` salvó la salida y el volcado se vio bien**.
-  La detuvo Claude Code en el `git add`. (2) Un `grep -rl … --include=*-lista.ts` que casa con
-  `estado-lista.ts`: el componente se contaba a sí mismo, así que el «1» significaba cero. (3) Los contrastes
-  de `--color-sobre-acento` se escribieron en el javadoc **antes de medirlos** (resultaron correctos: 8,67:1 y
-  5,76:1, medidos después). (4) Se afirmó que `<ng-content>` dentro de `@if` era perezoso y que por tanto el
-  componente TENÍA que absorber la tabla; la sonda lo refutó. Las dos primeras son instancias nuevas de
-  `D-guion-exit-enmascarado` —un instrumento que mide otra cosa distinta de la que se cree—; la tercera y la
-  cuarta son la misma lección de `D-arranque-no-literal` por el lado del mecanismo: lo que no se mide, no se
-  afirma. Corolario operativo escrito: **fallback silencioso en un guion de lectura, nunca**.
-  DEUDA. **TRES NUEVAS**: `D-horario-id-a-fuego` (O-demo), `D-contador-se-apaga-con-error` (C-revisión) y
-  `D-748-sin-derivacion` (Higiene/Método). **DOS CERRADAS**: `D-insignia-sin-leyenda`, pagada en su sede
-  escrita y con un argumento que su ficha no podía tener —desde S127 esa esquina tiene DOS números con signo,
-  el `+N` de desbordamiento y el coste blando, con significados sin relación y sólo uno con explicación—; y
-  `D-vacio-miente-con-error`, muerta POR CONSTRUCCIÓN al centralizar la precedencia, igual que
-  `D-pdc-lista-rancia` murió en S123 sin que nadie escribiera un `EventEmitter`. Deuda bloqueante abierta:
-  sigue en 1 (D31-a, las aulas de FPB).
-  SIN CONDICIÓN DE SALIDA. Los seis commits son coherentes uno a uno; se rehízo con `--soft` un reparto que
-  dejaba el primero en rojo por su cuenta, porque un commit intermedio que no compila rompe `git bisect`.
-  NOTAS TÉCNICAS QUE SOBREVIVEN. `npx vitest run <fichero>` sigue sin funcionar (`describe is not defined`);
-  la suite corre bajo `@angular/build:unit-test` y se lanza entera con `npx ng test --watch=false`. `mvn test`
-  sin `clean` deja informes huérfanos de surefire y da 283 en vez de 282. **El bundle de `ng test` NO sirve
-  para juzgar `D-bundle-presupuesto`**: dio 705 y luego 709,51 kB cuando el de producción estaba en 540,71;
-  el delta real de la sesión es +1,32 kB crudos. Los componentes son standalone, así que un componente nuevo
-  exige entrar en el `imports` de cada consumidor: el bloque 2 rompió el build por olvidarlo, y una receta
-  escrita en prosa no es un paso ejecutado.
-  INTEGRIDAD: `educhronos-demo-m4.db` en `ea1a70a0337831dddccdbcd322f48e9b`; el M4 corrió contra una copia.
-  LIMPIEZA (M1-bis): archivada S126 a `bitacora-sesiones.md` (promovida a cabecera de sesión, insertada al
-  final en orden ascendente, cuerpo íntegro); degradada S127 a «Última sesión registrada (previa):»; S128
-  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S125 a S126.
-  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
-  PENDIENTE y es el último Cambio del objetivo**. O-navegación TERMINADO en S127, y su criterio 1 deja de
-  llevar salvedad. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro.
-  Siguiente: **C-revisión**, la pasada por las tres vistas y los tres diálogos con el arquitecto como juez.
-  Lo fija su propio M0 (ver M1-ter).
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión

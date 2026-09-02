@@ -56,7 +56,9 @@
          tenue) / borde(+suave)
        tinta / tinta-suave       el texto. Nunca señal
 
-     JERARQUÍA DE ACCIONES, por relleno y no por color (aplicado, se declara):
+     JERARQUÍA DE ACCIONES, por relleno y no por color (DECLARADA EN S129 Y NO
+     APLICADA; medido en el M4 de S130: un solo background de acento en toda la
+     aplicación, y es la barra. Ver D-jerarquia-declarada-sin-aplicar):
      principal = acento pleno con tinta `sobre-acento`; secundaria = superficie
      con borde; destructiva = superficie con borde y tinta de error; inactiva o
      en curso = acento apagado. Un botón no cambia de COLOR para decir su
