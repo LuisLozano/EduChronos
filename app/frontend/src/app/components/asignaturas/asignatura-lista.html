@@ -42,10 +42,10 @@
             <td>{{ asig.codigo }}</td>
             <td>{{ asig.nombreCompleto }}</td>
             <td class="asignaturas__acciones">
-              <button type="button" class="asignaturas__editar" (click)="editar(asig)">
+              <button type="button" class="asignaturas__editar accion-compacta" (click)="editar(asig)">
                 Editar
               </button>
-              <button type="button" class="asignaturas__borrar" (click)="borrar(asig)">
+              <button type="button" class="asignaturas__borrar accion-destructiva accion-compacta" (click)="borrar(asig)">
                 Borrar
               </button>
             </td>

@@ -74,17 +74,3 @@
   gap: var(--e2);
   margin-top: var(--e4);
 }
-
-.tutoria-dialogo__cerrar,
-.tutoria-dialogo__guardar {
-  padding: var(--e2) var(--e4);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-s);
-  background: var(--color-superficie);
-  cursor: pointer;
-}
-
-.tutoria-dialogo__guardar:disabled {
-  opacity: 0.6;
-  cursor: default;
-}

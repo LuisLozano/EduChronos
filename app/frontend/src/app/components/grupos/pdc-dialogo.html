@@ -28,7 +28,7 @@
           <button type="button" class="pdc-dialogo__cerrar" (click)="cerrar()">
             Cancelar
           </button>
-          <button type="submit" class="pdc-dialogo__guardar" [disabled]="guardando()">
+          <button type="submit" class="pdc-dialogo__guardar accion-principal" [disabled]="guardando()">
             Crear PDC
           </button>
         </div>
@@ -53,7 +53,7 @@
         </button>
         <button
           type="button"
-          class="pdc-dialogo__borrar"
+          class="pdc-dialogo__borrar accion-destructiva"
           [disabled]="guardando()"
           (click)="borrar()"
         >

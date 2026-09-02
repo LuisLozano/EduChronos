@@ -13,7 +13,7 @@
     [value]="busqueda()"
     (input)="busqueda.set($any($event.target).value)"
   />
-  <button type="button" class="cabecera-lista__nuevo" (click)="alta.emit()">
+  <button type="button" class="cabecera-lista__nuevo accion-principal" (click)="alta.emit()">
     {{ rotuloAlta() }}
   </button>
 </div>

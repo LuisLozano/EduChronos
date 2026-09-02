@@ -47,19 +47,19 @@
               <!-- Solo los ordinarios: sobre un PDC estas tres acciones acaban en un
                    error que el usuario no puede resolver. Ver el javadoc de la clase. -->
               @if (esOrdinario(grupo)) {
-                <button type="button" class="grupos__editar" (click)="editar(grupo)">
+                <button type="button" class="grupos__editar accion-compacta" (click)="editar(grupo)">
                   Editar
                 </button>
-                <button type="button" class="grupos__borrar" (click)="borrar(grupo)">
+                <button type="button" class="grupos__borrar accion-destructiva accion-compacta" (click)="borrar(grupo)">
                   Borrar
                 </button>
-                <button type="button" class="grupos__pdc" (click)="pdc(grupo)">
+                <button type="button" class="grupos__pdc accion-compacta" (click)="pdc(grupo)">
                   PDC
                 </button>
               }
               <!-- FUERA del @if a propósito: un PDC hereda el tutor de su padre al
                    crearse y tiene que poder editarlo. Ver el javadoc de la clase. -->
-              <button type="button" class="grupos__tutoria" (click)="tutoria(grupo)">
+              <button type="button" class="grupos__tutoria accion-compacta" (click)="tutoria(grupo)">
                 Tutoría
               </button>
             </td>

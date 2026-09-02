@@ -50,10 +50,10 @@
       <td>{{ actividad.repeticionesPorSemana }}</td>
       <td>{{ actividad.plazas.length }}</td>
       <td class="actividades__acciones">
-        <button type="button" class="actividades__editar" (click)="editar(actividad)">
+        <button type="button" class="actividades__editar accion-compacta" (click)="editar(actividad)">
           Editar
         </button>
-        <button type="button" class="actividades__borrar" (click)="borrar(actividad)">
+        <button type="button" class="actividades__borrar accion-destructiva accion-compacta" (click)="borrar(actividad)">
           Borrar
         </button>
       </td>

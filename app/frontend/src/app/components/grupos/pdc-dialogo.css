@@ -62,25 +62,3 @@
   gap: var(--e2);
   margin-top: var(--e4);
 }
-
-.pdc-dialogo__cerrar,
-.pdc-dialogo__guardar,
-.pdc-dialogo__borrar {
-  padding: var(--e2) var(--e4);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-s);
-  background: var(--color-superficie);
-  cursor: pointer;
-}
-
-/* Rojo como el confirmar del molde de borrado: mismo gesto, mismo color. */
-.pdc-dialogo__borrar {
-  border-color: var(--color-error);
-  color: var(--color-error);
-}
-
-.pdc-dialogo__guardar:disabled,
-.pdc-dialogo__borrar:disabled {
-  opacity: 0.6;
-  cursor: default;
-}

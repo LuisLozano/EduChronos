@@ -78,18 +78,6 @@
   gap: var(--e2);
   margin-top: var(--e4);
 }
-.actividad-form__cancelar,
-.actividad-form__guardar {
-  padding: var(--e2) var(--e4);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-s);
-  background: var(--color-superficie);
-  cursor: pointer;
-}
-.actividad-form__guardar:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 .actividad-form__plaza-acciones {
   display: flex;
   justify-content: flex-end;
@@ -100,11 +88,6 @@
 .actividad-form__anadir-plaza {
   font-size: var(--tam-s);
   padding: var(--e1) var(--e2);
-}
-
-.actividad-form__quitar-plaza:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .actividad-form__plaza-titulo {

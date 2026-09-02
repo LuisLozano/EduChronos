@@ -17,17 +17,3 @@
   gap: var(--e2);
   margin-top: var(--e4);
 }
-
-.confirmar-borrado__cancelar,
-.confirmar-borrado__confirmar {
-  padding: var(--e2) var(--e4);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-s);
-  background: var(--color-superficie);
-  cursor: pointer;
-}
-
-.confirmar-borrado__confirmar {
-  border-color: var(--color-error);
-  color: var(--color-error);
-}

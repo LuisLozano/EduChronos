@@ -56,13 +56,14 @@
          tenue) / borde(+suave)
        tinta / tinta-suave       el texto. Nunca señal
 
-     JERARQUÍA DE ACCIONES, por relleno y no por color (DECLARADA EN S129 Y NO
-     APLICADA; medido en el M4 de S130: un solo background de acento en toda la
-     aplicación, y es la barra. Ver D-jerarquia-declarada-sin-aplicar):
+     JERARQUÍA DE ACCIONES, por relleno y no por color:
      principal = acento pleno con tinta `sobre-acento`; secundaria = superficie
      con borde; destructiva = superficie con borde y tinta de error; inactiva o
      en curso = acento apagado. Un botón no cambia de COLOR para decir su
      importancia; cambia de RELLENO. Por eso guardar no necesita verde.
+     DECLARADA EN S129 Y APLICADA EN S132, que es cuando dejó de ser una
+     afirmación sin artefacto: sus reglas viven más abajo, en la sección
+     «Jerarquía de acciones», y cierran `D-jerarquia-declarada-sin-aplicar`.
 
      Un color nuevo entra sólo si su trabajo no lo hace ninguno de los de
      arriba. Cambiar un valor de esta lista se propaga solo: es lo que compró
@@ -222,6 +223,101 @@
   --borde-fino: 1px;
   --radio-s: 4px;    /* controles */
   --radio-m: 6px;    /* lo que los contiene */
+}
+
+/* ---------------- Jerarquía de acciones ----------------
+   AQUÍ SE EJECUTA la jerarquía que la DECISIÓN 1 declara arriba. Se escribió en
+   S129, se midió sin aplicar en el M4 de S130 —un solo `background` de acento en
+   toda la aplicación, y era la barra— y la paga S132 (`D-jerarquia-declarada-sin-aplicar`).
+
+   Reglas globales sobre el elemento `button`, y no un molde copiado en cada hoja.
+   El motivo es medido: antes de S132 NINGUNA hoja de componente usaba el selector
+   `button` —cero apariciones de la palabra en las 28 hojas— y en cambio DIEZ
+   repetían carácter a carácter la misma caja de cinco propiedades, mientras otras
+   quince clases de botón no tenían ninguna regla y salían con el cromo nativo del
+   navegador. Un molde repetido diez veces no es un sistema: es diez sitios donde
+   la jerarquía puede dejar de cumplirse sin que nadie se entere.
+
+     por defecto        SECUNDARIA: superficie con borde. No lleva clase, porque
+                        es lo que es un botón cuando no se dice nada de él
+     .accion-principal  acento pleno con tinta `sobre-acento`. Una por pantalla
+                        o por diálogo
+     .accion-destructiva superficie con borde y tinta de error
+     :disabled          acento apagado
+
+   Y un nivel de TAMAÑO, ortogonal a los tres anteriores:
+
+     .accion-compacta   la acción que vive dentro de una fila de catálogo
+
+   POR RELLENO Y NO POR COLOR, que es lo que la decisión 1 exige, y TAMPOCO POR
+   PESO: hasta S132 tres botones (`jornada__guardar`, `.acciones .confirmar` y
+   `confirmar-reemplazo__confirmar`) decían su importancia con `font-weight`, y la
+   decisión 2 ya dice que el grueso no es una señal. Esas tres reglas se retiran
+   aquí; el relleno hace ahora el trabajo que hacían.
+
+   `font-family` y `font-size` se declaran porque el navegador NO los hereda en los
+   controles: sin ellos el botón sale en la fuente y el cuerpo del sistema, ajeno a
+   las decisiones 1 y 2. `--tam-s` es lo que la decisión 2 asigna a los controles.
+
+   NO ALCANZA A LA REJILLA: `.candado` (`horario-grid.css:115-122`) anula caja,
+   borde, fondo y tamaño con su propia regla, y es el único `button` que vive
+   dentro de `horario-grid`. Comprobado por el recuento de marcas `+N`, que es el
+   instrumento del criterio 4 y no cambia. */
+button {
+  font-family: inherit;
+  font-size: var(--tam-s);
+  line-height: var(--lh-apretado);
+  padding: var(--e2) var(--e4);
+  border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+  color: var(--color-tinta);
+  cursor: pointer;
+}
+
+.accion-principal {
+  border-color: var(--color-acento);
+  background: var(--color-acento);
+  color: var(--color-sobre-acento);
+  font-weight: var(--peso-medio);
+}
+
+.accion-destructiva {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* NIVEL DE TAMAÑO, y NO un quinto nivel de jerarquía: una acción compacta puede
+   ser secundaria o destructiva —en las listas es las dos cosas— y sigue diciendo
+   lo mismo. Es para las que viven DENTRO de una fila de catálogo, donde el que
+   manda es el dato de la fila y no el botón.
+
+   Elegido por el arquitecto sobre la aplicación real, contra la alternativa de
+   un solo tamaño, y con el número delante: la fila de catálogo mide 41 px con el
+   cromo nativo que había antes de S132; con la caja secundaria entera se va a 53
+   px (+29 %) y con ésta se queda en 43. Sobre las 208 filas de Actividades eso es
+   9032 px de tabla frente a 11172. La decisión 2 dice que la interfaz es densa a
+   propósito, y 12 px por fila era pagar la jerarquía con la densidad. */
+.accion-compacta {
+  padding: var(--e1) var(--e2);
+  font-size: var(--tam-xs);
+}
+
+/* «Acento apagado» de la decisión 1, y se toma al pie de la letra: el botón
+   principal inactivo conserva su RELLENO —sigue siendo el principal— pero en la
+   variante suave del acento, con tinta suave encima. Los otros dos niveles no
+   tienen relleno que apagar, así que se atenúan con la opacidad que las diez
+   hojas de formulario ya usaban; el valor es de ellas y no se reelige aquí. */
+button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.accion-principal:disabled {
+  opacity: 1;
+  border-color: var(--color-acento-suave);
+  background: var(--color-acento-suave);
+  color: var(--color-tinta-suave);
 }
 
 /* ---------------- Estados ----------------

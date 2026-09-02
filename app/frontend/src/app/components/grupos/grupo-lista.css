@@ -22,7 +22,3 @@
   display: flex;
   gap: var(--e2);
 }
-
-.grupos__borrar {
-  color: var(--color-error);
-}

@@ -18,7 +18,3 @@
   display: flex;
   gap: var(--e2);
 }
-
-.subgrupos__borrar {
-  color: var(--color-error);
-}

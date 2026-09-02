@@ -42,10 +42,10 @@
             <td>{{ subgrupo.codigo }}</td>
             <td>{{ subgrupo.grupos.join(', ') }}</td>
             <td class="subgrupos__acciones">
-              <button type="button" class="subgrupos__editar" (click)="editar(subgrupo)">
+              <button type="button" class="subgrupos__editar accion-compacta" (click)="editar(subgrupo)">
                 Editar
               </button>
-              <button type="button" class="subgrupos__borrar" (click)="borrar(subgrupo)">
+              <button type="button" class="subgrupos__borrar accion-destructiva accion-compacta" (click)="borrar(subgrupo)">
                 Borrar
               </button>
             </td>

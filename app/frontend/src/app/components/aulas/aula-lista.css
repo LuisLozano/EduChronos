@@ -18,7 +18,3 @@
   display: flex;
   gap: var(--e2);
 }
-
-.aulas__borrar {
-  color: var(--color-error);
-}

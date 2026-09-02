@@ -50,10 +50,10 @@
             <td>{{ a.planta ?? '—' }}</td>
             <td>{{ a.sector ?? '—' }}</td>
             <td class="aulas__acciones">
-              <button type="button" class="aulas__editar" (click)="editar(a)">
+              <button type="button" class="aulas__editar accion-compacta" (click)="editar(a)">
                 Editar
               </button>
-              <button type="button" class="aulas__borrar" (click)="borrar(a)">
+              <button type="button" class="aulas__borrar accion-destructiva accion-compacta" (click)="borrar(a)">
                 Borrar
               </button>
             </td>
