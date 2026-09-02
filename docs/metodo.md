@@ -40,6 +40,33 @@ era la única copia viva; S63 estuvo a punto de perder D-B8-1 y el mecanismo de 
 
 ---
 
+## M-respuesta — Formato de los turnos del modelo principal (S131)
+
+Un turno del modelo principal empieza por la DECISIÓN o la conclusión, no por el
+razonamiento que lleva a ella. Inmediatamente después va el REPARTO: qué hace el
+arquitecto, qué se delega a Claude Code y qué hace el propio modelo.
+
+Si el reparto tiene más de un paso por lado, se escribe como FLUJO NUMERADO en el
+orden real de ejecución —«1. tú levantas la aplicación; 2. Claude Code aplica y
+mide; 3. tú juzgas en el navegador; 4. me pegas el traspaso»—. Un reparto sin
+orden obliga al arquitecto a reconstruirlo, y es justo donde deja de leer.
+
+El razonamiento y la evidencia van DESPUÉS, y sólo si sostienen una decisión
+todavía abierta. Se amplían a petición.
+
+REGLA DE NO REPETICIÓN: lo que el arquitecto ya ha leído en el turno anterior
+—salida de Claude Code, tabla, diff— NO se reescribe ni se parafrasea de vuelta.
+Se cita por su nombre y se dice qué se concluye de ello.
+
+LO QUE ESTA REGLA NO RELAJA: M2 sigue trayendo la salida literal de una medición
+SIN INTERPRETAR antes de proponer estructura. Viajar entera y no ser parafraseada
+de vuelta son cosas distintas. Origen: el arquitecto declaró en S131 que lee las
+conclusiones y las preguntas, y hace de mensajero con el resto. Acortar el
+razonamiento es correcto; acortar lo que hay que JUZGAR rompería el mecanismo que
+sostienen M2 y M4.
+
+---
+
 ## M0 — Apertura: la sesión nombra su lugar en el mapa
 
 Antes de fijar alcance, la sesión responde OBLIGATORIAMENTE:
@@ -96,6 +123,12 @@ rotación). Por eso lleva verificación propia:
 alcance: nombra los candidatos vivos con su estado leído del mapa y deja la
 elección para la apertura. NO copia lo que ya está en la documentación: remite a
 ella. Si supera ~60 líneas, está duplicando documentación y hay que podarlo.
+
+**EXCEPCIÓN (S131) — la sesión de Acabado visual.** Si la siguiente sesión es de
+ese tipo (M-visual), el prompt SÍ lleva alcance: un ACTA con la lista cerrada de
+lo que puede cambiar, TRANSCRITA del registro y no decidida en el cierre. Si el
+registro no la contiene ya enumerada, no hay acta y la sesión no puede arrancar
+directa en Claude Code.
 
 ---
 
@@ -283,6 +316,62 @@ D-tokens-inexistentes: estado vivo equivocado.
 
 ---
 
+## M-visual — Sesión de acabado visual: el bucle vive en Claude Code (S131)
+
+Un cambio de aspecto no se puede juzgar hasta verlo. El ciclo aplicar → refrescar
+→ juzgar tiene que ocurrir donde está el servidor, no atravesando al arquitecto
+como mensajero entre dos modelos. Por eso este tipo de sesión ARRANCA EN CLAUDE
+CODE y el modelo principal sólo la cierra.
+
+**El acta la escribe el cierre anterior, no el bucle.** La sesión no abre M0:
+entra con una lista CERRADA de lo que puede cambiar, TRANSCRITA del registro por
+el M1-ter de la sesión previa. Lo que no está en el acta no se toca. Es
+R-terminado convertido en mecanismo: el recorrido de S130 generó trabajo que su
+previsión no contemplaba y partió el tramo por segunda vez.
+
+**Vehículo: `ng serve` en `localhost:4200` con su proxy** (usado en S100, S120 y
+S123), no el empaquetado. `spring-boot:run` NO reconstruye el frontend —corolario
+de S130—, así que sobre el bundle cada iteración cuesta un `package` entero.
+Trampa heredada de S124: `ng serve` puede servir un bundle RANCIO; ante cualquier
+resultado visual sorprendente se reinicia ANTES de creerle.
+
+**Variantes: 2–3, y sólo donde la decisión sea de gusto.** Si la regla ya está
+escrita en `styles.css`, no hay variante que ofrecer: se aplica. Se ven en la
+aplicación real, una detrás de otra; sólo si comparar lado a lado es
+imprescindible se escribe una maqueta en `/tmp` (M-doc-2). El juez es el
+arquitecto, que es lo que la ficha de O-diseño ya declara para su criterio 4.
+
+**Registro: `styles.css`, en el mismo commit que el CSS.** Lo que cambie una regla
+de aspecto se escribe junto a la decisión de identidad que la gobierna, donde el
+criterio 4 la verifica por grep desde S129. NO se abre sede paralela:
+`diseno-navegacion.md` es medición de geometría de O-navegación, y una segunda
+sede para la misma afirmación es la familia de `D-declarado-sin-artefacto`.
+
+**Hallazgos: se anotan, no se tocan.** Lo que el recorrido destape fuera del acta
+va al traspaso como candidato a deuda, con su clasificación propuesta (§4 de
+`gestion_proyecto.md`).
+
+**Puertas de salida del bucle.** Si el trabajo toca un `.ts`, lógica de negocio o
+un tipo compartido, SALE del bucle y vuelve al procedimiento normal con M3 y M4.
+El bucle cubre CSS y plantilla sin lógica.
+
+**Qué se conserva y qué se pierde.** M2 no se omite: lo ejecuta Claude Code dentro
+del bucle y su salida literal viaja al traspaso CON el comando que la produjo. M3
+no aplica mientras no se toque un `.ts`. De M4 se conserva el juicio en navegador
+y se pierde el turno de contraste entre dos modelos sobre el contrato: se acepta
+AQUÍ Y SÓLO AQUÍ, porque en aspecto el oráculo fuerte es el ojo del arquitecto
+sobre la aplicación corriendo. En Desarrollo M4 sigue entero.
+
+**El traspaso: cómo vuelve la sesión al modelo principal.** Claude Code avisa de
+que ha terminado escribiendo un traspaso corto —del orden de 30 líneas— que el
+arquitecto pega en la conversación. Contiene: commits con su hash, ficheros
+tocados, decisiones tomadas y variante elegida en cada una, mediciones con el
+comando que las produjo, hallazgos no ejecutados y estado de las suites. Sin él,
+el M1 del modelo principal sería narrativa inventada sobre una sesión que no ha
+visto: exactamente la afirmación no medida y propagada que registra S130.
+
+---
+
 ## Tipos de sesión
 
 El ritual es proporcional al tipo. M2 y M4 se conservan en casi todos (son los que
@@ -294,6 +383,7 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
 | **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Cuando el plan lo pide o el método cambia | M1 + R4/R5 | M2/M3/M4 (no hay código) |
+| **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
 
 Regla de admisión a Saneamiento: una deuda entra en el grupo SOLO si no tiene
 camino feliz que ocultar. En cuanto tiene lógica de negocio, sale y va a Desarrollo
