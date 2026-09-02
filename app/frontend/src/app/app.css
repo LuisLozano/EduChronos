@@ -97,7 +97,27 @@
    px, lo que cambia el recorte de un criterio ya cumplido sin que ningún
    criterio lo pida (R-terminado). Lo que S128 hace es EXPLICARLOS, que es lo
    que quedaba pendiente como higiene. El flex y el `overflow-y` de este mismo
-   selector viven en `styles.css`; aquí solo el padding. */
+   selector viven en `styles.css`; aquí solo el padding.
+
+   EL PADDING ES ASIMÉTRICO A PROPÓSITO (S132), y las dos mitades obedecen a
+   cosas distintas:
+     vertical  `--e4`, CONGELADO por el párrafo de arriba. No es una elección de
+               densidad: es el presupuesto del criterio 4 de O-navegación.
+     lateral   `--e5`, que es lo que la decisión 3 de identidad asigna al
+               «padding de tarjetas y contenedores», y esto es el contenedor de
+               la vista. Hasta S132 valía 0 y la rejilla del horario moría en el
+               borde del viewport; ahora el título de la vista cae en 24 px,
+               justo bajo la marca de esta misma barra.
+   Que no sean el mismo escalón NO es un descuido pendiente de unificar.
+
+   MEDIDO EN S132 ANTES DE DARLO (el lateral se paga en ANCHO de columna, y el
+   ancho se puede convertir en alto por reflujo). Sobre la superficie del
+   criterio —1920x887, dpr 1, la aplicación real en :4200 contra la BD demo del
+   M4— el barrido de los tres valores 0 / `--e4` / `--e5` deja el recuento de
+   marcas `+N` IDÉNTICO: 1ºA 2, 1B-A 4, 4ºA 3, 2B-B 0, que son las cifras con
+   las que S127 cerró el criterio. La columna pasa de 372 a 363 px. Repetido a
+   1280x800, donde el recorte es mayor por el hueco y no por el padding: los
+   tres valores vuelven a dar el mismo recuento. */
 .app__contenido {
-  padding: var(--e4) 0;
+  padding: var(--e4) var(--e5);
 }

@@ -181,6 +181,14 @@
        --e5  padding de tarjetas y contenedores; separación de navegación
        --e6  separación entre secciones
 
+     CUIDADO, Y NO ES DE DENSIDAD: el padding de `.app__contenido` es asimétrico
+     —`var(--e4) var(--e5)`— y seguirá siéndolo. El lateral es el `--e5` que la
+     regla de arriba manda para un contenedor; el vertical está CONGELADO en
+     `--e4` porque son los 32 px del presupuesto del criterio 4 de
+     O-navegación, no un escalón elegido. La derivación entera vive donde
+     gobierna, en `app.css` sobre el propio selector. Unificar los dos valores
+     movería el recorte de la rejilla.
+
      EXCLUSIÓN EXPRESA: la geometría de `horario-grid.css` NO se tokeniza. Sus
      valores son presupuesto de altura MEDIDO contra el criterio 4 de
      O-navegación (`diseno-navegacion.md` §4) y no elecciones de densidad;
