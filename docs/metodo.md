@@ -287,7 +287,15 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    sin tocar nada.
 2. El guion hace copia de seguridad antes de escribir y VERIFICA después, por grep
    y contra el fichero, que el texto quedó donde debía. Los códigos de salida se
-   capturan inmediatamente (regla de guion de S117).
+   capturan inmediatamente (regla de guion de S117). **El respaldo vive FUERA DEL
+   REPO, en `/tmp` (S132):** dejarlo junto al documento vivo crea una copia caducada
+   dentro del árbol, que es la forma exacta de `D-plan-duplicado` y que un `grep -r`
+   lee igual que a la viva. Es el mismo criterio que M-doc-2 aplica a las maquetas.
+5. **Un guion que añade o mueve líneas en `gestion_proyecto.md` o
+   `plan_trabajo_horarios.md` TERMINA regenerando el índice (S132).** Los números de
+   línea caducan en cuanto el cuerpo se desplaza, y `verificar-cierre.py` NO avisa de
+   forma útil: imprime las entradas descuadradas y sale con 0 igualmente
+   (`D-guion-exit-enmascarado`). En S132 hubo que suplirlo a mano tres veces.
 3. El modelo principal no pide los ficheros para devolverlos. Si necesita leer,
    lee del Project o encarga a Claude Code una lectura acotada.
 4. Los mensajes de commit los sigue entregando el modelo principal, de una línea.
@@ -350,6 +358,27 @@ sede para la misma afirmación es la familia de `D-declarado-sin-artefacto`.
 **Hallazgos: se anotan, no se tocan.** Lo que el recorrido destape fuera del acta
 va al traspaso como candidato a deuda, con su clasificación propuesta (§4 de
 `gestion_proyecto.md`).
+
+**El acta fija QUÉ se toca, no CÓMO (S132).** Si la premisa técnica del acta es falsa, se corrige y se hace
+el trabajo: el punto 3 de S132 pedía redibujar el adorno de radios y casillas, y la solución correcta fue
+`accent-color`, que no dibuja nada. Lo que el acta cierra es la LISTA, no la implementación.
+
+**Una decisión no escrita y que no sea de gusto NO se toma en el bucle (S132).** La regla de variantes cubre
+dos casos —regla escrita, se aplica; decisión de gusto, 2-3 variantes— y falta el tercero: una decisión de
+MÉTODO que la documentación deja abierta. En S132 fue si conservar o retirar un token sin uso, con su propia
+ficha declarando el binario «o se usa donde toca o se retira». Se anota en el traspaso y la resuelve el modelo
+principal en el M1.
+
+**Un punto que mueve geometría se mide en las DOS dimensiones (S132).** El punto 2 de S132 se cerró con el
+recuento de marcas `+N`, que sólo mide alto, y el mismo commit movió el umbral de corte lateral 80 px sin que
+nadie lo viera. Es M2 aplicado al bucle: el instrumento se elige por la dimensión que el cambio toca, no por
+la que se suele mirar.
+
+**LÍMITE: el recorrido de JUICIO no es una sesión de Acabado visual (S132).** M-visual CONSUME un acta; el
+juicio del arquitecto la PRODUCE. Una sesión que empiece por recorrer la aplicación no puede arrancar en
+Claude Code con lista cerrada, porque la lista es su salida. El recorrido lo hace el arquitecto sobre la
+aplicación levantada y su resultado es el acta de la siguiente sesión de acabado. Escrito al quedar el
+criterio 3 de O-diseño aplicado y sin juzgar.
 
 **Puertas de salida del bucle.** Si el trabajo toca un `.ts`, lógica de negocio o
 un tipo compartido, SALE del bucle y vuelve al procedimiento normal con M3 y M4.
