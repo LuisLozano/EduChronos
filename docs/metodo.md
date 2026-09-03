@@ -299,6 +299,14 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    línea caducan en cuanto el cuerpo se desplaza, y `verificar-cierre.py` NO avisa de
    forma útil: imprime las entradas descuadradas y sale con 0 igualmente
    (`D-guion-exit-enmascarado`). En S132 hubo que suplirlo a mano tres veces.
+6. **Un ancla que sea un ENCABEZADO colisiona con su propia entrada de índice (S133).** El índice generado
+   cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-nombre` aparecen SIEMPRE dos veces en
+   `gestion_proyecto.md` y en `plan_trabajo_horarios.md`: una en el cuerpo y otra en el índice. La guarda de
+   aparición única del punto 1 aborta, y aborta con razón. Toda ancla de encabezado se escribe anclada a
+   PRINCIPIO DE LÍNEA —prefijo de salto de línea en el patrón Y en el reemplazo—, que es lo que la distingue
+   de su entrada de índice. Afecta a TODOS los cierres, porque el M1 inserta siempre antes de la cabecera H3
+   viva. Lo destapó la guarda del guion de cierre de S133 en su primera pasada, con los cinco ficheros
+   intactos.
 
 ---
 
@@ -384,14 +392,6 @@ juicio de S133 situó en la landing una leyenda que vive en la rejilla desde S12
 sin encontrarla. Un recorrido humano es un instrumento como un guion de shell, y falla igual: es la causa
 raíz que `D-guion-exit-enmascarado` nombra desde S129. Coste doble, porque produce un falso hallazgo y roba
 atención a la parada que sí había que mirar.
-
-**Corolario de S133, y es del punto 5: un ancla que sea un ENCABEZADO colisiona con el índice.** El índice
-generado cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-nombre` aparecen SIEMPRE dos
-veces en `gestion_proyecto.md` y en `plan_trabajo_horarios.md`: una en el cuerpo y otra en el índice. La
-guarda de aparición única aborta, y aborta con razón. Toda ancla de encabezado se escribe anclada a
-PRINCIPIO DE LÍNEA —prefijo de salto de línea en el patrón y en el reemplazo—, que es lo que la distingue
-de su entrada de índice. Lo destapó la guarda del guion de cierre de S133 en su primera pasada, y afecta a
-todos los cierres: el M1 siguiente inserta antes de la cabecera H3 viva, que es exactamente este caso.
 
 
 **Puertas de salida del bucle.** Si el trabajo toca un `.ts`, lógica de negocio o

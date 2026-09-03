@@ -755,8 +755,8 @@ nuevo a partir del anterior, modificando solo los cambios.
   cada una es su entrada del ÍNDICE GENERADO. No era ambigüedad del cuerpo, era el índice citando el
   encabezado. Lo resolvió Claude Code anclando las dos a principio de línea, sin tocar el texto insertado ni
   la semántica. Afecta a TODOS los cierres, porque el M1 siempre inserta antes de la cabecera H3 viva: queda
-  escrito en `M-doc` como corolario del punto 5, que hasta hoy cubría regenerar el índice pero no que el
-  índice hace fracasar las anclas. La guarda funcionó: paró el guion con los cinco ficheros intactos.
+  escrito en `M-doc` como punto 6, junto al 5, que cubría regenerar el índice pero no que el índice hace
+  fracasar las anclas. La guarda funcionó: paró el guion con los cinco ficheros intactos.
   LIMPIEZA (M1-bis): archivada S131 a `bitacora-sesiones.md` (promovida a `### Sesión 131`, insertada al
   final en orden ascendente, cuerpo íntegro); degradada S132 a «Última sesión registrada (previa):»; S133
   queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S130 a S131.
