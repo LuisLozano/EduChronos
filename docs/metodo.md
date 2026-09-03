@@ -291,14 +291,14 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    REPO, en `/tmp` (S132):** dejarlo junto al documento vivo crea una copia caducada
    dentro del árbol, que es la forma exacta de `D-plan-duplicado` y que un `grep -r`
    lee igual que a la viva. Es el mismo criterio que M-doc-2 aplica a las maquetas.
+3. El modelo principal no pide los ficheros para devolverlos. Si necesita leer,
+   lee del Project o encarga a Claude Code una lectura acotada.
+4. Los mensajes de commit los sigue entregando el modelo principal, de una línea.
 5. **Un guion que añade o mueve líneas en `gestion_proyecto.md` o
    `plan_trabajo_horarios.md` TERMINA regenerando el índice (S132).** Los números de
    línea caducan en cuanto el cuerpo se desplaza, y `verificar-cierre.py` NO avisa de
    forma útil: imprime las entradas descuadradas y sale con 0 igualmente
    (`D-guion-exit-enmascarado`). En S132 hubo que suplirlo a mano tres veces.
-3. El modelo principal no pide los ficheros para devolverlos. Si necesita leer,
-   lee del Project o encarga a Claude Code una lectura acotada.
-4. Los mensajes de commit los sigue entregando el modelo principal, de una línea.
 
 ---
 

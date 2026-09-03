@@ -52,22 +52,22 @@
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
 - L699 — ### Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
-- L878 — ### Bloques de Fase 2
-- L886 — ### Bloques de Fase 5
-- L909 — ### Bloques de Fase 6
-- L954 — ### Bloques de Fase 8
-- L1163 — ### Fases completadas
-- L1267 — ### Cierre del modelo — Sesión 8
-- L1315 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1361 — ### Método de trabajo (procedimiento vigente)
-- L1394 — ### Deuda consciente VIVA
-- L2967 — ### Deuda consciente CERRADA (histórico)
-- L3055 — ### Notas técnicas validadas en Fase 0
-- L3065 — ### Notas técnicas validadas en Fase 6
-- L3099 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3108 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3135 — ### Registro detallado de sesiones S10–S31
-- L3144 — ## Señales globales de alerta
+- L881 — ### Bloques de Fase 2
+- L889 — ### Bloques de Fase 5
+- L912 — ### Bloques de Fase 6
+- L957 — ### Bloques de Fase 8
+- L1166 — ### Fases completadas
+- L1270 — ### Cierre del modelo — Sesión 8
+- L1318 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1364 — ### Método de trabajo (procedimiento vigente)
+- L1397 — ### Deuda consciente VIVA
+- L2970 — ### Deuda consciente CERRADA (histórico)
+- L3058 — ### Notas técnicas validadas en Fase 0
+- L3068 — ### Notas técnicas validadas en Fase 6
+- L3102 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3111 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3138 — ### Registro detallado de sesiones S10–S31
+- L3147 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -761,17 +761,20 @@ nuevo a partir del anterior, modificando solo los cambios.
   las tres deudas nuevas de S132 nacen en LAS DOS sedes para no engordarla.
   R4 / COSTURA, medido al cerrar y no al abrir. `scripts/verificar-cierre.py`: 0 comprobaciones duras con
   fallo, invariante H3 en 1, los tres censos en S130 y los dos índices con 0 entradas descuadradas. Tokens
-  sospechosos: **27 al cerrar, contra los 30 con que la sesión llegó al M1**.
+  sospechosos: **26, medidos sobre `e03a243`, contra los 30 con que la sesión llegó
+  al M1**. El número va atado a su commit y no a la sesión, que es la lección del bundle de S129 aplicada a
+  otro instrumento: cada edición del corpus lo mueve, y este párrafo hubo que corregirlo DOS veces por
+  anotarlo antes de terminar de editar —la segunda, después de haber escrito la corrección de la primera—.
   LA HIPÓTESIS QUE ESTE CIERRE ESCRIBIÓ SOBRE ESOS TRES ERA FALSA, y se corrige aquí en vez de dejarla. Se
   supuso que los tres de más eran deudas recién nacidas citadas una sola vez; medido comparando las dos
   salidas del mismo verificador, **las tres deudas de S132 nunca estuvieron en la lista** —nacieron en las dos
-  sedes, así que arrancan con 4, 8 y 6 apariciones—. Los tres que desaparecen son `D-F7`, `D-F8` y
+  sedes, así que arrancan con 4, 8 y 6 apariciones—. Los que desaparecen son `D-F7`, `D-F8`, `D-F8.5` y
   `D-controles-nativos-sin-neutralizar`. De ése último la causa está MEDIDA: pasa de 1 a 8 apariciones porque
   el renombrado del M1-bis le dio por fin texto en el plan, que es `D-deuda-sin-sede-en-el-plan` cobrándose
-  por el lado bueno. De `D-F7` y `D-F8` la causa **queda sin determinar** y se escribe así: el grep con que se
+  por el lado bueno. De `D-F7`, `D-F8` y `D-F8.5` la causa **queda sin determinar** y se escribe así: el grep con que se
   intentó se contamina con subcadenas (`D-F8` casa dentro de `D-F8.5`) y no es el tokenizador del script, de
   modo que concluir con él sería la familia de S122. No se persigue (R-deuda: no bloquea), y se registra que
-  el número bajó sin que dos tercios de la bajada tengan explicación.
+  el número bajó sin que tres cuartos de la bajada tengan explicación.
   DOS INSTANCIAS QUE PRODUCE ESTE PROPIO M1. (1) `D-guion-exit-enmascarado` vuelve a morder en su segunda
   forma, la de S123: tras el primer guion el índice de `gestion_proyecto.md` quedó con 14 entradas
   descuadradas y `verificar-cierre.py` salió con **retorno 0**, porque su §4 imprime las descuadradas y no las
