@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
-- L896 — ### Bloques de Fase 2
-- L904 — ### Bloques de Fase 5
-- L927 — ### Bloques de Fase 6
-- L972 — ### Bloques de Fase 8
-- L1181 — ### Fases completadas
-- L1285 — ### Cierre del modelo — Sesión 8
-- L1333 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1379 — ### Método de trabajo (procedimiento vigente)
-- L1412 — ### Deuda consciente VIVA
-- L3007 — ### Deuda consciente CERRADA (histórico)
-- L3095 — ### Notas técnicas validadas en Fase 0
-- L3105 — ### Notas técnicas validadas en Fase 6
-- L3139 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3148 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3175 — ### Registro detallado de sesiones S10–S31
-- L3184 — ## Señales globales de alerta
+- L699 — ### Sesión 134 — O-demo (H2): **ENTREVISTA EN VIVO CON EL JEFE DE ESTUDIOS. `D31-a` SALDADA y la deuda bloqueante del proyecto baja a CERO por primera vez desde que existe el mapa.** El correo redactado no llega a enviarse: el arquitecto sienta al jefe de estudios delante y la consulta se convierte en tres rondas de preguntas. Se cierran `D31-a` (las aulas de FPB), la parte (a) original de `D31` y media `D-gh6-tutor-contradictorio`; se REFUTA `D31 (b)`; y un tercer PDF aportado en la propia entrevista resuelve 21 de los 28 tutores. Nacen siete deudas y ninguna abre sesión. Ni un fichero de `app/` o `solver/` tocado.
+- L814 — ### Bloques de Fase 2
+- L822 — ### Bloques de Fase 5
+- L845 — ### Bloques de Fase 6
+- L890 — ### Bloques de Fase 8
+- L1099 — ### Fases completadas
+- L1203 — ### Cierre del modelo — Sesión 8
+- L1251 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1297 — ### Método de trabajo (procedimiento vigente)
+- L1330 — ### Deuda consciente VIVA
+- L2977 — ### Deuda consciente CERRADA (histórico)
+- L3065 — ### Notas técnicas validadas en Fase 0
+- L3075 — ### Notas técnicas validadas en Fase 6
+- L3109 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3118 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3145 — ### Registro detallado de sesiones S10–S31
+- L3154 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,21 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
+### Sesión 134 — O-demo (H2): **ENTREVISTA EN VIVO CON EL JEFE DE ESTUDIOS. `D31-a` SALDADA y la deuda bloqueante del proyecto baja a CERO por primera vez desde que existe el mapa.** El correo redactado no llega a enviarse: el arquitecto sienta al jefe de estudios delante y la consulta se convierte en tres rondas de preguntas. Se cierran `D31-a` (las aulas de FPB), la parte (a) original de `D31` y media `D-gh6-tutor-contradictorio`; se REFUTA `D31 (b)`; y un tercer PDF aportado en la propia entrevista resuelve 21 de los 28 tutores. Nacen siete deudas y ninguna abre sesión. Ni un fichero de `app/` o `solver/` tocado.
+  TIPO Y RITUAL: recogida de requisitos. **No hay fila en la tabla de Tipos que la describa**, igual que le pasó al recorrido de juicio de S133: dos seguidas. Se anota como observación de método y no como deuda; un tercer caso sí sería patrón. Sin M2, M3 ni M4: no hubo código que medir ni que mutar.
+  M0 IRREGULAR, y se registra como tal. La sesión se abrió para hacer el M0 de O-ajuste-cierre y NUNCA llegó a fijar alcance: la condición que bloqueaba O-demo —la respuesta del centro— se cumplió en vivo a mitad de turno. Lo que sí produjo esa apertura fallida es una medición que sigue pendiente de aplicar: **`D-F8.6-ii-b` está CERRADA desde S83** (bloque 8.6-iii-B1 marcado `[x]`, la propia ficha de la deuda dice «→ CERRADA en S83» y la bitácora de S83 lo confirma; S84 le añadió cobertura de test), y `gestion_proyecto.md` la afirma VIVA Y BLOQUEANTE en tres sitios: la fila de H1 en §2, su fila de §4 y el «Terminado cuando» de la ficha de O-ajuste-cierre. Ese objetivo NO estaba bloqueado por deuda alguna; su problema es que su criterio está escrito contra una deuda muerta. La corrección NO se hace en esta sesión.
+  LO QUE EL CENTRO RESPONDIÓ, y qué cierra cada cosa. **(1) Aulas de FPB (`D31-a`)**: lo que el horario no imprime va al **Taller 4** (1º FPB) y al **Taller 5** (2º FPB), uso exclusivo de FPB y tutoría incluida. Es una REGLA, no once datos sueltos, y corrobora por contraste lo medido: las únicas horas de FPB con aula impresa son CS/CyS en TALL3, y las cuentas cierran exactas (24 + 6 = 30 en 1FPB, 25 + 5 = 30 en 2FPB). El oráculo de S117 queda listo para cobrarse: la tabla `sesion` debe pasar de 770 a **819** filas, delta 49 = 24 + 25. **(2) Tutores**: el tutor se introduce a mano y es independiente de que exista hora de tutoría —los bachilleratos tienen tutor y no tienen TUT—, luego la heurística «tutor = quien imparte TUT» era falsa en los DOS sentidos y lo cargado hoy es incorrecto, no incompleto. El modelo ya lo preveía (`requiere_tutor` como flag de actividad, no nombre de asignatura) y no hay que cambiarlo: lo que falla es la derivación. **(3) Estructura de 4º ESO**: cuatro itinerarios cerrados, dos materias de modalidad de 3 h por alumno, sin cambio de itinerario a mitad de curso.
+  EL HALLAZGO DE LA SESIÓN, y contradice la frase del propio jefe de estudios con su propio ejemplo. Preguntado por si los alumnos se recombinan entre franjas, responde que sí, pero el ejemplo que da demuestra lo contrario: FQ se imparte a la vez por DOS profesores (FIS3 y FIS4) y el reparto está alineado con la franja siguiente —los de FIS3 van a Biología, los de FIS4 van a TEC—. Es decir, parten FQ en dos precisamente para que cada mitad case con su itinerario. Con el itinerario cerrado y sin cambios durante el curso, **el conjunto que se mueve junto es el itinerario y SÍ se reutiliza entre bloques**: exactamente una actividad con dos plazas, cada plaza con su subgrupo. **`D31 (b)` queda REFUTADA**, no confirmada: las optativas de 4º NO son población propia por bloque, como se asumió en S28. Confirmado por él a la pregunta directa.
+  TRES CAPAS MEDIDAS EN 4º ESO, sobre los conjuntos de grupos que acompañan a cada asignatura en el PDF de profesores (dato inequívoco; el encaje día/tramo NO se da por bueno, exige la extracción por geometría de S116). **Modalidad → `{4ºA, 4ºB, 4ºD}`, nunca 4ºC**: FQ (Carrasco y Marín), Biología (Crespo), TEC (Redondo), DIG (Barba), FOPP (Fuentes). **Latín y Economía → `4ºC` entero**, clase de grupo completo y no bloque. **Optativas de 3 h y de 2 h → los cuatro grupos**, y Religión/ATEDU además con 4ºADi y 4ºDDi. La consecuencia es una TERCERA forma de partición que el modelo no contempla: el itinerario de Humanidades/CCSS no se resuelve con un bloque sino METIENDO A ESOS ALUMNOS EN UN GRUPO. Nace `D-itinerario-como-grupo`. De paso queda medido que 4º tiene CUATRO grupos —Religión de 4º cubre A, B, C y D—, así que «los 3 4º» que dijo el jefe de estudios fue un lapsus.
+  EL TERCER PDF, y lo que trae que nadie esperaba. `Horarios de profesores.pdf`, aportado en la entrevista después de que el centro dijera no tener la lista de tutores, la trae IMPRESA en la cabecera de cada página. Medido sobre el fichero, no leído por encima: **80 profesores, 17 con línea `Tutor:`, que cubren 21 de los 28 grupos** —los 16 ordinarios de ESO y FPB más los 5 de diversificación—. Y contradice dos respuestas del propio centro: Pilar Guerrero Serrano figura como tutora de CINCO grupos PDC y los cinco Di llevan DOS tutores, el de su grupo padre y ella. Confirmado por el arquitecto ante el jefe de estudios: **el caso de diversificación es especial y la orientadora puede ser tutora de todos los grupos de diver**, luego la regla «un profesor, un grupo» rige para los ordinarios y no para los PDC, y la figura del co-tutor SÍ existe ahí. Contesta de rebote la pregunta que no llegó a responderse.
+  LO QUE EL TERCER PDF NO TRAE: ni una sola línea `Tutor:` para los siete grupos de Bachillerato, que son justo los que tienen tutor sin hora de tutoría. Y el sustituto que ofrecía el modelo tampoco vale: el **Hallazgo E** de `modelo_datos_fase1.md` afirma que PTVE lo imparte el tutor de cada grupo, y Mejías Márquez da PTVE a 1B-B y a 1B-D y PTEV a 2B-A y 2B-B juntos. Con la respuesta del centro sobre GH6 —«no es tutor de 1º Bach A»—, el Hallazgo E acumula DOS afirmaciones que los datos o el centro desmienten. Nace `D-hallazgo-E-refutado`.
+  DEUDA. Cerradas: `D31-a`; `D31 (a)` original —el refuerzo/ATED de 3º ESO queda validado por respuesta directa («la optativa es elegida para todo el curso») y no ya por analogía como en S69—; y `D-gh6-tutor-contradictorio` a medias, con la mitad OPUESTA a la supuesta. Refutada: `D31 (b)`. Nacen siete: `D-hallazgo-E-refutado`, `D-tutores-bachillerato`, `D-nombres-sin-codigo`, `D-censo-profesores-80-59`, `D-itinerario-como-grupo`, `D-taller5-inexistente` y `D-fuente-tercera-sin-usar`. **R-deuda ratificado en su caso más fácil**: siete deudas de golpe y ninguna abre sesión.
+  DOS DISCREPANCIAS DE `metodo.md` CON LA PRÁCTICA, anotadas y no tocadas: M1.2 dice que el plan conserva las CUATRO últimas cabeceras y la práctica desde hace sesiones conserva DOS (una H3 viva y una previa); y la tabla de Tipos no tiene fila para las dos últimas sesiones. Ninguna bloquea; van a la lista de la sesión de Higiene/Método.
+  Y UNA NORMA MUERTA EN EL PROMPT DE APERTURA: la NORMA DE DOCUMENTACIÓN del prompt («pide los ficheros y devuélvelos enteros») fue DEROGADA por `M-doc` en S122 con la medición delante. El cierre se hace por guion para Claude Code, como manda `metodo.md`.
+  LIMPIEZA (M1-bis): archivada S132 a `bitacora-sesiones.md` (promovida a `### Sesión 132`, insertada al final en orden ascendente, cuerpo íntegro); degradada S133 a «Última sesión registrada (previa):»; S134 queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S131 a S132. R4/costura: sin código en el árbol; los siete tokens nuevos nacen con definición viva en el plan y citante vivo en `gestion_proyecto.md` §4.
+  O-demo (H2, abierto en S115) ACTIVO y **DESBLOQUEADO**: `D31-a` saldada, trabajo ejecutable por primera vez desde S120. Falta cargar las 11 actividades de FPB —antes hay que dar de alta el aula Taller 5, que no existe en el catálogo— y declarar el centro completo contra el oráculo de 819 filas. O-ajuste-cierre (H1) sigue vivo, sin deuda que lo bloquee y con su criterio pendiente de reescribir. **Deuda bloqueante del proyecto: 0.**
+
+Última sesión registrada (previa): Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
   QUÉ SE JUZGÓ Y SOBRE QUÉ, para que el veredicto sea reproducible. Commit `4ba1fd4` con el árbol limpio,
   bundle servido por `mvn -pl solver install -DskipTests` + `mvn -pl app package -DskipTests` +
   `spring-boot:run` contra `app/educhronos-s133-m4.db`, copia de `educhronos-demo-m4.db` con md5
@@ -761,102 +775,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   final en orden ascendente, cuerpo íntegro); degradada S132 a «Última sesión registrada (previa):»; S133
   queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S130 a S131.
 
-Última sesión registrada (previa): Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
-  TIPO Y RITUAL: Acabado visual. Acta heredada del M1-ter de S131, M2 dentro del bucle, M4 en navegador, M1
-  aquí con el traspaso delante. Sin M0 —el acta viene del cierre anterior— y sin M3: no se tocó un solo `.ts`.
-  El modelo principal NO vio la sesión; todo lo que este registro afirma sale del traspaso o de la
-  documentación, y lo que no estaba en ninguno de los dos se pidió antes de escribirlo.
-  QUÉ SE APLICÓ, un commit por punto del acta. `82ec04c`, punto 2: `.app__contenido` de `var(--e4) 0` a
-  `var(--e4) var(--e5)`, sin variante porque la decisión 3 ya asigna `--e5`, asimétrico a propósito y con el
-  porqué escrito en `app.css`. `50ad1d5`, punto 1: la jerarquía por relleno, 43 ficheros, 14
-  `.accion-principal`, 9 `.accion-destructiva`, secundaria por defecto, `:disabled` como acento apagado, más
-  los tres `font-weight` que decían jerarquía por peso contra la decisión 2. `9a38e03`, punto 3: sólo
-  `styles.css`. `d7a427a`, punto 4: 9 ficheros.
-  LA VARIANTE QUE SE OFRECIÓ Y LA QUE ELEGISTE. La regla global engorda el botón de fila —41 px hoy, 53 sin
-  nivel de tamaño—, y ahí el alto es presupuesto medido. Elegida la B: `.accion-compacta` en las 16 acciones
-  de fila, que las deja en 43. Es el único punto del acta que admitía variante; los otros tres tenían la
-  regla escrita y se aplicaron.
-  MEDICIONES, sobre la aplicación real en :4200 (`ng serve` + proxy) con el backend contra una copia de
-  `educhronos-demo-m4.db` (md5 `ea1a70a…f48e9b`, verificado), que sirve el centro completo: 43 aulas, 100
-  asignaturas, 208 actividades, 334 subgrupos y el horario 1 con 770 sesiones. `medir-recorte.mjs` a
-  1920×887: 1ºA 2, 1B-A 4, 4ºA 3, 2B-B 0, sin desborde, idéntico en los cuatro commits y coincidente con lo
-  que S127 cerró. `donde-corta.mjs`: 0 líneas cortadas a 1920 y a 1440 en el estado final.
-  SUITES Y BUNDLE. `mvn clean test` → solver 91, app 282, BUILD SUCCESS. `npx ng test --watch=false` → 419 en
-  49 ficheros, sin un solo caso reescrito. `npm run e2e` → 2 pasados, y vuelve a medirse: llevaba sin correr
-  desde S130, que lo dejó pendiente por tener el 8080 ocupado. Bundle sobre `d7a427a`, atado a su commit como
-  manda la lección de S129: **540,83 kB crudos / 122,17 transferidos**, contra 542,39 / 121,84 de `ffdf966`.
-  El acabado CUESTA −1,56 kB crudos —los 32 bloques retirados— y +0,33 transferidos. Aviso en 550, no se
-  alcanza.
-  POR QUÉ O-DISEÑO NO CIERRA, contra la suposición con que se abrió este M1. El acta se agotó entera, pero el
-  criterio 3 pide sistema APLICADO **y** verificado en navegador, y el único recorrido del registro es el de
-  S130, que juzgó el estado anterior a estos cuatro commits y es quien los generó. Dar el criterio por
-  cumplido porque la lista se acabó sería cerrarlo por agotamiento y no por juicio: el mismo argumento con
-  que S129 partió C-revisión en tres tramos. Queda vivo exactamente una cosa, la pasada del arquitecto por
-  las tres vistas y los tres diálogos sobre el estado actual.
-  M-VISUAL, VEREDICTO DE SU PRIMERA SESIÓN: **funciona**. El acta aguantó sin desvíos, la variante sirvió
-  para decidir y el traspaso trajo lo que el M1 necesita —commits con hash, ficheros, mediciones con su
-  comando, suites, bundle atado a commit y hallazgos ya clasificados—. Pide tres ajustes, escritos en
-  `metodo.md`: el acta fija QUÉ se toca y no CÓMO (el punto 3 pedía redibujar el adorno y la solución era
-  `accent-color`); una decisión no escrita que no sea de gusto NO se toma en el bucle (la de
-  `--color-info-fondo` la tomó Claude Code y la ratifica este cierre); y un punto que mueve geometría se mide
-  en las DOS dimensiones. Y deja escrito un LÍMITE: el recorrido de juicio no puede ser una sesión de acabado
-  visual, porque produce el acta en vez de consumirla.
-  CORRECCIÓN DE AFIRMACIÓN VIVA (M2). El censo de botones que S130 escribió era corto. Remedido sobre
-  `82ec04c`: 54 `<button>` en 24 plantillas y no «34 botones en 10 componentes»; caja y radio 10, correcto;
-  una sola propiedad 10 y no 9; 15 clases sin regla y no 8 —faltaban `cancelar` de confirmar-generación,
-  `grupos__pdc`, `grupos__tutoria`, `generar`, `confirmar-reemplazo__cancelar`, `jornada__recargar` y el
-  botón sin clase de `panel-prevalidacion`—. Se corrige en las sedes VIVAS (la ficha de O-diseño y la de la
-  deuda); la entrada de S130 se archiva tal como se escribió, porque lo archivado no se corrige.
-  DEUDA. Cerradas dos: `D-jerarquia-declarada-sin-aplicar`, que era la que bloqueaba el criterio 3, y
-  `D-controles-nativos-sin-neutralizar`. Actualizada una: `D-tokens-sin-uso` baja de tres tokens a uno
-  —`--fuente-datos` se resuelve usándola en 9 sitios, `--color-ok-fondo` sale de la cola como decisión
-  consciente y queda `--color-info-fondo`—. Nacen tres: `D-instrumento-criterio4-ciego-al-ancho`,
-  `D-corte-lateral-a-1280` y `D-deuda-sin-sede-en-el-plan`. **Deuda bloqueante abierta: baja de 2 a 1**, sólo
-  `D31-a`.
-  DOS RECLASIFICACIONES SOBRE LO QUE PROPONÍA EL TRASPASO, y las dos con argumento. (1) El instrumento del
-  criterio 4 no es ciego a lo que el criterio pide: el criterio pide «sin scroll VERTICAL» y eso es lo que
-  mide. Lo que falta es instrumento para el ANCHO, y su sede es la sesión de Higiene/Método y no
-  O-navegación, que está TERMINADO —colgarla de un objetivo cerrado es decidir que no se paga nunca—. (2)
-  `D-corte-lateral-a-1280` cuelga de O-diseño, que es quien la introduce, por la misma razón.
-  HALLAZGO DEL M1, y es de costura documental. `D-jerarquia-declarada-sin-aplicar`,
-  `D-avisos-como-bloque-fijo`, `D-declarado-sin-artefacto`, `D-plan-duplicado` y el renombrado de
-  `D-select-nativo-desparejo` NO tienen texto íntegro en la sección «Deuda consciente VIVA» de este
-  documento, pese a que `gestion_proyecto.md` §4 declara que su fuente es este plan. La misma deuda tiene dos
-  nombres según el documento que se lea. Nace `D-deuda-sin-sede-en-el-plan`; no se salda aquí (R-deuda), y
-  las tres deudas nuevas de S132 nacen en LAS DOS sedes para no engordarla.
-  R4 / COSTURA, medido al cerrar y no al abrir. `scripts/verificar-cierre.py`: 0 comprobaciones duras con
-  fallo, invariante H3 en 1, los tres censos en S130 y los dos índices con 0 entradas descuadradas. Tokens
-  sospechosos: **26, medidos sobre `e03a243`, contra los 30 con que la sesión llegó
-  al M1**. El número va atado a su commit y no a la sesión, que es la lección del bundle de S129 aplicada a
-  otro instrumento: cada edición del corpus lo mueve, y este párrafo hubo que corregirlo DOS veces por
-  anotarlo antes de terminar de editar —la segunda, después de haber escrito la corrección de la primera—.
-  LA HIPÓTESIS QUE ESTE CIERRE ESCRIBIÓ SOBRE ESOS TRES ERA FALSA, y se corrige aquí en vez de dejarla. Se
-  supuso que los tres de más eran deudas recién nacidas citadas una sola vez; medido comparando las dos
-  salidas del mismo verificador, **las tres deudas de S132 nunca estuvieron en la lista** —nacieron en las dos
-  sedes, así que arrancan con 4, 8 y 6 apariciones—. Los que desaparecen son `D-F7`, `D-F8`, `D-F8.5` y
-  `D-controles-nativos-sin-neutralizar`. De ése último la causa está MEDIDA: pasa de 1 a 8 apariciones porque
-  el renombrado del M1-bis le dio por fin texto en el plan, que es `D-deuda-sin-sede-en-el-plan` cobrándose
-  por el lado bueno. De `D-F7`, `D-F8` y `D-F8.5` la causa **queda sin determinar** y se escribe así: el grep con que se
-  intentó se contamina con subcadenas (`D-F8` casa dentro de `D-F8.5`) y no es el tokenizador del script, de
-  modo que concluir con él sería la familia de S122. No se persigue (R-deuda: no bloquea), y se registra que
-  el número bajó sin que tres cuartos de la bajada tengan explicación.
-  DOS INSTANCIAS QUE PRODUCE ESTE PROPIO M1. (1) `D-guion-exit-enmascarado` vuelve a morder en su segunda
-  forma, la de S123: tras el primer guion el índice de `gestion_proyecto.md` quedó con 14 entradas
-  descuadradas y `verificar-cierre.py` salió con **retorno 0**, porque su §4 imprime las descuadradas y no las
-  suma a `problemas`. Lo detectó Claude Code por leer la salida y no el código de retorno, que es exactamente
-  la lección que la ficha lleva escrita desde S123 y que sigue sin pagarse. (2) Los guiones de este cierre
-  dejaron los respaldos `.bak-s132` DENTRO de `docs/`, que es literalmente la forma de `D-plan-duplicado`:
-  copias caducadas de un documento vivo dentro del repo, que un `grep -r` lee igual que a las vivas. El fallo
-  es de `M-doc`, que decía «hace copia de seguridad» sin decir dónde; queda corregido allí, junto con el paso
-  de regenerar el índice que los guiones tampoco traían y hubo que suplir a mano tres veces.
-  LIMPIEZA (M1-bis): archivada S130 a `bitacora-sesiones.md` (promovida a `### Sesión 130`, insertada al
-  final en orden ascendente, cuerpo íntegro); degradada S131 a «Última sesión registrada (previa):»; S132
-  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S129 a S130.
-  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
-  con los TRAMOS 1 y 2 HECHOS y el TRAMO 3 APLICADO Y SIN JUZGAR**. Criterios 1, 2 y 4 CUMPLIDOS; el 3 con la
-  aplicación completa y el juicio pendiente. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado
-  por el correo al centro. Siguiente: **el recorrido de juicio del criterio 3**, que lo hace el arquitecto y
-  cuya salida es el acta de la próxima sesión de acabado. Lo fija su propio M0 (ver M1-ter).
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -880,8 +798,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133.
-El plan conserva ahora S132 (degradada a formato compacto) y S133 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134.
+El plan conserva ahora S133 (degradada a formato compacto) y S134 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -1732,6 +1650,20 @@ con remisión a la bitácora.
   —refuerzo/ATED de 3ºESO— queda cubierta por la validación del tramo denso de 1ºESO como caso gemelo,
   pero NO se puso el de 3º explícitamente ante el centro: se considera validada por analogía, no por
   confirmación directa. → resolver (b)/(c)/(d) al abrir el CRUD de esos niveles o antes si hay contacto.
+  CIERRE (S134): la entrevista en vivo con el jefe de estudios salda la parte que quedaba y refuta una.
+  CERRADO: **`D31-a`** (las aulas de las 11 plazas de FPB) — lo que el horario no imprime va al Taller 4
+  (1º FPB) y al Taller 5 (2º FPB), uso exclusivo de FPB y tutoría incluida. CERRADO: la parte **(a)**
+  original —refuerzo/ATED de 3º ESO— por respuesta directa («la optativa es elegida para todo el curso»),
+  que sustituye a la validación por analogía de S69. **REFUTADA la parte (b)**: las optativas de 4º ESO NO
+  son población propia por bloque. El itinerario es cerrado, no cambia durante el curso y determina las dos
+  franjas, así que el subgrupo SÍ se reutiliza entre bloques; FQ se desdobla en dos plazas (FIS3 y FIS4)
+  precisamente para que cada mitad case con lo que hace en la franja siguiente. Aparece además una tercera
+  forma de partición no modelada, el itinerario resuelto por GRUPO (4ºC concentra Humanidades/CCSS, con
+  Latín y Economía como clase de grupo completo): ver `D-itinerario-como-grupo`. SIGUEN VIVAS **(c)** y
+  **(d)** —1º y 2º de Bachillerato—: el jefe de estudios remitió al PDF de prematrícula, que es catálogo de
+  OFERTA y no de horario (él mismo avisó de que optativas e itinerarios que figuran ahí pueden no haberse
+  impartido, y citó el Itinerario 3 «Tecnológico B» como caso), así que lo que se imparte de verdad hay que
+  medirlo del horario.
 - DECISIÓN DE PRODUCTO (S67): el usuario decide NO hacer demo al cliente hasta terminar
   8.5 (CRUD de catálogo). Razón: mientras el catálogo se defina en SeedCatalogoRunner
   (Java), no hay producto que enseñar, y una demo provocaría "¿cómo meto yo mis datos?"
@@ -3003,6 +2935,44 @@ con remisión a la bitácora.
   arregla en este mismo cierre por caer en el camino; las cuatro fichas que faltan, no. → sesión de
   Higiene/Método, junto a `D-tokens-inexistentes`, que es la misma familia por el otro extremo. Las tres
   deudas que S132 da de alta nacen en LAS DOS sedes para no engordarla. No se paga ahora.
+
+- **D-hallazgo-E-refutado** (S134, VIVA, no bloqueante) — el Hallazgo E de `modelo_datos_fase1.md` afirma
+  DOS cosas que los datos o el centro desmienten: que GH6 es tutor de 1º Bach A (el jefe de estudios dice
+  expresamente que NO lo es) y que en Bachillerato PTVE lo imparte el tutor de cada grupo (Mejías Márquez
+  da PTVE a 1B-B y a 1B-D, y PTEV a 2B-A y 2B-B juntos; con la regla de un tutor por grupo no puede ser
+  tutora de los cuatro). El documento de dominio afirma estado falso, que es la familia de
+  `D-tokens-inexistentes`. NO se corrige en S134 a propósito: retirar la afirmación de GH6 sin saber de qué
+  grupo es tutor dejaría el hueco sin sustituto. Se paga cuando `D-tutores-bachillerato` traiga el dato.
+- **D-tutores-bachillerato** (S134, VIVA, LIMITACIÓN CONOCIDA, no bloqueante) — faltan los tutores de los
+  siete grupos de Bachillerato (1B-A…1B-D, 2B-A…2B-C). `Horarios de profesores.pdf` no trae ni una línea
+  `Tutor:` para ellos, y la heurística de repuesto (PTVE) está refutada arriba. El centro dijo que el tutor
+  se introduce a mano y que en Bachillerato hay tutor sin hora de tutoría, así que el dato existe en su
+  sistema y no en ningún PDF de los entregados. Deuda de REQUISITOS: se cierra preguntando, no midiendo.
+- **D-nombres-sin-codigo** (S134, VIVA, no bloqueante) — `Horarios de profesores.pdf` identifica al
+  profesorado por NOMBRE COMPLETO; `Horarios de grupos.pdf` y `Horarios de aulas.pdf`, de donde salió el
+  catálogo cargado, lo identifican por CÓDIGO (FIS3, GH6, FIL2…). Sin el mapa nombre↔código, los 21 tutores
+  encontrados no se pueden cargar. Es derivable por cruce de celdas —Marín Rodríguez imparte `CA 2FPB`, que
+  el volcado atribuye a FIS3— pero es trabajo, no un dato gratis. Bloquea la carga de tutorías, no O-demo.
+- **D-censo-profesores-80-59** (S134, VIVA, LIMITACIÓN CONOCIDA, no bloqueante) — el PDF de profesores trae
+  80 páginas y el catálogo cargado tiene 59 profesores. La hipótesis es que las 21 restantes son personal
+  sin horario lectivo en estos datos (varias páginas salen con la rejilla vacía, y una es «Religión
+  Evangélica», que no es una persona). Está SIN MEDIR: se anota como hipótesis, no como explicación.
+- **D-itinerario-como-grupo** (S134, VIVA, MEJORA FUTURA, no bloqueante) — el modelo contempla que un grupo
+  se parta en subgrupos (bloque) y que una parte salga como grupo hijo (PDC/Di), pero no la tercera forma
+  que usa el centro: concentrar un itinerario ENTERO en un grupo administrativo. En 4º ESO, Humanidades y
+  Ciencias Sociales vive en 4ºC, y por eso Latín y Economía son clase de grupo completo mientras FQ,
+  Biología, TEC, DIG y FOPP son bloque sobre `{4ºA, 4ºB, 4ºD}`. Hoy no impide cargar ni generar: el horario
+  real ya está expresado. Importa cuando haya que CONSTRUIR un 4º desde cero por la UI. Candidata a
+  O-particiones.
+- **D-taller5-inexistente** (S134, VIVA, no bloqueante) — el centro dice que 2º FPB se imparte en el
+  «Taller 5» y ese espacio no aparece en ninguno de los tres PDF procesados en S116, luego no está entre las
+  43 aulas del catálogo. Hay que darlo de alta antes de cargar las 11 actividades de FPB. Es trabajo del
+  propio Cambio que las cargue, no un bloqueo previo.
+- **D-fuente-tercera-sin-usar** (S134, VIVA, MEJORA FUTURA, no bloqueante) — `Horarios de profesores.pdf`
+  trae profesor, asignatura, aula y grupos en la MISMA celda, más las cabeceras de tutor, las guardias y el
+  ETCP. Es probablemente mejor fuente que las dos que se cruzaron en S116, donde el aula había que
+  reconciliarla entre dos documentos. Queda por decidir si compensa rederivar el catálogo desde él. No se
+  decide en S134: el centro entregó ONCE PDF y ninguno está analizado.
 
 ### Deuda consciente CERRADA (histórico)
 

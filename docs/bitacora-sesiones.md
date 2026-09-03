@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S131. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S132. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S131). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S132). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -8886,3 +8886,100 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   El M1-bis trabajó sobre el vivo —el que leen `verificar-cierre.py` y `regenerar-indice.py`— y la copia sigue
   con contenido caducado. Nace `D-plan-duplicado`: no bloquea nada, pero un `grep -r` no distingue una de otra
   y afirmar estado vivo desde la copia rancia es la familia de `D-tokens-inexistentes`.
+
+### Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
+  TIPO Y RITUAL: Acabado visual. Acta heredada del M1-ter de S131, M2 dentro del bucle, M4 en navegador, M1
+  aquí con el traspaso delante. Sin M0 —el acta viene del cierre anterior— y sin M3: no se tocó un solo `.ts`.
+  El modelo principal NO vio la sesión; todo lo que este registro afirma sale del traspaso o de la
+  documentación, y lo que no estaba en ninguno de los dos se pidió antes de escribirlo.
+  QUÉ SE APLICÓ, un commit por punto del acta. `82ec04c`, punto 2: `.app__contenido` de `var(--e4) 0` a
+  `var(--e4) var(--e5)`, sin variante porque la decisión 3 ya asigna `--e5`, asimétrico a propósito y con el
+  porqué escrito en `app.css`. `50ad1d5`, punto 1: la jerarquía por relleno, 43 ficheros, 14
+  `.accion-principal`, 9 `.accion-destructiva`, secundaria por defecto, `:disabled` como acento apagado, más
+  los tres `font-weight` que decían jerarquía por peso contra la decisión 2. `9a38e03`, punto 3: sólo
+  `styles.css`. `d7a427a`, punto 4: 9 ficheros.
+  LA VARIANTE QUE SE OFRECIÓ Y LA QUE ELEGISTE. La regla global engorda el botón de fila —41 px hoy, 53 sin
+  nivel de tamaño—, y ahí el alto es presupuesto medido. Elegida la B: `.accion-compacta` en las 16 acciones
+  de fila, que las deja en 43. Es el único punto del acta que admitía variante; los otros tres tenían la
+  regla escrita y se aplicaron.
+  MEDICIONES, sobre la aplicación real en :4200 (`ng serve` + proxy) con el backend contra una copia de
+  `educhronos-demo-m4.db` (md5 `ea1a70a…f48e9b`, verificado), que sirve el centro completo: 43 aulas, 100
+  asignaturas, 208 actividades, 334 subgrupos y el horario 1 con 770 sesiones. `medir-recorte.mjs` a
+  1920×887: 1ºA 2, 1B-A 4, 4ºA 3, 2B-B 0, sin desborde, idéntico en los cuatro commits y coincidente con lo
+  que S127 cerró. `donde-corta.mjs`: 0 líneas cortadas a 1920 y a 1440 en el estado final.
+  SUITES Y BUNDLE. `mvn clean test` → solver 91, app 282, BUILD SUCCESS. `npx ng test --watch=false` → 419 en
+  49 ficheros, sin un solo caso reescrito. `npm run e2e` → 2 pasados, y vuelve a medirse: llevaba sin correr
+  desde S130, que lo dejó pendiente por tener el 8080 ocupado. Bundle sobre `d7a427a`, atado a su commit como
+  manda la lección de S129: **540,83 kB crudos / 122,17 transferidos**, contra 542,39 / 121,84 de `ffdf966`.
+  El acabado CUESTA −1,56 kB crudos —los 32 bloques retirados— y +0,33 transferidos. Aviso en 550, no se
+  alcanza.
+  POR QUÉ O-DISEÑO NO CIERRA, contra la suposición con que se abrió este M1. El acta se agotó entera, pero el
+  criterio 3 pide sistema APLICADO **y** verificado en navegador, y el único recorrido del registro es el de
+  S130, que juzgó el estado anterior a estos cuatro commits y es quien los generó. Dar el criterio por
+  cumplido porque la lista se acabó sería cerrarlo por agotamiento y no por juicio: el mismo argumento con
+  que S129 partió C-revisión en tres tramos. Queda vivo exactamente una cosa, la pasada del arquitecto por
+  las tres vistas y los tres diálogos sobre el estado actual.
+  M-VISUAL, VEREDICTO DE SU PRIMERA SESIÓN: **funciona**. El acta aguantó sin desvíos, la variante sirvió
+  para decidir y el traspaso trajo lo que el M1 necesita —commits con hash, ficheros, mediciones con su
+  comando, suites, bundle atado a commit y hallazgos ya clasificados—. Pide tres ajustes, escritos en
+  `metodo.md`: el acta fija QUÉ se toca y no CÓMO (el punto 3 pedía redibujar el adorno y la solución era
+  `accent-color`); una decisión no escrita que no sea de gusto NO se toma en el bucle (la de
+  `--color-info-fondo` la tomó Claude Code y la ratifica este cierre); y un punto que mueve geometría se mide
+  en las DOS dimensiones. Y deja escrito un LÍMITE: el recorrido de juicio no puede ser una sesión de acabado
+  visual, porque produce el acta en vez de consumirla.
+  CORRECCIÓN DE AFIRMACIÓN VIVA (M2). El censo de botones que S130 escribió era corto. Remedido sobre
+  `82ec04c`: 54 `<button>` en 24 plantillas y no «34 botones en 10 componentes»; caja y radio 10, correcto;
+  una sola propiedad 10 y no 9; 15 clases sin regla y no 8 —faltaban `cancelar` de confirmar-generación,
+  `grupos__pdc`, `grupos__tutoria`, `generar`, `confirmar-reemplazo__cancelar`, `jornada__recargar` y el
+  botón sin clase de `panel-prevalidacion`—. Se corrige en las sedes VIVAS (la ficha de O-diseño y la de la
+  deuda); la entrada de S130 se archiva tal como se escribió, porque lo archivado no se corrige.
+  DEUDA. Cerradas dos: `D-jerarquia-declarada-sin-aplicar`, que era la que bloqueaba el criterio 3, y
+  `D-controles-nativos-sin-neutralizar`. Actualizada una: `D-tokens-sin-uso` baja de tres tokens a uno
+  —`--fuente-datos` se resuelve usándola en 9 sitios, `--color-ok-fondo` sale de la cola como decisión
+  consciente y queda `--color-info-fondo`—. Nacen tres: `D-instrumento-criterio4-ciego-al-ancho`,
+  `D-corte-lateral-a-1280` y `D-deuda-sin-sede-en-el-plan`. **Deuda bloqueante abierta: baja de 2 a 1**, sólo
+  `D31-a`.
+  DOS RECLASIFICACIONES SOBRE LO QUE PROPONÍA EL TRASPASO, y las dos con argumento. (1) El instrumento del
+  criterio 4 no es ciego a lo que el criterio pide: el criterio pide «sin scroll VERTICAL» y eso es lo que
+  mide. Lo que falta es instrumento para el ANCHO, y su sede es la sesión de Higiene/Método y no
+  O-navegación, que está TERMINADO —colgarla de un objetivo cerrado es decidir que no se paga nunca—. (2)
+  `D-corte-lateral-a-1280` cuelga de O-diseño, que es quien la introduce, por la misma razón.
+  HALLAZGO DEL M1, y es de costura documental. `D-jerarquia-declarada-sin-aplicar`,
+  `D-avisos-como-bloque-fijo`, `D-declarado-sin-artefacto`, `D-plan-duplicado` y el renombrado de
+  `D-select-nativo-desparejo` NO tienen texto íntegro en la sección «Deuda consciente VIVA» de este
+  documento, pese a que `gestion_proyecto.md` §4 declara que su fuente es este plan. La misma deuda tiene dos
+  nombres según el documento que se lea. Nace `D-deuda-sin-sede-en-el-plan`; no se salda aquí (R-deuda), y
+  las tres deudas nuevas de S132 nacen en LAS DOS sedes para no engordarla.
+  R4 / COSTURA, medido al cerrar y no al abrir. `scripts/verificar-cierre.py`: 0 comprobaciones duras con
+  fallo, invariante H3 en 1, los tres censos en S130 y los dos índices con 0 entradas descuadradas. Tokens
+  sospechosos: **26, medidos sobre `e03a243`, contra los 30 con que la sesión llegó
+  al M1**. El número va atado a su commit y no a la sesión, que es la lección del bundle de S129 aplicada a
+  otro instrumento: cada edición del corpus lo mueve, y este párrafo hubo que corregirlo DOS veces por
+  anotarlo antes de terminar de editar —la segunda, después de haber escrito la corrección de la primera—.
+  LA HIPÓTESIS QUE ESTE CIERRE ESCRIBIÓ SOBRE ESOS TRES ERA FALSA, y se corrige aquí en vez de dejarla. Se
+  supuso que los tres de más eran deudas recién nacidas citadas una sola vez; medido comparando las dos
+  salidas del mismo verificador, **las tres deudas de S132 nunca estuvieron en la lista** —nacieron en las dos
+  sedes, así que arrancan con 4, 8 y 6 apariciones—. Los que desaparecen son `D-F7`, `D-F8`, `D-F8.5` y
+  `D-controles-nativos-sin-neutralizar`. De ése último la causa está MEDIDA: pasa de 1 a 8 apariciones porque
+  el renombrado del M1-bis le dio por fin texto en el plan, que es `D-deuda-sin-sede-en-el-plan` cobrándose
+  por el lado bueno. De `D-F7`, `D-F8` y `D-F8.5` la causa **queda sin determinar** y se escribe así: el grep con que se
+  intentó se contamina con subcadenas (`D-F8` casa dentro de `D-F8.5`) y no es el tokenizador del script, de
+  modo que concluir con él sería la familia de S122. No se persigue (R-deuda: no bloquea), y se registra que
+  el número bajó sin que tres cuartos de la bajada tengan explicación.
+  DOS INSTANCIAS QUE PRODUCE ESTE PROPIO M1. (1) `D-guion-exit-enmascarado` vuelve a morder en su segunda
+  forma, la de S123: tras el primer guion el índice de `gestion_proyecto.md` quedó con 14 entradas
+  descuadradas y `verificar-cierre.py` salió con **retorno 0**, porque su §4 imprime las descuadradas y no las
+  suma a `problemas`. Lo detectó Claude Code por leer la salida y no el código de retorno, que es exactamente
+  la lección que la ficha lleva escrita desde S123 y que sigue sin pagarse. (2) Los guiones de este cierre
+  dejaron los respaldos `.bak-s132` DENTRO de `docs/`, que es literalmente la forma de `D-plan-duplicado`:
+  copias caducadas de un documento vivo dentro del repo, que un `grep -r` lee igual que a las vivas. El fallo
+  es de `M-doc`, que decía «hace copia de seguridad» sin decir dónde; queda corregido allí, junto con el paso
+  de regenerar el índice que los guiones tampoco traían y hubo que suplir a mano tres veces.
+  LIMPIEZA (M1-bis): archivada S130 a `bitacora-sesiones.md` (promovida a `### Sesión 130`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S131 a «Última sesión registrada (previa):»; S132
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S129 a S130.
+  O-diseño (transversal, abierto en S121) ACTIVO: **C-tokens, C-sustitución y C-identidad HECHOS; C-revisión
+  con los TRAMOS 1 y 2 HECHOS y el TRAMO 3 APLICADO Y SIN JUZGAR**. Criterios 1, 2 y 4 CUMPLIDOS; el 3 con la
+  aplicación completa y el juicio pendiente. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado
+  por el correo al centro. Siguiente: **el recorrido de juicio del criterio 3**, que lo hace el arquitecto y
+  cuya salida es el acta de la próxima sesión de acabado. Lo fija su propio M0 (ver M1-ter).
