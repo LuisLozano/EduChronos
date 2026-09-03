@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S130. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S131. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S130). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S131). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -8837,3 +8837,52 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   Siguiente: **el resto del TRAMO 3**, sobre decisiones ya escritas y no sobre diseño nuevo. Lo fija su propio
   M0 (ver M1-ter).
 
+### Sesión 131 — Higiene/Método: **el bucle de acabado visual pasa a Claude Code**. Nacen `M-respuesta` —el turno del modelo principal empieza por la decisión y el reparto, y si hay varios pasos por lado el reparto va como FLUJO NUMERADO en orden de ejecución— y `M-visual` —la sesión de acabado arranca en Claude Code con acta CERRADA, itera sobre `ng serve`, registra en `styles.css` y vuelve con un traspaso—, y M1-ter gana su primera excepción: para ese tipo de sesión el prompt SÍ lleva alcance, TRANSCRITO del registro y no decidido en el cierre. NO avanza el mapa: `docs/metodo.md` 323 → 413 líneas y ni un fichero de `app/` o `solver/` tocado. Dos commits, los dos de documentación.
+  MOTIVO, DECLARADO POR EL ARQUITECTO Y NO DEDUCIDO. Dos problemas del procedimiento, no del producto. (1) El
+  modelo principal escribe de más: el arquitecto declara que lee las conclusiones y las preguntas, y que con el
+  resto hace de mensajero hacia Claude Code. (2) En los cambios de aspecto ese papel de mensajero era el propio
+  ciclo de trabajo —medición a Code, respuesta a la web, otra medición, y al final un fichero que el arquitecto
+  editaba a mano—, cuando quien tiene el servidor y puede enseñar el resultado en el navegador es Claude Code.
+  QUÉ SE DECIDIÓ, y qué se descartó con argumento. El registro de lo visual va a `styles.css`, que es donde el
+  criterio 4 de O-diseño lo verifica por grep desde S129, y NO a `diseno-navegacion.md`: ese documento es
+  medición de geometría de O-navegación, y una segunda sede para la misma afirmación es la familia de
+  `D-declarado-sin-artefacto`. Claude Code propone 2-3 variantes SOLO donde la decisión sea de gusto; si la
+  regla ya está escrita, se aplica sin preguntar. Los hallazgos fuera del acta se anotan y no se ejecutan, que
+  es R-terminado convertido en mecanismo después de que el recorrido de S130 partiera el tramo 3 por segunda
+  vez. Y hay puertas de salida: si el trabajo toca un `.ts`, lógica o un tipo compartido, sale del bucle y
+  vuelve al procedimiento normal con M3 y M4.
+  LO QUE SE ACEPTA PERDER, dicho antes de perderlo. En Acabado visual desaparece el turno de contraste entre
+  dos modelos sobre el contrato, que es el mecanismo que más errores de especificación ha cazado (dos en S79,
+  tres en S81/S82/S83, cinco en S85). Se acepta AQUÍ Y SÓLO AQUÍ, porque en aspecto el oráculo fuerte es el ojo
+  del arquitecto sobre la aplicación corriendo. En Desarrollo M4 sigue entero. Contrapeso escrito en M-visual:
+  M2 no se omite —lo ejecuta Claude Code dentro del bucle— y su salida literal viaja al traspaso CON el comando
+  que la produjo, porque sin eso el M1 del modelo principal sería narrativa sobre una sesión que no ha visto:
+  la afirmación no medida y propagada que registra S130.
+  UNA REGLA QUE NO SE RELAJA. `M-respuesta` acorta el RAZONAMIENTO, no lo que hay que juzgar: M2 sigue trayendo
+  la salida literal de una medición sin interpretar. Viajar entera y no ser parafraseada de vuelta son cosas
+  distintas, y confundirlas rompería el mecanismo que desmintió una suposición de apertura del arquitecto todas
+  las veces en S75–S85.
+  HALLAZGO DEL M1, Y ES DE M1-BIS. S130 dejó SIN HACER su paso M1.4: archivó S128 pero no extendió la crónica
+  de archivado —terminaba en «la de S127 en la Sesión 129»— ni actualizó la frase de ventana, que seguía
+  nombrando S128 como degradada y S129 como única H3 viva. Los dos censos de la bitácora sí se actualizaron, de
+  modo que la incoherencia quedó entre los censos y la crónica, que es exactamente el contraste que
+  `verificar-cierre.py` dice hacer desde S122. Por eso este M1-bis lleva DOS rotaciones de crónica y no una.
+  VEREDICTO DEL VERIFICADOR sobre esa incoherencia, corrido ANTES de tocar nada con `python3
+  scripts/verificar-cierre.py` y retorno capturado inmediatamente: **RETORNO 1**, y su §3 imprimió literalmente
+  «censo 1 (cabecera 'sesiones de trabajo'): S128 / censo 2 (orden 'cronológico ascendente'): S128 / crónica
+  del plan, última archivada: S127 / -> FALLO: no coinciden», con el resumen «comprobaciones duras con fallo:
+  1». Si no la detectó, es instancia nueva de la familia «el instrumento mide otra cosa» y nace como deuda de
+  método; si la detectó, lo que falló en S130 fue leer su salida. LA DETECTÓ, y con retorno distinto de cero:
+  no nace deuda de método, y lo que falló en S130 fue leer la salida de su propio verificador.
+  TIPO Y RITUAL: Higiene/Método. M1 + R4/R5, sin M2, M3 ni M4 de producto —no hay código—. La sesión no nombra
+  Cambio, Objetivo ni Hito, y la tabla de Tipos la exime: registrarla igual sigue el precedente de S105, que
+  tampoco avanzaba el mapa. Se registra además porque `metodo.md` marca tres veces «(S131)» y un número sin
+  sesión registrada detrás es un identificador sin referente vivo.
+  DEUDA: ninguna nueva de producto. O-diseño sigue ACTIVO con el tramo 3 de C-revisión a medias y
+  `D-jerarquia-declarada-sin-aplicar` bloqueando su criterio 3; la deuda bloqueante del proyecto sigue en 2 con
+  `D31-a`. La próxima sesión es la primera de Acabado visual y estrena M-visual sobre ese tramo.
+  DEUDA NUEVA, y la encontró el propio guion de cierre al exigir que las rutas se localizaran en vez de
+  suponerse: existen DOS `plan_trabajo_horarios.md`, el vivo en `docs/` y una copia antigua en `docs_extra/old/`.
+  El M1-bis trabajó sobre el vivo —el que leen `verificar-cierre.py` y `regenerar-indice.py`— y la copia sigue
+  con contenido caducado. Nace `D-plan-duplicado`: no bloquea nada, pero un `grep -r` no distingue una de otra
+  y afirmar estado vivo desde la copia rancia es la familia de `D-tokens-inexistentes`.

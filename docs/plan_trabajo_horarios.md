@@ -51,23 +51,23 @@
 - L687 — ## FASE 12 — CI/CD con GitHub Actions
 - L690 — ### Criterios de verificación
 - L697 — ## Registro de progreso
-- L699 — ### Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
-- L881 — ### Bloques de Fase 2
-- L889 — ### Bloques de Fase 5
-- L912 — ### Bloques de Fase 6
-- L957 — ### Bloques de Fase 8
-- L1166 — ### Fases completadas
-- L1270 — ### Cierre del modelo — Sesión 8
-- L1318 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1364 — ### Método de trabajo (procedimiento vigente)
-- L1397 — ### Deuda consciente VIVA
-- L2970 — ### Deuda consciente CERRADA (histórico)
-- L3058 — ### Notas técnicas validadas en Fase 0
-- L3068 — ### Notas técnicas validadas en Fase 6
-- L3102 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3111 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3138 — ### Registro detallado de sesiones S10–S31
-- L3147 — ## Señales globales de alerta
+- L699 — ### Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
+- L896 — ### Bloques de Fase 2
+- L904 — ### Bloques de Fase 5
+- L927 — ### Bloques de Fase 6
+- L972 — ### Bloques de Fase 8
+- L1181 — ### Fases completadas
+- L1285 — ### Cierre del modelo — Sesión 8
+- L1333 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1379 — ### Método de trabajo (procedimiento vigente)
+- L1412 — ### Deuda consciente VIVA
+- L3007 — ### Deuda consciente CERRADA (histórico)
+- L3095 — ### Notas técnicas validadas en Fase 0
+- L3105 — ### Notas técnicas validadas en Fase 6
+- L3139 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3148 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3175 — ### Registro detallado de sesiones S10–S31
+- L3184 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -696,7 +696,72 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
+### Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
+  QUÉ SE JUZGÓ Y SOBRE QUÉ, para que el veredicto sea reproducible. Commit `4ba1fd4` con el árbol limpio,
+  bundle servido por `mvn -pl solver install -DskipTests` + `mvn -pl app package -DskipTests` +
+  `spring-boot:run` contra `app/educhronos-s133-m4.db`, copia de `educhronos-demo-m4.db` con md5
+  `ea1a70a0337831dddccdbcd322f48e9b` verificado ANTES y DESPUÉS: la base de referencia queda intacta. Firefox
+  maximizado a 1920x1080, zoom 100 %. Vehículo el BUNDLE y no `ng serve`, decidido con argumento: en el
+  recorrido no se itera, así que `ng serve` sólo habría aportado su riesgo de servir un bundle rancio (S124).
+  SEIS PARADAS: landing, barra de aplicación, los ocho destinos de configuración —Actividades a fondo por ser
+  la lista más densa, las otras seis en pasada de divergencias, Jornada aparte por no tener forma de lista—,
+  los estados de lista, formularios y diálogos, y la vista de horario en sus tres ámbitos.
+  VEREDICTO: CRITERIO 3 CUMPLIDO, y con él O-diseño ENTERO. Las paradas 3, 4, 5 y 6 salen limpias, incluidas
+  las dos cosas que S132 aplicó y nadie había juzgado: la jerarquía de acciones por relleno y la
+  neutralización de los controles nativos. Las suites NO se recorren y no es un atajo: el guion de cierre
+  comprobó que entre el último commit de producto de S132 y `4ba1fd4` no hay un solo fichero de `app/` ni de
+  `solver/`, así que las 91 + 282 de Maven y las 419 de vitest medidas entonces siguen midiendo este árbol.
+  LO QUE NO SE VERIFICÓ, dicho para que la entrada no se lea más completa de lo que fue. El estado CARGANDO
+  de las listas, por transitorio y no sostenible a mano; y el estado VACÍO, inalcanzable con el centro
+  completo cargado sin fabricar datos. Los dos son ramas del componente compartido de estados, y las otras
+  dos —sin coincidencias y error de acción— sí se comprobaron.
+  EL ERROR DEL GUION DEL RECORRIDO, Y ES DEL MODELO PRINCIPAL. El guion mandó buscar en la landing la leyenda
+  de la insignia de coste blando, que no vive allí: vive en la propia insignia de la rejilla, como par
+  `title` + `aria-label`, desde que S128 cerró `D-insignia-sin-leyenda`. El arquitecto la buscó, no la
+  encontró y lo reportó como hallazgo. Es la causa raíz que la familia de `D-guion-exit-enmascarado` nombra
+  desde S129 —escribir de memoria teniendo el documento a tres secciones de distancia— aparecida en un
+  instrumento nuevo: un guion de recorrido humano en vez de un guion de shell. Un recorrido que manda buscar
+  lo inexistente produce dos falsos: el que no está y el que se deja de mirar mientras se busca. Corolario
+  escrito en `M-visual`.
+  LA RESERVA DEL SELECTOR DE CURSO: LA APLICACIÓN ESTÁ BIEN Y EL DOCUMENTO DECÍA DOS COSAS FALSAS. El
+  arquitecto reportó que no ve reserva alguna a la derecha de la barra. Medido sobre `app.html` y `app.css`:
+  el hueco `app__curso` EXISTE, está vacío a propósito y reserva ALTO —`min-height` de un interlineado, ~27
+  px—, no ancho, y no lleva rótulo. D18 de `diseno-navegacion.md` decía «rotulado como reserva» y justificaba
+  la decisión con que «el ancho de la barra se reparte una vez»: ninguna de las dos describe lo construido.
+  Se CORRIGE allí y NO nace deuda, porque la corrección es la deuda saldada. La consecuencia, en positivo y
+  escrita para quien llegue a la Fase 10: como lo reservado es el alto, añadir el selector NO hará crecer la
+  barra, que es exactamente lo que protege el presupuesto de la rejilla —51 px bajo la restricción «puede
+  encoger, no crecer» del criterio 4 de O-navegación—. Lo que no está reservado es el ancho.
+  DEUDA NUEVA: DOS MEJORAS FUTURAS, de propuestas del arquitecto durante el recorrido, y ninguna es acabado.
+  `D-tutor-invisible-en-grupos` y `D-plazas-ocultas-solo-al-arrastrar`, con texto íntegro aquí y
+  clasificación en `gestion_proyecto.md` §4. Las DOS sedes a propósito: escribirlas en una sola es
+  exactamente lo que `D-deuda-sin-sede-en-el-plan` reprocha a S130 y S131.
+  UN CASO DE `D-tokens-inexistentes` RESUELTO POR ADELANTADO, sin abrir su sesión. La medición de la
+  propuesta del tutor destapó que el javadoc de `GrupoDTO.java` afirma que el tipo «siempre será ORDINARIO»
+  citando `D-nueva-2`, y el TSDoc de `grupo.model.ts` ya registra lo contrario: `GET /api/grupos` hace
+  `findAll()` sin filtrar, y el frontend discrimina acciones por tipo, lo que sólo tiene sentido si llega más
+  de un valor. No se toca —R-deuda, y tirar del hilo es mapear las nueve citas, que su ficha declara trabajo
+  propio y no arreglo en caliente—, pero la sesión de Higiene/Método hereda uno de los nueve contextos ya
+  leído y con veredicto.
+  TIPO Y RITUAL: M0 + M4 en navegador + M1. La tabla de Tipos NO tiene fila para el recorrido de juicio y no
+  se inventa una en el cierre; lo que sí está escrito es su límite en `M-visual` desde S132, y se cumplió: la
+  sesión no arrancó en Claude Code, porque la lista era su salida y no su entrada.
+  MAPA: **O-diseño TERMINADO (S133)**, con sus cuatro criterios cumplidos y C-revisión cerrado en sus tres
+  tramos. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro; deuda
+  bloqueante del proyecto: 1 (`D31-a`). Con O-diseño fuera, **O-ajuste-cierre queda disponible** y es el
+  único objetivo vivo con deuda que bloquea su propio criterio. La elección la hace el M0 siguiente (M1-ter).
+  UN DEFECTO DE M-doc DESTAPADO POR LA PROPIA GUARDA, y no por un fallo consumado. El guion de cierre abortó
+  en su primera pasada con dos anclas no únicas, `### Sesión 132` y `#### O-diseño`: la segunda aparición de
+  cada una es su entrada del ÍNDICE GENERADO. No era ambigüedad del cuerpo, era el índice citando el
+  encabezado. Lo resolvió Claude Code anclando las dos a principio de línea, sin tocar el texto insertado ni
+  la semántica. Afecta a TODOS los cierres, porque el M1 siempre inserta antes de la cabecera H3 viva: queda
+  escrito en `M-doc` como corolario del punto 5, que hasta hoy cubría regenerar el índice pero no que el
+  índice hace fracasar las anclas. La guarda funcionó: paró el guion con los cinco ficheros intactos.
+  LIMPIEZA (M1-bis): archivada S131 a `bitacora-sesiones.md` (promovida a `### Sesión 131`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S132 a «Última sesión registrada (previa):»; S133
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S130 a S131.
+
+Última sesión registrada (previa): Sesión 132 — O-diseño (transversal): **C-revisión, TRAMO 3 APLICADO**, y primera sesión de **Acabado visual** bajo `M-visual`. El acta de cuatro puntos se agota entera en Claude Code: la jerarquía de acciones pasa a reglas globales sobre `button` y se retiran 32 bloques de 20 hojas, los 13 `<select>`, los 5 `input[type=number]` y los radios y casillas dejan de enseñar su adorno nativo, `--fuente-datos` estrena 9 usos y `.app__contenido` gana padding lateral. Cierran `D-jerarquia-declarada-sin-aplicar` y `D-controles-nativos-sin-neutralizar`, y la deuda bloqueante del proyecto baja de 2 a 1. Cuatro commits, 44 ficheros, +333/−243. **NO cierra O-diseño**: el criterio 3 queda con la aplicación completa y el juicio pendiente.
   TIPO Y RITUAL: Acabado visual. Acta heredada del M1-ter de S131, M2 dentro del bucle, M4 en navegador, M1
   aquí con el traspaso delante. Sin M0 —el acta viene del cierre anterior— y sin M3: no se tocó un solo `.ts`.
   El modelo principal NO vio la sesión; todo lo que este registro afirma sale del traspaso o de la
@@ -793,56 +858,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   por el correo al centro. Siguiente: **el recorrido de juicio del criterio 3**, que lo hace el arquitecto y
   cuya salida es el acta de la próxima sesión de acabado. Lo fija su propio M0 (ver M1-ter).
 
-Última sesión registrada (previa): Sesión 131 — Higiene/Método: **el bucle de acabado visual pasa a Claude Code**. Nacen `M-respuesta` —el turno del modelo principal empieza por la decisión y el reparto, y si hay varios pasos por lado el reparto va como FLUJO NUMERADO en orden de ejecución— y `M-visual` —la sesión de acabado arranca en Claude Code con acta CERRADA, itera sobre `ng serve`, registra en `styles.css` y vuelve con un traspaso—, y M1-ter gana su primera excepción: para ese tipo de sesión el prompt SÍ lleva alcance, TRANSCRITO del registro y no decidido en el cierre. NO avanza el mapa: `docs/metodo.md` 323 → 413 líneas y ni un fichero de `app/` o `solver/` tocado. Dos commits, los dos de documentación.
-  MOTIVO, DECLARADO POR EL ARQUITECTO Y NO DEDUCIDO. Dos problemas del procedimiento, no del producto. (1) El
-  modelo principal escribe de más: el arquitecto declara que lee las conclusiones y las preguntas, y que con el
-  resto hace de mensajero hacia Claude Code. (2) En los cambios de aspecto ese papel de mensajero era el propio
-  ciclo de trabajo —medición a Code, respuesta a la web, otra medición, y al final un fichero que el arquitecto
-  editaba a mano—, cuando quien tiene el servidor y puede enseñar el resultado en el navegador es Claude Code.
-  QUÉ SE DECIDIÓ, y qué se descartó con argumento. El registro de lo visual va a `styles.css`, que es donde el
-  criterio 4 de O-diseño lo verifica por grep desde S129, y NO a `diseno-navegacion.md`: ese documento es
-  medición de geometría de O-navegación, y una segunda sede para la misma afirmación es la familia de
-  `D-declarado-sin-artefacto`. Claude Code propone 2-3 variantes SOLO donde la decisión sea de gusto; si la
-  regla ya está escrita, se aplica sin preguntar. Los hallazgos fuera del acta se anotan y no se ejecutan, que
-  es R-terminado convertido en mecanismo después de que el recorrido de S130 partiera el tramo 3 por segunda
-  vez. Y hay puertas de salida: si el trabajo toca un `.ts`, lógica o un tipo compartido, sale del bucle y
-  vuelve al procedimiento normal con M3 y M4.
-  LO QUE SE ACEPTA PERDER, dicho antes de perderlo. En Acabado visual desaparece el turno de contraste entre
-  dos modelos sobre el contrato, que es el mecanismo que más errores de especificación ha cazado (dos en S79,
-  tres en S81/S82/S83, cinco en S85). Se acepta AQUÍ Y SÓLO AQUÍ, porque en aspecto el oráculo fuerte es el ojo
-  del arquitecto sobre la aplicación corriendo. En Desarrollo M4 sigue entero. Contrapeso escrito en M-visual:
-  M2 no se omite —lo ejecuta Claude Code dentro del bucle— y su salida literal viaja al traspaso CON el comando
-  que la produjo, porque sin eso el M1 del modelo principal sería narrativa sobre una sesión que no ha visto:
-  la afirmación no medida y propagada que registra S130.
-  UNA REGLA QUE NO SE RELAJA. `M-respuesta` acorta el RAZONAMIENTO, no lo que hay que juzgar: M2 sigue trayendo
-  la salida literal de una medición sin interpretar. Viajar entera y no ser parafraseada de vuelta son cosas
-  distintas, y confundirlas rompería el mecanismo que desmintió una suposición de apertura del arquitecto todas
-  las veces en S75–S85.
-  HALLAZGO DEL M1, Y ES DE M1-BIS. S130 dejó SIN HACER su paso M1.4: archivó S128 pero no extendió la crónica
-  de archivado —terminaba en «la de S127 en la Sesión 129»— ni actualizó la frase de ventana, que seguía
-  nombrando S128 como degradada y S129 como única H3 viva. Los dos censos de la bitácora sí se actualizaron, de
-  modo que la incoherencia quedó entre los censos y la crónica, que es exactamente el contraste que
-  `verificar-cierre.py` dice hacer desde S122. Por eso este M1-bis lleva DOS rotaciones de crónica y no una.
-  VEREDICTO DEL VERIFICADOR sobre esa incoherencia, corrido ANTES de tocar nada con `python3
-  scripts/verificar-cierre.py` y retorno capturado inmediatamente: **RETORNO 1**, y su §3 imprimió literalmente
-  «censo 1 (cabecera 'sesiones de trabajo'): S128 / censo 2 (orden 'cronológico ascendente'): S128 / crónica
-  del plan, última archivada: S127 / -> FALLO: no coinciden», con el resumen «comprobaciones duras con fallo:
-  1». Si no la detectó, es instancia nueva de la familia «el instrumento mide otra cosa» y nace como deuda de
-  método; si la detectó, lo que falló en S130 fue leer su salida. LA DETECTÓ, y con retorno distinto de cero:
-  no nace deuda de método, y lo que falló en S130 fue leer la salida de su propio verificador.
-  TIPO Y RITUAL: Higiene/Método. M1 + R4/R5, sin M2, M3 ni M4 de producto —no hay código—. La sesión no nombra
-  Cambio, Objetivo ni Hito, y la tabla de Tipos la exime: registrarla igual sigue el precedente de S105, que
-  tampoco avanzaba el mapa. Se registra además porque `metodo.md` marca tres veces «(S131)» y un número sin
-  sesión registrada detrás es un identificador sin referente vivo.
-  DEUDA: ninguna nueva de producto. O-diseño sigue ACTIVO con el tramo 3 de C-revisión a medias y
-  `D-jerarquia-declarada-sin-aplicar` bloqueando su criterio 3; la deuda bloqueante del proyecto sigue en 2 con
-  `D31-a`. La próxima sesión es la primera de Acabado visual y estrena M-visual sobre ese tramo.
-  DEUDA NUEVA, y la encontró el propio guion de cierre al exigir que las rutas se localizaran en vez de
-  suponerse: existen DOS `plan_trabajo_horarios.md`, el vivo en `docs/` y una copia antigua en `docs_extra/old/`.
-  El M1-bis trabajó sobre el vivo —el que leen `verificar-cierre.py` y `regenerar-indice.py`— y la copia sigue
-  con contenido caducado. Nace `D-plan-duplicado`: no bloquea nada, pero un `grep -r` no distingue una de otra
-  y afirmar estado vivo desde la copia rancia es la familia de `D-tokens-inexistentes`.
-
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
   de producto gemela de D23, con respaldo descriptivo a escala)
@@ -865,8 +880,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132.
-El plan conserva ahora S131 (degradada a formato compacto) y S132 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133.
+El plan conserva ahora S132 (degradada a formato compacto) y S133 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -1406,6 +1421,28 @@ las simplificaciones registradas en Fase 1 (D1-D12), cuya descripción completa 
 en `modelo_datos_fase1.md` sección 8, y la deuda surgida en fases posteriores,
 descrita aquí. La deuda ya CERRADA se archiva condensada en la sección siguiente,
 con remisión a la bitácora.
+
+- **D-tutor-invisible-en-grupos** (S133, VIVA, MEJORA FUTURA, no bloqueante) — LA TABLA DE GRUPOS NO PUEDE
+  ENSEÑAR QUIÉN ES EL TUTOR PORQUE EL DATO NO LLEGA AL CLIENTE. Propuesta del arquitecto en el recorrido de
+  S133: en la lista de grupos convendría ver el tutor de cada uno. Medido antes de clasificarla, y por eso no
+  es una columna: `grupo-lista.html` pinta cuatro `<th>` —Código, Nivel, Tipo y la de acciones— y `Grupo` (TS)
+  es espejo exacto de `GrupoDTO` (Java) con cuatro campos, `id`, `codigo`, `nivel` y `tipo`. El tutor NO
+  viaja. Pintarlo obliga a ampliar el contrato o a pedir la tutoría fila por fila, así que deja de ser
+  acabado y pasa a ser superficie nueva: fuera de O-diseño por el mismo corte aspecto/comportamiento que la
+  ficha de ese objetivo aplica desde S121. Sede O-demo, que es donde el centro real se enseña y donde saber
+  quién tutoriza cada grupo tiene valor para un jefe de estudios. No se paga ahora.
+
+- **D-plazas-ocultas-solo-al-arrastrar** (S133, VIVA, MEJORA FUTURA, no bloqueante) — LAS PLAZAS QUE NO CABEN
+  EN UNA CELDA SÓLO SE VEN TODAS AL EMPEZAR UN ARRASTRE. Propuesta del arquitecto en el recorrido de S133,
+  registrada con su argumento: al pinchar y arrastrar sobre una celda densa aparecen todas las asignaturas, y
+  pide que puedan verse sin tener que arrastrar, o con un mecanismo sencillo equivalente. Hoy el mecanismo es
+  la marca `+N` con el detalle en el `title`, forma decidida en S127 y dotada de etiqueta accesible en S129.
+  NO es un defecto: es cambiar una decisión escrita, y cambia INTERACCIÓN sobre la única superficie del
+  proyecto donde el alto es presupuesto medido —cualquier mecanismo que ocupe alto realimenta la medición de
+  la que depende que la rejilla no tenga scroll, que es el argumento con que D11 hizo obligatoria la
+  expansión—. Transversal, sin objetivo asignado; candidata a O-particiones, que volverá a tocar frontend.
+  Mismo encuadre y misma razón que `D-avisos-como-bloque-fijo`. No se paga ahora.
+
 
 - **D-gh6-tutor-contradictorio** (S115, VIVA, DOCUMENTAL, no bloqueante) — EL MODELO SE CONTRADICE
   SOBRE DE QUÉ GRUPO ES TUTOR GH6. `modelo_datos_fase1.md` §6.1 registra `ProfesorTutoria(GH6,
@@ -2529,7 +2566,7 @@ con remisión a la bitácora.
   nueve contextos y eso es trabajo propio, no un arreglo en caliente. Transversal, sin objetivo asignado.
   → sesión de Higiene/Método: leer los nueve contextos, mapear cada cita a la deuda real que le corresponda (o
   borrarla si describe una decisión ya cerrada) y, si aparece un patrón, valorar por fin el script de R4 que
-  falta desde S101.
+  falta desde S101. **UN CONTEXTO DE LOS NUEVE, LEÍDO Y CON VEREDICTO EN S133 sin abrir la sesión:** el javadoc de `GrupoDTO.java` cita `D-nueva-2` para afirmar que el tipo «en este flujo siempre será ORDINARIO», y es FALSO —`GET /api/grupos` hace `findAll()` sin filtrar por tipo, el TSDoc de `grupo.model.ts` ya lo registra así y `grupo-lista.html` discrimina acciones con `esOrdinario(grupo)`, lo que sólo tiene sentido si llega más de un valor—. El desfase es de documentación en el DTO Java, no de comportamiento. NO se corrigió en S133 (R-deuda, y la sesión no tocaba ese fichero); la sesión de Higiene/Método hereda este contexto resuelto.
 
 - **D-timeout-como-infactible** (S116, VIVA, TÉCNICA REAL, no bloqueante pero MIENTE) — UN AGOTAMIENTO DE
   TIEMPO DEL SOLVER SE COMUNICA COMO «NO HAY HORARIO FACTIBLE». `SolverHorario.java:117-125` devuelve el
