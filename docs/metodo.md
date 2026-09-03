@@ -379,6 +379,20 @@ juicio del arquitecto la PRODUCE. Una sesión que empiece por recorrer la aplica
 Claude Code con lista cerrada, porque la lista es su salida. El recorrido lo hace el arquitecto sobre la
 aplicación levantada y su resultado es el acta de la siguiente sesión de acabado. Escrito al quedar el
 criterio 3 de O-diseño aplicado y sin juzgar.
+**Corolario de S133: el guion de un recorrido se escribe contra el documento, no de memoria.** El guion de
+juicio de S133 situó en la landing una leyenda que vive en la rejilla desde S128, y el arquitecto la buscó
+sin encontrarla. Un recorrido humano es un instrumento como un guion de shell, y falla igual: es la causa
+raíz que `D-guion-exit-enmascarado` nombra desde S129. Coste doble, porque produce un falso hallazgo y roba
+atención a la parada que sí había que mirar.
+
+**Corolario de S133, y es del punto 5: un ancla que sea un ENCABEZADO colisiona con el índice.** El índice
+generado cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-nombre` aparecen SIEMPRE dos
+veces en `gestion_proyecto.md` y en `plan_trabajo_horarios.md`: una en el cuerpo y otra en el índice. La
+guarda de aparición única aborta, y aborta con razón. Toda ancla de encabezado se escribe anclada a
+PRINCIPIO DE LÍNEA —prefijo de salto de línea en el patrón y en el reemplazo—, que es lo que la distingue
+de su entrada de índice. Lo destapó la guarda del guion de cierre de S133 en su primera pasada, y afecta a
+todos los cierres: el M1 siguiente inserta antes de la cabecera H3 viva, que es exactamente este caso.
+
 
 **Puertas de salida del bucle.** Si el trabajo toca un `.ts`, lógica de negocio o
 un tipo compartido, SALE del bucle y vuelve al procedimiento normal con M3 y M4.

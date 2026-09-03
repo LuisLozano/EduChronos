@@ -543,6 +543,17 @@ que había que comprobar, y se comprobó.
 como reserva y sin funcionar, para no rehacerla entonces.
 *Descartado:* añadirlo cuando llegue la Fase 10. Es la razón por la que la reserva se
 pidió: el ancho de la barra se reparte una vez.
+**CORREGIDO EN S133, contra `app.html` y `app.css`.** D18 afirma dos cosas que lo
+construido no dice. (1) La reserva NO está «rotulada»: `app__curso` es un hueco
+vacío a propósito, sin texto. (2) Lo reservado NO es el ancho sino el ALTO —un
+`min-height` de un interlineado, ~27 px—, así que el argumento «el ancho de la barra
+se reparte una vez» no describe la decisión que se tomó. La decisión SIGUE SIENDO
+CORRECTA y no se reabre; lo que cambia es lo que promete. Consecuencia para la Fase
+10: añadir el selector no hará crecer la barra —que es lo que protege el presupuesto
+de altura de la rejilla— pero su ancho no está reservado y habrá que repartirlo
+entonces. El coste de la frase falsa se cobró en S133: el guion del recorrido mandó
+al arquitecto a buscar un rótulo inexistente.
+
 
 ---
 
