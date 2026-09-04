@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S132. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S133. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S132). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S133). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -8983,3 +8983,68 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   aplicación completa y el juicio pendiente. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado
   por el correo al centro. Siguiente: **el recorrido de juicio del criterio 3**, que lo hace el arquitecto y
   cuya salida es el acta de la próxima sesión de acabado. Lo fija su propio M0 (ver M1-ter).
+
+### Sesión 133 — O-diseño (transversal): **RECORRIDO DE JUICIO DEL CRITERIO 3, y el objetivo CIERRA**. El arquitecto recorre la aplicación levantada sobre el centro real en seis paradas; las cuatro de producto salen limpias y las dos observaciones caen fuera del criterio. El acta de la siguiente sesión de acabado sale VACÍA, y por tanto esa sesión no existe. Cierra C-revisión y con él O-diseño, abierto en S121. Nacen dos mejoras futuras de propuestas del arquitecto y se corrige D18 de `diseno-navegacion.md`, que afirmaba un rótulo inexistente. Ni un fichero de `app/` o `solver/` tocado.
+  QUÉ SE JUZGÓ Y SOBRE QUÉ, para que el veredicto sea reproducible. Commit `4ba1fd4` con el árbol limpio,
+  bundle servido por `mvn -pl solver install -DskipTests` + `mvn -pl app package -DskipTests` +
+  `spring-boot:run` contra `app/educhronos-s133-m4.db`, copia de `educhronos-demo-m4.db` con md5
+  `ea1a70a0337831dddccdbcd322f48e9b` verificado ANTES y DESPUÉS: la base de referencia queda intacta. Firefox
+  maximizado a 1920x1080, zoom 100 %. Vehículo el BUNDLE y no `ng serve`, decidido con argumento: en el
+  recorrido no se itera, así que `ng serve` sólo habría aportado su riesgo de servir un bundle rancio (S124).
+  SEIS PARADAS: landing, barra de aplicación, los ocho destinos de configuración —Actividades a fondo por ser
+  la lista más densa, las otras seis en pasada de divergencias, Jornada aparte por no tener forma de lista—,
+  los estados de lista, formularios y diálogos, y la vista de horario en sus tres ámbitos.
+  VEREDICTO: CRITERIO 3 CUMPLIDO, y con él O-diseño ENTERO. Las paradas 3, 4, 5 y 6 salen limpias, incluidas
+  las dos cosas que S132 aplicó y nadie había juzgado: la jerarquía de acciones por relleno y la
+  neutralización de los controles nativos. Las suites NO se recorren y no es un atajo: el guion de cierre
+  comprobó que entre el último commit de producto de S132 y `4ba1fd4` no hay un solo fichero de `app/` ni de
+  `solver/`, así que las 91 + 282 de Maven y las 419 de vitest medidas entonces siguen midiendo este árbol.
+  LO QUE NO SE VERIFICÓ, dicho para que la entrada no se lea más completa de lo que fue. El estado CARGANDO
+  de las listas, por transitorio y no sostenible a mano; y el estado VACÍO, inalcanzable con el centro
+  completo cargado sin fabricar datos. Los dos son ramas del componente compartido de estados, y las otras
+  dos —sin coincidencias y error de acción— sí se comprobaron.
+  EL ERROR DEL GUION DEL RECORRIDO, Y ES DEL MODELO PRINCIPAL. El guion mandó buscar en la landing la leyenda
+  de la insignia de coste blando, que no vive allí: vive en la propia insignia de la rejilla, como par
+  `title` + `aria-label`, desde que S128 cerró `D-insignia-sin-leyenda`. El arquitecto la buscó, no la
+  encontró y lo reportó como hallazgo. Es la causa raíz que la familia de `D-guion-exit-enmascarado` nombra
+  desde S129 —escribir de memoria teniendo el documento a tres secciones de distancia— aparecida en un
+  instrumento nuevo: un guion de recorrido humano en vez de un guion de shell. Un recorrido que manda buscar
+  lo inexistente produce dos falsos: el que no está y el que se deja de mirar mientras se busca. Corolario
+  escrito en `M-visual`.
+  LA RESERVA DEL SELECTOR DE CURSO: LA APLICACIÓN ESTÁ BIEN Y EL DOCUMENTO DECÍA DOS COSAS FALSAS. El
+  arquitecto reportó que no ve reserva alguna a la derecha de la barra. Medido sobre `app.html` y `app.css`:
+  el hueco `app__curso` EXISTE, está vacío a propósito y reserva ALTO —`min-height` de un interlineado, ~27
+  px—, no ancho, y no lleva rótulo. D18 de `diseno-navegacion.md` decía «rotulado como reserva» y justificaba
+  la decisión con que «el ancho de la barra se reparte una vez»: ninguna de las dos describe lo construido.
+  Se CORRIGE allí y NO nace deuda, porque la corrección es la deuda saldada. La consecuencia, en positivo y
+  escrita para quien llegue a la Fase 10: como lo reservado es el alto, añadir el selector NO hará crecer la
+  barra, que es exactamente lo que protege el presupuesto de la rejilla —51 px bajo la restricción «puede
+  encoger, no crecer» del criterio 4 de O-navegación—. Lo que no está reservado es el ancho.
+  DEUDA NUEVA: DOS MEJORAS FUTURAS, de propuestas del arquitecto durante el recorrido, y ninguna es acabado.
+  `D-tutor-invisible-en-grupos` y `D-plazas-ocultas-solo-al-arrastrar`, con texto íntegro aquí y
+  clasificación en `gestion_proyecto.md` §4. Las DOS sedes a propósito: escribirlas en una sola es
+  exactamente lo que `D-deuda-sin-sede-en-el-plan` reprocha a S130 y S131.
+  UN CASO DE `D-tokens-inexistentes` RESUELTO POR ADELANTADO, sin abrir su sesión. La medición de la
+  propuesta del tutor destapó que el javadoc de `GrupoDTO.java` afirma que el tipo «siempre será ORDINARIO»
+  citando `D-nueva-2`, y el TSDoc de `grupo.model.ts` ya registra lo contrario: `GET /api/grupos` hace
+  `findAll()` sin filtrar, y el frontend discrimina acciones por tipo, lo que sólo tiene sentido si llega más
+  de un valor. No se toca —R-deuda, y tirar del hilo es mapear las nueve citas, que su ficha declara trabajo
+  propio y no arreglo en caliente—, pero la sesión de Higiene/Método hereda uno de los nueve contextos ya
+  leído y con veredicto.
+  TIPO Y RITUAL: M0 + M4 en navegador + M1. La tabla de Tipos NO tiene fila para el recorrido de juicio y no
+  se inventa una en el cierre; lo que sí está escrito es su límite en `M-visual` desde S132, y se cumplió: la
+  sesión no arrancó en Claude Code, porque la lista era su salida y no su entrada.
+  MAPA: **O-diseño TERMINADO (S133)**, con sus cuatro criterios cumplidos y C-revisión cerrado en sus tres
+  tramos. O-demo (H2) sigue ABIERTO y sin trabajo ejecutable, bloqueado por el correo al centro; deuda
+  bloqueante del proyecto: 1 (`D31-a`). Con O-diseño fuera, **O-ajuste-cierre queda disponible** y es el
+  único objetivo vivo con deuda que bloquea su propio criterio. La elección la hace el M0 siguiente (M1-ter).
+  UN DEFECTO DE M-doc DESTAPADO POR LA PROPIA GUARDA, y no por un fallo consumado. El guion de cierre abortó
+  en su primera pasada con dos anclas no únicas, `### Sesión 132` y `#### O-diseño`: la segunda aparición de
+  cada una es su entrada del ÍNDICE GENERADO. No era ambigüedad del cuerpo, era el índice citando el
+  encabezado. Lo resolvió Claude Code anclando las dos a principio de línea, sin tocar el texto insertado ni
+  la semántica. Afecta a TODOS los cierres, porque el M1 siempre inserta antes de la cabecera H3 viva: queda
+  escrito en `M-doc` como punto 6, junto al 5, que cubría regenerar el índice pero no que el índice hace
+  fracasar las anclas. La guarda funcionó: paró el guion con los cinco ficheros intactos.
+  LIMPIEZA (M1-bis): archivada S131 a `bitacora-sesiones.md` (promovida a `### Sesión 131`, insertada al
+  final en orden ascendente, cuerpo íntegro); degradada S132 a «Última sesión registrada (previa):»; S133
+  queda como única cabecera H3 viva. Los dos censos de la bitácora pasan de S130 a S131.
