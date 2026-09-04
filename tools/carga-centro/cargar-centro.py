@@ -30,16 +30,27 @@ IDEMPOTENCIA
 
 PAYLOADS
     Se construyen campo a campo. NUNCA se reenvia el objeto del catalogo: ese
-    lleva metadatos de derivacion (celdas, _nota, _referencia, tramoVolcado,
-    _aulaDesconocida) que la API no conoce y que no tienen por que viajar.
+    lleva metadatos de derivacion (celdas, celdasEnVolcado, _referencia,
+    tramoVolcado) que la API no conoce y que no tienen por que viajar.
 
 OMISIONES DELIBERADAS
     - Los 5 subgrupos con creadoAutomaticamentePorPDC=true. Los crea la propia
       alta del PDC, con el codigo derivado {codigoPDC}-Completo; mandarlos seria
       un choque de codigo duplicado.
-    - Las 11 actividades cuya unica plaza va marcada con _aulaDesconocida=true
-      (Hallazgo H): son todas de FPB y en el volcado no consta su aula, asi que
-      incumplen el XOR de aula y son inexpresables. Se registran en el informe.
+
+    Hasta S135 habia una segunda omision: las 11 actividades de FPB cuya unica
+    plaza iba marcada con _aulaDesconocida=true (Hallazgo H). En el volcado no
+    constaba su aula, incumplian el XOR y eran inexpresables por formulario, asi
+    que el cargador las saltaba. CERRADA en S135: el catalogo derivado ya les fija
+    aula, no queda ninguna plaza marcada y la carga envia las 219 actividades.
+
+    PROCEDENCIA DE ESE DATO, que NO es una medicion. Lo dio el jefe de estudios
+    del centro en entrevista (S134): las horas de FPB que el horario impreso deja
+    sin aula se imparten en el Taller 4 (1FPB) y en el Taller 5 (2FPB), de uso
+    exclusivo de FPB y tutoria incluida. NO hay segunda fuente. Los once PDF del
+    centro no nombran el Taller 5 en ningun sitio y dejan la rejilla del Taller 4
+    entera en blanco (medido en S135); eso no contradice la regla, pero tampoco
+    la prueba.
 
 TRATAMIENTO DE ERRORES
     Cualquier respuesta que no sea 2xx es FATAL: se para en seco, se vuelca la
@@ -71,9 +82,13 @@ ROLES_TUTORIA = {"TUTOR_PRINCIPAL", "CO_TUTOR"}
 SUFIJO_SUBGRUPO_PDC = "-Completo"
 
 # Escrituras HTTP de una carga completa desde una base vacia:
-# 1 jornada + 8 niveles + 100 asignaturas + 59 profesores + 43 aulas + 23 grupos
-# + 5 PDC + 28 tutorias + 329 subgrupos + 208 actividades.
-ESCRITURAS_CARGA_COMPLETA = 804
+# 1 jornada + 8 niveles + 100 asignaturas + 59 profesores + 44 aulas + 23 grupos
+# + 5 PDC + 28 tutorias + 329 subgrupos + 219 actividades.
+# SE MANTIENE A MANO A PROPOSITO. No debe derivarse del catalogo: su valor esta
+# justamente en ser un oraculo INDEPENDIENTE de el. Derivada seria una tautologia
+# incapaz de detectar nunca un error del propio catalogo; a mano, cualquier
+# divergencia entre lo previsto y lo escrito sale en el informe final.
+ESCRITURAS_CARGA_COMPLETA = 816
 
 FAMILIAS = ["jornada", "niveles", "asignaturas", "profesores", "aulas", "grupos",
             "pdc", "tutorias", "subgrupos", "actividades", "plazas"]
@@ -311,24 +326,22 @@ def informar_prevalidacion(violaciones):
     return por_familia
 
 
-def son_las_11_esperadas(violaciones, catalogo):
-    """True si las violaciones son EXACTAMENTE las 11 conocidas del XOR en FPB.
+def prevalidacion_limpia(violaciones):
+    """True si la prevalidacion no ha encontrado NINGUNA violacion.
 
-    Cualquier otra cosa -una violacion de mas, una de menos o una de otra
-    familia- devuelve False y con ella el cargador aborta sin enviar nada.
+    Hasta S135 el criterio era otro: se toleraban 11 violaciones concretas -las
+    plazas de FPB sin aula en el volcado- y la carga seguia adelante omitiendo
+    esas 11 actividades. Cerrada esa omision (ver OMISIONES DELIBERADAS en la
+    cabecera), el unico estado aceptable es CERO. Cualquier violacion, sea del
+    XOR de aula o de cualquier otra regla, aborta la carga sin enviar nada: no
+    hay ya un conjunto de fallos conocidos que merezca pasar.
+
+    No recibe el catalogo. El criterio es el recuento, no una expectativa
+    derivada de lo que el catalogo contenga.
     """
-    if len(violaciones) != 11:
-        return False, "se esperaban 11 violaciones y hay %d" % len(violaciones)
-    grupos_fpb = {"1FPB", "2FPB"}
-    por_codigo = {a["codigo"]: a for a in catalogo["actividades"]}
-    for familia, sujeto, motivo in violaciones:
-        if familia != "plazas" or "XOR de aula" not in motivo:
-            return False, "violacion ajena al XOR de aula: [%s] %s: %s" % (familia, sujeto, motivo)
-        codigo = sujeto.rsplit(" plaza ", 1)[0]
-        tocados = set(por_codigo[codigo]["_referencia"]["gruposTocados"])
-        if not tocados <= grupos_fpb:
-            return False, "violacion del XOR fuera de FPB: %s toca %s" % (codigo, sorted(tocados))
-    return True, "las 11 violaciones son del XOR de aula y todas de FPB"
+    if violaciones:
+        return False, "hay %d violacion(es) y el unico estado aceptable es cero" % len(violaciones)
+    return True, "sin violaciones"
 
 
 # -------------------------------------------------------------------- carga
@@ -459,15 +472,13 @@ def cargar(cliente, catalogo, nombres):
     omitidos["subgrupos"] = omitidos_sg
     print("  subgrupos: %d altas, %d omitidos por creadoAutomaticamentePorPDC" % (n, len(omitidos_sg)))
 
-    # ---- actividades: se omiten las que tienen alguna plaza sin aula conocida
+    # ---- actividades: se envian todas. Hasta S135 se saltaban las que llevaban
+    # alguna plaza con _aulaDesconocida; hoy no queda ninguna y un marcador
+    # superviviente debe ABORTAR en la prevalidacion, no colarse como omision.
     presentes = mapa_por_codigo(cliente.get("/api/actividades"))
     n = 0
     plazas_enviadas = 0
-    omitidas_act = []
     for a in catalogo["actividades"]:
-        if any(p.get("_aulaDesconocida") for p in a["plazas"]):
-            omitidas_act.append(a["codigo"])
-            continue
         if a["codigo"] in presentes:
             continue
         cliente.post("/api/actividades", {
@@ -489,9 +500,7 @@ def cargar(cliente, catalogo, nombres):
         n += 1
     enviados["actividades"] = n
     enviados["plazas"] = plazas_enviadas
-    omitidos["actividades"] = omitidas_act
-    print("  actividades: %d altas (%d plazas), %d omitidas por _aulaDesconocida"
-          % (n, plazas_enviadas, len(omitidas_act)))
+    print("  actividades: %d altas (%d plazas)" % (n, plazas_enviadas))
 
     return enviados, omitidos
 
@@ -507,7 +516,6 @@ def informe_final(cliente, catalogo, enviados, omitidos):
     print()
     print("INFORME FINAL (leido por GET tras la carga)")
 
-    omitidas_act = set(omitidos.get("actividades", []))
     esperado = {
         "niveles": len(catalogo["niveles"]),
         "asignaturas": len(catalogo["asignaturas"]),
@@ -515,9 +523,8 @@ def informe_final(cliente, catalogo, enviados, omitidos):
         "aulas": len(catalogo["aulas"]),
         "grupos": len(catalogo["grupos"]),
         "subgrupos": len(catalogo["subgrupos"]),
-        "actividades": len(catalogo["actividades"]) - len(omitidas_act),
-        "plazas": sum(len(a["plazas"]) for a in catalogo["actividades"]
-                      if a["codigo"] not in omitidas_act),
+        "actividades": len(catalogo["actividades"]),
+        "plazas": sum(len(a["plazas"]) for a in catalogo["actividades"]),
         "tutorias": len(catalogo["tutorias"]),
     }
 
@@ -543,7 +550,7 @@ def informe_final(cliente, catalogo, enviados, omitidos):
         if marca != "OK":
             desajustes += 1
         print("  %-13s %9d %9d   %s" % (familia, esperado[familia], leido[familia], marca))
-    # Las 804 escrituras son las de una carga completa desde vacio. En una corrida
+    # Las 816 escrituras son las de una carga completa desde vacio. En una corrida
     # idempotente sobre un centro ya poblado solo quedan los PUT de tutoria, que se
     # envian siempre: eso no es un desajuste.
     if cliente.escrituras == ESCRITURAS_CARGA_COMPLETA:
@@ -561,14 +568,11 @@ def informe_final(cliente, catalogo, enviados, omitidos):
     print("  OMITIDOS")
     print("    subgrupos creados por el alta de los PDC (%d): %s"
           % (len(omitidos.get("subgrupos", [])), ", ".join(omitidos.get("subgrupos", []))))
-    print("    actividades sin aula en el volcado (%d): %s"
-          % (len(omitidas_act), ", ".join(sorted(omitidas_act))))
 
-    # ---- lo que la omision de FPB deja sin uso. Es un AVISO, no un error.
+    # ---- catalogo que se carga pero no lo usa ninguna actividad. AVISO, no error.
+    # Solo se imprime si hay algo que decir: en una carga sana no sale nada.
     usadas_asig, usados_prof = set(), set()
     for a in catalogo["actividades"]:
-        if a["codigo"] in omitidas_act:
-            continue
         if a.get("asignatura"):
             usadas_asig.add(a["asignatura"])
         for p in a["plazas"]:
@@ -577,11 +581,13 @@ def informe_final(cliente, catalogo, enviados, omitidos):
             usados_prof.update(p.get("profesores") or [])
     huerfanas = sorted({a["codigo"] for a in catalogo["asignaturas"]} - usadas_asig)
     huerfanos = sorted({p["codigo"] for p in catalogo["profesores"]} - usados_prof)
-    print()
-    print("  AVISO (no es un error): al omitir las actividades de FPB quedan cargados pero")
-    print("  sin aparecer en ninguna actividad:")
-    print("    %d asignaturas: %s" % (len(huerfanas), ", ".join(huerfanas)))
-    print("    %d profesores:  %s" % (len(huerfanos), ", ".join(huerfanos)))
+    if huerfanas or huerfanos:
+        print()
+        print("  AVISO (no es un error): quedan cargados sin aparecer en ninguna actividad:")
+        if huerfanas:
+            print("    %d asignaturas: %s" % (len(huerfanas), ", ".join(huerfanas)))
+        if huerfanos:
+            print("    %d profesores:  %s" % (len(huerfanos), ", ".join(huerfanos)))
     return desajustes
 
 
@@ -604,17 +610,20 @@ def main():
 
     violaciones = prevalidar(catalogo, nombres)
     informar_prevalidacion(violaciones)
-    esperadas, razon = son_las_11_esperadas(violaciones, catalogo)
+    limpia, razon = prevalidacion_limpia(violaciones)
     print("  veredicto: %s" % razon)
 
     if not args.cargar:
         print()
         print("Modo prevalidacion: no se ha enviado nada. Usa --cargar para poblar.")
-        return 0 if esperadas else 1
+        return 0 if limpia else 1
 
-    if not esperadas:
+    if not limpia:
         print()
-        print("ABORTA: la prevalidacion no da las 11 violaciones conocidas. No se envia nada.")
+        print("ABORTA: la prevalidacion no esta limpia. No se envia nada.")
+        print("Violaciones observadas (%d):" % len(violaciones))
+        for familia, sujeto, motivo in violaciones:
+            print("  [%s] %s: %s" % (familia, sujeto, motivo))
         return 1
 
     print()
