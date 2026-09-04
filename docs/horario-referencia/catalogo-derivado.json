@@ -21,19 +21,19 @@
    "niveles": 8,
    "asignaturas": 100,
    "profesores": 59,
-   "aulas": 43,
+   "aulas": 44,
    "grupos": 23,
    "pdc": 5,
    "tutores": 28,
    "subgrupos": 329,
    "actividades": 219,
-   "TOTAL": 815
+   "TOTAL": 816
   },
   "resumen": {
    "niveles": 8,
    "asignaturas": 100,
    "profesores": 59,
-   "aulas": 43,
+   "aulas": 44,
    "grupos": 28,
    "subgrupos": 334,
    "actividades": 219,
@@ -1373,7 +1373,17 @@
    "planta": null,
    "sector": null,
    "celdasEnVolcado": 0,
-   "usadaPorCatalogo": false
+   "usadaPorCatalogo": true
+  },
+  {
+   "codigo": "Taller 5",
+   "tipo": "TALLER_FPB",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "celdasEnVolcado": 0,
+   "usadaPorCatalogo": true
   }
  ],
  "grupos": [
@@ -4126,13 +4136,11 @@
      "profesores": [
       "PAU2"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -7056,13 +7064,11 @@
      "profesores": [
       "TEC1"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -7090,13 +7096,11 @@
      "profesores": [
       "FIS3"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 5",
      "aulasCandidatas": [],
      "subgrupos": [
       "2FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -7656,13 +7660,11 @@
      "profesores": [
       "PAU1"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 5",
      "aulasCandidatas": [],
      "subgrupos": [
       "2FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -8993,13 +8995,11 @@
      "profesores": [
       "FOL3"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -10465,13 +10465,11 @@
      "profesores": [
       "PAU1"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 5",
      "aulasCandidatas": [],
      "subgrupos": [
       "2FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -10506,13 +10504,11 @@
      "profesores": [
       "PAU2"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -11233,13 +11229,11 @@
      "profesores": [
       "FOL3"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 5",
      "aulasCandidatas": [],
      "subgrupos": [
       "2FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -11381,13 +11375,11 @@
      "profesores": [
       "PAU2"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -12225,13 +12217,11 @@
      "profesores": [
       "PAU2"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 4",
      "aulasCandidatas": [],
      "subgrupos": [
       "1FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
@@ -12256,13 +12246,11 @@
      "profesores": [
       "PAU1"
      ],
-     "aulaFija": null,
+     "aulaFija": "Taller 5",
      "aulasCandidatas": [],
      "subgrupos": [
       "2FPB-Completo"
-     ],
-     "_aulaDesconocida": true,
-     "_nota": "Sin aula en el volcado (Hallazgo H). Inexpresable por formulario: elegir aula antes de teclear. Ver ambiguedad A7."
+     ]
     }
    ],
    "_referencia": {
