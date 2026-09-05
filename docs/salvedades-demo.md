@@ -34,16 +34,22 @@ Es la salvedad más importante de este documento.
 
 ## 4. Datos que no constan en la documentación entregada
 
-**Los tutores de los siete grupos de Bachillerato.** En «Horarios de
-profesores» aparece la línea «Tutor:» en 17 profesores, que cubre los 16 grupos
-de ESO y FPB y los 5 de diversificación. Ningún grupo de 1º ni 2º de
-Bachillerato tiene tutor asignado en ese documento ni en ningún otro de los que
-recibimos.
+**Los tutores de los siete grupos de Bachillerato — RECIBIDOS Y APLICADOS.** En
+«Horarios de profesores» aparece la línea «Tutor:» en 17 profesores, que cubre
+los 16 grupos de ESO y FPB y los 5 de diversificación, y ningún grupo de 1º ni
+2º de Bachillerato tiene tutor asignado en ese documento ni en ningún otro de
+los que recibimos. La aplicación tenía puesto en esos siete un nombre deducido
+de quién imparte el bloque de Religión y su alternativa, criterio que ustedes
+nos confirmaron falso.
 
-La aplicación tiene hoy un nombre puesto en esos siete, deducido de quién
-imparte el bloque de Religión y su alternativa. **Ese criterio es falso** y
-ustedes ya nos lo confirmaron. Son los únicos siete datos de la demostración que
-sabemos incorrectos, y los señalamos aquí precisamente por eso.
+**Ustedes nos entregaron la lista oficial y ya está cargada.** La lista cubre los
+28 grupos, y antes de aplicarla la contrastamos con lo que ya teníamos: coincide
+grupo a grupo en los 21 que podíamos verificar por nuestra cuenta —los 16 de ESO
+y FPB y los 5 de diversificación—, y los siete profesores nuevos figuran en el
+claustro que la aplicación tiene cargado. **Los 28 tutores de la demostración
+proceden ahora de ustedes: 21 de la línea «Tutor:» de «Horarios de profesores» y
+7 de esta lista, que además corrobora los 21. Ninguno es ya una deducción
+nuestra.**
 
 **Las aulas de Formación Profesional Básica.** Las tenemos de palabra, de una
 conversación, sin ningún documento que las respalde o las contradiga. Si alguna
@@ -53,7 +59,8 @@ está mal, es un valor que se corrige en un minuto.
 
 **La co-tutoría de los cinco grupos de diversificación.** En «Horarios de
 profesores» figuran con dos tutores: el de su grupo de referencia y la
-orientadora. La aplicación registra hoy solo el primero. Sabe representar la
+orientadora, y la lista oficial que ustedes nos han entregado lo confirma: las
+cinco figuran también en esa lista. La aplicación registra hoy solo el primero. Sabe representar la
 figura del co-tutor y la muestra si existe, pero todavía no permite darla de
 alta desde el formulario. Está previsto.
 
@@ -69,15 +76,15 @@ demostración carga los 59 que tienen docencia en los grupos representados.
 
 ## 7. Lo que necesitamos de ustedes
 
-Por orden de utilidad:
+La lista oficial de tutores de Bachillerato, que era la primera petición de
+este documento, ya nos la entregaron y está aplicada (§4). Quedan dos, por orden
+de utilidad:
 
-1. **La lista oficial de tutores de los siete grupos de Bachillerato**
-   (1º A, B, C, D y 2º A, B, C). Es el único dato que hoy sabemos falso.
-2. **El listado de profesores y asignaturas con el nombre completo**, si existe
+1. **El listado de profesores y asignaturas con el nombre completo**, si existe
    en algún sitio sin truncar.
-3. **Las condiciones de disponibilidad del profesorado** que ustedes manejan al
+2. **Las condiciones de disponibilidad del profesorado** que ustedes manejan al
    confeccionar el horario, en el formato en que las tengan. Es lo que separa
    una demostración de un horario utilizable.
 
-Los puntos 1 y 2 mejoran esta demostración. El punto 3 es el que decide si la
+El punto 1 mejora esta demostración. El punto 2 es el que decide si la
 herramienta puede servirles el curso que viene.
