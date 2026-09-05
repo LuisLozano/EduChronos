@@ -3,7 +3,7 @@
   "proposito": "Guion de tecleo manual del catalogo de entrada + oraculo de regresion",
   "fuente": "docs/horario-referencia/ (28 grupo-*.json, 43 aula-*.json)",
   "normativa": "docs/modelo_datos_fase1.md §5 (I1-I7, S1-S9) y §6.1",
-  "advertencia": "NO es un fichero que la aplicacion lea. No hay importador.",
+  "advertencia": "La aplicacion NO lee este fichero. Lo lee tools/carga-centro/cargar-centro.py, que con el escribe el centro entero por la API REST del producto: es la sede unica de la estructura del centro y donde aterriza cualquier correccion de catalogo.",
   "ordenDeTecleo": [
    "jornada",
    "niveles",
@@ -43,11 +43,11 @@
   "verificacionInvariantes": {
    "I1": "cada grupo queda cubierto por sus subgrupos en cada bloque; poblacion real NO derivable (ver ambiguedades A1-A4)",
    "I2": "OK - 0 subgrupos repetidos entre plazas de una misma actividad",
-   "I4": "OK - un TUTOR_PRINCIPAL por grupo; 28/28 derivados (ver ambiguedad A5)",
+   "I4": "OK - un TUTOR_PRINCIPAL por grupo; 28/28, 21 derivados y 7 oficiales del centro (A5 resuelta: el centro entrego la lista oficial)",
    "I5": "OK - los 5 PDC tienen grupoPadre ORDINARIO",
    "I6": "50 subgrupos parciales reutilizados en >1 actividad (ver ambiguedad A6)",
    "I7": "OK - 0 plazas sin profesor",
-   "S8": "OK - 22 actividades requiereTutor, todas con un tutor del grupo cubierto en alguna plaza",
+   "S8": "OK - 16 actividades requiereTutor, todas con un tutor del grupo cubierto en alguna plaza",
    "S9": "OK - los 840 slots (28 grupos x 30 tramos) quedan cubiertos por exactamente una actividad"
   }
  },
@@ -1711,7 +1711,7 @@
   },
   {
    "grupo": "1B-A",
-   "tutorPrincipal": "GH6",
+   "tutorPrincipal": "LEN7",
    "candidatos": [
     "GH6"
    ],
@@ -1719,7 +1719,7 @@
   },
   {
    "grupo": "1B-B",
-   "tutorPrincipal": "FIL2",
+   "tutorPrincipal": "MAT7",
    "candidatos": [
     "FIL2"
    ],
@@ -1727,7 +1727,7 @@
   },
   {
    "grupo": "1B-C",
-   "tutorPrincipal": "EFI3",
+   "tutorPrincipal": "LEN2",
    "candidatos": [
     "EFI3"
    ],
@@ -1735,7 +1735,7 @@
   },
   {
    "grupo": "1B-D",
-   "tutorPrincipal": "FIL2",
+   "tutorPrincipal": "LEN1",
    "candidatos": [
     "FIL2"
    ],
@@ -1743,7 +1743,7 @@
   },
   {
    "grupo": "2B-A",
-   "tutorPrincipal": "FIL2",
+   "tutorPrincipal": "MAT2",
    "candidatos": [
     "FIL2"
    ],
@@ -1751,7 +1751,7 @@
   },
   {
    "grupo": "2B-B",
-   "tutorPrincipal": "FIL2",
+   "tutorPrincipal": "GH3",
    "candidatos": [
     "FIL2"
    ],
@@ -1759,7 +1759,7 @@
   },
   {
    "grupo": "2B-C",
-   "tutorPrincipal": "FIL2",
+   "tutorPrincipal": "GH5",
    "candidatos": [
     "FIL2"
    ],
@@ -6690,7 +6690,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTEV",
@@ -6733,7 +6733,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTEV",
@@ -6773,7 +6773,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTVE",
@@ -6813,7 +6813,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTVE",
@@ -6853,7 +6853,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTVE",
@@ -6893,7 +6893,7 @@
    "duracionTramos": 1,
    "repeticionesPorSemana": 1,
    "patronTemporal": "NEUTRA",
-   "requiereTutor": true,
+   "requiereTutor": false,
    "plazas": [
     {
      "asignatura": "PTVE",
