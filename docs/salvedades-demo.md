@@ -32,7 +32,7 @@ las restricciones personales que ustedes sí aplicaron.
 
 Es la salvedad más importante de este documento.
 
-## 4. Datos que no constan en la documentación entregada
+## 4. Datos que no constaban en la documentación entregada
 
 **Los tutores de los siete grupos de Bachillerato — RECIBIDOS Y APLICADOS.** En
 «Horarios de profesores» aparece la línea «Tutor:» en 17 profesores, que cubre
