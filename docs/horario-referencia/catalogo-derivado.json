@@ -1712,57 +1712,43 @@
   {
    "grupo": "1B-A",
    "tutorPrincipal": "LEN7",
-   "candidatos": [
-    "GH6"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "1B-B",
    "tutorPrincipal": "MAT7",
-   "candidatos": [
-    "FIL2"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "1B-C",
    "tutorPrincipal": "LEN2",
-   "candidatos": [
-    "EFI3"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "1B-D",
    "tutorPrincipal": "LEN1",
-   "candidatos": [
-    "FIL2"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "2B-A",
    "tutorPrincipal": "MAT2",
-   "candidatos": [
-    "FIL2"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "2B-B",
    "tutorPrincipal": "GH3",
-   "candidatos": [
-    "FIL2"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
    "grupo": "2B-C",
    "tutorPrincipal": "GH5",
-   "candidatos": [
-    "FIL2"
-   ],
+   "candidatos": [],
    "rol": "TUTOR_PRINCIPAL"
   },
   {
