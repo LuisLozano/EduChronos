@@ -426,6 +426,17 @@ SubgrupoGrupo(
 -- es la misma en todas ellas por construcción.
 ```
 
+> **NO MATERIALIZADAS — decisión D-a (Bloque 4, S48); verificado en S138.** `Particion` y
+> `SubgrupoParticion` **no existen en el esquema vigente**: no hay `CREATE TABLE` para ellas
+> en `app/src/main/resources/schema.sql` ni tablas correspondientes en la base de referencia
+> del centro. La decisión está declarada en el javadoc de `Subgrupo.java` y remite a S48.
+> Este §4.2 se conserva como DISEÑO de Fase 1; el esquema vigente es el de `schema.sql`.
+> S138 midió además dónde vive realmente la mezcla entre grupos: **no en subgrupos
+> multi-grupo** —los 334 subgrupos de la base de referencia son mono-grupo sin excepción, y
+> el `Set<GrupoAdministrativo>` de `Subgrupo` es capacidad construida y nunca estrenada—
+> **sino en `plaza_subgrupo`**, con 127 plazas de dos o más subgrupos. Ese mecanismo expresa
+> reparto arbitrario entre vías, que es más de lo que expresaría una partición con plantilla.
+
 ### 4.3 Restricciones y relaciones del profesorado
 
 ```
@@ -1792,6 +1803,12 @@ duplicación de configuración). En Fase 8 puede ser necesario añadir un
 campo `patron_generacion NULL` (JSON) a `Particion` para describir cómo se
 auto-generan los subgrupos cuando cambia el alcance. No se añade ahora
 porque el formato del JSON depende del diseño de la UI.
+
+> **ACOTADA en S138:** la forma escrita de esta deuda —campo `patron_generacion` JSON sobre
+> `Particion`— queda DESCARTADA por medición: presupone que el nivel se reparte en K vías de
+> forma regular, y 10 de los 39 bloques del centro real no lo hacen (uno de ellos, con 5
+> vías, no tiene ningún grupo presente en todas). Lo que sobrevive de D1 es su PROPÓSITO,
+> recogido en el criterio de O-particiones.
 
 **D2. Gestión de cursos académicos.**
 El concepto "curso 2024-25 vs 2025-26" se aborda en la Fase 10 revisada
