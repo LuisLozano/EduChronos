@@ -12,23 +12,23 @@
 - L219 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
 - L469 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
 - L756 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
-- L789 — ### H1 — Ajustar (cierre)
-- L791 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
-- L805 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1096 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1288 — ## 4. Clasificación del trabajo pendiente
-- L1306 — ### Clasificación de las deudas vivas actuales
-- L1312 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1319 — #### Deuda técnica real, colgada de su objetivo
-- L1387 — #### Mejora futura, cuelga y espera
-- L1419 — #### Decisión arquitectónica consciente → sale de la cola
-- L1431 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1440 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1447 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1506 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1560 — ## 6. Reglas estratégicas
-- L1607 — ## 7. Métricas del sistema
-- L1628 — ## 8. El sistema respondiendo a las preguntas clave
+- L826 — ### H1 — Ajustar (cierre)
+- L828 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
+- L842 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1133 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1325 — ## 4. Clasificación del trabajo pendiente
+- L1343 — ### Clasificación de las deudas vivas actuales
+- L1349 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1356 — #### Deuda técnica real, colgada de su objetivo
+- L1428 — #### Mejora futura, cuelga y espera
+- L1460 — #### Decisión arquitectónica consciente → sale de la cola
+- L1472 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1481 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1488 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1547 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1601 — ## 6. Reglas estratégicas
+- L1648 — ## 7. Métricas del sistema
+- L1669 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -757,34 +757,71 @@ de las Fases 9–12.
 - **Propósito:** cumplir el criterio 6 de Fase 8, que hoy no tiene constructor: crear un
   grupo dentro del curso lo incorpora automáticamente a las particiones existentes de su
   nivel.
-- **Terminado cuando:** con el centro real cargado, crear un grupo nuevo lo deja
-  incorporado a las particiones de su nivel sin edición manual subgrupo a subgrupo. El
-  gesto de prueba lo propuso el arquitecto en S115: cargar el centro y meter después un
-  grupo que participe en particiones reales del nivel (un 1º ESO o un 4º ESO; NO un FPB,
-  que no comparte partición con nadie y haría pasar la prueba sin probar nada).
+- **Terminado cuando:** **[REESCRITO en S138 tras medir. El criterio anterior decía
+  «sin edición manual subgrupo a subgrupo», y S138 midió que eso es INALCANZABLE en 10 de
+  los 39 bloques del centro por falta de INFORMACIÓN y no de código: en esos bloques el
+  reparto de un grupo entre las vías depende de la matrícula del curso y no se deduce de
+  nada persistido.]** Sobre la base de referencia del centro y **SIN horario generado**,
+  dar de alta por la interfaz un grupo ORDINARIO en un nivel con particiones densas
+  (1º ESO o 4º ESO; NO un FPB, que no comparte partición con nadie) lo deja participando
+  en todas las actividades del nivel en las que participan sus hermanos, con tres
+  condiciones verificadas POR CONSULTA y no por inspección visual:
+  **(1) En los bloques de universo replicado la incorporación es AUTOMÁTICA:** cero
+  decisiones del usuario y cero edición subgrupo a subgrupo. Son 29 de los 39 bloques.
+  **(2) En los bloques de REPARTO el usuario toma exactamente N decisiones por pantalla**
+  —N medido en S138 sobre el centro real: 2 en 1º ESO, 1 en 4º ESO, 1 en 2º ESO, 0 en
+  3º ESO, 2 en 1º Bachillerato y 4 en 2º Bachillerato— **y ninguna de ellas exige tocar
+  subgrupos ni plazas a mano.**
+  **(3) El alta es REVERSIBLE:** borrar el grupo recién creado deshace lo que el alta creó
+  y devuelve la base a su estado anterior, comprobado por comparación. Hoy no lo es:
+  `GrupoService.borrar` rechaza con 409 un grupo que esté en algún subgrupo, así que un
+  alta que cree 24 subgrupos produce un grupo que no se puede borrar sin desmontarlos uno
+  a uno, y septiembre es justamente cuando el alta se hace a tientas.
+  **FUERA del criterio por decisión explícita de S138:** operar sobre base CON horario ya
+  generado (`plaza_subgrupo` sólo se escribe con `PUT /api/actividades/{id}` y
+  `ActividadService.exigirSinDependientes` lo bloquea con 409; la guarda es deliberada y
+  protege la reconciliación posicional, así que no se toca); materializar `Particion`
+  (ver el punto siguiente); y la gestión de los subgrupos `-ATED`/`-Rel` de los grupos PDC
+  (`D-subgrupos-di-sin-api`), que el gesto de prueba no toca por ser de grupo ordinario.
 - **Depende de:** O-demo (necesita un centro real con particiones densas delante). Cuidado
   de ORDEN: la prueba se hace ANTES de generar, o después de que exista un borrado de
   horario; ampliar la población de un subgrupo toca actividades que quizá ya tengan
   sesiones, y `ActividadService.exigirSinDependientes` las bloquea con 409.
 - **Valor:** es el segundo de los dos criterios que cierran H2. Sin él, H2 no termina.
-- **Por qué es objetivo y no un Cambio de O-demo (medido en S115):** exige materializar
-  `Particion`, que NO existe por decisión explícita (D-a, S48; declarado en el javadoc de
-  `Subgrupo.java:29`). Hoy `GrupoService.crear` no importa siquiera `SubgrupoRepository`, la
-  relación grupo↔subgrupo vive solo del lado del subgrupo (`subgrupo_grupo`) y el grupo no
-  tiene lado inverso: no hay nada que un grupo nuevo pueda heredar. Toca dominio,
-  persistencia (migración de `schema.sql`), servicio, API y frontend. Y el coste real no es
-  el código sino cuatro preguntas de dominio abiertas: (1) a qué subgrupo de un bloque de 6
-  vías va el grupo entrante —RefMt tiene 3 vías simultáneas y elegir una al azar es tan
-  malo como meterlo en las tres—; (2) qué es «la partición del nivel» cuando hay actividades
-  multi-grupo que cruzan grupos y niveles; (3) qué pasa con plazas y actividades que ya
-  tienen sesiones; (4) si el automatismo es reversible, cuando hoy `GrupoService.borrar`
-  rechaza con 409 un grupo que esté en algún subgrupo. Meterlo dentro de O-demo habría hecho
-  que H2 no cerrara hasta resolverlo y que O-demo dejara de ser lo que es.
+- **Por qué es objetivo y no un Cambio de O-demo (medido en S115; ALCANCE CORREGIDO en
+  S138).** Sigue siendo objetivo: `GrupoService.crear` no importa `SubgrupoRepository`, la
+  relación grupo↔subgrupo vive sólo del lado del subgrupo (`subgrupo_grupo`) y
+  `GrupoAdministrativo` no tiene lado inverso —verificado en S138: cero `OneToMany` y cero
+  `Set<`—, luego no hay nada que un grupo nuevo pueda heredar y el trabajo no cabe dentro de
+  otro objetivo. **Lo que S138 REFUTA es el tamaño.** Este punto afirmaba que el objetivo
+  «exige materializar `Particion`» y que toca dominio, persistencia con migración de
+  `schema.sql`, servicio, API y frontend. La medición dice que NO hace falta: la mezcla
+  entre grupos no se hace con subgrupos multi-grupo —los 334 subgrupos de la base de
+  referencia son mono-grupo SIN EXCEPCIÓN, y el `Set<GrupoAdministrativo>` de `Subgrupo` es
+  capacidad construida y jamás estrenada— sino en `plaza_subgrupo`, con 127 plazas de dos o
+  más subgrupos. Ese mecanismo ya expresa reparto ARBITRARIO, incluido el caso que ninguna
+  plantilla declarativa captura: `BIOL_Físic_Geogr_HART-2BACH` tiene 5 vías y el universo
+  {2B-A, 2B-B, 2B-C} no aparece completo en NINGUNA. Por eso se DESCARTA también `D1` en su
+  forma escrita (campo `patron_generacion` JSON sobre `Particion`, `modelo_datos_fase1.md`
+  §8): una plantilla de producto cartesiano funcionaría en 3º y 4º ESO y se rompería justo
+  donde el horario es más difícil, que es 2º de Bachillerato —4 de sus 8 bloques reparten—.
+  **El diseño que se sigue de los datos es CLONAR DE UN HERMANO**: replicar la estructura de
+  subgrupos de un grupo existente del nivel y preguntar sólo en los bloques de reparto. Sin
+  esquema nuevo y sin migración. **Y las cuatro preguntas de dominio quedan CERRADAS en
+  S138, ninguna para el jefe de estudios:** (1) a qué vía va el grupo entrante NO es una
+  regla sino un dato de matrícula, luego es UX del alta y no requisito externo; (2) «la
+  partición del nivel» es derivable por consulta —ninguna actividad cruza niveles— y no
+  necesita entidad; (3) las plazas con sesiones bloquean con 409 y eso pasa a ser condición
+  de operación escrita en el criterio; (4) la irreversibilidad es real y pasa a ser
+  condición (3) del criterio.
 - **Absorbe:** D1 (generación automática de subgrupos por plantilla), que O-estructura
   declaraba absorber y cerró sin construirla —correctamente, porque no estaba en el texto de
   su criterio (R-terminado)—. También la invariante de población de D31: hoy I1 no la hace
   cumplir ningún componente, y materializar `Particion` es la sede natural para decidir si
   eso cambia.
+  **S138 acota qué queda de D1:** su forma escrita (`patron_generacion` sobre `Particion`)
+  se descarta por medición; lo que sobrevive de D1 es el PROPÓSITO —que el alta de un grupo
+  no obligue a crear subgrupos a mano—, que es exactamente el criterio reescrito.
 
 ### H1 — Ajustar (cierre)
 
@@ -1383,6 +1420,10 @@ asigna categoría, objetivo y disposición.
 | ~~D-jerarquia-declarada-sin-aplicar~~ (`styles.css` declaraba la jerarquía de acciones como aplicada, y no lo estaba) **CERRADA S132** | O-diseño, C-revisión (tramo 3) | — | Nace en el M4 de S130. `styles.css:59-63`, dentro de la decisión 1, dice «JERARQUÍA DE ACCIONES, por relleno y no por color (aplicado, se declara)». Medido: en toda la aplicación hay **un solo** `background: var(--color-acento)` y es la barra; ningún botón lleva relleno de acento; `__cancelar` y `__guardar` comparten una sola regla en los siete formularios; los siete `__borrar` de fila llevan sólo `color`, sin superficie ni borde; y en `pdc-dialogo` principal y destructiva son idénticas. Censo de botones: 10 reglas con caja y radio, 9 con una sola propiedad, 8 sin ninguna regla —los siete `__editar` de fila y `.cabecera-lista__nuevo` salen con el botón por defecto del navegador—. NO es diseño nuevo: los tres tokens existen y la regla está escrita desde S129; falta ejecutarla. Arrastra dos consecuencias: el criterio 3 no puede darse por cumplido mientras el fichero afirme «aplicado» sobre algo falso, y la pregunta del verde que S129 zanjó con «ya se resuelve por relleno» no está resuelta sino cerrada. Es la familia de `D-declarado-sin-artefacto`, salvo que aquí lo que falta no es el registro sino el producto. **PAGADA Y CERRADA en S132**, en su sede: reglas globales sobre `button` en `styles.css` y 32 bloques retirados de 20 hojas de componente —14 `.accion-principal`, 9 `.accion-destructiva`, secundaria por defecto, `:disabled` como acento apagado— más `.accion-compacta` como nivel de TAMAÑO en las 16 acciones de fila, que es la variante que eligió el arquitecto en el navegador. **El censo de esta ficha era CORTO**, remedido sobre `82ec04c`: 54 `<button>` en 24 plantillas y no 34 en 10; caja y radio 10 ✓; una sola propiedad 10 y no 9; 15 clases sin regla y no 8. Con ella se levanta el bloqueo del criterio 3 y la deuda bloqueante del proyecto vuelve a 1 (`D31-a`). **CERRADA** |
 | D-avisos-como-bloque-fijo (los avisos del horario ocupan una banda fija en vez de plegarse tras un indicador de estado) | Transversal, sin objetivo asignado; candidata a O-particiones | No | Nace en el M4 de S130, propuesta del arquitecto con argumento propio: sustituir la banda de texto por un botón con icono de estado —verde, aviso, error— que abra el detalle en un panel aparte liberaría alto para la rejilla, que es el presupuesto medido del criterio 4 de O-navegación. Queda FUERA de O-diseño por R-terminado y R-invalidación a la vez: cambia la INTERACCIÓN y no el acabado, y O-particiones toca frontend después. Se registra con su argumento para que no se pierda |
 | ~~D-prevalidacion-contraste-sin-ver~~ (aviso y error del panel se distinguían SOLO por color de texto, y no se habían visto juntos) **CERRADA S129** | O-diseño, C-revisión (tramo 1) | — | Nace en el M4 de S121 por un riesgo que la sesión NO pudo cerrar. C-sustitución colapsó cuatro ámbares (`#c80`, `#a60`, `#b8860b`, `#8a6100`) en `--color-aviso` (#8A5A00) y tres rojos (`#b00`, `#b00020`, `#c33`) en `--color-error` (#A32014), y en `panel-prevalidacion` los mensajes de severidad se distinguen solo por `color:`, sin fondo. Para verlos juntos hay que provocar un hallazgo, y ni la documentación del proyecto ni el asistente saben qué lo dispara: se registró como NO SABIDO en vez de mandar a probar a ciegas. Se verifica en C-revisión leyendo el componente antes. Si se confunden, el arreglo es un cambio de valor en `:root` y se propaga solo, que es justo lo que C-tokens compró. **CERRADA en S129 POR CONSTRUCCIÓN, con dos correcciones a esta ficha.** (1) **La verificación que pedía no era difícil: es IMPOSIBLE.** Medido en el backend: `Severidad` tiene dos valores y las tres reglas de `PrevalidacionService` emiten `ERROR`; **nadie emite `AVISO`**, ni en `main` ni en los tests, y el propio enum documenta que se conserva por contrato y como candidato del palomar de aulas. Los dos colores no coexisten, así que no se pueden ver juntos. (2) **Tenía DOS caras y la ficha sólo veía una:** además de las filas, los dos contadores de la cabecera eran números desnudos y consecutivos distinguidos sólo por la tinta, y **medido con la fórmula WCAG los dos tokens tienen 1,28:1 ENTRE SÍ** cuando a un elemento no textual portador de información se le piden 3:1; en el estado colapsado —el habitual— eran lo único en pantalla, luego el color no era redundante, era la información. El arreglo NO fue el cambio de valor en `:root` que esta ficha preveía: rótulo VISIBLE junto a cada número, severidad pintada como TEXTO en cada fila con el valor crudo del enum, y marco del panel tomando la severidad máxima con contrastes medidos antes de escribirlos (6,35:1 / 4,97:1 / 13,16:1 sobre `--color-error-fondo`). Al dejar el color de ser el único canal, la verificación imposible deja de ser condición para cerrarla: mismo mecanismo que mató a `D-vacio-miente-con-error` en S128. **CERRADA** |
+| D-subgrupos-di-sin-api (18 subgrupos de los grupos PDC sin ninguna vía de gestión) | Sin sede | No | Nace en S138. `PdcService` crea y borra exactamente UN subgrupo por PDC, `<codigo>-Completo`, y son 5 en la base. Pero el predicado `esMonoDiDePdc` que veta PUT/DELETE en `/api/subgrupos` casa «un solo grupo Y ese grupo es `DIVERSIFICACION_PDC`», y eso son 23: los 5 troncos más **18 desdobles de Religión/Atención Educativa** (`3ºCDi-ATED`, `3ºCDi-Rel` y hermanos) que **no posee nadie**. `/api/subgrupos` los rechaza con un 400 que remite a `/api/grupos/{idPadre}/pdc`, y ese sub-recurso sólo conoce el `-Completo`: **el mensaje de error manda al usuario a una puerta donde el recurso no está.** La ironía es medible: el predicado excluye con un párrafo de javadoc el caso del subgrupo con varios grupos PDC —el «tronco A8 compartido», del que hay CERO instancias— mientras deja fuera de la API 18 subgrupos que sí existen. Sin sede: el arreglo toca el agregado PDC y no cae en O-particiones (cuyo gesto de prueba es un grupo ORDINARIO) ni en O-ajuste-cierre; colgarlo de O-estructura, TERMINADO en S114, equivaldría a decidir que no se paga nunca |
+| D-borrado-pdc-integridad-500 (violación de FK latente al borrar un grupo PDC) | Sin sede | No | Nace en S138. `PdcService.borrar` guarda sólo por las plazas del `-Completo` y no mira los otros 18 subgrupos de `D-subgrupos-di-sin-api`. Reconstruido el escenario sobre COPIA con `foreign_keys=ON`: borrado el mono-Di y hecho `flush()`, quedan 2 filas de `subgrupo_grupo` apuntando al grupo, y el DELETE del PDC revienta con `FOREIGN KEY constraint failed`. **Medido en la capa SQL, NO en la respuesta HTTP**: lo que llega al usuario depende de cómo traduzca Spring esa `DataIntegrityViolationException`, y lo probable es un 500 donde debería haber un 409 modelado. **Hoy NO es alcanzable** —los cinco `-Completo` tienen 10 plazas cada uno, así que el 409 de plazas salta antes—, pero deja de serlo en cuanto un PDC se quede sin usar su tronco. Se registra con el escenario reconstruido para que quien lo pague no lo redescubra |
+| D-codigo-actividad-tilde (`EFis-4ºA+4ºADi` frente a `EFís-4ºD+4ºDDi`) | Transversal, con la sesión de Higiene/Método | No | Nace en S138 de paso. La misma asignatura aparece con y sin tilde en el código de dos actividades. `codigo` es UNIQUE, así que no rompe nada hoy; el daño es de ORDEN —ordena mal en cualquier listado— y sobre todo de DERIVACIÓN: el día que algo agrupe por prefijo de código, estas dos caen en cubos distintos sin que nada avise. Misma familia que la circularidad del mapa de códigos de grupo que S119 eliminó |
+| D-i3-sin-datos (la invariante I3 no está ejercitada por el centro completo) | Transversal, con la sesión de Higiene/Método | No | Nace en S138. `asignatura_aula_compatible` tiene **0 filas** en la base de referencia, luego la validación I3 de `ActividadService` (compatibilidad asignatura↔tipo de aula) no la ejercita ningún dato del centro real; sólo hay 84 filas de `plaza_aula_candidata`. Es la familia de `D-meta-invariantes-a-mano`: una invariante declarada viva que el juego de datos de referencia no toca, de modo que un fallo en ella no lo destaparía ninguna carga ni ninguna generación. No se decide aquí si el arreglo es poblar la tabla o retirar la invariante: eso es trabajo de su sesión |
 
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
