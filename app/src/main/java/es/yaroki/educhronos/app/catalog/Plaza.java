@@ -99,6 +99,21 @@ public class Plaza {
         this.subgrupos = new HashSet<>(subgrupos);
     }
 
+    /**
+     * Añade UN subgrupo a la población de la plaza, sobre la colección VIVA (Bloque S139,
+     * C-replicación-alta). Mutación de dominio nombrada, la puerta aditiva que hasta ahora no
+     * existía: {@link #actualizar} REEMPLAZA los cinco campos de contenido a la vez y obliga a
+     * releer los otros cuatro para tocar uno.
+     *
+     * <p>{@code add} sobre el conjunto gestionado, NO {@code this.subgrupos = ...}: cambiar la
+     * referencia de una colección que Hibernate ya vigila le obliga a rehacerla entera, y aquí
+     * lo que ocurre es exactamente una fila nueva en {@code plaza_subgrupo}. Idempotente por
+     * ser {@code Set}.
+     */
+    public void agregarSubgrupo(Subgrupo subgrupo) {
+        this.subgrupos.add(subgrupo);
+    }
+
     public Long getId() {
         return id;
     }

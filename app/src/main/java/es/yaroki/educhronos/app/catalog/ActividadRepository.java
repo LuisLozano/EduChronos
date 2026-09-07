@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,42 @@ import org.springframework.data.repository.query.Param;
  */
 public interface ActividadRepository extends JpaRepository<Actividad, Long> {
     Optional<Actividad> findByCodigo(String codigo);
+
+    /**
+     * Las actividades que TOCAN a un grupo —alguna de sus plazas tiene un subgrupo cuya
+     * población incluye ese grupo—, con la travesía {@code plazas → subgrupos → grupos}
+     * traída en la MISMA consulta (Bloque S139, C-replicación-alta). Sin el {@code join
+     * fetch}, clasificar un bloque obliga a navegar tres colecciones {@code LAZY} por plaza
+     * y dispara un N+1 de cientos de SELECT.
+     *
+     * <p><b>El filtro va en SUBCONSULTA, no en el {@code where} del fetch, y no es un
+     * detalle de estilo.</b> Un {@code join fetch p.subgrupos s ... where s.grupos.codigo =
+     * :codigo} devuelve las actividades con sus colecciones TRUNCADAS a los elementos que
+     * casan el filtro: {@code a.plazas} se quedaría solo con las plazas que tocan al grupo y
+     * {@code p.subgrupos} solo con los suyos. Sobre eso, la unión de grupos de una actividad
+     * valdría siempre {@code {grupo}} y TODO bloque se clasificaría como replicado. Peor: esas
+     * colecciones truncadas son las de entidades GESTIONADAS, así que un flush posterior
+     * podría interpretar lo que falta como filas a borrar. La subconsulta selecciona QUÉ
+     * actividades, y el fetch las trae ENTERAS.
+     *
+     * <p>Los {@code left join fetch} conservan la plaza sin subgrupos y el subgrupo sin
+     * grupos: hoy no existe ninguno en el catálogo real, pero un {@code inner join} los
+     * borraría de la colección en memoria en vez de fallar, que es el modo de error caro.
+     *
+     * <p>Una sola bag en juego ({@code Actividad.plazas} es {@code List}; {@code subgrupos} y
+     * {@code grupos} son {@code Set}), así que no hay {@code MultipleBagFetchException}.
+     */
+    @Query("select distinct a from Actividad a"
+            + " left join fetch a.plazas p"
+            + " left join fetch p.subgrupos s"
+            + " left join fetch s.grupos"
+            + " where a.id in ("
+            + "   select a2.id from Actividad a2"
+            + "     join a2.plazas p2"
+            + "     join p2.subgrupos s2"
+            + "     join s2.grupos g2"
+            + "   where g2.codigo = :codigo)")
+    List<Actividad> findConPoblacionPorGrupo(@Param("codigo") String codigo);
 
     /** Directa: FK {@code sesion_bloqueada.actividad_id} → actividad (pin de tramo). */
     @Query(value = "select count(*) from sesion_bloqueada where actividad_id = :id",

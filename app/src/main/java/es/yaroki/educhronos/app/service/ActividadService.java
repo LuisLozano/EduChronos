@@ -196,9 +196,15 @@ public class ActividadService {
      * sola implementación a propósito: si las dos rutas contaran cosas distintas, el usuario
      * podría vaciar una actividad por PUT y luego borrarla, o al revés.
      *
+     * <p><b>Es {@code public} desde S139</b> (C-replicación-alta): {@code ReplicacionService}
+     * la necesita para exigir la misma precondición sobre TODAS las actividades que va a
+     * tocar, ANTES de escribir nada. Reusarla —en vez de recontar por su cuenta— es lo que
+     * garantiza que las dos rutas cuenten exactamente lo mismo, que es la razón de ser de
+     * esta guarda única.
+     *
      * @param accion verbo que nombra lo que se rechaza; entra en el mensaje del 409.
      */
-    private void exigirSinDependientes(Long id, String accion) {
+    public void exigirSinDependientes(Long id, String accion) {
         List<Referencia> entrantes = List.of(
                 new Referencia("sesion(es) bloqueada(s)", repositorio.contarSesionesBloqueadas(id)),
                 new Referencia("sesion(es)", repositorio.contarSesionesSobreSusPlazas(id)),
