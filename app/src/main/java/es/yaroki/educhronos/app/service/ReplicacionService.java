@@ -287,18 +287,27 @@ public class ReplicacionService {
     // ───────────────────────────────────────────────────────── travesía del deshacer
 
     /**
-     * Las plazas de esas actividades, DEDUPLICADAS por id.
+     * Las plazas de esas actividades, DEDUPLICADAS por id. <b>Es la única puerta a las plazas
+     * en este servicio: ni el alta ni el deshacer leen {@code actividad.getPlazas()}.</b>
      *
-     * <p><b>Hace falta: {@code Actividad.plazas} es un {@code List} y
-     * {@code findConPoblacionPorGrupo} le hace {@code left join fetch} de {@code p.subgrupos}.</b>
-     * Una colección-bolsa fetch-joineada recibe una entrada por FILA del producto cartesiano, y
-     * el {@code distinct} del HQL solo desduplica la raíz: {@code getPlazas()} devuelve la misma
-     * plaza repetida tantas veces como subgrupos tenga. Medido en el fixture de S140: la plaza
-     * de dos subgrupos salía tres veces tras replicar, y la resta de G4 daba 0 sobre una plaza
-     * que en realidad conserva dos.
+     * <p><b>Por qué.</b> {@code Actividad.plazas} es un {@code List} y
+     * {@code findConPoblacionPorGrupo} le hace {@code left join fetch} de {@code p.subgrupos}.
+     * Una colección-bolsa fetch-joineada recibe una entrada por FILA del producto cartesiano y
+     * el {@code distinct} del HQL solo desduplica la raíz, así que {@code getPlazas()} devuelve
+     * cada plaza repetida tantas veces como subgrupos tenga.
      *
-     * <p>Se desduplica AQUÍ y no en la consulta —que es de S139 y la comparten el GET y el
-     * POST— porque cambiarla es tocar un fichero fuera de este bloque.
+     * <p><b>Lo que costaba, medido sobre el catálogo real (S140).</b> 30 de las 219 actividades
+     * tienen UNA plaza con ≥2 subgrupos —todas de la misma forma: la plaza compartida entre un
+     * grupo ordinario y su PDC, {@code EF-3ºA+3ºADi}—, y afectaban a los cinco ordinarios con
+     * PDC (3ºA/3ºB/3ºC con 4 actividades cada uno, 4ºA/4ºD con 2). El GET reportaba 4 vías
+     * donde hay 2, y el POST metía el {@code -Completo} del grupo nuevo en esa plaza, dejándolo
+     * con 1 plaza donde el Javadoc de clase promete 0: el grupo nuevo acababa sentado en la
+     * clase de otro. En el deshacer, la misma bolsa hacía que G4 restara tres retiradas donde
+     * había una y abortase una operación legítima.
+     *
+     * <p><b>Se desduplica aquí y no en la consulta</b> —que la comparten otras rutas cuyo
+     * comportamiento no está medido— y el resultado viaja DENTRO de {@link Bloque}, para que un
+     * consumidor no pueda volver a la bolsa sin que se note.
      */
     private static List<Plaza> plazasDe(List<Actividad> actividades) {
         Map<Long, Plaza> porId = new LinkedHashMap<>();
@@ -402,8 +411,10 @@ public class ReplicacionService {
         Map<String, String> espejoPorOriginal = derivarEspejos(grupo, hermano, delHermano);
         List<Actividad> actividades = actividadRepositorio.findConPoblacionPorGrupo(
                 hermano.getCodigo());
+        // Las plazas se DEDUPLICAN antes de clasificar: la consulta las trae repetidas (ver
+        // plazasDe). Contar la bolsa hacía pasar por bloque a una actividad de plaza única.
         return new Analisis(grupo, hermano, espejoPorOriginal, actividades,
-                clasificar(actividades));
+                clasificar(plazasDe(actividades)));
     }
 
     /**
@@ -460,20 +471,36 @@ public class ReplicacionService {
      * Clasifica en REPLICADO / REPARTE las actividades que son BLOQUE, descartando las de una
      * sola plaza. El predicado es la igualdad EXACTA con U: relajarlo a "contenido en U" lo
      * haría cierto por construcción y todo bloque saldría replicado.
+     *
+     * <p><b>Recibe PLAZAS ya deduplicadas, no actividades, y las reagrupa.</b> Contar
+     * {@code actividad.getPlazas()} —que es lo que hacía hasta S140— era contar la bolsa
+     * inflada por el fetch join, y una actividad de UNA plaza con dos subgrupos medía 2: se
+     * colaba como bloque, salía REPLICADO (todas sus "vías" son la misma plaza, luego todas
+     * cubren U) y {@link #cablearReplicados} le metía el espejo, justo lo que la regla "las de
+     * una sola plaza no se tocan" prohíbe. Reagrupar desde las plazas hace que el recuento sea
+     * el de filas de {@code plaza}, que es el que la regla nombra.
+     *
+     * <p>Cada {@link Bloque} se lleva SUS plazas ya deduplicadas para que ningún consumidor
+     * —cableado, proyección, destinos de reparto— vuelva a {@code getPlazas()} por su cuenta.
      */
-    private static List<Bloque> clasificar(List<Actividad> actividades) {
+    private static List<Bloque> clasificar(List<Plaza> plazas) {
+        Map<Long, List<Plaza>> porActividad = new LinkedHashMap<>();
+        for (Plaza plaza : plazas) {
+            porActividad.computeIfAbsent(plaza.getActividad().getId(), id -> new ArrayList<>())
+                    .add(plaza);
+        }
+
         List<Bloque> bloques = new ArrayList<>();
-        for (Actividad actividad : actividades) {
-            if (actividad.getPlazas().size() <= 1) {
+        for (List<Plaza> vias : porActividad.values()) {
+            if (vias.size() <= 1) {
                 continue;   // no es bloque: no se toca
             }
             Set<String> union = new HashSet<>();
-            for (Plaza plaza : actividad.getPlazas()) {
+            for (Plaza plaza : vias) {
                 union.addAll(gruposDe(plaza));
             }
-            boolean replicado = actividad.getPlazas().stream()
-                    .allMatch(plaza -> gruposDe(plaza).equals(union));
-            bloques.add(new Bloque(actividad, replicado));
+            boolean replicado = vias.stream().allMatch(plaza -> gruposDe(plaza).equals(union));
+            bloques.add(new Bloque(vias.get(0).getActividad(), List.copyOf(vias), replicado));
         }
         bloques.sort(Comparator.comparing(b -> b.actividad().getCodigo()));
         return bloques;
@@ -579,7 +606,7 @@ public class ReplicacionService {
             if (!bloque.replicado()) {
                 continue;
             }
-            for (Plaza plaza : bloque.actividad().getPlazas()) {
+            for (Plaza plaza : bloque.plazas()) {
                 for (Subgrupo original : List.copyOf(plaza.getSubgrupos())) {
                     Subgrupo espejo = espejos.get(original.getCodigo());
                     if (espejo != null) {
@@ -596,7 +623,7 @@ public class ReplicacionService {
         Map<Long, Plaza> porId = new LinkedHashMap<>();
         for (Bloque bloque : analisis.bloques()) {
             if (!bloque.replicado()) {
-                bloque.actividad().getPlazas().forEach(p -> porId.put(p.getId(), p));
+                bloque.plazas().forEach(p -> porId.put(p.getId(), p));
             }
         }
         for (Map.Entry<String, Subgrupo> entrada : espejos.entrySet()) {
@@ -621,7 +648,7 @@ public class ReplicacionService {
     }
 
     private static BloqueDTO aBloque(Bloque bloque, GrupoAdministrativo hermano) {
-        List<ViaDTO> vias = bloque.actividad().getPlazas().stream()
+        List<ViaDTO> vias = bloque.plazas().stream()
                 .sorted(Comparator.comparing(Plaza::getCodigo))
                 .map(plaza -> new ViaDTO(
                         plaza.getId(),
@@ -635,8 +662,15 @@ public class ReplicacionService {
 
     // ──────────────────────────────────────────────────────────────── tipos internos
 
-    /** Un bloque ya clasificado: la actividad y si todas sus vías cubren el mismo U. */
-    private record Bloque(Actividad actividad, boolean replicado) { }
+    /**
+     * Un bloque ya clasificado: la actividad, SUS plazas —deduplicadas por {@link #plazasDe},
+     * nunca {@code actividad.getPlazas()}— y si todas sus vías cubren el mismo U.
+     *
+     * <p>Que las plazas viajen DENTRO del bloque es lo que impide que la corrección de S140 se
+     * pierda: un consumidor que volviera a la bolsa de la actividad recuperaría los duplicados
+     * sin que nada se lo dijera.
+     */
+    private record Bloque(Actividad actividad, List<Plaza> plazas, boolean replicado) { }
 
     /**
      * Una retirada pendiente del deshacer: el {@code subgrupo} sale de la {@code plaza}. La
@@ -703,8 +737,8 @@ public class ReplicacionService {
                     continue;
                 }
                 Set<Long> vias = new LinkedHashSet<>();
-                bloque.actividad().getPlazas().forEach(p -> vias.add(p.getId()));
-                for (Plaza plaza : bloque.actividad().getPlazas()) {
+                bloque.plazas().forEach(p -> vias.add(p.getId()));
+                for (Plaza plaza : bloque.plazas()) {
                     for (Subgrupo subgrupo : plaza.getSubgrupos()) {
                         String espejo = espejoPorOriginal.get(subgrupo.getCodigo());
                         if (espejo == null) {

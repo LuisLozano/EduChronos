@@ -324,6 +324,85 @@ class ReplicacionEndpointTest {
         assertThat(subgrupoRepository.count()).isEqualTo(antes);
     }
 
+    // ──────────────────────────────── la plaza compartida ordinario + PDC (S140)
+
+    /**
+     * (T19) Una actividad de UNA plaza cuya población son DOS grupos —el ordinario y su PDC, la
+     * forma de {@code EF-3ºA+3ºADi}, 30 de las 219 del centro— NO es un bloque, y un bloque de
+     * dos plazas reporta DOS vías.
+     *
+     * <p>Las dos mitades del mismo defecto y por eso van juntas: {@code Actividad.plazas} es una
+     * bolsa que el {@code left join fetch} de {@code p.subgrupos} infla, así que
+     * {@code getPlazas()} repetía cada plaza una vez por subgrupo. Contarla hacía medir 2 a la
+     * actividad de plaza única —se colaba como bloque— y proyectarla daba 4 vías donde hay 2.
+     * Cae si se quita la deduplicación de {@code analizar}.
+     */
+    @Test
+    void t19_plazaUnicaCompartidaConElPdc_niEsBloqueNiDuplicaVias() throws Exception {
+        sembrarActividadCompartidaConPdc();
+
+        mockMvc.perform(get("/api/grupos/" + nuevoId + "/replicacion").param("hermano", "1ºA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.replicados[*].actividad",
+                        containsInAnyOrder("BLOQ-REPL")))
+                .andExpect(jsonPath("$.reparto[*].actividad", containsInAnyOrder("BLOQ-REP")))
+                .andExpect(jsonPath("$.replicados[0].vias", hasSize(2)))
+                .andExpect(jsonPath("$.reparto[0].vias", hasSize(2)));
+    }
+
+    /**
+     * (T20) Tras replicar con una actividad de plaza única compartida con el PDC, el espejo del
+     * {@code -Completo} sigue teniendo CERO plazas, que es lo que promete el Javadoc de clase.
+     *
+     * <p>Es la cara CARA del mismo defecto: al colarse esa actividad como bloque salía
+     * REPLICADO —todas sus "vías" son la misma plaza, luego todas cubren U— y
+     * {@code cablearReplicados} metía ahí el espejo. El grupo nuevo acababa en la clase de
+     * Educación Física del hermano y su PDC, sin error ni aviso. {@code T10} no lo veía porque
+     * su {@code ACT-UNICA} tiene un solo subgrupo.
+     *
+     * <p><b>NADA lee las plazas antes del POST, y es deliberado.</b> Leer
+     * {@code actividadRepository.findAll()} para capturar un "antes" inicializa
+     * {@code Actividad.plazas} LIMPIA en el contexto de persistencia —una consulta sin join a
+     * subgrupos—, y el {@code left join fetch} posterior ya no repuebla una colección
+     * inicializada: el POST no vería la bolsa inflada y el test pasaría con la corrección y sin
+     * ella. Medido: con ese "antes" delante, la mutación que quita la deduplicación NO tumbaba
+     * este test. Por eso el estado esperado se escribe literal.
+     */
+    @Test
+    void t20_replicarConPlazaCompartidaConElPdc_noCableaElCompleto() throws Exception {
+        long compartida = sembrarActividadCompartidaConPdc();
+
+        replicar(asignacion("1ºE-Rep", repP1Id));
+
+        assertThat(subgrupoRepository.contarPlazas(idDe("1ºE-Completo"))).isZero();
+        assertThat(subgruposDePlaza(compartida))
+                .containsExactlyInAnyOrder("1ºA-Completo", "1ºADi-Completo");
+    }
+
+    /**
+     * Una actividad de UNA plaza poblada por el hermano Y su PDC, que es la forma real que el
+     * fixture de {@link #setUp} no tiene: su {@code ACT-UNICA} lleva un solo subgrupo, y por eso
+     * la bolsa no se inflaba y el defecto no se veía. Devuelve el id de esa plaza.
+     */
+    private long sembrarActividadCompartidaConPdc() {
+        GrupoAdministrativo hermano = grupoRepository.findByCodigo("1ºA").orElseThrow();
+        Nivel eso1 = nivelRepository.findByCodigo("1ESO").orElseThrow();
+        GrupoAdministrativo pdc = grupoRepository.save(new GrupoAdministrativo(
+                "1ºADi", eso1, TipoGrupo.DIVERSIFICACION_PDC, hermano));
+        Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
+        Aula aula = aulaRepository.findByCodigo("A1").orElseThrow();
+
+        Actividad ef = new Actividad("EF-1ºA+1ºADi", mat, 1, 1, PatronTemporal.NEUTRA, false);
+        Plaza plaza = ef.agregarPlaza("EF-1ºA+1ºADi-P1", mat, aula, Set.of(), Set.of(),
+                Set.of(subgrupoRepository.findByCodigo("1ºA-Completo").orElseThrow(),
+                        sub("1ºADi-Completo", pdc)));
+        actividadRepository.save(ef);
+        entityManager.flush();
+        long id = plaza.getId();
+        entityManager.clear();
+        return id;
+    }
+
     // ────────────────────────────────────────────────────────── deshacer (S140)
 
     /**
