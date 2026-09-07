@@ -89,8 +89,9 @@ public class Actividad {
      * Reasigna los campos escalares de una actividad gestionada (edición del CRUD
      * 8.5-C1). Mutación de dominio nombrada en lugar de setters libres: la valida el
      * servicio y el flush transaccional la persiste sin {@code save}. NO toca la lista
-     * de plazas —la gestiona el servicio con {@link #limpiarPlazas} + {@link #agregarPlaza},
-     * regenerando sus códigos— ni el {@code id}.
+     * de plazas —la reconcilia el servicio POR POSICIÓN sobre las plazas vivas ordenadas por
+     * id: conserva el código de las que sobreviven, deja caer por {@code orphanRemoval} las
+     * que sobran y añade las que faltan con {@link #agregarPlaza}— ni el {@code id}.
      */
     public void actualizar(String codigo, Asignatura asignatura, int duracionTramos,
             int repeticionesPorSemana, PatronTemporal patronTemporal, boolean requiereTutor) {

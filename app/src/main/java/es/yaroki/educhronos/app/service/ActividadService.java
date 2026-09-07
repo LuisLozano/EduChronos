@@ -59,10 +59,13 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>unicidad de {@code codigo} de actividad, excluida por id en la edición.
  * </ol>
  *
- * <p><b>Derivación del código de plaza</b> (el usuario no lo teclea): {@code {codigo}-P{n}}
- * con n 1-based en orden de llegada. Se REGENERA entero en el alta y en cada PUT: el
- * {@code orphanRemoval} borra las plazas viejas ({@link Actividad#limpiarPlazas}) y se
- * crean nuevas 1..n ({@link Actividad#agregarPlaza}).
+ * <p><b>Derivación del código de plaza</b> (el usuario no lo teclea): en el ALTA,
+ * {@code {codigo}-P{n}} con n 1-based en orden de llegada ({@link Actividad#agregarPlaza}).
+ * En el PUT NO se regenera nada: {@link #reconciliarPlazas} empareja por POSICIÓN contra las
+ * plazas vivas ordenadas por id, CONSERVA el código de las que sobreviven, borra por
+ * {@code orphanRemoval} las que sobran y crea las que faltan como
+ * {@code {codigo}-P{maxSufijoVivo+1}}. El código de una plaza es ESTABLE mientras la plaza
+ * exista.
  *
  * <p><b>Dos familias de excepción, dos códigos HTTP.</b> "No encontrado" (id inexistente)
  * lanza {@link NoSuchElementException} (→ 404); un fallo de validación lanza

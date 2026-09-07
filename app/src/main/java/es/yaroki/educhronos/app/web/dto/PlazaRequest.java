@@ -6,9 +6,14 @@ import java.util.List;
  * Una plaza dentro del cuerpo de {@link ActividadRequest} (§4.6, Bloque 8.5-C1).
  * Actividad es un AGREGADO: la plaza viaja EMBEBIDA, no tiene endpoint propio.
  *
- * <p><b>SIN {@code codigo}</b>: el código de plaza no lo teclea el usuario; lo DERIVA
- * {@code ActividadService} como {@code {codigoActividad}-P{n}} (n = índice 1-based en
- * orden de llegada). Es inestable entre ediciones (identificador técnico interno).
+ * <p><b>SIN {@code codigo}</b>: el código de plaza no lo teclea el usuario ni viaja en el
+ * cuerpo; lo DERIVA {@code ActividadService} como {@code {codigoActividad}-P{n}} (n = índice
+ * 1-based en orden de llegada). Una vez derivado es ESTABLE: no cambia mientras la plaza
+ * sobreviva, porque el PUT reconcilia por posición y conserva el código de las plazas vivas.
+ * Lo INESTABLE es otra cosa: la CORRESPONDENCIA entre la posición de esta plaza en el array y
+ * la plaza viva que reconcilia. Es el único vínculo entre las dos —este record no lleva id ni
+ * código—, así que reordenar el array muta plazas distintas de las que se pretendía, sin
+ * error.
  *
  * <p>Todas las referencias por CÓDIGO (String), patrón de 8.5-B:
  * <ul>
