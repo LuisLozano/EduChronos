@@ -2,10 +2,12 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
 import es.yaroki.educhronos.app.service.ReplicacionService;
+import es.yaroki.educhronos.app.web.dto.ParteDeshacerDTO;
 import es.yaroki.educhronos.app.web.dto.PlanReplicacionDTO;
 import es.yaroki.educhronos.app.web.dto.ReplicacionRequest;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,10 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
  * {@link ReferenciaEntranteException} (alguna actividad afectada tiene dependientes) →
  * {@code 409} con el desglose.
  *
- * <p>El {@code POST} traduce las TRES y el {@code GET} solo las dos primeras: el plan se puede
- * consultar aunque haya un horario colgando, porque consultarlo no escribe. Traducir por TIPO
- * y no por endpoint es lo que hace que esa diferencia sea del SERVICIO —que solo lanza la
- * tercera desde {@code replicar}— y no de una tabla de códigos por ruta.
+ * <p>El {@code POST} traduce las TRES, el {@code GET} solo las dos primeras —el plan se puede
+ * consultar aunque haya un horario colgando, porque consultarlo no escribe— y el
+ * {@code DELETE} (Bloque S140, C-alta-reversible: deshacer la replicación) la primera y la
+ * tercera, porque no recibe cuerpo y no tiene nada que validar. Traducir por TIPO y no por
+ * endpoint es lo que hace que esas diferencias sean del SERVICIO —cada método lanza lo que le
+ * corresponde— y no de una tabla de códigos por ruta.
  */
 @RestController
 @RequestMapping("/api/grupos/{id}/replicacion")
@@ -70,6 +74,29 @@ public class ReplicacionController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Deshace la replicación: deja el grupo sin subgrupos y devuelve el parte (Bloque S140).
+     *
+     * <p><b>{@code 200} con parte VACÍO si el grupo ya está pelado</b>, no 404 ni 409: el
+     * {@code DELETE} es idempotente y llamarlo dos veces no puede ser un error. El 404 queda
+     * para lo único que sí lo es, que el grupo no exista.
+     *
+     * <p>No traduce {@link IllegalArgumentException}: el deshacer no valida cuerpo alguno —no
+     * lo tiene—, así que un 400 por esta ruta no describiría nada que el cliente pueda
+     * corregir. Las dos que sí lanza el servicio siguen traduciéndose por TIPO, igual que en
+     * las otras dos rutas.
+     */
+    @DeleteMapping
+    public ParteDeshacerDTO deshacer(@PathVariable("id") Long id) {
+        try {
+            return service.deshacer(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ReferenciaEntranteException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
 }

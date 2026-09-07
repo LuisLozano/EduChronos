@@ -8,9 +8,12 @@ import es.yaroki.educhronos.app.catalog.Plaza;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TipoGrupo;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.AsignacionRequest;
 import es.yaroki.educhronos.app.web.dto.BloqueDTO;
+import es.yaroki.educhronos.app.web.dto.ParteDeshacerDTO;
 import es.yaroki.educhronos.app.web.dto.PlanReplicacionDTO;
+import es.yaroki.educhronos.app.web.dto.PlazaDescableadaDTO;
 import es.yaroki.educhronos.app.web.dto.ReplicacionRequest;
 import es.yaroki.educhronos.app.web.dto.ViaDTO;
 import java.util.ArrayList;
@@ -31,6 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
  * mismo nivel —sus subgrupos y el cableado de esos subgrupos a las plazas de los bloques—,
  * en vez de teclear a mano las decenas de altas que eso supone (medido: replicar {@code 1ºA}
  * toca 12 actividades; {@code 4ºA}, otras 12).
+ *
+ * <p><b>Y el gesto inverso (Bloque S140, C-alta-reversible):</b> {@link #deshacer} deja el grupo
+ * DESNUDO otra vez, para poder replicar de otro hermano sin desmontar a mano lo que el alta
+ * cableó. No es el espejo del alta y no lo pretende —la decisión de reparto no se persiste, así
+ * que no hay nada que revertir—: lee el estado y lo suelta. El porqué, en su Javadoc.
  *
  * <p><b>Vocabulario, y es todo el algoritmo.</b>
  * <ul>
@@ -125,6 +133,232 @@ public class ReplicacionService {
         cablearReplicados(analisis, espejos);
         cablearReparto(analisis, espejos, decisiones);
         return aPlan(analisis);
+    }
+
+    /**
+     * Deja el grupo DESNUDO en UNA transacción: le quita todos sus subgrupos de cuantas plazas
+     * los lleven y después los borra. Devuelve el parte de lo hecho.
+     *
+     * <p><b>No revierte "la última replicación": no hay nada persistido que la identifique.</b>
+     * El alta no deja rastro de qué creó —ni marca en {@code subgrupo}, ni tabla de operaciones—,
+     * así que "lo que hizo aquel POST" no es una pregunta que la base pueda responder. Lo que
+     * este método sabe contestar es otra: qué subgrupos tiene HOY este grupo. Los borra todos.
+     * Si alguien replicó y luego editó a mano —añadió un optativo, movió un espejo de vía—, esa
+     * edición se pierde con lo demás.
+     *
+     * <p>Es correcto para el escenario que motiva el gesto —septiembre: se replica, se mira, no
+     * cuadra, se deshace y se vuelve a replicar de otro hermano— y es exactamente por eso que
+     * vive en un sub-recurso NOMBRADO y no en el {@code DELETE} del grupo: quien escribe
+     * {@code DELETE /api/grupos/{id}/replicacion} está pidiendo pelar el grupo, no quitar el
+     * último cambio.
+     *
+     * <p><b>El deshacer NO es el espejo del alta, y esa es la trampa.</b> {@link #cablearReparto}
+     * eligió la vía con un mapa que venía del CUERPO del POST y que no se persiste: la decisión
+     * no se puede recomputar. Así que aquí no se reconstruye nada — se LEE el estado, buscando
+     * el ESPEJO en las plazas en vez del original. Una sola travesía, idéntica para los bloques
+     * replicados y para los de reparto, que es lo que hace que la asimetría no importe.
+     *
+     * <p>Orden: resolver, las tres guardas, y solo entonces escribir. {@link NoSuchElementException}
+     * (→ 404) si el grupo no existe; {@link ReferenciaEntranteException} (→ 409) si algún
+     * subgrupo no es exclusivo del grupo o si alguna actividad afectada tiene dependientes.
+     */
+    @Transactional
+    public ParteDeshacerDTO deshacer(Long id) {
+        GrupoAdministrativo grupo = grupoRepositorio.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No existe grupo con id " + id));
+
+        // (a) Los subgrupos del grupo, con el MISMO barrido que usa el alta sobre el hermano.
+        List<Subgrupo> propios = subgruposDe(grupo);
+        if (propios.isEmpty()) {
+            return new ParteDeshacerDTO(grupo.getCodigo(), List.of(), List.of());
+        }
+        exigirSubgruposExclusivos(grupo, propios);                                  // (b) G2
+
+        List<Actividad> actividades = actividadRepositorio.findConPoblacionPorGrupo(
+                grupo.getCodigo());
+        for (Actividad actividad : actividades) {                                   // (c) G3
+            actividadService.exigirSinDependientes(actividad.getId(), "deshacer");
+        }
+        List<Plaza> plazas = plazasDe(actividades);
+        List<Retirada> retiradas = planificarRetiradas(plazas, propios);
+        exigirNingunaPlazaVacia(plazas, retiradas);                                 // (d) G4
+
+        // ---- (e) a partir de aquí, escritura; ya no puede fallar por validación.
+        // El parte se arma ANTES de tocar nada: después, los subgrupos están borrados y las
+        // plazas ya no los llevan, así que no habría de dónde leerlo.
+        ParteDeshacerDTO parte = aParte(grupo, propios, retiradas);
+        for (Retirada retirada : retiradas) {
+            retirada.plaza().quitarSubgrupo(retirada.subgrupo());
+        }
+        // El flush separa soltar las filas de plaza_subgrupo de borrar los subgrupos, porque
+        // plaza_subgrupo.subgrupo_id es NO ACTION en schema.sql (no está entre las siete
+        // cascadas) y con foreign_keys=ON el borrado mordería. MEDIDO en S140: quitarlo NO
+        // rompe ningún test — Hibernate ya emite las actualizaciones de colección antes que
+        // los borrados de entidad, así que hoy el orden sale bien solo. Se deja porque
+        // depender de ese orden implícito es exactamente lo que costó la lección de S73, y
+        // porque PdcService.borrar —donde sí hace falta, al borrar además el grupo— lo
+        // escribe igual: dos deshaceres que se leen distinto invitan a cambiar el que no
+        // "hace falta".
+        actividadRepositorio.saveAll(actividades);
+        actividadRepositorio.flush();
+        propios.forEach(subgrupoRepositorio::delete);
+        return parte;
+    }
+
+    // ─────────────────────────────────────────────────────────── guardas del deshacer
+
+    /**
+     * G2: cada subgrupo del grupo tiene EXACTAMENTE UN grupo asociado (a) y ese grupo es el
+     * que se está pelando (b). Si no, 409 nombrando el subgrupo: un subgrupo compartido con
+     * otro grupo —la "Lectura B" de Bachillerato, cuyos alumnos vienen de varios grupos del
+     * nivel— no es población que este grupo posea, y borrarlo se llevaría por delante a los
+     * demás.
+     *
+     * <p><b>Las dos comprobaciones se escriben aunque (b) sea hoy inalcanzable.</b> Lo es
+     * porque {@link #subgruposDe} ya filtra por "contiene a este grupo", así que un subgrupo
+     * con un solo grupo tiene forzosamente ESE. Escribir solo (a) es lo que convertiría la
+     * regla en un accidente del filtro: el día que la resolución de los subgrupos cambie —por
+     * código derivado, pongamos, en vez de por asociación— (b) deja de ser redundante y es la
+     * única que impide borrar el subgrupo de otro. Es el defecto que S139 introdujo al pasar
+     * del contrato al guion, y no se repite.
+     *
+     * <p>El conteo del 409 nunca puede salir 0 —lo que reventaría en el ctor de
+     * {@link ReferenciaEntranteException}— y no por suerte: si (a) falla es porque hay ≥2
+     * grupos y uno es el propio, luego ≥1 ajeno; si (b) fallara, el único grupo sería el ajeno.
+     */
+    private static void exigirSubgruposExclusivos(GrupoAdministrativo grupo,
+                                                  List<Subgrupo> propios) {
+        for (Subgrupo subgrupo : propios) {
+            Set<GrupoAdministrativo> grupos = subgrupo.getGrupos();
+            long ajenos = grupos.stream()
+                    .filter(g -> !g.getId().equals(grupo.getId()))
+                    .count();
+            if (grupos.size() != 1) {
+                throw compartido(grupo, subgrupo, ajenos);      // (a) exactamente uno
+            }
+            if (!grupos.iterator().next().getId().equals(grupo.getId())) {
+                throw compartido(grupo, subgrupo, ajenos);      // (b) y es el nuestro
+            }
+        }
+    }
+
+    /** El 409 de G2, con el subgrupo nombrado y el número de grupos ajenos que lo retienen. */
+    private static ReferenciaEntranteException compartido(GrupoAdministrativo grupo,
+                                                          Subgrupo subgrupo, long ajenos) {
+        return new ReferenciaEntranteException(
+                List.of(new Referencia("grupo(s) ajeno(s) a " + grupo.getCodigo()
+                        + " en el subgrupo " + subgrupo.getCodigo(), ajenos)),
+                "deshacer");
+    }
+
+    /**
+     * G4: ninguna plaza puede quedar con CERO subgrupos. <b>No es una guarda de negocio: es un
+     * ASERTO DE PRODUCCIÓN.</b> Una plaza sin población no describe nada —el solver no sabría a
+     * quién sentar en ella— y ningún flujo del catálogo puede producirla.
+     *
+     * <p>Que dispare significa que el razonamiento de este método es falso, no que el usuario
+     * haya pedido algo ilegal, y por eso lanza {@link IllegalStateException} —que sale como 500
+     * y se ve— en vez de un 4xx que lo presentaría como un caso de uso previsible. Se evalúa
+     * ANTES de escribir, sobre la resta simulada, para que el aserto no deje media transacción
+     * hecha si alguna vez se cumple.
+     *
+     * <p>Hoy no puede dispararse: una plaza en la que hay un espejo del grupo lleva también, por
+     * construcción del alta, al subgrupo original del hermano, que no es del grupo y sobrevive.
+     * Lo que lo haría cierto sería un catálogo editado a mano hasta dejar una plaza poblada solo
+     * por este grupo — y ahí se quiere ruido, no silencio.
+     */
+    private static void exigirNingunaPlazaVacia(List<Plaza> plazas, List<Retirada> retiradas) {
+        Map<Long, Long> aQuitar = new LinkedHashMap<>();
+        for (Retirada retirada : retiradas) {
+            aQuitar.merge(retirada.plaza().getId(), 1L, Long::sum);
+        }
+        for (Plaza plaza : plazas) {
+            long quedan = plaza.getSubgrupos().size() - aQuitar.getOrDefault(plaza.getId(), 0L);
+            if (quedan <= 0) {
+                throw new IllegalStateException(
+                        "Deshacer dejaria SIN SUBGRUPOS la plaza con id " + plaza.getId()
+                                + " (" + plaza.getCodigo() + ", actividad "
+                                + plaza.getActividad().getCodigo() + "): una plaza sin"
+                                + " poblacion no describe nada y ningun flujo puede producirla");
+            }
+        }
+    }
+
+    // ───────────────────────────────────────────────────────── travesía del deshacer
+
+    /**
+     * Las plazas de esas actividades, DEDUPLICADAS por id.
+     *
+     * <p><b>Hace falta: {@code Actividad.plazas} es un {@code List} y
+     * {@code findConPoblacionPorGrupo} le hace {@code left join fetch} de {@code p.subgrupos}.</b>
+     * Una colección-bolsa fetch-joineada recibe una entrada por FILA del producto cartesiano, y
+     * el {@code distinct} del HQL solo desduplica la raíz: {@code getPlazas()} devuelve la misma
+     * plaza repetida tantas veces como subgrupos tenga. Medido en el fixture de S140: la plaza
+     * de dos subgrupos salía tres veces tras replicar, y la resta de G4 daba 0 sobre una plaza
+     * que en realidad conserva dos.
+     *
+     * <p>Se desduplica AQUÍ y no en la consulta —que es de S139 y la comparten el GET y el
+     * POST— porque cambiarla es tocar un fichero fuera de este bloque.
+     */
+    private static List<Plaza> plazasDe(List<Actividad> actividades) {
+        Map<Long, Plaza> porId = new LinkedHashMap<>();
+        for (Actividad actividad : actividades) {
+            for (Plaza plaza : actividad.getPlazas()) {
+                porId.putIfAbsent(plaza.getId(), plaza);
+            }
+        }
+        return List.copyOf(porId.values());
+    }
+
+    /**
+     * La travesía ÚNICA: por cada plaza que toca al grupo, qué subgrupos de los suyos hay que
+     * soltar. No distingue bloque replicado de bloque de reparto ni mira cuántas plazas tiene
+     * la actividad — busca el ESPEJO, y donde esté, sale.
+     *
+     * <p>{@code List.copyOf} del conjunto antes de recorrerlo, por la misma razón que
+     * {@link #cablearReplicados}: la colección se muta después sobre las mismas plazas.
+     *
+     * <p>El emparejamiento va por CÓDIGO y no por identidad de objeto aunque las dos consultas
+     * compartan contexto de persistencia: el código de subgrupo es único en el esquema, así que
+     * es una clave tan buena como el id y no depende de que las dos lecturas devuelvan la misma
+     * instancia.
+     *
+     * <p>Se ordena por (actividad, plaza, subgrupo) para que el parte sea estable entre
+     * llamadas: el orden de {@code Set} no lo es, y un parte que baraje sus filas es difícil
+     * de comparar contra el anterior.
+     */
+    private static List<Retirada> planificarRetiradas(List<Plaza> plazas, List<Subgrupo> propios) {
+        Map<String, Subgrupo> porCodigo = new LinkedHashMap<>();
+        propios.forEach(subgrupo -> porCodigo.put(subgrupo.getCodigo(), subgrupo));
+
+        List<Retirada> retiradas = new ArrayList<>();
+        for (Plaza plaza : plazas) {
+            for (Subgrupo presente : List.copyOf(plaza.getSubgrupos())) {
+                Subgrupo propio = porCodigo.get(presente.getCodigo());
+                if (propio != null) {
+                    retiradas.add(new Retirada(plaza, propio));
+                }
+            }
+        }
+        retiradas.sort(Comparator
+                .comparing((Retirada r) -> r.plaza().getActividad().getCodigo())
+                .thenComparing(r -> r.plaza().getCodigo())
+                .thenComparing(r -> r.subgrupo().getCodigo()));
+        return retiradas;
+    }
+
+    private static ParteDeshacerDTO aParte(GrupoAdministrativo grupo, List<Subgrupo> propios,
+                                           List<Retirada> retiradas) {
+        return new ParteDeshacerDTO(
+                grupo.getCodigo(),
+                propios.stream().map(Subgrupo::getCodigo).toList(),
+                retiradas.stream()
+                        .map(r -> new PlazaDescableadaDTO(
+                                r.plaza().getId(),
+                                r.plaza().getCodigo(),
+                                r.plaza().getActividad().getCodigo(),
+                                r.subgrupo().getCodigo()))
+                        .toList());
     }
 
     // ───────────────────────────────────────────────────────── análisis y validación
@@ -403,6 +637,13 @@ public class ReplicacionService {
 
     /** Un bloque ya clasificado: la actividad y si todas sus vías cubren el mismo U. */
     private record Bloque(Actividad actividad, boolean replicado) { }
+
+    /**
+     * Una retirada pendiente del deshacer: el {@code subgrupo} sale de la {@code plaza}. La
+     * actividad no se guarda aparte —{@code plaza.getActividad()} la da, y ya está cargada en
+     * el contexto— para que no haya dos respuestas posibles a de qué actividad es la plaza.
+     */
+    private record Retirada(Plaza plaza, Subgrupo subgrupo) { }
 
     /**
      * Dónde puede aterrizar UN espejo: las actividades de reparto en las que participa su

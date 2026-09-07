@@ -1,7 +1,10 @@
 package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,6 +30,7 @@ import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
@@ -46,6 +50,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * </ul>
  * El hermano es {@code 1ºA} y el grupo nuevo {@code 1ºE}; {@code 1ºB} existe solo para que U
  * tenga más de un elemento y la distinción replicado/reparto sea observable.
+ *
+ * <p>El mismo fixture sirve al DELETE (Bloque S140, C-alta-reversible, T12–T18) sin tocarlo:
+ * lo que el deshacer necesita medir es que el POST se pueda revertir sobre las tres formas a
+ * la vez, y el {@code -Completo} sin plazas —el caso que descuadra el parte— ya está ahí.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -316,6 +324,160 @@ class ReplicacionEndpointTest {
         assertThat(subgrupoRepository.count()).isEqualTo(antes);
     }
 
+    // ────────────────────────────────────────────────────────── deshacer (S140)
+
+    /**
+     * (T12) Ciclo POST → DELETE: las TRES tablas que la replicación toca —{@code subgrupo},
+     * {@code subgrupo_grupo} y {@code plaza_subgrupo}— vuelven al recuento EXACTO que tenían
+     * antes del POST. Las tres y no solo la primera: borrar los subgrupos sin soltarlos de las
+     * plazas dejaría filas en {@code plaza_subgrupo} —y con {@code foreign_keys=ON} ni siquiera
+     * llegaría, porque esa FK es NO ACTION—, y soltarlos sin borrarlos dejaría subgrupos
+     * huérfanos con su fila de población viva.
+     *
+     * <p>Las aserciones intermedias existen para que el test no pueda pasar en vacío: si el
+     * POST dejara de escribir, el "vuelve a como estaba" sería cierto por no haber hecho nada.
+     */
+    @Test
+    void t12_cicloPostDelete_devuelveLasTresTablasASuRecuentoPrevio() throws Exception {
+        long subgruposAntes = contar("subgrupo");
+        long poblacionAntes = contar("subgrupo_grupo");
+        long cableadoAntes = contar("plaza_subgrupo");
+
+        replicar(asignacion("1ºE-Rep", repP1Id));
+        assertThat(contar("subgrupo")).isGreaterThan(subgruposAntes);
+        assertThat(contar("subgrupo_grupo")).isGreaterThan(poblacionAntes);
+        assertThat(contar("plaza_subgrupo")).isGreaterThan(cableadoAntes);
+
+        deshacer().andExpect(status().isOk());
+
+        assertThat(contar("subgrupo")).isEqualTo(subgruposAntes);
+        assertThat(contar("subgrupo_grupo")).isEqualTo(poblacionAntes);
+        assertThat(contar("plaza_subgrupo")).isEqualTo(cableadoAntes);
+    }
+
+    /**
+     * (T13) El parte nombra CUATRO subgrupos borrados y solo TRES descableados, y esa
+     * diferencia es el punto: el espejo del {@code -Completo} nace sin plazas (la actividad de
+     * una sola plaza no se toca), así que se borra sin soltar nada. Cae si el parte se deriva
+     * de las plazas —perdería el {@code -Completo}— o si cuenta subgrupos en vez de PARES
+     * (plaza, subgrupo).
+     */
+    @Test
+    void t13_elParteListaLosPares_yNoCoincideConLosSubgruposBorrados() throws Exception {
+        replicar(asignacion("1ºE-Rep", repP1Id));
+
+        deshacer()
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.grupo").value("1ºE"))
+                .andExpect(jsonPath("$.subgruposBorrados", containsInAnyOrder(
+                        "1ºE-Completo", "1ºE-Opt1", "1ºE-Opt2", "1ºE-Rep")))
+                .andExpect(jsonPath("$.plazasDescableadas", hasSize(3)))
+                .andExpect(jsonPath("$.plazasDescableadas[*].subgrupo", containsInAnyOrder(
+                        "1ºE-Opt1", "1ºE-Opt2", "1ºE-Rep")))
+                .andExpect(jsonPath("$.plazasDescableadas[*].actividad", containsInAnyOrder(
+                        "BLOQ-REPL", "BLOQ-REPL", "BLOQ-REP")));
+    }
+
+    /**
+     * (T14) G2(a): un subgrupo del grupo que además pertenece a OTRO grupo → 409 y CERO
+     * borrados. No es población que este grupo posea —el caso real es la "Lectura B" de
+     * Bachillerato, con alumnos de varios grupos del nivel— y borrarlo se llevaría por delante
+     * al otro. Cae si la guarda no mira cuántos grupos tiene cada subgrupo.
+     */
+    @Test
+    void t14_subgrupoCompartidoConOtroGrupo_409YCeroBorrados() throws Exception {
+        replicar(asignacion("1ºE-Rep", repP1Id));
+        long subgruposAntes = contar("subgrupo");
+        long cableadoAntes = contar("plaza_subgrupo");
+
+        Subgrupo opt1 = subgrupoRepository.findByCodigo("1ºE-Opt1").orElseThrow();
+        opt1.actualizar(opt1.getCodigo(), Set.of(
+                grupoRepository.findByCodigo("1ºE").orElseThrow(),
+                grupoRepository.findByCodigo("1ºB").orElseThrow()));
+        subgrupoRepository.save(opt1);
+        entityManager.flush();
+        entityManager.clear();
+
+        deshacer().andExpect(status().isConflict());
+        entityManager.clear();
+
+        assertThat(contar("subgrupo")).isEqualTo(subgruposAntes);
+        assertThat(contar("plaza_subgrupo")).isEqualTo(cableadoAntes);
+    }
+
+    /**
+     * (T15) G3: una actividad afectada con una fila en {@code sesion} → 409 y CERO borrados. Es
+     * la misma guarda ROMA del alta y por la misma razón: si el catálogo del grupo se va a
+     * mover, un horario generado sobre él deja de describir lo que hay. Cae si el deshacer no
+     * llama a {@code exigirSinDependientes} antes de escribir.
+     */
+    @Test
+    void t15_actividadAfectadaConSesion_409YCeroBorrados() throws Exception {
+        replicar(asignacion("1ºE-Rep", repP1Id));
+        long subgruposAntes = contar("subgrupo");
+        long cableadoAntes = contar("plaza_subgrupo");
+        sembrarSesionSobre(replP1Id);
+
+        deshacer().andExpect(status().isConflict());
+        entityManager.clear();
+
+        assertThat(contar("subgrupo")).isEqualTo(subgruposAntes);
+        assertThat(contar("plaza_subgrupo")).isEqualTo(cableadoAntes);
+    }
+
+    /**
+     * (T16) G4: una plaza cuya ÚNICA población es un subgrupo del grupo hace reventar el
+     * deshacer con {@link IllegalStateException} nombrando la plaza, en vez de dejarla sin
+     * subgrupos. Es un ASERTO DE PRODUCCIÓN, no una regla de negocio, y por eso se asevera
+     * contra el servicio y no por la red: un 500 es exactamente lo que debe verse.
+     *
+     * <p>El estado se monta a mano porque la replicación no puede producirlo: toda plaza donde
+     * entra un espejo lleva ya al original del hermano, que sobrevive al borrado.
+     */
+    @Test
+    void t16_plazaQueQuedariaSinSubgrupos_revientaConAsertoYNombraLaPlaza() {
+        GrupoAdministrativo nuevo = grupoRepository.findById(nuevoId).orElseThrow();
+        Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
+        Aula aula = aulaRepository.findByCodigo("A1").orElseThrow();
+
+        Actividad solo = new Actividad("ACT-SOLO", mat, 1, 1, PatronTemporal.NEUTRA, false);
+        Plaza plaza = solo.agregarPlaza("ACT-SOLO-P1", mat, aula, Set.of(), Set.of(),
+                Set.of(sub("1ºE-Solo", nuevo)));
+        actividadRepository.save(solo);
+        entityManager.flush();
+        long plazaId = plaza.getId();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> service.deshacer(nuevoId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(String.valueOf(plazaId))
+                .hasMessageContaining("ACT-SOLO");
+    }
+
+    /**
+     * (T17) El DELETE es IDEMPOTENTE: sobre un grupo ya pelado devuelve 200 con el parte vacío,
+     * no 404 ni 409. Llamarlo dos veces no puede ser un error, y el 404 se reserva para lo
+     * único que sí lo es (que el grupo no exista, T18).
+     */
+    @Test
+    void t17_segundoDelete_200ConParteVacio() throws Exception {
+        replicar(asignacion("1ºE-Rep", repP1Id));
+        deshacer().andExpect(status().isOk());
+
+        deshacer()
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.grupo").value("1ºE"))
+                .andExpect(jsonPath("$.subgruposBorrados").isEmpty())
+                .andExpect(jsonPath("$.plazasDescableadas").isEmpty());
+    }
+
+    /** (T18) Un id de grupo inexistente → 404, que es el único 404 que este DELETE produce. */
+    @Test
+    void t18_grupoInexistente_404() throws Exception {
+        mockMvc.perform(delete("/api/grupos/999999/replicacion"))
+                .andExpect(status().isNotFound());
+    }
+
     // ──────────────────────────────────────────────────────────────────────── helpers
 
     /**
@@ -354,6 +516,26 @@ class ReplicacionEndpointTest {
                 .andExpect(status().isCreated());
         entityManager.flush();
         entityManager.clear();
+    }
+
+    /** DELETE del sub-recurso, seguido de flush+clear para leer la base y no la sesión. */
+    private ResultActions deshacer() throws Exception {
+        ResultActions resultado = mockMvc.perform(
+                delete("/api/grupos/" + nuevoId + "/replicacion"));
+        entityManager.flush();
+        entityManager.clear();
+        return resultado;
+    }
+
+    /**
+     * Filas de una tabla, contadas por SQL nativo. Las tres que importan al deshacer
+     * ({@code subgrupo_grupo}, {@code plaza_subgrupo}) son join tables sin entidad propia: no
+     * hay repositorio que las cuente y el {@code count()} de JPA no las ve.
+     */
+    private long contar(String tabla) {
+        return ((Number) entityManager.getEntityManager()
+                .createNativeQuery("select count(*) from " + tabla)
+                .getSingleResult()).longValue();
     }
 
     private static String body(String... asignaciones) {

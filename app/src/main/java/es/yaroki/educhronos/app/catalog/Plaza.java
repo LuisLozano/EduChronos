@@ -114,6 +114,25 @@ public class Plaza {
         this.subgrupos.add(subgrupo);
     }
 
+    /**
+     * Quita UN subgrupo de la población de la plaza, sobre la colección VIVA (Bloque S140,
+     * C-alta-reversible). Simétrico de {@link #agregarSubgrupo} y por la misma razón: sin él,
+     * retirar un subgrupo obligaba a pasar por {@link #actualizar}, que REEMPLAZA los cinco
+     * campos de contenido a la vez y exige releer los otros cuatro para tocar uno.
+     *
+     * <p>{@code remove} sobre el conjunto gestionado, NO {@code this.subgrupos = ...}: cambiar
+     * la referencia de una colección que Hibernate ya vigila le obliga a rehacerla entera, y
+     * aquí lo que ocurre es exactamente una fila MENOS en {@code plaza_subgrupo}. Idempotente
+     * por ser {@code Set}: quitar lo que no está no es un error.
+     *
+     * <p>NO comprueba que quede al menos un subgrupo. Esa es una regla del catálogo, no de la
+     * fila: quien la necesita es {@code ReplicacionService.deshacer}, que la hace cumplir sobre
+     * el conjunto entero de retiradas ANTES de ejecutar ninguna.
+     */
+    public void quitarSubgrupo(Subgrupo subgrupo) {
+        this.subgrupos.remove(subgrupo);
+    }
+
     public Long getId() {
         return id;
     }
