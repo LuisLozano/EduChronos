@@ -294,7 +294,53 @@ class ReplicacionEndpointTest {
         assertThat(subgrupoRepository.count()).isEqualTo(antes);
     }
 
+    /**
+     * (T11) Con DOS bloques de reparto distintos tocando al hermano, una asignación que nombra
+     * el espejo de un subgrupo de A y una vía de B → 400 y CERO subgrupos creados. La otra
+     * asignación del cuerpo es correcta, así que el único motivo posible del rechazo es el
+     * cruce: cae si la comprobación se relaja a "pertenece a algún bloque de reparto", que era
+     * el comportamiento anterior y dejaba al grupo nuevo entrando por una vía de otra actividad.
+     */
+    @Test
+    void t11_plazaDeOtroBloqueDeReparto_400YCeroEscrituras() throws Exception {
+        long[] viasB = segundoBloqueDeReparto();
+        long antes = subgrupoRepository.count();
+
+        mockMvc.perform(post("/api/grupos/" + nuevoId + "/replicacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body(asignacion("1ºE-Rep", viasB[0]),      // espejo de A → vía de B
+                                asignacion("1ºE-Rep2", viasB[0]))))         // ésta sí es correcta
+                .andExpect(status().isBadRequest());
+        entityManager.clear();
+
+        assertThat(subgrupoRepository.count()).isEqualTo(antes);
+    }
+
     // ──────────────────────────────────────────────────────────────────────── helpers
+
+    /**
+     * Un SEGUNDO bloque de reparto ({@code BLOQ-REP2}) que también toca al hermano, montado
+     * dentro del test que lo necesita y no en {@link #setUp}: sumarlo al fixture común obligaría
+     * a todos los demás POST a traer una asignación más, y lo que ellos miden no es esto.
+     * Devuelve los ids de sus dos vías.
+     */
+    private long[] segundoBloqueDeReparto() {
+        GrupoAdministrativo hermano = grupoRepository.findByCodigo("1ºA").orElseThrow();
+        GrupoAdministrativo otro = grupoRepository.findByCodigo("1ºB").orElseThrow();
+        Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
+        Aula aula = aulaRepository.findByCodigo("A1").orElseThrow();
+
+        Actividad rep2 = new Actividad("BLOQ-REP2", null, 1, 1, PatronTemporal.NEUTRA, false);
+        Plaza p1 = rep2.agregarPlaza("BLOQ-REP2-P1", mat, aula, Set.of(), Set.of(),
+                Set.of(sub("1ºA-Rep2", hermano)));
+        Plaza p2 = rep2.agregarPlaza("BLOQ-REP2-P2", mat, aula, Set.of(), Set.of(),
+                Set.of(sub("1ºB-Rep2", otro)));
+        actividadRepository.save(rep2);
+        entityManager.flush();
+        long[] vias = {p1.getId(), p2.getId()};
+        entityManager.clear();
+        return vias;
+    }
 
     private Subgrupo sub(String codigo, GrupoAdministrativo grupo) {
         return subgrupoRepository.save(new Subgrupo(codigo, Set.of(grupo)));

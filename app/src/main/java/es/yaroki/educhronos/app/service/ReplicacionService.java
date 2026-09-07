@@ -267,8 +267,8 @@ public class ReplicacionService {
      */
     private Map<String, Long> validarAsignaciones(Analisis analisis,
                                                   List<AsignacionRequest> asignaciones) {
-        Set<String> esperados = analisis.espejosDeReparto();
-        Set<Long> plazasValidas = analisis.plazasDeReparto();
+        Map<String, Destino> destinos = analisis.destinosDeReparto();
+        Set<String> esperados = destinos.keySet();
 
         Map<String, Long> decisiones = new LinkedHashMap<>();
         for (AsignacionRequest asignacion : asignaciones == null ? List.<AsignacionRequest>of()
@@ -289,11 +289,14 @@ public class ReplicacionService {
                 throw new IllegalArgumentException(
                         "El subgrupo " + espejo + " aparece en mas de una asignacion");
             }
+            Destino destino = destinos.get(espejo);
             Long plaza = asignacion.plaza();
-            if (plaza != null && !plazasValidas.contains(plaza)) {
+            if (plaza != null && !destino.plazas().contains(plaza)) {
                 throw new IllegalArgumentException(
-                        "La plaza con id " + plaza + " no pertenece a ningun bloque de reparto"
-                                + " que toque al hermano " + analisis.hermano().getCodigo());
+                        "La plaza con id " + plaza + " no pertenece a " + destino.nombrar()
+                                + ", que es donde participa el original de " + espejo
+                                + ": una asignacion solo puede elegir entre las vias de SU"
+                                + " propio bloque");
             }
             decisiones.put(espejo, plaza);
         }
@@ -402,6 +405,22 @@ public class ReplicacionService {
     private record Bloque(Actividad actividad, boolean replicado) { }
 
     /**
+     * Dónde puede aterrizar UN espejo: las actividades de reparto en las que participa su
+     * original y las vías de esas actividades. Es lo que convierte "pertenece a algún bloque de
+     * reparto" —que dejaba colar el espejo del bloque A en una vía del bloque B— en "pertenece
+     * al SUYO".
+     */
+    private record Destino(Set<String> actividades, Set<Long> plazas) {
+
+        /** La actividad esperada, para el mensaje del 400. */
+        String nombrar() {
+            return actividades.size() == 1
+                    ? "la actividad " + actividades.iterator().next()
+                    : "las actividades " + actividades;
+        }
+    }
+
+    /**
      * El estado derivado que comparten validación, escritura y proyección, calculado UNA vez.
      * Que sea inmutable y se pase entero es lo que garantiza que el plan que devuelve el POST
      * describe la misma clasificación sobre la que se ha escrito.
@@ -423,34 +442,41 @@ public class ReplicacionService {
             return ids;
         }
 
-        /** Códigos de espejo cuyo original participa en algún bloque de REPARTO. */
-        Set<String> espejosDeReparto() {
-            Set<String> codigos = new LinkedHashSet<>();
+        /**
+         * Por cada espejo que hay que asignar, DÓNDE puede ir: las actividades de reparto en
+         * las que participa su original y las vías de ESAS actividades, no las de cualquier
+         * bloque de reparto. Las claves son, por construcción, el conjunto exacto de espejos
+         * que el cuerpo debe nombrar.
+         *
+         * <p>El mapa se acumula en vez de asignarse porque un mismo subgrupo puede participar
+         * en más de una actividad (medido en el catálogo real: 50 de los 334 aparecen en dos).
+         * Hoy ninguno participa en dos bloques de REPARTO a la vez, así que cada destino tiene
+         * una sola actividad; si algún día lo hiciera, el modelo de "una asignación por espejo"
+         * se le quedaría corto —cablearía una vía y dejaría la otra muda— y esto al menos lo
+         * dejaría visible en el mensaje en vez de elegir una en silencio.
+         */
+        Map<String, Destino> destinosDeReparto() {
+            Map<String, Destino> destinos = new LinkedHashMap<>();
             for (Bloque bloque : bloques) {
                 if (bloque.replicado()) {
                     continue;
                 }
+                Set<Long> vias = new LinkedHashSet<>();
+                bloque.actividad().getPlazas().forEach(p -> vias.add(p.getId()));
                 for (Plaza plaza : bloque.actividad().getPlazas()) {
                     for (Subgrupo subgrupo : plaza.getSubgrupos()) {
                         String espejo = espejoPorOriginal.get(subgrupo.getCodigo());
-                        if (espejo != null) {
-                            codigos.add(espejo);
+                        if (espejo == null) {
+                            continue;
                         }
+                        Destino destino = destinos.computeIfAbsent(espejo,
+                                clave -> new Destino(new LinkedHashSet<>(), new LinkedHashSet<>()));
+                        destino.actividades().add(bloque.actividad().getCodigo());
+                        destino.plazas().addAll(vias);
                     }
                 }
             }
-            return codigos;
-        }
-
-        /** Ids de las plazas que una asignación puede nombrar: las de los bloques de reparto. */
-        Set<Long> plazasDeReparto() {
-            Set<Long> ids = new LinkedHashSet<>();
-            for (Bloque bloque : bloques) {
-                if (!bloque.replicado()) {
-                    bloque.actividad().getPlazas().forEach(p -> ids.add(p.getId()));
-                }
-            }
-            return ids;
+            return destinos;
         }
     }
 }
