@@ -12,23 +12,23 @@
 - L219 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
 - L469 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
 - L756 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." (ESBOZADO S115)
-- L826 — ### H1 — Ajustar (cierre)
-- L828 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
-- L842 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1133 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1325 — ## 4. Clasificación del trabajo pendiente
-- L1343 — ### Clasificación de las deudas vivas actuales
-- L1349 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1356 — #### Deuda técnica real, colgada de su objetivo
-- L1428 — #### Mejora futura, cuelga y espera
-- L1460 — #### Decisión arquitectónica consciente → sale de la cola
-- L1472 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1481 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1488 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1547 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1601 — ## 6. Reglas estratégicas
-- L1648 — ## 7. Métricas del sistema
-- L1669 — ## 8. El sistema respondiendo a las preguntas clave
+- L838 — ### H1 — Ajustar (cierre)
+- L840 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado."
+- L854 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1145 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1337 — ## 4. Clasificación del trabajo pendiente
+- L1355 — ### Clasificación de las deudas vivas actuales
+- L1361 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1368 — #### Deuda técnica real, colgada de su objetivo
+- L1441 — #### Mejora futura, cuelga y espera
+- L1473 — #### Decisión arquitectónica consciente → sale de la cola
+- L1485 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1494 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1501 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1560 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1614 — ## 6. Reglas estratégicas
+- L1661 — ## 7. Métricas del sistema
+- L1682 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -764,7 +764,8 @@ de las Fases 9–12.
   nada persistido.]** Sobre la base de referencia del centro y **SIN horario generado**,
   dar de alta por la interfaz un grupo ORDINARIO en un nivel con particiones densas
   (1º ESO o 4º ESO; NO un FPB, que no comparte partición con nadie) lo deja participando
-  en todas las actividades del nivel en las que participan sus hermanos, con tres
+  en todos los BLOQUES del nivel —las actividades de MÁS DE UNA PLAZA— en los que
+  participan sus hermanos, con tres
   condiciones verificadas POR CONSULTA y no por inspección visual:
   **(1) En los bloques de universo replicado la incorporación es AUTOMÁTICA:** cero
   decisiones del usuario y cero edición subgrupo a subgrupo. Son 29 de los 39 bloques.
@@ -783,6 +784,17 @@ de las Fases 9–12.
   protege la reconciliación posicional, así que no se toca); materializar `Particion`
   (ver el punto siguiente); y la gestión de los subgrupos `-ATED`/`-Rel` de los grupos PDC
   (`D-subgrupos-di-sin-api`), que el gesto de prueba no toca por ser de grupo ordinario.
+  **AÑADIDO en S139 tras medir, y con ello la cabecera de este criterio queda ESTRECHADA
+  a los bloques:** quedan también FUERA las actividades de UNA SOLA PLAZA —las materias
+  ordinarias del grupo, 180 de las 219 del centro—. Clonar en ellas el subgrupo del
+  hermano no replica al grupo nuevo: lo FUNDE con su hermano en la misma sesión y con el
+  mismo profesor. Lo que necesitan es una ACTIVIDAD NUEVA, con profesor, aula y carga que
+  no se deducen de ningún hermano —el mismo dato faltante que la matrícula—, y su vía es
+  el alta de actividad por UI, que existe desde S110. La cabecera anterior era más ancha
+  que las tres condiciones de abajo, que sólo hablan de los 39 bloques. **La frontera no
+  es una convención impuesta:** medido en S139, ninguno de los 28 subgrupos `-Completo`
+  toca una sola plaza de bloque (cero pares), y los de optatividad viven exclusivamente
+  en bloques.
 - **Depende de:** O-demo (necesita un centro real con particiones densas delante). Cuidado
   de ORDEN: la prueba se hace ANTES de generar, o después de que exista un borrado de
   horario; ampliar la población de un subgrupo toca actividades que quizá ya tengan
@@ -1424,6 +1436,7 @@ asigna categoría, objetivo y disposición.
 | D-borrado-pdc-integridad-500 (violación de FK latente al borrar un grupo PDC) | Sin sede | No | Nace en S138. `PdcService.borrar` guarda sólo por las plazas del `-Completo` y no mira los otros 18 subgrupos de `D-subgrupos-di-sin-api`. Reconstruido el escenario sobre COPIA con `foreign_keys=ON`: borrado el mono-Di y hecho `flush()`, quedan 2 filas de `subgrupo_grupo` apuntando al grupo, y el DELETE del PDC revienta con `FOREIGN KEY constraint failed`. **Medido en la capa SQL, NO en la respuesta HTTP**: lo que llega al usuario depende de cómo traduzca Spring esa `DataIntegrityViolationException`, y lo probable es un 500 donde debería haber un 409 modelado. **Hoy NO es alcanzable** —los cinco `-Completo` tienen 10 plazas cada uno, así que el 409 de plazas salta antes—, pero deja de serlo en cuanto un PDC se quede sin usar su tronco. Se registra con el escenario reconstruido para que quien lo pague no lo redescubra |
 | D-codigo-actividad-tilde (`EFis-4ºA+4ºADi` frente a `EFís-4ºD+4ºDDi`) | Transversal, con la sesión de Higiene/Método | No | Nace en S138 de paso. La misma asignatura aparece con y sin tilde en el código de dos actividades. `codigo` es UNIQUE, así que no rompe nada hoy; el daño es de ORDEN —ordena mal en cualquier listado— y sobre todo de DERIVACIÓN: el día que algo agrupe por prefijo de código, estas dos caen en cubos distintos sin que nada avise. Misma familia que la circularidad del mapa de códigos de grupo que S119 eliminó |
 | D-i3-sin-datos (la invariante I3 no está ejercitada por el centro completo) | Transversal, con la sesión de Higiene/Método | No | Nace en S138. `asignatura_aula_compatible` tiene **0 filas** en la base de referencia, luego la validación I3 de `ActividadService` (compatibilidad asignatura↔tipo de aula) no la ejercita ningún dato del centro real; sólo hay 84 filas de `plaza_aula_candidata`. Es la familia de `D-meta-invariantes-a-mano`: una invariante declarada viva que el juego de datos de referencia no toca, de modo que un fallo en ella no lo destaparía ninguna carga ni ninguna generación. No se decide aquí si el arreglo es poblar la tabla o retirar la invariante: eso es trabajo de su sesión |
+| D-javadoc-plazas-caducado (el javadoc de plazas describía una regeneración de códigos que la reconciliación no hace) | O-particiones | No | Nace y se PAGA en S139, en tres sedes: el javadoc de clase de `ActividadService` y el de `Actividad.actualizar`, ambos con un `{@link}` a `limpiarPlazas`, método que ya no existe —lo sustituyó `reconciliarPlazas`, que precisamente CONSERVA los códigos—, y la contradicción entre `PlazaRequest` («inestable entre ediciones») y el ctor de `Plaza` («ESTABLE: no cambia mientras la plaza sobreviva»). Se paga en el camino y no en Higiene porque MORDIÓ en su propia sesión: esa contradicción llevó a escribir en el contrato de `C-replicación-alta` que las decisiones nombraran plazas por código, y el contraste de M4 tuvo que corregirlo a `id`. Mismo argumento con que S137 pagó `D-catalogo-meta-enganosa`. **CERRADA** |
 
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
