@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -142,6 +143,33 @@ class ReplicacionEndpointTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reparto[*].actividad", containsInAnyOrder("BLOQ-REP")))
                 .andExpect(jsonPath("$.replicados[*].actividad", containsInAnyOrder("BLOQ-REPL")));
+    }
+
+    /**
+     * (T21) Cada vía nombra los ESPEJOS de los originales que contiene, y solo esos (Bloque
+     * S141). Es el enlace espejo → bloque sin el cual el plan no se puede decidir desde un
+     * cliente: {@code gruposActuales} nombra GRUPOS y {@code subgruposACrear} es la lista
+     * entera sin atar a ningún bloque, así que quien reciba el plan no sabría qué espejos
+     * cubre cada bloque de reparto —que es exactamente el conjunto que el {@code POST} exige
+     * cubrir sin sobrar ni faltar—.
+     *
+     * <p>Las dos mitades son la misma regla vista por sus dos caras y ninguna sobra: la vía
+     * {@code BLOQ-REP-P1} lleva {@code 1ºA-Rep}, del hermano, y nombra su espejo; la
+     * {@code -P2} lleva {@code 1ºB-Rep}, que no es del hermano, y va VACÍA. Cae si alguien
+     * proyecta los espejos del BLOQUE en todas sus vías —con lo que la pantalla ofrecería
+     * decidir sobre vías donde el original no está— o si los deriva de {@code gruposActuales},
+     * que no distingue qué subgrupo de ese grupo está en la plaza.
+     *
+     * <p>La tercera línea fija que el campo se rellena TAMBIÉN en los replicados, donde es
+     * informativo: sale del mismo camino de proyección y no de una rama condicional.
+     */
+    @Test
+    void t21_cadaViaNombraLosEspejosDeSusPropiosOriginales() throws Exception {
+        mockMvc.perform(get("/api/grupos/" + nuevoId + "/replicacion").param("hermano", "1ºA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reparto[0].vias[0].espejos", contains("1ºE-Rep")))
+                .andExpect(jsonPath("$.reparto[0].vias[1].espejos", hasSize(0)))
+                .andExpect(jsonPath("$.replicados[0].vias[0].espejos", contains("1ºE-Opt1")));
     }
 
     /**

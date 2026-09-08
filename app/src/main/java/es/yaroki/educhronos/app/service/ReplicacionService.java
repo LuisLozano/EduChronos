@@ -642,12 +642,15 @@ public class ReplicacionService {
                 analisis.hermano().getCodigo(),
                 List.copyOf(analisis.espejoPorOriginal().values()),
                 analisis.bloques().stream().filter(Bloque::replicado)
-                        .map(b -> aBloque(b, analisis.hermano())).toList(),
+                        .map(b -> aBloque(b, analisis.hermano(), analisis.espejoPorOriginal()))
+                        .toList(),
                 analisis.bloques().stream().filter(b -> !b.replicado())
-                        .map(b -> aBloque(b, analisis.hermano())).toList());
+                        .map(b -> aBloque(b, analisis.hermano(), analisis.espejoPorOriginal()))
+                        .toList());
     }
 
-    private static BloqueDTO aBloque(Bloque bloque, GrupoAdministrativo hermano) {
+    private static BloqueDTO aBloque(Bloque bloque, GrupoAdministrativo hermano,
+                                     Map<String, String> espejoPorOriginal) {
         List<ViaDTO> vias = bloque.plazas().stream()
                 .sorted(Comparator.comparing(Plaza::getCodigo))
                 .map(plaza -> new ViaDTO(
@@ -655,9 +658,42 @@ public class ReplicacionService {
                         plaza.getCodigo(),
                         plaza.getAsignatura().getCodigo(),
                         gruposDe(plaza).stream().sorted().toList(),
+                        espejosDe(plaza, espejoPorOriginal),
                         gruposDe(plaza).contains(hermano.getCodigo())))
                 .toList();
         return new BloqueDTO(bloque.actividad().getCodigo(), vias);
+    }
+
+    /**
+     * Los espejos cuyos ORIGINALES están en esta plaza, ordenados. Es la ÚNICA travesía de
+     * esa regla en la clase: la proyección ({@link #aBloque}) la usa para PUBLICAR qué
+     * espejos decide cada vía, y {@link Analisis#destinosDeReparto} la usa para calcular el
+     * conjunto que el cuerpo del POST debe cubrir.
+     *
+     * <p><b>Que la llamen las dos y no que se parezcan, es el punto.</b> S141 estuvo a punto
+     * de dejar aquí una segunda copia del bucle de {@code destinosDeReparto} atada solo por
+     * un javadoc, que es justo lo que S139 había fundido a propósito: si la lista de
+     * esperados y la de vías publicadas se calculan por separado, tocar una sin la otra deja
+     * a la pantalla componiendo peticiones que el servidor rechaza con un 400, y ningún test
+     * de una sola de las dos lo vería.
+     *
+     * <p>El mapa NO se puede recorrer en sentido contrario para obtener esto:
+     * {@code Destino.plazas()} son TODAS las vías del bloque, no aquellas donde está el
+     * original, así que invertirlo daría a cada vía los espejos del bloque entero. Esa
+     * asimetría es la razón de que la dirección de la derivación sea esta y no la otra.
+     *
+     * <p>Se ORDENA porque {@code getSubgrupos()} es un {@code HashSet} y su recorrido no es
+     * estable entre ejecuciones; sin esto el mismo plan saldría con las vías en distinto
+     * orden y ningún aserto sobre la lista podría ser una igualdad. De regalo, hace
+     * determinista el orden de claves de {@code destinosDeReparto}, y con él el de los
+     * subgrupos que el 400 de «falta la asignación» enumera.
+     */
+    private static List<String> espejosDe(Plaza plaza, Map<String, String> espejoPorOriginal) {
+        return plaza.getSubgrupos().stream()
+                .map(subgrupo -> espejoPorOriginal.get(subgrupo.getCodigo()))
+                .filter(espejo -> espejo != null)
+                .sorted()
+                .toList();
     }
 
     // ──────────────────────────────────────────────────────────────── tipos internos
@@ -739,11 +775,10 @@ public class ReplicacionService {
                 Set<Long> vias = new LinkedHashSet<>();
                 bloque.plazas().forEach(p -> vias.add(p.getId()));
                 for (Plaza plaza : bloque.plazas()) {
-                    for (Subgrupo subgrupo : plaza.getSubgrupos()) {
-                        String espejo = espejoPorOriginal.get(subgrupo.getCodigo());
-                        if (espejo == null) {
-                            continue;
-                        }
+                    // UNA sola travesía, la de espejosDe, y no una copia de ella aquí: es lo
+                    // que impide que el conjunto que este mapa EXIGE cubrir y el que el plan
+                    // PUBLICA se desalineen. Ver el javadoc del método.
+                    for (String espejo : espejosDe(plaza, espejoPorOriginal)) {
                         Destino destino = destinos.computeIfAbsent(espejo,
                                 clave -> new Destino(new LinkedHashSet<>(), new LinkedHashSet<>()));
                         destino.actividades().add(bloque.actividad().getCodigo());
