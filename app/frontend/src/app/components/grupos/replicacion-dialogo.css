@@ -1,0 +1,78 @@
+/* CAJA calcada de `actividad-form.css:1-8` y NO de `pdc-dialogo.css`: es el único
+   diálogo del proyecto con una lista de longitud variable dentro —tantos desplegables
+   como espejos de reparto, más el detalle de los replicados—, y el único que ya
+   resolvió el desbordamiento. Sin el `max-height`/`overflow-y`, un plan con muchas
+   decisiones crece hasta salirse de la ventana y deja las acciones fuera de alcance.
+   El CDK no aporta estilos: el diálogo pone los suyos. */
+.replicacion-dialogo {
+  padding: var(--e5);
+  min-width: 26rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--color-superficie);
+  border-radius: var(--radio-m);
+}
+
+.replicacion-dialogo__titulo {
+  margin: 0 0 var(--e4);
+}
+
+.replicacion-dialogo__subtitulo {
+  margin: var(--e5) 0 var(--e2);
+  font-size: var(--tam-m);
+}
+
+.replicacion-dialogo__cargando,
+.replicacion-dialogo__vacio,
+.replicacion-dialogo__intro,
+.replicacion-dialogo__resumen {
+  margin: 0 0 var(--e3);
+  font-size: var(--tam-m);
+}
+
+.replicacion-dialogo__nota {
+  margin: 0 0 var(--e4);
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+
+.replicacion-dialogo__campo {
+  display: block;
+  margin-bottom: var(--e4);
+}
+
+.replicacion-dialogo__etiqueta {
+  display: block;
+  margin-bottom: var(--e1);
+  font-size: var(--tam-s);
+}
+
+.replicacion-dialogo__input {
+  width: 100%;
+  padding: var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  box-sizing: border-box;
+}
+
+.replicacion-dialogo__replicados {
+  margin-bottom: var(--e4);
+}
+
+.replicacion-dialogo__lista {
+  margin: var(--e2) 0 0;
+  padding-left: var(--e5);
+  font-size: var(--tam-s);
+}
+
+.replicacion-dialogo__error-servidor {
+  color: var(--color-error);
+  margin: var(--e2) 0;
+}
+
+.replicacion-dialogo__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}

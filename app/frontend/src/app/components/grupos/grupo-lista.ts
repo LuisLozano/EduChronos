@@ -5,6 +5,7 @@ import { GrupoService } from '../../services/grupo.service';
 import { Grupo } from '../../models/grupo.model';
 import { GrupoForm } from './grupo-form';
 import { PdcDialogo } from './pdc-dialogo';
+import { ReplicacionDialogo } from './replicacion-dialogo';
 import { TutoriaDialogo } from './tutoria-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
@@ -36,15 +37,20 @@ const ETIQUETAS_TIPO = new Map<string, string>([
  * valor que no esté en el mapa se muestra TAL CUAL, para que un `VIRTUAL_OPTATIVA`
  * futuro se vea en vez de desaparecer.
  *
- * <p>TRES ACCIONES SOLO PARA LOS ORDINARIOS —Editar, Borrar y PDC—. Una fila
- * `DIVERSIFICACION_PDC` no ofrece ninguna de las tres, porque acabarían en un error que
+ * <p>CUATRO ACCIONES SOLO PARA LOS ORDINARIOS —Editar, Borrar, PDC y Replicar—. Una fila
+ * `DIVERSIFICACION_PDC` no ofrece ninguna de las cuatro, porque acabarían en un error que
  * el usuario no puede resolver: Editar da 400 (la guarda que impide degradar un PDC a
- * ordinario por el PUT plano), Borrar da 409 (su subgrupo mono-Di lo retiene) y PDC
- * daría 400 (el sub-recurso exige un padre ORDINARIO; un PDC no cuelga de otro PDC).
- * No se pierde ninguna capacidad al esconderlas: el backend NO tiene edición de PDC
- * —el sub-recurso es alta/consulta/borrado— y su borrado vive en el diálogo del PADRE,
- * que es desde donde se gestiona todo el ciclo. Un tipo DESCONOCIDO se trata como no
- * ordinario: sin esas tres acciones, que es el lado seguro.
+ * ordinario por el PUT plano), Borrar da 409 (su subgrupo mono-Di lo retiene), PDC
+ * daría 400 (el sub-recurso exige un padre ORDINARIO; un PDC no cuelga de otro PDC) y
+ * Replicar daría 400 (`ReplicacionService.analizar` exige que el grupo a poblar sea
+ * ORDINARIO). No se pierde ninguna capacidad al esconderlas: el backend NO tiene edición
+ * de PDC —el sub-recurso es alta/consulta/borrado— y su borrado vive en el diálogo del
+ * PADRE, que es desde donde se gestiona todo el ciclo. Un tipo DESCONOCIDO se trata como
+ * no ordinario: sin esas cuatro acciones, que es el lado seguro.
+ *
+ * <p>Que «Replicar» viva DENTRO de ese `@if` es, además, lo que hace inalcanzable una de
+ * las siete guardas que el sub-recurso traduce a un 400 indistinguible; el diálogo se
+ * apoya en ese recuento para interpretarlo, y su javadoc lo deja escrito.
  *
  * <p><b>Y UNA CUARTA, «Tutoría», EN TODAS LAS FILAS SIN EXCEPCIÓN.</b> Es la única que
  * queda FUERA del filtro por tipo, y no por descuido: un PDC HEREDA el
@@ -152,6 +158,30 @@ export class GrupoLista implements OnInit {
   protected pdc(grupo: Grupo): void {
     this.dialog
       .open<boolean, Grupo>(PdcDialogo, { data: grupo })
+      .closed.subscribe((cambiado) => {
+        if (cambiado === true) {
+          this.cargar();
+        }
+      });
+  }
+
+  /**
+   * Abre el diálogo de REPLICACIÓN de ESTA fila. El `data` es el grupo NUEVO, el que se
+   * va a poblar: el diálogo saca de él el id para sus tres llamadas, el código para
+   * titularse y el NIVEL para filtrar los hermanos que ofrece.
+   *
+   * <p>Recarga con la MISMA regla que {@link #pdc} y por el mismo motivo: el diálogo
+   * cierra con `true` tanto si replicó como si deshizo —en los dos casos han cambiado los
+   * subgrupos del grupo—, y con `false` si el usuario salió sin escribir. El `=== true`
+   * estricto no se relaja: `closed` emite `undefined` al cerrar por backdrop o Escape.
+   *
+   * <p>La tabla no pinta subgrupos, así que la recarga no repinta ninguna celda de HOY;
+   * se hace igual porque es la lista la que gobierna cuándo se vuelve a leer el catálogo,
+   * y dejarla con datos de antes de una escritura es el defecto que {@link #pdc} evita.
+   */
+  protected replicar(grupo: Grupo): void {
+    this.dialog
+      .open<boolean, Grupo>(ReplicacionDialogo, { data: grupo })
       .closed.subscribe((cambiado) => {
         if (cambiado === true) {
           this.cargar();

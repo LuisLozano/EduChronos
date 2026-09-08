@@ -191,24 +191,28 @@ describe('GrupoLista', () => {
     expect(raiz.textContent).not.toContain('ORDINARIO');
   });
 
-  it('(7) una fila ORDINARIO ofrece las tres acciones de ordinario MÁS la de tutoría', async () => {
+  it('(7) una fila ORDINARIO ofrece las cuatro acciones de ordinario MÁS la de tutoría', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
+    // Igualdad de la lista COMPLETA y EN ORDEN, no un `toContain` por botón: es lo que
+    // ata el orden de la celda al de la plantilla. «Replicar» entró en S141 junto a
+    // «PDC», dentro del mismo @if de ordinarios.
     const textos = acciones(0).map((b) => b.textContent!.trim());
-    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Tutoría']);
+    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Replicar', 'Tutoría']);
   });
 
   it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC ofrece SOLO la de tutoría', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
-    // Igualdad de la lista COMPLETA, que mide las dos reglas a la vez: Editar, Borrar y
-    // PDC acabarían aquí en un error que el usuario no puede resolver (400/409/400) y
-    // siguen ocultas —si alguien quita el @if, aparecen y este aserto cae—, mientras que
+    // Igualdad de la lista COMPLETA, que mide las dos reglas a la vez: Editar, Borrar,
+    // PDC y Replicar acabarían aquí en un error que el usuario no puede resolver
+    // (400/409/400/400) y siguen ocultas —si alguien quita el @if, aparecen y este
+    // aserto cae—, mientras que
     // «Tutoría» SÍ se pinta, porque este PDC pudo heredar el tutor de su padre.
     expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría']);
-    // La fila SIGUE pintándose: lo que se oculta son tres acciones, no el grupo.
+    // La fila SIGUE pintándose: lo que se oculta son cuatro acciones, no el grupo.
     expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(fixture.nativeElement.textContent).toContain('1ESOADI');
   });

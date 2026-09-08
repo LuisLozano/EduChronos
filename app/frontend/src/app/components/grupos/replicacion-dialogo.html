@@ -1,0 +1,224 @@
+<div class="replicacion-dialogo">
+  <h2 class="replicacion-dialogo__titulo">Replicar {{ grupo.codigo }}</h2>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="replicacion-dialogo__cargando">Cargando…</p>
+
+      <div class="replicacion-dialogo__acciones">
+        <button type="button" class="replicacion-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+      </div>
+    }
+
+    @case ('eligiendo') {
+      <p class="replicacion-dialogo__intro">
+        {{ grupo.codigo }} se poblará copiando la estructura de un hermano suyo de
+        {{ grupo.nivel }}: sus subgrupos y el cableado de esos subgrupos a las actividades.
+      </p>
+
+      <div class="replicacion-dialogo__campo">
+        <!-- `for`/`id` explícitos y no un <label> envolvente: el desplegable se etiqueta
+             por asociación, no por anidamiento (D-actividad-ux). -->
+        <label class="replicacion-dialogo__etiqueta" for="replicacion-hermano">
+          Replicar desde
+        </label>
+        <!-- Molde `horario-view.html:13`: <select> gobernado por señal y no por Reactive
+             Forms. Ver el javadoc de clase. -->
+        <select
+          id="replicacion-hermano"
+          class="replicacion-dialogo__input"
+          (change)="hermano.set($any($event.target).value)"
+        >
+          <option value="" disabled selected>— elige un hermano —</option>
+          @for (c of candidatos(); track c.id) {
+            <!-- El value es el CÓDIGO, nunca el id: el hermano viaja por código en el GET,
+                 y el value de un <select> vuelve como TEXTO. -->
+            <option [value]="c.codigo">{{ c.codigo }}</option>
+          }
+        </select>
+        @if (candidatos().length === 0) {
+          <p class="replicacion-dialogo__vacio">
+            No hay ningún otro grupo ordinario de {{ grupo.nivel }} del que copiar.
+          </p>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="replicacion-dialogo__error-servidor" role="alert">{{ error() }}</p>
+      }
+
+      <div class="replicacion-dialogo__acciones">
+        <button type="button" class="replicacion-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="replicacion-dialogo__ver accion-principal"
+          [disabled]="hermano() === ''"
+          (click)="verPlan()"
+        >
+          Ver el plan
+        </button>
+      </div>
+    }
+
+    @case ('decidiendo') {
+      @if (nadaQueCopiar()) {
+        <p class="replicacion-dialogo__vacio">
+          {{ plan()!.hermano }} no tiene todavía nada que copiar: ni subgrupos que
+          replicar ni actividades en las que meter a {{ grupo.codigo }}. Dale primero
+          subgrupos a {{ plan()!.hermano }} y vuelve.
+        </p>
+      } @else {
+        @if (plan()!.subgruposACrear.length > 0) {
+          <p class="replicacion-dialogo__resumen">
+            Se crearán {{ plan()!.subgruposACrear.length }} subgrupo(s) en
+            {{ grupo.codigo }}, copiados de {{ plan()!.hermano }}.
+          </p>
+        }
+
+        @if (plan()!.replicados.length > 0) {
+          <div class="replicacion-dialogo__replicados">
+            <p class="replicacion-dialogo__resumen">
+              {{ plan()!.replicados.length }} bloque(s) se incorporan solos: no hay nada
+              que decidir en ellos.
+            </p>
+            <!-- PLEGADO de entrada, y el detalle NO existe en el DOM hasta desplegarlo:
+                 son decenas de bloques sobre los que el usuario no decide nada, y
+                 pintarlos abiertos entierra los pocos que sí le preguntan. -->
+            <button
+              type="button"
+              class="replicacion-dialogo__desplegar accion-compacta"
+              (click)="desplegado.set(!desplegado())"
+            >
+              {{ desplegado() ? 'Ocultar el detalle' : 'Ver el detalle' }}
+            </button>
+            @if (desplegado()) {
+              <ul class="replicacion-dialogo__lista">
+                @for (b of plan()!.replicados; track b.actividad) {
+                  <li class="replicacion-dialogo__replicado">{{ b.actividad }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @if (cuestiones().length > 0) {
+          <h3 class="replicacion-dialogo__subtitulo">
+            Reparto: {{ cuestiones().length }} decisión(es)
+          </h3>
+          <p class="replicacion-dialogo__nota">
+            En estas actividades los grupos van repartidos entre varias vías, y cuál le toca
+            a {{ grupo.codigo }} no está en el catálogo: lo decides tú.
+          </p>
+
+          @for (c of cuestiones(); track c.espejo) {
+            <div class="replicacion-dialogo__campo replicacion-dialogo__cuestion">
+              <label class="replicacion-dialogo__etiqueta" [for]="'replicacion-' + c.espejo">
+                {{ c.espejo }}
+              </label>
+              <select
+                [id]="'replicacion-' + c.espejo"
+                class="replicacion-dialogo__input replicacion-dialogo__decision"
+                (change)="responder(c.espejo, $any($event.target).value)"
+              >
+                <!-- SIN preselección y `disabled`, al revés que el «— sin tutor —» de
+                     TutoriaDialogo: aquí '' no es un valor legítimo, es «aún no has
+                     contestado», y es lo que mantiene «Aceptar» apagado. -->
+                <option value="" disabled selected>— elige una vía —</option>
+                @for (b of c.bloques; track b.actividad) {
+                  <optgroup [label]="b.actividad">
+                    @for (o of b.opciones; track o.via.plazaId) {
+                      <!-- El value es el plazaId: es lo que el POST nombra. El
+                           plazaCodigo NO se pinta (ordinal técnico inestable). -->
+                      <option [value]="o.via.plazaId">{{ rotulo(o) }}</option>
+                    }
+                  </optgroup>
+                }
+                <!-- Opción EXPLÍCITA y no la ausencia de respuesta: «no matricular» es una
+                     decisión tomada, y viaja como plaza null. -->
+                <option [value]="sinPlaza">No matricular aquí</option>
+              </select>
+            </div>
+          }
+        }
+      }
+
+      @if (error()) {
+        <p class="replicacion-dialogo__error-servidor" role="alert">{{ error() }}</p>
+      }
+
+      <div class="replicacion-dialogo__acciones">
+        <button type="button" class="replicacion-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="replicacion-dialogo__aceptar accion-principal"
+          [disabled]="!puedeAceptar()"
+          (click)="aceptar()"
+        >
+          Aceptar
+        </button>
+      </div>
+    }
+
+    @case ('enviando') {
+      <p class="replicacion-dialogo__cargando">Replicando…</p>
+    }
+
+    @case ('hecho') {
+      <p class="replicacion-dialogo__resumen">
+        {{ grupo.codigo }} replicado desde {{ plan()!.hermano }}:
+        {{ plan()!.subgruposACrear.length }} subgrupo(s) creado(s),
+        {{ plan()!.replicados.length }} bloque(s) incorporado(s) solos y
+        {{ plan()!.reparto.length }} repartido(s) según lo que decidiste.
+      </p>
+      <ul class="replicacion-dialogo__lista">
+        @for (s of plan()!.subgruposACrear; track s) {
+          <li class="replicacion-dialogo__creado">{{ s }}</li>
+        }
+      </ul>
+
+      @if (error()) {
+        <p class="replicacion-dialogo__error-servidor" role="alert">{{ error() }}</p>
+      }
+
+      <div class="replicacion-dialogo__acciones">
+        <button
+          type="button"
+          class="replicacion-dialogo__deshacer accion-destructiva"
+          (click)="deshacer()"
+        >
+          Deshacer
+        </button>
+        <button
+          type="button"
+          class="replicacion-dialogo__cerrar accion-principal"
+          (click)="cerrarTrasEscribir()"
+        >
+          Cerrar
+        </button>
+      </div>
+    }
+
+    @case ('deshaciendo') {
+      <p class="replicacion-dialogo__cargando">Deshaciendo…</p>
+    }
+
+    @case ('error') {
+      <!-- Sin acción de continuar a propósito: no se sabe si el plan es válido, y
+           ofrecer el envío a ciegas lleva a un error que el usuario no puede interpretar.
+           Mismo criterio que la rama 'error' de PdcDialogo. -->
+      <p class="replicacion-dialogo__error-servidor" role="alert">{{ error() }}</p>
+
+      <div class="replicacion-dialogo__acciones">
+        <button type="button" class="replicacion-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    }
+  }
+</div>
