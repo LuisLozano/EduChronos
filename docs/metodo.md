@@ -197,6 +197,14 @@ suite: ante un mutante SUPERVIVIENTE el conteo sale idéntico con la mutación p
 - Leer el spec ANTES de calibrar la campaña: el instrumento tiene sus propias
   trampas.
 
+PRECISIÓN (S141) — EN JAVA, EL DIFF DEL FUENTE NO BASTA: la restauración se verifica
+contra el ARTEFACTO, no sólo contra el texto. Medido: un arnés que restauraba con
+`shutil.copy2` preservaba la mtime, el fuente limpio quedaba más viejo que el `.class`
+mutado, Maven no recompilaba y la suite corría sobre el bytecode de la mutación con el
+fuente correcto delante —doce fallos atribuidos a la causa equivocada—. Restaurar con
+`copy` + `os.utime`, y borrar `target/classes` antes de la corrida de control. Es la
+trampa de S110 movida del fuente al artefacto.
+
 M3 se aplica DONDE HAY LÓGICA QUE MUTAR. Un renombrado, un binding de UI o un
 cambio cosmético no tienen mutación que valga: se declara qué se verifica (¿compila?
 ¿el formulario valida? ¿el conflicto se ve?) sin exigir campaña de mutación de
@@ -309,6 +317,17 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    intactos.
 
 ---
+
+PRECISIONES (S141), las dos medidas en el mismo cierre y las dos por fallo del guion:
+6. **Un ancla sobre un documento con índice se escribe A PRINCIPIO DE LÍNEA.** `regenerar-indice.py`
+   repite cada encabezado en el índice, así que TODO `##`/`###`/`####` aparece dos veces por
+   construcción y la guarda de «exactamente una vez» salta siempre. No es un caso raro: es el estado
+   normal de `gestion_proyecto.md` y `plan_trabajo_horarios.md` desde M-doc-3.
+7. **Un guion que toca VARIOS ficheros los escribe TODOS al final, cuando han pasado todas las
+   guardas.** El punto 1 promete abortar «sin tocar nada»; con escritura intercalada esa promesa es
+   FALSA en cuanto hay más de un fichero. Medido en S141: la guarda del tercero saltó con los dos
+   primeros ya en disco, y hubo que restaurar los cuatro desde `/tmp`. La regla decía una cosa y el
+   mecanismo hacía otra.
 
 ## M-doc-2 — Maquetas y artefactos desechables (S122)
 
