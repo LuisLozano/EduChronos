@@ -90,6 +90,10 @@ class IntercambioInstanciasEndpointTest {
     private static final String CO = "CO-1C";
     /** Comparte profesor con LEN; solo la usa el caso de violación preexistente. */
     private static final String HIS = "HIS-1D";
+    /** Comparte profesor con EF; el SEGUNDO solape preexistente del caso 17. */
+    private static final String GEO = "GEO-1E";
+    /** Comparte profesor con MAT y vive lejos; su intercambio crea el solape NUEVO. */
+    private static final String MAT2 = "MAT2-1F";
 
     private Long horarioId;
 
@@ -439,6 +443,45 @@ class IntercambioInstanciasEndpointTest {
         assertThat(paresPlazaAula(MAT, 1)).containsExactlyElementsOf(aulasMat);
     }
 
+    // ------------------------------------------------- 17: la resta es de MULTICONJUNTOS
+
+    /**
+     * (17) DOS violaciones preexistentes de la MISMA FAMILIA que la nueva. Es lo que
+     * distingue restar MULTICONJUNTOS de comparar por POSICIÓN.
+     *
+     * <p>El horario parte con dos {@code SOLAPE_PROFESOR} —P-LEN en LUNES-2 y P-EF en
+     * LUNES-3—, y el intercambio crea un TERCERO: MAT2 comparte profesor con MAT y
+     * aterriza en su tramo. La respuesta debe traer UNA violación nueva. Comparar las
+     * dos listas por posición no lo consigue: el verificador agrupa los solapes de
+     * profesor en un {@code HashMap} de profesor, así que meter una tercera entrada
+     * REORDENA las otras dos y las que no se han movido se cuentan como nuevas.
+     *
+     * <p><b>Cubre {@code soloNuevas}, que es de S143 y lo comparten {@code mover()} e
+     * {@code intercambiar()}.</b> El hueco no lo abre este Cambio: los 14 casos de
+     * {@code MovimientoInstanciaEndpointTest} también sobreviven a esa mutación, porque
+     * su única violación preexistente es de otra familia que la nueva y el verificador
+     * recorre las familias en orden fijo. No se duplica allí: un caso en un extremo del
+     * método compartido basta para fijarlo.
+     */
+    @Test
+    void conDosViolacionesPreexistentesDeLaMismaFamiliaSoloCuentaLaNueva() throws Exception {
+        poblar();
+        anadirDosSolapesDeProfesorYUnTerceroLatente();
+        assertThat(diagnosticoService.diagnosticar(horarioId).violaciones())
+                .as("el horario debe partir con DOS solapes de profesor")
+                .filteredOn(v -> "SOLAPE_PROFESOR".equals(v.regla()))
+                .hasSize(2);
+
+        mockMvc.perform(put(url(horarioId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT2, 1, CO, 1))) // MAT2 aterriza junto a MAT: P-MAT x2
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("VIOLA_REGLA_DURA"))
+                .andExpect(jsonPath("$.violaciones.length()").value(1))
+                .andExpect(jsonPath("$.violaciones[0].regla").value("SOLAPE_PROFESOR"))
+                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("P-MAT"));
+    }
+
     // ------------------------------------------------------------------ 16: contrato de forma
 
     /**
@@ -637,6 +680,51 @@ class IntercambioInstanciasEndpointTest {
         colocar(horario, actHis, 1, tramoDe(Dia.LUNES, 2)); // el tramo de LEN: solape de P-LEN
         entityManager.flush();
         entityManager.clear();
+    }
+
+    /**
+     * Deja el horario con DOS {@code SOLAPE_PROFESOR} preexistentes —HIS sobre LEN en
+     * LUNES-2 y GEO sobre EF en LUNES-3— y coloca MAT2, que comparte profesor con MAT
+     * pero vive en MARTES-2 (vacío) y por tanto NO viola nada todavía. El tercer solape
+     * lo enciende el intercambio, no el fixture.
+     */
+    private void anadirDosSolapesDeProfesorYUnTerceroLatente() {
+        Nivel eso1 = nivelRepository.findByCodigo("1ESO").orElseThrow();
+        Profesor pLen = profesorRepository.findByCodigo("P-LEN").orElseThrow();
+        Profesor pEf = profesorRepository.findByCodigo("P-EF").orElseThrow();
+        Profesor pMat = profesorRepository.findByCodigo("P-MAT").orElseThrow();
+
+        Actividad actHis = conProfesorPropio(HIS, "HIS", "Historia", "1ºD", eso1, pLen);
+        Actividad actGeo = conProfesorPropio(GEO, "GEOG", "Geografia", "1ºE", eso1, pEf);
+        Actividad actMat2 = conProfesorPropio(MAT2, "MAT2", "Matematicas II", "1ºF", eso1, pMat);
+        entityManager.flush();
+
+        HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
+        colocar(horario, actHis, 1, tramoDe(Dia.LUNES, 2));   // el tramo de LEN: solape de P-LEN
+        colocar(horario, actGeo, 1, tramoDe(Dia.LUNES, 3));   // el tramo de EF#1: solape de P-EF
+        colocar(horario, actMat2, 1, tramoDe(Dia.MARTES, 2)); // vacío: todavía sin solape
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    /**
+     * Actividad de una plaza con asignatura, aula, grupo y subgrupo PROPIOS y el profesor
+     * que se le pase: así el único recurso que puede chocar es ese profesor.
+     */
+    private Actividad conProfesorPropio(String codigo, String asigCodigo, String asigNombre,
+            String grupoCodigo, Nivel nivel, Profesor profesor) {
+        Asignatura asignatura = asignaturaRepository.save(new Asignatura(asigCodigo, asigNombre));
+        Aula aula = aulaRepository.save(
+                new Aula("A-" + asigCodigo, TipoAula.ORDINARIA, null, null, null, null));
+        GrupoAdministrativo grupo = grupoRepository.save(
+                new GrupoAdministrativo(grupoCodigo, nivel, TipoGrupo.ORDINARIO, null));
+        Subgrupo subgrupo = subgrupoRepository.save(
+                new Subgrupo(grupoCodigo + "-s1", Set.of(grupo)));
+
+        Actividad actividad = actividad(codigo, 1, PatronTemporal.NEUTRA);
+        actividad.getPlazas().add(plaza(codigo + "-P1", actividad, asignatura,
+                Set.of(profesor), aula, Set.of(subgrupo)));
+        return actividadRepository.save(actividad);
     }
 
     /** Una fila de {@code sesion} por plaza de la actividad, todas en el mismo tramo. */
