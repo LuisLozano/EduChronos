@@ -87,6 +87,22 @@ public class Sesion {
         return tramoInicio;
     }
 
+    /**
+     * Recoloca esta sesión en otro tramo, CONSERVANDO su aula y su plaza (S143).
+     *
+     * <p>Único mutador de la entidad, y deliberadamente estrecho: el resto de campos
+     * (horario, plaza, indice, aula) siguen siendo de solo lectura tras el
+     * constructor. Mover una instancia es cambiar el tramo de sus N filas y nada más;
+     * cambiar de aula es otra operación y no la abre este método.
+     *
+     * <p>NO valida: quién llama es {@code MovimientoInstanciaService}, que ya emitió
+     * el veredicto del verificador sobre la solución candidata antes de tocar nada.
+     * Una entidad JPA no es el sitio donde repetir esa comprobación.
+     */
+    public void moverA(TramoSemanal tramoInicio) {
+        this.tramoInicio = tramoInicio;
+    }
+
     public Aula getAula() {
         return aula;
     }
