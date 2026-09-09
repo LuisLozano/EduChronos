@@ -303,6 +303,110 @@ class MovimientoInstanciaEndpointTest {
                 .andExpect(jsonPath("$.causa").value("INSTANCIA_INEXISTENTE"));
     }
 
+    // ------------------------------------------------- el rechazo no deja rastro en la base
+
+    /**
+     * Un 409 por regla dura no puede haber escrito NADA. El veredicto se emite sobre una
+     * solución candidata construida en memoria, así que las filas deben seguir en su
+     * tramo original —leídas de la TABLA, con el contexto de Hibernate vaciado antes, no
+     * de las entidades que el servicio tuvo en la mano—.
+     *
+     * <p>El recuento total de {@code sesion} va aparte a propósito: sin él, un borrado
+     * parcial (mover = borrar y reinsertar, y fallar entre medias) pasaría por bueno,
+     * porque "la fila que queda está en su tramo original" seguiría siendo cierto.
+     */
+    @Test
+    void rechazoPorReglaDuraNoEscribeNadaEnLaBase() throws Exception {
+        poblar();
+        long filasAntes = sesionRepository.count();
+        Long tramoOriginal = filasDe(MAT, 1).get(0).getTramoInicio().getId();
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT, 1, 1, 2))) // LUNES-2: donde está LEN, mismo grupo
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("VIOLA_REGLA_DURA"));
+
+        // flush() fuerza a la BD lo que hubiera pendiente; clear() garantiza que lo que
+        // se lee después viene de la tabla y no del contexto de persistencia.
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(sesionRepository.count())
+                .as("ni una fila de más ni de menos en toda la tabla")
+                .isEqualTo(filasAntes);
+        assertThat(filasDe(MAT, 1)).singleElement().satisfies(s ->
+                assertThat(s.getTramoInicio().getId()).isEqualTo(tramoOriginal));
+    }
+
+    /**
+     * Lo mismo para el 409 por pin: la instancia sigue en su tramo original y la tabla
+     * conserva sus filas. El pin se comprueba antes del veredicto, así que este caso
+     * cubre una rama de salida distinta de la anterior.
+     */
+    @Test
+    void rechazoPorPinNoEscribeNadaEnLaBase() throws Exception {
+        poblar();
+        long filasAntes = sesionRepository.count();
+        Long tramoOriginal = filasDe(MAT, 1).get(0).getTramoInicio().getId();
+        pinTramoRepository.save(new SesionBloqueada(
+                actividadRepository.findByCodigo(MAT).orElseThrow(), 1, tramoDe(Dia.LUNES, 1)));
+        entityManager.flush();
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT, 1, 2, 2)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("INSTANCIA_PINADA"));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(sesionRepository.count()).isEqualTo(filasAntes);
+        assertThat(filasDe(MAT, 1)).singleElement().satisfies(s ->
+                assertThat(s.getTramoInicio().getId()).isEqualTo(tramoOriginal));
+    }
+
+    // ------------------------------------------------------------------ el aula no cambia
+
+    /**
+     * El movimiento cambia el tramo y SOLO el tramo. Sobre el desdoble de 6 plazas, que
+     * es donde un fallo se vería: tras el 200, las 6 filas están en el tramo nuevo y
+     * llevan EXACTAMENTE las mismas 6 aulas que antes.
+     *
+     * <p>La comparación es de MULTICONJUNTO, no de lista ordenada ni de conjunto: una
+     * permutación de las aulas entre plazas es un fallo real —cada plaza tiene la suya—,
+     * y un {@code Set} taparía además que dos filas acabaran compartiendo aula. Por eso
+     * se comparan los pares (plaza, aula), que es lo que fija cada aula a su fila.
+     */
+    @Test
+    void elMovimientoConservaElAulaDeCadaFila() throws Exception {
+        poblar();
+        List<String> aulasAntes = filasDe(DESD, 1).stream()
+                .map(s -> s.getPlaza().getCodigo() + "->" + s.getAula().getCodigo())
+                .sorted().toList();
+        assertThat(aulasAntes).hasSize(6); // premisa del caso
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(DESD, 1, 2, 2)))
+                .andExpect(status().isOk());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Sesion> despues = filasDe(DESD, 1);
+        assertThat(despues).hasSize(6).allSatisfy(s -> {
+            assertThat(s.getTramoInicio().getDia()).isEqualTo(Dia.MARTES);
+            assertThat(s.getTramoInicio().getOrden()).isEqualTo(5); // MARTES-2, orden global
+        });
+        assertThat(despues.stream()
+                        .map(s -> s.getPlaza().getCodigo() + "->" + s.getAula().getCodigo())
+                        .sorted().toList())
+                .as("cada plaza conserva SU aula")
+                .containsExactlyElementsOf(aulasAntes);
+    }
+
     // ------------------------------------------------------------------ contrato de forma
 
     /**
