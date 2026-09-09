@@ -4,6 +4,7 @@ import es.yaroki.educhronos.app.service.MovimientoInstanciaService;
 import es.yaroki.educhronos.app.service.MovimientoRechazadoException;
 import es.yaroki.educhronos.app.web.dto.CeldaRefDTO;
 import es.yaroki.educhronos.app.web.dto.FalloMovimientoDTO;
+import es.yaroki.educhronos.app.web.dto.IntercambiarInstanciasRequest;
 import es.yaroki.educhronos.app.web.dto.MoverInstanciaRequest;
 import es.yaroki.educhronos.app.web.dto.ViolacionDTO;
 import es.yaroki.educhronos.solver.cpsat.Violacion;
@@ -64,10 +65,30 @@ public class MovimientoInstanciaController {
         }
     }
 
+    /**
+     * INTERCAMBIA los tramos de dos instancias (S144). {@code 200} con las filas de
+     * ambas —dos listas, una por lado— si el intercambio es legal o si ambas ya estaban
+     * en el mismo tramo; en otro caso, el código que diga la causa.
+     *
+     * <p>Va en ESTE controlador y no en uno nuevo: usa el mismo
+     * {@link MovimientoInstanciaService} y no amplía el constructor, así que no arrastra
+     * el coste que justificó separar de {@code HorarioController} en S143.
+     */
+    @PutMapping("/{horarioId}/instancias/intercambio")
+    public ResponseEntity<Object> intercambiar(
+            @PathVariable("horarioId") Long horarioId,
+            @RequestBody IntercambiarInstanciasRequest peticion) {
+        try {
+            return ResponseEntity.ok(service.intercambiar(horarioId, peticion));
+        } catch (MovimientoRechazadoException e) {
+            return respuestaDeRechazo(e);
+        }
+    }
+
     /** Traduce la causa del rechazo a su código HTTP y a su cuerpo. */
     private ResponseEntity<Object> respuestaDeRechazo(MovimientoRechazadoException e) {
         HttpStatus status = switch (e.causa()) {
-            case TRAMO_INEXISTENTE -> HttpStatus.BAD_REQUEST;
+            case TRAMO_INEXISTENTE, INSTANCIAS_IGUALES -> HttpStatus.BAD_REQUEST;
             case HORARIO_INEXISTENTE, INSTANCIA_INEXISTENTE -> HttpStatus.NOT_FOUND;
             case VIOLA_REGLA_DURA, INSTANCIA_PINADA -> HttpStatus.CONFLICT;
         };

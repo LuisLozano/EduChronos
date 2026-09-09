@@ -19,5 +19,11 @@ public enum CausaMovimiento {
     /** El movimiento haría aparecer violaciones duras que no estaban. → 409 */
     VIOLA_REGLA_DURA,
     /** La instancia está pinada; el pin manda sobre el arrastre. → 409 */
-    INSTANCIA_PINADA
+    INSTANCIA_PINADA,
+    /**
+     * Las dos instancias de un INTERCAMBIO son la misma (S144). No es un 404 —ambas
+     * existen— ni un 409 —no hay conflicto con el estado—: es una petición mal formada,
+     * porque intercambiar algo consigo mismo no es una operación. → 400
+     */
+    INSTANCIAS_IGUALES
 }

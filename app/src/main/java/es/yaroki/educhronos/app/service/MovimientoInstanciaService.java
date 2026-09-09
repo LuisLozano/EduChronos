@@ -9,7 +9,10 @@ import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
 import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
+import es.yaroki.educhronos.app.web.dto.IntercambiarInstanciasRequest;
+import es.yaroki.educhronos.app.web.dto.IntercambioRealizadoDTO;
 import es.yaroki.educhronos.app.web.dto.MoverInstanciaRequest;
+import es.yaroki.educhronos.app.web.dto.ReferenciaInstancia;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import es.yaroki.educhronos.solver.cpsat.ResultadoVerificacion;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
@@ -156,7 +159,8 @@ public class MovimientoInstanciaService {
         boolean yaEnDestino = filas.stream()
                 .allMatch(s -> Objects.equals(s.getTramoInicio().getId(), destino.getId()));
         if (yaEnDestino) {
-            return releerInstancia(horarioId, peticion, ordenEnDia);
+            return releerInstancia(
+                horarioId, peticion.actividadCodigo(), peticion.indice(), ordenEnDia);
         }
 
         // ---- VEREDICTO. Un solo cargarProblema() por petición.
@@ -166,7 +170,9 @@ public class MovimientoInstanciaService {
                 problema, sesionRepository.findByHorarioId(horarioId), idxTramo);
 
         ResultadoVerificacion antes = verificador.verificar(problema, actual);
-        SolucionHorario candidata = conInstanciaEn(problema, actual, idxTramo, destino, peticion);
+        SolucionHorario candidata = conInstanciaEn(
+                problema, actual, idxTramo, destino,
+                peticion.actividadCodigo(), peticion.indice());
         ResultadoVerificacion despues = verificador.verificar(problema, candidata);
 
         List<Violacion> nuevas = soloNuevas(despues.violaciones(), antes.violaciones());
@@ -185,32 +191,215 @@ public class MovimientoInstanciaService {
         sesionRepository.saveAll(filas);
         sesionRepository.flush();
 
-        return releerInstancia(horarioId, peticion, ordenEnDia);
+        return releerInstancia(
+                horarioId, peticion.actividadCodigo(), peticion.indice(), ordenEnDia);
+    }
+
+    /**
+     * INTERCAMBIA los tramos de dos instancias del horario {@code horarioId} (S144,
+     * C-intercambiar-instancias): cada una pasa al tramo que ocupaba la otra,
+     * CONSERVANDO su aula, y devuelve las filas de ambas RELEÍDAS del repositorio.
+     *
+     * <p><b>No es "dos movimientos".</b> Encadenar dos {@link #mover} rechazaría casi
+     * todo intercambio legal: el primero dejaría a la primera instancia encima de la
+     * segunda y el veredicto vería un solape que el estado final no tiene. Por eso el
+     * veredicto se emite UNA vez sobre la solución con las DOS ya permutadas, y por eso
+     * {@link #conInstanciaEn} tuvo que encadenar.
+     *
+     * <p><b>NO hay {@code TRAMO_INEXISTENTE}</b>: el cuerpo no trae ningún par
+     * (dia, orden), así que {@link #resolverTramo} no entra. El destino de cada una es
+     * el {@code TramoSemanal} que la otra ya ocupa, tomado de sus propias filas.
+     *
+     * <p><b>Orden de las comprobaciones</b>, el mismo desempate que fijó S143 y una
+     * decisión nueva:
+     * <ol>
+     *   <li>forma del cuerpo y {@code INSTANCIAS_IGUALES} (400) — no depende del estado;</li>
+     *   <li>horario (404), filas de cada lado (404, DICIENDO cuál);</li>
+     *   <li>pin de cada lado (409) — <b>antes</b> del no-op, igual que en {@code mover}:
+     *       una instancia pinada está clavada, y "clavada" es un estado del recurso, no
+     *       del movimiento. Dos instancias en el MISMO tramo con una pinada dan 409, no
+     *       200;</li>
+     *   <li>no-op: si ambas ocupan el mismo tramo, permutarlas no cambia nada y se
+     *       devuelve 200 SIN escribir;</li>
+     *   <li>veredicto por diferencia y, solo entonces, escritura.</li>
+     * </ol>
+     *
+     * <p>Una sola transacción y un solo {@code cargarProblema()} para las dos mutaciones,
+     * por la misma frontera crítica del javadoc de clase (S62). NO toca
+     * {@code sesion_bloqueada} ni {@code aula_bloqueada}.
+     */
+    @Transactional
+    public IntercambioRealizadoDTO intercambiar(
+            Long horarioId, IntercambiarInstanciasRequest peticion) {
+
+        Objects.requireNonNull(peticion, "peticion no puede ser null");
+        ReferenciaInstancia primera = exigirReferencia(peticion.primera(), "primera");
+        ReferenciaInstancia segunda = exigirReferencia(peticion.segunda(), "segunda");
+
+        if (primera.actividadCodigo().equals(segunda.actividadCodigo())
+                && primera.indice() == segunda.indice()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIAS_IGUALES,
+                    "Las dos instancias son la misma (" + primera.actividadCodigo() + ", "
+                            + primera.indice() + "); intercambiar algo consigo mismo no es"
+                            + " una operación");
+        }
+
+        // Solo para decidir el 404 del horario; las filas se reconsultan aparte.
+        try {
+            generadorService.cargarHorario(horarioId);
+        } catch (IllegalArgumentException e) {
+            throw new MovimientoRechazadoException(
+                    CausaMovimiento.HORARIO_INEXISTENTE, e.getMessage());
+        }
+
+        // Una sola lectura de tramos para TODA la petición (S62).
+        List<TramoSemanal> tramos = tramoRepository.findAll();
+        Map<Long, Integer> ordenEnDia = CatalogoMapper.indiceOrdenEnDia(tramos);
+
+        // RECONSULTADAS, nunca la colección inversa del horario
+        // (D-post-horario-sin-sesiones, esquivada aquí por CUARTA vez a mano).
+        List<Sesion> filasPrimera = filasDe(horarioId, primera, "primera");
+        List<Sesion> filasSegunda = filasDe(horarioId, segunda, "segunda");
+
+        // El PIN manda, y se comprueba ANTES de la idempotencia: mismo desempate que S143.
+        exigirSinPin(primera, "primera");
+        exigirSinPin(segunda, "segunda");
+
+        // Tramos de partida, CAPTURADOS antes de escribir nada: la escritura muta las
+        // filas, y leer el destino de la otra después daría el tramo ya cambiado.
+        TramoSemanal tramoPrimera = filasPrimera.get(0).getTramoInicio();
+        TramoSemanal tramoSegunda = filasSegunda.get(0).getTramoInicio();
+
+        // Idempotencia: permutar dos instancias del mismo tramo no es un intercambio.
+        if (Objects.equals(tramoPrimera.getId(), tramoSegunda.getId())) {
+            return releerAmbas(horarioId, primera, segunda, ordenEnDia);
+        }
+
+        // ---- VEREDICTO. Un solo cargarProblema() por petición, y UNA sola verificación
+        // del después: sobre la solución con las DOS instancias ya permutadas.
+        ProblemaHorario problema = generadorService.cargarProblema();
+        Map<Tramo, TramoSemanal> idxTramo = SolucionMapper.indiceTramos(problema, tramos);
+        SolucionHorario actual = SolucionMapper.aSolucionHorario(
+                problema, sesionRepository.findByHorarioId(horarioId), idxTramo);
+
+        ResultadoVerificacion antes = verificador.verificar(problema, actual);
+        SolucionHorario candidata = conInstanciaEn(problema, actual, idxTramo, tramoSegunda,
+                primera.actividadCodigo(), primera.indice());
+        candidata = conInstanciaEn(problema, candidata, idxTramo, tramoPrimera,
+                segunda.actividadCodigo(), segunda.indice());
+        ResultadoVerificacion despues = verificador.verificar(problema, candidata);
+
+        List<Violacion> nuevas = soloNuevas(despues.violaciones(), antes.violaciones());
+        if (!nuevas.isEmpty()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.VIOLA_REGLA_DURA,
+                    "El intercambio de (" + primera.actividadCodigo() + ", " + primera.indice()
+                            + ") con (" + segunda.actividadCodigo() + ", " + segunda.indice()
+                            + ") provoca " + nuevas.size() + " violación(es) dura(s) nueva(s)",
+                    nuevas);
+        }
+
+        // ---- ESCRITURA. Solo aquí, y solo el tramo: el aula de cada fila se conserva.
+        for (Sesion s : filasPrimera) {
+            s.moverA(tramoSegunda);
+        }
+        for (Sesion s : filasSegunda) {
+            s.moverA(tramoPrimera);
+        }
+        sesionRepository.saveAll(filasPrimera);
+        sesionRepository.saveAll(filasSegunda);
+        sesionRepository.flush();
+
+        return releerAmbas(horarioId, primera, segunda, ordenEnDia);
+    }
+
+    /** Cuerpo del 200 del intercambio: {@link #releerInstancia} una vez por lado. */
+    private IntercambioRealizadoDTO releerAmbas(Long horarioId, ReferenciaInstancia primera,
+            ReferenciaInstancia segunda, Map<Long, Integer> ordenEnDia) {
+        return new IntercambioRealizadoDTO(
+                releerInstancia(horarioId, primera.actividadCodigo(), primera.indice(), ordenEnDia),
+                releerInstancia(horarioId, segunda.actividadCodigo(), segunda.indice(), ordenEnDia));
+    }
+
+    /**
+     * Valida la forma de un lado del cuerpo. El {@code lado} viaja en el mensaje porque
+     * un 404 que no diga CUÁL de las dos instancias falta obliga a quien llama a
+     * adivinar; con dos referencias en el cuerpo, "no existe" a secas no es accionable.
+     */
+    private static ReferenciaInstancia exigirReferencia(ReferenciaInstancia ref, String lado) {
+        if (ref == null || ref.actividadCodigo() == null) {
+            throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIA_INEXISTENTE,
+                    "La instancia '" + lado + "' es obligatoria y necesita actividadCodigo");
+        }
+        if (ref.indice() < 1) {
+            throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIA_INEXISTENTE,
+                    "La instancia '" + lado + "' tiene indice " + ref.indice()
+                            + "; debe ser >= 1 (1-based del dominio)");
+        }
+        return ref;
+    }
+
+    /** Filas de un lado, con el 404 que dice cuál falta. */
+    private List<Sesion> filasDe(Long horarioId, ReferenciaInstancia ref, String lado) {
+        List<Sesion> filas = sesionRepository.findParaInstancia(
+                horarioId, ref.actividadCodigo(), ref.indice());
+        if (filas.isEmpty()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIA_INEXISTENTE,
+                    "La instancia '" + lado + "' (" + ref.actividadCodigo() + ", "
+                            + ref.indice() + ") no está en el horario " + horarioId);
+        }
+        return filas;
+    }
+
+    /** Rechaza un lado pinado. Se comprueba por (actividad, indice), la clave del pin. */
+    private void exigirSinPin(ReferenciaInstancia ref, String lado) {
+        Actividad actividadJpa = actividadRepository.findByCodigo(ref.actividadCodigo())
+                .orElseThrow(() -> new MovimientoRechazadoException(
+                        CausaMovimiento.INSTANCIA_INEXISTENTE,
+                        "No existe actividad con codigo " + ref.actividadCodigo()
+                                + " (instancia '" + lado + "')"));
+        if (sesionBloqueadaRepository
+                .findByActividadAndIndice(actividadJpa, ref.indice()).isPresent()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIA_PINADA,
+                    "La instancia '" + lado + "' (" + ref.actividadCodigo() + ", "
+                            + ref.indice() + ") está pinada; quita el pin antes de"
+                            + " intercambiarla");
+        }
     }
 
     /**
      * Construye EN MEMORIA la solución candidata: la misma de siempre con la instancia
-     * reasignada al tramo destino. {@code aulasElegidas()} se reusa tal cual —el
-     * movimiento no cambia de aula—, así que un solape de aula en el destino aflora
-     * como violación nueva en vez de esconderse.
+     * reasignada al tramo destino. {@code aulasElegidas()} se reusa tal cual —ni el
+     * movimiento ni el intercambio cambian de aula—, así que un solape de aula en el
+     * destino aflora como violación nueva en vez de esconderse.
+     *
+     * <p><b>ENCADENA</b> (S144): toma las asignaciones de la solución que RECIBE, no de
+     * ninguna de partida guardada, así que aplicarla dos veces —la segunda sobre lo que
+     * devolvió la primera— compone las dos relocalizaciones. Es lo que hace
+     * {@link #intercambiar}, y por eso el parámetro es el par ({@code actividadCodigo},
+     * {@code indice}) y no un {@code MoverInstanciaRequest}: al intercambio no le llega
+     * ningún (dia, orden) que meter en uno sintético.
+     *
+     * <p>La rama {@code TRAMO_INEXISTENTE} de la inversión es inalcanzable desde
+     * {@link #intercambiar}: allí el destino es el tramo donde YA está la otra instancia,
+     * y si ese {@code TramoSemanal} no tuviera {@code Tramo} de dominio,
+     * {@code SolucionMapper.aSolucionHorario} habría abortado antes de llegar aquí.
      */
     private SolucionHorario conInstanciaEn(
             ProblemaHorario problema, SolucionHorario actual,
             Map<Tramo, TramoSemanal> idxTramo, TramoSemanal destino,
-            MoverInstanciaRequest peticion) {
+            String actividadCodigo, int indice) {
 
         es.yaroki.educhronos.solver.domain.Actividad actividad = problema.actividades().stream()
-                .filter(a -> a.codigo().equals(peticion.actividadCodigo()))
+                .filter(a -> a.codigo().equals(actividadCodigo))
                 .findFirst()
                 .orElseThrow(() -> new MovimientoRechazadoException(
                         CausaMovimiento.INSTANCIA_INEXISTENTE,
-                        "La actividad " + peticion.actividadCodigo() + " no está en el problema"));
-        if (peticion.indice() > actividad.repeticionesPorSemana()) {
+                        "La actividad " + actividadCodigo + " no está en el problema"));
+        if (indice > actividad.repeticionesPorSemana()) {
             throw new MovimientoRechazadoException(CausaMovimiento.INSTANCIA_INEXISTENTE,
-                    "indice " + peticion.indice() + " fuera de rango para la actividad "
-                            + peticion.actividadCodigo());
+                    "indice " + indice + " fuera de rango para la actividad " + actividadCodigo);
         }
-        ActividadInstancia instancia = new ActividadInstancia(actividad, peticion.indice());
+        ActividadInstancia instancia = new ActividadInstancia(actividad, indice);
 
         // Inversión de idxTramo por ID, no por identidad de objeto: ambos lados salen de
         // la MISMA lista de tramos de esta transacción, así que son la misma instancia;
@@ -265,10 +454,10 @@ public class MovimientoInstanciaService {
      * contrato que compara ambas salidas para la misma instancia.
      */
     private List<SesionVistaDTO> releerInstancia(
-            Long horarioId, MoverInstanciaRequest peticion, Map<Long, Integer> ordenEnDia) {
+            Long horarioId, String actividadCodigo, int indice, Map<Long, Integer> ordenEnDia) {
 
         List<Sesion> filas = sesionRepository.findParaInstancia(
-                horarioId, peticion.actividadCodigo(), peticion.indice());
+                horarioId, actividadCodigo, indice);
 
         List<SesionVistaDTO> salida = new ArrayList<>(filas.size());
         for (Sesion sesion : filas) {
