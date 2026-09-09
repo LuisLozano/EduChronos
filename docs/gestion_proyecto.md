@@ -20,15 +20,15 @@
 - L1427 — ### Clasificación de las deudas vivas actuales
 - L1433 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
 - L1440 — #### Deuda técnica real, colgada de su objetivo
-- L1520 — #### Mejora futura, cuelga y espera
-- L1552 — #### Decisión arquitectónica consciente → sale de la cola
-- L1564 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1573 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1580 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1639 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1693 — ## 6. Reglas estratégicas
-- L1740 — ## 7. Métricas del sistema
-- L1761 — ## 8. El sistema respondiendo a las preguntas clave
+- L1521 — #### Mejora futura, cuelga y espera
+- L1553 — #### Decisión arquitectónica consciente → sale de la cola
+- L1565 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1574 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1581 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1640 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1705 — ## 6. Reglas estratégicas
+- L1752 — ## 7. Métricas del sistema
+- L1773 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -1517,6 +1517,7 @@ asigna categoría, objetivo y disposición.
 | D-bloqueo-id-no-estable (el `id` de un bloqueo no es estable por contrato) | Sin sede | No | Nace en S142. `BloqueoService.guardar()` implementa el reemplazo (D-4/D-5) BORRANDO el pin previo —`aulaBloqueadaRepository.deleteByActividadAndIndice` más `sesionBloqueadaRepository.delete`, con `flush()` para no chocar con la restricción única `(actividad_id, indice)`— y reinsertando, así que el `id` que devuelve el `BloqueoDTO` NO es el mismo objeto lógico entre dos altas de la misma instancia. En S142 volvió a salir `1` tras mutar el pin de tramo, pero eso es **reutilización de `rowid` de SQLite**, no una garantía del contrato: un cliente que cachee ese id acierta por suerte, y el `DELETE /api/bloqueos/{id}` es precisamente quien lo consume. No se paga |
 | D-cast-sin-comprobacion-drop (`alSoltar` castea el `data` del CDK sin comprobarlo) | O-ajuste-cierre | No | Nace en S142, y el riesgo lo declara el propio código: `horario-grid.ts:454` hace `evento.item.data as InstanciaCelda`, un cast SIN comprobación que sólo es válido mientras el `cdkDropListGroup` de esa plantilla conecte únicamente celdas de esta rejilla, todas con `[cdkDragData]` de ese tipo. Si algún día se conecta otra fuente de arrastre —una paleta lateral, otra rejilla—, el cast pasa a ser mentira y falla en runtime sin que el compilador avise. Sede `O-ajuste-cierre` porque el punto exacto que toca es el del gesto de arrastre. No se paga |
 | D-proyeccion-instancia-espejo (`releerInstancia` duplica el mapeo `Sesion` -> `SesionVistaDTO` de `GeneradorHorarioService.proyectar`) | O-ajuste-cierre | No | Nace en S143 y la declara el propio ejecutor sin que se le pregunte. El servicio del movimiento necesita devolver la instancia releída, y para eso mapea `Sesion` a `SesionVistaDTO` por su cuenta en vez de reutilizar `proyectar`. Es un espejo DELIBERADO y con precedente escrito: añadirle lógica a `GeneradorHorarioService` significa tocar el servicio de 13 repositorios (`D-F8.2b-iii-A-a`), que es exactamente la razón por la que `DiagnosticoService` vive aparte, y `BloqueoService` ya documenta el mismo trato como «espejo frágil, deliberado y consciente». Compensado con un test de contrato que compara ambas salidas —`elCuerpoDel200CoincideConLaProyeccionDeEsaInstancia`—, que es lo que convierte la divergencia en fallo visible en vez de silenciosa. Pero es duplicación real y divergirá si alguien cambia la proyección sin mirar aquí. Sede O-ajuste-cierre porque el objetivo está ABIERTO y es el que la introduce; colgarla de uno cerrado equivale a decidir que no se paga nunca. No se paga ahora |
+| D-censo-r4-ciego-a-la-extincion (el censo marca el token con UNA aparición y no ve el que cae a CERO) | Transversal, sesión de Higiene/Método | No | Nace en S143, encontrada por Claude Code al cerrar y declarada por él. `scripts/verificar-cierre.py` lista como sospechosos los identificadores con exactamente UNA aparición en el corpus vivo, de modo que un token que pierde su última cita **sale de la lista en silencio**: deja de ser sospechoso por haber empeorado. Medido en vivo: al archivar S141, `C-alcance-particiones` cayó a cero apariciones en el corpus vivo —conserva 5 en la bitácora— y desapareció del censo, mientras cuatro tokens que sólo bajaron a una entraron en él. Es FAMILIA de `D-censo-r4-cuenta-menciones` pero NO la misma: aquella dice que el instrumento no distingue una definición de una mención; esta dice que es ciego al caso peor. El arreglo natural es que el censo cuente también los ceros, lo que exige una lista de tokens esperados y no sólo un recuento sobre lo que aparece. No se paga ahora (R-deuda) |
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
 |---|---|---|
@@ -1638,12 +1639,21 @@ una deuda concreta necesita re-lectura, se lee del plan.
 
 ## 5. Revisión del roadmap: por qué H2 va primero
 
+**AVISO DE VIGENCIA (S143):** esta sección narra el diagnóstico con el que se decidió
+priorizar H2, y sus cifras son de ENTONCES. Hoy son falsas y se conservan por registro,
+no como estado. «H2 al 0%» caducó en S141, cuando H2 CERRÓ. El «H1 al 90%» lo declaró
+insostenible §2 en S142 y S143 lo agrava: la condición 1 del criterio de O-ajuste-cierre
+no es sólo incumplida, es NO PRODUCIBLE sobre el centro real —28 grupos a 30/30, 29 de 29
+destinos rechazados en dos instancias de tamaño distinto—, de modo que un porcentaje no
+es defendible mientras la mitad que falta no tenga siquiera una forma verificable
+acordada. El estado vivo de H1 está en §2 y en la ficha de O-ajuste-cierre de §3, no aquí.
+
 El roadmap original ejecutó la Fase 8 en orden de DEPENDENCIA TÉCNICA DEL BACKEND
 (8.1 vía REST → 8.2 solver de pines → 8.3 diagnóstico → 8.6 vista → tests de la
 vista). Ese orden es impecable desde el código y contraproducente desde el
 producto: construyó toda la maquinaria de AJUSTAR (H1) antes de tocar la de CREAR
 (H2), cuando crear es el prerequisito de valor. Resultado medido: ~43 sesiones en
-Fase 8, H1 al 90%, H2 al 0%.
+Fase 8, H1 al 90%, H2 al 0% (dato de entonces; ver aviso de vigencia).
 
 **Orden nuevo: O-shell → O-catálogo → O-estructura → O-demo → O-particiones (todo H2),
 luego O-ajuste-cierre (H1), luego O-diseño (acabado visual, con las vistas ya
@@ -1679,10 +1689,12 @@ para invertir un orden decidido en S115.
   es una estimación numérica —no hay datos para cuantificarla—; es la eliminación
   de una categoría entera de trabajo.
 
-**Contraargumento honesto:** H1 está al 90% y terminarlo da sensación de cierre.
+**Contraargumento honesto:** H1 está al 90% (dato de entonces; ver aviso de vigencia) y terminarlo da
+sensación de cierre.
 Pero terminar H1 antes de H2 es terminar la mitad que no se puede usar. La
 sensación de progreso es la trampa que tiende el orden por dependencias. Por eso
-H1 se marca explícitamente "EN PAUSA al 90%, suficiente" y se salta a H2.
+H1 se marca explícitamente "EN PAUSA al 90%, suficiente" (dato de entonces; ver aviso de vigencia) y se salta
+a H2.
 
 **Decisión reversible:** el orden H2-primero y el grano de cuatro hitos se
 adoptan como base argumentada. Si al ejecutar se revela una razón para otro orden
