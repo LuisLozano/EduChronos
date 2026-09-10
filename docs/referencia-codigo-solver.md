@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-07-23
-- Commit: `dc2ab65`
+- Fecha: 2026-09-10
+- Commit: `ad6865a`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -231,6 +231,11 @@ Paquete: `es.yaroki.educhronos.solver.cpsat`
 Extiende: `RuntimeException`
 Constructores:
 - `public HorarioInfactibleException(String mensaje)`
+- `public HorarioInfactibleException(String mensaje, String estado, Integer segundos)`
+
+Métodos:
+- `public String estado()`
+- `public Integer segundos()`
 
 Consume: (ninguno)
 
@@ -332,10 +337,11 @@ Métodos:
 - `public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion)`
+- `public List<Violacion> verificarTutorias(ProblemaHorario problema)`
 - `static int ventanasDe(Set<Integer> posicionesDelDia)`
 - `static int excesoConsecutivasDe(Set<Integer> posicionesDelDia, int n)`
 
-Consume: `Actividad`, `ActividadInstancia`, `AtribucionBlanda`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `ResultadoVerificacion`, `RolTutoria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`
+Consume: `Actividad`, `ActividadInstancia`, `AtribucionBlanda`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `ResultadoVerificacion`, `RolTutoria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoRestriccion`, `Tramo`, `Violacion`
 
 ### `Violacion` — public record
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -911,6 +917,7 @@ Métodos:
 - `void coDocenciaConUnSoloTutor_noViola()`
 - `void violacionLlevaTramoNullYRecursoElGrupoCubierto()`
 - `void fixtureS8_soloViolaLaActividadCoTutor() throws Exception`
+- `void verificarTutoriasSinSolucion_coincideConLaViaDeVerificar() throws Exception`
 
 Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `Profesor`, `ProfesorTutoria`, `RolTutoria`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
