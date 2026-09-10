@@ -57,6 +57,32 @@
   <p class="error">{{ msg }}</p>
 }
 
+<!--
+  Rechazo del AJUSTE (S145). Bloque PROPIO y disjunto de `.error` (que es del
+  despinado) y de `.error-generacion`: son tres operaciones distintas, y compartir
+  párrafo haría que el aviso de una se leyera como si hablara de otra.
+
+  Las violaciones van en su <ul> y no dentro del texto: son N líneas y cada una
+  nombra su recurso o, cuando la regla no tiene recurso —DISTRIBUCION_MISMO_DIA—,
+  sus celdas culpables. El formato lo decide la función pura `textoViolacion`; aquí
+  no se compone ninguna frase.
+-->
+@if (errorAjuste(); as msg) {
+  <p class="error-ajuste">{{ msg }}</p>
+  @if (violacionesAjuste().length > 0) {
+    <ul class="violaciones-ajuste">
+      @for (v of violacionesAjuste(); track $index) {
+        <li class="violacion">{{ textoViolacion(v) }}</li>
+      }
+    </ul>
+  }
+}
+
+<!-- Limitación conocida del gesto, no un rechazo: no hubo petición. -->
+@if (avisoAjuste(); as msg) {
+  <p class="aviso-ajuste">{{ msg }}</p>
+}
+
 @if (errorDiagnostico(); as msg) {
   <p class="error-diagnostico">{{ msg }}</p>
 }
@@ -74,6 +100,7 @@
     [badges]="badges()"
     [violaciones]="violaciones()"
     (soltar)="alSoltar($event)"
+    (pinar)="alPinar($event)"
     (despinar)="alDespinar($event)"
   />
 } @else {

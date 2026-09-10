@@ -15,6 +15,14 @@
   font-size: var(--tam-l);
 }
 
+/* El coste de la operación: se pinta SIEMPRE, así que es el cuerpo del diálogo y no
+   una nota al pie. En color normal, no de error: enunciar lo que va a pasar no es
+   avisar de que algo va mal. */
+.consecuencias {
+  margin: 0 0 var(--e3);
+  padding-left: var(--e4);
+}
+
 /* Mismo rojo de aviso que el resto de errores de severidad ERROR (panel y vista). */
 .advertencia {
   color: var(--color-error);

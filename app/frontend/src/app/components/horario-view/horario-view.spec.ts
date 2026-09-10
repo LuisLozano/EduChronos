@@ -9,11 +9,14 @@ import { HorarioGrid } from '../horario-grid/horario-grid';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
+import { AjusteService } from '../../services/ajuste.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { JornadaService } from '../../services/jornada.service';
 import { Bloqueo } from '../../models/bloqueo.model';
-import { HorarioProyeccion } from '../../models/horario.model';
+import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
+import { IntercambioRealizado } from '../../models/ajuste.model';
+import { InstanciaCelda } from '../../horario/proyeccion';
 import { Diagnostico } from '../../models/diagnostico.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 import { JornadaDTO } from '../../models/jornada.model';
@@ -105,7 +108,10 @@ describe('contenedor del horario', () => {
   let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
   let sujetoJornada: Subject<JornadaDTO>;
   let jornadas: { obtener: ReturnType<typeof vi.fn> };
-  let sujetoCerrado: Subject<boolean | undefined>;
+  let ultimoCerrado: Subject<boolean | undefined>;
+  let ultimoMover: Subject<SesionVista[]>;
+  let ultimoIntercambiar: Subject<IntercambioRealizado>;
+  let ajustes: { mover: ReturnType<typeof vi.fn>; intercambiar: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
 
@@ -115,7 +121,6 @@ describe('contenedor del horario', () => {
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
     sujetoJornada = new Subject<JornadaDTO>();
-    sujetoCerrado = new Subject<boolean | undefined>();
 
     bloqueos = {
       // FRESCO POR INVOCACIÓN guardado en `ultimoListar`, misma forma que
@@ -146,9 +151,23 @@ describe('contenedor del horario', () => {
       generar: vi.fn(() => (ultimoGenerar = new Subject<HorarioProyeccion>())),
     };
     // Doble del Dialog del CDK: `open` devuelve un objeto con `closed`, el único
-    // miembro que `generar()` toca. El Subject de cierre es COMPARTIDO —cada test
-    // abre a lo sumo una vez—, y emitir a mano da la fase "antes de confirmar".
-    dialog = { open: vi.fn(() => ({ closed: sujetoCerrado })) };
+    // miembro que `generar()` toca. Emitir a mano da la fase "antes de confirmar".
+    //
+    // FRESCO POR INVOCACIÓN desde S145, no compartido: ahora el diálogo se abre en
+    // TODA generación, así que un test que genere dos veces (el reintento, (35))
+    // abre dos veces y deja DOS suscripciones vivas sobre el mismo Subject. Con uno
+    // compartido, el segundo `next(true)` dispararía también la primera y
+    // `lanzarGeneracion` correría dos veces por una sola confirmación: los conteos
+    // `toHaveBeenCalledTimes` medirían el doble sin que la implementación falle.
+    dialog = { open: vi.fn(() => ({ closed: (ultimoCerrado = new Subject<boolean | undefined>()) })) };
+    // Doble del servicio de ajuste. FRESCO POR INVOCACIÓN, por la misma razón que
+    // `guardar`: un Subject cerrado por `.error()` redispara síncronamente al
+    // re-suscribirse, y los tests del rechazo encadenan intento fallido → intento
+    // siguiente.
+    ajustes = {
+      mover: vi.fn(() => (ultimoMover = new Subject<SesionVista[]>())),
+      intercambiar: vi.fn(() => (ultimoIntercambiar = new Subject<IntercambioRealizado>())),
+    };
     // Doble del Router: solo se espía `navigate`. No está cableado al `paramMap`
     // doble, así que navegar NO redispara `cargar` (ver cabecero).
     router = { navigate: vi.fn() };
@@ -173,6 +192,7 @@ describe('contenedor del horario', () => {
         { provide: Dialog, useValue: dialog },
         { provide: HorarioService, useValue: horario },
         { provide: BloqueoService, useValue: bloqueos },
+        { provide: AjusteService, useValue: ajustes },
         { provide: DiagnosticoService, useValue: diagnosticos },
         { provide: PrevalidacionService, useValue: prevalidaciones },
         { provide: JornadaService, useValue: jornadas },
@@ -396,20 +416,32 @@ describe('contenedor del horario', () => {
     expect(grid.violaciones().size).toBe(2);
   });
 
-  /**
-   * El cuerpo del POST se CONSTRUYE en el contenedor a partir de la suelta: la
-   * rejilla emite la INSTANCIA y el tramo destino, y aquí se arma el
-   * `BloqueoRequest` con `aulas: []` —la suelta fija solo el TRAMO (D-5)—. El
-   * objeto esperado va LITERAL, nunca compuesto desde la suelta: componerlo desde
-   * `s` volvería circular el aserto. `dia = 3` y `orden = 4` son DISTINTOS a
-   * propósito —con `dia === orden` la permutación `{dia:s.orden, orden:s.dia}`
-   * (M21) saldría idéntica y quedaría sin medir—. No se emite respuesta: lo que
-   * mide este test es el argumento de la llamada, no la reacción al next.
-   */
-  it('(21) el cuerpo del POST se arma desde la suelta con aulas vacías y el tramo sin permutar', async () => {
-    const grid = await montar([]);
+  // --- Gesto del PIN, en los dos sentidos (S145) ------------------------------
+  //
+  // El sentido de QUITAR ya estaba cubierto por (2)-(4) y no se toca. Lo que se
+  // añade aquí es el de PONER, que S145 devolvió al producto con el candado como
+  // interruptor: al pasar el arrastre a ajustar el horario, `guardar` se quedó sin
+  // llamador y crear pines dejó de ser posible desde la interfaz.
 
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+  /**
+   * El cuerpo del POST se arma en el contenedor a partir de la CLAVE que emite la
+   * rejilla y del TRAMO que la rejilla NO manda: se resuelve contra la proyección
+   * vigente. El objeto esperado va LITERAL, nunca compuesto desde la fila:
+   * componerlo volvería circular el aserto.
+   *
+   * <p>El fixture tiene DOS instancias de la misma actividad en tramos distintos,
+   * y se pina la del índice 2: eso es lo que separa "resuelve por la clave entera"
+   * de "coge la primera fila de esa actividad", que daría el tramo de la hermana.
+   * `dia` (3) y `orden` (4) son distintos entre sí para que una permutación de los
+   * dos no salga idéntica.
+   */
+  it('(72) pinar arma el POST con el tramo que la instancia ocupa en la proyección', async () => {
+    const grid = await montarConSesiones([
+      fila(1, 'Mat-1ºA', 1, 5, 6),
+      fila(2, 'Mat-1ºA', 2, 3, 4),
+    ]);
+
+    grid.pinar.emit('Mat-1ºA|2');
     await fixture.whenStable();
 
     expect(bloqueos.guardar).toHaveBeenCalledTimes(1);
@@ -422,22 +454,65 @@ describe('contenedor del horario', () => {
   });
 
   /**
-   * La clave del índice se toma de la RESPUESTA del POST (`b`), no de la suelta
-   * (`s`): el backend es la autoridad sobre qué instancia quedó pinada. Para que
-   * la mutación `clavePin(b...)` → `clavePin(s...)` (M22) tenga víctima, la
-   * respuesta DIVERGE de la suelta en las dos dimensiones de la clave.
+   * Tras el 200 la instancia entra en el índice y el aviso de pines CRECE. Ese
+   * crecimiento es el síntoma de la capacidad recuperada: hasta este cambio el
+   * contador solo podía menguar, porque nada llamaba a `guardar`.
    *
-   * <p>FIXTURE DEFENSIVO DECLARADO: en producción el backend devuelve lo que
-   * recibe, así que esta divergencia (suelta `Mat-1ºA|2`, respuesta `LCL-1ºA|1`)
-   * es imposible. Es deliberada: sin ella, `s` y `b` coincidirían y la mutación
-   * quedaría verde. Mismo recurso que el it (9) de `diagnostico.spec` (S82). Se
-   * aseveran las DOS mitades: la clave de la respuesta presente con su valor, y
-   * la de la suelta ausente.
+   * <p>SIN alta optimista: la mitad "antes" es la única que discrimina —un alta
+   * optimista produce el MISMO estado final—, y por eso el sujeto no se emite hasta
+   * haber comprobado el 0. El fixture arranca con un pin previo para que el aserto
+   * mida además que el índice se PRESERVA: con `pinadas` vacío, "mapa copiado" y
+   * "mapa desde cero" darían lo mismo.
    */
-  it('(22) la clave del índice sale de la respuesta del POST, no de la suelta', async () => {
-    const grid = await montar([]);
+  it('(73) el pin entra en el índice al llegar la respuesta, y el aviso de pines crece', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([pin(7, 'Mat-1ºA', 1, 5, 6)]);
+    sujetoProyeccion.next({
+      ...PROYECCION_VACIA,
+      sesiones: [fila(1, 'Mat-1ºA', 1, 5, 6), fila(2, 'LCL-1ºA', 1, 3, 4)],
+    });
+    await fixture.whenStable();
+    const grid = rejilla();
 
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.aviso')?.textContent?.trim()).toBe('1 pines sin aplicar — regenerar');
+
+    grid.pinar.emit('LCL-1ºA|1');
+    await fixture.whenStable();
+
+    // ANTES de la respuesta: el candado no se cierra y el contador no se mueve.
+    expect(grid.pinadas().size).toBe(1);
+    expect(grid.pinadas().has('LCL-1ºA|1')).toBe(false);
+
+    ultimoGuardar.next({
+      id: 9,
+      actividadCodigo: 'LCL-1ºA',
+      indice: 1,
+      tramo: { dia: 3, orden: 4 },
+      aulas: [],
+    });
+    await fixture.whenStable();
+
+    // DESPUÉS: entra el nuevo, sigue el viejo, y el aviso lo refleja.
+    expect(grid.pinadas().size).toBe(2);
+    expect(grid.pinadas().get('LCL-1ºA|1')).toBe(9);
+    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
+    expect(raiz.querySelector('.aviso')?.textContent?.trim()).toBe('2 pines sin aplicar — regenerar');
+  });
+
+  /**
+   * La clave del índice sale de la RESPUESTA del POST, no de la petición: el backend
+   * es la autoridad sobre qué instancia quedó pinada.
+   *
+   * <p>FIXTURE DEFENSIVO DECLARADO, igual que el (22) original: en producción el
+   * backend devuelve lo que recibe, así que esta divergencia es imposible. Es
+   * deliberada —sin ella petición y respuesta coincidirían y la mutación quedaría
+   * verde— y diverge en las DOS dimensiones de la clave, actividad e índice.
+   */
+  it('(74) la clave del índice sale de la respuesta del POST, no de la petición', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 3, 4)]);
+
+    grid.pinar.emit('Mat-1ºA|2');
     await fixture.whenStable();
 
     ultimoGuardar.next({
@@ -454,86 +529,86 @@ describe('contenedor del horario', () => {
   });
 
   /**
-   * SIN alta optimista: el candado aparece al llegar la respuesta del POST, no al
-   * emitir la suelta. La mitad "antes" es la única que discrimina —un alta
-   * optimista produce el MISMO estado final—, y por eso el sujeto del `guardar`
-   * NO se emite hasta haber comprobado el 0. Mata M23 (poblar `pinadas` antes del
-   * subscribe), que dejaría el tamaño en 1 ya en la fase "antes".
-   */
-  it('(23) el pin entra en el índice al llegar la respuesta, no al emitir la suelta', async () => {
-    const grid = await montar([]);
-
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
-    await fixture.whenStable();
-    // ANTES de la respuesta: nada pinado.
-    expect(grid.pinadas().size).toBe(0);
-
-    ultimoGuardar.next({
-      id: 9,
-      actividadCodigo: 'Mat-1ºA',
-      indice: 2,
-      tramo: { dia: 3, orden: 4 },
-      aulas: [],
-    });
-    await fixture.whenStable();
-    // DESPUÉS: el único pin.
-    expect(grid.pinadas().size).toBe(1);
-  });
-
-  /**
-   * Un POST que falla NO pina y su mensaje se DEGRADA cuando el body no trae
-   * `message` ni `error`. Este test FABRICA ese body vacío, así que no depende
-   * de `server.error.include-message` —activo desde O-catálogo—: mide la rama
-   * del degradado, que sigue siendo alcanzable (un 500 de Tomcat, un corte de
-   * red o un cuerpo no-JSON llegan sin `message` con la clave activa).
-   * Se asevera el TEXTO EXACTO, no la mera presencia de `.error`: mata M24
-   * (`return cuerpo?.message ?? ''`), que dejaría el aviso vacío.
+   * Un POST que falla NO pina —el candado se queda abierto— y el mensaje se DEGRADA
+   * cuando el body no trae `message` ni `error`. Se asevera el TEXTO EXACTO, no la
+   * mera presencia de `.error`: la degradación silenciosa a cadena vacía dejaría el
+   * aviso mudo y pasaría con un aserto de presencia.
    *
-   * <p>Se lee por el `<p class="error">`: aquí la proyección va OK (`error()` es
-   * null) y no hay fallo de diagnóstico, así que ese párrafo es inequívocamente
-   * `errorPin` —mismo razonamiento que el (5)—. El body es `{}` (ni `message` ni
-   * `error`) para forzar la rama del degradado, y `pinadas` sigue en 0.
+   * <p>Se lee por el `<p class="error">`: aquí la proyección va OK y no hay fallo de
+   * diagnóstico, así que ese párrafo es inequívocamente `errorPin`. El mensaje sigue
+   * saliendo de {@link mensaje}, que habla del pin y no se tocó al añadir
+   * `mensajeAjuste`.
    */
-  it('(24) un POST que falla no pina y el mensaje se degrada a estado cuando el body va vacío', async () => {
-    const grid = await montar([]);
+  it('(75) un POST de pin que falla no pina y el mensaje se degrada al estado', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 3, 4)]);
 
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    grid.pinar.emit('Mat-1ºA|2');
     await fixture.whenStable();
 
     ultimoGuardar.error({ status: 400, error: {} });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
-    const aviso = raiz.querySelector('.error');
-    expect(aviso).not.toBeNull();
-    expect(aviso!.textContent?.trim()).toBe('El servidor rechazó el pin (400).');
+    expect(raiz.querySelector('.error')?.textContent?.trim()).toBe(
+      'El servidor rechazó el pin (400).',
+    );
     expect(grid.pinadas().size).toBe(0);
+    // El aviso de pines no llegó a existir: nada que regenerar.
+    expect(raiz.querySelector('.aviso')).toBeNull();
   });
 
   /**
-   * Dos invariantes del ciclo de pinado en un test:
-   *
-   * <p>(a) Tras un alta OK, la proyección NO se recarga: `getProyeccion` sigue en
-   * la ÚNICA llamada del montaje. El pin es una restricción para la PRÓXIMA
-   * generación, no un movimiento del horario vigente (TSDoc de la clase). Mata
-   * M25 (`this.cargar(1)` en el next), que dispararía un segundo `getProyeccion`.
-   *
-   * <p>(b) Un segundo `soltar` LIMPIA `errorPin` antes de que su POST responda:
-   * `alSoltar` hace `errorPin.set(null)` en su primera línea. Se comprueba con el
-   * segundo sujeto AÚN sin emitir. Mata M25b (quitar ese `set(null)`), que
-   * dejaría el aviso del fallo anterior pintado.
-   *
-   * <p>Aquí es donde el `guardar` FRESCO POR INVOCACIÓN es imprescindible: el
-   * sujeto del alta fallida queda cerrado tras `.error()`, y solo un sujeto nuevo
-   * en el segundo intento evita que re-suscribirse redispare el error y repueble
-   * `errorPin`, lo que haría inobservable la fase "a null".
+   * Una clave que no está en la proyección no tiene tramo que mandar: no se emite
+   * POST y no se inventa un aviso, con el mismo criterio que {@link alDespinar} ante
+   * un id ausente. La hermana SÍ presente es lo que hace escopado al aserto: sin
+   * ella, "no llamó" podría ser una proyección vacía.
    */
-  it('(25) el alta OK no recarga la proyección, y un nuevo intento limpia el error previo antes de responder', async () => {
-    const grid = await montar([]);
+  it('(76) pinar una clave ausente de la proyección no emite POST', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 3, 4)]);
+
+    // Misma actividad, otra repetición: esa instancia no está en la proyección.
+    grid.pinar.emit('Mat-1ºA|3');
+    await fixture.whenStable();
+
+    expect(bloqueos.guardar).not.toHaveBeenCalled();
+    expect(grid.pinadas().size).toBe(0);
+    expect((fixture.nativeElement as HTMLElement).querySelector('.error')).toBeNull();
+  });
+
+  /**
+   * Los DOS invariantes que el (25) original fijaba sobre el alta desde la suelta, y
+   * que al mover el alta al candado se habían quedado sin dueño:
+   *
+   * <p>(a) Tras un alta OK, la proyección NO se recarga: `getProyeccion` sigue en la
+   * ÚNICA llamada del montaje. El pin es una restricción para la PRÓXIMA generación,
+   * no un movimiento del horario vigente, así que no hay nada nuevo que traer. Mata
+   * el `this.cargar(id)` en el `next`, que dispararía un segundo GET.
+   *
+   * <p>(b) Un segundo intento LIMPIA `errorPin` antes de que su POST responda:
+   * `alPinar` hace `errorPin.set(null)` en su primera línea. Se comprueba con el
+   * segundo sujeto AÚN sin emitir; sin esa fase, el aviso del fallo anterior se
+   * quedaría pintado mientras el usuario espera y parecería que el reintento también
+   * falló.
+   *
+   * <p>Aquí es donde el doble `guardar` FRESCO POR INVOCACIÓN es imprescindible: el
+   * sujeto del alta fallida queda CERRADO tras `.error()`, y re-suscribirse a un
+   * Subject cerrado redispara el error SÍNCRONAMENTE, lo que repoblaría `errorPin` y
+   * haría inobservable la fase "a null". Mismo razonamiento que el (25) original.
+   *
+   * <p>Las tres instancias del fixture son distintas a propósito: si el segundo
+   * intento reusara la clave del primero, "limpia el error" y "el error nunca se
+   * pobló" no se distinguirían.
+   */
+  it('(78) el alta OK no recarga la proyección, y un nuevo intento limpia el error previo antes de responder', async () => {
+    const grid = await montarConSesiones([
+      fila(1, 'Mat-1ºA', 2, 3, 4),
+      fila(2, 'LCL-1ºA', 1, 2, 5),
+      fila(3, 'ING-1ºA', 1, 1, 1),
+    ]);
     expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
 
     // (a) alta OK: la proyección no se recarga.
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4 });
+    grid.pinar.emit('Mat-1ºA|2');
     await fixture.whenStable();
     ultimoGuardar.next({
       id: 9,
@@ -547,44 +622,455 @@ describe('contenedor del horario', () => {
 
     // (b) un alta que falla puebla el aviso...
     const raiz = fixture.nativeElement as HTMLElement;
-    grid.soltar.emit({ actividadCodigo: 'LCL-1ºA', indice: 1, dia: 2, orden: 5 });
+    grid.pinar.emit('LCL-1ºA|1');
     await fixture.whenStable();
     ultimoGuardar.error({ status: 400, error: {} });
     await fixture.whenStable();
     expect(raiz.querySelector('.error')).not.toBeNull();
 
     // ...y el siguiente intento lo limpia ANTES de que su POST responda.
-    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 3, dia: 1, orden: 1 });
+    grid.pinar.emit('ING-1ºA|1');
     await fixture.whenStable();
     expect(raiz.querySelector('.error')).toBeNull();
   });
 
   /**
-   * El alta PRESERVA el índice previo: se añade la clave nueva sin borrar las que
-   * ya estaban. Es el único test del camino de alta que arranca con `pinadas` NO
-   * vacío —(22) y (23) parten de vacío, donde "mapa copiado" y "mapa desde cero"
-   * dan idéntico resultado—, así que es el único que mata M26 (`new Map()` en vez
-   * de `new Map(this.pinadas())`), que descartaría el pin preexistente al añadir
-   * el nuevo.
+   * El gesto del pin y el del ajuste son INDEPENDIENTES: pinar no manda ninguna
+   * petición de movimiento. Mata la mutación que cableara `pinar` al camino del
+   * ajuste —los dos nacen del mismo componente y llevan la misma instancia—.
    */
-  it('(26) el alta preserva los pines previos del índice', async () => {
-    const grid = await montar([pin(7, 'Mat-1ºA', 1, 1, 2)]);
-    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
+  it('(77) pinar no dispara ninguna petición de ajuste', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 3, 4)]);
 
-    grid.soltar.emit({ actividadCodigo: 'LCL-1ºA', indice: 1, dia: 3, orden: 4 });
+    grid.pinar.emit('Mat-1ºA|2');
     await fixture.whenStable();
-    ultimoGuardar.next({
-      id: 9,
-      actividadCodigo: 'LCL-1ºA',
-      indice: 1,
-      tramo: { dia: 3, orden: 4 },
-      aulas: [],
+
+    expect(ajustes.mover).not.toHaveBeenCalled();
+    expect(ajustes.intercambiar).not.toHaveBeenCalled();
+  });
+
+  // --- Gesto de AJUSTE (S145) ------------------------------------------------
+  //
+  // Sustituye a los casos (21)-(26), que medían el alta de PIN que este mismo
+  // gesto hacía hasta S144. Ese camino ya no existe: arrastrar mueve el horario
+  // vigente, no deja una restricción para la próxima generación, así que aquellos
+  // asertos no se adaptan —afirmaban un comportamiento retirado—.
+
+  /**
+   * Una instancia ocupante del slot destino. Solo se leen `actividadCodigo` e
+   * `indice` —la clave de negocio que viaja al backend—; `entradas` va vacío porque
+   * el contenedor no lo mira: quien lo usa es la rejilla, para pintar.
+   */
+  function ocupante(actividadCodigo: string, indice: number): InstanciaCelda {
+    return { actividadCodigo, indice, entradas: [] };
+  }
+
+  /** Una fila de proyección mínima, para poblar las respuestas del ajuste. */
+  function fila(sesionId: number, actividadCodigo: string, indice: number, dia: number, tramo: number): SesionVista {
+    return {
+      sesionId,
+      indice,
+      dia,
+      tramo,
+      asignaturaCodigo: 'X',
+      asignaturaNombre: 'X',
+      profesores: ['P1'],
+      aulaCodigo: 'A1',
+      subgrupos: ['1ºA-Completo'],
+      grupos: ['1ºA'],
+      actividadCodigo,
+      plazaCodigo: `${actividadCodigo}-P1`,
+    };
+  }
+
+  /**
+   * Monta con una proyección que SÍ tiene sesiones, a diferencia de
+   * {@link montar}: los casos del refresco necesitan filas que sustituir, y con
+   * `sesiones: []` un "se refrescó" sería indistinguible de un "no se tocó nada".
+   */
+  async function montarConSesiones(sesiones: SesionVista[]): Promise<HorarioGrid> {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next({ ...PROYECCION_VACIA, sesiones });
+    await fixture.whenStable();
+    return rejilla();
+  }
+
+  /**
+   * Destino VACÍO ⇒ `mover`, nunca `intercambiar`. Las dos mitades discriminan: sin
+   * el `not.toHaveBeenCalled` sobre `intercambiar`, una implementación que llamara a
+   * los DOS pasaría.
+   *
+   * <p>El cuerpo va LITERAL, no compuesto desde el evento: componerlo volvería
+   * circular el aserto. `dia = 3` y `orden = 4` son distintos entre sí —con
+   * `dia === orden` una permutación de ambos daría un cuerpo idéntico— e `indice`
+   * es 2 y no 1, que una implementación podría fijar a mano. El id del horario (1)
+   * sale de la ruta, y va como primer argumento.
+   */
+  it('(61) destino vacío: se llama a mover con el tramo destino, y no a intercambiar', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4, ocupantes: [] });
+    await fixture.whenStable();
+
+    expect(ajustes.mover).toHaveBeenCalledTimes(1);
+    expect(ajustes.mover).toHaveBeenCalledWith(1, {
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      dia: 3,
+      orden: 4,
+    });
+    expect(ajustes.intercambiar).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Destino con UNA instancia ⇒ `intercambiar` con AMBAS nombradas, y no `mover`.
+   *
+   * <p>Las dos referencias DIFIEREN en actividad Y en índice, y ninguna repite los
+   * valores de la otra: así el aserto distingue "manda la arrastrada como primera y
+   * la ocupante como segunda" de una implementación que las permutara o que mandara
+   * dos veces la misma. El tramo destino NO viaja: el intercambio no lo lleva en el
+   * cuerpo (cada una va donde está la otra), y que el evento sí lo traiga es lo que
+   * mide que no se cuela.
+   */
+  it('(62) destino con una instancia: se llama a intercambiar con las DOS referencias, y no a mover', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      dia: 3,
+      orden: 4,
+      ocupantes: [ocupante('LCL-1ºA', 1)],
     });
     await fixture.whenStable();
 
-    expect(grid.pinadas().size).toBe(2);
-    expect(grid.pinadas().get('Mat-1ºA|1')).toBe(7);
-    expect(grid.pinadas().get('LCL-1ºA|1')).toBe(9);
+    expect(ajustes.intercambiar).toHaveBeenCalledTimes(1);
+    expect(ajustes.intercambiar).toHaveBeenCalledWith(1, {
+      primera: { actividadCodigo: 'Mat-1ºA', indice: 2 },
+      segunda: { actividadCodigo: 'LCL-1ºA', indice: 1 },
+    });
+    expect(ajustes.mover).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Destino con DOS o más ⇒ NINGUNA petición y un aviso que dice cuántas hay. Es
+   * una limitación conocida del gesto, no un rechazo: se pinta con la clase
+   * `.aviso-ajuste`, distinta de `.error-ajuste`, y NO se toca el backend.
+   *
+   * <p>El número va EN el aserto del texto (`Hay 2 clases`): sin él, una
+   * implementación que fijara la frase a mano —o que contara `entradas` en vez de
+   * instancias— quedaría verde.
+   */
+  it('(63) destino con dos o más: no se pide nada y el aviso dice cuántas hay', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      dia: 3,
+      orden: 4,
+      ocupantes: [ocupante('LCL-1ºA', 1), ocupante('ING-1ºA', 1)],
+    });
+    await fixture.whenStable();
+
+    expect(ajustes.mover).not.toHaveBeenCalled();
+    expect(ajustes.intercambiar).not.toHaveBeenCalled();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const aviso = raiz.querySelector('.aviso-ajuste');
+    expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe(
+      'Hay 2 clases en ese tramo: no puedo saber con cuál intercambiar.',
+    );
+    // No es un rechazo del servidor: el bloque de error sigue ausente.
+    expect(raiz.querySelector('.error-ajuste')).toBeNull();
+  });
+
+  /**
+   * El 200 del INTERCAMBIO refleja LOS DOS lados en la rejilla, cada lista aplicada
+   * a SU referencia. El fixture es el caso que rompe una implementación que
+   * reagrupara por `actividadCodigo`: las dos instancias son repeticiones de la
+   * MISMA actividad (`Mat-1ºA`, índices 1 y 2), así que concatenar y reagrupar las
+   * mezclaría sin remedio.
+   *
+   * <p>Se lee por el input `sesiones` de la rejilla, la frontera pública, y se
+   * asevera el par (dia, tramo) de cada instancia: los dos se INTERCAMBIAN, así que
+   * una implementación que aplicara `primera` a los dos lados —o que se saltara uno—
+   * cae. La mitad "antes" fija que no hubo movimiento optimista.
+   */
+  it('(64) el 200 del intercambio mueve las DOS instancias, cada lista a su lado', async () => {
+    const grid = await montarConSesiones([
+      fila(1, 'Mat-1ºA', 1, 1, 1),
+      fila(2, 'Mat-1ºA', 2, 5, 6),
+    ]);
+
+    grid.soltar.emit({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 1,
+      dia: 5,
+      orden: 6,
+      ocupantes: [ocupante('Mat-1ºA', 2)],
+    });
+    await fixture.whenStable();
+
+    // ANTES del 200: la rejilla no se ha movido.
+    expect(grid.sesiones().find((s) => s.indice === 1)?.dia).toBe(1);
+    expect(grid.sesiones().find((s) => s.indice === 2)?.dia).toBe(5);
+
+    ultimoIntercambiar.next({
+      primera: [fila(1, 'Mat-1ºA', 1, 5, 6)],
+      segunda: [fila(2, 'Mat-1ºA', 2, 1, 1)],
+    });
+    await fixture.whenStable();
+
+    // DESPUÉS: permutadas, y sin filas de más ni de menos.
+    expect(grid.sesiones().length).toBe(2);
+    const primera = grid.sesiones().find((s) => s.indice === 1);
+    const segunda = grid.sesiones().find((s) => s.indice === 2);
+    expect([primera?.dia, primera?.tramo]).toEqual([5, 6]);
+    expect([segunda?.dia, segunda?.tramo]).toEqual([1, 1]);
+  });
+
+  /**
+   * El 200 de MOVER sustituye las filas de la instancia movida y DEJA EN PAZ a las
+   * demás. La sesión ajena (`LCL-1ºA`) es lo que discrimina: sin ella, "sustituye lo
+   * suyo" y "reemplaza la proyección entera por la respuesta" darían lo mismo.
+   *
+   * <p>La instancia movida tiene DOS filas (un desdoble) y la respuesta también:
+   * una implementación que sustituyera solo la primera dejaría tres filas de esa
+   * instancia y el conteo cae.
+   */
+  it('(65) el 200 de mover sustituye las filas de esa instancia y no toca las ajenas', async () => {
+    const grid = await montarConSesiones([
+      fila(1, 'Mat-1ºA', 2, 1, 1),
+      fila(2, 'Mat-1ºA', 2, 1, 1),
+      fila(3, 'LCL-1ºA', 1, 2, 3),
+    ]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 4, orden: 5, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.next([fila(1, 'Mat-1ºA', 2, 4, 5), fila(2, 'Mat-1ºA', 2, 4, 5)]);
+    await fixture.whenStable();
+
+    const movidas = grid.sesiones().filter((s) => s.actividadCodigo === 'Mat-1ºA');
+    expect(movidas.length).toBe(2);
+    expect(movidas.every((s) => s.dia === 4 && s.tramo === 5)).toBe(true);
+    // La ajena, intacta.
+    const ajena = grid.sesiones().find((s) => s.actividadCodigo === 'LCL-1ºA');
+    expect([ajena?.dia, ajena?.tramo]).toEqual([2, 3]);
+  });
+
+  /**
+   * 409 `VIOLA_REGLA_DURA`: se pinta el texto de la causa Y una línea por violación,
+   * cada una con su recurso. Las DOS violaciones del fixture tienen recursos
+   * distintos y se aseveran las dos: con una sola, "pinta la primera" y "pinta
+   * todas" serían indistinguibles.
+   */
+  it('(66) un 409 VIOLA_REGLA_DURA pinta las violaciones con su recurso', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.error({
+      status: 409,
+      error: {
+        causa: 'VIOLA_REGLA_DURA',
+        mensaje: 'prosa de log que no se enseña',
+        violaciones: [
+          {
+            regla: 'SOLAPE_PROFESOR',
+            recursoCodigo: 'PROF7',
+            tramoCodigo: 'L-2',
+            celdas: [{ actividadCodigo: 'Mat-1ºA', indice: 2, plazaCodigo: null }],
+            descripcion: 'inerte',
+          },
+          {
+            regla: 'SOLAPE_SUBGRUPO',
+            recursoCodigo: '1ºA-Completo',
+            tramoCodigo: 'L-2',
+            celdas: [{ actividadCodigo: 'Mat-1ºA', indice: 2, plazaCodigo: null }],
+            descripcion: 'inerte',
+          },
+        ],
+      },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error-ajuste')?.textContent?.trim()).toBe(
+      'Ese cambio provoca conflictos que antes no existían:',
+    );
+    const lineas = Array.from(raiz.querySelectorAll('.violaciones-ajuste .violacion')).map((li) =>
+      li.textContent?.trim(),
+    );
+    expect(lineas).toEqual(['SOLAPE_PROFESOR — PROF7 en L-2', 'SOLAPE_SUBGRUPO — 1ºA-Completo en L-2']);
+    // La prosa del servidor NO se enseña en esta causa: la vista decide con la causa.
+    expect(raiz.textContent).not.toContain('prosa de log que no se enseña');
+  });
+
+  /**
+   * `DISTRIBUCION_MISMO_DIA` es regla DURA y NO trae `recursoCodigo` —el conflicto
+   * es de la actividad consigo misma, medido en S144—: la línea nombra la regla y
+   * las CELDAS culpables. Es el caso que rompe la plantilla ingenua, y por eso el
+   * aserto exige el texto completo: ni «recurso: undefined» ni la violación oculta.
+   *
+   * <p>Las dos celdas van en el aserto —son las dos repeticiones del mismo día—, y
+   * la ausencia de `null` en el texto se asevera aparte: la mutación que quita el
+   * fallback y escribe `recursoCodigo` a secas produce exactamente esa cadena.
+   */
+  it('(67) un 409 con DISTRIBUCION_MISMO_DIA, sin recurso, pinta la regla y sus celdas', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 3, dia: 3, orden: 4, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.error({
+      status: 409,
+      error: {
+        causa: 'VIOLA_REGLA_DURA',
+        mensaje: 'prosa',
+        violaciones: [
+          {
+            regla: 'DISTRIBUCION_MISMO_DIA',
+            recursoCodigo: null,
+            tramoCodigo: null,
+            celdas: [
+              { actividadCodigo: 'Mat-1ºA', indice: 1, plazaCodigo: null },
+              { actividadCodigo: 'Mat-1ºA', indice: 3, plazaCodigo: null },
+            ],
+            descripcion: 'inerte',
+          },
+        ],
+      },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const linea = raiz.querySelector('.violaciones-ajuste .violacion')?.textContent?.trim();
+    expect(linea).toBe('DISTRIBUCION_MISMO_DIA — Mat-1ºA #1, Mat-1ºA #3');
+    expect(linea).not.toContain('null');
+    expect(linea).not.toContain('undefined');
+  });
+
+  /**
+   * 409 `INSTANCIA_PINADA`: el mensaje dice que manda el PIN, y la rejilla NO se
+   * mueve. Las dos mitades importan —el texto exacto y la proyección intacta—:
+   * la segunda es la que mata un movimiento optimista que dejara la instancia en el
+   * destino pese al rechazo.
+   */
+  it('(68) un 409 INSTANCIA_PINADA dice que manda el pin y la rejilla no se mueve', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 1, 1)]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 4, orden: 5, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.error({
+      status: 409,
+      error: { causa: 'INSTANCIA_PINADA', mensaje: 'prosa', violaciones: [] },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error-ajuste')?.textContent?.trim()).toBe(
+      'Esa clase está pinada y el pin manda sobre el arrastre: quita el pin antes de moverla.',
+    );
+    // La rejilla sigue EXACTAMENTE como estaba: mismo tramo de origen.
+    expect(grid.sesiones().length).toBe(1);
+    expect([grid.sesiones()[0].dia, grid.sesiones()[0].tramo]).toEqual([1, 1]);
+    // Sin violaciones que enumerar, la lista ni se pinta.
+    expect(raiz.querySelector('.violaciones-ajuste')).toBeNull();
+  });
+
+  /**
+   * 404 `INSTANCIA_INEXISTENTE`: el cuerpo dice CUÁL de las dos falta —solo viaja en
+   * la prosa del servidor, no hay campo estructurado— y el aviso la nombra. Es la
+   * ÚNICA causa que arrastra ese texto, y el aserto lo exige literal: sin él, "una
+   * de las dos" a secas dejaría al usuario sin saber cuál.
+   */
+  it('(69) un 404 INSTANCIA_INEXISTENTE nombra cuál de las dos instancias falta', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      dia: 3,
+      orden: 4,
+      ocupantes: [ocupante('LCL-1ºA', 1)],
+    });
+    await fixture.whenStable();
+
+    ultimoIntercambiar.error({
+      status: 404,
+      error: {
+        causa: 'INSTANCIA_INEXISTENTE',
+        mensaje: "La instancia 'segunda' (LCL-1ºA, 1) no está en el horario 1",
+        violaciones: [],
+      },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error-ajuste')?.textContent?.trim()).toBe(
+      "Una de las dos clases ya no está en el horario. La instancia 'segunda' (LCL-1ºA, 1) no está en el horario 1",
+    );
+  });
+
+  /**
+   * Cualquier rechazo deja la proyección EXACTAMENTE como estaba: mismas filas, en
+   * los mismos tramos, y ninguna recarga. `getProyeccion` sigue en la única llamada
+   * del montaje, que es lo que mata un `this.cargar(id)` en la rama de error —un
+   * refresco que "arreglaría" la vista y taparía el hecho de que no se movió nada—.
+   *
+   * <p>El fixture usa una causa DESCONOCIDA a propósito (la del degradado), que es
+   * la rama por la que también pasan `TRAMO_INEXISTENTE` y cualquier causa futura:
+   * si el degradado tocara la rejilla, ninguna de las otras lo detectaría.
+   */
+  it('(70) tras un rechazo, la rejilla queda exactamente como estaba y no se recarga', async () => {
+    const grid = await montarConSesiones([
+      fila(1, 'Mat-1ºA', 2, 1, 1),
+      fila(2, 'LCL-1ºA', 1, 2, 3),
+    ]);
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+    const antes = grid.sesiones().map((s) => [s.sesionId, s.dia, s.tramo]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 4, orden: 5, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.error({ status: 400, error: { causa: 'TRAMO_INEXISTENTE', mensaje: 'x', violaciones: [] } });
+    await fixture.whenStable();
+
+    expect(grid.sesiones().map((s) => [s.sesionId, s.dia, s.tramo])).toEqual(antes);
+    expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+    // Degradado honesto: dice el estado, no inventa un motivo.
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error-ajuste')?.textContent?.trim()).toBe(
+      'El servidor rechazó el cambio (400).',
+    );
+  });
+
+  /**
+   * Mientras el ajuste vuela se reutiliza el estado de espera de S118 —la misma
+   * señal y el mismo `<p class="generando">`—, pero con SU frase: anunciarle los
+   * diez minutos de un solve sería falso. El botón «Generar» queda cerrado, que es
+   * la otra mitad de reutilizar el estado y no duplicarlo.
+   */
+  it('(71) mientras el ajuste vuela se reutiliza el aviso de espera, con su propia frase', async () => {
+    const grid = await montar([]);
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 3, orden: 4, ocupantes: [] });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.generando')?.textContent?.trim()).toBe('Aplicando el cambio…');
+    expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(true);
+
+    ultimoMover.next([]);
+    await fixture.whenStable();
+
+    expect(raiz.querySelector('.generando')).toBeNull();
   });
 
   // --- Gesto de generar (Fase 8) ---------------------------------------------
@@ -622,8 +1108,11 @@ describe('contenedor del horario', () => {
     await fixture.whenStable();
   }
 
-  /** Pulsa el botón «Generar» por el DOM, la frontera real del gesto. */
-  function pulsarGenerar(): void {
+  /**
+   * Pulsa el botón «Generar» por el DOM, la frontera real del gesto. Desde S145 eso
+   * ya NO lanza la generación: abre el diálogo y ahí se queda.
+   */
+  function abrirDialogoGenerar(): void {
     const boton = (fixture.nativeElement as HTMLElement).querySelector(
       'button.generar',
     ) as HTMLButtonElement;
@@ -634,21 +1123,73 @@ describe('contenedor del horario', () => {
   }
 
   /**
-   * Pre-validación SIN ningún ERROR: la generación procede directa, sin diálogo.
-   * Las DOS mitades discriminan: `generar` recibe EXACTAMENTE 1 (no 0: la mutación
-   * que exige confirmación siempre) y `Dialog.open` recibe 0 (no ≥1: la mutación
-   * que abre el diálogo pase lo que pase). El fixture tiene un AVISO no vacío para
-   * que «sin ERROR» no sea «sin avisos»: separa `filter(sev==='ERROR')` de
-   * `avisos.length > 0`.
+   * El gesto COMPLETO: pulsar y confirmar. Lo usan los tests que miden lo que pasa
+   * DESPUÉS de generar (navegación, errores, espera), a los que el diálogo no les
+   * interesa. Los que miden el diálogo mismo usan {@link abrirDialogoGenerar} y
+   * emiten el cierre a mano.
+   *
+   * <p>La emisión es síncrona tras el click y eso basta: `generar()` se suscribe a
+   * `closed` dentro del propio manejador, así que cuando esta línea corre la
+   * suscripción ya existe.
    */
-  it('(27) sin ERROR en la pre-validación, generar procede directo: 1 al servicio, 0 al diálogo', async () => {
+  function pulsarGenerar(): void {
+    abrirDialogoGenerar();
+    ultimoCerrado.next(true);
+  }
+
+  /**
+   * S145 INVIERTE el (27) original, que fijaba «sin ERROR ⇒ 0 al diálogo». Ahora el
+   * diálogo se abre SIEMPRE: lo que se confirma es el coste de la operación —diez
+   * minutos, sustituye el trabajo en curso, irreversible—, que existe también con el
+   * catálogo sano. Sobre el centro real la pre-validación devuelve lista vacía, así
+   * que con la regla vieja el diálogo no se abría NUNCA y una generación salía de un
+   * clic.
+   *
+   * <p>Las tres mitades discriminan: `open` recibe 1 (no 0: la regla vieja), el
+   * `data` va con la lista VACÍA —no con el aviso no-ERROR, que es lo que separa
+   * «filtra los ERROR» de «pasa lo que haya»— y `generar` recibe 0 antes del cierre.
+   */
+  it('(27) sin ERROR en la pre-validación, generar abre el diálogo igualmente, con data vacío', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
-    pulsarGenerar();
+    abrirDialogoGenerar();
+    await fixture.whenStable();
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, { data: [] });
+    expect(horario.generar).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * Gemelo del (27): confirmado con lista vacía, la generación procede. Sin este, la
+   * mutación que abre el diálogo pero no cablea el `closed` quedaría verde en el
+   * camino sin avisos, que es el único que recorre este centro.
+   */
+  it('(27b) confirmado el diálogo sin avisos, la generación procede una vez', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    abrirDialogoGenerar();
+    await fixture.whenStable();
+    ultimoCerrado.next(true);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(1);
-    expect(dialog.open).toHaveBeenCalledTimes(0);
+  });
+
+  /**
+   * Cancelar el diálogo NO dispara ninguna generación. `false` y no `undefined`
+   * —ese lo cubre el (29) del backdrop—: juntos fijan que la condición del cierre es
+   * exactamente `=== true` por los dos lados.
+   */
+  it('(27c) cancelado el diálogo sin avisos, no se llama al backend', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    abrirDialogoGenerar();
+    await fixture.whenStable();
+    ultimoCerrado.next(false);
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(0);
   });
 
   /**
@@ -666,7 +1207,7 @@ describe('contenedor del horario', () => {
   it('(28) con un ERROR, abre el diálogo con SOLO los errores y no llama al backend hasta el cierre', async () => {
     await montarConPrevalidacion([AVISO_ERROR, AVISO_NO_ERROR]);
 
-    pulsarGenerar();
+    abrirDialogoGenerar();
     await fixture.whenStable();
 
     expect(dialog.open).toHaveBeenCalledTimes(1);
@@ -683,11 +1224,11 @@ describe('contenedor del horario', () => {
   it('(29) diálogo cerrado por backdrop (undefined) no llama al backend', async () => {
     await montarConPrevalidacion([AVISO_ERROR]);
 
-    pulsarGenerar();
+    abrirDialogoGenerar();
     await fixture.whenStable();
     expect(horario.generar).toHaveBeenCalledTimes(0);
 
-    sujetoCerrado.next(undefined);
+    ultimoCerrado.next(undefined);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(0);
@@ -701,10 +1242,10 @@ describe('contenedor del horario', () => {
   it('(30) diálogo confirmado (true) llama al backend una vez', async () => {
     await montarConPrevalidacion([AVISO_ERROR]);
 
-    pulsarGenerar();
+    abrirDialogoGenerar();
     await fixture.whenStable();
 
-    sujetoCerrado.next(true);
+    ultimoCerrado.next(true);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(1);

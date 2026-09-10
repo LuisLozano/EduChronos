@@ -121,6 +121,28 @@
   cursor: pointer;
 }
 
+/* S145 · el candado de una instancia SIN pin está en el DOM pero no se ve en
+   reposo: con 791 instancias en el centro real, un glifo permanente en cada
+   esquina sería ruido constante para señalar el estado NORMAL (no tener pin).
+   Aparece al pasar por encima de la instancia y al enfocar el botón.
+
+   `opacity` y NO `display: none` ni `visibility: hidden`: los dos sacan al botón
+   del árbol de accesibilidad y lo vuelven INFOCALIZABLE, así que el gesto
+   quedaría solo para quien use ratón. Con opacity el botón sigue en el orden de
+   tabulación, y el `:focus-visible` lo hace visible en cuanto llega el foco.
+
+   El candado de una instancia YA PINADA no lleva `--libre` y por tanto no entra
+   aquí: se ve siempre, porque ahí el glifo informa de un estado excepcional que
+   hay que poder leer sin interactuar. */
+.candado--libre {
+  opacity: 0;
+}
+
+.instancia:hover .candado--libre,
+.candado--libre:focus-visible {
+  opacity: 1;
+}
+
 /* Estados del CDK: el original se atenúa y el hueco de destino se marca. */
 .cdk-drag-preview .entrada {
   box-shadow: 0 2px 6px var(--sombra-dialogo);

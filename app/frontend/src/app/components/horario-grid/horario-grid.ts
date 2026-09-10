@@ -19,12 +19,39 @@ import { altoDeCelda } from '../../horario/reparto';
 import { ocultasEnCelda } from '../../horario/oculto';
 import { ViolacionEnCelda } from '../../horario/diagnostico';
 
-/** Instancia soltada en un slot destino, en coordenadas de `TramoRef`. */
-export interface SueltaInstancia {
+/**
+ * Petición de AJUSTE nacida de una suelta: la instancia arrastrada, el tramo
+ * destino en coordenadas de `TramoRef`, y quién ocupaba ya ese tramo.
+ *
+ * <p>Lleva los `ocupantes` porque el contenedor tiene que elegir ENTRE DOS
+ * ENDPOINTS —mover o intercambiar— y esa elección depende de cuántas instancias
+ * hay en el destino, que solo esta capa sabe: es la rejilla la que agrupa la
+ * proyección por slot. Pasarlas ya agrupadas evita que el contenedor rehaga el
+ * agrupamiento sobre las sesiones filtradas.
+ *
+ * <p>Contarlas NO es validar. La rejilla no dice si el movimiento es legal —eso lo
+ * dice el servidor—; dice cuántas clases se ven en ese tramo, que es un hecho de lo
+ * que hay pintado.
+ */
+export interface AjusteInstancia {
   actividadCodigo: string;
   indice: number;
   dia: number;
   orden: number;
+  /**
+   * Instancias que YA hay en el slot destino, tal como
+   * {@link agruparPorActividad} las tiene agrupadas. Vacío si el destino está
+   * libre. NUNCA incluye a la arrastrada: la emisión se corta antes cuando el
+   * destino es el origen.
+   *
+   * <p>CIEGO a lo que la vista no muestra, por la misma razón que
+   * {@link HorarioGrid#slotsOcupados}: en la vista por grupo no se ven las clases
+   * de otros grupos, así que un destino que aquí sale vacío puede tener ocupantes
+   * invisibles. Eso no rompe nada —el veredicto sigue siendo del servidor, que ve
+   * el horario entero—, pero sí explica por qué a veces se manda `mover` donde un
+   * humano habría esperado `intercambiar`.
+   */
+  ocupantes: readonly InstanciaCelda[];
 }
 
 /**
@@ -111,9 +138,18 @@ export class HorarioGrid {
    */
   readonly recreoTras = input<number | null>(null);
 
-  readonly soltar = output<SueltaInstancia>();
+  readonly soltar = output<AjusteInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
   readonly despinar = output<string>();
+  /**
+   * Petición de PONER un pin, por CLAVE de {@link clavePin}. Simétrico exacto de
+   * {@link despinar}: la rejilla emite la clave y el contenedor decide qué endpoint
+   * toca y con qué cuerpo. Dos outputs y no uno con bandera, porque son dos
+   * peticiones distintas —un POST y un DELETE— y el contenedor ya tiene un método
+   * por cada una; un `output<{clave, pinar}>` obligaría a desempaquetar allí lo que
+   * aquí ya está decidido.
+   */
+  readonly pinar = output<string>();
 
   protected readonly dias = DIAS;
   protected readonly tramos = TRAMOS;
@@ -429,20 +465,46 @@ export class HorarioGrid {
   }
 
   /**
-   * Emite la petición de despinar. El `stopPropagation` es DEFENSIVO: hoy ningún
-   * ancestro escucha `click`, pero el botón vive dentro del `cdkDrag`, y dejar
-   * que el evento suba invitaría a que un listener futuro en la instancia o en la
-   * celda tratase el despinado como una selección.
+   * ALTERNA el pin de la instancia: emite `pinar` si no lo tiene y `despinar` si lo
+   * tiene. El sentido se decide aquí y no en el contenedor porque la rejilla ya sabe
+   * cuál es el estado —lo está pintando en el glifo—, y hacer que el contenedor lo
+   * dedujera otra vez del mapa `pinadas` sería derivar dos veces el mismo hecho, con
+   * el riesgo de que las dos derivaciones discrepen.
+   *
+   * <p>Se emite la CLAVE en los dos sentidos, nunca el id del bloqueo: la rejilla
+   * ignora que los pines tengan id, y resolver clave→id —o descubrir que no se
+   * puede— es trabajo del contenedor.
+   *
+   * <p>El `stopPropagation` del CLICK es DEFENSIVO y sigue haciendo falta pese al
+   * `(pointerdown)` de la plantilla: hoy ningún ancestro escucha `click`, pero el
+   * botón vive dentro del `cdkDrag`, y dejar que el evento suba invitaría a que un
+   * listener futuro en la instancia o en la celda tratase el gesto del pin como una
+   * selección. Son eventos DISTINTOS y protegen de cosas distintas: el de
+   * `pointerdown` impide que el CDK arranque un arrastre desde el candado, cosa que
+   * este no puede hacer porque para cuando hay `click` el arrastre ya habría
+   * empezado.
    */
-  protected alDespinar(inst: InstanciaCelda, evento: Event): void {
+  protected alAlternarPin(inst: InstanciaCelda, evento: Event): void {
     evento.stopPropagation();
-    this.despinar.emit(this.clave(inst));
+    const clave = this.clave(inst);
+    if (this.estaPinada(inst)) {
+      this.despinar.emit(clave);
+      return;
+    }
+    this.pinar.emit(clave);
   }
 
   /**
-   * Traduce el drop del CDK a `soltar`. Soltar en el mismo slot no es un pin
-   * nuevo y no emite nada; el resto se emite tal cual, sin validar (las reglas
-   * de D-3 son del backend).
+   * Traduce el drop del CDK a `soltar`, que desde S145 es una petición de AJUSTE y
+   * ya no un alta de pin. Soltar en el mismo slot no es un movimiento y no emite
+   * nada; el resto se emite tal cual, SIN VALIDAR: qué endpoint toca y si el
+   * movimiento es legal lo deciden el contenedor y el servidor, en ese orden.
+   *
+   * <p>Los `ocupantes` salen de {@link instancias}, la misma consulta que pinta la
+   * celda: el destino se lee de lo que HAY, no de lo que se supone. Se leen ANTES
+   * de emitir y con la proyección aún sin tocar, que es la única foto válida —la
+   * rejilla no se mueve hasta el 200, así que aquí no hay estado intermedio que
+   * pudiera falsear la cuenta—.
    *
    * <p>AVISO: `evento.item.data as InstanciaCelda` es un cast SIN comprobación.
    * Solo es válido mientras el `cdkDropListGroup` de esta plantilla conecte
@@ -457,6 +519,12 @@ export class HorarioGrid {
     if (origen.dia === dia && origen.tramo === orden) {
       return;
     }
-    this.soltar.emit({ actividadCodigo: inst.actividadCodigo, indice: inst.indice, dia, orden });
+    this.soltar.emit({
+      actividadCodigo: inst.actividadCodigo,
+      indice: inst.indice,
+      dia,
+      orden,
+      ocupantes: this.instancias(dia, orden),
+    });
   }
 }

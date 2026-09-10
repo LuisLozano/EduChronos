@@ -1,24 +1,47 @@
 <section class="confirmar-generacion">
-  <h2>Generar pese a la pre-validación</h2>
+  <h2>Confirmar la generación</h2>
 
-  <p class="advertencia">
-    El servidor rechazará esta generación y no detallará la causa en la respuesta.
-    Estos hallazgos de severidad ERROR lo impedirán:
-  </p>
+  <!--
+    S145: el COSTE se enuncia SIEMPRE, con lista de errores vacía o llena. Hasta
+    S144 esta plantilla asumía que había hallazgos que enumerar —el título hablaba
+    de la pre-validación y el párrafo prometía una lista—, así que con `[]` habría
+    quedado muda: un diálogo que pregunta sin decir qué se confirma. Ahora los tres
+    hechos del coste son el cuerpo, y los avisos un agravante opcional.
 
-  <ul class="errores">
-    @for (a of errores; track $index) {
-      <li class="error-entrada">
-        <span class="regla">{{ a.regla }}</span>
-        <span class="entidad">{{ a.entidadCodigo }}</span>
-        <span class="cuenta">{{ a.demanda }} / {{ a.disponible }}</span>
-        <span class="descripcion">{{ a.descripcion }}</span>
-      </li>
-    }
+    Los diez minutos son un SEGUNDO espejo del presupuesto del backend
+    (`educhronos.solver.max-segundos`), el primero es MINUTOS_ANUNCIADOS en
+    `horario-view.ts`. No se pasa por `data` porque la firma del diálogo es
+    `<boolean, AvisoPrevalidacion[]>` y ensancharla para transportar un número
+    obligaría a tocar todos sus usos.
+  -->
+  <ul class="consecuencias">
+    <li>Tarda unos diez minutos.</li>
+    <li>Sustituye el horario en el que estás trabajando.</li>
+    <li>No se puede deshacer.</li>
   </ul>
+
+  @if (errores.length > 0) {
+    <p class="advertencia">
+      Además, el servidor rechazará esta generación y no detallará la causa en la
+      respuesta. Estos hallazgos de severidad ERROR lo impedirán:
+    </p>
+
+    <ul class="errores">
+      @for (a of errores; track $index) {
+        <li class="error-entrada">
+          <span class="regla">{{ a.regla }}</span>
+          <span class="entidad">{{ a.entidadCodigo }}</span>
+          <span class="cuenta">{{ a.demanda }} / {{ a.disponible }}</span>
+          <span class="descripcion">{{ a.descripcion }}</span>
+        </li>
+      }
+    </ul>
+  }
 
   <div class="acciones">
     <button type="button" class="cancelar" (click)="cancelar()">Cancelar</button>
-    <button type="button" class="confirmar accion-principal" (click)="confirmar()">Generar de todos modos</button>
+    <button type="button" class="confirmar accion-principal" (click)="confirmar()">
+      {{ errores.length > 0 ? 'Generar de todos modos' : 'Generar horario' }}
+    </button>
   </div>
 </section>

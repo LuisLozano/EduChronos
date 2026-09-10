@@ -53,6 +53,30 @@
   font-weight: var(--peso-medio);
 }
 
+/* Rechazo del ajuste manual (S145). Clase PROPIA, misma razón que
+   .error-generacion: el gesto de mover una instancia y el de despinarla fallan por
+   motivos distintos y sus avisos tienen que ser distinguibles por DOM. */
+.error-ajuste {
+  color: var(--color-error);
+  font-weight: var(--peso-medio);
+  margin-bottom: 0;
+}
+
+/* Las violaciones que acompañan a un VIOLA_REGLA_DURA. Cuelgan del párrafo de
+   arriba, de ahí el margen superior a cero. */
+.violaciones-ajuste {
+  margin: 0 0 var(--e2);
+  padding-left: var(--e4);
+  color: var(--color-error);
+}
+
+/* Limitación conocida del gesto, no un rechazo del servidor: color de AVISO, no de
+   error, porque no ha fallado nada — no se llegó a pedir. */
+.aviso-ajuste {
+  color: var(--color-aviso);
+  font-weight: var(--peso-medio);
+}
+
 /* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
 .aviso {
   padding: var(--e2) var(--e2);

@@ -61,40 +61,71 @@
                       >}</span
                     >
                   }
-                  @if (tieneBadge(inst) || estaPinada(inst)) {
-                    <span class="adornos">
-                      @if (tieneBadge(inst)) {
-                        <!-- D-insignia-sin-leyenda (S128). El número es un delta
-                             CONTRAFACTUAL con signo y NO un coste absoluto, así que
-                             la leyenda no puede prometer que cuadre con `Totales`.
-                             Mismo par `title` + `aria-label` que el candado de más
-                             abajo. Motivo por el que se paga AQUÍ y no en C-revisión:
-                             desde S127 esta esquina tiene DOS números con signo —el
-                             `+N` de desbordamiento en la banda del rótulo y este— con
-                             significados sin relación, y solo uno llevaba explicación.
-                             El texto del `title` es de LEYENDA y no de lectura por
-                             instancia: no depende del signo, luego no hay que ampliar
-                             la API del componente ni añadir lógica. Coste en altura: 0. -->
-                        <span
-                          class="badge"
-                          title="Coste blando de esta clase. Positivo: moverla a otro hueco mejoraría el horario. Negativo: está tapando un hueco y moverla lo empeoraría."
-                          [attr.aria-label]="'Coste blando ' + badge(inst) + '. Positivo: moverla mejoraría el horario; negativo: está tapando un hueco.'"
-                          >{{ badge(inst) }}</span
-                        >
-                      }
-                      @if (estaPinada(inst)) {
-                        <button
-                          type="button"
-                          class="candado"
-                          title="Quitar pin"
-                          [attr.aria-label]="'Quitar el pin de ' + inst.actividadCodigo"
-                          (click)="alDespinar(inst, $event)"
-                        >
-                          &#128274;
-                        </button>
-                      }
-                    </span>
-                  }
+                  <!--
+                    S145: `.adornos` se pinta SIEMPRE, porque el candado dejó de ser
+                    solo un botón de quitar y pasó a ser el interruptor del pin: con
+                    el bloque condicionado a `estaPinada`, una instancia sin pin no
+                    tenía ningún sitio donde pulsar para ponerlo, y crear pines —que
+                    §1 del guion exige— se quedó sin gesto al pasar el arrastre a
+                    ajustar el horario.
+
+                    NO cuesta un píxel de alto: `.adornos` es `position: absolute`
+                    dentro de la banda, igual que `.rotulo`, así que no empuja nada y
+                    no puede realimentar la medición de D11. La `.badge` sigue
+                    condicionada a `tieneBadge`; lo que se incondiciona es el botón.
+                  -->
+                  <span class="adornos">
+                    @if (tieneBadge(inst)) {
+                      <!-- D-insignia-sin-leyenda (S128). El número es un delta
+                           CONTRAFACTUAL con signo y NO un coste absoluto, así que
+                           la leyenda no puede prometer que cuadre con `Totales`.
+                           Mismo par `title` + `aria-label` que el candado de más
+                           abajo. Motivo por el que se paga AQUÍ y no en C-revisión:
+                           desde S127 esta esquina tiene DOS números con signo —el
+                           `+N` de desbordamiento en la banda del rótulo y este— con
+                           significados sin relación, y solo uno llevaba explicación.
+                           El texto del `title` es de LEYENDA y no de lectura por
+                           instancia: no depende del signo, luego no hay que ampliar
+                           la API del componente ni añadir lógica. Coste en altura: 0. -->
+                      <span
+                        class="badge"
+                        title="Coste blando de esta clase. Positivo: moverla a otro hueco mejoraría el horario. Negativo: está tapando un hueco y moverla lo empeoraría."
+                        [attr.aria-label]="'Coste blando ' + badge(inst) + '. Positivo: moverla mejoraría el horario; negativo: está tapando un hueco.'"
+                        >{{ badge(inst) }}</span
+                      >
+                    }
+                    <!--
+                      Interruptor del pin. UN solo botón para los dos sentidos: son
+                      el mismo hecho —esta instancia está o no clavada— y dos
+                      botones alternándose en el mismo sitio se leerían como dos
+                      acciones distintas.
+
+                      El glifo abierto es 🔓 U+1F513 y NO un candado tachado ni un
+                      icono de error: dice «sin pin, se puede poner», que es el
+                      estado normal de casi todas las instancias, no una anomalía.
+
+                      `(pointerdown)` con `stopPropagation` es la protección REAL
+                      contra el arrastre: el `cdkDrag` del ancestro arranca en
+                      `pointerdown`, no en `click`, así que sin esto agarrar el
+                      candado y moverse cinco píxeles arrastraría la instancia
+                      entera. El `stopPropagation` del `click` se conserva y NO es
+                      redundante con éste: son eventos distintos y protege de otra
+                      cosa (ver el Javadoc de `alAlternarPin`).
+                    -->
+                    <button
+                      type="button"
+                      class="candado"
+                      [class.candado--libre]="!estaPinada(inst)"
+                      [title]="estaPinada(inst) ? 'Quitar pin' : 'Poner pin'"
+                      [attr.aria-label]="
+                        (estaPinada(inst) ? 'Quitar el pin de ' : 'Poner un pin en ') + inst.actividadCodigo
+                      "
+                      (pointerdown)="$event.stopPropagation()"
+                      (click)="alAlternarPin(inst, $event)"
+                    >
+                      {{ estaPinada(inst) ? '🔒' : '🔓' }}
+                    </button>
+                  </span>
                   @for (e of inst.entradas; track e.sesionId) {
                     <div
                       class="entrada"

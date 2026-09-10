@@ -1,5 +1,6 @@
-import { clavePin, indicePines } from './pines';
+import { clavePin, filaDeClave, indicePines } from './pines';
 import { Bloqueo } from '../models/bloqueo.model';
+import { SesionVista } from '../models/horario.model';
 
 /**
  * Bloqueo mínimo: solo importan la actividad, el índice y el id (sin pines de
@@ -69,5 +70,57 @@ describe('índice de pines', () => {
     expect(indice.size).toBe(1);
     expect(indice.has(clavePin('LCL-1ºA', 1))).toBe(true);
     expect(indice.get(clavePin('LCL-1ºA', 1))).toBeNull();
+  });
+
+  /** Fila mínima: solo importan la clave de negocio y el tramo que se va a leer. */
+  function fila(actividadCodigo: string, indice: number, dia: number, tramo: number): SesionVista {
+    return {
+      sesionId: 1,
+      indice,
+      dia,
+      tramo,
+      asignaturaCodigo: 'X',
+      asignaturaNombre: 'X',
+      profesores: [],
+      aulaCodigo: 'A1',
+      subgrupos: [],
+      grupos: [],
+      actividadCodigo,
+      plazaCodigo: 'P1',
+    };
+  }
+
+  /**
+   * La resolución es por la CLAVE ENTERA, no por la actividad: el fixture tiene dos
+   * repeticiones de la misma en tramos distintos, y devolver la primera daría el
+   * tramo de la hermana. Es la dimensión que decide dónde se clava el pin.
+   */
+  it('(5) filaDeClave distingue las repeticiones de una misma actividad', () => {
+    const sesiones = [fila('Mat-1ºA', 1, 5, 6), fila('Mat-1ºA', 2, 3, 4)];
+
+    expect(filaDeClave(sesiones, 'Mat-1ºA|2')?.tramo).toBe(4);
+    expect(filaDeClave(sesiones, 'Mat-1ºA|1')?.tramo).toBe(6);
+  });
+
+  /** Una clave que no está no se inventa: `undefined`, y quien llama decide. */
+  it('(6) filaDeClave devuelve undefined para una clave ausente', () => {
+    expect(filaDeClave([fila('Mat-1ºA', 1, 5, 6)], 'Mat-1ºA|3')).toBeUndefined();
+    expect(filaDeClave([], 'Mat-1ºA|1')).toBeUndefined();
+  });
+
+  /**
+   * Un `actividadCodigo` que CONTIENE el separador se resuelve bien. Es la razón
+   * documentada de comparar la clave reconstruida en vez de partir la recibida por
+   * `|`: un `split('|')` daría actividad `'A'` e índice `NaN` y devolvería
+   * `undefined` en silencio, clavando el pin en ningún sitio o en otro.
+   *
+   * <p>El fixture añade una segunda fila cuya clave es la que produciría ese
+   * troceado mal hecho, para que la mutación no pueda acertar por casualidad.
+   */
+  it('(7) filaDeClave resuelve un código que contiene el separador de la clave', () => {
+    const sesiones = [fila('A|B-1ºA', 2, 1, 1), fila('A', 2, 5, 6)];
+
+    expect(filaDeClave(sesiones, 'A|B-1ºA|2')?.actividadCodigo).toBe('A|B-1ºA');
+    expect(filaDeClave(sesiones, 'A|B-1ºA|2')?.tramo).toBe(1);
   });
 });

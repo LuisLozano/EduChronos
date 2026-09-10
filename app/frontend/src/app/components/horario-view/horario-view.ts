@@ -2,21 +2,24 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 
-import { HorarioProyeccion } from '../../models/horario.model';
-import { Diagnostico } from '../../models/diagnostico.model';
+import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
+import { Diagnostico, Violacion } from '../../models/diagnostico.model';
+import { FalloMovimiento, ReferenciaInstancia } from '../../models/ajuste.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 import { TramoJornadaDTO } from '../../models/jornada.model';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
+import { AjusteService } from '../../services/ajuste.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { JornadaService } from '../../services/jornada.service';
 import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
-import { clavePin, indicePines } from '../../horario/pines';
+import { clavePin, filaDeClave, indicePines } from '../../horario/pines';
 import { tituloHorario } from '../../horario/titulo';
 import { recreoTrasTramo } from '../../horario/recreo';
 import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
-import { HorarioGrid, SueltaInstancia } from '../horario-grid/horario-grid';
+import { reemplazarInstancia, textoViolacion } from '../../horario/ajuste';
+import { AjusteInstancia, HorarioGrid } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 
@@ -45,6 +48,7 @@ export class HorarioView {
   private readonly dialog = inject(Dialog);
   private readonly service = inject(HorarioService);
   private readonly bloqueos = inject(BloqueoService);
+  private readonly ajustes = inject(AjusteService);
   private readonly diagnosticos = inject(DiagnosticoService);
   private readonly prevalidacion = inject(PrevalidacionService);
   private readonly jornadas = inject(JornadaService);
@@ -60,8 +64,34 @@ export class HorarioView {
    * sin id conocido: se pinta, pero no se puede borrar.
    */
   protected readonly pinadas = signal<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
-  /** Último rechazo del backend (reglas de D-3); se limpia al siguiente intento. */
+  /** Último rechazo del backend al DESPINAR; se limpia al siguiente intento. */
   protected readonly errorPin = signal<string | null>(null);
+
+  /**
+   * Rechazo del último AJUSTE (S145). Señal PROPIA y DISJUNTA de {@link errorPin}
+   * y de {@link errorGeneracion}, misma disciplina que ellas: mover una instancia,
+   * despinarla y generar el horario son tres operaciones distintas y un aviso
+   * heredado de una diría algo falso de las otras. Se pinta bajo `.error-ajuste`.
+   */
+  protected readonly errorAjuste = signal<string | null>(null);
+
+  /**
+   * Violaciones duras que el servidor adjuntó al rechazo del ajuste. Van aparte de
+   * {@link errorAjuste} porque NO son texto: son una lista que la vista enumera. El
+   * cuerpo las trae vacías en toda causa que no sea `VIOLA_REGLA_DURA`.
+   */
+  protected readonly violacionesAjuste = signal<readonly Violacion[]>([]);
+
+  /**
+   * Limitación CONOCIDA del gesto, no un error: el destino tiene dos o más clases
+   * y no hay forma de saber con cuál intercambiar. Señal separada de
+   * {@link errorAjuste} justamente por eso —aquí no ha habido petición ni rechazo,
+   * y pintarlo como error del servidor sería mentir sobre qué pasó—.
+   */
+  protected readonly avisoAjuste = signal<string | null>(null);
+
+  /** Espejo de la función pura para que la plantilla enumere las violaciones. */
+  protected readonly textoViolacion = textoViolacion;
 
   /** Diagnóstico del horario cargado; null mientras no llega o si su carga falla. */
   protected readonly diagnostico = signal<Diagnostico | null>(null);
@@ -87,15 +117,24 @@ export class HorarioView {
   protected readonly errorGeneracion = signal<string | null>(null);
 
   /**
-   * Un POST de generación está EN VUELO. `true` al lanzarlo, `false` en éxito y en
+   * QUÉ hay en vuelo contra el backend, o `null` en reposo. `null` en éxito y en
    * error —las dos ramas, o un fallo dejaría el botón muerto para siempre—.
    *
-   * <p>Existe porque la generación tarda MINUTOS y hasta S118 la vista no lo decía:
+   * <p>Existe desde S118 porque la generación tarda MINUTOS y la vista no lo decía:
    * el botón seguía pulsable y la pantalla no cambiaba, así que una espera normal era
    * indistinguible de un cuelgue, y volver a pulsar lanzaba un segundo solve encima
    * del primero.
+   *
+   * <p>S145 lo ENSANCHA de booleano a discriminante en vez de añadir una segunda
+   * señal de espera para el ajuste: el estado «hay algo en vuelo» es uno solo —el
+   * botón «Generar» debe estar cerrado mientras se aplica un cambio, igual que al
+   * revés—, y dos booleanos independientes admitirían el estado imposible de tener
+   * los dos a `true`. Lo único que depende de CUÁL es el texto ({@link textoGenerando}).
    */
-  protected readonly generando = signal(false);
+  private readonly enVuelo = signal<'generacion' | 'ajuste' | null>(null);
+
+  /** Hay una operación en vuelo: cierra el botón y pinta el aviso de espera. */
+  protected readonly generando = computed(() => this.enVuelo() !== null);
 
   /**
    * Minutos que se anuncian durante la espera. ESPEJO del presupuesto por defecto del
@@ -275,19 +314,192 @@ export class HorarioView {
   }
 
   /**
-   * Persiste el pin de tramo de la instancia soltada. `aulas: []` porque la
-   * suelta solo fija el TRAMO; el body describe el pin completo (D-5), así que
-   * el pin queda sin pines de aula. La rejilla no se mueve: en OK solo aparece
-   * el candado, y en ERROR se muestra el rechazo del servidor sin reimplementar
-   * aquí ninguna de sus reglas.
+   * AJUSTA el horario con la instancia soltada (S145). Sustituye al alta de pin que
+   * este mismo gesto hacía hasta S144: arrastrar ya no pide «cuando regeneres,
+   * ponla aquí», sino «ponla aquí AHORA».
+   *
+   * <p>La rama la decide cuántas instancias hay en el destino, y SOLO eso:
+   *
+   * <ul>
+   *   <li>NINGUNA → `mover`: el tramo está libre en lo que se ve.</li>
+   *   <li>UNA → `intercambiar`: las dos permutan tramo. El destino da la `segunda`
+   *       referencia; la arrastrada es siempre la `primera`.</li>
+   *   <li>DOS O MÁS → NO se pide nada. Es una limitación conocida del gesto, no un
+   *       error: con varias candidatas el arrastre no expresa con cuál intercambiar,
+   *       y elegir una por el orden de la celda sería inventar una intención que el
+   *       usuario no manifestó.</li>
+   * </ul>
+   *
+   * <p>NO valida nada más. Que la instancia esté pinada, que el tramo destino no
+   * exista o que el movimiento rompa una regla dura son veredictos del SERVIDOR, y
+   * anticiparlos aquí sería un cuarto espejo de las restricciones (misma razón por
+   * la que `slotsOcupados` se queda en «hay clase» y no crece hacia una verificación).
+   *
+   * <p>Pintado NO optimista, como el despinado (D-F8.6-ii-5): la rejilla no se mueve
+   * hasta el 200. Con el 200 se refresca solo lo afectado, sin recargar la proyección
+   * entera y sin regenerar nada.
    */
-  protected alSoltar(s: SueltaInstancia): void {
+  protected alSoltar(a: AjusteInstancia): void {
+    this.limpiarAjuste();
+    const id = this.idCargado;
+    if (id === null) {
+      return;
+    }
+    if (a.ocupantes.length >= 2) {
+      this.avisoAjuste.set(
+        `Hay ${a.ocupantes.length} clases en ese tramo: no puedo saber con cuál intercambiar.`,
+      );
+      return;
+    }
+    const arrastrada: ReferenciaInstancia = {
+      actividadCodigo: a.actividadCodigo,
+      indice: a.indice,
+    };
+    if (a.ocupantes.length === 0) {
+      this.enVuelo.set('ajuste');
+      this.ajustes
+        .mover(id, { actividadCodigo: a.actividadCodigo, indice: a.indice, dia: a.dia, orden: a.orden })
+        .subscribe({
+          next: (filas) => {
+            this.enVuelo.set(null);
+            this.aplicarAjuste([{ ref: arrastrada, filas }]);
+          },
+          error: (err) => this.fallarAjuste(err),
+        });
+      return;
+    }
+    const ocupante = a.ocupantes[0];
+    const segunda: ReferenciaInstancia = {
+      actividadCodigo: ocupante.actividadCodigo,
+      indice: ocupante.indice,
+    };
+    this.enVuelo.set('ajuste');
+    this.ajustes.intercambiar(id, { primera: arrastrada, segunda }).subscribe({
+      next: (r) => {
+        this.enVuelo.set(null);
+        // Cada lista a SU lado. El backend manda dos precisamente para no obligar a
+        // reagrupar por actividadCodigo, que además sería irreversible cuando las dos
+        // instancias son repeticiones de la MISMA actividad.
+        this.aplicarAjuste([
+          { ref: arrastrada, filas: r.primera },
+          { ref: segunda, filas: r.segunda },
+        ]);
+      },
+      error: (err) => this.fallarAjuste(err),
+    });
+  }
+
+  /** Deja el bloque de ajuste en blanco. Se llama al empezar CADA gesto. */
+  private limpiarAjuste(): void {
+    this.errorAjuste.set(null);
+    this.violacionesAjuste.set([]);
+    this.avisoAjuste.set(null);
+  }
+
+  /**
+   * Aplica al horario vigente las filas que devolvió el servidor, una entrada por
+   * instancia afectada. NO recarga la proyección: el servidor ya devolvió el estado
+   * nuevo de lo único que cambió, y un GET entero descartaría esa respuesta para
+   * volver a pedir lo mismo.
+   *
+   * <p>Con `proyeccion()` en null no hay nada que refrescar y se calla: solo puede
+   * pasar si la carga falló entre el gesto y la respuesta, y en ese caso la rejilla
+   * ni siquiera está montada.
+   */
+  private aplicarAjuste(
+    cambios: readonly { ref: ReferenciaInstancia; filas: readonly SesionVista[] }[],
+  ): void {
+    const p = this.proyeccion();
+    if (p === null) {
+      return;
+    }
+    let sesiones: readonly SesionVista[] = p.sesiones;
+    for (const c of cambios) {
+      sesiones = reemplazarInstancia(sesiones, c.ref, c.filas);
+    }
+    this.proyeccion.set({ ...p, sesiones: [...sesiones] });
+  }
+
+  /**
+   * Cierra la espera y puebla el bloque de rechazo. La rejilla NO se toca: sin 200
+   * no hubo movimiento, así que sigue pintando exactamente lo que pintaba.
+   */
+  private fallarAjuste(err: { status?: number; error?: FalloMovimiento }): void {
+    this.enVuelo.set(null);
+    this.errorAjuste.set(this.mensajeAjuste(err));
+    this.violacionesAjuste.set(err?.error?.violaciones ?? []);
+  }
+
+  /**
+   * Texto para un ajuste rechazado, decidido por la CAUSA del cuerpo. Función NUEVA
+   * y no un ensanche de {@link mensaje}: aquella tiene un degradado fijo que habla
+   * del PIN («El servidor rechazó el pin»), y es la única del proyecto que no toma
+   * un degradado por parámetro. Meter aquí las causas del movimiento la obligaría a
+   * decir dos cosas distintas según quién la llame.
+   *
+   * <p>La causa manda sobre el status —mismo criterio que {@link mensajeGeneracion}—
+   * porque es el símbolo estable del hecho y los dos 409 (y los dos 404) no se
+   * distinguen por el número. Sin causa reconocida, el degradado dice el estado y no
+   * inventa un motivo: `TRAMO_INEXISTENTE` cae aquí a propósito —soltar en un recreo
+   * no es alcanzable desde esta rejilla, que solo pinta tramos lectivos—, y también
+   * cualquier causa que el backend añada después.
+   *
+   * <p>`INSTANCIA_INEXISTENTE` es la ÚNICA que arrastra la prosa del servidor, y es
+   * deliberado: cuál de las dos instancias falta viaja SOLO ahí —el servidor la
+   * interpola como `La instancia 'primera' (…)`— y no hay campo estructurado que lo
+   * diga. Callarla dejaría al usuario con «una de las dos» sin saber cuál.
+   */
+  private mensajeAjuste(err: { status?: number; error?: FalloMovimiento }): string {
+    const cuerpo = err?.error;
+    switch (cuerpo?.causa) {
+      case 'VIOLA_REGLA_DURA':
+        return 'Ese cambio provoca conflictos que antes no existían:';
+      case 'INSTANCIA_PINADA':
+        return 'Esa clase está pinada y el pin manda sobre el arrastre: quita el pin antes de moverla.';
+      case 'INSTANCIA_INEXISTENTE':
+        return `Una de las dos clases ya no está en el horario. ${cuerpo.mensaje ?? ''}`.trim();
+      case 'HORARIO_INEXISTENTE':
+        return 'Ese horario ya no existe. Recarga la página.';
+      case 'INSTANCIAS_IGUALES':
+        return 'No se puede intercambiar una clase consigo misma.';
+      default:
+        return `El servidor rechazó el cambio (${err?.status ?? 'error'}).`;
+    }
+  }
+
+  /**
+   * PONE el pin de la instancia cuya CLAVE emite la rejilla (S145). Gemelo de
+   * {@link alDespinar}: el mismo interruptor en el otro sentido.
+   *
+   * <p>El TRAMO no viaja en el evento —la rejilla emite solo la clave, simétrica con
+   * el despinado— y se resuelve aquí contra la proyección VIGENTE, que es la única
+   * autoridad sobre dónde está la instancia ahora mismo. Importa que sea la vigente y
+   * no la del montaje: tras un ajuste la instancia se ha movido, y pinarla con el
+   * tramo viejo clavaría la clase donde ya no está.
+   *
+   * <p>Si la clave no está en la proyección no hay tramo que mandar y se calla, con
+   * el mismo criterio que {@link alDespinar} ante un id ausente: un error de UI no
+   * ayuda a quien no tiene forma de arreglarlo.
+   *
+   * <p>`aulas: []` es DELIBERADO: el gesto fija el TRAMO y nada más. El cuerpo
+   * describe el pin completo (D-5), así que el pin queda sin pines de aula.
+   *
+   * <p>SIN alta optimista, igual que el despinado (D-F8.6-ii-5): el candado no se
+   * cierra hasta que llega la respuesta. La clave del índice se toma de esa
+   * RESPUESTA, no de la petición: el backend es la autoridad sobre qué quedó pinado.
+   */
+  protected alPinar(clave: string): void {
     this.errorPin.set(null);
+    const p = this.proyeccion();
+    const fila = p === null ? undefined : filaDeClave(p.sesiones, clave);
+    if (fila === undefined) {
+      return;
+    }
     this.bloqueos
       .guardar({
-        actividadCodigo: s.actividadCodigo,
-        indice: s.indice,
-        tramo: { dia: s.dia, orden: s.orden },
+        actividadCodigo: fila.actividadCodigo,
+        indice: fila.indice,
+        tramo: { dia: fila.dia, orden: fila.tramo },
         aulas: [],
       })
       .subscribe({
@@ -332,12 +544,24 @@ export class HorarioView {
   }
 
   /**
-   * Dispara una generación de horario. Gateado por {@link avisosPrevalidacion}:
-   * si es `null` (pre-validación no ejecutada) no hace nada —el botón ya está
-   * deshabilitado, esta guarda es el cinturón—. Si hay algún aviso de severidad
-   * `'ERROR'`, la generación está condenada: se pide confirmación explícita y solo
-   * se procede si el diálogo cierra con `true` (backdrop/Escape emiten `undefined`
-   * y abortan). Sin errores, procede directo.
+   * Dispara una generación de horario. Gateado por {@link avisosPrevalidacion}: si
+   * es `null` (pre-validación no ejecutada) no hace nada —el botón ya está
+   * deshabilitado, esta guarda es el cinturón—.
+   *
+   * <p>El diálogo se abre SIEMPRE (S145), no solo cuando hay avisos de severidad
+   * `'ERROR'`. Hasta S144 la confirmación estaba condicionada a que la
+   * pre-validación tuviera algo que decir, y sobre el centro real no tiene nada:
+   * devuelve lista vacía, así que el diálogo NUNCA se abría y una generación de diez
+   * minutos que sustituye el trabajo en curso salía con un solo clic y sin vuelta
+   * atrás. Lo que hay que confirmar no son los avisos —eso es un agravante—, es el
+   * COSTE de la operación, y ese existe con lista vacía igual que con lista llena.
+   *
+   * <p>Los errores se siguen filtrando y pasando por `data`: con lista vacía el
+   * diálogo pinta solo el coste, y con avisos añade el detalle. La firma
+   * `open<boolean, AvisoPrevalidacion[]>` no cambia.
+   *
+   * <p>Solo se procede si cierra con `true`; backdrop/Escape emiten `undefined` y
+   * abortan sin lanzar nada.
    */
   protected generar(): void {
     const avisos = this.avisosPrevalidacion();
@@ -345,17 +569,13 @@ export class HorarioView {
       return;
     }
     const errores = avisos.filter((a) => a.severidad === 'ERROR');
-    if (errores.length > 0) {
-      this.dialog
-        .open<boolean, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
-        .closed.subscribe((confirmado) => {
-          if (confirmado === true) {
-            this.lanzarGeneracion();
-          }
-        });
-      return;
-    }
-    this.lanzarGeneracion();
+    this.dialog
+      .open<boolean, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
+      .closed.subscribe((confirmado) => {
+        if (confirmado === true) {
+          this.lanzarGeneracion();
+        }
+      });
   }
 
   /**
@@ -382,10 +602,10 @@ export class HorarioView {
    */
   private lanzarGeneracion(): void {
     this.errorGeneracion.set(null);
-    this.generando.set(true);
+    this.enVuelo.set('generacion');
     this.service.generar().subscribe({
       next: (dto) => {
-        this.generando.set(false);
+        this.enVuelo.set(null);
         if (dto.id === this.idCargado) {
           this.cargar(dto.id);
         } else {
@@ -393,7 +613,7 @@ export class HorarioView {
         }
       },
       error: (err) => {
-        this.generando.set(false);
+        this.enVuelo.set(null);
         this.errorGeneracion.set(this.mensajeGeneracion(err));
       },
     });
@@ -431,9 +651,16 @@ export class HorarioView {
     return `El servidor no pudo generar el horario (${err?.status ?? 'error'}).`;
   }
 
-  /** Texto de la espera. Con los minutos, para que una espera larga no parezca un cuelgue. */
+  /**
+   * Texto de la espera, según QUÉ se espera. Un ajuste es una escritura corta y
+   * anunciarle los minutos de un solve sería falso; una generación sin los minutos
+   * vuelve a parecer un cuelgue, que es justo lo que S118 vino a arreglar. El
+   * párrafo y la señal son los mismos: lo único que se bifurca es la frase.
+   */
   protected textoGenerando(): string {
-    return `Generando horario… puede tardar hasta ${this.MINUTOS_ANUNCIADOS} minutos.`;
+    return this.enVuelo() === 'ajuste'
+      ? 'Aplicando el cambio…'
+      : `Generando horario… puede tardar hasta ${this.MINUTOS_ANUNCIADOS} minutos.`;
   }
 
   protected cambiarVista(v: Vista): void {

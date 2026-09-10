@@ -2,7 +2,8 @@ import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { HorarioGrid } from './horario-grid';
+import { AjusteInstancia, HorarioGrid } from './horario-grid';
+import { InstanciaCelda } from '../../horario/proyeccion';
 import { SesionVista } from '../../models/horario.model';
 import { Violacion } from '../../models/diagnostico.model';
 import { ViolacionEnCelda } from '../../horario/diagnostico';
@@ -132,6 +133,35 @@ function tdDe(fixture: ComponentFixture<HorarioGrid>, dia: number, tramo: number
   const raiz = fixture.nativeElement as HTMLElement;
   const fila = raiz.querySelectorAll('tbody tr')[tramo - 1];
   return fila.querySelectorAll('td')[dia - 1] as HTMLTableCellElement;
+}
+
+/**
+ * DebugElement del `<td>` del slot (dia, tramo). Hace falta el DebugElement —no el
+ * nativo— para disparar `cdkDropListDropped` con `triggerEventHandler`: el gesto de
+ * arrastre del CDK es irreproducible en jsdom, igual que `cdkDragStarted` en (T1).
+ */
+function tdDebugDe(fixture: ComponentFixture<HorarioGrid>, dia: number, tramo: number): DebugElement {
+  const filas = fixture.debugElement.queryAll(By.css('tbody tr'));
+  return filas[tramo - 1].queryAll(By.css('td'))[dia - 1];
+}
+
+/**
+ * El `data` que el CDK lleva en el arrastre: la INSTANCIA, nunca la sub-entrada
+ * (D-F8.6-A-2). `alSoltar` lee de ella la clave de negocio y el tramo de ORIGEN,
+ * que sale de la primera entrada.
+ */
+function arrastre(s: SesionVista): InstanciaCelda {
+  return { actividadCodigo: s.actividadCodigo, indice: s.indice, entradas: [s] };
+}
+
+/** Simula la suelta de `inst` sobre el slot (dia, tramo). */
+function soltarEn(
+  fixture: ComponentFixture<HorarioGrid>,
+  inst: InstanciaCelda,
+  dia: number,
+  tramo: number,
+): void {
+  tdDebugDe(fixture, dia, tramo).triggerEventHandler('cdkDropListDropped', { item: { data: inst } });
 }
 
 /** Cambia la lista de grupos de una sesión sin tocar el helper base {@link sesion}. */
@@ -269,16 +299,108 @@ describe('rejilla de horario', () => {
     expect(espia).toHaveBeenCalledWith('Mat-1ºA|2');
   });
 
-  it('(7) la instancia SIN pin no tiene candado, aunque comparta slot con una pinada', () => {
+  /**
+   * S145 REESCRIBE el (7), que afirmaba «la instancia sin pin no tiene candado».
+   * Dejó de ser cierto y no se adapta: ahora TODAS lo tienen, porque el candado es
+   * el interruptor del pin y una instancia sin pin necesita dónde pulsar para
+   * ponerlo. Lo que distingue los dos estados ya no es la PRESENCIA del botón sino
+   * su modificador, su glifo y sus textos, y eso es lo que se fija aquí.
+   *
+   * <p>Las dos instancias comparten slot y se aseveran las DOS en el mismo render:
+   * sin el contrapunto, un `[pinadas]` roto del todo dejaría los dos candados en
+   * `--libre` y la mitad de este test pasaría por la razón equivocada.
+   */
+  it('(7) las dos instancias tienen candado; la SIN pin lo lleva libre, la pinada no', () => {
     const raiz = fixture.nativeElement as HTMLElement;
-    // Las dos se pintaron: sin esto, "no hay candado" podría estar mirando un
-    // slot vacío en vez de una instancia sin pin.
+    // Las dos se pintaron: sin esto, el aserto podría estar mirando un slot vacío.
     expect(raiz.querySelectorAll('div.instancia').length).toBe(2);
 
-    expect(instanciaDe(fixture, 'LCL').querySelector('button.candado')).toBeNull();
-    // Contrapunto en el MISMO render: sin él, un `[pinadas]` roto del todo daría
-    // cero candados y el aserto pasaría por la razón equivocada.
-    expect(instanciaDe(fixture, 'Mat').querySelector('button.candado')).not.toBeNull();
+    const libre = instanciaDe(fixture, 'LCL').querySelector<HTMLButtonElement>('button.candado');
+    const pinado = instanciaDe(fixture, 'Mat').querySelector<HTMLButtonElement>('button.candado');
+    expect(libre).not.toBeNull();
+    expect(pinado).not.toBeNull();
+
+    // El modificador es lo que el CSS usa para ocultarlo en reposo: solo el libre.
+    expect(libre!.classList).toContain('candado--libre');
+    expect(pinado!.classList).not.toContain('candado--libre');
+
+    // Glifo y textos dicen el estado Y la acción, en los dos sentidos.
+    expect(libre!.textContent?.trim()).toBe('\u{1F513}');
+    expect(pinado!.textContent?.trim()).toBe('\u{1F512}');
+    expect(libre!.title).toBe('Poner pin');
+    expect(pinado!.title).toBe('Quitar pin');
+    expect(libre!.getAttribute('aria-label')).toBe('Poner un pin en LCL-1ºA');
+    expect(pinado!.getAttribute('aria-label')).toBe('Quitar el pin de Mat-1ºA');
+  });
+
+  /**
+   * El MISMO botón emite en los dos sentidos, decidido por el estado de la
+   * instancia. Es el gemelo del (6) —que mide el sentido de quitar— y juntos fijan
+   * la rama: una implementación que emitiera siempre el mismo output cae en uno de
+   * los dos. Se aseveran también los outputs CONTRARIOS a cero, porque emitir los
+   * dos a la vez daría el mismo `toHaveBeenCalledWith` y pasaría sin ellos.
+   */
+  it('(7b) el candado de una instancia sin pin emite pinar con su CLAVE, y no despinar', async () => {
+    const pinarEspia = vi.fn();
+    const despinarEspia = vi.fn();
+    fixture.componentInstance.pinar.subscribe(pinarEspia);
+    fixture.componentInstance.despinar.subscribe(despinarEspia);
+
+    instanciaDe(fixture, 'LCL').querySelector<HTMLButtonElement>('button.candado')!.click();
+    await fixture.whenStable();
+
+    expect(pinarEspia).toHaveBeenCalledTimes(1);
+    // Literal, no `clavePin(...)`: mismo criterio que el (6).
+    expect(pinarEspia).toHaveBeenCalledWith('LCL-1ºA|1');
+    expect(despinarEspia).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Contrapunto del (7b) sobre la PINADA: emite `despinar` y NO `pinar`. El (6) ya
+   * mide que `despinar` sale con su clave, pero no que `pinar` se quede callado, y
+   * esa mitad es la que mata la mutación de emitir los dos.
+   */
+  it('(7c) el candado de una instancia pinada no emite pinar', async () => {
+    const pinarEspia = vi.fn();
+    fixture.componentInstance.pinar.subscribe(pinarEspia);
+
+    instanciaDe(fixture, 'Mat').querySelector<HTMLButtonElement>('button.candado')!.click();
+    await fixture.whenStable();
+
+    expect(pinarEspia).not.toHaveBeenCalled();
+  });
+
+  /**
+   * El `pointerdown` del candado NO llega al ancestro que lleva el `cdkDrag`. Sin
+   * esto, agarrar el candado y moverse más que el umbral del CDK arrastraría la
+   * instancia entera, porque el arrastre arranca en `pointerdown` y no en `click`.
+   *
+   * <p>Se asevera la PROPAGACIÓN y no el arrastre: el gesto real del CDK necesita
+   * geometría de puntero que jsdom no tiene, así que ejercitarlo aquí mediría el
+   * doble y no el componente. El listener se engancha en el `div.instancia`, que es
+   * exactamente el elemento que lleva el `cdkDrag`.
+   *
+   * <p>La segunda mitad —el mismo evento SÍ llega cuando nace en otro punto de la
+   * instancia— es lo que impide que este test pase por un `dispatchEvent` que no
+   * burbujea de todas formas: sin ella, un evento mal construido daría cero en las
+   * dos mitades y el aserto sería vacío.
+   */
+  it('(7d) el pointerdown del candado no llega al ancestro que lleva el cdkDrag', async () => {
+    const enAncestro = vi.fn();
+    const instancia = instanciaDe(fixture, 'LCL');
+    instancia.addEventListener('pointerdown', enAncestro);
+
+    const candado = instancia.querySelector<HTMLButtonElement>('button.candado')!;
+    candado.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(enAncestro).not.toHaveBeenCalled();
+
+    // Testigo: el mismo evento, nacido en otro descendiente, SÍ sube.
+    instancia.querySelector('.entrada')!.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(enAncestro).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -439,6 +561,82 @@ describe('rejilla de horario', () => {
     await fixture.whenStable();
 
     expect(raiz.querySelectorAll('td.ocupado').length).toBe(0);
+  });
+
+  /**
+   * Soltar en el slot de ORIGEN no es un movimiento y NO emite nada. El corte está
+   * en la rejilla, no en el contenedor: es el único sitio que conoce el tramo de
+   * partida de la instancia arrastrada.
+   *
+   * <p>La segunda mitad —soltar en OTRO slot sí emite— es lo que impide que este
+   * test pase por un cableado roto: sin ella, un `alSoltar` que no emitiera nunca
+   * quedaría verde.
+   */
+  it('(T5) soltar en el slot de origen no emite; soltar en otro sí', async () => {
+    // Mat SOLA en (DIA, TRAMO): así el destino alternativo (2,3) está vacío y el
+    // aserto no depende de quién lo ocupe.
+    fixture.componentRef.setInput('sesiones', [MAT_PINADA]);
+    await fixture.whenStable();
+
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+
+    soltarEn(fixture, arrastre(MAT_PINADA), DIA, TRAMO);
+    await fixture.whenStable();
+    expect(emitidos.length).toBe(0);
+
+    soltarEn(fixture, arrastre(MAT_PINADA), 2, 3);
+    await fixture.whenStable();
+    expect(emitidos.length).toBe(1);
+    expect(emitidos[0].dia).toBe(2);
+    expect(emitidos[0].orden).toBe(3);
+  });
+
+  /**
+   * El evento lleva las instancias que YA hay en el slot destino, agrupadas como la
+   * proyección las tiene: el contenedor decide con ellas entre mover e intercambiar.
+   *
+   * <p>El destino es un DESDOBLE —una instancia con DOS entradas—: eso separa
+   * «cuenta instancias» de «cuenta sub-entradas», que es exactamente la distinción
+   * de la que depende la rama del contenedor. Con una instancia de una plaza, ambas
+   * darían 1 y la dimensión quedaría sin medir.
+   */
+  it('(T6) el evento lleva los ocupantes del slot destino, contados por INSTANCIA', async () => {
+    // El desdoble (Mat-1ºA #2, dos plazas) ocupa (DIA, TRAMO); LCL vive en (2,3) y es
+    // lo que se arrastra sobre él.
+    const lclFuera = enSlot(LCL_SIN_PIN, 2, 3);
+    fixture.componentRef.setInput('sesiones', [...DESDOBLE, lclFuera]);
+    await fixture.whenStable();
+
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+
+    soltarEn(fixture, arrastre(lclFuera), DIA, TRAMO);
+    await fixture.whenStable();
+
+    expect(emitidos.length).toBe(1);
+    // UNA instancia ocupante pese a sus DOS sub-entradas.
+    expect(emitidos[0].ocupantes.length).toBe(1);
+    expect(emitidos[0].ocupantes[0].actividadCodigo).toBe('Mat-1ºA');
+    expect(emitidos[0].ocupantes[0].indice).toBe(2);
+    // Y la arrastrada va con su propia clave, no con la del ocupante.
+    expect(emitidos[0].actividadCodigo).toBe('LCL-1ºA');
+    expect(emitidos[0].indice).toBe(1);
+  });
+
+  /** Un destino LIBRE emite la lista de ocupantes vacía, no `undefined` ni el origen. */
+  it('(T7) soltar en un slot vacío emite ocupantes vacíos', async () => {
+    fixture.componentRef.setInput('sesiones', [MAT_PINADA]);
+    await fixture.whenStable();
+
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+
+    soltarEn(fixture, arrastre(MAT_PINADA), 4, 5);
+    await fixture.whenStable();
+
+    expect(emitidos.length).toBe(1);
+    expect(emitidos[0].ocupantes).toEqual([]);
   });
 
   /**
