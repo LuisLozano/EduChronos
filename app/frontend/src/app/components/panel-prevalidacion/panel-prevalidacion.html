@@ -3,7 +3,12 @@
 } @else if (avisos() === null) {
   <p class="prevalidacion-pendiente">Sin pre-validar todavía.</p>
 } @else if (avisos()!.length === 0) {
-  <p class="prevalidacion-limpia">Catálogo sano: sin hallazgos de pre-validación.</p>
+  <!-- S146: el texto ya no dice «catálogo sano». La pre-validación comprueba
+       condiciones NECESARIAS, no suficientes: pasarlas todas no promete horario, ni
+       que el solve quepa en los diez minutos anunciados. «Sano» prometía justo eso y
+       convertía una lista vacía en una garantía que nadie puede dar. La segunda frase
+       lo dice explícito en vez de dejarlo a la interpretación del lector. -->
+  <p class="prevalidacion-limpia">Sin hallazgos de pre-validación. Esto no garantiza que el solver encuentre horario en el tiempo previsto.</p>
 } @else {
   <section class="prevalidacion-panel" [class.es-error]="hayError()">
     <header class="cabecera">

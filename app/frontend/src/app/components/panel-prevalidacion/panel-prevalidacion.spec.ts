@@ -131,4 +131,26 @@ describe('panel de pre-validación', () => {
     await fixture.whenStable();
     expect(raiz.querySelector('.prevalidacion-panel')!.classList.contains('es-error')).toBe(true);
   });
+
+  /**
+   * (33) EL LITERAL de la rama vacía, aseverado ENTERO y exacto (S146). Hasta aquí la
+   * rama `[]` solo estaba cubierta por (28), que mira la CLASE `.prevalidacion-limpia`
+   * y no el texto: el mensaje se podía reescribir —o devolver al «Catálogo sano…»
+   * anterior— sin que cayera ningún test.
+   *
+   * <p>Se compara la cadena COMPLETA con `toBe`, no un `toContain` de la primera
+   * frase: la segunda —la que avisa de que pasar la pre-validación no promete
+   * horario— es justamente la que se añadió, y un `toContain` la dejaría otra vez sin
+   * proteger. `textContent` se normaliza porque la plantilla es libre de reflowear.
+   */
+  it('(33) la rama vacía dice que no hay hallazgos y que eso no garantiza horario', async () => {
+    fixture.componentRef.setInput('avisos', []);
+    await fixture.whenStable();
+
+    const limpia = raiz.querySelector('.prevalidacion-limpia');
+    expect(limpia).not.toBeNull();
+    expect(limpia!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+      'Sin hallazgos de pre-validación. Esto no garantiza que el solver encuentre horario en el tiempo previsto.',
+    );
+  });
 });

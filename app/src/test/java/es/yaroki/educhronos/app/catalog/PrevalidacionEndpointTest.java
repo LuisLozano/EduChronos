@@ -150,6 +150,30 @@ class PrevalidacionEndpointTest {
         }
     }
 
+    /**
+     * (E1) S8 por la RED: una actividad {@code requiereTutor} sin ninguna fila de tutoría
+     * sale en el JSON con severidad {@code "AVISO"} y regla {@code "TUTORIA_SIN_TUTOR"}.
+     * Las dos cadenas se asertan LITERALES porque son contrato HTTP: el enum del servicio
+     * no se serializa tal cual (ver {@code AvisoPrevalidacionDTO}), así que un cambio de
+     * nombre en el enum no debe pasar inadvertido por el lado del cliente.
+     *
+     * <p>Fixture calibrado como los demás: 5 tramos en 5 días y una NEUTRA de 3
+     * repeticiones, con lo que (a) ve 3≤5, (c) ve 3≤5 y (d) ni mira. El
+     * {@code jsonPath("$.length()").value(1)} lo fija: el hallazgo aseverado es el único.
+     */
+    @Test
+    void actividadSinTutorPrincipal_saleEnElJsonComoAvisoDeTutoria() throws Exception {
+        poblarCatalogoConTutoriaSinTutor();
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].severidad").value("AVISO"))
+                .andExpect(jsonPath("$[0].regla").value("TUTORIA_SIN_TUTOR"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("Tut-1ºA"));
+    }
+
     /** Un catálogo sano pre-valida a {@code 200} con lista VACÍA. */
     @Test
     void catalogoSano_devuelve200ConListaVacia() throws Exception {
@@ -198,6 +222,17 @@ class PrevalidacionEndpointTest {
                 ctx.aula1(), Set.of(ctx.prof1()), Set.of(ctx.completo()));
     }
 
+    /**
+     * 5 tramos en 5 días y UNA actividad {@code requiereTutor} de 3 repeticiones, sin
+     * ninguna fila en {@code profesor_tutoria}: MAT8 no es TUTOR_PRINCIPAL de nada, así
+     * que S8 dispara. Ninguna otra regla llega a su techo.
+     */
+    private void poblarCatalogoConTutoriaSinTutor() {
+        Contexto ctx = contextoBase(5);
+        crearActividad("Tut-1ºA", 3, PatronTemporal.NEUTRA, ctx.asignatura(),
+                ctx.aula1(), Set.of(ctx.prof1()), Set.of(ctx.completo()), true);
+    }
+
     private record Contexto(GrupoAdministrativo grupo, Subgrupo completo, Profesor prof1,
                             Asignatura asignatura, Aula aula1, Aula aula2) { }
 
@@ -222,7 +257,15 @@ class PrevalidacionEndpointTest {
 
     private void crearActividad(String codigo, int repeticiones, PatronTemporal patron,
             Asignatura asignatura, Aula aula, Set<Profesor> profesores, Set<Subgrupo> subgrupos) {
+        crearActividad(codigo, repeticiones, patron, asignatura, aula, profesores, subgrupos, false);
+    }
+
+    /** Sobrecarga con {@code requiereTutor}, que solo S8 necesita. */
+    private void crearActividad(String codigo, int repeticiones, PatronTemporal patron,
+            Asignatura asignatura, Aula aula, Set<Profesor> profesores, Set<Subgrupo> subgrupos,
+            boolean requiereTutor) {
         Actividad act = new Actividad();
+        act.setRequiereTutor(requiereTutor);
         act.setCodigo(codigo);
         act.setAsignatura(asignatura);
         act.setRepeticionesPorSemana(repeticiones);

@@ -10,7 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.service.PrevalidacionService;
+import es.yaroki.educhronos.app.service.Severidad;
 import es.yaroki.educhronos.app.web.HorarioController;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
@@ -226,6 +229,39 @@ class GenerarHorarioEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"maxSegundos\":-1}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * (G1) UN AVISO NO ABORTA. Catálogo factible cuya única pega es S8 —la actividad es
+     * {@code requiereTutor} y su profesor no tutoriza nada—: el POST debe pasar, no dar
+     * 422. Es la contrapartida de la decisión de que S8 sea {@code AVISO} y de que la
+     * guarda de {@code GeneradorHorarioService} filtre por {@code ERROR}; si la severidad
+     * subiera a ERROR, o la guarda pasara a abortar ante CUALQUIER hallazgo, este caso cae.
+     *
+     * <p><b>Guarda anti-tautología</b>, imprescindible: sin ella el test seguiría verde si
+     * S8 no se detectara EN ABSOLUTO —que es exactamente el modo de fallo que debe cazar—.
+     * Antes del POST se comprueba sobre el MISMO catálogo que la pre-validación sí emite el
+     * hallazgo y que es de severidad {@code AVISO}; solo entonces el {@code 200} significa
+     * algo. Se llama al núcleo estático con el problema que carga el servicio real, la
+     * misma entrada que verá {@code generar()}.
+     */
+    @Test
+    void post_conS8VioladaYSinErrores_noAborta() throws Exception {
+        poblarCatalogoMinimo(1, 5);   // factible: 1 repetición en 5 tramos
+        actividadRepository.findByCodigo("Mat-1ºA").orElseThrow().setRequiereTutor(true);
+        entityManager.flush();
+
+        List<AvisoPrevalidacion> avisos =
+                PrevalidacionService.prevalidar(service.cargarProblema());
+        assertThat(avisos).singleElement().satisfies(a -> {
+            assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+        });
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
     }
 
     /**

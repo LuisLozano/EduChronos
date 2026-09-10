@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
@@ -10,7 +11,9 @@ import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
+import es.yaroki.educhronos.solver.domain.ProfesorTutoria;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.RolTutoria;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
@@ -27,6 +30,10 @@ import org.junit.jupiter.api.Test;
  * Se ejercita con {@code ProblemaHorario} construidos a mano —no hay JPA, ni Spring, ni
  * solver— porque es exactamente la entrada que el servicio recibe en producción tras
  * {@code cargarProblema()}.
+ *
+ * <p>La cuarta regla (S8, tutorías) no es aritmética: se delega en
+ * {@link VerificadorSolucion}. Sus fixtures se calibran por otra vía —el resto de reglas
+ * DEBE quedar callado— para que el hallazgo aseverado no pueda venir de otra comprobación.
  *
  * <p>Los fixtures están CALIBRADOS: en cada uno, la magnitud que se asevera cambia si la
  * regla se implementa mal (frontera {@code <} en vez de {@code <=}, conteo por plaza en
@@ -252,6 +259,102 @@ class PrevalidacionServiceTest {
         assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
     }
 
+    // ----------------------------------------------------------------- (S8) tutorías
+
+    /**
+     * (P1) S8 violada: la actividad {@code requiereTutor} la imparte LEN1, que no es
+     * TUTOR_PRINCIPAL de nada. Asevera los SEIS campos del hallazgo, no su mera presencia.
+     *
+     * <p>Fixture calibrado para que sea el ÚNICO posible: 5 tramos en 5 días contra una
+     * sola actividad de 1×1, así que (a) ve 1≤5, (c) ve 1≤5 y (d) ni mira (NEUTRA). El
+     * {@code hasSize(1)} final lo fija: el aviso aseverado no puede venir de otra regla.
+     *
+     * <p>La descripción esperada se PIDE AL VERIFICADOR en vez de copiarse como literal:
+     * así el aserto comprueba que el mapeo la pasa TAL CUAL, y no se convierte en un
+     * espejo del texto del solver que habría que mantener a mano.
+     */
+    @Test
+    void actividadRequiereTutorSinTutorPrincipal_produceAvisoQueNombraLaActividad() {
+        Profesor len1 = new Profesor("LEN1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+
+        ProblemaHorario problema = problema(
+                tramosEnDias(5, 1), List.of(len1), List.of(grupo), List.of(sg),
+                List.of(actividadTutorial("Tut-1ºA", len1, sg)),
+                List.of(), List.of());
+
+        String descripcionDelSolver = new VerificadorSolucion()
+                .verificarTutorias(problema).get(0).descripcion();
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+
+        assertThat(avisos).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+            assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
+            // La entidad es la ACTIVIDAD, no el grupo "1ºA" que lleva el recursoCodigo.
+            assertThat(a.entidadCodigo()).isEqualTo("Tut-1ºA");
+            assertThat(a.demanda()).isEqualTo(1);
+            assertThat(a.disponible()).isEqualTo(0);
+            assertThat(a.descripcion()).isEqualTo(descripcionDelSolver);
+        });
+    }
+
+    /**
+     * (P2) ORDEN: con un ERROR de (d) y un AVISO de S8 en el mismo catálogo, S8 va LA
+     * ÚLTIMA. Se asevera por ÍNDICE, no por contenido del conjunto: un orden invertido
+     * pasaría cualquier aserto de pertenencia y cae aquí.
+     *
+     * <p>Calibrado para que (a) y (c) callen: 6 tramos en 3 días; MAT1 demanda 4≤6, LEN1
+     * demanda 1≤6, y el grupo 1ºA acumula 4+1 = 5 ≤ 6. Los dos únicos hallazgos son los
+     * buscados, y el {@code hasSize(2)} lo fija.
+     */
+    @Test
+    void conUnErrorYUnaS8_laS8VaLaUltima() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+
+        ProblemaHorario problema = problema(
+                tramosEnDias(3, 2), List.of(mat1, len1), List.of(grupo), List.of(sg),
+                List.of(
+                        actividad("Mat-1ºA", 4, 1, PatronTemporal.DISTRIBUIDA,
+                                plaza("Mat-1ºA-P1", mat1, sg)),   // (d): 4 repeticiones > 3 días
+                        actividadTutorial("Tut-1ºA", len1, sg)),  // S8: LEN1 no es tutor
+                List.of(), List.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+
+        assertThat(avisos).hasSize(2);
+        assertThat(avisos.get(0).regla())
+                .isEqualTo(PrevalidacionService.REGLA_REPETICIONES_EXCEDEN_DIAS);
+        assertThat(avisos.get(0).severidad()).isEqualTo(Severidad.ERROR);
+        assertThat(avisos.get(1).regla())
+                .isEqualTo(PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
+        assertThat(avisos.get(1).severidad()).isEqualTo(Severidad.AVISO);
+    }
+
+    /**
+     * (P3, hermano de P1) MISMO fixture salvo la fila de tutoría: LEN1 SÍ es
+     * TUTOR_PRINCIPAL de 1ºA. Ningún hallazgo. Es el par discriminante de P1: sin él,
+     * una regla que avisara de TODA actividad {@code requiereTutor} pasaría P1.
+     */
+    @Test
+    void actividadRequiereTutorConTutorPrincipal_noProduceAviso() {
+        Profesor len1 = new Profesor("LEN1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+
+        ProblemaHorario problema = problema(
+                tramosEnDias(5, 1), List.of(len1), List.of(grupo), List.of(sg),
+                List.of(actividadTutorial("Tut-1ºA", len1, sg)),
+                List.of(),
+                List.of(new ProfesorTutoria(len1, grupo, RolTutoria.TUTOR_PRINCIPAL)));
+
+        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+    }
+
     // ------------------------------------------------------------------- helpers
 
     private static List<Tramo> tramosEnDias(int dias, int porDia) {
@@ -281,12 +384,27 @@ class PrevalidacionServiceTest {
         return new RestriccionHoraria(profesor, tramo, TipoRestriccion.DURA, 0, Optional.empty());
     }
 
+    /** Actividad tutorial de 1x1 con {@code requiereTutor = true} y un solo profesor. */
+    private static Actividad actividadTutorial(String codigo, Profesor profesor, Subgrupo sg) {
+        return new Actividad(codigo, Optional.of(MAT), 1, 1, PatronTemporal.NEUTRA,
+                List.of(plaza(codigo + "-P1", profesor, sg)), true);
+    }
+
     private static ProblemaHorario problema(
             List<Tramo> tramos, List<Profesor> profesores, List<GrupoAdministrativo> grupos,
             List<Subgrupo> subgrupos, List<Actividad> actividades,
             List<RestriccionHoraria> restricciones) {
+        return problema(tramos, profesores, grupos, subgrupos, actividades, restricciones,
+                List.of());
+    }
+
+    /** Sobrecarga con TUTORÍAS, que las tres primeras reglas no necesitaban. */
+    private static ProblemaHorario problema(
+            List<Tramo> tramos, List<Profesor> profesores, List<GrupoAdministrativo> grupos,
+            List<Subgrupo> subgrupos, List<Actividad> actividades,
+            List<RestriccionHoraria> restricciones, List<ProfesorTutoria> tutorias) {
         return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
-                subgrupos, actividades, restricciones, List.of(), List.of());
+                subgrupos, actividades, restricciones, List.of(), tutorias);
     }
 
     private static List<AvisoPrevalidacion> soloRegla(List<AvisoPrevalidacion> avisos, String regla) {

@@ -1,5 +1,8 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.solver.cpsat.ReglaDura;
+import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
+import es.yaroki.educhronos.solver.cpsat.Violacion;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.PatronTemporal;
@@ -26,11 +29,41 @@ import org.springframework.transaction.annotation.Transactional;
  * horario posible —o avisan de que probablemente no exista— ANTES de gastar el
  * presupuesto del solver.
  *
+ * <p><b>La cuarta regla (S8) REUTILIZA la del solver, no la reimplementa.</b> Las
+ * tres primeras son aritmética de conteo propia de esta capa; S8 ya está escrita —y
+ * probada— en {@link VerificadorSolucion}, y desde S146 esa clase expone
+ * {@code verificarTutorias(ProblemaHorario)}, un punto de entrada que NO pide
+ * {@link es.yaroki.educhronos.solver.domain.SolucionHorario} porque S8 es propiedad del
+ * CATÁLOGO. Aquí solo se traducen sus {@link Violacion} a {@link AvisoPrevalidacion}. NO
+ * es un espejo: si fuera una segunda implementación caería en la familia D-F8.2b-iv-a
+ * (misma regla escrita dos veces, que divergen en silencio). El verificador se instancia
+ * con {@code new} —igual que en {@code DiagnosticoService}—, no es un bean; aquí el campo
+ * es {@code static} porque el núcleo que lo usa lo es.
+ *
+ * <p><b>Por qué S8 es AVISO y no ERROR.</b> Por DOS razones independientes:
+ * <ol>
+ *   <li>No implica infactibilidad: el solver coloca perfectamente una actividad tutorial
+ *       cuyo profesor no es tutor. Abortar sería un falso positivo sobre un problema
+ *       resoluble, justo lo que el criterio de {@link Severidad} prohíbe.</li>
+ *   <li>No depende de la COLOCACIÓN. El horario generado es válido en todo lo demás, y
+ *       la violación se corrige cambiando el tutor del grupo —un
+ *       {@code PUT /api/grupos/&#123;id&#125;/tutoria}— SIN regenerar nada. Bloquear la
+ *       generación por esto empujaría al usuario a falsear tutores para poder generar,
+ *       que es peor que el dato que se quería proteger.</li>
+ * </ol>
+ *
+ * <p><b>Por qué demanda 1 y disponible 0.</b> {@link AvisoPrevalidacion} contractualiza
+ * que el hallazgo se emite cuando {@code demanda > disponible} (y que la igualdad NO es
+ * fallo). S8 no es una comparación de conteo, así que se codifica su cardinalidad real:
+ * hace falta UN tutor principal que imparta la actividad, y hay CERO. 1 &gt; 0 respeta el
+ * contrato sin inventar una aritmética que no existe.
+ *
  * <p><b>Qué NO es.</b> No es una validación de integridad del catálogo (huérfanos,
  * códigos duplicados): eso ya lo hace {@link es.yaroki.educhronos.app.mapper.CatalogoMapper}
- * al mapear. Aquí el catálogo YA es referencialmente sano; lo que se compara es
- * DEMANDA contra DISPONIBILIDAD. Son condiciones NECESARIAS, no suficientes: pasar
- * las tres no garantiza que el problema sea factible.
+ * al mapear. Aquí el catálogo YA es referencialmente sano; lo que comparan las tres
+ * primeras reglas es DEMANDA contra DISPONIBILIDAD (la cuarta, S8, no: es una propiedad
+ * del catálogo, y por eso avisa en vez de abortar). Son condiciones NECESARIAS, no
+ * suficientes: pasar las cuatro no garantiza que el problema sea factible.
  *
  * <p><b>Por qué delega en {@link GeneradorHorarioService#cargarProblema()}</b> en vez
  * de cargar el catálogo por su cuenta: mismo motivo que {@link DiagnosticoService}.
@@ -48,7 +81,7 @@ import org.springframework.transaction.annotation.Transactional;
  * servicio ya depende de {@code GeneradorHorarioService} para cargar—, que Spring Boot
  * rechaza al arrancar; (2) evita añadir una decimotercera dependencia al servicio que
  * ya arrastra la deuda D-F8.2b-iii-A-a. El núcleo estático es además la ÚNICA
- * implementación de las tres reglas: el endpoint y la generación entran por ahí, uno
+ * implementación de las cuatro reglas: el endpoint y la generación entran por ahí, uno
  * cargando el problema y otro reutilizando el que ya tiene en la mano. Ninguna regla
  * se escribe dos veces (familia D-F8.2b-iv-a).
  *
@@ -68,6 +101,21 @@ public class PrevalidacionService {
 
     /** Un grupo tiene más horas curriculares que tramos lectivos. ERROR. */
     public static final String REGLA_GRUPO_SOBRECARGADO = "GRUPO_SOBRECARGADO";
+
+    /**
+     * Una actividad {@code requiereTutor} no la imparte ningún TUTOR_PRINCIPAL de un
+     * grupo que cubre (S8, §4.6). AVISO. El identificador NO se escribe a mano: se toma
+     * del enum del solver, que es quien nombra la regla, para que la constante y la
+     * {@link Violacion#regla()} que se está traduciendo no puedan divergir.
+     */
+    public static final String REGLA_TUTORIA_SIN_TUTOR = ReglaDura.TUTORIA_SIN_TUTOR.name();
+
+    /**
+     * Verificador del solver, dueño de la implementación de S8. {@code new} y no bean
+     * (patrón de {@code DiagnosticoService}); {@code static} porque el núcleo
+     * {@link #prevalidar(ProblemaHorario)} que lo usa es estático. No guarda estado.
+     */
+    private static final VerificadorSolucion VERIFICADOR = new VerificadorSolucion();
 
     private final GeneradorHorarioService generadorService;
 
@@ -90,13 +138,15 @@ public class PrevalidacionService {
     }
 
     /**
-     * NÚCLEO: las tres comprobaciones sobre un {@link ProblemaHorario} ya cargado.
+     * NÚCLEO: las cuatro comprobaciones sobre un {@link ProblemaHorario} ya cargado.
      * Puro y estático —ni repositorios, ni transacción, ni estado—, para que
      * {@code GeneradorHorarioService.generar()} lo llame con el problema que YA cargó,
      * sin volver a leer el catálogo y sin inyectar este bean (ver javadoc de clase).
      *
      * <p>El orden de salida es estable: primero profesores, luego actividades, luego
-     * grupos, y dentro de cada bloque el orden del catálogo.
+     * grupos y por último tutorías (S8), y dentro de cada bloque el orden del catálogo.
+     * S8 va LA ÚLTIMA a propósito: es la única de severidad AVISO, así que los hallazgos
+     * que abortan la generación quedan agrupados al principio de la lista.
      */
     public static List<AvisoPrevalidacion> prevalidar(ProblemaHorario problema) {
         Objects.requireNonNull(problema, "problema no puede ser null");
@@ -112,6 +162,7 @@ public class PrevalidacionService {
         avisos.addAll(sobrecargaProfesor(problema, tramosLectivos));
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
         avisos.addAll(sobrecargaGrupo(problema, tramosLectivos));
+        avisos.addAll(tutoriasSinTutor(problema));
         return List.copyOf(avisos);
     }
 
@@ -293,6 +344,41 @@ public class PrevalidacionService {
                                 + " tramos curriculares y la semana solo tiene "
                                 + tramosLectivos + " tramos lectivos"));
             }
+        }
+        return avisos;
+    }
+
+    /**
+     * (S8) TUTORÍA SIN TUTOR — AVISO. Una actividad {@code requiereTutor} que no imparte
+     * ningún TUTOR_PRINCIPAL de un grupo que cubre (§4.6).
+     *
+     * <p><b>Delega, no reimplementa.</b> La regla vive en
+     * {@link VerificadorSolucion#verificarTutorias(ProblemaHorario)}; aquí solo se
+     * traduce cada {@link Violacion} al vocabulario de la pre-validación. Ver el javadoc
+     * de clase para el porqué de AVISO y del 1/0.
+     *
+     * <p><b>La entidad señalada es la ACTIVIDAD, no el grupo.</b> Se saca de las celdas
+     * de la violación y NO de su {@code recursoCodigo()}, que lleva el grupo afectado
+     * (ver {@code VerificadorSolucion.grupoAfectado}). Las demás reglas nombran la
+     * entidad que hay que TOCAR para arreglar el hallazgo, y aquí lo accionable es la
+     * actividad concreta que se quedó sin tutor.
+     *
+     * <p>{@code celdas().get(0)} es seguro y no necesita guarda: el constructor compacto
+     * de {@link Violacion} RECHAZA una lista de celdas vacía, y S8 la puebla con una
+     * celda por repetición ({@code repeticionesPorSemana >= 1} por invariante de
+     * {@code Actividad}). Todas las celdas de una violación S8 llevan además el MISMO
+     * {@code actividadCodigo}, así que la primera no desempata nada: es el único valor.
+     */
+    private static List<AvisoPrevalidacion> tutoriasSinTutor(ProblemaHorario problema) {
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (Violacion violacion : VERIFICADOR.verificarTutorias(problema)) {
+            avisos.add(new AvisoPrevalidacion(
+                    Severidad.AVISO,
+                    REGLA_TUTORIA_SIN_TUTOR,
+                    violacion.celdas().get(0).actividadCodigo(),
+                    1,
+                    0,
+                    violacion.descripcion()));
         }
         return avisos;
     }

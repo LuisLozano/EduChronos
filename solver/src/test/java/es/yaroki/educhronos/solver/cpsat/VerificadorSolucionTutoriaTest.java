@@ -166,4 +166,24 @@ class VerificadorSolucionTutoriaTest {
         assertThat(violaciones.get(0).celdas())
                 .allMatch(c -> c.actividadCodigo().equals("ACT-VIOLA"));
     }
+
+    // T7: la vía SIN solución da lo MISMO que la de siempre. Sobre el fixture
+    // discriminante (una actividad que CUMPLE y otra que VIOLA), verificarTutorias(problema)
+    // y verificar(problema, vacía) filtrado por TUTORIA_SIN_TUTOR se comparan como
+    // MULTICONJUNTO: mismo contenido y misma cardinalidad, sin depender del orden.
+    // El isNotEmpty() de la referencia impide que el aserto pase en vacío si algún día
+    // la implementación privada dejara de emitir nada.
+    @Test
+    void verificarTutoriasSinSolucion_coincideConLaViaDeVerificar() throws Exception {
+        ProblemaHorario problema;
+        try (InputStream in = getClass().getResourceAsStream("/fixtures/problema-8-5-s8.json")) {
+            problema = new ProblemaHorarioJsonLoader().cargar(in);
+        }
+
+        List<Violacion> porVerificar = tutoriaViolaciones(problema);
+        List<Violacion> sinSolucion = new VerificadorSolucion().verificarTutorias(problema);
+
+        assertThat(porVerificar).isNotEmpty();
+        assertThat(sinSolucion).containsExactlyInAnyOrderElementsOf(porVerificar);
+    }
 }

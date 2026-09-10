@@ -709,6 +709,32 @@ public final class VerificadorSolucion {
     }
 
     /**
+     * PUNTO DE ENTRADA SIN SOLUCIÓN a S8, para la pre-validación del catálogo. Devuelve
+     * las violaciones {@code TUTORIA_SIN_TUTOR} del problema y nada más.
+     *
+     * <p>Existe porque S8 es la ÚNICA de las comprobaciones de este verificador que no
+     * necesita una {@link SolucionHorario} —es propiedad del CATÁLOGO, no del horario:
+     * ver el javadoc de clase (S8 «es la única comprobación que NO mira la
+     * {@code SolucionHorario}») y el del privado al que delega—. Sin este método, quien
+     * quisiera S8 antes de resolver tenía que llamar a {@link #verificar} con una
+     * solución VACÍA y filtrar por la regla, cargando de paso con un
+     * {@code INSTANCIA_SIN_COLOCAR} por cada instancia esperada.
+     *
+     * <p>ADITIVO PURO: no cambia {@link #verificar} ni el privado. Las dos vías
+     * comparten la MISMA implementación, así que no pueden divergir; un test lo fija
+     * comparando ambas salidas como multiconjunto.
+     *
+     * @param problema catálogo a comprobar; no se toca la solución porque no hay.
+     * @return violaciones S8, en el orden del catálogo; vacía si ninguna actividad
+     *         {@code requiereTutor} incumple.
+     */
+    public List<Violacion> verificarTutorias(ProblemaHorario problema) {
+        List<Violacion> violaciones = new ArrayList<>();
+        verificarTutorias(problema, violaciones);
+        return violaciones;
+    }
+
+    /**
      * S8 (§4.6): toda actividad {@code requiereTutor} debe estar impartida por un
      * TUTOR_PRINCIPAL de un grupo que la actividad cubre. Es propiedad del CATÁLOGO,
      * no de la solución: por eso este método —único del fichero— NO recibe ni usa
