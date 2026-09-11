@@ -2,33 +2,35 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L56 — ## 1. Estado final del proyecto
-- L82 — ## 2. Hitos
-- L96 — ### Hitos: valor, dependencias, orden
-- L119 — ## 3. Objetivos técnicos
-- L129 — ### H2 — Configurar un centro desde cero
-- L131 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L147 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L219 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L469 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L756 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L857 — ### H1 — Ajustar (cierre)
-- L859 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1036 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1327 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1519 — ## 4. Clasificación del trabajo pendiente
-- L1537 — ### Clasificación de las deudas vivas actuales
-- L1543 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1550 — #### Deuda técnica real, colgada de su objetivo
-- L1634 — #### Mejora futura, cuelga y espera
-- L1668 — #### Decisión arquitectónica consciente → sale de la cola
-- L1680 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L1689 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L1696 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L1763 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L1828 — ## 6. Reglas estratégicas
-- L1875 — ## 7. Métricas del sistema
-- L1896 — ## 8. El sistema respondiendo a las preguntas clave
+- L58 — ## 1. Estado final del proyecto
+- L84 — ## 2. Hitos
+- L98 — ### Hitos: valor, dependencias, orden
+- L121 — ## 3. Objetivos técnicos
+- L132 — ### H2 — Configurar un centro desde cero
+- L134 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L150 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L222 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L472 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L759 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L860 — ### H1 — Ajustar (cierre)
+- L862 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1039 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1330 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1520 — ### H3 — Exportar
+- L1522 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos."
+- L1578 — ## 4. Clasificación del trabajo pendiente
+- L1596 — ### Clasificación de las deudas vivas actuales
+- L1602 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1609 — #### Deuda técnica real, colgada de su objetivo
+- L1694 — #### Mejora futura, cuelga y espera
+- L1728 — #### Decisión arquitectónica consciente → sale de la cola
+- L1740 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L1749 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L1756 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L1823 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L1888 — ## 6. Reglas estratégicas
+- L1935 — ## 7. Métricas del sistema
+- L1956 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -75,7 +77,7 @@ Cada eslabón corresponde a un criterio de verificación ya escrito en las Fases
 EJECUTABLE, no como casillas independientes. Mientras el guion falle en cualquier
 paso, el proyecto no está terminado, por muchos tests unitarios verdes que haya.
 
-Hoy el guion falla en el paso 4 y en el paso 5. **CORREGIDO en S142:** esta frase decía «falla en el paso 2: no existe interfaz para crear un centro», y dejó de ser cierta al cerrar H2 en S141 —el centro se crea entero por pantalla—. Falla en el **paso 4** porque el ajuste a mano no existe como tal: medido en S142, soltar una clase en la rejilla emite un PIN de tramo (`POST /api/bloqueos`), no la reubica, y no hay ninguna vía de API para mover una sesión —no existe `SesionController` y la única escritura sobre `sesionRepository` en todo `src/main` es el `saveAll` de la generación—, así que el horario sólo cambia regenerándolo entero. Y falla en el **paso 5** porque la exportación a PDF y CSV no está empezada (H3 al 0 %). **ACTUALIZADO en S146:** el paso 4 deja de fallar como eslabón al cerrar H1 —las cinco condiciones de O-ajuste-cierre cumplidas y verificadas sobre el centro real—. Hoy el guion falla en el paso 5 (exportación, H3 al 0 %), y los pasos 1 y 6 pertenecen a H4 (~10 %), cuyos criterios no se han verificado: la frase anterior nombraba sólo el 4 y el 5 y callaba los dos de H4. La cadena entera, que es lo que este apartado exige, no se ha ejecutado nunca.
+Hoy el guion falla en el paso 4 y en el paso 5. **CORREGIDO en S142:** esta frase decía «falla en el paso 2: no existe interfaz para crear un centro», y dejó de ser cierta al cerrar H2 en S141 —el centro se crea entero por pantalla—. Falla en el **paso 4** porque el ajuste a mano no existe como tal: medido en S142, soltar una clase en la rejilla emite un PIN de tramo (`POST /api/bloqueos`), no la reubica, y no hay ninguna vía de API para mover una sesión —no existe `SesionController` y la única escritura sobre `sesionRepository` en todo `src/main` es el `saveAll` de la generación—, así que el horario sólo cambia regenerándolo entero. Y falla en el **paso 5** porque la exportación a PDF y CSV no está empezada (H3 al 0 %). **ACTUALIZADO en S146:** el paso 4 deja de fallar como eslabón al cerrar H1 —las cinco condiciones de O-ajuste-cierre cumplidas y verificadas sobre el centro real—. Hoy el guion falla en el paso 5 (exportación, H3 al 0 %), y los pasos 1 y 6 pertenecen a H4 (~10 %), cuyos criterios no se han verificado: la frase anterior nombraba sólo el 4 y el 5 y callaba los dos de H4. La cadena entera, que es lo que este apartado exige, no se ha ejecutado nunca. **ACTUALIZADO en S147:** H3 abre con `O-exportación` (§3), con el criterio escrito sobre medición. El paso 5 sigue fallando —0 de 5 condiciones—, pero ya falla contra un criterio verificable. Su prueba en Windows real deja de ser de H3: se ejecuta con el paso 1, dentro de H4.
 
 ---
 
@@ -90,8 +92,8 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 |---|---|---|---|
 | **H1 — Ajustar un horario existente** ✔ TERMINADO S146 | Ver un horario, ver conflictos duros y blandos, **bloquear** sesiones (arrastrar PINCHA la instancia en su tramo), relanzar | **Sin porcentaje: no es medible hoy.** **CORREGIDO en S142**, detectado por Claude Code al verificar el cierre. Decía «~90 %», cifra que ya no se sostiene: de las cinco condiciones del criterio nuevo (§3) hay UNA cumplida y verificada —el pin de tramo—, y la condición 1 no está incumplida sino que describe **superficie que no existe** (recolocar una sesión no tiene endpoint, validación ni persistencia), así que no hay denominador honesto sobre el que calcular un avance. Un porcentaje sobre un criterio que acaba de AGRANDARSE afirmaría más de lo medido. **ACTUALIZADO en S145.** Sigue sin porcentaje y por la misma razón, pero el estado ya es medible por conteo de condiciones: CUATRO de las cinco están cumplidas y verificadas sobre el centro real —(1) y (2) con sus dos mitades, (4) y (5)—, y queda UNA, la prevalidación S8 de la condición (3), que es también el único Cambio abierto del objetivo. La columna «El usuario puede…» deja de ser falsa en su primera mitad: arrastrar YA reubica, por intercambio sobre celda ocupada y por movimiento sobre celda vacía, y el pin dejó de colgar del arrastre para tener gesto propio. **CERRADO en S146:** las cinco condiciones cumplidas y verificadas sobre el centro real; la última, la (3), con `C-prevalidacion-s8`. Segundo hito terminado del proyecto, tras H2 (S141) | **Ver el criterio REESCRITO en §3 (ficha de O-ajuste-cierre), que sustituye a la remisión a los criterios 1–4 de Fase 8.** **CORREGIDO en S142**, dos veces y las dos por medición. (a) La columna «El usuario puede…» decía «moverlo con drag & drop», y es FALSO: soltar una clase en la rejilla emite un PIN de tramo (`POST /api/bloqueos` con `aulas: []`, `horario-view.ts:284`), NO la reubica; la rejilla ni siquiera se mueve. Y no existe vía de API para mover una sesión —no hay `SesionController` entre los trece controladores, y la única escritura sobre `sesionRepository` en todo `src/main` es el `saveAll` de `GeneradorHorarioService:277`—, así que el horario sólo cambia regenerándolo entero. (b) «Cumplidos salvo verificación de cadena» YA NO APLICA: hay medición. De los cuatro criterios, el 4 (sesión bloqueada que no se mueve al relanzar) está VERIFICADO POR MUTACIÓN sobre el centro real en S142; el 1 no puede cumplirse porque el gesto que describe no existe; el 2 se pinta siempre y sin selección, con el detalle en `title`; y el 3 declara «catálogo sano» sobre un centro que a continuación agota los 600 s. Por eso el criterio se reescribe en §3 en vez de remendar esta celda. Se conserva lo dicho en S135 (R5): esta fila decía «y el gesto de despinar», apoyándose en `D-F8.6-ii-b`; el M0 de S134 midió que esa deuda está CERRADA desde S83 (bloque 8.6-iii-B1 marcado, la ficha remite a S83 y la bitácora lo confirma; S84 le añadió cobertura) y el gesto EXISTE |
 | **H2 — Configurar un centro desde cero** ✔ TERMINADO S141 | Crear profesores, aulas, grupos, currículo, desdobles, PDC, tutores por formularios y llegar a un horario válido sin tocar la BD | ~70% (O-shell hecho S100; O-catálogo TERMINADO S104, criterio precisado S106: 4 de 4 entidades CRUD por UI — Profesor (S101), Aula (S102), Asignatura (S103), Grupo (S104). El e2e UI→solver, antes 2ª mitad de O-catálogo, se reasignó a O-estructura en S106 al medirse que depende de currículo/jornada. O-estructura ABIERTO S107, 7 piezas hechas: C-jornada (S107, backend REST `/api/jornada` + formulario singleton, dimensión temporal del solve), C-subgrupos (S108, CRUD de subgrupos por UI sobre `/api/subgrupos`, con multiselect de grupos), C-actividades COMPLETO (trozo A en S109 —editor de Actividad de una plaza + guarda 409 del PUT + fin del vaciado de la BD en cada arranque— y trozo B en S110 —lista de plazas variable con alta/baja e I2 en cliente, con lo que desdobles, agrupamientos y bloques de optativas quedan construibles por UI—), C-niveles (S111, CRUD de Nivel por UI: cerraba el hueco medido en S109 —sin niveles por UI no hay grupos ni subgrupos— y con él las nueve filas del centro mínimo son construibles por pantalla) y C-e2e (S112, el e2e de navegador que crea el centro mínimo por la UI y verifica que el solver produce horario: TERCERA PATA del criterio, CUMPLIDA; incluyó arreglar un hueco funcional real de la primera generación) y C-pdc (S113, alta/consulta/borrado del grupo PDC por UI desde la fila de su padre + dos guardas de backend que impiden que el CRUD plano deshaga el agregado: con él el caso §6.2 del modelo —en su versión válida, la Nota (S23)— se construye íntegramente por pantalla y el solver produce horario sobre él, que es la SEGUNDA PATA demostrada en su caso más difícil) y C-tutores (S114, la asignación del tutor por UI sobre el sub-recurso que existía desde S77: su M0 midió que SÍ hacía falta —tres casos del §6 registran `ProfesorTutoria` en su configuración— y su M4 verificó en navegador que `TUTORIA_SIN_TUTOR` aparece sin tutor y desaparece con él; con ella las TRES PATAS quedan cumplidas y O-estructura CIERRA). «Desdobles y agrupamientos» dejó de ser trabajo propio al medirse que son actividades multiplaza. **O-estructura ✔ TERMINADO S114**, 8 piezas. **O-demo ABIERTO S115** y descompuesto en cinco Cambios; la misma sesión midió que el criterio 6 de Fase 8 no tiene constructor y lo sacó a objetivo propio, **O-particiones**, así que H2 pasa a cerrar con DOS objetivos por delante y no uno. **2 piezas: C-derivación (S115) y C-cargador (S116), con el que el IES completo —804 escrituras por la API REST— está en la base creado por las vías legítimas del producto; y, fuera de alcance, la primera prueba de que ese centro GENERA horario (FEASIBLE, objetivo 188.0), que despeja el mayor riesgo abierto del objetivo). C-generación EN CURSO desde S117, que resolvió dos de sus tres preguntas: la reconciliación de `sesion` (770/819 filas frente a 632 instancias: dos magnitudes distintas, no una discrepancia) y la caracterización del presupuesto (no gobierna la calidad sino la probabilidad de obtener horario; el defecto de 30 s es indefendible). **SEGUNDA PARTE en S118 (primera sesión de Desarrollo desde S114): la PIEZA DE PRODUCTO cerrada —presupuesto configurable `educhronos.solver.max-segundos` con defecto 600, separación 503 PRESUPUESTO_AGOTADO / 422 CATALOGO_INFACTIBLE / 422 CONFIGURACION_INCOMPLETA, y estado de espera en la vista— y el PRIMER HORARIO DEL CENTRO REAL generado por la vía de producción DESDE LA INTERFAZ (770 sesiones, el oráculo de S117 clavado). **C-generación CIERRA en S119 con la TERCERA parte: el contraste con el PDF.** Su M0 fijó qué se asevera como «válido» —el PDF no juzga la validez, es oráculo de CONTENIDO— en tres capas, y las tres se midieron sobre el horario de S118: **cero violaciones de regla dura sobre 770 sesiones** a escala real; **conservación de la carga con 526 claves, 11 divergentes todas de FPB y delta 49 idéntico al déficit predicho antes de mirar**; y los blandos recomponiendo el objetivo sin residuo (174 + 0 + 18 = 192). De paso se detectó y eliminó una circularidad en el mapa de códigos de grupo. **C-carga-manual-1eso, tras TRES sesiones sin decidirse, se decide y se ejecuta en S120** en versión recortada por ancho: el caso §6.1 —bloque de seis destinos alternativos con subgrupos de DOS grupos, y co-docencia de LCL— tecleado A MANO por la interfaz sobre base vacía, 38 envíos, veinte minutos, horario válido en 1 s y **ningún caso inexpresable**; con él la nota de alcance del criterio 5 se ESTRECHA (queda sin demostrar por UI la escala y el descubrimiento del modelado, porque el guion decía qué construir) y O-demo se queda **SIN TRABAJO EJECUTABLE**. **O-demo sigue ABIERTO**: faltan las 11 actividades de FPB (D31-a). **DESBLOQUEADO en S134**: no hubo correo, el arquitecto entrevistó al jefe de estudios y D31-a quedó SALDADA —lo que el horario no imprime va a Taller 4 (1º FPB) y Taller 5 (2º FPB), regla y no once datos—, con lo que la deuda bloqueante del proyecto baja a 0 por primera vez. **O-demo AVANZA en S135 con C-centro-completo HECHO, y es el mayor salto del objetivo desde S116:** alta del aula Taller 5, aula fija en las 11 plazas, carga del centro entero DESDE BASE VACÍA por la API REST (816 escrituras previstas, 816 escritas, diez familias cuadrando por GET: 44 aulas, 219 actividades, 316 plazas, 334 subgrupos, 28 grupos) y horario generado al primer intento pese a que los 28 grupos pasan a holgura cero: `FEASIBLE`, 819 filas de `sesion` clavando el oráculo rederivado del catálogo, delta 49 sobre las 770 de S118. Las tres capas de S119 remedidas a escala real: **cero violaciones de regla dura sobre 819**, **conservación de la carga con 526 claves y CERO divergentes (1301 = 1301)** —en S119 divergían 11, todas de FPB— y la identidad del objetivo sin residuo (188 + 0 + 15 = 203). **Con esto las DOS primeras patas del criterio 5 quedan demostradas a escala real. O-demo NO cierra**: falta juzgar «presentable al centro», y el obstáculo conocido son los 28 tutores, que S134 midió INCORRECTOS y no incompletos**. **S136 DEFINE Y MIDE la tercera pata con `C-presentable`, y corrige el diagnóstico de S134:** «presentable» queda escrito como «ningún dato mostrado contradice lo que el centro dijo de sí mismo, y lo que no tiene fuente aparece como ausente y no como inventado»; y de los 28 tutores 21 están BIEN (los 16 ordinarios de ESO y FPB casan 16/16 contra el PDF, los 5 PDC heredan el del padre), faltan 5 co-tutorías de ORI1 y sólo los 7 de Bachillerato son falsos —y son PORTANTES: sostienen S8 en las seis actividades de bloque—. La mitad declarativa del criterio queda cumplida por `docs/salvedades-demo.md`; la otra mitad **no depende de trabajo técnico sino de que el centro entregue la lista oficial de tutores**, así que O-demo vuelve a quedarse sin trabajo ejecutable | Criterios 5–6 de Fase 8: "configurar centro desde cero → horario válido" (O-demo) y "crear grupo nuevo se incorpora a las particiones" (O-particiones, §3). NOTA DE ALCANCE (S115): con la carga del centro real entrando por la API REST, el criterio 5 queda demostrado por UI a escala del centro mínimo (e2e de S112) y no a escala real; ver la nota escrita en la ficha de O-demo |
-| **H3 — Exportar** | Obtener PDF por grupo/profesor/aula y CSV | 0% | Los 4 criterios de Fase 9 |
-| **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12 |
+| **H3 — Exportar** ABIERTO S147 | Obtener PDF por grupo/profesor/aula y CSV | 0 %. **ACTUALIZADO en S147:** abre con `O-exportación`, su único objetivo previsto, y su criterio se escribe sobre medición del centro real: 0 de 5 condiciones cumplidas y ninguna línea de código de exportación | **Ver el criterio de `O-exportación` en §3, que SUSTITUYE a los 4 criterios de Fase 9** (S147). El 1 y el 3 no eran medibles tal como estaban escritos —«buena legibilidad» y «toda la información necesaria», sin umbral—, el 4 (Windows) pasa a H4 y la fase omitía el PDF por aula que §1 exige |
+| **H4 — Instalar y pasar de curso** | Instalar en Windows limpio; duplicar curso | ~10% (Fase 0 validó empaquetado una vez) | Criterios de Fases 10, 11 y 12, y el 4 de Fase 9 —«la exportación funciona en Windows»—, trasladado aquí en S147 porque sólo se verifica con el bundle (precedente: Fase 6 → Fase 11) |
 
 ### Hitos: valor, dependencias, orden
 
@@ -107,7 +109,7 @@ seis criterios de verificación de la Fase 8 (que mezclaban "ajustar" y
 - **H4 — Instalar/curso.** Valor: es la condición de entrega. Depende de: todo lo
   anterior estable.
 
-**Orden recomendado: H2 → cierre de H1 → H3 → H4.** Justificación en §5. **ESTADO en S146:** H2 cerrado en S141 y H1 en S146; el siguiente es H3, que todavía no tiene ningún objetivo escrito en §3. (El
+**Orden recomendado: H2 → cierre de H1 → H3 → H4.** Justificación en §5. **ESTADO en S146:** H2 cerrado en S141 y H1 en S146; el siguiente es H3, que todavía no tiene ningún objetivo escrito en §3. **ESTADO en S147:** H3 ABIERTO con `O-exportación`, objetivo activo del proyecto, con el criterio escrito sobre medición y 0 de 5 condiciones cumplidas. (El
 acabado visual transversal —O-diseño, §3— no es un hito funcional. **CORREGIDO en
 S121:** este paréntesis decía «va tras cerrar H1»; la revisión de S115 en §5 lo
 dejó desfasado y el M0 de S121 lo detectó como costura. El orden vigente hacia la
@@ -125,6 +127,7 @@ terminado, dependencias, valor y los cambios que agrupa.
 Se desarrollan los objetivos de H1 y H2 (los calientes). H3 y H4 se descomponen
 al abrirse; su descomposición es de bajo riesgo y está acotada por los criterios
 de las Fases 9–12.
+**CORREGIDO en S147, al abrir H3:** «de bajo riesgo» no se sostuvo para el criterio. De los cuatro criterios de Fase 9, el 1 y el 3 no eran medibles tal como estaban escritos, el 4 sólo se verifica con el bundle de H4, y la fase omitía el PDF por aula que §1 exige. El criterio de `O-exportación` se escribió midiendo antes, con la lección de S142.
 
 ### H2 — Configurar un centro desde cero
 
@@ -1514,6 +1517,62 @@ legítimo (que el ajuste funcione) está en O-ajuste-cierre; su trabajo ilegíti
 (pulir tests de una vista que el shell reubicará) desaparece por la regla de
 terminado (§6).
 
+### H3 — Exportar
+
+#### O-exportación — "El horario sale de la aplicación, en papel y en datos."
+- **Propósito:** que el usuario se lleve el horario en las dos formas que usa el centro:
+  impreso por grupo, por profesor y por aula, y como datos para otras herramientas. Es el
+  paso 5 del guion de §1. Abierto en S147 como único objetivo previsto de H3.
+- **Terminado cuando** — ESCRITO en S147 sobre medición (M2 de solo lectura sobre el
+  horario de referencia y sobre los PDF del centro), con la lección de S142: un criterio
+  escrito antes de medir puede ser inmedible. SUSTITUYE a los cuatro criterios de Fase 9,
+  que no se marcan (nota en la Fase 9 del plan). Todo se mide sobre COPIA de
+  `educhronos-s137.db` (`dfa4c0774a842d8eb6b7a941e23df2a9`, 819 sesiones).
+  O-exportación termina cuando:
+  1. Desde la vista del horario, un PDF por vista (grupo, profesor, aula) con una página
+     A4 por recurso: 28 grupos, 59 profesores y las 44 aulas del CATÁLOGO, vacías
+     incluidas —el centro imprime así sus 43 páginas de aula, 10 de ellas vacías—. Cada
+     página lleva la columna de horas y el recreo de la jornada que imprime el centro
+     (8:00–14:30, recreo 11:00–11:30), comprobada contra ese PDF y NO contra la base
+     (`D-hora-tramo-dependiente-de-zona`), y una leyenda con el nombre de catálogo de cada
+     profesor y asignatura que aparece en la página.
+  2. Completo y exclusivo: el texto de cada página contiene exactamente las entradas de su
+     recurso según un oráculo SQL sobre la copia, independiente del exportador y de la
+     proyección. Totales esperados, medidos en S147: 1285 entradas en 840 celdas de grupo,
+     835 celdas de profesor y 819 de aula. En papel no hay «+N».
+  3. Legible: ningún texto por debajo de 7,99 pt, el cuerpo único de los PDF del centro en
+     sus 71 páginas (medido en S147). Y revisión humana de los dos peores casos medidos:
+     1ºA (celdas de 6 entradas, el máximo del horario: martes T2 y jueves T5) y DIB2 (la
+     entrada más larga, 47 caracteres).
+  4. CSV: un proceso que lee SÓLO el CSV reconstruye las tres vistas idénticas al oráculo
+     de la condición 2. El grano —fila por sesión o por sesión y profesor— se decide en su
+     Cambio.
+  5. Sin dependencia de plataforma comprobable desde Linux: el PDF lleva incrustadas todas
+     sus fuentes (`pdffonts`) y el CSV declara su codificación. La prueba en Windows real
+     —antes criterio 4 de Fase 9— se ejecuta en H4 con el bundle (precedente: Fase 6 →
+     Fase 11). Los PDF del centro NO incrustan su fuente: esta condición es más estricta a
+     propósito, porque es nuestro bundle el que ha de funcionar en un Windows limpio.
+- **Depende de:** H1 y H2 cerrados (S146 y S141). No depende de generar: se mide por
+  lectura sobre un horario ya guardado, sin gastar 600 s y sin `D-horario-irreversible`.
+- **Valor:** es lo que el usuario se lleva impreso; §2 lo califica de ALTO y cobrable.
+- **Cambios que agrupa:** `C-alcance-exportacion` ✔ HECHO (S147), el M0 y la medición que
+  escribieron este criterio. Los siguientes se nombran en su M0. Previsión, no compromiso:
+  el CSV primero (el más barato, y el que monta la vía de exportación por id de horario y
+  el oráculo), después el motor de PDF empezando por 1ºA, y después las otras dos vistas.
+- **Restricciones de diseño heredadas de §4, ninguna bloqueante:** la exportación COMPONE
+  `GeneradorHorarioService.proyectar()` con la jornada y el catálogo de profesores —la
+  proyección no lleva ni el nombre del profesor ni las horas— y NO escribe un tercer mapeo
+  desde `Sesion` (`D-proyeccion-instancia-espejo`) ni se fía de la colección inversa
+  `horario.getSesiones()` (`D-post-horario-sin-sesiones`). Dos decisiones quedan para sus
+  Cambios: el motor de PDF —el criterio favorece generarlo en el servidor; iText (AGPL)
+  descartado por licencia, PDFBox y OpenPDF viables— y el CSV para Excel con configuración
+  regional española (separador y BOM), que se verifica en Windows dentro de H4.
+- **Aviso para el Cambio del PDF:** el precedente del centro no se transfiere solo. El
+  centro imprime códigos de aula cortos («A12In») en Courier, unos 15 caracteres por
+  columna; los nuestros llegan a 22 («Taller 1 Aula Plástica»). Se maqueta 1ºA ANTES que
+  nada: si no cabe en una página, se sabe pronto.
+- **Métrica de §7:** si pasa de ocho sesiones, esconde dos objetivos.
+
 ---
 
 ## 4. Clasificación del trabajo pendiente
@@ -1631,6 +1690,7 @@ asigna categoría, objetivo y disposición.
 | D-censo-r4-ciego-a-la-extincion (el censo marca el token con UNA aparición y no ve el que cae a CERO) | Transversal, sesión de Higiene/Método | No | Nace en S143, encontrada por Claude Code al cerrar y declarada por él. `scripts/verificar-cierre.py` lista como sospechosos los identificadores con exactamente UNA aparición en el corpus vivo, de modo que un token que pierde su última cita **sale de la lista en silencio**: deja de ser sospechoso por haber empeorado. Medido en vivo: al archivar S141, `C-alcance-particiones` cayó a cero apariciones en el corpus vivo —conserva 5 en la bitácora— y desapareció del censo, mientras cuatro tokens que sólo bajaron a una entraron en él. Es FAMILIA de `D-censo-r4-cuenta-menciones` pero NO la misma: aquella dice que el instrumento no distingue una definición de una mención; esta dice que es ciego al caso peor. El arreglo natural es que el censo cuente también los ceros, lo que exige una lista de tokens esperados y no sólo un recuento sobre lo que aparece. No se paga ahora (R-deuda) |
 | D-candados-en-tabulacion (el candado permanente añade 30 paradas de tabulación por vista, 29 de ellas invisibles) | O-ajuste-cierre (cerrado S146) | No | Nace en S145 y la introduce el propio Cambio. Para que exista gesto de pin hacía falta afordancia, y el candado pasó de renderizarse solo sobre instancias pinadas a estar siempre en el DOM, oculto por `opacity` —no por `display:none` ni `visibility:hidden`, que lo harían infocalizable— y visible en `:hover` y `:focus-visible`. Coste MEDIDO y no estimado sobre el banco: una vista de grupo renderiza 30 instancias y añade 30 paradas, idéntico en los 28 grupos (min = mediana = max = 30, porque todos tienen clase en los 30 tramos); la vista de aula llega también a 30 y la de profesor a 19. El delta es de 0–1 a 30, y 29 o 30 de esos botones son invisibles mientras se tabula hacia ellos si el navegador no los desplaza a la vista. **Sede O-ajuste-cierre y NO O-diseño**, por el precedente escrito de `D-corte-lateral-a-1280`: la sede la pone quien la introduce, y colgarla de un objetivo cerrado equivale a decidir que no se paga nunca. La exclusión de accesibilidad que la ficha ya tenía se refiere al `title` sin foco, que es preexistente. **NO roza el criterio 4 de O-navegación**, comprobado y no supuesto: ese criterio pide «sin scroll vertical», que es altura, `.adornos` es `position:absolute` y los casos (27) y (28) de D11 siguieron verdes sin tocarlos. Salida natural el día que se pague: `tabindex="-1"` en los candados libres con navegación por teclado propia de la rejilla, que es rediseño de interacción y no un parche. No se paga (R-deuda) |
 | D-spa-sin-fallback-de-rutas (el jar no reenvía las rutas profundas de la SPA al index.html) | H4 | No | Nace medida en el M4 de S145 y es PREEXISTENTE: no la introduce este Cambio. `http://localhost:8080/horario/1` devuelve 404 con la Whitelabel Error Page; hay que entrar por `/` y navegar desde la landing. Dos daños: cualquier M4 futuro que intente abrir una URL profunda pierde el tiempo antes de entenderlo, y no se pueden compartir enlaces a una vista concreta. **Sede H4** porque lo que falla es el empaquetado del jar servido, que es su superficie; H4 no está descompuesto en objetivos todavía, así que la deuda espera a su apertura. Queda además anotado en la nota de arranque de la bitácora: todo M4 entra por `/` |
+| D-hora-tramo-dependiente-de-zona (las horas de la jornada se guardan desplazadas una hora respecto a las que el centro imprime) | O-exportación | Sin medir: bloquea la condición 1 si `GET /api/jornada` devuelve 07:00 | Nace en el M2 de S147. `tramo_semanal` guarda 07:00–13:30 con recreo 10:00–10:30 en el horario de referencia; la plantilla de `JornadaService` y el PDF del centro dicen 8:00–14:30 con recreo 11:00–11:30. Desfase exacto de 1 h en los 35 tramos. **Hipótesis muy probable, NO verificada:** `LocalTime` se persiste como instante en la zona horaria de la JVM que escribe. Encaja con la nota técnica de Fase 6 del plan —«vuelve intacto», medido leyendo con la MISMA JVM que escribió, prueba ciega a esto—. Consecuencias: el oráculo SQL no vale para las horas, que se comprueban contra el PDF del centro; y una JVM en otra zona leería otras horas —los runners de CI de Fase 12 corren en UTC por defecto—. Es técnica real y no mejora futura porque guardar una hora de reloj como un instante desplazado es una representación incorrecta aunque hoy nadie la vea. Se mide en el M2 del primer Cambio de O-exportación que imprima horas: primero qué devuelve `GET /api/jornada` sobre una copia, después cómo mapea el driver la columna. No se paga ahora |
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
 |---|---|---|
