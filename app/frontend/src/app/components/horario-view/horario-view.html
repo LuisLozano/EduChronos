@@ -34,6 +34,20 @@
   >
     Generar horario
   </button>
+
+  <!--
+    Exportación a CSV (S148). Un <a download> y no un botón con HttpClient: la
+    descarga la hace el navegador contra el endpoint, sin Blob, sin objectURL y sin
+    método nuevo en HorarioService. El id sale de la PROYECCIÓN CARGADA, no de
+    `idCargado`: éste se fija al emitir la ruta, antes de que la respuesta llegue, y
+    apuntaría a un horario cuyos datos no son los que se están viendo.
+
+    La condición es la misma con la que se pinta la rejilla —`proyeccion()` no nula—:
+    sin proyección no hay id que exportar.
+  -->
+  @if (proyeccion(); as p) {
+    <a class="boton" [href]="'/api/horarios/' + p.id + '/csv'" download>Exportar CSV</a>
+  }
 </section>
 
 <!--

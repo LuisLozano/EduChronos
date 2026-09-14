@@ -316,6 +316,14 @@
 
      .accion-compacta   la acción que vive dentro de una fila de catálogo
 
+   Y UN CASO QUE NO ES UN `button` (S148): un enlace que descarga un recurso se
+   pinta como acción secundaria con la clase `.boton`. Lo que manda es lo que hace
+   —una acción de esta pantalla, no una navegación—, y `<a download>` es sólo la
+   forma de hacerla sin pasar por HttpClient. Entra en el selector base en lugar de
+   copiar sus nueve propiedades, que es exactamente el molde repetido que esta
+   sección vino a borrar; la regla `a.boton` de abajo repone SÓLO lo que la caja de
+   `button` no fija.
+
    POR RELLENO Y NO POR COLOR, que es lo que la decisión 1 exige, y TAMPOCO POR
    PESO: hasta S132 tres botones (`jornada__guardar`, `.acciones .confirmar` y
    `confirmar-reemplazo__confirmar`) decían su importancia con `font-weight`, y la
@@ -330,7 +338,8 @@
    borde, fondo y tamaño con su propia regla, y es el único `button` que vive
    dentro de `horario-grid`. Comprobado por el recuento de marcas `+N`, que es el
    instrumento del criterio 4 y no cambia. */
-button {
+button,
+a.boton {
   font-family: inherit;
   font-size: var(--tam-s);
   line-height: var(--lh-apretado);
@@ -340,6 +349,24 @@ button {
   background: var(--color-superficie);
   color: var(--color-tinta);
   cursor: pointer;
+}
+
+/* Las DOS diferencias entre un `<a href>` y un `<button>` que la regla de arriba no
+   cubre, y ninguna más:
+
+     text-decoration  el navegador subraya el ancla y no el botón. Sin esto la caja
+                      secundaria sale con el texto subrayado dentro
+     display          el ancla es `inline` y el botón `inline-block`: en un inline,
+                      el relleno vertical se pinta pero NO ocupa alto, así que la
+                      caja se derrama sobre las líneas vecinas en vez de empujarlas
+
+   `color` NO hace falta aunque el navegador pinte el enlace de azul: el selector
+   `a.boton` vale (0,1,1) y gana a la hoja del agente de usuario, de modo que el
+   `color: var(--color-tinta)` de la regla base ya se aplica. `cursor: pointer` y el
+   resto de la caja vienen de ahí igual. */
+a.boton {
+  text-decoration: none;
+  display: inline-block;
 }
 
 .accion-principal {

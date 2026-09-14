@@ -1846,4 +1846,48 @@ describe('contenedor del horario', () => {
 
     expect(grid.recreoTras()).toBe(3);
   });
+
+  /**
+   * S148 · el enlace de exportación apunta al horario QUE SE ESTÁ VIENDO. El id de la
+   * proyección (7) se elige distinto del de la ruta (1) a propósito: con los dos
+   * iguales, un enlace construido desde `idCargado` —que se fija al emitir la ruta,
+   * antes de que la respuesta llegue— pasaría el aserto sin apuntar a lo que se pinta.
+   *
+   * <p>`download` se comprueba como ATRIBUTO y no solo el href: sin él el navegador
+   * navega a la URL en vez de descargar, y el resto del enlace sería idéntico.
+   */
+  it('(51) con la proyección cargada hay un enlace de descarga al CSV de ESE horario', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next({ ...PROYECCION_VACIA, id: 7 });
+    await fixture.whenStable();
+
+    const enlace = (fixture.nativeElement as HTMLElement).querySelector('a[download]');
+    expect(enlace).not.toBeNull();
+    expect(enlace!.textContent?.trim()).toBe('Exportar CSV');
+    expect(enlace!.getAttribute('href')).toBe('/api/horarios/7/csv');
+  });
+
+  /**
+   * La otra mitad de (51): sin proyección no hay id que exportar, y un enlace a
+   * `/api/horarios/null/csv` daría un 404 al pulsarlo.
+   *
+   * <p>La GUARDA del error pintado es lo que hace honesto el aserto: la ausencia del
+   * enlace no prueba nada si el componente no llegó a montar la cabecera, o si el
+   * fallo se quedó sin reflejar en el DOM.
+   */
+  it('(52) si la proyección falla no se pinta el enlace de descarga', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.error({ status: 404 });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    // GUARDA: el estado de error SÍ está pintado.
+    expect(raiz.querySelector('.error')?.textContent?.trim()).toBe(
+      'No se pudo cargar el horario 1 (404).',
+    );
+
+    expect(raiz.querySelector('a[download]')).toBeNull();
+  });
 });
