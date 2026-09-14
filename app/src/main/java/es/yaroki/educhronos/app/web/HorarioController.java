@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.web;
 
+import es.yaroki.educhronos.app.exportacion.HorarioCsv;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -9,8 +10,11 @@ import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Capa REST FINA de horarios. Genera (Fase 8, Bloque 8.1) y proyecta (Fase 7,
- * Bloque 7A) horarios persistidos; no lista ni edita. Toda la orquestación y la
+ * Capa REST FINA de horarios. Genera (Fase 8, Bloque 8.1), proyecta (Fase 7,
+ * Bloque 7A) y exporta a CSV (S148, C-exportacion-csv) horarios persistidos; no
+ * lista ni edita. La exportación NO es una vía nueva a los datos: aplana la misma
+ * proyección con {@link HorarioCsv}. Toda la orquestación y la
  * persistencia siguen en {@link GeneradorHorarioService}: el controlador solo
  * enruta y traduce excepciones a códigos HTTP (no hay {@code @ControllerAdvice}
  * global; cada controlador traduce las suyas, patrón de 7A).
@@ -119,5 +125,35 @@ public class HorarioController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
+    }
+
+    /**
+     * Descarga la MISMA proyección del GET de arriba, aplanada a CSV (S148,
+     * C-exportacion-csv). No hay servicio nuevo ni consulta nueva: el controlador
+     * pide la proyección y se la pasa a {@link HorarioCsv}, que es una función pura.
+     *
+     * <p>El {@code try} envuelve SÓLO la llamada al servicio, y no la escritura del
+     * CSV, a propósito: el 404 es del id que no existe. La guarda de
+     * {@link HorarioCsv} lanza {@code IllegalStateException} —no {@code
+     * IllegalArgumentException}—, así que tampoco podría confundirse con un 404 si
+     * cayera dentro; pero dejar la escritura fuera hace que la frontera no dependa de
+     * qué tipo lance el serializador.
+     */
+    @GetMapping("/{id}/csv")
+    public ResponseEntity<byte[]> csv(@PathVariable("id") Long id) {
+        HorarioProyeccionDTO proyeccion;
+        try {
+            proyeccion = service.proyectar(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+
+        ContentDisposition adjunto = ContentDisposition.attachment()
+                .filename("horario-" + id + ".csv")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, adjunto.toString())
+                .body(HorarioCsv.escribir(proyeccion));
     }
 }
