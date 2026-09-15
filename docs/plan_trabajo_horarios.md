@@ -64,10 +64,10 @@
 - L3087 — ### Deuda consciente CERRADA (histórico)
 - L3186 — ### Notas técnicas validadas en Fase 0
 - L3196 — ### Notas técnicas validadas en Fase 6
-- L3234 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3243 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3270 — ### Registro detallado de sesiones S10–S31
-- L3279 — ## Señales globales de alerta
+- L3241 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3250 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3277 — ### Registro detallado de sesiones S10–S31
+- L3286 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -3199,9 +3199,16 @@ clasificación de la relación, no la regla. Las otras dos FK (actividad, plaza)
   org.hibernate.community.dialect.SQLiteDialect y lo recupera intacto, sin
   fallback a String (verificado S46, round-trip del catálogo)
   **MATIZ (S147):** «intacto» se midió leyendo con la MISMA JVM que escribió, y esa prueba
-  no ve un valor almacenado que dependa de la zona horaria. En el horario de referencia la
-  base guarda las horas desplazadas 1 h respecto a las que el centro imprime
-  (`D-hora-tramo-dependiente-de-zona`, hipótesis de zona horaria sin verificar).
+  no ve un valor almacenado que dependa de la zona horaria.
+  **CORREGIDO en S149 (R5), por medición:** lo que este matiz añadía —«la base guarda las
+  horas desplazadas 1 h respecto a las que el centro imprime»— era FALSO. El valor
+  persistido son milisegundos del instante de 1970-01-01, y leído en la zona del centro da
+  la hora correcta: `GET /api/jornada` devuelve 08:00–14:30 con recreo 11:00–11:30, que es
+  lo que el centro imprime; el 07:00 de S147 fue el `sqlite3` leyendo el entero crudo como
+  UTC. La primera mitad del matiz, en cambio, SÍ se confirma y es el defecto real: el mismo
+  fichero leído por dos JVM que solo difieren en `-Duser.timezone` desplaza las 70 horas 60
+  minutos exactos, así que es deuda de PORTABILIDAD y no de contenido
+  (`D-hora-tramo-dependiente-de-zona`, MEDIDA, sede reasignada a H4 y Fase 12).
 - Spring Boot 4 modularizó los test slices de persistencia. @DataJpaTest ya NO
   viene en spring-boot-starter-test: hay que añadir spring-boot-starter-data-jpa-test
   en scope test. Los paquetes cambiaron en SB4:
