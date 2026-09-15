@@ -1,11 +1,13 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
@@ -74,7 +76,8 @@ class PrevalidacionEndpointTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new HorarioController(generadorService,
-                                new DiagnosticoService(generadorService, tramoRepository)),
+                                new DiagnosticoService(generadorService, tramoRepository),
+                                mock(ExportacionHorarioService.class)),
                         new PrevalidacionController(prevalidacionService))
                 .build();
     }

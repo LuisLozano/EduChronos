@@ -1,8 +1,10 @@
 package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.exportacion.HorarioCsv;
+import es.yaroki.educhronos.app.exportacion.HorarioPdf;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,12 +50,19 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/horarios")
 public class HorarioController {
 
+    /** Única vista soportada hoy por el PDF; profesor y aula son el Cambio siguiente. */
+    private static final String VISTA_GRUPO = "grupo";
+
     private final GeneradorHorarioService service;
     private final DiagnosticoService diagnosticoService;
+    private final ExportacionHorarioService exportacionService;
 
-    public HorarioController(GeneradorHorarioService service, DiagnosticoService diagnosticoService) {
+    public HorarioController(GeneradorHorarioService service,
+                             DiagnosticoService diagnosticoService,
+                             ExportacionHorarioService exportacionService) {
         this.service = service;
         this.diagnosticoService = diagnosticoService;
+        this.exportacionService = exportacionService;
     }
 
     /**
@@ -155,5 +165,50 @@ public class HorarioController {
                 .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
                 .header(HttpHeaders.CONTENT_DISPOSITION, adjunto.toString())
                 .body(HorarioCsv.escribir(proyeccion));
+    }
+
+    /**
+     * Descarga el horario como PDF, una página A4 vertical por grupo (S149,
+     * C-exportacion-pdf-grupo). La composición de las tres fuentes —proyección, jornada
+     * y nombres de profesor— vive en {@link ExportacionHorarioService}; aquí solo se
+     * enruta y se traducen los dos errores de frontera.
+     *
+     * <p><b>El parametro {@code vista} se valida ANTES de pedir nada.</b> Hoy solo existe
+     * la vista de grupo; las de profesor y aula son el Cambio siguiente. Un valor
+     * desconocido es un 400 y no un 404: el horario existe, lo que no existe es esa
+     * vista. Rechazarlo antes de proyectar evita además hacer el trabajo caro para
+     * tirarlo después.
+     *
+     * <p>El 404 sigue el patrón de {@link #csv(Long)}: el {@code try} envuelve solo la
+     * llamada que puede toparse con un id inexistente. {@code pdfPorGrupo} tiene
+     * garantizado por contrato que su única {@code IllegalArgumentException} es la de
+     * {@code proyectar} —{@code HorarioPdf} lanza {@code IllegalStateException} para sus
+     * guardas—, así que envolverla no ensancha la traducción.
+     */
+    @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> pdf(
+            @PathVariable("id") Long id,
+            @RequestParam(name = "vista", defaultValue = VISTA_GRUPO) String vista) {
+
+        if (!VISTA_GRUPO.equals(vista)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "vista no soportada: '" + vista + "'. La única disponible es '"
+                            + VISTA_GRUPO + "'");
+        }
+
+        byte[] pdf;
+        try {
+            pdf = exportacionService.pdfPorGrupo(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+
+        ContentDisposition adjunto = ContentDisposition.attachment()
+                .filename("horario-" + id + "-" + VISTA_GRUPO + ".pdf")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, adjunto.toString())
+                .body(pdf);
     }
 }

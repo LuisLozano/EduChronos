@@ -1,11 +1,15 @@
 package es.yaroki.educhronos.app.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import es.yaroki.educhronos.app.service.DiagnosticoService;
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
@@ -39,12 +43,16 @@ class HorarioControllerHttpTest {
     @Mock
     private DiagnosticoService diagnosticoService;
 
+    @Mock
+    private ExportacionHorarioService exportacionService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new HorarioController(service, diagnosticoService)).build();
+                .standaloneSetup(new HorarioController(
+                        service, diagnosticoService, exportacionService)).build();
     }
 
     @Test
@@ -70,6 +78,61 @@ class HorarioControllerHttpTest {
                 .thenThrow(new IllegalArgumentException("No existe HorarioGenerado con id 9999"));
 
         mockMvc.perform(get("/api/horarios/9999/proyeccion"))
+                .andExpect(status().isNotFound());
+    }
+
+    // ------------------------------------------------------------------ S149: el PDF
+
+    /**
+     * El 200 del PDF: tipo, cabecera de descarga y CUERPO. Los bytes se afirman como los
+     * que devolvió el servicio y no solo «algo no vacío»: un controlador que escribiera el
+     * fichero por su cuenta —o que devolviera el cuerpo de otra ruta— pasaría un aserto
+     * de longitud.
+     */
+    @Test
+    void getPdf_conIdExistente_devuelve200ConTipoPdfYCabeceraDeDescarga() throws Exception {
+        byte[] esperado = {'%', 'P', 'D', 'F', '-', '1', '.', '4'};
+        when(exportacionService.pdfPorGrupo(1L)).thenReturn(esperado);
+
+        byte[] cuerpo = mockMvc.perform(get("/api/horarios/1/pdf"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "application/pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=\"horario-1-grupo.pdf\""))
+                .andReturn().getResponse().getContentAsByteArray();
+
+        assertThat(cuerpo).isEqualTo(esperado);
+    }
+
+    /** {@code vista=grupo} explícito es el mismo caso: el defecto no es una ruta distinta. */
+    @Test
+    void getPdf_conVistaGrupoExplicita_devuelve200() throws Exception {
+        when(exportacionService.pdfPorGrupo(1L)).thenReturn(new byte[] {'%', 'P', 'D', 'F'});
+
+        mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "grupo"))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * Una vista que aún no existe es 400 y NO 404: el horario está, lo que falta es la
+     * vista. Se usa {@code profesor}, que es el Cambio siguiente y por tanto el valor que
+     * de verdad va a teclear alguien antes de tiempo.
+     */
+    @Test
+    void getPdf_conVistaDesconocida_devuelve400YNoLlegaAProyectar() throws Exception {
+        mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "profesor"))
+                .andExpect(status().isBadRequest());
+
+        // El rechazo es ANTES de trabajar: el servicio no llega a ser llamado.
+        verifyNoInteractions(exportacionService);
+    }
+
+    @Test
+    void getPdf_conIdInexistente_devuelve404() throws Exception {
+        when(exportacionService.pdfPorGrupo(9999L))
+                .thenThrow(new IllegalArgumentException("No existe HorarioGenerado con id 9999"));
+
+        mockMvc.perform(get("/api/horarios/9999/pdf"))
                 .andExpect(status().isNotFound());
     }
 }

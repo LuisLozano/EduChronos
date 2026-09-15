@@ -1,11 +1,13 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
@@ -75,7 +77,8 @@ class ExportacionCsvEndpointTest {
     @BeforeEach
     void montar() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new HorarioController(generadorService, diagnosticoService))
+                .standaloneSetup(new HorarioController(generadorService, diagnosticoService,
+                        mock(ExportacionHorarioService.class)))
                 .build();
     }
 

@@ -48,6 +48,21 @@
             <artifactId>hibernate-community-dialects</artifactId>
         </dependency>
 
+        <!-- Generación de PDF (S149, C-exportacion-pdf-grupo). OpenPDF es el fork
+             mantenido de iText 2.1.7, el último bajo licencia libre (LGPL-2.1 / MPL-2.0);
+             iText 5+ es AGPL y quedaría fuera. La versión va AQUÍ y no en el
+             dependencyManagement del parent a propósito: ningún otro módulo genera
+             documentos —solver no puede depender de app y no debe conocer formatos de
+             salida—, así que subirla al parent anunciaría una dependencia compartida que
+             no existe. Cierre transitivo VACÍO: sus cuatro dependencias de compilación
+             (icu4j, bcprov, bcpkix, fop) están marcadas <optional> en su propio POM, y por
+             eso `mvn -o` la resuelve con lo que ya hay en ~/.m2. -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.32</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

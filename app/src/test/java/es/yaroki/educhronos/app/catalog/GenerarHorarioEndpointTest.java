@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.PrevalidacionService;
@@ -90,7 +92,8 @@ class GenerarHorarioEndpointTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new HorarioController(
-                service, new es.yaroki.educhronos.app.service.DiagnosticoService(service, tramoRepository)))
+                service, new es.yaroki.educhronos.app.service.DiagnosticoService(service, tramoRepository),
+                mock(ExportacionHorarioService.class)))
                 .build();
     }
 

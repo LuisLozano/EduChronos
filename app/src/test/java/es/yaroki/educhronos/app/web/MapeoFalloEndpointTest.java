@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.web;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -7,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
@@ -48,7 +50,7 @@ class MapeoFalloEndpointTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new HorarioController(service, diagnosticoService)).build();
+                .standaloneSetup(new HorarioController(service, diagnosticoService, mock(ExportacionHorarioService.class))).build();
     }
 
     /** Lanza desde la generación la excepción dada, sea cual sea el cuerpo. */

@@ -1,0 +1,462 @@
+package es.yaroki.educhronos.app.exportacion;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
+import es.yaroki.educhronos.app.web.dto.JornadaDTO;
+import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
+import es.yaroki.educhronos.app.web.dto.TramoJornadaDTO;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+/**
+ * Serializa un {@link HorarioProyeccionDTO} a PDF, una página A4 vertical por grupo
+ * (S149, C-exportacion-pdf-grupo). Función PURA, misma filosofía que {@link HorarioCsv}:
+ * entran la proyección y un {@link ContextoPdf} con los datos de catálogo ya resueltos, y
+ * salen los bytes del fichero. No toca JPA, no navega entidades, no consulta nada.
+ *
+ * <p><b>Por qué necesita un contexto, y el CSV no.</b> La proyección lleva el par
+ * {@code (dia, tramo)} como ORDINALES (1..5, 1..6) y los profesores como CÓDIGOS; eso le
+ * basta a una hoja de cálculo, pero un horario impreso se lee por la hora de reloj y por
+ * el nombre de la persona, y encima quiere saber quién es el tutor. Nada de eso está en
+ * {@link SesionVistaDTO}. La asignatura NO se cruza: su nombre ya viaja en la proyección
+ * ({@code asignaturaNombre}).
+ *
+ * <p><b>PRESUPUESTO DE PÁGINA</b>, medido en el M2 de S149 sobre el banco real y no
+ * negociable desde aquí:
+ * <ul>
+ *   <li>A4 vertical con {@value #MARGEN} pt de margen: útil 539 x 786 pt.
+ *   <li>Columna de horas {@value #COL_HORAS} pt + cinco columnas de día de
+ *       {@value #COL_DIA} pt = 539 pt exactos. Relleno {@value #PADDING} pt por lado.
+ *   <li>Cuerpo {@value #CUERPO} pt en rejilla, cabecera, columna de horas, línea de
+ *       tutor, clave de lectura y leyenda; nada por debajo. Título del grupo
+ *       {@value #TITULO} pt en negrita.
+ *   <li>Interlineado {@value #INTERLINEADO}.
+ * </ul>
+ * La fuente es DejaVu Sans Condensed EMPOTRADA desde el classpath ({@code /fuentes}),
+ * nunca leída de las fuentes del sistema: en producción esto corre en un Windows limpio
+ * donde {@code /usr/share/fonts} no existe. La licencia de la familia (Bitstream Vera)
+ * exige adjuntar el aviso y viaja al lado, en {@code fuentes/LICENCIA-DejaVu.txt}.
+ *
+ * <p><b>NO SE CONDENSA NADA.</b> La rejilla de pantalla recorta las celdas que no caben y
+ * lo marca con {@code +N} (D11), porque su alto es fijo; el papel no tiene esa
+ * limitación, así que aquí las celdas se imprimen ENTERAS. En el banco de referencia hay
+ * 22 celdas de seis entradas —dos en cada uno de once grupos—, y las seis se ven.
+ *
+ * <p><b>El texto de una entrada es UNA CADENA, no tres campos.</b> Los códigos de aula
+ * llevan espacios dentro ({@code "Taller 1 Aula Plástica"}, {@code "A12 Informática"}),
+ * de modo que partir por espacios para maquetar rompería el dato. El salto de línea lo
+ * decide el ancho medido por la fuente. Como esa cadena no lleva separadores, la página
+ * imprime la CLAVE DE LECTURA ({@value #CLAVE_DE_LECTURA}) bajo el título: sin ella una
+ * celda de tres palabras es ambigua.
+ *
+ * <p>Los fallos de integridad abortan con {@link IllegalStateException} y NUNCA con
+ * {@link IllegalArgumentException}: el controlador traduce esta última a 404 para el id
+ * inexistente, y un error de este serializador no es un recurso que falte.
+ */
+public final class HorarioPdf {
+
+    /** Margen de página, los cuatro lados. */
+    static final float MARGEN = 28f;
+
+    /** Ancho de la columna de horas. */
+    static final float COL_HORAS = 58f;
+
+    /** Ancho de cada una de las cinco columnas de día. */
+    static final float COL_DIA = 96.2f;
+
+    /** Relleno interior de celda, por lado. */
+    static final float PADDING = 2f;
+
+    /**
+     * Aire BAJO la última banda de una celda de varias entradas (S149, M5). Va en el
+     * contenedor y no en las bandas, y solo abajo, por dos razones que se miden en el
+     * papel: el relleno lateral del contenedor tiene que seguir siendo CERO —es lo que
+     * hace que las bandas lleguen al borde de la columna y se lean como bandas y no como
+     * rectángulos flotando—, y subirlo dentro de cada banda separaría también las entradas
+     * entre sí, que es un cambio de aspecto que nadie pidió y que en una celda de seis
+     * costaría 12 pt de alto en vez de 1,5.
+     *
+     * <p>Lo que corrige: con el contenedor a relleno 0 por los cuatro lados, el alto de la
+     * celda era EXACTAMENTE la suma de sus entradas, así que la última línea quedaba a los
+     * 0,50 pt de la propia banda del filete inferior —medido en M4: las 192 celdas de
+     * varias entradas del documento, sin excepción—, mientras que una celda de una sola
+     * entrada disfrutaba de los {@value #PADDING} pt de siempre. Esto iguala el trato.
+     */
+    static final float AIRE_BAJO_BANDAS = 1.5f;
+
+    /** Cuerpo de TODO el texto de la página salvo el título. Nada baja de aquí. */
+    static final float CUERPO = 7.99f;
+
+    /** Cuerpo del título del grupo. */
+    static final float TITULO = 10f;
+
+    /** Factor de interlineado. */
+    static final float INTERLINEADO = 1.15f;
+
+    /** Dice cómo se lee el texto de una celda, que va sin separadores. */
+    static final String CLAVE_DE_LECTURA = "Asignatura - Profesor - Aula";
+
+    /** Gris de la fila de recreo, ancho completo. */
+    private static final Color GRIS_RECREO = new Color(0.88f, 0.88f, 0.88f);
+
+    /**
+     * Gris de las bandas alternas dentro de una celda de varias entradas. Muy claro a
+     * propósito: la banda separa entradas, no las jerarquiza, y el texto sigue en negro.
+     */
+    private static final Color GRIS_BANDA = new Color(0.93f, 0.93f, 0.93f);
+
+    /**
+     * Rótulos de la cabecera de días. Se escriben aquí y no se toman del
+     * {@code dia} de la jornada a propósito: aquello es el {@code name()} de un enum
+     * ({@code "MIERCOLES"}, sin tilde y en mayúsculas), que es una clave, no un rótulo
+     * impreso. El índice del array es {@code dia - 1}, con {@code dia} 1..5 tal como lo
+     * numera {@link SesionVistaDTO}.
+     */
+    private static final String[] DIAS = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+
+    private static final String SEPARADOR_PROFESORES = "/";
+
+    /** Separa el código del nombre en la leyenda. Raya, no guion. */
+    private static final String SEPARADOR_LEYENDA = " — ";
+
+    private HorarioPdf() {
+    }
+
+    /**
+     * Bytes del PDF: una página por grupo.
+     *
+     * <p><b>El orden de las páginas es el del catálogo, no el de la proyección.</b> Lo
+     * manda {@link ContextoPdf#ordenDeGrupos()}, que el servicio toma de
+     * {@code GrupoService.listar()} —el MISMO orden con el que la aplicación lista los
+     * grupos en su pantalla—, para que quien busque un grupo en el papel lo encuentre
+     * donde la UI le ha enseñado a buscarlo. El orden de aparición en {@code sesiones},
+     * que es el que salía antes, no es un orden: es el rastro de por dónde empezó el
+     * lunes. Un grupo del horario que no estuviera en esa lista NO se pierde: se imprime
+     * al final, en orden de aparición, porque callar una página sería peor que
+     * descolocarla.
+     *
+     * @throws IllegalStateException si la jornada no trae tramos, o si un tramo lectivo
+     *     no tiene {@code ordenEnDia}
+     */
+    public static byte[] escribir(HorarioProyeccionDTO proyeccion, ContextoPdf contexto) {
+
+        List<TramoJornadaDTO> filas = filasDeTramo(contexto.jornada());
+        List<String> grupos = ordenarGrupos(proyeccion, contexto.ordenDeGrupos());
+
+        BaseFont normal = cargarFuente("DejaVuSansCondensed.ttf");
+        BaseFont negrita = cargarFuente("DejaVuSansCondensed-Bold.ttf");
+        Font fCuerpo = new Font(normal, CUERPO);
+        Font fNegrita = new Font(negrita, CUERPO);
+        Font fTitulo = new Font(negrita, TITULO);
+
+        ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4, MARGEN, MARGEN, MARGEN, MARGEN);
+        PdfWriter.getInstance(doc, salida);
+        doc.open();
+
+        for (int i = 0; i < grupos.size(); i++) {
+            if (i > 0) {
+                doc.newPage();
+            }
+            String grupo = grupos.get(i);
+            List<SesionVistaDTO> delGrupo = proyeccion.sesiones().stream()
+                    .filter(s -> s.grupos().contains(grupo))
+                    .toList();
+
+            doc.add(titulo(grupo, fTitulo));
+            String tutor = contexto.tutoresPorGrupo().get(grupo);
+            if (tutor != null && !tutor.isBlank()) {
+                doc.add(lineaSuelta("Tutor: " + tutor, fCuerpo));
+            }
+            doc.add(lineaSuelta(CLAVE_DE_LECTURA, fCuerpo));
+            doc.add(rejilla(delGrupo, filas, fCuerpo, fNegrita));
+            doc.add(leyenda(delGrupo, contexto.nombresDeProfesor(), fCuerpo, fNegrita));
+        }
+
+        doc.close();
+        return salida.toByteArray();
+    }
+
+    // ------------------------------------------------------------------ fuentes
+
+    /**
+     * Carga una fuente del classpath y la EMPOTRA. Los bytes se leen a memoria y se le
+     * pasan a {@link BaseFont#createFont}: el constructor por ruta buscaría en el sistema
+     * de ficheros, que es justo lo que no puede haber en el entorno de destino. El
+     * primer argumento sigue siendo el nombre con extensión porque de él deduce OpenPDF
+     * el tipo de fuente y es la clave de su caché.
+     */
+    private static BaseFont cargarFuente(String recurso) {
+        String ruta = "/fuentes/" + recurso;
+        try (InputStream in = HorarioPdf.class.getResourceAsStream(ruta)) {
+            if (in == null) {
+                throw new IllegalStateException("No está en el classpath la fuente " + ruta);
+            }
+            return BaseFont.createFont(recurso, BaseFont.IDENTITY_H, BaseFont.EMBEDDED,
+                    BaseFont.CACHED, in.readAllBytes(), null);
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo leer la fuente " + ruta, e);
+        }
+    }
+
+    // ------------------------------------------------------------------ filas y grupos
+
+    /**
+     * Las filas de la rejilla: los tramos de UN día de la jornada, en orden de
+     * {@code orden}, recreo incluido. Vale con un día porque la jornada se define por DÍA
+     * TIPO y {@code JornadaService.expandir} lo replica idéntico en los cinco; tomar el
+     * primero que aparece evita imponer aquí un sexto lugar donde se sepa eso.
+     */
+    private static List<TramoJornadaDTO> filasDeTramo(JornadaDTO jornada) {
+        if (jornada.tramos() == null || jornada.tramos().isEmpty()) {
+            throw new IllegalStateException("La jornada no tiene tramos: no hay rejilla que pintar");
+        }
+        String diaReferencia = jornada.tramos().get(0).dia();
+        return jornada.tramos().stream()
+                .filter(t -> diaReferencia.equals(t.dia()))
+                .sorted(Comparator.comparingInt(TramoJornadaDTO::orden))
+                .toList();
+    }
+
+    /**
+     * Los grupos que tienen página, en el orden del catálogo. Se recorre
+     * {@code ordenDeGrupos} y se queda con los que de verdad aparecen en la proyección
+     * —un grupo del catálogo sin clases no tiene nada que imprimir—; los que están en la
+     * proyección pero no en el catálogo van al final, por aparición.
+     */
+    private static List<String> ordenarGrupos(HorarioProyeccionDTO proyeccion,
+                                              List<String> ordenDeGrupos) {
+        Set<String> conHorario = new LinkedHashSet<>();
+        for (SesionVistaDTO sesion : proyeccion.sesiones()) {
+            conHorario.addAll(sesion.grupos());
+        }
+        List<String> ordenados = new ArrayList<>(conHorario.size());
+        for (String grupo : ordenDeGrupos) {
+            if (conHorario.remove(grupo)) {
+                ordenados.add(grupo);
+            }
+        }
+        ordenados.addAll(conHorario);
+        return ordenados;
+    }
+
+    // ------------------------------------------------------------------ página
+
+    private static Paragraph titulo(String grupo, Font fTitulo) {
+        Paragraph p = new Paragraph(grupo, fTitulo);
+        p.setLeading(TITULO * INTERLINEADO);
+        return p;
+    }
+
+    /** Una línea de cuerpo bajo el título (tutor, clave de lectura). */
+    private static Paragraph lineaSuelta(String texto, Font fCuerpo) {
+        Paragraph p = new Paragraph(texto, fCuerpo);
+        p.setLeading(CUERPO * INTERLINEADO);
+        return p;
+    }
+
+    /**
+     * La rejilla: cabecera de días + una fila por tramo de la jornada. Los tramos
+     * lectivos llevan sus cinco celdas de día; el recreo es UNA banda de cinco columnas,
+     * porque no hay nada que colocar en ella y cinco celdas vacías dirían lo contrario.
+     * Esa fila va SOMBREADA de punta a punta, columna de horas incluida: el gris es lo
+     * que hace que el ojo salte el corte sin leerlo.
+     */
+    private static PdfPTable rejilla(List<SesionVistaDTO> sesiones,
+                                     List<TramoJornadaDTO> filas,
+                                     Font fCuerpo, Font fNegrita) {
+
+        PdfPTable tabla = new PdfPTable(6);
+        tabla.setTotalWidth(new float[] {COL_HORAS, COL_DIA, COL_DIA, COL_DIA, COL_DIA, COL_DIA});
+        tabla.setLockedWidth(true);
+        tabla.setSpacingBefore(CUERPO * INTERLINEADO);
+        tabla.setSpacingAfter(CUERPO * INTERLINEADO);
+
+        tabla.addCell(celdaTexto("", fNegrita, Element.ALIGN_CENTER));
+        for (String dia : DIAS) {
+            tabla.addCell(celdaTexto(dia, fNegrita, Element.ALIGN_CENTER));
+        }
+
+        for (TramoJornadaDTO fila : filas) {
+            PdfPCell horas = celdaTexto(fila.horaInicio() + "-" + fila.horaFin(),
+                    fNegrita, Element.ALIGN_CENTER);
+
+            if (!fila.esLectivo()) {
+                horas.setBackgroundColor(GRIS_RECREO);
+                tabla.addCell(horas);
+                PdfPCell recreo = celdaTexto("Recreo", fCuerpo, Element.ALIGN_CENTER);
+                recreo.setColspan(DIAS.length);
+                recreo.setBackgroundColor(GRIS_RECREO);
+                tabla.addCell(recreo);
+                continue;
+            }
+
+            tabla.addCell(horas);
+            Integer tramo = fila.ordenEnDia();
+            if (tramo == null) {
+                throw new IllegalStateException(
+                        "El tramo lectivo de orden " + fila.orden() + " no trae ordenEnDia");
+            }
+            for (int dia = 1; dia <= DIAS.length; dia++) {
+                tabla.addCell(celdaDeHorario(entradasDe(sesiones, dia, tramo), fCuerpo));
+            }
+        }
+        return tabla;
+    }
+
+    /**
+     * Las entradas de una celda, en el orden en que vienen de la proyección. Cada una es
+     * una cadena {@code "<asignatura> <profesores unidos por /> <aula>"}, montada aquí y
+     * nunca vuelta a partir.
+     */
+    private static List<String> entradasDe(List<SesionVistaDTO> sesiones, int dia, int tramo) {
+        List<String> entradas = new ArrayList<>();
+        for (SesionVistaDTO s : sesiones) {
+            if (s.dia() == dia && s.tramo() == tramo) {
+                entradas.add(s.asignaturaCodigo()
+                        + " " + String.join(SEPARADOR_PROFESORES, s.profesores())
+                        + " " + s.aulaCodigo());
+            }
+        }
+        return entradas;
+    }
+
+    /**
+     * Celda de horario. Con UNA entrada (o ninguna) es una celda de texto normal, blanca.
+     *
+     * <p>Con VARIAS, una TABLA ANIDADA de una fila por entrada, con el fondo alternando
+     * gris claro y blanco desde la primera. La tabla anidada no es adorno: una entrada que
+     * no cabe a lo ancho se parte en dos líneas —{@code "…Taller 1 Aula" / "Plástica"}— y,
+     * pintada como párrafos sueltos, no hay forma de saber si esas dos líneas son una
+     * entrada o dos. El fondo de la fila anidada cubre la entrada COMPLETA, las dos
+     * líneas, porque el alto de esa fila lo fija su propio texto ya maquetado.
+     */
+    private static PdfPCell celdaDeHorario(List<String> entradas, Font fCuerpo) {
+        PdfPCell celda = new PdfPCell();
+        if (entradas.size() <= 1) {
+            celda.setPadding(PADDING);
+            // Una celda compuesta SIN elementos se pinta con alto cero y descuadra la
+            // fila; la frase vacía le da el alto de una línea.
+            celda.addElement(parrafo(entradas.isEmpty() ? "" : entradas.get(0), fCuerpo));
+            return celda;
+        }
+
+        // Sin relleno LATERAL en la celda contenedora: así las bandas llegan al borde de
+        // la columna y se ven como bandas, no como rectángulos flotando. El relleno del
+        // texto lo pone cada fila anidada. Abajo sí hay aire, para que la última línea no
+        // se pegue al filete que separa esta celda de la de debajo.
+        celda.setPadding(0f);
+        celda.setPaddingBottom(AIRE_BAJO_BANDAS);
+        PdfPTable bandas = new PdfPTable(1);
+        bandas.setWidthPercentage(100f);
+        for (int i = 0; i < entradas.size(); i++) {
+            PdfPCell banda = new PdfPCell(new Phrase(entradas.get(i), fCuerpo));
+            banda.setBorder(Rectangle.NO_BORDER);
+            banda.setPaddingLeft(PADDING);
+            banda.setPaddingRight(PADDING);
+            banda.setPaddingTop(0.5f);
+            banda.setPaddingBottom(0.5f);
+            banda.setLeading(0f, INTERLINEADO);
+            if (i % 2 == 0) {
+                banda.setBackgroundColor(GRIS_BANDA);
+            }
+            bandas.addCell(banda);
+        }
+        celda.addElement(bandas);
+        return celda;
+    }
+
+    /**
+     * La leyenda del pie: PROFESORES A LA IZQUIERDA y ASIGNATURAS A LA DERECHA, con
+     * encabezado en negrita sobre cada columna y cada entrada como {@code "CÓDIGO —
+     * Nombre"}. Solo los códigos QUE APARECEN EN ESA PÁGINA.
+     *
+     * <p>Las dos columnas son ahora dos listas independientes, no una lista partida por
+     * la mitad: con un encabezado encima, una asignatura colada al final de la columna de
+     * profesores sería una mentira tipográfica. El alto de la leyenda pasa a ser el del
+     * bloque MÁS LARGO de los dos, no la mitad de la suma.
+     *
+     * <p>Los nombres de catálogo salen tal cual están en el origen, truncados incluidos:
+     * eso es un dato del centro, no algo que el exportador deba maquillar.
+     */
+    private static PdfPTable leyenda(List<SesionVistaDTO> sesiones,
+                                     Map<String, String> nombresProfesor,
+                                     Font fCuerpo, Font fNegrita) {
+
+        Set<String> profesores = new TreeSet<>();
+        Map<String, String> asignaturas = new TreeMap<>();
+        for (SesionVistaDTO s : sesiones) {
+            profesores.addAll(s.profesores());
+            asignaturas.put(s.asignaturaCodigo(), s.asignaturaNombre());
+        }
+
+        List<String> izquierda = new ArrayList<>(profesores.size());
+        for (String codigo : profesores) {
+            String nombre = nombresProfesor.get(codigo);
+            izquierda.add(nombre == null ? codigo : codigo + SEPARADOR_LEYENDA + nombre);
+        }
+        List<String> derecha = new ArrayList<>(asignaturas.size());
+        for (Map.Entry<String, String> e : asignaturas.entrySet()) {
+            derecha.add(e.getKey() + SEPARADOR_LEYENDA + e.getValue());
+        }
+
+        PdfPTable tabla = new PdfPTable(2);
+        float mitad = (COL_HORAS + DIAS.length * COL_DIA) / 2f;
+        tabla.setTotalWidth(new float[] {mitad, mitad});
+        tabla.setLockedWidth(true);
+
+        tabla.addCell(celdaDeLeyenda("Profesores", fNegrita));
+        tabla.addCell(celdaDeLeyenda("Asignaturas", fNegrita));
+        int alto = Math.max(izquierda.size(), derecha.size());
+        for (int f = 0; f < alto; f++) {
+            tabla.addCell(celdaDeLeyenda(f < izquierda.size() ? izquierda.get(f) : "", fCuerpo));
+            tabla.addCell(celdaDeLeyenda(f < derecha.size() ? derecha.get(f) : "", fCuerpo));
+        }
+        return tabla;
+    }
+
+    // ------------------------------------------------------------------ piezas
+
+    private static Paragraph parrafo(String texto, Font fuente) {
+        Paragraph p = new Paragraph(texto, fuente);
+        p.setLeading(CUERPO * INTERLINEADO);
+        return p;
+    }
+
+    private static PdfPCell celdaTexto(String texto, Font fuente, int alineacion) {
+        PdfPCell celda = new PdfPCell(new Phrase(texto, fuente));
+        celda.setPadding(PADDING);
+        celda.setHorizontalAlignment(alineacion);
+        celda.setLeading(0f, INTERLINEADO);
+        return celda;
+    }
+
+    /** Celda de leyenda: sin rejilla alrededor, que es ruido en un pie de página. */
+    private static PdfPCell celdaDeLeyenda(String texto, Font fuente) {
+        PdfPCell celda = new PdfPCell(new Phrase(texto, fuente));
+        celda.setPadding(PADDING);
+        celda.setBorder(Rectangle.NO_BORDER);
+        celda.setLeading(0f, INTERLINEADO);
+        return celda;
+    }
+}
