@@ -1869,6 +1869,34 @@ describe('contenedor del horario', () => {
   });
 
   /**
+   * S149 · el segundo enlace, el del PDF por grupo. Se afirma la LISTA ENTERA de
+   * enlaces de descarga y no solo el nuevo: `querySelector` singular devuelve el
+   * primero, así que un aserto suelto sobre «hay un enlace de PDF» seguiría pasando si
+   * el de CSV desapareciera, y (51) seguiría pasando si el de PDF se colara DELANTE.
+   * El par rótulo+href fija también el ORDEN, que es lo que ve el usuario.
+   *
+   * <p>El href NO lleva `?vista=grupo`: el endpoint la pone por defecto. Si algún día
+   * el enlace tuviera que nombrarla, este aserto es el que lo dice.
+   */
+  it('(53) junto al de CSV hay un enlace de descarga al PDF del MISMO horario', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next({ ...PROYECCION_VACIA, id: 7 });
+    await fixture.whenStable();
+
+    const enlaces = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('a[download]'),
+    );
+
+    expect(
+      enlaces.map((a) => [a.textContent?.trim(), a.getAttribute('href'), a.className]),
+    ).toEqual([
+      ['Exportar CSV', '/api/horarios/7/csv', 'boton'],
+      ['Exportar PDF', '/api/horarios/7/pdf', 'boton'],
+    ]);
+  });
+
+  /**
    * La otra mitad de (51): sin proyección no hay id que exportar, y un enlace a
    * `/api/horarios/null/csv` daría un 404 al pulsarlo.
    *
@@ -1888,6 +1916,7 @@ describe('contenedor del horario', () => {
       'No se pudo cargar el horario 1 (404).',
     );
 
-    expect(raiz.querySelector('a[download]')).toBeNull();
+    // Los DOS enlaces (S149): sin proyección no hay id, ni para el CSV ni para el PDF.
+    expect(raiz.querySelectorAll('a[download]').length).toBe(0);
   });
 });

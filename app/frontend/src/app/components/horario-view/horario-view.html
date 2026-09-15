@@ -47,6 +47,15 @@
   -->
   @if (proyeccion(); as p) {
     <a class="boton" [href]="'/api/horarios/' + p.id + '/csv'" download>Exportar CSV</a>
+    <!--
+      S149 · el PDF por grupo, exactamente el mismo molde que el CSV de arriba: un
+      ancla con `download` contra su endpoint, sin HttpClient, sin Blob y sin método
+      nuevo en HorarioService. `vista` NO viaja en la URL aunque el endpoint lo acepte:
+      su valor por defecto es `grupo`, que es la única vista que existe hoy, y
+      escribirlo aquí obligaría a tocar esta línea cuando lleguen las de profesor y
+      aula —que traerán sus propios enlaces—.
+    -->
+    <a class="boton" [href]="'/api/horarios/' + p.id + '/pdf'" download>Exportar PDF</a>
   }
 </section>
 
