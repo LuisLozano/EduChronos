@@ -19,13 +19,24 @@ error compartido por las dos vías pasaría desapercibido.
 
 La BD se abre en SOLO LECTURA (`mode=ro`): este guion no puede modificarla.
 
+Desde S149 verifica TAMBIÉN el PDF de vista de grupo (C-exportacion-pdf-grupo). Mismo
+principio y mismas vistas SQL: lo que cambia es de dónde se leen las entradas. Del PDF se
+leen con `pdftotext`, NUNCA del flujo de contenido: con IDENTITY_H el texto va como
+identificadores de glifo y ahí no hay nada legible; `pdftotext` los traduce con el
+ToUnicode de la fuente empotrada, que es justo lo que ve quien abre el fichero.
+
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
+  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf>
 """
 import argparse
+import collections
 import csv
+import re
 import sqlite3
+import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 BOM = b"\xef\xbb\xbf"
 
@@ -189,17 +200,266 @@ def comparar(nombre, del_oraculo, del_csv):
     return not faltan and not sobran
 
 
+# --------------------------------------------------------------------------- PDF (S149)
+
+# Rótulos fijos de la página que NO son entradas de rejilla. Ver `entradas_de_pagina`.
+CLAVE_DE_LECTURA = "Asignatura - Profesor - Aula"
+ENCABEZADO_LEYENDA = "Profesores"
+DIAS_CABECERA = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
+RANGO_HORARIO = re.compile(r"\d{2}:\d{2}-\d{2}:\d{2}")
+
+# Geometría de la rejilla, las dos únicas medidas de la maqueta que el verificador
+# necesita: dónde acaba la columna de horas y cuánto mide cada columna de día.
+X_PRIMERA_COLUMNA = 86.0
+ANCHO_COLUMNA = 96.2
+
+
+def entradas_esperadas(ruta_db, horario_id):
+    """Entradas de rejilla que la BD exige, por código de grupo.
+
+    Reutiliza SQL_VISTAS: `v_grupo` ya dice qué grupo ve qué sesión, y de ahí se cuelgan
+    asignatura, profesores y aula para componer el texto tal como la maqueta lo imprime,
+    `<asignatura> <profesores unidos por /> <aula>`. Devuelve un Counter por grupo: la
+    MULTIPLICIDAD importa, porque la misma clase puede repetirse en la semana.
+    """
+    con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
+    try:
+        con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
+        por_grupo = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
+        for grupo, dia, tramo, asignatura, profesores, aula in con.execute("""
+                select g.grupo, g.dia, g.tramo, a.codigo,
+                       (select group_concat(p.codigo, '/') from (
+                            select p2.codigo from plaza_profesor pp
+                              join profesor p2 on p2.id = pp.profesor_id
+                             where pp.plaza_id = s.plaza_id order by p2.codigo) p),
+                       au.codigo
+                from v_grupo g
+                join v_sesion s on s.sesion_id = g.sesion_id
+                join plaza pl on pl.id = s.plaza_id
+                join asignatura a on a.id = pl.asignatura_id
+                join aula au on au.id = s.aula_id"""):
+            por_grupo[grupo][(dia, tramo)][
+                "%s %s %s" % (asignatura, profesores or "", aula)] += 1
+        return por_grupo
+    finally:
+        con.close()
+
+
+def texto_de_pagina(ruta_pdf, pagina):
+    """El texto de UNA página, por `pdftotext`. Falla ruidosamente si no está la
+    herramienta: un verificador que se salte una página en silencio no verifica nada."""
+    r = subprocess.run(["pdftotext", "-f", str(pagina), "-l", str(pagina), ruta_pdf, "-"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise Fallo("pdftotext falló en la página %d: %s" % (pagina, r.stderr.strip()))
+    return r.stdout
+
+
+def paginas_de(ruta_pdf):
+    """Número de páginas, según `pdfinfo`."""
+    r = subprocess.run(["pdfinfo", ruta_pdf], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise Fallo("pdfinfo falló: %s" % r.stderr.strip())
+    for linea in r.stdout.splitlines():
+        if linea.startswith("Pages:"):
+            return int(linea.split(":", 1)[1])
+    raise Fallo("pdfinfo no dice cuántas páginas hay")
+
+
+def celdas_de_pagina(ruta_pdf, pagina):
+    """Las celdas de la rejilla de una página: {(dia, tramo): texto}.
+
+    SE ACOTA POR REGIÓN, con las coordenadas que da `pdftotext -bbox-layout`, y no por la
+    forma del texto. La razón es medida, no estética: `pdftotext` NO emite el contenido de
+    arriba abajo —en el banco real hay páginas donde entradas de la rejilla salen DESPUÉS
+    de líneas de la leyenda—, así que cualquier corte por marcador («de la leyenda en
+    adelante, fuera») se lleva entradas buenas por delante. Y una entrada que no cabe a lo
+    ancho se parte en dos líneas que, en una fila con varias columnas ocupadas, no quedan
+    contiguas en el texto plano. Dentro de una celda, en cambio, sus líneas SÍ son
+    contiguas, y por eso la celda es la unidad de cotejo.
+
+    La rejilla se reconstruye del propio fichero, sin constantes de la maqueta salvo las
+    dos que fijan las columnas: la columna de horas ocupa hasta {0} pt y cada día {1} pt.
+    Las FILAS se delimitan con los rótulos de hora, que van arriba de su celda: el rango
+    HH:MM-HH:MM de cada fila marca dónde empieza.
+    """
+    raiz = ET.fromstring(subprocess.run(
+        ["pdftotext", "-bbox-layout", "-f", str(pagina), "-l", str(pagina), ruta_pdf, "-"],
+        capture_output=True, text=True, check=True).stdout)
+    ns = "{http://www.w3.org/1999/xhtml}"
+
+    palabras = []
+    for w in raiz.iter(ns + "word"):
+        palabras.append((float(w.get("xMin")), float(w.get("yMin")),
+                         float(w.get("yMax")), (w.text or "").strip()))
+
+    topes = sorted(y for x, y, _, t in palabras
+                   if x < X_PRIMERA_COLUMNA and RANGO_HORARIO.fullmatch(t))
+    if not topes:
+        raise Fallo("la página %d no tiene rótulos de hora: ¿es una página de horario?"
+                    % pagina)
+
+    # SUELO DE LA REJILLA. La última fila no tiene rótulo debajo que la cierre, así que sin
+    # este corte se tragaría la leyenda entera —y no basta con filtrar por x: una línea de
+    # leyenda empieza en la columna izquierda pero sus palabras siguen hacia la derecha y
+    # caen dentro de las columnas de día—. El corte es una COORDENADA; el rótulo de la
+    # leyenda solo sirve para localizarla.
+    suelo = min((y for _, y, _, t in palabras if t in ("Profesores", "Asignaturas")),
+                default=float("inf"))
+
+    def fila_de(centro):
+        for i in range(len(topes) - 1, -1, -1):
+            if centro >= topes[i] - 1.0:
+                return i
+        return None
+
+    filas = {}
+    for x, y0, y1, texto in palabras:
+        if not texto or x < X_PRIMERA_COLUMNA:
+            continue
+        dia = int((x - X_PRIMERA_COLUMNA) // ANCHO_COLUMNA) + 1
+        if dia < 1 or dia > 5:
+            continue
+        centro = (y0 + y1) / 2
+        if centro >= suelo:                   # de la leyenda hacia abajo, fuera
+            continue
+        fila = fila_de(centro)
+        if fila is None:                      # cabecera de días, por encima de todo
+            continue
+        filas.setdefault((dia, fila), []).append((y0, x, texto))
+
+    # La fila del recreo no es lectiva: se identifica por su rótulo y se descuenta para
+    # que las demás lleven la numeración 1..6 que usa la proyección.
+    fila_recreo = next((f for (d, f), ws in filas.items()
+                        if any(t == "Recreo" for _, _, t in ws)), None)
+
+    celdas = {}
+    for (dia, fila), ws in filas.items():
+        if fila == fila_recreo:
+            continue
+        tramo = fila + 1 if (fila_recreo is None or fila < fila_recreo) else fila
+        texto = " ".join(t for _, _, t in sorted(ws))
+        celdas[(dia, tramo)] = re.sub(r"\s+", " ", texto).strip()
+    return celdas
+
+
+def cotejar_celdas(celdas, esperadas_por_celda):
+    """Coteja celda a celda. Devuelve (halladas, faltan, sobra).
+
+    Dentro de una celda se tachan las entradas que la BD exige, de la más larga a la más
+    corta —así una que sea subcadena de otra no se cobra las apariciones de aquélla—. Lo
+    que la BD exige y no se pudo tachar FALTA; lo que queda en la celda tras tachar todo
+    SOBRA, y es texto de rejilla que la base no respalda.
+    """
+    halladas = 0
+    faltan = collections.Counter()
+    sobra = []
+    for clave in set(celdas) | set(esperadas_por_celda):
+        texto = celdas.get(clave, "")
+        exige = esperadas_por_celda.get(clave, collections.Counter())
+        encontradas = collections.Counter()
+        for entrada in sorted(exige, key=len, reverse=True):
+            while encontradas[entrada] < exige[entrada] and entrada in texto:
+                texto = texto.replace(entrada, "\x00", 1)
+                encontradas[entrada] += 1
+        halladas += sum(encontradas.values())
+        for entrada, cuantas in exige.items():
+            if encontradas[entrada] < cuantas:
+                faltan["%s @dia %d tramo %d" % (entrada, clave[0], clave[1])] += (
+                    cuantas - encontradas[entrada])
+        resto = " ".join(texto.replace("\x00", " ").split())
+        if resto:
+            sobra.append("dia %d tramo %d: %r" % (clave[0], clave[1], resto))
+    return halladas, faltan, sobra
+
+
+def verificar_pdf(ruta_db, horario_id, ruta_pdf):
+    """Coteja el PDF entero contra la vista de grupo. Devuelve True si cuadra."""
+    esperadas = entradas_esperadas(ruta_db, horario_id)
+    paginas = paginas_de(ruta_pdf)
+
+    print("--- ORÁCULO PDF (horario %s) ---" % horario_id)
+    print("  grupos con clases en la BD ... %d" % len(esperadas))
+    print("  entradas que exige la BD ..... %d"
+          % sum(sum(c.values()) for g in esperadas.values() for c in g.values()))
+    print("  páginas del PDF .............. %d" % paginas)
+
+    if paginas != len(esperadas):
+        print("  FALLO: %d páginas para %d grupos con clases" % (paginas, len(esperadas)))
+
+    vistos, total_faltan, total_sobran, total_halladas = set(), 0, 0, 0
+    for pagina in range(1, paginas + 1):
+        cabecera = [l.strip() for l in texto_de_pagina(ruta_pdf, pagina).splitlines()
+                    if l.strip()]
+        grupo = cabecera[0] if cabecera else "(vacía)"
+        vistos.add(grupo)
+        if grupo not in esperadas:
+            print("  pág %2d: FALLO, el grupo %r no tiene clases en la BD" % (pagina, grupo))
+            total_sobran += 1
+            continue
+        halladas, faltan, sobra = cotejar_celdas(
+            celdas_de_pagina(ruta_pdf, pagina), esperadas[grupo])
+        exige = sum(sum(c.values()) for c in esperadas[grupo].values())
+        n_faltan = sum(faltan.values())
+        n_sobran = len(sobra)
+        total_halladas += halladas
+        total_faltan += n_faltan
+        total_sobran += n_sobran
+        marca = "" if not (n_faltan or n_sobran) else "   <<< DESCUADRE"
+        print("  pág %2d  %-7s  exige %3d  halla %3d  faltan %d  sobran %d%s"
+              % (pagina, grupo, exige, halladas, n_faltan, n_sobran, marca))
+        for entrada, cuantas in sorted(faltan.items()):
+            print("        FALTA x%d: %s" % (cuantas, entrada))
+        for celda in sobra:
+            print("        SOBRA en %s" % celda)
+
+    sin_pagina = sorted(set(esperadas) - vistos)
+    if sin_pagina:
+        print("  FALLO: grupos con clases y SIN página: %s" % ", ".join(sin_pagina))
+
+    print("  TOTAL: halladas %d, FALTAN %d, SOBRAN %d"
+          % (total_halladas, total_faltan, total_sobran))
+    return (not total_faltan and not total_sobran and not sin_pagina
+            and paginas == len(esperadas))
+
+
+def censo_de_cuerpos(ruta_pdf):
+    """Censo de los tamaños de fuente del documento, leyendo los operadores Tf del flujo
+    DESCOMPRIMIDO. Esto sí se lee del flujo —es geometría, no texto— y a propósito no se
+    usa `pdftohtml`, que redondea 7,99 a 8,00 y redondearía igual un 7,6."""
+    import zlib
+    datos = open(ruta_pdf, "rb").read()
+    censo = collections.Counter()
+    for m in re.finditer(rb"stream\r?\n", datos):
+        ini = m.end()
+        fin = datos.find(b"endstream", ini)
+        try:
+            crudo = zlib.decompress(datos[ini:fin])
+        except Exception:
+            continue
+        for t in re.finditer(rb"/F\d+\s+([0-9.]+)\s+Tf", crudo):
+            censo[float(t.group(1))] += 1
+    return censo
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("modo", choices=["csv"])
+    parser.add_argument("modo", choices=["csv", "pdf"])
     parser.add_argument("db", help="copia de la BD (se abre en modo ro)")
     parser.add_argument("horario_id", type=int)
-    parser.add_argument("csv", help="fichero exportado a verificar")
+    parser.add_argument("fichero", help="fichero exportado a verificar")
     args = parser.parse_args()
+
+    if args.modo == "pdf":
+        try:
+            return 0 if verificar_pdf(args.db, args.horario_id, args.fichero) else 1
+        except Fallo as e:
+            print("FALLO: %s" % e, file=sys.stderr)
+            return 1
 
     vistas_oraculo = oraculo(args.db, args.horario_id)
     try:
-        vistas_csv = desde_csv(args.csv)
+        vistas_csv = desde_csv(args.fichero)
     except Fallo as e:
         print("FALLO: %s" % e, file=sys.stderr)
         return 1
