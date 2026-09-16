@@ -2,72 +2,73 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L75 — ## Cómo usar este documento en el Project de Claude
-- L95 — ## Principios de avance
-- L116 — ## FASE 0 — Decisión de stack tecnológico
-- L119 — ### Entregable
-- L123 — ### Criterios de verificación
-- L130 — ### Señal de que está mal
-- L135 — ## FASE 1 — Modelo de datos validado en papel
-- L139 — ### Entregable
-- L144 — ### Criterios de verificación
-- L162 — ### Señal de que está mal
-- L166 — ### Resultado de la fase
-- L174 — ## FASE 2 — Solver MVP: problema mínimo
-- L181 — ### Subconjunto de datos
-- L187 — ### Entregable
-- L194 — ### Criterios de verificación
-- L207 — ### Señal de que está mal
-- L210 — ### Decisiones tácticas
-- L284 — ### Criterios de verificación por bloque
-- L326 — ## FASE 3 — Solver: desdobles y agrupamientos
-- L329 — ### Lo que se añade
-- L334 — ### Criterios de verificación
-- L351 — ### Señal de que está mal
-- L357 — ## FASE 4 — Solver: grupos PDC/Diversificación
-- L360 — ### Lo que se añade
-- L364 — ### Criterios de verificación
-- L374 — ## FASE 5 — Solver: instituto completo
-- L420 — ### Lo que se añade
-- L426 — ### Criterios de verificación
-- L493 — ### Señal de que está mal
-- L500 — ## FASE 6 — Persistencia de datos
-- L504 — ### Entregable
-- L517 — ### Criterios de verificación
-- L545 — ## FASE 7 — UI: visualización de horarios
-- L548 — ### Entregable
-- L551 — ### Criterios de verificación
-- L563 — ### Bloques de Fase 7
-- L602 — ## FASE 8 — UI: configuración y ajuste manual
-- L613 — ### Entregable
-- L619 — ### Criterios de verificación
-- L664 — ## FASE 9 — Exportación
-- L667 — ### Criterios de verificación
-- L682 — ## FASE 10 — Gestión de cursos académicos
-- L691 — ### Entregable
-- L697 — ### Criterios de verificación
-- L706 — ## FASE 11 — Empaquetado y distribución Windows
-- L709 — ### Criterios de verificación
-- L718 — ## FASE 12 — CI/CD con GitHub Actions
-- L721 — ### Criterios de verificación
-- L728 — ## Registro de progreso
-- L730 — ### Sesión 149 — O-exportación (H3), C-exportacion-pdf-grupo: **EL HORARIO SALE EN PAPEL, Y UN ORÁCULO LO COTEJA CELDA A CELDA Y NO PÁGINA A PÁGINA.** 28 páginas A4 de grupo con 1285 entradas, 0 faltan y 0 sobran, verificadas sobre el fichero que descargó el NAVEGADOR. Cinco de las correcciones de la maqueta las pidió el usuario mirando el PDF, que es lo que la condición 3 delega en una persona.
-- L793 — ### Bloques de Fase 2
-- L801 — ### Bloques de Fase 5
-- L824 — ### Bloques de Fase 6
-- L869 — ### Bloques de Fase 8
-- L1078 — ### Fases completadas
-- L1182 — ### Cierre del modelo — Sesión 8
-- L1230 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1276 — ### Método de trabajo (procedimiento vigente)
-- L1309 — ### Deuda consciente VIVA
-- L3087 — ### Deuda consciente CERRADA (histórico)
-- L3186 — ### Notas técnicas validadas en Fase 0
-- L3196 — ### Notas técnicas validadas en Fase 6
-- L3241 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3250 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3277 — ### Registro detallado de sesiones S10–S31
-- L3286 — ## Señales globales de alerta
+- L76 — ## Cómo usar este documento en el Project de Claude
+- L96 — ## Principios de avance
+- L117 — ## FASE 0 — Decisión de stack tecnológico
+- L120 — ### Entregable
+- L124 — ### Criterios de verificación
+- L131 — ### Señal de que está mal
+- L136 — ## FASE 1 — Modelo de datos validado en papel
+- L140 — ### Entregable
+- L145 — ### Criterios de verificación
+- L163 — ### Señal de que está mal
+- L167 — ### Resultado de la fase
+- L175 — ## FASE 2 — Solver MVP: problema mínimo
+- L182 — ### Subconjunto de datos
+- L188 — ### Entregable
+- L195 — ### Criterios de verificación
+- L208 — ### Señal de que está mal
+- L211 — ### Decisiones tácticas
+- L285 — ### Criterios de verificación por bloque
+- L327 — ## FASE 3 — Solver: desdobles y agrupamientos
+- L330 — ### Lo que se añade
+- L335 — ### Criterios de verificación
+- L352 — ### Señal de que está mal
+- L358 — ## FASE 4 — Solver: grupos PDC/Diversificación
+- L361 — ### Lo que se añade
+- L365 — ### Criterios de verificación
+- L375 — ## FASE 5 — Solver: instituto completo
+- L421 — ### Lo que se añade
+- L427 — ### Criterios de verificación
+- L494 — ### Señal de que está mal
+- L501 — ## FASE 6 — Persistencia de datos
+- L505 — ### Entregable
+- L518 — ### Criterios de verificación
+- L546 — ## FASE 7 — UI: visualización de horarios
+- L549 — ### Entregable
+- L552 — ### Criterios de verificación
+- L564 — ### Bloques de Fase 7
+- L603 — ## FASE 8 — UI: configuración y ajuste manual
+- L614 — ### Entregable
+- L620 — ### Criterios de verificación
+- L665 — ## FASE 9 — Exportación
+- L668 — ### Criterios de verificación
+- L684 — ## FASE 10 — Gestión de cursos académicos
+- L693 — ### Entregable
+- L699 — ### Criterios de verificación
+- L708 — ## FASE 11 — Empaquetado y distribución Windows
+- L711 — ### Criterios de verificación
+- L720 — ## FASE 12 — CI/CD con GitHub Actions
+- L723 — ### Criterios de verificación
+- L730 — ## Registro de progreso
+- L732 — ### Sesión 150 — O-exportación (H3), C-exportacion-pdf-profesor-aula: **H3 CIERRA. EL HORARIO SALE EN PAPEL POR GRUPO, POR PROFESOR Y POR AULA, Y LO QUE SE LLEVA UNA PERSONA ES LO QUE VERIFICÓ EL ORÁCULO.** `O-exportación` TERMINADO con 5 de 5 condiciones, en 4 sesiones de las 8 del techo. Tercer hito cerrado del proyecto.
+- L796 — ### Bloques de Fase 2
+- L804 — ### Bloques de Fase 5
+- L827 — ### Bloques de Fase 6
+- L872 — ### Bloques de Fase 8
+- L1081 — ### Fases completadas
+- L1185 — ### Cierre del modelo — Sesión 8
+- L1233 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1279 — ### Método de trabajo (procedimiento vigente)
+- L1312 — ### Deuda consciente VIVA
+- L3090 — ### Deuda consciente CERRADA (histórico)
+- L3189 — ### Notas técnicas validadas en Fase 0
+- L3199 — ### Notas técnicas validadas en Fase 6
+- L3244 — ### Notas técnicas validadas en Fase 9
+- L3253 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3262 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3289 — ### Registro detallado de sesiones S10–S31
+- L3298 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -676,6 +677,7 @@ generado manualmente.
   > reconstruir las tres vistas». El **2** se generaliza a las tres vistas. El **4** (Windows) sale de H3 y pasa
   > a H4, porque sólo se verifica con el bundle (precedente: el criterio de Fase 6 diferido a Fase 11). Y la
   > fase **omitía el PDF por aula**, que §1 exige. **NO se marcan aquí**: se marcará el sustituto cuando se cumpla.
+  > **S150:** `O-exportación` TERMINADO con su criterio de cinco condiciones; el criterio 4 de Fase 9 sigue en H4.
 
 ---
 
@@ -727,7 +729,20 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 149 — O-exportación (H3), C-exportacion-pdf-grupo: **EL HORARIO SALE EN PAPEL, Y UN ORÁCULO LO COTEJA CELDA A CELDA Y NO PÁGINA A PÁGINA.** 28 páginas A4 de grupo con 1285 entradas, 0 faltan y 0 sobran, verificadas sobre el fichero que descargó el NAVEGADOR. Cinco de las correcciones de la maqueta las pidió el usuario mirando el PDF, que es lo que la condición 3 delega en una persona.
+### Sesión 150 — O-exportación (H3), C-exportacion-pdf-profesor-aula: **H3 CIERRA. EL HORARIO SALE EN PAPEL POR GRUPO, POR PROFESOR Y POR AULA, Y LO QUE SE LLEVA UNA PERSONA ES LO QUE VERIFICÓ EL ORÁCULO.** `O-exportación` TERMINADO con 5 de 5 condiciones, en 4 sesiones de las 8 del techo. Tercer hito cerrado del proyecto.
+  TIPO Y RITUAL: DESARROLLO — M0 + M2 de solo lectura + M3 en cuatro pasos con campaña de mutación + M4 en dos tiempos con descarga humana + M1. Seis commits: cinco de código e instrumento y uno de documentación.
+  M0. Las dos vistas juntas y no una por sesión, con argumento: S147 midió que profesor y aula tienen UNA entrada por celda (835 y 819), así que el riesgo de altura que justificó hacer grupo sola había desaparecido, y las decisiones pendientes —texto de celda, clave, cabecera, leyenda, forma del endpoint— eran las mismas para las dos. Regla de corte escrita antes: si la revisión humana de profesor tocaba la maqueta compartida, aula pasaba a S151. No se activó. R-invalidación: ninguna.
+  M2. El endpoint de S149 ya aceptaba `?vista=` con 400 para lo desconocido, y la maqueta sólo dependía de grupo en seis puntos. El oráculo ya calculaba las tres vistas en SQL; sólo su modo pdf estaba atado a grupo. **CORRECCIÓN AL ARQUITECTO:** sí existe PDF del centro por profesor (`docs_extra/Ejemplos_SJ/HorariosProfesores/`, 80 páginas, sin confirmar que sea del mismo curso), y de él salen el molde —título con nombre, clave «Asignatura - Aula - Grupo», «Tutor:» con varios grupos, leyenda sólo de asignaturas— y el orden de la celda, que el arquitecto había propuesto al revés. Cinco profesores tutelan dos grupos (ordinario + diversificación).
+  M3. **M3-1:** `VistaPdf` con métodos abstractos por constante —una vista nueva no compila incompleta; se comprobó en M3-3, cuando `javac` rechazó el `switch` sin rama de aula— y la vista de grupo IDÉNTICA: 34 flujos con el mismo md5, mismo texto extraído, 1285/0/0. **M3-2:** vista de profesor. OpenPDF partía `1B-C` por su guion; el `SplitCharacter` que sólo parte tras espacio y `/` lo evita y no mueve un byte de grupo (medido sobre sus 311 entradas antes de escribirlo). Revisión humana de DIB2 aprobada. **M3-3:** vista de aula con las 44 aulas del catálogo, sin leyenda en las 9 vacías, tres enlaces por vista y test del corte con demostración de que muerde. **M3-4, CAMPAÑA: 16 mutantes, 14 aciertos, 1 fallo y 1 sin predicción.** El fallo (9, permitir partir tras `-`) es EQUIVALENTE con este dato, medido: el guion candidato cae fuera del ancho útil. El 10 (no partir tras espacio) sobrevivía partiendo «Plástic»/«a», y lo mata el aserto reforzado del test del corte. Cubiertos 13 (un CO_TUTOR no sale en «Tutor de:»; el primer intento no lo mataba, y reaplicar el mutante lo descubrió) y 15 (un aula fuera del catálogo tiene página al final). El 6 es EQUIVALENTE POR DOMINIO: medido que la aplicación no admite plazas sin profesor (`ActividadService.validarProfesores`, en alta y edición, y el constructor de `Plaza` del solver). El oráculo cuenta aparte las páginas vacías con leyenda, para que FALTAN y SOBRAN sigan contando sólo entradas.
+  M4. Sobre copia, en dos tiempos: la aplicación quedó arrancada y el USUARIO descargó las tres vistas desde la interfaz. Sus ficheros son de después del arranque, sin duplicados, y su huella es idéntica a la de curl en las tres; grupo conserva `b397156a…`/`579b6f09…` desde antes de refactorizar. Sobre ellos: oráculo 1285/0/0, 835/0/0 y 819/0/0; 28/59/44 páginas; horas y recreo en las 131; `Tf` sólo 7,99 y 10,0 (uno por página); fuentes empotradas; tutor 28, 23 (5 dobles) y 0. **La leyenda no la comprobaba nadie**, y se escribió un comprobador independiente validado con tres mutaciones (la de exclusividad la añadió Claude Code): 28/59/44 sin fallo. Queda en `scripts/verificar-leyenda-pdf.py`.
+  CRITERIO. **Condiciones 1, 2, 3 y 5 CUMPLIDAS en S150**, con la 4 de S148: **5 de 5. `O-exportación` TERMINADO y H3 CERRADO.** Precisión escrita antes de ejecutar: en la vista de profesor el nombre de catálogo del titular va en el título. Cuatro Cambios.
+  DEUDA. No nace ninguna. **Deuda bloqueante: 0.** Reproducida `D-F8.6-ii-a`: el 400 y el 404 del PDF llegan sin `message` pese a `server.error.include-message=always`. Las tres deudas colgadas de este objetivo pasan a «cerrado S150» sin pagarse. OBSERVACIONES SIN TOKEN: mutantes 6 y 9 equivalentes (motivos arriba); `ENCABEZADO_LEYENDA` en `oraculo-exportacion.py` es una constante sin uso; `scripts/` no ignora `__pycache__` (se borró cada vez); la leyenda de un solo bloque ocupa el ancho entero y la de dos columnas deja blanco central en A5 (maqueta de S149, R-terminado); EFI3 imprime cuatro asignaturas casi homónimas (dato de catálogo, salvedad de S136).
+  SUITES: solver 92 SIN MOVERSE (no se tocó `solver/`, así que `referencia-codigo-solver.md` no se regenera); app 383 → 416 (+33: `VistaPdfTest` nuevo con 14, `HorarioPdfTest` 19 → 32, `ExportacionHorarioServiceTest` 5 → 9 y el controlador 6 → 8; **el reparto se comprobó por conteo en el M1** y el 33 de HorarioPdfTest que traía el guion era 32); vitest 481 → 482 en 52 ficheros. Ninguna dependencia nueva.
+  BANCOS. Intactos al abrir, entre pasos y al cerrar; toda aplicación arrancada sirvió una copia verificada por `/proc/<pid>/fd` y se paró por PID. Ninguna generación lanzada.
+  LIMPIEZA (M1-bis): archivada S148 a `bitacora-sesiones.md`; degradada S149 a «Última sesión registrada (previa):»; S150 queda como única cabecera H3 viva.
+  R4 / COSTURA. «`verificar-cierre.py`: 0 comprobaciones duras con fallo tras el cierre; índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, 0 y 0 entradas descuadradas sobre 29 y 67 encabezados —no hubo descuadre que corregir: se regeneraron tras insertar la cabecera de S150 y la sección de notas técnicas de Fase 9, que es el encabezado 67—. **Censo de tokens sospechosos: 33**, el mismo número que S149 declaró, y la comparación es honesta de 33 a 33 porque los dos se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**: tres entradas netas desde S149, las tres con la misma causa, el archivado de S148, que retira del corpus vivo la única cita viva que tenían en el plan `D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado` —los tres pasan de 2 apariciones a 1, la de su ficha de §4—; esta misma frase los rescata a los tres al nombrarlos, de ahí 33 y no 36, **quinta reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El número que vale es el medido después, y es el que consta. La comparación con HEAD se hizo midiendo el censo sobre el árbol sin tocar (33) y sobre el modificado (36), no por diferencia de listas de memoria. (b) El único token nuevo de esta sesión es `C-exportacion-pdf-profesor-aula`: **no lo marca el censo**, porque nace con 5 apariciones vivas —2 en el plan y 3 en gestión—. No nace ninguna deuda, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-exportación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso su paso a TERMINADO no mueve el censo. (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S148 archivado (`D-censo-r4-ciego-a-la-extincion`) —`C-exportacion-csv`, `D-aviso-fuera-del-dialogo`, `D-censo-r4-ciego-a-la-extincion`, `D-censo-r4-ciego-a-los-objetivos`, `D-censo-r4-cuenta-menciones`, `D-deuda-sin-sede-en-el-plan`, `D-hora-tramo-dependiente-de-zona`, `D-javadoc-plazas-caducado`, `D-post-horario-sin-sesiones`, `D-proyeccion-instancia-espejo`, `D-proyeccion-sin-duracion`, `O-diseño` y `O-exportación`—: **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 82. (d) HIGIENE/MÉTODO: **18 fichas** por la columna de sede de §4 con el criterio de S142, novena reproducción; el reparto es 12 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S149 porque esta sesión no da de alta ninguna ficha. **R-deuda aguanta**: al cerrarse `O-exportación` no queda ninguna condición viva que una deuda pueda bloquear, y las tres que colgaban de él pasan a «cerrado S150» sin pagarse.»
+
+Última sesión registrada (previa): Sesión 149 — O-exportación (H3), C-exportacion-pdf-grupo: **EL HORARIO SALE EN PAPEL, Y UN ORÁCULO LO COTEJA CELDA A CELDA Y NO PÁGINA A PÁGINA.** 28 páginas A4 de grupo con 1285 entradas, 0 faltan y 0 sobran, verificadas sobre el fichero que descargó el NAVEGADOR. Cinco de las correcciones de la maqueta las pidió el usuario mirando el PDF, que es lo que la condición 3 delega en una persona.
   TIPO Y RITUAL: DESARROLLO — M0 + M2 en tres etapas de solo lectura + M3 en cuatro pasos con campaña de mutación + M4 sobre el centro real + M5 + M1. El ritual creció sobre lo previsto porque la revisión humana entró DOS veces, y las dos cambiaron el producto.
   M0. Cambio elegido con argumento: grupo primero, no las tres vistas. Todo el riesgo vive en grupo —es la única vista con celdas multi-entrada— y las otras dos son la misma página con otra clave de agrupación. Meter las tres fundiría la decisión del motor, la medición de la jornada, la maquetación del peor caso y 131 páginas de verificación. R-invalidación: ninguna. **Tres condiciones fijadas ANTES de arrancar, y las tres resultaron necesarias:** (a) la fuente se elige antes de maquetar, porque `BaseFont.EMBEDDED` no empotra las catorce estándar y la anchura de la fuente decide si 1ºA cabe; (b) escalera de salida escrita antes de medir 1ºA —aula a la leyenda, luego apaisado, luego discutir la condición 3—; (c) regla de corte para `D-hora-tramo-dependiente-de-zona` según el tamaño medido del arreglo, no según la prisa.
   M2 EN TRES ETAPAS, SOLO LECTURA, sobre copias y con los bancos verificados en cada una. **(A) LA DEUDA DE ZONA HORARIA NO ERA LO QUE SU FICHA DECÍA.** `tramo_semanal.hora_inicio` está declarada `time(0)` pero `typeof()` devuelve `integer`: son milisegundos desde 1970-01-01T00:00Z. 25200000 son las 07:00 UTC, que en Europa/Madrid el 1 de enero de 1970 son las **08:00**, la hora que imprime el centro. El `sqlite3` de S147 leyó el entero crudo como UTC y por eso vio un desfase. **(B) Medido con la aplicación real:** mismo fichero, dos JVM que solo se diferencian en `-Duser.timezone`, y las 70 horas se desplazan 60 minutos exactos; `persistida`, `dia`, `esLectivo`, `orden` y `ordenEnDia` idénticos. La deuda pasa de sospecha razonada a hecho medido y **NO BLOQUEA la condición 1**: es defecto de portabilidad, no de contenido, y su sede se traslada a H4 y Fase 12. **No se paga**: `/api/jornada` ya la expone desde que existe el formulario de jornada, así que es preexistente y R-deuda manda. **(C) EL PRESUPUESTO DE PÁGINA, CALCULADO ANTES DE DIBUJAR.** La entrada más larga de las 28 vistas son 33 caracteres (`EXPRE DIB1 Taller 1 Aula Plástica`, 4ºA), y 22 de esos 33 son el código de aula. Medidos los anchos reales con la fuente: a 7,99 pt entran ~18,7 caracteres por línea en DejaVu Sans y ~20,8 en Condensed, así que el peor caso se parte en dos líneas. El reparto de densidad (648/83/37/22/28/22) sitúa el máximo en 6 entradas, **22 celdas, dos en cada uno de once grupos y siempre en tramos distintos**: una página tiene como mucho DOS filas con celda de seis, no seis. Con eso el presupuesto entra en vertical y la escalera de salida queda sin estrenar. La leyenda a DOS columnas es lo que lo hace posible: 1ºA tiene 34 entradas de leyenda para 30 celdas de rejilla.
@@ -737,23 +752,11 @@ nuevo a partir del anterior, modificando solo los cambios.
   CRITERIO. **Ninguna condición se MARCA, y se dice por delante.** Las condiciones 1, 2 y 3 se enuncian sobre las tres vistas y hoy está una; la 5 queda cumplida en su mitad de PDF sobre el documento que existe. Lo que avanza es real y medido: la vista de grupo entera, verificada celda a celda y por la vía de una persona. Estado del criterio: **1 de 5 cumplida (la 4, S148)**, la 5 a falta de las otras dos vistas, y las tres primeras con su tercio de grupo hecho. O-exportación lleva **3 sesiones de las 8** que §7 marca como techo.
   DEUDA. Nacen TRES, las tres con dos sedes (§4 y esta entrada), precedente de S142: **`D-javadoc-csv-separador-sin-fuente`**, **`D-pdf-error-de-maqueta-como-404`** (mutante 16, superviviente a propósito) y **`D-guion-pkill-casa-su-propio-envoltorio`**, que ya costó una corrida del M2-B. **Deuda bloqueante del proyecto: 0 confirmadas.** La fórmula cambia respecto a S147 y S148, que decían «0» a secas mientras §4 clasificaba `D-hora-tramo-dependiente-de-zona` como «sin medir: bloquea la condición 1 si...»; hoy esa deuda está MEDIDA y no bloquea, así que el 0 es por primera vez un hecho y no una abreviatura.
   OBSERVACIONES QUE NO SON DEUDA, sin token por falta de evidencia de fallo. **`pdftohtml` redondea 7,99 a 8,00**: no es deuda porque no hay nada nuestro que arreglar; es corrección de instrumento y vive en la condición 3. **El orden de páginas reutiliza `GrupoService.listar()`**, que es el que el usuario ya ve en pantalla, y por eso `1B-A` va antes que `1ºA` (`º` ordena tras las letras ASCII); cambiarlo arreglaría los dos sitios a la vez y es vista de catálogo, con `O-catálogo` cerrado desde S106. **El endpoint en `HorarioController` obligó a tocar 8 clases de test** por el tercer parámetro del constructor; el coste está pagado y el Cambio siguiente no lo repite porque añade vistas sobre el mismo servicio. **El oráculo en modo pdf depende de dos medidas de la maqueta** (la columna de horas acaba en 86 pt, cada día mide 96,2): si la maqueta cambia, el oráculo cambia con ella; las otras dos vistas usan la misma maqueta. **Siete asignaturas tienen el nombre igual al código** y la leyenda imprime `IPE — IPE`: se imprime lo que hay, misma salvedad de S136 que los nombres truncados en origen.
-  SUITES: solver 92 SIN MOVERSE (`solver/` no tocado, luego `referencia-codigo-solver.md` no se regenera), app 355 → 383 (+28: 18 de `HorarioPdfTest`, 5 de `ExportacionHorarioServiceTest` —clase nueva— y 5 del controlador) y vitest 481 en 52 ficheros (+1 sobre 480). Recorridas antes de escribir, entre pasos y antes de confirmar. Una dependencia añadida, `com.github.librepdf:openpdf:1.3.32`, SOLO en `app/pom.xml`.
+  SUITES: solver 92 SIN MOVERSE (`solver/` no tocado, luego `referencia-codigo-solver.md` no se regenera), app 355 → 383 (+28: 18 de `HorarioPdfTest`, 5 de `ExportacionHorarioServiceTest` —clase nueva— y 5 del controlador) **CORREGIDO en S150 (R5), por conteo:** el reparto real es 19, 5 y 4; el total de 28 era correcto y vitest 481 en 52 ficheros (+1 sobre 480). Recorridas antes de escribir, entre pasos y antes de confirmar. Una dependencia añadida, `com.github.librepdf:openpdf:1.3.32`, SOLO en `app/pom.xml`.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, verificadas al abrir, entre las cinco fases y al cerrar: **INTACTAS**. Las copias de trabajo vivieron en `/tmp/s149/`. **Dato que no era obvio y se registra:** una copia sobrevive a dos arranques completos de Spring Boot con su md5 intacto —Hibernate no reescribe—, así que arrancar sobre copia es de verdad de solo lectura. Ninguna generación lanzada: se usó el horario id 1 del banco.
   LIMPIEZA (M1-bis): archivada S147 a `bitacora-sesiones.md`; degradada S148 a «Última sesión registrada (previa):»; S149 queda como única cabecera H3 viva.
   R4 / COSTURA. «`verificar-cierre.py`: 0 comprobaciones duras con fallo tras el cierre; índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, de 9 y 8 entradas descuadradas a 0 y 0 sobre 29 y 66 encabezados. **Censo de tokens sospechosos: 33**, el mismo número que S148 declaró, y esta vez la comparación SÍ es honesta de 33 a 33: los dos se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **35**: dos entradas netas desde S148, las dos causadas por el archivado de S147, que retira del corpus vivo la única cita viva de `C-alcance-ajuste` y de `C-alcance-exportacion`; esta misma frase los rescata a los dos al nombrarlos, de ahí 33 y no 35, **cuarta reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El número que vale es el medido después, y es el que consta. (b) Los cuatro tokens nuevos de esta sesión son `C-exportacion-pdf-grupo`, `D-javadoc-csv-separador-sin-fuente`, `D-pdf-error-de-maqueta-como-404` y `D-guion-pkill-casa-su-propio-envoltorio`: **ninguno lo marca el censo**, porque nacen con 4, 3, 3 y 3 apariciones vivas —tres sedes cada deuda: §4, «Deuda consciente VIVA» y esta entrada—. Es la primera vez desde S130 que las altas entran en las TRES sedes, y por eso `D-deuda-sin-sede-en-el-plan` no engorda. `O-exportación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`). (c) Extinción comprobada a mano sobre los 12 tokens citados en el bloque de S147 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los dos que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 20. (d) HIGIENE/MÉTODO: **18 fichas** por la columna de sede de §4 con el criterio de S142, octava reproducción; el reparto es 12 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», y la misma regla reproduce el 17 de S148 sin el alta de esta sesión. **R-deuda aguanta**: ninguna deuda viva bloquea una condición viva de O-exportación.»
 
-Última sesión registrada (previa): Sesión 148 — O-exportación (H3), C-exportacion-csv: **EL HORARIO SALE DE LA APLICACIÓN EN DATOS, Y LO CERTIFICA UN ORÁCULO QUE NO COMPARTE UNA LÍNEA CON EL EXPORTADOR.** La condición 4 del criterio queda CUMPLIDA y la 5 a medias. El fichero que descarga el navegador es byte a byte el que pasó el oráculo —mismo md5 que `curl`— y reconstruye 1285 entradas de grupo, 835 de profesor y 819 de aula con 0 faltan y 0 sobran en las tres vistas. 15 mutantes lanzados, 15 muertos. Cero dependencias nuevas.
-  TIPO Y RITUAL: DESARROLLO — M0 + M2 de solo lectura + M3 con campaña de mutación + M4 sobre el centro real + M1. Tres commits: dos de código y uno de documentación.
-  M0. **El Cambio se eligió con argumento, aunque coincidiera con la previsión de la ficha.** El PDF primero tenía a su favor el único riesgo capaz de reescribir el criterio —que 1ºA no quepa en A4—, pero ese riesgo NO amenaza al CSV: si 1ºA no cabe, el CSV sigue siendo válido tal cual. Y el CSV monta tres piezas que el PDF necesita igual: la vía de exportación por id de horario, el ORÁCULO SQL —que sirve a la condición 4 y a la 2 de los tres PDF— y media condición 5. Empezar por el PDF habría fundido esa fontanería con la decisión del motor y con la maquetación, y sin oráculo la condición 2 no se habría podido verificar. **PRECISIÓN DEL CRITERIO, escrita ANTES de ejecutar:** la condición 1 decía «desde la vista del horario» y la 4 no, pero el paso 5 de §1 lo ejecuta una persona sobre la interfaz; la 4 gana «descargable desde la vista» y el enlace entra en el Cambio. **DECISIÓN DE ALCANCE: el CSV NO lleva horas**, porque la condición 4 se compara contra un oráculo que trabaja con celdas (día, tramo) y meterlas arrastraría `D-hora-tramo-dependiente-de-zona` a este Cambio; con la hipótesis sin verificar, exportar una hora falsa es peor que no exportarla. La medición de `GET /api/jornada` queda para el primer Cambio del PDF, que sí la necesita. R-invalidación: ninguna.
-  M2, SOLO LECTURA, sobre copia en `/tmp` y sin arrancar la aplicación. (a) `proyectar()` ya devuelve TODO lo que la condición 4 necesita —día 1–5, tramo 1–6 renumerado por `CatalogoMapper`, profesores, aula, grupos y subgrupos— y calcula los grupos igual que el oráculo: unión sin duplicados de los grupos de los subgrupos de la plaza. No hizo falta servicio nuevo: el controlador ya inyecta `GeneradorHorarioService`. (b) `src/main` no tenía NI UN endpoint que devolviera bytes, ni `produces`, ni `MediaType`: es el primero. (c) **No hay fallback de SPA**, luego una ruta bajo `/api/` terminada en `.csv` no puede caer en él, y el sufijo no se recorta (el suffix pattern matching está retirado en Spring 6/Boot 4 y aquí no se reactiva). (d) El ORÁCULO se escribió y se validó contra las 13 cifras de S147 —1285 entradas, 840 celdas, 648/83/37/22/28/22, 835, 819, máximos 1 y 35 aulas con clase— y cuadró las 13 SIN un solo ajuste, recalculando el `ordenEnDia` desde cero porque el `orden` de `tramo_semanal` es GLOBAL 1..35 y los recreos consumen número. (e) Ningún código de grupo, profesor, aula, asignatura, subgrupo, plaza ni actividad contiene `;`, `/`, `"` ni saltos; la ÚNICA coma vive en `profesor.nombre_completo` (58 de 59, patrón «Apellidos, Nombre»), que es la razón por la que el CSV no puede unir listas con coma.
-  M3. `HorarioCsv` es una función pura que consume el DTO; el endpoint `GET /api/horarios/{id}/csv` reutiliza el patrón de 404 de sus dos hermanos, con el `try` envolviendo SÓLO `proyectar(id)` para que un fallo de formato no acabe traducido a 404; el enlace de la vista no lleva `HttpClient`, `Blob` ni método nuevo en el servicio. **`D-post-horario-sin-sesiones` se respeta en su letra**: el código nuevo no toca `horario.getSesiones()`; la dependencia es la indirecta y ya existente de `proyectar()`, y la alternativa —reconsultar el repositorio— habría escrito el tercer mapeo que `D-proyeccion-instancia-espejo` prohíbe. MUTACIÓN: 15 mutantes, 15 muertos, ninguno superviviente, con el pristino restaurado y verificado por md5 en las 15 vueltas (los ficheros nuevos no estaban en git: `git checkout` no los habría restaurado). **DOS PREDICCIONES FALLIDAS, las dos a la baja y ninguna con superviviente**, que se registran porque una predicción escrita antes de medir sólo vale si sus fallos se cuentan: el mutante del separador NO mata el caso de la cabecera (es un literal con `;` escritos a mano, no pasa por la constante), y el de la unión de listas NO mata el test de contrato del endpoint (su fixture da un solo profesor y un solo grupo por plaza). Se decidió NO retocar la fixture: cambiarla a posteriori para mejorar una predicción es justo lo que la regla de «no arreglar en silencio» desaconseja, y el M4 mide esa unión a escala real con 16 filas de co-docencia y 1285 entradas de grupo, que es más fuerte.
-  **UN DEFECTO INTRODUCIDO POR EL ARQUITECTO Y CORREGIDO EN LA MISMA SESIÓN.** El guion del M3 mandó como respaldo de estilo «la clase del botón de generar sin `accion-principal`», dando por hecho que `.generar` aportaba caja; `.generar` NO tiene ninguna regla CSS en todo el proyecto y el enlace salió con el azul y el subrayado nativos del navegador, es decir, rompiendo la jerarquía que `O-diseño` dejó cumplida. No se arregló por R-terminado —no es pulir lo terminado— sino porque el Cambio no puede introducir el defecto. Medido antes de tocar: CERO selectores de ancla en todo el CSS y ninguna clase que dé a un `<a>` la caja secundaria. La caja base del proyecto es la regla del selector `button`, que un `<a>` no puede heredar, así que el selector pasa a `button, a.boton` y se añade `a.boton` con las dos propiedades que la regla base no fija y el ancla necesita: `text-decoration: none` y `display: inline-block`. **CONSECUENCIA ANOTADA PARA O-diseño, que no es deuda porque nada falla:** la especificidad de la caja base sube de (0,1) a (1,1) para las anclas, de modo que anular esa caja en un `a.boton` exigirá en el futuro (1,1) o más.
-  M4 sobre el centro real, con la aplicación sirviendo una COPIA y las dos bases de referencia intactas al abrir y al cerrar. 12 predicciones escritas ANTES de medir, 12 aciertos: 200 con `text/csv;charset=UTF-8` y `Content-Disposition` exactos, BOM por bytes, 820 registros y 820 CRLF, 16 filas con co-docencia (835 − 819), sumas de 835 y 1285 al partir las listas, cabecera idéntica, 404 para un id inexistente, y el oráculo en 1285/835/819 con 0 y 0 en las tres vistas. **EL INSTRUMENTO SE MUTÓ ANTES DE CREERLE**, sobre el CSV real: quitar una fila, cambiar un aula por otra libre en esa celda y quitar el BOM lo hacen fallar, cada uno por su motivo y con el detalle correcto. Y la comprobación que cierra el círculo: el fichero descargado por el NAVEGADOR tiene el mismo md5 que el de `curl`, `eff9b823c6baca32b1b6b36e1569933d`, luego lo que verificó el oráculo es exactamente lo que se lleva una persona. Abierto en LibreOffice Calc las doce columnas caen en su sitio con el `;` y las tildes y el `º` correctos; **Excel sobre Windows real sigue siendo de H4**, como manda la condición 5. Se entró por `/` y no se pulsó «Generar horario».
-  CRITERIO. **Condición 4 CUMPLIDA y condición 5 a medias**; las tres del PDF, intactas. Es el primer avance medido de H3 sobre el producto.
-  DEUDA. Nacen DOS, ambas con dos sedes (§4 y esta entrada), precedente de S142 para no engordar `D-deuda-sin-sede-en-el-plan`. **`D-censo-r4-ciego-a-los-objetivos`**, pendiente desde el cierre de S147: el censo de R4 nunca comprueba un `O-*`, y el hueco está también en la especificación de `metodo.md`. **`D-proyeccion-sin-duracion`**, destapada por el preámbulo del M3 al comprobar que la rejilla tampoco obtiene la duración por otra vía. Ninguna bloquea. **OBSERVACIÓN QUE NO ES DEUDA, sin token por falta de evidencia de fallo:** un código que contuviera `/` produciría hoy un 500 con el mensaje en el cuerpo y sin nada que lo muestre en la interfaz —el afirmar «falla con un mensaje claro» fue una imprecisión del arquitecto en el diseño—; no se fija con un test porque sería consagrar un comportamiento que no se quiere, y sobre datos reales no se puede dar (cero `/` medidos en los seis campos). **Deuda bloqueante del proyecto: 0.** HIGIENE/MÉTODO: 17 fichas por la columna de sede de §4 con el criterio de S142 (16 medidas al abrir, más el alta del censo), séptima reproducción; **R-deuda aguanta**: ninguna bloquea la condición que queda viva.
-  SUITES: solver 92 SIN MOVERSE (no se tocó `solver/`, luego `referencia-codigo-solver.md` no se regenera), app 339 → 355 (+13 de la función pura, +3 del endpoint) y vitest 478 → 480 en 52 ficheros. Recorridas antes de escribir, después de escribir y otra vez antes de confirmar. Ninguna dependencia añadida a ningún `pom.xml` ni a `package.json`: el escape RFC 4180 son unas líneas con tests propios.
-  BANCOS. `educhronos-s137-centro-completo.db` en `64d671fe…` y `educhronos-s137.db` en `dfa4c077…`, verificadas al abrir, entre fases y al cerrar: **INTACTAS**. La aplicación del M4 sirvió `educhronos-s148-m4.db`, copia con el mismo md5, y el oráculo leyó un fichero DISTINTO del mismo banco: lo que ha de ser independiente es el CAMINO DE CÁLCULO —SQL directo frente a `proyectar()` con `CatalogoMapper`—, no el dato, porque comparar dos contenidos distintos no probaría nada.
-  R4 / COSTURA. «`verificar-cierre.py`: 0 comprobaciones duras con fallo tras el cierre; índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, de 13 y 17 entradas descuadradas a 0 y 0 sobre 29 y 66 encabezados. **Censo de tokens sospechosos: 33**, frente al **33 declarado en S147** —pero la comparación honesta es 33 frente a 34, porque **el «33» de la línea de R4 de S147 es la SEGUNDA reproducción de `D-censo-r4-cuenta-menciones` —la primera fue S141—: la propia frase que nombra el token lo rescata del censo, así que el censo real de S147 era 34 y no 33.** (a) La corrida previa a escribir esta línea dio **35**: dos entradas netas desde S147, las dos causadas por el archivado de S146, que retira del corpus vivo la segunda cita de `D-aviso-fuera-del-dialogo` y de `D-javadoc-plazas-caducado`; y esta misma frase los rescata a los dos al nombrarlos, de ahí 33 y no 35, tercera reproducción de `D-censo-r4-cuenta-menciones` en tres cierres seguidos. El número que vale es el MEDIDO DESPUÉS de escribir la línea, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-exportacion-csv`, `D-censo-r4-ciego-a-los-objetivos` y `D-proyeccion-sin-duracion`: **ninguno de los tres lo marca el censo**, porque nacen con 5, 2 y 2 apariciones vivas respectivamente —dos sedes cada deuda, §4 y esta entrada, más las citas de la ficha— y el censo sólo lista los que tienen exactamente UNA. `O-exportación` sigue fuera del corpus por construcción, que es justo lo que `D-censo-r4-ciego-a-los-objetivos` da de alta. (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S146 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los dos que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 20.»
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -777,8 +780,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149.
-El plan conserva ahora S148 (degradada a formato compacto) y S149 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150.
+El plan conserva ahora S149 (degradada a formato compacto) y S150 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -3237,6 +3240,15 @@ clasificación de la relación, no la regla. Las otras dos FK (actividad, plaza)
   (ambas piezas son necesarias). Además, el slice `@DataJpaTest` de SB4.1 solo carga las auto-configs
   listadas en `META-INF/spring/org.springframework.boot.data.jpa.test.autoconfigure.AutoConfigureDataJpa.imports`;
   hubo que añadir ese fichero en test-resources para que el customizer corriera en los slices.
+
+### Notas técnicas validadas en Fase 9
+
+- **PDF: el prefijo de subset de fuente (`XXXXXX+`) lo sortea OpenPDF 1.3.32 en cada generación**
+  (S150): toda comparación de PDF lo normaliza y compara flujos inflados y texto; el md5 crudo
+  no sirve (también varía `CreationDate`).
+- **PDF: corte de línea** (S150): sin `SplitCharacter`, OpenPDF parte por el guion de los códigos
+  (`1B-`/`C`) y, si no hay punto de corte, a mitad de palabra; `HorarioPdf` sólo permite partir
+  tras espacio y `/`.
 
 ### Por qué OR-Tools sobre Timefold (no reabrir)
 
