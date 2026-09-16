@@ -474,6 +474,11 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
         print("  FALLO: %d páginas para %d %s %s" % (paginas, len(esperadas), varios, rotulo))
 
     vistos, total_faltan, total_sobran, total_halladas = set(), 0, 0, 0
+    # Contador APARTE. Una página vacía con leyenda no es una entrada de más: no hay
+    # ninguna entrada en esa página. Sumarla a SOBRAN mezclaba dos defectos distintos
+    # en un número, y encima contaba dos —un encabezado colado por cada rótulo— donde
+    # el defecto es UNO: esa página no debía llevar leyenda.
+    total_vacias_con_leyenda = 0
     for pagina in range(1, paginas + 1):
         cabecera = [l.strip() for l in texto_de_pagina(ruta_pdf, pagina).splitlines()
                     if l.strip()]
@@ -501,7 +506,7 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
             if colados:
                 print("  pág %2d  %-7s  VACÍA pero lleva leyenda: %s   <<< DESCUADRE"
                       % (pagina, recurso, ", ".join(colados)))
-                total_sobran += len(colados)
+                total_vacias_con_leyenda += 1
         n_faltan = sum(faltan.values())
         n_sobran = len(sobra)
         total_halladas += halladas
@@ -521,8 +526,10 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
 
     print("  TOTAL: halladas %d, FALTAN %d, SOBRAN %d"
           % (total_halladas, total_faltan, total_sobran))
-    return (not total_faltan and not total_sobran and not sin_pagina
-            and paginas == len(esperadas))
+    if conf["catalogo"]:
+        print("  TOTAL: páginas vacías con leyenda: %d" % total_vacias_con_leyenda)
+    return (not total_faltan and not total_sobran and not total_vacias_con_leyenda
+            and not sin_pagina and paginas == len(esperadas))
 
 
 def censo_de_cuerpos(ruta_pdf):
