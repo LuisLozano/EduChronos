@@ -658,6 +658,157 @@ class HorarioPdfTest {
         assertThat(texto(new PdfReader(pdf), 1)).doesNotContain("Tutor de:");
     }
 
+    // ------------------------------------------------------------------ C8: vista de AULA
+
+    /**
+     * La vista de aula pagina el CATÁLOGO ENTERO y en su orden: las aulas sin una sola
+     * clase también tienen página. Un aula que no aparece no se distingue de un aula que
+     * no existe, y este PDF se usa para ver qué está libre.
+     */
+    @Test
+    void enVistaDeAulaHayPaginaTambienParaLasAulasSinClases() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A1", "A5", "B08"), Map.of(), Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        assertThat(reader.getNumberOfPages()).isEqualTo(3);
+        assertThat(titulo(reader, 1)).isEqualTo("A1");
+        assertThat(titulo(reader, 2)).isEqualTo("A5");
+        assertThat(titulo(reader, 3)).isEqualTo("B08");
+        reader.close();
+    }
+
+    /**
+     * Una página vacía no lleva NI LOS ENCABEZADOS de la leyenda. «Profesores» y
+     * «Asignaturas» sobre la nada anuncian un contenido que no está, y quien lo lea
+     * buscará una lista que nadie escribió.
+     */
+    @Test
+    void enVistaDeAulaLaPaginaSinClasesNoLlevaEncabezadosDeLeyenda() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A5", "B08"), Map.of("MAT1", "Ríos Palomo, Carmen"),
+                        Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        String vacia = texto(reader, 2);
+        assertThat(vacia).contains("B08");
+        assertThat(vacia).doesNotContain("Profesores");
+        assertThat(vacia).doesNotContain("Asignaturas");
+        // La rejilla SÍ está: la página vacía es un horario vacío, no una hoja en blanco.
+        assertThat(vacia).contains("Lunes", "08:00-09:00", "Recreo");
+        reader.close();
+    }
+
+    /** La página CON clases conserva sus dos bloques y su clave de lectura. */
+    @Test
+    void enVistaDeAulaLaPaginaConClasesLlevaLosDosBloquesDeLeyenda() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A5"), Map.of("MAT1", "Ríos Palomo, Carmen"), Map.of()));
+
+        String pagina = texto(new PdfReader(pdf), 1);
+        assertThat(pagina).contains("Profesores");
+        assertThat(pagina).contains("MAT1 — Ríos Palomo, Carmen");
+        assertThat(pagina).contains("Asignaturas");
+        assertThat(pagina).contains("MAT — Matemáticas");
+        assertThat(pagina).contains("Asignatura - Profesor - Grupo");
+    }
+
+    /**
+     * Ninguna página de aula lleva línea bajo el título: un aula no tiene tutor. Se afirma
+     * sobre la página CON clases, que es donde una línea de más cabría sin llamar la
+     * atención.
+     */
+    @Test
+    void enVistaDeAulaNoHayLineaBajoElTitulo() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A5"), Map.of(), Map.of()));
+
+        // La segunda línea no vacía de la página es ya la clave de lectura: no hay nada
+        // entre el título y ella.
+        List<String> lineas = new ArrayList<>();
+        for (String linea : texto(new PdfReader(pdf), 1).split("\\R")) {
+            if (!linea.isBlank()) {
+                lineas.add(linea.trim());
+            }
+        }
+        assertThat(lineas.get(0)).isEqualTo("A5");
+        assertThat(lineas.get(1)).isEqualTo("Asignatura - Profesor - Grupo");
+    }
+
+    /** La celda de aula va en el orden de SU clave: asignatura, profesores y grupos. */
+    @Test
+    void enVistaDeAulaLaCeldaDeCoDocenciaVaEnOrdenAsignaturaProfesoresGrupos()
+            throws IOException {
+        SesionVistaDTO compartida = new SesionVistaDTO(
+                1L, 0, 1, 1, "LCL", "Lengua", List.of("LEN2", "LEN8"), "A5",
+                List.of(), List.of("2ºA", "2ºB"), "LCL-1", "LCL-1-P1");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(compartida)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A5"), Map.of(), Map.of()));
+
+        assertThat(normalizado(texto(new PdfReader(pdf), 1)))
+                .contains("LCL LEN2/LEN8 2ºA/2ºB");
+    }
+
+    // ------------------------------------------------------------------ C9: corte de línea
+
+    /**
+     * EL CORTE NO PARTE CÓDIGOS. Es el caso que faltaba en S150/M3-2: allí la regla se
+     * midió con un programa desechable fuera del repo, y sin este test nada impedía que
+     * alguien quitase {@code conCorteDeCodigos} y solo lo notara el papel.
+     *
+     * <p>La entrada es la más larga del banco real —{@code DIB2} el lunes a primera—, con
+     * la maqueta de verdad: columna de {@value HorarioPdf#COL_DIA} pt y cuerpo
+     * {@value HorarioPdf#CUERPO}. Sin la regla, OpenPDF parte por el guion del propio
+     * código y emite {@code "…1B-B/1B-"} / {@code "C/1B-D"}.
+     *
+     * <p>Los dos asertos son distintos a propósito. El primero mira TODAS las líneas y
+     * ninguna puede acabar en guion: eso es el defecto, dicho tal cual. El segundo exige
+     * que {@code 1B-C} esté entero EN UNA LÍNEA, no en la página: un {@code contains}
+     * sobre el texto completo pasaría aunque el código estuviera partido, porque al unir
+     * las líneas volvería a aparecer.
+     */
+    @Test
+    void elCorteDeLineaNoParteUnCodigoPorSuGuion() throws IOException {
+        SesionVistaDTO laMasLarga = new SesionVistaDTO(
+                1L, 0, 1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "Taller 1 Aula Plástica",
+                List.of(), List.of("1B-A", "1B-B", "1B-C", "1B-D"), "DTec-1", "DTec-1-P1");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(laMasLarga)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("DIB2"), Map.of(), Map.of()));
+
+        List<String> lineas = new ArrayList<>();
+        for (String linea : texto(new PdfReader(pdf), 1).split("\\R")) {
+            if (!linea.isBlank()) {
+                lineas.add(linea.trim());
+            }
+        }
+
+        assertThat(lineas)
+                .as("la entrada se parte en varias líneas, si no el caso no prueba nada")
+                .hasSizeGreaterThan(3);
+        assertThat(lineas)
+                .as("ninguna línea acaba en guion: eso sería un código partido")
+                .noneMatch(linea -> linea.endsWith("-"));
+        assertThat(lineas)
+                .as("1B-C entero en UNA línea, no repartido entre dos")
+                .anyMatch(linea -> linea.contains("1B-C"));
+    }
+
     // ------------------------------------------------------------------ utilidades
 
     private static String texto(PdfReader reader, int pagina) throws IOException {

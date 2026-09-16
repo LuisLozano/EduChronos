@@ -225,7 +225,17 @@ public final class HorarioPdf {
             }
             doc.add(lineaSuelta(vista.claveDeLectura(), fCuerpo));
             doc.add(rejilla(delRecurso, filas, vista, fCuerpo, fNegrita));
-            doc.add(leyenda(delRecurso, vista, contexto.nombresDeProfesor(), fCuerpo, fNegrita));
+
+            // Una leyenda sin una sola línea NO se imprime, ni siquiera sus encabezados:
+            // en una página vacía —las que la vista de aula sí saca— «Profesores» y
+            // «Asignaturas» sobre la nada anuncian un contenido que no está. Las páginas
+            // con clases siempre traen al menos el bloque de asignaturas lleno, así que
+            // esto no las toca.
+            List<BloqueLeyenda> bloques =
+                    vista.leyendaDe(delRecurso, contexto.nombresDeProfesor());
+            if (bloques.stream().anyMatch(bloque -> !bloque.lineas().isEmpty())) {
+                doc.add(leyenda(bloques, fCuerpo, fNegrita));
+            }
         }
 
         doc.close();
@@ -276,8 +286,15 @@ public final class HorarioPdf {
     /**
      * Los recursos que tienen página, en el orden del catálogo. Se recorre
      * {@code ordenDeRecursos} y se queda con los que de verdad aparecen en la proyección
-     * —un recurso del catálogo sin clases no tiene nada que imprimir—; los que están en la
-     * proyección pero no en el catálogo van al final, por aparición.
+     * —un recurso del catálogo sin clases no tiene nada que imprimir—, SALVO que la vista
+     * pida el catálogo entero ({@link VistaPdf#incluyeRecursosSinSesiones()}), en cuyo
+     * caso todos tienen página y las de los que no dan clase salen vacías.
+     *
+     * <p>Los que están en la proyección pero NO en el catálogo van al final, por
+     * aparición, y eso vale para las dos políticas: es la regla de S149 y dice que callar
+     * una página es peor que descolocarla. Con el catálogo entero ese caso debería ser
+     * imposible —el catálogo es la fuente de la que salen los recursos—, pero si pasara,
+     * un recurso descolocado sigue siendo mejor que un recurso perdido.
      */
     private static List<String> ordenarRecursos(HorarioProyeccionDTO proyeccion, VistaPdf vista,
                                                 List<String> ordenDeRecursos) {
@@ -287,7 +304,8 @@ public final class HorarioPdf {
         }
         List<String> ordenados = new ArrayList<>(conHorario.size());
         for (String recurso : ordenDeRecursos) {
-            if (conHorario.remove(recurso)) {
+            boolean tieneClases = conHorario.remove(recurso);
+            if (tieneClases || vista.incluyeRecursosSinSesiones()) {
                 ordenados.add(recurso);
             }
         }
@@ -435,12 +453,7 @@ public final class HorarioPdf {
      * <p>Los nombres de catálogo salen tal cual están en el origen, truncados incluidos:
      * eso es un dato del centro, no algo que el exportador deba maquillar.
      */
-    private static PdfPTable leyenda(List<SesionVistaDTO> sesiones,
-                                     VistaPdf vista,
-                                     Map<String, String> nombresProfesor,
-                                     Font fCuerpo, Font fNegrita) {
-
-        List<BloqueLeyenda> bloques = vista.leyendaDe(sesiones, nombresProfesor);
+    private static PdfPTable leyenda(List<BloqueLeyenda> bloques, Font fCuerpo, Font fNegrita) {
 
         PdfPTable tabla = new PdfPTable(bloques.size());
         float[] anchos = new float[bloques.size()];

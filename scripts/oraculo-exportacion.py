@@ -219,6 +219,7 @@ VISTAS = {
         "orden": ("asignatura", "profesores", "aula"),
         "recurso": "grupo",
         "recursos": "grupos",
+        "catalogo": None,
     },
     "profesor": {
         "sql": "v_profesor",
@@ -226,6 +227,18 @@ VISTAS = {
         "orden": ("asignatura", "aula", "grupos"),
         "recurso": "profesor",
         "recursos": "profesores",
+        "catalogo": None,
+    },
+    "aula": {
+        "sql": "v_aula",
+        "clave_de_lectura": "Asignatura - Profesor - Grupo",
+        "orden": ("asignatura", "profesores", "grupos"),
+        "recurso": "aula",
+        "recursos": "aulas",
+        # ÚNICA vista con catálogo: sus páginas NO son las que tienen clases, son TODAS
+        # las del catálogo. Un aula sin una sola sesión también tiene página, y vacía es
+        # justo lo que hay que mirar para saber qué está libre.
+        "catalogo": "select codigo from aula order by codigo",
     },
 }
 
@@ -255,6 +268,12 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
     try:
         con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
         por_recurso = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
+        # Las vistas con catálogo SIEMBRAN todos sus recursos antes de contar entradas: los
+        # que no aparezcan en ninguna sesión se quedan con cero, que es una página vacía
+        # EXIGIDA y no un recurso del que no se sepa nada.
+        if conf["catalogo"]:
+            for (codigo,) in con.execute(conf["catalogo"]):
+                por_recurso[codigo]  # noqa: B018 -- crea la entrada vacía a propósito
         for recurso, dia, tramo, asignatura, profesores, aula, grupos in con.execute("""
                 select v.%s, v.dia, v.tramo, a.codigo,
                        (select group_concat(p.codigo, '/') from (
@@ -437,13 +456,22 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
     paginas = paginas_de(ruta_pdf)
 
     print("--- ORÁCULO PDF (horario %s, vista %s) ---" % (horario_id, vista))
-    print("  %s con clases en la BD %s %d" % (varios, "." * (22 - len(varios)), len(esperadas)))
+    # Con catálogo, `esperadas` son TODOS los recursos y no solo los que dan clase: el
+    # rótulo lo dice, porque «con clases» sería falso y el número no cuadraría con las 35
+    # aulas que sí tienen horario.
+    rotulo = "del catálogo" if conf["catalogo"] else "con clases en la BD"
+    print("  %s %s %s %d"
+          % (varios, rotulo, "." * max(1, 22 - len(varios) - len(rotulo)), len(esperadas)))
     print("  entradas que exige la BD ..... %d"
           % sum(sum(c.values()) for g in esperadas.values() for c in g.values()))
+    if conf["catalogo"]:
+        print("  %s del catálogo SIN clases %s %d"
+              % (varios, "." * (20 - len(varios)),
+                 sum(1 for g in esperadas.values() if not g)))
     print("  páginas del PDF .............. %d" % paginas)
 
     if paginas != len(esperadas):
-        print("  FALLO: %d páginas para %d %s con clases" % (paginas, len(esperadas), varios))
+        print("  FALLO: %d páginas para %d %s %s" % (paginas, len(esperadas), varios, rotulo))
 
     vistos, total_faltan, total_sobran, total_halladas = set(), 0, 0, 0
     for pagina in range(1, paginas + 1):
@@ -463,6 +491,17 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
         halladas, faltan, sobra = cotejar_celdas(
             celdas_de_pagina(ruta_pdf, pagina), esperadas[recurso])
         exige = sum(sum(c.values()) for c in esperadas[recurso].values())
+
+        # Una página que la BD deja SIN NINGUNA entrada no puede llevar leyenda: sus
+        # encabezados anunciarían una lista que no existe. Solo se puede comprobar donde
+        # hay páginas vacías, o sea en las vistas con catálogo.
+        if exige == 0:
+            texto = texto_de_pagina(ruta_pdf, pagina)
+            colados = [r for r in ("Profesores", "Asignaturas") if r in texto]
+            if colados:
+                print("  pág %2d  %-7s  VACÍA pero lleva leyenda: %s   <<< DESCUADRE"
+                      % (pagina, recurso, ", ".join(colados)))
+                total_sobran += len(colados)
         n_faltan = sum(faltan.values())
         n_sobran = len(sobra)
         total_halladas += halladas
@@ -478,7 +517,7 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
 
     sin_pagina = sorted(set(esperadas) - vistos)
     if sin_pagina:
-        print("  FALLO: %s con clases y SIN página: %s" % (varios, ", ".join(sin_pagina)))
+        print("  FALLO: %s %s y SIN página: %s" % (varios, rotulo, ", ".join(sin_pagina)))
 
     print("  TOTAL: halladas %d, FALTAN %d, SOBRAN %d"
           % (total_halladas, total_faltan, total_sobran))

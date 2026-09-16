@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import es.yaroki.educhronos.app.exportacion.VistaPdf;
+import es.yaroki.educhronos.app.web.dto.AulaDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
@@ -53,6 +54,7 @@ class ExportacionHorarioServiceTest {
     @Mock private JornadaService jornadaService;
     @Mock private ProfesorService profesorService;
     @Mock private GrupoService grupoService;
+    @Mock private AulaService aulaService;
     @Mock private TutoriaService tutoriaService;
 
     @InjectMocks private ExportacionHorarioService servicio;
@@ -218,6 +220,39 @@ class ExportacionHorarioServiceTest {
         when(tutoriaService.obtener(10L)).thenReturn(List.of());
 
         assertThat(texto(servicio.pdf(1L, VistaPdf.PROFESOR))).doesNotContain("Tutor de:");
+    }
+
+    // ------------------------------------------------------------------ rama AULA
+
+    /**
+     * La rama de aula pagina el CATÁLOGO ENTERO, en su orden y sin líneas bajo el título.
+     * El caso da un aula CON clase y otra SIN ninguna, y exige las dos páginas: si el
+     * servicio pasara solo las aulas con horario, la segunda desaparecería y el PDF dejaría
+     * de responder a «¿qué hay libre?», que es para lo que existe.
+     */
+    @Test
+    void laRamaDeAulaPaginaElCatalogoEnteroYSinLineas() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(proyeccion(List.of(
+                sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA"))));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of(
+                new ProfesorDTO(3L, "MAT1", "Ríos Palomo, María del Carmen")));
+        when(aulaService.listar()).thenReturn(List.of(
+                new AulaDTO(1L, "A5", "ORDINARIA", 30, "Principal", 1, "Norte"),
+                new AulaDTO(2L, "B08", "ORDINARIA", 30, "Principal", 0, "Sur")));
+
+        PdfReader reader = new PdfReader(servicio.pdf(1L, VistaPdf.AULA));
+        try {
+            assertThat(reader.getNumberOfPages()).isEqualTo(2);
+            String conClase = new PdfTextExtractor(reader).getTextFromPage(1);
+            String vacia = new PdfTextExtractor(reader).getTextFromPage(2);
+            assertThat(conClase).contains("A5", "MAT MAT1 1ºA", "Asignatura - Profesor - Grupo");
+            assertThat(vacia).contains("B08");
+            assertThat(vacia).doesNotContain("Profesores", "Asignaturas");
+            assertThat(conClase).doesNotContain("Tutor");
+        } finally {
+            reader.close();
+        }
     }
 
     // ------------------------------------------------------------------ utilidades

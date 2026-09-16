@@ -1875,8 +1875,8 @@ describe('contenedor del horario', () => {
    * el de CSV desapareciera, y (51) seguiría pasando si el de PDF se colara DELANTE.
    * El par rótulo+href fija también el ORDEN, que es lo que ve el usuario.
    *
-   * <p>El href NO lleva `?vista=grupo`: el endpoint la pone por defecto. Si algún día
-   * el enlace tuviera que nombrarla, este aserto es el que lo dice.
+   * <p>S150 · los enlaces de PDF pasan a ser TRES, uno por vista, y los tres nombran la
+   * suya en la URL, el de grupo incluido. Este aserto es el que lo dice.
    */
   it('(53) junto al de CSV hay un enlace de descarga al PDF del MISMO horario', async () => {
     sujetoParam.next(convertToParamMap({ id: '1' }));
@@ -1892,8 +1892,34 @@ describe('contenedor del horario', () => {
       enlaces.map((a) => [a.textContent?.trim(), a.getAttribute('href'), a.className]),
     ).toEqual([
       ['Exportar CSV', '/api/horarios/7/csv', 'boton'],
-      ['Exportar PDF', '/api/horarios/7/pdf', 'boton'],
+      ['PDF por grupo', '/api/horarios/7/pdf?vista=grupo', 'boton'],
+      ['PDF por profesor', '/api/horarios/7/pdf?vista=profesor', 'boton'],
+      ['PDF por aula', '/api/horarios/7/pdf?vista=aula', 'boton'],
     ]);
+  });
+
+  /**
+   * S150 · los tres PDF piden TRES VISTAS DISTINTAS. (53) ya fija los rótulos y el orden,
+   * pero lo hace comparando una lista escrita a mano contra otra: si alguien copiara el
+   * enlace de grupo tres veces y solo cambiara el texto, habría que ver el descuadre a
+   * ojo entre cuatro filas casi iguales. Aquí se afirma la propiedad directamente —tres
+   * vistas, tres valores diferentes— y el fallo se lee solo.
+   */
+  it('(54) los tres enlaces de PDF piden tres vistas distintas del mismo horario', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next({ ...PROYECCION_VACIA, id: 7 });
+    await fixture.whenStable();
+
+    const vistas = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('a[download]'),
+    )
+      .map((a) => a.getAttribute('href') ?? '')
+      .filter((href) => href.includes('/pdf'))
+      .map((href) => new URL(href, 'http://localhost').searchParams.get('vista'));
+
+    expect(vistas).toEqual(['grupo', 'profesor', 'aula']);
+    expect(new Set(vistas).size).toBe(3);
   });
 
   /**
@@ -1916,7 +1942,7 @@ describe('contenedor del horario', () => {
       'No se pudo cargar el horario 1 (404).',
     );
 
-    // Los DOS enlaces (S149): sin proyección no hay id, ni para el CSV ni para el PDF.
+    // Los CUATRO enlaces (S150): sin proyección no hay id, ni para el CSV ni para los PDF.
     expect(raiz.querySelectorAll('a[download]').length).toBe(0);
   });
 });

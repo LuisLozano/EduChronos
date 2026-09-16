@@ -15,10 +15,11 @@ import java.util.TreeSet;
  *
  * <p><b>Qué es una vista.</b> La rejilla, la jornada, las fuentes, las bandas, el corte
  * de línea y las constantes de maqueta son las MISMAS para cualquier paginación: un
- * horario impreso es un horario impreso. Lo que cambia de una vista a otra es SIETE
+ * horario impreso es un horario impreso. Lo que cambia de una vista a otra es OCHO
  * cosas, ni una más, y son exactamente las que este enum declara: por qué se agrupa, cómo
  * se llama el parámetro, qué dice el título, qué dice la clave de lectura, qué texto lleva
- * una entrada, qué rótulo lleva la línea bajo el título y qué bloques tiene la leyenda.
+ * una entrada, qué rótulo lleva la línea bajo el título, qué bloques tiene la leyenda y si
+ * el catálogo entero tiene página o solo lo que tiene clases.
  * {@link HorarioPdf} pregunta; no sabe cuál es la respuesta.
  *
  * <p><b>Por qué métodos abstractos por constante y no un {@code switch} sobre
@@ -77,17 +78,14 @@ public enum VistaPdf {
         @Override
         public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
                                              Map<String, String> nombresDeProfesor) {
-            Set<String> profesores = new TreeSet<>();
-            for (SesionVistaDTO s : sesiones) {
-                profesores.addAll(s.profesores());
-            }
-            List<String> izquierda = new ArrayList<>(profesores.size());
-            for (String codigo : profesores) {
-                String nombre = nombresDeProfesor.get(codigo);
-                izquierda.add(nombre == null ? codigo : entrada(codigo, nombre));
-            }
-            return List.of(new BloqueLeyenda("Profesores", izquierda),
+            return List.of(bloqueDeProfesores(sesiones, nombresDeProfesor),
                     bloqueDeAsignaturas(sesiones));
+        }
+
+        /** Un grupo sin clases no tiene horario que imprimir. */
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return false;
         }
     },
 
@@ -143,6 +141,92 @@ public enum VistaPdf {
         public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
                                              Map<String, String> nombresDeProfesor) {
             return List.of(bloqueDeAsignaturas(sesiones));
+        }
+
+        /**
+         * Un profesor sin clases no tiene horario que imprimir. En el banco de referencia
+         * no hay ninguno —los 59 dan clase—, pero la regla no depende de ese dato.
+         */
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return false;
+        }
+    },
+
+    /**
+     * Una página por AULA (S150).
+     *
+     * <p><b>Ésta sí imprime el catálogo ENTERO</b>, aulas sin una sola clase incluidas, y
+     * es la única de las tres. No es un capricho de simetría: el horario de aulas se usa
+     * para VER QUÉ ESTÁ LIBRE, y un aula que no aparece no se distingue de un aula que no
+     * existe. El PDF de aulas del centro hace exactamente esto —43 páginas para 43 aulas,
+     * 10 de ellas sin ninguna clase, medido en el M2 sobre
+     * {@code docs/horario-referencia/pdf/Horarios de aulas.pdf}—, así que además es lo que
+     * su gente espera encontrar.
+     *
+     * <p>No lleva línea bajo el título: un aula no tiene tutor ni nada equivalente.
+     */
+    AULA("aula") {
+
+        /**
+         * El aula de la sesión, que es UNA. Si viniera sin código, la sesión no aporta
+         * página en vez de abrir una titulada con un hueco. En la práctica no puede
+         * pasar —{@code sesion.aula_id} es {@code not null} y {@code aula.codigo} es
+         * {@code not null unique} en el esquema, y la proyección lo copia de
+         * {@code sesion.getAula().getCodigo()}—, pero esto es una función pura que recibe
+         * DTOs de quien sea, y una guarda barata es más honesta que una página rota.
+         */
+        @Override
+        public List<String> recursosDe(SesionVistaDTO sesion) {
+            String aula = sesion.aulaCodigo();
+            return aula == null || aula.isBlank() ? List.of() : List.of(aula);
+        }
+
+        /** El código del aula, tal cual. No tiene otro nombre en el catálogo. */
+        @Override
+        public String tituloDe(String recurso, ContextoPdf contexto) {
+            return recurso;
+        }
+
+        @Override
+        public String claveDeLectura() {
+            return "Asignatura - Profesor - Grupo";
+        }
+
+        @Override
+        public String textoDeEntrada(SesionVistaDTO sesion) {
+            return sesion.asignaturaCodigo()
+                    + " " + String.join(SEPARADOR_LISTA, sesion.profesores())
+                    + " " + String.join(SEPARADOR_LISTA, sesion.grupos());
+        }
+
+        /**
+         * VACÍO: esta vista no lleva línea bajo el título. El rótulo no llega a usarse
+         * nunca porque el contexto de aula no trae valores en
+         * {@link ContextoPdf#lineaPorRecurso()}, y {@link HorarioPdf} solo imprime la
+         * línea cuando hay valor. Devolver {@code ""} y no {@code null} deja el contrato
+         * del método sin excepciones: siempre devuelve una cadena.
+         */
+        @Override
+        public String rotuloDeLinea() {
+            return "";
+        }
+
+        /**
+         * Profesores y asignaturas, como en la página de un grupo: en la de un aula
+         * también son códigos que hay que traducir. El grupo no necesita bloque, que es
+         * el mismo criterio que deja fuera al aula en la vista de grupo.
+         */
+        @Override
+        public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
+                                             Map<String, String> nombresDeProfesor) {
+            return List.of(bloqueDeProfesores(sesiones, nombresDeProfesor),
+                    bloqueDeAsignaturas(sesiones));
+        }
+
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return true;
         }
     };
 
@@ -201,6 +285,34 @@ public enum VistaPdf {
     /** Los bloques de la leyenda de una página, con los códigos de ESA página. */
     public abstract List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
                                                   Map<String, String> nombresDeProfesor);
+
+    /**
+     * Si el catálogo ENTERO tiene página, o solo lo que tiene clases.
+     *
+     * <p>Con {@code false}, un recurso del catálogo sin sesiones no se imprime. Con
+     * {@code true}, se imprime su página vacía: hay vistas —la de aula— donde el hueco
+     * ES la información.
+     */
+    public abstract boolean incluyeRecursosSinSesiones();
+
+    /**
+     * El bloque de profesores, que comparten las vistas donde el profesor aparece en la
+     * celda como CÓDIGO y hay que traducirlo. Un código sin nombre en catálogo se queda
+     * solo con su código, sin raya suelta detrás.
+     */
+    static BloqueLeyenda bloqueDeProfesores(List<SesionVistaDTO> sesiones,
+                                            Map<String, String> nombresDeProfesor) {
+        Set<String> profesores = new TreeSet<>();
+        for (SesionVistaDTO s : sesiones) {
+            profesores.addAll(s.profesores());
+        }
+        List<String> lineas = new ArrayList<>(profesores.size());
+        for (String codigo : profesores) {
+            String nombre = nombresDeProfesor.get(codigo);
+            lineas.add(nombre == null ? codigo : entrada(codigo, nombre));
+        }
+        return new BloqueLeyenda("Profesores", lineas);
+    }
 
     /**
      * El bloque de asignaturas, que lo tienen TODAS las vistas: el código que va en la

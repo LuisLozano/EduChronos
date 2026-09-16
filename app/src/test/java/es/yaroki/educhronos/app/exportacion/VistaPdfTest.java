@@ -32,6 +32,11 @@ class VistaPdfTest {
      * un 200 y nadie se enteraría.
      */
     @Test
+    void elParametroAulaDevuelveLaVistaDeAula() {
+        assertThat(VistaPdf.desdeParametro("aula")).contains(VistaPdf.AULA);
+    }
+
+    @Test
     void unParametroDesconocidoNoDevuelveNingunaVista() {
         assertThat(VistaPdf.desdeParametro("trimestre")).isEmpty();
     }
@@ -66,6 +71,44 @@ class VistaPdfTest {
 
         assertThat(VistaPdf.GRUPO.textoDeEntrada(sesion))
                 .isEqualTo("DTec DIB2 Taller 1 Aula Plástica");
+    }
+
+    /**
+     * El orden de la vista de aula es ASIGNATURA, PROFESORES y GRUPOS, que es justo lo que
+     * anuncia su clave de lectura. Con dos de cada uno: así un orden intercambiado no
+     * puede colarse por parecerse.
+     */
+    @Test
+    void laEntradaDeAulaVaEnOrdenAsignaturaProfesoresGrupos() {
+        SesionVistaDTO sesion = sesion("LCL", List.of("LEN2", "LEN8"), "A5",
+                List.of("2ºA", "2ºB"));
+
+        assertThat(VistaPdf.AULA.textoDeEntrada(sesion)).isEqualTo("LCL LEN2/LEN8 2ºA/2ºB");
+    }
+
+    // ------------------------------------------------------------------ recursos y catálogo
+
+    /** Solo la de aula imprime el catálogo entero; las otras dos, lo que tiene clases. */
+    @Test
+    void soloLaVistaDeAulaIncluyeRecursosSinSesiones() {
+        assertThat(VistaPdf.GRUPO.incluyeRecursosSinSesiones()).isFalse();
+        assertThat(VistaPdf.PROFESOR.incluyeRecursosSinSesiones()).isFalse();
+        assertThat(VistaPdf.AULA.incluyeRecursosSinSesiones()).isTrue();
+    }
+
+    /**
+     * Una sesión sin código de aula no aporta página en vez de abrir una titulada con un
+     * hueco. No puede pasar con los datos del esquema, pero ésta es una función pura que
+     * recibe DTOs de quien sea.
+     */
+    @Test
+    void enVistaDeAulaUnaSesionSinAulaNoAportaRecurso() {
+        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), null, List.of("2ºA"))))
+                .isEmpty();
+        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "  ", List.of("2ºA"))))
+                .isEmpty();
+        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "A5", List.of("2ºA"))))
+                .containsExactly("A5");
     }
 
     // ------------------------------------------------------------------ titulo

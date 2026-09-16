@@ -4,6 +4,7 @@ import es.yaroki.educhronos.app.catalog.RolTutoria;
 import es.yaroki.educhronos.app.exportacion.ContextoPdf;
 import es.yaroki.educhronos.app.exportacion.HorarioPdf;
 import es.yaroki.educhronos.app.exportacion.VistaPdf;
+import es.yaroki.educhronos.app.web.dto.AulaDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
@@ -34,6 +35,9 @@ import org.springframework.stereotype.Service;
  *       No se inventa aquí ni se ordena alfabéticamente por cuenta propia: se reutiliza
  *       el mismo orden con el que la aplicación lista los grupos en pantalla, para que el
  *       papel y la UI coincidan.
+ *   <li>{@link AulaService#listar()}: el ORDEN de las páginas de {@link VistaPdf#AULA}, y
+ *       además QUÉ páginas hay: esa vista imprime el catálogo entero, así que este listado
+ *       no solo ordena, decide.
  *   <li>{@link TutoriaService#obtener(Long)}: el tutor de cada grupo, para la línea que
  *       va bajo el título en esa misma vista. Un grupo sin TUTOR_PRINCIPAL no aporta
  *       entrada y su página sale sin esa línea.
@@ -64,17 +68,20 @@ public class ExportacionHorarioService {
     private final JornadaService jornadaService;
     private final ProfesorService profesorService;
     private final GrupoService grupoService;
+    private final AulaService aulaService;
     private final TutoriaService tutoriaService;
 
     public ExportacionHorarioService(GeneradorHorarioService generador,
                                      JornadaService jornadaService,
                                      ProfesorService profesorService,
                                      GrupoService grupoService,
+                                     AulaService aulaService,
                                      TutoriaService tutoriaService) {
         this.generador = generador;
         this.jornadaService = jornadaService;
         this.profesorService = profesorService;
         this.grupoService = grupoService;
+        this.aulaService = aulaService;
         this.tutoriaService = tutoriaService;
     }
 
@@ -112,6 +119,16 @@ public class ExportacionHorarioService {
                     List.copyOf(nombres.keySet()),
                     nombres,
                     gruposTutelados(grupoService.listar()));
+            // Un aula no tiene tutor ni nada que quepa bajo el título, así que el mapa de
+            // líneas va VACÍO: es lo que hace que esas páginas no lleven ninguna. Y el
+            // listado de aulas manda más aquí que en las otras vistas, porque
+            // `AULA.incluyeRecursosSinSesiones()` es true y por tanto decide qué páginas
+            // existen, no solo en qué orden salen.
+            case AULA -> new ContextoPdf(
+                    jornada,
+                    aulaService.listar().stream().map(AulaDTO::codigo).toList(),
+                    nombres,
+                    Map.of());
         };
         return HorarioPdf.escribir(proyeccion, vista, contexto);
     }
