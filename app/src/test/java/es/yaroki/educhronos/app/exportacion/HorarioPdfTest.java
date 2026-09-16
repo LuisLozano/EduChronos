@@ -763,23 +763,69 @@ class HorarioPdfTest {
                 .contains("LCL LEN2/LEN8 2ºA/2ºB");
     }
 
+    /**
+     * Un aula que NO está en el catálogo pero sí en una sesión tiene página, y va AL
+     * FINAL. Es la regla de S149 —callar una página es peor que descolocarla— y sigue
+     * valiendo cuando la vista imprime el catálogo entero: el caso existe porque con el
+     * catálogo completo es tentador quedarse solo con él, y entonces una sesión colocada
+     * en un aula que el catálogo no conoce desaparecería del PDF sin avisar
+     * (superviviente 15 del M3-4).
+     */
+    @Test
+    void enVistaDeAulaUnAulaAusenteDelCatalogoSeImprimeAlFinal() throws IOException {
+        SesionVistaDTO enCatalogo = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
+        SesionVistaDTO fueraDeCatalogo =
+                sesion(1, 2, "LEN", "Lengua", List.of("LEN1"), "Z99", "1ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(fueraDeCatalogo, enCatalogo)),
+                VistaPdf.AULA,
+                contexto(JORNADA, List.of("A5", "B08"), Map.of(), Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        // Las dos del catálogo —B08 sin clases incluida— y la intrusa detrás.
+        assertThat(reader.getNumberOfPages()).isEqualTo(3);
+        assertThat(titulo(reader, 1)).isEqualTo("A5");
+        assertThat(titulo(reader, 2)).isEqualTo("B08");
+        assertThat(titulo(reader, 3)).isEqualTo("Z99");
+        assertThat(texto(reader, 3)).contains("LEN LEN1 1ºA");
+        reader.close();
+    }
+
     // ------------------------------------------------------------------ C9: corte de línea
 
     /**
-     * EL CORTE NO PARTE CÓDIGOS. Es el caso que faltaba en S150/M3-2: allí la regla se
-     * midió con un programa desechable fuera del repo, y sin este test nada impedía que
-     * alguien quitase {@code conCorteDeCodigos} y solo lo notara el papel.
+     * EL CORTE NO PARTE NI CÓDIGOS NI PALABRAS. Es el caso que faltaba en S150/M3-2: allí
+     * la regla se midió con un programa desechable fuera del repo, y sin este test nada
+     * impedía que alguien quitase {@code conCorteDeCodigos} y solo lo notara el papel.
      *
      * <p>La entrada es la más larga del banco real —{@code DIB2} el lunes a primera—, con
      * la maqueta de verdad: columna de {@value HorarioPdf#COL_DIA} pt y cuerpo
-     * {@value HorarioPdf#CUERPO}. Sin la regla, OpenPDF parte por el guion del propio
-     * código y emite {@code "…1B-B/1B-"} / {@code "C/1B-D"}.
+     * {@value HorarioPdf#CUERPO}.
      *
-     * <p>Los dos asertos son distintos a propósito. El primero mira TODAS las líneas y
-     * ninguna puede acabar en guion: eso es el defecto, dicho tal cual. El segundo exige
-     * que {@code 1B-C} esté entero EN UNA LÍNEA, no en la página: un {@code contains}
-     * sobre el texto completo pasaría aunque el código estuviera partido, porque al unir
-     * las líneas volvería a aparecer.
+     * <p><b>Qué cubre, y contra qué defecto va cada aserto.</b>
+     * <ul>
+     *   <li>CORTE POR GUION. Sin la regla, OpenPDF parte por el guion del propio código y
+     *       emite {@code "…1B-B/1B-"} / {@code "C/1B-D"}. Lo caza el aserto de que ninguna
+     *       línea acaba en guion, que es el defecto dicho tal cual, más el de que
+     *       {@code 1B-C} esté entero EN UNA LÍNEA: un {@code contains} sobre el texto
+     *       completo pasaría aunque estuviera partido, porque al unir las líneas vuelve a
+     *       aparecer.
+     *   <li>CORTE A MITAD DE PALABRA. Si la regla dejara de permitir el espacio, no
+     *       quedaría casi ningún punto donde partir y OpenPDF recurre a cortar POR
+     *       CARÁCTER: emite {@code "…Aula Plástic"} / {@code "a 1B-A/…"} —medido en el
+     *       M3-4 de S150 sobre esta misma maqueta—. Ese caso NO acaba ninguna línea en
+     *       guion y deja {@code 1B-C} entero, así que los dos asertos anteriores lo dejan
+     *       pasar. Lo caza el tercero, que exige cada fragmento de la entrada entero
+     *       dentro de alguna línea.
+     * </ul>
+     *
+     * <p><b>Lo que este test NO puede cazar, y por qué no es un hueco.</b> Permitir
+     * partir también tras {@code '-'} —mutante 9 de la campaña del M3-4— no cambia ni una
+     * línea de este documento, y está MEDIDO, no supuesto: el guion candidato
+     * ({@code "…1B-C/1B-"}) cae más allá del ancho útil de la columna, así que el último
+     * punto de corte que cabe sigue siendo la barra de {@code "1B-C/"}. Es un mutante
+     * EQUIVALENTE con este dato; matarlo exigiría un código más corto antes del guion,
+     * que el catálogo de este centro no tiene.
      */
     @Test
     void elCorteDeLineaNoParteUnCodigoPorSuGuion() throws IOException {
@@ -807,6 +853,15 @@ class HorarioPdfTest {
         assertThat(lineas)
                 .as("1B-C entero en UNA línea, no repartido entre dos")
                 .anyMatch(linea -> linea.contains("1B-C"));
+
+        // Ningún fragmento se parte: ni los códigos ni las palabras del nombre de aula.
+        // Se afirma sobre CADA uno y no solo sobre el que hoy falla, porque cuál se rompe
+        // depende de dónde caiga el ancho, y eso cambia con el dato.
+        for (String fragmento : "DTec Taller 1 Aula Plástica 1B-A/1B-B/1B-C/1B-D".split("[ /]")) {
+            assertThat(lineas)
+                    .as("el fragmento %s aparece ENTERO en alguna línea", fragmento)
+                    .anyMatch(linea -> linea.contains(fragmento));
+        }
     }
 
     // ------------------------------------------------------------------ utilidades

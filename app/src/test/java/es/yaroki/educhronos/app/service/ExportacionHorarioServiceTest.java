@@ -222,6 +222,36 @@ class ExportacionHorarioServiceTest {
         assertThat(texto(servicio.pdf(1L, VistaPdf.PROFESOR))).doesNotContain("Tutor de:");
     }
 
+    /**
+     * Un CO_TUTOR NO sale en la línea de tutorías: quien solo co-tutela un grupo no es su
+     * tutor, y anunciarlo como tal en su propio horario es decir algo falso de una persona.
+     *
+     * <p>El grupo tiene CO_TUTOR y NINGÚN principal, y eso es deliberado. La primera
+     * versión de este caso le daba los dos roles con el principal delante —que es como los
+     * ordena {@code TutoriaService.obtener}— y NO mataba al mutante que quita el filtro:
+     * con el principal primero, «filtrar por rol» y «quedarse con el primero» dan el mismo
+     * resultado, así que el aserto no distinguía las dos cosas. Sin principal en la lista
+     * no hay ambigüedad posible: si se quita el filtro, el co-tutor pasa, y el test cae.
+     */
+    @Test
+    void enLaRamaDeProfesorUnCoTutorNoSaleEnLaLineaDeTutorias() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(proyeccion(List.of(
+                sesion(1, 1, "BIO", "Biología", List.of("BYG1"), "A6", "3ºB"))));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of(
+                new ProfesorDTO(7L, "BYG1", "Macías Magro, Sonia")));
+        when(grupoService.listar()).thenReturn(List.of(
+                new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO")));
+        when(tutoriaService.obtener(10L)).thenReturn(List.of(
+                new TutoriaDTO("BYG1", "CO_TUTOR")));
+
+        String pagina = texto(servicio.pdf(1L, VistaPdf.PROFESOR));
+
+        assertThat(pagina).contains("BYG1");
+        assertThat(pagina).doesNotContain("Tutor de:");
+        assertThat(pagina).doesNotContain("3ºB —");
+    }
+
     // ------------------------------------------------------------------ rama AULA
 
     /**
