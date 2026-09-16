@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.exportacion.VistaPdf;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -92,7 +93,7 @@ class HorarioControllerHttpTest {
     @Test
     void getPdf_conIdExistente_devuelve200ConTipoPdfYCabeceraDeDescarga() throws Exception {
         byte[] esperado = {'%', 'P', 'D', 'F', '-', '1', '.', '4'};
-        when(exportacionService.pdfPorGrupo(1L)).thenReturn(esperado);
+        when(exportacionService.pdf(1L, VistaPdf.GRUPO)).thenReturn(esperado);
 
         byte[] cuerpo = mockMvc.perform(get("/api/horarios/1/pdf"))
                 .andExpect(status().isOk())
@@ -107,7 +108,7 @@ class HorarioControllerHttpTest {
     /** {@code vista=grupo} explícito es el mismo caso: el defecto no es una ruta distinta. */
     @Test
     void getPdf_conVistaGrupoExplicita_devuelve200() throws Exception {
-        when(exportacionService.pdfPorGrupo(1L)).thenReturn(new byte[] {'%', 'P', 'D', 'F'});
+        when(exportacionService.pdf(1L, VistaPdf.GRUPO)).thenReturn(new byte[] {'%', 'P', 'D', 'F'});
 
         mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "grupo"))
                 .andExpect(status().isOk());
@@ -129,7 +130,7 @@ class HorarioControllerHttpTest {
 
     @Test
     void getPdf_conIdInexistente_devuelve404() throws Exception {
-        when(exportacionService.pdfPorGrupo(9999L))
+        when(exportacionService.pdf(9999L, VistaPdf.GRUPO))
                 .thenThrow(new IllegalArgumentException("No existe HorarioGenerado con id 9999"));
 
         mockMvc.perform(get("/api/horarios/9999/pdf"))

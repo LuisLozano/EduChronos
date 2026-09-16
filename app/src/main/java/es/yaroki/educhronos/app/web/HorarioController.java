@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.exportacion.HorarioCsv;
 import es.yaroki.educhronos.app.exportacion.HorarioPdf;
+import es.yaroki.educhronos.app.exportacion.VistaPdf;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
@@ -13,6 +14,8 @@ import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,9 +52,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/horarios")
 public class HorarioController {
-
-    /** Única vista soportada hoy por el PDF; profesor y aula son el Cambio siguiente. */
-    private static final String VISTA_GRUPO = "grupo";
 
     private final GeneradorHorarioService service;
     private final DiagnosticoService diagnosticoService;
@@ -168,43 +168,46 @@ public class HorarioController {
     }
 
     /**
-     * Descarga el horario como PDF, una página A4 vertical por grupo (S149,
-     * C-exportacion-pdf-grupo). La composición de las tres fuentes —proyección, jornada
-     * y nombres de profesor— vive en {@link ExportacionHorarioService}; aquí solo se
+     * Descarga el horario como PDF, una página A4 vertical por recurso de la vista
+     * pedida (S149, C-exportacion-pdf-grupo; S150, C-exportacion-pdf-profesor-aula). La
+     * composición de las fuentes —proyección, jornada, nombres de profesor y el catálogo
+     * que ordena las páginas— vive en {@link ExportacionHorarioService}; aquí solo se
      * enruta y se traducen los dos errores de frontera.
      *
-     * <p><b>El parametro {@code vista} se valida ANTES de pedir nada.</b> Hoy solo existe
-     * la vista de grupo; las de profesor y aula son el Cambio siguiente. Un valor
-     * desconocido es un 400 y no un 404: el horario existe, lo que no existe es esa
-     * vista. Rechazarlo antes de proyectar evita además hacer el trabajo caro para
-     * tirarlo después.
+     * <p><b>El parametro {@code vista} se resuelve ANTES de pedir nada.</b> Un valor que
+     * no nombre ninguna {@link VistaPdf} es un 400 y no un 404: el horario existe, lo que
+     * no existe es esa vista. Rechazarlo antes de proyectar evita además hacer el trabajo
+     * caro para tirarlo después. El mensaje lista las vistas DISPONIBLES derivándolas de
+     * {@code VistaPdf.values()}, y no de una enumeración escrita a mano que envejecería
+     * en silencio en cuanto naciera una vista nueva.
      *
      * <p>El 404 sigue el patrón de {@link #csv(Long)}: el {@code try} envuelve solo la
-     * llamada que puede toparse con un id inexistente. {@code pdfPorGrupo} tiene
-     * garantizado por contrato que su única {@code IllegalArgumentException} es la de
-     * {@code proyectar} —{@code HorarioPdf} lanza {@code IllegalStateException} para sus
-     * guardas—, así que envolverla no ensancha la traducción.
+     * llamada que puede toparse con un id inexistente. {@code pdf} tiene garantizado por
+     * contrato que su única {@code IllegalArgumentException} es la de {@code proyectar}
+     * —{@code HorarioPdf} lanza {@code IllegalStateException} para sus guardas—, así que
+     * envolverla no ensancha la traducción.
      */
     @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> pdf(
             @PathVariable("id") Long id,
-            @RequestParam(name = "vista", defaultValue = VISTA_GRUPO) String vista) {
+            @RequestParam(name = "vista", defaultValue = "grupo") String vista) {
 
-        if (!VISTA_GRUPO.equals(vista)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "vista no soportada: '" + vista + "'. La única disponible es '"
-                            + VISTA_GRUPO + "'");
-        }
+        VistaPdf v = VistaPdf.desdeParametro(vista).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "vista no soportada: '" + vista + "'. Las disponibles son: "
+                                + Arrays.stream(VistaPdf.values())
+                                        .map(VistaPdf::parametro)
+                                        .collect(Collectors.joining(", "))));
 
         byte[] pdf;
         try {
-            pdf = exportacionService.pdfPorGrupo(id);
+            pdf = exportacionService.pdf(id, v);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
 
         ContentDisposition adjunto = ContentDisposition.attachment()
-                .filename("horario-" + id + "-" + VISTA_GRUPO + ".pdf")
+                .filename("horario-" + id + "-" + v.parametro() + ".pdf")
                 .build();
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)

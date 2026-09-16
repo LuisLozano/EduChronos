@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.service;
 import es.yaroki.educhronos.app.catalog.RolTutoria;
 import es.yaroki.educhronos.app.exportacion.ContextoPdf;
 import es.yaroki.educhronos.app.exportacion.HorarioPdf;
+import es.yaroki.educhronos.app.exportacion.VistaPdf;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
@@ -14,9 +15,9 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 /**
- * Compone el PDF de horario por grupo (S149, C-exportacion-pdf-grupo). Es el único sitio
- * del Cambio que conoce a la vez las cinco fuentes que la página necesita; {@link HorarioPdf}
- * es una función pura y el controlador solo enruta.
+ * Compone el PDF de horario (S149, C-exportacion-pdf-grupo; generalizado en S150). Es el
+ * único sitio del Cambio que conoce a la vez las fuentes que la página necesita;
+ * {@link HorarioPdf} es una función pura y el controlador solo enruta.
  *
  * <p><b>Las fuentes, y por qué son varias y no una.</b>
  * <ul>
@@ -28,12 +29,13 @@ import org.springframework.stereotype.Service;
  *   <li>{@link ProfesorService#listar()}: los nombres de profesor para la leyenda. La
  *       proyección lleva CÓDIGOS de profesor ({@code Profesor::getCodigo}); el nombre de
  *       catálogo no viaja en ella.
- *   <li>{@link GrupoService#listar()}: el ORDEN de las páginas. No se inventa aquí ni se
- *       ordena alfabéticamente por cuenta propia: se reutiliza el mismo orden con el que
- *       la aplicación lista los grupos en pantalla, para que el papel y la UI coincidan.
+ *   <li>{@link GrupoService#listar()}: el ORDEN de las páginas de {@link VistaPdf#GRUPO}.
+ *       No se inventa aquí ni se ordena alfabéticamente por cuenta propia: se reutiliza
+ *       el mismo orden con el que la aplicación lista los grupos en pantalla, para que el
+ *       papel y la UI coincidan.
  *   <li>{@link TutoriaService#obtener(Long)}: el tutor de cada grupo, para la línea que
- *       va bajo el título. Un grupo sin TUTOR_PRINCIPAL no aporta entrada y su página
- *       sale sin esa línea.
+ *       va bajo el título en esa misma vista. Un grupo sin TUTOR_PRINCIPAL no aporta
+ *       entrada y su página sale sin esa línea.
  * </ul>
  * La ASIGNATURA no se cruza: su {@code nombreCompleto} ya va en la proyección, y pedirlo
  * otra vez sería otro camino más a un dato que ya está servido.
@@ -73,28 +75,38 @@ public class ExportacionHorarioService {
     }
 
     /**
-     * El PDF de un horario, una página A4 por grupo.
+     * El PDF de un horario, una página A4 por recurso de la vista pedida.
+     *
+     * <p>Lo que depende de la vista es el CONTEXTO —qué catálogo da el orden de páginas y
+     * qué dato va en la línea bajo el título—, no la serialización: por eso el reparto es
+     * un {@code switch} sobre la vista que devuelve un {@link ContextoPdf}, y la llamada a
+     * {@link HorarioPdf#escribir} es una sola y común. Una vista nueva añade su rama y no
+     * toca nada de esto.
      *
      * @throws IllegalArgumentException si no existe un horario con ese id (→ 404)
      */
-    public byte[] pdfPorGrupo(Long horarioId) {
+    public byte[] pdf(Long horarioId, VistaPdf vista) {
         HorarioProyeccionDTO proyeccion = generador.proyectar(horarioId);
         JornadaDTO jornada = jornadaService.obtenerJornada();
         Map<String, String> nombres = nombresDeProfesor();
-        List<GrupoDTO> grupos = grupoService.listar();
 
-        ContextoPdf contexto = new ContextoPdf(
-                jornada,
-                grupos.stream().map(GrupoDTO::codigo).toList(),
-                nombres,
-                tutoresPorGrupo(grupos, nombres));
-        return HorarioPdf.escribir(proyeccion, contexto);
+        ContextoPdf contexto = switch (vista) {
+            case GRUPO -> {
+                List<GrupoDTO> grupos = grupoService.listar();
+                yield new ContextoPdf(
+                        jornada,
+                        grupos.stream().map(GrupoDTO::codigo).toList(),
+                        nombres,
+                        tutoresPorGrupo(grupos, nombres));
+            }
+        };
+        return HorarioPdf.escribir(proyeccion, vista, contexto);
     }
 
     /**
-     * Código de grupo → nombre del TUTOR_PRINCIPAL, para la línea de tutor de cada página.
-     * Un grupo SIN tutor principal NO entra en el mapa: su página se imprime sin esa línea,
-     * que es lo que corresponde a un dato ausente.
+     * Código de grupo → nombre del TUTOR_PRINCIPAL, para la línea de tutor de cada página
+     * de {@link VistaPdf#GRUPO}. Un grupo SIN tutor principal NO entra en el mapa: su
+     * página se imprime sin esa línea, que es lo que corresponde a un dato ausente.
      *
      * <p>Se pregunta grupo a grupo por {@code TutoriaService.obtener} en vez de barrer el
      * repositorio de tutorías: son 28 consultas en un endpoint de informe, y a cambio esta

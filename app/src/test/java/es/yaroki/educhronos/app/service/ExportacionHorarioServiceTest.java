@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
+import es.yaroki.educhronos.app.exportacion.VistaPdf;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
@@ -70,7 +71,7 @@ class ExportacionHorarioServiceTest {
         when(tutoriaService.obtener(10L)).thenReturn(
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
 
-        String pagina = texto(servicio.pdfPorGrupo(1L));
+        String pagina = texto(servicio.pdf(1L, VistaPdf.GRUPO));
 
         assertThat(pagina).contains("Tutor: Macías Magro, Sonia");
         assertThat(pagina).doesNotContain("Tutor: MAT1");
@@ -90,7 +91,7 @@ class ExportacionHorarioServiceTest {
         when(tutoriaService.obtener(10L)).thenReturn(
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
 
-        String pagina = texto(servicio.pdfPorGrupo(1L));
+        String pagina = texto(servicio.pdf(1L, VistaPdf.GRUPO));
 
         assertThat(pagina).contains("Tutor: Macías Magro, Sonia");
         assertThat(pagina).contains("MAT1 — Macías Magro, Sonia");
@@ -117,7 +118,7 @@ class ExportacionHorarioServiceTest {
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
         when(tutoriaService.obtener(11L)).thenReturn(List.of());
 
-        byte[] pdf = servicio.pdfPorGrupo(1L);
+        byte[] pdf = servicio.pdf(1L, VistaPdf.GRUPO);
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(reader.getNumberOfPages()).isEqualTo(2);
@@ -144,7 +145,7 @@ class ExportacionHorarioServiceTest {
                 new TutoriaDTO("LEN1", "CO_TUTOR"),
                 new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
 
-        String pagina = texto(servicio.pdfPorGrupo(1L));
+        String pagina = texto(servicio.pdf(1L, VistaPdf.GRUPO));
 
         assertThat(pagina).contains("Tutor: Macías Magro, Sonia");
         assertThat(pagina).doesNotContain("Tutor: Crespo Saborido, Ana María");
@@ -163,7 +164,7 @@ class ExportacionHorarioServiceTest {
         when(profesorService.listar()).thenReturn(List.of());
         when(tutoriaService.obtener(anyLong())).thenReturn(List.of());
 
-        servicio.pdfPorGrupo(1L);
+        servicio.pdf(1L, VistaPdf.GRUPO);
 
         verify(generador).proyectar(1L);
         verifyNoMoreInteractions(generador);

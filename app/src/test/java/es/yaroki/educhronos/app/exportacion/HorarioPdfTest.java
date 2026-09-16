@@ -75,7 +75,7 @@ class HorarioPdfTest {
 
         byte[] pdf = HorarioPdf.escribir(
                 proyeccion(List.of(apareceAntes, apareceDespues)),
-                contexto(JORNADA, List.of("1ºA", "2ºZ"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA", "2ºZ"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(reader.getNumberOfPages()).isEqualTo(2);
@@ -97,7 +97,7 @@ class HorarioPdfTest {
 
         byte[] pdf = HorarioPdf.escribir(
                 proyeccion(List.of(desconocido, conocido)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(reader.getNumberOfPages()).isEqualTo(2);
@@ -114,7 +114,7 @@ class HorarioPdfTest {
                 List.of(), List.of("1ºA", "1ºB"), "EF-1", "EF-1-P1");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(compartida)),
-                contexto(JORNADA, List.of("1ºA", "1ºB"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA", "1ºB"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(reader.getNumberOfPages()).isEqualTo(2);
@@ -134,7 +134,7 @@ class HorarioPdfTest {
         SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(),
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(),
                         Map.of("1ºA", "Macías Magro, Sonia")));
 
         PdfReader reader = new PdfReader(pdf);
@@ -153,7 +153,7 @@ class HorarioPdfTest {
         SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(texto(reader, 1)).doesNotContain("Tutor");
@@ -171,7 +171,7 @@ class HorarioPdfTest {
         SesionVistaDTO otro = sesion(1, 2, "LEN", "Lengua", List.of("LEN1"), "A5", "1ºB");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(uno, otro)),
-                contexto(JORNADA, List.of("1ºA", "1ºB"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA", "1ºB"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         assertThat(texto(reader, 1)).contains("Asignatura - Profesor - Aula");
@@ -195,7 +195,7 @@ class HorarioPdfTest {
                 2, 1, "LCL", "Lengua Castellana", List.of("LEN2", "LEN8"), "A5", "4ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(conAulaLarga, coDocencia)),
-                contexto(JORNADA, List.of("4ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("4ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         // Se afirma sobre el texto con los espacios NORMALIZADOS porque la entrada larga
@@ -225,7 +225,7 @@ class HorarioPdfTest {
         }
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(seis),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String pagina = texto(reader, 1);
@@ -253,7 +253,7 @@ class HorarioPdfTest {
         SesionVistaDTO otra = sesion(1, 1, "LEN", "Lengua", List.of("LEN1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(una, otra)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String flujo = flujoDePagina(reader, 1);
@@ -272,7 +272,7 @@ class HorarioPdfTest {
         SesionVistaDTO sola = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sola)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String flujo = flujoDePagina(reader, 1);
@@ -302,7 +302,7 @@ class HorarioPdfTest {
         SesionVistaDTO corta = sesion(1, 1, "LEN", "Lengua", List.of("LEN1"), "A6", "4ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(larga, media, corta)),
-                contexto(JORNADA, List.of("4ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("4ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         float unaLinea = HorarioPdf.CUERPO * HorarioPdf.INTERLINEADO + 1f;
@@ -332,7 +332,7 @@ class HorarioPdfTest {
         SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         List<Float> filas = filasDeLaColumnaDeHoras(reader, 1);
@@ -365,7 +365,7 @@ class HorarioPdfTest {
                 sesion(1, 1, "ING", "Inglés", List.of("ING1"), "A7", "1ºA"));
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(tres),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String flujo = flujoDePagina(reader, 1);
@@ -408,7 +408,7 @@ class HorarioPdfTest {
 
         byte[] pdf = HorarioPdf.escribir(
                 proyeccion(List.of(sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA"))),
-                contexto(otraJornada, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(otraJornada, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String pagina = texto(reader, 1);
@@ -424,6 +424,7 @@ class HorarioPdfTest {
     void jornadaSinTramosAbortaConIllegalState() {
         assertThatThrownBy(() -> HorarioPdf.escribir(
                 proyeccion(List.of(sesion(1, 1, "MAT", "Mates", List.of("M1"), "A5", "1ºA"))),
+                VistaPdf.GRUPO,
                 contexto(new JornadaDTO(true, List.of()), List.of("1ºA"), Map.of(), Map.of())))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("no tiene tramos");
@@ -446,7 +447,7 @@ class HorarioPdfTest {
                 "LEN1", "Crespo Saborido, Ana María");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(enPrimera, enSegunda)),
-                contexto(JORNADA, List.of("1ºA", "1ºB"), nombres, Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA", "1ºB"), nombres, Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String primera = texto(reader, 1);
@@ -483,7 +484,7 @@ class HorarioPdfTest {
                 "MAT1", "Uno Uno", "MAT2", "Dos Dos", "MAT3", "Tres Tres");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(conTres)),
-                contexto(JORNADA, List.of("1ºA"), nombres, Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), nombres, Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
 
@@ -522,7 +523,7 @@ class HorarioPdfTest {
         SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT9"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         String pagina = texto(reader, 1);
@@ -544,7 +545,7 @@ class HorarioPdfTest {
         SesionVistaDTO sesion = sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
-                contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
 
         PdfReader reader = new PdfReader(pdf);
         List<PdfDictionary> descriptores = descriptoresDeFuente(reader);
