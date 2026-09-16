@@ -170,6 +170,56 @@ class ExportacionHorarioServiceTest {
         verifyNoMoreInteractions(generador);
     }
 
+    // ------------------------------------------------------------------ rama PROFESOR
+
+    /**
+     * La rama de profesor compone SUS tres piezas: el orden de páginas sale del listado de
+     * profesores, el título trae el nombre de catálogo y la línea junta los grupos que esa
+     * persona tutela.
+     *
+     * <p>El caso da a {@code BYG2} DOS tutorías —{@code 3ºB} y {@code 3ºBDi}, que es el
+     * caso real del banco— para fijar la inversión del mapa: la vista de grupo va de grupo
+     * a tutor, y ésta de tutor a grupos, y un profesor con dos es donde esa inversión se
+     * puede escribir mal sin que se note con uno.
+     */
+    @Test
+    void laRamaDeProfesorComponeOrdenNombresYSusTutorias() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(proyeccion(List.of(
+                sesion(1, 1, "BIO", "Biología", List.of("BYG2"), "A6", "3ºB"))));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of(
+                new ProfesorDTO(7L, "BYG2", "Afán Herencia, María Trinidad")));
+        when(grupoService.listar()).thenReturn(List.of(
+                new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO"),
+                new GrupoDTO(11L, "3ºBDi", "ESO3", "DIVERSIFICACION_PDC")));
+        when(tutoriaService.obtener(10L)).thenReturn(List.of(new TutoriaDTO("BYG2", "TUTOR_PRINCIPAL")));
+        when(tutoriaService.obtener(11L)).thenReturn(List.of(new TutoriaDTO("BYG2", "TUTOR_PRINCIPAL")));
+
+        String pagina = texto(servicio.pdf(1L, VistaPdf.PROFESOR));
+
+        assertThat(pagina).contains("BYG2 — Afán Herencia, María Trinidad");
+        assertThat(pagina).contains("Tutor de: 3ºB, 3ºBDi");
+        assertThat(pagina).contains("Asignatura - Aula - Grupo");
+    }
+
+    /**
+     * Un profesor SIN tutoría no entra en el mapa de líneas y su página sale sin ella,
+     * igual que un grupo sin tutor en la otra vista.
+     */
+    @Test
+    void enLaRamaDeProfesorQuienNoTutelaNadaNoLlevaLinea() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(proyeccion(List.of(
+                sesion(1, 1, "BIO", "Biología", List.of("BYG1"), "A6", "3ºB"))));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of(
+                new ProfesorDTO(7L, "BYG1", "Crespo Saborido, Ana María")));
+        when(grupoService.listar()).thenReturn(List.of(
+                new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO")));
+        when(tutoriaService.obtener(10L)).thenReturn(List.of());
+
+        assertThat(texto(servicio.pdf(1L, VistaPdf.PROFESOR))).doesNotContain("Tutor de:");
+    }
+
     // ------------------------------------------------------------------ utilidades
 
     /** Cablea el caso mínimo de un solo grupo con una clase. */

@@ -115,17 +115,37 @@ class HorarioControllerHttpTest {
     }
 
     /**
-     * Una vista que aún no existe es 400 y NO 404: el horario está, lo que falta es la
-     * vista. Se usa {@code profesor}, que es el Cambio siguiente y por tanto el valor que
-     * de verdad va a teclear alguien antes de tiempo.
+     * Una vista que no existe es 400 y NO 404: el horario está, lo que falta es la vista.
+     * El valor era {@code profesor} hasta S150, cuando esa vista pasó a existir; ahora es
+     * uno que no nombra nada, que es lo que este test siempre quiso decir.
      */
     @Test
     void getPdf_conVistaDesconocida_devuelve400YNoLlegaAProyectar() throws Exception {
-        mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "profesor"))
+        mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "trimestre"))
                 .andExpect(status().isBadRequest());
 
         // El rechazo es ANTES de trabajar: el servicio no llega a ser llamado.
         verifyNoInteractions(exportacionService);
+    }
+
+    /**
+     * La vista de profesor enruta a su propia llamada y se lleva su nombre al fichero: un
+     * controlador que ignorase el parámetro daría un 200 con el PDF de grupo dentro y un
+     * nombre que además lo desmentiría.
+     */
+    @Test
+    void getPdf_conVistaProfesor_devuelve200YFilenameDeProfesor() throws Exception {
+        byte[] esperado = {'%', 'P', 'D', 'F', '-', 'p'};
+        when(exportacionService.pdf(1L, VistaPdf.PROFESOR)).thenReturn(esperado);
+
+        byte[] cuerpo = mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "profesor"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "application/pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=\"horario-1-profesor.pdf\""))
+                .andReturn().getResponse().getContentAsByteArray();
+
+        assertThat(cuerpo).isEqualTo(esperado);
     }
 
     @Test

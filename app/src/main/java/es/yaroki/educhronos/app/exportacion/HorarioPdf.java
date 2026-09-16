@@ -5,8 +5,10 @@ import com.lowagie.text.Element;
 import com.lowagie.text.Font;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
+import com.lowagie.text.Chunk;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
+import com.lowagie.text.SplitCharacter;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
@@ -139,6 +141,39 @@ public final class HorarioPdf {
      */
     private static final String[] DIAS = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
 
+    /**
+     * La barra con la que las vistas unen una lista DENTRO del texto de una entrada. Se
+     * toma de {@link VistaPdf#SEPARADOR_LISTA} y no se reescribe aquí: si aquel cambiara,
+     * el corte de línea tiene que seguirle, no quedarse partiendo por un carácter que ya
+     * no separa nada.
+     */
+    private static final char BARRA = VistaPdf.SEPARADOR_LISTA.charAt(0);
+
+    /**
+     * DÓNDE se puede partir una entrada que no cabe a lo ancho: solo DESPUÉS de un
+     * espacio o de una {@value #BARRA}. Nunca dentro de un código.
+     *
+     * <p>Lo que corrige, medido en el M3-2 de S150 sobre las entradas reales del banco y
+     * con la construcción de celda de esta clase: el corte por defecto de OpenPDF parte
+     * donde le cabe, y en la vista de profesor eso producía
+     * {@code "…1B-A/1B-B/1B-"} / {@code "C/1B-D"} —el grupo {@code 1B-C} roto en dos
+     * líneas— y {@code "…4ºD/4"} / {@code "ºDDi EFI1"}, con {@code 4ºDDi} partido tras su
+     * primer carácter. Un código partido no es un código: quien lee el papel no puede
+     * saber si {@code "1B-"} es un grupo o el principio de otro.
+     *
+     * <p>El guion NO entra en la lista a propósito, y es justo el carácter que causaba el
+     * primer caso: {@code 1B-C} lo lleva dentro. Partir tras un guion es legítimo en prosa
+     * y es exactamente lo que aquí hay que impedir.
+     *
+     * <p><b>Esto no mueve la vista de grupo.</b> Medido antes de escribirlo sobre las 311
+     * entradas distintas que esa vista produce en el banco: ninguna se parte en un sitio
+     * distinto con esta regla que sin ella. Y ningún trozo indivisible desborda la
+     * columna —el más ancho es {@code "Laboratorio "}, 43,53 pt sobre los 92,20 pt de
+     * hueco útil—, así que la regla nunca deja una entrada sin sitio donde partir.
+     */
+    private static final SplitCharacter CORTE_QUE_NO_PARTE_CODIGOS =
+            (start, current, end, cc, ck) -> cc[current] == ' ' || cc[current] == BARRA;
+
     private HorarioPdf() {
     }
 
@@ -183,7 +218,7 @@ public final class HorarioPdf {
                     .filter(s -> vista.recursosDe(s).contains(recurso))
                     .toList();
 
-            doc.add(titulo(recurso, fTitulo));
+            doc.add(titulo(vista.tituloDe(recurso, contexto), fTitulo));
             String linea = contexto.lineaPorRecurso().get(recurso);
             if (linea != null && !linea.isBlank()) {
                 doc.add(lineaSuelta(vista.rotuloDeLinea() + linea, fCuerpo));
@@ -262,8 +297,8 @@ public final class HorarioPdf {
 
     // ------------------------------------------------------------------ página
 
-    private static Paragraph titulo(String recurso, Font fTitulo) {
-        Paragraph p = new Paragraph(recurso, fTitulo);
+    private static Paragraph titulo(String texto, Font fTitulo) {
+        Paragraph p = new Paragraph(texto, fTitulo);
         p.setLeading(TITULO * INTERLINEADO);
         return p;
     }
@@ -370,7 +405,8 @@ public final class HorarioPdf {
         PdfPTable bandas = new PdfPTable(1);
         bandas.setWidthPercentage(100f);
         for (int i = 0; i < entradas.size(); i++) {
-            PdfPCell banda = new PdfPCell(new Phrase(entradas.get(i), fCuerpo));
+            PdfPCell banda = new PdfPCell(
+                    conCorteDeCodigos(new Phrase(entradas.get(i), fCuerpo)));
             banda.setBorder(Rectangle.NO_BORDER);
             banda.setPaddingLeft(PADDING);
             banda.setPaddingRight(PADDING);
@@ -431,7 +467,20 @@ public final class HorarioPdf {
     private static Paragraph parrafo(String texto, Font fuente) {
         Paragraph p = new Paragraph(texto, fuente);
         p.setLeading(CUERPO * INTERLINEADO);
-        return p;
+        return conCorteDeCodigos(p);
+    }
+
+    /**
+     * Le pone a los trozos de una frase la regla de corte
+     * {@link #CORTE_QUE_NO_PARTE_CODIGOS}. Se hace sobre la frase YA construida, y no
+     * montando los {@link Chunk} a mano, para no cambiar de paso cómo se arma el texto:
+     * lo único que se añade es dónde puede romperse.
+     */
+    private static <T extends Phrase> T conCorteDeCodigos(T frase) {
+        for (Element trozo : frase.getChunks()) {
+            ((Chunk) trozo).setSplitCharacter(CORTE_QUE_NO_PARTE_CODIGOS);
+        }
+        return frase;
     }
 
     private static PdfPCell celdaTexto(String texto, Font fuente, int alineacion) {

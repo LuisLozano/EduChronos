@@ -9,6 +9,7 @@ import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.TutoriaDTO;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExportacionHorarioService {
 
+    /** Separa los grupos de un tutor en su línea. Va con espacio: es una enumeración leída. */
+    private static final String SEPARADOR_GRUPOS = ", ";
+
     private final GeneradorHorarioService generador;
     private final JornadaService jornadaService;
     private final ProfesorService profesorService;
@@ -99,8 +103,52 @@ public class ExportacionHorarioService {
                         nombres,
                         tutoresPorGrupo(grupos, nombres));
             }
+            // El orden de páginas sale de las CLAVES de `nombres`, que no es un atajo: ese
+            // mapa se llena recorriendo `profesorService.listar()` —ordenado por código— y
+            // es un LinkedHashMap, así que conserva ese orden. Volver a pedir el listado
+            // solo para quedarse con los códigos sería preguntar dos veces lo mismo.
+            case PROFESOR -> new ContextoPdf(
+                    jornada,
+                    List.copyOf(nombres.keySet()),
+                    nombres,
+                    gruposTutelados(grupoService.listar()));
         };
         return HorarioPdf.escribir(proyeccion, vista, contexto);
+    }
+
+    /**
+     * Código de profesor → los grupos que TUTELA, unidos por {@value #SEPARADOR_GRUPOS},
+     * para la línea que va bajo el título en {@link VistaPdf#PROFESOR}.
+     *
+     * <p>Es el REVERSO de {@link #tutoresPorGrupo}: la misma fuente —{@code TutoriaService}
+     * y el mismo rol TUTOR_PRINCIPAL— leída al revés. Se invierte aquí y no se pide de otra
+     * manera porque una segunda vía a las tutorías podría discrepar de la primera, y dos
+     * páginas del mismo PDF dirían cosas distintas del mismo hecho.
+     *
+     * <p>El orden de los grupos de un profesor es el de {@code GrupoService.listar()},
+     * heredado del recorrido: el mismo orden con el que salen las páginas de la vista de
+     * grupo, y no el azar de un mapa. Un profesor SIN tutoría no entra en el mapa y su
+     * página se imprime sin esa línea, igual que un grupo sin tutor en la vista de grupo.
+     *
+     * <p>El {@code TutoriaDTO} trae el CÓDIGO del profesor ({@code TutoriaDTO#profesor()}),
+     * que es justo la clave que la vista de profesor usa como recurso de página: no hace
+     * falta resolver ningún id.
+     */
+    private Map<String, String> gruposTutelados(List<GrupoDTO> grupos) {
+        Map<String, List<String>> porProfesor = new LinkedHashMap<>();
+        for (GrupoDTO grupo : grupos) {
+            for (TutoriaDTO tutoria : tutoriaService.obtener(grupo.id())) {
+                if (RolTutoria.TUTOR_PRINCIPAL.name().equals(tutoria.rol())) {
+                    porProfesor.computeIfAbsent(tutoria.profesor(), c -> new ArrayList<>())
+                            .add(grupo.codigo());
+                    break;
+                }
+            }
+        }
+        Map<String, String> lineas = new LinkedHashMap<>();
+        porProfesor.forEach((codigo, suyos) ->
+                lineas.put(codigo, String.join(SEPARADOR_GRUPOS, suyos)));
+        return lineas;
     }
 
     /**

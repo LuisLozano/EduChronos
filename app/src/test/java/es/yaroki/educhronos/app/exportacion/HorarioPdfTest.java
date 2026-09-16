@@ -555,6 +555,109 @@ class HorarioPdfTest {
         reader.close();
     }
 
+    // ------------------------------------------------------------------ C7: vista de PROFESOR
+
+    /**
+     * Una página por profesor, en el ORDEN DEL CONTEXTO. Mismo enfrentamiento que el caso
+     * de grupo: la proyección presenta a {@code DIB2} primero —su sesión es la del lunes a
+     * primera— y el catálogo dice {@code BYG1} primero.
+     */
+    @Test
+    void enVistaDeProfesorHayUnaPaginaPorProfesorEnElOrdenDelContexto() throws IOException {
+        SesionVistaDTO deDib = sesion(1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "A5", "1B-A");
+        SesionVistaDTO deByg = sesion(2, 1, "BIO", "Biología", List.of("BYG1"), "A6", "3ºB");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(deDib, deByg)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("BYG1", "DIB2"), Map.of(), Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        assertThat(reader.getNumberOfPages()).isEqualTo(2);
+        assertThat(titulo(reader, 1)).isEqualTo("BYG1");
+        assertThat(titulo(reader, 2)).isEqualTo("DIB2");
+    }
+
+    /**
+     * Una co-docencia sale ENTERA en las dos páginas. Es el reverso del caso de la plaza
+     * de dos grupos: las dos personas dan esa clase, y callársela a una sería mentir sobre
+     * su horario.
+     */
+    @Test
+    void enVistaDeProfesorUnaCoDocenciaApareceEnLasDosPaginas() throws IOException {
+        SesionVistaDTO compartida = sesion(1, 1, "LCL", "Lengua", List.of("LEN2", "LEN8"),
+                "A5", "2ºA");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(compartida)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("LEN2", "LEN8"), Map.of(), Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        assertThat(reader.getNumberOfPages()).isEqualTo(2);
+        assertThat(normalizado(texto(reader, 1))).contains("LCL A5 2ºA");
+        assertThat(normalizado(texto(reader, 2))).contains("LCL A5 2ºA");
+    }
+
+    /**
+     * La página de un profesor NO lleva el bloque de profesores de la leyenda, y su clave
+     * de lectura es la suya. Se afirman las dos cosas juntas porque las dos dicen lo mismo:
+     * esta página no es la de grupo con otro título.
+     */
+    @Test
+    void laPaginaDeProfesorNoLlevaEncabezadoDeProfesoresYTraeSuClaveDeLectura()
+            throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "A5", "1B-A");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("DIB2"), Map.of("DIB2", "Ramírez Soto, Ana"), Map.of()));
+
+        String pagina = texto(new PdfReader(pdf), 1);
+        assertThat(pagina).contains("Asignaturas");
+        assertThat(pagina).doesNotContain("Profesores");
+        assertThat(pagina).contains("Asignatura - Aula - Grupo");
+        assertThat(pagina).doesNotContain("Asignatura - Profesor - Aula");
+    }
+
+    /** El título de la página es el código Y el nombre, con la raya en medio. */
+    @Test
+    void enVistaDeProfesorElTituloLlevaCodigoYNombre() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "A5", "1B-A");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("DIB2"), Map.of("DIB2", "Ramírez Soto, Ana"), Map.of()));
+
+        assertThat(titulo(new PdfReader(pdf), 1)).isEqualTo("DIB2 — Ramírez Soto, Ana");
+    }
+
+    /**
+     * La línea de tutorías lleva los DOS grupos que el contexto trae, con su rótulo. El
+     * aserto incluye el rótulo a propósito: un {@code "Tutor de: "} vacío pasaría uno que
+     * solo mirase los grupos.
+     */
+    @Test
+    void enVistaDeProfesorLaLineaDeTutoriasLlevaSusDosGrupos() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "BIO", "Biología", List.of("BYG2"), "A6", "3ºB");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("BYG2"), Map.of(), Map.of("BYG2", "3ºB, 3ºBDi")));
+
+        assertThat(normalizado(texto(new PdfReader(pdf), 1))).contains("Tutor de: 3ºB, 3ºBDi");
+    }
+
+    /** Un profesor sin tutoría no lleva ni el rótulo: lo que no tiene fuente se calla. */
+    @Test
+    void enVistaDeProfesorSinTutoriaNoHayNiRotulo() throws IOException {
+        SesionVistaDTO sesion = sesion(1, 1, "BIO", "Biología", List.of("BYG2"), "A6", "3ºB");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(sesion)),
+                VistaPdf.PROFESOR,
+                contexto(JORNADA, List.of("BYG2"), Map.of(), Map.of()));
+
+        assertThat(texto(new PdfReader(pdf), 1)).doesNotContain("Tutor de:");
+    }
+
     // ------------------------------------------------------------------ utilidades
 
     private static String texto(PdfReader reader, int pagina) throws IOException {

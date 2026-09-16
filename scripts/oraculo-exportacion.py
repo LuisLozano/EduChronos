@@ -25,9 +25,16 @@ leen con `pdftotext`, NUNCA del flujo de contenido: con IDENTITY_H el texto va c
 identificadores de glifo y ahí no hay nada legible; `pdftotext` los traduce con el
 ToUnicode de la fuente empotrada, que es justo lo que ve quien abre el fichero.
 
+Desde S150 el modo pdf verifica ADEMÁS la vista de profesor, con `--vista profesor`. Las
+vistas SQL no cambian —`v_grupo` y `v_profesor` ya existían desde S148—: lo que cambia es
+de cuál se cuelgan las entradas y con qué orden se compone su texto, que es el del centro
+(«asignatura, aula, grupo» en la página de un profesor). El guion sigue SIN IMPORTAR NADA
+del exportador: si leyera `VistaPdf` para saber qué texto esperar, un error compartido por
+las dos vías pasaría desapercibido, que es justo lo que este oráculo existe para impedir.
+
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
-  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf>
+  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor]
 """
 import argparse
 import collections
@@ -202,8 +209,27 @@ def comparar(nombre, del_oraculo, del_csv):
 
 # --------------------------------------------------------------------------- PDF (S149)
 
+# Lo que cada vista cambia de la página. Se escribe aquí, a mano y a propósito: es la
+# expectativa CONTRA la que se coteja, y derivarla del exportador la volvería tautológica.
+VISTAS = {
+    "grupo": {
+        "sql": "v_grupo",
+        "clave_de_lectura": "Asignatura - Profesor - Aula",
+        # De la fila de `v_*` unida a la sesión: qué campos y en qué orden se concatenan.
+        "orden": ("asignatura", "profesores", "aula"),
+        "recurso": "grupo",
+        "recursos": "grupos",
+    },
+    "profesor": {
+        "sql": "v_profesor",
+        "clave_de_lectura": "Asignatura - Aula - Grupo",
+        "orden": ("asignatura", "aula", "grupos"),
+        "recurso": "profesor",
+        "recursos": "profesores",
+    },
+}
+
 # Rótulos fijos de la página que NO son entradas de rejilla. Ver `entradas_de_pagina`.
-CLAVE_DE_LECTURA = "Asignatura - Profesor - Aula"
 ENCABEZADO_LEYENDA = "Profesores"
 DIAS_CABECERA = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
 RANGO_HORARIO = re.compile(r"\d{2}:\d{2}-\d{2}:\d{2}")
@@ -214,33 +240,43 @@ X_PRIMERA_COLUMNA = 86.0
 ANCHO_COLUMNA = 96.2
 
 
-def entradas_esperadas(ruta_db, horario_id):
-    """Entradas de rejilla que la BD exige, por código de grupo.
+def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
+    """Entradas de rejilla que la BD exige, por código de RECURSO de la vista.
 
-    Reutiliza SQL_VISTAS: `v_grupo` ya dice qué grupo ve qué sesión, y de ahí se cuelgan
-    asignatura, profesores y aula para componer el texto tal como la maqueta lo imprime,
-    `<asignatura> <profesores unidos por /> <aula>`. Devuelve un Counter por grupo: la
-    MULTIPLICIDAD importa, porque la misma clase puede repetirse en la semana.
+    Reutiliza SQL_VISTAS: `v_grupo` y `v_profesor` ya dicen qué recurso ve qué sesión, y de
+    ahí se cuelgan asignatura, profesores, aula y grupos. El TEXTO se compone con el orden
+    que esa vista imprime —«asignatura, profesor, aula» en la de grupo; «asignatura, aula,
+    grupo» en la de profesor—, que es el de los horarios del centro. Devuelve un Counter
+    por recurso: la MULTIPLICIDAD importa, porque la misma clase puede repetirse en la
+    semana.
     """
+    conf = VISTAS[vista]
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
     try:
         con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
-        por_grupo = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
-        for grupo, dia, tramo, asignatura, profesores, aula in con.execute("""
-                select g.grupo, g.dia, g.tramo, a.codigo,
+        por_recurso = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
+        for recurso, dia, tramo, asignatura, profesores, aula, grupos in con.execute("""
+                select v.%s, v.dia, v.tramo, a.codigo,
                        (select group_concat(p.codigo, '/') from (
                             select p2.codigo from plaza_profesor pp
                               join profesor p2 on p2.id = pp.profesor_id
                              where pp.plaza_id = s.plaza_id order by p2.codigo) p),
-                       au.codigo
-                from v_grupo g
-                join v_sesion s on s.sesion_id = g.sesion_id
+                       au.codigo,
+                       (select group_concat(g.codigo, '/') from (
+                            select distinct g2.codigo from plaza_subgrupo ps
+                              join subgrupo_grupo sg on sg.subgrupo_id = ps.subgrupo_id
+                              join grupo_administrativo g2 on g2.id = sg.grupo_id
+                             where ps.plaza_id = s.plaza_id order by g2.codigo) g)
+                from %s v
+                join v_sesion s on s.sesion_id = v.sesion_id
                 join plaza pl on pl.id = s.plaza_id
                 join asignatura a on a.id = pl.asignatura_id
-                join aula au on au.id = s.aula_id"""):
-            por_grupo[grupo][(dia, tramo)][
-                "%s %s %s" % (asignatura, profesores or "", aula)] += 1
-        return por_grupo
+                join aula au on au.id = s.aula_id""" % (conf["recurso"], conf["sql"])):
+            campos = {"asignatura": asignatura, "profesores": profesores or "",
+                      "aula": aula, "grupos": grupos or ""}
+            texto = " ".join(campos[c] for c in conf["orden"])
+            por_recurso[recurso][(dia, tramo)][texto] += 1
+        return por_recurso
     finally:
         con.close()
 
@@ -338,9 +374,29 @@ def celdas_de_pagina(ruta_pdf, pagina):
         if fila == fila_recreo:
             continue
         tramo = fila + 1 if (fila_recreo is None or fila < fila_recreo) else fila
-        texto = " ".join(t for _, _, t in sorted(ws))
-        celdas[(dia, tramo)] = re.sub(r"\s+", " ", texto).strip()
+        texto = unir([t for _, _, t in sorted(ws)])
+        celdas[(dia, tramo)] = re.sub(r"[^\S\n]+", " ", texto).strip()
     return celdas
+
+
+def unir(palabras):
+    """Rehace el texto de una celda a partir de las palabras que `pdftotext` devuelve.
+
+    Normalmente se unen con un espacio, PERO no cuando la anterior acaba en `/`: ahí el
+    espacio no existe en el dato, lo pone el SALTO DE LÍNEA de la maqueta. Desde S150 el
+    exportador solo parte una entrada tras un espacio o tras esa barra, así que una lista
+    larga se corta como `1B-A/1B-B/1B-C/` + `1B-D`, y unirla a ciegas daría
+    `1B-C/ 1B-D`, que no casa con nada y se reportaría como una entrada que falta.
+
+    El guion NO recibe este trato: un `1B-` al final de línea sería un código partido, y
+    pegarle lo siguiente escondería justo el defecto que el corte nuevo evita.
+    """
+    texto = ""
+    for palabra in palabras:
+        if texto and not texto.endswith("/"):
+            texto += " "
+        texto += palabra
+    return texto
 
 
 def cotejar_celdas(celdas, esperadas_por_celda):
@@ -373,33 +429,40 @@ def cotejar_celdas(celdas, esperadas_por_celda):
     return halladas, faltan, sobra
 
 
-def verificar_pdf(ruta_db, horario_id, ruta_pdf):
-    """Coteja el PDF entero contra la vista de grupo. Devuelve True si cuadra."""
-    esperadas = entradas_esperadas(ruta_db, horario_id)
+def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
+    """Coteja el PDF entero contra la vista pedida. Devuelve True si cuadra."""
+    conf = VISTAS[vista]
+    uno, varios = conf["recurso"], conf["recursos"]
+    esperadas = entradas_esperadas(ruta_db, horario_id, vista)
     paginas = paginas_de(ruta_pdf)
 
-    print("--- ORÁCULO PDF (horario %s) ---" % horario_id)
-    print("  grupos con clases en la BD ... %d" % len(esperadas))
+    print("--- ORÁCULO PDF (horario %s, vista %s) ---" % (horario_id, vista))
+    print("  %s con clases en la BD %s %d" % (varios, "." * (22 - len(varios)), len(esperadas)))
     print("  entradas que exige la BD ..... %d"
           % sum(sum(c.values()) for g in esperadas.values() for c in g.values()))
     print("  páginas del PDF .............. %d" % paginas)
 
     if paginas != len(esperadas):
-        print("  FALLO: %d páginas para %d grupos con clases" % (paginas, len(esperadas)))
+        print("  FALLO: %d páginas para %d %s con clases" % (paginas, len(esperadas), varios))
 
     vistos, total_faltan, total_sobran, total_halladas = set(), 0, 0, 0
     for pagina in range(1, paginas + 1):
         cabecera = [l.strip() for l in texto_de_pagina(ruta_pdf, pagina).splitlines()
                     if l.strip()]
-        grupo = cabecera[0] if cabecera else "(vacía)"
-        vistos.add(grupo)
-        if grupo not in esperadas:
-            print("  pág %2d: FALLO, el grupo %r no tiene clases en la BD" % (pagina, grupo))
+        titulo = cabecera[0] if cabecera else "(vacía)"
+        # El título de una página puede llevar el nombre detrás del código («DIB2 — Ramírez
+        # Soto, Ana»): el recurso es lo que va ANTES de la raya. Se parte por la raya y no
+        # por el espacio porque hay códigos con espacios dentro.
+        recurso = titulo.split(" — ", 1)[0].strip()
+        vistos.add(recurso)
+        if recurso not in esperadas:
+            print("  pág %2d: FALLO, el %s %r no tiene clases en la BD"
+                  % (pagina, uno, recurso))
             total_sobran += 1
             continue
         halladas, faltan, sobra = cotejar_celdas(
-            celdas_de_pagina(ruta_pdf, pagina), esperadas[grupo])
-        exige = sum(sum(c.values()) for c in esperadas[grupo].values())
+            celdas_de_pagina(ruta_pdf, pagina), esperadas[recurso])
+        exige = sum(sum(c.values()) for c in esperadas[recurso].values())
         n_faltan = sum(faltan.values())
         n_sobran = len(sobra)
         total_halladas += halladas
@@ -407,7 +470,7 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf):
         total_sobran += n_sobran
         marca = "" if not (n_faltan or n_sobran) else "   <<< DESCUADRE"
         print("  pág %2d  %-7s  exige %3d  halla %3d  faltan %d  sobran %d%s"
-              % (pagina, grupo, exige, halladas, n_faltan, n_sobran, marca))
+              % (pagina, recurso, exige, halladas, n_faltan, n_sobran, marca))
         for entrada, cuantas in sorted(faltan.items()):
             print("        FALTA x%d: %s" % (cuantas, entrada))
         for celda in sobra:
@@ -415,7 +478,7 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf):
 
     sin_pagina = sorted(set(esperadas) - vistos)
     if sin_pagina:
-        print("  FALLO: grupos con clases y SIN página: %s" % ", ".join(sin_pagina))
+        print("  FALLO: %s con clases y SIN página: %s" % (varios, ", ".join(sin_pagina)))
 
     print("  TOTAL: halladas %d, FALTAN %d, SOBRAN %d"
           % (total_halladas, total_faltan, total_sobran))
@@ -448,11 +511,14 @@ def main():
     parser.add_argument("db", help="copia de la BD (se abre en modo ro)")
     parser.add_argument("horario_id", type=int)
     parser.add_argument("fichero", help="fichero exportado a verificar")
+    parser.add_argument("--vista", choices=sorted(VISTAS), default="grupo",
+                        help="modo pdf: qué vista se espera en el fichero (por defecto grupo)")
     args = parser.parse_args()
 
     if args.modo == "pdf":
         try:
-            return 0 if verificar_pdf(args.db, args.horario_id, args.fichero) else 1
+            return 0 if verificar_pdf(
+                    args.db, args.horario_id, args.fichero, args.vista) else 1
         except Fallo as e:
             print("FALLO: %s" % e, file=sys.stderr)
             return 1
