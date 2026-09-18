@@ -1,0 +1,290 @@
+# =====================================================================
+#  Educhronos - empaquetado, lado Windows.
+#
+#  Toma la carpeta de entrega que produce scripts/empaquetar-linux.sh y
+#  construye el app-image con jpackage. No necesita codigo fuente, ni Maven,
+#  ni Git, ni Java instalado: el JDK viaja en la entrega.
+#
+#    powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1
+#
+#  Opciones:
+#    -Base C:\ruta   donde trabajar (por defecto C:\DES\educhronos-build)
+#    -SinHumo        no arranca la aplicacion al terminar
+#
+#  Sin tildes a proposito: Windows PowerShell 5.1 lee los .ps1 en la
+#  codificacion del sistema cuando no llevan BOM.
+#
+#  Los 14 modulos del runtime estan medidos, no supuestos (S152):
+#    jdk.zipfs    lo exige el cargador nativo de OR-Tools; sin el, el solver
+#                 muere con ProviderNotFoundException al primer POST.
+#    java.desktop lo exige el enlazador de propiedades de Spring Boot
+#                 (java.beans); sin el, la aplicacion ni arranca.
+# =====================================================================
+param(
+    [string]$Base = "C:\DES\educhronos-build",
+    [switch]$SinHumo
+)
+$ErrorActionPreference = 'Continue'
+
+$entrega = $PSScriptRoot
+$jdkRaiz = "$Base\jdk"
+$entrada = "$Base\entrada"
+$dest    = "$Base\imagen"
+$datos   = "$Base\humo"
+
+$modulos = "java.base,java.compiler,java.desktop,java.instrument,java.management," +
+           "java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss," +
+           "java.sql.rowset,jdk.jfr,jdk.unsupported,jdk.zipfs"
+$limite = 250000000
+
+# -Base es el primer parametro POSICIONAL: si alguien encadena otra orden en la
+# misma linea, PowerShell se la pasa aqui. Una ruta relativa se resolveria contra
+# el directorio actual y el guion escribiria en un sitio inventado, en silencio
+# (ocurrio en S152: "Copy-Item" llego como -Base). Se exige ruta absoluta.
+if (-not [System.IO.Path]::IsPathRooted($Base)) {
+    Write-Host "ABORTA: -Base tiene que ser una ruta absoluta."
+    Write-Host ("  recibido: '{0}'" -f $Base)
+    Write-Host "  ejemplo : -Base C:\DES\educhronos-build"
+    Write-Host "  Si encadenaste otra orden detras del guion, ponla en una linea aparte."
+    exit 2
+}
+if (-not (Test-Path $Base)) { New-Item -ItemType Directory $Base -Force | Out-Null }
+
+# Nombre propio por corrida: si no, una segunda corrida borra la transcripcion
+# de la primera, que es justo la que se quiere comparar.
+$modo = if ($SinHumo) { "sinhumo" } else { "completo" }
+$sello = Get-Date -Format "yyyyMMdd-HHmmss"
+$transcripcion = "$Base\empaquetado-$modo-$sello.txt"
+Start-Transcript -Path $transcripcion -Force | Out-Null
+Write-Host ("Base: {0}" -f $Base)
+Write-Host ("Transcripcion: {0}" -f $transcripcion)
+
+function Terminar($codigo) { Stop-Transcript | Out-Null; exit $codigo }
+
+Write-Host "=========================================================="
+Write-Host " 1. VERIFICACION DE LA ENTREGA"
+Write-Host "=========================================================="
+Write-Host "entrega: $entrega"
+
+$sumas = "$entrega\SHA256SUMS"
+if (-not (Test-Path $sumas)) { Write-Host "ABORTA: falta SHA256SUMS."; Terminar 1 }
+
+$esperado = @{}
+foreach ($linea in Get-Content $sumas) {
+    $t = $linea -split '\s+', 2
+    if ($t.Count -eq 2) { $esperado[$t[1].Trim()] = $t[0].ToUpper() }
+}
+Write-Host ("entradas en SHA256SUMS: {0}" -f $esperado.Count)
+if ($esperado.Count -ne 2) { Write-Host "ABORTA: se esperaban 2 entradas (jar y jdk)."; Terminar 1 }
+
+$jarNombre = $null; $jdkZip = $null
+foreach ($n in $esperado.Keys) {
+    if ($n -like '*.jar') { $jarNombre = $n }
+    if ($n -like '*.zip') { $jdkZip    = $n }
+}
+if (-not $jarNombre -or -not $jdkZip) { Write-Host "ABORTA: SHA256SUMS no nombra un .jar y un .zip."; Terminar 1 }
+
+# El jar viaja junto a este guion; el JDK, en la carpeta jdk\ hermana.
+$rutaJar = Join-Path $entrega $jarNombre
+$rutaJdk = Join-Path (Split-Path $entrega -Parent) "jdk\$jdkZip"
+Write-Host "jar: $rutaJar"
+Write-Host "jdk: $rutaJdk"
+if (-not (Test-Path $rutaJar)) { Write-Host "ABORTA: no esta el jar."; Terminar 1 }
+if (-not (Test-Path $rutaJdk)) { Write-Host "ABORTA: no esta el zip del JDK (carpeta jdk\ hermana)."; Terminar 1 }
+
+$hJar = (Get-FileHash $rutaJar -Algorithm SHA256).Hash
+$hJdk = (Get-FileHash $rutaJdk -Algorithm SHA256).Hash
+Write-Host ("jar esperado : {0}" -f $esperado[$jarNombre])
+Write-Host ("jar medido   : {0}" -f $hJar)
+Write-Host ("jdk esperado : {0}" -f $esperado[$jdkZip])
+Write-Host ("jdk medido   : {0}" -f $hJdk)
+if ($hJar -ne $esperado[$jarNombre] -or $hJdk -ne $esperado[$jdkZip]) {
+    Write-Host "ABORTA: alguna huella no coincide. La copia no esta integra."
+    Terminar 1
+}
+Write-Host "Las dos huellas coinciden."
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " 2. JDK PORTABLE"
+Write-Host "=========================================================="
+if (Test-Path $jdkRaiz) { Remove-Item $jdkRaiz -Recurse -Force }
+New-Item -ItemType Directory $jdkRaiz -Force | Out-Null
+Expand-Archive $rutaJdk -DestinationPath $jdkRaiz -Force
+$jdkDir = Get-ChildItem $jdkRaiz -Directory | Select-Object -First 1
+if (-not $jdkDir) { Write-Host "ABORTA: el zip del JDK no trajo ninguna carpeta."; Terminar 1 }
+$jdk = $jdkDir.FullName
+$jpackage = "$jdk\bin\jpackage.exe"
+Write-Host "JDK: $jdk"
+if (-not (Test-Path $jpackage)) { Write-Host "ABORTA: no hay jpackage.exe."; Terminar 1 }
+& "$jdk\bin\java.exe" -version 2>&1 | ForEach-Object { Write-Host "    $_" }
+$njmods = (Get-ChildItem "$jdk\jmods" -ErrorAction SilentlyContinue).Count
+Write-Host ("jmods: {0}" -f $njmods)
+if ($njmods -eq 0) { Write-Host "ABORTA: sin jmods, jpackage no puede montar el runtime."; Terminar 1 }
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " 3. JPACKAGE"
+Write-Host "=========================================================="
+if (Test-Path $entrada) { Remove-Item $entrada -Recurse -Force }
+New-Item -ItemType Directory $entrada -Force | Out-Null
+Copy-Item $rutaJar $entrada
+if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
+New-Item -ItemType Directory $dest -Force | Out-Null
+
+Write-Host "modulos (14, medidos en S152):"
+Write-Host "    $modulos"
+$crono = [System.Diagnostics.Stopwatch]::StartNew()
+& $jpackage --type app-image --name Educhronos `
+    --input $entrada --main-jar $jarNombre `
+    --add-modules $modulos --dest $dest
+$exitJp = $LASTEXITCODE
+$crono.Stop()
+Write-Host ("exit jpackage = {0}   segundos = {1:N1}" -f $exitJp, $crono.Elapsed.TotalSeconds)
+if ($exitJp -ne 0) { Write-Host "ABORTA: jpackage fallo."; Terminar 1 }
+Get-ChildItem "$dest\Educhronos" | Format-Table Mode, Length, Name -AutoSize
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " 4. TAMANOS  (condicion 2, en bytes de 10^6)"
+Write-Host "=========================================================="
+$carpeta = (Get-ChildItem "$dest\Educhronos" -Recurse -File | Measure-Object Length -Sum).Sum
+$runtime = (Get-ChildItem "$dest\Educhronos\runtime" -Recurse -File | Measure-Object Length -Sum).Sum
+$appdir  = (Get-ChildItem "$dest\Educhronos\app" -Recurse -File | Measure-Object Length -Sum).Sum
+Write-Host ("carpeta : {0,13} B   ({1:N1} MB)" -f $carpeta, ($carpeta/1000000))
+Write-Host ("runtime : {0,13} B   ({1:N1} MB)" -f $runtime, ($runtime/1000000))
+Write-Host ("app     : {0,13} B   ({1:N1} MB)" -f $appdir,  ($appdir/1000000))
+Write-Host ("limite  : {0} B" -f $limite)
+if ($carpeta -lt $limite) {
+    Write-Host ("CUMPLE. Margen {0:N1} MB." -f (($limite-$carpeta)/1000000))
+} else {
+    Write-Host ("NO CUMPLE. Exceso {0:N1} MB." -f (($carpeta-$limite)/1000000))
+    Write-Host "Palanca medida y no aplicada (S152): 60.869.367 B de nativos de"
+    Write-Host "OR-Tools de otras plataformas, podables con <exclusions>."
+}
+Write-Host "Referencia S151 sin --add-modules: carpeta 291502931 B, runtime 134690396 B"
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " 5. ZIP"
+Write-Host "=========================================================="
+$zip = "$Base\Educhronos-win.zip"
+if (Test-Path $zip) { Remove-Item $zip -Force }
+# Compress-Archive de PowerShell 5.1 tarda minutos con ~232 MB.
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$cronoZip = [System.Diagnostics.Stopwatch]::StartNew()
+[System.IO.Compression.ZipFile]::CreateFromDirectory("$dest\Educhronos", $zip,
+    [System.IO.Compression.CompressionLevel]::Optimal, $true)
+$cronoZip.Stop()
+if (-not (Test-Path $zip)) { Write-Host "ABORTA: no se creo el zip."; Terminar 1 }
+Write-Host ("zip: {0}  ({1} B)  en {2:N1} s" -f $zip, (Get-Item $zip).Length, $cronoZip.Elapsed.TotalSeconds)
+
+if ($SinHumo) {
+    Write-Host ""
+    Write-Host "Prueba de humo omitida por -SinHumo."
+    Write-Host ("App-image en {0}\Educhronos" -f $dest)
+    Write-Host ("transcripcion: {0}" -f $transcripcion)
+    Terminar 0
+}
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " 6. PRUEBA DE HUMO"
+Write-Host "=========================================================="
+Write-Host "Arranca sobre una base VACIA en una carpeta aparte. No prueba datos."
+if (Test-Path $datos) { Remove-Item $datos -Recurse -Force }
+New-Item -ItemType Directory $datos -Force | Out-Null
+$proc = Start-Process -FilePath "$dest\Educhronos\Educhronos.exe" -WorkingDirectory $datos -PassThru
+Write-Host ("PID lanzador = {0}" -f $proc.Id)
+
+$listo = $false
+for ($i = 1; $i -le 45; $i++) {
+    Start-Sleep -Seconds 2
+    try {
+        $r = Invoke-WebRequest -Uri "http://localhost:8080/api/jornada" -UseBasicParsing -TimeoutSec 5
+        if ($r.StatusCode -eq 200) { $listo = $true; Write-Host ("arrancado en ~{0} s" -f ($i*2)); break }
+    } catch { }
+}
+Write-Host ("LISTO = {0}" -f $listo)
+if ($listo) {
+    $cuerpo = (Invoke-WebRequest -Uri "http://localhost:8080/api/jornada" -UseBasicParsing).Content
+    if ($cuerpo.Length -gt 160) { Write-Host $cuerpo.Substring(0,160) } else { Write-Host $cuerpo }
+}
+
+$solver = "NO EJECUTADO"
+if ($listo) {
+    $solver = "NO DISCRIMINANTE"
+    Write-Host "--- POST /api/horarios (maxSegundos 5): ejercita el cargador nativo de OR-Tools"
+    $codigo = 0
+    $cuerpoPost = ""
+    try {
+        $p = Invoke-WebRequest -Uri "http://localhost:8080/api/horarios" -Method POST `
+             -ContentType "application/json" -Body '{"maxSegundos":5}' `
+             -UseBasicParsing -TimeoutSec 120
+        $codigo = [int]$p.StatusCode
+        $cuerpoPost = $p.Content
+    } catch {
+        if ($_.Exception.Response) {
+            $codigo = [int]$_.Exception.Response.StatusCode
+            $sr = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $cuerpoPost = $sr.ReadToEnd()
+            $sr.Close()
+        } else {
+            $cuerpoPost = $_.Exception.Message
+        }
+    }
+    Write-Host ("  http = {0}" -f $codigo)
+    if ($cuerpoPost.Length -gt 300) { Write-Host ("  " + $cuerpoPost.Substring(0,300)) }
+    else { Write-Host ("  " + $cuerpoPost) }
+    if ($codigo -eq 500) {
+        Write-Host "  FALLO: un 500 aqui es tipicamente un runtime al que le falta un"
+        Write-Host "  modulo. Con jdk.zipfs ausente, el cargador nativo de OR-Tools muere"
+        Write-Host "  con ProviderNotFoundException (medido en S152)."
+        $solver = "FALLO"
+    } elseif ($codigo -eq 503) {
+        Write-Host "  OK: el solver corrio y agoto el presupuesto, luego el nativo cargo."
+        $solver = "OK"
+    } else {
+        Write-Host "  NO DISCRIMINANTE: sobre base vacia el rechazo puede llegar ANTES de"
+        Write-Host "  tocar el solver, asi que esto NO prueba que el nativo cargue. Eso lo"
+        Write-Host "  cierra la condicion 3, con el banco."
+    }
+}
+
+Write-Host "--- procesos:"
+Get-CimInstance Win32_Process -Filter "Name='Educhronos.exe'" |
+    Select-Object ProcessId, ParentProcessId, @{n='MB';e={[int]($_.WorkingSetSize/1MB)}} |
+    Format-Table -AutoSize
+Write-Host "--- ficheros creados en el directorio de trabajo:"
+Get-ChildItem $datos | Format-Table Length, Name -AutoSize
+Write-Host "--- escucha en el 8080:"
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object LocalAddress, LocalPort, OwningProcess | Format-Table -AutoSize
+
+Write-Host "--- parada (primero las hijas, luego el lanzador):"
+Get-CimInstance Win32_Process -Filter "ParentProcessId=$($proc.Id)" | ForEach-Object {
+    Write-Host ("  matando hijo {0}" -f $_.ProcessId)
+    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+}
+Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 4
+$vivos = Get-Process -Name Educhronos -ErrorAction SilentlyContinue
+if ($vivos) { Write-Host "  QUEDAN PROCESOS:"; $vivos | Format-Table Id, ProcessName -AutoSize }
+else { Write-Host "  no queda ningun proceso Educhronos" }
+$puerto = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+if ($puerto) { Write-Host "  PUERTO 8080 OCUPADO"; $puerto | Format-Table -AutoSize }
+else { Write-Host "  puerto 8080 libre" }
+
+Write-Host ""
+Write-Host "=========================================================="
+Write-Host " RESUMEN"
+Write-Host "=========================================================="
+Write-Host ("carpeta     : {0} B ({1:N1} MB)" -f $carpeta, ($carpeta/1000000))
+Write-Host ("condicion 2 : {0}" -f $(if ($carpeta -lt $limite) { "CUMPLE" } else { "NO CUMPLE" }))
+Write-Host ("arranque    : {0}" -f $(if ($listo) { "OK" } else { "FALLO" }))
+Write-Host ("solver      : {0}" -f $solver)
+Write-Host ("app-image   : {0}\Educhronos" -f $dest)
+Write-Host ("zip         : {0}" -f $zip)
+Write-Host ("transcripcion: {0}" -f $transcripcion)
+if (-not $listo -or $solver -eq "FALLO") { Terminar 1 }
+Terminar 0
