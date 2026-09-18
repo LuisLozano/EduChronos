@@ -444,8 +444,15 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo** | Avanzar un Cambio con lógica | Caso normal bajo objetivo activo | M0, M2, M3, M4 (si >1 módulo), M1 completo | Ninguno |
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
-| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Cuando el plan lo pide o el método cambia | M1 + R4/R5 | M2/M3/M4 (no hay código) |
+| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión (excepción a R-apertura, S152) | M1 + R4/R5 | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 (no hay código) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
+
+Por qué Higiene/Método tiene excepción a R-apertura (S152): una sesión de método no
+avanza ningún Cambio, así que con la regla literal no podía abrirse NUNCA, y cuatro
+M0 la descartaron con razón (S121, S142, S147, S151) mientras su cola crecía hasta
+18 fichas. Lo que avanza es la fiabilidad de los instrumentos, y su criterio de
+terminado es el recuento de fichas al cerrar. La justificación de gestión vive en
+§6 de `gestion_proyecto.md`.
 
 Regla de admisión a Saneamiento: una deuda entra en el grupo SOLO si no tiene
 camino feliz que ocultar. En cuanto tiene lógica de negocio, sale y va a Desarrollo

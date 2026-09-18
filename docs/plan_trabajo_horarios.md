@@ -48,28 +48,28 @@
 - L700 — ### Criterios de verificación
 - L709 — ## FASE 11 — Empaquetado y distribución Windows
 - L712 — ### Criterios de verificación
-- L726 — ## FASE 12 — CI/CD con GitHub Actions
-- L729 — ### Criterios de verificación
-- L736 — ## Registro de progreso
-- L738 — ### Sesión 151 — O-instalación (H4), C-alcance-instalacion: **H4 ABRE, Y EL BUNDLE DE LA APLICACIÓN REAL SE CONSTRUYE POR PRIMERA VEZ. EN LINUX Y EN WINDOWS EXPORTA CON EL ORÁCULO A CERO, PERO UN USUARIO NO SABRÍA SI ESTÁ ARRANCADO NI CÓMO CERRARLO.** `O-instalación` nace con nueve condiciones escritas después de medir en Linux, en la máquina Windows de construcción y en un Windows 11 Home sin Java. 0 de 9. Ni un fichero de código tocado.
-- L804 — ### Bloques de Fase 2
-- L812 — ### Bloques de Fase 5
-- L835 — ### Bloques de Fase 6
-- L880 — ### Bloques de Fase 8
-- L1089 — ### Fases completadas
-- L1193 — ### Cierre del modelo — Sesión 8
-- L1241 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1287 — ### Método de trabajo (procedimiento vigente)
-- L1320 — ### Deuda consciente VIVA
-- L3113 — ### Deuda consciente CERRADA (histórico)
-- L3212 — ### Notas técnicas validadas en Fase 0
-- L3225 — ### Notas técnicas validadas en Fase 6
-- L3270 — ### Notas técnicas validadas en Fase 9
-- L3279 — ### Notas técnicas validadas en Fase 11
-- L3306 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3315 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3342 — ### Registro detallado de sesiones S10–S31
-- L3351 — ## Señales globales de alerta
+- L730 — ## FASE 12 — CI/CD con GitHub Actions
+- L733 — ### Criterios de verificación
+- L740 — ## Registro de progreso
+- L742 — ### Sesión 152 — O-instalación (H4), C-construccion-reproducible: **EL BUNDLE DE WINDOWS SE CONSTRUYE CON DOS GUIONES VERSIONADOS Y BAJA DE 250 MB.** `O-instalación` pasa de 0 a **2 de 9**: la condición 1 se REESCRIBE sobre la medición de que `jpackage` no construye cruzado, y la 2 se cumple por una palanca que la ficha no contemplaba —el runtime, no los nativos—, con 231.691.863 B frente a 250.000.000. Ningún fichero de `src` tocado.
+- L814 — ### Bloques de Fase 2
+- L822 — ### Bloques de Fase 5
+- L845 — ### Bloques de Fase 6
+- L890 — ### Bloques de Fase 8
+- L1099 — ### Fases completadas
+- L1203 — ### Cierre del modelo — Sesión 8
+- L1251 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1297 — ### Método de trabajo (procedimiento vigente)
+- L1330 — ### Deuda consciente VIVA
+- L3161 — ### Deuda consciente CERRADA (histórico)
+- L3260 — ### Notas técnicas validadas en Fase 0
+- L3273 — ### Notas técnicas validadas en Fase 6
+- L3318 — ### Notas técnicas validadas en Fase 9
+- L3327 — ### Notas técnicas validadas en Fase 11
+- L3380 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3389 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3416 — ### Registro detallado de sesiones S10–S31
+- L3425 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -712,7 +712,7 @@ nuevo a partir del anterior, modificando solo los cambios.
 ### Criterios de verificación
 - [ ] La ejecución en un Windows limpio (sin Java, Node, etc. previos) 
       funciona sin intervención técnica
-- [ ] El bundle resultante pesa menos de 250MB (objetivo: optimización en Fase 11)
+- [x] El bundle resultante pesa menos de 250MB (objetivo: optimización en Fase 11)
 - [ ] No requiere permisos de administrador
 - [ ] Probado en Windows 10 y Windows 11
   > **NOTA (S151) sobre los criterios 1–4.** Los PRECISA el «Terminado cuando» de `O-instalación` (§3 de
@@ -720,6 +720,10 @@ nuevo a partir del anterior, modificando solo los cambios.
   > técnica» se desglosa en arranque visible, cierre, errores visibles y datos en una carpeta del usuario; y «sin
   > permisos de administrador» se prueba con una cuenta estándar. **NO se marcan aquí**: se marcarán cuando se
   > cumpla el sustituto. Medido en S151: la carpeta del app-image de Windows ocupa 291,5 MB.
+  > **ACTUALIZADO en S152: el criterio 2 SE MARCA**, porque su sustituto —la condición 2 de
+  > `O-instalación`— está cumplido y medido: 231.691.863 B sobre la carpeta, con el runtime
+  > recortado a 14 módulos. Los criterios 1, 3 y 4 siguen sin marcar: la máquina donde se
+  > midió es de dominio, la cuenta estándar no se ha probado y Windows 10 tampoco.
 
 ---
 
@@ -735,7 +739,25 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 151 — O-instalación (H4), C-alcance-instalacion: **H4 ABRE, Y EL BUNDLE DE LA APLICACIÓN REAL SE CONSTRUYE POR PRIMERA VEZ. EN LINUX Y EN WINDOWS EXPORTA CON EL ORÁCULO A CERO, PERO UN USUARIO NO SABRÍA SI ESTÁ ARRANCADO NI CÓMO CERRARLO.** `O-instalación` nace con nueve condiciones escritas después de medir en Linux, en la máquina Windows de construcción y en un Windows 11 Home sin Java. 0 de 9. Ni un fichero de código tocado.
+### Sesión 152 — O-instalación (H4), C-construccion-reproducible: **EL BUNDLE DE WINDOWS SE CONSTRUYE CON DOS GUIONES VERSIONADOS Y BAJA DE 250 MB.** `O-instalación` pasa de 0 a **2 de 9**: la condición 1 se REESCRIBE sobre la medición de que `jpackage` no construye cruzado, y la 2 se cumple por una palanca que la ficha no contemplaba —el runtime, no los nativos—, con 231.691.863 B frente a 250.000.000. Ningún fichero de `src` tocado.
+  TIPO Y RITUAL: DESARROLLO — M0 + M2 en cinco etapas (cuatro en Linux por Claude Code, una en Windows por el usuario) + M4 sobre el bundle en las dos plataformas + M1. Sin M3: no hay lógica que mutar, el producto son dos guiones de empaquetado y un documento.
+  M0. Primer Cambio de `O-instalación` tras el de alcance. Va antes que arranque, cierre o datos por dos razones medidas: todos los demás Cambios necesitan construir el bundle para probarse —y en S151 esas órdenes vivieron en un `LEEME` de `/tmp` que se perdió—, y la 2 era la única condición que podía no cumplirse. R-invalidación: ninguna, y en sentido inverso se tuvo en cuenta la Fase 12, cuyo reparto natural (jar en Linux, `jpackage` en Windows) es el que se ha escrito.
+  M2-A, INVENTARIO. Clon limpio, `mvn clean package -DskipTests` en 21-35 s, jar 156.363.130 B idéntico al de S151. Condición 1 verificada: un solo `static/main-*.js` y es el que cita `index.html`. El peso del jar es **53,1 % OR-Tools** (82.981.118 B), con 80.936.474 B en cinco jars de nativos; los cinco cuelgan como dependencias runtime transitivas de `ortools-java`, luego se podan con `<exclusions>` sin tocar código. `jdeps` da 13 módulos.
+  M2-B, RUNTIME Y EJECUCIÓN. `jlink` con los 13 módulos construye, y la aplicación arranca en 4,9 s, sirve `/api/jornada` con 200 y no da un solo ERROR: **sólo cae al primer POST al solver**, con `ProviderNotFoundException` de `jdk.zipfs`, que `jdeps` no puede ver porque el proveedor `jar` se resuelve por `ServiceLoader`. Verificado por mutación de un solo factor: con `jdk.zipfs`, 503 `PRESUPUESTO_AGOTADO` en 5 s y 0 ERROR. **La lección es el modo de fallo, no el módulo: un humo de arranque da verde sobre un runtime roto.**
+  M2-C/D, EL OTRO EXTREMO DEL SUELO. Se midió si `java.desktop` (23,3 MB) era recortable, con la hipótesis escrita de que lo arrastraba openpdf. **FALSA:** sin él la aplicación ni arranca —`java.beans` en `prepareEnvironment`, enlazador de propiedades de Spring Boot—, así que la prueba del PDF ni llegó a correr. El control con los 14 módulos salió entero en verde sobre el banco `educhronos-s137.db`: **grupo 28 páginas y 1285/0/0, profesor 59 y 835/0/0, aula 44 y 819/0/0**, leyenda 28/28, 59/59 y 44/44, y el CSV cuadrando las tres vistas sobre 819 filas. Suelo cerrado por las dos direcciones: 14 módulos.
+  M2-E, WINDOWS. Con `--add-modules`, la carpeta baja de 291.502.931 a **231.691.863 B** (runtime de 134.690.396 a 74.879.328, -44,4 %) y el zip a 176.010.699 B. **La previsión que imprime el guion de Linux acertó al byte.** Tres corridas, el mismo número. Reproducidas sin marcar nada: la base cae en el directorio de trabajo, escucha en `::` y el navegador no se abre solo.
+  PRODUCTO. `scripts/empaquetar-linux.sh` (construye, verifica la condición 1, prevé el tamaño, cachea el JDK por sha256 y arma la entrega en `jdk/` + `build/`) y `scripts/empaquetar-windows.ps1` (verifica las dos huellas, descomprime el JDK, `jpackage` con los 14 módulos, mide, comprime y hace humo). El `.ps1` se versiona en el repo y el de Linux lo copia a la entrega: una sola fuente. Más `docs/empaquetado.md`, que es lo que S151 no tuvo.
+  CRITERIO. **Condición 1 REESCRITA y CUMPLIDA**: el texto original —«un guion… sin ningún paso fuera del guion»— describía algo irrealizable, porque `jpackage` no hace cruzado y la máquina Windows no tiene código, Git ni Maven; el usuario descarta llevar el repo allí. Se reescribe a dos guiones, uno por plataforma, con el traspaso de la carpeta como único paso manual. Se cambió el criterio con argumento en vez de ejecutar algo que el criterio prohíbe y marcarlo igual. **Condición 2 CUMPLIDA** sobre bundle construido, no sobre resta. **2 de 9.**
+  DECISIONES DE MÉTODO. Los guiones NO ejecutan la suite: empaquetar y verificar son puertas distintas. El humo mide arranque y sólo eso, y lo DECLARA —sobre base vacía el POST se rechaza en la prevalidación con 422 sin tocar el solver, medido—, así que `jdk.zipfs` lo cubre la condición 3. El tamaño se mide en bytes de 10^6, como dice la condición. Y `D-higiene-sin-apertura` queda **DECIDIDA por el usuario**: excepción escrita a R-apertura con disparador medible, en §6 y en la tabla de tipos.
+  R-TERMINADO APLICADO DOS VECES, y la segunda contra el propio asistente, que había recomendado lo contrario con una estimación en la mano: la poda de nativos NO se aplica —**69.453.720 B** sobrantes para un bundle de Windows, medidos y documentados—, porque la condición 2 se cumple sin ella; y `project.build.outputTimestamp` tampoco.
+  DEUDA. Nacen `D-jar-no-reproducible` y `D-jackson-dos-ramas`. Tres instancias más de `D-guion-exit-enmascarado`, las tres del asistente y las tres cazadas por Claude Code. **Deuda bloqueante: 0.**
+  CORRECCIONES. (a) De Claude Code: la resta de nativos que el asistente escribió en `docs/empaquetado.md` era la de LINUX (60.869.367 B) en un documento sobre Windows; la correcta es 69.453.720 B, 8,6 MB más, y ahora va con su derivación. (b) De Claude Code: la constante de previsión del guion afirmaba una procedencia que él no había medido; se reescribió diciendo de dónde sale. (c) Del usuario: las dos primeras corridas en Windows llevaban una orden encadenada que PowerShell tomó como `-Base`, y el guion escribió en una carpeta inventada sin avisar. (d) De Claude Code, DOS VECES y una en cada parte del M1, con la misma causa: un ancla de texto sobre un documento que lleva índice generado casa también con la ENTRADA DEL ÍNDICE, y hay que anclarla a principio de línea. En la parte A fue «#### Mejora futura, cuelga y espera», que aparecía dos veces —cuerpo e índice— y el guardián de unicidad abortó sin escribir un solo byte en ninguno de los dos ficheros. En la parte B fue el `find` de la cabecera de S151, que NO llevaba guardián: casó con la entrada del índice en el desplazamiento 2052 en vez de con el cuerpo en el 42828, y como de ahí colgaba todo el rebanado, la entrada entera de S152 se insertó DENTRO del índice y el cuerpo conservó S151 como cabecera viva; hubo que revertir con `git checkout --` los dos ficheros que esa parte toca y repetirla con el ancla corregida. Revelador de cuál era el defecto: los otros dos anclajes de ese mismo rebanado ya empezaban por salto de línea, y los dos funcionaron —el archivado de S150 a la bitácora salió correcto incluso en la corrida fallida—.
+  SUITES: no se ejecutaron porque no se tocó ningún fichero de código. Conteo vigente, heredado de S150: solver 92, app 416, vitest 482 en 52 ficheros.
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`: **INTACTOS**, verificados al abrir y al cerrar cada etapa. Toda aplicación arrancada sirvió una copia y se paró por PID; las copias servidas para exportar tampoco cambiaron un byte.
+  LIMPIEZA (M1-bis): archivada S150 a `bitacora-sesiones.md`; degradada S151 a «Última sesión registrada (previa):»; S152 queda como única cabecera H3 viva.
+  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **0 y 0 entradas descuadradas sobre 31 y 68 encabezados**, y en HEAD estaban también a 0 y 0 sobre 31 y 68 —esta sesión no dejó descuadre que corregir porque la parte A regeneró tras sus inserciones y la parte B se regeneró aquí, antes de medir nada—. **Censo de tokens sospechosos: 33** sobre 258 tokens distintos, frente a los 33 sobre 255 que declaró S151, y la comparación es honesta porque los dos se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento —importado como módulo— sobre las versiones commiteadas que `git show HEAD:` saca a una carpeta aparte, da **33**: tres entradas netas, y son **las mismas tres de S150** —`D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado`—, porque las dos citas vivas que les quedaban estaban DENTRO del bloque de S150 que esta sesión archiva, así que vuelven a bajar de 3 apariciones a 1, la de su ficha de §4; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **séptima reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. Que sean EXACTAMENTE los mismos tres tokens que en S150 es dato nuevo y no casualidad: el rescate que una sesión les hace vive en su propia línea de R4, y archivar esa línea dos sesiones después se lo retira otra vez; el ciclo se repetirá mientras esos tres no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-construccion-reproducible`, `D-jar-no-reproducible` y `D-jackson-dos-ramas`: **no los marca el censo**, porque nacen con 5, 4 y 3 apariciones vivas, medidas antes de esta línea, en las tres sedes de siempre —§3 y §2 para el Cambio; §4, «Deuda consciente VIVA» y esta entrada para las dos deudas—, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-instalación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso cumplir dos de sus nueve condiciones no mueve el censo. (c) Extinción comprobada a mano sobre los 15 tokens citados en el bloque de S150 archivado (`D-censo-r4-ciego-a-la-extincion`) —`C-exportacion-csv`, `C-exportacion-pdf-profesor-aula`, `D-F8.6-ii-a`, `D-aviso-fuera-del-dialogo`, `D-censo-r4-ciego-a-la-extincion`, `D-censo-r4-ciego-a-los-objetivos`, `D-censo-r4-cuenta-menciones`, `D-deuda-sin-sede-en-el-plan`, `D-hora-tramo-dependiente-de-zona`, `D-javadoc-plazas-caducado`, `D-post-horario-sin-sesiones`, `D-proyeccion-instancia-espejo`, `D-proyeccion-sin-duracion`, `O-diseño` y `O-exportación`—: **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 82. (d) HIGIENE/MÉTODO: **18 fichas** por la columna de sede de §4 con el criterio de S142, undécima reproducción; el reparto es 12 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101». **El disparador de la excepción a R-apertura que esta misma sesión escribe NO está activo: 18 de 20, faltan 2.** Medido también sobre HEAD con el mismo criterio, que da **19**: la que deja de contarse es `D-higiene-sin-apertura`, cuya columna de sede la nombraba mientras estaba pendiente y que esta sesión deja CERRADA, de modo que el 18 de S151 y el 18 de hoy NO cuentan el mismo conjunto —la ficha que explicaba por qué ese 18 no bajaba nunca es justamente la que se ha pagado—. **R-deuda aguanta**: con las condiciones 1 y 2 cumplidas, la única deuda viva que toca una condición viva de `O-instalación` sigue siendo `D-spa-sin-fallback-de-rutas`, que ES la condición 9 y se paga dentro del objetivo; `D-jar-no-reproducible` nace apuntando a este objetivo pero no bloquea ninguna condición, porque la 1 —ya cumplida— no pide reproducibilidad bit a bit.»
+
+Última sesión registrada (previa): Sesión 151 — O-instalación (H4), C-alcance-instalacion: **H4 ABRE, Y EL BUNDLE DE LA APLICACIÓN REAL SE CONSTRUYE POR PRIMERA VEZ. EN LINUX Y EN WINDOWS EXPORTA CON EL ORÁCULO A CERO, PERO UN USUARIO NO SABRÍA SI ESTÁ ARRANCADO NI CÓMO CERRARLO.** `O-instalación` nace con nueve condiciones escritas después de medir en Linux, en la máquina Windows de construcción y en un Windows 11 Home sin Java. 0 de 9. Ni un fichero de código tocado.
   TIPO Y RITUAL: MEDICIÓN — M0 + M2 de solo lectura en cinco etapas, tres ejecutadas por Claude Code y dos por el usuario en Windows + M1. Sin M3 ni M4. Sexto caso del tipo; sigue sin fila en la tabla de Tipos de `metodo.md`.
   M0. Tercer M0 que elige entre FRENTES, tras S142 y S147: con H3 cerrado no había objetivo activo. **H4 elegido; Higiene/Método descartada otra vez por R-apertura**, y esta vez se registra la causa de fondo: con las reglas vigentes esa sesión no puede abrirse nunca (`D-higiene-sin-apertura`). Dentro de H4, el empaquetado va antes que la duplicación de curso: es el riesgo mayor y el menos medido, y decide dónde viven los datos, de lo que depende la Fase 10. Objetivo **`O-instalación`**, Cambio **`C-alcance-instalacion`**, con el precedente de `C-alcance-exportacion`. R-invalidación: ninguna. El usuario dispone de Windows 10 y Windows 11.
   M2-A, INVENTARIO. **De la Fase 0 no queda nada:** el repo abre en Fase 2 y nunca ha contenido un script, un `.bat` ni un perfil de `jpackage`; la Fase 0 sólo empaquetó `HelloOrTools`. El «~10 %» de H4 en §2 se corrige a 0 %. El build ya mete Angular en el jar (`frontend-maven-plugin` y `copy-resources`, los dos en `prepare-package`); la base es `jdbc:sqlite:educhronos.db`, relativa al directorio de trabajo; no hay zona horaria fijada; no hay ningún `WebMvcConfigurer`, lo que confirma `D-spa-sin-fallback-de-rutas` por ausencia; y no existe noción de curso en el código ni en el esquema. `copy-resources` no limpia su destino: sin `clean`, cada build deja en el jar un `main-*.js` huérfano (medido en el jar del repo; desde `clean` sale uno solo).
@@ -752,18 +774,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   LIMPIEZA (M1-bis): archivada S149 a `bitacora-sesiones.md`; degradada S150 a «Última sesión registrada (previa):»; S151 queda como única cabecera H3 viva.
   R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 21 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con 29 y 67: el descuadre lo produjo esta misma sesión al insertar la ficha de §3 y la cabecera de S151, y se corrigió regenerando—. **Censo de tokens sospechosos: 33**, el mismo número que S150 declaró, y la comparación es honesta de 33 a 33 porque los dos se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **34**, y el censo de HEAD, medido con el mismo instrumento sobre un clon del repo sin tocar, da **33**: una entrada neta, y es `C-alcance-ajuste`, cuya única cita viva en el plan estaba DENTRO de la línea de R4 del bloque de S149 que esta sesión archiva, así que baja de 2 a 1; esta misma frase lo rescata al nombrarlo, de ahí 33 y no 34, **sexta reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El número que vale es el medido después, y es el que consta. La comparación se hizo midiendo el censo sobre HEAD (33) y sobre el árbol modificado (34), no por diferencia de listas de memoria. (b) Los dos tokens nuevos de esta sesión son `C-alcance-instalacion` y `D-higiene-sin-apertura`: **no los marca el censo**, porque nacen con 3 y 4 apariciones vivas, medidas ANTES de esta línea, que las sube a 5 y 5 —el Cambio en la ficha de §3 y en esta entrada; la deuda en §4, en «Deuda consciente VIVA» y en esta entrada—, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-instalación` está fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso ABRIR un objetivo no mueve el censo, igual que cerrarlo no lo movía en S150. (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S149 archivado (`D-censo-r4-ciego-a-la-extincion`) —`C-alcance-ajuste`, `C-alcance-exportacion`, `C-exportacion-pdf-grupo`, `D-censo-r4-ciego-a-la-extincion`, `D-censo-r4-ciego-a-los-objetivos`, `D-censo-r4-cuenta-menciones`, `D-deuda-sin-sede-en-el-plan`, `D-guion-pkill-casa-su-propio-envoltorio`, `D-hora-tramo-dependiente-de-zona`, `D-javadoc-csv-separador-sin-fuente`, `D-pdf-error-de-maqueta-como-404`, `O-catálogo` y `O-exportación`—: **NINGUNO cae a 0** en el corpus vivo; el único que baja a 1 es `C-alcance-ajuste`, ya dicho, y el resto aguanta entre 2 y 30. (d) HIGIENE/MÉTODO: **18 fichas** por la columna de sede de §4 con el criterio de S142, décima reproducción; el reparto es 12 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S150 aunque esta sesión dé de alta una ficha, porque `D-higiene-sin-apertura` nace con sede propia —pendiente de decisión del usuario— y no engorda ninguna de las tres; es además la ficha que explica por qué ese 18 no baja nunca. **R-deuda aguanta**: la única deuda viva que toca una condición viva de `O-instalación` es `D-spa-sin-fallback-de-rutas`, que ES la condición 9 y se paga dentro del objetivo.»
 
-Última sesión registrada (previa): Sesión 150 — O-exportación (H3), C-exportacion-pdf-profesor-aula: **H3 CIERRA. EL HORARIO SALE EN PAPEL POR GRUPO, POR PROFESOR Y POR AULA, Y LO QUE SE LLEVA UNA PERSONA ES LO QUE VERIFICÓ EL ORÁCULO.** `O-exportación` TERMINADO con 5 de 5 condiciones, en 4 sesiones de las 8 del techo. Tercer hito cerrado del proyecto.
-  TIPO Y RITUAL: DESARROLLO — M0 + M2 de solo lectura + M3 en cuatro pasos con campaña de mutación + M4 en dos tiempos con descarga humana + M1. Seis commits: cinco de código e instrumento y uno de documentación.
-  M0. Las dos vistas juntas y no una por sesión, con argumento: S147 midió que profesor y aula tienen UNA entrada por celda (835 y 819), así que el riesgo de altura que justificó hacer grupo sola había desaparecido, y las decisiones pendientes —texto de celda, clave, cabecera, leyenda, forma del endpoint— eran las mismas para las dos. Regla de corte escrita antes: si la revisión humana de profesor tocaba la maqueta compartida, aula pasaba a S151. No se activó. R-invalidación: ninguna.
-  M2. El endpoint de S149 ya aceptaba `?vista=` con 400 para lo desconocido, y la maqueta sólo dependía de grupo en seis puntos. El oráculo ya calculaba las tres vistas en SQL; sólo su modo pdf estaba atado a grupo. **CORRECCIÓN AL ARQUITECTO:** sí existe PDF del centro por profesor (`docs_extra/Ejemplos_SJ/HorariosProfesores/`, 80 páginas, sin confirmar que sea del mismo curso), y de él salen el molde —título con nombre, clave «Asignatura - Aula - Grupo», «Tutor:» con varios grupos, leyenda sólo de asignaturas— y el orden de la celda, que el arquitecto había propuesto al revés. Cinco profesores tutelan dos grupos (ordinario + diversificación).
-  M3. **M3-1:** `VistaPdf` con métodos abstractos por constante —una vista nueva no compila incompleta; se comprobó en M3-3, cuando `javac` rechazó el `switch` sin rama de aula— y la vista de grupo IDÉNTICA: 34 flujos con el mismo md5, mismo texto extraído, 1285/0/0. **M3-2:** vista de profesor. OpenPDF partía `1B-C` por su guion; el `SplitCharacter` que sólo parte tras espacio y `/` lo evita y no mueve un byte de grupo (medido sobre sus 311 entradas antes de escribirlo). Revisión humana de DIB2 aprobada. **M3-3:** vista de aula con las 44 aulas del catálogo, sin leyenda en las 9 vacías, tres enlaces por vista y test del corte con demostración de que muerde. **M3-4, CAMPAÑA: 16 mutantes, 14 aciertos, 1 fallo y 1 sin predicción.** El fallo (9, permitir partir tras `-`) es EQUIVALENTE con este dato, medido: el guion candidato cae fuera del ancho útil. El 10 (no partir tras espacio) sobrevivía partiendo «Plástic»/«a», y lo mata el aserto reforzado del test del corte. Cubiertos 13 (un CO_TUTOR no sale en «Tutor de:»; el primer intento no lo mataba, y reaplicar el mutante lo descubrió) y 15 (un aula fuera del catálogo tiene página al final). El 6 es EQUIVALENTE POR DOMINIO: medido que la aplicación no admite plazas sin profesor (`ActividadService.validarProfesores`, en alta y edición, y el constructor de `Plaza` del solver). El oráculo cuenta aparte las páginas vacías con leyenda, para que FALTAN y SOBRAN sigan contando sólo entradas.
-  M4. Sobre copia, en dos tiempos: la aplicación quedó arrancada y el USUARIO descargó las tres vistas desde la interfaz. Sus ficheros son de después del arranque, sin duplicados, y su huella es idéntica a la de curl en las tres; grupo conserva `b397156a…`/`579b6f09…` desde antes de refactorizar. Sobre ellos: oráculo 1285/0/0, 835/0/0 y 819/0/0; 28/59/44 páginas; horas y recreo en las 131; `Tf` sólo 7,99 y 10,0 (uno por página); fuentes empotradas; tutor 28, 23 (5 dobles) y 0. **La leyenda no la comprobaba nadie**, y se escribió un comprobador independiente validado con tres mutaciones (la de exclusividad la añadió Claude Code): 28/59/44 sin fallo. Queda en `scripts/verificar-leyenda-pdf.py`.
-  CRITERIO. **Condiciones 1, 2, 3 y 5 CUMPLIDAS en S150**, con la 4 de S148: **5 de 5. `O-exportación` TERMINADO y H3 CERRADO.** Precisión escrita antes de ejecutar: en la vista de profesor el nombre de catálogo del titular va en el título. Cuatro Cambios.
-  DEUDA. No nace ninguna. **Deuda bloqueante: 0.** Reproducida `D-F8.6-ii-a`: el 400 y el 404 del PDF llegan sin `message` pese a `server.error.include-message=always`. Las tres deudas colgadas de este objetivo pasan a «cerrado S150» sin pagarse. OBSERVACIONES SIN TOKEN: mutantes 6 y 9 equivalentes (motivos arriba); `ENCABEZADO_LEYENDA` en `oraculo-exportacion.py` es una constante sin uso; `scripts/` no ignora `__pycache__` (se borró cada vez); la leyenda de un solo bloque ocupa el ancho entero y la de dos columnas deja blanco central en A5 (maqueta de S149, R-terminado); EFI3 imprime cuatro asignaturas casi homónimas (dato de catálogo, salvedad de S136).
-  SUITES: solver 92 SIN MOVERSE (no se tocó `solver/`, así que `referencia-codigo-solver.md` no se regenera); app 383 → 416 (+33: `VistaPdfTest` nuevo con 14, `HorarioPdfTest` 19 → 32, `ExportacionHorarioServiceTest` 5 → 9 y el controlador 6 → 8; **el reparto se comprobó por conteo en el M1** y el 33 de HorarioPdfTest que traía el guion era 32); vitest 481 → 482 en 52 ficheros. Ninguna dependencia nueva.
-  BANCOS. Intactos al abrir, entre pasos y al cerrar; toda aplicación arrancada sirvió una copia verificada por `/proc/<pid>/fd` y se paró por PID. Ninguna generación lanzada.
-  LIMPIEZA (M1-bis): archivada S148 a `bitacora-sesiones.md`; degradada S149 a «Última sesión registrada (previa):»; S150 queda como única cabecera H3 viva.
-  R4 / COSTURA. «`verificar-cierre.py`: 0 comprobaciones duras con fallo tras el cierre; índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, 0 y 0 entradas descuadradas sobre 29 y 67 encabezados —no hubo descuadre que corregir: se regeneraron tras insertar la cabecera de S150 y la sección de notas técnicas de Fase 9, que es el encabezado 67—. **Censo de tokens sospechosos: 33**, el mismo número que S149 declaró, y la comparación es honesta de 33 a 33 porque los dos se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**: tres entradas netas desde S149, las tres con la misma causa, el archivado de S148, que retira del corpus vivo la única cita viva que tenían en el plan `D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado` —los tres pasan de 2 apariciones a 1, la de su ficha de §4—; esta misma frase los rescata a los tres al nombrarlos, de ahí 33 y no 36, **quinta reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El número que vale es el medido después, y es el que consta. La comparación con HEAD se hizo midiendo el censo sobre el árbol sin tocar (33) y sobre el modificado (36), no por diferencia de listas de memoria. (b) El único token nuevo de esta sesión es `C-exportacion-pdf-profesor-aula`: **no lo marca el censo**, porque nace con 5 apariciones vivas —2 en el plan y 3 en gestión—. No nace ninguna deuda, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-exportación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso su paso a TERMINADO no mueve el censo. (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S148 archivado (`D-censo-r4-ciego-a-la-extincion`) —`C-exportacion-csv`, `D-aviso-fuera-del-dialogo`, `D-censo-r4-ciego-a-la-extincion`, `D-censo-r4-ciego-a-los-objetivos`, `D-censo-r4-cuenta-menciones`, `D-deuda-sin-sede-en-el-plan`, `D-hora-tramo-dependiente-de-zona`, `D-javadoc-plazas-caducado`, `D-post-horario-sin-sesiones`, `D-proyeccion-instancia-espejo`, `D-proyeccion-sin-duracion`, `O-diseño` y `O-exportación`—: **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 82. (d) HIGIENE/MÉTODO: **18 fichas** por la columna de sede de §4 con el criterio de S142, novena reproducción; el reparto es 12 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S149 porque esta sesión no da de alta ninguna ficha. **R-deuda aguanta**: al cerrarse `O-exportación` no queda ninguna condición viva que una deuda pueda bloquear, y las tres que colgaban de él pasan a «cerrado S150» sin pagarse.»
 
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
@@ -788,8 +798,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151.
-El plan conserva ahora S150 (degradada a formato compacto) y S151 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152.
+El plan conserva ahora S151 (degradada a formato compacto) y S152 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2680,6 +2690,16 @@ con remisión a la bitácora.
   mismo acaba de volcar, o el volcado va primero y el patrón se escribe después. Y la lección de (12): una
   lección escrita no basta si el siguiente guion se escribe sin releerla. No se paga ahora.
 
+  **DOS INSTANCIAS EN S152, las dos del asistente y las dos cazadas por Claude Code.** (1) Un
+  `cmp` entre dos variantes del bundle corrió cuando una no había producido ficheros: imprimió
+  cuatro veces «DISTINTOS» con el segundo tamaño vacío, es decir, publicó una diferencia
+  MEDIDA donde sólo había un fichero ausente; la guarda va sobre la existencia de los dos
+  operandos, no sobre el retorno de `cmp`. (2) Un `echo "--- $solver …"` en un guion de
+  comprobación: con `set -u`, bash expandió su propia variable inexistente y mató el proceso
+  antes de las dos comprobaciones que venían detrás. **TERCERA, en el producto:** el `-Base`
+  del `.ps1` aceptaba ruta relativa, así que un token encadenado en la misma línea llegó como
+  primer parámetro posicional y el guion escribió su salida entera en una carpeta inventada,
+  en silencio; pagada en el sitio con una guarda de ruta absoluta.
 - **D-vista-horario-sin-horario** (S120, VIVA, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
   VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
   sobre una base recién creada y poblada a mano por la interfaz: antes de generar nada, la vista de Horario
@@ -3101,6 +3121,26 @@ con remisión a la bitácora.
   guarda «ninguna JVM» da un falso limpio con el bundle vivo. Se comprueba por PID guardado, por
   `/proc/<pid>/exe` y por el puerto; un `pgrep -af` con la ruta del bundle cae en la misma trampa si el guion
   la contiene.
+- **D-jar-no-reproducible** (S152, VIVA, no bloqueante) — DOS CONSTRUCCIONES DEL MISMO COMMIT
+  DAN JARS DISTINTOS. Medido: tres pasadas de `a4aa695`, tres sha256 y el mismo tamaño exacto.
+  De las 399 entradas del jar, 201 llevan la hora de pared de la construcción y sólo las 153
+  del cargador de Spring Boot van normalizadas a 1980; el `MANIFEST.MF` no lleva marca de
+  tiempo, así que el contenido es idéntico y lo que baila son las fechas del zip, de ancho
+  fijo. `project.build.outputTimestamp` no está declarada en ninguno de los tres `pom` y es la
+  palanca estándar. NO se paga en S152 (R-terminado: la condición 1 no pide reproducibilidad
+  bit a bit) y su arreglo no es de una línea: antes del empaquetado hay un `npm ci` y un build
+  de Angular, así que declararla puede no bastar y hay que medirlo. Consecuencia práctica, ya
+  escrita en `docs/empaquetado.md` §7: el `SHA256SUMS` de la entrega verifica el TRANSPORTE y
+  no identifica una versión, de modo que relanzar el guion de Linux invalida una `build/` ya
+  copiada a Windows aunque no haya cambiado una línea; la identidad la da el commit del
+  `LEEME.txt`. Sube de presión cuando la Fase 12 quiera publicar artefactos por tag.
+- **D-jackson-dos-ramas** (S152, VIVA, no bloqueante) — EL JAR LLEVA LAS DOS RAMAS MAYORES DE
+  JACKSON A LA VEZ. En `BOOT-INF/lib` conviven `jackson-databind-3.1.4` y
+  `jackson-databind-2.21.4`, 3,6 MB. No es sólo peso: dos ramas mayores de la misma librería
+  en el classpath es riesgo de comportamiento, porque qué clase gana depende del orden de
+  carga. NO se ha medido quién arrastra cada una ni si alguna está inerte, y suponerlo sería
+  inventar; lo establecido es que las dos están. Quien lo pague empieza por un
+  `dependency:tree` sobre `com.fasterxml.jackson`. No bloquea ninguna condición viva.
 - **D-higiene-sin-apertura** (S151, VIVA, DE MÉTODO, no bloqueante) — LA SESIÓN DE HIGIENE/MÉTODO NO PUEDE
   ABRIRSE CON LAS REGLAS VIGENTES. La tabla de tipos de `metodo.md` la admite «cuando el plan lo pide», y el
   plan la pide desde hace sesiones: 18 fichas de §4 la tienen por sede. Pero R-apertura exige nombrar el
@@ -3108,7 +3148,15 @@ con remisión a la bitácora.
   que elige entre frentes la descarta con razón (S121, S142, S147 y S151). Es la misma forma que §4 critica al
   colgar deudas de objetivos cerrados: una sede que nunca se abre equivale a decidir que no se paga. No la
   resuelve una sesión de producto: hace falta una decisión del usuario, o una excepción escrita a R-apertura
-  para el tipo Higiene/Método con su disparador, o repartir sus fichas entre objetivos. No se paga.
+  para el tipo Higiene/Método con su disparador, o repartir sus fichas entre objetivos.
+  **DECIDIDA Y CERRADA en S152 por el usuario: la excepción, escrita en §6 de
+  `gestion_proyecto.md` y en la tabla de tipos de `metodo.md`.** La sesión de Higiene/Método
+  se abre sin nombrar Cambio, Objetivo ni Hito, sólo ENTRE objetivos, y con disparador
+  medible: 20 fichas de §4 con esa sede o con la del script de R4, o un defecto de instrumento
+  que cueste trabajo medible por segunda vez en una misma sesión. Su criterio de terminado es
+  el recuento al cerrar. El reparto se descartó con argumento medido: 16 de las 18 fichas son
+  transversales porque no tienen objetivo natural, y las demás lo tendrían en objetivos
+  cerrados. **CERRADA**
 
 ### Deuda consciente CERRADA (histórico)
 
@@ -3302,6 +3350,32 @@ clasificación de la relación, no la regla. Las otras dos FK (actividad, plaza)
   pasan el mismo oráculo; el CSV lleva BOM y CRLF en las dos plataformas.
 - **`/tmp` es volátil** en la máquina de desarrollo (S151): se vació entre dos días y se llevó el clon, el
   JDK portable y el app-image. Lo que una medición necesite conservar va fuera de `/tmp`.
+- **El runtime mínimo son 14 módulos** (S152), y el suelo está cerrado por las dos direcciones
+  con mutación de un solo factor: `java.base`, `java.compiler`, `java.desktop`,
+  `java.instrument`, `java.management`, `java.net.http`, `java.prefs`, `java.rmi`,
+  `java.scripting`, `java.security.jgss`, `java.sql.rowset`, `jdk.jfr`, `jdk.unsupported` y
+  `jdk.zipfs`. Trece los da `jdeps`; el decimocuarto, `jdk.zipfs`, NO, porque el cargador
+  nativo de OR-Tools resuelve el proveedor `jar` por `ServiceLoader` en ejecución y el
+  análisis estático no lo ve. Sin él la aplicación arranca en 4,9 s, sirve `/api/jornada` con
+  200 y no escupe un solo ERROR: **sólo cae al primer `POST /api/horarios`**, con
+  `ProviderNotFoundException`. Sin `java.desktop` ni siquiera arranca —`java.beans`, que pide
+  el enlazador de propiedades de Spring Boot en `prepareEnvironment`—, y no es openpdf quien
+  lo hace obligatorio, aunque también lo use. `jlink` monta 21 módulos a partir de esos 14.
+- **Tamaños con el runtime recortado** (S152, Windows): carpeta **231.691.863 B**, runtime
+  74.879.328 B, `app\` 156.363.511 B (el jar más 381 B del `.cfg`), `Educhronos.exe` 449.024 B,
+  zip 176.010.699 B. Frente a S151 sin `--add-modules`, el runtime baja un 44,4 %. Tres
+  corridas independientes dieron el mismo número al byte. `jpackage` tarda ~4 s y el zip ~7 s
+  con `ZipFile::CreateFromDirectory`, frente a los minutos de `Compress-Archive`.
+- **Un humo de arranque no verifica el runtime** (S152). Sobre base vacía, `POST /api/horarios`
+  se rechaza en la prevalidación con 422 `CONFIGURACION_INCOMPLETA` («El problema no tiene
+  tramos») sin tocar el solver —rastro de OR-Tools en el log: vacío—, así que ese POST NO puede
+  cubrir `jdk.zipfs`. Para que discrimine hace falta un banco con jornada y catálogo. El guion
+  lo clasifica como NO DISCRIMINANTE en vez de darlo por bueno.
+- **El jar NO es reproducible bit a bit** (S152): tres pasadas del mismo commit dan tres sha256
+  y el mismo tamaño exacto; 201 de las 399 entradas llevan la hora de pared. Ver
+  `D-jar-no-reproducible`.
+- **El procedimiento vive en `docs/empaquetado.md`** (S152), con los dos guiones en
+  `scripts/empaquetar-linux.sh` y `scripts/empaquetar-windows.ps1`.
 
 ### Por qué OR-Tools sobre Timefold (no reabrir)
 
