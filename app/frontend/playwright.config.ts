@@ -51,8 +51,11 @@ export default defineConfig({
       // dejado una corrida abortada.
       //
       // Con `-pl app` el working dir del proceso es `app/`, así que la BD del
-      // e2e es `app/educhronos-e2e.db`, separada de `app/educhronos.db` (la BD
-      // de trabajo del desarrollador, que el e2e no debe tocar).
+      // e2e es `app/educhronos-e2e.db`. La URL explícita también la separa de la
+      // base de desarrollo: desde S153 un arranque SIN argumento no usa `app/`,
+      // sino la carpeta de datos del usuario (`$XDG_DATA_HOME/educhronos`, o
+      // `~/.local/share/educhronos`). Por eso el e2e la pasa: no hereda dónde
+      // resuelva la aplicación por defecto.
       command:
         'rm -f app/educhronos-e2e.db* && mvn -pl app spring-boot:run -Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db',
       cwd: '../..',
@@ -61,10 +64,10 @@ export default defineConfig({
       // Arranque de Spring + carga de la JVM + compilación Maven: generoso.
       timeout: 120_000,
       // Nunca reutilizar: si se enganchara a un backend de desarrollo ya
-      // escuchando en :8080, el e2e correría contra `app/educhronos.db` y el
-      // aislamiento no serviría de nada. Consecuencia asumida: para correr el
-      // e2e hay que tener parado el backend de dev, o Playwright aborta por
-      // puerto ocupado.
+      // escuchando en :8080, el e2e correría contra la base de ESE backend —hoy
+      // la de la carpeta de datos del usuario— y el aislamiento no serviría de
+      // nada. Consecuencia asumida: para correr el e2e hay que tener parado el
+      // backend de dev, o Playwright aborta por puerto ocupado.
       reuseExistingServer: false,
       stdout: 'pipe',
       stderr: 'pipe',
