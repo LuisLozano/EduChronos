@@ -36,7 +36,9 @@ El guion de Linux no conoce la dirección de la máquina Windows.
 
     scripts/empaquetar-linux.sh [--salida DIR]
 
-Por defecto la entrega queda en `$HOME/entrega-educhronos`.
+Por defecto la entrega queda en `$HOME/entrega-educhronos`. `--salida` acepta ruta
+relativa: el guion la normaliza a absoluta nada más leerla, contra el directorio desde el
+que se lanza.
 
 Qué hace, en orden:
 
@@ -49,6 +51,11 @@ Qué hace, en orden:
    la condición 2.
 5. Descarga el JDK portable de Windows a la caché, verificando su sha256.
 6. Arma la carpeta de entrega.
+7. Comprueba su propia entrega y **aborta si sale incompleta**: `SHA256SUMS` tiene que
+   quedar con dos entradas de dos campos, un `.jar` y un `.zip`. Lo mismo que el `.ps1`
+   exige al llegar a Windows, pero en la máquina donde se construye: en S153 una entrega
+   con una sola huella se dio por buena aquí y el fallo no apareció hasta después de
+   transportar 190 MB.
 
 ### La caché del JDK
 

@@ -57,6 +57,15 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+# --salida admite ruta RELATIVA y se normaliza AQUÍ, antes de que nadie la use. Se resuelve
+# contra el directorio desde el que se lanza el guion, que es lo que espera quien la teclea.
+# Hace falta porque más abajo la huella del JDK se calcula dentro de un `cd` a otra carpeta:
+# con $SALIDA relativa, el destino del volcado se resolvía desde ESE cd y apuntaba a un
+# directorio inexistente, así que la línea del JDK no se escribía y la entrega salía con una
+# sola huella. Medido en S153 con `--salida ./empaquetado`.
+mkdir -p "$SALIDA" || { echo "ABORTA: no se puede crear la carpeta de salida: $SALIDA"; exit 1; }
+SALIDA="$(cd "$SALIDA" && pwd)" || { echo "ABORTA: no se puede resolver la carpeta de salida."; exit 1; }
+
 DIR_GUION="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RAIZ="$(git -C "$DIR_GUION" rev-parse --show-toplevel 2>/dev/null)"
 if [ -z "$RAIZ" ]; then echo "ABORTA: el guion no está dentro de un repo git."; exit 1; fi
@@ -193,10 +202,39 @@ EXIT_PS=$?
 echo "exit cp ps1 = $EXIT_PS"
 if [ "$EXIT_PS" -ne 0 ]; then echo "ABORTA: falta scripts/empaquetar-windows.ps1."; exit 1; fi
 
-( cd "$SALIDA/build" && sha256sum "$JAR_NOMBRE" > SHA256SUMS )
-( cd "$SALIDA/jdk"   && sha256sum "$ZIP_JDK"   >> "$SALIDA/build/SHA256SUMS" )
+# Los dos `cd` son para que en SHA256SUMS quede el nombre PELADO del fichero, que es lo que
+# el guion de Windows espera (compone las rutas por su cuenta: el jar junto a él, el zip en
+# la carpeta jdk\ hermana). El volcado del segundo va FUERA del subshell, para que el
+# destino se resuelva en el directorio de partida y no dentro del `cd`.
+( cd "$SALIDA/build" && sha256sum "$JAR_NOMBRE" ) > "$SALIDA/build/SHA256SUMS"
+EXIT_SHA_JAR=$?
+( cd "$SALIDA/jdk"   && sha256sum "$ZIP_JDK"   ) >> "$SALIDA/build/SHA256SUMS"
+EXIT_SHA_JDK=$?
+echo "exit sha jar = $EXIT_SHA_JAR ; exit sha jdk = $EXIT_SHA_JDK"
+if [ "$EXIT_SHA_JAR" -ne 0 ] || [ "$EXIT_SHA_JDK" -ne 0 ]; then
+  echo "ABORTA: no se pudo calcular alguna huella."
+  exit 1
+fi
 echo "--- SHA256SUMS:"
 cat "$SALIDA/build/SHA256SUMS"
+
+# GUARDA DE LA ENTREGA. El .ps1 ya comprueba esto mismo al llegar a Windows —exige 2
+# entradas, un .jar y un .zip— pero el lado Linux no comprobaba NADA de lo que acababa de
+# escribir. Por eso en S153 una entrega con una sola huella se dio por buena aquí, se
+# transportaron 190 MB a la otra máquina, y el defecto no apareció hasta que el .ps1 abortó
+# con «se esperaban 2 entradas (jar y jdk)». La entrega se valida donde se construye.
+LINEAS_SHA=$(wc -l < "$SALIDA/build/SHA256SUMS")
+CAMPOS_MAL=$(awk 'NF != 2 { n++ } END { print n+0 }' "$SALIDA/build/SHA256SUMS")
+N_JAR=$(awk '{ print $2 }' "$SALIDA/build/SHA256SUMS" | grep -c '\.jar$')
+N_ZIP=$(awk '{ print $2 }' "$SALIDA/build/SHA256SUMS" | grep -c '\.zip$')
+echo "guarda: $LINEAS_SHA líneas, $CAMPOS_MAL con campos mal, $N_JAR .jar, $N_ZIP .zip"
+if [ "$LINEAS_SHA" -ne 2 ] || [ "$CAMPOS_MAL" -ne 0 ] || [ "$N_JAR" -ne 1 ] || [ "$N_ZIP" -ne 1 ]; then
+  echo "ABORTA: SHA256SUMS no ha quedado con dos entradas de dos campos, un .jar y un .zip."
+  echo "        Contenido escrito:"
+  sed 's/^/        /' "$SALIDA/build/SHA256SUMS"
+  echo "        La entrega NO sirve; no se transporta."
+  exit 1
+fi
 
 cat > "$SALIDA/build/LEEME.txt" <<LEEME_EOF
 Educhronos - entrega para construir el app-image de Windows.
