@@ -194,7 +194,44 @@ Write-Host "=========================================================="
 Write-Host "Arranca sobre una base VACIA en una carpeta aparte. No prueba datos."
 if (Test-Path $datos) { Remove-Item $datos -Recurse -Force }
 New-Item -ItemType Directory $datos -Force | Out-Null
-$proc = Start-Process -FilePath "$dest\Educhronos\Educhronos.exe" -WorkingDirectory $datos -PassThru
+
+# La URL se pasa EXPLICITA, y es lo que sostiene la frase de arriba. Desde S153 la
+# aplicacion sin argumento NO crea la base en el directorio de trabajo: la resuelve en la
+# carpeta de datos del usuario (%LOCALAPPDATA%\Educhronos), que PERSISTE entre corridas.
+# Con la resolucion por defecto, el Remove-Item de $datos ya no garantizaria una base
+# vacia (limpiaria una carpeta donde no vive la base) y el listado del final saldria vacio
+# sin que nada fallase. Pasandola aqui, el humo prueba lo que dice que prueba: base vacia,
+# en sitio conocido y borrado en cada corrida.
+#
+# Que la resolucion POR DEFECTO acierte no se verifica aqui: eso es el M4 de la condicion 7.
+#
+# PENDIENTE DE MEDIR EN WINDOWS (no se puede probar en Linux, este guion solo corre alli):
+#   La ruta lleva barras invertidas dentro de una URL JDBC. El driver Xerial 3.53.2.0 no
+#   normaliza nada: toma la subcadena que sigue a "jdbc:sqlite:" tal cual y se la pasa al
+#   open nativo (solo trata aparte ":memory:", "file:" y ":resource:"). Verificado leyendo
+#   el bytecode del driver, NO ejecutandolo en Windows. Si el open fallase con
+#   SQLITE_CANTOPEN, la alternativa a probar es la misma ruta con barras normales:
+#   ("$bdHumo" -replace '\\', '/').
+# (El segundo riesgo que tuvo este bloque, el troceo de -ArgumentList por espacios, ya no
+# aplica: la URL viaja por variable de entorno. La razon esta junto al Start-Process.)
+$bdHumo = "$datos\educhronos-humo.db"
+Write-Host ("base del humo: {0}" -f $bdHumo)
+
+# Por VARIABLE DE ENTORNO y no por argumento. Start-Process -ArgumentList en PowerShell
+# 5.1 une los elementos con espacios y NO los encomilla, asi que un -Base con espacios
+# partiria "--spring.datasource.url=jdbc:sqlite:C:\Mis Cosas\humo\educhronos-humo.db" en
+# dos argumentos y la URL llegaria truncada, en silencio y con el humo pareciendo correcto.
+# Una variable de entorno no se parte. Spring Boot enlaza SPRING_DATASOURCE_URL a
+# spring.datasource.url por binding relajado.
+$env:SPRING_DATASOURCE_URL = "jdbc:sqlite:$bdHumo"
+try {
+    $proc = Start-Process -FilePath "$dest\Educhronos\Educhronos.exe" `
+            -WorkingDirectory $datos -PassThru
+} finally {
+    # Se limpia en cuanto el proceso esta lanzado: lo hereda el hijo, y asi no queda
+    # colgando en la sesion de PowerShell para lo que venga despues.
+    Remove-Item Env:\SPRING_DATASOURCE_URL -ErrorAction SilentlyContinue
+}
 Write-Host ("PID lanzador = {0}" -f $proc.Id)
 
 $listo = $false
@@ -255,7 +292,10 @@ Write-Host "--- procesos:"
 Get-CimInstance Win32_Process -Filter "Name='Educhronos.exe'" |
     Select-Object ProcessId, ParentProcessId, @{n='MB';e={[int]($_.WorkingSetSize/1MB)}} |
     Format-Table -AutoSize
-Write-Host "--- ficheros creados en el directorio de trabajo:"
+# Debe aparecer educhronos-humo.db, la base que se paso por argumento. Ya NO sirve como
+# comprobacion de "donde nace la base por defecto": eso lo decide el post-procesador de
+# S153 y se verifica en el M4.
+Write-Host "--- ficheros en la carpeta del humo:"
 Get-ChildItem $datos | Format-Table Length, Name -AutoSize
 Write-Host "--- escucha en el 8080:"
 Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue |
