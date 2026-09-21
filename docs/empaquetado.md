@@ -158,6 +158,16 @@ la LAN. Para desarrollo hay escotilla: `--server.address=0.0.0.0`.
 sin pantalla; qué hace el `.exe` con la bandeja, el navegador y el candado en un Windows de
 verdad es trabajo del M4 sobre esa máquina.
 
+### Rutas de la SPA (S155)
+
+El jar sirve la interfaz desde `classpath:/static/` con un manejador propio (`RutasSpaConfig` y
+`ResolvedorRutasSpa`, en `es.yaroki.educhronos.app.config`). Toda ruta que no sea un fichero, no empiece por
+`/api/` y no tenga extensión en su último segmento recibe `index.html`, así que F5 y una URL directa a una vista
+funcionan. Una URL que no es ninguna vista la redirige Angular a la portada. `spring.web.resources.add-mappings=false`
+hace que ese manejador sea el único de `/**`. El e2e corre contra `ng serve` y NO ejercita este servido;
+compruébalo a mano sobre el jar o el bundle: `curl -s -o /dev/null -w '%{http_code} %{content_type}\n'
+http://127.0.0.1:8080/horario/1` debe dar `200 text/html`, y `/api/no-existe` debe dar `404`.
+
 ---
 
 ## 4. Los 14 módulos del runtime
