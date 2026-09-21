@@ -276,12 +276,11 @@ if ($ocupado) {
 #
 # MEDIDO EN WINDOWS (S153, humo del empaquetado; S156, Windows 11 limpio): la URL con
 # barras invertidas abre.
-#   La ruta lleva barras invertidas dentro de una URL JDBC. El driver Xerial 3.53.2.0 no
-#   normaliza nada: toma la subcadena que sigue a "jdbc:sqlite:" tal cual y se la pasa al
-#   open nativo (solo trata aparte ":memory:", "file:" y ":resource:"). Verificado leyendo
-#   el bytecode del driver, NO ejecutandolo en Windows. Si el open fallase con
-#   SQLITE_CANTOPEN, la alternativa a probar es la misma ruta con barras normales:
-#   ("$bdHumo" -replace '\\', '/').
+#   La ruta viaja dentro de la URL JDBC con sus barras invertidas TAL CUAL. El driver
+#   Xerial 3.53.2.0 no normaliza nada: toma la subcadena que sigue a "jdbc:sqlite:" y se
+#   la pasa al open nativo (solo trata aparte ":memory:", "file:" y ":resource:"). Se
+#   verifico primero leyendo el bytecode del driver (S153) y despues EJECUTANDO: en el
+#   humo del empaquetado (S153) y en un Windows 11 limpio (S156).
 # (El segundo riesgo que tuvo este bloque, el troceo de -ArgumentList por espacios, ya no
 # aplica: la URL viaja por variable de entorno. La razon esta junto al Start-Process.)
 $bdHumo = "$datos\educhronos-humo.db"

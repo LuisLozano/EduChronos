@@ -318,7 +318,7 @@ Ver §3 bis. Medido en Linux; en Windows, pendiente del M4.
 La condición 3 de `O-instalación` se verificó así. Repetirla con cada versión que se entregue.
 
 **Máquina y cuenta.** Un Windows 11 sin Java ni Node. Desde una consola de administrador:
-`net user educhronos-prueba * /add` crea una cuenta local ESTÁNDAR (sólo «Usuarios").
+`net user educhronos-prueba * /add` crea una cuenta local ESTÁNDAR (sólo «Usuarios»).
 Comprobación: `net localgroup Administradores` no la lista, y DENTRO de esa cuenta
 `whoami /groups | findstr S-1-5-32-544` sale vacío (en una consola elevada de un
 administrador sale el SID: no vale como prueba). `where.exe java` y `where.exe node` no
