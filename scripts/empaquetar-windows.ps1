@@ -5,10 +5,13 @@
 #  construye el app-image con jpackage. No necesita codigo fuente, ni Maven,
 #  ni Git, ni Java instalado: el JDK viaja en la entrega.
 #
-#    powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1
+#    powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1 -HuellaJar <sha256>
 #
 #  Opciones:
 #    -Base C:\ruta   donde trabajar (por defecto C:\DES\educhronos-build)
+#    -HuellaJar H    OBLIGATORIA. La sha256 del jar, copiada de la consola del guion de
+#                    Linux al terminar. NO se lee de esta carpeta a proposito: es lo unico
+#                    que distingue una entrega al dia de una caducada.
 #    -SinHumo        no arranca la aplicacion al terminar
 #
 #  Sin tildes a proposito: Windows PowerShell 5.1 lee los .ps1 en la
@@ -22,6 +25,7 @@
 # =====================================================================
 param(
     [string]$Base = "C:\DES\educhronos-build",
+    [string]$HuellaJar,
     [switch]$SinHumo
 )
 $ErrorActionPreference = 'Continue'
@@ -56,6 +60,17 @@ if (-not [System.IO.Path]::IsPathRooted($Base)) {
     Write-Host ("  recibido: '{0}'" -f $Base)
     Write-Host "  ejemplo : -Base C:\DES\educhronos-build"
     Write-Host "  Si encadenaste otra orden detras del guion, ponla en una linea aparte."
+    exit 2
+}
+
+# -HuellaJar tiene que llegar por un canal DISTINTO de la propia entrega: se copia de la
+# consola de la maquina de Linux, no se lee de esta carpeta. SHA256SUMS viaja DENTRO de la
+# entrega, asi que una entrega vieja pasa sus propias huellas sin que nada chille
+# (D-entrega-caducada-indetectable, S154). Sin [Parameter(Mandatory)]: pediria el valor por
+# teclado en vez de abortar, y un guion que espera tecleo no sirve en una tanda.
+if ($HuellaJar -notmatch '^[0-9A-Fa-f]{64}$') {
+    Write-Host "ABORTA: falta -HuellaJar o no es una sha256 (64 hexadecimales). Copiala de la orden"
+    Write-Host "        que imprime el guion de Linux al terminar; NO la tomes de esta carpeta."
     exit 2
 }
 if (-not (Test-Path $Base)) { New-Item -ItemType Directory $Base -Force | Out-Null }
@@ -113,6 +128,17 @@ if ($hJar -ne $esperado[$jarNombre] -or $hJdk -ne $esperado[$jdkZip]) {
     Terminar 1
 }
 Write-Host "Las dos huellas coinciden."
+
+# TERCERA comprobacion, y la unica que detecta una entrega CADUCADA: las dos de arriba solo
+# dicen que esta copia esta integra respecto al SHA256SUMS que viaja con ella, y eso lo
+# cumple igual una entrega de hace tres construcciones.
+Write-Host ("jar -HuellaJar: {0}" -f $HuellaJar.ToUpper())
+if ($hJar -ne $HuellaJar.ToUpper()) {
+    Write-Host "ABORTA: el jar de esta carpeta no es el que construyo Linux (huella distinta de"
+    Write-Host "        -HuellaJar). La entrega esta caducada o es de otra construccion."
+    Terminar 1
+}
+Write-Host "El jar es el de la construccion de Linux."
 
 Write-Host ""
 Write-Host "=========================================================="
@@ -190,6 +216,10 @@ $cronoZip = [System.Diagnostics.Stopwatch]::StartNew()
 $cronoZip.Stop()
 if (-not (Test-Path $zip)) { Write-Host "ABORTA: no se creo el zip."; Terminar 1 }
 Write-Host ("zip: {0}  ({1} B)  en {2:N1} s" -f $zip, (Get-Item $zip).Length, $cronoZip.Elapsed.TotalSeconds)
+# La huella del zip se imprime AQUI y se repite en el resumen: es lo que se comprueba en el
+# equipo de destino antes de extraer, y sale de la consola, no de dentro del zip.
+$hZip = (Get-FileHash $zip -Algorithm SHA256).Hash
+Write-Host ("zip sha256: {0}" -f $hZip)
 
 if ($SinHumo) {
     Write-Host ""
@@ -371,6 +401,8 @@ Write-Host ("arranque    : {0}" -f $(if ($listo) { "OK" } else { "FALLO" }))
 Write-Host ("solver      : {0}" -f $solver)
 Write-Host ("app-image   : {0}\Educhronos" -f $dest)
 Write-Host ("zip         : {0}" -f $zip)
+Write-Host ("zip sha256  : {0}" -f $hZip)
+Write-Host ("jar sha256  : {0}" -f $HuellaJar.ToUpper())
 Write-Host ("transcripcion: {0}" -f $transcripcion)
 if (-not $listo -or $solver -eq "FALLO") { Terminar 1 }
 Terminar 0

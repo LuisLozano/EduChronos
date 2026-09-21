@@ -81,7 +81,11 @@ a la entrega. Hay una sola fuente y no dos copias que puedan divergir.
 
 Desde la carpeta `build\`:
 
-    powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1 -Base C:\DES\educhronos-build
+    powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1 -Base C:\DES\educhronos-build -HuellaJar <sha256 del jar>
+
+La huella se copia de la CONSOLA de la máquina de Linux: el guion de Linux termina
+imprimiendo esta orden entera, con el número ya puesto, bajo el rótulo «Orden para
+Windows». No está en la carpeta de entrega y no debe buscarse ahí (§7).
 
 Opciones:
 
@@ -91,6 +95,9 @@ Opciones:
   el directorio actual y el guion escribiría en un sitio inventado sin avisar.
   Ocurrió en S152, con un `Copy-Item` encadenado en la misma línea. No encadenes
   otra orden detrás del guion.
+- `-HuellaJar <sha256>` — **obligatoria**, y el guion aborta con código 2 si falta
+  o no son 64 hexadecimales. Es la huella del jar tal como la midió Linux, y llega
+  por un canal distinto de la entrega a propósito: ver §7.
 - `-SinHumo` — no arranca la aplicación al terminar.
 
 Qué hace, en orden:
@@ -100,7 +107,10 @@ Qué hace, en orden:
    puede montar el runtime.
 3. `jpackage --type app-image` con los 14 módulos.
 4. Mide la carpeta y dice si cumple la condición 2.
-5. Comprime el app-image.
+5. Comprime el app-image e imprime el **sha256 del zip**, que sale también en el
+   resumen final junto al del jar. Esa es la huella que se comprueba en el equipo de
+   destino antes de extraer: viaja por la consola o por donde se anuncie la descarga,
+   nunca dentro del propio zip.
 6. Prueba de humo, salvo `-SinHumo`.
 
 Cada corrida deja su propia transcripción en `-Base`, con el modo y la fecha en
@@ -279,6 +289,17 @@ versión. Si se relanza el guion de Linux, una `build/` ya copiada a Windows dej
 de casar aunque no haya cambiado una línea, y el `.ps1` abortará con «alguna
 huella no coincide». Es correcto, pero puede despistar. La identidad de versión
 la da el commit escrito en `LEEME.txt`.
+
+**Desde S156 la identidad del jar sí se comprueba, y con eso queda saldada
+`D-entrega-caducada-indetectable`.** Lo que `SHA256SUMS` no podía hacer es detectar una
+entrega CADUCADA: el fichero de huellas viaja DENTRO de la carpeta, así que una entrega de
+hace tres construcciones cuadra consigo misma y el `.ps1` la daba por buena. Ahora el `.ps1`
+exige `-HuellaJar` y compara el jar contra ella; ese número llega por OTRO canal —la consola
+de Linux, copiada a mano— y no está en la carpeta, que es lo único que lo hace independiente.
+Si no casa, aborta con «el jar de esta carpeta no es el que construyó Linux». Sigue sin ser
+una identidad de versión —dos construcciones del mismo commit dan huellas distintas, y para
+eso sigue estando el commit del `LEEME.txt`—: lo que garantiza es que se empaqueta EL jar que
+acaba de construirse y no otro.
 
 **Nada de lo medido aquí vale para la condición 3.** La máquina de construcción
 tiene cuenta de dominio y no es un Windows limpio. Windows 10, sin probar.

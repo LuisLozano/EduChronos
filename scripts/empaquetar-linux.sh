@@ -236,6 +236,18 @@ if [ "$LINEAS_SHA" -ne 2 ] || [ "$CAMPOS_MAL" -ne 0 ] || [ "$N_JAR" -ne 1 ] || [
   exit 1
 fi
 
+# LA HUELLA DEL JAR SALE POR LA CONSOLA Y NO POR LA CARPETA. Se extrae de lo que se acaba de
+# escribir, pero se imprime aparte para copiarla a mano: es el canal independiente que le
+# falta al transporte. SHA256SUMS viaja DENTRO de la entrega, así que una entrega vieja pasa
+# sus propias huellas sin que nada chille (D-entrega-caducada-indetectable, S154); con
+# -HuellaJar, el .ps1 compara el jar contra un número que NO estaba en la carpeta.
+HUELLA_JAR=$(awk '$2 ~ /\.jar$/ { print $1 }' "$SALIDA/build/SHA256SUMS")
+if ! printf '%s' "$HUELLA_JAR" | grep -qE '^[0-9A-Fa-f]{64}$'; then
+  echo "ABORTA: la huella del jar extraída de SHA256SUMS no son 64 hexadecimales."
+  echo "        extraído: '$HUELLA_JAR'"
+  exit 1
+fi
+
 cat > "$SALIDA/build/LEEME.txt" <<LEEME_EOF
 Educhronos - entrega para construir el app-image de Windows.
 
@@ -248,14 +260,21 @@ Que traer a Windows:
   build/   en cada construccion
 
 Como construir, desde la carpeta build/:
-  powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1
+  powershell -ExecutionPolicy Bypass -File .\empaquetar-windows.ps1 -HuellaJar <sha256 del jar>
 
 Opciones:
-  -Base C:\ruta    donde trabajar (por defecto C:\DES\educhronos-build)
-  -SinHumo         no arranca la aplicacion despues de empaquetar
+  -Base C:\ruta     donde trabajar (por defecto C:\DES\educhronos-build)
+  -HuellaJar H      OBLIGATORIA. La sha256 del jar.
+  -SinHumo          no arranca la aplicacion despues de empaquetar
+
+El valor de -HuellaJar NO ESTA EN ESTA CARPETA, y es a proposito: se copia de la
+consola de la maquina de Linux, del bloque "Orden para Windows" que el guion
+imprime al terminar. Si la huella viajara aqui, una entrega vieja pasaria sus
+propias huellas y nadie se enteraria.
 
 El guion verifica las dos huellas de SHA256SUMS antes de nada y aborta si
-alguna no coincide.
+alguna no coincide. Despues compara el jar contra -HuellaJar: eso es lo que
+distingue esta entrega de una caducada.
 LEEME_EOF
 
 echo
@@ -266,4 +285,6 @@ ls -l "$SALIDA/jdk" "$SALIDA/build"
 du -sh "$SALIDA/jdk" "$SALIDA/build"
 echo
 echo "Desde Windows, trae estas carpetas y ejecuta en build\\:"
-echo "  powershell -ExecutionPolicy Bypass -File .\\empaquetar-windows.ps1"
+echo
+echo "--- Orden para Windows (cópiala tal cual; la huella NO viaja en la carpeta):"
+echo "powershell -ExecutionPolicy Bypass -File .\\empaquetar-windows.ps1 -Base C:\\DES\\educhronos-build -HuellaJar $HUELLA_JAR"
