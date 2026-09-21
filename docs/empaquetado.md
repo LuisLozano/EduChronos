@@ -310,3 +310,40 @@ el directorio de trabajo en S153 (condición 7), y en S154 la aplicación pasó 
 en 127.0.0.1 (condición 8), a avisar de que ha arrancado abriendo el navegador y a impedir la
 segunda instancia (condición 4), y a cerrarse desde su propio icono de bandeja (condición 5).
 Ver §3 bis. Medido en Linux; en Windows, pendiente del M4.
+
+---
+
+## Prueba final en Windows limpio (S156)
+
+La condición 3 de `O-instalación` se verificó así. Repetirla con cada versión que se entregue.
+
+**Máquina y cuenta.** Un Windows 11 sin Java ni Node. Desde una consola de administrador:
+`net user educhronos-prueba * /add` crea una cuenta local ESTÁNDAR (sólo «Usuarios").
+Comprobación: `net localgroup Administradores` no la lista, y DENTRO de esa cuenta
+`whoami /groups | findstr S-1-5-32-544` sale vacío (en una consola elevada de un
+administrador sale el SID: no vale como prueba). `where.exe java` y `where.exe node` no
+encuentran nada (en PowerShell, `where` sin `.exe` es otra orden).
+
+**Entrega.** El zip que produce `empaquetar-windows.ps1` viaja por USB; su sha256 lo imprime
+el guion. Por USB el fichero no lleva la marca de descarga y Windows no muestra SmartScreen.
+Se extrae con el Explorador en una carpeta del usuario y se arranca con doble clic: no debe
+aparecer ningún diálogo de seguridad ni de credenciales.
+
+**Datos.** Para probar con el centro real, la copia del banco `educhronos-s137.db`
+(md5 `dfa4c0774a842d8eb6b7a941e23df2a9`) se coloca como
+`%LOCALAPPDATA%\Educhronos\educhronos.db`.
+
+**Oráculo.** Las cuatro descargas (CSV y PDF por grupo, profesor y aula) se llevan a Linux y
+se comprueban contra OTRA copia del mismo banco. El horario del banco es el id 1, el único.
+
+    O=scripts/oraculo-exportacion.py
+    DB=<copia de educhronos-s137.db>
+    python3 $O csv $DB 1 horario-1.csv
+    python3 $O pdf $DB 1 horario-1-grupo.pdf    --vista grupo
+    python3 $O pdf $DB 1 horario-1-profesor.pdf --vista profesor
+    python3 $O pdf $DB 1 horario-1-aula.pdf     --vista aula
+
+Esperado, todo con código 0: CSV «OK: las tres vistas coinciden»; grupo 28 páginas y
+«halladas 1285, FALTAN 0, SOBRAN 0»; profesor 59 páginas y 835/0/0; aula 44 páginas, 819/0/0
+y «páginas vacías con leyenda: 0». El CSV, además, se abre en Excel con las columnas
+separadas y las tildes correctas.

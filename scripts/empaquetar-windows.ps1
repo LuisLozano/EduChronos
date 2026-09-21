@@ -274,7 +274,8 @@ if ($ocupado) {
 #
 # Que la resolucion POR DEFECTO acierte no se verifica aqui: eso es el M4 de la condicion 7.
 #
-# PENDIENTE DE MEDIR EN WINDOWS (no se puede probar en Linux, este guion solo corre alli):
+# MEDIDO EN WINDOWS (S153, humo del empaquetado; S156, Windows 11 limpio): la URL con
+# barras invertidas abre.
 #   La ruta lleva barras invertidas dentro de una URL JDBC. El driver Xerial 3.53.2.0 no
 #   normaliza nada: toma la subcadena que sigue a "jdbc:sqlite:" tal cual y se la pasa al
 #   open nativo (solo trata aparte ":memory:", "file:" y ":resource:"). Verificado leyendo
