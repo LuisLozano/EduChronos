@@ -61,15 +61,15 @@
 - L1251 — ### Decisiones permanentes (no reabrir sin razón de peso)
 - L1297 — ### Método de trabajo (procedimiento vigente)
 - L1330 — ### Deuda consciente VIVA
-- L3211 — ### Deuda consciente CERRADA (histórico)
-- L3311 — ### Notas técnicas validadas en Fase 0
-- L3324 — ### Notas técnicas validadas en Fase 6
-- L3369 — ### Notas técnicas validadas en Fase 9
-- L3378 — ### Notas técnicas validadas en Fase 11
-- L3497 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3506 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3533 — ### Registro detallado de sesiones S10–S31
-- L3542 — ## Señales globales de alerta
+- L3216 — ### Deuda consciente CERRADA (histórico)
+- L3316 — ### Notas técnicas validadas en Fase 0
+- L3329 — ### Notas técnicas validadas en Fase 6
+- L3374 — ### Notas técnicas validadas en Fase 9
+- L3383 — ### Notas técnicas validadas en Fase 11
+- L3502 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3511 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3538 — ### Registro detallado de sesiones S10–S31
+- L3547 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -749,7 +749,7 @@ nuevo a partir del anterior, modificando solo los cambios.
   M4, LINUX. Jar de 156.388.388 B, listo en 7 s. Rutas profundas, con query y `/loquesea` → 200 `text/html` con los dos `Accept`, con el mismo md5 que `/` (`1391572255a60b836dee893fe7b2b199`); `/api/no-existe` → 404 en JSON; `/main-inexistente.js` → 404; favicon y el `main-*.js` real → 200 con su tipo; `/api/jornada` sin cambios. MUTANTE DEL CABLEADO (`--spring.web.resources.add-mappings=true`): la tabla no cambia en nada. Con TRACE, A registra `[/**]` y B `[/webjars/**, /**]`: la propiedad surte efecto y el reenvío sobrevive igual, porque prevalece el manejador propio (por qué, no medido). NAVEGADOR (usuario): F5 en `/horario/1` y en `/configuracion/jornada` recarga la vista; la URL directa en una pestaña nueva abre la vista; `/loquesea` lleva a la portada. Al recargar tras elegir otro grupo, la vista vuelve a 1B-A: ver DEUDA.
   CRITERIO. **Condición 9 CUMPLIDA (S155).** `O-instalación`: **8 de 9**. Nada vale para la condición 3.
   DECISIONES DE MÉTODO. (1) El manejador de Boot se APAGA con la propiedad pública y no se le gana con un `@Order` negativo, que dependería de su implementación. (2) La propiedad se MANTIENE aunque su mutante sobrevive: su valor es que haya un solo `/**`, no que el reenvío funcione. Los tres textos que decían lo contrario (dos javadocs y el comentario del `.properties`) se corrigieron antes del cierre. (3) El test es UNITARIO: introducir el primer `@SpringBootTest` o `@WebMvcTest` era una decisión de infraestructura cara, y además no habría probado el cuerpo JSON del 404 (MockMvc no pasa por el despacho de errores del contenedor). Lógica → unitario y M3; cableado → M4 sobre el jar. (4) La ruta comodín ENTRA en el alcance: sin ella, el reenvío convierte un 404 honesto en una pantalla en blanco. No es pulir, es no empeorar lo que el propio Cambio toca. (5) Las instrucciones del Project conservaban la norma documental anterior a M-doc (S122), «pide los ficheros y devuélvelos enteros». El asistente la siguió y el usuario lo detectó. Se corrige en las instrucciones del Project; `metodo.md` ya dice lo correcto, igual que el patrón del nombre de sesión (M1.7) y el prompt siguiente (M1.8).
-  DEUDA. **SALDADA `D-spa-sin-fallback-de-rutas`.** Nacen **`D-seleccion-de-vista-fuera-de-la-url`** (mejora futura, sin objetivo asignado) y **`D-reenvio-spa-sin-guarda-automatica`** (técnica real, sede Fase 12). Ninguna bloquea.
+  DEUDA. **SALDADA `D-spa-sin-fallback-de-rutas`.** Nacen **`D-seleccion-de-vista-fuera-de-la-url`** (mejora futura, sin objetivo asignado) y **`D-reenvio-spa-sin-guarda-automatica`** (técnica real, sede Fase 12). Ninguna bloquea. En el propio cierre, una instancia de **`D-declarado-sin-artefacto`**: Claude Code guardó «en memoria» que `regenerar-indice.py` no interpreta argumentos y que un `--help` exploratorio REGENERA y ESCRIBE los índices; la memoria no es sede recuperable por el método, así que la lección vive aquí. Es además la **cuarta instancia de `D-guion-escribe-donde-no-se-dijo`**, estirando su definición de «dónde» a «cuándo»: una herramienta que escribe cuando se le pide ayuda. El descuadre previo de los índices no se perdió: se reconstruyó el estado en `/tmp` y se midió llamando a `comprobar()` como módulo, que sólo lee. Un solo defecto de instrumento en la sesión: el disparador de §6 no salta.
   CORRECCIONES. (a) Del asistente: la premisa del paso 0.3 («`SqliteForeignKeysConfig` es una `@Configuration`»), escrita de memoria y cazada por Claude Code; la predicción del mutante M4, errónea por exceso (pasó por alto que devolver siempre el índice también se salta las dos guardas); tres textos que afirmaban más de lo medido, escritos antes de medir y refutados por el mutante del cableado; y pedir los ficheros de documentación contra M-doc. (b) De S154, cazado en el M1 de S155: la fila de H4 de §2 seguía en «3 de 9» y el verificador no lo detectó, porque `O-instalación` queda fuera de su corpus (`D-censo-r4-ciego-a-los-objetivos`); corregida. (c) De Claude Code, a su favor: amplió el M4 con un TRACE fuera del guion, de pura medición, y fue lo que separó «la propiedad no surte efecto» de «surte efecto y no hace falta».
   SUITES: **solver 92, app 465, vitest 482 en 52 ficheros**, en verde; la apertura era 92/458/482 y los 7 nuevos son de `ResolvedorRutasSpaTest`. e2e: `centro-minimo.spec.ts:265` ROJO y PREEXISTENTE, ÚNICO fallo de la corrida (1 fallado, 1 pasado, 58,9 s), idéntico al de S154.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, intactos en cada tanda; el M4 corrió sobre copias.
@@ -3173,6 +3173,11 @@ con remisión a la bitácora.
   aborta si su propia entrega no queda con dos entradas de dos campos, un `.jar` y un `.zip`, que es
   el espejo de la guarda que el `.ps1` ya tenía al otro lado. Queda VIVA porque el `-Base` del `.ps1`
   sigue sin normalizar y nadie ha auditado qué otros parámetros de ruta aceptan valor relativo.
+  **Cuarta instancia (S155):** `regenerar-indice.py` no interpreta argumentos, y un `--help` exploratorio regenera
+  y escribe los índices de los dos documentos. No hubo daño, porque el estado previo se reconstruyó en `/tmp`, pero
+  la medición del descuadre «antes» casi se pierde. Regla práctica mientras no se arregle: se invoca sin
+  argumentos y sólo cuando se quiere escribir; para medir sin escribir, se importa como módulo y se llama a
+  `comprobar()`.
 
 - **D-e2e-centro-minimo-rojo** (S154, VIVA, TÉCNICA REAL, no bloqueante) — `centro-minimo.spec.ts:265`
   falla: espera 3 `.instancia` tras generar y recibe 0. Medido sobre `1e5baaf` limpio, en un worktree
