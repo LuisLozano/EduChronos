@@ -37,6 +37,16 @@ $modulos = "java.base,java.compiler,java.desktop,java.instrument,java.management
            "java.sql.rowset,jdk.jfr,jdk.unsupported,jdk.zipfs"
 $limite = 250000000
 
+# Modo escritorio (S154): sin esta opcion el .exe arranca como un servidor mudo. Con ella
+# hace lo que un programa de escritorio: comprueba que no haya otro Educhronos abierto, abre
+# el navegador, pone el icono en la bandeja y escribe su log en la carpeta de datos.
+#
+# El literal TIENE que ser identico a la constante ModoEscritorio.PROPIEDAD del codigo Java
+# (app/src/main/java/es/yaroki/educhronos/app/escritorio/ModoEscritorio.java). Si se renombra
+# alli y no aqui, el bundle arranca en modo servidor SIN dar ningun error: sin navegador, sin
+# bandeja y sin forma de cerrarlo. La comparacion la hace el paso 8a de S154 con grep.
+$propiedadEscritorio = "educhronos.escritorio"
+
 # -Base es el primer parametro POSICIONAL: si alguien encadena otra orden en la
 # misma linea, PowerShell se la pasa aqui. Una ruta relativa se resolveria contra
 # el directorio actual y el guion escribiria en un sitio inventado, en silencio
@@ -134,9 +144,11 @@ New-Item -ItemType Directory $dest -Force | Out-Null
 
 Write-Host "modulos (14, medidos en S152):"
 Write-Host "    $modulos"
+Write-Host ("java-options: -D{0}=true" -f $propiedadEscritorio)
 $crono = [System.Diagnostics.Stopwatch]::StartNew()
 & $jpackage --type app-image --name Educhronos `
     --input $entrada --main-jar $jarNombre `
+    --java-options "-D$propiedadEscritorio=true" `
     --add-modules $modulos --dest $dest
 $exitJp = $LASTEXITCODE
 $crono.Stop()
@@ -192,8 +204,35 @@ Write-Host "=========================================================="
 Write-Host " 6. PRUEBA DE HUMO"
 Write-Host "=========================================================="
 Write-Host "Arranca sobre una base VACIA en una carpeta aparte. No prueba datos."
+
+# AVISO: desde S154 el .exe arranca en MODO ESCRITORIO (--java-options
+# -Deduchronos.escritorio=true). Durante el humo, por tanto, la aplicacion ABRE EL NAVEGADOR
+# en http://127.0.0.1:8080 y PONE SU ICONO en la bandeja del sistema. Es lo esperado, no un
+# efecto secundario que haya que corregir: el humo ejercita el .exe tal como lo recibe el
+# usuario. Quien lance este guion vera aparecer una pestana; se cierra sola al pararse el
+# proceso, unos segundos despues.
+#
+# Y un efecto que NO se puede evitar pasando la base por variable de entorno: el modo
+# escritorio resuelve y CREA la carpeta de datos del usuario (%LOCALAPPDATA%\Educhronos)
+# pase lo que pase, porque ahi viven el candado de instancia unica y el fichero de log. La
+# BASE sigue siendo la temporal de $datos —que es lo que sostiene "no prueba datos"—, pero
+# esa carpeta se toca. Si ya existia, el humo le anade su educhronos.log.
 if (Test-Path $datos) { Remove-Item $datos -Recurse -Force }
 New-Item -ItemType Directory $datos -Force | Out-Null
+
+# GUARDA (S154): con el 8080 ya ocupado, este humo daria VERDE SIN PROBAR NADA de lo que
+# acaba de construirse. El modo escritorio detecta al otro Educhronos por el candado, no
+# arranca, abre el navegador y sale con 0; el Invoke-WebRequest de mas abajo recibiria su
+# 200 de LA INSTANCIA DEL USUARIO, y el POST /api/horarios se ejecutaria contra SU base.
+# Por eso se aborta, y no se avisa y se sigue.
+$ocupado = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+if ($ocupado) {
+    Write-Host "ABORTA: el puerto 8080 ya esta ocupado ANTES de lanzar el humo."
+    $ocupado | Select-Object LocalAddress, LocalPort, OwningProcess | Format-Table -AutoSize
+    Write-Host "  Cierra ese programa (si es Educhronos, con Salir en el icono de la bandeja)"
+    Write-Host "  y vuelve a lanzar. El app-image y el zip ya estan construidos."
+    Terminar 1
+}
 
 # La URL se pasa EXPLICITA, y es lo que sostiene la frase de arriba. Desde S153 la
 # aplicacion sin argumento NO crea la base en el directorio de trabajo: la resuelve en la
@@ -301,18 +340,25 @@ Write-Host "--- escucha en el 8080:"
 Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue |
     Select-Object LocalAddress, LocalPort, OwningProcess | Format-Table -AutoSize
 
-Write-Host "--- parada (primero las hijas, luego el lanzador):"
-Get-CimInstance Win32_Process -Filter "ParentProcessId=$($proc.Id)" | ForEach-Object {
-    Write-Host ("  matando hijo {0}" -f $_.ProcessId)
-    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
-}
+# Se mata SOLO EL LANZADOR, y el lanzador arrastra a la JVM hija. MEDIDO en Windows en
+# S154. Antes se mataban primero las hijas y luego el lanzador; sobra, y ademas invierte el
+# orden natural: matar la hija primero deja un instante en el que el lanzador sigue vivo sin
+# nada que lanzar. La comprobacion de que no queda NINGUN Educhronos.exe es la que dice si
+# esta suposicion se cumple el dia que deje de cumplirse.
+Write-Host "--- parada (se mata el lanzador; arrastra a la JVM hija):"
+Write-Host ("  matando lanzador {0}" -f $proc.Id)
 Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 4
 $vivos = Get-Process -Name Educhronos -ErrorAction SilentlyContinue
-if ($vivos) { Write-Host "  QUEDAN PROCESOS:"; $vivos | Format-Table Id, ProcessName -AutoSize }
-else { Write-Host "  no queda ningun proceso Educhronos" }
+if ($vivos) {
+    Write-Host "  FALLO: QUEDAN PROCESOS Educhronos vivos tras matar al lanzador."
+    Write-Host "  (El 8080 ocupado se descarto antes de lanzar, asi que son suyos.)"
+    $vivos | Format-Table Id, ProcessName -AutoSize
+} else {
+    Write-Host "  no queda ningun proceso Educhronos"
+}
 $puerto = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
-if ($puerto) { Write-Host "  PUERTO 8080 OCUPADO"; $puerto | Format-Table -AutoSize }
+if ($puerto) { Write-Host "  FALLO: PUERTO 8080 OCUPADO tras la parada"; $puerto | Format-Table -AutoSize }
 else { Write-Host "  puerto 8080 libre" }
 
 Write-Host ""

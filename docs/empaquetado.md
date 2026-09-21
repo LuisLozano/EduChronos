@@ -112,6 +112,54 @@ Un `.ps1` que llega por descarga suele venir marcado como bloqueado.
 
 ---
 
+## 3 bis. Cómo se comporta el programa instalado (S154)
+
+El `.exe` no es el `java -jar` de desarrollo: `jpackage` lo arranca con
+`--java-options "-Deduchronos.escritorio=true"`, y esa propiedad enciende el **modo
+escritorio**. Ese literal es la constante `ModoEscritorio.PROPIEDAD` del código Java y está
+en DOS sitios, el `.ps1` y la clase; si dejan de coincidir, el programa arranca como un
+servidor mudo sin dar ningún error.
+
+**Al abrirlo se abre el navegador solo**, en `http://127.0.0.1:8080`. Eso es lo que hace
+visible que ha arrancado: no hay ventana propia que mirar.
+
+**Si ya está abierto y se vuelve a pinchar**, el segundo no arranca nada: detecta al primero
+por un candado de fichero, devuelve al usuario a la pestaña y termina con código 0. Medido en
+S154: 0,3 s, sin abrir la base y sin escribir una línea en el log del que está corriendo.
+
+**Se cierra desde el icono de la bandeja, con «Salir»** —el mismo icono tiene «Abrir
+Educhronos» para volver a la pestaña—. No hace falta el Administrador de tareas. Si el
+escritorio no tiene bandeja (pasa en varios Linux modernos, y en cualquier sesión sin
+pantalla), queda dicho en el log y entonces sí hay que parar el proceso.
+
+**Si el puerto 8080 está cogido**, no arranca y lo dice con todas las letras: «No se puede
+abrir Educhronos: otro programa está usando el puerto 8080. Cierra ese programa y vuelve a
+intentarlo.» Termina con código 1. Es el único diagnóstico que el programa se atreve a dar,
+porque es el único sobre el que el usuario puede actuar; cualquier otro fallo remite al log
+por su ruta.
+
+**Dónde está el log.** Junto a la base de datos y al candado, en la carpeta de datos del
+usuario:
+
+| Sistema | Carpeta | Ficheros |
+|---|---|---|
+| Windows | `%LOCALAPPDATA%\Educhronos` | `educhronos.db`, `educhronos.log`, `educhronos.lock` |
+| Linux | `$XDG_DATA_HOME/educhronos`, o `~/.local/share/educhronos` | los mismos |
+
+El log sólo existe en modo escritorio. En desarrollo (`java -jar`, `mvn spring-boot:run`, el
+e2e) la traza sigue yendo a la consola y no se escribe ningún fichero, igual que antes de
+S154.
+
+**Sólo escucha en 127.0.0.1.** Desde otro equipo de la red del centro no se entra: la
+conexión se rechaza. Hasta S154 escuchaba en todas las interfaces y respondía desde la IP de
+la LAN. Para desarrollo hay escotilla: `--server.address=0.0.0.0`.
+
+**Nada de esto está medido en Windows todavía.** Lo de arriba se verificó en Linux, y además
+sin pantalla; qué hace el `.exe` con la bandeja, el navegador y el candado en un Windows de
+verdad es trabajo del M4 sobre esa máquina.
+
+---
+
 ## 4. Los 14 módulos del runtime
 
 La lista está MEDIDA, no supuesta, y el suelo está cerrado por las dos
@@ -225,7 +273,9 @@ la da el commit escrito en `LEEME.txt`.
 **Nada de lo medido aquí vale para la condición 3.** La máquina de construcción
 tiene cuenta de dominio y no es un Windows limpio. Windows 10, sin probar.
 
-**Lo que este procedimiento deja igual que S151**, porque no es su trabajo: la
-base se crea en el directorio de trabajo (condición 7), la aplicación escucha en
-todas las interfaces (condición 8), no avisa de que ha arrancado (condición 4),
-no se cierra desde ella misma (condición 5) y F5 da 404 (condición 9).
+**Lo que este procedimiento deja igual que S151**, porque no es su trabajo: F5 da 404
+(condición 9). Las otras cuatro que aquí se listaban ya no valen: la base dejó de crearse en
+el directorio de trabajo en S153 (condición 7), y en S154 la aplicación pasó a escuchar sólo
+en 127.0.0.1 (condición 8), a avisar de que ha arrancado abriendo el navegador y a impedir la
+segunda instancia (condición 4), y a cerrarse desde su propio icono de bandeja (condición 5).
+Ver §3 bis. Medido en Linux; en Windows, pendiente del M4.
