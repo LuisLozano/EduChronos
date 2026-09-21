@@ -43,33 +43,33 @@
 - L621 — ### Criterios de verificación
 - L666 — ## FASE 9 — Exportación
 - L669 — ### Criterios de verificación
-- L685 — ## FASE 10 — Gestión de cursos académicos
-- L694 — ### Entregable
-- L700 — ### Criterios de verificación
-- L709 — ## FASE 11 — Empaquetado y distribución Windows
-- L712 — ### Criterios de verificación
-- L730 — ## FASE 12 — CI/CD con GitHub Actions
-- L733 — ### Criterios de verificación
-- L740 — ## Registro de progreso
-- L742 — ### Sesión 155 — O-instalación (H4), C-rutas-spa: **F5 Y LAS URL DIRECTAS FUNCIONAN: EL JAR REENVÍA LAS RUTAS DE LA SPA A `index.html` SIN TRAGARSE LOS 404 DE LA API NI LOS DE LOS FICHEROS.** `O-instalación` pasa de 7 a **8 de 9**: la condición 9 queda cumplida y verificada en Linux, y salda `D-spa-sin-fallback-de-rutas`. Queda sólo la condición 3.
-- L814 — ### Bloques de Fase 2
-- L822 — ### Bloques de Fase 5
-- L845 — ### Bloques de Fase 6
-- L890 — ### Bloques de Fase 8
-- L1099 — ### Fases completadas
-- L1203 — ### Cierre del modelo — Sesión 8
-- L1251 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1297 — ### Método de trabajo (procedimiento vigente)
-- L1330 — ### Deuda consciente VIVA
-- L3216 — ### Deuda consciente CERRADA (histórico)
-- L3316 — ### Notas técnicas validadas en Fase 0
-- L3329 — ### Notas técnicas validadas en Fase 6
-- L3374 — ### Notas técnicas validadas en Fase 9
-- L3383 — ### Notas técnicas validadas en Fase 11
-- L3502 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3511 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3538 — ### Registro detallado de sesiones S10–S31
-- L3547 — ## Señales globales de alerta
+- L686 — ## FASE 10 — Gestión de cursos académicos
+- L695 — ### Entregable
+- L701 — ### Criterios de verificación
+- L710 — ## FASE 11 — Empaquetado y distribución Windows
+- L713 — ### Criterios de verificación
+- L734 — ## FASE 12 — CI/CD con GitHub Actions
+- L737 — ### Criterios de verificación
+- L744 — ## Registro de progreso
+- L746 — ### Sesión 156 — O-instalación (H4), C-windows-limpio: **LA APLICACIÓN SE INSTALA Y FUNCIONA EN UN WINDOWS 11 LIMPIO CON CUENTA ESTÁNDAR, LLEGADA POR USB, SIN UN SOLO DIÁLOGO DE SEGURIDAD.** `O-instalación` pasa de 8 a **9 de 9 y TERMINA** en seis sesiones (S151–S156). Salda `D-entrega-caducada-indetectable`.
+- L815 — ### Bloques de Fase 2
+- L823 — ### Bloques de Fase 5
+- L846 — ### Bloques de Fase 6
+- L891 — ### Bloques de Fase 8
+- L1100 — ### Fases completadas
+- L1204 — ### Cierre del modelo — Sesión 8
+- L1252 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1298 — ### Método de trabajo (procedimiento vigente)
+- L1331 — ### Deuda consciente VIVA
+- L3214 — ### Deuda consciente CERRADA (histórico)
+- L3315 — ### Notas técnicas validadas en Fase 0
+- L3328 — ### Notas técnicas validadas en Fase 6
+- L3373 — ### Notas técnicas validadas en Fase 9
+- L3382 — ### Notas técnicas validadas en Fase 11
+- L3522 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3531 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3558 — ### Registro detallado de sesiones S10–S31
+- L3567 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -670,7 +670,7 @@ generado manualmente.
 - [ ] El PDF por grupo es imprimible en A4 con buena legibilidad
 - [ ] El PDF por profesor muestra solo sus sesiones
 - [ ] El CSV contiene toda la información necesaria para procesarlo externamente
-- [ ] La exportación funciona en Windows
+- [x] La exportación funciona en Windows
   > **NOTA (S147) sobre los criterios 1–4.** Quedan SUSTITUIDOS por el «Terminado cuando» de `O-exportación`
   > (§3 de `gestion_proyecto.md`), escrito en S147 sobre medición. El **1** («buena legibilidad») y el **3**
   > («toda la información necesaria») no eran medibles tal como estaban escritos: el primero pasa a «ningún
@@ -679,6 +679,7 @@ generado manualmente.
   > a H4, porque sólo se verifica con el bundle (precedente: el criterio de Fase 6 diferido a Fase 11). Y la
   > fase **omitía el PDF por aula**, que §1 exige. **NO se marcan aquí**: se marcará el sustituto cuando se cumpla.
   > **S150:** `O-exportación` TERMINADO con su criterio de cinco condiciones; el criterio 4 de Fase 9 sigue en H4.
+  > **S156: el criterio 4 SE MARCA.** La condición 3 de `O-instalación`, que lo absorbió, pasa el oráculo sobre las descargas hechas en un Windows 11 limpio, y el CSV se abre bien en Excel.
 
 ---
 
@@ -710,10 +711,10 @@ nuevo a partir del anterior, modificando solo los cambios.
 **Objetivo:** Bundle portable para usuario no técnico en Windows.
 
 ### Criterios de verificación
-- [ ] La ejecución en un Windows limpio (sin Java, Node, etc. previos) 
+- [x] La ejecución en un Windows limpio (sin Java, Node, etc. previos) 
       funciona sin intervención técnica
 - [x] El bundle resultante pesa menos de 250MB (objetivo: optimización en Fase 11)
-- [ ] No requiere permisos de administrador
+- [x] No requiere permisos de administrador
 - [ ] Probado en Windows 10 y Windows 11
   > **NOTA (S151) sobre los criterios 1–4.** Los PRECISA el «Terminado cuando» de `O-instalación` (§3 de
   > `gestion_proyecto.md`), escrito sobre medición: el tamaño se mide sobre la carpeta y en MB; «sin intervención
@@ -724,6 +725,9 @@ nuevo a partir del anterior, modificando solo los cambios.
   > `O-instalación`— está cumplido y medido: 231.691.863 B sobre la carpeta, con el runtime
   > recortado a 14 módulos. Los criterios 1, 3 y 4 siguen sin marcar: la máquina donde se
   > midió es de dominio, la cuenta estándar no se ha probado y Windows 10 tampoco.
+  > **ACTUALIZADO en S156: los criterios 1 y 3 SE MARCAN**, porque `O-instalación` está TERMINADO: probado en un
+  > Windows 11 sin Java ni Node con una cuenta estándar. El **4 NO se marca**: Windows 10 salió del criterio por
+  > decisión del usuario (limitación conocida, §4 de `gestion_proyecto.md`), y sólo se ha probado Windows 11.
 
 ---
 
@@ -739,7 +743,24 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 155 — O-instalación (H4), C-rutas-spa: **F5 Y LAS URL DIRECTAS FUNCIONAN: EL JAR REENVÍA LAS RUTAS DE LA SPA A `index.html` SIN TRAGARSE LOS 404 DE LA API NI LOS DE LOS FICHEROS.** `O-instalación` pasa de 7 a **8 de 9**: la condición 9 queda cumplida y verificada en Linux, y salda `D-spa-sin-fallback-de-rutas`. Queda sólo la condición 3.
+### Sesión 156 — O-instalación (H4), C-windows-limpio: **LA APLICACIÓN SE INSTALA Y FUNCIONA EN UN WINDOWS 11 LIMPIO CON CUENTA ESTÁNDAR, LLEGADA POR USB, SIN UN SOLO DIÁLOGO DE SEGURIDAD.** `O-instalación` pasa de 8 a **9 de 9 y TERMINA** en seis sesiones (S151–S156). Salda `D-entrega-caducada-indetectable`.
+  TIPO Y RITUAL: DESARROLLO reducido — M0 + M2 (guiones de empaquetado y oráculo, sólo lectura) + M4 en tres máquinas (Linux, construcción de dominio y Windows 11 Home con cuenta estándar) + oráculo en Linux + M1. Sin M3: ningún cambio de producto; el del `.ps1` se verificó por sus casos negativos en Windows.
+  M0. Sexto y último Cambio de `O-instalación`. Tres decisiones del usuario. (1) Windows 10 SALE del criterio: según el usuario, todos los equipos del centro están en Windows 11; no verificado en el centro; se reabre si aparece un equipo con Windows 10 (limitación conocida, §4). (2) Medio de entrega: USB, también para las versiones futuras; se reabre si se distribuye por descarga o correo. (3) Firma: NO. En la máquina de prueba el USB no dispara SmartScreen y el Control inteligente de aplicaciones está Desactivado, con «Evaluación» en gris (fotografiado); se reabre si cambia el medio o si un equipo del centro bloquea el ejecutable. Riesgo residual escrito y no resuelto: la prueba se hace en un portátil del usuario, no en un equipo gestionado del centro.
+  M2. El `.ps1` no tenía parámetros obligatorios, verificaba el jar contra el `SHA256SUMS` de su propia carpeta y no imprimía la huella del zip. Oráculo: `scripts/oraculo-exportacion.py`, una invocación por fichero; ninguna orden literal ni el `horario_id` estaban escritos en el repo (medido: id 1, único horario del banco, FEASIBLE). El censo Tf de S150 no es alcanzable desde su línea de órdenes y queda fuera: la condición 3 no lo pide. El `Uso:` del oráculo anuncia `--vista grupo|profesor` y acepta también `aula` (defecto de texto, sin deuda).
+  PRODUCTO (`5a939ca`). `-HuellaJar` en `empaquetar-windows.ps1`, sin valor por defecto y validado como 64 hexadecimales (exit 2), comparado con la huella del jar además de con `SHA256SUMS` (exit 1, «entrega caducada»); sha256 del zip en la salida y en el resumen. `empaquetar-linux.sh` imprime al final la orden para Windows con la huella y ya no imprime la orden vieja sin ella; el `LEEME.txt` NO lleva la huella. `docs/empaquetado.md` actualizado.
+  M4, CONSTRUCCIÓN (dominio). Parseo: 0 errores. Sin huella → exit 2. Con una huella inventada → «Las dos huellas coinciden» y aborto, exit 1: el caso de S154 reproducido y rechazado. Con la de Linux (`267ce55a…`) construye. `Terminar` no hace pausa.
+  M4, WINDOWS 11 HOME, cuenta `educhronos-prueba` creada con `net user /add`: fuera de Administradores (`net localgroup`) y sin el SID S-1-5-32-544 en su token; sin `java` ni `node`. Zip llegado por USB y extraído con el Explorador. Doble clic: NINGÚN diálogo (ni SmartScreen, ni cortafuegos, ni credenciales); el navegador se abre solo. Sin base previa, la cuenta nueva arrancó creando una base vacía en `%LOCALAPPDATA%\Educhronos`; sustituida por la copia del banco, aparecieron los datos. F5 recarga la vista. Relanzar con la aplicación viva deja un solo icono y abre una pestaña. «Salir» cierra en orden (log) y relanzar diez segundos después arranca sin conflicto de puerto. Las cuatro descargas se abren; el CSV, en Excel, con columnas y tildes correctas. Tamaño leído en Propiedades: 231.985.152 B, múltiplo exacto de 4096, así que casi seguro es el tamaño EN DISCO y no la suma de bytes que pide la condición 2; como el tamaño en disco nunca es menor, la cota se cumple igual.
+  ORÁCULO (Linux, sobre copia del banco, md5 intacto antes y después): CSV «OK: las tres vistas coinciden» (1285/835/819, 0 faltan y 0 sobran); grupo, 28 páginas, 1285/0/0; profesor, 59 páginas, 835/0/0; aula, 44 páginas, 819/0/0 y 0 vacías con leyenda. Los cuatro con exit 0. Las órdenes literales quedan escritas en `docs/empaquetado.md`.
+  CRITERIO. **Condición 3 CUMPLIDA (S156). `O-instalación`: 9 de 9, TERMINADO.** Marcados el criterio 4 de Fase 9 y los criterios 1 y 3 de Fase 11; el 4 de Fase 11 queda sin marcar, con nota. H4 sigue abierto y SIN objetivo activo.
+  LOG. El `educhronos.log` traído de Windows empieza a mitad de sesión: el cierre del proceso que exportó y un arranque nuevo, con 0 ERROR y la única WARN conocida. Hipótesis probable, NO verificada: la rotación diaria por defecto de Spring Boot al cruzar la medianoche, con lo anterior comprimido junto al log. Se verifica mirando la carpeta.
+  DECISIONES DE MÉTODO. (1) A petición del usuario, el M4 de Windows se recortó a comprobaciones sin comandos. No se midieron en Windows 11 la marca de descarga, el recuento de procesos, el `netstat` ni el diálogo de puerto ocupado, que cubren S153 y S154 en Windows con el mismo jar; ni la huella del zip, cubierta por la extracción y por el F5. Lo que la condición 3 añade —cuenta estándar, ningún diálogo, oráculo y Excel— sí se midió. (2) La defensa de `-HuellaJar` es de procedimiento: la huella del jar sigue en `SHA256SUMS`, y quien la copie de ahí se salta la comprobación. La versión estructural —quitar la línea del jar de `SHA256SUMS`, porque `-HuellaJar` ya verifica también su transporte— se anota y no se aplica (R-terminado).
+  DEUDA. **SALDADA `D-entrega-caducada-indetectable`.** Nace **`D-arranque-sin-aviso-de-espera`** (mejora futura, sin objetivo asignado). Entran en §4 dos filas sin token: la limitación conocida de Windows 10 y la decisión consciente de no firmar. Una instancia de **`D-guion-exit-enmascarado`**, del asistente: el bloque de la construcción llevaba un comentario donde debía ir la orden; el usuario lo pegó entero, no se construyó nada y `"codigo: $LASTEXITCODE"` imprimió el 1 de la prueba anterior, un código que medía otra orden. Costó una ronda. Un solo defecto de instrumento en la sesión: el disparador de §6 no salta.
+  CORRECCIONES. (a) Del asistente: la instancia anterior, y dar por hecho que todo lo de Windows se hacía con la cuenta de prueba, cuando la construcción necesita la máquina de dominio. (b) Cazadas por el asistente y repetidas: el primer `whoami /groups` se ejecutó en la consola elevada de la cuenta administradora, y la primera foto del Control inteligente era la portada, sin el estado. (c) Comentario caducado en el `.ps1` sobre la URL JDBC con barras invertidas: ver el paso 3 del cierre.
+  SUITES: **solver 92, app 465, vitest 482 en 52 ficheros**, medidas en el cierre; la sesión no tocó código de la aplicación. e2e no corrido (`D-e2e-centro-minimo-rojo`, sede Fase 12).
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: **INTACTOS**. El oráculo corrió sobre una COPIA del primero, fuera del repo, con md5 idéntico antes y después; la máquina Windows recibió otra copia, que no volvió.
+  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 14 y 27 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 31 y 68, medido importando el instrumento como módulo sobre lo que `git show HEAD:` saca a una carpeta aparte: el descuadre lo produjo esta misma sesión al reescribir la condición 3 y el encabezado del objetivo, insertar el bullet de estado, las cuatro filas de §4, la cabecera de S156 y las seis notas técnicas de Fase 11, y se corrigió regenerando—. **Censo de tokens sospechosos: 33** sobre 269 tokens distintos, el mismo número que declararon S151, S152, S153, S154 y S155, y la comparación es honesta porque los seis se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento, da **33** sobre 267: tres entradas netas y ninguna salida, y son otra vez `D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado` —las mismas tres de S150, S152 y S154—, porque la única cita viva que les quedaba estaba DENTRO del bloque de S154 que esta sesión archiva; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **undécima reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El ciclo es el que S152 dejó escrito y S154 volvió a medir con estos mismos tres tokens: el rescate vive en la línea de R4 de una sesión, y archivar esa línea dos sesiones después se lo retira; seguirá repitiéndose mientras no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-windows-limpio` y `D-arranque-sin-aviso-de-espera`: **no los marca el censo**, porque nacen con **10 y 4** apariciones vivas medidas ANTES de esta línea —7 en gestión y 3 en el plan el Cambio; 1 y 3 la deuda—, en las sedes de siempre, así que `D-deuda-sin-sede-en-el-plan` no engorda. Las dos filas nuevas de §4 sin token —Windows 10 fuera del criterio y la decisión de no firmar— no entran en el censo por construcción, y tampoco lo mueve cerrar el objetivo: `O-instalación` está fuera del corpus (`D-censo-r4-ciego-a-los-objetivos`). (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S154 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y los diez restantes aguantan entre 2 y 11. (d) HIGIENE/MÉTODO: **19 fichas** por la columna de sede de §4 con el criterio de S142, decimoquinta reproducción; el reparto es 13 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S153, S154 y S155: las altas de hoy nacen con sede propia —la deuda sin objetivo asignado, y las dos filas en su cajón de §4— y no engordan ninguna de las tres. **El disparador de la excepción a R-apertura NO está activo: 19 de 20, falta 1**, y el de la excepción de Higiene de §6 tampoco saltó: un solo defecto de instrumento en la sesión, y no costó trabajo medible dos veces. **R-deuda aguanta, y ya sin superficie**: con `O-instalación` TERMINADO no queda en §3 ningún objetivo abierto —los diez están cerrados—, así que ninguna deuda viva bloquea una condición viva; `D-arranque-sin-aviso-de-espera` nace sin objetivo asignado y `D-entrega-caducada-indetectable` sale de la cola saldada.»
+
+Última sesión registrada (previa): Sesión 155 — O-instalación (H4), C-rutas-spa: **F5 Y LAS URL DIRECTAS FUNCIONAN: EL JAR REENVÍA LAS RUTAS DE LA SPA A `index.html` SIN TRAGARSE LOS 404 DE LA API NI LOS DE LOS FICHEROS.** `O-instalación` pasa de 7 a **8 de 9**: la condición 9 queda cumplida y verificada en Linux, y salda `D-spa-sin-fallback-de-rutas`. Queda sólo la condición 3.
   TIPO Y RITUAL: DESARROLLO — M0 + M2 en dos etapas (inventario sobre el jar; fases del build y API de Boot 4.1 y Spring 7 sobre el bytecode) + M3 (cuatro mutantes del resolvedor) + M4 en Linux (tabla de `curl` sobre el jar, mutante del cableado y navegador) + M1. Sin M4 en Windows por decisión de alcance: el servido vive en el jar, igual en las dos plataformas, y la condición 3 lo re-verifica.
   M0. Quinto Cambio de `O-instalación`. Va antes que la 3 porque la 3 es la verificación final de las demás (hacerla antes obligaría a repetirla) y sigue sin máquina. Alcance fijado por el usuario en dos pasos: el primero dejaba fuera la ruta comodín de Angular y la medición la metió (ver DECISIONES). Fuera: e2e, Windows, guiones de empaquetado y todo lo de la condición 3.
   M2-A, SOBRE EL JAR DE HEAD. `/horario/1` → 404; `/api/no-existe` → 404 en JSON; `/main-inexistente.js` → 404; `/` → 200; `/api/jornada` con `Accept: text/html` → 406, así que el `Accept` no separa la API de la SPA. Cero `WebMvcConfigurer`, `ErrorController` o `forward:`; todos los controladores cuelgan de `/api/*`. La SPA usa `PathLocationStrategy`. El e2e corre contra `ng serve`, que reescribe cualquier ruta: por eso nunca vio el defecto.
@@ -755,26 +776,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, intactos en cada tanda; el M4 corrió sobre copias.
   LIMPIEZA (M1-bis): archivada S153 a `bitacora-sesiones.md`; degradada S154 a «Última sesión registrada (previa):»; S155 queda como única cabecera H3 viva. Sin frente cerrado que condensar: `O-instalación` sigue abierto.
   R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 10 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 31 y 68: el descuadre lo produjo esta misma sesión al reescribir la condición 9, insertar el bullet de estado, las dos filas de §4, la cabecera de S155, las dos altas de deuda, la ficha de deuda cerrada y las cuatro notas técnicas de Fase 11, y se corrigió regenerando—. **Censo de tokens sospechosos: 33** sobre 267 tokens distintos, el mismo número que declararon S151, S152, S153 y S154, y la comparación es honesta porque los cinco se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento importado como módulo sobre las versiones que `git show HEAD:` saca a una carpeta aparte, da **33** sobre 264: tres entradas netas, y son `C-alcance-ajuste`, `C-alcance-exportacion` y `C-alcance-instalacion` —no las tres de S150, S152 y S154—, porque la única cita viva que les quedaba estaba DENTRO del bloque de S153 que esta sesión archiva; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **décima reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El mecanismo es el mismo que S152 dejó escrito y S154 volvió a medir, con otros tres tokens: lo que rescata es la línea de R4 de una sesión, y archivar esa línea dos sesiones después se lo retira; seguirá repitiéndose mientras no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-rutas-spa`, `D-seleccion-de-vista-fuera-de-la-url` y `D-reenvio-spa-sin-guarda-automatica`: **no los marca el censo**, porque nacen con 8, 3 y 3 apariciones vivas medidas ANTES de esta línea, en las sedes de siempre —§2, §3 y la entrada de sesión para el Cambio; §4, «Deuda consciente VIVA» y esta entrada para las dos deudas—, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-instalación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso cumplir la condición 9 no mueve el censo; esa misma ceguera es la que dejó la fila de H4 de §2 en «3 de 9» desde S154 y la que esta sesión corrige a mano. (c) Extinción comprobada a mano sobre los 16 tokens citados en el bloque de S153 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y los 13 restantes aguantan entre 2 y 22. (d) HIGIENE/MÉTODO: **19 fichas** por la columna de sede de §4 con el criterio de S142, decimocuarta reproducción; el reparto es 13 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S153 y S154: las dos altas de esta sesión nacen con sede propia —Fase 12 y sin objetivo asignado— y no engordan ninguna de las tres. **El disparador de la excepción a R-apertura NO está activo: 19 de 20, falta 1**, y el de la excepción de Higiene de §6 tampoco saltó en esta sesión: ningún defecto de instrumento costó trabajo medible dos veces. **R-deuda aguanta**, y con margen nuevo: saldada la 9, la única condición viva de `O-instalación` es la 3, ninguna deuda viva la bloquea —`D-entrega-caducada-indetectable` tiene sede en ella y declara «No» en su columna de bloqueo— y las dos altas de hoy apuntan a Fase 12 y a ningún objetivo, así que por primera vez en el objetivo no queda ninguna deuda viva sobre una condición viva.»
-
-Última sesión registrada (previa): Sesión 154 — O-instalación (H4), C-arranque-cierre: **EDUCHRONOS SE COMPORTA COMO UN PROGRAMA DE ESCRITORIO: ABRE EL NAVEGADOR, NO SE DUPLICA, SE CIERRA DESDE LA BANDEJA Y SÓLO ESCUCHA EN LOCAL.** `O-instalación` pasa de 3 a **7 de 9**: las condiciones 4, 5, 6 y 8 quedan cumplidas y verificadas en Linux y en Windows, y las 1 y 2 RE-VERIFICADAS sobre el bundle nuevo. Decidido el mecanismo de arranque y cierre, que era la última decisión de diseño abierta del objetivo salvo las de la condición 3.
-  TIPO Y RITUAL: DESARROLLO — M0 + M2 en tres etapas (inventario en Linux, dos procesos en Windows, revisión del diff) + M3 (cuatro mutaciones) + M4 en las dos plataformas + M1. El M4 de Windows necesitó DOS rondas: la primera construyó una entrega caducada (ver DEUDA).
-  M0. Cuarto Cambio de `O-instalación`. Va antes que la 9 y la 3 porque la 3 no puede planificarse (no hay Windows limpio con cuenta estándar) y porque las 4, 5 y 6 cuelgan de una sola decisión (el mecanismo) y su ausencia encarecía cada M4. La 8 entra por decisión del usuario: casi gratis en código y acoplada a la 4. Alcance CERRADO: fuera la 9, la 3, medio de entrega, firma, instalador, arranque con el sistema y cualquier opción de bandeja más allá de «Abrir» y «Salir».
-  M2-A, INVENTARIO EN LINUX. Puerto y dirección no aparecían en ninguna parte (el 8080 era el defecto de Boot); cero `logging.*`, cero AWT, cero código de apagado; `main` de una sentencia. Jar de 156.367.213 B: escucha en `*:8080` y responde 200 desde la LAN; la segunda instancia muere con 1 a los 5,63 s tras ABRIR la base viva y correr `schema.sql`; SIGTERM da 143 en 0,045 s con apagado ordenado (Tomcat, JPA, Hikari); ningún log; el fallo por puerto ocupado es idéntico sea quien sea el ocupante. Conclusiones: el apagado ya existía y faltaba el disparador; la instancia única no puede apoyarse en el puerto y debe decidirse ANTES de Spring.
-  M2-B, WINDOWS. Matar la JVM hija hace terminar al lanzador (código −1) y matar el lanzador arrastra a la hija; puerto libre y cero procesos en los dos casos. MATIZA el registro de S153, que anotó que el cierre «exigió Administrador de tareas y dos procesos».
-  DECISIÓN DEL MECANISMO (usuario, sobre dos opciones). Bandeja del sistema frente a un botón «Salir» en la SPA: gana la bandeja porque señala que la aplicación está viva (la causa raíz de S151) y no depende de tener una pestaña abierta; el diálogo nativo hacía falta en cualquier caso para la 6. Descartada la consola visible (`--win-console`): da trazas, no mensajes.
-  PRODUCTO. Paquete `es.yaroki.educhronos.app.escritorio`: `ModoEscritorio` (propiedad `educhronos.escritorio`, que pone `jpackage` con `--java-options`), `InstanciaUnica` (`tryLock` sobre `educhronos.lock`; canal estático y NUNCA cerrado), `Escritorio`, `Navegador`, `Bandeja`, `Dialogos`, `Pantalla`, `FalloArranque` y `Red` (puerto y dirección en un solo sitio). `CarpetaDatos` extraída del post-procesador de S153 sin cambiar su comportamiento: sus 14 casos siguen verdes sin tocarlos. El candado va en `main` y no en el post-procesador porque este corre en los 33 slices. `server.address=127.0.0.1` GLOBAL. `empaquetar-windows.ps1`: la opción de java y un humo corregido (guarda de 8080 libre ANTES de lanzar, parada matando el LANZADOR, y FALLO si quedan procesos o puerto). `docs/empaquetado.md`: sección de uso y §7 corregido, que afirmaba tres cosas que este Cambio deja falsas.
-  REVISIÓN DEL DIFF (M4 del asistente antes de Windows). Tres defectos corregidos antes de construir: un fallo anterior a Spring (carpeta imposible, candado ilegible) moría en silencio fuera del `try`; la segunda instancia abría el navegador contra un puerto aún muerto si la primera estaba arrancando (el escenario de S151); y el humo del `.ps1` mataba en el orden contrario al medido y podía dar verde contra una instancia del usuario. Más: navegador y bandeja con protección separada, para que un fallo del primero no deje sin «Salir».
-  M3. Cuatro mutaciones, medidas y revertidas: `InstanciaUnica` que siempre obtiene → caen los 3 casos, incluido el ENTRE PROCESOS con JVM hija; `FalloArranque` que sólo mira la causa directa → cae el caso anidado y sobreviven los otros 5; `esperarEscucha` que siempre es cierto → cae el de puerto cerrado; el mensaje previo a Spring que ignora la excepción → cae su caso. Bandeja, navegador y diálogos fuera de la suite: AWT no corre sin pantalla.
-  M4, LINUX SIN PANTALLA. Primer arranque MURIÓ tras servir `/api/jornada`, con `AWTError` (ver NOTAS de Fase 11): nace `Pantalla` y la regla de que nada de la capa de escritorio tumba una aplicación que ya sirve. Después: escucha `127.0.0.1:8080` y la LAN rechazada (rc=7); segunda instancia 0 en 0,31 s sin abrir la base; doble clic medido; SIGTERM 143 en 0,050 s; tras `kill -KILL` el candado no queda huérfano; puerto ocupado 1 en 6,85 s con su frase; carpeta imposible 1 en 0,37 s con su frase; modo desarrollo intacto.
-  M4, WINDOWS (cuenta de dominio `llozano`). Bundle de 231.715.485 B con el jar `68af23ae…` y `java-options=-Deduchronos.escritorio=true` en el `.cfg`. Humo y arranque escuchando en `127.0.0.1`. Navegador a ~7 s, icono en la bandeja, `localhost` carga. Relanzar: código 0, mismos procesos, pestaña de vuelta. «Salir»: icono retirado, apagado ordenado en el log (hilo `educhronos-salir`), lanzador con código 0, cero procesos, 8080 libre; confirma que el lanzador devuelve el código de la hija. Puerto ocupado: un solo diálogo, texto correcto. La prueba desde otro equipo NO discrimina en esta máquina.
-  CRITERIO. **Condiciones 4, 5, 6 y 8 CUMPLIDAS (S154).** **1 y 2 RE-VERIFICADAS:** 231.715.485 B, +19.539 B sobre S153, margen 18,3 MB. `O-instalación`: **7 de 9**. Nada vale para la condición 3.
-  DECISIONES DE MÉTODO. (1) Modo escritorio por BANDERA explícita del lanzador y no por detección: desarrollo, `spring-boot:run`, suite y e2e no cambian. (2) La URL que se abre es `127.0.0.1` y no `localhost`, aunque `localhost` también cargó. (3) **El disparador de la excepción de Higiene de §6 SALTÓ** —un defecto de instrumento costó trabajo medible dos veces en la misma sesión: el ciclo repetido por un `nohup` sin `wait` y la ronda de M4 sobre la entrega caducada—, pero la regla sólo abre esa sesión ENTRE objetivos: queda como primera candidata cuando cierre `O-instalación`.
-  DEUDA. Nacen **`D-e2e-centro-minimo-rojo`** (técnica real, sede Fase 12, no bloquea `O-instalación`) y **`D-entrega-caducada-indetectable`** (de método, sede la condición 3), y la limitación conocida del **puerto 8080 fijo**. Una instancia más de **`D-guion-pkill-casa-su-propio-envoltorio`** (`pgrep -f` de Claude Code encontró su propio shell) y una de **`D-declarado-sin-artefacto`** (el fallo del e2e «guardado en memoria»). Sigue viva **`D-spa-sin-fallback-de-rutas`**, que es la condición 9.
-  CORRECCIONES. (a) Del asistente: la errata `-Deducronos` en el plan, cazada por él mismo antes del guion; la guarda `isHeadless()` o `HeadlessException`, insuficiente, cazada por la medición de Claude Code; un bloque de PowerShell que capturó en una variable la salida de diagnóstico de su propia función; y la afirmación de que el e2e rojo podía bloquear la condición 3, falsa según la ficha. (b) Cazados por el asistente en la revisión del diff: los tres defectos de REVISIÓN DEL DIFF. (c) De Claude Code, detectados por él: un `nohup` sin `wait` que perdió un código de salida (repetido el ciclo), un `env` con la opción detrás de la asignación (salida 127, repetido) y el `pgrep -f`.
-  SUITES: **solver 92, app 458, vitest 482 en 52 ficheros**, en verde; la apertura era 92/430/482 y los 28 nuevos son del modo escritorio. e2e: `centro-minimo.spec.ts:265` ROJO y PREEXISTENTE (worktree sobre `1e5baaf`).
-  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, intactos en cada tanda; ningún M4 los abrió.
-  LIMPIEZA (M1-bis): archivada S152 a `bitacora-sesiones.md`; degradada S153 a «Última sesión registrada (previa):»; S154 queda como única cabecera H3 viva. Sin frente cerrado que condensar: `O-instalación` sigue abierto.
-  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 19 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con 31 y 68: el descuadre lo produjo esta misma sesión al reescribir las cuatro condiciones, insertar el bullet de estado, las tres filas de §4, la cabecera de S154, las dos altas de deuda y las notas técnicas, y se corrigió regenerando—. **Censo de tokens sospechosos: 33** sobre 264 tokens distintos, el mismo número que declararon S151, S152 y S153, y la comparación es honesta porque los cuatro se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento importado como módulo sobre las versiones commiteadas que `git show HEAD:` saca a una carpeta aparte, da **33** sobre 261: tres entradas netas, y son **las mismas tres de S150 y S152** —`D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado`—, porque la única cita viva que les quedaba estaba DENTRO del bloque de S152 que esta sesión archiva; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **novena reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. Que vuelvan a ser exactamente esos tres confirma lo que S152 dejó escrito: el rescate vive en la línea de R4 de una sesión, y archivar esa línea dos sesiones después se lo retira otra vez; el ciclo se repetirá mientras no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-arranque-cierre`, `D-e2e-centro-minimo-rojo` y `D-entrega-caducada-indetectable`: **no los marca el censo**, porque nacen con 6, 4 y 3 apariciones vivas medidas ANTES de esta línea, en las sedes de siempre —§3 y §2 para el Cambio; §4, «Deuda consciente VIVA» y esta entrada para las dos deudas—, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-instalación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso cumplir cuatro condiciones de golpe no mueve el censo. (c) Extinción comprobada a mano sobre los 22 tokens citados en el bloque de S152 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y el resto aguanta entre 2 y 45. (d) HIGIENE/MÉTODO: **19 fichas** por la columna de sede de §4 con el criterio de S142, decimotercera reproducción; el reparto es 13 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S153: las dos altas de esta sesión nacen con sede propia —Fase 12 y la condición 3— y no engordan ninguna de las tres. **El disparador de la excepción a R-apertura NO está activo: 19 de 20, falta 1**, aunque el de la excepción de Higiene de §6 sí saltó (ver DECISIONES DE MÉTODO). **R-deuda aguanta**: con las condiciones 1, 2, 4, 5, 6, 7 y 8 cumplidas, la única deuda viva que toca una condición VIVA de `O-instalación` sigue siendo `D-spa-sin-fallback-de-rutas`, que ES la condición 9 y se paga dentro del objetivo; `D-e2e-centro-minimo-rojo` nace apuntando a la Fase 12 y `D-entrega-caducada-indetectable` a la condición 3, y ninguna bloquea una condición viva.»
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -798,8 +799,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155.
-El plan conserva ahora S154 (degradada a formato compacto) y S155 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156.
+El plan conserva ahora S155 (degradada a formato compacto) y S156 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -3190,17 +3191,6 @@ con remisión a la bitácora.
   bloquea la Fase 12, que no puede montar CI con él en rojo. La causa no se investigó, por estar fuera
   del alcance del Cambio. Sede: Fase 12 (CI).
 
-- **D-entrega-caducada-indetectable** (S154, VIVA, de método, no bloqueante) — el `.ps1` verifica la
-  entrega contra el `SHA256SUMS` de su misma carpeta, así que una entrega vieja pasa sus propias
-  huellas y el guion no puede distinguirla de la buena. Costó una ronda entera de M4 en Windows: se
-  construyó la entrega del principio de la sesión (jar `71d1299f…`, con el código de S153) en lugar de
-  la v3 (`68af23ae…`); el guion dio las dos huellas por buenas y el bundle salió sin modo escritorio.
-  Lo delataron tres pruebas ajenas al guion: el tamaño idéntico al byte al de S153, la línea
-  `java-options` ausente en la transcripción y el `.cfg` sin la propiedad. El arreglo va con el medio
-  de entrega: que la huella esperada viaje por un canal distinto de la propia entrega, o que se
-  compare con la que imprime el guion de Linux al construirla. Sede: `O-instalación`, el Cambio de la
-  condición 3. No se paga ahora.
-
 - **D-seleccion-de-vista-fuera-de-la-url** (S155, VIVA, MEJORA FUTURA, no bloqueante) — la vista del horario no
   guarda en la URL qué grupo, profesor o aula se está mirando: con F5, que funciona desde S155, vuelve al primer
   grupo (1B-A). Visto por el usuario en el M4 de S155. La selección vive en dos señales del componente, `vista` y `entidad` (`horario-view.ts:58-59`), que no se leen ni se escriben en la URL —la ruta sólo lleva el id del horario (`paramMap`, `horario-view.ts:218`)—, y al cargar la proyección `entidad` se reinicia a la primera entidad de la lista (`horario-view.ts:307`). No es defecto de la condición 9 de
@@ -3213,11 +3203,20 @@ con remisión a la bitácora.
   `RutasSpaConfig` dejaría la suite verde (no medido como mutante). Hoy lo verifica sólo el M4 a mano. Arreglo
   barato: dos `curl` sobre el jar en CI o en el humo del empaquetado.
 
+- **D-arranque-sin-aviso-de-espera** (S156, VIVA, MEJORA FUTURA, no bloqueante) — entre el doble clic y la apertura
+  del navegador (unos 16 s desde que arranca el proceso, medidos en el log del Windows 11 limpio) nada indica que la
+  aplicación esté arrancando: parece que ha fallado e invita a pulsar otra vez. Propuesta del usuario en el M4 de
+  S156. No es defecto de la condición 4 de `O-instalación`, y la instancia única ya evita los procesos duplicados.
+  Candidatas sin decidir: pantalla de presentación nativa de la JVM (no verificada con el lanzador de `jpackage`),
+  icono de la bandeja adelantado con «Iniciando…», o ventana propia que se cierre al abrir el navegador. Sin objetivo
+  asignado.
+
 ### Deuda consciente CERRADA (histórico)
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
 
+- **D-entrega-caducada-indetectable** (S154 → SALDADA S156) — el `.ps1` verificaba la entrega contra el `SHA256SUMS` de su misma carpeta, así que una entrega vieja pasaba sus propias huellas. Saldada por `C-windows-limpio`: `-HuellaJar` obligatorio en `empaquetar-windows.ps1`, impreso en consola por `empaquetar-linux.sh` y ausente del `LEEME.txt`; verificado en Windows con una huella ajena, que pasa `SHA256SUMS` y aborta. La defensa es de procedimiento (la huella sigue en `SHA256SUMS`); la versión estructural queda anotada en la entrada de S156.
 - **D-spa-sin-fallback-de-rutas** (S145 → SALDADA S155) — el jar no reenviaba las rutas profundas de la SPA a `index.html`: F5 o una URL directa a una vista daba la Whitelabel Error Page. Saldada por `C-rutas-spa` como condición 9 de `O-instalación`: `ResolvedorRutasSpa` y `RutasSpaConfig` en `es.yaroki.educhronos.app.config`, `spring.web.resources.add-mappings=false` en el `application.properties` de main y la ruta comodín en `app.routes.ts`. Detalle en la entrada de S155.
 - **D-F8.4-A-c** (S79 → CERRADA S146) — la severidad de la prevalidación no discriminaba: las tres reglas emitían `ERROR`, y los asertos de severidad de A3 (`PrevalidacionServiceTest`) y A4 (`PrevalidacionEndpointTest`) quedaban tautológicos «hasta que exista un productor de `AVISO`» (reencuadre de S92). Cerrada por esa condición escrita y no por trabajo propio: el productor es S8, cuarta regla de `PrevalidacionService` desde S146, que reutiliza `VerificadorSolucion.verificarTutorias(ProblemaHorario)`. La severidad discrimina, medido por mutación: pasar el AVISO de S8 a ERROR mata P1, P2, E1 y G1. Detalle: plan, entrada de S146.
 - **D-tutores-bachillerato** (S134 → CERRADA S137) — faltaban los tutores de los siete grupos de Bachillerato (1B-A…1B-D, 2B-A…2B-C), dato que vivía en el sistema del centro y en ningún PDF entregado, y que S136 midió que era **lo único que separaba a O-demo de su criterio**. Deuda de REQUISITOS: se cerró preguntando. El centro entregó la lista oficial de los 28 grupos, que casa 16/16 con el cruce de S136 en todo lo verificable; los siete son 1B-A/LEN7, 1B-B/MAT7, 1B-C/LEN2, 1B-D/LEN1, 2B-A/MAT2, 2B-B/GH3 y 2B-C/GH5, los siete presentes entre los 59 profesores del catálogo. Cargados y verificados en `app/educhronos-s137-centro-completo.db` junto con la otra mitad del par indivisible. **CERRADA**
@@ -3498,6 +3497,27 @@ clasificación de la relación, no la regla. Las otras dos FK (actividad, plaza)
   `WebMvcConfigurer` ni manejadores de recursos. `RutasSpaConfig` es la primera `@Configuration` del proyecto;
   `SqliteForeignKeysConfig` es `@AutoConfiguration`, registrada en el `.imports` por su orden frente al
   `DataSource`.
+- **Windows 11 limpio con cuenta estándar (S156).** Cuenta creada con `net user <nombre> * /add` desde una consola
+  elevada: nace sólo en «Usuarios». Se comprueba con `net localgroup Administradores` y, DENTRO de la cuenta, con
+  `whoami /groups | findstr S-1-5-32-544`, que debe salir vacío; en una consola elevada de un administrador sale el
+  SID como grupo habilitado, que es lo que dio la primera medición. En PowerShell, `where` es alias de
+  `Where-Object`: para buscar ejecutables, `where.exe`.
+- **Sin diálogos por USB (S156).** Zip copiado por USB y extraído con el Explorador: el doble clic no mostró
+  SmartScreen, ni aviso del cortafuegos, ni petición de credenciales. La ausencia de la marca de descarga
+  (`Zone.Identifier`) NO se midió; es la explicación conocida desde S151. Sin aviso del cortafuegos en una ruta sin
+  reglas previas, coherente con la escucha en `127.0.0.1` (condición 8). El Control inteligente de aplicaciones de
+  esa máquina está Desactivado, con «Evaluación» en gris.
+- **Primer arranque en una cuenta nueva (S156).** Sin base previa, la aplicación crea `%LOCALAPPDATA%\Educhronos`
+  con una base vacía (unos 152 KB según el Explorador), el candado y el log. Sustituida esa base por la copia del
+  banco, la interfaz mostró el centro real.
+- **Arranque en Windows 11 (S156).** `Started EduchronosApplication in 14.475 seconds (process running for
+  15.765)`, y el navegador se abre 0,15 s después. Ver `D-arranque-sin-aviso-de-espera`.
+- **El log de Windows puede no estar entero (S156).** El `educhronos.log` copiado empezaba con el cierre de un
+  proceso cuyo arranque no aparecía. Hipótesis probable, NO verificada: la rotación por defecto de Spring Boot rota
+  el fichero por fecha con el primer mensaje tras la medianoche (ese proceso cruzó las 00:00) y deja lo anterior
+  comprimido en la misma carpeta. Se verifica mirándola. El log no registra peticiones HTTP.
+- **Tamaño en Windows (S156).** Propiedades de la carpeta dio 231.985.152 B, múltiplo exacto de 4096: es el tamaño
+  en disco, no la suma de bytes. La previsión del guion de Linux para este jar era 231.717.152 B.
 
 ### Por qué OR-Tools sobre Timefold (no reabrir)
 
