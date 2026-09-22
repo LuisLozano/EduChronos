@@ -18,8 +18,11 @@ import es.yaroki.educhronos.app.catalog.TipoGrupo;
 import es.yaroki.educhronos.app.catalog.TipoRestriccion;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
+import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -53,6 +56,7 @@ class GeneradorHorarioServiceTest {
     @Autowired
     private GeneradorHorarioService service;
 
+    @Autowired private HorarioGeneradoRepository horarioRepository;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
     @Autowired private SubgrupoRepository subgrupoRepository;
@@ -96,5 +100,22 @@ class GeneradorHorarioServiceTest {
             assertThat(r.profesor().codigo()).isEqualTo("MAT8");
             assertThat(r.tramo().codigo()).isEqualTo("L1"); // lunes, 1er tramo lectivo
         });
+    }
+
+    /**
+     * El vigente es el de id MAYOR (S161). La base de test es compartida y puede traer
+     * horarios de otros tests, así que no se asume vacía: se insertan dos y se exige el
+     * del SEGUNDO, que por IDENTITY sobre SQLite recibe un id mayor que el del primero.
+     */
+    @Test
+    void idVigente_devuelveElDeIdMayor() {
+        HorarioGenerado primero = horarioRepository.save(
+                new HorarioGenerado("primero", Instant.now(), "FEASIBLE", null, null));
+        HorarioGenerado segundo = horarioRepository.save(
+                new HorarioGenerado("segundo", Instant.now(), "FEASIBLE", null, null));
+        entityManager.flush();
+
+        assertThat(segundo.getId()).isGreaterThan(primero.getId());
+        assertThat(service.idVigente()).contains(segundo.getId());
     }
 }

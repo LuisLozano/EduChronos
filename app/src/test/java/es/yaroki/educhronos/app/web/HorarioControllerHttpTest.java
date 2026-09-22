@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,6 +16,7 @@ import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -171,5 +173,23 @@ class HorarioControllerHttpTest {
 
         mockMvc.perform(get("/api/horarios/9999/pdf"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void vigente_conHorario_devuelve200ConElId() throws Exception {
+        when(service.idVigente()).thenReturn(Optional.of(7L));
+
+        mockMvc.perform(get("/api/horarios/vigente"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7));
+    }
+
+    @Test
+    void vigente_sinHorario_devuelve204SinCuerpo() throws Exception {
+        when(service.idVigente()).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/horarios/vigente"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
     }
 }

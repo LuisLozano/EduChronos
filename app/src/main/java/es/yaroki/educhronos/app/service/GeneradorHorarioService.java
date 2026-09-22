@@ -39,6 +39,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -349,6 +350,13 @@ public class GeneradorHorarioService {
         sesionRepository.saveAll(sesiones);
 
         return horario;
+    }
+
+    /** Id del horario vigente del curso abierto (ver
+     *  {@link HorarioGeneradoRepository#findFirstByOrderByIdDesc}); vacío si no hay ninguno. */
+    @Transactional(readOnly = true)
+    public Optional<Long> idVigente() {
+        return horarioRepository.findFirstByOrderByIdDesc().map(HorarioGenerado::getId);
     }
 
     /**

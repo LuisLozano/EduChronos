@@ -13,6 +13,7 @@ import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
+import es.yaroki.educhronos.app.web.dto.HorarioVigenteDTO;
 import es.yaroki.educhronos.app.web.dto.RechazoCursoDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import java.nio.charset.StandardCharsets;
@@ -134,6 +135,20 @@ public class HorarioController {
             respuesta = respuesta.header(HttpHeaders.RETRY_AFTER, "0");
         }
         return respuesta.body(cuerpo);
+    }
+
+    /**
+     * Horario vigente del curso abierto: 200 con su id, o 204 si el curso no tiene
+     * ninguno (un curso recién duplicado). Que no haya horario no es un error, por eso
+     * no es 404. Es un GET, así que la guarda de solo lectura lo deja pasar en un curso
+     * archivado (O-curso, condición 4). Salda D-horario-id-a-fuego en el backend: la
+     * barra deja de suponer el id 1 (S161).
+     */
+    @GetMapping("/vigente")
+    public ResponseEntity<HorarioVigenteDTO> vigente() {
+        return service.idVigente()
+                .map(id -> ResponseEntity.ok(new HorarioVigenteDTO(id)))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}/proyeccion")
