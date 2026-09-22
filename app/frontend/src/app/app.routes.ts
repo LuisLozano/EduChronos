@@ -44,6 +44,8 @@ export const routes: Routes = [
       { path: 'actividades', component: ActividadLista, data: { titulo: 'Actividades' } },
     ],
   },
+  // Sin id: la vista resuelve el horario vigente del curso abierto (S161, D-horario-id-a-fuego).
+  { path: 'horario', component: HorarioView },
   { path: 'horario/:id', component: HorarioView },
   // Una URL que no es ninguna vista (por ejemplo, un marcador viejo) vuelve a la portada en lugar de dejar
   // la aplicación en blanco. Es la otra mitad del reenvío del backend (RutasSpaConfig, S155).

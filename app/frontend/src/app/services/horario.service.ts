@@ -26,4 +26,12 @@ export class HorarioService {
   generar(): Observable<HorarioProyeccion> {
     return this.http.post<HorarioProyeccion>('/api/horarios', {});
   }
+
+  /**
+   * GET /api/horarios/vigente → el horario de id mayor del curso abierto, o null si no
+   * tiene ninguno (el backend responde 204 sin cuerpo). S161, O-curso condición 4.
+   */
+  getVigente(): Observable<{ id: number } | null> {
+    return this.http.get<{ id: number } | null>('/api/horarios/vigente');
+  }
 }

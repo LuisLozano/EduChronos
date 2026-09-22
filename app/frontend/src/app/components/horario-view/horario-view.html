@@ -121,6 +121,11 @@
 
 @if (error(); as msg) {
   <p class="error">{{ msg }}</p>
+} @else if (sinHorario()) {
+  <!-- S161 · el curso abierto no tiene horario. Clase de AVISO, no de error: no ha
+       fallado nada. `sin-horario` no lleva CSS; distingue este párrafo del `.aviso`
+       de pines. -->
+  <p class="aviso sin-horario">Este curso todavía no tiene horario. Créalo con «Generar horario».</p>
 } @else if (proyeccion()) {
   <app-horario-grid
     [sesiones]="sesionesFiltradas()"

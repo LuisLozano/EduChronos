@@ -78,6 +78,6 @@ describe('App', () => {
     const hrefs = Array.from(compiled.querySelectorAll('.app__nav a'))
       .map((a) => a.getAttribute('href'));
     expect(hrefs).toContain('/configuracion');
-    expect(hrefs).toContain('/horario/1');
+    expect(hrefs).toContain('/horario');
   });
 });

@@ -6,9 +6,8 @@ import { RouterLink } from '@angular/router';
  * ningún servicio ni con el backend. Ofrece los dos accesos de primer nivel de
  * la aplicación —Configuración y Horario— como enlaces de router.
  *
- * <p>La ruta de Horario apunta a `horario/1` por convención de arranque (el
- * primer horario sembrado); cuando O-catálogo/O-demo creen horarios reales, el
- * destino se derivará del centro activo, no será fijo. Configuración enlaza al
+ * <p>La ruta de Horario apunta a `/horario`, sin id: es la vista la que resuelve el
+ * horario vigente del curso abierto (S161). Configuración enlaza al
  * placeholder de esta misma fase, que O-catálogo rellenará.
  */
 @Component({

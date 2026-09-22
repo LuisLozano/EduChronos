@@ -55,6 +55,8 @@ export class HorarioView {
 
   protected readonly proyeccion = signal<HorarioProyeccion | null>(null);
   protected readonly error = signal<string | null>(null);
+  /** El curso abierto no tiene ningún horario (GET vigente → 204). S161. */
+  protected readonly sinHorario = signal(false);
   protected readonly vista = signal<Vista>('grupo');
   protected readonly entidad = signal<string>('');
 
@@ -215,7 +217,11 @@ export class HorarioView {
   private idCargado: number | null = null;
 
   constructor() {
-    this.route.paramMap.subscribe((pm) => this.cargar(Number(pm.get('id'))));
+    this.route.paramMap.subscribe((pm) => {
+      const id = pm.get('id');
+      if (id === null) this.resolverVigente();
+      else this.cargar(Number(id));
+    });
   }
 
   /**
@@ -297,6 +303,7 @@ export class HorarioView {
   private cargar(id: number): void {
     this.idCargado = id;
     this.error.set(null);
+    this.sinHorario.set(false);
     this.cargarPines();
     this.cargarJornada();
     this.cargarPrevalidacion();
@@ -312,6 +319,32 @@ export class HorarioView {
       },
     });
   }
+  /**
+   * Ruta `/horario` sin id (S161): pregunta por el horario vigente del curso abierto.
+   * Si lo hay, navega a `/horario/{id}` REEMPLAZANDO la entrada del historial, para que
+   * «Atrás» no vuelva a una ruta que redirige. Si no lo hay, la vista lo dice y deja
+   * «Generar» operativo: por eso carga pines, jornada y pre-validación, igual que
+   * {@link cargar}, pero no diagnóstico ni proyección, que necesitan un id.
+   * `idCargado` queda en null, y {@link lanzarGeneracion} navega al horario nuevo.
+   */
+  private resolverVigente(): void {
+    this.idCargado = null;
+    this.error.set(null);
+    this.sinHorario.set(false);
+    this.proyeccion.set(null);
+    this.cargarPines();
+    this.cargarJornada();
+    this.cargarPrevalidacion();
+    this.service.getVigente().subscribe({
+      next: (v) => {
+        if (v) this.router.navigate(['/horario', v.id], { replaceUrl: true });
+        else this.sinHorario.set(true);
+      },
+      error: (err) =>
+        this.error.set(`No se pudo averiguar el horario del curso (${err?.status ?? 'error'}).`),
+    });
+  }
+
 
   /**
    * AJUSTA el horario con la instancia soltada (S145). Sustituye al alta de pin que
@@ -590,9 +623,11 @@ export class HorarioView {
    * de nada: el router IGNORA la navegación a la URL vigente —`onSameUrlNavigation`
    * vale `'ignore'` por defecto y `provideRouter(routes)` no pasa
    * `withRouterConfig`—, así que `paramMap` no reemite y la rejilla se quedaría con
-   * el horario viejo. Se manifiesta en la PRIMERA generación de una instalación
-   * nueva: la landing y el header apuntan a `/horario/1` clavado y el primer
-   * horario recibe id 1, así que origen y destino coinciden.
+   * el horario viejo. La barra y la landing ya no llevan id —enlazan `/horario`, y
+   * desde ahí {@link idCargado} es null y se navega—, pero la rama sigue haciendo
+   * falta porque a la vista se puede entrar por URL directa o por un marcador a un id
+   * que aún no existe: en una instalación nueva, un `/horario/1` viejo da 404 y el
+   * primer horario recibe id 1, así que origen y destino coinciden.
    *
    * <p>En AMBAS ramas la proyección devuelta por el POST se descarta y la recarga es
    * por GET fresco (S93): rejilla, pines y diagnóstico no pueden pertenecer a

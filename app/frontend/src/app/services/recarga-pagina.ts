@@ -8,8 +8,8 @@ import { Injectable } from '@angular/core';
  * son otros. Todo el estado del cliente vive en signals de componente —medido en el M2 de
  * S160: cero `BehaviorSubject`, cero signals en los diecisiete servicios, cero
  * `localStorage`—, así que no hay caché que invalidar; lo que sí queda es lo PINTADO en ese
- * instante y las rutas con id, como el `/horario/1` que la barra enlaza literalmente, que
- * tras el cambio apunta a un horario distinto o a ninguno. Un `router.navigate` dejaría
+ * instante y las rutas con id, como el `/horario/N` que la vista resolvió en la base vieja,
+ * que tras el cambio apunta a un horario distinto o a ninguno. Un `router.navigate` dejaría
  * viva la pantalla anterior y sus datos; una recarga en `/` no deja nada.
  *
  * <p><b>Por qué es un servicio y no `window.location.assign` a pelo.</b> Para que los specs

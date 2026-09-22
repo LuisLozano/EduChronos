@@ -90,4 +90,13 @@ describe('cliente de horarios', () => {
 
     req.flush(null);
   });
+
+  /** `getVigente` congela su par (verbo, URL): GET a la ruta del vigente, sin id (S161). */
+  it('(83) getVigente pide GET a la ruta del horario vigente', () => {
+    servicio.getVigente().subscribe();
+
+    const req = http.expectOne({ method: 'GET', url: '/api/horarios/vigente' });
+
+    req.flush(null);
+  });
 });

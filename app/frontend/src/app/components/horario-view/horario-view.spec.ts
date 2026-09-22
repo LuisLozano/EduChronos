@@ -93,6 +93,7 @@ describe('contenedor del horario', () => {
   let sujetoParam: Subject<ParamMap>;
   let ultimoListar: Subject<Bloqueo[]>;
   let sujetoProyeccion: Subject<HorarioProyeccion>;
+  let sujetoVigente: Subject<{ id: number } | null>;
   let sujetoDiagnostico: Subject<Diagnostico>;
   let ultimoGuardar: Subject<Bloqueo>;
   let ultimoBorrar: Subject<void>;
@@ -102,7 +103,11 @@ describe('contenedor del horario', () => {
     guardar: ReturnType<typeof vi.fn>;
     borrar: ReturnType<typeof vi.fn>;
   };
-  let horario: { getProyeccion: ReturnType<typeof vi.fn>; generar: ReturnType<typeof vi.fn> };
+  let horario: {
+    getProyeccion: ReturnType<typeof vi.fn>;
+    generar: ReturnType<typeof vi.fn>;
+    getVigente: ReturnType<typeof vi.fn>;
+  };
   let diagnosticos: { getDiagnostico: ReturnType<typeof vi.fn> };
   let sujetoPrevalidacion: Subject<AvisoPrevalidacion[]>;
   let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
@@ -118,6 +123,7 @@ describe('contenedor del horario', () => {
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
     sujetoProyeccion = new Subject<HorarioProyeccion>();
+    sujetoVigente = new Subject<{ id: number } | null>();
     sujetoDiagnostico = new Subject<Diagnostico>();
     sujetoPrevalidacion = new Subject<AvisoPrevalidacion[]>();
     sujetoJornada = new Subject<JornadaDTO>();
@@ -149,6 +155,8 @@ describe('contenedor del horario', () => {
       // FRESCO POR INVOCACIÓN, por el mismo motivo que `guardar`: el reintento de
       // generación (35) re-suscribe tras un `.error()` sobre el Subject anterior.
       generar: vi.fn(() => (ultimoGenerar = new Subject<HorarioProyeccion>())),
+      // Compartido, como `getProyeccion`: ningún caso lo re-suscribe tras un error (S161).
+      getVigente: vi.fn(() => sujetoVigente),
     };
     // Doble del Dialog del CDK: `open` devuelve un objeto con `closed`, el único
     // miembro que `generar()` toca. Emitir a mano da la fase "antes de confirmar".
@@ -1944,5 +1952,69 @@ describe('contenedor del horario', () => {
 
     // Los CUATRO enlaces (S150): sin proyección no hay id, ni para el CSV ni para los PDF.
     expect(raiz.querySelectorAll('a[download]').length).toBe(0);
+  });
+
+  /**
+   * RUTA SIN ID (S161, C-horario-vigente): la barra y la landing enlazan `/horario` y la
+   * vista pregunta por el horario vigente. `convertToParamMap({})` es la emisión real de
+   * esa ruta: `get('id')` devuelve null.
+   *
+   * <p>(79) Hay vigente: se navega a él REEMPLAZANDO la entrada del historial, y la
+   * proyección NO se pide aquí —la pedirá la ruta con id—. Que el doble del Router no
+   * esté cableado al `paramMap` es lo que hace medible el segundo aserto.
+   */
+  it('(79) sin id y con horario vigente navega a él reemplazando el historial', async () => {
+    sujetoParam.next(convertToParamMap({}));
+    sujetoVigente.next({ id: 4 });
+    await fixture.whenStable();
+
+    expect(horario.getVigente).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/horario', 4], { replaceUrl: true });
+    expect(horario.getProyeccion).not.toHaveBeenCalled();
+  });
+
+  /**
+   * (80) Sin vigente (204): la vista lo DICE, sin tono de error, y «Generar» queda
+   * operativo en cuanto llega la pre-validación —que por eso se carga también en esta
+   * rama—. Se asevera además que no se navega.
+   */
+  it('(80) sin id y sin horario vigente lo dice y deja Generar habilitado', async () => {
+    sujetoParam.next(convertToParamMap({}));
+    sujetoVigente.next(null);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.sin-horario')?.textContent?.trim()).toBe(
+      'Este curso todavía no tiene horario. Créalo con «Generar horario».',
+    );
+    expect(raiz.querySelector('.error')).toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
+
+    sujetoPrevalidacion.next([AVISO_NO_ERROR]);
+    await fixture.whenStable();
+
+    expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  /** (81) El GET del vigente falla: el error se pinta con su status. */
+  it('(81) sin id y con fallo al pedir el vigente pinta el error con su status', async () => {
+    sujetoParam.next(convertToParamMap({}));
+    sujetoVigente.error({ status: 503 });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error')?.textContent?.trim()).toBe(
+      'No se pudo averiguar el horario del curso (503).',
+    );
+    expect(raiz.querySelector('.sin-horario')).toBeNull();
+  });
+
+  /** (82) Con id, el camino de siempre: no se pregunta por el vigente. */
+  it('(82) con id no pide el horario vigente y carga ese id', async () => {
+    sujetoParam.next(convertToParamMap({ id: '3' }));
+    await fixture.whenStable();
+
+    expect(horario.getVigente).not.toHaveBeenCalled();
+    expect(horario.getProyeccion).toHaveBeenCalledWith(3);
   });
 });
