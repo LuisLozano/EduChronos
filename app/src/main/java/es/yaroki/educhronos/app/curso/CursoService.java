@@ -20,6 +20,11 @@ import org.springframework.stereotype.Service;
  * —el fichero nuevo nace junto al origen—, pero quién se abre la próxima vez lo sigue
  * decidiendo quien puso la URL.
  *
+ * <p><b>La ventana de escrituras, cerrada.</b> Mientras dura el duplicado el estado queda
+ * marcado y {@link GuardaSoloLectura} rechaza toda escritura con un 403. Eso cierra el hueco
+ * que la fase A dejó documentado entre la copia y el archivado del origen, donde una
+ * escritura entrante podía quedarse en el curso viejo sin llegar al nuevo.
+ *
  * <p><b>{@code synchronized}.</b> Duplicar mueve ficheros y reescribe la identidad de dos
  * bases; dos a la vez podrían pisarse el temporal. Es una operación de una vez al año: el
  * candado más simple que funciona.
@@ -74,9 +79,16 @@ public class CursoService {
     public synchronized Path duplicar(String nombreNuevo, String nombreActual) {
         Path origen = baseAbierta();
         String nombreArchivado = estado.nombre() != null ? estado.nombre() : nombreActual;
-        Path destino = duplicador.duplicar(origen, nombreActual, nombreNuevo, puntero());
-        estado.marcarArchivado(nombreArchivado);
-        return destino;
+        estado.iniciarDuplicado();
+        try {
+            Path destino = duplicador.duplicar(origen, nombreActual, nombreNuevo, puntero());
+            estado.marcarArchivado(nombreArchivado);
+            return destino;
+        } finally {
+            // En un finally, también cuando el duplicado se rechaza: un nombre mal escrito
+            // no puede dejar la aplicación sin aceptar escrituras.
+            estado.terminarDuplicado();
+        }
     }
 
     /**

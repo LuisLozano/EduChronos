@@ -59,11 +59,12 @@ import org.springframework.http.HttpStatus;
  *       trabajar.
  * </ul>
  *
- * <p><b>Ventana de escrituras.</b> Entre {@code b} (la copia) y {@code f} (el archivado del
- * origen) la aplicación sigue aceptando escrituras, y las que entren en ese hueco se quedan
- * en el curso viejo sin llegar al nuevo. Es una ventana de milisegundos y la cierra la fase
- * B de C-duplicado-guarda, que es la que pone la guarda de solo lectura; aquí se deja
- * escrita y no se finge resuelta.
+ * <p><b>Ventana de escrituras: CERRADA en la fase B (S159).</b> Entre {@code b} (la copia) y
+ * {@code f} (el archivado del origen) la aplicación aceptaba escrituras, y las que entraran
+ * en ese hueco se quedaban en el curso viejo sin llegar al nuevo. Ya no: {@code CursoService}
+ * marca el estado como «duplicando» antes de entrar aquí y lo desmarca en un {@code finally},
+ * y {@link GuardaSoloLectura} rechaza toda escritura mientras dura. Este duplicador sigue sin
+ * saber nada de eso a propósito: quien abre la ventana es quien la cierra.
  */
 public class DuplicadorCurso {
 

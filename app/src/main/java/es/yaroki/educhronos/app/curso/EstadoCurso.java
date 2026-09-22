@@ -30,6 +30,12 @@ public class EstadoCurso implements SmartInitializingSingleton {
 
     private volatile boolean archivado;
 
+    /**
+     * Hay un duplicado a medias AHORA MISMO. Lo mira la guarda de solo lectura para rechazar
+     * escrituras mientras dura (fase B de C-duplicado-guarda).
+     */
+    private volatile boolean duplicando;
+
     public EstadoCurso(CursoRepository cursos) {
         this.cursos = cursos;
     }
@@ -52,6 +58,31 @@ public class EstadoCurso implements SmartInitializingSingleton {
     /** ¿Es el curso abierto de solo lectura? */
     public boolean archivado() {
         return archivado;
+    }
+
+    /** ¿Se está creando un curso nuevo en este instante? */
+    public boolean duplicando() {
+        return duplicando;
+    }
+
+    /**
+     * Empieza un duplicado. Desde aquí y hasta {@link #terminarDuplicado()} la guarda
+     * rechaza toda escritura: es lo que cierra la ventana que la fase A dejó abierta entre la
+     * copia y el archivado del origen, donde una escritura entrante se habría quedado en el
+     * curso viejo sin llegar al nuevo.
+     */
+    public void iniciarDuplicado() {
+        this.duplicando = true;
+    }
+
+    /**
+     * Termina el duplicado, haya salido bien o mal. Se llama desde un {@code finally}: si
+     * sólo se llamara en el camino de éxito, un nombre mal escrito dejaría la aplicación
+     * rechazando escrituras para siempre, sin nada archivado y sin forma de salir salvo
+     * reiniciar.
+     */
+    public void terminarDuplicado() {
+        this.duplicando = false;
     }
 
     /**
