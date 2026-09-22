@@ -374,9 +374,10 @@ public class CursoService {
      * en vuelo en el filtro —un contador que sube al entrar y baja al salir, con su propia
      * espera— y eso pone estado compartido en el camino de TODAS las peticiones para un
      * riesgo que aquí no se materializa: Educhronos es de un solo usuario en su ordenador
-     * (condición 8: escucha sólo en el bucle local), y el cambio de curso se lanza desde un
-     * diálogo modal, de modo que no hay nadie más pulsando botones mientras dura. Queda
-     * escrito para que, si alguna vez hay concurrencia real, se sepa dónde mirar.
+     * (condición 8 de O-instalación: escucha sólo en el bucle local), y el cambio de curso se
+     * lanza desde un diálogo modal, de modo que no hay nadie más pulsando botones mientras
+     * dura. Queda escrito para que, si alguna vez hay concurrencia real, se sepa dónde
+     * mirar.
      *
      * @return {@code true} si el pool quedó libre dentro del plazo
      */
@@ -424,6 +425,23 @@ public class CursoService {
      * aquí, con {@link #listar()}, y viaja al duplicador como un booleano. Un curso SIN fila
      * cuenta como activo: una base de antes de S159 es un curso en marcha, no un archivo.
      *
+     * <p><b>El nombre no puede repetir el de NINGÚN curso de la carpeta, y eso se comprueba
+     * por CONTENIDO</b> (corrección de S160). {@link DuplicadorCurso} ya rechazaba dos casos
+     * —que el nombre sea el del curso abierto, y que el fichero de destino exista—, pero los
+     * dos miran el NOMBRE DE FICHERO, y el fichero no siempre se llama como el curso: una
+     * base anterior a S159 se llama {@code educhronos.db} y por dentro puede decir
+     * {@code 2025/2026}. Medido en el M4 de esta sesión por el arquitecto: desde un
+     * {@code 2026/2027} activo se creó un {@code curso-2025-2026.db} habiendo ya un
+     * {@code educhronos.db} llamado {@code 2025/2026}, y el centro se quedó con DOS cursos
+     * del mismo nombre y sin forma de distinguirlos en el selector. El hallazgo estaba
+     * anotado en el M2 («no se abre ningún otro fichero de curso para leer su tabla curso») y
+     * se quedó en nota; aquí se cierra.
+     *
+     * <p>Se comprueba AQUÍ y no en el duplicador porque exige mirar todos los ficheros de la
+     * carpeta, que es lo que {@link #listar()} ya hace; el duplicador sigue sin conocer más
+     * base que la suya. Y va ANTES de tomar el turno y de escribir un solo byte: un rechazo
+     * no deja fichero, ni archivado, ni puntero, ni indicador levantado.
+     *
      * @param nombreNuevo nombre del curso a crear
      * @param nombreActual nombre del curso actual, necesario sólo si la base no lo trae
      * @return la ruta del fichero creado
@@ -432,7 +450,12 @@ public class CursoService {
     public synchronized Path duplicar(String nombreNuevo, String nombreActual) {
         Path origen = base.baseAbierta();
         String nombreArchivado = estado.nombre() != null ? estado.nombre() : nombreActual;
-        boolean permitirArchivado = sinNingunCursoActivo();
+        // UNA sola lectura de la carpeta para las dos preguntas que dependen de ella: si el
+        // nombre ya está cogido y si queda algún curso activo. Dos llamadas a listar()
+        // podrían ver carpetas distintas y contestar cosas incompatibles.
+        List<CursoListadoDTO> cursos = listar();
+        exigirNombreLibre(cursos, nombreNuevo);
+        boolean permitirArchivado = sinNingunCursoActivo(cursos);
         if (!estado.intentarIniciarDuplicado()) {
             throw new RechazoCursoException(
                     HttpStatus.CONFLICT, CURSO_OCUPADO,
@@ -459,8 +482,40 @@ public class CursoService {
      * ¿No queda ningún curso activo en la carpeta? Un curso sin nombre cuenta como ACTIVO:
      * ver la nota del requisito (b) en {@link #duplicar}.
      */
-    private boolean sinNingunCursoActivo() {
-        return listar().stream().noneMatch(curso -> !curso.archivado());
+    private static boolean sinNingunCursoActivo(List<CursoListadoDTO> cursos) {
+        return cursos.stream().noneMatch(curso -> !curso.archivado());
+    }
+
+    /**
+     * Rechaza si ya hay un curso con ese nombre en la carpeta, sea cual sea su fichero.
+     *
+     * <p>Compara contra el nombre LEÍDO de cada base, que es lo que distingue esta
+     * comprobación de las dos del duplicador: ver la nota de {@link #duplicar}. Un curso sin
+     * nombre no compite con nadie —{@code null} no es igual a ningún nombre— y por eso el
+     * filtro lo deja fuera antes de comparar.
+     *
+     * <p>El {@code message} nombra el FICHERO además del curso: sin él, el usuario ve «ya
+     * existe un curso 2025/2026» mirando un selector donde el único 2025/2026 se llama
+     * {@code educhronos.db}, y no sabe cuál es.
+     *
+     * @throws RechazoCursoException 409 {@code CURSO_YA_EXISTE} si el nombre está cogido
+     */
+    private static void exigirNombreLibre(List<CursoListadoDTO> cursos, String nombreNuevo) {
+        if (nombreNuevo == null) {
+            // La forma la valida el duplicador, que es quien tiene el texto del rechazo.
+            return;
+        }
+        cursos.stream()
+                .filter(curso -> nombreNuevo.equals(curso.nombre()))
+                .findFirst()
+                .ifPresent(
+                        curso -> {
+                            throw new RechazoCursoException(
+                                    HttpStatus.CONFLICT, DuplicadorCurso.CURSO_YA_EXISTE,
+                                    "Ya existe un curso " + nombreNuevo
+                                            + " en la carpeta de datos (" + curso.fichero()
+                                            + ").");
+                        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────────── común

@@ -433,6 +433,79 @@ class CursoAperturaTest {
     }
 
     /**
+     * (T13, corrección de S160) El nombre del curso nuevo no puede repetir el de NINGÚN curso
+     * de la carpeta, aunque su fichero se llame de otra forma.
+     *
+     * <p><b>Es el defecto que el arquitecto encontró en el M4 de esta sesión</b>, y el caso
+     * lo reproduce tal cual: una base anterior a S159 que se llama {@code educhronos.db} y
+     * por dentro dice {@code 2025/2026}, con un {@code 2026/2027} activo y abierto. Duplicar
+     * pidiendo {@code 2025/2026} se aceptaba, porque las dos comprobaciones del duplicador
+     * miran el NOMBRE DE FICHERO —y {@code curso-2025-2026.db} no existía—, y el centro se
+     * quedaba con dos cursos del mismo nombre.
+     *
+     * <p>Los asertos de «no se ha escrito nada» son la otra mitad: un rechazo tardío —después
+     * de copiar o de archivar— dejaría el destrozo hecho y el mensaje sería un consuelo. Se
+     * mide por md5 de los dos ficheros, por el listado de la carpeta, por el puntero y por el
+     * estado en memoria, que es todo lo que esta operación puede tocar.
+     */
+    @Test
+    void duplicar_conElNombreDeOtroCursoDeLaCarpeta_409YNoEscribeNada() throws Exception {
+        // La base antigua: fichero educhronos.db, curso 2025/2026, archivada.
+        Path antigua = BancoDeCursos.fabricar(
+                carpeta.resolve("educhronos.db"), "2025/2026", true);
+        // Y el curso en marcha, que es el que está abierto.
+        ponerNombreALaBaseAbierta("2026/2027", false);
+        String huellaAntigua = BancoDeCursos.huella(antigua);
+        String huellaAbierta = BancoDeCursos.huella(carpeta.resolve(ABIERTA));
+        List<String> ficherosAntes = ficherosDeLaCarpeta();
+
+        assertThatThrownBy(() -> servicio.duplicar("2025/2026", null))
+                .isInstanceOfSatisfying(
+                        RechazoCursoException.class,
+                        e -> {
+                            assertThat(e.causa()).isEqualTo(DuplicadorCurso.CURSO_YA_EXISTE);
+                            assertThat(e.status().value()).isEqualTo(409);
+                            assertThat(e.getMessage())
+                                    .as("el message nombra el curso Y el fichero que lo tiene")
+                                    .contains("2025/2026")
+                                    .contains("educhronos.db");
+                        });
+
+        assertThat(ficherosDeLaCarpeta())
+                .as("la carpeta no gana ningún fichero: ni el curso nuevo ni un temporal")
+                .isEqualTo(ficherosAntes);
+        assertThat(BancoDeCursos.huella(antigua))
+                .as("la base antigua, intacta")
+                .isEqualTo(huellaAntigua);
+        assertThat(BancoDeCursos.huella(carpeta.resolve(ABIERTA)))
+                .as("la base abierta, intacta: NO se ha archivado")
+                .isEqualTo(huellaAbierta);
+        assertThat(carpeta.resolve("curso-abierto"))
+                .as("y no se ha tocado el puntero")
+                .doesNotExist();
+        assertThat(estado.nombre()).as("el estado sigue en el curso abierto").isEqualTo("2026/2027");
+        assertThat(estado.archivado()).isFalse();
+        assertThat(estado.duplicando()).as("sin indicadores colgados").isFalse();
+        assertThat(estado.cambiando()).isFalse();
+    }
+
+    /**
+     * (T13.b) Un curso SIN nombre no bloquea ningún nombre: {@code null} no es igual a nada.
+     * Sin este caso, el filtro podría comparar al revés y una carpeta con una base anónima
+     * dejaría de aceptar cualquier duplicado.
+     */
+    @Test
+    void duplicar_unaBaseSinNombreNoReservaNingunNombre() throws Exception {
+        BancoDeCursos.fabricar(carpeta.resolve("curso-2019-2020.db"), null, false);
+        ponerNombreALaBaseAbierta("2025/2026", false);
+
+        Path destino = servicio.duplicar("2026/2027", null);
+
+        assertThat(destino).isRegularFile().hasFileName("curso-2026-2027.db");
+        assertThat(estado.nombre()).isEqualTo("2026/2027");
+    }
+
+    /**
      * (T11.b) Duplicar un curso ACTIVO archiva el origen y deja abierto el nuevo. Hasta S159
      * dejaba la aplicación dentro del curso recién archivado, es decir, en solo lectura:
      * el centro creaba el curso del año siguiente y lo primero que veía era un 403.
@@ -532,6 +605,13 @@ class CursoAperturaTest {
     private static void assumeQueSePuedeMedir(long cuenta) {
         org.junit.jupiter.api.Assumptions.assumeTrue(
                 cuenta >= 0, "este sistema no publica /proc/self/fd: el cierre no se puede medir");
+    }
+
+    /** Los ficheros de la carpeta, ordenados: para aseverar que NO ha aparecido ninguno. */
+    private static List<String> ficherosDeLaCarpeta() throws Exception {
+        try (var listado = Files.list(carpeta)) {
+            return listado.map(f -> f.getFileName().toString()).sorted().toList();
+        }
     }
 
     /** Deja en la carpeta sólo el fichero dado, para que cada caso parta de lo mismo. */
