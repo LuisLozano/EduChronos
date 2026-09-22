@@ -1,9 +1,12 @@
 package es.yaroki.educhronos.app.config;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -32,6 +35,12 @@ public final class CarpetaDatos {
 
     /** Carpeta bajo el directorio de datos XDG: en el resto de sistemas, en minúsculas. */
     public static final String CARPETA_POSIX = "educhronos";
+
+    /**
+     * Fichero que dice QUÉ base de la carpeta está abierta (O-curso, S159). Sin extensión y
+     * con nombre de prosa: no es una base, es un puntero de una línea.
+     */
+    public static final String NOMBRE_PUNTERO = "curso-abierto";
 
     private CarpetaDatos() {}
 
@@ -128,6 +137,81 @@ public final class CarpetaDatos {
                             + ". Compruebe los permisos o arranque con "
                             + "--spring.datasource.url=jdbc:sqlite:<ruta de la base>");
         }
+    }
+
+    /**
+     * La base que hay que abrir dentro de la carpeta de datos: la que diga el puntero
+     * {@link #NOMBRE_PUNTERO} o, si no hay puntero utilizable, {@link #NOMBRE_FICHERO}
+     * (O-curso, S159).
+     *
+     * <p><b>El puntero guarda un NOMBRE de fichero, no una ruta</b>, y aquí se exige que lo
+     * sea: un contenido con separadores se descarta en vez de resolverse. Si no, un puntero
+     * con {@code ../../algo} abriría una base de fuera de la carpeta de datos, y el fichero
+     * lo escribe un programa pero lo puede editar cualquiera.
+     *
+     * <p><b>Un puntero roto no impide arrancar.</b> Apunta a un fichero que ya no está, o
+     * trae basura: se abre {@code educhronos.db} y se avisa. La alternativa —fallar— dejaría
+     * al centro sin poder entrar por un fichero de una línea que él no escribió.
+     *
+     * <p>Toca disco, como {@link #crear}: mira si el puntero existe y si su destino existe.
+     *
+     * @param carpeta carpeta de datos, ya creada
+     * @return el fichero de base a abrir, dentro de esa carpeta
+     */
+    public static Path baseAbierta(Path carpeta) {
+        return baseAbierta(carpeta, aviso -> {});
+    }
+
+    /**
+     * Igual que {@link #baseAbierta(Path)}, y ADEMÁS cuenta lo que le ha pasado. Es la que
+     * usa el post-procesador, que tiene un log diferido donde registrar el aviso; la de un
+     * argumento existe para probar la decisión sin montar un log.
+     *
+     * @param carpeta carpeta de datos, ya creada
+     * @param aviso recibe un texto cuando hay un puntero y no se ha podido usar
+     * @return el fichero de base a abrir, dentro de esa carpeta
+     */
+    public static Path baseAbierta(Path carpeta, Consumer<String> aviso) {
+        Path porDefecto = carpeta.resolve(NOMBRE_FICHERO);
+        Path puntero = carpeta.resolve(NOMBRE_PUNTERO);
+        if (!Files.isRegularFile(puntero)) {
+            return porDefecto;
+        }
+        String contenido;
+        try {
+            contenido = Files.readString(puntero, StandardCharsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                    "No se puede leer el puntero de curso abierto: " + puntero, e);
+        }
+        if (contenido.isEmpty() || !esNombreSimple(contenido)) {
+            aviso.accept(
+                    "El puntero " + puntero + " no contiene un nombre de fichero utilizable ("
+                            + contenido + "): se abre " + NOMBRE_FICHERO + ".");
+            return porDefecto;
+        }
+        Path apuntada = carpeta.resolve(contenido);
+        if (!Files.isRegularFile(apuntada)) {
+            aviso.accept(
+                    "El puntero " + puntero + " apunta a " + contenido
+                            + ", que no está en la carpeta de datos: se abre "
+                            + NOMBRE_FICHERO + ".");
+            return porDefecto;
+        }
+        return apuntada;
+    }
+
+    /**
+     * ¿Es un nombre de fichero suelto? Un solo segmento, sin separador de NINGUNO de los dos
+     * sistemas: la comprobación tiene que rechazar {@code ..\\otra} también cuando corre en
+     * POSIX, porque el fichero puede venir de una carpeta sincronizada desde Windows.
+     */
+    private static boolean esNombreSimple(String contenido) {
+        return !contenido.contains("/")
+                && !contenido.contains("\\")
+                && Path.of(contenido).getNameCount() == 1
+                && !contenido.equals("..")
+                && !contenido.equals(".");
     }
 
     private static boolean esWindows(String nombreSistema) {

@@ -52,3 +52,7 @@ create table if not exists sesion_bloqueada (indice integer not null, actividad_
 create table if not exists subgrupo (id integer, codigo varchar(255) not null unique, primary key (id));
 create table if not exists subgrupo_grupo (grupo_id bigint not null, subgrupo_id bigint not null, primary key (grupo_id, subgrupo_id), foreign key (grupo_id) references grupo_administrativo(id), foreign key (subgrupo_id) references subgrupo(id));
 create table if not exists tramo_semanal (es_lectivo boolean not null, hora_fin time(0) not null, hora_inicio time(0) not null, orden integer not null, id integer, siguiente_inmediato_id bigint, dia varchar(255) not null check ((dia in ('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES'))), primary key (id), foreign key (siguiente_inmediato_id) references tramo_semanal(id));
+
+-- curso: identidad del fichero (nombre y si está archivado). FILA ÚNICA: el check (id = 1) se añade a mano,
+-- como las FK. NO es configuración: no se copia tal cual al duplicar (O-curso, S159).
+create table if not exists curso (id integer not null check (id = 1), nombre varchar(9) not null, archivado boolean not null, primary key (id));

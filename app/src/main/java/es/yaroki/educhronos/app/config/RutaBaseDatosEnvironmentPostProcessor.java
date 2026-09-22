@@ -48,6 +48,13 @@ import org.springframework.core.env.MapPropertySource;
  * {@code application.properties}. Sin eso la regla de no-op leería un entorno donde el
  * fichero de test aún no está y le pisaría la URL a los slices.
  *
+ * <p><b>Qué base de la carpeta se abre</b> (O-curso, S159). Ya no es siempre
+ * {@code educhronos.db}: lo decide {@link CarpetaDatos#baseAbierta}, que lee el puntero
+ * {@code curso-abierto} si lo hay. El post-procesador sigue siendo quien publica la URL, y
+ * además publica {@link #CLAVE_CARPETA} para que quien duplique sepa qué carpeta gobierna.
+ * Un puntero roto no impide arrancar: se abre la base por defecto y el aviso sale por este
+ * log diferido.
+ *
  * <p><b>Si la carpeta no se puede crear</b> se lanza {@link IllegalStateException} con la
  * ruta en el mensaje. NO hay vuelta atrás al directorio de trabajo: ese fallback silencioso
  * es justamente el defecto que la condición 7 elimina, y reintroducirlo dejaría al usuario
@@ -66,6 +73,14 @@ public class RutaBaseDatosEnvironmentPostProcessor implements EnvironmentPostPro
 
     /** Prefijo de la URL JDBC que se publica; lo exige el driver de SQLite. */
     static final String PREFIJO_URL = "jdbc:sqlite:";
+
+    /**
+     * Clave con la carpeta de datos, publicada en la MISMA fuente que la URL (O-curso,
+     * S159). Es la señal de que hay una carpeta de datos que gobernar: quien arranca con
+     * {@code --spring.datasource.url} no la recibe, y entonces no se escribe puntero de
+     * curso abierto (condición 7).
+     */
+    static final String CLAVE_CARPETA = "educhronos.datos.carpeta";
 
     /** Carpeta bajo {@code %LOCALAPPDATA%}: en Windows los nombres van capitalizados. */
     static final String CARPETA_WINDOWS = CarpetaDatos.CARPETA_WINDOWS;
@@ -127,10 +142,15 @@ public class RutaBaseDatosEnvironmentPostProcessor implements EnvironmentPostPro
         Path carpeta = resolverCarpeta(nombreSistema, entorno, directorioPersonal);
         crearCarpeta(carpeta);
 
-        Path fichero = carpeta.resolve(NOMBRE_FICHERO);
+        Path fichero = CarpetaDatos.baseAbierta(carpeta, log::warn);
         String url = PREFIJO_URL + fichero;
         environment.getPropertySources()
-                .addLast(new MapPropertySource(NOMBRE_FUENTE, Map.of(CLAVE_URL, url)));
+                .addLast(
+                        new MapPropertySource(
+                                NOMBRE_FUENTE,
+                                Map.of(
+                                        CLAVE_URL, url,
+                                        CLAVE_CARPETA, carpeta.toAbsolutePath().toString())));
         log.info("Base de datos de Educhronos en " + fichero);
     }
 
