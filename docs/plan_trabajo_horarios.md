@@ -51,7 +51,7 @@
 - L734 — ## FASE 12 — CI/CD con GitHub Actions
 - L737 — ### Criterios de verificación
 - L744 — ## Registro de progreso
-- L746 — ### Sesión 156 — O-instalación (H4), C-windows-limpio: **LA APLICACIÓN SE INSTALA Y FUNCIONA EN UN WINDOWS 11 LIMPIO CON CUENTA ESTÁNDAR, LLEGADA POR USB, SIN UN SOLO DIÁLOGO DE SEGURIDAD.** `O-instalación` pasa de 8 a **9 de 9 y TERMINA** en seis sesiones (S151–S156). Salda `D-entrega-caducada-indetectable`.
+- L746 — ### Sesión 157 — Higiene/Método, entre objetivos (excepción de §6): **EL CENSO DE R4 DEJA DE CONTAR MENCIONES, VE LOS OBJETIVOS Y LAS EXTINCIONES, Y LOS ÍNDICES PASAN A FALLO DURO; LAS NORMAS DE GUION SE REÚNEN EN `metodo.md`.** Fichas con sede Higiene/Método o script de R4: **de 19 a 11**. Primera sesión abierta por la excepción de S152.
 - L815 — ### Bloques de Fase 2
 - L823 — ### Bloques de Fase 5
 - L846 — ### Bloques de Fase 6
@@ -61,15 +61,15 @@
 - L1252 — ### Decisiones permanentes (no reabrir sin razón de peso)
 - L1298 — ### Método de trabajo (procedimiento vigente)
 - L1331 — ### Deuda consciente VIVA
-- L3214 — ### Deuda consciente CERRADA (histórico)
-- L3315 — ### Notas técnicas validadas en Fase 0
-- L3328 — ### Notas técnicas validadas en Fase 6
-- L3373 — ### Notas técnicas validadas en Fase 9
-- L3382 — ### Notas técnicas validadas en Fase 11
-- L3522 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3531 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3558 — ### Registro detallado de sesiones S10–S31
-- L3567 — ## Señales globales de alerta
+- L3121 — ### Deuda consciente CERRADA (histórico)
+- L3323 — ### Notas técnicas validadas en Fase 0
+- L3336 — ### Notas técnicas validadas en Fase 6
+- L3381 — ### Notas técnicas validadas en Fase 9
+- L3390 — ### Notas técnicas validadas en Fase 11
+- L3530 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3539 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3566 — ### Registro detallado de sesiones S10–S31
+- L3575 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -743,7 +743,24 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 156 — O-instalación (H4), C-windows-limpio: **LA APLICACIÓN SE INSTALA Y FUNCIONA EN UN WINDOWS 11 LIMPIO CON CUENTA ESTÁNDAR, LLEGADA POR USB, SIN UN SOLO DIÁLOGO DE SEGURIDAD.** `O-instalación` pasa de 8 a **9 de 9 y TERMINA** en seis sesiones (S151–S156). Salda `D-entrega-caducada-indetectable`.
+### Sesión 157 — Higiene/Método, entre objetivos (excepción de §6): **EL CENSO DE R4 DEJA DE CONTAR MENCIONES, VE LOS OBJETIVOS Y LAS EXTINCIONES, Y LOS ÍNDICES PASAN A FALLO DURO; LAS NORMAS DE GUION SE REÚNEN EN `metodo.md`.** Fichas con sede Higiene/Método o script de R4: **de 19 a 11**. Primera sesión abierta por la excepción de S152.
+  TIPO Y RITUAL: HIGIENE/MÉTODO — M0 + tres mediciones de solo lectura + corrida en seco del verificador en /tmp + autoprueba y mutación del instrumento (su M3, ver DECISIONES) + M1. Sin código de la aplicación.
+  M0. Sin Cambio, Objetivo ni Hito, por la excepción de §6: H4 sin objetivo activo y disparador saltado en S154. Orden decidido para lo que queda de H4: Higiene → objetivo de la Fase 10 → objetivo de la Fase 12 (la Fase 10 es el único eslabón de §1 que falla; la CI tiene que proteger el guion entero y la condicionan cuatro deudas). Alcance fijado tras medir: familia del censo de R4 (tres fichas) + normas de guion (cuatro) + `D-plan-duplicado` + `__pycache__`; salida 19 → 11. Fuera, con argumento: la costura documental y seis fichas de datos, tests y producto que no son de método; no se reclasifican para bajar la cifra.
+  MEDICIÓN. (1) 19 fichas (13 + 4 + 2), idéntico a S156. (2) `scripts/__pycache__` no estaba ignorado. (3) `verificar-cierre.py`: la sección de índices imprimía y no sumaba; la autoprueba declaraba «7» a mano; el patrón no cubría `O-*`, `§x.y` ni `Cx`. (4) La copia de `docs_extra/old/` ya no existe. (5) El `-Base` del `.ps1` aborta con ruta relativa desde S152: la ficha que lo daba por vivo era falsa.
+  INSTRUMENTOS (`9e1ff53`, `7abd837`). Censo sobre el plan sin su entrada de sesión, con los tokens que sólo viven en ella aparte; `O-*` en el patrón; extinción respecto de HEAD como informe; índices descuadrados o ausentes como fallo duro; autoprueba de 12 comprobaciones con recuento calculado. `.gitignore` ignora `__pycache__/` en todo el árbol.
+  M3 DEL INSTRUMENTO. Cinco mutantes, uno por capacidad; los cinco abortan y a cada uno lo caza su propia comprobación (A5/A5b, A5c, A6, A7, A8b).
+  CONTRASTE. Sobre los documentos sin tocar: 33 → 40 sospechosos. Seis de los siete nuevos son los tokens que S155 y S156 dieron por rescatados por su línea de R4; el séptimo, `O-nombre`, un ejemplo literal de `metodo.md`, reescrito `O-<nombre>`. Con `§` y `Cx`, nueve más, todos secciones o criterios de otros documentos: salen del censo y la especificación de R4 se corrige.
+  MÉTODO (`21c3d41` y el commit de metodo.md de este cierre). R4 declara su cobertura mecánica; la automatización del cierre describe el censo nuevo; el tipo Higiene/Método lleva autoprueba con mutantes cuando toca un instrumento de `scripts/`; nueva sección M-guion con ocho normas; §6 precisa que la sesión de Higiene cierra al alcanzar la cifra fijada en su M0.
+  CRITERIO. 19 → 11, la cifra fijada en el M0. Cerradas: `D-censo-r4-cuenta-menciones`, `D-censo-r4-ciego-a-la-extincion`, `D-censo-r4-ciego-a-los-objetivos` (pagadas), `D-guion-exit-enmascarado` (pagada su mitad del verificador, integrada la de método), `D-guion-busca-token-esperado`, `D-guion-pkill-casa-su-propio-envoltorio`, `D-guion-escribe-donde-no-se-dijo` (integradas en M-guion) y `D-plan-duplicado` (extinción del objeto). `D-arranque-no-literal` cambia de sede y sigue en la cuenta.
+  DECISIONES DE MÉTODO. (1) `§x.y` y `Cx` fuera del censo por medición, no por comodidad. (2) La extinción informa y no falla: puede ser correcta, como la de `O-nombre`. (3) Los 33 tokens de una aparición preexistentes siguen sin revisar: ninguna ficha del alcance pedía vaciar esa lista (R-terminado). (4) La cifra del censo abre serie nueva: la línea de R4 de una sesión ya no rescata tokens, y los números no se comparan con los de S141–S156.
+  DEUDA. Ocho cerradas, ninguna nueva. Un defecto de instrumento, del asistente: el ancla de la fila de tipos se escribió desde la copia de `metodo.md` del Project, anterior a S152; la guarda de ancla única la paró sin escribir, costó una ronda y dio la precisión de la norma 3. El disparador de §6 no salta.
+  CORRECCIONES. (a) Del asistente: la anterior. (b) En la ficha de `D-guion-escribe-donde-no-se-dijo`: el resto de código que declaraba vivo estaba cubierto desde S152. (c) Duplicado de la línea BANCOS en la entrada de S156, visto en la apertura: se va con ella al archivo.
+  SUITES: **solver 92, app 465, vitest 482 en 52 ficheros**, medidas en el cierre y en verde; la sesión no tocó código de la aplicación, y las cifras son idénticas a las de S156. e2e no corrido (`D-e2e-centro-minimo-rojo`, sede Fase 12).
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: **INTACTOS**. La sesión no abrió ninguno de los dos.
+  LIMPIEZA (M1-bis): archivada S155 a `bitacora-sesiones.md`; degradada S156 a «Última sesión registrada (previa):»; S157 queda como única cabecera H3 viva.
+  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (**12** defectos inyectados, los 12 detectados, recuento calculado y no escrito a mano). Índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 5 y 10 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados; el descuadre lo produjo esta misma sesión al mover cuatro entradas de deuda, archivar el bloque de S155 e insertar esta entrada, y se corrigió regenerando. Desde S157 un índice descuadrado o ausente SUMA a los fallos duros, así que esta línea ya no puede salir en verde sin regenerar. **Censo: 280 tokens distintos y 40 con UNA sola aparición; 0 sólo en la entrada de sesión; 0 extinciones respecto de HEAD.** Primera medición con el instrumento nuevo, y la serie NO es comparable con la de S141–S156 (ver DECISIONES, 4). (a) La corrida inmediatamente anterior al cierre, con los documentos aún sin tocar, dio **39 y una extinción con nombre: `O-nombre`**, retirado a propósito al reescribir el ejemplo de `metodo.md` como `O-<nombre>`. Al escribir su cierre en §4, la ficha de `D-censo-r4-ciego-a-la-extincion` lo CITA, así que vuelve al corpus con una aparición: de ahí 40 y 0. Es la mecánica de `D-censo-r4-cuenta-menciones` en su forma que NO se ha cerrado —una cita en §4 es un citante vivo permanente, no la línea de una sesión que se archiva—, y consta aquí porque explica la diferencia entre las dos cifras. (b) Esta línea de R4 ya NO rescata a nadie: vive dentro de la entrada de sesión del plan, que el censo retira del corpus (34 líneas retiradas), y por eso los tokens que nombra no cambian el número. Es la comprobación en vivo de lo que la sesión pagó. (c) Los 33 tokens de una aparición preexistentes siguen sin revisar, por R-terminado: ninguna ficha del alcance pedía vaciar esa lista. (d) HIGIENE/MÉTODO: **11 fichas** por la columna de sede de §4 con el criterio de S142, la cifra que el M0 fijó como criterio de terminado; las once están en «Transversal, con la sesión de Higiene/Método», y las otras dos sedes —«Transversal, sesión de Higiene/Método» y «Transversal, con el script de R4 pendiente desde S101»— quedan a CERO: las seis fichas que las poblaban se cierran y `D-arranque-no-literal` se muda a la primera. **El disparador de la excepción a R-apertura NO está activo: 11 de 20**, y tampoco el de §6, porque el único defecto de instrumento de la sesión costó una ronda y no dos. **R-deuda aguanta**: no hay objetivo activo, y ninguna de las once fichas vivas de Higiene bloquea nada.»
+
+Última sesión registrada (previa): Sesión 156 — O-instalación (H4), C-windows-limpio: **LA APLICACIÓN SE INSTALA Y FUNCIONA EN UN WINDOWS 11 LIMPIO CON CUENTA ESTÁNDAR, LLEGADA POR USB, SIN UN SOLO DIÁLOGO DE SEGURIDAD.** `O-instalación` pasa de 8 a **9 de 9 y TERMINA** en seis sesiones (S151–S156). Salda `D-entrega-caducada-indetectable`.
   TIPO Y RITUAL: DESARROLLO reducido — M0 + M2 (guiones de empaquetado y oráculo, sólo lectura) + M4 en tres máquinas (Linux, construcción de dominio y Windows 11 Home con cuenta estándar) + oráculo en Linux + M1. Sin M3: ningún cambio de producto; el del `.ps1` se verificó por sus casos negativos en Windows.
   M0. Sexto y último Cambio de `O-instalación`. Tres decisiones del usuario. (1) Windows 10 SALE del criterio: según el usuario, todos los equipos del centro están en Windows 11; no verificado en el centro; se reabre si aparece un equipo con Windows 10 (limitación conocida, §4). (2) Medio de entrega: USB, también para las versiones futuras; se reabre si se distribuye por descarga o correo. (3) Firma: NO. En la máquina de prueba el USB no dispara SmartScreen y el Control inteligente de aplicaciones está Desactivado, con «Evaluación» en gris (fotografiado); se reabre si cambia el medio o si un equipo del centro bloquea el ejecutable. Riesgo residual escrito y no resuelto: la prueba se hace en un portátil del usuario, no en un equipo gestionado del centro.
   M2. El `.ps1` no tenía parámetros obligatorios, verificaba el jar contra el `SHA256SUMS` de su propia carpeta y no imprimía la huella del zip. Oráculo: `scripts/oraculo-exportacion.py`, una invocación por fichero; ninguna orden literal ni el `horario_id` estaban escritos en el repo (medido: id 1, único horario del banco, FEASIBLE). El censo Tf de S150 no es alcanzable desde su línea de órdenes y queda fuera: la condición 3 no lo pide. El `Uso:` del oráculo anuncia `--vista grupo|profesor` y acepta también `aula` (defecto de texto, sin deuda).
@@ -759,23 +776,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   SUITES: **solver 92, app 465, vitest 482 en 52 ficheros**, medidas en el cierre; la sesión no tocó código de la aplicación. e2e no corrido (`D-e2e-centro-minimo-rojo`, sede Fase 12).
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: **INTACTOS**. El oráculo corrió sobre una COPIA del primero, fuera del repo, con md5 idéntico antes y después; la máquina Windows recibió otra copia, que no volvió.
   R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 14 y 27 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 31 y 68, medido importando el instrumento como módulo sobre lo que `git show HEAD:` saca a una carpeta aparte: el descuadre lo produjo esta misma sesión al reescribir la condición 3 y el encabezado del objetivo, insertar el bullet de estado, las cuatro filas de §4, la cabecera de S156 y las seis notas técnicas de Fase 11, y se corrigió regenerando—. **Censo de tokens sospechosos: 33** sobre 269 tokens distintos, el mismo número que declararon S151, S152, S153, S154 y S155, y la comparación es honesta porque los seis se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento, da **33** sobre 267: tres entradas netas y ninguna salida, y son otra vez `D-proyeccion-sin-duracion`, `D-aviso-fuera-del-dialogo` y `D-javadoc-plazas-caducado` —las mismas tres de S150, S152 y S154—, porque la única cita viva que les quedaba estaba DENTRO del bloque de S154 que esta sesión archiva; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **undécima reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El ciclo es el que S152 dejó escrito y S154 volvió a medir con estos mismos tres tokens: el rescate vive en la línea de R4 de una sesión, y archivar esa línea dos sesiones después se lo retira; seguirá repitiéndose mientras no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-windows-limpio` y `D-arranque-sin-aviso-de-espera`: **no los marca el censo**, porque nacen con **10 y 4** apariciones vivas medidas ANTES de esta línea —7 en gestión y 3 en el plan el Cambio; 1 y 3 la deuda—, en las sedes de siempre, así que `D-deuda-sin-sede-en-el-plan` no engorda. Las dos filas nuevas de §4 sin token —Windows 10 fuera del criterio y la decisión de no firmar— no entran en el censo por construcción, y tampoco lo mueve cerrar el objetivo: `O-instalación` está fuera del corpus (`D-censo-r4-ciego-a-los-objetivos`). (c) Extinción comprobada a mano sobre los 13 tokens citados en el bloque de S154 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y los diez restantes aguantan entre 2 y 11. (d) HIGIENE/MÉTODO: **19 fichas** por la columna de sede de §4 con el criterio de S142, decimoquinta reproducción; el reparto es 13 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S153, S154 y S155: las altas de hoy nacen con sede propia —la deuda sin objetivo asignado, y las dos filas en su cajón de §4— y no engordan ninguna de las tres. **El disparador de la excepción a R-apertura NO está activo: 19 de 20, falta 1**, y el de la excepción de Higiene de §6 tampoco saltó: un solo defecto de instrumento en la sesión, y no costó trabajo medible dos veces. **R-deuda aguanta, y ya sin superficie**: con `O-instalación` TERMINADO no queda en §3 ningún objetivo abierto —los diez están cerrados—, así que ninguna deuda viva bloquea una condición viva; `D-arranque-sin-aviso-de-espera` nace sin objetivo asignado y `D-entrega-caducada-indetectable` sale de la cola saldada.»
-
-Última sesión registrada (previa): Sesión 155 — O-instalación (H4), C-rutas-spa: **F5 Y LAS URL DIRECTAS FUNCIONAN: EL JAR REENVÍA LAS RUTAS DE LA SPA A `index.html` SIN TRAGARSE LOS 404 DE LA API NI LOS DE LOS FICHEROS.** `O-instalación` pasa de 7 a **8 de 9**: la condición 9 queda cumplida y verificada en Linux, y salda `D-spa-sin-fallback-de-rutas`. Queda sólo la condición 3.
-  TIPO Y RITUAL: DESARROLLO — M0 + M2 en dos etapas (inventario sobre el jar; fases del build y API de Boot 4.1 y Spring 7 sobre el bytecode) + M3 (cuatro mutantes del resolvedor) + M4 en Linux (tabla de `curl` sobre el jar, mutante del cableado y navegador) + M1. Sin M4 en Windows por decisión de alcance: el servido vive en el jar, igual en las dos plataformas, y la condición 3 lo re-verifica.
-  M0. Quinto Cambio de `O-instalación`. Va antes que la 3 porque la 3 es la verificación final de las demás (hacerla antes obligaría a repetirla) y sigue sin máquina. Alcance fijado por el usuario en dos pasos: el primero dejaba fuera la ruta comodín de Angular y la medición la metió (ver DECISIONES). Fuera: e2e, Windows, guiones de empaquetado y todo lo de la condición 3.
-  M2-A, SOBRE EL JAR DE HEAD. `/horario/1` → 404; `/api/no-existe` → 404 en JSON; `/main-inexistente.js` → 404; `/` → 200; `/api/jornada` con `Accept: text/html` → 406, así que el `Accept` no separa la API de la SPA. Cero `WebMvcConfigurer`, `ErrorController` o `forward:`; todos los controladores cuelgan de `/api/*`. La SPA usa `PathLocationStrategy`. El e2e corre contra `ng serve`, que reescribe cualquier ruta: por eso nunca vio el defecto.
-  M2-B. El bundle se construye y copia en `prepare-package`, después de `test`. Angular no tenía ruta `'**'`. Boot 4.1.0 y Spring 7.0.8 medidos sobre el bytecode (ver NOTAS de Fase 11): `@Order(0)` y guarda `hasMappingForPattern` en la autoconfiguración de Boot, y ningún registro con `add-mappings=false`. El proyecto no tiene ningún test con contexto de Spring. Conteo de partida: 92/458.
-  PRODUCTO. `ResolvedorRutasSpa` sirve el recurso pedido si existe y, si no, `index.html`, salvo rutas `api/` o con extensión en el último segmento. `RutasSpaConfig`, primera `@Configuration` del proyecto, lo registra sobre `/**` en `classpath:/static/`. `spring.web.resources.add-mappings=false` en el `application.properties` de main. `{ path: '**', redirectTo: '' }` en `app.routes.ts`, que lleva a `Landing`.
-  M3. Test unitario de 7 casos sobre una carpeta `@TempDir`, sin contexto de Spring. Mutantes: exclusión de `api/` suprimida → cae f; prefijo sin barra → cae g; extensión siempre falsa → cae e; siempre el índice → caen c, d, e y f (la predicción era c y d: ver CORRECCIONES). Ninguno sobrevive.
-  M4, LINUX. Jar de 156.388.388 B, listo en 7 s. Rutas profundas, con query y `/loquesea` → 200 `text/html` con los dos `Accept`, con el mismo md5 que `/` (`1391572255a60b836dee893fe7b2b199`); `/api/no-existe` → 404 en JSON; `/main-inexistente.js` → 404; favicon y el `main-*.js` real → 200 con su tipo; `/api/jornada` sin cambios. MUTANTE DEL CABLEADO (`--spring.web.resources.add-mappings=true`): la tabla no cambia en nada. Con TRACE, A registra `[/**]` y B `[/webjars/**, /**]`: la propiedad surte efecto y el reenvío sobrevive igual, porque prevalece el manejador propio (por qué, no medido). NAVEGADOR (usuario): F5 en `/horario/1` y en `/configuracion/jornada` recarga la vista; la URL directa en una pestaña nueva abre la vista; `/loquesea` lleva a la portada. Al recargar tras elegir otro grupo, la vista vuelve a 1B-A: ver DEUDA.
-  CRITERIO. **Condición 9 CUMPLIDA (S155).** `O-instalación`: **8 de 9**. Nada vale para la condición 3.
-  DECISIONES DE MÉTODO. (1) El manejador de Boot se APAGA con la propiedad pública y no se le gana con un `@Order` negativo, que dependería de su implementación. (2) La propiedad se MANTIENE aunque su mutante sobrevive: su valor es que haya un solo `/**`, no que el reenvío funcione. Los tres textos que decían lo contrario (dos javadocs y el comentario del `.properties`) se corrigieron antes del cierre. (3) El test es UNITARIO: introducir el primer `@SpringBootTest` o `@WebMvcTest` era una decisión de infraestructura cara, y además no habría probado el cuerpo JSON del 404 (MockMvc no pasa por el despacho de errores del contenedor). Lógica → unitario y M3; cableado → M4 sobre el jar. (4) La ruta comodín ENTRA en el alcance: sin ella, el reenvío convierte un 404 honesto en una pantalla en blanco. No es pulir, es no empeorar lo que el propio Cambio toca. (5) Las instrucciones del Project conservaban la norma documental anterior a M-doc (S122), «pide los ficheros y devuélvelos enteros». El asistente la siguió y el usuario lo detectó. Se corrige en las instrucciones del Project; `metodo.md` ya dice lo correcto, igual que el patrón del nombre de sesión (M1.7) y el prompt siguiente (M1.8).
-  DEUDA. **SALDADA `D-spa-sin-fallback-de-rutas`.** Nacen **`D-seleccion-de-vista-fuera-de-la-url`** (mejora futura, sin objetivo asignado) y **`D-reenvio-spa-sin-guarda-automatica`** (técnica real, sede Fase 12). Ninguna bloquea. En el propio cierre, una instancia de **`D-declarado-sin-artefacto`**: Claude Code guardó «en memoria» que `regenerar-indice.py` no interpreta argumentos y que un `--help` exploratorio REGENERA y ESCRIBE los índices; la memoria no es sede recuperable por el método, así que la lección vive aquí. Es además la **cuarta instancia de `D-guion-escribe-donde-no-se-dijo`**, estirando su definición de «dónde» a «cuándo»: una herramienta que escribe cuando se le pide ayuda. El descuadre previo de los índices no se perdió: se reconstruyó el estado en `/tmp` y se midió llamando a `comprobar()` como módulo, que sólo lee. Un solo defecto de instrumento en la sesión: el disparador de §6 no salta.
-  CORRECCIONES. (a) Del asistente: la premisa del paso 0.3 («`SqliteForeignKeysConfig` es una `@Configuration`»), escrita de memoria y cazada por Claude Code; la predicción del mutante M4, errónea por exceso (pasó por alto que devolver siempre el índice también se salta las dos guardas); tres textos que afirmaban más de lo medido, escritos antes de medir y refutados por el mutante del cableado; y pedir los ficheros de documentación contra M-doc. (b) De S154, cazado en el M1 de S155: la fila de H4 de §2 seguía en «3 de 9» y el verificador no lo detectó, porque `O-instalación` queda fuera de su corpus (`D-censo-r4-ciego-a-los-objetivos`); corregida. (c) De Claude Code, a su favor: amplió el M4 con un TRACE fuera del guion, de pura medición, y fue lo que separó «la propiedad no surte efecto» de «surte efecto y no hace falta».
-  SUITES: **solver 92, app 465, vitest 482 en 52 ficheros**, en verde; la apertura era 92/458/482 y los 7 nuevos son de `ResolvedorRutasSpaTest`. e2e: `centro-minimo.spec.ts:265` ROJO y PREEXISTENTE, ÚNICO fallo de la corrida (1 fallado, 1 pasado, 58,9 s), idéntico al de S154.
-  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, intactos en cada tanda; el M4 corrió sobre copias.
-  LIMPIEZA (M1-bis): archivada S153 a `bitacora-sesiones.md`; degradada S154 a «Última sesión registrada (previa):»; S155 queda como única cabecera H3 viva. Sin frente cerrado que condensar: `O-instalación` sigue abierto.
-  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (7 defectos inyectados, los 7 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 10 entradas descuadradas a 0 y 0** sobre 31 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 31 y 68: el descuadre lo produjo esta misma sesión al reescribir la condición 9, insertar el bullet de estado, las dos filas de §4, la cabecera de S155, las dos altas de deuda, la ficha de deuda cerrada y las cuatro notas técnicas de Fase 11, y se corrigió regenerando—. **Censo de tokens sospechosos: 33** sobre 267 tokens distintos, el mismo número que declararon S151, S152, S153 y S154, y la comparación es honesta porque los cinco se miden DESPUÉS de escribir su línea de R4. (a) La corrida previa a escribir esta línea dio **36**, y el censo de HEAD, medido con el mismo instrumento importado como módulo sobre las versiones que `git show HEAD:` saca a una carpeta aparte, da **33** sobre 264: tres entradas netas, y son `C-alcance-ajuste`, `C-alcance-exportacion` y `C-alcance-instalacion` —no las tres de S150, S152 y S154—, porque la única cita viva que les quedaba estaba DENTRO del bloque de S153 que esta sesión archiva; esta misma frase las rescata a las tres al nombrarlas, de ahí 33 y no 36, **décima reproducción consecutiva de `D-censo-r4-cuenta-menciones`** —la línea de R4 se escribe DENTRO del corpus que el censo mide—. El mecanismo es el mismo que S152 dejó escrito y S154 volvió a medir, con otros tres tokens: lo que rescata es la línea de R4 de una sesión, y archivar esa línea dos sesiones después se lo retira; seguirá repitiéndose mientras no ganen un citante vivo FUERA de las entradas de sesión. El número que vale es el medido después, y es el que consta. (b) Los tokens nuevos de esta sesión son `C-rutas-spa`, `D-seleccion-de-vista-fuera-de-la-url` y `D-reenvio-spa-sin-guarda-automatica`: **no los marca el censo**, porque nacen con 8, 3 y 3 apariciones vivas medidas ANTES de esta línea, en las sedes de siempre —§2, §3 y la entrada de sesión para el Cambio; §4, «Deuda consciente VIVA» y esta entrada para las dos deudas—, así que `D-deuda-sin-sede-en-el-plan` no engorda. `O-instalación` sigue fuera del corpus por construcción (`D-censo-r4-ciego-a-los-objetivos`), y por eso cumplir la condición 9 no mueve el censo; esa misma ceguera es la que dejó la fila de H4 de §2 en «3 de 9» desde S154 y la que esta sesión corrige a mano. (c) Extinción comprobada a mano sobre los 16 tokens citados en el bloque de S153 archivado (`D-censo-r4-ciego-a-la-extincion`): **NINGUNO cae a 0** en el corpus vivo; los tres que bajan a 1 son los ya dichos, y los 13 restantes aguantan entre 2 y 22. (d) HIGIENE/MÉTODO: **19 fichas** por la columna de sede de §4 con el criterio de S142, decimocuarta reproducción; el reparto es 13 en «Transversal, con la sesión de Higiene/Método», 2 en «Transversal, sesión de Higiene/Método» y 4 en «Transversal, con el script de R4 pendiente desde S101», idéntico al de S153 y S154: las dos altas de esta sesión nacen con sede propia —Fase 12 y sin objetivo asignado— y no engordan ninguna de las tres. **El disparador de la excepción a R-apertura NO está activo: 19 de 20, falta 1**, y el de la excepción de Higiene de §6 tampoco saltó en esta sesión: ningún defecto de instrumento costó trabajo medible dos veces. **R-deuda aguanta**, y con margen nuevo: saldada la 9, la única condición viva de `O-instalación` es la 3, ninguna deuda viva la bloquea —`D-entrega-caducada-indetectable` tiene sede en ella y declara «No» en su columna de bloqueo— y las dos altas de hoy apuntan a Fase 12 y a ningún objetivo, así que por primera vez en el objetivo no queda ninguna deuda viva sobre una condición viva.»
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -799,8 +799,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156.
-El plan conserva ahora S155 (degradada a formato compacto) y S156 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157.
+El plan conserva ahora S156 (degradada a formato compacto) y S157 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2649,58 +2649,6 @@ con remisión a la bitácora.
   superficie NUEVA, no un ajuste. No bloquea el criterio —el horario válido se produce y la espera tiene señal—
   y no se paga ahora (R-deuda).
 
-- **D-guion-exit-enmascarado** (S117, VIVA, DE MÉTODO, no bloqueante) — UN GUION ANUNCIÓ COMO ÉXITO UN BUILD
-  FAILURE. Detectado y corregido por Claude Code dentro de la propia sesión: la plantilla de guion usada para
-  invocar Maven capturaba `EXIT=$?` DESPUÉS de un `echo`, así que medía el código de salida del `echo` —siempre
-  0— y no el del comando; una primera corrida se reportó como correcta siendo BUILD FAILURE. El daño no fue
-  más allá porque la salida se leyó entera, pero la plantilla es la de sesiones anteriores y nadie ha
-  auditado cuáles la usaron. Es de la misma familia que el hallazgo de método de S109 (los tests de endpoint
-  asertaban sobre el `MockHttpServletResponse` y no sobre el cuerpo de red): un instrumento que mide otra cosa
-  distinta de la que se cree. → sesión de Higiene/Método, junto al script de R4 que falta desde S101, al que
-  esta deuda añade un caso concreto: comprobar el código de salida del COMANDO, inmediatamente y sin nada en
-  medio. **CUARTA Y QUINTA INSTANCIA en S128, las dos del arquitecto y las dos en guiones de LECTURA, que es
-  variante nueva.** (4) Un volcado de inventario pedía `sed -n '40,80p' ruta-inexistente || find … -exec sed …`:
-  el `sed` falló, **el `||` salvó la salida** y el volcado se vio bien, así que la ruta falsa
-  (`components/horario/`, cuando el fichero vive en `components/horario-grid/`) sobrevivió tres turnos hasta
-  que reventó en un `git add` —donde Claude Code la paró en vez de parchearla en silencio—. (5) La guarda del
-  cableado del bloque 2, `grep -rl "EstadoLista" --include=*-lista.ts | wc -l`, **casa con `estado-lista.ts`**:
-  el componente se contaba a sí mismo, así que el «1» que devolvió significaba CERO listas cableadas. Las dos
-  son la misma forma que las tres anteriores —un instrumento que mide otra cosa distinta de la que se cree—
-  con un corolario operativo nuevo que se escribe aquí: **fallback silencioso en un guion de lectura, nunca**;
-  si un `sed` no encuentra su fichero, tiene que petar. **SIETE INSTANCIAS MÁS en S129 —de la (6) a la (12)—, todas del
-  arquitecto y todas con la MISMA causa raíz, que aquí se nombra por primera vez: patrones y rangos escritos DE
-  MEMORIA teniendo a tres secciones de distancia el fichero que los define.** (6) `grep -rn -- '--e[1-6]'
-  --include='*.css'`: el `--` desactiva el parseo de opciones, así que `--include` pasó a ser operando, `grep`
-  devolvió 2, `pipefail` lo propagó y el `||` imprimió «(cero usos fuera de styles.css)» **justo debajo de los
-  quince usos que acababa de listar**. Es la variante PEOR de la familia: no enmascara un fallo, publica una
-  conclusión falsa, y quien lea la última línea se lleva lo contrario de la verdad. (7) Un `echo` de conclusión
-  —«NADIE estila select: confirma la deuda»— escrito ANTES de medir, y falso: 12 de los 14 `<select>` llevan la
-  misma clase que los inputs. (8) Buscar `--(peso|linea)` cuando los tokens de interlineado se llaman
-  `--lh-apretado` y `--lh-normal`: la sección informó los tres pesos y **calló el interlineado entero sin decir
-  que no lo había buscado**. (9) `(signal|computed)[^;]*(cargando|error…)` con el orden invertido respecto a
-  como se escribe TypeScript (`readonly cargando = signal(false)`), que produjo siete «cero coincidencias»
-  falsos. (10) Buscar `title=` literal, perdiendo `[title]` y `[attr.aria-label]`, que es exactamente donde
-  vivía el molde que el guion buscaba. (11) Una regex para sustituir el comentario del contador que buscaba un
-  bloque conteniendo `!error()` —cadena que el comentario de la TABLA también contiene—: **borró cinco líneas de
-  más en las siete plantillas**, y lo cazó Claude Code leyendo el diff, no la suite, porque ese borrado no ponía
-  rojo nada. (12) **REINCIDENCIA:** el `grep` sin coincidencias bajo `pipefail` matando el proceso volvió a
-  ocurrir en el guion de la campaña de mutación, DOS guiones después de que el asistente diagnosticara esa misma
-  causa en (6). Se añade además un caso menor de la familia de `D-arranque-no-literal`: un dato ajeno metido sin
-  verificar dentro de un mensaje de aborto («el censo decía once», cuando eran nueve). **SEGUNDO COROLARIO
-  OPERATIVO, que se escribe aquí:** un guion de lectura no busca por nombres recordados; los deriva de lo que él
-  mismo acaba de volcar, o el volcado va primero y el patrón se escribe después. Y la lección de (12): una
-  lección escrita no basta si el siguiente guion se escribe sin releerla. No se paga ahora.
-
-  **DOS INSTANCIAS EN S152, las dos del asistente y las dos cazadas por Claude Code.** (1) Un
-  `cmp` entre dos variantes del bundle corrió cuando una no había producido ficheros: imprimió
-  cuatro veces «DISTINTOS» con el segundo tamaño vacío, es decir, publicó una diferencia
-  MEDIDA donde sólo había un fichero ausente; la guarda va sobre la existencia de los dos
-  operandos, no sobre el retorno de `cmp`. (2) Un `echo "--- $solver …"` en un guion de
-  comprobación: con `set -u`, bash expandió su propia variable inexistente y mató el proceso
-  antes de las dos comprobaciones que venían detrás. **TERCERA, en el producto:** el `-Base`
-  del `.ps1` aceptaba ruta relativa, así que un token encadenado en la misma línea llegó como
-  primer parámetro posicional y el guion escribió su salida entera en una carpeta inventada,
-  en silencio; pagada en el sitio con una guarda de ruta absoluta.
 - **D-vista-horario-sin-horario** (S120, VIVA, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
   VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
   sobre una base recién creada y poblada a mano por la interfaz: antes de generar nada, la vista de Horario
@@ -2778,7 +2726,7 @@ con remisión a la bitácora.
   Esta vez la orden se PROBÓ y se ESCRIBIÓ literal en la entrada de S129, con su prerrequisito
   (`mvn -pl solver install -DskipTests`, o se compila contra el jar de `~/.m2`). Escribir el literal no cierra la
   deuda —su arreglo es un `.sh` versionado, y crear superficie nueva estaba fuera del alcance del tramo—, pero
-  deja de obligar a la sexta reconstrucción. No se paga ahora.
+  deja de obligar a la sexta reconstrucción. No se paga ahora. **SEDE CORREGIDA en S157:** el script de R4 ya no está pendiente; lo que queda de esta ficha es el `.sh` de arranque versionado, que es trabajo de Higiene y no del verificador.
 
 - **D-sin-puntos-de-ruptura** (S121, VIVA, MEJORA FUTURA de UX, no bloqueante) — NO HAY UN SOLO `@media` EN
   TODO EL FRONTEND. Medido en el M2 de S121 al inventariar la superficie visual: cero media queries en `src`,
@@ -2969,7 +2917,6 @@ con remisión a la bitácora.
   reconciliarla entre dos documentos. Queda por decidir si compensa rederivar el catálogo desde él. No se
   decide en S134: el centro entregó ONCE PDF y ninguno está analizado. **AFINADA en S135:** los once están ya extraídos a texto (`pdftotext -layout`) y consultados para una pregunta concreta —si corroboran las aulas de FPB—, así que «ninguno está analizado» deja de ser cierto; lo que sigue sin decidirse es si compensa REDERIVAR el catálogo desde `Horarios de profesores.pdf`. Medido de paso: Taller 5 no aparece en ninguno de los once, y Taller 4 aparece como aula con la rejilla vacía.
 - **D-aula-tipo-sin-uso-real** (S135, VIVA, no bloqueante) — la tipificación de `aula.tipo` en el catálogo no sigue el uso real del centro: **Taller 2 y Taller 4 están tipados `TALLER_FPB` y tienen la rejilla VACÍA en el volcado, mientras Taller 3 —el único que imparte FPB de verdad— está tipado `ORDINARIA`**. Medido en S135 que hoy no decide nada: el solver NO ve el campo (`TipoAula` no existe en `solver/` y el enum lo declara de sí mismo, «vive sólo en la capa de persistencia»), y su único consumidor semántico, `AsignaturaAulaCompatible`, tiene CERO filas: mecanismo montado sin datos dentro. La app lo valida con `valueOf` y devuelve 400 si no casa, así que basta con que parsee. Taller 5 se dio de alta como `TALLER_FPB` por DESCRIPCIÓN —uso exclusivo de FPB según el centro— y no copiando el tipo de Taller 4, para no heredar el criterio sin examinarlo. Arreglarlo obliga a revisar los 43 tipos y no bloquea ningún criterio: no se paga en S135 (R-deuda). El riesgo es que el día que `AsignaturaAulaCompatible` se llene, el campo decida con un criterio falso.
-- **D-guion-busca-token-esperado** (S135, VIVA, deuda de MÉTODO, no bloqueante) — los guiones de lectura escritos por el modelo principal buscan el TOKEN QUE ESPERAN en vez del vigente, y en S135 falló TRES veces en una sola sesión: un `grep` de `_aulaDesconocida` y del literal `11` pasó por encima de `ESCRITURAS_CARGA_COMPLETA = 804`, que no contiene ninguno de los dos y habría hecho fallar `main` sobre una carga correcta; SQL contra `horario` y `tramo_id` cuando el esquema dice `horario_generado` y `tramo_inicio_id`; y lectura del conteo de suites por «vitest 316», cifra de S118 muerta desde entonces (la vigente es 419). Es la familia de `D-guion-exit-enmascarado` y la causa raíz que S129 nombró —escribir de memoria teniendo el documento a un comando de distancia—, aparecida en instrumentos de LECTURA. Las tres las cazó Claude Code midiendo. Contención ya practicada y que conviene volver norma: gatear toda escritura con una corrida EN SECO revisada, que en S135 interceptó tres defectos del parche antes de tocar el repo. → sesión de Higiene/Método.
 - **D-cargador-tutoria-pisa** (S136, VIVA, DEUDA TÉCNICA REAL, no bloqueante) — `tools/carga-centro/cargar-centro.py`
   emite un PUT por cada ENTRADA de `catalogo["tutorias"]` con una lista de UN elemento, y
   `PUT /api/grupos/{id}/tutoria` es REEMPLAZO TOTAL: dos entradas del mismo grupo no se acumulan, la segunda
@@ -3100,23 +3047,6 @@ con remisión a la bitácora.
   sobre la causa. Ningún test del controlador lo caza porque ninguno hace fallar la composición por otra vía,
   que es exactamente lo que el mutante 16 demostró. Arreglarlo bien es rediseñar el contrato de excepciones del
   controlador y no ensanchar el `catch`; no bloquea ninguna condición viva. Sede O-exportación. No se paga.
-- **D-guion-pkill-casa-su-propio-envoltorio** (S149, VIVA, no bloqueante) — un guion que para la aplicación con
-  `pkill -f` se mata a sí mismo. Nace en el M2-B de S149 y ya costó una corrida: `pkill -f 'spring-boot:run'`
-  casa con el `bash -c '<texto>'` que envuelve el propio guion, porque el patrón está dentro de esa cadena. El
-  guion murió a mitad con salida 144, se llevó por delante su propia secuencia y dejó una JVM huérfana sirviendo
-  el puerto; la lectura que faltaba hubo que repetirla. Lo mismo vale para `pgrep -af`, que siempre se
-  autolista. El arreglo es guardar el PID al lanzar (`MVN=$!`, hijo por `pgrep -P`) y matar por número, que es
-  lo que las fases siguientes de S149 hicieron sin volver a fallar. El defecto vive en la FORMA de escribir los
-  guiones y no en un guion concreto, así que su sede es la sesión de Higiene/Método y no un objetivo. No se paga.
-  **S151, dos variantes más, las dos de COMPROBACIÓN y no de parada:** `ps -eo pid,args | grep -i
-  '[E]duchronos'` dio cuatro falsos positivos, porque el truco del corchete no salva nada cuando el directorio
-  de trabajo o el comando llevan la ruta del repo (el `konsole --workdir` y el propio shell); y `pgrep -a java`
-  NO ve una aplicación empaquetada con `jpackage`, cuyo proceso se llama `Educhronos` y no `java`, así que la
-  guarda «ninguna JVM» da un falso limpio con el bundle vivo. Se comprueba por PID guardado, por
-  `/proc/<pid>/exe` y por el puerto; un `pgrep -af` con la ruta del bundle cae en la misma trampa si el guion
-  la contiene. **S154, otra instancia:** en el cierre de un guion de verificación, `pgrep -f 'http.server
-  8080'` devolvió el PID del propio shell de Claude Code, pese a que el guion prohibía `pgrep` por patrón;
-  comprobado con `ps -p`, sin daño.
 - **D-jar-no-reproducible** (S152, VIVA, no bloqueante) — DOS CONSTRUCCIONES DEL MISMO COMMIT
   DAN JARS DISTINTOS. Medido: tres pasadas de `a4aa695`, tres sha256 y el mismo tamaño exacto.
   De las 399 entradas del jar, 201 llevan la hora de pared de la construcción y sólo las 153
@@ -3157,29 +3087,6 @@ con remisión a la bitácora.
 - **D-guarda-escritura-sin-caso** (S153, VIVA, DEUDA TÉCNICA REAL, no bloqueante) — LA GUARDA
   `Files.isWritable` DE `crearCarpeta` NO LA EJERCITA NINGÚN CASO. Nace en el M3 de S153, medida por mutación y no supuesta: suprimir la condicion `if (!Files.isWritable(carpeta))` de `crearCarpeta` SOBREVIVE a los 14 casos del spec. El único caso de carpeta imposible usa un fichero como padre, y ahí revienta antes `createDirectories`, así que esa línea no llega a ejecutarse nunca en la suite. NO se cubre, por dos razones medidas: un `chmod 0555` sobre un `@TempDir` no discrimina si la suite corre como root —y la Fase 12 traerá runners—, y en Windows `isWritable` no significa lo mismo que en POSIX, porque mira el atributo de solo lectura y no los permisos efectivos, de modo que puede dar por escribible una carpeta que no lo es. La guarda SE QUEDA porque su diagnóstico nombra la carpeta: sin ella el fallo sale después como SQLITE_CANTOPEN dentro de `DataSourceScriptDatabaseInitializer.runScripts`, sin decir dónde. Queda escrito en el javadoc de `crearCarpeta`. Se paga cuando la Fase 12 traiga runners, o con un doble del sistema de ficheros.
 
-- **D-guion-escribe-donde-no-se-dijo** (S153, VIVA, DE MÉTODO, no bloqueante) — UN PARÁMETRO DE RUTA
-  ADMITE VALOR RELATIVO Y EL GUION ESCRIBE DONDE NO SE DIJO. Nace con TRES instancias medidas en dos
-  sesiones, y ninguna la detectó el guion que la cometía. (1) El `-Base` de `empaquetar-windows.ps1`
-  en S152 escribió en una carpeta inventada. (2) El `--salida` de `empaquetar-linux.sh` en S153: con
-  ruta relativa, el volcado de la huella del JDK se resolvía DENTRO de un `cd` posterior —el destino
-  quedaba colgando del directorio al que se acababa de entrar—, así que `SHA256SUMS` salía con una
-  sola entrada, el guion terminaba en 0 y la entrega viajó 190 MB hasta que abortó el `.ps1` en la
-  otra máquina. (3) Medida al demostrar el arreglo, y no sufrida: sin normalizar, `--salida ./x` no
-  cuelga del directorio desde el que se lanza el guion sino de la raíz del repo, por un `cd "$RAIZ"`
-  previo; dejó 332 MB de entrega dentro del repo con `exit 0` y sin que nada fallase. NO es lo mismo
-  que `D-guion-exit-enmascarado`, que va sobre la SEÑAL —un instrumento que dice verde cuando hay
-  rojo—: aquí el guion termina bien y la operación aterriza en otra ruta; dos de las tres instancias
-  no enmascaran ningún fallo. La (2) pertenece a las dos familias y se cita en ambas fichas.
-  ARREGLADA la instancia (2) en S153: `--salida` se normaliza a absoluta nada más leerse y el guion
-  aborta si su propia entrega no queda con dos entradas de dos campos, un `.jar` y un `.zip`, que es
-  el espejo de la guarda que el `.ps1` ya tenía al otro lado. Queda VIVA porque el `-Base` del `.ps1`
-  sigue sin normalizar y nadie ha auditado qué otros parámetros de ruta aceptan valor relativo.
-  **Cuarta instancia (S155):** `regenerar-indice.py` no interpreta argumentos, y un `--help` exploratorio regenera
-  y escribe los índices de los dos documentos. No hubo daño, porque el estado previo se reconstruyó en `/tmp`, pero
-  la medición del descuadre «antes» casi se pierde. Regla práctica mientras no se arregle: se invoca sin
-  argumentos y sólo cuando se quiere escribir; para medir sin escribir, se importa como módulo y se llama a
-  `comprobar()`.
-
 - **D-e2e-centro-minimo-rojo** (S154, VIVA, TÉCNICA REAL, no bloqueante) — `centro-minimo.spec.ts:265`
   falla: espera 3 `.instancia` tras generar y recibe 0. Medido sobre `1e5baaf` limpio, en un worktree
   con su propio `npm ci`: falla idéntico, así que es PREEXISTENTE y ajeno a `C-arranque-cierre`; no se
@@ -3215,6 +3122,107 @@ con remisión a la bitácora.
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
+
+- **D-plan-duplicado** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
+- **D-censo-r4-cuenta-menciones** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
+- **D-censo-r4-ciego-a-la-extincion** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
+- **D-censo-r4-ciego-a-los-objetivos** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
+
+- **D-guion-exit-enmascarado** (S117, CERRADA S157, DE MÉTODO, no bloqueante) — UN GUION ANUNCIÓ COMO ÉXITO UN BUILD
+  FAILURE. Detectado y corregido por Claude Code dentro de la propia sesión: la plantilla de guion usada para
+  invocar Maven capturaba `EXIT=$?` DESPUÉS de un `echo`, así que medía el código de salida del `echo` —siempre
+  0— y no el del comando; una primera corrida se reportó como correcta siendo BUILD FAILURE. El daño no fue
+  más allá porque la salida se leyó entera, pero la plantilla es la de sesiones anteriores y nadie ha
+  auditado cuáles la usaron. Es de la misma familia que el hallazgo de método de S109 (los tests de endpoint
+  asertaban sobre el `MockHttpServletResponse` y no sobre el cuerpo de red): un instrumento que mide otra cosa
+  distinta de la que se cree. → sesión de Higiene/Método, junto al script de R4 que falta desde S101, al que
+  esta deuda añade un caso concreto: comprobar el código de salida del COMANDO, inmediatamente y sin nada en
+  medio. **CUARTA Y QUINTA INSTANCIA en S128, las dos del arquitecto y las dos en guiones de LECTURA, que es
+  variante nueva.** (4) Un volcado de inventario pedía `sed -n '40,80p' ruta-inexistente || find … -exec sed …`:
+  el `sed` falló, **el `||` salvó la salida** y el volcado se vio bien, así que la ruta falsa
+  (`components/horario/`, cuando el fichero vive en `components/horario-grid/`) sobrevivió tres turnos hasta
+  que reventó en un `git add` —donde Claude Code la paró en vez de parchearla en silencio—. (5) La guarda del
+  cableado del bloque 2, `grep -rl "EstadoLista" --include=*-lista.ts | wc -l`, **casa con `estado-lista.ts`**:
+  el componente se contaba a sí mismo, así que el «1» que devolvió significaba CERO listas cableadas. Las dos
+  son la misma forma que las tres anteriores —un instrumento que mide otra cosa distinta de la que se cree—
+  con un corolario operativo nuevo que se escribe aquí: **fallback silencioso en un guion de lectura, nunca**;
+  si un `sed` no encuentra su fichero, tiene que petar. **SIETE INSTANCIAS MÁS en S129 —de la (6) a la (12)—, todas del
+  arquitecto y todas con la MISMA causa raíz, que aquí se nombra por primera vez: patrones y rangos escritos DE
+  MEMORIA teniendo a tres secciones de distancia el fichero que los define.** (6) `grep -rn -- '--e[1-6]'
+  --include='*.css'`: el `--` desactiva el parseo de opciones, así que `--include` pasó a ser operando, `grep`
+  devolvió 2, `pipefail` lo propagó y el `||` imprimió «(cero usos fuera de styles.css)» **justo debajo de los
+  quince usos que acababa de listar**. Es la variante PEOR de la familia: no enmascara un fallo, publica una
+  conclusión falsa, y quien lea la última línea se lleva lo contrario de la verdad. (7) Un `echo` de conclusión
+  —«NADIE estila select: confirma la deuda»— escrito ANTES de medir, y falso: 12 de los 14 `<select>` llevan la
+  misma clase que los inputs. (8) Buscar `--(peso|linea)` cuando los tokens de interlineado se llaman
+  `--lh-apretado` y `--lh-normal`: la sección informó los tres pesos y **calló el interlineado entero sin decir
+  que no lo había buscado**. (9) `(signal|computed)[^;]*(cargando|error…)` con el orden invertido respecto a
+  como se escribe TypeScript (`readonly cargando = signal(false)`), que produjo siete «cero coincidencias»
+  falsos. (10) Buscar `title=` literal, perdiendo `[title]` y `[attr.aria-label]`, que es exactamente donde
+  vivía el molde que el guion buscaba. (11) Una regex para sustituir el comentario del contador que buscaba un
+  bloque conteniendo `!error()` —cadena que el comentario de la TABLA también contiene—: **borró cinco líneas de
+  más en las siete plantillas**, y lo cazó Claude Code leyendo el diff, no la suite, porque ese borrado no ponía
+  rojo nada. (12) **REINCIDENCIA:** el `grep` sin coincidencias bajo `pipefail` matando el proceso volvió a
+  ocurrir en el guion de la campaña de mutación, DOS guiones después de que el asistente diagnosticara esa misma
+  causa en (6). Se añade además un caso menor de la familia de `D-arranque-no-literal`: un dato ajeno metido sin
+  verificar dentro de un mensaje de aborto («el censo decía once», cuando eran nueve). **SEGUNDO COROLARIO
+  OPERATIVO, que se escribe aquí:** un guion de lectura no busca por nombres recordados; los deriva de lo que él
+  mismo acaba de volcar, o el volcado va primero y el patrón se escribe después. Y la lección de (12): una
+  lección escrita no basta si el siguiente guion se escribe sin releerla. No se paga ahora.
+
+  **DOS INSTANCIAS EN S152, las dos del asistente y las dos cazadas por Claude Code.** (1) Un
+  `cmp` entre dos variantes del bundle corrió cuando una no había producido ficheros: imprimió
+  cuatro veces «DISTINTOS» con el segundo tamaño vacío, es decir, publicó una diferencia
+  MEDIDA donde sólo había un fichero ausente; la guarda va sobre la existencia de los dos
+  operandos, no sobre el retorno de `cmp`. (2) Un `echo "--- $solver …"` en un guion de
+  comprobación: con `set -u`, bash expandió su propia variable inexistente y mató el proceso
+  antes de las dos comprobaciones que venían detrás. **TERCERA, en el producto:** el `-Base`
+  del `.ps1` aceptaba ruta relativa, así que un token encadenado en la misma línea llegó como
+  primer parámetro posicional y el guion escribió su salida entera en una carpeta inventada,
+  en silencio; pagada en el sitio con una guarda de ruta absoluta. — CERRADA en S157: ver §4 de gestion_proyecto.md.
+
+- **D-guion-busca-token-esperado** (S135, CERRADA S157, deuda de MÉTODO, no bloqueante) — los guiones de lectura escritos por el modelo principal buscan el TOKEN QUE ESPERAN en vez del vigente, y en S135 falló TRES veces en una sola sesión: un `grep` de `_aulaDesconocida` y del literal `11` pasó por encima de `ESCRITURAS_CARGA_COMPLETA = 804`, que no contiene ninguno de los dos y habría hecho fallar `main` sobre una carga correcta; SQL contra `horario` y `tramo_id` cuando el esquema dice `horario_generado` y `tramo_inicio_id`; y lectura del conteo de suites por «vitest 316», cifra de S118 muerta desde entonces (la vigente es 419). Es la familia de `D-guion-exit-enmascarado` y la causa raíz que S129 nombró —escribir de memoria teniendo el documento a un comando de distancia—, aparecida en instrumentos de LECTURA. Las tres las cazó Claude Code midiendo. Contención ya practicada y que conviene volver norma: gatear toda escritura con una corrida EN SECO revisada, que en S135 interceptó tres defectos del parche antes de tocar el repo. → sesión de Higiene/Método. — CERRADA en S157: ver §4 de gestion_proyecto.md.
+
+- **D-guion-pkill-casa-su-propio-envoltorio** (S149, CERRADA S157, no bloqueante) — un guion que para la aplicación con
+  `pkill -f` se mata a sí mismo. Nace en el M2-B de S149 y ya costó una corrida: `pkill -f 'spring-boot:run'`
+  casa con el `bash -c '<texto>'` que envuelve el propio guion, porque el patrón está dentro de esa cadena. El
+  guion murió a mitad con salida 144, se llevó por delante su propia secuencia y dejó una JVM huérfana sirviendo
+  el puerto; la lectura que faltaba hubo que repetirla. Lo mismo vale para `pgrep -af`, que siempre se
+  autolista. El arreglo es guardar el PID al lanzar (`MVN=$!`, hijo por `pgrep -P`) y matar por número, que es
+  lo que las fases siguientes de S149 hicieron sin volver a fallar. El defecto vive en la FORMA de escribir los
+  guiones y no en un guion concreto, así que su sede es la sesión de Higiene/Método y no un objetivo. No se paga.
+  **S151, dos variantes más, las dos de COMPROBACIÓN y no de parada:** `ps -eo pid,args | grep -i
+  '[E]duchronos'` dio cuatro falsos positivos, porque el truco del corchete no salva nada cuando el directorio
+  de trabajo o el comando llevan la ruta del repo (el `konsole --workdir` y el propio shell); y `pgrep -a java`
+  NO ve una aplicación empaquetada con `jpackage`, cuyo proceso se llama `Educhronos` y no `java`, así que la
+  guarda «ninguna JVM» da un falso limpio con el bundle vivo. Se comprueba por PID guardado, por
+  `/proc/<pid>/exe` y por el puerto; un `pgrep -af` con la ruta del bundle cae en la misma trampa si el guion
+  la contiene. **S154, otra instancia:** en el cierre de un guion de verificación, `pgrep -f 'http.server
+  8080'` devolvió el PID del propio shell de Claude Code, pese a que el guion prohibía `pgrep` por patrón;
+  comprobado con `ps -p`, sin daño. — CERRADA en S157: ver §4 de gestion_proyecto.md.
+
+- **D-guion-escribe-donde-no-se-dijo** (S153, CERRADA S157, DE MÉTODO, no bloqueante) — UN PARÁMETRO DE RUTA
+  ADMITE VALOR RELATIVO Y EL GUION ESCRIBE DONDE NO SE DIJO. Nace con TRES instancias medidas en dos
+  sesiones, y ninguna la detectó el guion que la cometía. (1) El `-Base` de `empaquetar-windows.ps1`
+  en S152 escribió en una carpeta inventada. (2) El `--salida` de `empaquetar-linux.sh` en S153: con
+  ruta relativa, el volcado de la huella del JDK se resolvía DENTRO de un `cd` posterior —el destino
+  quedaba colgando del directorio al que se acababa de entrar—, así que `SHA256SUMS` salía con una
+  sola entrada, el guion terminaba en 0 y la entrega viajó 190 MB hasta que abortó el `.ps1` en la
+  otra máquina. (3) Medida al demostrar el arreglo, y no sufrida: sin normalizar, `--salida ./x` no
+  cuelga del directorio desde el que se lanza el guion sino de la raíz del repo, por un `cd "$RAIZ"`
+  previo; dejó 332 MB de entrega dentro del repo con `exit 0` y sin que nada fallase. NO es lo mismo
+  que `D-guion-exit-enmascarado`, que va sobre la SEÑAL —un instrumento que dice verde cuando hay
+  rojo—: aquí el guion termina bien y la operación aterriza en otra ruta; dos de las tres instancias
+  no enmascaran ningún fallo. La (2) pertenece a las dos familias y se cita en ambas fichas.
+  ARREGLADA la instancia (2) en S153: `--salida` se normaliza a absoluta nada más leerse y el guion
+  aborta si su propia entrega no queda con dos entradas de dos campos, un `.jar` y un `.zip`, que es
+  el espejo de la guarda que el `.ps1` ya tenía al otro lado. Queda VIVA porque el `-Base` del `.ps1`
+  sigue sin normalizar y nadie ha auditado qué otros parámetros de ruta aceptan valor relativo.
+  **Cuarta instancia (S155):** `regenerar-indice.py` no interpreta argumentos, y un `--help` exploratorio regenera
+  y escribe los índices de los dos documentos. No hubo daño, porque el estado previo se reconstruyó en `/tmp`, pero
+  la medición del descuadre «antes» casi se pierde. Regla práctica mientras no se arregle: se invoca sin
+  argumentos y sólo cuando se quiere escribir; para medir sin escribir, se importa como módulo y se llama a
+  `comprobar()`. — CERRADA en S157: ver §4 de gestion_proyecto.md.
 
 - **D-entrega-caducada-indetectable** (S154 → SALDADA S156) — el `.ps1` verificaba la entrega contra el `SHA256SUMS` de su misma carpeta, así que una entrega vieja pasaba sus propias huellas. Saldada por `C-windows-limpio`: `-HuellaJar` obligatorio en `empaquetar-windows.ps1`, impreso en consola por `empaquetar-linux.sh` y ausente del `LEEME.txt`; verificado en Windows con una huella ajena, que pasa `SHA256SUMS` y aborta. La defensa es de procedimiento (la huella sigue en `SHA256SUMS`); la versión estructural queda anotada en la entrada de S156.
 - **D-spa-sin-fallback-de-rutas** (S145 → SALDADA S155) — el jar no reenviaba las rutas profundas de la SPA a `index.html`: F5 o una URL directa a una vista daba la Whitelabel Error Page. Saldada por `C-rutas-spa` como condición 9 de `O-instalación`: `ResolvedorRutasSpa` y `RutasSpaConfig` en `es.yaroki.educhronos.app.config`, `spring.web.resources.add-mappings=false` en el `application.properties` de main y la ruta comodín en `app.routes.ts`. Detalle en la entrada de S155.
