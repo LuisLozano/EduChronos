@@ -508,7 +508,9 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
    como dato. (`D-guion-exit-enmascarado`)
 3. **Nombres, rutas y patrones se derivan de lo que el propio guion acaba de
    volcar**, no de memoria ni del token que se espera encontrar: antes de buscar un
-   identificador se lista el directorio o el esquema que lo contiene.
+   identificador se lista el directorio o el esquema que lo contiene. Vale
+   también para los documentos: un ancla se copia del fichero del repo, no de
+   una copia del Project ni de la memoria, que pueden ir por detrás (S157).
    (`D-guion-busca-token-esperado`)
 4. **Una guarda comprueba que existen sus operandos, no sólo su resultado**:
    comparar con un fichero ausente publica una diferencia. Y un filtro se prueba
