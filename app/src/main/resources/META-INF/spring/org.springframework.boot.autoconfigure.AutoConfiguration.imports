@@ -1,1 +1,2 @@
 es.yaroki.educhronos.app.config.SqliteForeignKeysConfig
+es.yaroki.educhronos.app.config.BaseConmutableConfig

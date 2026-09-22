@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.BloqueoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.BloqueoController;
@@ -42,7 +43,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({BloqueoService.class, GeneradorHorarioService.class})
+@Import({BloqueoService.class, GeneradorHorarioService.class, EstadoCurso.class})
 class BloqueoEndpointTest {
 
     @Autowired private EntityManager entityManager;

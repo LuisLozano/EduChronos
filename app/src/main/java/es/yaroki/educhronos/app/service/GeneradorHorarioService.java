@@ -18,6 +18,8 @@ import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
+import es.yaroki.educhronos.app.curso.EstadoCurso;
+import es.yaroki.educhronos.app.curso.RechazoCursoException;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +81,13 @@ public class GeneradorHorarioService {
     private final AulaBloqueadaRepository aulaBloqueadaRepository;
     private final ProfesorTutoriaRepository profesorTutoriaRepository;
 
+    /**
+     * La identidad del curso abierto, sólo para los indicadores (S160). Este servicio no la
+     * lee ni la escribe: se da de alta al entrar en {@link #generar} y de baja al salir, y
+     * eso es todo lo que sabe de cursos.
+     */
+    private final EstadoCurso estadoCurso;
+
     public GeneradorHorarioService(
             TramoSemanalRepository tramoRepository,
             AulaRepository aulaRepository,
@@ -91,7 +101,8 @@ public class GeneradorHorarioService {
             SesionRepository sesionRepository,
             SesionBloqueadaRepository sesionBloqueadaRepository,
             AulaBloqueadaRepository aulaBloqueadaRepository,
-            ProfesorTutoriaRepository profesorTutoriaRepository) {
+            ProfesorTutoriaRepository profesorTutoriaRepository,
+            EstadoCurso estadoCurso) {
         this.tramoRepository = tramoRepository;
         this.aulaRepository = aulaRepository;
         this.asignaturaRepository = asignaturaRepository;
@@ -105,6 +116,7 @@ public class GeneradorHorarioService {
         this.sesionBloqueadaRepository = sesionBloqueadaRepository;
         this.aulaBloqueadaRepository = aulaBloqueadaRepository;
         this.profesorTutoriaRepository = profesorTutoriaRepository;
+        this.estadoCurso = estadoCurso;
     }
 
     /**
@@ -177,12 +189,42 @@ public class GeneradorHorarioService {
      *         necesaria: el problema no puede tener solución y no se gasta el solver.
      * @throws es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException si el
      *         problema no admite un horario factible.
+     * @throws RechazoCursoException 409 {@code CURSO_CAMBIANDO} si se está abriendo otra
+     *         base justo ahora (S160, invariante I2).
      */
     public HorarioGenerado generar(Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
         if (maxSegundos != null && maxSegundos <= 0) {
             throw new IllegalArgumentException(
                     "maxSegundos debe ser > 0 si se especifica; recibido " + maxSegundos);
         }
+        // Se da de alta ANTES de cargar nada (S160, I2). Desde aquí y hasta el finally, un
+        // cambio de curso no puede empezar: si pudiera, el solve leería el catálogo de una
+        // base y guardaría el horario en otra, sin un solo error por el camino. La guarda de
+        // la validación va antes porque un maxSegundos absurdo es un 400 que no necesita
+        // ocupar la aplicación ni un instante.
+        if (!estadoCurso.intentarIniciarGeneracion()) {
+            throw new RechazoCursoException(
+                    HttpStatus.CONFLICT, EstadoCurso.CURSO_CAMBIANDO,
+                    "Se está abriendo otro curso. Espera a que termine y vuelve a generar.");
+        }
+        try {
+            return generarConElCursoTomado(maxSegundos, semilla, via, nombre);
+        } finally {
+            // En un finally, también cuando el solve revienta o se declara infactible: un
+            // fallo no puede dejar la cuenta alta, porque entonces no se podría volver a
+            // cambiar de curso sin reiniciar la aplicación.
+            estadoCurso.terminarGeneracion();
+        }
+    }
+
+    /**
+     * La generación de siempre, ya con el solve dado de alta en {@link EstadoCurso}. Se
+     * separa de {@link #generar} para que el {@code try/finally} del indicador no meta un
+     * nivel de sangrado en un método que ya era largo, y para que el alta y la baja queden a
+     * la vista en un solo sitio.
+     */
+    private HorarioGenerado generarConElCursoTomado(
+            Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
         ViaSolver viaEfectiva = via != null ? via : ViaSolver.OPTIMIZACION;
         String nombreEfectivo = (nombre != null && !nombre.isBlank())
                 ? nombre : "Horario " + Instant.now();

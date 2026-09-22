@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -72,7 +73,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(GeneradorHorarioService.class)
+@Import({GeneradorHorarioService.class, EstadoCurso.class, EstadoCurso.class})
 class GenerarHorarioEndpointTest {
 
     @Autowired private EntityManager entityManager;

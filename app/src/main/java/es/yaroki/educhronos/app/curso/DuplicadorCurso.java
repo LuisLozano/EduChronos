@@ -59,6 +59,16 @@ import org.springframework.http.HttpStatus;
  *       trabajar.
  * </ul>
  *
+ * <p><b>Que el origen esté archivado lo decide QUIEN LLAMA, no esta clase</b> (S160,
+ * requisito (b) de C-selector-curso). La regla nueva es «de un curso archivado sí se duplica,
+ * pero sólo si no queda ningún curso activo en la carpeta», y responderla exige mirar TODOS
+ * los ficheros de curso, que es trabajo de {@code CursoService}: es quien sabe cuál es la
+ * carpeta y quien ya los lista. Entra por el parámetro {@code permitirArchivado} en vez de
+ * repetirse aquí para que no haya dos lecturas de los mismos ficheros —y dos respuestas
+ * posibles— a la misma pregunta. Lo que esta clase conserva es el rechazo en sí, con su
+ * causa y su texto, que es el caso corriente: el centro está en su curso del año y se
+ * equivoca de botón.
+ *
  * <p><b>Ventana de escrituras: CERRADA en la fase B (S159).</b> Entre {@code b} (la copia) y
  * {@code f} (el archivado del origen) la aplicación aceptaba escrituras, y las que entraran
  * en ese hueco se quedaban en el curso viejo sin llegar al nuevo. Ya no: {@code CursoService}
@@ -104,15 +114,22 @@ public class DuplicadorCurso {
      * @param nombreNuevo nombre del curso a crear, con la forma {@code 2026/2027}
      * @param punteroONull fichero de puntero a reescribir, o {@code null} para no escribir
      *     ninguno (arranque con URL explícita, condición 7)
+     * @param permitirArchivado si se acepta que el origen esté archivado. Lo DECIDE el
+     *     llamador y entra por parámetro: ver la nota de clase sobre el requisito (b)
      * @return la ruta del fichero creado
      * @throws RechazoCursoException si la operación se rechaza por una razón prevista
      */
-    public Path duplicar(Path origen, String nombreActual, String nombreNuevo, Path punteroONull) {
+    public Path duplicar(
+            Path origen,
+            String nombreActual,
+            String nombreNuevo,
+            Path punteroONull,
+            boolean permitirArchivado) {
         Path carpeta = origen.toAbsolutePath().getParent();
 
         // a) Identidad del origen y todos los rechazos, ANTES de escribir un solo byte.
         Optional<FilaCurso> fila = leerCurso(origen);
-        if (fila.map(FilaCurso::archivado).orElse(false)) {
+        if (!permitirArchivado && fila.map(FilaCurso::archivado).orElse(false)) {
             throw new RechazoCursoException(
                     HttpStatus.CONFLICT, CURSO_ARCHIVADO,
                     "Este curso está archivado y es de solo lectura; no se puede duplicar.");
@@ -187,8 +204,15 @@ public class DuplicadorCurso {
         return nombreActual;
     }
 
-    /** La fila única de {@code curso}, si la base la tiene. */
-    private Optional<FilaCurso> leerCurso(Path base) {
+    /**
+     * La fila única de {@code curso}, si la base la tiene.
+     *
+     * <p><b>Visible de paquete desde S160</b>, para que {@code CursoService.listar()} lea la
+     * identidad de los cursos que NO están abiertos por esta misma vía y no por una segunda
+     * consulta escrita aparte. Es lectura pura: abre, hace un {@code select} y cierra, sin
+     * tocar un byte del fichero (invariante I6).
+     */
+    Optional<FilaCurso> leerCurso(Path base) {
         try (Connection conexion = abrir(base);
                 Statement sentencia = conexion.createStatement();
                 ResultSet filas =
@@ -266,8 +290,12 @@ public class DuplicadorCurso {
      * mover o montar en otro sitio sin que el puntero apunte al vacío. Se escribe en un
      * temporal y se mueve encima, para que un corte no deje un puntero a medias que el
      * arranque siguiente leería como roto.
+     *
+     * <p><b>Visible de paquete desde S160</b>: el cambio de curso reescribe el mismo puntero
+     * y tiene que hacerlo con el mismo mecanismo atómico. Copiarlo habría dejado dos formas
+     * de escribir un fichero cuya escritura a medias rompe el arranque siguiente.
      */
-    private void escribirPuntero(Path puntero, String nombreDeFichero) {
+    void escribirPuntero(Path puntero, String nombreDeFichero) {
         Path temporal = puntero.resolveSibling("." + puntero.getFileName() + ".tmp");
         try {
             Files.writeString(temporal, nombreDeFichero, StandardCharsets.UTF_8);
@@ -300,5 +328,5 @@ public class DuplicadorCurso {
     }
 
     /** La fila única de {@code curso}, tal como está en el fichero. */
-    private record FilaCurso(String nombre, boolean archivado) {}
+    record FilaCurso(String nombre, boolean archivado) {}
 }

@@ -44,11 +44,27 @@ import tools.jackson.databind.ObjectMapper;
  * {@code message} del cuerpo tal cual.
  *
  * <p><b>Por qué {@code /api/cursos} está exento.</b> Un curso archivado tiene que poder
- * salir de sí mismo: el selector de cursos de la condición 5 vivirá en ese recurso, y si la
- * guarda lo tapara, abrir un curso viejo dejaría la aplicación sin salida más que reiniciar.
+ * salir de sí mismo: el selector de cursos de la condición 5 vive en ese recurso —desde S160,
+ * el {@code GET /api/cursos} que lista y el {@code POST /api/cursos/abrir} que cambia—, y si
+ * la guarda lo tapara, abrir un curso viejo dejaría la aplicación sin salida más que
+ * reiniciar. La exención por segmento cubre {@code /api/cursos/abrir} sin nombrarlo.
  * La exención no lo deja indefenso: el propio servicio rechaza duplicar un curso archivado
  * con un 409 {@code CURSO_ARCHIVADO}. La comprobación es por segmento y no por prefijo, para
  * que {@code /api/cursosX} —que no es este recurso— NO quede exento.
+ *
+ * <p><b>Durante un CAMBIO DE CURSO se rechaza todo, también las lecturas</b> (S160,
+ * C-selector-curso). Es la única situación en que un {@code GET} no pasa, y la razón es que
+ * durante el cambio la pregunta «¿de qué base sale esto?» no tiene respuesta estable: el pool
+ * al que iría a parar la consulta puede ser el de antes o el de después según el milisegundo.
+ * Contestar con datos de un curso que ya no es el abierto es peor que pedir que se espere, y
+ * el cambio dura lo que tarda en abrirse un fichero. El código es 503 y no 403: no es que no
+ * se pueda, es que ahora no; y el 403 ya significa otra cosa en este mismo filtro.
+ *
+ * <p><b>Por eso {@code shouldNotFilter} ya no se salta los métodos seguros.</b> Hasta S159
+ * un {@code GET} ni entraba al filtro; ahora entra y se decide dentro, porque «seguro» sólo
+ * quiere decir que no modifica, y lo que el cambio de curso impide no es modificar, es leer
+ * de una base que se está sustituyendo. Lo que el filtro sigue sin mirar es lo que no es API
+ * y el recurso de cursos.
  *
  * <p><b>El cuerpo lo escribe el filtro, a mano.</b> No se lanza una excepción para que la
  * traduzca Spring: lo que puebla el {@code reason} de un {@code ResponseStatusException} se
@@ -67,6 +83,12 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
 
     /** El curso abierto está archivado: es de solo lectura. */
     public static final String CURSO_SOLO_LECTURA = "CURSO_SOLO_LECTURA";
+
+    /**
+     * Se está abriendo otra base: ni se lee ni se escribe. El símbolo sale de
+     * {@link EstadoCurso}, que es de donde sale el hecho.
+     */
+    public static final String CURSO_CAMBIANDO = EstadoCurso.CURSO_CAMBIANDO;
 
     /** Raíz de todo lo que es API: lo de fuera es el bundle de Angular y no se guarda. */
     static final String RAIZ_API = "/api/";
@@ -88,14 +110,12 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
     }
 
     /**
-     * Lo que la guarda no mira siquiera: los métodos seguros, todo lo que no sea API y el
-     * recurso de cursos.
+     * Lo que la guarda no mira siquiera: lo que no es API y el recurso de cursos. Los métodos
+     * seguros SÍ entran desde S160, porque durante un cambio de curso tampoco pasan; que
+     * pasen o no se decide dentro.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest peticion) {
-        if (METODOS_SEGUROS.contains(peticion.getMethod())) {
-            return true;
-        }
         String ruta = ruta(peticion);
         if (!ruta.startsWith(RAIZ_API)) {
             return true;
@@ -103,13 +123,38 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
         return ruta.equals(RECURSO_CURSOS) || ruta.startsWith(RECURSO_CURSOS + "/");
     }
 
+    /**
+     * El orden de las tres preguntas es el contrato.
+     *
+     * <ol>
+     *   <li><b>Cambiando</b> va primero y alcanza a TODOS los métodos: durante el cambio no
+     *       hay base de la que contestar, ni para leer.
+     *   <li><b>Método seguro</b>: pasado el cambio, leer siempre se puede, archivado o no.
+     *   <li><b>Duplicando</b> antes que <b>archivado</b>, porque durante el duplicado el
+     *       curso todavía NO está archivado y decir lo contrario mandaría al usuario a buscar
+     *       un curso activo que es este mismo.
+     * </ol>
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest peticion, HttpServletResponse respuesta, FilterChain cadena)
             throws ServletException, IOException {
+        if (estado.cambiando()) {
+            rechazar(
+                    respuesta,
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    CURSO_CAMBIANDO,
+                    "Se está abriendo otro curso. Vuelve a intentarlo en un momento.");
+            return;
+        }
+        if (METODOS_SEGUROS.contains(peticion.getMethod())) {
+            cadena.doFilter(peticion, respuesta);
+            return;
+        }
         if (estado.duplicando()) {
             rechazar(
                     respuesta,
+                    HttpStatus.FORBIDDEN,
                     CURSO_DUPLICANDOSE,
                     "Se está creando un curso nuevo. Vuelve a intentarlo en un momento.");
             return;
@@ -117,6 +162,7 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
         if (estado.archivado()) {
             rechazar(
                     respuesta,
+                    HttpStatus.FORBIDDEN,
                     CURSO_SOLO_LECTURA,
                     "El curso " + estado.nombre() + " está archivado y es de solo lectura."
                             + " Los cambios se hacen en el curso activo.");
@@ -137,10 +183,11 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
                 : uri;
     }
 
-    /** Escribe el 403 y su cuerpo. No se llama a la cadena: la petición muere aquí. */
-    private void rechazar(HttpServletResponse respuesta, String causa, String mensaje)
+    /** Escribe el rechazo y su cuerpo. No se llama a la cadena: la petición muere aquí. */
+    private void rechazar(
+            HttpServletResponse respuesta, HttpStatus status, String causa, String mensaje)
             throws IOException {
-        respuesta.setStatus(HttpStatus.FORBIDDEN.value());
+        respuesta.setStatus(status.value());
         respuesta.setContentType(MediaType.APPLICATION_JSON_VALUE);
         respuesta.setCharacterEncoding(StandardCharsets.UTF_8.name());
         respuesta.getWriter().write(json.writeValueAsString(new RechazoCursoDTO(causa, mensaje)));

@@ -205,8 +205,16 @@ public final class CarpetaDatos {
      * ¿Es un nombre de fichero suelto? Un solo segmento, sin separador de NINGUNO de los dos
      * sistemas: la comprobación tiene que rechazar {@code ..\\otra} también cuando corre en
      * POSIX, porque el fichero puede venir de una carpeta sincronizada desde Windows.
+     *
+     * <p><b>Pública desde S160</b>, porque la pregunta se hace en dos sitios por el mismo
+     * motivo: aquí, sobre lo que trae el puntero {@code curso-abierto}, y en
+     * {@code CursoService.abrir}, sobre el nombre que manda el cliente. Las dos entradas las
+     * escribe alguien de fuera y las dos acabarían en un {@code carpeta.resolve(...)}, donde
+     * un {@code ../../algo} abriría una base de fuera de la carpeta de datos. Una segunda
+     * copia de la regla sería una segunda regla, y la que se olvidara de actualizar sería la
+     * agujereada.
      */
-    private static boolean esNombreSimple(String contenido) {
+    public static boolean esNombreSimple(String contenido) {
         return !contenido.contains("/")
                 && !contenido.contains("\\")
                 && Path.of(contenido).getNameCount() == 1

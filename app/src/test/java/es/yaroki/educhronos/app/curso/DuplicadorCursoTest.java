@@ -49,6 +49,15 @@ class DuplicadorCursoTest {
     /** Fichero que le corresponde a {@link #NUEVO}. */
     private static final String FICHERO_NUEVO = "curso-2026-2027.db";
 
+    /**
+     * Lo que el llamador responde cuando SÍ queda algún curso activo en la carpeta, que es el
+     * caso corriente y el que estos diez casos fijan. La decisión no es de esta clase desde
+     * S160 (requisito (b)); quien la toma es {@code CursoService.sinNingunCursoActivo()}, y su
+     * spec está en {@code CursoAperturaTest}. Aquí entra como constante con nombre para que se
+     * lea qué se está diciendo y no un {@code false} suelto repetido siete veces.
+     */
+    private static final boolean NO_ARCHIVADO = false;
+
     private final DuplicadorCurso duplicador = new DuplicadorCurso();
 
     // ─────────────────────────────────────────────────────────────── qué hereda el curso nuevo
@@ -62,7 +71,7 @@ class DuplicadorCursoTest {
     void elCursoNuevoHeredaTodoElCatalogoYNadaDelHorario(@TempDir Path carpeta) throws Exception {
         Path origen = baseFabricada(carpeta, ACTUAL, false);
 
-        Path destino = duplicador.duplicar(origen, null, NUEVO, null);
+        Path destino = duplicador.duplicar(origen, null, NUEVO, null, NO_ARCHIVADO);
 
         assertThat(destino).isRegularFile().hasFileName(FICHERO_NUEVO);
         for (String tabla : tablas(origen)) {
@@ -92,7 +101,7 @@ class DuplicadorCursoTest {
     void elOrigenQuedaArchivadoYConservaSusDatos(@TempDir Path carpeta) throws Exception {
         Path origen = baseFabricada(carpeta, ACTUAL, false);
 
-        duplicador.duplicar(origen, null, NUEVO, null);
+        duplicador.duplicar(origen, null, NUEVO, null, NO_ARCHIVADO);
 
         assertThat(curso(origen)).isEqualTo(ACTUAL + "|true");
         assertThat(filas(origen, "profesor")).isOne();
@@ -173,6 +182,25 @@ class DuplicadorCursoTest {
         assertThat(ficheros(carpeta)).containsExactly(origen.getFileName().toString());
     }
 
+    /**
+     * (11, S160) Con {@code permitirArchivado}, un origen archivado SÍ se duplica: es la
+     * salida del callejón del requisito (b) —un centro que archivó su único curso—. El curso
+     * nuevo nace ACTIVO, que es el punto entero: si naciera archivado, el centro seguiría sin
+     * poder trabajar y habría gastado un fichero en descubrirlo. El origen se queda archivado
+     * como estaba.
+     */
+    @Test
+    void conPermisoUnOrigenArchivadoSiSeDuplicaYElNuevoNaceActivo(@TempDir Path carpeta)
+            throws Exception {
+        Path origen = baseFabricada(carpeta, ACTUAL, true);
+
+        Path destino = duplicador.duplicar(origen, null, NUEVO, null, true);
+
+        assertThat(destino).isRegularFile().hasFileName(FICHERO_NUEVO);
+        assertThat(curso(destino)).as("el curso nuevo nace activo").isEqualTo(NUEVO + "|false");
+        assertThat(curso(origen)).as("el origen sigue archivado").isEqualTo(ACTUAL + "|true");
+    }
+
     // ─────────────────────────────────────────────────────────────── bordes
 
     /**
@@ -186,7 +214,7 @@ class DuplicadorCursoTest {
         Path temporal = carpeta.resolve("." + FICHERO_NUEVO + ".tmp");
         Files.writeString(temporal, "restos de una copia muerta", StandardCharsets.UTF_8);
 
-        Path destino = duplicador.duplicar(origen, null, NUEVO, null);
+        Path destino = duplicador.duplicar(origen, null, NUEVO, null, NO_ARCHIVADO);
 
         assertThat(temporal).doesNotExist();
         assertThat(destino).isRegularFile();
@@ -206,7 +234,7 @@ class DuplicadorCursoTest {
         assertThat(sinNombre).hasMessageContaining("no tiene nombre");
         assertThat(ficheros(carpeta)).containsExactly(origen.getFileName().toString());
 
-        Path destino = duplicador.duplicar(origen, ACTUAL, NUEVO, null);
+        Path destino = duplicador.duplicar(origen, ACTUAL, NUEVO, null, NO_ARCHIVADO);
 
         assertThat(destino).isRegularFile();
         assertThat(curso(origen)).as("el origen queda archivado con el nombre aportado")
@@ -224,7 +252,7 @@ class DuplicadorCursoTest {
         Path origenConPuntero = baseFabricada(conPuntero, ACTUAL, false);
         Path puntero = conPuntero.resolve("curso-abierto");
 
-        duplicador.duplicar(origenConPuntero, null, NUEVO, puntero);
+        duplicador.duplicar(origenConPuntero, null, NUEVO, puntero, NO_ARCHIVADO);
 
         assertThat(puntero).isRegularFile();
         assertThat(Files.readString(puntero)).isEqualTo(FICHERO_NUEVO);
@@ -232,7 +260,7 @@ class DuplicadorCursoTest {
         Path sinPuntero = Files.createDirectory(carpeta.resolve("sin"));
         Path origenSinPuntero = baseFabricada(sinPuntero, ACTUAL, false);
 
-        duplicador.duplicar(origenSinPuntero, null, NUEVO, null);
+        duplicador.duplicar(origenSinPuntero, null, NUEVO, null, NO_ARCHIVADO);
 
         assertThat(ficheros(sinPuntero))
                 .as("sólo las dos bases: ningún puntero")
@@ -374,7 +402,7 @@ class DuplicadorCursoTest {
     private RechazoCursoException rechazo(
             Path origen, String nombreActual, String nombreNuevo, Path puntero) {
         try {
-            duplicador.duplicar(origen, nombreActual, nombreNuevo, puntero);
+            duplicador.duplicar(origen, nombreActual, nombreNuevo, puntero, NO_ARCHIVADO);
         } catch (RechazoCursoException e) {
             return e;
         }

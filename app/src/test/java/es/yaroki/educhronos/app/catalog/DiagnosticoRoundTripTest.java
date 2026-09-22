@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
@@ -59,7 +60,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({GeneradorHorarioService.class, DiagnosticoService.class})
+@Import({GeneradorHorarioService.class, EstadoCurso.class, DiagnosticoService.class})
 class DiagnosticoRoundTripTest {
 
     @Autowired private EntityManager entityManager;

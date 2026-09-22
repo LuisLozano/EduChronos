@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -54,7 +55,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({GeneradorHorarioService.class, PrevalidacionService.class})
+@Import({GeneradorHorarioService.class, EstadoCurso.class, PrevalidacionService.class})
 class PrevalidacionEndpointTest {
 
     @Autowired private EntityManager entityManager;

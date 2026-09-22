@@ -32,6 +32,13 @@ import org.springframework.web.context.WebApplicationContext;
  * <p>Contexto y base propios por la misma razón que {@code CursoEndpointTest}: este test
  * archiva la base que abre, y hacerlo sobre la {@code educhronos-test.db} compartida dejaría
  * al resto de la suite escribiendo contra un curso de solo lectura.
+ *
+ * <p><b>Desde S160 hace falta un gesto más para llegar al 403.</b> Duplicar ya no deja la
+ * aplicación dentro del curso archivado: deja abierto el NUEVO, que está activo y acepta
+ * escrituras. Para ver la guarda hay que volver al archivado con
+ * {@code POST /api/cursos/abrir}, y eso es lo que el caso hace. El contrato que fija no
+ * cambia —una escritura sobre un curso archivado es 403 con causa y nombre—; lo que cambia es
+ * cómo se llega a estar en uno, y el caso lo recorre entero.
  */
 @SpringBootTest
 class GuardaEndpointTest {
@@ -58,12 +65,17 @@ class GuardaEndpointTest {
     }
 
     /**
-     * (10) La misma petición, antes y después de duplicar: 201 mientras el curso está activo,
-     * 403 con causa y mensaje cuando queda archivado. Y la lectura sigue funcionando, que es
-     * la mitad del contrato: un curso archivado se consulta, no se modifica.
+     * (10) La misma petición, en los tres estados por los que pasa el centro: 201 en el curso
+     * activo, 201 todavía en el curso NUEVO recién duplicado, y 403 con causa y mensaje
+     * cuando se vuelve al archivado. Y la lectura sigue funcionando, que es la mitad del
+     * contrato: un curso archivado se consulta, no se modifica.
+     *
+     * <p>El 201 del medio es el aserto que S160 añade, y es el que mide el cambio: si
+     * duplicar dejara abierto el curso archivado —como hasta S159—, esa escritura sería un
+     * 403 y el caso caería ahí.
      */
     @Test
-    void laMismaEscrituraPasaDe201A403AlArchivarseElCurso() throws Exception {
+    void laEscrituraPasaDe201A403AlVolverAlCursoArchivado() throws Exception {
         mockMvc.perform(
                         post("/api/niveles")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -82,6 +94,24 @@ class GuardaEndpointTest {
                         post("/api/niveles")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"codigo\":\"2ESO\",\"orden\":2}"))
+                .andExpect(status().isCreated())
+                .andDo(
+                        r ->
+                                assertThat(r.getResponse().getStatus())
+                                        .as("en el curso NUEVO se escribe: está activo")
+                                        .isEqualTo(201));
+
+        mockMvc.perform(
+                        post("/api/cursos/abrir")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"fichero\":\"educhronos.db\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archivado").value(true));
+
+        mockMvc.perform(
+                        post("/api/niveles")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"codigo\":\"3ESO\",\"orden\":3}"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.causa").value("CURSO_SOLO_LECTURA"))
                 .andExpect(jsonPath("$.message").value(
@@ -91,7 +121,8 @@ class GuardaEndpointTest {
         // rechaza ÉL con un 409, no el filtro con un 403. Este aserto es el que mide la
         // exención en integración: sin él, quitar la exención no tumbaba este caso, porque
         // cuando aquí se duplica el curso todavía está activo y la guarda dejaría pasar la
-        // petición de todos modos.
+        // petición de todos modos. Sigue siendo 409 CURSO_ARCHIVADO y no el permiso del
+        // requisito (b) porque curso-2026-2027.db está ahí y está ACTIVO.
         mockMvc.perform(
                         post("/api/cursos")
                                 .contentType(MediaType.APPLICATION_JSON)

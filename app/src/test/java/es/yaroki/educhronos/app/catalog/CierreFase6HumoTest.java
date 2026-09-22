@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.Sesion;
@@ -55,7 +56,7 @@ import org.springframework.context.annotation.Import;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(GeneradorHorarioService.class)
+@Import({GeneradorHorarioService.class, EstadoCurso.class, EstadoCurso.class})
 class CierreFase6HumoTest {
 
     @Autowired private EntityManager entityManager;

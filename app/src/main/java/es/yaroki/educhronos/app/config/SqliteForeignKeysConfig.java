@@ -56,8 +56,19 @@ public class SqliteForeignKeysConfig {
      * entregarla. Corre en el checkout, cuando la conexión aún no está en una
      * transacción (SQLite ignoraría el pragma dentro de una), de modo que las FK
      * quedan activas para toda la vida del checkout.
+     *
+     * <p><b>Ya no es {@code final} (S160).</b> {@link BaseConmutable} —el
+     * {@code DataSource} del proyecto desde C-selector-curso— HEREDA de ella, y esa es
+     * toda la modificación que el cambio de curso en caliente exige de esta clase. El
+     * motivo es el invariante I1: al cambiar de curso se sustituye el pool que hay
+     * debajo, y el pragma tiene que seguir encendiéndose en las conexiones del pool
+     * NUEVO. Heredando, {@code getConnection()} es este mismo de aquí y lee el destino
+     * vigente por {@code getTargetDataSource()}, de modo que no hay un segundo sitio
+     * donde acordarse del pragma. El {@code instanceof} del post-procesador de arriba
+     * —que ya existía para no envolver dos veces— deja además la {@code BaseConmutable}
+     * sin envolver, y por eso se puede inyectar por su tipo.
      */
-    static final class ForeignKeysEnforcingDataSource extends DelegatingDataSource {
+    static class ForeignKeysEnforcingDataSource extends DelegatingDataSource {
 
         ForeignKeysEnforcingDataSource(DataSource delegate) {
             super(delegate);

@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.web;
 import es.yaroki.educhronos.app.exportacion.HorarioCsv;
 import es.yaroki.educhronos.app.exportacion.HorarioPdf;
 import es.yaroki.educhronos.app.exportacion.VistaPdf;
+import es.yaroki.educhronos.app.curso.RechazoCursoException;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
@@ -12,6 +13,7 @@ import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
 import es.yaroki.educhronos.app.web.dto.GenerarHorarioRequest;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
+import es.yaroki.educhronos.app.web.dto.RechazoCursoDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +51,13 @@ import org.springframework.web.server.ResponseStatusException;
  * {@code IllegalArgumentException} de la generación (p. ej. {@code maxSegundos} no
  * positivo) → {@code 400}. El resto (errores de integridad del catálogo) se deja
  * propagar.
+ *
+ * <p><b>{@link RechazoCursoException} → su propio status, con cuerpo {@link RechazoCursoDTO}</b>
+ * (S160). Desde C-selector-curso, {@code generar} puede negarse porque se está abriendo otro
+ * curso: un 409 {@code CURSO_CAMBIANDO}. El manejador está AQUÍ y no en un
+ * {@code @ControllerAdvice} global, siguiendo la costumbre del proyecto —cada controlador
+ * traduce las suyas—, y es una copia literal del de {@code CursoController} porque las dos
+ * respuestas tienen que ser indistinguibles para el cliente: mismo cuerpo, misma causa.
  */
 @RestController
 @RequestMapping("/api/horarios")
@@ -86,6 +96,18 @@ public class HorarioController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    /**
+     * Un rechazo previsto del curso sale con su status y su causa en el cuerpo, igual que en
+     * {@code CursoController}. No pasa por {@code ResponseStatusException} por el motivo de
+     * siempre: su {@code reason} no llega al navegador de forma que un test pueda aseverarla
+     * (D-F8.6-ii-a).
+     */
+    @ExceptionHandler(RechazoCursoException.class)
+    ResponseEntity<RechazoCursoDTO> rechazoDeCurso(RechazoCursoException e) {
+        return ResponseEntity.status(e.status())
+                .body(new RechazoCursoDTO(e.causa(), e.getMessage()));
     }
 
     /**

@@ -151,7 +151,7 @@ class GuardaSoloLecturaTest {
     @Test
     void duplicando_seRechazaConCausaPropia() throws Exception {
         EstadoCurso estado = activo();
-        estado.iniciarDuplicado();
+        assertThat(estado.intentarIniciarDuplicado()).as("nada lo impide").isTrue();
         MockFilterChain cadena = new MockFilterChain();
         MockHttpServletResponse respuesta = new MockHttpServletResponse();
 
@@ -162,6 +162,84 @@ class GuardaSoloLecturaTest {
         assertThat(causa(respuesta)).isEqualTo("CURSO_DUPLICANDOSE");
         assertThat(mensaje(respuesta)).contains("Vuelve a intentarlo");
         assertThat(estado.archivado()).as("duplicar no archiva por sí solo").isFalse();
+    }
+
+    /**
+     * (11, S160) Mientras se abre otro curso se rechaza TODO con 503 y causa propia, también
+     * el {@code GET}. Es la única situación en que una lectura no pasa, y el caso lo
+     * comprueba en los dos lados: el {@code POST} que ya se rechazaba y el {@code GET} que
+     * hasta S159 ni entraba al filtro.
+     *
+     * <p>El 503 y no el 403 es parte del contrato: al cliente le dice «ahora no» en vez de
+     * «tú no», y el 403 ya significa otra cosa en este mismo filtro.
+     */
+    @Test
+    void cambiando_seRechazaTodoIncluidoElGet_con503() throws Exception {
+        EstadoCurso estado = activo();
+        assertThat(estado.intentarIniciarCambio()).as("nada lo impide").isTrue();
+
+        for (String metodo : new String[] {"GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"}) {
+            MockFilterChain cadena = new MockFilterChain();
+            MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+            guarda(estado).doFilter(peticion(metodo, "/api/niveles"), respuesta, cadena);
+
+            assertThat(cadena.getRequest()).as("%s: la cadena NO se llama", metodo).isNull();
+            assertThat(respuesta.getStatus()).as("%s", metodo).isEqualTo(503);
+            assertThat(causa(respuesta)).as("%s", metodo).isEqualTo("CURSO_CAMBIANDO");
+            assertThat(mensaje(respuesta)).as("%s", metodo).contains("otro curso");
+        }
+    }
+
+    /**
+     * (12, S160) Ni siquiera cambiando se tapa {@code /api/cursos}: por ahí se entra al
+     * selector y por ahí se sale. Si la exención no cubriera las sub-rutas, el propio
+     * {@code POST /api/cursos/abrir} que provoca el cambio se auto-bloquearía en cuanto lo
+     * intentara un segundo cliente, y el usuario vería un 503 sin poder preguntar por qué.
+     */
+    @Test
+    void cambiando_elRecursoDeCursosSigueExentoIncluidoAbrir() throws Exception {
+        EstadoCurso estado = activo();
+        assertThat(estado.intentarIniciarCambio()).isTrue();
+
+        for (String ruta : new String[] {"/api/cursos", "/api/cursos/abrir"}) {
+            for (String metodo : new String[] {"GET", "POST"}) {
+                MockFilterChain cadena = new MockFilterChain();
+
+                guarda(estado)
+                        .doFilter(peticion(metodo, ruta), new MockHttpServletResponse(), cadena);
+
+                assertThat(cadena.getRequest()).as("%s %s exento", metodo, ruta).isNotNull();
+            }
+        }
+
+        MockFilterChain cadena = new MockFilterChain();
+        MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+        guarda(estado).doFilter(peticion("GET", "/api/cursosX"), respuesta, cadena);
+
+        assertThat(cadena.getRequest()).as("/api/cursosX NO está exento").isNull();
+        assertThat(respuesta.getStatus()).isEqualTo(503);
+    }
+
+    /**
+     * (13, S160) Cambiando manda sobre archivado: el mensaje que llega es el del cambio, no
+     * el de solo lectura. Importa porque los dos estados pueden coincidir —se abre otro curso
+     * ESTANDO en uno archivado, que es el caso normal de salir de un archivo— y decirle al
+     * usuario que el curso es de solo lectura justo mientras se le está cambiando lo mandaría
+     * a arreglar algo que ya está arreglándose.
+     */
+    @Test
+    void cambiando_mandaSobreArchivado() throws Exception {
+        EstadoCurso estado = archivado();
+        assertThat(estado.intentarIniciarCambio()).isTrue();
+        MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+        guarda(estado)
+                .doFilter(peticion("POST", "/api/niveles"), respuesta, new MockFilterChain());
+
+        assertThat(respuesta.getStatus()).isEqualTo(503);
+        assertThat(causa(respuesta)).isEqualTo("CURSO_CAMBIANDO");
     }
 
     /**
