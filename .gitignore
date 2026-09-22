@@ -37,5 +37,5 @@ Thumbs.db
 docs_extra
 *_bck.md
 
-# Bytecode de los scripts de carga (tools/)
-tools/carga-centro/__pycache__/
+# Bytecode de Python, en cualquier carpeta (scripts/, tools/…) (S157)
+__pycache__/
