@@ -83,6 +83,11 @@
   margin-left: auto;
   display: flex;
   align-items: center;
+  /* SIN `gap`, y la ausencia está razonada: este contenedor flex tiene UN SOLO hijo —el
+     `app-curso-barra` que ocupa el hueco desde S160—, así que un `gap` aquí no separaría
+     nada. Se intentó en el M4 de la fase B y 8, 16 y 24 px se veían idénticos. La separación
+     entre las piezas del selector vive en el `:host` de `curso-barra.css`, que es el
+     contenedor flex de verdad. */
   min-height: calc(var(--tam-l) * var(--lh-normal));
 }
 

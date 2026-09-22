@@ -1,0 +1,133 @@
+/* El CDK no aporta estilos: el diálogo pone los suyos, como tutoria-dialogo. */
+.cursos-dialogo {
+  padding: var(--e5);
+  min-width: 26rem;
+  background: var(--color-superficie);
+  border-radius: var(--radio-m);
+}
+
+.cursos-dialogo__titulo {
+  margin: 0 0 var(--e4);
+}
+
+.cursos-dialogo__cargando {
+  margin: 0 0 var(--e4);
+  font-size: var(--tam-m);
+}
+
+/* Lista de filas accionables: sin viñeta, con separador entre ellas. */
+.cursos-dialogo__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cursos-dialogo__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+
+/* El curso abierto se distingue por TRES vías y no por una: fondo, peso del nombre y el
+   texto «Abierto ahora» que sustituye al botón. El color por sí solo no serviría a quien
+   no lo distinga. */
+.cursos-dialogo__fila--abierto {
+  background: var(--color-acento-suave);
+}
+
+.cursos-dialogo__fila--abierto .cursos-dialogo__nombre {
+  font-weight: var(--peso-medio);
+}
+
+.cursos-dialogo__identidad {
+  display: flex;
+  flex-direction: column;
+  /* Empuja estado y acción al borde derecho sin declarar anchos. */
+  margin-right: auto;
+}
+
+.cursos-dialogo__nombre {
+  font-size: var(--tam-m);
+}
+
+.cursos-dialogo__fichero {
+  font-size: var(--tam-xs);
+  color: var(--color-tinta-suave);
+}
+
+.cursos-dialogo__estado {
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+
+/* Ámbar de aviso, el mismo par de tokens que usa la marca de la barra. */
+.cursos-dialogo__estado--archivado {
+  color: var(--color-aviso);
+  background: var(--color-aviso-fondo);
+  padding: 0 var(--e1);
+  border-radius: var(--radio-s);
+}
+
+.cursos-dialogo__abierto {
+  font-size: var(--tam-s);
+  font-weight: var(--peso-medio);
+}
+
+.cursos-dialogo__campo {
+  display: block;
+  margin-bottom: var(--e4);
+}
+
+.cursos-dialogo__etiqueta {
+  display: block;
+  margin-bottom: var(--e1);
+  font-size: var(--tam-s);
+}
+
+.cursos-dialogo__input {
+  width: 100%;
+  padding: var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  box-sizing: border-box;
+}
+
+.cursos-dialogo__ayuda {
+  margin: var(--e1) 0 0;
+  font-size: var(--tam-xs);
+  color: var(--color-tinta-suave);
+}
+
+/* Lo que va a pasar, enumerado. Mismo tratamiento que las consecuencias de
+   confirmar-generacion: tres hechos cortos, no un párrafo que nadie lee. */
+.cursos-dialogo__consecuencias {
+  margin: 0 0 var(--e4);
+  padding-left: var(--e4);
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+
+.cursos-dialogo__error {
+  color: var(--color-error);
+  margin: var(--e2) 0;
+}
+
+/* El motivo de que «Duplicar curso…» esté apagado. Va dentro de la fila de acciones y
+   ocupa todo el ancho para quedar ENCIMA del botón que explica, no a su lado. */
+.cursos-dialogo__motivo {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: right;
+  font-size: var(--tam-xs);
+  color: var(--color-tinta-suave);
+}
+
+.cursos-dialogo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}

@@ -1,0 +1,26 @@
+<!-- Sin envoltorio propio: el `.app__curso` de app.css ya es el contenedor flex, y
+     añadir otro metería una caja más en la cadena de altura que ese hueco fija. -->
+@if (texto()) {
+  <span class="curso-barra__nombre" [title]="error()">{{ texto() }}</span>
+}
+
+@if (esArchivado()) {
+  <!-- Par `title` + `aria-label` completo, molde del candado de horario-grid: la marca
+       dice «Solo lectura» EN TEXTO —no sólo en ámbar— y explica el porqué a quien pase el
+       ratón y a quien use un lector de pantalla. -->
+  <span
+    class="curso-barra__marca"
+    [title]="explicacionArchivado()"
+    [attr.aria-label]="explicacionArchivado()"
+    >Solo lectura</span
+  >
+}
+
+<button
+  type="button"
+  class="curso-barra__boton"
+  [disabled]="curso() === null"
+  (click)="abrirDialogo()"
+>
+  Cursos…
+</button>

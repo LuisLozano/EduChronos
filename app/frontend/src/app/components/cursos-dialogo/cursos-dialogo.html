@@ -1,0 +1,159 @@
+<div class="cursos-dialogo">
+  @switch (estado()) {
+    @case ('cargando') {
+      <h2 class="cursos-dialogo__titulo">Cursos</h2>
+      <p class="cursos-dialogo__cargando">Cargando…</p>
+
+      <div class="cursos-dialogo__acciones">
+        <button type="button" class="cursos-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+      </div>
+    }
+
+    @case ('error') {
+      <!-- Sin lista no hay selector que ofrecer, así que tampoco se ofrece duplicar:
+           el botón se apoya en la lista para decidir el requisito (b). -->
+      <h2 class="cursos-dialogo__titulo">Cursos</h2>
+      <p class="cursos-dialogo__error" role="alert">{{ error() }}</p>
+
+      <div class="cursos-dialogo__acciones">
+        <button type="button" class="cursos-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    }
+
+    @case ('cargado') {
+      @if (modo() === 'lista') {
+        <h2 class="cursos-dialogo__titulo">Cursos</h2>
+
+        <ul class="cursos-dialogo__lista">
+          @for (c of cursos(); track c.fichero) {
+            <li class="cursos-dialogo__fila" [class.cursos-dialogo__fila--abierto]="c.abierto">
+              <span class="cursos-dialogo__identidad">
+                <span class="cursos-dialogo__nombre">{{ rotulo(c) }}</span>
+                <!-- El fichero se pinta SIEMPRE y no sólo cuando falta el nombre: es la
+                     identidad real del curso —lo que viaja en el POST de abrir— y dos
+                     ficheros podrían traer el mismo nombre si alguien los copia a mano. -->
+                <span class="cursos-dialogo__fichero">{{ c.fichero }}</span>
+              </span>
+
+              <!-- El estado va en TEXTO y no sólo por color (regla de severidad de
+                   styles.css): quien no distinga la tinta ámbar no pierde el dato. -->
+              <span
+                class="cursos-dialogo__estado"
+                [class.cursos-dialogo__estado--archivado]="c.archivado"
+                >{{ c.archivado ? 'Archivado' : 'Activo' }}</span
+              >
+
+              @if (c.abierto) {
+                <span class="cursos-dialogo__abierto">Abierto ahora</span>
+              } @else {
+                <button
+                  type="button"
+                  class="cursos-dialogo__abrir accion-compacta"
+                  [disabled]="guardando()"
+                  (click)="abrir(c)"
+                >
+                  Abrir
+                </button>
+              }
+            </li>
+          }
+        </ul>
+
+        @if (error()) {
+          <p class="cursos-dialogo__error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="cursos-dialogo__acciones">
+          <button type="button" class="cursos-dialogo__cerrar" (click)="cerrar()">
+            Cancelar
+          </button>
+
+          <!-- Deshabilitado CON EXPLICACIÓN a la vista, no sólo en gris: un botón apagado
+               sin motivo deja al usuario probando clics. El texto dice qué hacer, no qué
+               pasa. -->
+          @if (!puedeDuplicar()) {
+            <p class="cursos-dialogo__motivo">Abre el curso activo para duplicarlo.</p>
+          }
+          <button
+            type="button"
+            class="cursos-dialogo__duplicar accion-principal"
+            [disabled]="!puedeDuplicar() || guardando()"
+            (click)="irADuplicar()"
+          >
+            Duplicar curso…
+          </button>
+        </div>
+      } @else {
+        <h2 class="cursos-dialogo__titulo">Duplicar curso</h2>
+
+        <form class="cursos-dialogo__form" [formGroup]="form" (ngSubmit)="duplicar()">
+          <!-- SIN `placeholder`, y es una corrección medida (S160, M4 de la fase B): un
+               ejemplo en gris dentro del campo se lee como un valor ya puesto, y el
+               arquitecto leyó «2025/2026» y «2026/2027» como si el formulario viniera
+               relleno. La forma se dice DEBAJO, en el texto de ayuda, donde no se confunde
+               con el contenido. El único texto que sí va dentro es el del curso nuevo cuando
+               hay propuesta, y ese es un VALOR de verdad. -->
+          <div class="cursos-dialogo__campo">
+            <label class="cursos-dialogo__etiqueta" for="curso-nuevo">Curso nuevo</label>
+            <input
+              id="curso-nuevo"
+              type="text"
+              formControlName="nombreNuevo"
+              class="cursos-dialogo__input"
+              autocomplete="off"
+            />
+            <p class="cursos-dialogo__ayuda">Dos años consecutivos, como 2026/2027.</p>
+          </div>
+
+          <!-- Sólo cuando la base abierta no trae nombre (condición 6). En el caso normal
+               ni se pinta: el backend rechaza con 400 un nombre actual que no coincida con
+               el suyo, así que preguntarlo sería invitar a la discrepancia. -->
+          @if (pideNombreActual()) {
+            <div class="cursos-dialogo__campo">
+              <label class="cursos-dialogo__etiqueta" for="curso-actual">
+                Nombre del curso actual
+              </label>
+              <input
+                id="curso-actual"
+                type="text"
+                formControlName="nombreActual"
+                class="cursos-dialogo__input"
+                autocomplete="off"
+              />
+              <p class="cursos-dialogo__ayuda">
+                Este curso no tiene nombre guardado. Es el que quedará archivado.
+              </p>
+            </div>
+          }
+
+          <ul class="cursos-dialogo__consecuencias">
+            <li>El curso actual queda archivado, en solo lectura.</li>
+            <li>El curso nuevo conserva la configuración, sin horarios ni bloqueos.</li>
+            <li>Al terminar se abre el curso nuevo.</li>
+          </ul>
+
+          @if (error()) {
+            <p class="cursos-dialogo__error" role="alert">{{ error() }}</p>
+          }
+
+          <div class="cursos-dialogo__acciones">
+            <button type="button" class="cursos-dialogo__cerrar" (click)="volverALista()">
+              Volver
+            </button>
+            <button
+              type="submit"
+              class="cursos-dialogo__crear accion-principal"
+              [disabled]="guardando()"
+            >
+              Duplicar
+            </button>
+          </div>
+        </form>
+      }
+    }
+  }
+</div>

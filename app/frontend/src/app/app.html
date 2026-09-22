@@ -4,12 +4,14 @@
     <a routerLink="/configuracion" routerLinkActive="app__nav-activo" ariaCurrentWhenActive="page">Configuración</a>
     <a routerLink="/horario/1" routerLinkActive="app__nav-activo" ariaCurrentWhenActive="page">Horario</a>
   </nav>
-  <!-- Sitio reservado para el selector de curso activo de Fase 10 (criterio 1 de
-       O-navegación). Va vacío A PROPÓSITO: pintar un selector inerte sería que la
-       UI prometiera algo que no existe. Lo que reserva no es «espacio a la
-       derecha» sino una ALTURA medida —ver `.app__curso` en app.css—, que es la
-       parte del criterio que dice «sin rehacerla». -->
-  <div class="app__curso"></div>
+  <!-- Sitio del selector de curso activo (criterio 1 de O-navegación), OCUPADO por
+       C-selector-curso en S160. Estuvo vacío desde S127 a propósito: pintar un
+       selector inerte habría sido que la UI prometiera algo que no existía. Lo que
+       reservaba no era «espacio a la derecha» sino una ALTURA medida —ver
+       `.app__curso` en app.css—, que es la parte del criterio que dice «sin
+       rehacerla»: `app-curso-barra` entra con texto y un botón compacto, sin
+       `<select>`, para caber en los 27 px de la línea de la marca. -->
+  <div class="app__curso"><app-curso-barra /></div>
 </header>
 
 <main class="app__contenido">

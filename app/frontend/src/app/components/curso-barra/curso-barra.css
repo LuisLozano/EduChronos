@@ -1,0 +1,69 @@
+/* El elemento del componente nace `display: inline`, igual que documentan
+   `cabecera-lista.css` y `estado-lista.css` para los suyos. Aquí el daño es que las tres
+   piezas —nombre, marca de solo lectura y botón— quedan pegadas: un `gap` puesto en
+   `.app__curso` NO las separa, porque ese contenedor flex tiene UN SOLO hijo, que es este
+   host. Medido en el M4 de la fase B con el arquitecto: 8, 16 y 24 px en `.app__curso` se
+   veían exactamente iguales, que es la señal de que la regla no llegaba a aplicarse.
+
+   El contenedor flex de verdad es este, y por eso el `gap` vive aquí.
+
+   `--e4` y no el `--e2` que la escala manda para «elementos de un mismo bloque»: sobre el
+   fondo de acento no hay bordes ni superficies que separen las piezas por su cuenta, y el
+   botón trae además su propio padding de 8 px, de modo que con `--e2` los dos espacios se
+   leen como uno. Comparadas las dos en la barra real antes de elegir. `--e4` es «separación
+   entre bloques hermanos», que es lo que son: un dato que se lee y un control que se pulsa.
+
+   No toca la ALTURA que `.app__curso` reserva —medida después del cambio: la barra sigue en
+   sus 51 px—, porque `align-items: center` sobre una sola línea de texto no la mueve. */
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+}
+
+/* Todo va sobre el acento de la barra, así que la tinta es `--color-sobre-acento` y sus
+   variantes; los tokens de superficie clara de `styles.css` no sirven aquí. */
+.curso-barra__nombre {
+  font-size: var(--tam-s);
+  color: var(--color-sobre-acento);
+}
+
+/* La marca de solo lectura usa el par de tokens de AVISO, no los de error: un curso
+   archivado no es un fallo, es un estado en el que se puede seguir trabajando (leyendo).
+   Va en su propia caja con fondo para que se lea como etiqueta y no como parte del
+   nombre. El contraste se mide sobre `--color-aviso-fondo`, no sobre el acento: la caja
+   trae su propio fondo. */
+.curso-barra__marca {
+  font-size: var(--tam-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-aviso);
+  background: var(--color-aviso-fondo);
+  padding: 0 var(--e1);
+  border-radius: var(--radio-s);
+  /* Sin line-height propio: hereda el de la barra para no crecer por encima de la línea
+     de la marca, que es el compromiso que `.app__curso` documenta. */
+}
+
+/* Botón de barra: contorno sobre el acento, como los enlaces de navegación, y NO un botón
+   de superficie clara, que aquí cantaría. Altura gobernada por el padding vertical
+   mínimo: un control más alto que la línea de texto engordaría la barra. */
+.curso-barra__boton {
+  padding: 0 var(--e2);
+  font-size: var(--tam-s);
+  font-family: inherit;
+  color: var(--color-sobre-acento);
+  background: transparent;
+  border: 1px solid var(--color-sobre-acento-tenue);
+  border-radius: var(--radio-s);
+  cursor: pointer;
+}
+
+.curso-barra__boton:hover:not(:disabled) {
+  border-color: var(--color-sobre-acento);
+  background: var(--color-acento-fuerte);
+}
+
+.curso-barra__boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
