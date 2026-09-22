@@ -18,6 +18,7 @@ import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
+import es.yaroki.educhronos.app.curso.CursoService;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.curso.RechazoCursoException;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
@@ -189,23 +190,28 @@ public class GeneradorHorarioService {
      *         necesaria: el problema no puede tener solución y no se gasta el solver.
      * @throws es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException si el
      *         problema no admite un horario factible.
-     * @throws RechazoCursoException 409 {@code CURSO_CAMBIANDO} si se está abriendo otra
-     *         base justo ahora (S160, invariante I2).
+     * @throws RechazoCursoException 409 si otra operación de curso está en marcha (S160,
+     *         invariante I2): {@code CURSO_CAMBIANDO} si se está abriendo otra base,
+     *         {@code CURSO_OCUPADO} si se está duplicando el curso.
      */
     public HorarioGenerado generar(Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
         if (maxSegundos != null && maxSegundos <= 0) {
             throw new IllegalArgumentException(
                     "maxSegundos debe ser > 0 si se especifica; recibido " + maxSegundos);
         }
-        // Se da de alta ANTES de cargar nada (S160, I2). Desde aquí y hasta el finally, un
-        // cambio de curso no puede empezar: si pudiera, el solve leería el catálogo de una
-        // base y guardaría el horario en otra, sin un solo error por el camino. La guarda de
-        // la validación va antes porque un maxSegundos absurdo es un 400 que no necesita
-        // ocupar la aplicación ni un instante.
-        if (!estadoCurso.intentarIniciarGeneracion()) {
-            throw new RechazoCursoException(
-                    HttpStatus.CONFLICT, EstadoCurso.CURSO_CAMBIANDO,
-                    "Se está abriendo otro curso. Espera a que termine y vuelve a generar.");
+        // Se da de alta ANTES de cargar nada (S160, I2). Desde aquí y hasta el finally, ni un
+        // cambio de curso ni un duplicado pueden empezar: si pudieran, el solve leería el
+        // catálogo de una base y guardaría el horario en otra, o en un curso que acaba de
+        // quedar archivado, sin un solo error por el camino. La guarda de la validación va
+        // antes porque un maxSegundos absurdo es un 400 que no necesita ocupar la aplicación
+        // ni un instante.
+        //
+        // El rechazo NOMBRA la operación que estorba, y por eso el estado contesta con un
+        // enum: preguntar después cuál de las dos era sería leer fuera del monitor y podría
+        // nombrar una que ya terminó.
+        EstadoCurso.Admision admision = estadoCurso.intentarIniciarGeneracion();
+        if (!admision.concedida()) {
+            throw rechazoDeCurso(admision);
         }
         try {
             return generarConElCursoTomado(maxSegundos, semilla, via, nombre);
@@ -215,6 +221,30 @@ public class GeneradorHorarioService {
             // cambiar de curso sin reiniciar la aplicación.
             estadoCurso.terminarGeneracion();
         }
+    }
+
+    /**
+     * Traduce el rechazo del estado a la respuesta que verá el cliente. Las dos causas ya
+     * existían —{@code CURSO_CAMBIANDO} la usa la guarda, {@code CURSO_OCUPADO} la usa
+     * {@code CursoService.abrir}—, así que no nace ningún símbolo nuevo para esto: lo que el
+     * cliente aprende es qué operación estorba, no un código más que mapear.
+     */
+    private static RechazoCursoException rechazoDeCurso(EstadoCurso.Admision admision) {
+        return switch (admision) {
+            case HAY_CAMBIO ->
+                    new RechazoCursoException(
+                            HttpStatus.CONFLICT, EstadoCurso.CURSO_CAMBIANDO,
+                            "Se está abriendo otro curso. Espera a que termine y vuelve a"
+                                    + " generar.");
+            case HAY_DUPLICADO ->
+                    new RechazoCursoException(
+                            HttpStatus.CONFLICT, CursoService.CURSO_OCUPADO,
+                            "Se está duplicando el curso; espera unos segundos y vuelve a"
+                                    + " generar.");
+            case CONCEDIDA ->
+                    throw new IllegalStateException(
+                            "no se traduce a rechazo una admisión concedida");
+        };
     }
 
     /**

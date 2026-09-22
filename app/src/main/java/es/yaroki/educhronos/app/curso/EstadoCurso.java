@@ -30,25 +30,34 @@ import org.springframework.stereotype.Component;
  * «pues allá voy» en dos llamadas sueltas dejaría entre medias una ventana en la que otro
  * hilo también cree que se puede.
  *
- * <p>Tabla de exclusiones, que es el contrato entero:
+ * <p>Tabla de exclusiones, que es el contrato entero. Es SIMÉTRICA: ninguna de las tres
+ * empieza si otra está en marcha, y la única compañía que se admite es la de otra generación.
  *
  * <pre>
  *   quiere empezar ↓   | generando &gt; 0 | duplicando | cambiando
  *   ───────────────────┼───────────────┼────────────┼──────────
- *   generar            |      SÍ       |     SÍ     |    NO
+ *   generar            |      SÍ       |     NO     |    NO
  *   duplicar           |      NO       |     NO     |    NO
  *   cambiar de curso   |      NO       |     NO     |    NO
  * </pre>
  *
- * <p>Generar es la única que admite compañía, y sólo de otra generación: dos solves a la vez
- * son dos lecturas y dos escrituras independientes sobre la misma base, que es lo que la
- * aplicación ya hacía antes de S160 y no se estrecha ahora. Por eso {@code generando} es un
- * CONTADOR y no un booleano: con un booleano, el segundo solve en terminar apagaría el
- * indicador con el primero aún dentro, y un cambio de curso se colaría en medio. Que
- * duplicar no aparezca como obstáculo para generar no es un descuido: {@code GuardaSoloLectura}
- * ya rechaza el {@code POST /api/horarios} con un 403 mientras se duplica, así que esa
- * combinación no llega hasta aquí por la vía HTTP, y bloquearla también aquí no añadiría
- * nada que se pueda observar.
+ * <p>Dos solves a la vez sí conviven: son dos lecturas y dos escrituras independientes sobre
+ * la misma base, que es lo que la aplicación ya hacía antes de S160 y no se estrecha ahora.
+ * Por eso {@code generando} es un CONTADOR y no un booleano: con un booleano, el segundo
+ * solve en terminar apagaría el indicador con el primero aún dentro, y un cambio de curso se
+ * colaría en medio.
+ *
+ * <p><b>La casilla generar/duplicando valía SÍ hasta la corrección de S160, y era un defecto
+ * real.</b> Se justificaba diciendo que {@code GuardaSoloLectura} ya rechaza el
+ * {@code POST /api/horarios} con un 403 mientras se duplica, de modo que la combinación no
+ * llegaría hasta aquí. Eso es un comprobar-y-actuar repartido en DOS sitios, y entre los dos
+ * cabe una petición: la que pasa la guarda con {@code duplicando} todavía falso y entra al
+ * servicio cuando ya es cierto. Lo que pasaba entonces, en orden: el duplicado archiva el
+ * origen; su apertura del curso nuevo se encuentra {@code generando > 0} y se va con un 409;
+ * y el {@code guardar()} del solve escribe el horario en el curso ARCHIVADO, por JPA y sin
+ * pasar por guarda ninguna. Un horario en un curso de solo lectura que nadie volverá a mirar.
+ * La regla vive AQUÍ, donde se mira y se marca en el mismo bloque, y la guarda es lo que
+ * siempre fue: un atajo que ahorra trabajo, no la regla.
  */
 @Component
 public class EstadoCurso implements SmartInitializingSingleton {
@@ -174,16 +183,51 @@ public class EstadoCurso implements SmartInitializingSingleton {
     }
 
     /**
+     * Qué contesta {@link #intentarIniciarGeneracion()}: si el solve queda contado y, cuando
+     * no, POR QUÉ (S160).
+     *
+     * <p><b>Un enum y no un booleano, y la razón no es el gusto.</b> Quien rechaza tiene que
+     * decirle al usuario qué está pasando —no es lo mismo «se está abriendo otro curso» que
+     * «se está duplicando el curso»—, y averiguarlo preguntando después con
+     * {@code cambiando()} o {@code duplicando()} sería leer fuera del monitor: para cuando se
+     * preguntara, el estado podría haber cambiado y el mensaje nombraría una operación que ya
+     * terminó. La razón viaja CON la decisión, tomada en el mismo bloque sincronizado.
+     *
+     * <p>Los otros dos {@code intentarIniciar…} siguen devolviendo {@code boolean} a
+     * propósito: sus dos llamadores responden un único {@code CURSO_OCUPADO} con el mismo
+     * texto para cualquier motivo, así que un enum ahí sería un tipo que nadie mira.
+     */
+    public enum Admision {
+        /** El solve queda dado de alta. */
+        CONCEDIDA,
+        /** Se está abriendo otra base. */
+        HAY_CAMBIO,
+        /** Se está creando un curso nuevo. */
+        HAY_DUPLICADO;
+
+        public boolean concedida() {
+            return this == CONCEDIDA;
+        }
+    }
+
+    /**
      * Da de alta un solve, si se puede (S160).
      *
-     * @return {@code true} si queda contado; {@code false} si se está cambiando de curso
+     * <p>Rechaza con un duplicado en marcha además de con un cambio: ver la tabla de
+     * exclusiones y la nota sobre por qué esa casilla dejó de valer SÍ.
+     *
+     * @return {@link Admision#CONCEDIDA} si queda contado; si no, cuál de las dos operaciones
+     *     lo impide
      */
-    public synchronized boolean intentarIniciarGeneracion() {
+    public synchronized Admision intentarIniciarGeneracion() {
         if (cambiando) {
-            return false;
+            return Admision.HAY_CAMBIO;
+        }
+        if (duplicando) {
+            return Admision.HAY_DUPLICADO;
         }
         this.generando++;
-        return true;
+        return Admision.CONCEDIDA;
     }
 
     /**

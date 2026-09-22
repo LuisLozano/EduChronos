@@ -318,7 +318,8 @@ class CursoAperturaTest {
     void abrir_conUnSolveEnMarcha_409YNoCambiaNada() throws Exception {
         BancoDeCursos.fabricar(carpeta.resolve("curso-2026-2027.db"), "2026/2027", false);
         Path antes = base.baseAbierta();
-        assertThat(estado.intentarIniciarGeneracion()).isTrue();
+        assertThat(estado.intentarIniciarGeneracion())
+                .isEqualTo(EstadoCurso.Admision.CONCEDIDA);
 
         try {
             assertThatThrownBy(() -> servicio.abrir("curso-2026-2027.db"))

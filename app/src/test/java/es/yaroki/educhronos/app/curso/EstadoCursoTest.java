@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.curso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import es.yaroki.educhronos.app.curso.EstadoCurso.Admision;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -27,7 +28,7 @@ class EstadoCursoTest {
     void generandoBloqueaElCambioYElDuplicado() {
         EstadoCurso estado = nuevo();
 
-        assertThat(estado.intentarIniciarGeneracion()).isTrue();
+        assertThat(estado.intentarIniciarGeneracion()).isEqualTo(Admision.CONCEDIDA);
         assertThat(estado.generando()).isOne();
 
         assertThat(estado.intentarIniciarCambio()).as("cambiar con un solve dentro").isFalse();
@@ -50,8 +51,10 @@ class EstadoCursoTest {
     void dosSolvesALaVez_elCambioSigueBloqueadoHastaQueSaleElSegundo() {
         EstadoCurso estado = nuevo();
 
-        assertThat(estado.intentarIniciarGeneracion()).isTrue();
-        assertThat(estado.intentarIniciarGeneracion()).as("dos solves SÍ conviven").isTrue();
+        assertThat(estado.intentarIniciarGeneracion()).isEqualTo(Admision.CONCEDIDA);
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("dos solves SÍ conviven")
+                .isEqualTo(Admision.CONCEDIDA);
         assertThat(estado.generando()).isEqualTo(2);
 
         estado.terminarGeneracion();
@@ -77,24 +80,37 @@ class EstadoCursoTest {
         assertThat(estado.intentarIniciarCambio()).isTrue();
         assertThat(estado.cambiando()).isTrue();
 
-        assertThat(estado.intentarIniciarGeneracion()).as("generar").isFalse();
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("generar")
+                .isEqualTo(Admision.HAY_CAMBIO);
         assertThat(estado.intentarIniciarDuplicado()).as("duplicar").isFalse();
         assertThat(estado.intentarIniciarCambio()).as("otro cambio").isFalse();
         assertThat(estado.generando()).as("el intento fallido no cuenta un solve").isZero();
 
         estado.terminarCambio();
         assertThat(estado.cambiando()).isFalse();
-        assertThat(estado.intentarIniciarGeneracion()).as("al terminar, todo vuelve").isTrue();
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("al terminar, todo vuelve")
+                .isEqualTo(Admision.CONCEDIDA);
     }
 
     /**
-     * (T3.d) Con un duplicado en marcha no se cambia de curso ni se duplica otra vez. Generar
-     * SÍ se deja pasar aquí a propósito: quien lo impide es {@code GuardaSoloLectura}, que
-     * rechaza el {@code POST /api/horarios} con un 403 mientras dura el duplicado, y
-     * duplicarlo en este nivel sería una segunda regla que nadie podría observar por separado.
+     * (T3.d) Con un duplicado en marcha NO empieza nada: ni un cambio, ni otro duplicado, ni
+     * un solve.
+     *
+     * <p><b>La tercera casilla es la corrección de S160.</b> Antes valía «sí», con el
+     * argumento de que {@code GuardaSoloLectura} ya rechaza el {@code POST /api/horarios}
+     * mientras se duplica. Eso repartía la regla en dos sitios, y entre los dos cabía una
+     * petición: la que pasa la guarda con {@code duplicando} todavía falso y entra al
+     * servicio cuando ya es cierto. El final de esa carrera era un horario escrito por JPA en
+     * el curso recién archivado. La regla vive aquí, donde se mira y se marca de una vez.
+     *
+     * <p>El aserto sobre el CONTADOR es la otra mitad: un rechazo no puede dejar contado un
+     * solve que no existe, porque entonces el duplicado que lo provocó no podría abrir después
+     * el curso nuevo.
      */
     @Test
-    void duplicandoBloqueaElCambioYOtroDuplicado() {
+    void duplicandoBloqueaLasTresCosas() {
         EstadoCurso estado = nuevo();
 
         assertThat(estado.intentarIniciarDuplicado()).isTrue();
@@ -103,12 +119,18 @@ class EstadoCursoTest {
         assertThat(estado.intentarIniciarCambio()).as("cambiar").isFalse();
         assertThat(estado.intentarIniciarDuplicado()).as("otro duplicado").isFalse();
         assertThat(estado.intentarIniciarGeneracion())
-                .as("generar NO lo bloquea este objeto: lo bloquea la guarda")
-                .isTrue();
-        estado.terminarGeneracion();
+                .as("generar, y el rechazo NOMBRA al duplicado")
+                .isEqualTo(Admision.HAY_DUPLICADO);
+        assertThat(estado.generando())
+                .as("un rechazo no cuenta un solve que no ha empezado")
+                .isZero();
 
         estado.terminarDuplicado();
         assertThat(estado.intentarIniciarCambio()).isTrue();
+        estado.terminarCambio();
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("al terminar el duplicado, generar vuelve a entrar")
+                .isEqualTo(Admision.CONCEDIDA);
     }
 
     /**
@@ -125,7 +147,7 @@ class EstadoCursoTest {
         estado.terminarGeneracion();
         assertThat(estado.generando()).isZero();
 
-        assertThat(estado.intentarIniciarGeneracion()).isTrue();
+        assertThat(estado.intentarIniciarGeneracion()).isEqualTo(Admision.CONCEDIDA);
         assertThat(estado.generando()).isOne();
         assertThat(estado.intentarIniciarCambio())
                 .as("un solve real sigue bloqueando tras los terminar de más")

@@ -361,6 +361,23 @@ public class CursoService {
      * {@code HikariDataSource.close()} corta las conexiones en uso, y hacerlo abortaría a
      * media lectura la petición de otro usuario.
      *
+     * <p><b>VENTANA CONOCIDA, de microsegundos y NO cubierta</b> (S160), hermana de las dos
+     * ventanas de corte que documenta el javadoc de {@link DuplicadorCurso}. «Cero conexiones
+     * activas» no quiere decir «nadie está escribiendo»: quiere decir que nadie tiene una
+     * conexión TOMADA en este instante. Una petición de escritura que ya pasó por
+     * {@link GuardaSoloLectura} —cuando {@code cambiando} todavía era falso— y aún no ha
+     * pedido su conexión al pool cae del otro lado del cambio: se ejecuta contra la base
+     * NUEVA habiendo sido aprobada contra el estado de la ANTERIOR. Si la nueva estuviera
+     * archivada, esa escritura entraría en un curso de solo lectura.
+     *
+     * <p>No se cierra, y la decisión es deliberada. Cerrarla exigiría contar las peticiones
+     * en vuelo en el filtro —un contador que sube al entrar y baja al salir, con su propia
+     * espera— y eso pone estado compartido en el camino de TODAS las peticiones para un
+     * riesgo que aquí no se materializa: Educhronos es de un solo usuario en su ordenador
+     * (condición 8: escucha sólo en el bucle local), y el cambio de curso se lanza desde un
+     * diálogo modal, de modo que no hay nadie más pulsando botones mientras dura. Queda
+     * escrito para que, si alguna vez hay concurrencia real, se sepa dónde mirar.
+     *
      * @return {@code true} si el pool quedó libre dentro del plazo
      */
     private boolean esperarPoolLibre() {

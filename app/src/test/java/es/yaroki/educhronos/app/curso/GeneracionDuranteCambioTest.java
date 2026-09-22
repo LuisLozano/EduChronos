@@ -22,11 +22,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Generar un horario mientras se abre otro curso (O-curso, S160, invariante I2).
+ * Generar un horario mientras otra operación de curso está en marcha (O-curso, S160,
+ * invariante I2).
  *
  * <p>Es la otra mitad de la exclusión que {@code CursoAperturaTest} prueba por su lado: allí,
- * un solve en marcha impide el cambio; aquí, un cambio en marcha impide el solve. Las dos
- * hacen falta, porque una sola dejaría el orden de llegada decidiendo quién gana.
+ * un solve en marcha impide el cambio y el duplicado; aquí, un cambio o un duplicado en marcha
+ * impiden el solve. Las dos hacen falta, porque una sola dejaría el orden de llegada
+ * decidiendo quién gana.
  *
  * <p><b>El cambio se simula marcando {@link EstadoCurso}</b> y no abriendo un curso de verdad,
  * porque abrir termina en milisegundos y no hay forma fiable de meter una petición dentro de
@@ -67,6 +69,7 @@ class GeneracionDuranteCambioTest {
     @AfterEach
     void soltarIndicadores() {
         estado.terminarCambio();
+        estado.terminarDuplicado();
         while (estado.generando() > 0) {
             estado.terminarGeneracion();
         }
@@ -95,6 +98,46 @@ class GeneracionDuranteCambioTest {
 
         assertThat(estado.generando())
                 .as("un rechazo NO da de alta un solve")
+                .isZero();
+    }
+
+    /**
+     * (T4.c, corrección de S160) Con un DUPLICADO en marcha, {@code generar} se niega con 409
+     * {@code CURSO_OCUPADO} y un mensaje que nombra el duplicado, no el cambio de curso.
+     *
+     * <p><b>Este caso cubre un defecto que estuvo en el árbol.</b> Hasta la corrección,
+     * {@code intentarIniciarGeneracion()} sólo miraba {@code cambiando}, y se justificaba
+     * diciendo que {@code GuardaSoloLectura} ya rechazaba el {@code POST} durante el
+     * duplicado. Pero eso es comprobar en un sitio y actuar en otro: una petición que pasa la
+     * guarda con {@code duplicando} aún falso entra aquí cuando ya es cierto, el duplicado
+     * archiva el origen, su apertura del curso nuevo se encuentra {@code generando > 0} y se
+     * va con un 409, y el solve acaba escribiendo el horario en el curso ARCHIVADO por JPA,
+     * sin pasar por guarda ninguna.
+     *
+     * <p>Por eso el {@code .addFilters} sigue sin ponerse: con el filtro montado, la petición
+     * moriría en él con un 403 y este caso pasaría en verde sin ejecutar la línea que de
+     * verdad cierra el agujero.
+     *
+     * <p>Se comprueba la CAUSA y no sólo el status: un 409 con
+     * {@code CURSO_CAMBIANDO} mandaría al usuario a buscar un cambio de curso que nadie ha
+     * pedido.
+     */
+    @Test
+    void generarConUnDuplicadoEnMarcha_409CursoOcupado() throws Exception {
+        assertThat(estado.intentarIniciarDuplicado()).isTrue();
+
+        mockMvc.perform(
+                        post("/api/horarios")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("CURSO_OCUPADO"))
+                .andExpect(jsonPath("$.message").value(
+                        org.hamcrest.Matchers.containsString("duplicando")));
+
+        assertThat(estado.generando())
+                .as("un rechazo NO da de alta un solve: si lo hiciera, el duplicado que lo"
+                        + " provocó no podría abrir después el curso nuevo")
                 .isZero();
     }
 
