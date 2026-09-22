@@ -237,7 +237,8 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // 9. Al horario por el enlace del header. En /configuracion es ÚNICO; desde la
   //    landing sería ambiguo, porque allí «Horario» aparece además como tarjeta de
   //    la página (es el motivo por el que humo.spec.ts no lo usa como ancla).
-  //    El destino es /horario/1, clavado en `app.html`.
+  //    El destino es /horario, que resuelve el horario vigente del curso abierto; esta
+  //    base aún no tiene ninguno, así que la vista se queda ahí y lo avisa (S161).
   //
   //    REVERIFICADO EN S123, porque C-rutas-hijas metió ocho enlaces nuevos en esta
   //    página: los ocho del índice de destinos. La afirmación de arriba SIGUE SIENDO
@@ -246,7 +247,8 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   //    colisión simétrica dentro de sí mismo: «Grupos» casa DOS entradas sin `exact`,
   //    porque está contenido en «Subgrupos». Por eso `irA` lo lleva y esto no.
   await page.getByRole('link', { name: 'Horario', exact: true }).click();
-  await expect(page).toHaveURL(/\/horario\/1$/);
+  await expect(page).toHaveURL(/\/horario$/);
+  await expect(page.getByText('Este curso todavía no tiene horario')).toBeVisible();
 
   // PRECONDICIÓN antes de generar: si el centro está mal montado se sabe AQUÍ, sin
   // gastar los 30 s del solve en un fallo que ya estaba decidido.
