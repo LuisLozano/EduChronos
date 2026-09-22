@@ -51,7 +51,7 @@
 - L741 — ## FASE 12 — CI/CD con GitHub Actions
 - L744 — ### Criterios de verificación
 - L751 — ## Registro de progreso
-- L753 — ### Sesión 160 — O-curso (H4), C-selector-curso: **EL CURSO SE CAMBIA DESDE LA BARRA SIN CERRAR LA APLICACIÓN, Y EL DUPLICADO Y EL SOLO LECTURA LLEGAN A LA INTERFAZ: `O-curso` EN 6 DE 9.**
+- L753 — ### Sesión 161 — O-curso (H4), C-horario-vigente: **«HORARIO» LLEVA AL ÚLTIMO HORARIO DEL CURSO ABIERTO, TAMBIÉN EN UNO ARCHIVADO, Y SUS CUATRO DESCARGAS PASAN EL ORÁCULO: `O-curso` EN 7 DE 9.**
 - L822 — ### Bloques de Fase 2
 - L830 — ### Bloques de Fase 5
 - L853 — ### Bloques de Fase 6
@@ -61,15 +61,15 @@
 - L1262 — ### Decisiones permanentes (no reabrir sin razón de peso)
 - L1308 — ### Método de trabajo (procedimiento vigente)
 - L1341 — ### Deuda consciente VIVA
-- L3204 — ### Deuda consciente CERRADA (histórico)
-- L3406 — ### Notas técnicas validadas en Fase 0
-- L3419 — ### Notas técnicas validadas en Fase 6
-- L3464 — ### Notas técnicas validadas en Fase 9
-- L3473 — ### Notas técnicas validadas en Fase 11
-- L3613 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3622 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3649 — ### Registro detallado de sesiones S10–S31
-- L3658 — ## Señales globales de alerta
+- L3182 — ### Deuda consciente CERRADA (histórico)
+- L3417 — ### Notas técnicas validadas en Fase 0
+- L3430 — ### Notas técnicas validadas en Fase 6
+- L3475 — ### Notas técnicas validadas en Fase 9
+- L3484 — ### Notas técnicas validadas en Fase 11
+- L3624 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3633 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3660 — ### Registro detallado de sesiones S10–S31
+- L3669 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -750,7 +750,24 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 160 — O-curso (H4), C-selector-curso: **EL CURSO SE CAMBIA DESDE LA BARRA SIN CERRAR LA APLICACIÓN, Y EL DUPLICADO Y EL SOLO LECTURA LLEGAN A LA INTERFAZ: `O-curso` EN 6 DE 9.**
+### Sesión 161 — O-curso (H4), C-horario-vigente: **«HORARIO» LLEVA AL ÚLTIMO HORARIO DEL CURSO ABIERTO, TAMBIÉN EN UNO ARCHIVADO, Y SUS CUATRO DESCARGAS PASAN EL ORÁCULO: `O-curso` EN 7 DE 9.**
+  TIPO Y RITUAL: DESARROLLO — M0 + M2 en dos rondas de solo lectura + fase A (backend) + fase B (frontend) + corrección del e2e, con M3 por mutación en las dos fases; M4 por HTTP en la fase A y en navegador con el usuario al final, con oráculo sobre las descargas + M1.
+  M0. Cambio `C-horario-vigente`, Objetivo `O-curso`, Hito H4; sin R-invalidación. Va antes que el e2e (condición 8) porque cambia el enlace «Horario» de la barra y de la landing, que el spec recorrerá, y porque la condición 9 verifica la 4.
+  MEDICIÓN (M2, HEAD `48b4402`, solo lectura). (1) `horario_generado` tiene `fecha_generacion`, pero se ordena por id: sin AUTOINCREMENT SQLite asigna max(id)+1, así que el id mayor es el último insertado de los que existen; la fecha depende del reloj del equipo. (2) No había ningún GET del horario en sí, sólo sus sub-recursos por id. (3) El id literal vivía en `app.html`, `landing.html` y tres comentarios; las descargas ya usaban el id de la proyección cargada. (4) Sin horario, la vista trataba «no hay horario» como un 404; «Generar» seguía visible porque vive fuera de la cadena `@if`. (5) `s137` tiene un horario y `centro-completo` ninguno: con uno solo, «último» y «primero» coinciden y el M4 no discriminaría, así que se generó un segundo. (6) El oráculo recibe el id del horario y acepta la vista de aula. (7) Ni el plan ni el log registran cuánto dura un solve sobre `s137`.
+  DECISIONES. `GET /api/horarios/vigente` → 200 `{id}` o 204: que no haya horario no es un error. El enlace se resuelve AL NAVEGAR y no se guarda en la barra: `/horario` sin id pregunta por el vigente y navega con `replaceUrl`, así un horario recién generado no deja la barra apuntando al anterior hasta recargar. La ruta la atiende la misma `HorarioView`, que reutiliza su camino de «Generar». Es un GET: la guarda de solo lectura lo deja pasar en un archivado. Fuera: listar o elegir horarios anteriores (R-terminado) y `D-horario-irreversible`.
+  FASE A (`f43f00e`). `findFirstByOrderByIdDesc`, `GeneradorHorarioService.idVigente()`, `HorarioVigenteDTO` y el endpoint. +3 tests; m1–m3 cazados. M4 por HTTP sobre copias: 200 `{id:1}` en `s137`, 204 en el curso recién duplicado y en `centro-completo`, 200 `{id:1}` en el archivado y 403 `CURSO_SOLO_LECTURA` al escribir en él.
+  FASE B (`653b638`). Ruta `/horario`, `getVigente()`, barra y landing a `/horario`, aviso «Este curso todavía no tiene horario» con «Generar» habilitado, y los tres comentarios que citaban `/horario/1`. `app.spec.ts` fijaba el literal viejo y se ajustó. +5 tests de vitest; mb1–mb4 cazados.
+  CORRECCIÓN e2e (`3ef960d`). `centro-minimo.spec.ts:249` exigía `/horario/1`; ahora exige `/horario` y el aviso. Corrido: pasa ese punto y cae en la línea 267, al generar, que es el fallo preexistente de `D-e2e-centro-minimo-rojo` (no se paga, sede Fase 12).
+  M4 CON EL USUARIO, en navegador, sobre una copia de `s137` con URL explícita. U1: «Horario» → `/horario/1`, y «Atrás» vuelve a la portada. U2: generar → `/horario/2`, con «Horario» marcado (antes no se marcaba sobre `/horario/2`). U3: desde Configuración, «Horario» → `/horario/2`, el paso que discrimina. U4: duplicar → el curso nuevo muestra el aviso con «Generar» habilitado. U5: abrir el archivado → «Solo lectura» y `/horario/2`, con las tres vistas. U6: las cuatro descargas del horario 2 pasan el oráculo —grupo 1285/0/0, profesor 835/0/0, aula 819/0/0 y CSV OK—; el PDF de grupo contra el horario 1 falla (112 halladas, 1173 faltan, 754 sobran), lo que prueba que es del 2. Duración del solve: no medida, porque el log no la registra.
+  CRITERIO. `O-curso` **7 de 9** en Linux: se suma la 4. Quedan la 8 (e2e) y la 9 (Windows). `C-horario-vigente` ✔ HECHO.
+  DEUDA. Se SALDAN `D-horario-id-a-fuego` (bloqueaba la condición 4) y, de paso, `D-vista-horario-sin-horario`. Nace **`D-generacion-sin-movimiento`** (mejora futura, propuesta del usuario en el M4: la espera de la generación sólo muestra un texto fijo). R-deuda: con `O-curso` activo sólo queda bloqueando `D-e2e-aislamiento` (condición 8).
+  DEFECTOS DE INSTRUMENTO, todos del asistente. (1) El M2 consultó la tabla `curso` en bancos que no la tienen: se crea al arrancar la aplicación. (2) El guion de la fase A pedía revertir los mutantes con `git checkout` sobre ficheros con cambios sin commitear, lo que habría borrado la fase; Claude Code restauró desde una copia. (3) El M2 buscó el literal `/horario/1` excluyendo los specs y sólo dentro de `src`, así que no vio `app.spec.ts` ni el e2e, que lo fijaban: una búsqueda de dependientes que excluye los tests esconde justo los que se van a romper. (4) El guion de la fase B esperaba el grep de `horario/1` a cero cuando su propio paso 5 pedía un comentario que lo cita. (5) Tres rangos de `sed` del M2b cortaron antes de lo que interesaba. (6) El guion del oráculo pidió la duración del solve a un log que no la registra.
+  SUITES: **solver 92, app 534, vitest 513 en 55 ficheros**; app pasa de 531 a 534 y vitest de 508 a 513. e2e: `centro-minimo` corrido, rojo en el punto preexistente (línea 267).
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: INTACTOS. Todo M4 trabajó sobre copias en `/tmp`.
+  LIMPIEZA (M1-bis): archivada S159 a `bitacora-sesiones.md`; degradada S160 a «Última sesión registrada (previa):»; S161 queda como única cabecera H3 viva.
+  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (12 defectos inyectados, los 12 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 10 entradas descuadradas a 0 y 0** sobre 33 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 33 y 68: el descuadre lo produjo esta misma sesión al insertar en gestión la nota de la fila de H4, el bullet de estado, la nota de `C-horario-vigente` hecho, la de la deuda saldada, los dos cierres de §4 y la fila nueva, y en el plan la cabecera de S161, el archivado de S159, la degradación de S160, las dos fichas que pasan a CERRADA y el alta de deuda; la medición del «antes» se hizo importando `regenerar-indice.py` como módulo y llamando sólo a su comprobación—. **Censo de tokens sospechosos: 39** sobre 292 tokens distintos en el corpus vivo, y la lista es IDÉNTICA a la de HEAD (39 sobre 290): ningún token entra ni sale. (a) Los dos tokens nuevos, `C-horario-vigente` y `D-generacion-sin-movimiento`, **no los marca el censo**: nacen con 7 y 2 apariciones vivas —el Cambio en la fila de H4, en los Cambios de la ficha de `O-curso`, en los dos cierres de §4 y en las dos notas de cierre de las fichas del plan; la deuda en su ficha de «Deuda consciente VIVA» y en su fila de §4—, así que `D-deuda-sin-sede-en-el-plan` no engorda. (b) Una de las 7 de `C-horario-vigente` NO es una cita: es la entrada del ÍNDICE GENERADO que reproduce la cabecera de S161, **tercera reproducción medida de `D-censo-r4-rescate-por-indice`** tras las de S159 y S160; sin ella el token tendría 6 y seguiría fuera de la lista, así que el rescate no cambia ninguna decisión, sólo el número. La deuda nueva no lo sufre: la cabecera no la nombra. (c) La línea de R4 no rescata nada, porque desde S157 la entrada de sesión sale del corpus: el censo de antes y después de escribirla es el mismo, y las cifras que constan son las medidas DESPUÉS. (d) Extinción respecto de HEAD (`D-censo-r4-ciego-a-la-extincion`, ya instrumentada): **NINGÚN token cae a 0**, ni entre los citados en el bloque de S159 que esta sesión archiva. Las dos deudas que se cierran siguen vivas como token —`D-horario-id-a-fuego` con 6 apariciones y `D-vista-horario-sin-horario` con 7—, porque su ficha pasa a «Deuda consciente CERRADA» y su fila de §4 se queda tachada. (e) `O-nombre` sigue siendo el único token que vive SÓLO en entradas de sesión, sin cambio respecto de HEAD. (f) Los tres censos coinciden en **S159** —cabecera de la bitácora, línea de orden y crónica del plan—, comprobado por el verificador tras actualizar los dos de la bitácora, calcando el cierre de S160. (g) HIGIENE/MÉTODO: **13 fichas** vivas, las mismas que en S160 porque hoy no nace ninguna, contadas por la columna de sede de §4 con el criterio de S142 y descontando las cinco tachadas; **el disparador por recuento NO está activo: 13 de 20**. (h) La frase de ventana del plan se comprobó A MANO (`D-verificar-cierre-ciego-a-la-ventana`): dice S160 degradada y S161 como única cabecera H3 viva, y el plan tiene exactamente una. **R-deuda aguanta con `O-curso` activo:** con `D-horario-id-a-fuego` saldada, de las vivas sólo bloquea `D-e2e-aislamiento` (condición 8), que el objetivo absorbe, y la deuda que nace hoy no bloquea nada.»
+
+Última sesión registrada (previa): Sesión 160 — O-curso (H4), C-selector-curso: **EL CURSO SE CAMBIA DESDE LA BARRA SIN CERRAR LA APLICACIÓN, Y EL DUPLICADO Y EL SOLO LECTURA LLEGAN A LA INTERFAZ: `O-curso` EN 6 DE 9.**
   TIPO Y RITUAL: DESARROLLO — M0 + M2 de solo lectura + fase A (backend) con una corrección + unicidad del nombre + fase B (frontend), cada una con M3 por mutación + M4 por HTTP real y, en la fase B, en navegador y bandeja con el usuario en modo escritorio + M1.
   M0. Cambio `C-selector-curso`, Objetivo `O-curso`, Hito H4; sin R-invalidación. Va antes que el horario vigente por riesgo —es la única pregunta de arquitectura abierta del objetivo— y porque desbloquea las condiciones 1, 3, 5 y 6; la 4 se puede verificar sin selector, con URL explícita.
   MEDICIÓN (M2, HEAD `304fa4f`, Claude Code, solo lectura). (1) «Salir» usa el contexto que recibe del `ApplicationReadyEvent`, y la bandeja se quita en `ContextClosedEvent`; el candado vive en dos campos estáticos y se toma antes de crear Spring; la segunda instancia sondea 127.0.0.1:8080 y no habla con la primera. (2) Con URL explícita el post-procesador no actúa. (3) Pool de Hikari autoconfigurado, envuelto por el post-procesador de claves foráneas; JPA sin caché de segundo nivel; `EstadoCurso` es el único estado ligado a la base. (4) El solve es síncrono, corre fuera de transacción y no tiene indicador de «generando». (5) Sin AUTOINCREMENT no hay `sqlite_sequence`: el primer horario de un curso duplicado recibe id 1, el mismo que el del archivado (medido sobre los dos bancos). (6) El frontend no tiene estado global ni llamaba a `/api/curso`; patrón de diálogo: `TutoriaDialogo`. (7) La bandeja y el arranque de escritorio no tienen tests. (8) El nombre repetido se comprobaba solo por nombre de fichero (M4.d); se descartó por error y reapareció en el M4 de la fase B.
@@ -766,23 +783,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: INTACTOS. Todo M4 trabajó sobre copias en `/tmp`.
   LIMPIEZA (M1-bis): archivada S158 a `bitacora-sesiones.md`; degradada S159 a «Última sesión registrada (previa):»; S160 queda como única cabecera H3 viva.
   R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (12 defectos inyectados, los 12 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 13 y 19 entradas descuadradas a 0 y 0** sobre 33 y 68 encabezados —el descuadre lo produjo esta misma sesión al insertar en gestión el bullet de estado, la precisión de la decisión (E), la nota de `C-selector-curso` hecho, la nota de la fila de H4 y las dos filas de §4, y en el plan la cabecera de S160, las dos altas de deuda, la nota de S160 en `D-horario-id-a-fuego` y la degradación de S159; la medición del «antes» se reconstruyó importando `regenerar-indice.py` como módulo y llamando sólo a su comprobación, porque regenerar destruye el dato y el script ignora los argumentos—. **Censo de tokens sospechosos: 39** sobre 290 tokens distintos en el corpus vivo, y la lista es IDÉNTICA a la de HEAD (39 sobre 287): ningún token entra ni sale. (a) Los tres tokens nuevos, `C-selector-curso`, `D-verificar-cierre-ciego-a-la-ventana` y `D-curso-sin-borrado`, **no los marca el censo**: nacen con 3, 2 y 3 apariciones vivas en sus sedes —§2 y §3 para el Cambio; ficha de «Deuda consciente VIVA» del plan y fila de §4 para las dos deudas, y la de borrado además en «Fuera de este objetivo»—, así que `D-deuda-sin-sede-en-el-plan` no engorda. (b) Una de las tres de `C-selector-curso` NO es una cita: es la entrada del ÍNDICE GENERADO que reproduce la cabecera de S160, **segunda reproducción medida de `D-censo-r4-rescate-por-indice`** tras la de S159; sin ella el token tendría 2, las dos sedes reales, y seguiría fuera de la lista, así que el rescate no cambia ninguna decisión, sólo el número. Las dos deudas nuevas no lo sufren: la cabecera no las nombra. (c) La línea de R4 no rescata nada, porque desde S157 la entrada de sesión sale del corpus: el censo de antes y después de escribirla es el mismo, y las cifras que constan son las medidas DESPUÉS. (d) Extinción respecto de HEAD (`D-censo-r4-ciego-a-la-extincion`, ya instrumentada): **NINGÚN token cae a 0**, ni entre los citados en el bloque de S158 que esta sesión archiva. (e) `O-nombre` sigue siendo el único token que vive SÓLO en entradas de sesión, sin cambio respecto de HEAD. (f) Los tres censos coinciden en **S158** —cabecera de la bitácora, línea de orden y crónica del plan—, comprobado por el verificador tras actualizar los dos de la bitácora a mano, calcando el cierre de S159. (g) HIGIENE/MÉTODO: **13 fichas** vivas, una más que en S159 por `D-verificar-cierre-ciego-a-la-ventana`, contadas por la columna de sede de §4 con el criterio de S142 y descontando las cinco tachadas; **el disparador por recuento NO está activo: 13 de 20**. (h) La frase de ventana del plan se comprobó A MANO, que es justo lo que la deuda que nace hoy registra: dice S159 degradada y S160 como única cabecera H3 viva, y el plan tiene exactamente una. **R-deuda aguanta con `O-curso` activo:** de las vivas sólo bloquean las dos que el objetivo absorbe —`D-horario-id-a-fuego` (condición 4) y `D-e2e-aislamiento` (condición 8)—, y ninguna de las dos que nacen hoy bloquea nada.»
-
-Última sesión registrada (previa): Sesión 159 — O-curso (H4), C-duplicado-guarda: **EL CURSO SE DUPLICA Y EL ANTERIOR QUEDA EN SOLO LECTURA, EN EL BACKEND: `O-curso` EN 2 DE 9.** Antes, decisión de mapa: la disponibilidad del profesorado entra en el paso 2 de §1 y H2 se reabre con `O-disponibilidad`, registrado y no abierto.
-  TIPO Y RITUAL: DESARROLLO — decisión de mapa medida + M0 + M2 en dos rondas de solo lectura + implementación en dos fases, cada una con M3 por mutación y M4 por HTTP real (la B también en navegador) + M1.
-  DECISIÓN DE MAPA (`6a820ff`). Medido en HEAD `7a45f3e`: ningún código del frontend alcanza `GET/PUT /api/profesores/{id}/restricciones-horarias` ni lo ha alcanzado nunca (`git log -S` vacío); backend (S78) y solver (S26) vivos; los tres bancos, 59 profesores y 0 restricciones. La rejilla estaba planificada en el corte de 8.5 (bloque 8.5-E) y se perdió al cerrarlo sólo con backend. Se amplía el paso 2 de §1; H2 se reabre con `O-disponibilidad` (§3), tras `O-curso` y antes de la Fase 12 y la aceptación. `D-F8.5-E-b` pasa a él sin bloquear (un formulario sobre el mismo PUT no es «otra vía de escritura»); `D-F8.5-E-a` sigue como limitación conocida. La guarda de `O-curso` se fija genérica.
-  M0. Cambio `C-duplicado-guarda`, Objetivo `O-curso`, Hito H4; sin R-invalidación: el selector, el horario vigente y el e2e se construyen encima.
-  MEDICIÓN. (1) `VACUUM INTO` con sqlite-jdbc 3.53.2.0: copia idéntica en 2 ms, sin lo no confirmado de otra conexión; FALLA dentro de una transacción de la propia conexión y si el destino existe. (2) `spring.sql.init.mode=always`: cada arranque crea las tablas que faltan y no toca los datos. (3) La URL de la base se fija una vez por contexto en `RutaBaseDatosEnvironmentPostProcessor`; el candado es de la carpeta y sólo en modo escritorio. (4) Los 19 `mensaje()` del frontend leen `err.error.message`; no hay interceptor. (5) 34 escrituras, ningún filtro ni `@ControllerAdvice`; el 403 no lo trata ningún componente. (6) La tabla `configuracion` existe sin uso en producción.
-  DECISIONES. Nombre y archivado en una tabla `curso` de FILA ÚNICA, no en `configuracion`: ésta es configuración y se copia, la identidad del fichero no; y así las 17 tablas del oráculo de la condición 1 quedan intactas. Curso ACTIVO = el editable (como mucho uno); curso ABIERTO = el que la aplicación tiene cargado, que puede ser un archivado. Puntero `curso-abierto` en la carpeta de datos, escrito ANTES de archivar el origen. Con URL explícita la copia va junto a la base y no se escribe puntero (condición 7). Guarda por filtro, 403 con cuerpo propio y exención de `/api/cursos`; `D-F8.6-ii-a` se esquiva, no se paga (R-deuda, precedente S118). Del usuario: hasta el selector, el curso nuevo se abre al relanzar.
-  FASE A (`915b18e`). Paquete `curso`: `DuplicadorCurso` (JDBC directo, sin Spring ni transacción), `EstadoCurso`, `CursoService`, `CursoController` (`GET /api/curso`, `POST /api/cursos`) y `RechazoCursoDTO {causa, message}`; `CarpetaDatos.baseAbierta` y el post-procesador publican `educhronos.datos.carpeta`. +21 tests; 6 mutantes, todos cazados. M4: 17 tablas idénticas al banco y 4 del horario vacías; condición 2 medida en los dos lados (DELETE de la actividad 20: 409 en el origen, 204 en la copia); condiciones 6 y 7 en ejecución.
-  FASE B (`116f44e`). `GuardaSoloLectura` (`OncePerRequestFilter`) e indicador `duplicando`, que cierra la ventana de escrituras entre la copia y el archivado. +10 tests; 5 mutantes, todos cazados. M4: siete escrituras de cinco familias, incluido el PUT de restricciones, y una ruta inexistente → 403 `CURSO_SOLO_LECTURA`, en UTF-8; md5 del archivado intacto al intentar escribir, al relanzar sobre él y al escribir en el activo. En navegador, por el usuario: crear un nivel y borrar un profesor muestran el mensaje con sus acentos.
-  CRITERIO. `O-curso` **2 de 9** (cumplidas la 2 y la 7). Backend hecho y falta la interfaz: la 1, la 3 y la 6, cuyas mitades pasan al Cambio del selector. `C-duplicado-guarda` ✔ HECHO.
-  DEUDA. Nace **`D-educhronos-props-sin-agrupar`** (técnica real, sin objetivo asignado). `D-F8.6-ii-a`: instancia de S159, esquivada. Anotados en la ficha de `O-curso` dos requisitos del Cambio del selector: listar los cursos de la carpeta (un puntero roto abre `educhronos.db`, que puede estar archivado) y permitir duplicar un archivado cuando no queda ningún activo.
-  PRECEDENTES. Primera tabla de fila única (`check (id = 1)` añadido a mano, como las FK); primer `@SpringBootTest` y primer `@DynamicPropertySource`; primer filtro transversal. Lección de test: MockMvc por `webAppContextSetup` NO aplica los filtros sin `.addFilters`, y un test así pasa sin ejercitar la guarda.
-  DEFECTOS DE INSTRUMENTO. Del asistente: (1) el guion de registro apuntaba a los documentos en la raíz y no en `docs/` (la guarda abortó sin escribir); (2) el M9 del guion de medición imprimía sin etiquetas y el 21 de tablas parecía un recuento de filas; (3) un grep de verificación con los patrones en orden inverso; (4) predicción errónea en la mutación m2: el caso 10 duplicaba con el curso activo, donde la exención no se ejerce; Claude Code añadió el aserto que faltaba en vez de forzar el test; (5) el guion de este cierre metía un salto de línea dentro de una celda al ampliar la fila de H4 de §2, y la fila de la tabla quedó partida en dos líneas físicas —las otras tres filas de hitos son una línea que acaba en `|`—; visto en la costura del diff y recompuesto antes de commitear. De Claude Code: (6) dedujo en el M0 que el `reason` llegaría como `message` por `include-message=always`, contra lo medido en S118 y S158; corregido por el asistente antes de diseñar; (7) un test de la fase A escribió en el padre del `@TempDir` y dejó residuo en `/tmp`; reescrito.
-  SUITES: **solver 92, app 496, vitest 482 en 52 ficheros**, medidas en el cierre; app pasa de 465 a 496. e2e no corrido (`D-e2e-centro-minimo-rojo`, sede Fase 12).
-  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`, medidos en el cierre: INTACTOS. Todo M4 trabajó sobre copias en `/tmp`.
-  LIMPIEZA (M1-bis): archivada S157 a `bitacora-sesiones.md`; degradada S158 a «Última sesión registrada (previa):»; S159 queda como única cabecera H3 viva.
-  R4 / COSTURA. «`verificar-cierre.py`: **0 comprobaciones duras con fallo** tras el cierre, con su autoprueba en verde (12 defectos inyectados, los 12 detectados); índices de `gestion_proyecto.md` y `plan_trabajo_horarios.md` regenerados, **de 31 y 10 entradas descuadradas a 0 y 0** sobre 33 y 68 encabezados —en HEAD los dos estaban a 0 con esos mismos 33 y 68: el descuadre lo produjo esta misma sesión al insertar en gestión el bullet de estado, la nota de `C-duplicado-guarda` hecho, el bloque de términos y requisitos del selector, la nota de la fila de H4 y las dos filas de §4, y en el plan la cabecera de S159, las dos altas de deuda y la degradación de S158; se corrigió regenerando, y la medición del «antes» se reconstruyó sobre copias en `/tmp` importando el verificador como módulo, porque regenerar destruye el dato—. **Censo de tokens sospechosos: 39** sobre 287 tokens distintos en el corpus vivo, y la lista es IDÉNTICA a la de HEAD (39 sobre 285): ningún token entra ni sale. (a) Los dos tokens nuevos, `C-duplicado-guarda` y `D-educhronos-props-sin-agrupar`, **no los marca el censo**: nacen con 4 y 2 apariciones vivas en las sedes de siempre —§2 y §3 para el Cambio; ficha de «Deuda consciente VIVA» del plan y fila de §4 para la deuda—, así que `D-deuda-sin-sede-en-el-plan` no engorda. (b) Una de las cuatro de `C-duplicado-guarda` NO es una cita: es la entrada del ÍNDICE GENERADO que reproduce la cabecera de S159, **primera reproducción medida de `D-censo-r4-rescate-por-indice` desde su alta en S158**; sin ella el token tendría 3 y seguiría fuera de la lista, así que el rescate no cambia ninguna decisión, sólo el número. (c) La línea de R4 ya NO rescata nada, porque desde S157 la entrada de sesión sale del corpus —30 líneas retiradas en esta corrida—: por esta vía `D-censo-r4-cuenta-menciones` deja de reproducirse, y el censo de antes y después de escribir esta frase es el mismo. (d) Extinción respecto de HEAD (`D-censo-r4-ciego-a-la-extincion`, ya instrumentada): **NINGÚN token cae a 0**, ni entre los citados en el bloque de S157 que esta sesión archiva. (e) `O-nombre` sigue siendo el único token que vive SÓLO en entradas de sesión, con 3 apariciones y ninguna fuera, sin cambio respecto de HEAD: la retirada de su cita viva la decidió S157 y sigue en pie. (f) Los tres censos coinciden en **S157** —cabecera de la bitácora, línea de orden y crónica del plan—, comprobado por el verificador tras actualizar los dos de la bitácora a mano, calcando el cierre de S158.»
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -806,8 +806,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160.
-El plan conserva ahora S159 (degradada a formato compacto) y S160 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160, y la de S159 en la Sesión 161.
+El plan conserva ahora S160 (degradada a formato compacto) y S161 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2674,20 +2674,6 @@ con remisión a la bitácora.
   superficie NUEVA, no un ajuste. No bloquea el criterio —el horario válido se produce y la espera tiene señal—
   y no se paga ahora (R-deuda).
 
-- **D-vista-horario-sin-horario** (S120, VIVA, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
-  VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
-  sobre una base recién creada y poblada a mano por la interfaz: antes de generar nada, la vista de Horario
-  pinta «No se pudo cargar el diagnóstico.» y «No se pudo cargar el horario 1 (404).», junto al mensaje
-  correcto «Catálogo sano: sin hallazgos de pre-validación». El 404 es la respuesta CORRECTA del backend —no
-  hay ningún horario todavía—, y lo que está mal es que la vista trate «aún no hay horario» como un fallo en
-  vez de como el estado inicial normal. No bloquea el criterio de O-demo —el horario se genera y es válido—
-  pero cae de lleno en su cláusula «presentable al centro»: es literalmente lo primero que ve un usuario que
-  acaba de configurar su centro. Hermana del hallazgo de S118 sobre D-prevalidacion-ciega-a-holgura-cero (la
-  prevalidación tampoco distingue el centro recién instalado), y de la misma familia que la carga de una vista
-  sin datos previos. → cuelga de O-demo. Arreglo natural: distinguir 404 de error en el cliente y pintar un
-  estado vacío en vez de dos rojos; es COMPORTAMIENTO, no aspecto, así que O-diseño no lo cubre (mismo
-  criterio que S118 aplicó al estado de espera). No se paga ahora (R-deuda).
-
 - **D-selectores-sin-busqueda** (S120, VIVA, MEJORA FUTURA de UX, no bloqueante) — LOS SELECTORES DE
   ENTIDADES SON MULTISELECT NATIVO SIN BUSCADOR NI FILTRO. Medido en el M4 de S120 al construir a mano la
   actividad de seis plazas: poner dos subgrupos en una plaza se hace con ctrl+clic sobre una lista plana, y lo
@@ -2842,23 +2828,6 @@ con remisión a la bitácora.
   abierta. Es comportamiento del ajuste manual y no de la navegación, así que **su sede es O-ajuste-cierre y
   no O-navegación ni O-demo** (el asistente la encuadró primero en O-demo y se corrigió en el mismo M1).
   → O-ajuste-cierre.
-
-- **D-horario-id-a-fuego** (S128, VIVA, TÉCNICA REAL, no bloqueante) — LA BARRA Y LA LANDING ENLAZAN
-  `/horario/1` CON EL ID LITERAL. Leído en `app.html:5` y `landing.html:8` al reestilar la barra en
-  C-identidad. Dos consecuencias, y la segunda no se había visto: (1) en cuanto se genera un segundo horario
-  el enlace sigue apuntando al primero, y (2) **sobre `/horario/2` el `routerLinkActive` tampoco marca
-  «Horario»**, porque el prefijo no casa, así que el id a fuego no sólo enlaza mal sino que apaga el indicador
-  de sección que el criterio 1 de O-navegación acaba de verificar. NO se arregla en S128 y la razón es de
-  contrato, no de alcance: `D-horario-irreversible` ya midió que **no existe `GET /api/horarios`**, luego no
-  hay forma de que el cliente sepa cuál es el horario vigente. Cualquier arreglo empieza por ese endpoint. Se
-  paga en O-demo, que es donde se bautizan y se listan horarios de verdad. No se paga ahora.
-  **PASA A BLOQUEAR en S158:** es la condición 4 de `O-curso`. Los horarios se acumulan y el curso
-  archivado debe mostrar el último; con el enlace fijo mostraría el primero. Medido en S158 que
-  sigue sin existir `GET /api/horarios`.
-  **NOTA (S160):** medido en el M2 de S160 que en un curso duplicado el primer horario recibe id 1 (sin
-  AUTOINCREMENT no hay `sqlite_sequence`), el mismo id que el horario del curso archivado: el mismo
-  `/horario/1` nombra horarios distintos según el curso abierto. El cliente recarga en `/` al cambiar de
-  curso, así que no reutiliza rutas; el enlace fijo sigue siendo el problema de la condición 4.
 
 - **D-tokens-sin-uso** (S129, VIVA, DE ACABADO, no bloqueante) — CUATRO TOKENS DE `styles.css` NO LOS USA
   NADIE. Censados uno a uno en el M2 de S129 recorriendo los 46 tokens de `:root`: `--radio-s` (3px),
@@ -3186,6 +3155,15 @@ con remisión a la bitácora.
   puede borrar: ¿el activo?, ¿el último?, ¿con qué confirmación?). La unicidad del nombre por contenido (S160,
   `bc0355a`) quita el caso más probable de duplicado indeseado. Se revisa al cerrar `O-curso`: o pasa a
   condición del criterio o queda como mejora.
+- **D-generacion-sin-movimiento** (S161, VIVA, MEJORA FUTURA, no bloqueante, sin objetivo asignado) — MIENTRAS SE
+  GENERA, LA PANTALLA SÓLO MUESTRA UN TEXTO FIJO. Propuesta del usuario en el M4 de S161: la generación dura
+  minutos sobre el centro real y la vista sólo pinta el texto del estado «generando» que añadió S118
+  (`D-generacion-sin-indicador`, cerrada), sin nada en movimiento que diga que se sigue trabajando. Dos
+  variantes: (1) una animación indeterminada, barata y honesta; (2) una barra de progreso, que NO puede medir
+  avance real —el solver no sabe qué fracción del trabajo lleva: optimiza hasta agotar el presupuesto o probar
+  el óptimo— y sólo podría mostrar el tiempo transcurrido frente al tope, lo que exige publicar el presupuesto
+  por API (`D-presupuesto-anunciado-espejo`). Medido de paso: el log no registra la duración del solve. No
+  cambia el criterio de ningún objetivo (R-terminado).
 - **D-educhronos-props-sin-agrupar** (S159, VIVA, no bloqueante) — LA SEGUNDA CLAVE `educhronos.*` LLEGÓ SIN
   MIGRAR A `@ConfigurationProperties`. El precedente escrito en `application.properties:76` pide migrar a un
   record `@ConfigurationProperties` al llegar la segunda clave `educhronos.*`, y S159 añade
@@ -3205,6 +3183,39 @@ con remisión a la bitácora.
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
+
+- **D-horario-id-a-fuego** (S128, CERRADA S161, TÉCNICA REAL, no bloqueante) — LA BARRA Y LA LANDING ENLAZAN
+  `/horario/1` CON EL ID LITERAL. Leído en `app.html:5` y `landing.html:8` al reestilar la barra en
+  C-identidad. Dos consecuencias, y la segunda no se había visto: (1) en cuanto se genera un segundo horario
+  el enlace sigue apuntando al primero, y (2) **sobre `/horario/2` el `routerLinkActive` tampoco marca
+  «Horario»**, porque el prefijo no casa, así que el id a fuego no sólo enlaza mal sino que apaga el indicador
+  de sección que el criterio 1 de O-navegación acaba de verificar. NO se arregla en S128 y la razón es de
+  contrato, no de alcance: `D-horario-irreversible` ya midió que **no existe `GET /api/horarios`**, luego no
+  hay forma de que el cliente sepa cuál es el horario vigente. Cualquier arreglo empieza por ese endpoint. Se
+  paga en O-demo, que es donde se bautizan y se listan horarios de verdad. No se paga ahora.
+  **PASA A BLOQUEAR en S158:** es la condición 4 de `O-curso`. Los horarios se acumulan y el curso
+  archivado debe mostrar el último; con el enlace fijo mostraría el primero. Medido en S158 que
+  sigue sin existir `GET /api/horarios`.
+  **NOTA (S160):** medido en el M2 de S160 que en un curso duplicado el primer horario recibe id 1 (sin
+  AUTOINCREMENT no hay `sqlite_sequence`), el mismo id que el horario del curso archivado: el mismo
+  `/horario/1` nombra horarios distintos según el curso abierto. El cliente recarga en `/` al cambiar de
+  curso, así que no reutiliza rutas; el enlace fijo sigue siendo el problema de la condición 4.
+  **CERRADA en S161 por `C-horario-vigente`** (`f43f00e`, `653b638`): `GET /api/horarios/vigente` (200 con el id mayor, o 204) y la ruta `/horario`, que resuelve el vigente al navegar; barra y landing enlazan `/horario`, y «Horario» se marca también sobre `/horario/N`. Verificado en navegador con dos horarios, también en el curso archivado.
+
+- **D-vista-horario-sin-horario** (S120, CERRADA S161, TÉCNICA REAL de UX, no bloqueante pero MUERDE EN LA DEMO) — LA
+  VISTA DE HORARIO RECIBE A UN CENTRO RECIÉN CONFIGURADO CON DOS MENSAJES DE ERROR. Medido en el M4 de S120,
+  sobre una base recién creada y poblada a mano por la interfaz: antes de generar nada, la vista de Horario
+  pinta «No se pudo cargar el diagnóstico.» y «No se pudo cargar el horario 1 (404).», junto al mensaje
+  correcto «Catálogo sano: sin hallazgos de pre-validación». El 404 es la respuesta CORRECTA del backend —no
+  hay ningún horario todavía—, y lo que está mal es que la vista trate «aún no hay horario» como un fallo en
+  vez de como el estado inicial normal. No bloquea el criterio de O-demo —el horario se genera y es válido—
+  pero cae de lleno en su cláusula «presentable al centro»: es literalmente lo primero que ve un usuario que
+  acaba de configurar su centro. Hermana del hallazgo de S118 sobre D-prevalidacion-ciega-a-holgura-cero (la
+  prevalidación tampoco distingue el centro recién instalado), y de la misma familia que la carga de una vista
+  sin datos previos. → cuelga de O-demo. Arreglo natural: distinguir 404 de error en el cliente y pintar un
+  estado vacío en vez de dos rojos; es COMPORTAMIENTO, no aspecto, así que O-diseño no lo cubre (mismo
+  criterio que S118 aplicó al estado de espera). No se paga ahora (R-deuda).
+  **CERRADA en S161, de paso, por `C-horario-vigente`** (`653b638`): entrando por «Horario», un curso sin horario ve «Este curso todavía no tiene horario» con «Generar» habilitado, sin el error del diagnóstico ni el 404. El 404 queda sólo para una URL directa a un id que no existe, donde es correcto.
 
 - **D-plan-duplicado** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
 - **D-censo-r4-cuenta-menciones** (CERRADA S157) — sin entrada previa en el plan (D-deuda-sin-sede-en-el-plan); texto y cierre en §4 de gestion_proyecto.md.
