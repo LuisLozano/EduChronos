@@ -56,20 +56,20 @@
 - L826 — ### Bloques de Fase 5
 - L849 — ### Bloques de Fase 6
 - L894 — ### Bloques de Fase 8
-- L1103 — ### Fases completadas
-- L1207 — ### Cierre del modelo — Sesión 8
-- L1255 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1301 — ### Método de trabajo (procedimiento vigente)
-- L1334 — ### Deuda consciente VIVA
-- L3166 — ### Deuda consciente CERRADA (histórico)
-- L3368 — ### Notas técnicas validadas en Fase 0
-- L3381 — ### Notas técnicas validadas en Fase 6
-- L3426 — ### Notas técnicas validadas en Fase 9
-- L3435 — ### Notas técnicas validadas en Fase 11
-- L3575 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3584 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3611 — ### Registro detallado de sesiones S10–S31
-- L3620 — ## Señales globales de alerta
+- L1106 — ### Fases completadas
+- L1210 — ### Cierre del modelo — Sesión 8
+- L1258 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1304 — ### Método de trabajo (procedimiento vigente)
+- L1337 — ### Deuda consciente VIVA
+- L3172 — ### Deuda consciente CERRADA (histórico)
+- L3374 — ### Notas técnicas validadas en Fase 0
+- L3387 — ### Notas técnicas validadas en Fase 6
+- L3432 — ### Notas técnicas validadas en Fase 9
+- L3441 — ### Notas técnicas validadas en Fase 11
+- L3581 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3590 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3617 — ### Registro detallado de sesiones S10–S31
+- L3626 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -1028,6 +1028,9 @@ bitácora, y el plan debe conservar lo que FALTA, no solo lo hecho.
       usuario, o (b) I1 falla en producción sin que nadie lo detecte. Consecuencia asumida:
       I1 sigue sin verificador, igual que hoy.
 - [x] Bloque 8.5-E — CRUD REST de `ProfesorRestriccionHoraria`, sub-recurso GET/PUT con reemplazo total (S78). CIERRA 8.5 → `peso` NO se expone (ModeloCpSat usa la constante `PESO_INDISP_BLANDA` y nunca lee `r.peso()`); D-F8.5-E-a, D-F8.5-E-b, D-F8.5-E-c, D-F8.5-E-d; Detalle: bitácora S78.
+  **NOTA (S159):** la rejilla de restricciones que el corte de 8.5 asignó a este bloque no se construyó;
+  S78 cerró 8.5 sólo con el backend. Medido en S159 que el frontend no alcanza el endpoint. Pasa a
+  `O-disponibilidad` (`gestion_proyecto.md` §3).
 - [x] Bloque 8.6-i — Cliente REST de bloqueos (S81): `bloqueo.model.ts` + `BloqueoService` TS + `pines.ts`
       (`clavePin`, `indicePines`); `HorarioService` intacto. El `GET /api/bloqueos` es precondición del
       CANDADO, no del POST (idempotente por instancia). NO toca backend: `SesionVista` ya lleva la clave
@@ -1765,6 +1768,7 @@ con remisión a la bitácora.
   D21(a) —parametrización de pesos blandos— y hermana de `requiereTutor` (S77: superficie viva,
   semántica muerta). → activarlo es trabajo de D21, con su calibración pendiente de datos del
   centro; activarlo sin calibrar sería peor que dejarlo inerte.
+  **NOTA (S159):** sigue como limitación conocida. `O-disponibilidad` no expondrá `peso`.
 - **D-F8.5-E-b** (S78, VIVA) — UNICIDAD (profesor, tramo) SIN RED BAJO LA APLICACIÓN. Que un
   profesor no tenga dos restricciones sobre el mismo tramo vive SOLO en la validación de
   `RestriccionHorariaService` sobre la lista entrante. NO hay `UNIQUE (profesor_id, tramo_id)` en
@@ -1772,6 +1776,8 @@ con remisión a la bitácora.
   base queda con DOS filas, con el flush sin error. Cualquier inserción por otra vía (test, seed,
   script) viola la regla en silencio. Familia exacta de D-F8.5-D2a-a (I4) y de D-F8.2b-iv-a
   (validación sin espejo en la BD). → índice único si aparece otra vía de escritura.
+  **REASIGNADA en S159** a `O-disponibilidad`, sin bloquear: ni su rejilla (mismo PUT, misma validación) ni el
+  duplicado de `O-curso` (copia filas, no las crea) son otra vía de escritura.
 - **D-F8.5-E-c** (S78, VIVA, de FRAMEWORK, no bloqueante) — EL DIALECTO NO CLASIFICA LOS FALLOS
   DE FK COMO `DataIntegrityViolationException`. Medido en S78 al afinar el aserto de borrado: una
   violación de FK llega como `GenericJDBCException`, por dos causas distintas y acumulativas —
