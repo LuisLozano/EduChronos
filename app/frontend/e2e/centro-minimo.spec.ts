@@ -19,7 +19,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  * <p><b>El paso 1 (jornada) depende del aislamiento de la BD.</b> Con la BD
  * vacía `persistida()` es false y «Guardar jornada» hace el PUT directo, sin
  * abrir `ConfirmarReemplazo`. Eso lo garantiza `playwright.config.ts`, que borra
- * `app/educhronos-e2e.db` en cada corrida. Si alguien reutilizara una BD con
+ * `app/target/e2e/educhronos-e2e.db` en cada corrida. Si alguien reutilizara una BD con
  * jornada guardada, este paso se volvería indeterminado —aparecería un diálogo
  * que el test no espera— y fallaría por una vía que no tiene nada que ver con lo
  * que mide.

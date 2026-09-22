@@ -15,7 +15,16 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  // EN SERIE, y no por velocidad. Cambiar de curso cambia la base de TODO el backend
+  // (`BaseConmutable`), así que dos specs en paralelo se pisan siempre.
+  //
+  // INVARIANTE DE ORDEN: duplicar archiva la base de arranque y no hay vía para
+  // desarchivarla, así que `curso.spec.ts` debe correr DESPUÉS de todo spec que escriba.
+  // Lo garantiza el orden alfabético de ficheros, que es el mecanismo que documenta
+  // Playwright sin paralelismo. Si aparece un segundo spec que cambie de curso, esto deja
+  // de bastar: hará falta un backend por spec (S162, D-e2e-aislamiento).
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
   reporter: 'list',
@@ -39,25 +48,28 @@ export default defineConfig({
       // primero sobre él → "Unable to find a suitable main class". De ahí el
       // `-pl app`, que lo dirige al único módulo arrancable.
       //
-      // Sin perfil `seed`: no se activa ninguno, así que `SeedCatalogoRunner`
-      // (@Profile("seed")) no corre y el catálogo queda vacío.
-      //
-      // BD propia y limpia, garantizada por el `rm -f` de este command —NO por
-      // el esquema—. Desde S109 `schema.sql` no demuele nada: son 21
+      // BD propia y limpia, garantizada por el `rm -rf` de este command —NO por
+      // el esquema—. Desde S109 `schema.sql` no demuele nada: son 22
       // `create table if not exists` y cero DROP (su propia cabecera lo
       // documenta), así que es idempotente pero conserva las filas que ya
       // hubiera. Lo único que deja la BD a cero es borrarla antes de arrancar.
-      // El `*` del `rm` arrastra los `-journal`/`-wal`/`-shm` que pudiera haber
-      // dejado una corrida abortada.
       //
-      // Con `-pl app` el working dir del proceso es `app/`, así que la BD del
-      // e2e es `app/educhronos-e2e.db`. La URL explícita también la separa de la
-      // base de desarrollo: desde S153 un arranque SIN argumento no usa `app/`,
+      // Carpeta propia, `app/target/e2e/`, con ruta ABSOLUTA (`$PWD` es la raíz
+      // del repo, por el `cwd`), porque el directorio de trabajo de la JVM no está
+      // fijado en el repo. Se borra entera en cada corrida, con los
+      // `-journal`/`-wal`/`-shm` que pudiera haber dejado una corrida abortada.
+      // Tiene que ser PROPIA porque el listado de cursos (`/api/cursos`) muestra la
+      // carpeta de la base abierta: así no aparece `app/educhronos.db`, y los
+      // `curso-*.db` que crea el duplicado desaparecen con ella (S162).
+      //
+      // La base del e2e es, pues, `app/target/e2e/educhronos-e2e.db`. La URL
+      // explícita también la separa de la base de desarrollo: desde S153 un
+      // arranque SIN argumento no usa `app/`,
       // sino la carpeta de datos del usuario (`$XDG_DATA_HOME/educhronos`, o
       // `~/.local/share/educhronos`). Por eso el e2e la pasa: no hereda dónde
       // resuelva la aplicación por defecto.
       command:
-        'rm -f app/educhronos-e2e.db* && mvn -pl app spring-boot:run -Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:educhronos-e2e.db',
+        'rm -rf "$PWD/app/target/e2e" && mkdir -p "$PWD/app/target/e2e" && mvn -pl app spring-boot:run -Dspring-boot.run.arguments=--spring.datasource.url=jdbc:sqlite:$PWD/app/target/e2e/educhronos-e2e.db',
       cwd: '../..',
       // GET que ya existe y responde 200 con el catálogo vacío (`[]`).
       url: 'http://localhost:8080/api/prevalidacion',
