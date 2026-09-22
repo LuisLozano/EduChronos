@@ -29,6 +29,14 @@ quedar sin citante vivo NI sin definición viva. Se verifica por grep contra el
 fichero, no por inspección visual. Si un recorte dejaría un token huérfano, NO se
 recorta: se para y se decide.
 
+**Cobertura mecánica (S157):** `scripts/verificar-cierre.py` cuenta `D-*`, `Dnn`,
+`C-*` y `O-*`. `§x.y` y `Cx` quedan a comprobación humana al archivar: no son
+identificadores únicos —el mismo `§4` existe en varios documentos, y medido en S157
+los que un recuento señala (`§4.2`, `C01`…) remiten a secciones y criterios de
+documentos distintos—. Las apariciones dentro de la entrada de sesión del plan NO
+cuentan como citante vivo: la línea de R4 de una sesión no puede rescatar un token
+que se archivará con ella (`D-censo-r4-cuenta-menciones`, cerrada en S157).
+
 **R5 (mecanismo vivo ≠ historia):** el texto que describe CÓMO SE COMPORTA EL
 SISTEMA o QUÉ QUEDA PENDIENTE es estado vivo y no se archiva, aunque no tenga
 identificador. Nombres de clases, métodos y comportamientos de src/main son estado
@@ -308,7 +316,7 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    forma útil: imprime las entradas descuadradas y sale con 0 igualmente
    (`D-guion-exit-enmascarado`). En S132 hubo que suplirlo a mano tres veces.
 6. **Un ancla que sea un ENCABEZADO colisiona con su propia entrada de índice (S133).** El índice generado
-   cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-nombre` aparecen SIEMPRE dos veces en
+   cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-<nombre>` aparecen SIEMPRE dos veces en
    `gestion_proyecto.md` y en `plan_trabajo_horarios.md`: una en el cuerpo y otra en el índice. La guarda de
    aparición única del punto 1 aborta, y aborta con razón. Toda ancla de encabezado se escribe anclada a
    PRINCIPIO DE LÍNEA —prefijo de salto de línea en el patrón Y en el reemplazo—, que es lo que la distingue
@@ -444,7 +452,7 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo** | Avanzar un Cambio con lógica | Caso normal bajo objetivo activo | M0, M2, M3, M4 (si >1 módulo), M1 completo | Ninguno |
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
-| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión (excepción a R-apertura, S152) | M1 + R4/R5 | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 (no hay código) |
+| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión (excepción a R-apertura, S152) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
 
 Por qué Higiene/Método tiene excepción a R-apertura (S152): una sesión de método no
@@ -465,8 +473,11 @@ con M3 completo.
 El paso M1.6 es mecánico y verificable; no requiere el modelo principal razonando.
 Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
 - `grep -c "^### Sesión" plan_trabajo_horarios.md` → debe dar 1 (invariante H3).
-- Censo de tokens R4: extraer todos los `D-*`, `C*`, `§*`; comprobar que cada uno
-  tiene definición viva Y citante vivo.
+- Censo de tokens R4: `D-*`, `Dnn`, `C-*` y `O-*` sobre el plan SIN su entrada de
+  sesión, gestión y método. Lista los de una sola aparición y los que sólo viven en
+  la entrada, e informa de los que había en HEAD y ya no hay (extinción, sin sumar
+  a fallos). Cobertura y exclusiones en R4 (S157).
+- Índices (M-doc-3): una entrada descuadrada o un índice ausente es fallo duro (S157).
 - Coherencia de los dos censos de la bitácora entre sí y con la crónica.
 - Diff de costura: que las regiones tocadas sean solo las previstas.
 - Regenerar el índice de `gestion_proyecto.md` y `plan_trabajo_horarios.md`
@@ -480,3 +491,40 @@ su código de salida INMEDIATAMENTE y sin nada en medio. Un `EXIT=$?` colocado t
 `echo` mide el `echo` —siempre 0— y convierte un fallo en éxito anunciado
 (D-guion-exit-enmascarado). Es la misma familia que el hallazgo de S109 sobre los
 tests de endpoint: un instrumento que mide otra cosa distinta de la que se cree.
+
+---
+
+## M-guion — Normas para escribir guiones (S157)
+
+Un guion es un instrumento: si mide otra cosa de la que cree, publica una conclusión
+falsa con `exit 0`. Estas normas reúnen lo que las fichas de §4 aprendieron entre
+S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
+
+1. **El código de salida se captura en el acto**, sin nada entre el comando y `$?`
+   (regla de S117, arriba). (`D-guion-exit-enmascarado`)
+2. **Ningún `||` de rescate ni `2>/dev/null` en un guion de lectura**: un fallo
+   tapado se lee como «cero coincidencias». Un `grep` sin coincidencias sale con 1
+   y bajo `pipefail` o `set -e` mata el guion: se gestiona a propósito y se reporta
+   como dato. (`D-guion-exit-enmascarado`)
+3. **Nombres, rutas y patrones se derivan de lo que el propio guion acaba de
+   volcar**, no de memoria ni del token que se espera encontrar: antes de buscar un
+   identificador se lista el directorio o el esquema que lo contiene.
+   (`D-guion-busca-token-esperado`)
+4. **Una guarda comprueba que existen sus operandos, no sólo su resultado**:
+   comparar con un fichero ausente publica una diferencia. Y un filtro se prueba
+   antes de fiarse de él: si casa siempre («pin» dentro de «Mapping»), no filtra.
+   (`D-guion-exit-enmascarado`, `D-guion-busca-token-esperado`)
+5. **Un proceso se identifica por el PID guardado al lanzarlo, por
+   `/proc/<pid>/exe` o por el puerto**, nunca con `pkill -f` ni `pgrep -f` por
+   patrón: el patrón casa con el envoltorio del propio guion, y la aplicación
+   empaquetada no se llama `java`. (`D-guion-pkill-casa-su-propio-envoltorio`)
+6. **Todo parámetro de ruta se normaliza a absoluta nada más leerse, o el guion
+   aborta si no lo es.** Hecho en `empaquetar-linux.sh` (`--salida`) y en
+   `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
+   otros. (`D-guion-escribe-donde-no-se-dijo`)
+7. **Una herramienta se invoca sólo con los argumentos que interpreta**:
+   `regenerar-indice.py` no lee argumentos y escribe los índices aunque se le pase
+   `--help`. Ante la duda, se lee el fuente. (`D-guion-escribe-donde-no-se-dijo`)
+8. **Toda escritura va precedida de una corrida en seco revisada fuera del repo**,
+   y el guion que escribe aborta si su ancla no aparece exactamente una vez
+   (M-doc). (`D-guion-busca-token-esperado`)
