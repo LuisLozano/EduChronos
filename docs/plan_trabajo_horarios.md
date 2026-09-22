@@ -46,30 +46,30 @@
 - L686 — ## FASE 10 — Gestión de cursos académicos
 - L695 — ### Entregable
 - L701 — ### Criterios de verificación
-- L710 — ## FASE 11 — Empaquetado y distribución Windows
-- L713 — ### Criterios de verificación
-- L734 — ## FASE 12 — CI/CD con GitHub Actions
-- L737 — ### Criterios de verificación
-- L744 — ## Registro de progreso
-- L746 — ### Sesión 157 — Higiene/Método, entre objetivos (excepción de §6): **EL CENSO DE R4 DEJA DE CONTAR MENCIONES, VE LOS OBJETIVOS Y LAS EXTINCIONES, Y LOS ÍNDICES PASAN A FALLO DURO; LAS NORMAS DE GUION SE REÚNEN EN `metodo.md`.** Fichas con sede Higiene/Método o script de R4: **de 19 a 11**. Primera sesión abierta por la excepción de S152.
-- L815 — ### Bloques de Fase 2
-- L823 — ### Bloques de Fase 5
-- L846 — ### Bloques de Fase 6
-- L891 — ### Bloques de Fase 8
-- L1100 — ### Fases completadas
-- L1204 — ### Cierre del modelo — Sesión 8
-- L1252 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1298 — ### Método de trabajo (procedimiento vigente)
-- L1331 — ### Deuda consciente VIVA
-- L3121 — ### Deuda consciente CERRADA (histórico)
-- L3323 — ### Notas técnicas validadas en Fase 0
-- L3336 — ### Notas técnicas validadas en Fase 6
-- L3381 — ### Notas técnicas validadas en Fase 9
-- L3390 — ### Notas técnicas validadas en Fase 11
-- L3530 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3539 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3566 — ### Registro detallado de sesiones S10–S31
-- L3575 — ## Señales globales de alerta
+- L717 — ## FASE 11 — Empaquetado y distribución Windows
+- L720 — ### Criterios de verificación
+- L741 — ## FASE 12 — CI/CD con GitHub Actions
+- L744 — ### Criterios de verificación
+- L751 — ## Registro de progreso
+- L753 — ### Sesión 157 — Higiene/Método, entre objetivos (excepción de §6): **EL CENSO DE R4 DEJA DE CONTAR MENCIONES, VE LOS OBJETIVOS Y LAS EXTINCIONES, Y LOS ÍNDICES PASAN A FALLO DURO; LAS NORMAS DE GUION SE REÚNEN EN `metodo.md`.** Fichas con sede Higiene/Método o script de R4: **de 19 a 11**. Primera sesión abierta por la excepción de S152.
+- L822 — ### Bloques de Fase 2
+- L830 — ### Bloques de Fase 5
+- L853 — ### Bloques de Fase 6
+- L898 — ### Bloques de Fase 8
+- L1107 — ### Fases completadas
+- L1211 — ### Cierre del modelo — Sesión 8
+- L1259 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1305 — ### Método de trabajo (procedimiento vigente)
+- L1338 — ### Deuda consciente VIVA
+- L3133 — ### Deuda consciente CERRADA (histórico)
+- L3335 — ### Notas técnicas validadas en Fase 0
+- L3348 — ### Notas técnicas validadas en Fase 6
+- L3393 — ### Notas técnicas validadas en Fase 9
+- L3402 — ### Notas técnicas validadas en Fase 11
+- L3542 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3551 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3578 — ### Registro detallado de sesiones S10–S31
+- L3587 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -704,6 +704,13 @@ nuevo a partir del anterior, modificando solo los cambios.
 - [ ] El horario del curso anterior queda archivado y accesible en modo lectura
 - [ ] Los cambios en el curso activo no afectan a los archivados
 - [ ] El usuario puede volver al curso anterior si necesita consultarlo
+  > **NOTA (S158) sobre los criterios 1–4.** Los SUSTITUYE el «Terminado cuando» de `O-curso` (§3 de
+  > `gestion_proyecto.md`), escrito sobre medición. El 1 no discriminaba: cualquier copia del fichero preserva
+  > la configuración. El 2 y el 3 se precisan con una guarda de escritura en la aplicación, porque el solo
+  > lectura de fichero se midió inservible. El 4 se cumple cambiando de curso desde la barra. Se descarta el
+  > entregable «selector de curso activo al iniciar la aplicación»: la instancia única abre el navegador sin
+  > preguntar, y D18 reservó el selector dentro de la aplicación. **NO se marcan aquí**: se marcarán cuando se
+  > cumpla el sustituto.
 
 ---
 
@@ -2365,6 +2372,8 @@ con remisión a la bitácora.
   `grupo_administrativo.codigo`, …) de forma no determinista, que es la clase de fallo intermitente que
   desprestigia una suite e2e entera. → decidir al escribir el segundo spec que escriba: o `fullyParallel:
   false`, o códigos únicos por worker (`test.info().parallelIndex`), o una BD por worker. No se paga ahora.
+  **PASA A BLOQUEAR en S158:** es la condición 8 de `O-curso`. El spec de duplicar curso es el
+  segundo que escribe, que es cuando esta ficha dice que se decide.
 
 - **D-props-test-obsoleto** (S112, VIVA, DE DOCUMENTACIÓN, no bloqueante) — EL `application.properties` DE TEST
   AFIRMA UNA PREMISA FALSA DESDE S109. `app/src/test/resources/application.properties` dice: «schema.sql dropea
@@ -2827,6 +2836,9 @@ con remisión a la bitácora.
   contrato, no de alcance: `D-horario-irreversible` ya midió que **no existe `GET /api/horarios`**, luego no
   hay forma de que el cliente sepa cuál es el horario vigente. Cualquier arreglo empieza por ese endpoint. Se
   paga en O-demo, que es donde se bautizan y se listan horarios de verdad. No se paga ahora.
+  **PASA A BLOQUEAR en S158:** es la condición 4 de `O-curso`. Los horarios se acumulan y el curso
+  archivado debe mostrar el último; con el enlace fijo mostraría el primero. Medido en S158 que
+  sigue sin existir `GET /api/horarios`.
 
 - **D-tokens-sin-uso** (S129, VIVA, DE ACABADO, no bloqueante) — CUATRO TOKENS DE `styles.css` NO LOS USA
   NADIE. Censados uno a uno en el M2 de S129 recorriendo los 46 tokens de `:root`: `--radio-s` (3px),
