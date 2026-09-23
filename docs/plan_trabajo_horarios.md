@@ -61,15 +61,15 @@
 - L1265 — ### Decisiones permanentes (no reabrir sin razón de peso)
 - L1311 — ### Método de trabajo (procedimiento vigente)
 - L1344 — ### Deuda consciente VIVA
-- L3167 — ### Deuda consciente CERRADA (histórico)
-- L3424 — ### Notas técnicas validadas en Fase 0
-- L3437 — ### Notas técnicas validadas en Fase 6
-- L3482 — ### Notas técnicas validadas en Fase 9
-- L3491 — ### Notas técnicas validadas en Fase 11
-- L3633 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3642 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3669 — ### Registro detallado de sesiones S10–S31
-- L3678 — ## Señales globales de alerta
+- L3168 — ### Deuda consciente CERRADA (histórico)
+- L3425 — ### Notas técnicas validadas en Fase 0
+- L3438 — ### Notas técnicas validadas en Fase 6
+- L3483 — ### Notas técnicas validadas en Fase 9
+- L3492 — ### Notas técnicas validadas en Fase 11
+- L3634 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3643 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3670 — ### Registro detallado de sesiones S10–S31
+- L3679 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -3149,6 +3149,7 @@ con remisión a la bitácora.
   cambia el criterio de ningún objetivo (R-terminado).
 - **D-curso-pestanas-desfasadas** (S163, VIVA, TÉCNICA REAL, no bloqueante, sede objetivo de aceptación, sin ficha) — UNA PESTAÑA PUEDE MOSTRAR UN CURSO MIENTRAS EL BACKEND TIENE ABIERTO OTRO. Lo observó el usuario en la prueba de Windows de S163: dos pestañas en cursos distintos. No es de Windows: el backend tiene un solo curso abierto para todo el proceso (decisión E de `O-curso`, precisada en S160: el pool se cambia en caliente bajo un datasource estable), y la barra de cada pestaña pide `GET /api/curso` una sola vez al cargarse (`curso-barra.ts:51-57`). Un segundo lanzamiento abre siempre una pestaña nueva contra la instancia abierta (`Escritorio.java:113-125`), así que el caso no es rebuscado. Consecuencias, DEDUCIDAS del diseño y NO medidas: (1) el curso archivado no corre riesgo, porque la guarda de solo lectura actúa sobre la base realmente abierta; (2) una pestaña que cree estar en el activo con el archivado abierto ve rechazadas sus escrituras, lo que confunde pero no hace daño; (3) una pestaña que muestra el archivado con el activo abierto es el caso malo: sus descargas saldrían del activo con la etiqueta del archivado, y «Generar» o una edición irían al activo. No cambia ninguna condición de `O-curso` (R-terminado) ni bloquea `O-disponibilidad` (R-deuda). Se mide (en Linux basta) y se decide al abrir el objetivo de aceptación, que recorre la cadena como lo haría el centro.
 - **D-ps1-palanca-de-linux** (S163, VIVA, TÉCNICA REAL, de texto, no bloqueante, sede Fase 12) — EL TEXTO DE PALANCA DEL GUION DE WINDOWS DA LA CIFRA DE LINUX. Medido en el M2 de S163 (Claude Code): `scripts/empaquetar-windows.ps1:200-201` cita 60.869.367 B, que `docs/empaquetado.md:240-242` da como la cifra de Linux; la de Windows es 69.453.720 B. Sólo aparece si el tamaño sale NO CUMPLE. Cuelga de la Fase 12, que rehará la construcción.
+- **D-jornada-congelada-por-disponibilidad** (S164, VIVA, TÉCNICA REAL, no bloqueante, sede objetivo de aceptación, sin ficha) — UNA SOLA RESTRICCIÓN HORARIA CONGELA LA JORNADA DE TODO EL CENTRO. Medido por lectura en el M2 de S164 (Claude Code): `JornadaService.reemplazarJornada` borra y recrea la malla, y antes `comprobarSinDependientes` (`JornadaService.java:267-275`) cuenta restricciones horarias, sesiones y pines; si alguno es mayor que 0, responde 409 (`JornadaController.java:53-54`). El motivo es correcto: `ordenEnDia` es posicional, y reordenar la malla bajo restricciones vivas las movería de fila. La guarda ya existe y hoy la dispara cualquier horario generado; con `O-disponibilidad` la dispara también la primera restricción de cualquier profesor. Muerde al pasar de curso si cambia la jornada: el duplicado copia `profesor_restriccion_horaria`, así que editarla exigiría vaciar la disponibilidad de todo el profesorado. No cambia ninguna condición de `O-disponibilidad` ni lo bloquea (R-deuda). Se mide y se decide en el objetivo de aceptación, que recorre la cadena como lo haría el centro.
 - **D-educhronos-props-sin-agrupar** (S159, VIVA, no bloqueante) — LA SEGUNDA CLAVE `educhronos.*` LLEGÓ SIN
   MIGRAR A `@ConfigurationProperties`. El precedente escrito en `application.properties:76` pide migrar a un
   record `@ConfigurationProperties` al llegar la segunda clave `educhronos.*`, y S159 añade
