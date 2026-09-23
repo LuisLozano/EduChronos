@@ -937,7 +937,7 @@ de las Fases 9–12.
   6; backend: solver, verificador y prevalidación), primero, porque es lo que la rejilla promete.
   `C-rejilla-disponibilidad` (condiciones 1 a 4 y 7; maqueta M-mockup y frontend).
 - **ESTADO en S164: 0 de 7.**
-- **ESTADO en S167: 1 de 7** (cumplida la 5, con alcance limitado a duración 1: el verificador tiene la regla `INDISPONIBILIDAD_PROFESOR` por tramo ocupado y el movimiento manual a un tramo vetado se rechaza con 409, pero el solver sigue vetando y penalizando sólo el tramo de inicio; el caso duración > 1 lo bloquea el cortafuegos `RESTRICCION_HORARIA_CON_BLOQUE` de la prevalidación y remite a `D-indisp-solo-tramo-de-inicio`). NO se cuenta como cumplida a secas (decisión del usuario, S167).
+- **ESTADO en S167: 0 de 7 plenas, 1 con alcance limitado (cond. 5).** La 5 vale sólo para duración 1: el verificador tiene la regla `INDISPONIBILIDAD_PROFESOR` por tramo ocupado y el movimiento manual a un tramo vetado se rechaza con 409, pero el solver sigue vetando y penalizando sólo el tramo de inicio; el caso duración > 1 lo bloquea el cortafuegos `RESTRICCION_HORARIA_CON_BLOQUE` de la prevalidación y remite a `D-indisp-solo-tramo-de-inicio`. NO se cuenta como cumplida a secas (decisión del usuario, S167).
 - **Deudas:** `D-F8.5-E-b` cuelga de aquí y NO bloquea (§4). `D-F8.5-E-a` sigue como limitación conocida.
 - **Fuera:** las preferencias positivas (modelo §7), la calibración de `peso` (D21) y la gestión de guardias —repartir guardias de recreo o de aula—, que sería un objetivo propio (S164).
 
