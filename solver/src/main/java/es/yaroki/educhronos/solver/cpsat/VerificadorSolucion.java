@@ -17,6 +17,7 @@ import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -39,9 +40,10 @@ import java.util.function.Function;
  * aula, subgrupo y grupo (S9, espejo de la quinta restricción dura del solver;
  * agrupa por subgrupo.grupo() directo, ciega al grupoPadre); distribución por
  * día de las actividades {@code DISTRIBUIDA} (con la misma guarda anti-palomar
- * D12 que el modelo); y S8 (una actividad {@code requiereTutor} la imparte un
- * TUTOR_PRINCIPAL de un grupo que cubre). S8 es la única comprobación que NO
- * mira la {@link SolucionHorario}: es propiedad del catálogo, no del horario.
+ * D12 que el modelo); indisponibilidad DURA del profesorado, por tramo OCUPADO;
+ * y S8 (una actividad {@code requiereTutor} la imparte un TUTOR_PRINCIPAL de un
+ * grupo que cubre). S8 es la única comprobación que NO mira la
+ * {@link SolucionHorario}: es propiedad del catálogo, no del horario.
  */
 public final class VerificadorSolucion {
 
@@ -52,6 +54,7 @@ public final class VerificadorSolucion {
         verificarTodasColocadas(esperadas, solucion, violaciones);
         verificarBloquesConsecutivos(problema, esperadas, solucion, violaciones); // D13
         verificarNoSolapes(problema, esperadas, solucion, violaciones);
+        verificarIndisponibilidadDura(problema, esperadas, solucion, violaciones);
         verificarDistribucion(problema, esperadas, solucion, violaciones);
         verificarTutorias(problema, violaciones); // S8: propiedad del catálogo, no usa la solución
 
@@ -148,9 +151,17 @@ public final class VerificadorSolucion {
      * conteo —que recorre el dominio, sin OR-Tools— lo delataría.
      *
      * <p>Una restricción BLANDA (profesor P, tramo T) se incumple por cada
-     * instancia que usa a P y cae en T. El conteo es a nivel de instancia (igual
-     * que el modelo): un profesor que aparece en varias plazas de la misma
-     * actividad cuenta una vez, porque la actividad ocupa el tramo una vez.
+     * instancia que usa a P y OCUPA T ({@link #tramosOcupados}: inicio e interiores
+     * de un bloque). El conteo es a nivel de instancia (igual que el modelo): un
+     * profesor que aparece en varias plazas de la misma actividad cuenta una vez,
+     * porque la actividad ocupa el tramo una vez. Un bloque que cubre N tramos BLANDA
+     * del mismo profesor penaliza N; un bloque imposible (D13) cuenta solo su inicio,
+     * mismo criterio que {@code verificarNoSolapes}.
+     *
+     * <p><b>Gemelo solo con duración 1</b> (S165, T4): el modelo penaliza únicamente el
+     * tramo de INICIO. Con {@code duracionTramos == 1} ocupados = {inicio} y ambos
+     * cuentan igual; con bloques este conteo es el correcto y el del modelo no. El
+     * cortafuegos de {@code PrevalidacionService} impide hoy resolver esa combinación.
      *
      * @return número total de incumplimientos blandos en la solución (suma sobre
      *         todas las restricciones BLANDA y todas las instancias). Es el conteo
@@ -171,7 +182,7 @@ public final class VerificadorSolucion {
                 if (tramoOpt.isEmpty()) {
                     continue; // instancia sin colocar: ya lo reporta verificar()
                 }
-                if (!tramoOpt.get().equals(r.tramo())) {
+                if (!ocupadosOInicio(inst, tramoOpt.get(), problema).contains(r.tramo())) {
                     continue;
                 }
                 // ¿usa esta instancia al profesor de la restricción? Unión de los
@@ -296,7 +307,9 @@ public final class VerificadorSolucion {
      * profesor, reusando las funciones puras {@link #ventanasDe} y
      * {@link #excesoConsecutivasDe}. La indisponibilidad blanda es LOCAL (no
      * contrafactual): cuenta las restricciones BLANDA {@code (profesor, tramo)} que
-     * la instancia incumple por caer en ese tramo.
+     * la instancia incumple por OCUPAR ese tramo, con una {@link Penalizacion} por
+     * tramo ocupado (un bloque puede emitir varias). Ventanas y consecutivas siguen
+     * mirando solo el tramo de inicio (pendiente de decisión de semántica, S166).
      *
      * <p>Solo se emite {@link Penalizacion} con {@code delta != 0}: una celda sin
      * aportación no aparece en el mapa. La celda es POR INSTANCIA
@@ -360,22 +373,28 @@ public final class VerificadorSolucion {
                             "Mover esta sesión cambia el exceso de consecutivas de "
                                     + p.codigo() + " el día " + dia + " en " + deltaConsec));
                 }
-                // INDISPONIBILIDAD_BLANDA: LOCAL (no contrafactual). Nº de restricciones
-                // BLANDA (p, tramo actual) que la instancia incumple por caer en él.
-                int incumplidas = 0;
-                for (RestriccionHoraria r : problema.restriccionesHorarias()) {
-                    if (r.tipo() == TipoRestriccion.BLANDA
-                            && r.profesor().equals(p)
-                            && r.tramo().equals(tramo)) {
-                        incumplidas++;
+                // INDISPONIBILIDAD_BLANDA: LOCAL (no contrafactual). Por cada tramo que la
+                // instancia OCUPA (S165, T4: no solo el de inicio), nº de restricciones
+                // BLANDA (p, ese tramo) que incumple; una Penalizacion por tramo ocupado
+                // con incumplimiento, con ese tramo en tramoCodigo. Con duración 1 es
+                // exactamente la emisión de antes. Mismo criterio de ocupación que
+                // contarPenalizacionIndisponibilidadBlanda, para que sumen igual.
+                for (Tramo ocupado : ocupadosOInicio(inst, tramo, problema)) {
+                    int incumplidas = 0;
+                    for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+                        if (r.tipo() == TipoRestriccion.BLANDA
+                                && r.profesor().equals(p)
+                                && r.tramo().equals(ocupado)) {
+                            incumplidas++;
+                        }
                     }
-                }
-                if (incumplidas != 0) {
-                    emitir(porCelda, celda, new Penalizacion(
-                            ReglaBlanda.INDISPONIBILIDAD_BLANDA, p.codigo(), tramo.codigo(),
-                            incumplidas,
-                            "Sesión en tramo con indisponibilidad blanda de " + p.codigo()
-                                    + " en " + tramo.codigo()));
+                    if (incumplidas != 0) {
+                        emitir(porCelda, celda, new Penalizacion(
+                                ReglaBlanda.INDISPONIBILIDAD_BLANDA, p.codigo(), ocupado.codigo(),
+                                incumplidas,
+                                "Sesión en tramo con indisponibilidad blanda de " + p.codigo()
+                                        + " en " + ocupado.codigo()));
+                    }
                 }
             }
         }
@@ -500,6 +519,18 @@ public final class VerificadorSolucion {
             ocupados.add(tr);
         }
         return Optional.of(ocupados);
+    }
+
+    /**
+     * Tramos que ocupa una instancia colocada en {@code inicio}, o solo el inicio si su
+     * bloque es imposible (D13): el mismo {@code orElse} que {@code verificarNoSolapes}.
+     * Lo usan los recuentos BLANDA, que no pueden saltarse la instancia sin cambiar su
+     * valor previo; el bloque imposible ya lo reporta {@link #verificar}.
+     */
+    private List<Tramo> ocupadosOInicio(ActividadInstancia inst, Tramo inicio,
+                                        ProblemaHorario problema) {
+        return tramosOcupados(inicio, inst.actividad().duracionTramos(), problema)
+                .orElse(List.of(inicio));
     }
 
     private void verificarTodasColocadas(List<ActividadInstancia> esperadas,
@@ -657,6 +688,76 @@ public final class VerificadorSolucion {
                 String descripcion = etiquetaTipo + " " + recurso
                         + " usado " + celdas.size() + " veces en el tramo " + tramo.codigo();
                 violaciones.add(new Violacion(regla, recurso, tramo.codigo(), celdas, descripcion));
+            }
+        }
+    }
+
+    /**
+     * Indisponibilidad DURA del profesorado ({@link ReglaDura#INDISPONIBILIDAD_PROFESOR}).
+     * Por cada instancia colocada, cada profesor de sus plazas y cada tramo que la
+     * instancia OCUPA ({@link #tramosOcupados}: inicio e interiores de un bloque), si
+     * existe una restricción DURA {@code (profesor, tramo)}, se emite UNA violación con
+     * {@code recursoCodigo = profesor}, {@code tramoCodigo = tramo ocupado} y la celda de
+     * la instancia.
+     *
+     * <p><b>Por tramo ocupado, no por tramo de inicio</b> (S165, T2): hasta aquí el
+     * verificador no comprobaba la indisponibilidad DURA en absoluto, y el modelo
+     * CP-SAT solo veta el tramo de INICIO (S165, T1). Con {@code duracionTramos == 1}
+     * ambos criterios coinciden; con bloques, este es el correcto y el del solver no
+     * (el cortafuegos de {@code PrevalidacionService} impide hoy esa combinación).
+     *
+     * <p><b>Restricciones repetidas cuentan UNA vez.</b> Dos filas DURA con el mismo
+     * {@code (profesor, tramo)} vetan el mismo hecho: se agrupan en un {@code Set} de
+     * tramos por profesor, igual que {@code ModeloCpSat.restriccionIndisponibilidadProfesor}
+     * y que la regla de sobrecarga de {@code PrevalidacionService} (DURA por tramo
+     * DISTINTO). La violación es «el profesor ocupa un tramo vetado», no «incumple la
+     * fila N».
+     *
+     * <p>No duplica lo que ya se reporta: una instancia sin colocar la reporta
+     * {@link #verificarTodasColocadas} y un bloque imposible
+     * {@link #verificarBloquesConsecutivos}; ambas se saltan aquí. Un profesor que figura
+     * en varias plazas de la misma actividad cuenta una vez por tramo (unión por
+     * instancia, mismo criterio que el no-solape de profesor). Los profesores se recorren
+     * por código para que el orden de salida no dependa del orden de iteración de los
+     * {@code Set} de la plaza.
+     */
+    private void verificarIndisponibilidadDura(ProblemaHorario problema,
+                                               List<ActividadInstancia> esperadas,
+                                               SolucionHorario solucion,
+                                               List<Violacion> violaciones) {
+        Map<Profesor, Set<Tramo>> vetadosPorProfesor = new HashMap<>();
+        for (RestriccionHoraria r : problema.restriccionesHorarias()) {
+            if (r.tipo() == TipoRestriccion.DURA) {
+                vetadosPorProfesor.computeIfAbsent(r.profesor(), k -> new HashSet<>()).add(r.tramo());
+            }
+        }
+        if (vetadosPorProfesor.isEmpty()) {
+            return;
+        }
+
+        for (ActividadInstancia inst : esperadas) {
+            Optional<Tramo> inicioOpt = solucion.tramoDeInstancia(inst);
+            if (inicioOpt.isEmpty()) {
+                continue; // ya lo reporta verificarTodasColocadas
+            }
+            Optional<List<Tramo>> ocupadosOpt =
+                    tramosOcupados(inicioOpt.get(), inst.actividad().duracionTramos(), problema);
+            if (ocupadosOpt.isEmpty()) {
+                continue; // bloque imposible: ya lo reporta verificarBloquesConsecutivos
+            }
+            List<Profesor> profesores = new ArrayList<>(profesoresDe(inst));
+            profesores.sort(Comparator.comparing(Profesor::codigo));
+            CeldaRef celda = new CeldaRef(inst.actividad().codigo(), inst.indice(), null);
+            for (Tramo tramo : ocupadosOpt.get()) {
+                for (Profesor p : profesores) {
+                    if (vetadosPorProfesor.getOrDefault(p, Set.of()).contains(tramo)) {
+                        violaciones.add(new Violacion(ReglaDura.INDISPONIBILIDAD_PROFESOR,
+                                p.codigo(), tramo.codigo(), List.of(celda),
+                                "Profesor " + p.codigo() + " ocupa el tramo " + tramo.codigo()
+                                        + " (" + etiqueta(inst) + "), en el que tiene"
+                                        + " indisponibilidad DURA"));
+                    }
+                }
             }
         }
     }
