@@ -63,7 +63,9 @@ import org.springframework.transaction.annotation.Transactional;
  * al mapear. Aquí el catálogo YA es referencialmente sano; lo que comparan las tres
  * primeras reglas es DEMANDA contra DISPONIBILIDAD (la cuarta, S8, no: es una propiedad
  * del catálogo, y por eso avisa en vez de abortar). Son condiciones NECESARIAS, no
- * suficientes: pasar las cuatro no garantiza que el problema sea factible.
+ * suficientes: pasarlas no garantiza que el problema sea factible. La quinta (e) no es
+ * una condición del catálogo sino un CORTAFUEGOS: rechaza una combinación que el
+ * generador todavía no resuelve bien (restricciones horarias con bloques, S165).
  *
  * <p><b>Por qué delega en {@link GeneradorHorarioService#cargarProblema()}</b> en vez
  * de cargar el catálogo por su cuenta: mismo motivo que {@link DiagnosticoService}.
@@ -81,7 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
  * servicio ya depende de {@code GeneradorHorarioService} para cargar—, que Spring Boot
  * rechaza al arrancar; (2) evita añadir una decimotercera dependencia al servicio que
  * ya arrastra la deuda D-F8.2b-iii-A-a. El núcleo estático es además la ÚNICA
- * implementación de las cuatro reglas: el endpoint y la generación entran por ahí, uno
+ * implementación de las reglas: el endpoint y la generación entran por ahí, uno
  * cargando el problema y otro reutilizando el que ya tiene en la mano. Ninguna regla
  * se escribe dos veces (familia D-F8.2b-iv-a).
  *
@@ -101,6 +103,13 @@ public class PrevalidacionService {
 
     /** Un grupo tiene más horas curriculares que tramos lectivos. ERROR. */
     public static final String REGLA_GRUPO_SOBRECARGADO = "GRUPO_SOBRECARGADO";
+
+    /**
+     * Un profesor con restricciones horarias imparte una actividad de más de un tramo
+     * seguido. ERROR: cortafuegos, ver {@link #restriccionHorariaConBloque}.
+     */
+    public static final String REGLA_RESTRICCION_HORARIA_CON_BLOQUE =
+            "RESTRICCION_HORARIA_CON_BLOQUE";
 
     /**
      * Una actividad {@code requiereTutor} no la imparte ningún TUTOR_PRINCIPAL de un
@@ -138,13 +147,14 @@ public class PrevalidacionService {
     }
 
     /**
-     * NÚCLEO: las cuatro comprobaciones sobre un {@link ProblemaHorario} ya cargado.
+     * NÚCLEO: todas las comprobaciones sobre un {@link ProblemaHorario} ya cargado.
      * Puro y estático —ni repositorios, ni transacción, ni estado—, para que
      * {@code GeneradorHorarioService.generar()} lo llame con el problema que YA cargó,
      * sin volver a leer el catálogo y sin inyectar este bean (ver javadoc de clase).
      *
      * <p>El orden de salida es estable: primero profesores, luego actividades, luego
-     * grupos y por último tutorías (S8), y dentro de cada bloque el orden del catálogo.
+     * grupos, luego el cortafuegos de restricciones con bloques y por último tutorías
+     * (S8), y dentro de cada bloque el orden del catálogo.
      * S8 va LA ÚLTIMA a propósito: es la única de severidad AVISO, así que los hallazgos
      * que abortan la generación quedan agrupados al principio de la lista.
      */
@@ -162,6 +172,7 @@ public class PrevalidacionService {
         avisos.addAll(sobrecargaProfesor(problema, tramosLectivos));
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
         avisos.addAll(sobrecargaGrupo(problema, tramosLectivos));
+        avisos.addAll(restriccionHorariaConBloque(problema));
         avisos.addAll(tutoriasSinTutor(problema));
         return List.copyOf(avisos);
     }
@@ -343,6 +354,69 @@ public class PrevalidacionService {
                         "El grupo '" + grupo.codigo() + "' acumula " + demanda
                                 + " tramos curriculares y la semana solo tiene "
                                 + tramosLectivos + " tramos lectivos"));
+            }
+        }
+        return avisos;
+    }
+
+    /**
+     * (e) RESTRICCIÓN HORARIA CON BLOQUE — ERROR, CORTAFUEGOS. Falla por cada par
+     * (profesor, actividad) en el que el profesor tiene al menos una restricción horaria
+     * (DURA o BLANDA) e imparte, en alguna plaza, una actividad con
+     * {@code duracionTramos > 1}.
+     *
+     * <p><b>Por qué existe (S165).</b> El modelo CP-SAT solo mira el tramo de INICIO de
+     * cada instancia al aplicar la indisponibilidad: con un bloque de 2 o más tramos, una
+     * DURA sobre un tramo INTERIOR no se veta (S165, T1) y una BLANDA sobre un tramo
+     * interior no penaliza (S165, T4). El generador devolvería un horario que parece
+     * válido y mete al profesor en su tramo vetado. Con {@code duracionTramos == 1}
+     * inicio y ocupación coinciden y el modelo es correcto, así que el cortafuegos se
+     * limita exactamente a la combinación defectuosa.
+     *
+     * <p><b>Para retirarlo</b> hay que arreglar antes, en {@code ModeloCpSat},
+     * {@code restriccionIndisponibilidadProfesor} (vetar todo inicio cuyo bloque OCUPE un
+     * tramo DURA) y {@code objetivoIndisponibilidadBlandaProfesor} (penalizar todo inicio
+     * que cubra el tramo BLANDA), con fixtures de bloque + DURA/BLANDA que hoy fallen y
+     * la huella canónica del modelo como puerta de regresión (S166). El verificador ya
+     * cuenta por ocupación desde S167 ({@code INDISPONIBILIDAD_PROFESOR}).
+     *
+     * <p>Señala al PROFESOR ({@code entidadCodigo}), porque lo que activa el error es
+     * darle restricciones; la actividad va en la descripción. Codifica la cardinalidad
+     * real en el contrato {@code demanda > disponible}: la actividad pide
+     * {@code duracionTramos} tramos seguidos y, con restricciones horarias, el generador
+     * solo soporta 1.
+     */
+    private static List<AvisoPrevalidacion> restriccionHorariaConBloque(ProblemaHorario problema) {
+        Set<Profesor> conRestriccion = new LinkedHashSet<>();
+        for (RestriccionHoraria restriccion : problema.restriccionesHorarias()) {
+            conRestriccion.add(restriccion.profesor());
+        }
+
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (Profesor profesor : problema.profesores()) {
+            if (!conRestriccion.contains(profesor)) {
+                continue;
+            }
+            for (Actividad actividad : problema.actividades()) {
+                if (actividad.duracionTramos() <= 1) {
+                    continue;
+                }
+                boolean imparte = actividad.plazas().stream()
+                        .anyMatch(plaza -> plaza.profesores().contains(profesor));
+                if (!imparte) {
+                    continue;
+                }
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.ERROR,
+                        REGLA_RESTRICCION_HORARIA_CON_BLOQUE,
+                        profesor.codigo(),
+                        actividad.duracionTramos(),
+                        1,
+                        "El profesor '" + profesor.codigo() + "' tiene restricciones horarias"
+                                + " e imparte la actividad '" + actividad.codigo() + "' de "
+                                + actividad.duracionTramos() + " tramos seguidos: el generador"
+                                + " aún no soporta restricciones horarias con actividades de"
+                                + " más de un tramo"));
             }
         }
         return avisos;
