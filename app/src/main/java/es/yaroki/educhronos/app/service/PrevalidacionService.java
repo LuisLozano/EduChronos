@@ -377,10 +377,10 @@ public class PrevalidacionService {
      * (DURA o BLANDA) e imparte, en alguna plaza, una actividad con
      * {@code duracionTramos > 1}.
      *
-     * <p><b>Por qué existe (S165).</b> El modelo CP-SAT solo mira el tramo de INICIO de
+     * <p><b>Por qué existe (S165, M2).</b> El modelo CP-SAT solo mira el tramo de INICIO de
      * cada instancia al aplicar la indisponibilidad: con un bloque de 2 o más tramos, una
-     * DURA sobre un tramo INTERIOR no se veta (S165, T1) y una BLANDA sobre un tramo
-     * interior no penaliza (S165, T4). El generador devolvería un horario que parece
+     * DURA sobre un tramo INTERIOR no se veta (S165, M2, T1) y una BLANDA sobre un tramo
+     * interior no penaliza (S165, M2, T4). El generador devolvería un horario que parece
      * válido y mete al profesor en su tramo vetado. Con {@code duracionTramos == 1}
      * inicio y ocupación coinciden y el modelo es correcto, así que el cortafuegos se
      * limita exactamente a la combinación defectuosa.
@@ -389,8 +389,8 @@ public class PrevalidacionService {
      * {@code restriccionIndisponibilidadProfesor} (vetar todo inicio cuyo bloque OCUPE un
      * tramo DURA) y {@code objetivoIndisponibilidadBlandaProfesor} (penalizar todo inicio
      * que cubra el tramo BLANDA), con fixtures de bloque + DURA/BLANDA que hoy fallen y
-     * la huella canónica del modelo como puerta de regresión (S166). El verificador ya
-     * cuenta por ocupación desde S167 ({@code INDISPONIBILIDAD_PROFESOR}).
+     * la huella canónica del modelo como puerta de regresión (S165, fase 0, 0.3). El verificador ya
+     * cuenta por ocupación desde S165 ({@code INDISPONIBILIDAD_PROFESOR}).
      *
      * <p>Señala al PROFESOR ({@code entidadCodigo}), porque lo que activa el error es
      * darle restricciones; la actividad va en la descripción. Codifica la cardinalidad
@@ -441,7 +441,7 @@ public class PrevalidacionService {
      *
      * <p><b>Por qué es ERROR.</b> Es infactibilidad GARANTIZADA: el pin fija el tramo de
      * inicio con una igualdad ({@code ModeloCpSat.restriccionSesionBloqueada}) y la DURA
-     * lo prohíbe; medido en S165 (T3), el solver acaba en {@code INFEASIBLE} tras gastar
+     * lo prohíbe; medido en S165 (M2, T3), el solver acaba en {@code INFEASIBLE} tras gastar
      * un solve y sin decir por qué. Aquí se rechaza antes, nombrando profesor y tramo.
      *
      * <p><b>Tramos OCUPADOS, no solo el de inicio.</b> Se usa la definición del

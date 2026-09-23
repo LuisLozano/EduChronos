@@ -158,7 +158,7 @@ public final class VerificadorSolucion {
      * del mismo profesor penaliza N; un bloque imposible (D13) cuenta solo su inicio,
      * mismo criterio que {@code verificarNoSolapes}.
      *
-     * <p><b>Gemelo solo con duración 1</b> (S165, T4): el modelo penaliza únicamente el
+     * <p><b>Gemelo solo con duración 1</b> (S165, M2, T4): el modelo penaliza únicamente el
      * tramo de INICIO. Con {@code duracionTramos == 1} ocupados = {inicio} y ambos
      * cuentan igual; con bloques este conteo es el correcto y el del modelo no. El
      * cortafuegos de {@code PrevalidacionService} impide hoy resolver esa combinación.
@@ -309,7 +309,7 @@ public final class VerificadorSolucion {
      * contrafactual): cuenta las restricciones BLANDA {@code (profesor, tramo)} que
      * la instancia incumple por OCUPAR ese tramo, con una {@link Penalizacion} por
      * tramo ocupado (un bloque puede emitir varias). Ventanas y consecutivas siguen
-     * mirando solo el tramo de inicio (pendiente de decisión de semántica, S166).
+     * mirando solo el tramo de inicio (pendiente de decisión de semántica, S165).
      *
      * <p>Solo se emite {@link Penalizacion} con {@code delta != 0}: una celda sin
      * aportación no aparece en el mapa. La celda es POR INSTANCIA
@@ -374,7 +374,7 @@ public final class VerificadorSolucion {
                                     + p.codigo() + " el día " + dia + " en " + deltaConsec));
                 }
                 // INDISPONIBILIDAD_BLANDA: LOCAL (no contrafactual). Por cada tramo que la
-                // instancia OCUPA (S165, T4: no solo el de inicio), nº de restricciones
+                // instancia OCUPA (S165, M2, T4: no solo el de inicio), nº de restricciones
                 // BLANDA (p, ese tramo) que incumple; una Penalizacion por tramo ocupado
                 // con incumplimiento, con ese tramo en tramoCodigo. Con duración 1 es
                 // exactamente la emisión de antes. Mismo criterio de ocupación que
@@ -496,7 +496,7 @@ public final class VerificadorSolucion {
      * inicio: comportamiento idéntico al previo a D13 (los datasets de duración 1
      * no cambian).
      *
-     * <p>Público y estático desde S167 para que la pre-validación del pin sobre DURA
+     * <p>Público y estático desde S165 para que la pre-validación del pin sobre DURA
      * ({@code PrevalidacionService}) use ESTA definición de «tramos ocupados» en vez de
      * escribir una segunda (familia D-F8.2b-iv-a). No usa estado de instancia.
      */
@@ -704,9 +704,9 @@ public final class VerificadorSolucion {
      * {@code recursoCodigo = profesor}, {@code tramoCodigo = tramo ocupado} y la celda de
      * la instancia.
      *
-     * <p><b>Por tramo ocupado, no por tramo de inicio</b> (S165, T2): hasta aquí el
+     * <p><b>Por tramo ocupado, no por tramo de inicio</b> (S165, M2, T2): hasta aquí el
      * verificador no comprobaba la indisponibilidad DURA en absoluto, y el modelo
-     * CP-SAT solo veta el tramo de INICIO (S165, T1). Con {@code duracionTramos == 1}
+     * CP-SAT solo veta el tramo de INICIO (S165, M2, T1). Con {@code duracionTramos == 1}
      * ambos criterios coinciden; con bloques, este es el correcto y el del solver no
      * (el cortafuegos de {@code PrevalidacionService} impide hoy esa combinación).
      *

@@ -182,12 +182,12 @@ class PrevalidacionEndpointTest {
     }
 
     /**
-     * (F-HTTP) Pin sobre un tramo DURA (S167, condición 6 de {@code O-disponibilidad}): el
+     * (F-HTTP) Pin sobre un tramo DURA (S165, condición 6 de {@code O-disponibilidad}): el
      * GET lo enseña como el ÚNICO hallazgo, ERROR y a nombre de MAT8; el POST da
      * {@code 422} por la pre-validación sin construir el solver, y el motivo nombra al
      * profesor y al tramo. Mismo patrón que {@code grupoSobrecargado_…}: sin
      * {@code mocked.constructed()} vacío, un 422 no probaría que no se gastó el solve (el
-     * solver también lo daría, INFEASIBLE, medido en S165 T3).
+     * solver también lo daría, INFEASIBLE, medido en S165, M2, T3).
      *
      * <p>Calibrado: 5 tramos, uno por día (L1, M1, X1, J1, V1); Mat-1ºA de 1 repetición y
      * duración 1 con MAT8; DURA de MAT8 en L1 y pin de Mat-1ºA #1 en L1. (a) ve 1 ≤ 5 − 1,
@@ -202,7 +202,7 @@ class PrevalidacionEndpointTest {
         TramoSemanal lunes1 = tramoRepository.findAll().stream()
                 .filter(t -> t.getDia() == Dia.LUNES).findFirst().orElseThrow();
         restriccionRepository.save(new ProfesorRestriccionHoraria(
-                ctx.prof1(), lunes1, TipoRestriccion.DURA, 0, "S167"));
+                ctx.prof1(), lunes1, TipoRestriccion.DURA, 0, "S165"));
         pinTramoRepository.save(new SesionBloqueada(
                 actividadRepository.findByCodigo("Mat-1ºA").orElseThrow(), 1, lunes1));
         entityManager.flush();

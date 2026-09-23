@@ -16,7 +16,7 @@ package es.yaroki.educhronos.solver.cpsat;
  *   <li>{@code DISTRIBUCION_MISMO_DIA} — una actividad DISTRIBUIDA repite día.</li>
  *   <li>{@code INDISPONIBILIDAD_PROFESOR} — un profesor ocupa un tramo en el que tiene
  *       una restricción horaria DURA. Cuenta TODOS los tramos que ocupa la instancia
- *       (inicio e interiores de un bloque), no solo el de inicio (S165, T2).</li>
+ *       (inicio e interiores de un bloque), no solo el de inicio (S165, M2, T2).</li>
  *   <li>{@code TUTORIA_SIN_TUTOR} — una actividad {@code requiereTutor} no la
  *       imparte ningún TUTOR_PRINCIPAL de un grupo que cubre (§4.6, invariante S8).
  *       Es propiedad del CATÁLOGO, no de la solución: no depende del tramo.</li>

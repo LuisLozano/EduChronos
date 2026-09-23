@@ -393,7 +393,7 @@ class PrevalidacionServiceTest {
     }
 
     /**
-     * (E2) Una BLANDA también lo dispara: el defecto del modelo afecta a las dos (S165 T1
+     * (E2) Una BLANDA también lo dispara: el defecto del modelo afecta a las dos (S165, M2: T1
      * para DURA, T4 para BLANDA). Mismo fixture que E1 con la restricción BLANDA.
      */
     @Test
@@ -432,7 +432,7 @@ class PrevalidacionServiceTest {
 
     /**
      * (E4) Restricción DURA con actividades de UN tramo: el caso que el modelo ya trata
-     * bien (S165, control T1). El cortafuegos calla; cae si se olvida el filtro
+     * bien (S165, M2, control T1). El cortafuegos calla; cae si se olvida el filtro
      * {@code duracionTramos > 1}.
      */
     @Test

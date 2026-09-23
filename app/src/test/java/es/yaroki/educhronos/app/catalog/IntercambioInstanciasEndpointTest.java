@@ -532,7 +532,7 @@ class IntercambioInstanciasEndpointTest {
         return casadas.get(0);
     }
 
-    // ----------------------------------------- indisponibilidad DURA (S167, 1.4)
+    // ----------------------------------------- indisponibilidad DURA (S165, fase 1, 1.4)
 
     /**
      * Un intercambio que mete a un profesor en su tramo DURA se rechaza. Sin restricción,
@@ -546,7 +546,7 @@ class IntercambioInstanciasEndpointTest {
         poblar();
         restriccionRepository.save(new ProfesorRestriccionHoraria(
                 profesorRepository.findByCodigo("P-MAT").orElseThrow(), tramoDe(Dia.LUNES, 2),
-                TipoRestriccion.DURA, 0, "S167"));
+                TipoRestriccion.DURA, 0, "S165"));
         entityManager.flush();
         entityManager.clear();
 

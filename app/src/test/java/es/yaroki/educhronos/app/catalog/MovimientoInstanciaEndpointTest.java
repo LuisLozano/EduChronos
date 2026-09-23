@@ -445,7 +445,7 @@ class MovimientoInstanciaEndpointTest {
         assertThat(delMovimiento).isEqualTo(deLaProyeccion.get(0));
     }
 
-    // ----------------------------------------- indisponibilidad DURA (S167, 1.4)
+    // ----------------------------------------- indisponibilidad DURA (S165, fase 1, 1.4)
 
     /**
      * Mover una instancia a un tramo DURA de su profesor es una violación NUEVA de
@@ -480,7 +480,7 @@ class MovimientoInstanciaEndpointTest {
 
     /**
      * El veredicto es por DIFERENCIA también para la indisponibilidad (confirma
-     * {@code soloNuevas}, que en S165 solo estaba inferido del código). El horario parte
+     * {@code soloNuevas}, que en el M2 de S165 solo estaba inferido del código). El horario parte
      * con MAT#1 en LUNES-1 y una DURA de P-MAT en LUNES-1: la violación ya está ahí —se
      * comprueba antes, o el test no mediría nada—. Mover DESD#1, que no comparte recurso
      * con MAT, no añade ninguna: 200. Un veredicto por filtro devolvería 409.
@@ -510,7 +510,7 @@ class MovimientoInstanciaEndpointTest {
     private void vetarDura(String profesorCodigo, TramoSemanal tramo) {
         restriccionRepository.save(new ProfesorRestriccionHoraria(
                 profesorRepository.findByCodigo(profesorCodigo).orElseThrow(), tramo,
-                TipoRestriccion.DURA, 0, "S167"));
+                TipoRestriccion.DURA, 0, "S165"));
         entityManager.flush();
         entityManager.clear();
     }

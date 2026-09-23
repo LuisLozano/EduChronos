@@ -24,8 +24,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
- * Indisponibilidad horaria del profesorado en el VERIFICADOR, por tramo OCUPADO (S167,
- * a partir de los hallazgos T2 y T4 de S165):
+ * Indisponibilidad horaria del profesorado en el VERIFICADOR, por tramo OCUPADO (S165,
+ * a partir de los hallazgos T2 y T4 de su M2):
  * <ul>
  *   <li>DURA → {@link ReglaDura#INDISPONIBILIDAD_PROFESOR}, una violación por
  *       (instancia, profesor, tramo ocupado vetado).</li>
@@ -167,8 +167,8 @@ class VerificadorSolucionIndisponibilidadTest {
     @Test
     void dura_bloqueConTramoInteriorVetado_violacionEnElInterior() {
         // B (d=2, MAT8) arranca en L1 → ocupa {L1, L2}. DURA (MAT8, L2): el INTERIOR.
-        // {L1, L2} ∩ {L2} = {L2} → 1 violación con tramoCodigo L2. Es el caso de S165
-        // T2/T1: mirando solo el inicio (L1) saldrían 0.
+        // {L1, L2} ∩ {L2} = {L2} → 1 violación con tramoCodigo L2. Es el caso de S165,
+        // M2, T2/T1: mirando solo el inicio (L1) saldrían 0.
         ProblemaHorario p = problema(actividad("B", 2, MAT8), List.of(dura(MAT8, L2)));
 
         assertThat(indisponibilidad(p, en(p, L1))).singleElement().satisfies(v -> {
@@ -227,7 +227,7 @@ class VerificadorSolucionIndisponibilidadTest {
     @Test
     void blanda_bloqueConTramoInteriorVetado_penalizaUno() {
         // B (d=2, MAT8) en L1 → ocupa {L1, L2}; BLANDA (MAT8, L2), el interior.
-        // Recuento: 1 restricción × 1 instancia que ocupa L2 = 1 (en S165 T4 daba 0).
+        // Recuento: 1 restricción × 1 instancia que ocupa L2 = 1 (en S165, M2, T4 daba 0).
         // Atribución: una Penalizacion en la celda B#1, tramo L2, delta 1.
         ProblemaHorario p = problema(actividad("B", 2, MAT8), List.of(blanda(MAT8, L2)));
         SolucionHorario sol = en(p, L1);
