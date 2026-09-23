@@ -13,28 +13,28 @@
 - L477 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
 - L764 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
 - L865 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." (ABIERTO S164)
-- L943 — ### H1 — Ajustar (cierre)
-- L945 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1122 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1413 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1603 — ### H3 — Exportar
-- L1605 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1666 — ### H4 — Instalar y pasar de curso
-- L1668 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1842 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1939 — ## 4. Clasificación del trabajo pendiente
-- L1957 — ### Clasificación de las deudas vivas actuales
-- L1963 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L1970 — #### Deuda técnica real, colgada de su objetivo
-- L2079 — #### Mejora futura, cuelga y espera
-- L2117 — #### Decisión arquitectónica consciente → sale de la cola
-- L2130 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L2141 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L2150 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L2217 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L2282 — ## 6. Reglas estratégicas
-- L2342 — ## 7. Métricas del sistema
-- L2363 — ## 8. El sistema respondiendo a las preguntas clave
+- L944 — ### H1 — Ajustar (cierre)
+- L946 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1123 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1414 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1604 — ### H3 — Exportar
+- L1606 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1667 — ### H4 — Instalar y pasar de curso
+- L1669 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1843 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1940 — ## 4. Clasificación del trabajo pendiente
+- L1958 — ### Clasificación de las deudas vivas actuales
+- L1964 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L1971 — #### Deuda técnica real, colgada de su objetivo
+- L2080 — #### Mejora futura, cuelga y espera
+- L2118 — #### Decisión arquitectónica consciente → sale de la cola
+- L2131 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L2142 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L2151 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L2218 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L2283 — ## 6. Reglas estratégicas
+- L2343 — ## 7. Métricas del sistema
+- L2364 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -937,6 +937,7 @@ de las Fases 9–12.
   6; backend: solver, verificador y prevalidación), primero, porque es lo que la rejilla promete.
   `C-rejilla-disponibilidad` (condiciones 1 a 4 y 7; maqueta M-mockup y frontend).
 - **ESTADO en S164: 0 de 7.**
+- **ESTADO en S167: 1 de 7** (cumplida la 5, con alcance limitado a duración 1: el verificador tiene la regla `INDISPONIBILIDAD_PROFESOR` por tramo ocupado y el movimiento manual a un tramo vetado se rechaza con 409, pero el solver sigue vetando y penalizando sólo el tramo de inicio; el caso duración > 1 lo bloquea el cortafuegos `RESTRICCION_HORARIA_CON_BLOQUE` de la prevalidación y remite a `D-indisp-solo-tramo-de-inicio`). NO se cuenta como cumplida a secas (decisión del usuario, S167).
 - **Deudas:** `D-F8.5-E-b` cuelga de aquí y NO bloquea (§4). `D-F8.5-E-a` sigue como limitación conocida.
 - **Fuera:** las preferencias positivas (modelo §7), la calibración de `peso` (D21) y la gestión de guardias —repartir guardias de recreo o de aula—, que sería un objetivo propio (S164).
 
@@ -2072,7 +2073,7 @@ asigna categoría, objetivo y disposición.
 | D-curso-pestanas-desfasadas (una pestaña sigue mostrando el curso que tenía al cargarse mientras el backend ya tiene abierto otro) | Objetivo de aceptación (sin ficha) | No | Nace en S163, en la prueba de Windows, pero no es de Windows: el backend tiene un solo curso abierto para todo el proceso (decisión E de `O-curso`), cada pestaña recuerda el suyo y el propio producto abre una pestaña nueva en cada segundo lanzamiento. El archivado no corre riesgo: la guarda actúa sobre la base realmente abierta. El caso malo es una pestaña que muestra el archivado con el activo abierto: sus descargas, «Generar» y ediciones irían al activo. Deducido del diseño, NO medido. Se mide y se decide al abrir la aceptación. |
 | D-ps1-palanca-de-linux (el texto de palanca de `empaquetar-windows.ps1` da la cifra de Linux) | Fase 12 (sin ficha) | No | Nace en S163 (M2, Claude Code): el `.ps1` cita 60.869.367 B, que `docs/empaquetado.md` da como la cifra de Linux; la de Windows es 69.453.720 B. Sólo se ve en un NO CUMPLE. Cuelga de la Fase 12, que rehará la construcción. |
 | D-jornada-congelada-por-disponibilidad (una sola restricción horaria congela la edición de la jornada de todo el centro) | Objetivo de aceptación (sin ficha) | No | Nace en el M2 de S164 (Claude Code, lectura): `JornadaService.comprobarSinDependientes` (`:267-275`) rechaza con 409 el PUT de `/api/jornada` si existe una sola restricción, sesión o pin, porque `ordenEnDia` es posicional y reordenar la malla movería de fila las restricciones. Hoy ya lo provoca cualquier horario generado, y el orden natural del centro es definir la jornada primero. Muerde al pasar de curso si cambia la jornada: el duplicado copia las restricciones, y habría que vaciar la disponibilidad de todo el profesorado para editarla. Se mide en la aceptación, que recorre ese caso. No bloquea `O-disponibilidad` (R-deuda). |
-| D-indisp-solo-tramo-de-inicio (el solver sólo aplica DURA y BLANDA al tramo de inicio de cada sesión) | O-disponibilidad (condición 5) | Decisión del usuario: la condición 5, tal como se escribió en S164, pide el arreglo | Nace en S165 (T1/T4, medido). S167 no toca el solver y lo sustituye por el cortafuegos `RESTRICCION_HORARIA_CON_BLOQUE` de la prevalidación, que SÓLO se retira junto con el arreglo del solver para duración > 1, nunca por separado. Puerta del arreglo: huella canónica en los 44 fixtures e invariante de indexación de tramos (S166 0.3 y 0.2). Texto íntegro en «Deuda consciente VIVA». |
+| D-indisp-solo-tramo-de-inicio (el solver sólo aplica DURA y BLANDA al tramo de inicio de cada sesión) | O-disponibilidad (condición 5) | No: la condición 5 cuenta como cumplida con alcance limitado a duración 1, no a secas (decisión del usuario, S167) | Nace en S165 (T1/T4, medido). S167 no toca el solver y lo sustituye por el cortafuegos `RESTRICCION_HORARIA_CON_BLOQUE` de la prevalidación, que SÓLO se retira junto con el arreglo del solver para duración > 1, nunca por separado. Puerta del arreglo: huella canónica en los 44 fixtures e invariante de indexación de tramos (S166 0.3 y 0.2). El arreglo NO reutiliza `VerificadorSolucion.tramosOcupados`: el verificador sigue siendo oráculo independiente. Texto íntegro en «Deuda consciente VIVA». |
 | D-ventanas-consecutivas-ciegas-a-bloques (ventanas y consecutivas no ven los tramos interiores de un bloque, en solver y verificador) | Sin objetivo asignado | No | Nace en S165 por lectura. No depende de las restricciones horarias: afecta ya a todo catálogo con actividades de más de un tramo. Requiere que el usuario cierre la semántica antes de implementar; la primera sesión será de análisis. Texto íntegro en «Deuda consciente VIVA». |
 | D-modelo-no-determinista-entre-jvm (el `CpModelProto` de un mismo problema cambia de orden entre procesos) | Con `D-generacion-no-reproducible` | No | Nace en S166 0.3, medido en tres JVM: hash crudo distinto en 13 de 44 fixtures con los mismos recuentos; la huella canónica es estable. Causa probable `Map.copyOf`/`Set.copyOf`, no probada. Texto íntegro en «Deuda consciente VIVA». |
 
