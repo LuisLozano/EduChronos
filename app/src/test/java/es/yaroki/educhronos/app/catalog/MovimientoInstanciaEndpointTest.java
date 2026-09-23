@@ -73,6 +73,7 @@ class MovimientoInstanciaEndpointTest {
     @Autowired private SesionBloqueadaRepository pinTramoRepository;
     @Autowired private HorarioGeneradoRepository horarioRepository;
     @Autowired private SesionRepository sesionRepository;
+    @Autowired private ProfesorRestriccionHorariaRepository restriccionRepository;
 
     private MockMvc mockMvc;
 
@@ -444,7 +445,75 @@ class MovimientoInstanciaEndpointTest {
         assertThat(delMovimiento).isEqualTo(deLaProyeccion.get(0));
     }
 
+    // ----------------------------------------- indisponibilidad DURA (S167, 1.4)
+
+    /**
+     * Mover una instancia a un tramo DURA de su profesor es una violación NUEVA de
+     * {@code INDISPONIBILIDAD_PROFESOR}. Sin la restricción, este mismo movimiento —MAT#1
+     * de LUNES-1 a MARTES-2— es legal (caso {@code movimientoValido200…}): MARTES-2 está
+     * vacío y MAT no comparte nada con nadie allí. Luego la ÚNICA violación nueva posible
+     * es la de P-MAT en M2, y la lista del 409 tiene exactamente un elemento. La base no
+     * cambia: MAT sigue en LUNES-1.
+     */
+    @Test
+    void destinoEnTramoDuraDelProfesorDevuelve409ConIndisponibilidad() throws Exception {
+        poblar();
+        vetarDura("P-MAT", tramoDe(Dia.MARTES, 2));
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT, 1, 2, 2))) // MARTES-2: vetado para P-MAT
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("VIOLA_REGLA_DURA"))
+                .andExpect(jsonPath("$.violaciones.length()").value(1))
+                .andExpect(jsonPath("$.violaciones[0].regla").value("INDISPONIBILIDAD_PROFESOR"))
+                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("P-MAT"))
+                .andExpect(jsonPath("$.violaciones[0].tramoCodigo").value("M2"))
+                .andExpect(jsonPath("$.violaciones[0].celdas[0].actividadCodigo").value(MAT))
+                .andExpect(jsonPath("$.violaciones[0].celdas[0].indice").value(1));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(filasDe(MAT, 1)).singleElement().satisfies(s ->
+                assertThat(s.getTramoInicio().getOrden()).isEqualTo(1)); // sigue en LUNES-1
+    }
+
+    /**
+     * El veredicto es por DIFERENCIA también para la indisponibilidad (confirma
+     * {@code soloNuevas}, que en S165 solo estaba inferido del código). El horario parte
+     * con MAT#1 en LUNES-1 y una DURA de P-MAT en LUNES-1: la violación ya está ahí —se
+     * comprueba antes, o el test no mediría nada—. Mover DESD#1, que no comparte recurso
+     * con MAT, no añade ninguna: 200. Un veredicto por filtro devolvería 409.
+     */
+    @Test
+    void unaIndisponibilidadPreexistenteAjenaAlMovimientoNoLoRechaza() throws Exception {
+        poblar();
+        vetarDura("P-MAT", tramoDe(Dia.LUNES, 1)); // donde ya está MAT#1
+
+        assertThat(diagnosticoService.diagnosticar(horarioId).violaciones())
+                .as("el horario debe partir CON la indisponibilidad de P-MAT en L1")
+                .singleElement().satisfies(v -> {
+                    assertThat(v.regla()).isEqualTo("INDISPONIBILIDAD_PROFESOR");
+                    assertThat(v.recursoCodigo()).isEqualTo("P-MAT");
+                });
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(DESD, 1, 2, 2))) // DESD no toca a P-MAT
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(6));
+    }
+
     // ------------------------------------------------------------------ fixture
+
+    /** Restricción DURA del profesor {@code profesorCodigo} sobre {@code tramo}. */
+    private void vetarDura(String profesorCodigo, TramoSemanal tramo) {
+        restriccionRepository.save(new ProfesorRestriccionHoraria(
+                profesorRepository.findByCodigo(profesorCodigo).orElseThrow(), tramo,
+                TipoRestriccion.DURA, 0, "S167"));
+        entityManager.flush();
+        entityManager.clear();
+    }
 
     private static String cuerpo(String actividadCodigo, int indice, int dia, int orden) {
         return "{\"actividadCodigo\":\"" + actividadCodigo + "\",\"indice\":" + indice

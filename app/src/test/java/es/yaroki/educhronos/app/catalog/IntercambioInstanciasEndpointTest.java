@@ -79,6 +79,7 @@ class IntercambioInstanciasEndpointTest {
     @Autowired private SesionBloqueadaRepository pinTramoRepository;
     @Autowired private HorarioGeneradoRepository horarioRepository;
     @Autowired private SesionRepository sesionRepository;
+    @Autowired private ProfesorRestriccionHorariaRepository restriccionRepository;
 
     private MockMvc mockMvc;
 
@@ -529,6 +530,42 @@ class IntercambioInstanciasEndpointTest {
                         + indice + ")]");
         assertThat(casadas).hasSize(1);
         return casadas.get(0);
+    }
+
+    // ----------------------------------------- indisponibilidad DURA (S167, 1.4)
+
+    /**
+     * Un intercambio que mete a un profesor en su tramo DURA se rechaza. Sin restricción,
+     * MAT#1 (LUNES-1) ↔ LEN#1 (LUNES-2) es el intercambio legal del caso (1). Con una DURA
+     * de P-MAT en LUNES-2, MAT cae en su tramo vetado: una sola violación nueva,
+     * INDISPONIBILIDAD_PROFESOR de P-MAT en L2 (LEN va a LUNES-1, donde P-LEN no tiene
+     * veto). La base no cambia: cada una sigue en su tramo.
+     */
+    @Test
+    void intercambioQueMeteAlProfesorEnSuTramoDuraDevuelve409() throws Exception {
+        poblar();
+        restriccionRepository.save(new ProfesorRestriccionHoraria(
+                profesorRepository.findByCodigo("P-MAT").orElseThrow(), tramoDe(Dia.LUNES, 2),
+                TipoRestriccion.DURA, 0, "S167"));
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(put(url(horarioId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT, 1, LEN, 1)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("VIOLA_REGLA_DURA"))
+                .andExpect(jsonPath("$.violaciones.length()").value(1))
+                .andExpect(jsonPath("$.violaciones[0].regla").value("INDISPONIBILIDAD_PROFESOR"))
+                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("P-MAT"))
+                .andExpect(jsonPath("$.violaciones[0].tramoCodigo").value("L2"));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(filasDe(MAT, 1)).singleElement().satisfies(s ->
+                assertThat(s.getTramoInicio().getOrden()).isEqualTo(1)); // MAT sigue en LUNES-1
+        assertThat(filasDe(LEN, 1)).singleElement().satisfies(s ->
+                assertThat(s.getTramoInicio().getOrden()).isEqualTo(2)); // LEN sigue en LUNES-2
     }
 
     // ------------------------------------------------------------------ fixture
