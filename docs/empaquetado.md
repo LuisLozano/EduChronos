@@ -347,3 +347,14 @@ Esperado, todo con código 0: CSV «OK: las tres vistas coinciden»; grupo 28 p�
 «halladas 1285, FALTAN 0, SOBRAN 0»; profesor 59 páginas y 835/0/0; aula 44 páginas, 819/0/0
 y «páginas vacías con leyenda: 0». El CSV, además, se abre en Excel con las columnas
 separadas y las tildes correctas.
+
+## Construir en la máquina virtual (S163)
+
+Desde S163 el bundle de Windows se construye en una máquina virtual VirtualBox con Windows 11 Pro. El procedimiento de este documento no cambia; sólo cambian el transporte y las cuentas.
+
+1. En Linux: `scripts/empaquetar-linux.sh --salida /home/luis/educhronos-vm/entrega`. `/home/luis/educhronos-vm` es la carpeta compartida con el invitado, que la monta como `E:`.
+2. En Windows, con la cuenta de administrador y PowerShell elevada: `Copy-Item -Recurse E:\entrega C:\DES\entrega`, `cd C:\DES\entrega\build` y la orden que imprime el paso 1, con su `-HuellaJar`. Si `C:\DES\entrega` ya existe, bórrala antes, o `Copy-Item` anidará la copia.
+3. Copia `Educhronos-win.zip` y la transcripción a `E:\bundle\`.
+4. La prueba se hace con una cuenta estándar, copiando el zip a disco local. Ni el bundle ni la base se ejecutan desde `E:`.
+
+La prueba de humo escribe `%LOCALAPPDATA%\Educhronos` en la cuenta que construye; construir con el administrador deja limpia la carpeta de datos de la cuenta de prueba.
