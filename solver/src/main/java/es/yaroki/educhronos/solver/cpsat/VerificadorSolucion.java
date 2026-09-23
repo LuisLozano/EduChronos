@@ -495,9 +495,13 @@ public final class VerificadorSolucion {
      * <p>Para {@code duracion == 1} devuelve siempre la lista con el único tramo de
      * inicio: comportamiento idéntico al previo a D13 (los datasets de duración 1
      * no cambian).
+     *
+     * <p>Público y estático desde S167 para que la pre-validación del pin sobre DURA
+     * ({@code PrevalidacionService}) use ESTA definición de «tramos ocupados» en vez de
+     * escribir una segunda (familia D-F8.2b-iv-a). No usa estado de instancia.
      */
-    private Optional<List<Tramo>> tramosOcupados(Tramo inicio, int duracion,
-                                                 ProblemaHorario problema) {
+    public static Optional<List<Tramo>> tramosOcupados(Tramo inicio, int duracion,
+                                                       ProblemaHorario problema) {
         // (diaSemana, ordenEnDia) -> Tramo, para resolver sucesores en el día.
         Map<Integer, Map<Integer, Tramo>> porDiaOrden = new HashMap<>();
         for (Tramo tr : problema.tramos()) {

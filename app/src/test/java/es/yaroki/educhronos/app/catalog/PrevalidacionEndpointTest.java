@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,6 +71,8 @@ class PrevalidacionEndpointTest {
     @Autowired private AulaRepository aulaRepository;
     @Autowired private TramoSemanalRepository tramoRepository;
     @Autowired private ActividadRepository actividadRepository;
+    @Autowired private ProfesorRestriccionHorariaRepository restriccionRepository;
+    @Autowired private SesionBloqueadaRepository pinTramoRepository;
 
     private MockMvc mockMvc;
 
@@ -176,6 +179,56 @@ class PrevalidacionEndpointTest {
                 .andExpect(jsonPath("$[0].severidad").value("AVISO"))
                 .andExpect(jsonPath("$[0].regla").value("TUTORIA_SIN_TUTOR"))
                 .andExpect(jsonPath("$[0].entidadCodigo").value("Tut-1ºA"));
+    }
+
+    /**
+     * (F-HTTP) Pin sobre un tramo DURA (S167, condición 6 de {@code O-disponibilidad}): el
+     * GET lo enseña como el ÚNICO hallazgo, ERROR y a nombre de MAT8; el POST da
+     * {@code 422} por la pre-validación sin construir el solver, y el motivo nombra al
+     * profesor y al tramo. Mismo patrón que {@code grupoSobrecargado_…}: sin
+     * {@code mocked.constructed()} vacío, un 422 no probaría que no se gastó el solve (el
+     * solver también lo daría, INFEASIBLE, medido en S165 T3).
+     *
+     * <p>Calibrado: 5 tramos, uno por día (L1, M1, X1, J1, V1); Mat-1ºA de 1 repetición y
+     * duración 1 con MAT8; DURA de MAT8 en L1 y pin de Mat-1ºA #1 en L1. (a) ve 1 ≤ 5 − 1,
+     * (c) 1 ≤ 5, (d) no mira NEUTRA, el cortafuegos no mira duración 1, S8 no aplica.
+     */
+    @Test
+    void pinSobreTramoDura_abortaCon422QueNombraProfesorYTramoSinConstruirElSolver()
+            throws Exception {
+        Contexto ctx = contextoBase(5);
+        crearActividad("Mat-1ºA", 1, PatronTemporal.NEUTRA, ctx.asignatura(),
+                ctx.aula1(), Set.of(ctx.prof1()), Set.of(ctx.completo()));
+        TramoSemanal lunes1 = tramoRepository.findAll().stream()
+                .filter(t -> t.getDia() == Dia.LUNES).findFirst().orElseThrow();
+        restriccionRepository.save(new ProfesorRestriccionHoraria(
+                ctx.prof1(), lunes1, TipoRestriccion.DURA, 0, "S167"));
+        pinTramoRepository.save(new SesionBloqueada(
+                actividadRepository.findByCodigo("Mat-1ºA").orElseThrow(), 1, lunes1));
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].severidad").value("ERROR"))
+                .andExpect(jsonPath("$[0].regla").value("PIN_SOBRE_TRAMO_DURA"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("MAT8"))
+                .andExpect(jsonPath("$[0].descripcion").value(containsString("L1")));
+
+        try (MockedConstruction<SolverHorario> mocked =
+                     Mockito.mockConstruction(SolverHorario.class)) {
+
+            mockMvc.perform(post("/api/horarios")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().reason(containsString("'MAT8'")))
+                    .andExpect(status().reason(containsString("L1")))
+                    .andExpect(resultado -> assertThat(resultado.getResolvedException())
+                            .hasCauseInstanceOf(PrevalidacionFallidaException.class));
+
+            assertThat(mocked.constructed()).isEmpty();
+        }
     }
 
     /** Un catálogo sano pre-valida a {@code 200} con lista VACÍA. */

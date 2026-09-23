@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.domain.Actividad;
+import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.Asignatura;
 import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
@@ -14,12 +15,14 @@ import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.ProfesorTutoria;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
 import es.yaroki.educhronos.solver.domain.RolTutoria;
+import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -504,6 +507,183 @@ class PrevalidacionServiceTest {
                 PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
     }
 
+    // ------------------------------------------------------ (f) pin sobre tramo DURA
+
+    /**
+     * (F1) Pin sobre un tramo DURA de su profesor: UN error que señala a MAT1 y cuya
+     * descripción nombra la sesión (Mat-1ºA #1) y el tramo (D1T1). Demanda 1 (el tramo que
+     * pide el pin) contra disponible 0. Calibrado para que el resto calle: 30 tramos,
+     * MAT1 demanda 1 ≤ 30 − 1, grupo 1 ≤ 30, duración 1 (el cortafuegos no mira).
+     */
+    @Test
+    void pinSobreTramoDuraDeSuProfesor_produceErrorQueNombraProfesorSesionYTramo() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad mat = actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                plaza("Mat-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(mat),
+                List.of(dura(mat1, tramos.get(0))),
+                List.of(pin(mat, 1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+            assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
+            assertThat(a.entidadCodigo()).isEqualTo("MAT1");
+            assertThat(a.demanda()).isEqualTo(1);
+            assertThat(a.disponible()).isEqualTo(0);
+            assertThat(a.descripcion()).contains("'Mat-1ºA' #1").contains("D1T1")
+                    .contains("'MAT1'");
+        });
+    }
+
+    /** (F2) Pin sobre un tramo LIBRE (la DURA está en D1T2 y el pin en D1T1): nada. */
+    @Test
+    void pinSobreTramoLibre_noProduceAviso() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad mat = actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                plaza("Mat-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(mat),
+                List.of(dura(mat1, tramos.get(1))),
+                List.of(pin(mat, 1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+    }
+
+    /**
+     * (F3) Pin sobre un tramo BLANDA: nada. La blanda es preferencia; el pin la incumple
+     * a sabiendas y el optimizador lo paga en el objetivo, no es infactible.
+     */
+    @Test
+    void pinSobreTramoBlanda_noProduceAviso() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad mat = actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                plaza("Mat-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(mat),
+                List.of(blanda(mat1, tramos.get(0))),
+                List.of(pin(mat, 1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+    }
+
+    /**
+     * (F4) Co-docencia: MAT1 y LEN1 en la MISMA plaza, pin en D1T1, y solo LEN1 tiene
+     * DURA ahí. UN error, a nombre de LEN1 (no de MAT1). Cada uno demanda 1 ≤ 30 − 1.
+     */
+    @Test
+    void pinEnCoDocenciaConDuraSoloDeUno_errorANombreDelProfesorVetado() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Plaza coDocencia = new Plaza("Amb-1ºA-P1", MAT, Set.of(mat1, len1),
+                Optional.of(A1), Set.of(), Set.of(sg));
+        Actividad amb = actividad("Amb-1ºA", 1, 1, PatronTemporal.NEUTRA, coDocencia);
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1, len1), List.of(grupo), List.of(sg), List.of(amb),
+                List.of(dura(len1, tramos.get(0))),
+                List.of(pin(amb, 1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
+            assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
+            assertThat(a.entidadCodigo()).isEqualTo("LEN1");
+            assertThat(a.descripcion()).contains("'LEN1'").doesNotContain("MAT1");
+        });
+    }
+
+    /**
+     * (F5) Tramos OCUPADOS, no solo el del pin: un bloque de 2 fijado en D1T1 ocupa D1T1
+     * y D1T2, y la DURA está en D1T2. UN error del pin que nombra D1T2. El cortafuegos (e)
+     * también dispara —MAT1 tiene restricción e imparte un bloque— y va ANTES: la lista
+     * es exactamente [cortafuegos, pin]. MAT1 demanda 2 ≤ 30 − 1.
+     */
+    @Test
+    void pinDeUnBloqueCuyoTramoInteriorEsDura_produceErrorQueNombraElInterior() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad bloque = actividad("Lab-1ºA", 1, 2, PatronTemporal.NEUTRA,
+                plaza("Lab-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(bloque),
+                List.of(dura(mat1, tramos.get(1))),
+                List.of(pin(bloque, 1, tramos.get(0))));
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+
+        assertThat(avisos).extracting(AvisoPrevalidacion::regla).containsExactly(
+                PrevalidacionService.REGLA_RESTRICCION_HORARIA_CON_BLOQUE,
+                PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
+        assertThat(avisos.get(1).descripcion()).contains("D1T1").contains("D1T2");
+    }
+
+    /**
+     * (F6) Dos filas DURA iguales (MAT1, D1T1) y un pin ahí: UN error, no dos. El veto es
+     * el hecho, no la fila; mismo criterio que el verificador y la regla (a).
+     */
+    @Test
+    void pinSobreDuraRepetida_unSoloError() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad mat = actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                plaza("Mat-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(mat),
+                List.of(dura(mat1, tramos.get(0)), dura(mat1, tramos.get(0))),
+                List.of(pin(mat, 1, tramos.get(0))));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema),
+                PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA)).hasSize(1);
+    }
+
+    /**
+     * (F7) Bloque IMPOSIBLE fijado por un pin: Lab-1ºA de 2 tramos fijado en D1T6, el
+     * último del día, desborda (no existe D1T7). Sin tramos ocupados que reconstruir, se
+     * mira el tramo del pin, y MAT1 tiene DURA en D1T6 → UN error del pin (además del
+     * cortafuegos, que dispara por restricción + bloque). Si el respaldo fuera «ningún
+     * tramo», este pin contradictorio pasaría callado.
+     */
+    @Test
+    void pinDeUnBloqueImposibleSobreDura_miraElTramoDelPin() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 6);
+        Tramo d1t6 = tramos.get(5);
+        Actividad bloque = actividad("Lab-1ºA", 1, 2, PatronTemporal.NEUTRA,
+                plaza("Lab-1ºA-P1", mat1, sg));
+
+        ProblemaHorario problema = problemaConPines(
+                tramos, List.of(mat1), List.of(grupo), List.of(sg), List.of(bloque),
+                List.of(dura(mat1, d1t6)),
+                List.of(pin(bloque, 1, d1t6)));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema),
+                PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA))
+                .singleElement().extracting(AvisoPrevalidacion::descripcion)
+                .asString().contains("D1T6");
+    }
+
     // ------------------------------------------------------------------- helpers
 
     private static List<Tramo> tramosEnDias(int dias, int porDia) {
@@ -558,6 +738,20 @@ class PrevalidacionServiceTest {
             List<RestriccionHoraria> restricciones, List<ProfesorTutoria> tutorias) {
         return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
                 subgrupos, actividades, restricciones, List.of(), tutorias);
+    }
+
+    /** Con PINES de tramo, que solo la regla (f) necesita. Sin tutorías. */
+    private static ProblemaHorario problemaConPines(
+            List<Tramo> tramos, List<Profesor> profesores, List<GrupoAdministrativo> grupos,
+            List<Subgrupo> subgrupos, List<Actividad> actividades,
+            List<RestriccionHoraria> restricciones, List<SesionBloqueada> pines) {
+        return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
+                subgrupos, actividades, restricciones, pines, List.of());
+    }
+
+    /** Pin de tramo de la instancia {@code indice} de {@code actividad}, sin pin de aula. */
+    private static SesionBloqueada pin(Actividad actividad, int indice, Tramo tramo) {
+        return new SesionBloqueada(new ActividadInstancia(actividad, indice), tramo, Map.of());
     }
 
     private static List<AvisoPrevalidacion> soloRegla(List<AvisoPrevalidacion> avisos, String regla) {

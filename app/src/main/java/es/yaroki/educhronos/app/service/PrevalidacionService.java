@@ -4,16 +4,19 @@ import es.yaroki.educhronos.solver.cpsat.ReglaDura;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.cpsat.Violacion;
 import es.yaroki.educhronos.solver.domain.Actividad;
+import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.Profesor;
 import es.yaroki.educhronos.solver.domain.RestriccionHoraria;
+import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,7 +68,9 @@ import org.springframework.transaction.annotation.Transactional;
  * del catálogo, y por eso avisa en vez de abortar). Son condiciones NECESARIAS, no
  * suficientes: pasarlas no garantiza que el problema sea factible. La quinta (e) no es
  * una condición del catálogo sino un CORTAFUEGOS: rechaza una combinación que el
- * generador todavía no resuelve bien (restricciones horarias con bloques, S165).
+ * generador todavía no resuelve bien (restricciones horarias con bloques, S165). La
+ * sexta (f) sí es una infactibilidad garantizada: un pin sobre un tramo DURA de un
+ * profesor de la sesión pinada.
  *
  * <p><b>Por qué delega en {@link GeneradorHorarioService#cargarProblema()}</b> en vez
  * de cargar el catálogo por su cuenta: mismo motivo que {@link DiagnosticoService}.
@@ -112,6 +117,12 @@ public class PrevalidacionService {
             "RESTRICCION_HORARIA_CON_BLOQUE";
 
     /**
+     * Un pin (bloqueo de tramo) coloca una sesión en un tramo en el que alguno de sus
+     * profesores tiene una restricción DURA. ERROR, ver {@link #pinSobreTramoDura}.
+     */
+    public static final String REGLA_PIN_SOBRE_TRAMO_DURA = "PIN_SOBRE_TRAMO_DURA";
+
+    /**
      * Una actividad {@code requiereTutor} no la imparte ningún TUTOR_PRINCIPAL de un
      * grupo que cubre (S8, §4.6). AVISO. El identificador NO se escribe a mano: se toma
      * del enum del solver, que es quien nombra la regla, para que la constante y la
@@ -153,8 +164,8 @@ public class PrevalidacionService {
      * sin volver a leer el catálogo y sin inyectar este bean (ver javadoc de clase).
      *
      * <p>El orden de salida es estable: primero profesores, luego actividades, luego
-     * grupos, luego el cortafuegos de restricciones con bloques y por último tutorías
-     * (S8), y dentro de cada bloque el orden del catálogo.
+     * grupos, luego el cortafuegos de restricciones con bloques, luego los pines sobre
+     * DURA y por último tutorías (S8), y dentro de cada bloque el orden del catálogo.
      * S8 va LA ÚLTIMA a propósito: es la única de severidad AVISO, así que los hallazgos
      * que abortan la generación quedan agrupados al principio de la lista.
      */
@@ -173,6 +184,7 @@ public class PrevalidacionService {
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
         avisos.addAll(sobrecargaGrupo(problema, tramosLectivos));
         avisos.addAll(restriccionHorariaConBloque(problema));
+        avisos.addAll(pinSobreTramoDura(problema));
         avisos.addAll(tutoriasSinTutor(problema));
         return List.copyOf(avisos);
     }
@@ -417,6 +429,82 @@ public class PrevalidacionService {
                                 + actividad.duracionTramos() + " tramos seguidos: el generador"
                                 + " aún no soporta restricciones horarias con actividades de"
                                 + " más de un tramo"));
+            }
+        }
+        return avisos;
+    }
+
+    /**
+     * (f) PIN SOBRE TRAMO DURA — ERROR. Falla por cada terna (pin, tramo que ocupa la
+     * sesión pinada, profesor de la sesión) en la que ese profesor tiene una restricción
+     * DURA sobre ese tramo (condición 6 de {@code O-disponibilidad}).
+     *
+     * <p><b>Por qué es ERROR.</b> Es infactibilidad GARANTIZADA: el pin fija el tramo de
+     * inicio con una igualdad ({@code ModeloCpSat.restriccionSesionBloqueada}) y la DURA
+     * lo prohíbe; medido en S165 (T3), el solver acaba en {@code INFEASIBLE} tras gastar
+     * un solve y sin decir por qué. Aquí se rechaza antes, nombrando profesor y tramo.
+     *
+     * <p><b>Tramos OCUPADOS, no solo el de inicio.</b> Se usa la definición del
+     * verificador, {@link VerificadorSolucion#tramosOcupados}: con duración 1 es el tramo
+     * del pin, y con un bloque son todos los que cubre. Si el bloque del pin es imposible
+     * (desborda el día o cruza el recreo) se mira solo el tramo del pin, mismo criterio
+     * que los recuentos BLANDA del verificador.
+     *
+     * <p>Una DURA repetida sobre el mismo (profesor, tramo) cuenta una vez: los vetos se
+     * agrupan en un {@code Set} de tramos por profesor, igual que en el verificador y en
+     * la regla (a). Solo DURA: una BLANDA es preferencia y el pin la incumple a sabiendas.
+     *
+     * <p>Señala al PROFESOR ({@code entidadCodigo}); la sesión y el TRAMO van en la
+     * descripción, porque {@link AvisoPrevalidacion} no tiene campo de tramo. Cardinalidad
+     * en el contrato {@code demanda > disponible}: el pin pide 1 tramo en el que el
+     * profesor tiene 0 disponibles (mismo criterio que S8, 1 contra 0).
+     */
+    private static List<AvisoPrevalidacion> pinSobreTramoDura(ProblemaHorario problema) {
+        Map<Profesor, Set<Tramo>> vetadosPorProfesor = new LinkedHashMap<>();
+        for (RestriccionHoraria restriccion : problema.restriccionesHorarias()) {
+            if (restriccion.tipo() == TipoRestriccion.DURA) {
+                vetadosPorProfesor
+                        .computeIfAbsent(restriccion.profesor(), p -> new LinkedHashSet<>())
+                        .add(restriccion.tramo());
+            }
+        }
+
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        if (vetadosPorProfesor.isEmpty()) {
+            return avisos;
+        }
+        for (SesionBloqueada pin : problema.bloqueos()) {
+            ActividadInstancia instancia = pin.instancia();
+            List<Tramo> ocupados = VerificadorSolucion.tramosOcupados(
+                            pin.tramo(), instancia.actividad().duracionTramos(), problema)
+                    .orElse(List.of(pin.tramo()));
+            List<Profesor> profesores = instancia.actividad().plazas().stream()
+                    .flatMap(plaza -> plaza.profesores().stream())
+                    .distinct()
+                    .sorted(Comparator.comparing(Profesor::codigo))
+                    .toList();
+            for (Tramo tramo : ocupados) {
+                for (Profesor profesor : profesores) {
+                    if (!vetadosPorProfesor.getOrDefault(profesor, Set.of()).contains(tramo)) {
+                        continue;
+                    }
+                    String donde = tramo.equals(pin.tramo())
+                            ? "en el tramo " + tramo.codigo()
+                            : "desde el tramo " + pin.tramo().codigo()
+                                    + ", y la sesión ocupa el tramo " + tramo.codigo();
+                    avisos.add(new AvisoPrevalidacion(
+                            Severidad.ERROR,
+                            REGLA_PIN_SOBRE_TRAMO_DURA,
+                            profesor.codigo(),
+                            1,
+                            0,
+                            "La sesión '" + instancia.actividad().codigo() + "' #"
+                                    + instancia.indice() + " está fijada " + donde
+                                    + " (día " + tramo.diaSemana() + ", tramo "
+                                    + tramo.ordenEnDia() + "), en el que el profesor '"
+                                    + profesor.codigo() + "' no puede dar clase"
+                                    + " (restricción DURA)"));
+                }
             }
         }
         return avisos;
