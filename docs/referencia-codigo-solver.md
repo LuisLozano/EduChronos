@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-09-10
-- Commit: `ad6865a`
+- Fecha: 2026-09-23
+- Commit: `f9e59e2`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -286,7 +286,7 @@ Consume: (ninguno)
 
 ### `ReglaDura` — public enum
 Paquete: `es.yaroki.educhronos.solver.cpsat`
-Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`, `TUTORIA_SIN_TUTOR`
+Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`, `TUTORIA_SIN_TUTOR`, `INDISPONIBILIDAD_PROFESOR`
 
 Consume: (ninguno)
 
@@ -337,6 +337,7 @@ Métodos:
 - `public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion)`
+- `public static Optional<List<Tramo>> tramosOcupados(Tramo inicio, int duracion, ProblemaHorario problema)`
 - `public List<Violacion> verificarTutorias(ProblemaHorario problema)`
 - `static int ventanasDe(Set<Integer> posicionesDelDia)`
 - `static int excesoConsecutivasDe(Set<Integer> posicionesDelDia, int n)`
@@ -906,6 +907,25 @@ Métodos:
 - `void desdobleNoSeReportaComoSolapeDeGrupo_regresion()`
 
 Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
+### `VerificadorSolucionIndisponibilidadTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void dura_instanciaEnTramoVetado_unaViolacionConProfesorTramoYCelda()`
+- `void dura_instanciaEnTramoLibre_ningunaViolacion()`
+- `void dura_coDocencia_soloElProfesorVetadoRecibeLaViolacion()`
+- `void dura_dosRestriccionesIgualesDelMismoProfesorYTramo_cuentanUna()`
+- `void dura_bloqueConTramoInteriorVetado_violacionEnElInterior()`
+- `void dura_bloqueQueCubreDosTramosVetados_unaViolacionPorTramo()`
+- `void dura_bloqueImposible_noDuplicaElAvisoDelBloque()`
+- `void dura_instanciaSinColocar_noDuplicaElAvisoDeSinColocar()`
+- `void dura_restriccionBlanda_noEsViolacionDura()`
+- `void blanda_bloqueConTramoInteriorVetado_penalizaUno()`
+- `void blanda_bloqueQueCubreDosTramosVetados_penalizaDosYLaAtribucionSumaIgual()`
+- `void blanda_bloqueAdyacenteAlVeto_noPenaliza()`
+- `void blanda_duracionUno_mismoValorQueAntes()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
 
 ### `VerificadorSolucionTutoriaTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
