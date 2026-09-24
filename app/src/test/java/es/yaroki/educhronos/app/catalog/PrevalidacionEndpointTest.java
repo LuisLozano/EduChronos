@@ -8,17 +8,19 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
-import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.service.PrevalidacionService;
 import es.yaroki.educhronos.app.web.HorarioController;
 import es.yaroki.educhronos.app.web.PrevalidacionController;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
 import jakarta.persistence.EntityManager;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
@@ -50,9 +53,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * que violan una condición necesaria son TAMBIÉN infactibles para el solver —es
  * justamente lo que la regla garantiza—, así que un {@code 422} por sí solo no distingue
  * cuál de las dos vías actuó. Se comprueban por eso las dos cosas que sí discriminan: la
- * CAUSA de la excepción resuelta, y que {@code mocked.constructed()} quede vacío. Lo
- * segundo es la prueba directa de que no se gastó presupuesto de solve, que es el
- * propósito entero del bloque.
+ * {@code causa} del CUERPO ({@code PREVALIDACION_FALLIDA}, que el solver no emite nunca), y
+ * que {@code mocked.constructed()} quede vacío. Lo segundo es la prueba directa de que no
+ * se gastó presupuesto de solve, que es el propósito entero del bloque.
+ *
+ * <p><b>Se aserta el cuerpo, nunca {@code status().reason()}</b> (S166): el {@code reason}
+ * lo puebla {@code standaloneSetup} aunque por la red no viaje nada (D-F8.6-ii-a, medido en
+ * la fase 1 de S166). Hasta S166 estos tests miraban la causa de la excepción resuelta;
+ * desde que el controlador construye el cuerpo del 422 ya no hay excepción que resolver.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -102,8 +110,7 @@ class PrevalidacionEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"maxSegundos\":5}"))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(resultado -> assertThat(resultado.getResolvedException())
-                        .hasCauseInstanceOf(PrevalidacionFallidaException.class));
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"));
 
         mockMvc.perform(get("/api/prevalidacion"))
                 .andExpect(status().isOk())
@@ -122,7 +129,8 @@ class PrevalidacionEndpointTest {
      * <p>Tres asertos, y el tercero es el que de verdad importa:
      * <ol>
      *   <li>el GET muestra el hallazgo con severidad {@code ERROR} (no {@code AVISO});</li>
-     *   <li>el POST da {@code 422} y su causa es {@link PrevalidacionFallidaException} —NO
+     *   <li>el POST da {@code 422} con causa {@code PREVALIDACION_FALLIDA} en el cuerpo —NO
+     *       {@code CATALOGO_INFACTIBLE}, la de
      *       {@link es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException}—, que es
      *       la distinción que este catálogo hace delicada: es infactible por las DOS vías,
      *       así que sin mirar la causa un 422 no probaría cuál de las dos actuó;</li>
@@ -150,8 +158,7 @@ class PrevalidacionEndpointTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnprocessableEntity())
-                    .andExpect(resultado -> assertThat(resultado.getResolvedException())
-                            .hasCauseInstanceOf(PrevalidacionFallidaException.class));
+                    .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"));
 
             assertThat(mocked.constructed()).isEmpty();
         }
@@ -189,6 +196,11 @@ class PrevalidacionEndpointTest {
      * {@code mocked.constructed()} vacío, un 422 no probaría que no se gastó el solve (el
      * solver también lo daría, INFEASIBLE, medido en S165, M2, T3).
      *
+     * <p>El motivo se lee del CUERPO (S166, condición 6): {@code $.mensaje} lleva la MISMA
+     * descripción que sirve el GET —la que el diálogo de confirmación ya enseñaba—, y además
+     * se exigen sueltos el profesor y el tramo por si la descripción cambiara de forma.
+     * {@code estado} y {@code segundos} ausentes o nulos: no hubo solve.
+     *
      * <p>Calibrado: 5 tramos, uno por día (L1, M1, X1, J1, V1); Mat-1ºA de 1 repetición y
      * duración 1 con MAT8; DURA de MAT8 en L1 y pin de Mat-1ºA #1 en L1. (a) ve 1 ≤ 5 − 1,
      * (c) 1 ≤ 5, (d) no mira NEUTRA, el cortafuegos no mira duración 1, S8 no aplica.
@@ -207,13 +219,14 @@ class PrevalidacionEndpointTest {
                 actividadRepository.findByCodigo("Mat-1ºA").orElseThrow(), 1, lunes1));
         entityManager.flush();
 
-        mockMvc.perform(get("/api/prevalidacion"))
+        String descripcion = descripcionDe(mockMvc.perform(get("/api/prevalidacion"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].severidad").value("ERROR"))
                 .andExpect(jsonPath("$[0].regla").value("PIN_SOBRE_TRAMO_DURA"))
                 .andExpect(jsonPath("$[0].entidadCodigo").value("MAT8"))
-                .andExpect(jsonPath("$[0].descripcion").value(containsString("L1")));
+                .andExpect(jsonPath("$[0].descripcion").value(containsString("L1")))
+                .andReturn(), "PIN_SOBRE_TRAMO_DURA");
 
         try (MockedConstruction<SolverHorario> mocked =
                      Mockito.mockConstruction(SolverHorario.class)) {
@@ -222,13 +235,69 @@ class PrevalidacionEndpointTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnprocessableEntity())
-                    .andExpect(status().reason(containsString("'MAT8'")))
-                    .andExpect(status().reason(containsString("L1")))
-                    .andExpect(resultado -> assertThat(resultado.getResolvedException())
-                            .hasCauseInstanceOf(PrevalidacionFallidaException.class));
+                    .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                    .andExpect(jsonPath("$.mensaje").value(containsString(descripcion)))
+                    .andExpect(jsonPath("$.mensaje").value(containsString("'MAT8'")))
+                    .andExpect(jsonPath("$.mensaje").value(containsString("tramo L1")))
+                    .andExpect(jsonPath("$.estado").doesNotExist())
+                    .andExpect(jsonPath("$.segundos").doesNotExist());
 
             assertThat(mocked.constructed()).isEmpty();
         }
+    }
+
+    /**
+     * (F-HTTP-2) DOS errores de reglas distintas en el mismo 422: el cuerpo los lleva los
+     * dos, no solo el primero (S166, condición 6). Quien lee el mensaje tiene que poder
+     * arreglarlo todo de una vez, no a golpe de generación fallida.
+     *
+     * <p>Calibrado para que haya EXACTAMENTE dos (lo fija {@code $.length()} del GET): 10
+     * tramos, dos por día en los cinco días. Mat-1ºA NEUTRA de 1 repetición con MAT8, DURA
+     * de MAT8 en el primer tramo del lunes y pin de Mat-1ºA #1 ahí → PIN_SOBRE_TRAMO_DURA.
+     * Len-1ºA DISTRIBUIDA de 6 repeticiones con LEN1 → REPETICIONES_EXCEDEN_DIAS (6 &gt; 5
+     * días). (a) ve 1 ≤ 10 − 1 y 6 ≤ 10, (c) ve 7 ≤ 10. El pin se computa DESPUÉS de las
+     * repeticiones ({@code PrevalidacionService.prevalidar}), así que un cuerpo con solo el
+     * primer error perdería justo el del pin.
+     */
+    @Test
+    void dosErroresDePrevalidacion_elCuerpoDel422LlevaLosDos() throws Exception {
+        Contexto ctx = contextoBase(10);
+        Profesor len1 = profesorRepository.save(new Profesor("LEN1", "Dos"));
+        crearActividad("Mat-1ºA", 1, PatronTemporal.NEUTRA, ctx.asignatura(),
+                ctx.aula1(), Set.of(ctx.prof1()), Set.of(ctx.completo()));
+        crearActividad("Len-1ºA", 6, PatronTemporal.DISTRIBUIDA, ctx.asignatura(),
+                ctx.aula2(), Set.of(len1), Set.of(ctx.completo()));
+        TramoSemanal lunes1 = tramoRepository.findAll().stream()
+                .filter(t -> t.getDia() == Dia.LUNES).findFirst().orElseThrow();
+        restriccionRepository.save(new ProfesorRestriccionHoraria(
+                ctx.prof1(), lunes1, TipoRestriccion.DURA, 0, "S166"));
+        pinTramoRepository.save(new SesionBloqueada(
+                actividadRepository.findByCodigo("Mat-1ºA").orElseThrow(), 1, lunes1));
+        entityManager.flush();
+
+        MvcResult prevalidacion = mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andReturn();
+        String delPin = descripcionDe(prevalidacion, "PIN_SOBRE_TRAMO_DURA");
+        String deRepeticiones = descripcionDe(prevalidacion, "REPETICIONES_EXCEDEN_DIAS");
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString(deRepeticiones)))
+                .andExpect(jsonPath("$.mensaje").value(containsString(delPin)));
+    }
+
+    /** La descripción del ÚNICO hallazgo de la regla dada en la respuesta del GET. */
+    private static String descripcionDe(MvcResult prevalidacion, String regla) throws Exception {
+        List<String> descripciones = JsonPath.read(
+                prevalidacion.getResponse().getContentAsString(StandardCharsets.UTF_8),
+                "$[?(@.regla=='" + regla + "')].descripcion");
+        assertThat(descripciones).hasSize(1);
+        return descripciones.get(0);
     }
 
     /** Un catálogo sano pre-valida a {@code 200} con lista VACÍA. */

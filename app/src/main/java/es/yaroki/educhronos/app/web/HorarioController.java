@@ -48,7 +48,8 @@ import org.springframework.web.server.ResponseStatusException;
  * {@link MapeoFalloSolver} según el veredicto CP-SAT (S118: {@code 422}, {@code 503}
  * o {@code 500}, ya no un 422 único); {@link PrevalidacionFallidaException} →
  * {@code 422} (Bloque 8.4-A): es un hecho detectado ANTES del solve y con el recurso
- * culpable nombrado, y NO pasa por el mapeo —no hay veredicto que mapear—;
+ * culpable nombrado, y NO pasa por el mapeo —no hay veredicto que mapear—; desde S166
+ * sale con cuerpo {@link FalloGeneracionDTO} y causa {@code PREVALIDACION_FALLIDA};
  * {@code IllegalArgumentException} de la generación (p. ej. {@code maxSegundos} no
  * positivo) → {@code 400}. El resto (errores de integridad del catálogo) se deja
  * propagar.
@@ -63,6 +64,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/horarios")
 public class HorarioController {
+
+    /** Causa del 422 de la pre-validación: contrato con la vista, no texto para el usuario. */
+    static final String CAUSA_PREVALIDACION_FALLIDA = "PREVALIDACION_FALLIDA";
 
     private final GeneradorHorarioService service;
     private final DiagnosticoService diagnosticoService;
@@ -91,7 +95,7 @@ public class HorarioController {
                     service.generar(req.maxSegundos(), req.semilla(), req.via(), req.nombre());
             return ResponseEntity.ok(service.proyectar(horario.getId()));
         } catch (PrevalidacionFallidaException e) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+            return respuestaDeFallo(e);
         } catch (HorarioInfactibleException e) {
             return respuestaDeFallo(e);
         } catch (IllegalArgumentException e) {
@@ -114,10 +118,13 @@ public class HorarioController {
     /**
      * Traduce un fallo del solver a su respuesta, con el cuerpo que verá el navegador.
      *
-     * <p>NO lanza {@code ResponseStatusException} como las otras ramas: esa vía deja
-     * el cuerpo en manos del mecanismo de error de Spring, que aquí está medido como
-     * mudo (D-F8.6-ii-a, ver {@link FalloGeneracionDTO}). Un {@code ResponseEntity}
-     * es lo único que garantiza que la causa llegue por la red.
+     * <p>Ni esta rama ni la de la pre-validación (la sobrecarga de abajo) lanzan
+     * {@code ResponseStatusException}: esa vía deja el cuerpo en manos del mecanismo de
+     * error de Spring, que aquí está medido como mudo (D-F8.6-ii-a, ver
+     * {@link FalloGeneracionDTO}). Un {@code ResponseEntity} es lo único que garantiza que
+     * la causa llegue por la red. D-F8.6-ii-a sigue viva para el resto de
+     * {@code ResponseStatusException} del proyecto, incluidos el 400 de esta misma
+     * generación y los 404 de este controlador: su motivo no viaja.
      */
     private ResponseEntity<Object> respuestaDeFallo(HorarioInfactibleException e) {
         MapeoFalloSolver.RespuestaFallo fallo = MapeoFalloSolver.mapear(e.estado());
@@ -135,6 +142,22 @@ public class HorarioController {
             respuesta = respuesta.header(HttpHeaders.RETRY_AFTER, "0");
         }
         return respuesta.body(cuerpo);
+    }
+
+    /**
+     * El 422 de la pre-validación, con su motivo en el cuerpo (S166, condición 6 de
+     * {@code O-disponibilidad}). Hasta S166 salía por {@code ResponseStatusException} y
+     * llegaba al navegador sin motivo, así que la vista decía «no tiene solución» ante un
+     * pin que contradice una DURA, que sí la tiene en cuanto se quita el pin.
+     *
+     * <p>Mismo cuerpo que el fallo del solver, con causa propia —NO la del solver: aquí no
+     * hubo solve, y {@code CONFIGURACION_INCOMPLETA} ya significa «falta la jornada»—.
+     * {@code mensaje} lleva las descripciones de TODOS los ERROR, que nombran el recurso
+     * culpable; {@code estado} y {@code segundos} van nulos porque no hubo solve.
+     */
+    private ResponseEntity<Object> respuestaDeFallo(PrevalidacionFallidaException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new FalloGeneracionDTO(CAUSA_PREVALIDACION_FALLIDA, e.getMessage(), null, null));
     }
 
     /**
