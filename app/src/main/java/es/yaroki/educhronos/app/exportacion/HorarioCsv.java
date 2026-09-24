@@ -9,8 +9,11 @@ import java.util.List;
  * Serializa un {@link HorarioProyeccionDTO} a CSV. Función PURA: entra el DTO que
  * devuelve {@code GeneradorHorarioService.proyectar}, salen los bytes del fichero.
  * No toca JPA, no navega entidades y no reordena: el CSV es la proyección APLANADA,
- * una línea por {@link SesionVistaDTO} en el mismo orden en que vienen (que ya es
- * {@code (dia, tramo, asignaturaCodigo)}, fijado en {@code proyectar}).
+ * una línea por cada tramo que ocupa cada {@link SesionVistaDTO}
+ * ({@link SesionVistaDTO#tramosCubiertos()}), en el mismo orden en que vienen (que ya es
+ * {@code (dia, tramo, asignaturaCodigo)}, fijado en {@code proyectar}). Una sesión de
+ * un tramo da una línea; la de un bloque de N tramos da N líneas seguidas, idénticas
+ * salvo la columna {@code Tramo}, con la misma {@code Sesión}.
  *
  * <p><b>Por qué {@code ";"} y no {@code ","}.</b> El destino es Excel con
  * configuración regional española, donde el separador de lista del sistema es el
@@ -48,8 +51,8 @@ public final class HorarioCsv {
     }
 
     /**
-     * Bytes del CSV: BOM UTF-8 + cabecera + un registro por sesión, todos terminados
-     * en CRLF (el último también).
+     * Bytes del CSV: BOM UTF-8 + cabecera + un registro por cada tramo que ocupa cada
+     * sesión, todos terminados en CRLF (el último también).
      *
      * @throws IllegalStateException si un elemento de una lista multivalor contiene
      *     {@code "/"}, que es el separador de esa lista: el fichero mentiría sobre
@@ -60,19 +63,21 @@ public final class HorarioCsv {
         texto.append(CABECERA).append(CRLF);
 
         for (SesionVistaDTO sesion : proyeccion.sesiones()) {
-            registro(texto,
-                    Integer.toString(sesion.dia()),
-                    Integer.toString(sesion.tramo()),
-                    sesion.asignaturaCodigo(),
-                    sesion.asignaturaNombre(),
-                    unir(sesion.profesores(), "Profesores"),
-                    sesion.aulaCodigo(),
-                    unir(sesion.grupos(), "Grupos"),
-                    unir(sesion.subgrupos(), "Subgrupos"),
-                    sesion.actividadCodigo(),
-                    sesion.plazaCodigo(),
-                    Integer.toString(sesion.indice()),
-                    Long.toString(sesion.sesionId()));
+            for (int tramo : sesion.tramosCubiertos()) {
+                registro(texto,
+                        Integer.toString(sesion.dia()),
+                        Integer.toString(tramo),
+                        sesion.asignaturaCodigo(),
+                        sesion.asignaturaNombre(),
+                        unir(sesion.profesores(), "Profesores"),
+                        sesion.aulaCodigo(),
+                        unir(sesion.grupos(), "Grupos"),
+                        unir(sesion.subgrupos(), "Subgrupos"),
+                        sesion.actividadCodigo(),
+                        sesion.plazaCodigo(),
+                        Integer.toString(sesion.indice()),
+                        Long.toString(sesion.sesionId()));
+            }
         }
 
         byte[] cuerpo = texto.toString().getBytes(StandardCharsets.UTF_8);

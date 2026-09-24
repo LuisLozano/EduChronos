@@ -27,20 +27,20 @@ class ProyeccionDtoContratoTest {
     private final ObjectMapper mapper = new MappingJackson2HttpMessageConverter().getObjectMapper();
 
     @Test
-    void sesionVistaDto_serializaExactamenteLas12ClavesConSusTipos() throws Exception {
+    void sesionVistaDto_serializaExactamenteLas13ClavesConSusTipos() throws Exception {
         // CENTINELA D-F8.1-8: este contrato refleja app.web.dto.SesionVistaDTO. Si cambias el
         // DTO (añadir/quitar/renombrar/re-tipar un campo), este test salta A PROPÓSITO.
         // Al actualizarlo, actualiza TAMBIÉN app/frontend/src/app/models/horario.model.ts
         // (interfaz espejo, no atada automáticamente).
         List<String> clavesEsperadas = List.of(
-                "sesionId", "indice", "dia", "tramo",
+                "sesionId", "indice", "dia", "tramo", "duracion",
                 "asignaturaCodigo", "asignaturaNombre",
                 "profesores", "aulaCodigo",
                 "subgrupos", "grupos",
                 "actividadCodigo", "plazaCodigo");
 
         SesionVistaDTO sesion = new SesionVistaDTO(
-                10L, 1, 2, 3, "Mat", "Matematicas", List.of("MATA"), "A1",
+                10L, 1, 2, 3, 1, "Mat", "Matematicas", List.of("MATA"), "A1",
                 List.of("1ºA-Completo"), List.of("1ºA"), "Mat-1ºA", "Mat-1ºA-P1");
 
         JsonNode json = mapper.readTree(mapper.writeValueAsString(sesion));
@@ -51,6 +51,7 @@ class ProyeccionDtoContratoTest {
         assertThat(json.get("indice").isNumber()).isTrue();
         assertThat(json.get("dia").isNumber()).isTrue();
         assertThat(json.get("tramo").isNumber()).isTrue();
+        assertThat(json.get("duracion").isNumber()).isTrue();
 
         assertThat(json.get("asignaturaCodigo").isTextual()).isTrue();
         assertThat(json.get("asignaturaNombre").isTextual()).isTrue();
@@ -61,6 +62,24 @@ class ProyeccionDtoContratoTest {
         assertThat(json.get("profesores").isArray()).isTrue();
         assertThat(json.get("subgrupos").isArray()).isTrue();
         assertThat(json.get("grupos").isArray()).isTrue();
+    }
+
+    /**
+     * La duración viaja con SU VALOR, y {@code tramosCubiertos()} —un método del record, no
+     * un componente— NO sale en el JSON: lo que ocupa una sesión se deriva en cada lado de
+     * {@code tramo} y {@code duracion}, y un segundo campo con lo mismo podría contradecirlos.
+     */
+    @Test
+    void sesionVistaDto_serializaLaDuracionConSuValorYNoLosTramosCubiertos() throws Exception {
+        SesionVistaDTO bloque = new SesionVistaDTO(
+                11L, 1, 2, 3, 2, "Tec", "Tecnologia", List.of("TEC1"), "T1",
+                List.of("1ºA-Completo"), List.of("1ºA"), "Tec-1ºA", "Tec-1ºA-P1");
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(bloque));
+
+        assertThat(json.get("duracion").asInt()).isEqualTo(2);
+        assertThat(json.get("tramo").asInt()).isEqualTo(3);
+        assertThat(json.has("tramosCubiertos")).isFalse();
     }
 
     @Test
@@ -74,7 +93,7 @@ class ProyeccionDtoContratoTest {
                 "objetivo", "cotaInferior", "fechaGeneracion", "sesiones");
 
         SesionVistaDTO sesion = new SesionVistaDTO(
-                10L, 1, 2, 3, "Mat", "Matematicas", List.of("MATA"), "A1",
+                10L, 1, 2, 3, 1, "Mat", "Matematicas", List.of("MATA"), "A1",
                 List.of("1ºA-Completo"), List.of("1ºA"), "Mat-1ºA", "Mat-1ºA-P1");
         HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
                 1L, "Horario seed 7B", "BORRADOR", "OPTIMAL", 12.0, 8.0,

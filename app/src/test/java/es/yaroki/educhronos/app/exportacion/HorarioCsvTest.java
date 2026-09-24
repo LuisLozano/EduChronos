@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +66,7 @@ class HorarioCsvTest {
     @Test
     void cadaCampoCaeEnSuColumnaYLasListasSeUnenConBarra() {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                42L, 2, 3, 5, "MAT", "Matematicas",
+                42L, 2, 3, 5, 1, "MAT", "Matematicas",
                 List.of("P-MAT", "P-AYU"), "A-12",
                 List.of(), // subgrupos VACÍA: el campo tiene que salir vacío
                 List.of("1ºA", "1ºB"),
@@ -86,6 +87,34 @@ class HorarioCsvTest {
         assertThat(columna(fila, "Plaza")).isEqualTo("Mat-1ºA-P1");
         assertThat(columna(fila, "Índice")).isEqualTo("2");
         assertThat(columna(fila, "Sesión")).isEqualTo("42");
+    }
+
+    // ------------------------------------------------------------------ bloques (S170)
+
+    /**
+     * Una sesión de un bloque de dos tramos se escribe en DOS registros, uno por tramo que
+     * ocupa, iguales en todo salvo la columna Tramo —misma Sesión, mismo Índice—. Al lado va
+     * una sesión de un tramo, que sigue dando un único registro: el aserto de tamaño cuenta
+     * las dos a la vez.
+     */
+    @Test
+    void unaSesionDeDosTramosDaUnRegistroPorTramoIgualesSalvoElTramo() {
+        SesionVistaDTO bloque = new SesionVistaDTO(
+                42L, 1, 2, 3, 2, "TEC", "Tecnologia",
+                List.of("P-TEC"), "T-1",
+                List.of("1ºA-s1"), List.of("1ºA"),
+                "Tec-1ºA", "Tec-1ºA-P1");
+        SesionVistaDTO suelta = sesion(7L, 1, 5, "MAT", "Matematicas");
+
+        String[] lineas = lineas(HorarioCsv.escribir(proyeccion(List.of(bloque, suelta))));
+
+        assertThat(lineas).as("cabecera + 2 del bloque + 1 de la suelta").hasSize(4);
+        assertThat(columna(lineas[1], "Tramo")).isEqualTo("3");
+        assertThat(columna(lineas[2], "Tramo")).isEqualTo("4");
+        assertThat(sinColumna(lineas[1], "Tramo")).isEqualTo(sinColumna(lineas[2], "Tramo"));
+        assertThat(columna(lineas[1], "Sesión")).isEqualTo("42");
+        assertThat(columna(lineas[3], "Sesión")).isEqualTo("7");
+        assertThat(columna(lineas[3], "Tramo")).isEqualTo("5");
     }
 
     // ------------------------------------------------------------------ C4
@@ -147,7 +176,7 @@ class HorarioCsvTest {
     @Test
     void codificaEnUtf8LosCodigosConOrdinalYLasTildes() {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                1L, 1, 1, 1, "EF", "Plástica",
+                1L, 1, 1, 1, 1, "EF", "Plástica",
                 List.of("P-EF"), "A-1",
                 List.of("3ºADi-Completo"), List.of("3ºADi"),
                 "EF-3ºA", "EF-3ºA-P1");
@@ -167,7 +196,7 @@ class HorarioCsvTest {
     @Test
     void abortaSiUnProfesorContieneLaBarraDeUnion() {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                1L, 1, 1, 1, "MAT", "Matematicas",
+                1L, 1, 1, 1, 1, "MAT", "Matematicas",
                 List.of("P/MAT"), "A-1",
                 List.of("1ºA-s1"), List.of("1ºA"),
                 "Mat-1ºA", "Mat-1ºA-P1");
@@ -181,7 +210,7 @@ class HorarioCsvTest {
     @Test
     void abortaSiUnGrupoContieneLaBarraDeUnion() {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                1L, 1, 1, 1, "MAT", "Matematicas",
+                1L, 1, 1, 1, 1, "MAT", "Matematicas",
                 List.of("P-MAT"), "A-1",
                 List.of("1ºA-s1"), List.of("1ºA/B"),
                 "Mat-1ºA", "Mat-1ºA-P1");
@@ -195,7 +224,7 @@ class HorarioCsvTest {
     @Test
     void abortaSiUnSubgrupoContieneLaBarraDeUnion() {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                1L, 1, 1, 1, "MAT", "Matematicas",
+                1L, 1, 1, 1, 1, "MAT", "Matematicas",
                 List.of("P-MAT"), "A-1",
                 List.of("1ºA/s1"), List.of("1ºA"),
                 "Mat-1ºA", "Mat-1ºA-P1");
@@ -217,7 +246,7 @@ class HorarioCsvTest {
     private static SesionVistaDTO sesion(
             Long id, int indice, int tramo, String codigo, String nombre) {
         return new SesionVistaDTO(
-                id, indice, 1, tramo, codigo, nombre,
+                id, indice, 1, tramo, 1, codigo, nombre,
                 List.of("P-" + codigo), "A-" + codigo,
                 List.of("1ºA-s1"), List.of("1ºA"),
                 codigo + "-1ºA", codigo + "-1ºA-P1");
@@ -226,7 +255,7 @@ class HorarioCsvTest {
     /** Una proyección de una sesión cuyo único rasgo es el nombre de asignatura. */
     private static HorarioProyeccionDTO unaSesionConNombre(String nombreAsignatura) {
         return proyeccion(List.of(new SesionVistaDTO(
-                1L, 1, 1, 1, "ASI", nombreAsignatura,
+                1L, 1, 1, 1, 1, "ASI", nombreAsignatura,
                 List.of("P-ASI"), "A-1",
                 List.of("1ºA-s1"), List.of("1ºA"),
                 "Asi-1ºA", "Asi-1ºA-P1")));
@@ -264,5 +293,13 @@ class HorarioCsvTest {
                     "La fila tiene " + campos.length + " campos y la cabecera " + cabecera.size());
         }
         return campos[i];
+    }
+
+    /** La fila con esa columna quitada, para comparar dos filas en todo lo demás. */
+    private static List<String> sinColumna(String fila, String nombre) {
+        int i = List.of(CABECERA.split(";", -1)).indexOf(nombre);
+        List<String> campos = new ArrayList<>(List.of(fila.split(";", -1)));
+        campos.remove(i);
+        return campos;
     }
 }

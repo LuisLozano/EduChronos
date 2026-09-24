@@ -86,6 +86,8 @@ class MovimientoInstanciaEndpointTest {
     private static final String DESD = "DESD-6";
     /** Comparte profesor con MAT; solo la usa el caso de violación preexistente. */
     private static final String HIS = "HIS-1A";
+    /** Bloque de DOS tramos con recursos propios; solo lo usa el caso de la duración. */
+    private static final String BLQ = "BLQ-1D";
 
     private Long horarioId;
 
@@ -445,6 +447,37 @@ class MovimientoInstanciaEndpointTest {
         assertThat(delMovimiento).isEqualTo(deLaProyeccion.get(0));
     }
 
+    /**
+     * El cuerpo del 200 lleva la DURACIÓN de la instancia (S170, C-exportacion-bloques F2),
+     * y es el mismo que la proyección da para esa instancia: {@code releerInstancia} y
+     * {@code proyectar} tienen que rellenarla igual. La instancia es un bloque de DOS
+     * tramos, colocado en MARTES-2 (cubre MARTES-2 y MARTES-3), y se mueve a donde ya está,
+     * que es la rama idempotente: devuelve las filas releídas sin pasar por el veredicto.
+     */
+    @Test
+    void moverAlMismoTramoUnBloqueDeDosTramosDevuelveSuDuracionComoLaProyeccion() throws Exception {
+        poblar();
+        anadirBloqueDeDosTramos();
+
+        String movido = mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(BLQ, 1, 2, 2))) // MARTES-2: donde ya está
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].tramo").value(2))
+                .andExpect(jsonPath("$[0].duracion").value(2))
+                .andReturn().getResponse().getContentAsString();
+
+        String proyeccion = mockMvc.perform(get("/api/horarios/" + horarioId + "/proyeccion"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<Object> deLaProyeccion = JsonPath.read(proyeccion,
+                "$.sesiones[?(@.actividadCodigo=='" + BLQ + "' && @.indice==1)]");
+        assertThat(deLaProyeccion).hasSize(1);
+        assertThat((Object) JsonPath.read(movido, "$[0]")).isEqualTo(deLaProyeccion.get(0));
+    }
+
     // ----------------------------------------- indisponibilidad DURA (S165, fase 1, 1.4)
 
     /**
@@ -635,6 +668,33 @@ class MovimientoInstanciaEndpointTest {
 
         HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
         colocar(horario, actHis, 1, tramoDe(Dia.LUNES, 1)); // el tramo de MAT: solape de P-MAT
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    /**
+     * Añade BLQ, una actividad de DOS tramos con grupo, profesor y aula propios, colocada en
+     * MARTES-2: cubre MARTES-2 y MARTES-3, el último tramo del día, así que el bloque cabe.
+     * La duración se fija sobre la entidad que devuelve {@link #actividad}, que crea todas
+     * las demás con 1.
+     */
+    private void anadirBloqueDeDosTramos() {
+        Asignatura tec = asignaturaRepository.save(new Asignatura("TEC", "Tecnologia"));
+        Aula aTec = aulaRepository.save(new Aula("A-TEC", TipoAula.ORDINARIA, null, null, null, null));
+        GrupoAdministrativo g1d = grupoRepository.save(new GrupoAdministrativo(
+                "1ºD", nivelRepository.findByCodigo("1ESO").orElseThrow(),
+                TipoGrupo.ORDINARIO, null));
+        Subgrupo sgD = subgrupoRepository.save(new Subgrupo("1ºD-s1", Set.of(g1d)));
+        Profesor pTec = profesorRepository.save(new Profesor("P-TEC", "Profesor TEC"));
+
+        Actividad actBlq = actividad(BLQ, 1, PatronTemporal.NEUTRA);
+        actBlq.setDuracionTramos(2);
+        actBlq.getPlazas().add(plaza(BLQ + "-P1", actBlq, tec, Set.of(pTec), aTec, Set.of(sgD)));
+        actividadRepository.save(actBlq);
+        entityManager.flush();
+
+        HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
+        colocar(horario, actBlq, 1, tramoDe(Dia.MARTES, 2));
         entityManager.flush();
         entityManager.clear();
     }

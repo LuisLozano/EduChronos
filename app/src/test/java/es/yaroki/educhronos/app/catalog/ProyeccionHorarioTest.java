@@ -120,6 +120,46 @@ class ProyeccionHorarioTest {
         });
     }
 
+    /**
+     * La proyección lleva la DURACIÓN de la actividad de cada sesión (S170,
+     * C-exportacion-bloques F2): sobre el catálogo de arriba se añade una actividad de 1ºA
+     * de dos tramos, y tras resolver y guardar, su sesión se proyecta con {@code duracion}
+     * 2 y todas las demás —de un tramo— con 1. El valor sale de {@code actividad}, no de la
+     * sesión: el test no lo fija en ninguna fila.
+     */
+    @Test
+    void proyectaLaDuracionDeLaActividadDeCadaSesion() {
+        poblarCatalogo();
+        Asignatura tec = asignaturaRepository.save(new Asignatura("Tec", "Tecnologia"));
+        Profesor tec9 = profesorRepository.save(new Profesor("TEC9", "Profesor TEC9"));
+        Aula taller = aulaRepository.save(new Aula("T1", TipoAula.ORDINARIA, null, null, null, null));
+        Actividad dosTramos = new Actividad();
+        dosTramos.setCodigo("Tec-1ºA");
+        dosTramos.setAsignatura(tec);
+        dosTramos.setRepeticionesPorSemana(1);
+        dosTramos.setDuracionTramos(2);
+        dosTramos.setPatronTemporal(PatronTemporal.NEUTRA);
+        dosTramos.getPlazas().add(plazaFija("Tec-1ºA-P1", dosTramos, tec, Set.of(tec9), taller,
+                Set.of(subgrupoRepository.findByCodigo("1ºA-Completo").orElseThrow())));
+        actividadRepository.save(dosTramos);
+        entityManager.flush();
+
+        ProblemaHorario problema = service.cargarProblema();
+        ResultadoOptimizacion resultado = new SolverHorario(10, 42).resolverOptimizandoConDetalle(problema);
+        Long id = service.guardar(resultado, problema, "Proyeccion con bloque").getId();
+        entityManager.flush();
+        entityManager.clear();
+
+        List<SesionVistaDTO> ses = service.proyectar(id).sesiones();
+
+        assertThat(ses).filteredOn(s -> s.actividadCodigo().equals("Tec-1ºA"))
+                .singleElement()
+                .satisfies(s -> assertThat(s.duracion()).isEqualTo(2));
+        assertThat(ses).filteredOn(s -> !s.actividadCodigo().equals("Tec-1ºA"))
+                .hasSize(24)
+                .allSatisfy(s -> assertThat(s.duracion()).isEqualTo(1));
+    }
+
     // ------------------------------------------------------------- fixture builder
     // Transcripción de problema-3-cierre-cyr-refmt.json a entidades JPA (new+save),
     // espejo del builder de CierreFase6HumoTest.

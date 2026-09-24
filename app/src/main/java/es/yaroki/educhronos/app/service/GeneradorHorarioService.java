@@ -428,6 +428,7 @@ public class GeneradorHorarioService {
 
             sesiones.add(new SesionVistaDTO(
                     sesion.getId(), sesion.getIndice(), dia, ordenTramo,
+                    sesion.getPlaza().getActividad().getDuracionTramos(),
                     asignatura.getCodigo(), asignatura.getNombreCompleto(),
                     profesores, sesion.getAula().getCodigo(),
                     subgrupos, grupos,

@@ -110,7 +110,7 @@ class HorarioPdfTest {
     @Test
     void unaPlazaDeDosGruposApareceEnLasDosPaginas() throws IOException {
         SesionVistaDTO compartida = new SesionVistaDTO(
-                1L, 0, 1, 1, "EF", "Educación Física", List.of("EFI2"), "Gimnasio",
+                1L, 0, 1, 1, 1, "EF", "Educación Física", List.of("EFI2"), "Gimnasio",
                 List.of(), List.of("1ºA", "1ºB"), "EF-1", "EF-1-P1");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(compartida)),
@@ -345,6 +345,56 @@ class HorarioPdfTest {
     }
 
     /**
+     * UN BLOQUE DE DOS TRAMOS SE PINTA EN SUS DOS FILAS (S170, C-exportacion-bloques F2). La
+     * sesión empieza el martes en el tramo 1 y dura 2: su entrada tiene que salir en las
+     * celdas (martes, 1) y (martes, 2), y en ninguna otra de la rejilla.
+     *
+     * <p>Basta la vista de GRUPO: la celda la decide {@code entradasDe}, que es común a las
+     * tres vistas; lo que cambia de una a otra es el texto de la entrada, no dónde cae.
+     *
+     * <p>Se afirma por COORDENADA, con la misma técnica que
+     * {@link #laLeyendaLlevaEncabezadosYCadaColumnaSoloLoSuyo} y
+     * {@link #laFilaDelRecreoVaEntreElTercerYElCuartoTramoLectivo}: cada bloque de texto
+     * ({@code Tm}) que cae en la x de una columna de día se asigna a la fila de la columna de
+     * horas en cuya franja vertical está. Se cuentan los bloques de las CINCO columnas, no
+     * solo los del martes: un bloque de más en cualquier celda —del martes o de otro día—
+     * rompe el aserto. El texto plano confirma aparte que la entrada sale dos veces.
+     */
+    @Test
+    void unaSesionDeDosTramosSePintaEnSusDosCeldasYEnNingunaOtra() throws IOException {
+        SesionVistaDTO bloque = new SesionVistaDTO(
+                1L, 1, 2, 1, 2, "TEC", "Tecnología", List.of("TEC1"), "Z9",
+                List.of(), List.of("1ºA"), "TEC-ACT", "TEC-P1");
+
+        byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(bloque)),
+                VistaPdf.GRUPO, contexto(JORNADA, List.of("1ºA"), Map.of(), Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        List<Float> filas = filasDeLaColumnaDeHoras(reader, 1);
+        assertThat(filas).as("cabecera + los siete tramos de la jornada").hasSize(8);
+
+        // (día, fila) de cada bloque de texto en las columnas de día. La fila 0 es la
+        // cabecera; la 1, 2 y 3 son los tramos lectivos 1..3, la 4 el recreo.
+        List<String> celdas = new ArrayList<>();
+        for (float[] b : bloquesDeTexto(reader, 1)) {
+            for (int dia = 1; dia <= 5; dia++) {
+                float x = HorarioPdf.MARGEN + HorarioPdf.COL_HORAS
+                        + (dia - 1) * HorarioPdf.COL_DIA + HorarioPdf.PADDING;
+                if (Math.abs(b[0] - x) < 0.01f) {
+                    celdas.add(dia + "-" + filaDe(filas, b[1]));
+                }
+            }
+        }
+        assertThat(celdas).as("celdas (día-fila) con texto").containsExactlyInAnyOrder("2-1", "2-2");
+
+        String entrada = VistaPdf.GRUPO.textoDeEntrada(bloque);
+        String pagina = normalizado(texto(reader, 1));
+        assertThat(pagina.split(Pattern.quote(entrada), -1).length - 1)
+                .as("veces que sale la entrada «%s»", entrada).isEqualTo(2);
+        reader.close();
+    }
+
+    /**
      * AIRE BAJO LA ÚLTIMA BANDA (S149, M5). Va en el CONTENEDOR, no en las bandas: por eso
      * {@link #laBandaDeUnaEntradaPartidaCubreSusDosLineas} sigue midiendo las mismas
      * alturas y este caso mide otra cosa, la distancia entre el suelo de la última banda y
@@ -478,7 +528,7 @@ class HorarioPdfTest {
     @Test
     void laLeyendaLlevaEncabezadosYCadaColumnaSoloLoSuyo() throws IOException {
         SesionVistaDTO conTres = new SesionVistaDTO(
-                1L, 0, 1, 1, "MAT", "Matemáticas", List.of("MAT1", "MAT2", "MAT3"), "A5",
+                1L, 0, 1, 1, 1, "MAT", "Matemáticas", List.of("MAT1", "MAT2", "MAT3"), "A5",
                 List.of(), List.of("1ºA"), "MAT-ACT", "MAT-P1");
         Map<String, String> nombres = Map.of(
                 "MAT1", "Uno Uno", "MAT2", "Dos Dos", "MAT3", "Tres Tres");
@@ -752,7 +802,7 @@ class HorarioPdfTest {
     void enVistaDeAulaLaCeldaDeCoDocenciaVaEnOrdenAsignaturaProfesoresGrupos()
             throws IOException {
         SesionVistaDTO compartida = new SesionVistaDTO(
-                1L, 0, 1, 1, "LCL", "Lengua", List.of("LEN2", "LEN8"), "A5",
+                1L, 0, 1, 1, 1, "LCL", "Lengua", List.of("LEN2", "LEN8"), "A5",
                 List.of(), List.of("2ºA", "2ºB"), "LCL-1", "LCL-1-P1");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(compartida)),
@@ -830,7 +880,7 @@ class HorarioPdfTest {
     @Test
     void elCorteDeLineaNoParteUnCodigoPorSuGuion() throws IOException {
         SesionVistaDTO laMasLarga = new SesionVistaDTO(
-                1L, 0, 1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "Taller 1 Aula Plástica",
+                1L, 0, 1, 1, 1, "DTec", "Dibujo Técnico", List.of("DIB2"), "Taller 1 Aula Plástica",
                 List.of(), List.of("1B-A", "1B-B", "1B-C", "1B-D"), "DTec-1", "DTec-1-P1");
 
         byte[] pdf = HorarioPdf.escribir(proyeccion(List.of(laMasLarga)),
@@ -980,6 +1030,21 @@ class HorarioPdfTest {
         return ys;
     }
 
+    /**
+     * La fila de la rejilla en la que cae una {@code y}: la primera, de arriba abajo, cuyo
+     * borde inferior queda por debajo. {@code filas} es la salida de
+     * {@link #filasDeLaColumnaDeHoras}, ordenada de arriba abajo; -1 si la y está por
+     * debajo de toda la rejilla.
+     */
+    private static int filaDe(List<Float> filas, float y) {
+        for (int i = 0; i < filas.size(); i++) {
+            if (y >= filas.get(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /** La {@code y} de la fila sombreada de la columna de horas, que es la del recreo. */
     private static Float yDelRecreo(PdfReader reader, int pagina) throws IOException {
         String flujo = flujoDePagina(reader, pagina);
@@ -1052,7 +1117,7 @@ class HorarioPdfTest {
     private static SesionVistaDTO sesion(int dia, int tramo, String codigo, String nombre,
                                          List<String> profesores, String aula, String grupo) {
         return new SesionVistaDTO(
-                (long) codigo.hashCode(), 0, dia, tramo, codigo, nombre, profesores, aula,
+                (long) codigo.hashCode(), 0, dia, tramo, 1, codigo, nombre, profesores, aula,
                 List.of(), List.of(grupo), codigo + "-ACT", codigo + "-P1");
     }
 }

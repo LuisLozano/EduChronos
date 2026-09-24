@@ -314,7 +314,7 @@ class ExportacionHorarioServiceTest {
     private static SesionVistaDTO sesion(int dia, int tramo, String codigo, String nombre,
                                          List<String> profesores, String aula, String grupo) {
         return new SesionVistaDTO(
-                (long) codigo.hashCode(), 0, dia, tramo, codigo, nombre, profesores, aula,
+                (long) codigo.hashCode(), 0, dia, tramo, 1, codigo, nombre, profesores, aula,
                 List.of(), List.of(grupo), codigo + "-ACT", codigo + "-P1");
     }
 }

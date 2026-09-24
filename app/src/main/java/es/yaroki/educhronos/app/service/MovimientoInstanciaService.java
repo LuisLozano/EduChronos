@@ -472,6 +472,7 @@ public class MovimientoInstanciaService {
             var asignatura = plaza.getAsignatura();
             salida.add(new SesionVistaDTO(
                     sesion.getId(), sesion.getIndice(), tramo.getDia().ordinal() + 1, ordenTramo,
+                    sesion.getPlaza().getActividad().getDuracionTramos(),
                     asignatura.getCodigo(), asignatura.getNombreCompleto(),
                     plaza.getProfesores().stream().map(p -> p.getCodigo()).sorted().toList(),
                     sesion.getAula().getCodigo(),

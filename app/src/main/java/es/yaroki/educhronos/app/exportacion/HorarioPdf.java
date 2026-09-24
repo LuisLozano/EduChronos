@@ -382,12 +382,17 @@ public final class HorarioPdf {
      * Las entradas de una celda, en el orden en que vienen de la proyección. Cada una es
      * la cadena que compone {@link VistaPdf#textoDeEntrada}, montada allí y nunca vuelta
      * a partir aquí.
+     *
+     * <p>Una sesión entra en TODAS las celdas de su día que cubre
+     * ({@link SesionVistaDTO#tramosCubiertos()}), no solo en la de su tramo de inicio: un
+     * bloque de dos tramos se pinta en las dos filas, con la misma entrada en cada una.
+     * Es común a las tres vistas.
      */
     private static List<String> entradasDe(List<SesionVistaDTO> sesiones, VistaPdf vista,
                                            int dia, int tramo) {
         List<String> entradas = new ArrayList<>();
         for (SesionVistaDTO s : sesiones) {
-            if (s.dia() == dia && s.tramo() == tramo) {
+            if (s.dia() == dia && s.tramosCubiertos().contains(tramo)) {
                 entradas.add(vista.textoDeEntrada(s));
             }
         }

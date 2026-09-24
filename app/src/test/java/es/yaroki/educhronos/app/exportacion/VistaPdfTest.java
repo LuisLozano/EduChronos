@@ -162,7 +162,7 @@ class VistaPdfTest {
 
     private static SesionVistaDTO sesion(String asignatura, List<String> profesores,
                                          String aula, List<String> grupos) {
-        return new SesionVistaDTO(1L, 0, 1, 1, asignatura, "Dibujo Técnico",
+        return new SesionVistaDTO(1L, 0, 1, 1, 1, asignatura, "Dibujo Técnico",
                 profesores, aula, List.of(), grupos, asignatura + "-ACT", asignatura + "-P1");
     }
 }

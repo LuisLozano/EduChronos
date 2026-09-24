@@ -61,7 +61,7 @@ class HorarioControllerHttpTest {
     @Test
     void get_conIdExistente_devuelve200YLasSesiones() throws Exception {
         SesionVistaDTO sesion = new SesionVistaDTO(
-                10L, 1, 1, 1, "Mat", "Matematicas", List.of("MATA"), "A1",
+                10L, 1, 1, 1, 1, "Mat", "Matematicas", List.of("MATA"), "A1",
                 List.of("1ºA-Completo"), List.of("1ºA"), "Mat-1ºA", "Mat-1ºA-P1");
         HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
                 1L, "Horario seed 7B", "BORRADOR", "OPTIMAL", 0.0, 0.0,
