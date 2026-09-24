@@ -203,7 +203,7 @@ class PrevalidacionEndpointTest {
      *
      * <p>Calibrado: 5 tramos, uno por día (L1, M1, X1, J1, V1); Mat-1ºA de 1 repetición y
      * duración 1 con MAT8; DURA de MAT8 en L1 y pin de Mat-1ºA #1 en L1. (a) ve 1 ≤ 5 − 1,
-     * (c) 1 ≤ 5, (d) no mira NEUTRA, el cortafuegos no mira duración 1, S8 no aplica.
+     * (c) 1 ≤ 5, (d) no mira NEUTRA, S8 no aplica.
      */
     @Test
     void pinSobreTramoDura_abortaCon422QueNombraProfesorYTramoSinConstruirElSolver()

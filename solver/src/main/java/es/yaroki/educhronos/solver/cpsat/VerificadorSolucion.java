@@ -158,10 +158,11 @@ public final class VerificadorSolucion {
      * del mismo profesor penaliza N; un bloque imposible (D13) cuenta solo su inicio,
      * mismo criterio que {@code verificarNoSolapes}.
      *
-     * <p><b>Gemelo solo con duración 1</b> (S165, M2, T4): el modelo penaliza únicamente el
-     * tramo de INICIO. Con {@code duracionTramos == 1} ocupados = {inicio} y ambos
-     * cuentan igual; con bloques este conteo es el correcto y el del modelo no. El
-     * cortafuegos de {@code PrevalidacionService} impide hoy resolver esa combinación.
+     * <p><b>Gemelo también con bloques</b> desde S166: hasta entonces el modelo penalizaba
+     * únicamente el tramo de INICIO (S165, M2, T4) y solo coincidían con
+     * {@code duracionTramos == 1}; un cortafuegos de {@code PrevalidacionService} impedía
+     * resolver restricciones con bloques. Hoy el modelo penaliza cada tramo ocupado y los
+     * dos cuentan igual (ver {@code SolverHorarioIndisponibilidadBloqueTest}).
      *
      * @return número total de incumplimientos blandos en la solución (suma sobre
      *         todas las restricciones BLANDA y todas las instancias). Es el conteo
@@ -706,9 +707,9 @@ public final class VerificadorSolucion {
      *
      * <p><b>Por tramo ocupado, no por tramo de inicio</b> (S165, M2, T2): hasta aquí el
      * verificador no comprobaba la indisponibilidad DURA en absoluto, y el modelo
-     * CP-SAT solo veta el tramo de INICIO (S165, M2, T1). Con {@code duracionTramos == 1}
-     * ambos criterios coinciden; con bloques, este es el correcto y el del solver no
-     * (el cortafuegos de {@code PrevalidacionService} impide hoy esa combinación).
+     * CP-SAT solo vetaba el tramo de INICIO (S165, M2, T1). Desde S166 el modelo veta
+     * todos los tramos que ocupa la sesión, igual que este criterio, y el cortafuegos que
+     * lo suplía en {@code PrevalidacionService} se retiró.
      *
      * <p><b>Restricciones repetidas cuentan UNA vez.</b> Dos filas DURA con el mismo
      * {@code (profesor, tramo)} vetan el mismo hecho: se agrupan en un {@code Set} de

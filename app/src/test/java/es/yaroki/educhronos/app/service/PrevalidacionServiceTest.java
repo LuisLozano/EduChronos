@@ -358,17 +358,18 @@ class PrevalidacionServiceTest {
         assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
     }
 
-    // ------------------------------------------- (e) cortafuegos restricción + bloque
+    // ------------------------------------ restricciones horarias con bloques (S166)
 
     /**
-     * (E1) Cortafuegos, caso positivo con DURA. MAT1 tiene una DURA e imparte Mat-1ºA de
-     * 2 tramos seguidos: UN error que nombra a MAT1 (entidad) y a la actividad
-     * (descripción), con demanda 2 (tramos seguidos que pide la actividad) y disponible 1
-     * (lo que el generador soporta con restricciones). Calibrado para que el resto calle:
-     * 30 tramos en 5 días; MAT1 demanda 2×2 = 4 ≤ 30 − 1; el grupo, 4 ≤ 30; NEUTRA.
+     * GUARDA (S166): restricciones horarias y bloques conviven. MAT1 tiene una DURA y una
+     * BLANDA e imparte Mat-1ºA de 2 tramos seguidos, y la pre-validación no da NINGÚN
+     * ERROR. Hasta S166 lo impedía el cortafuegos RESTRICCION_HORARIA_CON_BLOQUE (S165),
+     * que se retiró cuando el solver pasó a vetar y penalizar todos los tramos que ocupa
+     * cada sesión. Calibrado como el resto del bloque: 30 tramos en 5 días; MAT1 demanda
+     * 2×2 = 4 ≤ 30 − 1; el grupo, 4 ≤ 30; NEUTRA.
      */
     @Test
-    void profesorConDuraQueImparteUnBloque_produceErrorQueNombraProfesorYActividad() {
+    void profesorConDuraYBlandaQueImparteUnBloque_noProduceNingunError() {
         Profesor mat1 = new Profesor("MAT1", "Uno");
         GrupoAdministrativo grupo = grupo("1ºA");
         Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
@@ -378,132 +379,40 @@ class PrevalidacionServiceTest {
                 tramos, List.of(mat1), List.of(grupo), List.of(sg),
                 List.of(actividad("Mat-1ºA", 2, 2, PatronTemporal.NEUTRA,
                         plaza("Mat-1ºA-P1", mat1, sg))),
-                List.of(dura(mat1, tramos.get(0))));
+                List.of(dura(mat1, tramos.get(1)), blanda(mat1, tramos.get(3))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
-            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
-            assertThat(a.regla())
-                    .isEqualTo(PrevalidacionService.REGLA_RESTRICCION_HORARIA_CON_BLOQUE);
-            assertThat(a.entidadCodigo()).isEqualTo("MAT1");
-            assertThat(a.demanda()).isEqualTo(2);
-            assertThat(a.disponible()).isEqualTo(1);
-            assertThat(a.descripcion()).contains("MAT1").contains("Mat-1ºA")
-                    .contains("aún no soporta");
-        });
+        assertThat(PrevalidacionService.prevalidar(problema))
+                .filteredOn(a -> a.severidad() == Severidad.ERROR)
+                .isEmpty();
     }
 
     /**
-     * (E2) Una BLANDA también lo dispara: el defecto del modelo afecta a las dos (S165, M2: T1
-     * para DURA, T4 para BLANDA). Mismo fixture que E1 con la restricción BLANDA.
+     * (E6) ORDEN: un ERROR va ANTES que S8 (AVISO), que sigue la última. Se asevera por
+     * índice. Hasta S166 el ERROR lo ponía el cortafuegos de restricciones con bloques;
+     * retirado, lo pone un pin de Mat-1ºA #1 sobre la DURA de MAT1 (regla (f)), que se
+     * computa antes que S8. LEN1 imparte una tutoría sin ser tutor. Grupo 1ºA:
+     * 2×2 + 1 = 5 ≤ 30; MAT1 demanda 4 ≤ 30 − 1.
      */
     @Test
-    void profesorConBlandaQueImparteUnBloque_tambienProduceError() {
-        Profesor mat1 = new Profesor("MAT1", "Uno");
-        GrupoAdministrativo grupo = grupo("1ºA");
-        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
-        List<Tramo> tramos = tramosEnDias(5, 6);
-
-        ProblemaHorario problema = problema(
-                tramos, List.of(mat1), List.of(grupo), List.of(sg),
-                List.of(actividad("Mat-1ºA", 2, 2, PatronTemporal.NEUTRA,
-                        plaza("Mat-1ºA-P1", mat1, sg))),
-                List.of(blanda(mat1, tramos.get(0))));
-
-        assertThat(soloRegla(PrevalidacionService.prevalidar(problema),
-                PrevalidacionService.REGLA_RESTRICCION_HORARIA_CON_BLOQUE))
-                .singleElement().extracting(AvisoPrevalidacion::entidadCodigo).isEqualTo("MAT1");
-    }
-
-    /** (E3) Mismo bloque SIN restricciones horarias: el cortafuegos calla. */
-    @Test
-    void bloqueSinRestriccionesHorarias_noProduceAviso() {
-        Profesor mat1 = new Profesor("MAT1", "Uno");
-        GrupoAdministrativo grupo = grupo("1ºA");
-        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
-
-        ProblemaHorario problema = problema(
-                tramosEnDias(5, 6), List.of(mat1), List.of(grupo), List.of(sg),
-                List.of(actividad("Mat-1ºA", 2, 2, PatronTemporal.NEUTRA,
-                        plaza("Mat-1ºA-P1", mat1, sg))),
-                List.of());
-
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
-    }
-
-    /**
-     * (E4) Restricción DURA con actividades de UN tramo: el caso que el modelo ya trata
-     * bien (S165, M2, control T1). El cortafuegos calla; cae si se olvida el filtro
-     * {@code duracionTramos > 1}.
-     */
-    @Test
-    void restriccionConActividadDeUnTramo_noProduceAviso() {
-        Profesor mat1 = new Profesor("MAT1", "Uno");
-        GrupoAdministrativo grupo = grupo("1ºA");
-        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
-        List<Tramo> tramos = tramosEnDias(5, 6);
-
-        ProblemaHorario problema = problema(
-                tramos, List.of(mat1), List.of(grupo), List.of(sg),
-                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
-                        plaza("Mat-1ºA-P1", mat1, sg))),
-                List.of(dura(mat1, tramos.get(0))));
-
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
-    }
-
-    /**
-     * (E5) NO TAUTOLÓGICO: en el catálogo hay restricciones Y hay un bloque, pero no del
-     * mismo profesor. MAT1 tiene la DURA e imparte 1 tramo; LEN1 imparte el bloque y no
-     * tiene restricciones. Cero avisos: la regla es por PROFESOR, no «existe restricción
-     * y existe bloque». Grupos distintos para que ningún conteo de grupo intervenga.
-     */
-    @Test
-    void restriccionYBloqueDeProfesoresDistintos_noProduceAviso() {
-        Profesor mat1 = new Profesor("MAT1", "Uno");
-        Profesor len1 = new Profesor("LEN1", "Dos");
-        GrupoAdministrativo a = grupo("1ºA");
-        GrupoAdministrativo b = grupo("1ºB");
-        Subgrupo sgA = new Subgrupo("1ºA-Completo", Set.of(a));
-        Subgrupo sgB = new Subgrupo("1ºB-Completo", Set.of(b));
-        List<Tramo> tramos = tramosEnDias(5, 6);
-
-        ProblemaHorario problema = problema(
-                tramos, List.of(mat1, len1), List.of(a, b), List.of(sgA, sgB),
-                List.of(
-                        actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
-                                plaza("Mat-1ºA-P1", mat1, sgA)),
-                        actividad("Len-1ºB", 2, 2, PatronTemporal.NEUTRA,
-                                plaza("Len-1ºB-P1", len1, sgB))),
-                List.of(dura(mat1, tramos.get(0))));
-
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
-    }
-
-    /**
-     * (E6) ORDEN: el cortafuegos es ERROR y va ANTES que S8 (AVISO), que sigue la
-     * última. Se asevera por índice. MAT1 (con DURA) imparte el bloque; LEN1 imparte una
-     * tutoría sin ser tutor. Grupo 1ºA: 2×2 + 1 = 5 ≤ 30.
-     */
-    @Test
-    void conCortafuegosYUnaS8_elCortafuegosVaAntesQueS8() {
+    void conUnErrorYUnaS8_elErrorVaAntesQueS8() {
         Profesor mat1 = new Profesor("MAT1", "Uno");
         Profesor len1 = new Profesor("LEN1", "Dos");
         GrupoAdministrativo grupo = grupo("1ºA");
         Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
         List<Tramo> tramos = tramosEnDias(5, 6);
+        Actividad mat = actividad("Mat-1ºA", 2, 2, PatronTemporal.NEUTRA,
+                plaza("Mat-1ºA-P1", mat1, sg));
 
-        ProblemaHorario problema = problema(
+        ProblemaHorario problema = problemaConPines(
                 tramos, List.of(mat1, len1), List.of(grupo), List.of(sg),
-                List.of(
-                        actividad("Mat-1ºA", 2, 2, PatronTemporal.NEUTRA,
-                                plaza("Mat-1ºA-P1", mat1, sg)),
-                        actividadTutorial("Tut-1ºA", len1, sg)),
-                List.of(dura(mat1, tramos.get(0))));
+                List.of(mat, actividadTutorial("Tut-1ºA", len1, sg)),
+                List.of(dura(mat1, tramos.get(0))),
+                List.of(pin(mat, 1, tramos.get(0))));
 
         List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
 
         assertThat(avisos).extracting(AvisoPrevalidacion::regla).containsExactly(
-                PrevalidacionService.REGLA_RESTRICCION_HORARIA_CON_BLOQUE,
+                PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA,
                 PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
     }
 
@@ -513,7 +422,7 @@ class PrevalidacionServiceTest {
      * (F1) Pin sobre un tramo DURA de su profesor: UN error que señala a MAT1 y cuya
      * descripción nombra la sesión (Mat-1ºA #1) y el tramo (D1T1). Demanda 1 (el tramo que
      * pide el pin) contra disponible 0. Calibrado para que el resto calle: 30 tramos,
-     * MAT1 demanda 1 ≤ 30 − 1, grupo 1 ≤ 30, duración 1 (el cortafuegos no mira).
+     * MAT1 demanda 1 ≤ 30 − 1, grupo 1 ≤ 30, duración 1.
      */
     @Test
     void pinSobreTramoDuraDeSuProfesor_produceErrorQueNombraProfesorSesionYTramo() {
@@ -608,9 +517,9 @@ class PrevalidacionServiceTest {
 
     /**
      * (F5) Tramos OCUPADOS, no solo el del pin: un bloque de 2 fijado en D1T1 ocupa D1T1
-     * y D1T2, y la DURA está en D1T2. UN error del pin que nombra D1T2. El cortafuegos (e)
-     * también dispara —MAT1 tiene restricción e imparte un bloque— y va ANTES: la lista
-     * es exactamente [cortafuegos, pin]. MAT1 demanda 2 ≤ 30 − 1.
+     * y D1T2, y la DURA está en D1T2. UN error del pin que nombra D1T2, y es el ÚNICO
+     * hallazgo: hasta S166 lo precedía el cortafuegos de restricciones con bloques, ya
+     * retirado. MAT1 demanda 2 ≤ 30 − 1.
      */
     @Test
     void pinDeUnBloqueCuyoTramoInteriorEsDura_produceErrorQueNombraElInterior() {
@@ -629,9 +538,8 @@ class PrevalidacionServiceTest {
         List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
 
         assertThat(avisos).extracting(AvisoPrevalidacion::regla).containsExactly(
-                PrevalidacionService.REGLA_RESTRICCION_HORARIA_CON_BLOQUE,
                 PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
-        assertThat(avisos.get(1).descripcion()).contains("D1T1").contains("D1T2");
+        assertThat(avisos.get(0).descripcion()).contains("D1T1").contains("D1T2");
     }
 
     /**
@@ -659,9 +567,8 @@ class PrevalidacionServiceTest {
     /**
      * (F7) Bloque IMPOSIBLE fijado por un pin: Lab-1ºA de 2 tramos fijado en D1T6, el
      * último del día, desborda (no existe D1T7). Sin tramos ocupados que reconstruir, se
-     * mira el tramo del pin, y MAT1 tiene DURA en D1T6 → UN error del pin (además del
-     * cortafuegos, que dispara por restricción + bloque). Si el respaldo fuera «ningún
-     * tramo», este pin contradictorio pasaría callado.
+     * mira el tramo del pin, y MAT1 tiene DURA en D1T6 → UN error del pin. Si el respaldo
+     * fuera «ningún tramo», este pin contradictorio pasaría callado.
      */
     @Test
     void pinDeUnBloqueImposibleSobreDura_miraElTramoDelPin() {
