@@ -1735,6 +1735,70 @@ describe('contenedor del horario', () => {
   });
 
   /**
+   * S166 · el 422 de la PRE-VALIDACIÓN trae su motivo en `mensaje`, y la vista lo
+   * enseña. Un pin sobre un tramo DURA sí tiene solución —basta con quitar el pin—, así
+   * que el genérico del (42), «no tiene solución», le mentiría al usuario.
+   *
+   * <p>Mismo status que el (42) y el (46): el que decide es la `causa`. Se asertan
+   * sueltos la regla, el profesor y el tramo, y la ausencia del genérico.
+   */
+  it('(83) un 422 de pre-validación enseña su motivo, no «no tiene solución»', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({
+      status: 422,
+      error: {
+        causa: 'PREVALIDACION_FALLIDA',
+        mensaje:
+          "Pre-validacion fallida: La sesión 'AMO-1FPB' #3 está fijada en el tramo X1 " +
+          "(día 3, tramo 1), en el que el profesor 'PAU2' no puede dar clase (restricción DURA)",
+        estado: null,
+        segundos: null,
+      },
+    });
+    await fixture.whenStable();
+
+    const texto = (fixture.nativeElement as HTMLElement)
+      .querySelector('.error-generacion')!
+      .textContent!.trim();
+    expect(texto).toContain('restricción DURA');
+    expect(texto).toContain("'PAU2'");
+    expect(texto).toContain('tramo X1 (día 3, tramo 1)');
+    expect(texto).not.toContain('no tiene solución');
+  });
+
+  /**
+   * S166 · pareja del (83): el `mensaje` de un fallo del SOLVER sigue sin enseñarse. Es
+   * prosa de log («Estado CP-SAT: INFEASIBLE») y el infactible de S118 dice lo que decía.
+   * Sin este caso, «enseñar `mensaje` en todo 422» pasaría el (83).
+   */
+  it('(84) un 422 del solver con mensaje sigue dando el texto del catálogo infactible', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({
+      status: 422,
+      error: {
+        causa: 'CATALOGO_INFACTIBLE',
+        mensaje: 'Estado CP-SAT: INFEASIBLE',
+        estado: 'INFEASIBLE',
+        segundos: 600,
+      },
+    });
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso!.textContent?.trim()).toBe(
+      'Esta configuración no tiene solución. Revisa el catálogo.',
+    );
+  });
+
+  /**
    * D9, la mitad que importa: la cabecera vive FUERA de la cadena `@if`, así que
    * sobrevive al arranque con 404 —proyección que no existe todavía, que es el
    * estado real de una instalación nueva antes de la primera generación—.

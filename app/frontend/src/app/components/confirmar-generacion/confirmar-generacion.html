@@ -21,9 +21,12 @@
   </ul>
 
   @if (errores.length > 0) {
+    <!-- S166: hasta aquí decía también que el servidor «no detallará la causa en la
+         respuesta». Dejó de ser cierto: el 422 de la pre-validación trae el motivo y la
+         vista lo enseña. -->
     <p class="advertencia">
-      Además, el servidor rechazará esta generación y no detallará la causa en la
-      respuesta. Estos hallazgos de severidad ERROR lo impedirán:
+      Además, el servidor rechazará esta generación. Estos hallazgos de severidad ERROR lo
+      impedirán:
     </p>
 
     <ul class="errores">

@@ -157,4 +157,17 @@ describe('diálogo de confirmar generación', () => {
       'Generar de todos modos',
     );
   });
+
+  /**
+   * S166 · la advertencia ya no promete que el servidor callará la causa: desde la
+   * condición 6 el 422 de la pre-validación la trae y la vista la enseña. Se fija el
+   * texto entero para que la afirmación falsa no pueda volver ni quedarse a medias.
+   */
+  it('(41) la advertencia anuncia el rechazo sin decir que el servidor callará la causa', () => {
+    const advertencia = (fixture.nativeElement as HTMLElement).querySelector('.advertencia');
+
+    expect(advertencia!.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Además, el servidor rechazará esta generación. Estos hallazgos de severidad ERROR lo impedirán:',
+    );
+  });
 });

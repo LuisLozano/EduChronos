@@ -668,12 +668,22 @@ export class HorarioView {
    * <p>La `causa` manda sobre el status cuando viene; el status es el respaldo para
    * un cuerpo que no la traiga (un proxy que lo recorte, una versión previa del
    * backend). Sin ninguno de los dos, el genérico con el número.
+   *
+   * <p>ÚNICA excepción a «nunca la prosa» (S166): el rechazo de la pre-validación. Su
+   * `mensaje` no es log del solver sino las descripciones de los hallazgos ERROR —las
+   * mismas del panel—, y es lo único que dice QUÉ tocar: un pin sobre un tramo DURA sí
+   * tiene solución, y el genérico de catálogo infactible le mentiría al usuario. Sin
+   * `mensaje`, cae al genérico del 422 como antes.
    */
   private mensajeGeneracion(err: {
     status?: number;
-    error?: { causa?: string };
+    error?: { causa?: string; mensaje?: string };
   }): string {
     const causa = err?.error?.causa;
+    const mensaje = err?.error?.mensaje;
+    if (causa === 'PREVALIDACION_FALLIDA' && mensaje) {
+      return mensaje;
+    }
     if (causa === 'PRESUPUESTO_AGOTADO' || err?.status === 503) {
       return 'Se agotó el tiempo de cálculo. Vuelve a intentarlo.';
     }
