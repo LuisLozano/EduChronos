@@ -215,8 +215,11 @@ public final class ProblemaHorarioMapper {
             tutorias.add(construir(() -> new ProfesorTutoria(prof, grupo, rol), ctx));
         }
 
-        // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia).
-        // El mapper los ordena: el autor del JSON no tiene que preocuparse del orden.
+        // ProblemaHorario exige tramos ordenados por (diaSemana, ordenEnDia) y sin dos con el
+        // mismo par, y lo comprueba en su constructor (S166). El mapper los ordena: el autor del
+        // JSON no tiene que preocuparse del orden. Un par repetido con distinto código NO lo
+        // arregla la ordenación: lo rechaza el constructor, y sale como
+        // ProblemaInvalidoException por construir().
         List<Tramo> tramosOrdenados = new ArrayList<>(tramos.values());
         tramosOrdenados.sort(Comparator.comparingInt(Tramo::diaSemana)
                 .thenComparingInt(Tramo::ordenEnDia));

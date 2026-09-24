@@ -65,6 +65,32 @@ class ProblemaHorarioJsonLoaderTest {
                 .hasMessageContaining("FANTASMA");
     }
 
+    /**
+     * S166: dos tramos con el mismo (diaSemana, ordenEnDia) y distinto código. El mapper solo
+     * comprueba códigos repetidos; el par lo rechaza el constructor de ProblemaHorario, y su
+     * IllegalArgumentException sale como ProblemaInvalidoException por el envoltorio
+     * {@code construir} del mapper.
+     */
+    @Test
+    void rechazaDosTramosConElMismoDiaYOrden() {
+        String json = """
+            { "tramos": [{"codigo":"L1","diaSemana":1,"ordenEnDia":1},
+                         {"codigo":"OTRO","diaSemana":1,"ordenEnDia":1}],
+              "aulas": [{"codigo":"A5","nombre":"Aula 5"}],
+              "asignaturas": [{"codigo":"Mat","nombre":"Matematicas"}],
+              "profesores": [{"codigo":"MAT8","nombre":"P"}],
+              "grupos": [{"codigo":"1A","tipo":"ORDINARIO"}],
+              "subgrupos": [{"codigo":"1A-Completo","grupos":["1A"]}],
+              "actividades": [{"codigo":"Mat-1A","asignatura":"Mat","repeticionesPorSemana":1,
+                "duracionTramos":1,"patronTemporal":"NEUTRA","plazas":[
+                {"codigo":"P1","asignatura":"Mat","profesores":["MAT8"],
+                 "aulaFija":"A5","subgrupos":["1A-Completo"]}]}] }
+            """;
+        assertThatThrownBy(() -> loader.cargar(stream(json)))
+                .isInstanceOf(ProblemaInvalidoException.class)
+                .hasMessageContaining("OTRO");
+    }
+
     @Test
     void rechazaPlazaSinProfesores() {
         String json = """
