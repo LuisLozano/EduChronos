@@ -32,9 +32,14 @@ de cuál se cuelgan las entradas y con qué orden se compone su texto, que es el
 del exportador: si leyera `VistaPdf` para saber qué texto esperar, un error compartido por
 las dos vías pasaría desapercibido, que es justo lo que este oráculo existe para impedir.
 
+Desde S170 cada sesión se expande a los tramos que cubre según `actividad.duracion_tramos`,
+una guarda aborta antes de comparar si algún bloque del horario desborda el día o cruza el
+recreo, y el CSV admite varias filas por sesión (una por tramo) siempre que no repitan un
+mismo (Sesión, Día, Tramo) ni difieran en otra columna que «Tramo».
+
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
-  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor]
+  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor|aula]
 """
 import argparse
 import collections
@@ -69,9 +74,13 @@ from tramo_semanal t
 where t.es_lectivo = 1;
 
 create temp view v_sesion as
-select s.id as sesion_id, s.plaza_id, s.aula_id, v.dia, v.tramo
+select s.id as sesion_id, s.plaza_id, s.aula_id, c.dia, c.tramo
 from sesion s
-join v_tramo v on v.tramo_id = s.tramo_inicio_id
+join plaza p     on p.id = s.plaza_id
+join actividad a on a.id = p.actividad_id
+join v_tramo i   on i.tramo_id = s.tramo_inicio_id
+join v_tramo c   on c.dia = i.dia
+                and c.tramo between i.tramo and i.tramo + a.duracion_tramos - 1
 where s.horario_id = :horario_id;
 
 create temp view v_grupo as
@@ -98,6 +107,56 @@ class Fallo(Exception):
     """Motivo por el que el CSV no se puede dar por bueno."""
 
 
+# Sesiones cuyo bloque no cabe: los tramos lectivos que cubre no son `duracion_tramos`
+# (desborda el día), o su extensión en el `orden` de tramo_semanal no lo es (cruza el
+# recreo: ese orden cuenta el recreo y la numeración lectiva no). Con `v_sesion` expandida,
+# una sesión así se compararía con MENOS tramos de los que ocupa y podría salir OK.
+SQL_BLOQUES_IMPOSIBLES = """
+select s.id, a.codigo, a.duracion_tramos,
+       count(c.tramo_id) as cubiertos,
+       max(t.orden) - min(t.orden) + 1 as extension
+from sesion s
+join plaza p              on p.id = s.plaza_id
+join actividad a          on a.id = p.actividad_id
+left join v_tramo i       on i.tramo_id = s.tramo_inicio_id
+left join v_tramo c       on c.dia = i.dia
+                         and c.tramo between i.tramo and i.tramo + a.duracion_tramos - 1
+left join tramo_semanal t on t.id = c.tramo_id
+where s.horario_id = ?
+group by s.id, a.codigo, a.duracion_tramos
+having count(c.tramo_id) <> a.duracion_tramos
+    or coalesce(max(t.orden) - min(t.orden) + 1, 0) <> a.duracion_tramos
+order by s.id
+"""
+
+
+def guarda_bloques(ruta_db, horario_id):
+    """Aborta con Fallo si alguna sesión del horario tiene un bloque imposible. Corre antes
+    de cualquier comparación, en los dos modos."""
+    con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
+    try:
+        con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
+        filas = con.execute(SQL_BLOQUES_IMPOSIBLES, (int(horario_id),)).fetchall()
+    finally:
+        con.close()
+    if filas:
+        raise Fallo("%d sesión(es) del horario %s con un bloque imposible:\n%s" % (
+            len(filas), horario_id, "\n".join(
+                "  sesión %d, actividad %s, duración %d: cubre %d tramo(s) lectivo(s), "
+                "extensión %s en el orden de tramo_semanal"
+                % (sid, act, dur, cub, "-" if ext is None else ext)
+                for sid, act, dur, cub, ext in filas)))
+    print("--- GUARDA DE BLOQUES (horario %s): ninguna sesión con bloque imposible ---"
+          % horario_id)
+
+
+def nombre_dia(dia):
+    """«lunes»..«viernes» para un Día 1..5 leído del CSV."""
+    if dia in ("1", "2", "3", "4", "5"):
+        return DIAS_CABECERA[int(dia) - 1].lower()
+    return "fuera de 1..5"
+
+
 def oraculo(ruta_db, horario_id):
     """Las tres vistas calculadas en SQL, como conjuntos de tuplas."""
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
@@ -116,7 +175,7 @@ def oraculo(ruta_db, horario_id):
             "aula": conjunto("v_aula"),
         }
         sesiones = con.execute(
-            "select count(*) from v_sesion").fetchone()[0]
+            "select count(distinct sesion_id) from v_sesion").fetchone()[0]
 
         print("--- ORÁCULO (horario %s) ---" % horario_id)
         print("  sesiones del horario ......... %d" % sesiones)
@@ -159,7 +218,11 @@ def desde_csv(ruta_csv):
     col = {nombre: i for i, nombre in enumerate(filas[0])}
     vistas = {"grupo": set(), "profesor": set(), "aula": set()}
     vistas_por_columna = [("grupo", "Grupos"), ("profesor", "Profesores")]
-    sesiones_vistas = set()
+    # Una sesión de un bloque ocupa VARIAS filas, una por tramo que cubre. Lo que no puede
+    # pasar es que un mismo (Sesión, Día, Tramo) salga dos veces, ni que dos filas de la
+    # misma Sesión digan cosas distintas fuera de «Tramo»: serían dos sesiones con un id.
+    celdas_vistas = set()
+    primera_fila = {}
 
     for n, fila in enumerate(filas[1:], start=2):
         if len(fila) != len(CABECERA):
@@ -168,10 +231,19 @@ def desde_csv(ruta_csv):
         dia = fila[col["Día"]]
         tramo = fila[col["Tramo"]]
         sesion = fila[col["Sesión"]]
-        if sesion in sesiones_vistas:
-            raise Fallo("la Sesión %s aparece en más de una fila (línea %d)"
-                        % (sesion, n))
-        sesiones_vistas.add(sesion)
+        if (sesion, dia, tramo) in celdas_vistas:
+            raise Fallo("la Sesión %s aparece repetida en el día %s (%s), tramo %s (línea %d)"
+                        % (sesion, dia, nombre_dia(dia), tramo, n))
+        celdas_vistas.add((sesion, dia, tramo))
+        if sesion in primera_fila:
+            linea_primera, anterior = primera_fila[sesion]
+            for columna, i in col.items():
+                if columna != "Tramo" and fila[i] != anterior[i]:
+                    raise Fallo("la Sesión %s tiene filas que difieren en la columna «%s»: "
+                                "%r en la línea %d y %r en la línea %d"
+                                % (sesion, columna, anterior[i], linea_primera, fila[i], n))
+        else:
+            primera_fila[sesion] = (n, fila)
 
         for vista, columna in vistas_por_columna:
             crudo_col = fila[col[columna]]
@@ -287,7 +359,7 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
                               join grupo_administrativo g2 on g2.id = sg.grupo_id
                              where ps.plaza_id = s.plaza_id order by g2.codigo) g)
                 from %s v
-                join v_sesion s on s.sesion_id = v.sesion_id
+                join sesion s on s.id = v.sesion_id
                 join plaza pl on pl.id = s.plaza_id
                 join asignatura a on a.id = pl.asignatura_id
                 join aula au on au.id = s.aula_id""" % (conf["recurso"], conf["sql"])):
@@ -560,6 +632,12 @@ def main():
     parser.add_argument("--vista", choices=sorted(VISTAS), default="grupo",
                         help="modo pdf: qué vista se espera en el fichero (por defecto grupo)")
     args = parser.parse_args()
+
+    try:
+        guarda_bloques(args.db, args.horario_id)
+    except Fallo as e:
+        print("FALLO: %s" % e, file=sys.stderr)
+        return 1
 
     if args.modo == "pdf":
         try:
