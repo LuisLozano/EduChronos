@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { ProfesorLista } from './profesor-lista';
+import { DisponibilidadDialogo } from './disponibilidad/disponibilidad-dialogo';
 
 /**
  * Congela el comportamiento de la lista. El foco de M3 (traducción de error) son
@@ -166,5 +167,64 @@ describe('ProfesorLista', () => {
     expect(sinResultados.textContent).toContain('zzz');
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
+
+  /** Dos filas: los casos pulsan la SEGUNDA, así una plantilla que pasara siempre la
+   * primera fila del `@for` quedaría en rojo. */
+  const FILAS = [
+    { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' },
+    { id: 8, codigo: 'LEN2', nombreCompleto: 'Luis Muñoz' },
+  ];
+
+  /**
+   * Pulsa «Disponibilidad» en una fila, por el DOM y no por el método: mide también que
+   * el `(click)` de esa fila pase SU profesor. El diálogo espiado se cierra con `true`
+   * por defecto, el caso más comprometido para (11).
+   */
+  function pulsarDisponibilidad(fila: number, cierraCon: boolean | undefined = true): void {
+    dialog.open.mockReturnValue({
+      closed: { subscribe: (fn: (v: boolean | undefined) => void) => fn(cierraCon) },
+    });
+    const raiz = fixture.nativeElement as HTMLElement;
+    const botones = [...raiz.querySelectorAll<HTMLButtonElement>(
+      `tbody tr:nth-child(${fila + 1}) .profesores__acciones button`)];
+    botones.find((b) => b.textContent!.trim() === 'Disponibilidad')!.click();
+  }
+
+  it('(9) pulsar Disponibilidad abre DisponibilidadDialogo', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    pulsarDisponibilidad(1);
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    // El COMPONENTE, no sólo el data: cablear el botón al formulario de edición, que
+    // vive en la misma celda y también recibe el profesor, pasaría el aserto de (10).
+    expect(dialog.open.mock.calls[0][0]).toBe(DisponibilidadDialogo);
+  });
+
+  it('(10) el data es el Profesor DE ESA FILA, entero y sin envolver', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    pulsarDisponibilidad(1);
+
+    // Igualdad sobre el objeto completo: cae pasar la fila equivocada, pasar el id en
+    // vez de la entidad y envolverla en `{ data: { profesor } }`.
+    expect(dialog.open.mock.calls[0][1]).toEqual({ data: FILAS[1] });
+  });
+
+  it('(11) al cerrar el diálogo de disponibilidad la lista NO recarga, ni siquiera con true', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+
+    // La tabla no pinta ningún dato de disponibilidad: un `.closed.subscribe(...)`
+    // copiado de `abrirForm` añadiría un GET por cada guardado, y este expectNone lo caza.
+    pulsarDisponibilidad(0, true);
+    http.expectNone('/api/profesores');
+
+    // El diálogo se abrió de verdad: el expectNone mide la ausencia de recarga, no un
+    // botón que no hiciera nada.
+    expect(dialog.open).toHaveBeenCalledTimes(1);
   });
 });

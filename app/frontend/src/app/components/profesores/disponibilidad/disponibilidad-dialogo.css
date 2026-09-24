@@ -1,0 +1,191 @@
+/* El CDK no aporta estilos: el diálogo pone los suyos, como tutoria-dialogo. Colores,
+   tamaños de letra y espaciado salen de los tokens de styles.css. */
+.disponibilidad-dialogo {
+  padding: var(--e5);
+  min-width: 22rem;
+  background: var(--color-superficie);
+  border-radius: var(--radio-m);
+}
+
+.disponibilidad-dialogo__titulo {
+  margin: 0 0 var(--e4);
+}
+
+.disponibilidad-dialogo__cargando,
+.disponibilidad-dialogo__aviso {
+  margin: 0 0 var(--e4);
+  font-size: var(--tam-m);
+  max-width: 32rem;
+}
+
+.disponibilidad-dialogo__etiqueta {
+  display: block;
+  margin-bottom: var(--e1);
+  font-size: var(--tam-s);
+}
+
+/* Pincel: control segmentado. El activo se dice con aria-pressed y se ve por RELLENO,
+   no por color de señal (decisión 1): acento suave y borde de acento. */
+.disponibilidad-dialogo__pincel {
+  display: inline-flex;
+  margin-bottom: var(--e4);
+}
+
+.disponibilidad-dialogo__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  border-radius: 0;
+  margin-left: calc(-1 * var(--borde-fino));
+}
+
+.disponibilidad-dialogo__opcion:first-child {
+  border-radius: var(--radio-s) 0 0 var(--radio-s);
+  margin-left: 0;
+}
+
+.disponibilidad-dialogo__opcion:last-child {
+  border-radius: 0 var(--radio-s) var(--radio-s) 0;
+}
+
+.disponibilidad-dialogo__opcion[aria-pressed='true'] {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+  font-weight: var(--peso-medio);
+}
+
+/* Muestra de un estado en el pincel y en la leyenda: la celda en pequeño. */
+.disponibilidad-dialogo__muestra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+}
+
+/* Rejilla: la gramática de horario-grid (retícula completa, cabeceras centradas sobre
+   superficie-alt), no la de las tablas de catálogo. */
+.disponibilidad-dialogo__rejilla {
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--tam-s);
+}
+
+.disponibilidad-dialogo__rejilla th,
+.disponibilidad-dialogo__rejilla td {
+  border: var(--borde-fino) solid var(--color-borde);
+  padding: 0;
+}
+
+.disponibilidad-dialogo__rejilla th {
+  background: var(--color-superficie-alt);
+  text-align: center;
+}
+
+.disponibilidad-dialogo__esquina {
+  width: 7.5rem;
+  padding: var(--e1);
+  font-weight: var(--peso-normal);
+}
+
+/* Cabeceras pulsables y celdas: `button` anula la caja global de la jerarquía de
+   acciones, igual que `.candado` en horario-grid. */
+.disponibilidad-dialogo__cabecera {
+  width: 100%;
+  padding: var(--e1);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: var(--peso-fuerte);
+}
+
+.disponibilidad-dialogo__cabecera--tramo {
+  font-weight: var(--peso-normal);
+}
+
+.disponibilidad-dialogo__cabecera:hover {
+  background: var(--color-acento-suave);
+}
+
+.disponibilidad-dialogo__celda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.5rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: var(--tam-l);
+  background: var(--color-superficie);
+}
+
+/* Los dos estados con fila. La tinta la hereda el SVG por currentColor; el contraste
+   símbolo/fondo medido en S167 es 6,35:1 (error) y 5,33:1 (aviso), sobre 3:1. */
+.disponibilidad-dialogo__celda--dura,
+.disponibilidad-dialogo__muestra--dura {
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+}
+
+.disponibilidad-dialogo__celda--blanda,
+.disponibilidad-dialogo__muestra--blanda {
+  background: var(--color-aviso-fondo);
+  color: var(--color-aviso);
+}
+
+.disponibilidad-dialogo__simbolo {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
+/* Recreo: separador estrecho, como la fila de recreo de horario-grid. */
+.disponibilidad-dialogo__recreo td {
+  padding: var(--e1) 0;
+  text-align: center;
+  font-size: var(--tam-xs);
+  line-height: var(--lh-apretado);
+  color: var(--color-tinta-suave);
+  background: var(--color-superficie-alt);
+}
+
+.disponibilidad-dialogo__leyenda {
+  margin-top: var(--e4);
+  font-size: var(--tam-xs);
+}
+
+.disponibilidad-dialogo__leyenda-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e4);
+  margin: 0 0 var(--e1);
+  padding: 0;
+  list-style: none;
+}
+
+.disponibilidad-dialogo__leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+}
+
+.disponibilidad-dialogo__nota {
+  margin: 0;
+  color: var(--color-tinta-suave);
+}
+
+.disponibilidad-dialogo__error-servidor {
+  color: var(--color-error);
+  margin: var(--e2) 0;
+}
+
+.disponibilidad-dialogo__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}

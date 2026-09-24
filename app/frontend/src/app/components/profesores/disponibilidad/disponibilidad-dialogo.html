@@ -1,0 +1,185 @@
+<div class="disponibilidad-dialogo">
+  <h2 class="disponibilidad-dialogo__titulo">Disponibilidad — {{ profesor.nombreCompleto }}</h2>
+
+  <!-- Símbolo de un estado. SVG con currentColor: toma la tinta de la celda, así que el
+       color vive en el CSS y el trazo aquí. «Disponible» no lleva símbolo: es la celda vacía. -->
+  <ng-template #simbolo let-e>
+    @switch (e) {
+      @case ('DURA') {
+        <svg class="disponibilidad-dialogo__simbolo" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <line x1="3.6" y1="12.4" x2="12.4" y2="3.6" stroke="currentColor" stroke-width="1.75" />
+        </svg>
+      }
+      @case ('BLANDA') {
+        <svg class="disponibilidad-dialogo__simbolo" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      }
+    }
+  </ng-template>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="disponibilidad-dialogo__cargando">Cargando…</p>
+
+      <div class="disponibilidad-dialogo__acciones">
+        <button type="button" class="disponibilidad-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+      </div>
+    }
+
+    @case ('sin-jornada') {
+      <!-- Sin rejilla a propósito: sobre la jornada propuesta no se puede guardar nada.
+           Ver el javadoc de EstadoDisponibilidad. -->
+      <p class="disponibilidad-dialogo__aviso">
+        La jornada del centro todavía no está guardada. Guárdala primero en
+        Configuración › Jornada: la disponibilidad se marca sobre sus tramos.
+      </p>
+
+      <div class="disponibilidad-dialogo__acciones">
+        <button type="button" class="disponibilidad-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+        <button type="button" class="disponibilidad-dialogo__guardar accion-principal" disabled>
+          Guardar
+        </button>
+      </div>
+    }
+
+    @case ('cargado') {
+      <span class="disponibilidad-dialogo__etiqueta" id="disponibilidad-pincel">Pincel</span>
+      <div class="disponibilidad-dialogo__pincel" role="group" aria-labelledby="disponibilidad-pincel">
+        @for (e of opcionesPincel; track e) {
+          <button
+            type="button"
+            class="disponibilidad-dialogo__opcion"
+            [attr.aria-pressed]="pincel() === e"
+            (click)="pincel.set(e)"
+          >
+            <span
+              class="disponibilidad-dialogo__muestra"
+              [class.disponibilidad-dialogo__muestra--dura]="e === 'DURA'"
+              [class.disponibilidad-dialogo__muestra--blanda]="e === 'BLANDA'"
+            >
+              <ng-container [ngTemplateOutlet]="simbolo" [ngTemplateOutletContext]="{ $implicit: e }" />
+            </span>
+            {{ rotulos[e] }}
+          </button>
+        }
+      </div>
+
+      <table class="disponibilidad-dialogo__rejilla">
+        <thead>
+          <tr>
+            <th scope="col" class="disponibilidad-dialogo__esquina">Tramo</th>
+            @for (c of rejilla().columnas; track c.dia) {
+              <th scope="col">
+                <button
+                  type="button"
+                  class="disponibilidad-dialogo__cabecera"
+                  [attr.aria-label]="c.nombre + ', todos los tramos: aplicar ' + rotulos[pincel()]"
+                  (click)="pintar({ tipo: 'dia', dia: c.dia })"
+                >
+                  {{ c.nombre }}
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of rejilla().filas; track $index) {
+            @if (f.tipo === 'lectivo') {
+              <tr>
+                <th scope="row">
+                  <button
+                    type="button"
+                    class="disponibilidad-dialogo__cabecera disponibilidad-dialogo__cabecera--tramo dato"
+                    [attr.aria-label]="f.horaInicio + '–' + f.horaFin + ', todos los días: aplicar ' + rotulos[pincel()]"
+                    (click)="pintar({ tipo: 'tramo', ordenEnDia: f.ordenEnDia })"
+                  >
+                    {{ f.horaInicio }}–{{ f.horaFin }}
+                  </button>
+                </th>
+                @for (c of rejilla().columnas; track c.dia) {
+                  <td>
+                    <button
+                      type="button"
+                      class="disponibilidad-dialogo__celda"
+                      [class.disponibilidad-dialogo__celda--dura]="estadoDe(c.dia, f.ordenEnDia) === 'DURA'"
+                      [class.disponibilidad-dialogo__celda--blanda]="estadoDe(c.dia, f.ordenEnDia) === 'BLANDA'"
+                      [attr.aria-label]="c.nombre + ' ' + f.horaInicio + '–' + f.horaFin + ': ' + rotulos[estadoDe(c.dia, f.ordenEnDia)]"
+                      (click)="pintar({ tipo: 'celda', dia: c.dia, ordenEnDia: f.ordenEnDia })"
+                    >
+                      <ng-container
+                        [ngTemplateOutlet]="simbolo"
+                        [ngTemplateOutletContext]="{ $implicit: estadoDe(c.dia, f.ordenEnDia) }"
+                      />
+                    </button>
+                  </td>
+                }
+              </tr>
+            } @else {
+              <!-- Separadora, NO pulsable: el recreo no tiene número y no admite restricción. -->
+              <tr class="disponibilidad-dialogo__recreo">
+                <td [attr.colspan]="rejilla().columnas.length + 1">
+                  Recreo · <span class="dato">{{ f.horaInicio }}–{{ f.horaFin }}</span>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+
+      <div class="disponibilidad-dialogo__leyenda">
+        <ul class="disponibilidad-dialogo__leyenda-lista">
+          @for (e of opcionesPincel; track e) {
+            <li class="disponibilidad-dialogo__leyenda-item">
+              <span
+                class="disponibilidad-dialogo__muestra"
+                [class.disponibilidad-dialogo__muestra--dura]="e === 'DURA'"
+                [class.disponibilidad-dialogo__muestra--blanda]="e === 'BLANDA'"
+              >
+                <ng-container [ngTemplateOutlet]="simbolo" [ngTemplateOutletContext]="{ $implicit: e }" />
+              </span>
+              {{ rotulos[e] }}
+            </li>
+          }
+        </ul>
+        <p class="disponibilidad-dialogo__nota">
+          Las guardias y reducciones en tramos lectivos se marcan como “No puede”.
+        </p>
+      </div>
+
+      @if (error()) {
+        <p class="disponibilidad-dialogo__error-servidor" role="alert">{{ error() }}</p>
+      }
+
+      <div class="disponibilidad-dialogo__acciones">
+        <button type="button" class="disponibilidad-dialogo__cerrar" (click)="cerrar()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="disponibilidad-dialogo__guardar accion-principal"
+          [disabled]="guardando()"
+          (click)="guardar()"
+        >
+          Guardar
+        </button>
+      </div>
+    }
+
+    @case ('error') {
+      <!-- Sin rejilla a propósito: sin jornada o sin restricciones no se sabe qué pintar. -->
+      <p class="disponibilidad-dialogo__error-servidor" role="alert">{{ error() }}</p>
+
+      <div class="disponibilidad-dialogo__acciones">
+        <button type="button" class="disponibilidad-dialogo__cerrar" (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    }
+  }
+</div>

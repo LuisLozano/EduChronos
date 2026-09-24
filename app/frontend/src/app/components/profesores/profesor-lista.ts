@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ProfesorService } from '../../services/profesor.service';
 import { Profesor } from '../../models/profesor.model';
 import { ProfesorForm } from './profesor-form';
+import { DisponibilidadDialogo } from './disponibilidad/disponibilidad-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
@@ -93,6 +94,20 @@ export class ProfesorLista implements OnInit {
           this.cargar();
         }
       });
+  }
+
+  /**
+   * Abre el diálogo de disponibilidad de ESTA fila, con el profesor completo como `data`
+   * (molde de `GrupoLista.tutoria`: entidad directa, no envuelta; el diálogo saca de ella
+   * el id para sus llamadas y el nombre para titularse).
+   *
+   * <p><b>NO SE SUSCRIBE A `closed`, y por tanto NO RECARGA.</b> Esta tabla no pinta ningún
+   * dato de disponibilidad —sus columnas son Código y Nombre completo—, así que tras
+   * guardar no hay nada que refrescar. `DisponibilidadDialogo` cierra con `true` cuando
+   * escribe, porque ese es su contrato con cualquier consumidor; aquí no se consume.
+   */
+  protected disponibilidad(p: Profesor): void {
+    this.dialog.open<boolean, Profesor>(DisponibilidadDialogo, { data: p });
   }
 
   protected borrar(p: Profesor): void {
