@@ -1,3 +1,4 @@
+import { CdkDrag } from '@angular/cdk/drag-drop';
 import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -40,6 +41,7 @@ function sesion(
     indice,
     dia: DIA,
     tramo: TRAMO,
+    duracion: 1,
     asignaturaCodigo,
     asignaturaNombre: asignaturaCodigo,
     profesores: ['PROF1'],
@@ -151,7 +153,7 @@ function tdDebugDe(fixture: ComponentFixture<HorarioGrid>, dia: number, tramo: n
  * que sale de la primera entrada.
  */
 function arrastre(s: SesionVista): InstanciaCelda {
-  return { actividadCodigo: s.actividadCodigo, indice: s.indice, entradas: [s] };
+  return { actividadCodigo: s.actividadCodigo, indice: s.indice, entradas: [s], continuacion: false };
 }
 
 /** Simula la suelta de `inst` sobre el slot (dia, tramo). */
@@ -856,5 +858,121 @@ describe('rejilla de horario', () => {
     expect(grupos).not.toBeNull();
     expect(grupos!.getAttribute('aria-label')).not.toBeNull();
     expect(grupos!.getAttribute('aria-label')).toBe(grupos!.getAttribute('title'));
+  });
+
+  // ------------------------------------------------ bloques de varios tramos (S170, F3)
+
+  /**
+   * Instancia de UN tramo que se pinta en DOS: empieza el martes en el tramo 1 y dura
+   * 2, así que ocupa (2,1) y (2,2). Índice 3 por el criterio del fichero de no usar 1.
+   * LCL queda fuera, en (3,3), como la OTRA instancia que se arrastra y como testigo de
+   * que un gesto tomó efecto.
+   */
+  const BLOQUE_2T: SesionVista = { ...sesion(200, 'Tec-1ºA', 3, 'TEC'), dia: 2, tramo: 1, duracion: 2 };
+  const LCL_FUERA = enSlot(LCL_SIN_PIN, 3, 3);
+
+  /** La instancia pintada en el <td> (dia, tramo); falla si no hay exactamente una. */
+  function unicaInstanciaEn(dia: number, tramo: number): DebugElement {
+    const instancias = tdDebugDe(fixture, dia, tramo).queryAll(By.css('div.instancia'));
+    expect(instancias.length).toBe(1);
+    return instancias[0];
+  }
+
+  async function montarBloque(): Promise<void> {
+    fixture.componentRef.setInput('sesiones', [BLOQUE_2T, LCL_FUERA]);
+    await fixture.whenStable();
+  }
+
+  it('(31) un bloque de dos tramos se pinta en sus dos celdas, y sólo la segunda es continuación', async () => {
+    await montarBloque();
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    const inicio = unicaInstanciaEn(2, 1).nativeElement as HTMLElement;
+    const segunda = unicaInstanciaEn(2, 2).nativeElement as HTMLElement;
+    expect(inicio.querySelector('.asig')?.textContent?.trim()).toBe('TEC');
+    expect(segunda.querySelector('.asig')?.textContent?.trim()).toBe('TEC');
+    expect(inicio.classList).not.toContain('continuacion');
+    expect(segunda.classList).toContain('continuacion');
+    // En ninguna otra celda: dos instancias de TEC en toda la rejilla.
+    const tec = Array.from(raiz.querySelectorAll('div.instancia')).filter(
+      (d) => d.querySelector('.asig')?.textContent?.trim() === 'TEC',
+    );
+    expect(tec.length).toBe(2);
+  });
+
+  /**
+   * Se comprueba por el ESTADO de la directiva ({@link CdkDrag#disabled}), leído del
+   * inyector de cada instancia: es lo que el CDK consulta al empezar un gesto. La clase
+   * `cdk-drag-disabled` es su reflejo en el DOM y se afirma también.
+   */
+  it('(32) la continuación tiene el arrastre deshabilitado y la de inicio no', async () => {
+    await montarBloque();
+
+    const inicio = unicaInstanciaEn(2, 1);
+    const segunda = unicaInstanciaEn(2, 2);
+    expect(inicio.injector.get(CdkDrag).disabled).toBe(false);
+    expect(segunda.injector.get(CdkDrag).disabled).toBe(true);
+    expect((inicio.nativeElement as HTMLElement).classList).not.toContain('cdk-drag-disabled');
+    expect((segunda.nativeElement as HTMLElement).classList).toContain('cdk-drag-disabled');
+  });
+
+  /** El único elemento interactivo de `.instancia` es el candado (lectura de 1c, S170). */
+  it('(33) la continuación no lleva ningún elemento interactivo, y la de inicio lleva su candado', async () => {
+    await montarBloque();
+    const interactivos = 'button, a, input, select, textarea, [tabindex]';
+
+    const inicio = unicaInstanciaEn(2, 1).nativeElement as HTMLElement;
+    const segunda = unicaInstanciaEn(2, 2).nativeElement as HTMLElement;
+    expect(inicio.querySelectorAll('button.candado').length).toBe(1);
+    expect(segunda.querySelectorAll(interactivos).length).toBe(0);
+    // El contenido textual sí está: la continuación no es una celda vacía.
+    expect(segunda.querySelector('.aula')?.textContent?.trim()).toBe('A1');
+    expect(segunda.querySelector('.prof')?.textContent?.trim()).toBe('PROF1');
+  });
+
+  it('(34) soltar el bloque sobre su propia continuación emite ocupantes vacíos', async () => {
+    await montarBloque();
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+
+    soltarEn(fixture, arrastre(BLOQUE_2T), 2, 2);
+    await fixture.whenStable();
+
+    // Es un movimiento de verdad —el inicio pasa del tramo 1 al 2—, y la celda de
+    // destino sólo tiene al propio bloque: no hay con quién intercambiar.
+    expect(emitidos.length).toBe(1);
+    expect(emitidos[0].orden).toBe(2);
+    expect(emitidos[0].ocupantes).toEqual([]);
+  });
+
+  it('(35) soltar otra instancia sobre la continuación de un bloque emite el bloque como único ocupante', async () => {
+    await montarBloque();
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+
+    soltarEn(fixture, arrastre(LCL_FUERA), 2, 2);
+    await fixture.whenStable();
+
+    expect(emitidos.length).toBe(1);
+    expect(emitidos[0].ocupantes.length).toBe(1);
+    expect(emitidos[0].ocupantes[0].actividadCodigo).toBe('Tec-1ºA');
+    expect(emitidos[0].ocupantes[0].indice).toBe(3);
+  });
+
+  it('(36) arrastrando otra instancia, la continuación del bloque está ocupada; arrastrando el bloque, ninguna de sus celdas', async () => {
+    await montarBloque();
+
+    debugDe(fixture, 'LCL').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+    expect(tdDe(fixture, 2, 1).classList).toContain('ocupado');
+    expect(tdDe(fixture, 2, 2).classList).toContain('ocupado');
+
+    debugDe(fixture, 'LCL').triggerEventHandler('cdkDragEnded', {});
+    unicaInstanciaEn(2, 1).triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+    expect(tdDe(fixture, 2, 1).classList).not.toContain('ocupado');
+    expect(tdDe(fixture, 2, 2).classList).not.toContain('ocupado');
+    // Testigo de que el segundo gesto tomó efecto: la celda de LCL sí se marca.
+    expect(tdDe(fixture, 3, 3).classList).toContain('ocupado');
   });
 });

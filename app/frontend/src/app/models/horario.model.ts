@@ -9,8 +9,10 @@ export interface SesionVista {
   indice: number;
   /** 1..5 (lunes..viernes). */
   dia: number;
-  /** ordenEnDia 1..6 (recreos excluidos). */
+  /** ordenEnDia 1..6 (recreos excluidos). Es el tramo de INICIO. */
   tramo: number;
+  /** Tramos que ocupa la sesión, >= 1. Espejo del campo `duracion` de `SesionVistaDTO`. */
+  duracion: number;
   asignaturaCodigo: string;
   asignaturaNombre: string;
   /** Co-docencia: varios profesores en UNA entrada (D-F7-2). */

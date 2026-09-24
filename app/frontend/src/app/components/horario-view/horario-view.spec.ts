@@ -670,7 +670,7 @@ describe('contenedor del horario', () => {
    * el contenedor no lo mira: quien lo usa es la rejilla, para pintar.
    */
   function ocupante(actividadCodigo: string, indice: number): InstanciaCelda {
-    return { actividadCodigo, indice, entradas: [] };
+    return { actividadCodigo, indice, entradas: [], continuacion: false };
   }
 
   /** Una fila de proyección mínima, para poblar las respuestas del ajuste. */
@@ -680,6 +680,7 @@ describe('contenedor del horario', () => {
       indice,
       dia,
       tramo,
+      duracion: 1,
       asignaturaCodigo: 'X',
       asignaturaNombre: 'X',
       profesores: ['P1'],

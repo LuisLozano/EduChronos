@@ -55,6 +55,23 @@
   margin-bottom: 0;
 }
 
+/* CONTINUACIÓN (S170): la misma clase en un tramo que no es el de su inicio. Se
+   lee como «sigue de arriba», no como una clase que empieza aquí: el filete
+   izquierdo pasa a discontinuo —mismo color de acento, así que no parece un
+   aviso ni un error— y la asignatura baja a tinta suave. No se arrastra desde
+   aquí, y el cursor deja de prometerlo. Solo tokens existentes. */
+.instancia.continuacion {
+  cursor: default;
+}
+
+.instancia.continuacion .entrada {
+  border-left-style: dashed;
+}
+
+.instancia.continuacion .asig {
+  color: var(--color-tinta-suave);
+}
+
 .instancia.pinada .entrada {
   background: var(--color-aviso-fondo);
 }

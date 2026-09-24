@@ -1,4 +1,4 @@
-import { agruparPorActividad, agruparPorSlot, claveSlot, filtrar } from './proyeccion';
+import { agruparPorActividad, agruparPorSlot, claveSlot, filtrar, tramosCubiertos } from './proyeccion';
 import { SesionVista } from '../models/horario.model';
 import { PROYECCION_1ESO } from '../testing/proyeccion-1eso.fixture';
 
@@ -66,7 +66,7 @@ function entrada(
   actividadCodigo: string, indice: number, plazaCodigo: string, dia = 1, tramo = 1,
 ): SesionVista {
   return {
-    sesionId: 0, indice, dia, tramo,
+    sesionId: 0, indice, dia, tramo, duracion: 1,
     asignaturaCodigo: 'X', asignaturaNombre: 'X', profesores: [], aulaCodigo: 'A1',
     subgrupos: [], grupos: ['1ºA'], actividadCodigo, plazaCodigo,
   };
@@ -125,5 +125,48 @@ describe('envoltorio de instancia dentro del slot', () => {
 
     expect(celdas.get(claveSlot(1, 1))?.[0].indice).toBe(1);
     expect(celdas.get(claveSlot(2, 1))?.[0].indice).toBe(2);
+  });
+});
+
+/**
+ * Bloques de varios tramos (S170, C-exportacion-bloques F3). El inicio es el tramo 4 y
+ * no el 1, a propósito: con inicio 1, una función que devolviera `1..duracion` sin
+ * sumar el inicio pasaría el caso de duración 1.
+ */
+describe('tramos que cubre una sesión', () => {
+  it('(9) duración 1: sólo su tramo', () => {
+    expect(tramosCubiertos({ ...entrada('A', 1, 'A-P1', 1, 4), duracion: 1 })).toEqual([4]);
+  });
+
+  it('(10) duración 2: su tramo y el siguiente', () => {
+    expect(tramosCubiertos({ ...entrada('A', 1, 'A-P1', 1, 4), duracion: 2 })).toEqual([4, 5]);
+  });
+
+  it('(11) duración 3: su tramo y los dos siguientes', () => {
+    expect(tramosCubiertos({ ...entrada('A', 1, 'A-P1', 1, 4), duracion: 3 })).toEqual([4, 5, 6]);
+  });
+
+  it('(12) un bloque de dos tramos aparece en sus dos celdas: la de inicio sin marca y la siguiente como continuación', () => {
+    const bloque = { ...entrada('Tec-1ºA', 1, 'Tec-1ºA-P1', 1, 1), duracion: 2 };
+    const celdas = agruparPorActividad([bloque]);
+
+    // Sólo esas dos celdas, ninguna otra.
+    expect([...celdas.keys()].sort()).toEqual(['1-1', '1-2']);
+    expect(celdas.get('1-1')).toEqual([
+      { actividadCodigo: 'Tec-1ºA', indice: 1, entradas: [bloque], continuacion: false },
+    ]);
+    expect(celdas.get('1-2')).toEqual([
+      { actividadCodigo: 'Tec-1ºA', indice: 1, entradas: [bloque], continuacion: true },
+    ]);
+    // Identidad intacta: la continuación lleva la MISMA sesión, no una copia.
+    expect(celdas.get('1-2')?.[0].entradas[0]).toBe(bloque);
+  });
+
+  it('(13) una sesión de un tramo aparece sólo en su celda, sin marca de continuación', () => {
+    const suelta = entrada('Mat-1ºA', 1, 'Mat-1ºA-P1', 1, 1);
+    const celdas = agruparPorActividad([suelta]);
+
+    expect([...celdas.keys()]).toEqual(['1-1']);
+    expect(celdas.get('1-1')?.[0].continuacion).toBe(false);
   });
 });

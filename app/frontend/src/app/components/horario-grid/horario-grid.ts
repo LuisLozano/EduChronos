@@ -42,7 +42,8 @@ export interface AjusteInstancia {
    * Instancias que YA hay en el slot destino, tal como
    * {@link agruparPorActividad} las tiene agrupadas. Vacío si el destino está
    * libre. NUNCA incluye a la arrastrada: la emisión se corta antes cuando el
-   * destino es el origen.
+   * destino es el origen, y en cualquier otro destino —que puede ser su propia
+   * continuación— se filtra por clave.
    *
    * <p>CIEGO a lo que la vista no muestra, por la misma razón que
    * {@link HorarioGrid#slotsOcupados}: en la vista por grupo no se ven las clases
@@ -519,12 +520,17 @@ export class HorarioGrid {
     if (origen.dia === dia && origen.tramo === orden) {
       return;
     }
+    // La arrastrada se excluye de sus ocupantes, como ya hace `slotsOcupados`: con las
+    // continuaciones (S170) un bloque puede estar pintado en la celda de destino —soltarlo
+    // una fila más abajo cae sobre su propia continuación—, y contarse a sí mismo como
+    // ocupante convertiría un movimiento en un intercambio consigo mismo.
+    const clave = this.clave(inst);
     this.soltar.emit({
       actividadCodigo: inst.actividadCodigo,
       indice: inst.indice,
       dia,
       orden,
-      ocupantes: this.instancias(dia, orden),
+      ocupantes: this.instancias(dia, orden).filter((i) => this.clave(i) !== clave),
     });
   }
 }

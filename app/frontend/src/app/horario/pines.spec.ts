@@ -79,6 +79,7 @@ describe('índice de pines', () => {
       indice,
       dia,
       tramo,
+      duracion: 1,
       asignaturaCodigo: 'X',
       asignaturaNombre: 'X',
       profesores: [],

@@ -31,8 +31,10 @@
                   [class.con-badge]="tieneBadge(inst)"
                   [class.bloque]="esBloque(inst)"
                   [class.en-violacion]="tieneViolacionInstancia(inst)"
+                  [class.continuacion]="inst.continuacion"
                   cdkDrag
                   [cdkDragData]="inst"
+                  [cdkDragDisabled]="inst.continuacion"
                   (cdkDragStarted)="alIniciarArrastre(inst)"
                   (cdkDragEnded)="alTerminarArrastre()"
                 >
@@ -111,20 +113,27 @@
                       entera. El `stopPropagation` del `click` se conserva y NO es
                       redundante con éste: son eventos distintos y protege de otra
                       cosa (ver el Javadoc de `alAlternarPin`).
+
+                      Una CONTINUACIÓN (S170) no lleva candado: el pin se pone y se
+                      quita desde el tramo de inicio, que es el que el pin fija. Un
+                      segundo interruptor en la celda de abajo sería el mismo hecho
+                      pintado dos veces.
                     -->
-                    <button
-                      type="button"
-                      class="candado"
-                      [class.candado--libre]="!estaPinada(inst)"
-                      [title]="estaPinada(inst) ? 'Quitar pin' : 'Poner pin'"
-                      [attr.aria-label]="
-                        (estaPinada(inst) ? 'Quitar el pin de ' : 'Poner un pin en ') + inst.actividadCodigo
-                      "
-                      (pointerdown)="$event.stopPropagation()"
-                      (click)="alAlternarPin(inst, $event)"
-                    >
-                      {{ estaPinada(inst) ? '🔒' : '🔓' }}
-                    </button>
+                    @if (!inst.continuacion) {
+                      <button
+                        type="button"
+                        class="candado"
+                        [class.candado--libre]="!estaPinada(inst)"
+                        [title]="estaPinada(inst) ? 'Quitar pin' : 'Poner pin'"
+                        [attr.aria-label]="
+                          (estaPinada(inst) ? 'Quitar el pin de ' : 'Poner un pin en ') + inst.actividadCodigo
+                        "
+                        (pointerdown)="$event.stopPropagation()"
+                        (click)="alAlternarPin(inst, $event)"
+                      >
+                        {{ estaPinada(inst) ? '🔒' : '🔓' }}
+                      </button>
+                    }
                   </span>
                   @for (e of inst.entradas; track e.sesionId) {
                     <div

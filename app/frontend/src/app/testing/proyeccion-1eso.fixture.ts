@@ -23,7 +23,7 @@ function sufijo(suf: string): string[] {
 
 /** Las 6 sub-entradas del bloque en un mismo slot (misma repetición). */
 function bloque(dia: number, tramo: number, indice: number): SesionVista[] {
-  const base = { indice, dia, tramo, grupos: GRUPOS_NIVEL, actividadCodigo: BLOQUE };
+  const base = { indice, dia, tramo, duracion: 1, grupos: GRUPOS_NIVEL, actividadCodigo: BLOQUE };
   return [
     s({ ...base, asignaturaCodigo: 'CyR', asignaturaNombre: 'Computacion y Robotica',
       profesores: ['TEC3'], aulaCodigo: 'A5', subgrupos: sufijo('CyR-Tec'), plazaCodigo: 'Bloque-CyR-Tec' }),
@@ -47,7 +47,7 @@ function bloque(dia: number, tramo: number, indice: number): SesionVista[] {
  */
 function lclCoDocencia(): SesionVista {
   return s({
-    indice: 1, dia: 3, tramo: 1,
+    indice: 1, dia: 3, tramo: 1, duracion: 1,
     asignaturaCodigo: 'LCL', asignaturaNombre: 'Lengua Castellana y Literatura',
     profesores: ['LEN2', 'LEN8'], aulaCodigo: 'A5',
     subgrupos: ['1ºA-Completo'], grupos: ['1ºA'],
@@ -59,7 +59,7 @@ function lclCoDocencia(): SesionVista {
 function mat(letra: string, aula: string, prof: string): SesionVista[] {
   const g = `1º${letra}`;
   return [1, 2, 3].map((indice) =>
-    s({ indice, dia: indice, tramo: 2, asignaturaCodigo: 'Mat', asignaturaNombre: 'Matematicas',
+    s({ indice, dia: indice, tramo: 2, duracion: 1, asignaturaCodigo: 'Mat', asignaturaNombre: 'Matematicas',
       profesores: [prof], aulaCodigo: aula, subgrupos: [`${g}-Completo`], grupos: [g],
       actividadCodigo: `Mat-${g}`, plazaCodigo: `Mat-${g}-P1` }),
   );

@@ -14,6 +14,7 @@ function sesion(sesionId: number, actividadCodigo: string, indice: number, dia =
     indice,
     dia,
     tramo,
+    duracion: 1,
     asignaturaCodigo: 'X',
     asignaturaNombre: 'X',
     profesores: ['P1'],

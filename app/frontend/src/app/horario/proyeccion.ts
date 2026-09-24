@@ -51,19 +51,33 @@ export function claveSlot(dia: number, tramo: number): string {
 }
 
 /**
- * Agrupa las sesiones por slot `(dia, tramo)`. Un slot con más de una entrada es
- * una celda-como-lista: el desdoble/agrupamiento/co-docencia coloca varias
- * plazas en el mismo tramo, y cada una es una sub-entrada.
+ * Los tramos que ocupa una sesión: `[tramo, …, tramo + duracion - 1]`. Espejo de
+ * `SesionVistaDTO.tramosCubiertos()` en Java. La numeración es la lectiva del día,
+ * que excluye el recreo; que un bloque no cruce el recreo ni desborde el día lo
+ * garantiza el backend (solver y verificador), no esta función, que sólo cuenta.
+ */
+export function tramosCubiertos(s: SesionVista): number[] {
+  return Array.from({ length: s.duracion }, (_, i) => s.tramo + i);
+}
+
+/**
+ * Agrupa las sesiones por slot `(dia, tramo)`, colocando cada una en TODOS los
+ * slots que ocupa ({@link tramosCubiertos}): un bloque de dos tramos aparece en dos
+ * slots. Un slot con más de una entrada es una celda-como-lista: el
+ * desdoble/agrupamiento/co-docencia coloca varias plazas en el mismo tramo, y cada
+ * una es una sub-entrada.
  */
 export function agruparPorSlot(sesiones: readonly SesionVista[]): Map<string, SesionVista[]> {
   const slots = new Map<string, SesionVista[]>();
   for (const s of sesiones) {
-    const k = claveSlot(s.dia, s.tramo);
-    const arr = slots.get(k);
-    if (arr) {
-      arr.push(s);
-    } else {
-      slots.set(k, [s]);
+    for (const tramo of tramosCubiertos(s)) {
+      const k = claveSlot(s.dia, tramo);
+      const arr = slots.get(k);
+      if (arr) {
+        arr.push(s);
+      } else {
+        slots.set(k, [s]);
+      }
     }
   }
   return slots;
@@ -73,11 +87,17 @@ export function agruparPorSlot(sesiones: readonly SesionVista[]): Map<string, Se
  * Las sub-entradas de un slot que pertenecen a UNA instancia —el par
  * (`actividadCodigo`, `indice`), D-6—. Es la unidad que el usuario manipula:
  * las 6 plazas de un bloque se mueven juntas o no se mueven.
+ *
+ * <p>`continuacion` es false en el slot del tramo de INICIO y true en los demás que
+ * la instancia cubre. Una continuación se pinta, pero no es otra instancia: sus
+ * `entradas` son las mismas sesiones que las del slot de inicio, y sólo desde ése
+ * se arrastra y se pina.
  */
 export interface InstanciaCelda {
   actividadCodigo: string;
   indice: number;
   entradas: SesionVista[];
+  continuacion: boolean;
 }
 
 /**
@@ -85,6 +105,8 @@ export interface InstanciaCelda {
  * slot, reúne las sub-entradas por instancia, preservando el orden de aparición
  * tanto entre instancias como dentro de cada una. La clave externa del Map
  * sigue siendo {@link claveSlot}, de modo que la rejilla indexa igual que antes.
+ * Una instancia de varios tramos aparece en cada slot que cubre, marcada como
+ * continuación en todos salvo el de su tramo de inicio.
  */
 export function agruparPorActividad(sesiones: readonly SesionVista[]): Map<string, InstanciaCelda[]> {
   const celdas = new Map<string, InstanciaCelda[]>();
@@ -96,7 +118,12 @@ export function agruparPorActividad(sesiones: readonly SesionVista[]): Map<strin
       if (inst) {
         inst.entradas.push(e);
       } else {
-        porInstancia.set(ki, { actividadCodigo: e.actividadCodigo, indice: e.indice, entradas: [e] });
+        porInstancia.set(ki, {
+          actividadCodigo: e.actividadCodigo,
+          indice: e.indice,
+          entradas: [e],
+          continuacion: claveSlot(e.dia, e.tramo) !== k,
+        });
       }
     }
     celdas.set(k, [...porInstancia.values()]);
