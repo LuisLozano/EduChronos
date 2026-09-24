@@ -975,4 +975,20 @@ describe('rejilla de horario', () => {
     // Testigo de que el segundo gesto tomó efecto: la celda de LCL sí se marca.
     expect(tdDe(fixture, 3, 3).classList).toContain('ocupado');
   });
+
+  /**
+   * El aviso de coste blando describe la INSTANCIA, como el candado: se pinta en su
+   * tramo de inicio y no en la continuación (S170, F4). Mismo input que (15). El valor
+   * 2 no es 1 para que un aserto por texto no case con otro número de la celda.
+   */
+  it('(37) un bloque de dos tramos con coste blando lleva el aviso en su inicio y no en la continuación', async () => {
+    await montarBloque();
+    fixture.componentRef.setInput('badges', new Map<string, number>([['Tec-1ºA|3', 2]]));
+    await fixture.whenStable();
+
+    const inicio = unicaInstanciaEn(2, 1).nativeElement as HTMLElement;
+    const segunda = unicaInstanciaEn(2, 2).nativeElement as HTMLElement;
+    expect(inicio.querySelector('.badge')?.textContent?.trim()).toBe('2');
+    expect(segunda.querySelector('.badge')).toBeNull();
+  });
 });
