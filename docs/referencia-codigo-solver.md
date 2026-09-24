@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-09-23
-- Commit: `f9e59e2`
+- Fecha: 2026-09-24
+- Commit: `206b754`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -774,6 +774,18 @@ Métodos:
 
 Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
 
+### `SolverHorarioIndisponibilidadBloqueTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void t1_duraEnTramoInteriorConHueco_elBloqueNoCubreElTramoVetado()`
+- `void t1b_duraEnTramoInteriorDeLaUnicaColocacion_esInfactible()`
+- `void t4_blandaEnTramoInteriorEvitable_elSolverLaEvitaYLaPenalizacionEsCero()`
+- `void t4b_blandaEnTramoInteriorInevitable_penalizaUno()`
+- `void t4c_blandaEnDosTramosDelMismoBloqueInevitable_penalizaDos()`
+- `void conc_terminoBlandaDelModeloIgualAlRecuentoDelVerificador()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `RestriccionHoraria`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `TipoRestriccion`, `Tramo`
+
 ### `SolverHorarioIndisponibilidadProfesorTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -943,6 +955,20 @@ Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTempor
 
 ---
 
+## Tests — paquete `domain`
+
+### `ProblemaHorarioTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.domain`
+Métodos:
+- `void tramosDesordenadosDentroDeUnDia_seRechazan()`
+- `void diasIntercalados_seRechazan()`
+- `void dosTramosConElMismoDiaYOrden_seRechazan()`
+- `void ordenEnDiaConHuecosPeroOrdenado_seAcepta()`
+
+Consume: (ninguno)
+
+---
+
 ## Tests — paquete `io`
 
 ### `ProblemaHorarioJsonLoaderTest` — package-private class
@@ -950,6 +976,7 @@ Paquete: `es.yaroki.educhronos.solver.io`
 Métodos:
 - `void cargaDatasetMinimoValidoSinExcepciones() throws Exception`
 - `void rechazaReferenciaAProfesorInexistente()`
+- `void rechazaDosTramosConElMismoDiaYOrden()`
 - `void rechazaPlazaSinProfesores()`
 - `void cargaAulasCandidatasResueltas() throws Exception`
 - `void rechazaGrupoPdcSinGrupoPadre()`
