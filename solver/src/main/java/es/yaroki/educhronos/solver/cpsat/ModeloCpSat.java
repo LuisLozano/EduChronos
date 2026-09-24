@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -143,6 +144,9 @@ final class ModeloCpSat {
     private final ProblemaHorario problema;
     private final CpModel model = new CpModel();
     private final List<InstanciaProgramada> instancias = new ArrayList<>();
+
+    /** Inicios válidos por duración ({@link #iniciosValidos}), calculados una vez. */
+    private final Map<Long, Set<Integer>> iniciosValidosPorDuracion = new HashMap<>();
 
     /**
      * Andamiaje genérico de la función objetivo: términos blandos ya ponderados
@@ -483,6 +487,14 @@ final class ModeloCpSat {
      * dominio permitido queda vacío y el problema es INFEASIBLE — respuesta
      * correcta; la detección temprana de esa situación es validación de
      * configuración (deuda D18), no trabajo del modelo CP-SAT.
+     *
+     * <p><b>Todos los tramos que OCUPA la sesión, no solo el de inicio</b> (S166,
+     * D-indisp-solo-tramo-de-inicio). Una sesión de duración {@code d} que arranca en el
+     * índice {@code t} ocupa {@code t..t+d−1}, igual que su intervalo
+     * ({@link #crearVariables}); así que un vetado {@code v} prohíbe los inicios
+     * {@code v−k}, {@code k} en {@code 0..d−1}, que sean inicios válidos
+     * ({@link #iniciosValidosDeBloque}). Con {@code d = 1} solo hay {@code k = 0}: el
+     * dominio prohibido son los vetados, y la llamada es la misma que antes de S166.
      */
     private void restriccionIndisponibilidadProfesor() {
         int numTramos = problema.tramos().size();
@@ -498,13 +510,36 @@ final class ModeloCpSat {
         }
         for (Map.Entry<Profesor, Set<Integer>> e : prohibidosPorProfesor.entrySet()) {
             Profesor profesor = e.getKey();
-            Domain permitido = complementoDe(e.getValue(), numTramos);
+            Map<Long, Domain> permitidoPorDuracion = new HashMap<>();
             for (InstanciaProgramada ip : instancias) {
                 if (usaProfesor(ip, profesor)) {
+                    long duracion = ip.instancia().actividad().duracionTramos();
+                    Domain permitido = permitidoPorDuracion.computeIfAbsent(duracion, d -> {
+                        Set<Integer> iniciosProhibidos = new HashSet<>();
+                        for (int v : e.getValue()) {
+                            for (int k = 0; k < d; k++) {
+                                if (esInicioValido(v - k, d)) {
+                                    iniciosProhibidos.add(v - k);
+                                }
+                            }
+                        }
+                        return complementoDe(iniciosProhibidos, numTramos);
+                    });
                     model.addLinearExpressionInDomain(ip.tramoIndex(), permitido);
                 }
             }
         }
+    }
+
+    /**
+     * ¿Puede arrancar en el índice {@code t} una sesión de duración {@code duracion}? Es la
+     * lista blanca de {@link #iniciosValidosDeBloque}; con duración 1, todo índice del
+     * problema. Fuera de rango, no.
+     */
+    private boolean esInicioValido(int t, long duracion) {
+        return t >= 0 && iniciosValidosPorDuracion
+                .computeIfAbsent(duracion, this::iniciosValidos)
+                .contains(t);
     }
 
     /**
@@ -631,6 +666,14 @@ final class ModeloCpSat {
      * que caiga en uno u otro penaliza una vez por cada coincidencia, que es lo
      * correcto (incumple dos preferencias distintas si cayera en ambas, imposible
      * al ser una sola instancia en un solo tramo).
+     *
+     * <p><b>«Cae en» es OCUPA, no arranca</b> (S166, D-indisp-solo-tramo-de-inicio). El
+     * literal se reifica sobre los inicios válidos desde los que la instancia cubre el
+     * vetado {@code v}: {@code v−k}, {@code k} en {@code 0..d−1}, como la variante DURA. Un
+     * bloque que cubre DOS tramos BLANDA del profesor activa los dos literales y suma 2, que
+     * es lo que cuenta el verificador. Si ningún inicio válido cubre {@code v}, la instancia
+     * no puede pasar por él y no se crea literal. Con {@code d = 1} el único inicio es
+     * {@code v}: mismo literal, mismo nombre y mismos dominios que antes de S166.
      */
     private void objetivoIndisponibilidadBlandaProfesor() {
         int numTramos = problema.tramos().size();
@@ -640,21 +683,32 @@ final class ModeloCpSat {
             }
             Profesor profesor = r.profesor();
             int tramoVetado = problema.indiceDeTramo(r.tramo());
-            Domain soloVetado = Domain.fromValues(new long[] {tramoVetado});
-            Domain noVetado = complemento(tramoVetado, numTramos);
 
             for (InstanciaProgramada ip : instancias) {
                 if (!usaProfesor(ip, profesor)) {
                     continue;
                 }
+                long duracion = ip.instancia().actividad().duracionTramos();
+                Set<Integer> cubren = new LinkedHashSet<>();
+                for (int k = 0; k < duracion; k++) {
+                    if (esInicioValido(tramoVetado - k, duracion)) {
+                        cubren.add(tramoVetado - k);
+                    }
+                }
+                if (cubren.isEmpty()) {
+                    continue; // ningún inicio válido la hace pasar por el vetado
+                }
                 BoolVar penaliza = model.newBoolVar(
                         "penalBlanda_" + profesor.codigo() + "_t" + tramoVetado
                                 + "_" + ip.instancia().actividad().codigo()
                                 + "#" + ip.instancia().indice());
-                // penaliza == 1  <=>  la instancia cae en el tramo vetado.
-                model.addLinearExpressionInDomain(ip.tramoIndex(), soloVetado)
+                Domain cubreVetado = Domain.fromValues(
+                        cubren.stream().mapToLong(Integer::longValue).toArray());
+                Domain noCubreVetado = complementoDe(cubren, numTramos);
+                // penaliza == 1  <=>  la instancia ocupa el tramo vetado.
+                model.addLinearExpressionInDomain(ip.tramoIndex(), cubreVetado)
                         .onlyEnforceIf(penaliza);
-                model.addLinearExpressionInDomain(ip.tramoIndex(), noVetado)
+                model.addLinearExpressionInDomain(ip.tramoIndex(), noCubreVetado)
                         .onlyEnforceIf(penaliza.not());
                 terminosObjetivo.add(LinearExpr.term(penaliza, PESO_INDISP_BLANDA));
             }
@@ -842,6 +896,16 @@ final class ModeloCpSat {
      * {@link #ORDEN_TRAS_RECREO}). Para {@code duracion == 1} todo tramo es válido.
      */
     private Domain iniciosValidosDeBloque(long duracion) {
+        long[] arr = iniciosValidos(duracion).stream().mapToLong(Integer::longValue).toArray();
+        return Domain.fromValues(arr);
+    }
+
+    /**
+     * Los índices de {@link #iniciosValidosDeBloque}, en orden creciente. Separados del
+     * {@code Domain} desde S166 para que la indisponibilidad (DURA y BLANDA) pregunte por un
+     * inicio concreto sin rehacer el cálculo.
+     */
+    private Set<Integer> iniciosValidos(long duracion) {
         List<Tramo> tramos = problema.tramos();
         // (diaSemana, ordenEnDia) -> índice plano, para resolver sucesores.
         Map<Integer, Map<Integer, Integer>> porDiaOrden = new HashMap<>();
@@ -852,7 +916,7 @@ final class ModeloCpSat {
                     .put(tr.ordenEnDia(), t);
         }
 
-        List<Long> validos = new ArrayList<>();
+        Set<Integer> validos = new LinkedHashSet<>();
         for (int t = 0; t < tramos.size(); t++) {
             Tramo inicio = tramos.get(t);
             Map<Integer, Integer> ordenesDelDia = porDiaOrden.get(inicio.diaSemana());
@@ -871,14 +935,10 @@ final class ModeloCpSat {
                 }
             }
             if (ok) {
-                validos.add((long) t);
+                validos.add(t);
             }
         }
-        long[] arr = new long[validos.size()];
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = validos.get(i);
-        }
-        return Domain.fromValues(arr);
+        return validos;
     }
 
     private void crearVariables() {
