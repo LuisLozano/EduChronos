@@ -283,6 +283,10 @@ diseño; se declara como inversión consciente de M2.
 La maqueta se escribe en disco y se abre en el navegador (M-doc-2);
 no se vuelca en la conversación.
 
+**PRECISIÓN (S167).** «La sesión se dedica a diseño» se lee como «la FASE»: en una sesión con fases (lección de
+S166), invertir M2 es defendible si la maqueta cierra sus decisiones y no se escribe código de producción antes del
+M2. Aplicado en S167: maqueta → decisiones (E) → M2 → código.
+
 ---
 
 ## M-doc — Cómo se entrega la documentación (S122)
