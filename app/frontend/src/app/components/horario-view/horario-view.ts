@@ -567,9 +567,12 @@ export class HorarioView {
   }
 
   /**
-   * Mensaje del servidor. El `reason` del `ResponseStatusException` solo viaja
-   * en el body si `server.error.include-message` está activo (hoy no lo está):
-   * por eso el degradado a `error` + estado, en vez de inventar un texto propio.
+   * Mensaje del servidor. El `reason` del `ResponseStatusException` viaja en el
+   * body como `message` desde S167, con la clave de Boot 4
+   * (`spring.web.error.include-message`, vigilada por `MensajeDeErrorHttpTest`).
+   * Hasta entonces la clave era la de Boot 3, no hacía nada, y todo rechazo de pin
+   * caía a «El servidor rechazó el pin (N).». Sin `message` se cae a `error` y, sin
+   * cuerpo, al degradado con el estado, en vez de inventar un texto propio.
    */
   private mensaje(err: { status?: number; error?: { message?: string; error?: string } }): string {
     const cuerpo = err?.error;
