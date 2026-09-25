@@ -7,9 +7,10 @@ Este guion ejecuta, como UNA sola cadena, los seis pasos de §1 de `docs/gestion
 el proyecto está terminado cuando un humano lo ejecuta entero en un Windows limpio y cada paso pasa su
 oráculo.
 
-Los resultados esperados que se citan aquí son los del ensayo por la API sobre Linux (S171), con el
-jar de `4c07553`. Los datos que no dependen de dónde coloque el solver cada clase (cuentas, entradas por
-página, reglas rechazadas) se exigen tal cual. La colocación puede variar, y por eso las acciones del
+Los resultados esperados que se citan aquí salen de dos ensayos en Linux, los dos en S171: uno por la
+API, con el jar de `4c07553`, y otro por pantalla, ejecutado por un humano con el jar de `0356a80`.
+Los datos que no dependen de dónde coloque el solver cada clase (cuentas, entradas por página, reglas
+rechazadas) se exigen tal cual. La colocación puede variar, y por eso las acciones del
 paso 4 se describen por la condición que deben cumplir, no por una celda fija.
 
 Todos los rótulos de pantalla entre «» están copiados del código del frontend
@@ -218,8 +219,7 @@ abierto con un mensaje, el alta ha fallado: el paso falla.
 **Resultado esperado**
 - Tras la acción 1, la insignia «Propuesta · sin guardar» desaparece.
 - Cada lista muestra lo creado. La tabla de «Grupos» muestra tres grupos: 3ºA y 3ºB con «Tipo»
-  «Ordinario», y 3ºA-Di con «PDC».
-  «Subgrupos» muestra siete.
+  «Ordinario», y 3ºA-Di con «PDC». «Subgrupos» muestra siete.
 - Tras la acción 9, 3ºA-Di tiene tutor principal P1.
 - Tras la acción 14, la vista del horario muestra «Sin hallazgos de pre-validación. Esto no garantiza
   que el solver encuentre horario en el tiempo previsto.» y «Este curso todavía no tiene horario. Créalo
@@ -279,7 +279,8 @@ vez de mover, y esa no es la acción pedida.
 
 - **4a — Mover a una celda con restricción BLANDA.** Elegir una sesión de LEN (profesora P2) cuya celda
   de viernes, tramo 6, esté libre para su grupo, para su aula y para P2. En la vista de su grupo,
-  arrastrarla a Viernes · 6.
+  arrastrarla a Viernes · 6. Mirar la celda (captura 4a-1), pulsar **F5** y volver a mirarla
+  (captura 4a-2).
 - **4b — Intento que rompe una DURA.** Elegir una clase de P3 que NO sea TEC-3ºB (una sesión de
   ING-3ºA o de RELVAL-3ºAB) y un tramo del lunes libre para su grupo, sus subgrupos, sus aulas y el
   otro profesor de la clase, de modo que lo único que se rompa sea la indisponibilidad DURA de P3.
@@ -289,59 +290,79 @@ vez de mover, y esa no es la acción pedida.
   cruzaría el recreo.
 - **4d — Fijar y relanzar.**
   1. Pasar el ratón sobre la sesión de LEN de 4a: aparece el candado 🔓 («Poner pin»). Pulsarlo.
-  2. «Generar horario» › «Generar horario».
+  2. «Generar horario» › «Generar horario». **Se regenera UNA sola vez.** Si por error se regenera más
+     de una, el horario final es el de MAYOR id, el que muestra la barra de direcciones. Ese es el que
+     usan el paso 5 y el §7, y en el acta se anotan todos los ids.
   3. Anotar el id nuevo de la barra de direcciones.
   4. Abrir `/api/horarios/<id nuevo>/proyeccion` y `/api/horarios/<id nuevo>/diagnostico`, volviendo con
      «Atrás» después de cada una.
 
 **Resultado esperado**
-- **4a:** la clase queda en Viernes · 6 sin ningún aviso de rechazo y lleva una insignia de coste
-  blando positiva. En `/api/horarios/<id>/diagnostico`:
-  - `violaciones` sigue vacía;
-  - `penalizaciones` contiene `{"regla":"INDISPONIBILIDAD_BLANDA","actividadCodigo":"LEN-…","indice":…,"tramoCodigo":"V6","delta":1}`;
-  - `totales.indispBlanda` vale 1.
+- **4a:** la clase queda en Viernes · 6 sin ningún aviso de rechazo.
+  - **Tras soltar, la celda aún NO muestra el coste.** La rejilla no recarga el diagnóstico después
+    de un ajuste: es un defecto conocido, `D-vista-horario-estado-rancio`, y no hace fallar el paso.
+  - **Tras pulsar F5, la celda muestra la insignia de coste**, un número positivo en la esquina de la
+    clase. En el ensayo de Linux, sin la insignia antes de F5 y con ella después.
+  - En `/api/horarios/<id>/diagnostico`:
+    - `violaciones` sigue vacía;
+    - `penalizaciones` contiene `{"regla":"INDISPONIBILIDAD_BLANDA","actividadCodigo":"LEN-…","indice":…,"tramoCodigo":"V6","delta":1}`;
+    - `totales.indispBlanda` vale 1.
 
-  En el ensayo se movió LEN-3ºB #1 de J5 a V6. Además apareció `EXCESO_CONSECUTIVAS`, porque P2 quedó
-  con cuatro clases seguidas; eso depende de la colocación y no se exige.
+  En el ensayo por la API se movió LEN-3ºB #1 de J5 a V6. Además apareció `EXCESO_CONSECUTIVAS`,
+  porque P2 quedó con cuatro clases seguidas; eso depende de la colocación y no se exige.
 - **4b:** la clase NO se mueve. Aparece «Ese cambio provoca conflictos que antes no existían:» con UNA
   sola línea: `INDISPONIBILIDAD_PROFESOR — P3 en L<n>`. En el ensayo, ING-3ºA #1 a L1 dio 409
   `VIOLA_REGLA_DURA` con esa única violación, y la base quedó sin cambios.
 - **4c:** TEC no se mueve. Aparece el mismo texto con UNA sola línea:
   `BLOQUE_IMPOSIBLE — TEC-3ºB #1 en <día>3`. En el ensayo, a J3: 409 con esa única violación y la
-  base sin cambios.
+  base sin cambios. **Defecto conocido, sin que el paso falle:** este mensaje sigue visible después de
+  regenerar en 4d (`D-vista-horario-estado-rancio`).
 - **4d:**
   - Tras pulsar el candado, la clase se pinta como fijada, con 🔒 («Quitar pin»), y aparece
-    «1 pines sin aplicar — regenerar». Ese aviso se sigue viendo mientras exista el pin, también después
-    de regenerar.
+    «1 pines sin aplicar — regenerar».
   - Tras regenerar, el id de la barra es nuevo (en una instalación nueva, `2`) y la sesión fijada sigue
-    en Viernes · 6 con 🔒.
+    en Viernes · 6 con 🔒 y con la insignia de coste.
+  - **Dos defectos conocidos, sin que el paso falle (`D-vista-horario-estado-rancio`):**
+    - el aviso «1 pines sin aplicar — regenerar» sigue visible aunque el pin ya está aplicado: cuenta
+      los pines que existen, no los que faltan por aplicar;
+    - el mensaje de rechazo de 4c («Ese cambio provoca conflictos que antes no existían:» con
+      `BLOQUE_IMPOSIBLE — …`) sigue visible.
   - Ninguna clase lleva contorno rojo.
   - Proyección: `"estadoSolver":"OPTIMAL"` y `"objetivo":1.0`.
   - Diagnóstico: `"violaciones":[]`, `"totales":{"ventanas":0,"consecutivas":0,"indispBlanda":1}`, y la
     ÚNICA penalización con `delta` positivo es la `INDISPONIBILIDAD_BLANDA` de esa sesión en `V6`. Las
     `VENTANA_PROFESOR` con `delta` −1 son contrafactuales: miden lo que empeoraría mover la clase, no
     un coste que exista.
-  - En el ensayo: horario 2, OPTIMAL, objetivo 1.0 y esa única blanda.
+  - En el ensayo por la API: horario 2, OPTIMAL, objetivo 1.0 y esa única blanda. En el ensayo por
+    pantalla se regeneró dos veces por error (horarios 2 y 3), y los dos dieron ese mismo resultado.
 
 **Oráculo**
-- En pantalla: la posición de las clases, los textos de rechazo, el candado y la ausencia de contorno
-  rojo.
+- En pantalla: la posición de las clases, la insignia de 4a después de F5, los textos de rechazo, el
+  candado y la ausencia de contorno rojo.
 - En el navegador: el diagnóstico y la proyección.
 - A posteriori en Linux (§7.3): el diagnóstico del horario final recalculado.
 
-**Captura.** 4a: la clase en V6 con su insignia, y el diagnóstico con la penalización. 4b: el rechazo
-con su línea. 4c: el rechazo con su línea. 4d: la rejilla regenerada con la clase fijada en V6, la
-proyección y el diagnóstico.
+**Captura.** 4a-1: la clase en V6 recién soltada. 4a-2: la misma celda después de F5, con la insignia,
+y el diagnóstico con la penalización. 4b: el rechazo con su línea. 4c: el rechazo con su línea. 4d: la
+rejilla regenerada con la clase fijada en V6, y la proyección y el diagnóstico **del horario final**.
 
 ### Paso 5 — Exportar
 
-**Acción.** En la vista del horario final (el de 4d), pulsar los cuatro enlaces: «Exportar CSV»,
-«PDF por grupo», «PDF por profesor» y «PDF por aula». Abrir cada fichero.
+**Acción.** En la vista del horario final (el de 4d, con el id de la barra de direcciones), pulsar los
+cuatro enlaces: «Exportar CSV», «PDF por grupo», «PDF por profesor» y «PDF por aula». Abrir cada
+fichero **por su nombre exacto**, con el `<id>` del horario final: `horario-<id>.csv`,
+`horario-<id>-grupo.pdf`, `horario-<id>-profesor.pdf` y `horario-<id>-aula.pdf`.
+
+**Aviso.** En la carpeta de descargas puede haber ficheros de otras corridas con el mismo patrón
+(`horario-1.csv`…) o con sufijo añadido por el navegador (`horario-3(1).csv`, `horario-3 (2).pdf`…).
+Solo cuentan los del `<id>` final y sin sufijo. Si el navegador ha añadido sufijo, hay que anotarlo en
+el acta y usar ese fichero en §7.4.
 
 **Resultado esperado**
 - Se descargan `horario-<id>.csv`, `horario-<id>-grupo.pdf`, `horario-<id>-profesor.pdf` y
   `horario-<id>-aula.pdf`.
-- El CSV se abre en Excel con 25 filas de datos: 24 sesiones más el segundo tramo de TEC.
+- `horario-<id>.csv` se abre en Excel (en el ensayo de Linux, en LibreOffice Calc) con 25 filas de
+  datos: 24 sesiones más el segundo tramo de TEC.
 - PDF de grupo: 3 páginas (3ºA, 3ºA-Di, 3ºB). PDF de profesor: 4 páginas (P1–P4). PDF de aula: 3 páginas
   (A1, A2, LAB).
 - TEC aparece en sus dos tramos en el CSV y en los PDF de 3ºB, P3 y LAB.
@@ -356,7 +377,8 @@ proyección y el diagnóstico.
 | `oraculo-exportacion.py pdf --vista aula` | A1 10, A2 8, LAB 7; «TOTAL: halladas 25, FALTAN 0, SOBRAN 0», «páginas vacías con leyenda: 0», rc 0 |
 | `verificar-leyenda-pdf.py` × 3 | «páginas OK: 3 / 4 / 3   con fallo: 0», rc 0 |
 
-**Captura.** 5a: el CSV abierto. 5b: la página de 3ºB del PDF de grupo, con TEC en dos celdas.
+**Captura.** 5a: `horario-<id>.csv` abierto, con su nombre visible en la barra de título. 5b: la página de
+3ºB de `horario-<id>-grupo.pdf`, con TEC en dos celdas.
 
 ### Paso 6 — Duplicar el curso
 
@@ -364,15 +386,17 @@ El campo exige la forma `2025/2026`, con barra: «2025-2026» da el error «El n
 la forma 2026/2027, con dos años consecutivos.». Los ficheros sí se nombran con guion
 (`curso-2026-2027.db`).
 
-**Acción**
+**Acción.** Son seis acciones y el paso NO termina en el rechazo de la acción 4: las acciones 5 y 6
+comprueban el curso nuevo.
 1. «Cursos…» › «Duplicar curso…».
 2. «Curso nuevo» `2026/2027`. «Nombre del curso actual» `2025/2026`: aparece porque la base no tiene
-   nombre. «Duplicar».
-3. «Cursos…». En la fila del fichero `educhronos.db`, «Abrir».
-4. «Configuración» › «Niveles» › «Nuevo nivel» › «Código» `4ESO`, «Orden» `4` › «Guardar». Después,
-   «Cancelar».
+   nombre. **Captura 6a ANTES de pulsar «Duplicar»**, con los dos campos rellenos. Después, «Duplicar».
+3. «Cursos…». Captura 6b de la lista. En la fila del fichero `educhronos.db`, «Abrir».
+4. «Configuración» › «Niveles» › «Nuevo nivel» › «Código» `4ESO`, «Orden» `4` › «Guardar». Captura 6c
+   de la barra y del mensaje. Después, «Cancelar».
 5. «Cursos…». En la fila de `curso-2026-2027.db`, «Abrir».
-6. «Horario».
+6. «Horario» (captura 6d-1) y «Configuración» › «Asignaturas» (captura 6d-2). Por último, captura 6e de la
+   carpeta de datos.
 
 **Resultado esperado**
 - **Tras 2:** la barra muestra `2026/2027` sin marca de solo lectura.
@@ -396,9 +420,10 @@ la forma 2026/2027, con dos años consecutivos.». Los ficheros sí se nombran c
 - A posteriori en Linux (§7.5): las 17 tablas de configuración idénticas en las dos bases, el curso
   nuevo sin horario y la fila `curso` de cada una.
 
-**Captura.** 6a: el formulario de duplicar relleno. 6b: la lista de cursos. 6c: la barra con «Solo
-lectura» y el mensaje del alta rechazada. 6d: el curso nuevo con su configuración y sin horario. 6e: la
-carpeta de datos.
+**Captura.** 6a (acción 2, antes de «Duplicar»): el formulario de duplicar relleno. 6b (acción 3): la
+lista de cursos. 6c (acción 4): la barra con «Solo lectura» y el mensaje del alta rechazada. 6d-1 y
+6d-2 (acción 6): el curso nuevo sin horario y con su configuración. 6e (acción 6): la carpeta de
+datos, con `curso-abierto`.
 
 ## 6. Qué se trae de Windows
 
@@ -411,7 +436,9 @@ carpeta de datos.
 ## 7. Oráculos a posteriori (Linux, sobre copias)
 
 Son las órdenes del ensayo de S171. Todas trabajan sobre **copias**: la carpeta traída no se modifica, y
-sqlite se abre en `mode=ro`. `<id>` es el id del horario final (paso 4d).
+sqlite se abre en `mode=ro`. `<id>` es el id del horario final del paso 4d; si se regeneró más de una
+vez, el mayor. El único bloque que arranca la aplicación (§7.3) lo hace siempre en el puerto **8081**,
+así que no importa que haya otra instancia en el 8080.
 
 ### 7.1 Preparación
 
@@ -470,13 +497,15 @@ cada horario. No hay que regenerar nada.
 
 ```bash
 cp $T/educhronos.db $W/recalculo.db
-ss -ltnH 'sport = :8080'                                   # debe salir vacío
-nohup java -jar $JAR --spring.datasource.url=jdbc:sqlite:$W/recalculo.db > $W/recalculo.log 2>&1 &
+P=8081
+if [ -n "$(ss -ltnH "sport = :$P")" ]; then echo "PARA: el puerto $P está ocupado"; else
+nohup java -jar $JAR --server.port=$P --spring.datasource.url=jdbc:sqlite:$W/recalculo.db > $W/recalculo.log 2>&1 &
 echo $! > $W/recalculo.pid
-for i in $(seq 1 60); do c=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/curso); [ "$c" = 200 ] && break; sleep 1; done; echo "http=$c"
-for h in 1 <id>; do
-  curl -s -o $W/proy-$h.json http://127.0.0.1:8080/api/horarios/$h/proyeccion
-  curl -s -o $W/diag-$h.json http://127.0.0.1:8080/api/horarios/$h/diagnostico
+for i in $(seq 1 60); do c=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$P/api/curso); [ "$c" = 200 ] && break; sleep 1; done; echo "http=$c"
+grep "Database JDBC URL" $W/recalculo.log                   # debe nombrar $W/recalculo.db, no otra base
+for h in $(sqlite3 "file:$W/recalculo.db?mode=ro" "select id from horario_generado order by id"); do
+  curl -s -o $W/proy-$h.json http://127.0.0.1:$P/api/horarios/$h/proyeccion
+  curl -s -o $W/diag-$h.json http://127.0.0.1:$P/api/horarios/$h/diagnostico
   python3 -c "
 import json; p=json.load(open('$W/proy-$h.json')); d=json.load(open('$W/diag-$h.json'))
 print('horario', p['id'], p['estadoSolver'], 'objetivo', p['objetivo'], 'sesiones', len(p['sesiones']))
@@ -484,13 +513,14 @@ print('  violaciones', len(d['violaciones']), 'totales', d['totales'])
 print('  blandas con delta>0:', [(x['regla'], x['actividadCodigo'], x['indice'], x['tramoCodigo']) for x in d['penalizaciones'] if x['delta'] > 0])"
 done
 kill $(cat $W/recalculo.pid)
+fi
 ```
 
 Esperado:
 - Horario 1: `OPTIMAL`, objetivo `0.0`, 24 sesiones y 0 violaciones.
-- Horario `<id>`: `OPTIMAL`, objetivo `1.0`, 24 sesiones, 0 violaciones, totales `ventanas 0,
-  consecutivas 0, indispBlanda 1`, y como única blanda con delta positivo
-  `('INDISPONIBILIDAD_BLANDA', 'LEN-…', …, 'V6')`.
+- Horario `<id>`, y cualquier horario intermedio si se regeneró de más: `OPTIMAL`, objetivo `1.0`, 24
+  sesiones, 0 violaciones, totales `ventanas 0, consecutivas 0, indispBlanda 1`, y como única blanda con
+  delta positivo `('INDISPONIBILIDAD_BLANDA', 'LEN-…', …, 'V6')`.
 - La sesión fijada: `sqlite3 "file:$W/copia.db?mode=ro" "select count(*) from sesion_bloqueada"` → 1.
 
 El orden de `penalizaciones` puede cambiar de una JVM a otra: en el ensayo, el recálculo dio la misma
@@ -529,6 +559,7 @@ for t in horario_generado sesion sesion_bloqueada aula_bloqueada; do
   printf '%-30s nuevo %s  archivado %s\n' $t "$(sqlite3 "file:$N?mode=ro" "select count(*) from $t")" "$(sqlite3 "file:$A?mode=ro" "select count(*) from $t")"; done
 echo "curso nuevo:     $(sqlite3 "file:$N?mode=ro" "select nombre, archivado from curso")"
 echo "curso archivado: $(sqlite3 "file:$A?mode=ro" "select nombre, archivado from curso")"
+echo "sesiones = 24 × horarios: $(sqlite3 "file:$A?mode=ro" "select case when (select count(*) from sesion) = 24*(select count(*) from horario_generado) then 'sí' else 'NO' end")"
 echo "tablas de configuración con diferencias: $fallos"
 cat $T/curso-abierto; echo
 ```
@@ -536,8 +567,11 @@ cat $T/curso-abierto; echo
 Esperado:
 - Las 17 tablas, con `nuevo-archivado 0` y `archivado-nuevo 0` y las mismas cuentas que en §7.2;
   «tablas de configuración con diferencias: 0».
-- En el curso nuevo, 0 en `horario_generado`, `sesion`, `sesion_bloqueada` y `aula_bloqueada`. En el
-  archivado, 2, 48, 1 y 0.
+- En el curso nuevo: 0 horarios, 0 sesiones y 0 bloqueos (`horario_generado`, `sesion`,
+  `sesion_bloqueada` y `aula_bloqueada`, todas a 0).
+- En el archivado: tantos `horario_generado` como generaciones (2 si se regeneró una vez),
+  `sesion` = 24 × `horario_generado`, `sesion_bloqueada` 1 y `aula_bloqueada` 0; «sesiones = 24 ×
+  horarios: sí».
 - `curso nuevo: 2026/2027|0` y `curso archivado: 2025/2026|1`.
 - El puntero contiene `curso-2026-2027.db`.
 
@@ -554,14 +588,14 @@ Java y Node ausentes antes de instalar: sí / no
 Commit aceptado:
 sha256 del jar (-HuellaJar):
 sha256 del zip del bundle:
-Ids de horario: generado en el paso 3 =        regenerado en 4d =
+Ids de horario: generado en el paso 3 =        regenerado en 4d (final) =        otros, si se regeneró de más =
 
 | Paso | Resultado (PASA/FALLA) | Oráculo aplicado | Capturas | Observaciones |
 |------|------------------------|------------------|----------|---------------|
 | 1 Instalar           | | pantalla + carpeta de datos                          | 1a 1b | |
 | 2 Crear el centro    | | listas + prevalidación + §7.2                        | 2a–2h | |
 | 3 Generar            | | diagnóstico en navegador + §7.3                      | 3a–3d | |
-| 4 Ajustar (a, b, c, d) | | pantalla + diagnóstico + §7.3                      | 4a–4d | |
+| 4 Ajustar (a, b, c, d) | | pantalla + diagnóstico + §7.3                      | 4a-1 4a-2 4b 4c 4d | |
 | 5 Exportar           | | §7.4 (siete rc=0)                                    | 5a 5b | |
 | 6 Duplicar           | | pantalla + §7.5                                      | 6a–6e | |
 
