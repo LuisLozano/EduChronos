@@ -601,3 +601,5 @@ Ids de horario: generado en el paso 3 =        regenerado en 4d (final) =       
 
 Veredicto de la cadena: PASA / FALLA (si FALLA: paso, Cambio que lo arregla, y nueva corrida desde el paso 1)
 ```
+
+Las actas de cada corrida viven en `docs/actas-aceptacion/`, una por fichero.
