@@ -52,24 +52,24 @@
 - L745 — ### Criterios de verificación
 - L752 — ## Registro de progreso
 - L754 — ### Sesión 172 — O-aceptación (H4), C-corrida-aceptacion: **LA CADENA ENTERA SE EJECUTA EN WINDOWS POR UN HUMANO. `O-aceptación` TERMINADO, 4 DE 4, CON SALVEDAD POR DECISIÓN DEL USUARIO.**
-- L823 — ### Bloques de Fase 2
-- L831 — ### Bloques de Fase 5
-- L854 — ### Bloques de Fase 6
-- L899 — ### Bloques de Fase 8
-- L1111 — ### Fases completadas
-- L1215 — ### Cierre del modelo — Sesión 8
-- L1263 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1309 — ### Método de trabajo (procedimiento vigente)
-- L1342 — ### Deuda consciente VIVA
-- L3232 — ### Deuda consciente CERRADA (histórico)
-- L3503 — ### Notas técnicas validadas en Fase 0
-- L3516 — ### Notas técnicas validadas en Fase 6
-- L3561 — ### Notas técnicas validadas en Fase 9
-- L3570 — ### Notas técnicas validadas en Fase 11
-- L3713 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3722 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3749 — ### Registro detallado de sesiones S10–S31
-- L3758 — ## Señales globales de alerta
+- L825 — ### Bloques de Fase 2
+- L833 — ### Bloques de Fase 5
+- L856 — ### Bloques de Fase 6
+- L901 — ### Bloques de Fase 8
+- L1113 — ### Fases completadas
+- L1217 — ### Cierre del modelo — Sesión 8
+- L1265 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1311 — ### Método de trabajo (procedimiento vigente)
+- L1344 — ### Deuda consciente VIVA
+- L3234 — ### Deuda consciente CERRADA (histórico)
+- L3505 — ### Notas técnicas validadas en Fase 0
+- L3518 — ### Notas técnicas validadas en Fase 6
+- L3563 — ### Notas técnicas validadas en Fase 9
+- L3572 — ### Notas técnicas validadas en Fase 11
+- L3715 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3724 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3751 — ### Registro detallado de sesiones S10–S31
+- L3760 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -763,6 +763,8 @@ nuevo a partir del anterior, modificando solo los cambios.
   OBSERVACIONES, SIN DEUDA NUEVA. (a) El tutor de un grupo no se propaga a un PDC que ya existía (la herencia ocurre al crear el PDC; conocido desde el M2 de S171). (b) `D-vista-horario-estado-rancio` se reproduce en Windows igual que en Linux. (c) El paso 6 del guion no advierte de que no se genere en el curso nuevo; sólo importa si hay otra corrida (R-terminado). (d) Avisos del build de la fase A, sin comprobar si son anteriores: versión de maven-resources-plugin, deprecación en `ProyeccionDtoContratoTest`, presupuesto inicial de Angular 589 de 550 kB.
   COSTURA. `D-curso-pestanas-desfasadas`, `D-jornada-congelada-por-disponibilidad` y `D-curso-sin-borrado` colgaban de `O-aceptación`: quedan sin sede desde S172 y se reasignan al abrir el siguiente objetivo.
   DEFECTOS DE INSTRUMENTO. Del asistente: (1) la captura 3b quedó fuera de orden en las instrucciones del paso 3; (2) la orden `Copy-Item …\*.txt` arrastró a `bundle/` transcripciones de días anteriores, inofensivas; (3) no se comprobaron las capturas al terminar cada paso, y tres de las cuatro discrepancias (3b, 4a-1 y 4d) se habrían corregido a tiempo. Lección para cualquier corrida guiada: la lista de capturas se confirma al cerrar cada paso, no al final.
+  LIMPIEZA (M1-bis). Archivada S170 en la bitácora, promovida a H3 y con el cuerpo idéntico; degradada S171; S172, única cabecera H3 viva. Los tres censos, en S170. Sin acumulación que condensar.
+  R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 12 de 12, 0 fallos duros; índices descuadrados antes de regenerar, gestión 1 de 34 y plan 19 de 68, después 0 y 0. Censo de 315 a 316 tokens: nace `C-corrida-aceptacion` (4); `O-aceptación` de 34 a 40; `C-guion-aceptacion` y `D-vista-horario-estado-rancio` bajan de 4 a 3 al salir S171 del índice; ninguna extinción. Frase de ventana y H3 única, comprobadas a mano. Barras de las filas tocadas sin cambios (H4 y dos de §4 con 5; `D-curso-sin-borrado` con 4, de otra tabla). Higiene/Método: 14 de 20. Solo tocados los tres documentos previstos.
   SUITES: sin correr, la sesión no tocó código: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros, con `centro-minimo` rojo preexistente.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`: INTACTOS.
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s172/` (jar, `empaquetar-linux.log`, `datos/`, `descargas/`, `capturas/` —26—, `oraculos/`). En la carpeta compartida: `entrega/` y `bundle/` de `8d9a74a`, `bundle-65222f0-s169/`, `medidas/s172/`. Las cuentas `prueba` y `prueba2` conservan sus datos.
