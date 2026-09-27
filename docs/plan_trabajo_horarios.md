@@ -50,26 +50,26 @@
 - L721 — ### Criterios de verificación
 - L742 — ## FASE 12 — CI/CD con GitHub Actions
 - L745 — ### Criterios de verificación
-- L752 — ## Registro de progreso
-- L754 — ### Sesión 172 — O-aceptación (H4), C-corrida-aceptacion: **LA CADENA ENTERA SE EJECUTA EN WINDOWS POR UN HUMANO. `O-aceptación` TERMINADO, 4 DE 4, CON SALVEDAD POR DECISIÓN DEL USUARIO.**
-- L825 — ### Bloques de Fase 2
-- L833 — ### Bloques de Fase 5
-- L856 — ### Bloques de Fase 6
-- L901 — ### Bloques de Fase 8
-- L1113 — ### Fases completadas
-- L1217 — ### Cierre del modelo — Sesión 8
-- L1265 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1311 — ### Método de trabajo (procedimiento vigente)
-- L1344 — ### Deuda consciente VIVA
-- L3234 — ### Deuda consciente CERRADA (histórico)
-- L3505 — ### Notas técnicas validadas en Fase 0
-- L3518 — ### Notas técnicas validadas en Fase 6
-- L3563 — ### Notas técnicas validadas en Fase 9
-- L3572 — ### Notas técnicas validadas en Fase 11
-- L3715 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3724 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3751 — ### Registro detallado de sesiones S10–S31
-- L3760 — ## Señales globales de alerta
+- L754 — ## Registro de progreso
+- L756 — ### Sesión 172 — O-aceptación (H4), C-corrida-aceptacion: **LA CADENA ENTERA SE EJECUTA EN WINDOWS POR UN HUMANO. `O-aceptación` TERMINADO, 4 DE 4, CON SALVEDAD POR DECISIÓN DEL USUARIO.**
+- L827 — ### Bloques de Fase 2
+- L835 — ### Bloques de Fase 5
+- L858 — ### Bloques de Fase 6
+- L903 — ### Bloques de Fase 8
+- L1115 — ### Fases completadas
+- L1219 — ### Cierre del modelo — Sesión 8
+- L1267 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1313 — ### Método de trabajo (procedimiento vigente)
+- L1346 — ### Deuda consciente VIVA
+- L3236 — ### Deuda consciente CERRADA (histórico)
+- L3507 — ### Notas técnicas validadas en Fase 0
+- L3520 — ### Notas técnicas validadas en Fase 6
+- L3565 — ### Notas técnicas validadas en Fase 9
+- L3574 — ### Notas técnicas validadas en Fase 11
+- L3717 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3726 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3753 — ### Registro detallado de sesiones S10–S31
+- L3762 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -746,6 +746,8 @@ nuevo a partir del anterior, modificando solo los cambios.
 - [ ] Cada push a main ejecuta los tests automáticamente
 - [ ] Un tag de versión genera automáticamente el bundle Windows
 - [ ] El bundle generado es funcional (probado manualmente)
+
+**SUSTITUIDOS en S173** por el criterio de `O-ci` (`gestion_proyecto.md` §3): los tres no eran verificables tal como estaban escritos.
 
 ---
 
@@ -2372,7 +2374,7 @@ con remisión a la bitácora.
   de horario, que es H1. Deja de ser aplazable en cuanto un SEGUNDO caso necesite encadenar fallo→recarga sobre
   proyección: entonces el parche local se convierte en duplicación y toca migrar. No se paga ahora.
 
-- **D-e2e-retry-bd** (S112, VIVA, TÉCNICA REAL, no bloqueante HOY) — UN REINTENTO DE PLAYWRIGHT CORRERÍA SOBRE
+- **D-e2e-retry-bd** (S112, VIVA, TÉCNICA REAL, BLOQUEANTE desde S173: condición 2 de `O-ci`) — UN REINTENTO DE PLAYWRIGHT CORRERÍA SOBRE
   LA BD DEL INTENTO FALLIDO. `playwright.config.ts` declara `retries: process.env['CI'] ? 2 : 0`, y el borrado
   de la base (`rm -f app/educhronos-e2e.db*`) vive en el `command` del `webServer`, que Playwright ejecuta UNA
   VEZ al arrancar la corrida, no por test ni por reintento. Consecuencia: en CI, un reintento del spec del
@@ -3083,7 +3085,7 @@ con remisión a la bitácora.
 - **D-guarda-escritura-sin-caso** (S153, VIVA, DEUDA TÉCNICA REAL, no bloqueante) — LA GUARDA
   `Files.isWritable` DE `crearCarpeta` NO LA EJERCITA NINGÚN CASO. Nace en el M3 de S153, medida por mutación y no supuesta: suprimir la condicion `if (!Files.isWritable(carpeta))` de `crearCarpeta` SOBREVIVE a los 14 casos del spec. El único caso de carpeta imposible usa un fichero como padre, y ahí revienta antes `createDirectories`, así que esa línea no llega a ejecutarse nunca en la suite. NO se cubre, por dos razones medidas: un `chmod 0555` sobre un `@TempDir` no discrimina si la suite corre como root —y la Fase 12 traerá runners—, y en Windows `isWritable` no significa lo mismo que en POSIX, porque mira el atributo de solo lectura y no los permisos efectivos, de modo que puede dar por escribible una carpeta que no lo es. La guarda SE QUEDA porque su diagnóstico nombra la carpeta: sin ella el fallo sale después como SQLITE_CANTOPEN dentro de `DataSourceScriptDatabaseInitializer.runScripts`, sin decir dónde. Queda escrito en el javadoc de `crearCarpeta`. Se paga cuando la Fase 12 traiga runners, o con un doble del sistema de ficheros.
 
-- **D-e2e-centro-minimo-rojo** (S154, VIVA, TÉCNICA REAL, no bloqueante) — `centro-minimo.spec.ts:265`
+- **D-e2e-centro-minimo-rojo** (S154, VIVA, TÉCNICA REAL, BLOQUEANTE desde S173: condición 2 de `O-ci`) — `centro-minimo.spec.ts:265`
   falla: espera 3 `.instancia` tras generar y recibe 0. Medido sobre `1e5baaf` limpio, en un worktree
   con su propio `npm ci`: falla idéntico, así que es PREEXISTENTE y ajeno a `C-arranque-cierre`; no se
   sabe desde qué sesión. IPv6 descartado con tres medidas: la escucha queda en
@@ -3092,14 +3094,14 @@ con remisión a la bitácora.
   sobre copia del banco y su ficha dice «no depende de generar». Pero es el eslabón «crear centro →
   generar» de R-e2e: un e2e rojo que nadie mira es una señal perdida sobre hitos ya cerrados, y
   bloquea la Fase 12, que no puede montar CI con él en rojo. La causa no se investigó, por estar fuera
-  del alcance del Cambio. Sede: Fase 12 (CI).
+  del alcance del Cambio. Sede: `O-ci` (H4), condición 2, bloqueante desde S173.
 
 - **D-seleccion-de-vista-fuera-de-la-url** (S155, VIVA, MEJORA FUTURA, no bloqueante) — la vista del horario no
   guarda en la URL qué grupo, profesor o aula se está mirando: con F5, que funciona desde S155, vuelve al primer
   grupo (1B-A). Visto por el usuario en el M4 de S155. La selección vive en dos señales del componente, `vista` y `entidad` (`horario-view.ts:58-59`), que no se leen ni se escriben en la URL —la ruta sólo lleva el id del horario (`paramMap`, `horario-view.ts:218`)—, y al cargar la proyección `entidad` se reinicia a la primera entidad de la lista (`horario-view.ts:307`). No es defecto de la condición 9 de
   `O-instalación`, que pide que la vista se sirva, y se sirve. Daño: no se puede marcar ni compartir un enlace a
   un grupo concreto. Arreglo previsible: la selección como parámetro de la URL. Sin objetivo asignado.
-- **D-reenvio-spa-sin-guarda-automatica** (S155, VIVA, técnica real, no bloqueante, sede Fase 12) — el cableado
+- **D-reenvio-spa-sin-guarda-automatica** (S155, VIVA, técnica real, no bloqueante, sede `O-ci` (Fase 12) desde S173) — el cableado
   del reenvío de la SPA (`RutasSpaConfig` registrando `ResolvedorRutasSpa` sobre `/**`) no lo protege ningún test
   automático. La lógica del resolvedor sí (7 casos; los cuatro mutantes caen). Pero no hay tests con contexto de
   Spring, `mvn test` corre antes de que exista el bundle y el e2e va contra `ng serve`. Previsiblemente, retirar
@@ -3133,7 +3135,7 @@ con remisión a la bitácora.
   es la misma familia que el paréntesis de aviso que la propia frase arrastra desde S118. El arreglo es que el
   verificador DERIVE la afirmación del fichero en vez de mirarla. Hasta que se instrumente, cada M1 la comprueba
   a mano —así se hizo en este cierre—.
-- **D-curso-sin-borrado** (S160, VIVA, MEJORA FUTURA, no bloqueante, sede `O-aceptación`, objetivo de aceptación desde S163 y con ficha desde S168) — UN CURSO NO SE PUEDE
+- **D-curso-sin-borrado** (S160, VIVA, MEJORA FUTURA, no bloqueante, sin sede desde S173 (era `O-aceptación`), objetivo de aceptación desde S163 y con ficha desde S168) — UN CURSO NO SE PUEDE
   ELIMINAR DESDE LA APLICACIÓN. El selector de S160 lista, abre y duplica, pero no borra: un duplicado con el
   año equivocado sólo se quita borrando el fichero en la carpeta de datos. No está en el criterio de `O-curso`
   ni en el paso 6 de §1, y es destructivo sobre el histórico del centro, con preguntas sin decidir (qué se
@@ -3149,9 +3151,9 @@ con remisión a la bitácora.
   el óptimo— y sólo podría mostrar el tiempo transcurrido frente al tope, lo que exige publicar el presupuesto
   por API (`D-presupuesto-anunciado-espejo`). Medido de paso: el log no registra la duración del solve. No
   cambia el criterio de ningún objetivo (R-terminado).
-- **D-curso-pestanas-desfasadas** (S163, VIVA, TÉCNICA REAL, no bloqueante, sede `O-aceptación`, ficha escrita en S168) — UNA PESTAÑA PUEDE MOSTRAR UN CURSO MIENTRAS EL BACKEND TIENE ABIERTO OTRO. Lo observó el usuario en la prueba de Windows de S163: dos pestañas en cursos distintos. No es de Windows: el backend tiene un solo curso abierto para todo el proceso (decisión E de `O-curso`, precisada en S160: el pool se cambia en caliente bajo un datasource estable), y la barra de cada pestaña pide `GET /api/curso` una sola vez al cargarse (`curso-barra.ts:51-57`). Un segundo lanzamiento abre siempre una pestaña nueva contra la instancia abierta (`Escritorio.java:113-125`), así que el caso no es rebuscado. Consecuencias, DEDUCIDAS del diseño y NO medidas: (1) el curso archivado no corre riesgo, porque la guarda de solo lectura actúa sobre la base realmente abierta; (2) una pestaña que cree estar en el activo con el archivado abierto ve rechazadas sus escrituras, lo que confunde pero no hace daño; (3) una pestaña que muestra el archivado con el activo abierto es el caso malo: sus descargas saldrían del activo con la etiqueta del archivado, y «Generar» o una edición irían al activo. No cambia ninguna condición de `O-curso` (R-terminado) ni bloquea `O-disponibilidad` (R-deuda). Se mide (en Linux basta) y se decide al abrir el objetivo de aceptación, que recorre la cadena como lo haría el centro. **Medido en S168 (M2, lectura, Claude Code, HEAD `4d3b39c`):** cada pestaña carga el curso en un signal una sola vez (`curso-barra.ts:51-57`), sin almacenamiento en el navegador, sin aviso entre pestañas y sin cabecera que diga el curso: toda petición va al curso abierto en el backend. Duplicar y abrir recargan la misma pestaña (`cursos-dialogo.ts:147-148` y `:195-196`), y un segundo lanzamiento abre otra (`Escritorio.java:113-125`). Con una sola pestaña, el paso 6 no pasa por el estado malo. Con dos, sí: la pestaña A abre el archivado, se relanza la aplicación y desde la B se abre el activo; A sigue mostrando el archivado. DEDUCIDO, no reproducido. Queda fuera del criterio de `O-aceptación` (decisión D).
-- **D-ps1-palanca-de-linux** (S163, VIVA, TÉCNICA REAL, de texto, no bloqueante, sede Fase 12) — EL TEXTO DE PALANCA DEL GUION DE WINDOWS DA LA CIFRA DE LINUX. Medido en el M2 de S163 (Claude Code): `scripts/empaquetar-windows.ps1:200-201` cita 60.869.367 B, que `docs/empaquetado.md:240-242` da como la cifra de Linux; la de Windows es 69.453.720 B. Sólo aparece si el tamaño sale NO CUMPLE. Cuelga de la Fase 12, que rehará la construcción.
-- **D-jornada-congelada-por-disponibilidad** (S164, VIVA, TÉCNICA REAL, no bloqueante, sede `O-aceptación`, ficha escrita en S168) — UNA SOLA RESTRICCIÓN HORARIA CONGELA LA JORNADA DE TODO EL CENTRO. Medido por lectura en el M2 de S164 (Claude Code): `JornadaService.reemplazarJornada` borra y recrea la malla, y antes `comprobarSinDependientes` (`JornadaService.java:267-275`) cuenta restricciones horarias, sesiones y pines; si alguno es mayor que 0, responde 409 (`JornadaController.java:53-54`). El motivo es correcto: `ordenEnDia` es posicional, y reordenar la malla bajo restricciones vivas las movería de fila. La guarda ya existe y hoy la dispara cualquier horario generado; con `O-disponibilidad` la dispara también la primera restricción de cualquier profesor. Muerde al pasar de curso si cambia la jornada: el duplicado copia `profesor_restriccion_horaria`, así que editarla exigiría vaciar la disponibilidad de todo el profesorado. No cambia ninguna condición de `O-disponibilidad` ni lo bloquea (R-deuda). Se mide y se decide en el objetivo de aceptación, que recorre la cadena como lo haría el centro. **Medido por HTTP en S168 (M2, Claude Code, HEAD `4d3b39c`):** sin restricciones, un PUT de `/api/jornada` idéntico al vigente da 200. Con una restricción DURA, ese mismo PUT da 409 «No se puede borrar: referenciada por 1 restricciones horarias», igual que un PUT que cambia una hora. La congelación no distingue entre cambiar y no cambiar, y el mensaje habla de borrar cuando el usuario no ha borrado nada, que es `D-jornada-msg409` (S107). El duplicado (`POST /api/cursos`, 201) copia la restricción, y en el curso nuevo los dos PUT dan 409. `comprobarSinDependientes` sigue en `:267-275` y cuenta restricciones, sesiones y pines. De paso: reenviar el GET literal da 400 por solape, porque la validación va antes que la guarda; la asimetría del contrato (GET de la semana, PUT de un día tipo) es `D-jornada-asimetria` (S107). No medido: si «Guardar jornada» en la interfaz envía el PUT aunque no haya cambios. Queda fuera del criterio de `O-aceptación` (decisión D): el guion define la jornada primero y el paso 6 conserva la configuración.
+- **D-curso-pestanas-desfasadas** (S163, VIVA, TÉCNICA REAL, no bloqueante, sin sede desde S173 (era `O-aceptación`), ficha escrita en S168) — UNA PESTAÑA PUEDE MOSTRAR UN CURSO MIENTRAS EL BACKEND TIENE ABIERTO OTRO. Lo observó el usuario en la prueba de Windows de S163: dos pestañas en cursos distintos. No es de Windows: el backend tiene un solo curso abierto para todo el proceso (decisión E de `O-curso`, precisada en S160: el pool se cambia en caliente bajo un datasource estable), y la barra de cada pestaña pide `GET /api/curso` una sola vez al cargarse (`curso-barra.ts:51-57`). Un segundo lanzamiento abre siempre una pestaña nueva contra la instancia abierta (`Escritorio.java:113-125`), así que el caso no es rebuscado. Consecuencias, DEDUCIDAS del diseño y NO medidas: (1) el curso archivado no corre riesgo, porque la guarda de solo lectura actúa sobre la base realmente abierta; (2) una pestaña que cree estar en el activo con el archivado abierto ve rechazadas sus escrituras, lo que confunde pero no hace daño; (3) una pestaña que muestra el archivado con el activo abierto es el caso malo: sus descargas saldrían del activo con la etiqueta del archivado, y «Generar» o una edición irían al activo. No cambia ninguna condición de `O-curso` (R-terminado) ni bloquea `O-disponibilidad` (R-deuda). Se mide (en Linux basta) y se decide al abrir el objetivo de aceptación, que recorre la cadena como lo haría el centro. **Medido en S168 (M2, lectura, Claude Code, HEAD `4d3b39c`):** cada pestaña carga el curso en un signal una sola vez (`curso-barra.ts:51-57`), sin almacenamiento en el navegador, sin aviso entre pestañas y sin cabecera que diga el curso: toda petición va al curso abierto en el backend. Duplicar y abrir recargan la misma pestaña (`cursos-dialogo.ts:147-148` y `:195-196`), y un segundo lanzamiento abre otra (`Escritorio.java:113-125`). Con una sola pestaña, el paso 6 no pasa por el estado malo. Con dos, sí: la pestaña A abre el archivado, se relanza la aplicación y desde la B se abre el activo; A sigue mostrando el archivado. DEDUCIDO, no reproducido. Queda fuera del criterio de `O-aceptación` (decisión D).
+- **D-ps1-palanca-de-linux** (S163, VIVA, TÉCNICA REAL, de texto, no bloqueante, sede `O-ci` (Fase 12) desde S173) — EL TEXTO DE PALANCA DEL GUION DE WINDOWS DA LA CIFRA DE LINUX. Medido en el M2 de S163 (Claude Code): `scripts/empaquetar-windows.ps1:200-201` cita 60.869.367 B, que `docs/empaquetado.md:240-242` da como la cifra de Linux; la de Windows es 69.453.720 B. Sólo aparece si el tamaño sale NO CUMPLE. Cuelga de la Fase 12, que rehará la construcción.
+- **D-jornada-congelada-por-disponibilidad** (S164, VIVA, TÉCNICA REAL, no bloqueante, sin sede desde S173 (era `O-aceptación`), ficha escrita en S168) — UNA SOLA RESTRICCIÓN HORARIA CONGELA LA JORNADA DE TODO EL CENTRO. Medido por lectura en el M2 de S164 (Claude Code): `JornadaService.reemplazarJornada` borra y recrea la malla, y antes `comprobarSinDependientes` (`JornadaService.java:267-275`) cuenta restricciones horarias, sesiones y pines; si alguno es mayor que 0, responde 409 (`JornadaController.java:53-54`). El motivo es correcto: `ordenEnDia` es posicional, y reordenar la malla bajo restricciones vivas las movería de fila. La guarda ya existe y hoy la dispara cualquier horario generado; con `O-disponibilidad` la dispara también la primera restricción de cualquier profesor. Muerde al pasar de curso si cambia la jornada: el duplicado copia `profesor_restriccion_horaria`, así que editarla exigiría vaciar la disponibilidad de todo el profesorado. No cambia ninguna condición de `O-disponibilidad` ni lo bloquea (R-deuda). Se mide y se decide en el objetivo de aceptación, que recorre la cadena como lo haría el centro. **Medido por HTTP en S168 (M2, Claude Code, HEAD `4d3b39c`):** sin restricciones, un PUT de `/api/jornada` idéntico al vigente da 200. Con una restricción DURA, ese mismo PUT da 409 «No se puede borrar: referenciada por 1 restricciones horarias», igual que un PUT que cambia una hora. La congelación no distingue entre cambiar y no cambiar, y el mensaje habla de borrar cuando el usuario no ha borrado nada, que es `D-jornada-msg409` (S107). El duplicado (`POST /api/cursos`, 201) copia la restricción, y en el curso nuevo los dos PUT dan 409. `comprobarSinDependientes` sigue en `:267-275` y cuenta restricciones, sesiones y pines. De paso: reenviar el GET literal da 400 por solape, porque la validación va antes que la guarda; la asimetría del contrato (GET de la semana, PUT de un día tipo) es `D-jornada-asimetria` (S107). No medido: si «Guardar jornada» en la interfaz envía el PUT aunque no haya cambios. Queda fuera del criterio de `O-aceptación` (decisión D): el guion define la jornada primero y el paso 6 conserva la configuración.
 - **D-ventanas-consecutivas-ciegas-a-bloques** (S165, VIVA, TÉCNICA REAL, no bloqueante, sin objetivo asignado) — VENTANAS Y CONSECUTIVAS NO VEN LOS TRAMOS INTERIORES DE UN BLOQUE, NI EN EL SOLVER NI EN EL VERIFICADOR. Por lectura (S165, M2 y fase 1, Claude Code): en `ModeloCpSat`, los literales `instEnT`/`ocupa` del término de ventanas y `instEnTC`/`ocupaC` del de consecutivas significan «la instancia EMPIEZA en t»; en `VerificadorSolucion`, `contarVentanasProfesor`, `contarPenalizacionConsecutivasProfesor` y los deltas de ventanas y consecutivas de `atribuirBlandas` sólo añaden el `ordenEnDia` del tramo de inicio. Un bloque de 2 cuenta como una sola clase y su segundo tramo parece hueco. Como solver y verificador comparten el punto ciego, los tests de concordancia no lo pueden detectar. A diferencia de `D-indisp-solo-tramo-de-inicio`, NO depende de las restricciones horarias: afecta hoy a todo catálogo con actividades de más de un tramo (fixtures de FPB y `fusion-instituto-completo`; ningún banco del centro, medido en S165, fase 0, 0.4). No se implementa nada hasta que el usuario cierre la semántica —si un bloque ocupa cada uno de sus tramos a efectos de ventanas, y si cuenta como N sesiones seguidas o como una a efectos de consecutivas—; la primera sesión será de análisis y cuantificará el impacto en los objetivos de escala. S165 dejó los dos términos intactos a propósito.
   **NOTA de S166:** `SolverHorarioIndisponibilidadBloqueTest.t4` usa como desempate una ventana creada por una sesión pinada; quien salde esta deuda debe comprobar que ese test sigue discriminando.
 - **D-modelo-no-determinista-entre-jvm** (S165, VIVA, TÉCNICA REAL, no bloqueante, sede con `D-generacion-no-reproducible`) — EL MODELO CP-SAT DE UN MISMO PROBLEMA NO SALE IGUAL EN DOS PROCESOS. Medido en S165, fase 0, 0.3 (Claude Code, test desechable, HEAD `7bd70a6`, tres JVM): el SHA-256 de `CpModelProto.toByteArray()` es el mismo al construir dos veces en una JVM, pero cambia entre JVM en 13 de los 44 fixtures —`3-cierre-cyr-refmt`, `5-escala-1bach`, `5-escala-4ESO`, `5-escala-4ESO-Di`, `5-escala-instituto`, `5-fusion-3-4-eso`, `5-fusion-eso-completa`, `5-fusion-instituto-completo`, los tres `8-2b-pin-aula-*`, `aulaCandidata-factible` y `aulaCandidata-mixta`— con los mismos recuentos de variables y restricciones en todos: cambia el ORDEN, no el contenido. Causa probable, por lectura y NO probada: el orden de iteración de `Map.copyOf`/`Set.copyOf`, que lleva una sal aleatoria por JVM y alimenta las opciones de aula de `InstanciaProgramada` y los conjuntos de `Plaza`. Una huella canónica —variables por nombre y dominio, restricciones con las referencias sustituidas por nombres y sus listas ordenadas, objetivo ordenado— sale idéntica en las tres JVM, sin nombres de variable duplicados; que detecte un cambio real está aún por demostrar con un mutante. Consecuencias: (1) un hash crudo del modelo no sirve de puerta de regresión, sí la huella (`D-indisp-solo-tramo-de-inicio`); (2) por inferencia, fijar `num_search_workers`, uno de los caminos de `D-generacion-no-reproducible`, podría no bastar para repetir una generación entre dos arranques, porque el orden del modelo puede orientar la búsqueda. En la misma medición, `fusion-instituto-completo` con 600 s y semilla 42 dio objetivo 230, 217 y 224 en tres corridas: es evidencia de `D-generacion-no-reproducible`, no de esta.
@@ -3202,7 +3204,7 @@ con remisión a la bitácora.
   (`D-gh6-tutor-contradictorio`, `D-configuracion-monolitica`) renderizan bien. `verificar-cierre.py` no cuenta celdas.
   Arreglo natural: comprobar en cada tabla de los documentos vivos que toda fila tiene tantas celdas no escapadas como
   su cabecera, contando también las barras dentro de código en línea. **Quinta fila, medida en el M1 de S168 y NO corregida:** en `plan_trabajo_horarios.md`, la fila «Plaza ↔ Profesor» de la tabla que empieza en la cabecera de la L1271 (L1285 en `6e20527`) tiene cinco barras frente a tres por la cardinalidad `|PlazaProfesor|≥2` dentro de código en línea; viene de `36b67d3`. El recuento del M1 dio 184 filas en 9 tablas de gestión, todas bien, y ésta como única fila del plan que no casa. Se deja para la sesión que salde esta deuda.
-- **D-contrato-dto-mide-jackson2** (S170, VIVA, TÉCNICA REAL, no bloqueante, sede Fase 12, sin ficha) — EL TEST DE
+- **D-contrato-dto-mide-jackson2** (S170, VIVA, TÉCNICA REAL, no bloqueante, sede `O-ci` (Fase 12) desde S173, sin ficha) — EL TEST DE
   CONTRATO DEL DTO DE LA PROYECCIÓN SERIALIZA CON JACKSON 2 Y LA APLICACIÓN SIRVE JSON CON JACKSON 3. Medido en S170
   (F3, lectura, Claude Code, HEAD `c634f87`): Spring Boot 4.1.0; `spring-boot-starter-web` trae
   `tools.jackson.core:jackson-databind` 3.1.4, el `JsonMapper` que autoconfigura Boot y que usa `GuardaSoloLectura`;
