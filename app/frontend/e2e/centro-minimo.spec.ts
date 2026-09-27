@@ -69,7 +69,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  * repintado.
  */
 
-/** Timeout del conjunto: el solve por UI son 30 s y hay ocho altas antes. */
+/** Timeout del conjunto: la espera del solve son 45 s y hay ocho altas antes. */
 test.setTimeout(180_000);
 
 /** El diálogo vivo. Es único: el recorrido cierra cada uno antes de abrir el siguiente. */
@@ -258,18 +258,34 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
 
   await generar.click();
 
-  // ASERTO PRINCIPAL. Son 3 instancias porque `repeticionesPorSemana` es 3 —tres
-  // ActividadInstancia— y hay UNA plaza. El timeout cubre el solve por UI: el POST
-  // va con cuerpo `{}`, así que el backend aplica los defaults de
-  // `GeneradorHorarioService`, 30 s de límite. El código de la actividad
-  // (MAT-1ESOA) NO se pinta en la rejilla: por eso el ancla es `.instancia` y no su
-  // texto.
-  await expect(page.locator('.instancia')).toHaveCount(3, { timeout: 45_000 });
-
-  // El diálogo de confirmación NO debe haberse abierto: la pre-validación devolvió
-  // [] y esa es su única condición de apertura. Si aparece, el centro está mal
-  // montado y el test debe morir aquí, no atravesarlo confirmando a ciegas.
+  // Desde S145 TODA generación se confirma, también con la pre-validación limpia: lo
+  // que el diálogo pide confirmar es el COSTE —sustituye el horario en curso y no se
+  // deshace—, no los avisos. Sin confirmar no sale el POST. Su botón se llama igual
+  // que el de la página, así que se acota al diálogo.
+  //
+  // El POST es síncrono —responde al terminar el solve—, así que su status es el
+  // veredicto del solver, y el cuerpo va en el mensaje para que un 4xx/5xx diga por
+  // qué. Va con cuerpo `{}`: el backend aplica el presupuesto por defecto,
+  // `educhronos.solver.max-segundos=600`, y el spec confía en que un centro de una
+  // actividad llega al óptimo en mucho menos. Los 45 s de la espera son esa apuesta:
+  // si deja de cumplirse, el test muere aquí y no en la rejilla.
+  await expect(page.locator('.confirmar-generacion')).toBeVisible();
+  const [resp] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/horarios',
+      { timeout: 45_000 },
+    ),
+    dialogo(page).getByRole('button', { name: 'Generar horario', exact: true }).click(),
+  ]);
+  expect(resp.status(), await resp.text()).toBeLessThan(300);
   await expect(page.locator('.confirmar-generacion')).toHaveCount(0);
+
+  // ASERTO PRINCIPAL. Son 3 instancias porque `repeticionesPorSemana` es 3 —tres
+  // ActividadInstancia— y hay UNA plaza. El solve ya terminó con el POST, así que
+  // aquí solo queda la navegación y el GET de la proyección: basta el timeout por
+  // defecto. El código de la actividad (MAT-1ESOA) NO se pinta en la rejilla: por
+  // eso el ancla es `.instancia` y no su texto.
+  await expect(page.locator('.instancia')).toHaveCount(3);
 
   // Contenido de la primera instancia: los campos que la rejilla pinta por sesión.
   // Sin esto, tres celdas vacías contarían igual que tres sesiones reales.
