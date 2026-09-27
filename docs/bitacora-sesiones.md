@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S172. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S173. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S172). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S173). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -9726,3 +9726,19 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   SUITES: sin correr, la sesión no tocó código: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros, con `centro-minimo` rojo preexistente.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…`: INTACTOS.
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s172/` (jar, `empaquetar-linux.log`, `datos/`, `descargas/`, `capturas/` —26—, `oraculos/`). En la carpeta compartida: `entrega/` y `bundle/` de `8d9a74a`, `bundle-65222f0-s169/`, `medidas/s172/`. Las cuentas `prueba` y `prueba2` conservan sus datos.
+
+### Sesión 173 — O-ci (H4), C-alcance-ci: **H4 ABRE SU CUARTO Y ÚLTIMO OBJETIVO, `O-ci` (FASE 12), CON EL CRITERIO ESCRITO SOBRE MEDICIÓN: 0 DE 4.** Los tres criterios de la Fase 12 no eran verificables tal como estaban escritos; los sustituyen cuatro condiciones. La medición encuentra que el empaquetado ya está partido como lo necesita la CI y que UTC no rompe la suite.
+  TIPO Y RITUAL: APERTURA DE OBJETIVO — M0 + M2 de solo lectura + decisiones + alta documental con revisión del diff + M1. Sin código de la aplicación. Precedente: `C-alcance-aceptacion` (S168). Dirigida desde un solo chat.
+  M0. Cambio `C-alcance-ci`, Objetivo `O-ci` (nuevo), Hito H4. Va ahora por el orden de S163; `O-aceptación` terminó en S172. R-invalidación: ninguna; es el objetivo al que remitían los guiones de empaquetado y el e2e. R-deuda: ninguna deuda bloquea la apertura. Antes de fijar alcance, el usuario preguntó si el plan gratuito de GitHub lo permite: el repositorio es público y los runners estándar son gratuitos en repos públicos.
+  FASE 1 — M2 (HEAD `b04069c`, Claude Code, solo lectura, árbol intacto) en siete puntos: remoto público sin `.github/`; versiones fijadas (Java 17, OR-Tools 9.11.4210, Node 22.23.1, npm 10.9.8); suites en 52 s, 12 s y 64 s con los conteos vigentes y `centro-minimo` en rojo; `TZ=UTC mvn test` pasa entero; el `.ps1` no usa red ni WiX, con el traspaso manual y `-HuellaJar` copiada de la consola; un solo tag y sin `outputTimestamp`; `retries: 2` con `CI`. El almacenamiento lo comprobó el arquitecto en la documentación de GitHub: los artefactos de Actions caducan (90 días como máximo en repos públicos) y los assets de Release no.
+  FASE 2 — criterio de cuatro condiciones y decisiones A a F de la ficha, confirmadas por el usuario. La única con compromiso real fue la condición 4: guion de aceptación completo sobre el bundle de CI, frente a probar sólo instalar, generar y exportar.
+  FASE 3 `e7cdd3e` — ALTA DOCUMENTAL. Ficha de `O-ci` en §3; notas de S173 en §1, §2 y el ESTADO de hitos. En §4, `D-e2e-centro-minimo-rojo` y `D-e2e-retry-bd` pasan a bloquear (condición 2); seis no bloqueantes pasan a colgar de `O-ci`; `D-hora-tramo-dependiente-de-zona`, `D-curso-pestanas-desfasadas`, `D-jornada-congelada-por-disponibilidad` y `D-curso-sin-borrado` quedan sin sede. En el plan, las cabeceras de ocho fichas se alinean con §4 y la Fase 12 lleva nota de sustitución. Claude Code revisó el diff en seco antes de escribir; las cuatro correcciones de costura (C1–C4) entraron antes del commit.
+  CRITERIO. **`O-ci` ABIERTO, 0 de 4.** `C-alcance-ci` ✔ HECHO. Primer Cambio previsto: el job de Windows (decisión F). H4 sigue abierto.
+  COSTURA. Resuelta la de S172: las tres deudas de curso quedan sin sede explícita, porque `O-ci` no las toca y no hay objetivo planificado después de H4.
+  OBSERVACIONES, SIN DEUDA NUEVA. (a) La suite es ciega a `D-hora-tramo-dependiente-de-zona`, como predecía su ficha: escribe y lee con la misma JVM. (b) `ng test` no entra en modo watch sin TTY (`isTTY()` de `@angular/build` también mira `CI`): en un runner corre de una pasada sin flags. (c) Descargar el zip de la Release al Linux del usuario y entregarlo por USB mantiene la decisión de S156 sin firma.
+  DEFECTOS DE INSTRUMENTO. Del asistente: (1) el alta dejó costura a medias (tres cabeceras del plan y la celda de bloqueo de `D-hora-tramo-dependiente-de-zona`); (2) el ancla de C1 se escribió sin ver la negrita del fichero (norma 3 de M-guion). Los detectó la revisión en seco de Claude Code antes de escribir; ninguno costó trabajo medible por segunda vez. Higiene/Método sigue en 14 de 20.
+  SUITES: corridas en el M2, sin cambios de código: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros, con `centro-minimo` rojo preexistente, ahora bloqueante de `O-ci`.
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…` (md5, medidos en el cierre; `find` bajo /home/luis da una sola copia de cada uno, en `app/`): INTACTOS.
+  MATERIAL SIN VERSIONAR. /tmp/educhronos-s173/ (logs del M2, copias en seco y salida del cierre): puede no sobrevivir.
+  LIMPIEZA (M1-bis). Archivada S171 en la bitácora (17 líneas, idénticas byte a byte a las 774–790 del plan en `e7cdd3e`), promovida a H3 y con el cuerpo idéntico: el diff sólo difiere en la línea de título, y su texto tras el prefijo es el mismo. Degradada S172; S173, única cabecera H3 viva. Los tres censos, en S171. Condensación: ninguna; `O-ci` recién abierto no deja frente cerrado.
+  R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 12 de 12, 0 fallos duros; índices descuadrados antes de regenerar, gestión 0 de 35 y plan 19 de 68, después 0 y 0. Censo de 316 a 318 tokens desde `b04069c`: nacen `O-ci` (29) y `C-alcance-ci` (2); ninguna extinción; tokens de una aparición, 38 antes y después. `C-alcance-ci` sólo tiene una cita real, en la ficha de `O-ci`: la segunda es la línea del índice que reproduce la cabecera de S173 (`D-censo-r4-rescate-por-indice`). Frente a `e7cdd3e`, el M1 sólo mueve cuentas por el índice: `O-ci` de 27 a 29 y `C-alcance-ci` de 1 a 2 al entrar la cabecera de S173; `O-aceptación` de 42 a 40 y `C-corrida-aceptacion` de 4 a 3 al salir la de S172. H3 única, comprobada a mano (`grep -c "^### Sesión"` da 1). Frase de ventana, leída a mano en el plan: «El plan conserva ahora S172 (degradada a formato compacto) y S173 como única cabecera H3 viva.» Barras de las 13 filas de tabla tocadas en la fase 3 sin cambios (12 con 5; `D-curso-sin-borrado` con 4, de otra tabla). Higiene/Método: 14 de 20. Tocados sólo el plan y la bitácora; `gestion_proyecto.md` no cambia en el M1, porque su índice ya estaba al día.
