@@ -33,8 +33,8 @@ cuando la CI no esté disponible o haya que diagnosticar a mano.
 1. Job `linux` (`ubuntu-latest`, Temurin 17): `empaquetar-linux.sh --salida`, extrae la
    huella del jar de `SHA256SUMS` y la pasa como salida del job. Sube `build/` y `jdk/`
    como artefacto de un día.
-2. Job `windows` (`windows-latest`, Windows PowerShell 5.1, la misma versión que en el
-   centro): la orden de §3 con `-HuellaJar` tomada de esa salida y `-SinHumo`. Después
+2. Job `windows` (`windows-latest`, Windows PowerShell 5.1, la misma de la construcción
+   manual (§1)): la orden de §3 con `-HuellaJar` tomada de esa salida y `-SinHumo`. Después
    comprueba byte a byte que `Educhronos-win.zip.sha256` corresponde al zip.
 3. Job `publicar`, sólo con tag: `sha256sum -c` y crea la Release con los dos ficheros.
    Es el único job con permiso de escritura en el repositorio.
@@ -59,8 +59,9 @@ rojo en el paso y con el mensaje esperados.
 unos dos minutos y medio. El zip usa `\` como separador y no lleva entradas de directorio,
 igual que el zip manual aceptado en S172, que el Explorador extrajo sin problemas.
 
-**Límites.** Los logs de las ejecuciones sólo los ve quien tiene permisos en el
-repositorio; la huella del jar está en el log del job `linux`. `ubuntu-latest` y
+**Límites.** La API de GitHub sin credenciales no entrega los logs de las ejecuciones (403,
+medido en S174); en S174 se leyeron en la web con la sesión del propietario del
+repositorio. La huella del jar está en el log del job `linux`. `ubuntu-latest` y
 `windows-latest` no están fijados a una versión: el paso de `ubuntu-latest` a Ubuntu 26,
 anunciado para el 19 de octubre de 2026, puede cambiar las herramientas del job `linux`.
 
