@@ -26,12 +26,14 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env['CI'],
-  retries: process.env['CI'] ? 2 : 0,
+  // Un reintento correría sobre la base del intento fallido: el borrado vive en el command
+  // del webServer, que corre una vez por corrida. Si vuelven los reintentos, borrar por test.
+  retries: 0,
   reporter: 'list',
 
   use: {
     baseURL: 'http://localhost:4200',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   projects: [
