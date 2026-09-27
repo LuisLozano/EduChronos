@@ -6,9 +6,63 @@ de `C-construccion-reproducible`, sobre medición y no sobre estimación.
 **Qué cubre:** la CONSTRUCCIÓN. Qué produce cada máquina, qué ficheros necesita
 y cómo se invoca.
 
-**Qué NO cubre:** cómo llega el programa al usuario final. El medio de entrega y
-la firma del ejecutable siguen sin decidir; son trabajo de la condición 3 de
-`O-instalación`. Lo que hoy existe es una carpeta y su zip, no un instalador.
+**Qué NO cubre:** un instalador. Lo que existe es una carpeta y su zip. Desde S174
+el zip sale de la Release de GitHub y llega al centro por USB, sin firma de código
+(decisión de S156 y decisión C de `O-ci`).
+
+---
+
+## Vía principal: la CI (S174)
+
+Desde S174 el bundle de Windows lo construye GitHub Actions con
+`.github/workflows/bundle.yml`. Ejecuta los mismos dos guiones de §2 y §3, sin copias
+propias. La vía manual (§2, §3 y la máquina virtual de S163) queda de respaldo: para
+cuando la CI no esté disponible o haya que diagnosticar a mano.
+
+**Cómo se dispara.**
+
+- **Un tag `v*` construye y publica:** `git tag -a v0.2.0 -m "…"` y
+  `git push origin v0.2.0`. Si el nombre lleva guion (`v0.1.0-rc.1`), la Release sale
+  como pre-release.
+- **«Run workflow» en la pestaña Actions construye sin publicar:** el zip queda como
+  artefacto de la ejecución durante 7 días. Sirve para ensayar. Lanzado a mano sobre un
+  tag, sí publica.
+
+**Qué hace.**
+
+1. Job `linux` (`ubuntu-latest`, Temurin 17): `empaquetar-linux.sh --salida`, extrae la
+   huella del jar de `SHA256SUMS` y la pasa como salida del job. Sube `build/` y `jdk/`
+   como artefacto de un día.
+2. Job `windows` (`windows-latest`, Windows PowerShell 5.1, la misma versión que en el
+   centro): la orden de §3 con `-HuellaJar` tomada de esa salida y `-SinHumo`. Después
+   comprueba byte a byte que `Educhronos-win.zip.sha256` corresponde al zip.
+3. Job `publicar`, sólo con tag: `sha256sum -c` y crea la Release con los dos ficheros.
+   Es el único job con permiso de escritura en el repositorio.
+
+**Qué se entrega.** Los dos assets de la Release, `Educhronos-win.zip` y
+`Educhronos-win.zip.sha256`. Se descargan desde Linux, se comprueban con
+`sha256sum -c Educhronos-win.zip.sha256` y el zip viaja por USB. La identidad de versión
+la dan el tag y el sha256 de la Release; el commit va en las notas de la Release.
+
+**Por qué sin humo.** La prueba de humo abre el navegador y la bandeja y, sobre una base
+vacía, no llega al solver (§6). El arranque del bundle lo prueba la aceptación
+(`docs/guion-aceptacion.md`) sobre el zip de la Release. Decisión de S174.
+
+**Qué la pone en rojo.** Cualquier fallo de los dos guiones; un jar que no casa con la
+huella del job `linux`; un app-image de más de 250.000.000 B, porque desde S174 el `.ps1`
+aborta (§3); y un `.sha256` que no corresponde al zip. Los tres últimos se comprobaron en
+S174 con un defecto provocado en una rama desechable: los tres pusieron la ejecución en
+rojo en el paso y con el mensaje esperados.
+
+**Medido en S174** (`v0.1.0-rc.1`, commit `0cceca4`): carpeta del app-image
+231.770.158 B en 193 ficheros, margen 18,2 MB; zip 176.078.739 B; ejecución completa en
+unos dos minutos y medio. El zip usa `\` como separador y no lleva entradas de directorio,
+igual que el zip manual aceptado en S172, que el Explorador extrajo sin problemas.
+
+**Límites.** Los logs de las ejecuciones sólo los ve quien tiene permisos en el
+repositorio; la huella del jar está en el log del job `linux`. `ubuntu-latest` y
+`windows-latest` no están fijados a una versión: el paso de `ubuntu-latest` a Ubuntu 26,
+anunciado para el 19 de octubre de 2026, puede cambiar las herramientas del job `linux`.
 
 ---
 
@@ -27,12 +81,16 @@ La máquina Windows **no necesita** código fuente, ni Git, ni Maven, ni Java
 instalado. El JDK viaja dentro de la entrega. Solo hace falta PowerShell; medido
 con Windows PowerShell 5.1.
 
-El traspaso entre las dos es manual: el usuario tira la carpeta desde Windows.
+En la vía manual, el traspaso entre las dos lo hace una persona: el usuario tira la carpeta desde Windows.
 El guion de Linux no conoce la dirección de la máquina Windows.
+En la CI el traspaso lo hace un artefacto de Actions entre los dos jobs.
 
 ---
 
 ## 2. Lado Linux
+
+Esta sección y la §3 describen la vía manual, de respaldo desde S174. La vía principal es
+la CI, que ejecuta estos mismos guiones (ver «Vía principal: la CI»).
 
     scripts/empaquetar-linux.sh [--salida DIR]
 
@@ -98,7 +156,7 @@ Opciones:
 - `-HuellaJar <sha256>` — **obligatoria**, y el guion aborta con código 2 si falta
   o no son 64 hexadecimales. Es la huella del jar tal como la midió Linux, y llega
   por un canal distinto de la entrega a propósito: ver §7.
-- `-SinHumo` — no arranca la aplicación al terminar.
+- `-SinHumo` — no arranca la aplicación al terminar. La CI lo usa siempre.
 
 Qué hace, en orden:
 
@@ -106,11 +164,14 @@ Qué hace, en orden:
 2. Descomprime el JDK y comprueba que trae `jmods`; sin ellos `jpackage` no
    puede montar el runtime.
 3. `jpackage --type app-image` con los 14 módulos.
-4. Mide la carpeta y dice si cumple la condición 2.
+4. Mide la carpeta y dice si cumple la condición 2. **Desde S174, si no cumple, aborta
+   con código 1 y no genera el zip**; antes sólo avisaba y terminaba en 0.
 5. Comprime el app-image e imprime el **sha256 del zip**, que sale también en el
    resumen final junto al del jar. Esa es la huella que se comprueba en el equipo de
    destino antes de extraer: viaja por la consola o por donde se anuncie la descarga,
    nunca dentro del propio zip.
+   Desde S174 lo escribe también en `Educhronos-win.zip.sha256`, junto al zip, en
+   formato `sha256sum` (una línea, LF y sin BOM): es el fichero que publica la CI.
 6. Prueba de humo, salvo `-SinHumo`.
 
 Cada corrida deja su propia transcripción en `-Base`, con el modo y la fecha en
@@ -301,6 +362,10 @@ una identidad de versión —dos construcciones del mismo commit dan huellas dis
 eso sigue estando el commit del `LEEME.txt`—: lo que garantiza es que se empaqueta EL jar que
 acaba de construirse y no otro.
 
+**En la CI (S174) la huella viaja como salida del job `linux`, no dentro del artefacto**
+(decisión D de `O-ci`). Es el mismo canal distinto, sin la copia a mano. Un defecto que la
+altera en el traspaso pone el job `windows` en rojo con ese mismo mensaje (medido en S174).
+
 **Nada de lo medido aquí vale para la condición 3.** La máquina de construcción
 tiene cuenta de dominio y no es un Windows limpio. Windows 10, sin probar.
 
@@ -326,6 +391,8 @@ encuentran nada (en PowerShell, `where` sin `.exe` es otra orden).
 
 **Entrega.** El zip que produce `empaquetar-windows.ps1` viaja por USB; su sha256 lo imprime
 el guion. Por USB el fichero no lleva la marca de descarga y Windows no muestra SmartScreen.
+Desde S174 el zip es el de la Release del tag, y su sha256 el del asset `.sha256`,
+comprobado en Linux con `sha256sum -c` antes de copiarlo al USB.
 Se extrae con el Explorador en una carpeta del usuario y se arranca con doble clic: no debe
 aparecer ningún diálogo de seguridad ni de credenciales.
 
