@@ -197,8 +197,12 @@ if ($carpeta -lt $limite) {
     Write-Host ("CUMPLE. Margen {0:N1} MB." -f (($limite-$carpeta)/1000000))
 } else {
     Write-Host ("NO CUMPLE. Exceso {0:N1} MB." -f (($carpeta-$limite)/1000000))
-    Write-Host "Palanca medida y no aplicada (S152): 60.869.367 B de nativos de"
+    Write-Host "Palanca medida y no aplicada (S152): 69.453.720 B de nativos de"
     Write-Host "OR-Tools de otras plataformas, podables con <exclusions>."
+    # S174 (O-ci, condicion 3): antes solo avisaba y el guion terminaba en 0, tambien con
+    # -SinHumo; la CI necesita un rojo real.
+    Write-Host "ABORTA: el app-image supera el limite de 250.000.000 B; no se genera el zip."
+    Terminar 1
 }
 Write-Host "Referencia S151 sin --add-modules: carpeta 291502931 B, runtime 134690396 B"
 
@@ -207,7 +211,10 @@ Write-Host "=========================================================="
 Write-Host " 5. ZIP"
 Write-Host "=========================================================="
 $zip = "$Base\Educhronos-win.zip"
+$zipSha = "$zip.sha256"
 if (Test-Path $zip) { Remove-Item $zip -Force }
+# El .sha256 de una corrida anterior no puede sobrevivir a su zip.
+if (Test-Path $zipSha) { Remove-Item $zipSha -Force }
 # Compress-Archive de PowerShell 5.1 tarda minutos con ~232 MB.
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $cronoZip = [System.Diagnostics.Stopwatch]::StartNew()
@@ -220,11 +227,24 @@ Write-Host ("zip: {0}  ({1} B)  en {2:N1} s" -f $zip, (Get-Item $zip).Length, $c
 # equipo de destino antes de extraer, y sale de la consola, no de dentro del zip.
 $hZip = (Get-FileHash $zip -Algorithm SHA256).Hash
 Write-Host ("zip sha256: {0}" -f $hZip)
+# S174 (O-ci, condicion 3): la huella va tambien a un fichero en formato sha256sum, para que
+# la CI la publique junto al zip sin leer la consola. Sin BOM y con LF: Set-Content y
+# Out-File cambian las dos cosas segun la version de PowerShell.
+try {
+    [System.IO.File]::WriteAllText($zipSha,
+        ("{0}  {1}`n" -f $hZip.ToLower(), (Split-Path $zip -Leaf)),
+        (New-Object System.Text.UTF8Encoding $false))
+} catch {
+    Write-Host ("ABORTA: no se pudo escribir {0}: {1}" -f $zipSha, $_.Exception.Message)
+    Terminar 1
+}
+Write-Host ("zip .sha256: {0}" -f $zipSha)
 
 if ($SinHumo) {
     Write-Host ""
     Write-Host "Prueba de humo omitida por -SinHumo."
     Write-Host ("App-image en {0}\Educhronos" -f $dest)
+    Write-Host ("zip .sha256: {0}" -f $zipSha)
     Write-Host ("transcripcion: {0}" -f $transcripcion)
     Terminar 0
 }
@@ -402,6 +422,7 @@ Write-Host ("solver      : {0}" -f $solver)
 Write-Host ("app-image   : {0}\Educhronos" -f $dest)
 Write-Host ("zip         : {0}" -f $zip)
 Write-Host ("zip sha256  : {0}" -f $hZip)
+Write-Host ("zip .sha256 : {0}" -f $zipSha)
 Write-Host ("jar sha256  : {0}" -f $HuellaJar.ToUpper())
 Write-Host ("transcripcion: {0}" -f $transcripcion)
 if (-not $listo -or $solver -eq "FALLO") { Terminar 1 }
