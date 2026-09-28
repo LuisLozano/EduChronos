@@ -30,10 +30,10 @@ cuando la CI no esté disponible o haya que diagnosticar a mano.
 
 **Qué hace.**
 
-1. Job `linux` (`ubuntu-latest`, Temurin 17): `empaquetar-linux.sh --salida`, extrae la
+1. Job `linux` (`ubuntu-24.04`, Temurin 17): `empaquetar-linux.sh --salida`, extrae la
    huella del jar de `SHA256SUMS` y la pasa como salida del job. Sube `build/` y `jdk/`
    como artefacto de un día.
-2. Job `windows` (`windows-latest`, Windows PowerShell 5.1, la misma de la construcción
+2. Job `windows` (`windows-2025-vs2026`, Windows PowerShell 5.1, la misma de la construcción
    manual (§1)): la orden de §3 con `-HuellaJar` tomada de esa salida y `-SinHumo`. Después
    comprueba byte a byte que `Educhronos-win.zip.sha256` corresponde al zip.
 3. Job `publicar`, sólo con tag: `sha256sum -c` y crea la Release con los dos ficheros.
@@ -43,6 +43,7 @@ cuando la CI no esté disponible o haya que diagnosticar a mano.
 `Educhronos-win.zip.sha256`. Se descargan desde Linux, se comprueban con
 `sha256sum -c Educhronos-win.zip.sha256` y el zip viaja por USB. La identidad de versión
 la dan el tag y el sha256 de la Release; el commit va en las notas de la Release.
+El procedimiento completo está en «Guía de distribución (S177)».
 
 **Por qué sin humo.** La prueba de humo abre el navegador y la bandeja y, sobre una base
 vacía, no llega al solver (§6). El arranque del bundle lo prueba la aceptación
@@ -61,9 +62,48 @@ igual que el zip manual aceptado en S172, que el Explorador extrajo sin problema
 
 **Límites.** La API de GitHub sin credenciales no entrega los logs de las ejecuciones (403,
 medido en S174); en S174 se leyeron en la web con la sesión del propietario del
-repositorio. La huella del jar está en el log del job `linux`. `ubuntu-latest` y
-`windows-latest` no están fijados a una versión: el paso de `ubuntu-latest` a Ubuntu 26,
-anunciado para el 19 de octubre de 2026, puede cambiar las herramientas del job `linux`.
+repositorio. La huella del jar está en el log del job `linux`. Los runners están fijados
+(`ubuntu-24.04` y `windows-2025-vs2026`, S177): cambiar de imagen es un commit en
+`bundle.yml`, y un bundle construido sobre otra imagen es otro artefacto que necesita su propia
+aceptación.
+
+---
+
+## Guía de distribución (S177)
+
+De un commit de `main` a un centro con la aplicación instalada o actualizada. Lo que se entrega es
+siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo commit dan zips distintos
+(`D-jar-no-reproducible`).
+
+1. **Tag.** Sobre un commit de `main` con la ejecución de `tests` en verde:
+   `git tag -a vX.Y.Z -m "…"` y `git push origin vX.Y.Z`. Sin guion en el nombre, la Release sale como
+   definitiva.
+2. **Release.** Esperar a que `bundle` termine en verde. La Release lleva `Educhronos-win.zip` y
+   `Educhronos-win.zip.sha256`, y el commit en sus notas.
+3. **Descarga en Linux**, sin credenciales:
+```
+   T=vX.Y.Z; U=https://github.com/LuisLozano/EduChronos/releases/download/$T
+   curl -fLO "$U/Educhronos-win.zip" && curl -fLO "$U/Educhronos-win.zip.sha256"
+```
+4. **Comprobación.** `sha256sum -c Educhronos-win.zip.sha256` da `OK`. Si no, no se entrega.
+5. **USB.** Se copian los dos ficheros. En Windows, `Get-FileHash -Algorithm SHA256 Educhronos-win.zip`
+   debe dar el mismo valor.
+6. **Instalación nueva.** Como en «Prueba final en Windows limpio (S156)»: extraer con el Explorador en
+   una carpeta del usuario y doble clic en `Educhronos.exe`. No pide permisos de administrador.
+7. **Actualización.** Los datos no viven en la carpeta del programa sino en `%LOCALAPPDATA%\Educhronos\`,
+   así que actualizar es sustituir la carpeta del programa:
+   1. Cerrar la aplicación desde el icono de la bandeja y comprobar en el Administrador de tareas que no
+      queda ningún proceso `Educhronos`.
+   2. Copiar `%LOCALAPPDATA%\Educhronos\` a otro sitio, como respaldo.
+   3. Borrar la carpeta del programa antigua y extraer la nueva en el mismo sitio.
+   4. Abrir `Educhronos.exe` y comprobar en el selector que están los cursos de antes.
+
+   Para volver atrás: con la aplicación cerrada, extraer el zip anterior y restaurar la copia de datos.
+   **Límite:** la base no lleva versión de esquema (`D-esquema-sin-version`), así que esta vía sólo vale
+   si `app/src/main/resources/schema.sql` no cambia entre las dos versiones. Antes de entregar,
+   `git diff --stat <tag anterior> <tag nuevo> -- app/src/main/resources/schema.sql` debe salir vacío.
+   La aplicación no muestra su versión: anotar fuera qué tag se entregó a cada centro.
+   Verificación: condición 4 de `O-ci` (`docs/actas-aceptacion/`).
 
 ---
 
