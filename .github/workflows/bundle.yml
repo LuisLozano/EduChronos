@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     outputs:
       huella: ${{ steps.huella.outputs.huella }}
@@ -62,7 +62,7 @@ jobs:
           if-no-files-found: error
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
     needs: linux
     timeout-minutes: 40
     steps:
@@ -117,7 +117,7 @@ jobs:
           if-no-files-found: warn
 
   publicar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: windows
     if: startsWith(github.ref, 'refs/tags/v')
     timeout-minutes: 40
