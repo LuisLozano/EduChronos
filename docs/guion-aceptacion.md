@@ -476,7 +476,7 @@ así que no importa que haya otra instancia en el 8080.
 R=<raíz del repo, en el commit aceptado>
 T=<carpeta traída de Windows>        # contiene educhronos.db, curso-2026-2027.db, curso-abierto
 X=<carpeta con las cuatro descargas>
-JAR=<el jar extraído del zip en 3.1, cuyo sha256 coincide con la huella del log del job `linux`>
+JAR=<el jar extraído del zip en 3.1, cuyo sha256 coincide con la huella del log del job linux>
 W=/tmp/aceptacion-oraculos; mkdir -p $W
 sha256sum $JAR                        # debe coincidir con el del acta
 cp $T/educhronos.db $W/copia.db && cp $T/curso-2026-2027.db $W/copia-nuevo.db; echo "rc=$?"
