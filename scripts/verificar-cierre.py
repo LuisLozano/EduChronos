@@ -15,13 +15,24 @@ Comprueba:
      está definido—. El script no distingue cuál de las dos; señala el token y el
      humano mira. Se listan aparte los tokens que NO aparecen fuera de la entrada
      de sesión y sólo viven dentro de ella: la línea de R4 de una sesión no puede
-     rescatar a un token que se archivará con ella (S157).
+     rescatar a un token que se archivará con ella (S157). Sale también del corpus
+     la línea del índice generado que copia la cabecera de sesión: la reproduce
+     literal y le rescataba sus tokens (D-censo-r4-rescate-por-indice, S179).
   3. Extinción respecto de HEAD: tokens que tenían ≥1 aparición en el corpus vivo
      de HEAD y 0 en el actual. Es INFORME y NO suma a problemas.
   4. Coherencia de los DOS censos de la bitácora entre sí y con la crónica de
      archivado del plan.
   5. Índices de M-doc-3: una entrada descuadrada o un índice ausente es FALLO
      DURO y suma a problemas (S157).
+  6. Frase de ventana del plan («El plan conserva ahora Sxxx … y Syyy …»): se
+     DERIVA de las cabeceras —la previa degradada y la H3 viva— y es FALLO DURO si
+     no cuadra, falta o se repite a principio de línea (sección 5 de la salida;
+     D-verificar-cierre-ciego-a-la-ventana, S179).
+  7. Tablas de los cuatro ficheros (plan, gestión, método y bitácora): cada fila
+     tiene tantas celdas como su cabecera, contando la barra sin escapar dentro de
+     código, y ninguna fila `|` queda fuera de toda tabla. Cada descuadre y cada
+     fila fuera de tabla es FALLO DURO (sección 6 de la salida;
+     D-verificar-cierre-ciego-a-las-tablas, S179).
 
 El corpus VIVO son los tres documentos de estado: plan, gestión y método.
 `bitacora-sesiones.md` es histórico de solo lectura (R4/R5) y NO cuenta como
@@ -98,10 +109,34 @@ def _limites_entradas(plan):
     return ini[0], fin[0]
 
 
-def sin_entradas(plan):
+def _retirar_entradas(plan):
+    """-> (plan sin el tramo [ini, fin) ni sus líneas de índice, nº de líneas de índice quitadas).
+
+    El índice generado (M-doc-3) copia cada encabezado literal, así que la cabecera
+    de sesión reaparece en él y rescataba sus tokens (D-censo-r4-rescate-por-indice,
+    S158). Se casa por TEXTO y no por número de línea: el verificador corre antes de
+    regenerar el índice, cuando sus números pueden estar caducados.
+    """
     ini, fin = _limites_entradas(plan)
     lineas = plan.split("\n")
-    return "\n".join(lineas[:ini] + lineas[fin:])
+    cabeceras = {l for l in lineas[ini:fin] if re.match(r"^#{2,4} ", l)}
+    resto, en_indice, quitadas = [], False, 0
+    for l in lineas[:ini] + lineas[fin:]:
+        if l == "<!-- INDICE:INICIO -->":
+            en_indice = True
+        elif l == "<!-- INDICE:FIN -->":
+            en_indice = False
+        elif en_indice:
+            m = re.match(r"^- L\d+ — (.*)$", l)
+            if m and m.group(1) in cabeceras:
+                quitadas += 1
+                continue
+        resto.append(l)
+    return "\n".join(resto), quitadas
+
+
+def sin_entradas(plan):
+    return _retirar_entradas(plan)[0]
 
 
 def solo_entradas(plan):
@@ -186,6 +221,106 @@ def indices_ok(ruta):
 
 def problema_indice(res):
     return res is None or res[1] > 0
+
+
+# --- f) frase de ventana: se DERIVA del plan, no se lee a mano --------------
+RX_VIVA = re.compile(r"^### Sesión (\d+)\b", re.M)
+RX_PREVIA = re.compile(r"^Última sesión registrada \(previa\): Sesión (\d+)\b", re.M)
+RX_FRASE = re.compile(r"^El plan conserva ahora S(\d+) \(degradada a formato compacto\) y S(\d+) como única"
+                      r" cabecera H3 viva\.", re.M)
+
+
+def ventana(plan):
+    """Lista de problemas de la frase de ventana (D-verificar-cierre-ciego-a-la-ventana); vacía si cuadra.
+
+    La frase cuenta sólo A PRINCIPIO DE LÍNEA: las citas a media línea (líneas de R4,
+    fichas) no son la frase.
+    """
+    viva, previa, frase = RX_VIVA.findall(plan), RX_PREVIA.findall(plan), RX_FRASE.findall(plan)
+    problemas = []
+    if len(viva) != 1:
+        problemas.append("cabecera '### Sesión N': %d, se exige 1" % len(viva))
+    if len(previa) != 1:
+        problemas.append("'Última sesión registrada (previa): Sesión M': %d, se exige 1" % len(previa))
+    if len(frase) != 1:
+        problemas.append("frase 'El plan conserva ahora…' a principio de línea: %d, se exige 1" % len(frase))
+    if not problemas and (int(frase[0][0]), int(frase[0][1])) != (int(previa[0]), int(viva[0])):
+        problemas.append("la frase dice S%s y S%s; el plan tiene previa S%s y viva S%s"
+                         % (frase[0][0], frase[0][1], previa[0], viva[0]))
+    return problemas
+
+
+# --- g) tablas: celdas por fila y filas fuera de tabla ----------------------
+# Lógica escrita y probada contra inyecciones en S179 (casos A11 y A12);
+# recibe el TEXTO del fichero, no su ruta.
+# GFM: una tabla exige fila separadora; la
+# barra dentro de `código` SÍ parte la celda y la escapada `\|` no.
+SEP = re.compile(r"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$")
+BARRA = re.compile(r"(?<!\\)\|")
+
+
+def celdas(linea):
+    s = linea.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|") and not s.endswith("\\|"):
+        s = s[:-1]
+    return len(BARRA.split(s))
+
+
+def es_valla(s):
+    return s.startswith("```") or s.startswith("~~~")
+
+
+def analizar_con_huerfanas(texto):
+    """-> (tablas, filas, descuadres, huérfanas). Descuadre = (línea, celdas, esperadas, tipo).
+    Huérfana = línea que empieza por '|' y tiene otra barra, fuera de toda tabla y de toda
+    valla (GFM las pinta como párrafo, barras incluidas)."""
+    lineas = texto.split("\n")
+    tablas, filas, malas, huerfanas = 0, 0, [], []
+    i, n, en_valla = 0, len(lineas), False
+    while i < n:
+        s = lineas[i].strip()
+        if es_valla(s):
+            en_valla = not en_valla
+            i += 1
+            continue
+        if (not en_valla and s.startswith("|") and len(BARRA.findall(s)) >= 2
+                and not (i + 1 < n and SEP.match(lineas[i + 1].strip()) and "-" in lineas[i + 1])):
+            huerfanas.append(i + 1)
+            i += 1
+            continue
+        if (not en_valla and BARRA.search(s) and i + 1 < n
+                and SEP.match(lineas[i + 1].strip()) and "-" in lineas[i + 1]):
+            tablas += 1
+            esperadas = celdas(lineas[i])
+            sep_c = celdas(lineas[i + 1])
+            if sep_c != esperadas:
+                malas.append((i + 2, sep_c, esperadas, "separadora"))
+            j = i + 2
+            while j < n:
+                t = lineas[j].strip()
+                if not t or t.startswith("#") or t.startswith(">") or es_valla(t):
+                    break
+                filas += 1
+                c = celdas(lineas[j])
+                if c != esperadas:
+                    malas.append((j + 1, c, esperadas, "fila"))
+                j += 1
+            i = j
+            continue
+        i += 1
+    return tablas, filas, malas, huerfanas
+
+
+def tramos(nums):
+    out = []
+    for x in nums:
+        if out and x == out[-1][1] + 1:
+            out[-1][1] = x
+        else:
+            out.append([x, x])
+    return ["%d–%d" % (a, b) if a != b else "%d" % a for a, b in out]
 
 
 # ---------------------------------------------------------------------------
@@ -301,10 +436,99 @@ def _a8():
         return "A8e: la ausencia de índice no cuenta como problema"
 
 
+# Número de línea CADUCADO a propósito (L77): se casa por texto.
+PLAN_CON_INDICE = ("cabecera del plan\n"
+                   "<!-- INDICE:INICIO -->\n"
+                   "- L77 — ### Sesión 99 — entrada viva con D-solo-cabecera\n"
+                   "- L8 — ## Otra sección con D-control-fuera\n"
+                   "<!-- INDICE:FIN -->\n"
+                   "### Sesión 99 — entrada viva con D-solo-cabecera\n"
+                   "Última fase completada (previa): 5 — x\n"
+                   "## Otra sección con D-control-fuera\n")
+
+
+def _a9():
+    # La línea del índice que copia la cabecera de sesión NO rescata a sus tokens,
+    # y la de un encabezado de fuera del tramo se queda.
+    sos, solo, _ = censo_r4([sin_entradas(PLAN_CON_INDICE)], solo_entradas(PLAN_CON_INDICE))
+    if "D-solo-cabecera" in sos:
+        return "A9: la línea de índice de la cabecera de sesión rescata su token"
+    if "D-solo-cabecera" not in solo:
+        return "A9b: el token de la cabecera de sesión no sale como sólo-entrada"
+    if acumular([sin_entradas(PLAN_CON_INDICE)]).get("D-control-fuera", 0) != 2:
+        return "A9c: se retira la línea de índice de un encabezado de fuera del tramo"
+    if _retirar_entradas(PLAN_CON_INDICE)[1] != 1:
+        return "A9d: no cuenta bien las líneas de índice retiradas"
+
+
+def _frase(m, n, cola=" (paréntesis)"):
+    return ("El plan conserva ahora S%d (degradada a formato compacto) y S%d como única cabecera H3 viva."
+            % (m, n)) + cola
+
+
+def _a10():
+    base = "### Sesión 8 — viva\nÚltima sesión registrada (previa): Sesión 7 — x\n"
+    casos = [
+        ("A10a", base + _frase(7, 8) + "\n", 0, "da problema con todo cuadrando"),
+        ("A10b", base + _frase(6, 8) + "\n", 1, "no ve una frase que nombra otra previa"),
+        ("A10c", base + _frase(7, 9) + "\n", 1, "no ve una frase que nombra otra viva"),
+        ("A10d", base, 1, "no ve que falta la frase"),
+        ("A10e", base + "cita: " + _frase(7, 8) + "\n", 1, "acepta la frase a media línea"),
+        ("A10f", base + _frase(7, 8) + "\n" + _frase(7, 8) + "\n", 1, "acepta dos frases"),
+        ("A10g", base + "cita: «" + _frase(7, 8, cola="") + "»\n", 1,
+         "acepta una cita a media línea acabada en viva.»"),
+        ("A10h", base + _frase(7, 8, cola="") + "\n", 0, "no acepta la frase sin nada detrás"),
+    ]
+    for nombre, texto, esperados, motivo in casos:
+        if len(ventana(texto)) != esperados:
+            return "%s: %s (%r)" % (nombre, motivo, ventana(texto))
+
+
+TABLA_SINTETICA = ("| a | b |\n"
+                   "|---|---|\n"
+                   "| 1 | 2 |\n"
+                   "| 1 | 2 | 3 |\n"        # L4: celda de más
+                   "| `x|y` | 2 |\n"        # L5: barra dentro de código
+                   "| 1 |\n"                # L6: celda de menos
+                   "| `x\\|y` | 2 |\n"      # L7: control, barra escapada
+                   "\n"
+                   "```\n"
+                   "| a | b |\n"
+                   "|---|---|\n"
+                   "| 1 | 2 | 3 |\n"        # control: dentro de valla
+                   "```\n")
+
+
+def _a11():
+    _, _, malas, _ = analizar_con_huerfanas(TABLA_SINTETICA)
+    lineas = [m[0] for m in malas]
+    if 4 not in lineas:
+        return "A11: no ve una fila con una celda de más (%r)" % (malas,)
+    if 5 not in lineas:
+        return "A11b: no ve la barra sin escapar dentro de código (%r)" % (malas,)
+    if 6 not in lineas:
+        return "A11c: no ve una fila con una celda de menos (%r)" % (malas,)
+    if 7 in lineas:
+        return "A11d (control): parte por una barra escapada (%r)" % (malas,)
+    if [x for x in lineas if x > 7]:
+        return "A11e (control): no salta la tabla dentro de una valla (%r)" % (malas,)
+    if malas != [(4, 3, 2, "fila"), (5, 3, 2, "fila"), (6, 1, 2, "fila")]:
+        return "A11f: descuadres inesperados (%r)" % (malas,)
+
+
+def _a12():
+    huerfana = "| a | b |\n|---|---|\n| 1 | 2 |\n\n| huérfana | x |\n"
+    if analizar_con_huerfanas(huerfana)[3] != [5]:
+        return "A12: no ve la fila fuera de tabla (%r)" % (analizar_con_huerfanas(huerfana)[3],)
+    if analizar_con_huerfanas("| a | b |\n|---|---|\n| 1 | 2 |\n")[3] != []:
+        return "A12b: una tabla con separadora produce huérfanas"
+
+
 COMPROBACIONES = [
     ("A1", _a1), ("A1b", _a1b), ("A2", _a2), ("A2b", _a2b), ("A3", _a3),
     ("A4", _a4), ("A4b", _a4b), ("A5", _a5), ("A5b", _a5b), ("A6", _a6),
-    ("A7", _a7), ("A8", _a8),
+    ("A7", _a7), ("A8", _a8), ("A9", _a9), ("A10", _a10), ("A11", _a11),
+    ("A12", _a12),
 ]
 
 
@@ -344,12 +568,13 @@ def main(argv):
     print("\n=== 2. CENSO DE TOKENS R4 (corpus vivo: plan SIN entrada + gestión + método) ===")
     print("   patrón: D-*, Dnn, C-*, O-*   (§x.y y Cx NO se cuentan: ver metodo.md R4)")
     try:
-        plan_sin = sin_entradas(plan)
+        plan_sin, indice_quitadas = _retirar_entradas(plan)
         plan_entrada = solo_entradas(plan)
     except ValueError as e:
         raise SystemExit("ABORTA: no se puede aislar la entrada de sesión del plan: %s" % e)
-    quitadas = plan.count("\n") - plan_sin.count("\n")
-    print("   entrada de sesión retirada del corpus: %d líneas" % quitadas)
+    quitadas = plan.count("\n") - plan_sin.count("\n") - indice_quitadas
+    print("   entrada de sesión retirada del corpus: %d líneas, y %d línea(s) de índice que copian su cabecera"
+          % (quitadas, indice_quitadas))
     sospechosos, solo_entrada, total = censo_r4([plan_sin, gestion, metodo], plan_entrada)
     print("   %d tokens distintos en el corpus vivo." % total)
     print("   -- 2a. UNA sola aparición en el corpus vivo (%d):" % len(sospechosos))
@@ -400,6 +625,28 @@ def main(argv):
             print("   %-28s %d entradas, %d descuadradas" % (os.path.basename(r), res[0], res[1]))
         if problema_indice(res):
             problemas += 1
+
+    print("\n=== 5. FRASE DE VENTANA DEL PLAN (derivada de las cabeceras) ===")
+    pv = ventana(plan)
+    if pv:
+        for p in pv:
+            print("   FALLO: %s" % p)
+        problemas += len(pv)
+    else:
+        (m, n), = RX_FRASE.findall(plan)
+        print("   la frase dice S%s (previa) y S%s (viva), como las cabeceras del plan -> OK" % (m, n))
+
+    print("\n=== 6. TABLAS (celdas por fila y filas fuera de tabla) ===")
+    for ruta, txt in ((PLAN, plan), (GESTION, gestion), (METODO, metodo), (BITACORA, bita)):
+        t, f, malas, huerfanas = analizar_con_huerfanas(txt)
+        nombre = os.path.basename(ruta)
+        print("   %-28s %d tablas, %d filas, %d descuadres, %d fuera de tabla"
+              % (nombre, t, f, len(malas), len(huerfanas)))
+        for ln, c, e, tipo in malas:
+            print("     FALLO %s:%d  %s con %d celdas, esperadas %d" % (nombre, ln, tipo, c, e))
+        if huerfanas:
+            print("     FALLO %s: filas fuera de tabla en líneas %s" % (nombre, ", ".join(tramos(huerfanas))))
+        problemas += len(malas) + len(huerfanas)
 
     print("\n=== RESUMEN ===")
     print("   comprobaciones duras con fallo: %d" % problemas)
