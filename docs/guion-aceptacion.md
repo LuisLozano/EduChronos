@@ -38,8 +38,10 @@ Todos los rótulos de pantalla entre «» están copiados del código del fronte
   vía manual de ese documento es de respaldo y no produce el artefacto que se acepta.
 - Se anotan para el acta: **tag**, **commit** (en las notas de la Release), **sha256 del zip** (el del
   asset `.sha256`) y **sha256 del jar**.
-- El jar que necesitan los oráculos de §7 se extrae del propio zip (`Educhronos/app/app-<versión>.jar`)
-  y se guarda aparte. Su sha256 se compara con la huella que imprime el job `linux` de `bundle.yml` en su
+- El jar que necesitan los oráculos de §7 se extrae del propio zip (entrada
+  `Educhronos\app\app-<versión>.jar`: el zip usa `\` como separador, así que en Linux se extrae con
+  `unzip -p Educhronos-win.zip 'Educhronos\\app\\app-<versión>.jar' > app-<versión>.jar`) y se guarda
+  aparte. Su sha256 se compara con la huella que imprime el job `linux` de `bundle.yml` en su
   log, que se lee en la web de GitHub (la API sin credenciales no da los logs). Si no coinciden, la
   corrida no empieza. No vale reconstruirlo: el jar no es reproducible bit a bit.
 
@@ -474,7 +476,7 @@ así que no importa que haya otra instancia en el 8080.
 R=<raíz del repo, en el commit aceptado>
 T=<carpeta traída de Windows>        # contiene educhronos.db, curso-2026-2027.db, curso-abierto
 X=<carpeta con las cuatro descargas>
-JAR=<el jar guardado en 3.1, cuyo sha256 es el de -HuellaJar>
+JAR=<el jar extraído del zip en 3.1, cuyo sha256 coincide con la huella del log del job `linux`>
 W=/tmp/aceptacion-oraculos; mkdir -p $W
 sha256sum $JAR                        # debe coincidir con el del acta
 cp $T/educhronos.db $W/copia.db && cp $T/curso-2026-2027.db $W/copia-nuevo.db; echo "rc=$?"
@@ -634,8 +636,9 @@ Ejecutor:
 Máquina (modelo / VM) y edición de Windows (versión y compilación):
 Cuenta estándar sin administrador: sí / no
 Java y Node ausentes antes de instalar: sí / no
+Tag y Release (tag y URL de la Release):
 Commit aceptado:
-sha256 del jar (-HuellaJar):
+sha256 del jar (extraído del zip; igual a la huella del log del job `linux`):
 sha256 del zip del bundle:
 Ids de horario: generado en el paso 3 =        regenerado en 4d (final) =        otros, si se regeneró de más =
 
