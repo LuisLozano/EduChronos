@@ -325,22 +325,12 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    línea caducan en cuanto el cuerpo se desplaza, y `verificar-cierre.py` NO avisa de
    forma útil: imprime las entradas descuadradas y sale con 0 igualmente
    (`D-guion-exit-enmascarado`). En S132 hubo que suplirlo a mano tres veces.
-6. **Un ancla que sea un ENCABEZADO colisiona con su propia entrada de índice (S133).** El índice generado
-   cita cada encabezado literalmente, así que `### Sesión NN` o `#### O-<nombre>` aparecen SIEMPRE dos veces en
-   `gestion_proyecto.md` y en `plan_trabajo_horarios.md`: una en el cuerpo y otra en el índice. La guarda de
-   aparición única del punto 1 aborta, y aborta con razón. Toda ancla de encabezado se escribe anclada a
-   PRINCIPIO DE LÍNEA —prefijo de salto de línea en el patrón Y en el reemplazo—, que es lo que la distingue
-   de su entrada de índice. Afecta a TODOS los cierres, porque el M1 inserta siempre antes de la cabecera H3
-   viva. Lo destapó la guarda del guion de cierre de S133 en su primera pasada, con los cinco ficheros
-   intactos.
+6. **Anclas sobre documentos con índice (S133):** norma 9 de M-guion (S179).
 
 ---
 
 PRECISIONES (S141), las dos medidas en el mismo cierre y las dos por fallo del guion:
-6. **Un ancla sobre un documento con índice se escribe A PRINCIPIO DE LÍNEA.** `regenerar-indice.py`
-   repite cada encabezado en el índice, así que TODO `##`/`###`/`####` aparece dos veces por
-   construcción y la guarda de «exactamente una vez» salta siempre. No es un caso raro: es el estado
-   normal de `gestion_proyecto.md` y `plan_trabajo_horarios.md` desde M-doc-3.
+6. **Anclas sobre documentos con índice (S141):** norma 9 de M-guion (S179).
 7. **Un guion que toca VARIOS ficheros los escribe TODOS al final, cuando han pasado todas las
    guardas.** El punto 1 promete abortar «sin tocar nada»; con escritura intercalada esa promesa es
    FALSA en cuanto hay más de un fichero. Medido en S141: la guarda del tercero saltó con los dos
@@ -548,7 +538,10 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
    y el guion que escribe aborta si su ancla no aparece exactamente una vez
    (M-doc). (`D-guion-busca-token-esperado`)
 9. **En un documento con índice generado (M-doc-3), un ancla de texto se fija a
-   principio de línea**: el índice copia cada encabezado literal, y las fichas y las
-   líneas de R4 citan frases del cuerpo, así que un ancla sin fijar casa también con
-   esas copias. La guarda de la norma 8 aborta sin escribir, pero el intento ya se ha
-   pagado. (S153, corrección d; S178, defecto 3)
+   principio de línea, con el salto de línea como prefijo en el patrón Y en el
+   reemplazo.** El índice copia literal cada encabezado, así que todo `##`, `###` o
+   `####` aparece dos veces por construcción; y las fichas y las líneas de R4 citan
+   frases del cuerpo. Un ancla sin fijar casa también con esas copias. La guarda de la
+   norma 8 aborta sin escribir, pero el intento ya se ha pagado. Reúne el punto 6 de
+   M-doc (S133) y la precisión 6 de S141; S153 (corrección d) y S178 (defecto 3)
+   fallaron por no aplicarla.
