@@ -768,7 +768,7 @@ nuevo a partir del anterior, modificando solo los cambios.
   CRITERIO. **Condición 4 CUMPLIDA (S177). `O-ci` TERMINADO, 4 de 4**, en cinco sesiones (S173–S177) y cinco Cambios. **H4 TERMINADO**: los cuatro hitos están cerrados, el estado final de §1 se alcanza sin salvedad y no queda ningún objetivo planificado.
   OBSERVACIONES. (a) El zip de `empaquetar-windows.ps1` usa `\` como separador, fuera de la especificación del formato; el Explorador lo extrae bien. (b) En el paso 1 la carpeta de datos tiene tres ficheros, con el `.lock` de instancia única (S154); el guion dice dos. (c) La prueba de actualización no ejercita migración de esquema. (d) El CSV se abrió con el Bloc de notas: la VM no tiene Excel (verificado en S156).
   DEUDA. Nace `D-version-invisible`, MEJORA FUTURA, sin sede. Ninguna saldada. `D-esquema-sin-version`: nota sobre la primera entrega. COSTURA: `D-jar-no-reproducible`, `D-reenvio-spa-sin-guarda-automatica`, `D-contrato-dto-mide-jackson2`, `D-props-main-invisibles-en-tests` y `D-guarda-escritura-sin-caso` colgaban de `O-ci` y quedan sin sede; se reasignan al planificar lo siguiente.
-  DEFECTOS DE INSTRUMENTO. Del asistente: (1) la instrucción de traer el zip por la carpeta compartida contradecía la guía, que dice USB, y costó el intento de `prueba3`: una cuenta y un paso 1. (2) El guion de F2 anidaba bloques de tres comillas invertidas y la interfaz lo partió en tres. (3) Una orden `sed` del M2 habría impreso «L1+60» literal; la corrigió Claude Code. (4) La ruta del jar dentro del zip, escrita con `/` de memoria; la corrigió la medida A3 antes del tag. (5) Un marcador con comillas invertidas dentro de un bloque bash del guion. Sólo (1) costó trabajo por segunda vez. Además, el comprobador de permisos de Claude Code cortó la primera pasada de F2; las medidas se lanzaron con `!`.
+  DEFECTOS DE INSTRUMENTO. Del asistente: (1) la instrucción de traer el zip por la carpeta compartida contradecía la guía, que dice USB, y costó el intento de `prueba3`: una cuenta y un paso 1. (2) El guion de F2 anidaba bloques de tres comillas invertidas y la interfaz lo partió en tres. (3) Una orden `sed` del M2 habría impreso «L1+60» literal; la corrigió Claude Code. (4) La ruta del jar dentro del zip, escrita con `/` de memoria; la corrigió la medida A3 antes del tag. (5) Un marcador con comillas invertidas dentro de un bloque bash del guion. Sólo (1) costó trabajo, una vez. **CORREGIDO en S178:** decía «costó trabajo por segunda vez»; en S177 hubo un único fallo con coste, así que el disparador de Higiene/Método no saltó. Además, el comprobador de permisos de Claude Code cortó la primera pasada de F2; las medidas se lanzaron con `!`.
   SUITES: sin correr en el cierre, porque el diff no toca `src/`: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros. En verde en la CI sobre `a7846b6`.
   BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…` (md5, medidos en el cierre; `find` bajo /home/luis da una sola copia de cada uno, en `app/`): INTACTOS.
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s177/` (zip, `.sha256` y jar; `prueba4/` con datos, descargas, capturas, oráculos y `MANIFIESTO.sha256`; `prueba2/` con las tres copias, §7.6 y `MANIFIESTO.sha256`). En la carpeta compartida, `v0.1.0/`. Las cuentas `prueba2`, `prueba3` y `prueba4` conservan su estado. `/tmp/s177-rc1/` puede no sobrevivir.
@@ -3096,7 +3096,7 @@ con remisión a la bitácora.
   icono de la bandeja adelantado con «Iniciando…», o ventana propia que se cierre al abrir el navegador. Sin objetivo
   asignado.
 
-- **D-esquema-sin-version** (S158, VIVA, TÉCNICA REAL, no bloqueante, sin objetivo asignado) — UNA BASE DE UNA
+- **D-esquema-sin-version** (S158, VIVA, TÉCNICA REAL, BLOQUEA H5 desde S178; antes sin objetivo asignado) — UNA BASE DE UNA
   VERSIÓN ANTERIOR NO SE ADAPTA AL ESQUEMA DE LA NUEVA. Nace en S158, en el M0 de `O-curso`. `schema.sql` son 21
   `create table if not exists`, así que una base existente no recibe columnas ni restricciones nuevas. No hay
   ningún `ALTER TABLE` ejecutable ni mecanismo de migración; `user_version` vale 0 y nadie lo lee ni lo escribe.
@@ -3105,7 +3105,7 @@ con remisión a la bitácora.
   `O-curso` también los cursos archivados, que viven años, se abrirían con una versión que espera otro esquema.
   Flyway sigue descartado por decisión escrita. Arreglo mínimo candidato, no medido: sellar la versión en
   `user_version` y negarse a abrir una base incompatible con un mensaje claro. Sube de presión con el primer
-  cambio de `schema.sql` posterior a la primera entrega. No se paga ahora.
+  cambio de `schema.sql` posterior a la primera entrega. No se pagaba; desde S178 bloquea H5.
 
 - **D-verificar-cierre-ciego-a-la-ventana** (S160, VIVA, MÉTODO, no bloqueante, sede Higiene/Método) — EL
   VERIFICADOR NO MIRA LA FRASE DE VENTANA DEL PLAN. `verificar-cierre.py` contrasta los censos de la bitácora
@@ -3210,7 +3210,7 @@ con remisión a la bitácora.
   30-50 de test; S3, 1-3 y un test; S2, 3-4 ficheros y 2 specs, 40-80 líneas. No bloquea `O-aceptación`:
   `docs/guion-aceptacion.md` (`f91fa1c`) las declara defecto conocido y el paso 4(a) usa F5, con lo que el paso
   4 de §1 se ve por celda. Candidata a un Saneamiento de la vista de horario. No se paga ahora.
-- **D-version-invisible** (S177, MEJORA FUTURA, sin sede) — la aplicación no dice qué versión es: ni la
+- **D-version-invisible** (S177, MEJORA FUTURA hasta S178; desde S178 BLOQUEA H5) — la aplicación no dice qué versión es: ni la
   interfaz, ni el zip, ni `Educhronos.exe` (sin `--app-version`; pom `0.1.0-SNAPSHOT`; el tag sólo en el nombre
   de la Release). En la aceptación, que la actualización corría sobre el programa nuevo sólo se probó por la huella
   del jar instalado. Ficha en §4 de `gestion_proyecto.md`.
