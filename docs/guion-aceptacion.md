@@ -33,13 +33,15 @@ Todos los rótulos de pantalla entre «» están copiados del código del fronte
 ### 3.1 Windows (la aceptación)
 
 - Windows 11 **limpio**, **cuenta estándar** (sin permisos de administrador), **sin Java ni Node**.
-- El bundle se construye desde el commit que se acepta según `docs/empaquetado.md`: lado Linux (§2),
-  lado Windows (§3) y construcción en la máquina virtual (sección «Construir en la máquina virtual
-  (S163)»). No se repite aquí el procedimiento.
-- Se anotan para el acta: **commit**, **sha256 del jar** (el que se pasa como `-HuellaJar`) y
-  **sha256 del zip del bundle** (lo imprime `empaquetar-windows.ps1`).
-- Se guarda aparte el **mismo fichero de jar** cuyo sha256 se pasó como `-HuellaJar`. Los oráculos
-  de §7 lo necesitan. No vale reconstruirlo: el jar no es reproducible bit a bit.
+- El bundle es el zip de la Release del tag que se acepta, descargado en Linux y comprobado con
+  `sha256sum -c` según `docs/empaquetado.md`, «Guía de distribución (S177)». No se construye a mano: la
+  vía manual de ese documento es de respaldo y no produce el artefacto que se acepta.
+- Se anotan para el acta: **tag**, **commit** (en las notas de la Release), **sha256 del zip** (el del
+  asset `.sha256`) y **sha256 del jar**.
+- El jar que necesitan los oráculos de §7 se extrae del propio zip (`Educhronos/app/app-<versión>.jar`)
+  y se guarda aparte. Su sha256 se compara con la huella que imprime el job `linux` de `bundle.yml` en su
+  log, que se lee en la web de GitHub (la API sin credenciales no da los logs). Si no coinciden, la
+  corrida no empieza. No vale reconstruirlo: el jar no es reproducible bit a bit.
 
 ### 3.2 Ensayo en Linux (opcional; NO valida el paso 1)
 
@@ -161,7 +163,7 @@ Totales: 8 actividades, 10 plazas y 24 filas de sesión por horario. Carga por g
 
 **Acción**
 1. Extraer el zip del bundle con el Explorador en una carpeta del usuario (`docs/empaquetado.md`,
-   «Prueba final en Windows limpio (S156)»).
+   «Guía de distribución (S177)», instalación nueva).
 2. Doble clic en `Educhronos.exe`, dentro de la carpeta extraída.
 
 **Resultado esperado**
@@ -382,6 +384,9 @@ el acta y usar ese fichero en §7.4.
 
 ### Paso 6 — Duplicar el curso
 
+> **Aviso (S172).** En este paso no se pulsa «Generar horario» en ningún curso. §7.5 exige que la base
+> del curso nuevo no tenga horario, y en S172 una generación hecha fuera del guion hizo fallar ese oráculo.
+
 El campo exige la forma `2025/2026`, con barra: «2025-2026» da el error «El nombre del curso debe tener
 la forma 2026/2027, con dos años consecutivos.». Los ficheros sí se nombran con guion
 (`curso-2026-2027.db`).
@@ -425,6 +430,27 @@ lista de cursos. 6c (acción 4): la barra con «Solo lectura» y el mensaje del 
 6d-2 (acción 6): el curso nuevo sin horario y con su configuración. 6e (acción 6): la carpeta de
 datos, con `curso-abierto`.
 
+## 5 bis. Actualización sobre una instalación previa
+
+Condición 4 de `O-ci`. Se ejecuta después del paso 6 y en otra cuenta: `prueba2`, en la máquina virtual,
+que conserva la instalación y los datos de la corrida de S172 (bundle de `8d9a74a`). Sigue
+`docs/empaquetado.md`, «Guía de distribución (S177)», actualización. No es uno de los seis pasos de la
+cadena: comprueba que una versión nueva sustituye a la anterior sin perder datos.
+
+1. Con la aplicación de S172 abierta, anotar los cursos del selector y cuál está abierto. Captura 7a.
+2. Cerrar la aplicación desde el icono de la bandeja. En el Administrador de tareas no queda ningún
+   proceso `Educhronos`.
+3. Copiar la carpeta `%LOCALAPPDATA%\Educhronos\` entera al Escritorio como `Educhronos-datos-antes`.
+4. Borrar la carpeta del programa de S172 y extraer en el mismo sitio el zip de la Release.
+5. Doble clic en `Educhronos.exe`. En el selector aparecen los mismos cursos que en la acción 1, con el
+   mismo abierto. Abrir el curso archivado sólo para mirarlo y volver al activo. Captura 7b.
+6. Cerrar desde la bandeja y copiar la carpeta de datos como `Educhronos-datos-despues`.
+7. Arrancar, abrir el curso activo (el no archivado), pulsar «Generar horario» y confirmar el diálogo, sin
+   tocar la base a mano. Captura 7c: el horario generado con su diagnóstico.
+8. Cerrar desde la bandeja y copiar la carpeta de datos como `Educhronos-datos-final`.
+
+**Oráculo.** §7.6.
+
 ## 6. Qué se trae de Windows
 
 - **La carpeta de datos entera**, `%LOCALAPPDATA%\Educhronos\` (`educhronos.db`, `curso-2026-2027.db`,
@@ -432,6 +458,8 @@ datos, con `curso-abierto`.
   bandeja › «Salir».
 - **Las cuatro descargas** del paso 5.
 - **Todas las capturas**.
+- **Las tres copias de la carpeta de datos** de §5 bis (`Educhronos-datos-antes`, `-despues` y `-final`)
+  y las capturas 7a a 7c.
 
 ## 7. Oráculos a posteriori (Linux, sobre copias)
 
@@ -574,6 +602,27 @@ Esperado:
   horarios: sí».
 - `curso nuevo: 2026/2027|0` y `curso archivado: 2025/2026|1`.
 - El puntero contiene `curso-2026-2027.db`.
+
+### 7.6 Actualización (§5 bis)
+
+Sobre las tres copias traídas a Linux (`antes`, `despues`, `final`), con la aplicación cerrada al copiar:
+
+1. **Los mismos ficheros de datos.** `ls antes/*.db` y `ls despues/*.db` dan los mismos nombres, y
+   `cmp antes/curso-abierto despues/curso-abierto` no imprime nada.
+2. **Los mismos datos.** Para cada base, el volcado es idéntico:
+```
+   for db in antes/*.db; do n=$(basename "$db")
+     diff <(sqlite3 "file:antes/$n?mode=ro" .dump) <(sqlite3 "file:despues/$n?mode=ro" .dump) \
+       > /dev/null && echo "$n OK" || echo "$n DIFIERE"
+   done
+```
+   Todas dan `OK`. No se compara el sha256 del fichero: arrancar puede tocarlo sin cambiar los datos.
+3. **Genera sin tocar la base.** En la base que nombra `final/curso-abierto`,
+   `select count(*) from horario_generado` vale uno más que en `despues`, y la captura 7c muestra el
+   diagnóstico sin violaciones duras.
+
+El esquema no cambia entre el bundle de S172 y el aceptado, así que esta prueba no ejercita ninguna
+migración (`D-esquema-sin-version`).
 
 ## 8. Acta
 
