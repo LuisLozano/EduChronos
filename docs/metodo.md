@@ -462,7 +462,7 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo** | Avanzar un Cambio con lógica | Caso normal bajo objetivo activo | M0, M2, M3, M4 (si >1 módulo), M1 completo | Ninguno |
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
-| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión (excepción a R-apertura, S152), o por decisión del usuario cuando ninguna sesión puede abrirse (S178) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
+| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
 
 Por qué Higiene/Método tiene excepción a R-apertura (S152): una sesión de método no
@@ -484,11 +484,18 @@ El paso M1.6 es mecánico y verificable; no requiere el modelo principal razonan
 Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
 - `grep -c "^### Sesión" plan_trabajo_horarios.md` → debe dar 1 (invariante H3).
 - Censo de tokens R4: `D-*`, `Dnn`, `C-*` y `O-*` sobre el plan SIN su entrada de
-  sesión, gestión y método. Lista los de una sola aparición y los que sólo viven en
-  la entrada, e informa de los que había en HEAD y ya no hay (extinción, sin sumar
-  a fallos). Cobertura y exclusiones en R4 (S157).
+  sesión ni las líneas del índice que copian su cabecera (S179), gestión y método.
+  Lista los de una sola aparición y los que sólo viven en la entrada, e informa de
+  los que había en HEAD y ya no hay (extinción, sin sumar a fallos). Cobertura y
+  exclusiones en R4 (S157).
 - Índices (M-doc-3): una entrada descuadrada o un índice ausente es fallo duro (S157).
 - Coherencia de los dos censos de la bitácora entre sí y con la crónica.
+- Frase de ventana (S179): se deriva de la cabecera H3 viva y de la previa degradada;
+  si no las nombra, falta o se repite a principio de línea, es fallo duro. Deja de
+  comprobarse a mano.
+- Tablas de plan, gestión, método y bitácora (S179): cada fila con tantas celdas
+  como su cabecera, contando la barra sin escapar dentro de código, y ninguna fila
+  `|` fuera de toda tabla; fallo duro.
 - Diff de costura: que las regiones tocadas sean solo las previstas.
 - Regenerar el índice de `gestion_proyecto.md` y `plan_trabajo_horarios.md`
   (M-doc-3): los números de línea caducan en cada cierre.
@@ -540,3 +547,8 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
 8. **Toda escritura va precedida de una corrida en seco revisada fuera del repo**,
    y el guion que escribe aborta si su ancla no aparece exactamente una vez
    (M-doc). (`D-guion-busca-token-esperado`)
+9. **En un documento con índice generado (M-doc-3), un ancla de texto se fija a
+   principio de línea**: el índice copia cada encabezado literal, y las fichas y las
+   líneas de R4 citan frases del cuerpo, así que un ancla sin fijar casa también con
+   esas copias. La guarda de la norma 8 aborta sin escribir, pero el intento ya se ha
+   pagado. (S153, corrección d; S178, defecto 3)

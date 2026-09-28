@@ -35,8 +35,8 @@
 - L2289 — #### Deuda ya CERRADA (histórico, no pendiente)
 - L2356 — ## 5. Revisión del roadmap: por qué H2 va primero
 - L2421 — ## 6. Reglas estratégicas
-- L2501 — ## 7. Métricas del sistema
-- L2522 — ## 8. El sistema respondiendo a las preguntas clave
+- L2511 — ## 7. Métricas del sistema
+- L2532 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -2455,7 +2455,7 @@ Una sesión de tipo Higiene/Método puede abrirse sin nombrar Cambio, Objetivo n
 Hito, con dos condiciones. **Cuándo:** sólo ENTRE objetivos, nunca con un objetivo
 activo a medias, para que no compita con el trabajo de producto. **Con qué
 disparador:** cuando las fichas de §4 cuya sede sea Higiene/Método o el script de
-R4 lleguen a VEINTE, o cuando en una misma sesión un defecto de instrumento cueste
+R4 lleguen a VEINTE, o cuando en una misma sesión un mismo defecto de instrumento cueste
 trabajo medible por segunda vez. Lo que avanza no es un hito: es la fiabilidad de
 los instrumentos con que se mide todo lo demás, y por eso R-apertura no le encaja.
 La sesión cierra con el recuento actualizado, que es su criterio de terminado.
@@ -2469,6 +2469,16 @@ puede abrir por decisión suya una sesión de Higiene/Método para decidir qué 
 planifica; su criterio de terminado lo fija su M0. S178 es la primera: el disparador
 que el registro de S177 daba por saltado no saltó, porque hubo un solo fallo con
 coste.
+
+**PRECISADO en S179 (decisión del usuario, a propuesta del arquitecto):** el segundo
+disparador se lee como EL MISMO defecto de instrumento costando trabajo medible por
+segunda vez en una misma sesión; dos defectos distintos con un coste cada uno no lo
+disparan. Es lo que dice la letra y lo que el disparador quiere detectar: un
+instrumento que ya se ha demostrado roto. La otra lectura saltaría con dos errores
+sueltos del asistente que no son instrumentos. Un guion es un instrumento (M-guion).
+Con esta lectura, S177 no lo disparó y S178 sí, por su defecto (3): el mismo ancla
+costó un intento abortado y un parche que no casó. Nace de
+`D-disparador-higiene-ambiguo`.
 
 **R-e2e — El e2e de navegador cubre el guion de aceptación, no la lógica.**
 La suite e2e de navegador (Playwright, `app/frontend/e2e/`) verifica ÚNICAMENTE los
