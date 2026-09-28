@@ -128,3 +128,11 @@ Identificadas por su sha256, tomado de `prueba4/MANIFIESTO.sha256`.
 | capturas/7c-2.png | `9efb425437b5a723642c024215099ff7ab4e1528bc1c80f83d41bde3e1522439` |
 | capturas/7d.png | `72a649569097a224542d038e68173eb0c4f34ef232926d77630387d0e99a2c0f` |
 | capturas/Thumbs.db:encryptable | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+## Nota posterior (S178)
+
+La tabla de capturas tiene 49 filas y 48 capturas. La fila de
+`capturas/Thumbs.db:encryptable` (sha256 `e3b0c442…b855`, el de un fichero vacío) es
+un flujo alternativo de NTFS de 0 bytes, arrastrado al copiar desde Windows, que
+entró por `MANIFIESTO.sha256`. No es una captura y no cambia el veredicto. La fila se
+conserva para que el acta siga casando con su manifiesto.
