@@ -88,6 +88,14 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
 4. **Comprobación.** `sha256sum -c Educhronos-win.zip.sha256` da `OK`. Si no, no se entrega.
 5. **USB.** Se copian los dos ficheros. En Windows, `Get-FileHash -Algorithm SHA256 Educhronos-win.zip`
    debe dar el mismo valor.
+
+   **Por USB, no por red (medido en S177).** Copiado desde una carpeta compartida (la de VirtualBox), el zip
+   llegó con la marca de Internet (`Zone.Identifier`, `ZoneId=3`); al extraerlo la marca pasó a
+   `Educhronos.exe` y SmartScreen detuvo el arranque. Por USB llegó sin marca. Antes de extraer,
+   `Get-Item .\Educhronos-win.zip -Stream *` sólo debe listar `:$DATA`. Si el zip llega por otra vía (red,
+   correo, descarga), antes de extraerlo: clic derecho › Propiedades › «Desbloquear», o
+   `Unblock-File .\Educhronos-win.zip`. Esta vía no se ha medido.
+
 6. **Instalación nueva.** Como en «Prueba final en Windows limpio (S156)»: extraer con el Explorador en
    una carpeta del usuario y doble clic en `Educhronos.exe`. No pide permisos de administrador.
 7. **Actualización.** Los datos no viven en la carpeta del programa sino en `%LOCALAPPDATA%\Educhronos\`,
