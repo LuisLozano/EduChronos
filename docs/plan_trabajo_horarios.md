@@ -51,25 +51,25 @@
 - L742 — ## FASE 12 — CI/CD con GitHub Actions
 - L745 — ### Criterios de verificación
 - L758 — ## Registro de progreso
-- L760 — ### Sesión 178 — Higiene/Método, abierta por decisión del usuario: **EL PROYECTO TIENE UN ESTADO FINAL NUEVO: UN PROFESOR DEL CENTRO HACE EL HORARIO 2026/2027 CON EDUCHRONOS, PARTIENDO DEL 2025/2026, Y SE COMPARA CON EL OFICIAL. NACEN EL HITO H5, CON CINCO OBJETIVOS PREVISTOS, Y R-INCIDENCIA.** Criterio fijado en el M0 y alcanzado: estado final 2 en §1, H5 en §2, R-incidencia en §6 y en `metodo.md`, `D-esquema-sin-version` y `D-version-invisible` asignadas a H5, y dos costuras.
-- L828 — ### Bloques de Fase 2
-- L836 — ### Bloques de Fase 5
-- L859 — ### Bloques de Fase 6
-- L904 — ### Bloques de Fase 8
-- L1116 — ### Fases completadas
-- L1220 — ### Cierre del modelo — Sesión 8
-- L1268 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1314 — ### Método de trabajo (procedimiento vigente)
-- L1347 — ### Deuda consciente VIVA
-- L3223 — ### Deuda consciente CERRADA (histórico)
-- L3516 — ### Notas técnicas validadas en Fase 0
-- L3529 — ### Notas técnicas validadas en Fase 6
-- L3574 — ### Notas técnicas validadas en Fase 9
-- L3583 — ### Notas técnicas validadas en Fase 11
-- L3726 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3735 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3762 — ### Registro detallado de sesiones S10–S31
-- L3771 — ## Señales globales de alerta
+- L760 — ### Sesión 179 — Higiene/Método, por disparador: **EL VERIFICADOR DEL CIERRE DERIVA LA FRASE DE VENTANA Y CUENTA LAS CELDAS DE LAS TABLAS, Y EL CENSO DEJA DE CONTAR EL ÍNDICE DE LA CABECERA; EL DISPARADOR DE HIGIENE TIENE UNA SOLA LECTURA. HIGIENE/MÉTODO DE 15 A 11.** Criterio fijado en el M0 y alcanzado: `D-disparador-higiene-ambiguo`, `D-verificar-cierre-ciego-a-la-ventana`, `D-verificar-cierre-ciego-a-las-tablas` y `D-censo-r4-rescate-por-indice`, saldadas.
+- L826 — ### Bloques de Fase 2
+- L834 — ### Bloques de Fase 5
+- L857 — ### Bloques de Fase 6
+- L902 — ### Bloques de Fase 8
+- L1114 — ### Fases completadas
+- L1218 — ### Cierre del modelo — Sesión 8
+- L1266 — ### Decisiones permanentes (no reabrir sin razón de peso)
+- L1312 — ### Método de trabajo (procedimiento vigente)
+- L1345 — ### Deuda consciente VIVA
+- L3190 — ### Deuda consciente CERRADA (histórico)
+- L3519 — ### Notas técnicas validadas en Fase 0
+- L3532 — ### Notas técnicas validadas en Fase 6
+- L3577 — ### Notas técnicas validadas en Fase 9
+- L3586 — ### Notas técnicas validadas en Fase 11
+- L3729 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3738 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3765 — ### Registro detallado de sesiones S10–S31
+- L3774 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -757,7 +757,22 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 178 — Higiene/Método, abierta por decisión del usuario: **EL PROYECTO TIENE UN ESTADO FINAL NUEVO: UN PROFESOR DEL CENTRO HACE EL HORARIO 2026/2027 CON EDUCHRONOS, PARTIENDO DEL 2025/2026, Y SE COMPARA CON EL OFICIAL. NACEN EL HITO H5, CON CINCO OBJETIVOS PREVISTOS, Y R-INCIDENCIA.** Criterio fijado en el M0 y alcanzado: estado final 2 en §1, H5 en §2, R-incidencia en §6 y en `metodo.md`, `D-esquema-sin-version` y `D-version-invisible` asignadas a H5, y dos costuras.
+### Sesión 179 — Higiene/Método, por disparador: **EL VERIFICADOR DEL CIERRE DERIVA LA FRASE DE VENTANA Y CUENTA LAS CELDAS DE LAS TABLAS, Y EL CENSO DEJA DE CONTAR EL ÍNDICE DE LA CABECERA; EL DISPARADOR DE HIGIENE TIENE UNA SOLA LECTURA. HIGIENE/MÉTODO DE 15 A 11.** Criterio fijado en el M0 y alcanzado: `D-disparador-higiene-ambiguo`, `D-verificar-cierre-ciego-a-la-ventana`, `D-verificar-cierre-ciego-a-las-tablas` y `D-censo-r4-rescate-por-indice`, saldadas.
+  TIPO Y RITUAL: HIGIENE/MÉTODO por disparador — M0 + F1 (medición, solo lectura) + F2a/F2b (verificador: corrida en seco en un clon y aplicación; autoprueba con defectos inyectados y nueve mutantes, que hace de M3) + F3/F3b (texto de método) + M1. Sin código de la aplicación. Dirigida desde un solo chat.
+  M0. Sin Cambio, Objetivo ni Hito (excepción de §6): entre objetivos, H5 sin ninguno abierto, y con el disparador saltado en S178 por su defecto (3), que costó dos veces por sí solo, así que la apertura no dependía de la lectura ambigua. Contador en 15 de 20. Se hace antes de abrir la demo porque la ventana entre objetivos se cierra con ella y porque dos de las fichas cuestan en cada M1. Criterio: de 15 a 11, con las cuatro fichas de la cabecera.
+  F1 — medición (Claude Code, HEAD `8fc8a58`). Censo y verificador son el mismo fichero; autoprueba 12 de 12. Nada lee la frase de ventana. El índice sólo copia la cabecera viva: la previa no es encabezado. Tablas: 1 descuadre en el plan (L1284, la quinta fila que S168 dejó a la sesión que saldara la deuda) y 40 filas de §4 de gestión FUERA DE TODA TABLA desde S141, porque una línea en blanco de `5c58437` cortaba la tabla de deuda técnica real; con 4 celdas cada una, un recuento de barras las daba por buenas, que es lo que hizo a mano la R4 de S178. Ni `metodo.md` ni el plan escriben la orden literal del verificador.
+  F2. `9c2898c`: `verificar-cierre.py` deriva la frase de ventana de la cabecera viva y de la previa (sección 5) y cuenta celdas por fila y filas fuera de tabla en plan, gestión, método y bitácora (sección 6), las dos como fallo duro; el censo retira además las líneas del índice que copian la cabecera de sesión, casando por texto. En el mismo commit, la fila L1284 del plan con las barras escapadas y la línea en blanco de §4 quitada, porque sobre los documentos de `8fc8a58` el verificador nuevo da 41 fallos duros. Autoprueba de 12 a 16 casos; nueve mutantes, uno por capacidad, todos muertos en su caso. Hecho en un clon y aplicado con `git apply`, con el diff comprobado byte a byte.
+  F3. `b62e050`: una sola lectura del disparador, en §6 de gestión y en la tabla de tipos de `metodo.md` (el MISMO defecto con coste por segunda vez en una misma sesión; dos defectos distintos no lo disparan), por decisión del usuario a propuesta del arquitecto; §Automatización del cierre con las dos comprobaciones nuevas; norma 9 de M-guion, anclas a principio de línea. `a1a84a3`: la norma 9 duplicaba el punto 6 de M-doc (S133) y la precisión 6 de S141; queda como sede única y los dos remiten a ella.
+  CRITERIO. Alcanzado: fichas con sede Higiene/Método o script de R4, de 15 a 11.
+  DEUDA. Saldadas y CERRADAS las cuatro; `D-verificar-cierre-ciego-a-las-tablas`, AMPLIADA a las filas fuera de tabla. No nace ninguna. Instancia nueva de `D-arranque-no-literal`: la orden del verificador no está escrita en ningún documento.
+  DEFECTOS DE INSTRUMENTO. Del asistente: (1) el esperado de F1 («S168 los corrigió») se escribió sin leer la ficha, que decía lo contrario (norma 3 de M-guion); sin coste. (2) La norma 9 se propuso sin buscar en `metodo.md` si ya existía; existía dos veces, y costó F3b, un commit de corrección. (3) El patrón de la frase terminaba en un espacio, que habría dado un fallo falso con la frase al final de su línea; lo avisó Claude Code y se corrigió en F2b antes de aplicar, sin coste propio. (4) El encargo de F2b suponía una forma del comentario que el fichero no tenía; Claude Code conservó la media frase, sin coste. Con la lectura escrita en F3, ningún defecto costó dos veces: el disparador NO salta. De Claude Code: una guarda propia de más abortó sin escribir en F2a, sin coste. Claude Code añadió `Co-Authored-By` a los commits, como los anteriores.
+  SUITES: sin correr, porque el diff no toca `src/`: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros.
+  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…` (md5, medidos en el cierre; `find` bajo `app/` da una sola copia de cada uno): INTACTOS.
+  MATERIAL SIN VERSIONAR. `/tmp/s179/` (medidas, clones y mutantes); puede no sobrevivir.
+  LIMPIEZA (M1-bis). Archivada S177 en la bitácora (17 líneas: las 16 de cuerpo, idénticas byte a byte a las 776–791 del plan en `a1a84a3`, y el título con el mismo texto tras el prefijo), promovida a H3. Degradada S178; S179, única cabecera H3 viva. Los tres censos, en S177. Las cuatro fichas pasan de la deuda VIVA a la CERRADA del plan, al principio, delante de las de S175, en el orden que tenían; en §4 de gestión se tachan en su sitio. `D-arranque-no-literal` recibe la instancia de S179 en las dos sedes. Condensación: ninguna.
+  R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 16 de 16, 0 fallos duros; ventana S178/S179 por la sección 5, sin lectura a mano; tablas por la sección 6, 0 descuadres y 0 filas fuera de tabla en los cuatro ficheros; índices descuadrados antes de regenerar, gestión 0 de 35 y plan 19 de 68, después 0 y 0. H3 única (S179) por la sección 1; los tres censos, en S177. Censo de 324 a 324 tokens desde `8fc8a58`: ninguno nace ni se extingue; `D-esquema-sin-version` de 6 a 5 y `D-version-invisible` de 5 a 4, por la línea del índice de la cabecera de S178, que el censo ya no cuenta (`9c2898c`); `D-disparador-higiene-ambiguo` de 2 a 3, por su cita en el párrafo PRECISADO de §6 de gestión (`b62e050`). Tokens de una aparición, 39 antes y después, con la misma lista. Higiene/Método: 11 de 20 (23 filas de deuda, 12 tachadas). Tocados `scripts/verificar-cierre.py`, `metodo.md`, `gestion_proyecto.md`, `plan_trabajo_horarios.md` y `bitacora-sesiones.md`, con los índices de gestión y plan.
+
+Última sesión registrada (previa): Sesión 178 — Higiene/Método, abierta por decisión del usuario: **EL PROYECTO TIENE UN ESTADO FINAL NUEVO: UN PROFESOR DEL CENTRO HACE EL HORARIO 2026/2027 CON EDUCHRONOS, PARTIENDO DEL 2025/2026, Y SE COMPARA CON EL OFICIAL. NACEN EL HITO H5, CON CINCO OBJETIVOS PREVISTOS, Y R-INCIDENCIA.** Criterio fijado en el M0 y alcanzado: estado final 2 en §1, H5 en §2, R-incidencia en §6 y en `metodo.md`, `D-esquema-sin-version` y `D-version-invisible` asignadas a H5, y dos costuras.
   TIPO Y RITUAL: HIGIENE/MÉTODO — M0 + decisiones del usuario + F1 (corrida en seco en /tmp/s178, dos pasadas revisadas por Claude Code) + F2 (aplicación y commits) + M1. Sin código de la aplicación. Dirigida desde un solo chat.
   M0. Sin Cambio, Objetivo ni Hito: H4 terminado en S177 y ningún objetivo planificado. Ninguna sesión podía abrirse con las reglas vigentes: las de producto piden objetivo, y el disparador de Higiene/Método no saltó. El registro de S177 decía que sí, pero en S177 hubo un solo fallo con coste, el intento de `prueba3`; las actividades mal tecleadas en el paso 2 fueron desviación de ejecución, corregida sin coste. Contador en 14 de 20. El usuario abre la sesión por decisión suya (precedente S152) con un único propósito: decidir qué pasa tras alcanzar §1. Medido en §4: 14 filas vivas con sede Higiene/Método y unas 96 colgadas de objetivos cerrados o de ninguno; con todos los objetivos cerrados, R-deuda las hacía impagables.
   DECISIONES (usuario, a propuesta del arquitecto). (1) Educhronos no se usa en producción en 2026/2027: ese curso es el banco de prueba. (2) Estado final 2 (§1): un profesor del centro, sin guion ni ayuda técnica, crea el curso 2026/2027 en el bundle partiendo del 2025/2026 cargado, obtiene un horario válido y éste se compara con el oficial con métricas fijadas antes de mirar. (3) Un solo hito, H5, con cinco objetivos en orden: demo con 2025/2026 en el bundle → carga de los PDF de 2026/2027 en una base aparte → preparación → prueba del profesor → comparación. El arquitecto propuso tres hitos; en la primera corrida en seco Claude Code señaló que la demo no da capacidad nueva, y el arquitecto aplicó la misma vara, la de S168, a la comparación. (4) R-incidencia (§6): una incidencia se busca en §4 antes de darla de alta y, si existe, la deuda toma su sede; bloquea sólo si bloquea el objetivo siguiente; una capacidad nueva entra sólo si el profesor la necesita. (5) La excepción de Higiene/Método se amplía: el usuario puede abrirla por decisión suya cuando ninguna sesión puede abrirse. (6) `D-esquema-sin-version` y `D-version-invisible` bloquean H5: habrá versiones durante la prueba, la base del profesor tiene que sobrevivirlas y cada incidencia tiene que decir qué versión corre. (7) La fila de `Thumbs.db` del acta de S177 se anota y no se borra, para que el acta siga casando con su manifiesto.
@@ -771,24 +786,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   MATERIAL SIN VERSIONAR. `/tmp/s178/` (corridas en seco y guion de cierre): puede no sobrevivir.
   LIMPIEZA (M1-bis). Archivada S176 en la bitácora (15 líneas: las 14 de cuerpo, idénticas byte a byte a las 779–792 del plan en `9e568f6`, y el título con el mismo texto tras el prefijo), promovida a H3. Degradada S177; S178, única cabecera H3 viva. Los tres censos, en S176. `D-disparador-higiene-ambiguo` entra al final de la deuda VIVA del plan, tras `D-version-invisible`, y en §4 de gestión tras `D-verificar-cierre-ciego-a-las-tablas`. Condensación: ninguna; esta sesión no cierra ningún frente.
   R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 12 de 12, 0 fallos duros; índices descuadrados antes de regenerar, gestión 34 de 35 y plan 19 de 68, después 0 y 0 (el de gestión arrastraba el descuadre de `21cb6ef`, que se comprometió sin regenerar). Censo de 323 a 324 tokens desde `00c9729`: nace `D-disparador-higiene-ambiguo` (2: su ficha en el plan y su fila en §4); ninguna extinción; `D-esquema-sin-version` de 3 a 6 y `D-version-invisible` de 2 a 5, dos cada una por `21cb6ef` (fila de H5 y ESTADO en S178 de §2) y una por la entrada del índice de la cabecera de S178 (`D-censo-r4-rescate-por-indice`); `D-generacion-no-reproducible` de 12 a 13 por la fila de H5; `O-ci` de 42 a 40 y `C-aceptacion-ci` de 5 a 4 al salir del índice la cabecera de S177. Tokens de una aparición, 39 antes y después, con la misma lista. H3 única, comprobada a mano (`grep -c "^### Sesión"` da 1). Frase de ventana, leída a mano en el plan: «El plan conserva ahora S177 (degradada a formato compacto) y S178 como única cabecera H3 viva.» Barras de las filas de tabla tocadas (fila nueva de H5, filas de `D-esquema-sin-version` y `D-version-invisible`, fila nueva de `D-disparador-higiene-ambiguo`), 5 en todas, como sus vecinas. Higiene/Método: 15 de 20 (23 filas de deuda, 8 tachadas). Tocados `gestion_proyecto.md`, `metodo.md`, `plan_trabajo_horarios.md`, `bitacora-sesiones.md` y `actas-aceptacion/acta-s177.md`, con los índices de gestión y plan.
-
-Última sesión registrada (previa): Sesión 177 — O-ci (H4), C-aceptacion-ci: **UN HUMANO EJECUTA EL GUION DE ACEPTACIÓN ENTERO SOBRE EL ZIP DE LA RELEASE `v0.1.0`, CONSTRUIDO POR LA CI, EN WINDOWS 11 CON CUENTA ESTÁNDAR NUEVA, Y LOS SEIS PASOS PASAN SU ORÁCULO SIN SALVEDAD; LA ACTUALIZACIÓN SOBRE LA INSTALACIÓN DE S172 CONSERVA LOS DATOS AL BYTE. `O-ci` TERMINADO, 4 DE 4, Y H4 TERMINADO: NO QUEDA NINGÚN OBJETIVO PLANIFICADO.**
-  TIPO Y RITUAL: DESARROLLO REDUCIDO, sin M3 porque no hubo cambio de producto (precedente S172) — M0 + F1 (M2) + F2 (runners, guion y guía) + F3 (tag y Release) + F4 (corrida guiada, con las capturas revisadas al cerrar cada paso) + F5 (acta y aviso en la guía) + M1. Dirigida desde un solo chat.
-  M0. Cambio `C-aceptacion-ci` (quinto y último de `O-ci`), Objetivo `O-ci` (condición 4), Hito H4. R-invalidación: ninguna, no hay objetivo planificado después. R-deuda: ninguna deuda viva bloquea. Higiene/Método en 14 de 20. Al fijar alcance: se fijan los runners de `bundle.yml`, porque `ubuntu-latest` pasa a 26.04 desde el 19 de octubre y el artefacto aceptado sólo debe cambiar de imagen con un commit (el argumento de la decisión I); y el aviso del paso 6, aparcado en S172 por R-terminado, entra con la corrida nueva por la regla F.
-  F1 — M2 (HEAD `f89a481`, Claude Code, solo lectura). Los tres jobs de `bundle.yml`, en `*-latest`. La versión que ve el usuario no sale del tag: `jpackage` sin `--app-version`, pom `0.1.0-SNAPSHOT`, zip de nombre fijo y `LEEME.txt` fuera del zip. §3.1 del guion describía la vía manual y exigía guardar un jar que la CI no publica. La guía cubría del tag a «extraer y abrir», sin la orden de descarga; faltaba actualizar. La aplicación sólo escribe en `%LOCALAPPDATA%\Educhronos`. `schema.sql`, idéntico a `8d9a74a`.
-  F2. `a888599`: runners fijados en `ubuntu-24.04` y `windows-2025-vs2026` (medido en el README de runner-images). `c2dfbbe`: guion sobre el zip de la Release, aviso del paso 6, §5 bis y §7.6. `5beb5cd`: «Guía de distribución (S177)» en `docs/empaquetado.md`. `dc54d20`: jar extraído del zip (el zip usa `\` como separador) y campo de tag en el acta. `a7846b6`: un marcador sin comillas invertidas dentro de un bloque bash. Medido antes del tag: los assets de rc.1 se descargan sin credenciales, y el jar dentro de su zip tiene la huella del log del job `linux` (`9f9e89ab…`).
-  F3. `tests` en verde sobre `a7846b6` (36388998261); ensayo de `bundle` por `workflow_dispatch` en verde (36389626607), con `labels` `ubuntu-24.04` y `windows-2025-vs2026`. Tag anotado `v0.1.0` → ejecución 36390351012 en verde; Release definitiva con `Educhronos-win.zip` (176.078.736 B, `7afc5b8c…9fb170`) y su `.sha256`. Jar extraído del zip `90606e50…17e9a`, igual a la huella de los jobs `linux` y `windows`, leídas por el usuario.
-  F4 — corrida. Intento ANULADO en `prueba3`: el zip, copiado desde la carpeta compartida de VirtualBox, llevaba `Zone.Identifier` con `ZoneId=3`, la marca pasó a `Educhronos.exe` al extraer y SmartScreen lo detuvo; el producto no llegó a ejecutarse. Repetida desde el paso 1 en `prueba4`, cuenta estándar nueva, con la ausencia de Java, Node y DLL de Visual C++ comprobada y el zip llegado por USB sin marca. Pasos 1 a 6 con su oráculo en pantalla. Desviación de ejecución en el paso 2, corregida por pantalla antes de ningún oráculo: tres actividades mal tecleadas (ACM-3ºA-Di con 1 repetición, ING-3ºA con asignatura, código `REVAL-3ºAB`), corregidas con «Editar» y las ocho verificadas campo a campo; las plazas conservan `REVAL-3ºAB-P1/P2` porque el código de plaza es estable por diseño, y ningún oráculo lo mira (medido en §7 y en `scripts/`). Horario 1 en el paso 3 y 2 en 4d; el curso nuevo, sin horario. §7.2 a §7.5 pasan enteros (§7.4, siete rc=0). §5 bis en `prueba2`: los mismos cursos antes y después de sustituir la carpeta, los `.db` idénticos al byte, y el curso activo genera el horario 2 sin violaciones; que corría el programa nuevo lo prueba la huella del jar instalado (captura 7d). §7.6 pasa.
-  F5. Acta `docs/actas-aceptacion/acta-s177.md`, veredicto PASA sin salvedades, con la tabla de capturas por sha256 (decisión G de `O-aceptación`); aviso en la guía sobre la marca de Internet: por USB llega sin marca (medido); «Desbloquear», no medido.
-  CRITERIO. **Condición 4 CUMPLIDA (S177). `O-ci` TERMINADO, 4 de 4**, en cinco sesiones (S173–S177) y cinco Cambios. **H4 TERMINADO**: los cuatro hitos están cerrados, el estado final de §1 se alcanza sin salvedad y no queda ningún objetivo planificado.
-  OBSERVACIONES. (a) El zip de `empaquetar-windows.ps1` usa `\` como separador, fuera de la especificación del formato; el Explorador lo extrae bien. (b) En el paso 1 la carpeta de datos tiene tres ficheros, con el `.lock` de instancia única (S154); el guion dice dos. (c) La prueba de actualización no ejercita migración de esquema. (d) El CSV se abrió con el Bloc de notas: la VM no tiene Excel (verificado en S156).
-  DEUDA. Nace `D-version-invisible`, MEJORA FUTURA, sin sede. Ninguna saldada. `D-esquema-sin-version`: nota sobre la primera entrega. COSTURA: `D-jar-no-reproducible`, `D-reenvio-spa-sin-guarda-automatica`, `D-contrato-dto-mide-jackson2`, `D-props-main-invisibles-en-tests` y `D-guarda-escritura-sin-caso` colgaban de `O-ci` y quedan sin sede; se reasignan al planificar lo siguiente.
-  DEFECTOS DE INSTRUMENTO. Del asistente: (1) la instrucción de traer el zip por la carpeta compartida contradecía la guía, que dice USB, y costó el intento de `prueba3`: una cuenta y un paso 1. (2) El guion de F2 anidaba bloques de tres comillas invertidas y la interfaz lo partió en tres. (3) Una orden `sed` del M2 habría impreso «L1+60» literal; la corrigió Claude Code. (4) La ruta del jar dentro del zip, escrita con `/` de memoria; la corrigió la medida A3 antes del tag. (5) Un marcador con comillas invertidas dentro de un bloque bash del guion. Sólo (1) costó trabajo, una vez. **CORREGIDO en S178:** decía «costó trabajo por segunda vez»; en S177 hubo un único fallo con coste, así que el disparador de Higiene/Método no saltó. Además, el comprobador de permisos de Claude Code cortó la primera pasada de F2; las medidas se lanzaron con `!`.
-  SUITES: sin correr en el cierre, porque el diff no toca `src/`: **solver 116, app 558, vitest 570 en 58 ficheros**; e2e 3 tests en 3 ficheros. En verde en la CI sobre `a7846b6`.
-  BANCOS. `educhronos-s137.db` en `dfa4c077…` y `educhronos-s137-centro-completo.db` en `64d671fe…` (md5, medidos en el cierre; `find` bajo /home/luis da una sola copia de cada uno, en `app/`): INTACTOS.
-  MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s177/` (zip, `.sha256` y jar; `prueba4/` con datos, descargas, capturas, oráculos y `MANIFIESTO.sha256`; `prueba2/` con las tres copias, §7.6 y `MANIFIESTO.sha256`). En la carpeta compartida, `v0.1.0/`. Las cuentas `prueba2`, `prueba3` y `prueba4` conservan su estado. `/tmp/s177-rc1/` puede no sobrevivir.
-  LIMPIEZA (M1-bis). Archivada S175 en la bitácora (14 líneas: las 13 de cuerpo, idénticas byte a byte a las 776–788 del plan en `52c6ceb`, y el título con el mismo texto tras el prefijo), promovida a H3. Degradada S176; S177, única cabecera H3 viva. Los tres censos, en S175. `D-version-invisible` entra al final de la deuda VIVA del plan, tras `D-vista-horario-estado-rancio`. Condensación: ninguna; el único frente que cierra es `O-ci`, en este mismo cierre, y su ficha queda íntegra.
-  R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 12 de 12, 0 fallos duros; índices descuadrados antes de regenerar, gestión 14 de 35 y plan 20 de 68, después 0 y 0. Censo de 321 a 323 tokens desde `f89a481` (los commits de S177 anteriores al cierre no tocan el corpus): nacen `C-aceptacion-ci` (5, una de ellas la entrada del índice de la cabecera de S177) y `D-version-invisible` (2); ninguna extinción; `O-ci` de 37 a 42; `C-pipeline-push` de 5 a 4 al salir del índice la cabecera de S176 (`D-censo-r4-rescate-por-indice`); las cinco deudas de la COSTURA suben una cada una, por la línea de cierre de la ficha (`D-jar-no-reproducible` y `D-props-main-invisibles-en-tests` de 4 a 5; `D-reenvio-spa-sin-guarda-automatica`, `D-contrato-dto-mide-jackson2` y `D-guarda-escritura-sin-caso` de 3 a 4). Tokens de una aparición, 39 antes y después, con la misma lista. H3 única, comprobada a mano (`grep -c "^### Sesión"` da 1). Frase de ventana, leída a mano en el plan: «El plan conserva ahora S176 (degradada a formato compacto) y S177 como única cabecera H3 viva.» Barras de las tres filas de tabla tocadas (celda de H4, fila de `D-esquema-sin-version` y fila nueva de `D-version-invisible`), 5 en las tres, como sus vecinas. Higiene/Método: 14 de 20 (22 filas de deuda, 8 tachadas). Tocados `gestion_proyecto.md`, `plan_trabajo_horarios.md` y `bitacora-sesiones.md`, con sus índices.
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -812,14 +809,15 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160, y la de S159 en la Sesión 161, y la de S160 en la Sesión 162, y la de S161 en la Sesión 163, y la de S162 en la Sesión 164, la de S163 en la Sesión 165, y la de S164 en la Sesión 166, y la de S165 en la Sesión 167, y la de S166 en la Sesión 168, y la de S167 en la Sesión 169, y la de S168 en la Sesión 170, y la de S169 en la Sesión 171, y la de S170 en la Sesión 172, y la de S171 en la Sesión 173, y la de S172 en la Sesión 174, y la de S173 en la Sesión 175, y la de S174 en la Sesión 176, y la de S175 en la Sesión 177, y la de S176 en la Sesión 178.
-El plan conserva ahora S177 (degradada a formato compacto) y S178 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160, y la de S159 en la Sesión 161, y la de S160 en la Sesión 162, y la de S161 en la Sesión 163, y la de S162 en la Sesión 164, la de S163 en la Sesión 165, y la de S164 en la Sesión 166, y la de S165 en la Sesión 167, y la de S166 en la Sesión 168, y la de S167 en la Sesión 169, y la de S168 en la Sesión 170, y la de S169 en la Sesión 171, y la de S170 en la Sesión 172, y la de S171 en la Sesión 173, y la de S172 en la Sesión 174, y la de S173 en la Sesión 175, y la de S174 en la Sesión 176, y la de S175 en la Sesión 177, y la de S176 en la Sesión 178, y la de S177 en la Sesión 179.
+El plan conserva ahora S178 (degradada a formato compacto) y S179 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
 los dos censos de la bitácora contra esta crónica y avisa si discrepan —en S122 discrepaban: la cabecera de
 la bitácora iba por S119 y su línea de orden por S118, porque S121 actualizó uno de los dos censos y no el
-otro—.) El detalle
+otro—. Desde S179 el verificador deriva también esta frase de las cabeceras y es fallo duro si no cuadra.) El
+detalle
 histórico de cualquier sesión anterior —incluida S42
 (citada por la deuda abierta D25) y S43 (citada por el cierre de D23)— está en la bitácora.
 
@@ -2722,6 +2720,7 @@ con remisión a la bitácora.
   (`mvn -pl solver install -DskipTests`, o se compila contra el jar de `~/.m2`). Escribir el literal no cierra la
   deuda —su arreglo es un `.sh` versionado, y crear superficie nueva estaba fuera del alcance del tramo—, pero
   deja de obligar a la sexta reconstrucción. No se paga ahora. **SEDE CORREGIDA en S157:** el script de R4 ya no está pendiente; lo que queda de esta ficha es el `.sh` de arranque versionado, que es trabajo de Higiene y no del verificador.
+  **INSTANCIA de S179:** la orden de `scripts/verificar-cierre.py` no está escrita en `metodo.md` ni en el plan; sus invocaciones (`--solo-autoprueba`, `EDUCHRONOS_RAIZ`) se leyeron del fuente en F1.
 
 - **D-sin-puntos-de-ruptura** (S121, VIVA, MEJORA FUTURA de UX, no bloqueante) — NO HAY UN SOLO `@media` EN
   TODO EL FRONTEND. Medido en el M2 de S121 al inventariar la superficie visual: cero media queries en `src`,
@@ -3106,14 +3105,6 @@ con remisión a la bitácora.
   `user_version` y negarse a abrir una base incompatible con un mensaje claro. Sube de presión con el primer
   cambio de `schema.sql` posterior a la primera entrega. No se pagaba; desde S178 bloquea H5.
 
-- **D-verificar-cierre-ciego-a-la-ventana** (S160, VIVA, MÉTODO, no bloqueante, sede Higiene/Método) — EL
-  VERIFICADOR NO MIRA LA FRASE DE VENTANA DEL PLAN. `verificar-cierre.py` contrasta los censos de la bitácora
-  con la crónica de archivado, pero NO comprueba la frase «El plan conserva ahora Sxxx (degradada a formato
-  compacto) y Syyy como única cabecera H3 viva»: su comprobación cuenta cabeceras H3 y da 1 correctamente, sin
-  contrastar la prosa que las describe. El cierre de S158 la dejó en S156/S157 y lo detectó A MANO el de S159;
-  es la misma familia que el paréntesis de aviso que la propia frase arrastra desde S118. El arreglo es que el
-  verificador DERIVE la afirmación del fichero en vez de mirarla. Hasta que se instrumente, cada M1 la comprueba
-  a mano —así se hizo en este cierre—.
 - **D-curso-sin-borrado** (S160, VIVA, MEJORA FUTURA, no bloqueante, sin sede desde S173 (era `O-aceptación`), objetivo de aceptación desde S163 y con ficha desde S168) — UN CURSO NO SE PUEDE
   ELIMINAR DESDE LA APLICACIÓN. El selector de S160 lista, abre y duplica, pero no borra: un duplicado con el
   año equivocado sólo se quita borrando el fichero en la carpeta de datos. No está en el criterio de `O-curso`
@@ -3163,24 +3154,6 @@ con remisión a la bitácora.
   `educhronos.datos.carpeta`, publicada por el post-procesador y no configurable por el usuario, leída con
   `@Value("${educhronos.datos.carpeta:}")` en `CursoService` (motivo en su Javadoc). No se migró por R-deuda:
   tocaba `GeneradorHorarioService` y su test de presupuesto, fuera del Cambio. Técnica real, sin objetivo asignado.
-- **D-censo-r4-rescate-por-indice** (S158, VIVA, técnica real, no bloqueante, sede Higiene/Método) — EL ÍNDICE
-  GENERADO RESCATA DEL CENSO LOS TOKENS DE LA CABECERA DE SESIÓN. Nace en el M1 de S158, medida por Claude Code.
-  El censo de R4 retira del corpus la entrada de sesión (la viva y la previa degradada) pero NO su reflejo en el
-  índice generado del plan, que reproduce la cabecera de la entrada. Así, un token nombrado en esa cabecera gana
-  una aparición falsa y sale de la lista de sospechosos: en S158, `C-alcance-curso` pasó de 1 a 2 apariciones
-  solo por la línea del índice. Es el mismo modo de fallo que S157 pagó con `D-censo-r4-cuenta-menciones`, por
-  una puerta que aquella sesión no miró. Arreglo candidato, no medido: retirar también del corpus las líneas del
-  índice que apuntan a las entradas retiradas. No se paga ahora.
-- **D-verificar-cierre-ciego-a-las-tablas** (S168, VIVA, TÉCNICA REAL, no bloqueante, sede Higiene/Método) — UNA FILA DE TABLA
-  CON MÁS CELDAS QUE SU CABECERA ESCONDE SU ÚLTIMA CELDA AL RENDERIZAR, Y NINGÚN INSTRUMENTO LO DETECTA. Medido en la
-  fase 3 de S168 (Claude Code): en la tabla «Mejora futura» de §4 de `gestion_proyecto.md`, de tres columnas, las filas
-  de `D-curso-sin-borrado` (S160), `D-curso-sin-renombrar` y `D-bundle-sobre-techo-550` (S167) tenían cuatro celdas, con
-  una celda «No» que corresponde a la columna «¿Bloquea?» de la tabla de deuda técnica real. En Markdown de GitHub la
-  celda sobrante se descarta, así que la nota, que es la columna con todo el contenido, no se veía; la nota de S168 de
-  `D-curso-sin-borrado` habría nacido invisible. Corregidas en `b912d22`. **Cuarta fila, medida en el M1 de S168:** la fila tachada de `D-guion-pkill-casa-su-propio-envoltorio`, en la tabla de deuda técnica real (cuatro columnas), tenía cinco celdas por otra causa: una barra sin escapar dentro de código en línea (`ps -eo pid,args | grep …`) partía la celda. Corregida en el commit de cierre de S168 escapando la barra, que GitHub pinta igual dentro de código en una tabla. Las filas con la barra escapada
-  (`D-gh6-tutor-contradictorio`, `D-configuracion-monolitica`) renderizan bien. `verificar-cierre.py` no cuenta celdas.
-  Arreglo natural: comprobar en cada tabla de los documentos vivos que toda fila tiene tantas celdas no escapadas como
-  su cabecera, contando también las barras dentro de código en línea. **Quinta fila, medida en el M1 de S168 y NO corregida:** en `plan_trabajo_horarios.md`, la fila «Plaza ↔ Profesor» de la tabla que empieza en la cabecera de la L1271 (L1285 en `6e20527`) tiene cinco barras frente a tres por la cardinalidad `|PlazaProfesor|≥2` dentro de código en línea; viene de `36b67d3`. El recuento del M1 dio 184 filas en 9 tablas de gestión, todas bien, y ésta como única fila del plan que no casa. Se deja para la sesión que salde esta deuda.
 - **D-contrato-dto-mide-jackson2** (S170, VIVA, TÉCNICA REAL, no bloqueante, sede `O-ci` (Fase 12) desde S173, sin ficha) — EL TEST DE
   CONTRATO DEL DTO DE LA PROYECCIÓN SERIALIZA CON JACKSON 2 Y LA APLICACIÓN SIRVE JSON CON JACKSON 3. Medido en S170
   (F3, lectura, Claude Code, HEAD `c634f87`): Spring Boot 4.1.0; `spring-boot-starter-web` trae
@@ -3213,18 +3186,48 @@ con remisión a la bitácora.
   interfaz, ni el zip, ni `Educhronos.exe` (sin `--app-version`; pom `0.1.0-SNAPSHOT`; el tag sólo en el nombre
   de la Release). En la aceptación, que la actualización corría sobre el programa nuevo sólo se probó por la huella
   del jar instalado. Ficha en §4 de `gestion_proyecto.md`.
-- **D-disparador-higiene-ambiguo** (S178, VIVA, DE MÉTODO, sede Higiene/Método) — el segundo disparador de
-  Higiene/Método («un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión», §6 de
-  `gestion_proyecto.md` y tabla de tipos de `metodo.md`) admite dos lecturas: el mismo defecto que cuesta dos veces,
-  o un segundo defecto con coste en la misma sesión. El registro de S177 lo dio por saltado con un solo coste; el M0
-  de S178 aplicó la segunda lectura para negarlo, y el M1 de S178 la misma para darlo por saltado. Arreglo: escribir
-  una sola lectura en los dos sitios.
 
 ### Deuda consciente CERRADA (histórico)
 
 Deuda ya resuelta, condensada a una línea; el mecanismo vivo en `src/main` se conserva y
 el detalle narrativo vive en la bitácora.
 
+- **D-verificar-cierre-ciego-a-la-ventana** (S160, CERRADA S179, MÉTODO, no bloqueante, sede Higiene/Método) — EL
+  VERIFICADOR NO MIRA LA FRASE DE VENTANA DEL PLAN. `verificar-cierre.py` contrasta los censos de la bitácora
+  con la crónica de archivado, pero NO comprueba la frase «El plan conserva ahora Sxxx (degradada a formato
+  compacto) y Syyy como única cabecera H3 viva»: su comprobación cuenta cabeceras H3 y da 1 correctamente, sin
+  contrastar la prosa que las describe. El cierre de S158 la dejó en S156/S157 y lo detectó A MANO el de S159;
+  es la misma familia que el paréntesis de aviso que la propia frase arrastra desde S118. El arreglo es que el
+  verificador DERIVE la afirmación del fichero en vez de mirarla. Hasta que se instrumente, cada M1 la comprueba
+  a mano —así se hizo en este cierre—.
+  **CERRADA en S179** (`9c2898c`): la sección 5 del verificador deriva la frase de la cabecera viva y de la previa y es fallo duro si no cuadra, falta o se repite a principio de línea. Deja de comprobarse a mano.
+- **D-censo-r4-rescate-por-indice** (S158, CERRADA S179, técnica real, no bloqueante, sede Higiene/Método) — EL ÍNDICE
+  GENERADO RESCATA DEL CENSO LOS TOKENS DE LA CABECERA DE SESIÓN. Nace en el M1 de S158, medida por Claude Code.
+  El censo de R4 retira del corpus la entrada de sesión (la viva y la previa degradada) pero NO su reflejo en el
+  índice generado del plan, que reproduce la cabecera de la entrada. Así, un token nombrado en esa cabecera gana
+  una aparición falsa y sale de la lista de sospechosos: en S158, `C-alcance-curso` pasó de 1 a 2 apariciones
+  solo por la línea del índice. Es el mismo modo de fallo que S157 pagó con `D-censo-r4-cuenta-menciones`, por
+  una puerta que aquella sesión no miró. Arreglo candidato, no medido: retirar también del corpus las líneas del
+  índice que apuntan a las entradas retiradas. No se paga ahora.
+  **CERRADA en S179** (`9c2898c`): el censo retira también, dentro del bloque de índice, las líneas que copian un encabezado del tramo retirado, casando por texto (caso A9 de la autoprueba).
+- **D-verificar-cierre-ciego-a-las-tablas** (S168, CERRADA S179, TÉCNICA REAL, no bloqueante, sede Higiene/Método) — UNA FILA DE TABLA
+  CON MÁS CELDAS QUE SU CABECERA ESCONDE SU ÚLTIMA CELDA AL RENDERIZAR, Y NINGÚN INSTRUMENTO LO DETECTA. Medido en la
+  fase 3 de S168 (Claude Code): en la tabla «Mejora futura» de §4 de `gestion_proyecto.md`, de tres columnas, las filas
+  de `D-curso-sin-borrado` (S160), `D-curso-sin-renombrar` y `D-bundle-sobre-techo-550` (S167) tenían cuatro celdas, con
+  una celda «No» que corresponde a la columna «¿Bloquea?» de la tabla de deuda técnica real. En Markdown de GitHub la
+  celda sobrante se descarta, así que la nota, que es la columna con todo el contenido, no se veía; la nota de S168 de
+  `D-curso-sin-borrado` habría nacido invisible. Corregidas en `b912d22`. **Cuarta fila, medida en el M1 de S168:** la fila tachada de `D-guion-pkill-casa-su-propio-envoltorio`, en la tabla de deuda técnica real (cuatro columnas), tenía cinco celdas por otra causa: una barra sin escapar dentro de código en línea (`ps -eo pid,args | grep …`) partía la celda. Corregida en el commit de cierre de S168 escapando la barra, que GitHub pinta igual dentro de código en una tabla. Las filas con la barra escapada
+  (`D-gh6-tutor-contradictorio`, `D-configuracion-monolitica`) renderizan bien. `verificar-cierre.py` no cuenta celdas.
+  Arreglo natural: comprobar en cada tabla de los documentos vivos que toda fila tiene tantas celdas no escapadas como
+  su cabecera, contando también las barras dentro de código en línea. **Quinta fila, medida en el M1 de S168 y NO corregida:** en `plan_trabajo_horarios.md`, la fila «Plaza ↔ Profesor» de la tabla que empieza en la cabecera de la L1271 (L1285 en `6e20527`) tiene cinco barras frente a tres por la cardinalidad `|PlazaProfesor|≥2` dentro de código en línea; viene de `36b67d3`. El recuento del M1 dio 184 filas en 9 tablas de gestión, todas bien, y ésta como única fila del plan que no casa. Se deja para la sesión que salde esta deuda.
+  **CERRADA en S179, AMPLIADA** (`9c2898c`): la sección 6 cuenta las celdas de cada fila contra su cabecera, con la barra sin escapar dentro de código como separador, y detecta filas de tabla fuera de toda tabla, en los cuatro ficheros; fallo duro. La quinta fila (L1284) se escapó en el mismo commit, y la medida destapó 40 filas de §4 de gestión fuera de tabla desde S141 por una línea en blanco de `5c58437`, quitada también.
+- **D-disparador-higiene-ambiguo** (S178, CERRADA S179, DE MÉTODO, sede Higiene/Método) — el segundo disparador de
+  Higiene/Método («un defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión», §6 de
+  `gestion_proyecto.md` y tabla de tipos de `metodo.md`) admite dos lecturas: el mismo defecto que cuesta dos veces,
+  o un segundo defecto con coste en la misma sesión. El registro de S177 lo dio por saltado con un solo coste; el M0
+  de S178 aplicó la segunda lectura para negarlo, y el M1 de S178 la misma para darlo por saltado. Arreglo: escribir
+  una sola lectura en los dos sitios.
+  **CERRADA en S179** (`b62e050`): una sola lectura, en §6 de gestión y en la tabla de tipos de `metodo.md`: el mismo defecto de instrumento que cuesta trabajo por segunda vez en una misma sesión; dos defectos distintos no lo disparan.
 - **D-e2e-retry-bd** (S112, CERRADA S175, TÉCNICA REAL, BLOQUEANTE desde S173: condición 2 de `O-ci`) — UN REINTENTO DE PLAYWRIGHT CORRERÍA SOBRE
   LA BD DEL INTENTO FALLIDO. `playwright.config.ts` declara `retries: process.env['CI'] ? 2 : 0`, y el borrado
   de la base (`rm -f app/educhronos-e2e.db*`) vive en el `command` del `webServer`, que Playwright ejecuta UNA
