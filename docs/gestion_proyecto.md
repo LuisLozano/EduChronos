@@ -3,40 +3,40 @@
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
 - L64 — ## 1. Estado final del proyecto
-- L91 — ## 2. Hitos
-- L105 — ### Hitos: valor, dependencias, orden
-- L128 — ## 3. Objetivos técnicos
-- L139 — ### H2 — Configurar un centro desde cero
-- L141 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L157 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L229 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L479 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L766 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L867 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L966 — ### H1 — Ajustar (cierre)
-- L968 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1145 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1436 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1626 — ### H3 — Exportar
-- L1628 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1689 — ### H4 — Instalar y pasar de curso
-- L1691 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1865 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1960 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L2029 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L2067 — ## 4. Clasificación del trabajo pendiente
-- L2085 — ### Clasificación de las deudas vivas actuales
-- L2091 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L2098 — #### Deuda técnica real, colgada de su objetivo
-- L2213 — #### Mejora futura, cuelga y espera
-- L2253 — #### Decisión arquitectónica consciente → sale de la cola
-- L2266 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L2277 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L2286 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L2353 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L2418 — ## 6. Reglas estratégicas
-- L2478 — ## 7. Métricas del sistema
-- L2499 — ## 8. El sistema respondiendo a las preguntas clave
+- L93 — ## 2. Hitos
+- L108 — ### Hitos: valor, dependencias, orden
+- L131 — ## 3. Objetivos técnicos
+- L142 — ### H2 — Configurar un centro desde cero
+- L144 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L160 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L232 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L482 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L769 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L870 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L969 — ### H1 — Ajustar (cierre)
+- L971 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1148 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1439 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1629 — ### H3 — Exportar
+- L1631 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1692 — ### H4 — Instalar y pasar de curso
+- L1694 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1868 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1963 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L2032 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L2070 — ## 4. Clasificación del trabajo pendiente
+- L2088 — ### Clasificación de las deudas vivas actuales
+- L2094 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L2101 — #### Deuda técnica real, colgada de su objetivo
+- L2217 — #### Mejora futura, cuelga y espera
+- L2257 — #### Decisión arquitectónica consciente → sale de la cola
+- L2270 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L2281 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L2290 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L2357 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L2422 — ## 6. Reglas estratégicas
+- L2502 — ## 7. Métricas del sistema
+- L2523 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -2202,6 +2202,7 @@ asigna categoría, objetivo y disposición.
 | D-censo-r4-rescate-por-indice (el índice generado rescata del censo los tokens de la cabecera de sesión) | Transversal, con la sesión de Higiene/Método | No | Nace en el M1 de S158, medida por Claude Code. El censo de R4 retira del corpus la entrada de sesión (la viva y la previa degradada) pero NO su reflejo en el índice generado del plan, que reproduce la cabecera de la entrada. Así, un token nombrado en esa cabecera gana una aparición falsa y sale de la lista de sospechosos: en S158, `C-alcance-curso` pasó de 1 a 2 apariciones solo por la línea del índice. Es el mismo modo de fallo que S157 pagó con `D-censo-r4-cuenta-menciones`, por una puerta que aquella sesión no miró. Arreglo candidato, no medido: retirar también del corpus las líneas del índice que apuntan a las entradas retiradas. No se paga ahora. |
 | D-verificar-cierre-ciego-a-la-ventana (`verificar-cierre.py` no comprueba la frase de ventana del plan) | Transversal, con la sesión de Higiene/Método | No | Nace en el M1 de S160. El verificador contrasta los censos de la bitácora con la crónica de archivado, pero NO la frase «El plan conserva ahora Sxxx (degradada a formato compacto) y Syyy como única cabecera H3 viva»: su comprobación cuenta cabeceras H3 y da 1 correctamente, sin contrastar la prosa que las describe. El cierre de S158 la dejó en S156/S157 y lo detectó A MANO el de S159; el propio paréntesis de la frase avisa de que ya pasó en S118 y en S137. Arreglo candidato, no medido: que el verificador DERIVE la afirmación del fichero en vez de mirarla. Hasta entonces, cada M1 la comprueba a mano. No se paga ahora. |
 | D-verificar-cierre-ciego-a-las-tablas (una fila con más celdas que su cabecera esconde su última celda al renderizar) | Transversal, con la sesión de Higiene/Método | No | Nace en S168: tres filas de «Mejora futura» tenían cuatro celdas y su nota no se veía, corregidas en `b912d22`; y una fila tachada de la tabla de deuda técnica real se partía por una barra sin escapar dentro de código, corregida en el cierre. `verificar-cierre.py` no cuenta celdas. Texto íntegro en el plan. |
+| D-disparador-higiene-ambiguo (el segundo disparador de Higiene/Método admite dos lecturas) | Transversal, con la sesión de Higiene/Método | No | Nace en S178. El registro de S177 y el M0 y el M1 de S178 lo leyeron de forma distinta; texto íntegro en el plan. |
 | D-curso-pestanas-desfasadas (una pestaña sigue mostrando el curso que tenía al cargarse mientras el backend ya tiene abierto otro) | Sin sede desde S173: no la toca `O-ci`, y no hay objetivo planificado después de H4 (era `O-aceptación`) | No | Nace en S163, en la prueba de Windows, pero no es de Windows: el backend tiene un solo curso abierto para todo el proceso (decisión E de `O-curso`), cada pestaña recuerda el suyo y el propio producto abre una pestaña nueva en cada segundo lanzamiento. El archivado no corre riesgo: la guarda actúa sobre la base realmente abierta. El caso malo es una pestaña que muestra el archivado con el activo abierto: sus descargas, «Generar» y ediciones irían al activo. Deducido del diseño, NO medido. Se mide y se decide al abrir la aceptación. **S168:** medida por lectura; con una pestaña no ocurre y con dos sí, deducido. Fuera del criterio de `O-aceptación` (D). Detalle en su ficha del plan. |
 | ~~D-ps1-palanca-de-linux~~ (el texto de palanca de `empaquetar-windows.ps1` da la cifra de Linux) **CERRADA S174** | `O-ci` (Fase 12) | — | Nace en S163 (M2, Claude Code): el `.ps1` cita 60.869.367 B, que `docs/empaquetado.md` da como la cifra de Linux; la de Windows es 69.453.720 B. Sólo se ve en un NO CUMPLE. Cuelga de la Fase 12, que rehará la construcción. **Saldada en S174** (`4a445e6`, F1 de `C-bundle-por-tag`): `ps1:200` da 69.453.720 B. Se pagó dentro del Cambio porque, desde S174, un NO CUMPLE aborta y ese texto es el diagnóstico del job rojo de la CI. |
 | D-contrato-dto-mide-jackson2 (el test de contrato del DTO de la proyección serializa con Jackson 2 y la aplicación sirve JSON con Jackson 3) | `O-ci` (Fase 12) | No | Nace en S170 (F3, lectura, Claude Code): `ProyeccionDtoContratoTest` usa `MappingJackson2HttpMessageConverter`, y la aplicación, con Spring Boot 4.1, el `JsonMapper` de Jackson 3; Jackson 2 sólo entra por el solver. No mordió en S170: el JSON real de `/proyeccion` se midió con el jar arrancado. Cuelga de la Fase 12, con la calidad de las suites. Ficha en el plan. **S176:** la CI lo muestra en cada ejecución como anotación de aviso (`ProyeccionDtoContratoTest.java:27`, `MappingJackson2HttpMessageConverter` marcado para retirada). Sin cambio de clasificación. |
