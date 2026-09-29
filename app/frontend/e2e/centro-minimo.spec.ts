@@ -265,10 +265,11 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   //
   // El POST es síncrono —responde al terminar el solve—, así que su status es el
   // veredicto del solver, y el cuerpo va en el mensaje para que un 4xx/5xx diga por
-  // qué. Va con cuerpo `{}`: el backend aplica el presupuesto por defecto,
-  // `educhronos.solver.max-segundos=600`, y el spec confía en que un centro de una
-  // actividad llega al óptimo en mucho menos. Los 45 s de la espera son esa apuesta:
-  // si deja de cumplirse, el test muere aquí y no en la rejilla.
+  // qué. Va con el tiempo elegido en el diálogo de confirmación, que aquí no se toca:
+  // `{"maxSegundos":600}`, los 10 minutos por defecto (S184). El centro mínimo llega a
+  // OPTIMAL en menos de un segundo (medido en S184: ≈0,33 s entre el inicio de la
+  // generación y el guardado). Los 45 s de la espera son el margen de esa apuesta: si
+  // deja de cumplirse, el test muere aquí y no en la rejilla.
   await expect(page.locator('.confirmar-generacion')).toBeVisible();
   const [resp] = await Promise.all([
     page.waitForResponse(

@@ -70,8 +70,9 @@
   Estado de espera (S118). MARCADO MÍNIMO Y SIN ESTILO a propósito: O-diseño
   rehará el aspecto, no el estado (R-invalidación), así que aquí no hay spinner,
   ni animación, ni clase nueva que luego haya que desmontar. Un <p> con su texto.
+  Desde S184 es SÓLO del ajuste: la generación espera en su diálogo modal.
 -->
-@if (generando()) {
+@if (enVuelo() === 'ajuste') {
   <p class="generando">{{ textoGenerando() }}</p>
 }
 

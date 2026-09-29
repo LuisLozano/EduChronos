@@ -1,0 +1,20 @@
+<section class="generando-dialogo">
+  <h2>Generando horario</h2>
+
+  <p>Puede tardar hasta {{ minutos }} minutos. Mientras tanto no se puede usar la aplicación.</p>
+
+  <progress
+    class="barra"
+    aria-label="Tiempo de cálculo transcurrido"
+    [max]="totalSegundos"
+    [value]="valorBarra(transcurrido(), totalSegundos)"
+  ></progress>
+
+  @if (transcurrido() >= totalSegundos) {
+    <p class="transcurrido">Terminando…</p>
+  } @else {
+    <p class="transcurrido">
+      Transcurrido: {{ formatoMinSeg(transcurrido()) }} de {{ formatoMinSeg(totalSegundos) }}
+    </p>
+  }
+</section>

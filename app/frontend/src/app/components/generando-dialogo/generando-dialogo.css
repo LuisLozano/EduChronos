@@ -1,0 +1,27 @@
+/* Misma caja que `confirmar-generacion`: el CDK monta el overlay sin estilo y el diálogo
+   de espera sustituye al de confirmación en el mismo sitio, así que se ven iguales. */
+.generando-dialogo {
+  max-width: 34rem;
+  padding: var(--e4) var(--e4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-dialogo);
+}
+
+.generando-dialogo h2 {
+  margin: 0 0 var(--e2);
+  font-size: var(--tam-l);
+}
+
+/* La barra a todo el ancho del diálogo, con el color de acento que ya usan los radios. */
+.barra {
+  display: block;
+  width: 100%;
+  margin: var(--e3) 0 var(--e2);
+  accent-color: var(--color-acento);
+}
+
+.transcurrido {
+  margin: 0;
+}

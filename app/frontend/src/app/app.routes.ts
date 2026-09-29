@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Landing } from './components/landing/landing';
 import { Configuracion } from './components/configuracion/configuracion';
 import { HorarioView } from './components/horario-view/horario-view';
+import { sinGeneracionEnCurso } from './components/horario-view/sin-generacion-en-curso';
 
 import { Jornada } from './components/jornada/jornada';
 import { ProfesorLista } from './components/profesores/profesor-lista';
@@ -45,8 +46,9 @@ export const routes: Routes = [
     ],
   },
   // Sin id: la vista resuelve el horario vigente del curso abierto (S161, D-horario-id-a-fuego).
-  { path: 'horario', component: HorarioView },
-  { path: 'horario/:id', component: HorarioView },
+  // Mientras se genera no se sale de la vista (S184, condición 3 de O-pre-demo).
+  { path: 'horario', component: HorarioView, canDeactivate: [sinGeneracionEnCurso] },
+  { path: 'horario/:id', component: HorarioView, canDeactivate: [sinGeneracionEnCurso] },
   // Una URL que no es ninguna vista (por ejemplo, un marcador viejo) vuelve a la portada en lugar de dejar
   // la aplicación en blanco. Es la otra mitad del reenvío del backend (RutasSpaConfig, S155).
   { path: '**', redirectTo: '' },

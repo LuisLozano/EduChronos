@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Dialog } from '@angular/cdk/dialog';
+import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
 import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
 import { Diagnostico, Violacion } from '../../models/diagnostico.model';
@@ -22,6 +22,7 @@ import { reemplazarInstancia, textoViolacion } from '../../horario/ajuste';
 import { AjusteInstancia, HorarioGrid } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
+import { DatosGenerando, GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
 
 /**
  * Contenedor de las tres vistas: carga la proyección del horario `{id}` (param
@@ -42,7 +43,7 @@ import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacio
   templateUrl: './horario-view.html',
   styleUrl: './horario-view.css',
 })
-export class HorarioView {
+export class HorarioView implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
@@ -131,20 +132,21 @@ export class HorarioView {
    * señal de espera para el ajuste: el estado «hay algo en vuelo» es uno solo —el
    * botón «Generar» debe estar cerrado mientras se aplica un cambio, igual que al
    * revés—, y dos booleanos independientes admitirían el estado imposible de tener
-   * los dos a `true`. Lo único que depende de CUÁL es el texto ({@link textoGenerando}).
+   * los dos a `true`. Desde S184 lo que depende de CUÁL es dónde se espera: la
+   * generación, en el diálogo modal de {@link lanzarGeneracion}; el ajuste, en el
+   * párrafo de la plantilla. Es `protected` porque la plantilla pregunta por el ajuste.
    */
-  private readonly enVuelo = signal<'generacion' | 'ajuste' | null>(null);
+  protected readonly enVuelo = signal<'generacion' | 'ajuste' | null>(null);
 
-  /** Hay una operación en vuelo: cierra el botón y pinta el aviso de espera. */
+  /** Hay una operación en vuelo: cierra el botón «Generar». */
   protected readonly generando = computed(() => this.enVuelo() !== null);
 
   /**
-   * Minutos que eligió quien lanzó la generación en vuelo, o `null` si no hay ninguna
-   * (S184, condición 1 de O-pre-demo). Es el presupuesto que viaja al backend y el que
-   * se anuncia en la espera: una sola fuente, sin copia del valor del servidor. Vuelve
-   * a `null` en éxito y en error, igual que {@link enVuelo}.
+   * El diálogo de espera de la generación en vuelo, o `null` si no hay ninguna (S184).
+   * Lo abre {@link lanzarGeneracion} y lo cierra ella misma al llegar la respuesta, o
+   * {@link ngOnDestroy} si la vista desaparece antes.
    */
-  protected readonly minutosEnCurso = signal<number | null>(null);
+  private refEspera: DialogRef<unknown> | null = null;
 
   /**
    * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
@@ -639,15 +641,33 @@ export class HorarioView {
    *
    * <p>El presupuesto viaja en SEGUNDOS, que es lo que acepta el backend como
    * `maxSegundos`; la vista trabaja en minutos, que es lo que se elige y se anuncia.
+   *
+   * <p><b>La espera vive en un diálogo MODAL</b> (S184, decisión P de O-pre-demo): la
+   * generación bloquea la aplicación entera en la pestaña, no sólo el botón. El diálogo
+   * se abre con `disableClose` —ni Escape ni el fondo lo cierran— y con
+   * `closeOnNavigation: false` —un «atrás» del navegador no lo quita—; la navegación de
+   * la aplicación la frena {@link sinGeneracionEnCurso}. Recargar la página pierde el
+   * estado en la interfaz, pero el backend sigue rechazando la segunda generación y las
+   * escrituras (limitación escrita en la decisión P).
+   *
+   * <p><b>La ref se cierra ANTES de navegar o recargar</b>, en la misma rama que pone
+   * `enVuelo` a `null`. Con `closeOnNavigation: false` el diálogo no se cierra solo al
+   * cambiar de ruta, y la guarda consulta {@link generandoHorario}: si se navegara
+   * primero, la guarda vería la generación todavía en marcha y frenaría la navegación
+   * al horario recién generado, con el diálogo aún encima.
    */
   private lanzarGeneracion(minutos: number): void {
     this.errorGeneracion.set(null);
     this.enVuelo.set('generacion');
-    this.minutosEnCurso.set(minutos);
+    this.refEspera = this.dialog.open<unknown, DatosGenerando>(GenerandoDialogo, {
+      data: { minutos },
+      disableClose: true,
+      closeOnNavigation: false,
+    });
     this.service.generar(minutos * 60).subscribe({
       next: (dto) => {
         this.enVuelo.set(null);
-        this.minutosEnCurso.set(null);
+        this.cerrarEspera();
         if (dto.id === this.idCargado) {
           this.cargar(dto.id);
         } else {
@@ -656,10 +676,34 @@ export class HorarioView {
       },
       error: (err) => {
         this.enVuelo.set(null);
-        this.minutosEnCurso.set(null);
+        this.cerrarEspera();
         this.errorGeneracion.set(this.mensajeGeneracion(err));
       },
     });
+  }
+
+  /** Cierra el diálogo de espera, si lo hay, y olvida su ref. */
+  private cerrarEspera(): void {
+    this.refEspera?.close();
+    this.refEspera = null;
+  }
+
+  /**
+   * ¿Hay una GENERACIÓN en vuelo? Sólo la generación: un ajuste es una escritura corta
+   * que no bloquea la aplicación. Público porque lo consulta la guarda de ruta
+   * {@link sinGeneracionEnCurso} (S184).
+   */
+  generandoHorario(): boolean {
+    return this.enVuelo() === 'generacion';
+  }
+
+  /**
+   * Si la vista se destruye con una generación en vuelo, el diálogo de espera no puede
+   * quedarse huérfano encima de otra pantalla: con `closeOnNavigation: false` nadie más
+   * lo cerraría.
+   */
+  ngOnDestroy(): void {
+    this.cerrarEspera();
   }
 
   /**
@@ -722,15 +766,12 @@ export class HorarioView {
   }
 
   /**
-   * Texto de la espera, según QUÉ se espera. Un ajuste es una escritura corta y
-   * anunciarle los minutos de un solve sería falso; una generación sin los minutos
-   * vuelve a parecer un cuelgue, que es justo lo que S118 vino a arreglar. El
-   * párrafo y la señal son los mismos: lo único que se bifurca es la frase.
+   * Texto del párrafo de espera, que desde S184 es SÓLO del ajuste: la generación espera
+   * en su diálogo modal ({@link lanzarGeneracion}). Un ajuste es una escritura corta y
+   * anunciarle los minutos de un solve sería falso.
    */
   protected textoGenerando(): string {
-    return this.enVuelo() === 'ajuste'
-      ? 'Aplicando el cambio…'
-      : `Generando horario… puede tardar hasta ${this.minutosEnCurso()} minutos.`;
+    return 'Aplicando el cambio…';
   }
 
   protected cambiarVista(v: Vista): void {

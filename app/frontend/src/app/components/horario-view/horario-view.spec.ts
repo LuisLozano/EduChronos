@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { HorarioView } from './horario-view';
 import { HorarioGrid } from '../horario-grid/horario-grid';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
+import { GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
 import { HorarioService } from '../../services/horario.service';
 import { BloqueoService } from '../../services/bloqueo.service';
 import { AjusteService } from '../../services/ajuste.service';
@@ -114,6 +115,7 @@ describe('contenedor del horario', () => {
   let sujetoJornada: Subject<JornadaDTO>;
   let jornadas: { obtener: ReturnType<typeof vi.fn> };
   let ultimoCerrado: Subject<number | undefined>;
+  let ultimaEspera: { close: ReturnType<typeof vi.fn>; closed: Subject<unknown> } | undefined;
   let ultimoMover: Subject<SesionVista[]>;
   let ultimoIntercambiar: Subject<IntercambioRealizado>;
   let ajustes: { mover: ReturnType<typeof vi.fn>; intercambiar: ReturnType<typeof vi.fn> };
@@ -167,7 +169,19 @@ describe('contenedor del horario', () => {
     // compartido, el segundo `next(true)` dispararía también la primera y
     // `lanzarGeneracion` correría dos veces por una sola confirmación: los conteos
     // `toHaveBeenCalledTimes` medirían el doble sin que la implementación falle.
-    dialog = { open: vi.fn(() => ({ closed: (ultimoCerrado = new Subject<number | undefined>()) })) };
+    //
+    // DOS diálogos por generación desde S184: el de confirmación y el de espera. El doble
+    // despacha por componente: para `GenerandoDialogo` devuelve una ref con `close`
+    // espiable, fresca por apertura y guardada en `ultimaEspera`; para el resto, el
+    // `closed` de siempre.
+    ultimaEspera = undefined;
+    dialog = {
+      open: vi.fn((componente: unknown) =>
+        componente === GenerandoDialogo
+          ? (ultimaEspera = { close: vi.fn(), closed: new Subject<unknown>() })
+          : { closed: (ultimoCerrado = new Subject<number | undefined>()) },
+      ),
+    };
     // Doble del servicio de ajuste. FRESCO POR INVOCACIÓN, por la misma razón que
     // `guardar`: un Subject cerrado por `.error()` redispara síncronamente al
     // re-suscribirse, y los tests del rechazo encadenan intento fallido → intento
@@ -1075,6 +1089,8 @@ describe('contenedor del horario', () => {
     const raiz = fixture.nativeElement as HTMLElement;
     expect(raiz.querySelector('.generando')?.textContent?.trim()).toBe('Aplicando el cambio…');
     expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(true);
+    // S184: un ajuste en vuelo NO es una generación, y no bloquea la navegación.
+    expect(fixture.componentInstance.generandoHorario()).toBe(false);
 
     ultimoMover.next([]);
     await fixture.whenStable();
@@ -1147,13 +1163,6 @@ describe('contenedor del horario', () => {
   function pulsarGenerar(minutos = 10): void {
     abrirDialogoGenerar();
     ultimoCerrado.next(minutos);
-  }
-
-  /** Los minutos de la generación en vuelo (S184), leídos de la señal protegida. */
-  function minutosEnCurso(): number | null {
-    return (
-      fixture.componentInstance as unknown as { minutosEnCurso(): number | null }
-    ).minutosEnCurso();
   }
 
   /**
@@ -1666,18 +1675,19 @@ describe('contenedor del horario', () => {
    * primero. El `|| generando()` se AÑADE al `avisosPrevalidacion() === null` que ya
    * estaba: el (34) sigue midiendo esa otra mitad y ninguno de los dos basta solo.
    *
-   * <p>(b) el texto de espera aparece; (c) con los minutos dentro. El número es lo
-   * que distingue "está trabajando" de "se ha colgado" en una espera de minutos, así
-   * que un texto sin él no cumple el propósito y el aserto lo exige.
+   * <p>(b) la espera se anuncia; (c) con los minutos dentro. El número es lo que
+   * distingue "está trabajando" de "se ha colgado" en una espera de minutos.
    *
    * <p>S184 · el diálogo cierra con 30, y 30 es lo que se anuncia y lo que viaja: 1800
    * segundos al servicio. Con 30 y no con los 10 por defecto, un texto o un cuerpo
-   * fijos no pueden pasar.
+   * fijos no pueden pasar. Desde F3 la espera es un SEGUNDO diálogo, modal y que no
+   * se cierra ni con Escape, ni con el fondo, ni al navegar: aquí se asevera con qué
+   * se abre, y su texto lo asevera su propio spec (`generando-dialogo.spec.ts`).
    *
    * <p>El Subject del POST NO se emite: la fase "en vuelo" es justamente la que se
    * mide, y cualquier emisión la cerraría.
    */
-  it('(43) elegidos 30 minutos: generar(1800), botón cerrado y espera con los 30 minutos', async () => {
+  it('(43) elegidos 30 minutos: generar(1800), botón cerrado y diálogo de espera de 30 minutos', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
     pulsarGenerar(30);
@@ -1690,23 +1700,27 @@ describe('contenedor del horario', () => {
     const boton = raiz.querySelector('button.generar') as HTMLButtonElement;
     expect(boton.disabled).toBe(true);
 
-    const espera = raiz.querySelector('.generando');
-    expect(espera).not.toBeNull();
-    expect(espera!.textContent?.trim()).toBe('Generando horario… puede tardar hasta 30 minutos.');
-    expect(minutosEnCurso()).toBe(30);
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+    expect(dialog.open).toHaveBeenLastCalledWith(GenerandoDialogo, {
+      data: { minutos: 30 },
+      disableClose: true,
+      closeOnNavigation: false,
+    });
   });
 
   /** S184 · pareja del (43) con el valor por defecto: 10 minutos son 600 segundos. */
-  it('(85) con los 10 minutos por defecto: generar(600) y espera con los 10 minutos', async () => {
+  it('(85) con los 10 minutos por defecto: generar(600) y diálogo de espera de 10 minutos', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
     pulsarGenerar(10);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledWith(600);
-    expect((fixture.nativeElement as HTMLElement).querySelector('.generando')?.textContent).toContain(
-      '10 minutos',
-    );
+    expect(dialog.open).toHaveBeenLastCalledWith(GenerandoDialogo, {
+      data: { minutos: 10 },
+      disableClose: true,
+      closeOnNavigation: false,
+    });
   });
 
   /**
@@ -1725,14 +1739,14 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
-    expect(minutosEnCurso()).toBe(10);
+    expect(ultimaEspera!.close).toHaveBeenCalledTimes(0);
     ultimoGenerar.next({ ...PROYECCION_VACIA, id: 2 });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
     expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
     expect(raiz.querySelector('.generando')).toBeNull();
-    expect(minutosEnCurso()).toBeNull();
+    expect(ultimaEspera!.close).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -1751,7 +1765,7 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
-    expect(minutosEnCurso()).toBe(10);
+    expect(ultimaEspera!.close).toHaveBeenCalledTimes(0);
     ultimoGenerar.error({ status: 503, error: { causa: 'PRESUPUESTO_AGOTADO' } });
     await fixture.whenStable();
 
@@ -1759,7 +1773,61 @@ describe('contenedor del horario', () => {
     expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
     expect(raiz.querySelector('.generando')).toBeNull();
     expect(raiz.querySelector('.error-generacion')).not.toBeNull();
-    expect(minutosEnCurso()).toBeNull();
+    expect(ultimaEspera!.close).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * S184 · el ORDEN de la rama de éxito: cuando se llama a `router.navigate`, la vista ya
+   * no está generando y el diálogo de espera ya está cerrado. Al revés, la guarda
+   * `sinGeneracionEnCurso` vería la generación en marcha y frenaría la navegación al
+   * horario recién generado, con el modal encima. El doble de `navigate` fotografía el
+   * estado en el instante de la llamada.
+   */
+  it('(92) al navegar tras el 200 la vista ya no genera y la espera ya está cerrada', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+    let alNavegar: { generando: boolean; cierres: number } | undefined;
+    router.navigate.mockImplementation(() => {
+      alNavegar = {
+        generando: fixture.componentInstance.generandoHorario(),
+        cierres: ultimaEspera!.close.mock.calls.length,
+      };
+    });
+
+    pulsarGenerar();
+    await fixture.whenStable();
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 99 });
+    await fixture.whenStable();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(alNavegar).toEqual({ generando: false, cierres: 1 });
+  });
+
+  /**
+   * S184 · el párrafo de espera de la vista ya NO sale durante una generación: la espera
+   * es el diálogo modal. La otra mitad —que sí sale durante un ajuste— la mide el (71).
+   */
+  it('(93) durante una generación la vista no pinta su párrafo de espera', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.generandoHorario()).toBe(true);
+    expect((fixture.nativeElement as HTMLElement).querySelector('.generando')).toBeNull();
+  });
+
+  /** S184 · `generandoHorario()` sólo con una generación: en reposo es false, y vuelve a false al terminar. */
+  it('(94) generandoHorario() es true solo mientras vuela una generación', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+    expect(fixture.componentInstance.generandoHorario()).toBe(false);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.generandoHorario()).toBe(true);
+
+    ultimoGenerar.next({ ...PROYECCION_VACIA, id: 2 });
+    await fixture.whenStable();
+    expect(fixture.componentInstance.generandoHorario()).toBe(false);
   });
 
   /**
