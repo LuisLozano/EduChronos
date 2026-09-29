@@ -1,5 +1,5 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
-import { DIALOG_DATA } from '@angular/cdk/dialog';
+import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 /** Lo que recibe el diálogo de espera: los minutos que eligió quien genera. */
 export interface DatosGenerando {
@@ -26,8 +26,16 @@ export function formatoMinSeg(segundos: number): string {
  * Diálogo MODAL de espera mientras se genera un horario (S184, condición 3 de
  * O-pre-demo). Lo abre `HorarioView` con `disableClose` y lo cierra ella misma cuando
  * llega la respuesta: este componente no tiene botones ni nada enfocable, y no se cierra
- * solo. Por eso no inyecta `DialogRef`, a diferencia de `ConfirmarGeneracion`: nadie
- * cierra desde dentro.
+ * solo. Inyecta `DialogRef` sólo para escuchar el teclado, no para cerrarse.
+ *
+ * <p><b>El Tab no sale del diálogo</b> (S184 F3-bis). El diálogo no tiene nada tabulable,
+ * así que la trampa de foco del CDK no tiene adónde devolver el foco: medido en S184 F3
+ * (D3, 2c), del ancla de la trampa el Tab siguiente saltaba a `body` y de ahí a los
+ * enlaces, botones y selects de la página, por detrás del fondo. Mientras vive, el diálogo
+ * anula el Tab —con y sin Shift— en `keydownEvents`, que el CDK alimenta desde un
+ * `keydown` sobre `body` y entrega al overlay de encima, así que le llega esté donde esté
+ * el foco. Es lo que hace verdad su propio texto: «Mientras tanto no se puede usar la
+ * aplicación». Las demás teclas no se tocan; Escape ya lo anula `disableClose`.
  *
  * <p>La barra avanza con el TIEMPO TRANSCURRIDO sobre el elegido (decisión P), no con el
  * progreso del solver, que no lo publica: es una cota, no una promesa. El reloj es de
@@ -58,6 +66,15 @@ export class GenerandoDialogo implements OnDestroy {
     () => this.transcurrido.set(Math.floor((Date.now() - this.inicio) / 1000)),
     1000,
   );
+
+  constructor() {
+    const retencion = inject(DialogRef).keydownEvents.subscribe((evento) => {
+      if (evento.key === 'Tab') {
+        evento.preventDefault();
+      }
+    });
+    inject(DestroyRef).onDestroy(() => retencion.unsubscribe());
+  }
 
   ngOnDestroy(): void {
     clearInterval(this.reloj);

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DIALOG_DATA } from '@angular/cdk/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { Subject } from 'rxjs';
 
 import { GenerandoDialogo, formatoMinSeg, valorBarra } from './generando-dialogo';
 
@@ -15,11 +16,21 @@ import { GenerandoDialogo, formatoMinSeg, valorBarra } from './generando-dialogo
 describe('diálogo de espera de la generación', () => {
   let fixture: ComponentFixture<GenerandoDialogo>;
 
+  /**
+   * Doble de `DialogRef`: sólo `keydownEvents`, que es lo único que el diálogo toca
+   * (S184 F3-bis). Emitir en él es lo que hace el CDK con cada `keydown` sobre `body`.
+   */
+  let teclas: Subject<KeyboardEvent>;
+
   async function montar(minutos: number): Promise<void> {
     TestBed.resetTestingModule();
+    teclas = new Subject<KeyboardEvent>();
     await TestBed.configureTestingModule({
       imports: [GenerandoDialogo],
-      providers: [{ provide: DIALOG_DATA, useValue: { minutos } }],
+      providers: [
+        { provide: DIALOG_DATA, useValue: { minutos } },
+        { provide: DialogRef, useValue: { keydownEvents: teclas } },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(GenerandoDialogo);
     await fixture.whenStable();
@@ -117,5 +128,38 @@ describe('diálogo de espera de la generación', () => {
     expect(formatoMinSeg(75)).toBe('1:15');
     expect(formatoMinSeg(600)).toBe('10:00');
     expect(formatoMinSeg(3600)).toBe('60:00');
+  });
+
+  // --- S184 F3-bis · el Tab no sale del diálogo -----------------------------------
+
+  /** Emite una tecla como la entrega el CDK y dice si alguien la anuló. */
+  function pulsar(key: string, shiftKey = false): boolean {
+    const evento = new KeyboardEvent('keydown', { key, shiftKey, cancelable: true });
+    teclas.next(evento);
+    return evento.defaultPrevented;
+  }
+
+  it('(8) el Tab se anula: el foco no sale del diálogo', () => {
+    expect(pulsar('Tab')).toBe(true);
+  });
+
+  it('(9) el Shift+Tab también se anula', () => {
+    expect(pulsar('Tab', true)).toBe(true);
+  });
+
+  /** El diálogo no se mete en las demás teclas: Escape ya lo anula `disableClose`. */
+  it('(10) Enter y Escape no se tocan', () => {
+    expect(pulsar('Enter')).toBe(false);
+    expect(pulsar('Escape')).toBe(false);
+  });
+
+  /**
+   * Destruido el diálogo, su suscripción está liberada: un Tab ya no se anula. Sin esto,
+   * cada generación dejaría una escucha viva sobre un overlay muerto.
+   */
+  it('(11) al destruirse deja de anular el Tab', () => {
+    fixture.destroy();
+
+    expect(pulsar('Tab')).toBe(false);
   });
 });
