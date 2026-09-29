@@ -30,22 +30,26 @@ import org.springframework.stereotype.Component;
  * «pues allá voy» en dos llamadas sueltas dejaría entre medias una ventana en la que otro
  * hilo también cree que se puede.
  *
- * <p>Tabla de exclusiones, que es el contrato entero. Es SIMÉTRICA: ninguna de las tres
- * empieza si otra está en marcha, y la única compañía que se admite es la de otra generación.
+ * <p>Tabla de exclusiones, que es el contrato entero. Es SIMÉTRICA y no tiene excepciones:
+ * ninguna de las tres empieza si hay otra en marcha, tampoco una generación con otra
+ * generación dentro.
  *
  * <pre>
  *   quiere empezar ↓   | generando &gt; 0 | duplicando | cambiando
  *   ───────────────────┼───────────────┼────────────┼──────────
- *   generar            |      SÍ       |     NO     |    NO
+ *   generar            |      NO       |     NO     |    NO
  *   duplicar           |      NO       |     NO     |    NO
  *   cambiar de curso   |      NO       |     NO     |    NO
  * </pre>
  *
- * <p>Dos solves a la vez sí conviven: son dos lecturas y dos escrituras independientes sobre
- * la misma base, que es lo que la aplicación ya hacía antes de S160 y no se estrecha ahora.
- * Por eso {@code generando} es un CONTADOR y no un booleano: con un booleano, el segundo
- * solve en terminar apagaría el indicador con el primero aún dentro, y un cambio de curso se
- * colaría en medio.
+ * <p><b>La casilla generar/generando valía SÍ hasta S184</b> (S184, decisión O de
+ * O-pre-demo; revierte lo decidido en S160). En S160 dos solves a la vez convivían, como dos
+ * lecturas y dos escrituras independientes sobre la misma base. Desde S184 la segunda
+ * generación se rechaza aquí, en el mismo bloque sincronizado que da de alta la primera, y no
+ * en la guarda: dos {@code POST /api/horarios} pueden pasar la guarda a la vez con
+ * {@code generando} a cero, y sólo este monitor decide cuál entra. Ninguna operación convive
+ * ya con otra. {@code generando} sigue siendo un {@code int} por compatibilidad con quien lo
+ * lee, pero sólo vale 0 o 1.
  *
  * <p><b>La casilla generar/duplicando valía SÍ hasta la corrección de S160, y era un defecto
  * real.</b> Se justificaba diciendo que {@code GuardaSoloLectura} ya rechaza el
@@ -70,6 +74,18 @@ public class EstadoCurso implements SmartInitializingSingleton {
      */
     public static final String CURSO_CAMBIANDO = "CURSO_CAMBIANDO";
 
+    /**
+     * Hay una generación en marcha (S184, condición 2 de O-pre-demo). Vive aquí por lo mismo
+     * que {@link #CURSO_CAMBIANDO}: la usan la guarda, que rechaza las escrituras mientras
+     * dura, y {@code GeneradorHorarioService}, que rechaza la segunda generación, y el cliente
+     * tiene que ver el mismo símbolo y el mismo texto venga de donde venga.
+     */
+    public static final String GENERACION_EN_CURSO = "GENERACION_EN_CURSO";
+
+    /** Texto para el usuario de {@link #GENERACION_EN_CURSO}; viaja en el {@code message}. */
+    public static final String MENSAJE_GENERACION_EN_CURSO =
+            "Se está generando un horario. Espera a que termine para hacer cambios.";
+
     private final CursoRepository cursos;
 
     private volatile String nombre;
@@ -83,8 +99,9 @@ public class EstadoCurso implements SmartInitializingSingleton {
     private volatile boolean duplicando;
 
     /**
-     * CUÁNTOS solves hay en marcha. Contador y no bandera: ver la tabla de exclusiones en el
-     * javadoc de clase.
+     * Solves en marcha: 0 o 1 desde S184, porque la segunda generación se rechaza (ver la
+     * tabla de exclusiones en el javadoc de clase). Sigue siendo un {@code int} por
+     * compatibilidad con quien lo lee.
      */
     private volatile int generando;
 
@@ -203,7 +220,9 @@ public class EstadoCurso implements SmartInitializingSingleton {
         /** Se está abriendo otra base. */
         HAY_CAMBIO,
         /** Se está creando un curso nuevo. */
-        HAY_DUPLICADO;
+        HAY_DUPLICADO,
+        /** Ya hay otra generación en marcha (S184). */
+        HAY_GENERACION;
 
         public boolean concedida() {
             return this == CONCEDIDA;
@@ -213,10 +232,12 @@ public class EstadoCurso implements SmartInitializingSingleton {
     /**
      * Da de alta un solve, si se puede (S160).
      *
-     * <p>Rechaza con un duplicado en marcha además de con un cambio: ver la tabla de
-     * exclusiones y la nota sobre por qué esa casilla dejó de valer SÍ.
+     * <p>Rechaza con un cambio, con un duplicado (S160) y con otra generación (S184) en
+     * marcha: ver la tabla de exclusiones y las notas sobre por qué esas casillas dejaron de
+     * valer SÍ. El alta va SÓLO en la rama concedida: un rechazo que contara un solve dejaría
+     * la aplicación bloqueada por uno que nunca existió.
      *
-     * @return {@link Admision#CONCEDIDA} si queda contado; si no, cuál de las dos operaciones
+     * @return {@link Admision#CONCEDIDA} si queda contado; si no, cuál de las tres operaciones
      *     lo impide
      */
     public synchronized Admision intentarIniciarGeneracion() {
@@ -225,6 +246,9 @@ public class EstadoCurso implements SmartInitializingSingleton {
         }
         if (duplicando) {
             return Admision.HAY_DUPLICADO;
+        }
+        if (generando > 0) {
+            return Admision.HAY_GENERACION;
         }
         this.generando++;
         return Admision.CONCEDIDA;

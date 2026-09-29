@@ -243,6 +243,98 @@ class GuardaSoloLecturaTest {
     }
 
     /**
+     * (14, S184) Con una generación en marcha, una escritura se rechaza con 409 y causa
+     * PROPIA, el cuerpo sale en JSON UTF-8 con el texto de {@link EstadoCurso}, y la cadena
+     * NO se llama: un 409 escrito después de haber tocado el catálogo no protegería nada.
+     */
+    @Test
+    void generando_postSeRechazaCon409YCausaPropiaSinLlamarALaCadena() throws Exception {
+        EstadoCurso estado = generando();
+        MockFilterChain cadena = new MockFilterChain();
+        MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+        guarda(estado).doFilter(peticion("POST", "/api/niveles"), respuesta, cadena);
+
+        assertThat(cadena.getRequest()).as("la cadena NO se llama").isNull();
+        assertThat(respuesta.getStatus()).isEqualTo(409);
+        assertThat(respuesta.getContentType()).contains("application/json");
+        assertThat(respuesta.getCharacterEncoding().toUpperCase()).isEqualTo("UTF-8");
+        assertThat(causa(respuesta)).isEqualTo("GENERACION_EN_CURSO");
+        assertThat(mensaje(respuesta)).isEqualTo(EstadoCurso.MENSAJE_GENERACION_EN_CURSO);
+    }
+
+    /** (15, S184) PUT y DELETE, igual: toda escritura, no sólo el alta. */
+    @Test
+    void generando_putYDeleteSeRechazanCon409() throws Exception {
+        EstadoCurso estado = generando();
+
+        for (String metodo : new String[] {"PUT", "DELETE"}) {
+            MockFilterChain cadena = new MockFilterChain();
+            MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+            guarda(estado).doFilter(peticion(metodo, "/api/niveles/1"), respuesta, cadena);
+
+            assertThat(cadena.getRequest()).as("%s: la cadena NO se llama", metodo).isNull();
+            assertThat(respuesta.getStatus()).as("%s", metodo).isEqualTo(409);
+            assertThat(causa(respuesta)).as("%s", metodo).isEqualTo("GENERACION_EN_CURSO");
+        }
+    }
+
+    /**
+     * (16, S184) Las lecturas pasan durante la generación: el usuario puede seguir mirando el
+     * catálogo mientras espera. Es lo que distingue este rechazo del de un cambio de curso.
+     */
+    @Test
+    void generando_getYHeadPasan() throws Exception {
+        EstadoCurso estado = generando();
+
+        for (String metodo : new String[] {"GET", "HEAD"}) {
+            MockFilterChain cadena = new MockFilterChain();
+            MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+            guarda(estado).doFilter(peticion(metodo, "/api/niveles"), respuesta, cadena);
+
+            assertThat(cadena.getRequest()).as("%s pasa", metodo).isNotNull();
+            assertThat(respuesta.getStatus()).as("%s", metodo).isEqualTo(200);
+        }
+    }
+
+    /**
+     * (17, S184) El recurso de cursos sigue exento durante la generación. Quien impide el
+     * cambio de curso con un solve dentro es {@link EstadoCurso#intentarIniciarCambio()}, con
+     * su 409 {@code CURSO_OCUPADO}; la guarda no se adelanta a esa regla.
+     */
+    @Test
+    void generando_abrirCursoSigueExento() throws Exception {
+        MockFilterChain cadena = new MockFilterChain();
+
+        guarda(generando())
+                .doFilter(
+                        peticion("POST", "/api/cursos/abrir"),
+                        new MockHttpServletResponse(),
+                        cadena);
+
+        assertThat(cadena.getRequest()).as("exento").isNotNull();
+    }
+
+    /**
+     * (18, S184) Al terminar la generación, la misma escritura vuelve a pasar: un rechazo que
+     * no se levanta sería un bloqueo permanente.
+     */
+    @Test
+    void generando_alTerminarLaEscrituraVuelveAPasar() throws Exception {
+        EstadoCurso estado = generando();
+        estado.terminarGeneracion();
+        MockFilterChain cadena = new MockFilterChain();
+        MockHttpServletResponse respuesta = new MockHttpServletResponse();
+
+        guarda(estado).doFilter(peticion("POST", "/api/niveles"), respuesta, cadena);
+
+        assertThat(cadena.getRequest()).as("la cadena se llamó").isNotNull();
+        assertThat(respuesta.getStatus()).isEqualTo(200);
+    }
+
+    /**
      * (8) El cuerpo sale en UTF-8 y el Content-Type lo dice. El aserto va sobre los BYTES
      * decodificados como UTF-8, no sobre {@code getContentAsString()}: con el charset por
      * defecto del contenedor los bytes de «está» son otros y el navegador muestra un rombo.
@@ -271,6 +363,15 @@ class GuardaSoloLecturaTest {
     /** Estado de una base sin nombre de curso: ni archivada ni duplicando. */
     private static EstadoCurso activo() {
         return new EstadoCurso(null);
+    }
+
+    /** Curso activo con una generación dada de alta, como la deja el servicio al entrar. */
+    private static EstadoCurso generando() {
+        EstadoCurso estado = new EstadoCurso(null);
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("nada lo impide")
+                .isEqualTo(EstadoCurso.Admision.CONCEDIDA);
+        return estado;
     }
 
     private static EstadoCurso archivado() {

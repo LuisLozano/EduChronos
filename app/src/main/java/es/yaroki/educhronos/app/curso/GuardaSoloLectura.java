@@ -17,7 +17,8 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Un curso archivado no se modifica, y mientras se está creando uno nuevo no se modifica
- * nada (O-curso, S159, fase B de C-duplicado-guarda).
+ * nada (O-curso, S159, fase B de C-duplicado-guarda). Tampoco mientras se genera un horario
+ * (S184, condición 2 de O-pre-demo).
  *
  * <p><b>Es el PRIMER enganche transversal del proyecto.</b> Hasta S159 no había ni un
  * {@code Filter}, ni un {@code HandlerInterceptor}, ni un {@code @ControllerAdvice}: cada
@@ -66,6 +67,20 @@ import tools.jackson.databind.ObjectMapper;
  * de una base que se está sustituyendo. Lo que el filtro sigue sin mirar es lo que no es API
  * y el recurso de cursos.
  *
+ * <p><b>Durante una GENERACIÓN se rechaza toda escritura con un 409</b> (S184, decisión O de
+ * O-pre-demo). Un solve lee el catálogo al empezar y escribe el horario al terminar, minutos
+ * después; un cambio de catálogo entre medias daría un horario que no corresponde a lo que el
+ * usuario ve. Las lecturas pasan. El código es 409 y no 403 ni 503: es un conflicto con una
+ * operación en curso, la misma respuesta —símbolo y texto— que el servicio da a la segunda
+ * generación, que también es una escritura y también muere aquí.
+ *
+ * <p><b>La ventana en vuelo.</b> Como en las ventanas de S159 y S160, comprobar aquí y actuar
+ * en el controlador son dos momentos: una escritura que pasa la guarda justo antes de que
+ * empiece la generación puede aterrizar durante ella. Lo que manda sobre la segunda generación
+ * es {@link EstadoCurso#intentarIniciarGeneracion()}, que mira y marca en el mismo bloque
+ * sincronizado; para las escrituras de catálogo, esta guarda es un atajo y no un cierre, y la
+ * atomicidad del guardado del horario es del objetivo 3.
+ *
  * <p><b>El cuerpo lo escribe el filtro, a mano.</b> No se lanza una excepción para que la
  * traduzca Spring: lo que puebla el {@code reason} de un {@code ResponseStatusException} se
  * lee del {@code MockHttpServletResponse} y no del cuerpo que viaja por la red
@@ -89,6 +104,12 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
      * {@link EstadoCurso}, que es de donde sale el hecho.
      */
     public static final String CURSO_CAMBIANDO = EstadoCurso.CURSO_CAMBIANDO;
+
+    /**
+     * Se está generando un horario: ninguna escritura entra mientras dura. Símbolo y texto
+     * salen de {@link EstadoCurso}, como los de {@link #CURSO_CAMBIANDO}.
+     */
+    public static final String GENERACION_EN_CURSO = EstadoCurso.GENERACION_EN_CURSO;
 
     /** Raíz de todo lo que es API: lo de fuera es el bundle de Angular y no se guarda. */
     static final String RAIZ_API = "/api/";
@@ -124,15 +145,18 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
     }
 
     /**
-     * El orden de las tres preguntas es el contrato.
+     * El orden de las preguntas es el contrato.
      *
      * <ol>
      *   <li><b>Cambiando</b> va primero y alcanza a TODOS los métodos: durante el cambio no
      *       hay base de la que contestar, ni para leer.
      *   <li><b>Método seguro</b>: pasado el cambio, leer siempre se puede, archivado o no.
-     *   <li><b>Duplicando</b> antes que <b>archivado</b>, porque durante el duplicado el
-     *       curso todavía NO está archivado y decir lo contrario mandaría al usuario a buscar
-     *       un curso activo que es este mismo.
+     *   <li><b>Duplicando</b> (403) antes que <b>archivado</b>, porque durante el duplicado
+     *       el curso todavía NO está archivado y decir lo contrario mandaría al usuario a
+     *       buscar un curso activo que es este mismo.
+     *   <li><b>Generando</b> (409, {@code GENERACION_EN_CURSO}, S184): una escritura durante
+     *       una generación, incluida la de una segunda generación.
+     *   <li><b>Archivado</b> (403).
      * </ol>
      */
     @Override
@@ -157,6 +181,14 @@ public class GuardaSoloLectura extends OncePerRequestFilter {
                     HttpStatus.FORBIDDEN,
                     CURSO_DUPLICANDOSE,
                     "Se está creando un curso nuevo. Vuelve a intentarlo en un momento.");
+            return;
+        }
+        if (estado.generando() > 0) {
+            rechazar(
+                    respuesta,
+                    HttpStatus.CONFLICT,
+                    GENERACION_EN_CURSO,
+                    EstadoCurso.MENSAJE_GENERACION_EN_CURSO);
             return;
         }
         if (estado.archivado()) {

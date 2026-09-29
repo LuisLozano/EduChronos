@@ -193,7 +193,8 @@ public class GeneradorHorarioService {
      *         problema no admite un horario factible.
      * @throws RechazoCursoException 409 si otra operación de curso está en marcha (S160,
      *         invariante I2): {@code CURSO_CAMBIANDO} si se está abriendo otra base,
-     *         {@code CURSO_OCUPADO} si se está duplicando el curso.
+     *         {@code CURSO_OCUPADO} si se está duplicando el curso,
+     *         {@code GENERACION_EN_CURSO} si ya hay otra generación en marcha (S184).
      */
     public HorarioGenerado generar(Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
         if (maxSegundos != null && maxSegundos <= 0) {
@@ -225,10 +226,12 @@ public class GeneradorHorarioService {
     }
 
     /**
-     * Traduce el rechazo del estado a la respuesta que verá el cliente. Las dos causas ya
-     * existían —{@code CURSO_CAMBIANDO} la usa la guarda, {@code CURSO_OCUPADO} la usa
-     * {@code CursoService.abrir}—, así que no nace ningún símbolo nuevo para esto: lo que el
-     * cliente aprende es qué operación estorba, no un código más que mapear.
+     * Traduce el rechazo del estado a la respuesta que verá el cliente. Las dos primeras
+     * causas ya existían —{@code CURSO_CAMBIANDO} la usa la guarda, {@code CURSO_OCUPADO} la
+     * usa {@code CursoService.abrir}— y no nació ningún símbolo nuevo para ellas: lo que el
+     * cliente aprende es qué operación estorba. {@code GENERACION_EN_CURSO} (S184) es la
+     * excepción, y es la misma que da la guarda a una escritura durante la generación, para
+     * que el cliente reciba un solo símbolo y un solo texto.
      */
     private static RechazoCursoException rechazoDeCurso(EstadoCurso.Admision admision) {
         return switch (admision) {
@@ -242,6 +245,10 @@ public class GeneradorHorarioService {
                             HttpStatus.CONFLICT, CursoService.CURSO_OCUPADO,
                             "Se está duplicando el curso; espera unos segundos y vuelve a"
                                     + " generar.");
+            case HAY_GENERACION ->
+                    new RechazoCursoException(
+                            HttpStatus.CONFLICT, EstadoCurso.GENERACION_EN_CURSO,
+                            EstadoCurso.MENSAJE_GENERACION_EN_CURSO);
             case CONCEDIDA ->
                     throw new IllegalStateException(
                             "no se traduce a rechazo una admisión concedida");

@@ -142,6 +142,36 @@ class GeneracionDuranteCambioTest {
     }
 
     /**
+     * (T4.d, S184) Con otra GENERACIÓN en marcha, {@code generar} se niega con 409
+     * {@code GENERACION_EN_CURSO} y el texto de {@link EstadoCurso}, el mismo que da la guarda
+     * a una escritura durante la generación.
+     *
+     * <p>Sin el filtro, por lo mismo que los otros dos casos: con él montado, la petición
+     * moriría en la guarda con el mismo 409 y este caso pasaría en verde sin ejecutar la línea
+     * del servicio, que es la que decide cuando dos peticiones pasan la guarda a la vez.
+     *
+     * <p>El contador sigue en 1: el rechazo no da de alta un segundo solve, y la generación
+     * que ya estaba dentro sigue contada.
+     */
+    @Test
+    void generarConOtraGeneracionEnMarcha_409GeneracionEnCurso() throws Exception {
+        assertThat(estado.intentarIniciarGeneracion())
+                .isEqualTo(EstadoCurso.Admision.CONCEDIDA);
+
+        mockMvc.perform(
+                        post("/api/horarios")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("GENERACION_EN_CURSO"))
+                .andExpect(jsonPath("$.message").value(EstadoCurso.MENSAJE_GENERACION_EN_CURSO));
+
+        assertThat(estado.generando())
+                .as("el rechazo no toca el contador: sigue la que ya estaba")
+                .isOne();
+    }
+
+    /**
      * (T4.b) El contador vuelve a cero aunque {@code generar} lance. El catálogo de esta base
      * está vacío, así que la generación revienta dentro —sin jornada no hay problema que
      * resolver—, y eso es justo lo que hace falta: si {@code terminarGeneracion()} viviera

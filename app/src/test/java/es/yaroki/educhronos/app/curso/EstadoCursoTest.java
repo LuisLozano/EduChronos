@@ -42,30 +42,27 @@ class EstadoCursoTest {
     }
 
     /**
-     * (T3.b) EL CONTADOR: dos solves a la vez, y el cambio sigue bloqueado hasta que sale el
-     * SEGUNDO. Con un booleano en vez de un contador, el primero en terminar apagaría el
-     * indicador con el otro aún dentro y un cambio de curso se colaría a mitad de un solve,
-     * que es exactamente el defecto que esto evita.
+     * (T3.b) Una sola generación a la vez (S184, decisión O de O-pre-demo; hasta S184 este
+     * caso aseveraba lo contrario, que dos solves convivían). La segunda se rechaza NOMBRANDO
+     * la generación, y el rechazo no toca el contador: si lo subiera, al terminar la primera
+     * quedaría un solve fantasma y ni generar ni cambiar de curso volverían a entrar sin
+     * reiniciar la aplicación.
      */
     @Test
-    void dosSolvesALaVez_elCambioSigueBloqueadoHastaQueSaleElSegundo() {
+    void segundaGeneracion_seRechazaYNoTocaElContador() {
         EstadoCurso estado = nuevo();
 
         assertThat(estado.intentarIniciarGeneracion()).isEqualTo(Admision.CONCEDIDA);
         assertThat(estado.intentarIniciarGeneracion())
-                .as("dos solves SÍ conviven")
-                .isEqualTo(Admision.CONCEDIDA);
-        assertThat(estado.generando()).isEqualTo(2);
-
-        estado.terminarGeneracion();
-        assertThat(estado.generando()).isOne();
-        assertThat(estado.intentarIniciarCambio())
-                .as("todavía queda uno dentro: NO se cambia")
-                .isFalse();
+                .as("la segunda, con la primera dentro")
+                .isEqualTo(Admision.HAY_GENERACION);
+        assertThat(estado.generando()).as("el rechazo no cuenta un solve").isOne();
 
         estado.terminarGeneracion();
         assertThat(estado.generando()).isZero();
-        assertThat(estado.intentarIniciarCambio()).as("ahora sí").isTrue();
+        assertThat(estado.intentarIniciarGeneracion())
+                .as("al terminar la primera, otra vuelve a entrar")
+                .isEqualTo(Admision.CONCEDIDA);
     }
 
     /**
