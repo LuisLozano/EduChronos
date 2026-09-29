@@ -139,14 +139,12 @@ export class HorarioView {
   protected readonly generando = computed(() => this.enVuelo() !== null);
 
   /**
-   * Minutos que se anuncian durante la espera. ESPEJO del presupuesto por defecto del
-   * backend (`educhronos.solver.max-segundos`, hoy 600 s): el servidor no lo publica
-   * en ningún endpoint, así que esto es una copia y puede desincronizarse en silencio
-   * si allí se cambia el valor sin tocar aquí. Es una cota anunciada, no una promesa;
-   * se prefiere a no decir nada, porque un número —aunque sea aproximado— es lo que
-   * distingue "está trabajando" de "se ha colgado".
+   * Minutos que eligió quien lanzó la generación en vuelo, o `null` si no hay ninguna
+   * (S184, condición 1 de O-pre-demo). Es el presupuesto que viaja al backend y el que
+   * se anuncia en la espera: una sola fuente, sin copia del valor del servidor. Vuelve
+   * a `null` en éxito y en error, igual que {@link enVuelo}.
    */
-  private readonly MINUTOS_ANUNCIADOS = 10;
+  protected readonly minutosEnCurso = signal<number | null>(null);
 
   /**
    * Suma con signo de los delta blandos por instancia (clave de {@link clavePin}),
@@ -593,11 +591,12 @@ export class HorarioView {
    * COSTE de la operación, y ese existe con lista vacía igual que con lista llena.
    *
    * <p>Los errores se siguen filtrando y pasando por `data`: con lista vacía el
-   * diálogo pinta solo el coste, y con avisos añade el detalle. La firma
-   * `open<boolean, AvisoPrevalidacion[]>` no cambia.
+   * diálogo pinta solo el coste, y con avisos añade el detalle. La firma es
+   * `open<number, AvisoPrevalidacion[]>` desde S184 (antes, `<boolean, …>`).
    *
-   * <p>Solo se procede si cierra con `true`; backdrop/Escape emiten `undefined` y
-   * abortan sin lanzar nada.
+   * <p>Desde S184 el diálogo cierra con los MINUTOS elegidos, y solo un número lanza
+   * la generación; cancelar, backdrop y Escape emiten `undefined` y abortan sin lanzar
+   * nada.
    */
   protected generar(): void {
     const avisos = this.avisosPrevalidacion();
@@ -606,10 +605,10 @@ export class HorarioView {
     }
     const errores = avisos.filter((a) => a.severidad === 'ERROR');
     this.dialog
-      .open<boolean, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
-      .closed.subscribe((confirmado) => {
-        if (confirmado === true) {
-          this.lanzarGeneracion();
+      .open<number, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
+      .closed.subscribe((minutos) => {
+        if (typeof minutos === 'number') {
+          this.lanzarGeneracion(minutos);
         }
       });
   }
@@ -637,13 +636,18 @@ export class HorarioView {
    * horarios distintos.
    *
    * <p>El error puebla {@link errorGeneracion} (señal propia, no gatea la rejilla).
+   *
+   * <p>El presupuesto viaja en SEGUNDOS, que es lo que acepta el backend como
+   * `maxSegundos`; la vista trabaja en minutos, que es lo que se elige y se anuncia.
    */
-  private lanzarGeneracion(): void {
+  private lanzarGeneracion(minutos: number): void {
     this.errorGeneracion.set(null);
     this.enVuelo.set('generacion');
-    this.service.generar().subscribe({
+    this.minutosEnCurso.set(minutos);
+    this.service.generar(minutos * 60).subscribe({
       next: (dto) => {
         this.enVuelo.set(null);
+        this.minutosEnCurso.set(null);
         if (dto.id === this.idCargado) {
           this.cargar(dto.id);
         } else {
@@ -652,42 +656,56 @@ export class HorarioView {
       },
       error: (err) => {
         this.enVuelo.set(null);
+        this.minutosEnCurso.set(null);
         this.errorGeneracion.set(this.mensajeGeneracion(err));
       },
     });
   }
 
   /**
-   * Texto para un fallo de generación, decidido por el STATUS y la `causa` del
-   * cuerpo (S118) — NUNCA por la prosa del servidor, que es un mensaje de log en
-   * bruto ("Estado CP-SAT: UNKNOWN") y no algo que enseñar a quien hace horarios.
+   * Texto para un fallo de generación. Las reglas van en ESTE orden (S184, condición 4
+   * de O-pre-demo):
    *
-   * <p>Los cuatro textos existen para que cada uno diga qué HACER, y por eso no
-   * pueden colapsarse en uno: ante un presupuesto agotado la acción es reintentar,
-   * ante un catálogo infactible reintentar NO sirve —el resultado será idéntico— y
-   * ante una jornada sin definir el sitio donde ir es otro. Un mensaje único
-   * mandaría a esperar en balde a dos de cada tres.
+   * <ol>
+   *   <li>`PREVALIDACION_FALLIDA` con `mensaje` → ese `mensaje`.
+   *   <li>`PRESUPUESTO_AGOTADO` → «Se agotó el tiempo de cálculo…».
+   *   <li>`CONFIGURACION_INCOMPLETA` → falta la jornada.
+   *   <li>`CATALOGO_INFACTIBLE` o status 422 → el catálogo no tiene solución.
+   *   <li>Cuerpo con `message` no vacío → ese `message`.
+   *   <li>Si no, el genérico con el status.
+   * </ol>
    *
-   * <p>La `causa` manda sobre el status cuando viene; el status es el respaldo para
-   * un cuerpo que no la traiga (un proxy que lo recorte, una versión previa del
-   * backend). Sin ninguno de los dos, el genérico con el número.
+   * <p>Los fallos del SOLVER (`FalloGeneracionDTO`: `causa` y `mensaje`) se deciden por
+   * la `causa` y nunca por su prosa, que es log en bruto ("Estado CP-SAT: UNKNOWN"). Los
+   * cuatro textos existen para que cada uno diga qué HACER: ante un presupuesto agotado,
+   * reintentar; ante un catálogo infactible reintentar NO sirve; ante una jornada sin
+   * definir, el sitio donde ir es otro. ÚNICA excepción (S166): el `mensaje` de la
+   * pre-validación, que son las descripciones de los hallazgos ERROR y lo único que dice
+   * QUÉ tocar.
    *
-   * <p>ÚNICA excepción a «nunca la prosa» (S166): el rechazo de la pre-validación. Su
-   * `mensaje` no es log del solver sino las descripciones de los hallazgos ERROR —las
-   * mismas del panel—, y es lo único que dice QUÉ tocar: un pin sobre un tramo DURA sí
-   * tiene solución, y el genérico de catálogo infactible le mentiría al usuario. Sin
-   * `mensaje`, cae al genérico del 422 como antes.
+   * <p><b>Por qué el 503 ya no basta para decir «se agotó el tiempo»</b> (S184). Hasta
+   * aquí todo 503 lo decía, y la guarda también contesta 503 (`CURSO_CAMBIANDO`) cuando
+   * se está abriendo otro curso: la vista mandaba reintentar un solve que ni había
+   * empezado. Sólo la causa `PRESUPUESTO_AGOTADO` lo afirma.
+   *
+   * <p><b>Por qué el `message` va después de las causas del solver y antes del
+   * genérico</b> (S184). Los rechazos de curso (`RechazoCursoDTO`: `causa` y
+   * `message`; 409 `GENERACION_EN_CURSO`, `CURSO_OCUPADO`, `CURSO_CAMBIANDO`; 403 de
+   * solo lectura o duplicado; 503 del cambio de curso) y los 400 de Spring traen su
+   * motivo en `message`, ya escrito para el usuario; antes se perdía en el genérico con
+   * el número. Va detrás de las cuatro causas para que ninguna de ellas pueda quedar
+   * tapada por un texto del servidor. El 422 sin causa sigue en la regla 4, como antes.
    */
   private mensajeGeneracion(err: {
     status?: number;
-    error?: { causa?: string; mensaje?: string };
+    error?: { causa?: string; mensaje?: string; message?: string } | null;
   }): string {
     const causa = err?.error?.causa;
     const mensaje = err?.error?.mensaje;
     if (causa === 'PREVALIDACION_FALLIDA' && mensaje) {
       return mensaje;
     }
-    if (causa === 'PRESUPUESTO_AGOTADO' || err?.status === 503) {
+    if (causa === 'PRESUPUESTO_AGOTADO') {
       return 'Se agotó el tiempo de cálculo. Vuelve a intentarlo.';
     }
     if (causa === 'CONFIGURACION_INCOMPLETA') {
@@ -695,6 +713,10 @@ export class HorarioView {
     }
     if (causa === 'CATALOGO_INFACTIBLE' || err?.status === 422) {
       return 'Esta configuración no tiene solución. Revisa el catálogo.';
+    }
+    const message = err?.error?.message;
+    if (message) {
+      return message;
     }
     return `El servidor no pudo generar el horario (${err?.status ?? 'error'}).`;
   }
@@ -708,7 +730,7 @@ export class HorarioView {
   protected textoGenerando(): string {
     return this.enVuelo() === 'ajuste'
       ? 'Aplicando el cambio…'
-      : `Generando horario… puede tardar hasta ${this.MINUTOS_ANUNCIADOS} minutos.`;
+      : `Generando horario… puede tardar hasta ${this.minutosEnCurso()} minutos.`;
   }
 
   protected cambiarVista(v: Vista): void {

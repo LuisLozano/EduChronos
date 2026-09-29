@@ -19,12 +19,14 @@ export class HorarioService {
   }
 
   /**
-   * POST /api/horarios (body `{}`) → genera y persiste un horario nuevo con los
-   * defaults del backend y devuelve su proyección completa. Gemelo pelado de
-   * {@link getProyeccion}: un `return this.http.post` sin `.pipe`.
+   * POST /api/horarios (body `{ maxSegundos }`) → genera y persiste un horario nuevo
+   * con el presupuesto que eligió quien genera (S184, condición 1 de O-pre-demo) y
+   * devuelve su proyección completa. El resto de parámetros cae a los defaults del
+   * backend. Gemelo pelado de {@link getProyeccion}: un `return this.http.post` sin
+   * `.pipe`.
    */
-  generar(): Observable<HorarioProyeccion> {
-    return this.http.post<HorarioProyeccion>('/api/horarios', {});
+  generar(maxSegundos: number): Observable<HorarioProyeccion> {
+    return this.http.post<HorarioProyeccion>('/api/horarios', { maxSegundos });
   }
 
   /**

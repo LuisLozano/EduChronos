@@ -15,6 +15,34 @@
   font-size: var(--tam-l);
 }
 
+/* Elección del tiempo (S184). Las clases equivalentes de `actividad-form` (su fieldset
+   de plaza y sus radios) están encapsuladas en ese componente, así que se repiten aquí
+   los mismos tokens: marco suave, leyenda pequeña y radios en línea. */
+.tiempo {
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-m);
+  padding: var(--e3);
+  margin: 0 0 var(--e3);
+}
+
+.tiempo__titulo {
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+
+.tiempo__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  margin-right: var(--e4);
+}
+
+.tiempo__ayuda {
+  margin: var(--e2) 0 0;
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+
 /* El coste de la operación: se pinta SIEMPRE, así que es el cuerpo del diálogo y no
    una nota al pie. En color normal, no de error: enunciar lo que va a pasar no es
    avisar de que algo va mal. */

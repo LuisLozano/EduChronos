@@ -113,7 +113,7 @@ describe('contenedor del horario', () => {
   let prevalidaciones: { getPrevalidacion: ReturnType<typeof vi.fn> };
   let sujetoJornada: Subject<JornadaDTO>;
   let jornadas: { obtener: ReturnType<typeof vi.fn> };
-  let ultimoCerrado: Subject<boolean | undefined>;
+  let ultimoCerrado: Subject<number | undefined>;
   let ultimoMover: Subject<SesionVista[]>;
   let ultimoIntercambiar: Subject<IntercambioRealizado>;
   let ajustes: { mover: ReturnType<typeof vi.fn>; intercambiar: ReturnType<typeof vi.fn> };
@@ -167,7 +167,7 @@ describe('contenedor del horario', () => {
     // compartido, el segundo `next(true)` dispararía también la primera y
     // `lanzarGeneracion` correría dos veces por una sola confirmación: los conteos
     // `toHaveBeenCalledTimes` medirían el doble sin que la implementación falle.
-    dialog = { open: vi.fn(() => ({ closed: (ultimoCerrado = new Subject<boolean | undefined>()) })) };
+    dialog = { open: vi.fn(() => ({ closed: (ultimoCerrado = new Subject<number | undefined>()) })) };
     // Doble del servicio de ajuste. FRESCO POR INVOCACIÓN, por la misma razón que
     // `guardar`: un Subject cerrado por `.error()` redispara síncronamente al
     // re-suscribirse, y los tests del rechazo encadenan intento fallido → intento
@@ -1063,7 +1063,7 @@ describe('contenedor del horario', () => {
   /**
    * Mientras el ajuste vuela se reutiliza el estado de espera de S118 —la misma
    * señal y el mismo `<p class="generando">`—, pero con SU frase: anunciarle los
-   * diez minutos de un solve sería falso. El botón «Generar» queda cerrado, que es
+   * minutos de un solve sería falso. El botón «Generar» queda cerrado, que es
    * la otra mitad de reutilizar el estado y no duplicarlo.
    */
   it('(71) mientras el ajuste vuela se reutiliza el aviso de espera, con su propia frase', async () => {
@@ -1140,16 +1140,44 @@ describe('contenedor del horario', () => {
    * <p>La emisión es síncrona tras el click y eso basta: `generar()` se suscribe a
    * `closed` dentro del propio manejador, así que cuando esta línea corre la
    * suscripción ya existe.
+   *
+   * <p>Desde S184 el diálogo cierra con los MINUTOS elegidos; por defecto, los 10 con
+   * que abre.
    */
-  function pulsarGenerar(): void {
+  function pulsarGenerar(minutos = 10): void {
     abrirDialogoGenerar();
-    ultimoCerrado.next(true);
+    ultimoCerrado.next(minutos);
+  }
+
+  /** Los minutos de la generación en vuelo (S184), leídos de la señal protegida. */
+  function minutosEnCurso(): number | null {
+    return (
+      fixture.componentInstance as unknown as { minutosEnCurso(): number | null }
+    ).minutosEnCurso();
+  }
+
+  /**
+   * Lanza una generación que falla con el error dado y devuelve el texto del aviso
+   * (S184). Solo para los casos de mensajes de rechazo, que miden QUÉ texto sale y nada
+   * más: el gesto, la espera y la rejilla ya los miden los casos de arriba.
+   */
+  async function textoDeFallo(error: { status: number; error?: unknown }): Promise<string> {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error(error);
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso).not.toBeNull();
+    return aviso!.textContent?.trim() ?? '';
   }
 
   /**
    * S145 INVIERTE el (27) original, que fijaba «sin ERROR ⇒ 0 al diálogo». Ahora el
-   * diálogo se abre SIEMPRE: lo que se confirma es el coste de la operación —diez
-   * minutos, sustituye el trabajo en curso, irreversible—, que existe también con el
+   * diálogo se abre SIEMPRE: lo que se confirma es el coste de la operación —el tiempo
+   * de cálculo, sustituye el trabajo en curso, irreversible—, que existe también con el
    * catálogo sano. Sobre el centro real la pre-validación devuelve lista vacía, así
    * que con la regla vieja el diálogo no se abría NUNCA y una generación salía de un
    * clic.
@@ -1179,23 +1207,23 @@ describe('contenedor del horario', () => {
 
     abrirDialogoGenerar();
     await fixture.whenStable();
-    ultimoCerrado.next(true);
+    ultimoCerrado.next(10);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(1);
   });
 
   /**
-   * Cancelar el diálogo NO dispara ninguna generación. `false` y no `undefined`
-   * —ese lo cubre el (29) del backdrop—: juntos fijan que la condición del cierre es
-   * exactamente `=== true` por los dos lados.
+   * Cancelar el diálogo NO dispara ninguna generación. Desde S184 cancelar cierra SIN
+   * valor, igual que el backdrop del (29); este caso lo recorre por el camino sin
+   * avisos, que es el del centro real.
    */
   it('(27c) cancelado el diálogo sin avisos, no se llama al backend', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
     abrirDialogoGenerar();
     await fixture.whenStable();
-    ultimoCerrado.next(false);
+    ultimoCerrado.next(undefined);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(0);
@@ -1225,10 +1253,9 @@ describe('contenedor del horario', () => {
   });
 
   /**
-   * Cierre por backdrop/Escape (emite `undefined`): la generación NO procede. Se
-   * usa `undefined` y no `false` porque es el valor que mata la mutación
-   * `confirmado !== false` (que dejaría pasar el `undefined` del backdrop); con
-   * `false` esa mutación quedaría verde.
+   * Cierre por backdrop/Escape (emite `undefined`): la generación NO procede. Desde
+   * S184 la condición es «el cierre trae un número»: `undefined` es justo el valor que
+   * una condición floja (`!== false`, `!= null` mal escrito) dejaría pasar.
    */
   it('(29) diálogo cerrado por backdrop (undefined) no llama al backend', async () => {
     await montarConPrevalidacion([AVISO_ERROR]);
@@ -1244,17 +1271,17 @@ describe('contenedor del horario', () => {
   });
 
   /**
-   * Confirmado con `true`: ahí sí procede la generación, UNA vez. Es el gemelo de
+   * Confirmado con minutos: ahí sí procede la generación, UNA vez. Es el gemelo de
    * (29): mismo montaje, cierre opuesto, resultado opuesto. Juntos fijan que la
-   * condición del cierre es exactamente `=== true`.
+   * condición del cierre es «trae un número».
    */
-  it('(30) diálogo confirmado (true) llama al backend una vez', async () => {
+  it('(30) diálogo confirmado (con minutos) llama al backend una vez', async () => {
     await montarConPrevalidacion([AVISO_ERROR]);
 
     abrirDialogoGenerar();
     await fixture.whenStable();
 
-    ultimoCerrado.next(true);
+    ultimoCerrado.next(10);
     await fixture.whenStable();
 
     expect(horario.generar).toHaveBeenCalledTimes(1);
@@ -1586,18 +1613,17 @@ describe('contenedor del horario', () => {
    * el usuario tiene una acción útil: volver a intentarlo. El mensaje debe ofrecer
    * esa acción.
    *
-   * <p>Va EMPAREJADO con el (42): son la misma pregunta —¿la vista distingue el
-   * status?— con las dos respuestas, y por eso no se puede pasar uno solo con un
-   * mensaje fijo. El body va `{}` a propósito: si el texto saliera del cuerpo del
-   * error y no del status, ambos degradarían al mismo sitio y el par caería.
+   * <p>S184 · lo decide la CAUSA `PRESUPUESTO_AGOTADO`, no el 503: la guarda también
+   * contesta 503 al cambiar de curso, y el (91) fija que un 503 sin causa ya no dice
+   * «se agotó». Va emparejado con el (42), que da otro texto para el 422.
    */
-  it('(41) un 503 de generación ofrece reintentar, no declara el horario imposible', async () => {
+  it('(41) un 503 PRESUPUESTO_AGOTADO ofrece reintentar, no declara el horario imposible', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
     pulsarGenerar();
     await fixture.whenStable();
 
-    ultimoGenerar.error({ status: 503, error: {} });
+    ultimoGenerar.error({ status: 503, error: { causa: 'PRESUPUESTO_AGOTADO' } });
     await fixture.whenStable();
 
     const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
@@ -1641,17 +1667,24 @@ describe('contenedor del horario', () => {
    * estaba: el (34) sigue midiendo esa otra mitad y ninguno de los dos basta solo.
    *
    * <p>(b) el texto de espera aparece; (c) con los minutos dentro. El número es lo
-   * que distingue "está trabajando" de "se ha colgado" en una espera de diez minutos,
-   * así que un texto sin él no cumple el propósito y el aserto lo exige.
+   * que distingue "está trabajando" de "se ha colgado" en una espera de minutos, así
+   * que un texto sin él no cumple el propósito y el aserto lo exige.
    *
-   * <p>El Subject NO se emite: la fase "en vuelo" es justamente la que se mide, y
-   * cualquier emisión la cerraría.
+   * <p>S184 · el diálogo cierra con 30, y 30 es lo que se anuncia y lo que viaja: 1800
+   * segundos al servicio. Con 30 y no con los 10 por defecto, un texto o un cuerpo
+   * fijos no pueden pasar.
+   *
+   * <p>El Subject del POST NO se emite: la fase "en vuelo" es justamente la que se
+   * mide, y cualquier emisión la cerraría.
    */
-  it('(43) mientras el POST vuela: botón cerrado y aviso de espera con los minutos', async () => {
+  it('(43) elegidos 30 minutos: generar(1800), botón cerrado y espera con los 30 minutos', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
-    pulsarGenerar();
+    pulsarGenerar(30);
     await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledTimes(1);
+    expect(horario.generar).toHaveBeenCalledWith(1800);
 
     const raiz = fixture.nativeElement as HTMLElement;
     const boton = raiz.querySelector('button.generar') as HTMLButtonElement;
@@ -1659,7 +1692,21 @@ describe('contenedor del horario', () => {
 
     const espera = raiz.querySelector('.generando');
     expect(espera).not.toBeNull();
-    expect(espera!.textContent).toContain('10 minutos');
+    expect(espera!.textContent?.trim()).toBe('Generando horario… puede tardar hasta 30 minutos.');
+    expect(minutosEnCurso()).toBe(30);
+  });
+
+  /** S184 · pareja del (43) con el valor por defecto: 10 minutos son 600 segundos. */
+  it('(85) con los 10 minutos por defecto: generar(600) y espera con los 10 minutos', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar(10);
+    await fixture.whenStable();
+
+    expect(horario.generar).toHaveBeenCalledWith(600);
+    expect((fixture.nativeElement as HTMLElement).querySelector('.generando')?.textContent).toContain(
+      '10 minutos',
+    );
   });
 
   /**
@@ -1678,12 +1725,14 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
+    expect(minutosEnCurso()).toBe(10);
     ultimoGenerar.next({ ...PROYECCION_VACIA, id: 2 });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
     expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
     expect(raiz.querySelector('.generando')).toBeNull();
+    expect(minutosEnCurso()).toBeNull();
   });
 
   /**
@@ -1702,6 +1751,7 @@ describe('contenedor del horario', () => {
     pulsarGenerar();
     await fixture.whenStable();
 
+    expect(minutosEnCurso()).toBe(10);
     ultimoGenerar.error({ status: 503, error: { causa: 'PRESUPUESTO_AGOTADO' } });
     await fixture.whenStable();
 
@@ -1709,6 +1759,7 @@ describe('contenedor del horario', () => {
     expect((raiz.querySelector('button.generar') as HTMLButtonElement).disabled).toBe(false);
     expect(raiz.querySelector('.generando')).toBeNull();
     expect(raiz.querySelector('.error-generacion')).not.toBeNull();
+    expect(minutosEnCurso()).toBeNull();
   });
 
   /**
@@ -1797,6 +1848,81 @@ describe('contenedor del horario', () => {
     expect(aviso!.textContent?.trim()).toBe(
       'Esta configuración no tiene solución. Revisa el catálogo.',
     );
+  });
+
+  // --- S184 · rechazos con `message` (condición 4 de O-pre-demo) ----------------
+  // Los rechazos que no son del solver traen su motivo en `message`, ya escrito para
+  // el usuario. Cada caso asevera el texto EXACTO del servidor, y los de 503 además que
+  // NO dice «Se agotó»: el 503 dejó de bastar para eso.
+
+  /** El 503 de la guarda al cambiar de curso no es un presupuesto agotado. */
+  it('(86) un 503 CURSO_CAMBIANDO muestra su message y no «Se agotó»', async () => {
+    const texto = await textoDeFallo({
+      status: 503,
+      error: {
+        causa: 'CURSO_CAMBIANDO',
+        message: 'Se está abriendo otro curso. Vuelve a intentarlo en un momento.',
+      },
+    });
+
+    expect(texto).toBe('Se está abriendo otro curso. Vuelve a intentarlo en un momento.');
+    expect(texto).not.toContain('Se agotó');
+  });
+
+  /** La segunda generación (S184 F1): 409 con el texto que da el backend. */
+  it('(87) un 409 GENERACION_EN_CURSO muestra su message', async () => {
+    const texto = await textoDeFallo({
+      status: 409,
+      error: {
+        causa: 'GENERACION_EN_CURSO',
+        message: 'Se está generando un horario. Espera a que termine para hacer cambios.',
+      },
+    });
+
+    expect(texto).toBe('Se está generando un horario. Espera a que termine para hacer cambios.');
+  });
+
+  /** Generar en un curso archivado: el 403 de la guarda dice por qué. */
+  it('(88) un 403 CURSO_SOLO_LECTURA muestra su message', async () => {
+    const texto = await textoDeFallo({
+      status: 403,
+      error: {
+        causa: 'CURSO_SOLO_LECTURA',
+        message:
+          'El curso 2025/2026 está archivado y es de solo lectura. Los cambios se hacen en el curso activo.',
+      },
+    });
+
+    expect(texto).toBe(
+      'El curso 2025/2026 está archivado y es de solo lectura. Los cambios se hacen en el curso activo.',
+    );
+  });
+
+  /** El 400 de Spring trae `message` sin `causa`: también se enseña. */
+  it('(89) un 400 con cuerpo {message} muestra el message', async () => {
+    const texto = await textoDeFallo({
+      status: 400,
+      error: { message: 'maxSegundos debe ser > 0 si se especifica; recibido -1' },
+    });
+
+    expect(texto).toBe('maxSegundos debe ser > 0 si se especifica; recibido -1');
+  });
+
+  /** Sin cuerpo no hay nada que enseñar: el genérico con el número. */
+  it('(90) un 500 sin cuerpo da el genérico con el 500', async () => {
+    const texto = await textoDeFallo({ status: 500 });
+
+    expect(texto).toBe('El servidor no pudo generar el horario (500).');
+  });
+
+  /**
+   * El 503 sin causa ya NO dice «Se agotó» (S184): era la regla que convertía el 503 de
+   * la guarda en un presupuesto agotado. Pareja del (41), que lo dice con la causa.
+   */
+  it('(91) un 503 sin cuerpo da el genérico con el 503, no «Se agotó»', async () => {
+    const texto = await textoDeFallo({ status: 503 });
+
+    expect(texto).toBe('El servidor no pudo generar el horario (503).');
   });
 
   /**

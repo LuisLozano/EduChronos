@@ -67,8 +67,12 @@ describe('diálogo de confirmar generación', () => {
     await montar([ERROR_A, ERROR_B]);
   });
 
-  /** El botón principal cierra con `true`: procede la generación. */
-  it('(35) confirmar cierra la ref con true', () => {
+  /**
+   * El botón principal, sin tocar la elección, cierra con los 10 minutos por defecto
+   * (S184; hasta entonces cerraba con `true`). Es el caso más común: quien no mira el
+   * tiempo genera con el valor de siempre.
+   */
+  it('(35) confirmar sin tocar la elección cierra la ref con 10', () => {
     const boton = (fixture.nativeElement as HTMLElement).querySelector(
       'button.confirmar',
     ) as HTMLButtonElement;
@@ -76,11 +80,15 @@ describe('diálogo de confirmar generación', () => {
     boton.click();
 
     expect(ref.close).toHaveBeenCalledTimes(1);
-    expect(ref.close).toHaveBeenCalledWith(true);
+    expect(ref.close).toHaveBeenCalledWith(10);
   });
 
-  /** El botón de cancelar cierra con `false`: aborta. Gemelo opuesto de (35). */
-  it('(36) cancelar cierra la ref con false', () => {
+  /**
+   * El botón de cancelar cierra SIN valor (S184; hasta entonces con `false`): lo mismo
+   * que backdrop y Escape, así que el contenedor sólo tiene que distinguir número de no
+   * número. Se asevera la llamada vacía, no sólo que no sea un número.
+   */
+  it('(36) cancelar cierra la ref sin valor', () => {
     const boton = (fixture.nativeElement as HTMLElement).querySelector(
       'button.cancelar',
     ) as HTMLButtonElement;
@@ -88,7 +96,7 @@ describe('diálogo de confirmar generación', () => {
     boton.click();
 
     expect(ref.close).toHaveBeenCalledTimes(1);
-    expect(ref.close).toHaveBeenCalledWith(false);
+    expect(ref.close.mock.calls[0]).toEqual([]);
   });
 
   /**
@@ -112,14 +120,15 @@ describe('diálogo de confirmar generación', () => {
    *
    * <p>Los TRES hechos van en el aserto por separado: cada uno es una razón distinta
    * para no pulsar sin pensar —tiempo, pérdida de trabajo, irreversibilidad— y con
-   * uno solo, "dice algo" pasaría por "los dice todos".
+   * uno solo, "dice algo" pasaría por "los dice todos". Desde S184 el tiempo es el de
+   * la opción marcada, que al abrir es la de 10: se asevera la frase entera.
    */
   it('(38) con la lista vacía, el diálogo enuncia el coste de la operación', async () => {
     await montar([]);
 
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
 
-    expect(texto).toContain('diez minutos');
+    expect(texto).toContain('Tarda hasta 10 minutos.');
     expect(texto).toContain('Sustituye el horario en el que estás trabajando');
     expect(texto).toContain('No se puede deshacer');
   });
@@ -141,7 +150,7 @@ describe('diálogo de confirmar generación', () => {
     expect(confirmar.textContent?.trim()).toBe('Generar horario');
 
     confirmar.click();
-    expect(ref.close).toHaveBeenCalledWith(true);
+    expect(ref.close).toHaveBeenCalledWith(10);
   });
 
   /**
@@ -170,4 +179,56 @@ describe('diálogo de confirmar generación', () => {
       'Además, el servidor rechazará esta generación. Estos hallazgos de severidad ERROR lo impedirán:',
     );
   });
+
+  /**
+   * S184 · las cuatro opciones EXACTAS, en su orden, con la de 10 marcada y sólo ella, y
+   * la ayuda debajo. Con una sola opción comprobada, «ofrece 10» pasaría por «ofrece las
+   * cuatro»; con sólo el `checked` de la primera, dos marcadas a la vez pasarían.
+   */
+  it('(42) ofrece 10, 20, 30 y 60 minutos, con 10 marcado al abrir', () => {
+    const raiz = fixture.nativeElement as HTMLElement;
+    const opciones = Array.from(raiz.querySelectorAll('.tiempo__opcion'));
+
+    expect(raiz.querySelector('.tiempo legend')?.textContent?.trim()).toBe('Tiempo de cálculo');
+    expect(opciones.map((o) => o.textContent?.trim())).toEqual([
+      '10 minutos',
+      '20 minutos',
+      '30 minutos',
+      '60 minutos',
+    ]);
+    expect(radios().map((r) => r.checked)).toEqual([true, false, false, false]);
+    expect(radios().every((r) => r.name === 'minutos')).toBe(true);
+    expect(raiz.querySelector('.tiempo__ayuda')?.textContent?.trim()).toBe(
+      'Con más tiempo es más probable que salga horario, y suele salir mejor.',
+    );
+  });
+
+  /**
+   * S184 · elegir 30 cambia la consecuencia a «30 minutos» y confirmar cierra con 30.
+   * Se elige por el DOM (click en el radio), como se pulsan los botones: así se cubre
+   * también el cableado plantilla→señal.
+   */
+  it('(43) al elegir 30, el texto dice 30 minutos y confirmar cierra con 30', async () => {
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    radios()[2].click();
+    await fixture.whenStable();
+
+    expect(raiz.querySelector('.consecuencias')?.textContent).toContain('Tarda hasta 30 minutos.');
+    expect(raiz.querySelector('.consecuencias')?.textContent).not.toContain('10 minutos');
+
+    (raiz.querySelector('button.confirmar') as HTMLButtonElement).click();
+
+    expect(ref.close).toHaveBeenCalledTimes(1);
+    expect(ref.close).toHaveBeenCalledWith(30);
+  });
+
+  /** Los radios del tiempo, en orden de pintado. */
+  function radios(): HTMLInputElement[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLInputElement>(
+        '.tiempo input[type="radio"]',
+      ),
+    );
+  }
 });

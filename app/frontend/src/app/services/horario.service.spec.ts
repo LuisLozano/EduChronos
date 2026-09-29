@@ -76,17 +76,16 @@ describe('cliente de horarios', () => {
   });
 
   /**
-   * `generar` congela el otro par (verbo, URL): POST a la colección, sin id. El
-   * cuerpo se asevera `{}` LITERAL —no cualquier body—: una mutación que colara
-   * parámetros (p. ej. `{ maxSegundos: 30 }`) cambiaría el contrato con el backend
-   * y ESTE ROJO SERÍA CORRECTO. El body vacío es deliberado: el backend acepta
-   * `{}` y cae a sus defaults (S-medido).
+   * `generar` congela el otro par (verbo, URL): POST a la colección, sin id. Desde
+   * S184 el cuerpo lleva el presupuesto elegido y NADA más, y se asevera su JSON
+   * LITERAL —no cualquier body—: un cuerpo vacío volvería a los 600 s por defecto del
+   * backend sin que nadie lo notara, y cualquier campo de más cambiaría el contrato.
    */
-  it('(33) generar pide POST a la colección con body vacío', () => {
-    servicio.generar().subscribe();
+  it('(33) generar pide POST a la colección con el presupuesto en el cuerpo', () => {
+    servicio.generar(1800).subscribe();
 
     const req = http.expectOne({ method: 'POST', url: '/api/horarios' });
-    expect(req.request.body).toEqual({});
+    expect(JSON.stringify(req.request.body)).toBe('{"maxSegundos":1800}');
 
     req.flush(null);
   });

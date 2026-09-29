@@ -8,14 +8,28 @@
     quedado muda: un diálogo que pregunta sin decir qué se confirma. Ahora los tres
     hechos del coste son el cuerpo, y los avisos un agravante opcional.
 
-    Los diez minutos son un SEGUNDO espejo del presupuesto del backend
-    (`educhronos.solver.max-segundos`), el primero es MINUTOS_ANUNCIADOS en
-    `horario-view.ts`. No se pasa por `data` porque la firma del diálogo es
-    `<boolean, AvisoPrevalidacion[]>` y ensancharla para transportar un número
-    obligaría a tocar todos sus usos.
+    S184: el tiempo lo elige quien genera, y la primera consecuencia repite la opción
+    marcada; no hay ninguna cifra fija que copiar del backend.
   -->
+  <fieldset class="tiempo">
+    <legend class="tiempo__titulo">Tiempo de cálculo</legend>
+    @for (m of opciones; track m) {
+      <label class="tiempo__opcion">
+        <input
+          type="radio"
+          name="minutos"
+          [value]="m"
+          [checked]="minutos() === m"
+          (change)="minutos.set(m)"
+        />
+        {{ m }} minutos
+      </label>
+    }
+    <p class="tiempo__ayuda">Con más tiempo es más probable que salga horario, y suele salir mejor.</p>
+  </fieldset>
+
   <ul class="consecuencias">
-    <li>Tarda unos diez minutos.</li>
+    <li>Tarda hasta {{ minutos() }} minutos.</li>
     <li>Sustituye el horario en el que estás trabajando.</li>
     <li>No se puede deshacer.</li>
   </ul>
