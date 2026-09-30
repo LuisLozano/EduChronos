@@ -295,4 +295,42 @@ describe('TutoriaDialogo', () => {
     expect(ref.close).not.toHaveBeenCalledWith(true);
     expect(service.reemplazar).not.toHaveBeenCalled();
   });
+
+  /**
+   * Filtro del selector de tutor (S185, condición 5 de O-pre-demo). DOCE profesores: con 10 o
+   * menos el filtro no se pinta. La consulta va por el NOMBRE, que es parte del texto visible:
+   * «ruiz» casa con P10 y P11 y NO con P05, el elegido.
+   */
+  describe('filtro de selectores (S185)', () => {
+    const PROFESORADO_12: Profesor[] = Array.from({ length: 12 }, (_, i) => ({
+      id: 100 + i,
+      codigo: `P${String(i + 1).padStart(2, '0')}`,
+      nombreCompleto: i === 9 ? 'Eva Ruiz' : i === 10 ? 'Juan Ruiz' : `Docente ${i + 1}`,
+    }));
+
+    it('tutor: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montar(of([]), of(PROFESORADO_12));
+      await fixture.whenStable();
+
+      const s = select()!;
+      s.value = 'P05';
+      s.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      const campo = raiz().querySelector<HTMLInputElement>('input[aria-label="Filtrar profesores"]');
+      expect(campo).not.toBeNull();
+      campo!.value = 'ruiz';
+      campo!.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+
+      expect(Array.from(select()!.options).map((o) => o.value).filter((v) => v !== '')).toEqual([
+        'P05', 'P10', 'P11',
+      ]);
+      const valor = (fixture.componentInstance as unknown as {
+        form: { controls: { principal: { value: string } } };
+      }).form.controls.principal.value;
+      expect(valor).toBe('P05');
+      expect(select()!.value).toBe('P05');
+    });
+  });
 });

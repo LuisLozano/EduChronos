@@ -20,6 +20,14 @@
           <label class="tutoria-dialogo__etiqueta" for="tutoria-principal">
             Tutor principal
           </label>
+          <app-filtro-opciones
+            #fTutor
+            etiqueta="profesores"
+            [opciones]="profesorado()"
+            [texto]="textoTutor"
+            [codigo]="codigoDe"
+            [seleccionados]="[form.controls.principal.value]"
+          />
           <select
             id="tutoria-principal"
             formControlName="principal"
@@ -29,7 +37,7 @@
                  GrupoForm: aquí '' no es "aún no has elegido", es el valor legítimo
                  "este grupo no tiene tutor principal", y elegirlo es como se quita. -->
             <option value="">— sin tutor —</option>
-            @for (p of profesorado(); track p.id) {
+            @for (p of fTutor.visibles(); track p.id) {
               <!-- El value es el CÓDIGO, nunca el id: el value de un <select> vuelve
                    como TEXTO, así que un id colado aquí pasaría el compilador y
                    moriría con un 404 al guardar. -->

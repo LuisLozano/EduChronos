@@ -8,6 +8,7 @@ import { ProfesorService } from '../../services/profesor.service';
 import { Grupo } from '../../models/grupo.model';
 import { Profesor } from '../../models/profesor.model';
 import { Tutoria, TutoriaRequest } from '../../models/tutoria.model';
+import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
 /**
  * En qué estado está la pantalla. UN valor, no banderas sueltas: mismo criterio que
@@ -68,7 +69,7 @@ export type EstadoTutoria = 'cargando' | 'cargado' | 'error';
  */
 @Component({
   selector: 'app-tutoria-dialogo',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './tutoria-dialogo.html',
   styleUrl: './tutoria-dialogo.css',
 })
@@ -88,6 +89,9 @@ export class TutoriaDialogo implements OnInit {
 
   /** Opciones del desplegable, en el orden en que llegan del backend. */
   protected readonly profesorado = signal<Profesor[]>([]);
+  /** Accesores del filtro de selectores (S185): código y texto visible de cada opción. */
+  protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
+  protected readonly textoTutor = (p: Profesor): string => `${p.codigo} — ${p.nombreCompleto}`;
 
   /**
    * Los `CO_TUTOR` tal como llegaron del `GET`. Se pintan en SOLO LECTURA y se reenvían

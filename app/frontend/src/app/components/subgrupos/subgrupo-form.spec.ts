@@ -214,4 +214,41 @@ describe('SubgrupoForm', () => {
     inst.guardar();
     http.expectNone('/api/subgrupos'); // no hubo POST: el guard de form.invalid frenó
   });
+
+  /**
+   * Filtro del selector de grupos (S185, condición 5 de O-pre-demo). DOCE grupos: con 10 o
+   * menos el filtro no se pinta. «g1» casa con G10, G11 y G12 y NO con G05, la elegida.
+   */
+  describe('filtro de selectores (S185)', () => {
+    const GRUPOS_12 = Array.from({ length: 12 }, (_, i) => ({
+      id: i + 1,
+      codigo: `G${String(i + 1).padStart(2, '0')}`,
+      nivel: '1ESO',
+      tipo: 'ORDINARIO',
+    }));
+
+    it('grupos: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montar(null, GRUPOS_12);
+      const raiz = fixture.nativeElement as HTMLElement;
+      const select = (): HTMLSelectElement => raiz.querySelector<HTMLSelectElement>('.subgrupo-form__multiple')!;
+
+      for (const o of Array.from(select().options)) {
+        o.selected = o.value === 'G05';
+      }
+      select().dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      const campo = raiz.querySelector<HTMLInputElement>('input[aria-label="Filtrar grupos"]');
+      expect(campo).not.toBeNull();
+      campo!.value = 'g1';
+      campo!.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+
+      expect(Array.from(select().options).map((o) => o.value)).toEqual(['G05', 'G10', 'G11', 'G12']);
+      const valor = (fixture.componentInstance as unknown as {
+        form: { controls: { grupos: { value: string[] } } };
+      }).form.controls.grupos.value;
+      expect(valor).toEqual(['G05']);
+    });
+  });
 });

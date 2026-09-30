@@ -768,4 +768,154 @@ describe('ActividadForm', () => {
     await fixture.whenStable();
     expect(ref.close).toHaveBeenCalledWith(true);
   });
+
+  /**
+   * Filtro de los seis selectores (S185, condición 5 de O-pre-demo). Listas de DOCE: con 10 o
+   * menos el filtro no se pinta. «x1» casa con x10, x11 y x12 y NO con x05, que es la elegida:
+   * la opción elegida tiene que seguir en el select aunque la consulta no la alcance.
+   */
+  describe('filtro de selectores (S185)', () => {
+    const doce = (prefijo: string): string[] =>
+      Array.from({ length: 12 }, (_, i) => `${prefijo}${String(i + 1).padStart(2, '0')}`);
+    const ASIGNATURAS_12 = doce('M').map((codigo, i) => ({ id: i + 1, codigo, nombreCompleto: codigo }));
+    const PROFESORES_12 = doce('P').map((codigo, i) => ({ id: i + 1, codigo, nombreCompleto: codigo }));
+    const AULAS_12 = doce('A').map((codigo, i) => ({
+      id: i + 1, codigo, tipo: 'ORDINARIA', capacidad: null, edificio: null, planta: null, sector: null,
+    }));
+    const SUBGRUPOS_12 = doce('S').map((codigo, i) => ({ id: i + 1, codigo, grupos: ['1ºA'] }));
+
+    /** Como `montar(null)`, con las cuatro listas de doce. */
+    function montarLargo(): void {
+      ref = { close: vi.fn() };
+      TestBed.configureTestingModule({
+        imports: [ActividadForm],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: DialogRef, useValue: ref },
+          { provide: DIALOG_DATA, useValue: null },
+        ],
+      });
+      fixture = TestBed.createComponent(ActividadForm);
+      http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      http.expectOne('/api/asignaturas').flush(ASIGNATURAS_12);
+      http.expectOne('/api/profesores').flush(PROFESORES_12);
+      http.expectOne('/api/aulas').flush(AULAS_12);
+      http.expectOne('/api/subgrupos').flush(SUBGRUPOS_12);
+      fixture.detectChanges();
+    }
+
+    const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    const sel = (css: string): HTMLSelectElement => raiz().querySelector<HTMLSelectElement>(css)!;
+    const campo = (css: string): HTMLInputElement | null => raiz().querySelector<HTMLInputElement>(css);
+    /** Valores de las opciones del select, sin las fijas (value ''). */
+    const valores = (s: HTMLSelectElement): string[] =>
+      Array.from(s.options).map((o) => o.value).filter((v) => v !== '');
+    const valorRaiz = (): unknown =>
+      (fixture.componentInstance as unknown as { form: { controls: Record<string, { value: unknown }> } })
+        .form.controls['asignatura'].value;
+    const valorPlaza = (control: string): unknown => instancia().plazas.at(0).controls[control].value;
+
+    async function escribir(el: HTMLInputElement | null, consulta: string): Promise<void> {
+      expect(el).not.toBeNull();
+      el!.value = consulta;
+      el!.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    }
+
+    async function elegirSimple(s: HTMLSelectElement, codigo: string): Promise<void> {
+      s.value = codigo;
+      s.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+    }
+
+    async function elegirMultiple(s: HTMLSelectElement, ...codigos: string[]): Promise<void> {
+      for (const o of Array.from(s.options)) {
+        o.selected = codigos.includes(o.value);
+      }
+      s.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+    }
+
+    const ASIG_RAIZ = 'form > label select[formControlName="asignatura"]';
+    const ASIG_PLAZA = '.actividad-form__plaza select[formControlName="asignatura"]';
+
+    it('asignatura: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      await elegirSimple(sel(ASIG_RAIZ), 'M05');
+      await escribir(campo('form > app-filtro-opciones input[aria-label="Filtrar asignaturas"]'), 'm1');
+
+      expect(valores(sel(ASIG_RAIZ))).toEqual(['M05', 'M10', 'M11', 'M12']);
+      expect(valorRaiz()).toBe('M05');
+      expect(sel(ASIG_RAIZ).value).toBe('M05');
+    });
+
+    it('asignatura de plaza: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      await elegirSimple(sel(ASIG_PLAZA), 'M05');
+      await escribir(campo('.actividad-form__plaza input[aria-label="Filtrar asignaturas"]'), 'm1');
+
+      expect(valores(sel(ASIG_PLAZA))).toEqual(['M05', 'M10', 'M11', 'M12']);
+      expect(valorPlaza('asignatura')).toBe('M05');
+      expect(sel(ASIG_PLAZA).value).toBe('M05');
+    });
+
+    it('aula fija: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      const fija = (): HTMLSelectElement => sel('select[formControlName="aulaFija"]');
+      await elegirSimple(fija(), 'A05');
+      await escribir(campo('input[aria-label="Filtrar aulas"]'), 'a1');
+
+      expect(valores(fija())).toEqual(['A05', 'A10', 'A11', 'A12']);
+      expect(valorPlaza('aulaFija')).toBe('A05');
+      expect(fija().value).toBe('A05');
+    });
+
+    it('aulas candidatas: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      raiz().querySelector<HTMLInputElement>('input[type="radio"][value="CANDIDATAS"]')!.click();
+      await fixture.whenStable();
+      const candidatas = (): HTMLSelectElement => sel('.actividad-form__candidatas');
+      await elegirMultiple(candidatas(), 'A05');
+      await escribir(campo('input[aria-label="Filtrar aulas candidatas"]'), 'a1');
+
+      expect(valores(candidatas())).toEqual(['A05', 'A10', 'A11', 'A12']);
+      expect(valorPlaza('aulasCandidatas')).toEqual(['A05']);
+    });
+
+    it('profesores: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      const profesores = (): HTMLSelectElement => sel('.actividad-form__profesores');
+      await elegirMultiple(profesores(), 'P05');
+      await escribir(campo('input[aria-label="Filtrar profesores"]'), 'p1');
+
+      expect(valores(profesores())).toEqual(['P05', 'P10', 'P11', 'P12']);
+      expect(valorPlaza('profesores')).toEqual(['P05']);
+    });
+
+    it('subgrupos: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      montarLargo();
+      const subgrupos = (): HTMLSelectElement => sel('.actividad-form__subgrupos');
+      await elegirMultiple(subgrupos(), 'S05');
+      await escribir(campo('input[aria-label="Filtrar subgrupos"]'), 's1');
+
+      expect(valores(subgrupos())).toEqual(['S05', 'S10', 'S11', 'S12']);
+      expect(valorPlaza('subgrupos')).toEqual(['S05']);
+    });
+
+    it('subgrupos: elegir otra con el filtro puesto conserva la primera', async () => {
+      montarLargo();
+      const subgrupos = (): HTMLSelectElement => sel('.actividad-form__subgrupos');
+      await elegirMultiple(subgrupos(), 'S05');
+      await escribir(campo('input[aria-label="Filtrar subgrupos"]'), 's1');
+
+      // Como el usuario: marca S10 sin tocar lo ya marcado, y el select emite `change`.
+      Array.from(subgrupos().options).find((o) => o.value === 'S10')!.selected = true;
+      subgrupos().dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      expect(new Set(valorPlaza('subgrupos') as string[])).toEqual(new Set(['S05', 'S10']));
+    });
+  });
 });

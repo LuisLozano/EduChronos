@@ -12,6 +12,7 @@ import { SubgrupoService } from '../../services/subgrupo.service';
 import { GrupoService } from '../../services/grupo.service';
 import { Subgrupo, SubgrupoRequest } from '../../models/subgrupo.model';
 import { Grupo } from '../../models/grupo.model';
+import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
 /** Validator: un `string[]` debe tener al menos un elemento. `Validators.required`
  *  no sirve para esto: da por válido un array vacío (lo trata como valor presente).
@@ -56,7 +57,7 @@ function arrayNoVacio(control: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-subgrupo-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './subgrupo-form.html',
   styleUrl: './subgrupo-form.css',
 })
@@ -73,6 +74,8 @@ export class SubgrupoForm implements OnInit {
 
   /** Opciones del multiselect, en el orden en que llegan del backend. */
   protected readonly grupos = signal<Grupo[]>([]);
+  /** Código de cada opción, para el filtro de selectores (S185). */
+  protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
 
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],

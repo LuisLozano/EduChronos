@@ -2276,4 +2276,67 @@ describe('contenedor del horario', () => {
     expect(horario.getVigente).not.toHaveBeenCalled();
     expect(horario.getProyeccion).toHaveBeenCalledWith(3);
   });
+
+  /**
+   * Filtro del selector de entidad (S185, condición 5 de O-pre-demo). Proyección propia de DOCE
+   * sesiones, cada una con su grupo (G01…G12) y su profesor (P01…P12): con 10 o menos entidades
+   * el filtro no se pinta, y las DOS vistas tienen que pasar del umbral para que «cambiar de
+   * vista limpia el filtro» lo mida con el campo todavía en pantalla.
+   */
+  describe('filtro de selectores (S185)', () => {
+    const dos = (i: number): string => String(i + 1).padStart(2, '0');
+    const SESIONES_12: SesionVista[] = Array.from({ length: 12 }, (_, i) => ({
+      ...fila(i + 1, `Act${dos(i)}`, 1, (i % 5) + 1, Math.floor(i / 5) + 1),
+      grupos: [`G${dos(i)}`],
+      profesores: [`P${dos(i)}`],
+    }));
+
+    const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    /** El de entidad es el select del <label> que sigue al filtro. */
+    const selectEntidad = (): HTMLSelectElement =>
+      raiz().querySelector<HTMLSelectElement>('app-filtro-opciones + label select')!;
+    /** El de vista es el que ofrece las tres vistas. */
+    const selectVista = (): HTMLSelectElement =>
+      Array.from(raiz().querySelectorAll<HTMLSelectElement>('select')).find((s) =>
+        Array.from(s.options).some((o) => o.value === 'profesor'),
+      )!;
+    const campo = (): HTMLInputElement | null =>
+      raiz().querySelector<HTMLInputElement>('app-filtro-opciones input');
+
+    async function escribir(consulta: string): Promise<void> {
+      const el = campo();
+      expect(el).not.toBeNull();
+      el!.value = consulta;
+      el!.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    }
+
+    it('entidad: filtrar conserva visible la elegida y no cambia el valor', async () => {
+      await montarConSesiones(SESIONES_12);
+      selectEntidad().value = 'G05';
+      selectEntidad().dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      expect(campo()?.getAttribute('aria-label')).toBe('Filtrar grupos');
+      await escribir('g1');
+
+      expect(Array.from(selectEntidad().options).map((o) => o.value)).toEqual(['G05', 'G10', 'G11', 'G12']);
+      expect((fixture.componentInstance as unknown as { entidad(): string }).entidad()).toBe('G05');
+      expect(selectEntidad().value).toBe('G05');
+    });
+
+    it('entidad: cambiar de vista limpia el filtro', async () => {
+      await montarConSesiones(SESIONES_12);
+      await escribir('g1');
+
+      selectVista().value = 'profesor';
+      selectVista().dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      expect(campo()?.value).toBe('');
+      expect(Array.from(selectEntidad().options).map((o) => o.value)).toEqual(
+        Array.from({ length: 12 }, (_, i) => `P${dos(i)}`),
+      );
+    });
+  });
 });

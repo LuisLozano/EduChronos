@@ -10,6 +10,14 @@
         <span class="subgrupo-form__error">El código es obligatorio.</span>
       }
     </label>
+    <app-filtro-opciones
+      #fGrupos
+      etiqueta="grupos"
+      [opciones]="grupos()"
+      [texto]="codigoDe"
+      [codigo]="codigoDe"
+      [seleccionados]="seleccionados()"
+    />
     <label class="subgrupo-form__campo">
       <span class="subgrupo-form__etiqueta">Grupos</span>
       <select
@@ -17,7 +25,7 @@
         class="subgrupo-form__input subgrupo-form__multiple"
         (change)="alSeleccionar($event)"
       >
-        @for (g of grupos(); track g.id) {
+        @for (g of fGrupos.visibles(); track g.id) {
           <option [value]="g.codigo" [selected]="seleccionados().includes(g.codigo)">
             {{ g.codigo }}
           </option>

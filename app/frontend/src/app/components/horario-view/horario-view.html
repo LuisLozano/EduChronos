@@ -17,10 +17,18 @@
     </select>
   </label>
 
+  <app-filtro-opciones
+    #fEntidad
+    [etiqueta]="vista() === 'grupo' ? 'grupos' : vista() === 'profesor' ? 'profesores' : 'aulas'"
+    [opciones]="entidades()"
+    [texto]="identidad"
+    [codigo]="identidad"
+    [seleccionados]="[entidad()]"
+  />
   <label>
     {{ vista() }}
     <select (change)="cambiarEntidad($any($event.target).value)">
-      @for (e of entidades(); track e) {
+      @for (e of fEntidad.visibles(); track e) {
         <option [value]="e" [selected]="e === entidad()">{{ e }}</option>
       }
     </select>

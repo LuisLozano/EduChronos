@@ -1,4 +1,4 @@
-import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
@@ -23,6 +23,7 @@ import { AjusteInstancia, HorarioGrid } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 import { DatosGenerando, GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
+import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
 /**
  * Contenedor de las tres vistas: carga la proyección del horario `{id}` (param
@@ -39,7 +40,7 @@ import { DatosGenerando, GenerandoDialogo } from '../generando-dialogo/generando
  */
 @Component({
   selector: 'app-horario-view',
-  imports: [HorarioGrid, PanelPrevalidacion],
+  imports: [HorarioGrid, PanelPrevalidacion, FiltroOpciones],
   templateUrl: './horario-view.html',
   styleUrl: './horario-view.css',
 })
@@ -60,6 +61,9 @@ export class HorarioView implements OnDestroy {
   protected readonly sinHorario = signal(false);
   protected readonly vista = signal<Vista>('grupo');
   protected readonly entidad = signal<string>('');
+  /** Código y texto de una entidad de la vista: la propia cadena (filtro de selectores, S185). */
+  protected readonly identidad = (e: string): string => e;
+  private readonly filtroEntidad = viewChild<FiltroOpciones<string>>('fEntidad');
 
   /**
    * Instancias pinadas en TODO el horario, de la clave de {@link clavePin} al
@@ -776,6 +780,7 @@ export class HorarioView implements OnDestroy {
 
   protected cambiarVista(v: Vista): void {
     this.vista.set(v);
+    this.filtroEntidad()?.limpiar();
     this.entidad.set(this.entidades()[0] ?? '');
   }
 

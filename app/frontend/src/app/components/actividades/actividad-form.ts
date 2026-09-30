@@ -27,6 +27,7 @@ import { Asignatura } from '../../models/asignatura.model';
 import { Aula } from '../../models/aula.model';
 import { Profesor } from '../../models/profesor.model';
 import { Subgrupo } from '../../models/subgrupo.model';
+import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
 /** Validator: un `string[]` debe tener al menos un elemento. `Validators.required` no
  *  sirve para esto: da por válido un array vacío (lo trata como valor presente).
@@ -121,7 +122,7 @@ type PlazaFila = FormGroup<{
  */
 @Component({
   selector: 'app-actividad-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './actividad-form.html',
   styleUrl: './actividad-form.css',
 })
@@ -149,6 +150,10 @@ export class ActividadForm implements OnInit {
   protected readonly subgrupos = signal<Subgrupo[]>([]);
 
   protected readonly patrones = PATRONES_TEMPORALES;
+
+  /** Accesores del filtro de selectores (S185): código y texto visible de cada opción. */
+  protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
+  protected readonly textoAula = (a: Aula): string => `${a.codigo} (${a.tipo})`;
 
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],

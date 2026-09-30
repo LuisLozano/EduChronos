@@ -16,11 +16,19 @@
       }
     </label>
 
+    <app-filtro-opciones
+      #fAsignatura
+      etiqueta="asignaturas"
+      [opciones]="asignaturas()"
+      [texto]="codigoDe"
+      [codigo]="codigoDe"
+      [seleccionados]="[form.controls.asignatura.value]"
+    />
     <label class="actividad-form__campo">
       <span class="actividad-form__etiqueta">Asignatura (opcional)</span>
       <select formControlName="asignatura" class="actividad-form__input">
         <option value="">— varias (una por plaza) —</option>
-        @for (a of asignaturas(); track a.id) {
+        @for (a of fAsignatura.visibles(); track a.id) {
         <option [value]="a.codigo">{{ a.codigo }}</option>
         }
       </select>
@@ -78,11 +86,19 @@
       <fieldset class="actividad-form__plaza" [formGroupName]="i">
         <legend class="actividad-form__plaza-titulo">Plaza {{ i + 1 }}</legend>
 
+        <app-filtro-opciones
+          #fAsignaturaPlaza
+          etiqueta="asignaturas"
+          [opciones]="asignaturas()"
+          [texto]="codigoDe"
+          [codigo]="codigoDe"
+          [seleccionados]="[fila.controls.asignatura.value]"
+        />
         <label class="actividad-form__campo">
           <span class="actividad-form__etiqueta">Asignatura de la plaza</span>
           <select formControlName="asignatura" class="actividad-form__input">
             <option value="" disabled>— elige —</option>
-            @for (a of asignaturas(); track a.id) {
+            @for (a of fAsignaturaPlaza.visibles(); track a.id) {
             <option [value]="a.codigo">{{ a.codigo }}</option>
             }
           </select>
@@ -104,6 +120,14 @@
         </div>
 
         @if (fila.controls.modoAula.value === 'FIJA') {
+        <app-filtro-opciones
+          #fAulaFija
+          etiqueta="aulas"
+          [opciones]="aulas()"
+          [texto]="textoAula"
+          [codigo]="codigoDe"
+          [seleccionados]="[fila.controls.aulaFija.value]"
+        />
         <label class="actividad-form__campo">
           <span class="actividad-form__etiqueta">Aula fija</span>
           <select
@@ -111,7 +135,7 @@
             class="actividad-form__input actividad-form__aula-fija"
           >
             <option value="" disabled>— elige —</option>
-            @for (aula of aulas(); track aula.id) {
+            @for (aula of fAulaFija.visibles(); track aula.id) {
             <option [value]="aula.codigo">{{ aula.codigo }} ({{ aula.tipo }})</option>
             }
           </select>
@@ -120,6 +144,14 @@
           }
         </label>
         } @else {
+        <app-filtro-opciones
+          #fAulasCandidatas
+          etiqueta="aulas candidatas"
+          [opciones]="aulas()"
+          [texto]="textoAula"
+          [codigo]="codigoDe"
+          [seleccionados]="seleccionados(fila, 'aulasCandidatas')"
+        />
         <label class="actividad-form__campo">
           <span class="actividad-form__etiqueta">Aulas candidatas</span>
           <select
@@ -127,7 +159,7 @@
             class="actividad-form__input actividad-form__multiple actividad-form__candidatas"
             (change)="alSeleccionar($event, fila, 'aulasCandidatas')"
           >
-            @for (aula of aulas(); track aula.id) {
+            @for (aula of fAulasCandidatas.visibles(); track aula.id) {
             <option
               [value]="aula.codigo"
               [selected]="seleccionados(fila, 'aulasCandidatas').includes(aula.codigo)"
@@ -142,6 +174,14 @@
         </label>
         }
 
+        <app-filtro-opciones
+          #fProfesores
+          etiqueta="profesores"
+          [opciones]="profesores()"
+          [texto]="codigoDe"
+          [codigo]="codigoDe"
+          [seleccionados]="seleccionados(fila, 'profesores')"
+        />
         <label class="actividad-form__campo">
           <span class="actividad-form__etiqueta">Profesores</span>
           <select
@@ -149,7 +189,7 @@
             class="actividad-form__input actividad-form__multiple actividad-form__profesores"
             (change)="alSeleccionar($event, fila, 'profesores')"
           >
-            @for (p of profesores(); track p.id) {
+            @for (p of fProfesores.visibles(); track p.id) {
             <option
               [value]="p.codigo"
               [selected]="seleccionados(fila, 'profesores').includes(p.codigo)"
@@ -163,6 +203,14 @@
           }
         </label>
 
+        <app-filtro-opciones
+          #fSubgrupos
+          etiqueta="subgrupos"
+          [opciones]="subgrupos()"
+          [texto]="codigoDe"
+          [codigo]="codigoDe"
+          [seleccionados]="seleccionados(fila, 'subgrupos')"
+        />
         <label class="actividad-form__campo">
           <span class="actividad-form__etiqueta">Subgrupos</span>
           <select
@@ -170,7 +218,7 @@
             class="actividad-form__input actividad-form__multiple actividad-form__subgrupos"
             (change)="alSeleccionar($event, fila, 'subgrupos')"
           >
-            @for (s of subgrupos(); track s.id) {
+            @for (s of fSubgrupos.visibles(); track s.id) {
             <option
               [value]="s.codigo"
               [selected]="seleccionados(fila, 'subgrupos').includes(s.codigo)"
