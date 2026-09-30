@@ -135,4 +135,62 @@ describe('búsqueda de las listas de catálogo', () => {
       expect(coincide('', 'zzz')).toBe(false);
     });
   });
+
+  /**
+   * EL ORDINAL ESCRITO DISCRIMINA (S185, M4 del usuario). En este centro «1ºB» es ESO
+   * y «1B» es Bachillerato: quien escribe el ordinal está distinguiendo, quien no lo
+   * escribe sigue encontrando los dos (la regla de S124). La decisión es por PARTE de
+   * la consulta, y el «°» de hoja de cálculo cuenta como «º».
+   */
+  describe('ordinal escrito (S185)', () => {
+    it('(B1) «1ºB» no casa con «1B-A-Bio» y sí con «1ºB-Completo»', () => {
+      expect(coincide('1B-A-Bio', '1ºB')).toBe(false);
+      expect(coincide('1ºB-Completo', '1ºB')).toBe(true);
+    });
+
+    it('(B2) «1B» sin ordinal casa con «1B-A-Bio» y con «1ºB-Completo»', () => {
+      expect(coincide('1B-A-Bio', '1B')).toBe(true);
+      expect(coincide('1ºB-Completo', '1B')).toBe(true);
+    });
+
+    /** Por parte: «3ºA» discrimina, «Di» no lleva ordinal y se compara como siempre. */
+    it('(B3) «3ºA Di» casa con «3ºADi-ATEDU-EFI1» y no con «3ºA-Completo»', () => {
+      expect(coincide('3ºADi-ATEDU-EFI1', '3ºA Di')).toBe(true);
+      expect(coincide('3ºA-Completo', '3ºA Di')).toBe(false);
+    });
+
+    /** Un ordinal solo se normaliza a nada sin el flag: la parte se descarta y no filtra. */
+    it('(B4) «º» sola no filtra: casa con «2B-A-Bio»', () => {
+      expect(coincide('2B-A-Bio', 'º')).toBe(true);
+    });
+
+    it('(B5) normaliza conserva «º» y «ª» con el flag y los quita sin él', () => {
+      expect(normaliza('Téllez 1ºB 2ªC', true)).toBe('TELLEZ1ºB2ªC');
+      expect(normaliza('Téllez 1ºB 2ªC')).toBe('TELLEZ1B2C');
+    });
+
+    /**
+     * Una regex con `/g` en `.test()` guarda `lastIndex` entre llamadas: la segunda
+     * empezaría a mitad de cadena y dejaría de ver el ordinal. El resultado tiene que
+     * ser el mismo en cada vuelta. El último aserto es el que lo mide de verdad: entre
+     * llamadas, el `replace` de `normaliza` deja `lastIndex` a 0, pero entre las PARTES
+     * de una misma consulta nada lo limpia, y «1ºB» se compararía sin ordinal.
+     */
+    it('(B6) llamadas y partes repetidas son estables', () => {
+      for (let vuelta = 0; vuelta < 3; vuelta++) {
+        expect(coincide('1B-A-Bio', '1ºB')).toBe(false);
+        expect(coincide('1ºB-Completo', '1ºB')).toBe(true);
+      }
+      expect(coincide('1ºA-1B', '1ºA 1ºB')).toBe(false);
+    });
+
+    it('(B7) «4ºc» casa con «4ºC-Rel»: la caja no importa con ordinal', () => {
+      expect(coincide('4ºC-Rel', '4ºc')).toBe(true);
+    });
+
+    it('(B8) «1°B» con signo de grado discrimina como «1ºB»', () => {
+      expect(coincide('1B-A-Bio', '1\u00B0B')).toBe(false);
+      expect(coincide('1ºB-Completo', '1\u00B0B')).toBe(true);
+    });
+  });
 });
