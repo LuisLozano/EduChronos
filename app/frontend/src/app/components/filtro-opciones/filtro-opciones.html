@@ -1,0 +1,13 @@
+@if (activo()) {
+  <div class="filtro-opciones">
+    <input
+      type="search"
+      class="filtro-opciones__campo"
+      placeholder="Filtrar…"
+      [attr.aria-label]="'Filtrar ' + etiqueta()"
+      [value]="consulta()"
+      (input)="alEscribir($event)"
+    />
+    <span class="filtro-opciones__recuento" aria-live="polite">{{ visibles().length }} de {{ total() }}</span>
+  </div>
+}
