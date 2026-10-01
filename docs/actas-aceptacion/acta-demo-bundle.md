@@ -12,6 +12,7 @@ ni nombres ni disponibilidades.
 - **Versión:** Release `v0.1.0`, commit `a7846b69146fc64f57a14060da99eb00f569ea44`,
   zip `Educhronos-win.zip` de 176.078.736 B,
   sha256 `7afc5b8c97e2eb8f2484c612cfdab72cf694b01deb5cecb82fdf04131c9fb170`.
+  Desde S187, `v0.2.0` (zip `be072519…a2a228a7`, decisión L).
 - **Máquina:** máquina virtual `Win11` de S163 (VirtualBox, 3 CPU, 8192 MB). Windows 11 Pro,
   versión 10.0.26200.9457 (`Get-CimInstance Win32_OperatingSystem` y `ver`, S181).
 - **Cuenta:** `demo` (`educhronos\demo`), creada en S181 con `net user demo /add`; `whoami /groups`
@@ -24,9 +25,15 @@ ni nombres ni disponibilidades.
   nueva con la base colocada, sin abrir). La demo arranca de `s181-demo-lista`. Tomadas en S181 con la VM
   apagada: `s177-estado` (`092bcb0d-5ea9-4af3-b757-9e159e53e85c`) y, colgando de ella,
   `s181-demo-lista` (`89411b3e-9921-4a7d-8f8a-fc55aed8dc82`), la actual.
+  En S187 se toma `s187-demo-lista` (`a464f499-85de-4ef7-a7b9-8c14c8ac6295`), con la VM apagada,
+  colgando de `s181-demo-lista`: la misma cuenta y la misma base sin abrir, con `v0.2.0` en lugar de
+  `v0.1.0`. Desde S187 la demo arranca de `s187-demo-lista`.
 - **Programa:** extraído con el Explorador en
   `C:\Users\demo\Downloads\Educhronos-win\Educhronos\Educhronos.exe`; ni el zip ni el `.exe` llevan
   `Zone.Identifier`.
+  Desde S187, `v0.2.0` (zip `be072519…a2a228a7`, jar `7e243fb5…e4b155b5`) en la misma ruta, tras
+  retirar `v0.1.0`; ni el zip ni el `.exe` llevan `Zone.Identifier`. El jar conserva el nombre
+  `app-0.1.0-SNAPSHOT.jar` (`D-version-invisible`): la versión se identifica por su sha256.
 - **Ids de horario:** 2025/2026, id 1 (el del banco); 2026/2027, PENDIENTE (en el ensayo de S182 fue el id 1).
 
 ## Resumen por condición
@@ -61,6 +68,21 @@ Medido en S181.
    `/home/luis/educhronos-vm`), con el md5 comprobado en los dos lados. En este sentido la marca de
    Internet no importa.
 
+**Actualización a `v0.2.0` (S187).** Desde `s181-demo-lista`. Linux: el zip de `v0.2.0` ya estaba en
+el USB, en `s186-f3/`, y `sha256sum -c` da OK; la raíz del USB y `EDUCHRONOS-S181/` conservan zips
+de `v0.1.0`, así que en Windows el zip se toma siempre por su ruta completa
+(`<letra>:\s186-f3\Educhronos-win.zip`). La base no viaja: ya está en la instantánea, y en Windows
+se comprueban su md5 (`DFA4C077…`) y que no hay `curso-abierto`. Windows: sha256 del zip en el USB y
+de su copia en Descargas (`BE072519…`), y `Get-Item -Stream *` sólo da `:$DATA`; se retiran
+`Downloads\Educhronos-win\`, `Educhronos-win.zip` y su `.sha256` de `v0.1.0`, y se extrae `v0.2.0`
+con el Explorador en la misma ruta. Es la actualización de `docs/empaquetado.md:101-107` con dos
+pasos omitidos: el respaldo de datos (paso 2), porque la instantánea ya lo es, y abrir la aplicación
+para comprobar los cursos (paso 4), porque abriría la base, que la condición 1 exige sin abrir. Así
+queda un único `Educhronos.exe` en el perfil, el que encuentra la búsqueda de Inicio (en S186 se
+extrajo al lado, en `Descargas\s186\`, que para la demo dejaría dos). Comprobación final con la
+aplicación sin abrir: un único `Educhronos.exe`, jar `7E243FB5…E4B155B5`, base `DFA4C077…` sola en
+su carpeta, sin `curso-abierto` y sin procesos.
+
 ## Reglas de observación
 
 1. La consigna se lee entera antes de empezar, igual en el ensayo y en la demo.
@@ -88,8 +110,13 @@ umbral o si ella la pide) y se anotan literales, con el minuto.
    curso nuevo».
 4. No sabe qué clases tenía BYG1: «El horario de 2025/2026 dice qué clases da cada profesor». Si
    sigue atascada otros 5 minutos: «Son las de ByG de 1º».
+5. La generación falla y vuelve a intentarlo con el mismo tiempo: «Puedes darle más tiempo».
+   (S187: con 10 minutos salió horario en 1 de 1 en S187 y en 1 de 3 en S182; el mensaje del 503
+   dice «Vuelve a intentarlo» sin nombrar el tiempo.)
 
-Se revisan cuando exista la versión de `O-pre-demo`.
+Se revisan cuando exista la versión de `O-pre-demo`. **Revisadas en S187 sobre `v0.2.0`:** siguen
+valiendo de la 1 a la 4 (T1 y T4 se hicieron por ese camino; en T5 el horario de 2025/2026 fue el
+rodeo, sin ayuda) y se añade la 5.
 
 ## Consigna
 
@@ -166,6 +193,59 @@ Resultado en datos, medido en Linux sobre las copias traídas (S182):
 
 Aclaraciones: ninguna. Cambios en la consigna: ninguno; queda congelada como está en este acta.
 
+## Ensayo sobre `v0.2.0` (S187)
+
+01/10/2026 (S187), en la VM desde `s187-demo-lista`, cuenta `demo`, `v0.2.0`. Ejecuta el
+desarrollador y guía el arquitecto, con las mismas reglas y la misma consigna que en S182. Se ensaya
+entera (condición 1), no sólo las tareas que tocan los cambios de `v0.2.0` (T2, T5, T6, T8 y T9):
+las tareas van encadenadas y el texto de la condición pide el ensayo entero. Horas de la VM. La
+aplicación arrancó a las 07:24:47 (`educhronos.lock`), antes de la hora anotada para T1.
+
+| Tarea | Inicio | Fin | QUÉ claro | Notas |
+|---|---|---|---|---|
+| T1 | 07:24:47 | 07:27:45 | sí | Encontrado en Inicio; sin avisos de Windows. Hora anotada al empezar, 07:25:36, ya con la aplicación abierta |
+| T2 | 07:29:45 | 07:31:40 | sí | Filtro de los desplegables usado en Profesor y Grupo; con «4º» encontró 4ºC a la primera |
+| T3 | 07:34:10 | 07:35:11 | sí | Cuatro descargas en Descargas, con los nombres de S182; el navegador no preguntó nada |
+| T4 | 07:41:05 | 07:42:32 | sí | 2025/2026 archivado como «2025/2026»; nuevo «2026/2027» en `curso-2026-2027.db`; sin mensajes |
+| T5 | 07:48:29 | 07:55:57 | sí | 409 «No se puede borrar: referenciada por 4 plaza(s)» al borrar BYG1 antes de reasignar. Sin ayuda: volvió al 2025/2026, vio en su horario que BYG1 daba en 1º y filtró Actividades por «ByG-1º» (`D-entidad-sin-actividades`). BYG4 no existía al editar la primera actividad; la creó y siguió. Selector de profesor con filtro, sin problemas |
+| T6 | 08:06:15 | 08:09:42 | sí | El filtro «4ºC» da 11 de 219 y omite `Bloque-ATEDU_Rel-4ESO`, como en S182 (`D-filtro-por-codigo`) |
+| T7 | 08:16:24 | 08:18:41 | sí | Sin mensajes. Observación sin alta: en el diálogo de disponibilidad, «Guardar» está siempre habilitado, haya cambios o no |
+| T8 | 08:24:06 | 08:37:06 | sí | Diálogo con 10 minutos por defecto; la barra mostró «de 10:00». Comprobados en las vistas BYG4 y el Latín de 4ºC |
+| T9 | 08:42:17 | 08:43:24 | sí | — |
+
+Generación en el curso 2026/2027, un solo intento:
+
+| Intento | Pulsa | Resultado | Salida |
+|---|---|---|---|
+| I1 | 08:25:18 | 08:35:20 | Horario 1: FEASIBLE, objetivo 233, 602,8 s según la base (`fecha_generacion` menos el instante del nombre), con los 10 minutos por defecto |
+
+La hora de pulsar es la de la base; la anotada en PowerShell justo después fue 08:25:21. Una corrida
+no es una medida (`D-generacion-no-reproducible`): en S182, 1 de 3 a 600 s. No hay captura del
+resultado (`T8-resultado.png` no se guardó); el horario generado aparece en `T8-BYG4.png` y
+`T8-4C.png` («Horario 01/10/2026 08:25»).
+
+Resultado en datos, medido en Linux sobre las copias traídas (S187):
+- Transporte de vuelta por la carpeta compartida a `E:\medidas\s187\`: ocho ficheros copiados uno a
+  uno con la aplicación cerrada («Salir»), con el md5 calculado en Windows sobre el original e igual
+  en Linux.
+- `integrity_check` ok y `foreign_key_check` vacío en las dos bases. `educhronos.db` tiene el mismo
+  md5 que en S182.
+- 2025/2026: 0/0 frente al banco en 21 tablas; `curso`, una fila, «2025/2026», archivada. Las cuatro
+  descargas pasan el oráculo (`docs/empaquetado.md:455-460`) y la leyenda
+  (`docs/guion-aceptacion.md:563-566`): grupo 1285/0/0 en 28 páginas, profesor 835/0/0 en 59, aula
+  819/0/0 en 44 con 0 páginas vacías con leyenda, y CSV «OK: las tres vistas coinciden». El CSV es
+  idéntico al de S182; los PDF difieren en md5 (no investigado; probablemente por la fecha que
+  llevan dentro).
+- 2026/2027: exactamente los cambios de la consigna y ninguno más, como en S182.
+- Horario 1 del 2026/2027: BYG4 con 12 sesiones, 3 por grupo de 1ºA a 1ºD y sin repetir día; 4ºC con
+  sus 30 tramos ocupados (53 sesiones contando las optativas en paralelo, igual que en el banco y en
+  S182), LAT 2 y GeH 4; ING1 con 0 el viernes y 4 cada día de lunes a jueves; ninguna sesión en un
+  tramo DURA; FIS2 con 1 sesión en el primer tramo (preferencia blanda; 2 en S182).
+- Log sin ERROR ni Exception; cierre ordenado con «Salir».
+
+Aclaraciones: ninguna. Ayudas: ninguna. Cambios en la consigna: ninguno. Material en
+`/home/luis/educhronos-aceptacion/s187/`.
+
 ## Arranque (condición 2)
 
 CUMPLIDA en S181, en la preparación (22:16, hora de la VM). Doble clic en `Educhronos.exe`: se abre
@@ -182,6 +262,7 @@ PENDIENTE: las cuatro descargas y el oráculo (se espera 1285/0/0, 835/0/0, 819/
 Ensayada en S182: las cuatro descargas pasan el oráculo contra la `educhronos.db` de la VM. Grupo
 1285/0/0 en 28 páginas, profesor 835/0/0 en 59, aula 819/0/0 en 44 con 0 páginas vacías con
 leyenda, y CSV «OK: las tres vistas coinciden». La condición se cumple en la demo.
+Ensayada otra vez en S187 sobre `v0.2.0`, con las mismas cifras.
 
 ## Ejercicio de muestra (condición 4)
 
