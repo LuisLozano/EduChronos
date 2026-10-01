@@ -40,7 +40,7 @@ ni nombres ni disponibilidades.
 
 | Condición | Resultado | Sección |
 |---|---|---|
-| 1. Preparación en la VM | CUMPLIDA (S182) sobre `v0.1.0`; se rehará sobre la versión de `O-pre-demo` (decisión L) | Cabecera, Procedimiento de transporte, Ensayo |
+| 1. Preparación en la VM | CUMPLIDA (S182) sobre `v0.1.0`; se rehará sobre la versión de `O-pre-demo` (decisión L) **CUMPLIDA (S187) sobre `v0.2.0`**: ensayo entero desde `s187-demo-lista`, sin aclaraciones ni ayudas (sección «Ensayo sobre `v0.2.0` (S187)»). | Cabecera, Procedimiento de transporte, Ensayo |
 | 2. Arranque | CUMPLIDA (S181) | Arranque |
 | 3. Consulta de 2025/2026 | PENDIENTE (ensayada en verde en S182) | Consulta de 2025/2026 |
 | 4. Ejercicio de muestra | PENDIENTE | Ejercicio de muestra |
@@ -199,7 +199,8 @@ Aclaraciones: ninguna. Cambios en la consigna: ninguno; queda congelada como est
 desarrollador y guía el arquitecto, con las mismas reglas y la misma consigna que en S182. Se ensaya
 entera (condición 1), no sólo las tareas que tocan los cambios de `v0.2.0` (T2, T5, T6, T8 y T9):
 las tareas van encadenadas y el texto de la condición pide el ensayo entero. Horas de la VM. La
-aplicación arrancó a las 07:24:47 (`educhronos.lock`), antes de la hora anotada para T1.
+aplicación arrancó a las 07:24:47 (fecha de `educhronos.lock` en el listado de PowerShell de T4; el
+fichero no se trajo, y el log empieza a las 07:24:49), antes de la hora anotada para T1.
 
 | Tarea | Inicio | Fin | QUÉ claro | Notas |
 |---|---|---|---|---|
