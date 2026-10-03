@@ -45,11 +45,11 @@ ni nombres ni disponibilidades.
 |---|---|---|
 | 1. Preparación en la VM | CUMPLIDA (S182) sobre `v0.1.0`; se rehará sobre la versión de `O-pre-demo` (decisión L). **CUMPLIDA (S187) sobre `v0.2.0`**: ensayo entero desde `s187-demo-lista`, sin aclaraciones ni ayudas (sección «Ensayo sobre `v0.2.0` (S187)»). | Cabecera, Procedimiento de transporte, Ensayo |
 | 2. Arranque | CUMPLIDA (S181) | Arranque |
-| 3. Consulta de 2025/2026 | PENDIENTE (ensayada en verde en S182 y en S187). **MEDIDA (S188), NO CUMPLIDA**: una descarga de cuatro (grupos, oráculo 1285/0/0) | Consulta de 2025/2026, Demo con la secretaria (S188) |
-| 4. Ejercicio de muestra | PENDIENTE. **MEDIDA (S188), NO CUMPLIDA**: T5 sin reasignación (4 actividades borradas, BYG4 sin plazas); duplicado, horas, disponibilidad y generación hechos; registro con las desviaciones de la sección de la demo | Ejercicio de muestra, Demo con la secretaria (S188) |
-| 5. Inventario de huecos | PENDIENTE. **No se hizo en S188**: el usuario intentará recuperar los datos más adelante (decisión F) | Inventario de huecos, Incidencias |
+| 3. Consulta de 2025/2026 | PENDIENTE (ensayada en verde en S182 y en S187). **MEDIDA (S188), NO CUMPLIDA**: una descarga de cuatro (grupos, oráculo 1285/0/0). **CUMPLIDA CON SALVEDAD (S189, decisión N)** | Consulta de 2025/2026, Demo con la secretaria (S188) |
+| 4. Ejercicio de muestra | PENDIENTE. **MEDIDA (S188), NO CUMPLIDA**: T5 sin reasignación (4 actividades borradas, BYG4 sin plazas); duplicado, horas, disponibilidad y generación hechos; registro con las desviaciones de la sección de la demo. **CUMPLIDA CON SALVEDAD (S189, decisión N)** | Ejercicio de muestra, Demo con la secretaria (S188) |
+| 5. Inventario de huecos | PENDIENTE. **No se hizo en S188**: el usuario intentará recuperar los datos más adelante (decisión F). **CUMPLIDA (S189)** | Inventario de huecos, Incidencias |
 | 6. Base de partida | CUMPLIDA (S181) | Base de partida |
-| 7. Acta | PENDIENTE. **EN CURSO (S188)**: acta escrita, falta el inventario | Este documento |
+| 7. Acta | PENDIENTE. **EN CURSO (S188)**: acta escrita, falta el inventario. **CUMPLIDA (S189)** | Este documento |
 
 ## Procedimiento de transporte
 
@@ -368,8 +368,37 @@ diálogo de `v0.2.0`. Sin inicio ni final por tarea: ver las desviaciones.
 
 ## Inventario de huecos (condición 5)
 
-PENDIENTE: lo que entrega a la empresa, por tipo de dato, cada uno como «ya está en Educhronos»,
-«se puede meter» o «no se puede».
+Inventario de huecos (S189). Fuente: la lista que la secretaria dio directamente al usuario,
+transcrita en S189 (decisión F). La prematrícula 2025/26 se aportó solo como ayuda y no se usó para
+clasificar. El horario de guardias 2025/2026 (`docs_extra/Ejemplos_SJ/HorariosProfesores/Horarios de guardias.pdf`, no
+versionado, sha256 `8791a132529bb837dcfe65ed97f22d3eed98186f7d2e4df3db45676014c53694`) es la prueba de la fila 9.
+Criterio (decisión O): «meter» es por pantalla; «ya está» quiere decir representado y presente en la
+base de partida (s137); «se puede meter», representable por pantalla y ausente; «no se puede», ese
+dato no se guarda por pantalla, y se anota si su efecto se expresa de otro modo. Pruebas: lectura de
+`v0.2.0` en `s189/f1/informe.md`.
+
+| # | Tipo de dato que entrega | Clasificación | Nota | Deuda |
+|---|---|---|---|---|
+| 1 | Niveles, grupos y materias con sus horas | Ya está | 8 niveles, 28 grupos, 219 actividades; las horas viven en cada actividad | — |
+| 2 | Bloques de optativas «elige 1 de N» | Ya está | 39 actividades de varias plazas | — |
+| 2b | «Hasta completar 4 horas» (Bachillerato) | No se puede | No hay alumnos; se parte de subgrupos ya formados | `D-matricula-fuera` |
+| 3 | Itinerarios | No se puede | Sin concepto; su efecto está repartido en subgrupos | `D-matricula-fuera` |
+| 4 | Religión o Atención Educativa | Ya está | 12 bloques | — |
+| 5 | Alumnos matriculados por optativa | No se puede | Ningún campo cuenta alumnos | `D-matricula-fuera` |
+| 6 | Asignaturas de cada profesor | Ya está | A través de sus plazas, 59 de 59 | — |
+| 7 | Disponibilidad de los profesores | Se puede meter | Por pantalla; la base no tiene ninguna | — |
+| 8 | Horas de clase por profesor | No se puede | Solo derivada de las plazas; solo se avisa por exceso | `D-totales-sin-contraste` |
+| 9 | Guardias: número por profesor y calendario | No se puede | Sin concepto ni cobertura por tramo; el recreo no admite sesiones | `D-guardias-sin-modelo` |
+| 10 | Uso de las aulas | Ya está | Tipo en las 44 aulas, con `D-aula-tipo-sin-uso-real` | — |
+| 10b | Capacidad de las aulas | Se puede meter | Se guarda, pero nada la usa | — |
+| 11 | Tipo de aula exigido por asignatura | No se puede | Solo por API; el aula de cada plaza sí está | `D-S103-compat` |
+| 12 | Cargos del equipo directivo y jefaturas de estudio | No se puede | Solo existe la tutoría | `D-cargos-sin-modelo` |
+| 13 | Reuniones semanales de tutores y de equipo directivo | Se puede meter, con rodeo | Actividad de una plaza con sus profesores y sin subgrupos; caen en horas lectivas | `D-cargos-sin-modelo` |
+| 14 | Tutores | Ya está | 28 tutores principales | — |
+
+Recuento: 16 filas; 6 «ya está», 3 «se puede meter», 7 «no se puede». Cada «no se puede» tiene ficha
+en §4 (R-incidencia). Las ayudas de la condición 4 se dieron de alta en S188.
+
 **S188:** no se hizo. El usuario intentará recuperar los datos más adelante, con el paquete de 2026/2027
 o con lo que ella cuente (decisión F).
 
@@ -398,6 +427,16 @@ Ya registradas, con nota de S188:
 10. `D-actividad-ux`: el manejo de actividades le resultó engorroso, y sus nombres, confusos.
 11. `D-curso-sin-borrado`: preguntó si se pueden borrar cursos anteriores (T9).
 12. `D-tiempo-elegido-no-se-recuerda`: revisada con la demo, no se dio.
+
+**S189, del inventario** (todas salen de `O-demo-bundle`). Nuevas, con sede en el objetivo (3):
+13. `D-matricula-fuera`: la matrícula no entra en Educhronos: ni alumnos por optativa, ni
+    itinerarios, ni preferencias (inventario (S189), filas 2b, 3 y 5).
+14. `D-guardias-sin-modelo`: las guardias no son un dato: ni su número por profesor, ni su cobertura
+    por tramo, ni las de recreo (inventario (S189), fila 9).
+15. `D-totales-sin-contraste`: los totales que entrega el centro no se pueden declarar ni contrastar
+    con lo configurado (inventario (S189), fila 8).
+16. `D-cargos-sin-modelo`: no hay cargos, y sus reuniones solo entran montadas a mano (inventario
+    (S189), filas 12 y 13).
 
 ## Base de partida (condición 6)
 
@@ -449,6 +488,9 @@ log de la VM tras «Salir»), `descargas/` (las cuatro del horario 1 de 2025/202
 ficheros traídos, `md5-windows.txt`, la salida de Windows y las medidas) y `f3/` (M2 de solo
 lectura sobre `v0.2.0`), cada una con su `MANIFIESTO.sha256`. La instantánea `s188-demo-hecha` guarda
 el estado de la VM tras la demo (S188).
+`/home/luis/educhronos-aceptacion/s189/`: `f1/` (lectura de solo lectura de `v0.2.0` para el
+inventario) y `f2/` (sha256 del horario de guardias, diff y medidas de esta edición), cada una con
+su `MANIFIESTO.sha256`.
 
 ### Capturas
 
