@@ -368,6 +368,9 @@ diálogo de `v0.2.0`. Sin inicio ni final por tarea: ver las desviaciones.
 
 ## Inventario de huecos (condición 5)
 
+**S188:** no se hizo. El usuario intentará recuperar los datos más adelante, con el paquete de 2026/2027
+o con lo que ella cuente (decisión F).
+
 Inventario de huecos (S189). Fuente: la lista que la secretaria dio directamente al usuario,
 transcrita en S189 (decisión F). La prematrícula 2025/26 se aportó solo como ayuda y no se usó para
 clasificar. El horario de guardias 2025/2026 (`docs_extra/Ejemplos_SJ/HorariosProfesores/Horarios de guardias.pdf`, no
@@ -398,9 +401,6 @@ dato no se guarda por pantalla, y se anota si su efecto se expresa de otro modo.
 
 Recuento: 16 filas; 6 «ya está», 3 «se puede meter», 7 «no se puede». Cada «no se puede» tiene ficha
 en §4 (R-incidencia). Las ayudas de la condición 4 se dieron de alta en S188.
-
-**S188:** no se hizo. El usuario intentará recuperar los datos más adelante, con el paquete de 2026/2027
-o con lo que ella cuente (decisión F).
 
 ## Incidencias
 
