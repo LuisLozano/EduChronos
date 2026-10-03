@@ -6,13 +6,14 @@ ni nombres ni disponibilidades.
 
 ## ACTA DE LA DEMO — Educhronos
 
-- **Fecha de la demo:** PENDIENTE.
+- **Fecha de la demo:** 03/10/2026 (S188).
 - **Asistentes por rol:** la persona que elabora hoy los horarios del centro (opera); el
-  desarrollador (observa y anota). PENDIENTE confirmar.
+  desarrollador (observa y anota). En la demo (S188): la secretaria del centro (opera) y el usuario
+  (observa).
 - **Versión:** Release `v0.1.0`, commit `a7846b69146fc64f57a14060da99eb00f569ea44`,
   zip `Educhronos-win.zip` de 176.078.736 B,
   sha256 `7afc5b8c97e2eb8f2484c612cfdab72cf694b01deb5cecb82fdf04131c9fb170`.
-  Desde S187, `v0.2.0` (zip `be072519…a2a228a7`, decisión L).
+  Desde S187, `v0.2.0` (zip `be072519…a2a228a7`, decisión L), que es la de la demo (S188).
 - **Máquina:** máquina virtual `Win11` de S163 (VirtualBox, 3 CPU, 8192 MB). Windows 11 Pro,
   versión 10.0.26200.9457 (`Get-CimInstance Win32_OperatingSystem` y `ver`, S181).
 - **Cuenta:** `demo` (`educhronos\demo`), creada en S181 con `net user demo /add`; `whoami /groups`
@@ -28,25 +29,27 @@ ni nombres ni disponibilidades.
   En S187 se toma `s187-demo-lista` (`a464f499-85de-4ef7-a7b9-8c14c8ac6295`), con la VM apagada,
   colgando de `s181-demo-lista`: la misma cuenta y la misma base sin abrir, con `v0.2.0` en lugar de
   `v0.1.0`. Desde S187 la demo arranca de `s187-demo-lista`.
+  En S188, tras la demo y con la VM apagada, se toma `s188-demo-hecha`
+  (`834ef7fe-35ef-42bf-aad0-eaf40dc93bac`), colgando de `s187-demo-lista`, antes de extraer la evidencia.
 - **Programa:** extraído con el Explorador en
   `C:\Users\demo\Downloads\Educhronos-win\Educhronos\Educhronos.exe`; ni el zip ni el `.exe` llevan
   `Zone.Identifier`.
   Desde S187, `v0.2.0` (zip `be072519…a2a228a7`, jar `7e243fb5…e4b155b5`) en la misma ruta, tras
   retirar `v0.1.0`; ni el zip ni el `.exe` llevan `Zone.Identifier`. El jar conserva el nombre
   `app-0.1.0-SNAPSHOT.jar` (`D-version-invisible`): la versión se identifica por su sha256.
-- **Ids de horario:** 2025/2026, id 1 (el del banco); 2026/2027, PENDIENTE (en el ensayo de S182 fue el id 1).
+- **Ids de horario:** 2025/2026, id 1 (el del banco); 2026/2027, id 1 en la demo (S188), como en los ensayos de S182 y S187.
 
 ## Resumen por condición
 
 | Condición | Resultado | Sección |
 |---|---|---|
-| 1. Preparación en la VM | CUMPLIDA (S182) sobre `v0.1.0`; se rehará sobre la versión de `O-pre-demo` (decisión L) **CUMPLIDA (S187) sobre `v0.2.0`**: ensayo entero desde `s187-demo-lista`, sin aclaraciones ni ayudas (sección «Ensayo sobre `v0.2.0` (S187)»). | Cabecera, Procedimiento de transporte, Ensayo |
+| 1. Preparación en la VM | CUMPLIDA (S182) sobre `v0.1.0`; se rehará sobre la versión de `O-pre-demo` (decisión L). **CUMPLIDA (S187) sobre `v0.2.0`**: ensayo entero desde `s187-demo-lista`, sin aclaraciones ni ayudas (sección «Ensayo sobre `v0.2.0` (S187)»). | Cabecera, Procedimiento de transporte, Ensayo |
 | 2. Arranque | CUMPLIDA (S181) | Arranque |
-| 3. Consulta de 2025/2026 | PENDIENTE (ensayada en verde en S182) | Consulta de 2025/2026 |
-| 4. Ejercicio de muestra | PENDIENTE | Ejercicio de muestra |
-| 5. Inventario de huecos | PENDIENTE | Inventario de huecos, Incidencias |
+| 3. Consulta de 2025/2026 | PENDIENTE (ensayada en verde en S182 y en S187). **MEDIDA (S188), NO CUMPLIDA**: una descarga de cuatro (grupos, oráculo 1285/0/0) | Consulta de 2025/2026, Demo con la secretaria (S188) |
+| 4. Ejercicio de muestra | PENDIENTE. **MEDIDA (S188), NO CUMPLIDA**: T5 sin reasignación (4 actividades borradas, BYG4 sin plazas); duplicado, horas, disponibilidad y generación hechos; registro con las desviaciones de la sección de la demo | Ejercicio de muestra, Demo con la secretaria (S188) |
+| 5. Inventario de huecos | PENDIENTE. **No se hizo en S188**: el usuario intentará recuperar los datos más adelante (decisión F) | Inventario de huecos, Incidencias |
 | 6. Base de partida | CUMPLIDA (S181) | Base de partida |
-| 7. Acta | PENDIENTE | Este documento |
+| 7. Acta | PENDIENTE. **EN CURSO (S188)**: acta escrita, falta el inventario | Este documento |
 
 ## Procedimiento de transporte
 
@@ -247,6 +250,88 @@ Resultado en datos, medido en Linux sobre las copias traídas (S187):
 Aclaraciones: ninguna. Ayudas: ninguna. Cambios en la consigna: ninguno. Material en
 `/home/luis/educhronos-aceptacion/s187/`.
 
+## Demo con la secretaria (S188)
+
+03/10/2026 (S188), en la VM desde `s187-demo-lista`, cuenta `demo`, `v0.2.0` (zip `be072519…a2a228a7`).
+Opera la secretaria del centro y observa el usuario. Horas de la VM, que casan al segundo con las del
+log (`+02:00`) y con las de la base (UTC).
+
+Procedimiento seguido:
+- La consigna se leyó entera en voz alta y se le entregó en papel con el mismo texto; ella la leyó.
+- El observador arrancó la VM, con la sesión de `demo` iniciada y el escritorio vacío. Educhronos lo
+  abrió ella (T1).
+- Al acabar, la VM se apagó desde Windows sin «Salir»: el log se corta a las 13:14:39, sin la
+  secuencia de cierre.
+- Con la VM apagada, y ANTES de volver a arrancarla, instantánea `s188-demo-hecha`
+  (`834ef7fe-35ef-42bf-aad0-eaf40dc93bac`), colgando de `s187-demo-lista`.
+- Evidencia traída con `copiar-evidencia-ejecutado.ps1` a `E:\medidas\s188\`: 6 ficheros, con el md5
+  calculado en Windows sobre el original e igual en Linux. `integrity_check` ok en las dos bases.
+
+Tiempos, de los artefactos: un solo arranque, a las 13:01:35 (un único `Starting` en el log); una
+sola descarga, `horario-1-grupo.pdf`, a las 13:02:12; cambios de base en el log (pool nuevo) a las
+13:06:30, 13:14:13 y 13:14:39, que el log no atribuye a ninguna acción. Hora de fin del ejercicio: no
+medida. No se anotaron tiempos por tarea ni el minuto de cada pregunta.
+
+Generación en el curso 2026/2027:
+
+| Intento | Pulsa | Resultado | Salida |
+|---|---|---|---|
+| I1 | 13:22:44 | 13:32:47 | Horario 1: FEASIBLE, objetivo 218, 807 sesiones, 603,165 s según la base (`fecha_generacion` menos el instante del nombre), con 10 minutos elegidos |
+
+Al primer intento, según el observador: un intento fallido no dejaría rastro en la base ni en el log
+(`D-generacion-sin-rastro`), y la base sólo tiene este horario.
+
+Desviaciones de las reglas de observación:
+- Sin inicio ni final por tarea (regla 6).
+- Sin el minuto ni el texto literal de las preguntas (reglas 3 y 5).
+- El umbral de atasco se aplicó por criterio del observador («respondía cuando veía que iba a
+  ceder»; persona poco accesible), no a los 5 minutos (regla 5).
+- Sin capturas.
+- El observador la paró cuando iba a generar en el 2026/2027 antes de configurar: por
+  `D-horario-irreversible`, las actividades con sesiones no se pueden editar ni borrar y no hay forma
+  de descartar un horario, así que eso habría bloqueado las tareas 5 y 6 sin salida.
+
+| Tarea | Resultado | Notas |
+|---|---|---|
+| T1 | Hecha sola | Relanzó el programa creyendo que no arrancaba: unos 13 s sin ninguna señal hasta el navegador (`D-arranque-sin-aviso-de-espera`). Un segundo lanzamiento abre otra pestaña y no escribe en el log: el relanzamiento no consta en los datos |
+| T2 | Hecha con AYUDA | AYUDA: buscaba los grupos en el PDF descargado; se le explicó que los horarios se ven en pantalla (`D-vista-horario-no-se-descubre`). AYUDA: con el filtro del selector no veía que la lista cambiaba; se le dijo que abriera el desplegable (`D-selectores-combobox`) |
+| T3 | NO COMPLETADA | Sólo `horario-1-grupo.pdf`, que pasa el oráculo (1285/0/0 en 28 páginas, idénticas a las de S187); no hay PDF de profesores ni de aulas, ni CSV. Causa no medida |
+| T4 | Hecha sola | Buscó primero el botón en la configuración; está en la barra superior |
+| T5 | NO CUMPLIDA, sin que nadie lo advirtiera | BYG1 borrado y BYG4 creado como «PROFESORA NUEVA», en mayúsculas tal como se escribió (la aplicación no transforma el texto), pero las cuatro actividades de ByG de 1º, con sus plazas, se borraron en vez de reasignarse, y BYG4 queda con 0 plazas (`D-borrado-sin-control-de-horas`). AYUDA: el 409 de borrar BYG1 no le llamó la atención ni lo entendió; se le explicó (`D-error-poco-visible`). Para saber qué daba BYG1 usó el PDF de grupos (`D-entidad-sin-actividades`). ACLARACIÓN: preguntó si no era más sencillo editar BYG1 y cambiarle el nombre; el código de `v0.2.0` lo permite (código y nombre editables, plazas conservadas). Es una observación sobre la consigna y sobre la decisión I |
+| T6 | Hecha | Latín 2 y Geografía e Historia 4 en 4ºC, 30 de 30 tramos, tras buscar en Asignaturas y por «Latín»: la lista de Actividades busca por el código, «LAT» (`D-filtro-por-codigo`) |
+| T7 | Hecha sin ayuda | Celda a celda: las cabeceras de día y de tramo pintan una columna o una fila entera, y no lo descubrió. «Guardar» siempre habilitado, como en S187: sin daño, sigue sin alta |
+| T8 | Generada y comprobada | Comprobada con el observador sin advertir que faltaba ByG en 1ºA–1ºD (40 sesiones cada uno, frente a 43 en S187). AYUDA, sin atasco: preguntó para qué sirven los otros tiempos y se le explicó (`D-tiempo-generacion-poco-claro`). `D-tiempo-elegido-no-se-recuerda` no se dio. FIS2 en el primer tramo 4 veces (S187: 1): preferencia blanda, no es criterio |
+| T9 | Hecha | El 2025/2026 sigue ahí, idéntico byte a byte al de los ensayos (md5 `f88bfa7d…`). Preguntó si se pueden borrar cursos anteriores; se le dijo que de momento no (`D-curso-sin-borrado`) |
+
+Resultado en datos, medido en Linux sobre las copias traídas (S188):
+- Transporte de vuelta por la carpeta compartida a `E:\medidas\s188\`: seis ficheros (las dos bases,
+  `curso-abierto`, `educhronos.lock`, el log y `horario-1-grupo.pdf`) copiados uno a uno con la
+  aplicación cerrada, con el md5 calculado en Windows sobre el original e igual en Linux.
+- `integrity_check` ok en las dos bases.
+- 2025/2026: `educhronos.db` idéntico byte a byte al de los ensayos (md5 `f88bfa7d…`, el de S182 y
+  S187), archivado como «2025/2026». La descarga de grupos pasa el oráculo
+  (`docs/empaquetado.md:455-460`): 1285/0/0 en 28 páginas, las mismas que en S187.
+- 2026/2027, frente a la base del ensayo de S187: faltan las cuatro actividades `ByG-1ºA` a
+  `ByG-1ºD`, con sus cuatro plazas y sus filas de `plaza_profesor` y `plaza_subgrupo`; BYG4 tiene el
+  mismo id y código con el nombre en mayúsculas. Las otras 14 tablas comparadas, iguales: `LAT-4ºC` 2
+  y `GeH-4ºC` 4, 6 filas DURA de ING1 el viernes y 5 BLANDA de FIS2 en el primer tramo, peso 1.
+- Horario 1 del 2026/2027: 807 sesiones, 12 menos que en S187 (cuatro actividades de tres horas);
+  BYG4 con 0 sesiones; 1ºA–1ºD con 40 cada uno; 4ºC con sus 30 tramos ocupados (53 sesiones), LAT 2 y
+  GeH 4; ING1 con 0 el viernes; ninguna sesión en un tramo DURA; FIS2 con 4 sesiones en el primer
+  tramo.
+- Log: un solo arranque y ninguna línea de cierre; la última, a las 13:14:39, es anterior a la
+  generación.
+
+Aclaraciones: una (T5). Ayudas: cuatro (dos en T2, una en T5 y una en T8). Lo enseñado fuera del
+ejercicio: nada.
+
+Sugerencias recogidas, que no se trabajan aquí (las decide el objetivo (3)): una ventana de
+«iniciando»; el filtro dentro del desplegable; navegar desde profesor, asignatura, grupo y subgrupo
+a sus actividades; más información en la tabla de actividades; un curso inicial de uso (fuera del
+criterio: guía de uso).
+
+Material en `/home/luis/educhronos-aceptacion/s188/` (`f1/`, `f2/`, `f3/`).
+
 ## Arranque (condición 2)
 
 CUMPLIDA en S181, en la preparación (22:16, hora de la VM). Doble clic en `Educhronos.exe`: se abre
@@ -264,6 +349,9 @@ Ensayada en S182: las cuatro descargas pasan el oráculo contra la `educhronos.d
 1285/0/0 en 28 páginas, profesor 835/0/0 en 59, aula 819/0/0 en 44 con 0 páginas vacías con
 leyenda, y CSV «OK: las tres vistas coinciden». La condición se cumple en la demo.
 Ensayada otra vez en S187 sobre `v0.2.0`, con las mismas cifras.
+**S188, en la demo:** MEDIDA, NO CUMPLIDA. Una descarga de cuatro, `horario-1-grupo.pdf`, que pasa el
+oráculo (1285/0/0 en 28 páginas, idénticas a las de S187); no hay PDF de profesores ni de aulas, ni
+CSV, y la causa no se midió.
 
 ## Ejercicio de muestra (condición 4)
 
@@ -272,16 +360,44 @@ PENDIENTE, por tarea: inicio, final, aclaraciones y ayudas (literal). Nombre que
 
 Protocolo de la generación en la demo: pendiente de la versión de `O-pre-demo`, que cambia el
 tiempo de cálculo (decisión L).
+**S188, en la demo:** MEDIDA, NO CUMPLIDA; detalle por tarea en «Demo con la secretaria (S188)». La
+tarea 5 no se cumplió (cuatro actividades borradas en vez de reasignarse, BYG4 sin plazas); el
+duplicado, las horas, la disponibilidad y la generación se hicieron. Nombre que dio al curso
+2025/2026 al archivarlo: «2025/2026». Generación: FEASIBLE, 603,165 s, con 10 minutos elegidos en el
+diálogo de `v0.2.0`. Sin inicio ni final por tarea: ver las desviaciones.
 
 ## Inventario de huecos (condición 5)
 
 PENDIENTE: lo que entrega a la empresa, por tipo de dato, cada uno como «ya está en Educhronos»,
 «se puede meter» o «no se puede».
+**S188:** no se hizo. El usuario intentará recuperar los datos más adelante, con el paquete de 2026/2027
+o con lo que ella cuente (decisión F).
 
 ## Incidencias
 
 PENDIENTE: cada una con su `D-*`, o «ninguna». Salen de las ayudas de la condición 4 y de los
 «no se puede» de la condición 5 (R-incidencia), anotando que salen de `O-demo-bundle`.
+
+**S188, de la demo** (todas salen de `O-demo-bundle`). Nuevas, con sede en el objetivo (3):
+1. `D-borrado-sin-control-de-horas`: borrar una actividad con profesor se permite y nada avisa de
+   que un grupo queda por debajo de sus horas (T5).
+2. `D-vista-horario-no-se-descubre`: no descubrió que los horarios se ven en pantalla y los buscó
+   en el PDF (T2).
+3. `D-error-poco-visible`: el 409 se muestra como un párrafo rojo sin fondo que no llamó la
+   atención ni se entendió (T5).
+4. `D-tiempo-generacion-poco-claro`: la línea del diálogo que explica los tiempos no bastó y
+   preguntó para qué sirven (T8).
+
+Ya registradas, con nota de S188:
+5. `D-selectores-combobox`: el filtro es un campo aparte y no abre la lista (T2).
+6. `D-arranque-sin-aviso-de-espera`: relanzó el programa creyendo que no arrancaba (T1).
+7. `D-horario-irreversible`: el observador paró una generación previa a configurar.
+8. `D-entidad-sin-actividades`: usó el PDF para saber qué daba BYG1 y pide navegar a las
+   actividades (T5).
+9. `D-filtro-por-codigo`: «Latín» no encuentra «LAT» (T6).
+10. `D-actividad-ux`: el manejo de actividades le resultó engorroso, y sus nombres, confusos.
+11. `D-curso-sin-borrado`: preguntó si se pueden borrar cursos anteriores (T9).
+12. `D-tiempo-elegido-no-se-recuerda`: revisada con la demo, no se dio.
 
 ## Base de partida (condición 6)
 
@@ -329,6 +445,10 @@ M2, borradores y comparación de la base de partida). El USB conserva `EDUCHRONO
 `/home/luis/educhronos-aceptacion/s182/`: `datos/` (las dos bases, `curso-abierto`, `.lock` y
 log de la VM tras «Salir»), `descargas/` (las cuatro del horario 1 de 2025/2026), `capturas/` y
 `MANIFIESTO.sha256`. Tras verificar, la VM se restauró a `s181-demo-lista` (S182).
+`/home/luis/educhronos-aceptacion/s188/`: `f1/` (instantánea y diagnóstico de la VM), `f2/` (los seis
+ficheros traídos, `md5-windows.txt`, la salida de Windows y las medidas) y `f3/` (M2 de solo
+lectura sobre `v0.2.0`), cada una con su `MANIFIESTO.sha256`. La instantánea `s188-demo-hecha` guarda
+el estado de la VM tras la demo (S188).
 
 ### Capturas
 
