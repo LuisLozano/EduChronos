@@ -44,7 +44,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Servicio de aplicación que orquesta la generación de un horario: carga el
@@ -64,7 +66,10 @@ import org.springframework.transaction.annotation.Transactional;
  * ViaSolver, String)} NO es transaccional: la transacción se abre y cierra en
  * {@code cargarProblema()}, y
  * la resolución (potencialmente larga) corre sobre un POJO ya desligado de JPA,
- * sin mantener abierta la conexión SQLite.
+ * sin mantener abierta la conexión SQLite. La llamada interna a {@link #guardar} pasa por
+ * una {@code TransactionTemplate} porque una llamada sobre {@code this} no atraviesa el
+ * proxy y su {@code @Transactional} no se aplicaría (S192). {@code cargarProblema()} tiene el
+ * mismo caso y queda fuera de esta condición.
  */
 @Service
 public class GeneradorHorarioService {
@@ -90,6 +95,9 @@ public class GeneradorHorarioService {
      */
     private final EstadoCurso estadoCurso;
 
+    /** La transacción de escritura de {@link #guardar} en la vía de {@link #generar} (S192). */
+    private final TransactionTemplate transaccion;
+
     public GeneradorHorarioService(
             TramoSemanalRepository tramoRepository,
             AulaRepository aulaRepository,
@@ -104,7 +112,8 @@ public class GeneradorHorarioService {
             SesionBloqueadaRepository sesionBloqueadaRepository,
             AulaBloqueadaRepository aulaBloqueadaRepository,
             ProfesorTutoriaRepository profesorTutoriaRepository,
-            EstadoCurso estadoCurso) {
+            EstadoCurso estadoCurso,
+            PlatformTransactionManager gestorTransacciones) {
         this.tramoRepository = tramoRepository;
         this.aulaRepository = aulaRepository;
         this.asignaturaRepository = asignaturaRepository;
@@ -119,6 +128,7 @@ public class GeneradorHorarioService {
         this.aulaBloqueadaRepository = aulaBloqueadaRepository;
         this.profesorTutoriaRepository = profesorTutoriaRepository;
         this.estadoCurso = estadoCurso;
+        this.transaccion = new TransactionTemplate(gestorTransacciones);
     }
 
     /**
@@ -166,8 +176,11 @@ public class GeneradorHorarioService {
      * <p><b>Frontera transaccional (deliberada).</b> Este método NO es
      * {@code @Transactional}: {@code cargarProblema()} abre y cierra su transacción
      * de solo lectura, la resolución (potencialmente larga) corre FUERA de toda
-     * transacción sobre un POJO ya desligado de JPA, y {@code guardar()} abre la
-     * transacción de escritura al final. Envolver el solve en una transacción
+     * transacción sobre un POJO ya desligado de JPA, y {@code guardar()} corre al final
+     * dentro de la transacción de escritura de una {@code TransactionTemplate}: una llamada
+     * sobre {@code this} no atraviesa el proxy, así que su {@code @Transactional} no bastaría
+     * (S192). {@code cargarProblema()} tiene el mismo caso y queda fuera de esta condición.
+     * Envolver el solve en una transacción
      * mantendría abierta la conexión SQLite durante la búsqueda (ver nota de clase).
      *
      * <p>Todos los parámetros son opcionales: {@code maxSegundos} cae al valor de
@@ -288,7 +301,7 @@ public class GeneradorHorarioService {
             case OPTIMIZACION -> solver.resolverOptimizandoConDetalle(problema);
         };
 
-        return guardar(resultado, problema, nombreEfectivo);
+        return transaccion.execute(tx -> guardar(resultado, problema, nombreEfectivo));
     }
 
     /**
