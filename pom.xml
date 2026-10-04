@@ -7,7 +7,7 @@
 
     <groupId>es.yaroki.educhronos</groupId>
     <artifactId>educhronos-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <name>Educhronos</name>
@@ -19,6 +19,7 @@
     </modules>
 
     <properties>
+        <revision>0.0.0-dev</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.release>17</maven.compiler.release>
@@ -152,6 +153,30 @@
                         <id>jacoco-report</id>
                         <phase>test</phase>
                         <goals><goal>report</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- S192: instala y despliega los poms con ${revision} ya resuelto. Sin él, el pom de
+                 solver en ~/.m2 dice <parent><version>${revision}</version> y `mvn -pl app` sin
+                 -am (job e2e de CI, webServer de Playwright) no resuelve solver. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>flatten</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals><goal>clean</goal></goals>
                     </execution>
                 </executions>
             </plugin>

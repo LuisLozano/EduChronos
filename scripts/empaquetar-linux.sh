@@ -8,7 +8,7 @@
 # jpackage no construye para otra plataforma, así que el app-image de Windows
 # se hace en Windows. El jar sí es el mismo en ambas.
 #
-#   scripts/empaquetar-linux.sh [--salida DIR]
+#   scripts/empaquetar-linux.sh [--salida DIR] [--version VER]
 #
 # La entrega queda en dos carpetas:
 #   <salida>/jdk/    el JDK portable de Windows. Se copia UNA vez.
@@ -28,6 +28,10 @@ CACHE="${EDUCHRONOS_CACHE:-$HOME/.cache/educhronos-empaquetado}"
 SALIDA="$HOME/entrega-educhronos"
 LIMITE=250000000
 
+# Versión del jar (S192). Sin --version, Maven usa la <revision> del pom raíz (0.0.0-dev).
+VERSION=""
+PATRON_VERSION='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+
 # Todo lo que NO es el jar dentro del app-image de Windows, medido el 2026-09-18
 # sobre la máquina de construcción con estos mismos 14 módulos (transcripción
 # citada en la entrada de S152 del plan): carpeta 231.691.863, de los que
@@ -38,10 +42,11 @@ LIMITE=250000000
 CONSTANTE_WINDOWS=75328733
 
 uso () {
-  echo "Uso: $(basename "$0") [--salida DIR]"
+  echo "Uso: $(basename "$0") [--salida DIR] [--version VER]"
   echo
   echo "Construye el jar desde cero y arma la carpeta de entrega para Windows."
   echo "  --salida DIR   carpeta de entrega (por defecto \$HOME/entrega-educhronos)"
+  echo "  --version VER  versión del jar, X.Y.Z o X.Y.Z-sufijo (por defecto la del pom, 0.0.0-dev)"
   echo "  --ayuda, -h    esta ayuda"
 }
 
@@ -52,6 +57,14 @@ while [ $# -gt 0 ]; do
         echo "ABORTA: --salida necesita un valor."; uso; exit 2
       fi
       SALIDA="$2"; shift 2 ;;
+    --version)
+      if [ $# -lt 2 ] || [ -z "$2" ]; then
+        echo "ABORTA: --version necesita un valor."; uso; exit 2
+      fi
+      if ! [[ "$2" =~ $PATRON_VERSION ]]; then
+        echo "ABORTA: versión no válida: $2 (se espera X.Y.Z o X.Y.Z-sufijo)."; uso; exit 2
+      fi
+      VERSION="$2"; shift 2 ;;
     --ayuda|-h) uso; exit 0 ;;
     *) echo "Opción desconocida: $1"; uso; exit 2 ;;
   esac
@@ -82,6 +95,7 @@ if [ "$SUCIOS" -ne 0 ]; then
 fi
 echo "salida : $SALIDA"
 echo "caché  : $CACHE"
+echo "versión: ${VERSION:-la del pom (sin --version)}"
 
 echo
 echo "=============================================================="
@@ -89,7 +103,9 @@ echo " 2. CONSTRUCCIÓN (sin tests, por decisión escrita)"
 echo "=============================================================="
 cd "$RAIZ" || exit 1
 INICIO=$(date +%s)
-mvn clean package -DskipTests
+ARGS_MVN=(clean package -DskipTests)
+if [ -n "$VERSION" ]; then ARGS_MVN+=("-Drevision=$VERSION"); fi
+mvn "${ARGS_MVN[@]}"
 EXIT_MVN=$?
 FIN=$(date +%s)
 echo "exit mvn = $EXIT_MVN   segundos = $((FIN-INICIO))"

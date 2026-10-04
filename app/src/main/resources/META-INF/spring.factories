@@ -1,2 +1,3 @@
 org.springframework.boot.EnvironmentPostProcessor=\
-  es.yaroki.educhronos.app.config.RutaBaseDatosEnvironmentPostProcessor
+  es.yaroki.educhronos.app.config.RutaBaseDatosEnvironmentPostProcessor,\
+  es.yaroki.educhronos.app.config.VersionEnvironmentPostProcessor

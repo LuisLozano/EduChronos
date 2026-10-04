@@ -2,6 +2,7 @@
 target/
 *.versionsBackup
 dependency-reduced-pom.xml
+.flattened-pom.xml
 
 # Frontend Angular (Fase 7). Artefactos de Node/CLI: no se versionan.
 app/frontend/node_modules/

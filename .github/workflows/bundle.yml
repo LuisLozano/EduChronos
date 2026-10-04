@@ -33,7 +33,14 @@ jobs:
 
       - name: Empaquetar (lado Linux)
         shell: bash
-        run: scripts/empaquetar-linux.sh --salida "$RUNNER_TEMP/entrega"
+        # Con un tag v*, el jar lleva su versión (S192): v1.2.3 → --version 1.2.3. Sin tag, la
+        # del pom. El script valida el formato y sale con 2 si el tag no es X.Y.Z[-sufijo].
+        run: |
+          version=()
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version=(--version "${GITHUB_REF_NAME#v}")
+          fi
+          scripts/empaquetar-linux.sh --salida "$RUNNER_TEMP/entrega" "${version[@]}"
 
       - name: Huella del jar
         id: huella
