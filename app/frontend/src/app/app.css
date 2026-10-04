@@ -17,33 +17,49 @@
    sin llegar a marcarse (S127). Cada ~7 px que engorde la barra bajan
    `alto-celda` ~1 px: al cruzar 1,23 empiezan a marcarse y las 50 marcas pasan
    a 72, que es regresión visible sobre un criterio cerrado. El alto NO se
-   declara —no hay `height` aquí ni lo habrá—: sale de padding más interlineado
-   de la marca, y el marco flex de `styles.css` reparte el resto. Medido en la
-   superficie de verificación: 12 + 27 + 12 = 51 px, uno menos que los 52 de
-   antes. Si esta regla cambia, se recuentan las marcas de 1B-A, 4ºA y 2B-B
-   (4 / 3 / 0) antes de darlo por bueno. */
+   declara —no hay `height` aquí ni lo habrá—: sale del padding vertical más el
+   alto del grupo `.app__identidad`, y el marco flex de `styles.css` reparte el
+   resto. REPARTO VIGENTE (S193), medido en la superficie de verificación:
+   10,5 + 30 + 10,5 = 51 px, con el grupo de 30 px = marca 18 + versión 12, las
+   dos con interlineado 1. Son los mismos 51 px que S128 dejó con 12 + 27 + 12
+   cuando la marca iba sola. Si esta regla cambia, se recuentan las marcas de
+   1B-A, 4ºA y 2B-B (4 / 3 / 0) antes de darlo por bueno. */
 .app__barra {
   display: flex;
   align-items: center;
   gap: var(--e6);
-  padding: var(--e3) var(--e5);
+  /* Vertical: la mitad de lo que el grupo deja libre; las cifras, en el reparto vigente de arriba. */
+  padding: 10.5px var(--e5);
   background: var(--color-acento);
   color: var(--color-sobre-acento);
 }
 
 /* La marca es hoy SOLO TIPOGRÁFICA: no hay logo. Se monta como flex con `gap`
    para que el logo, cuando exista, entre delante del texto sin reescribir esta
-   regla. Su alto máximo es el de la línea de texto (27 px): un logo más alto
-   engorda la barra, y eso lo prohíbe la restricción de arriba. */
+   regla. Su alto es el de su línea de texto, 18 px con interlineado 1 (S193):
+   es la parte de la marca en los 30 px de `.app__identidad` del reparto de
+   arriba. Un logo más alto engorda la barra, y eso lo prohíbe la restricción. */
 .app__marca {
   display: flex;
   align-items: center;
   gap: var(--e2);
   font-size: var(--tam-l);
   font-weight: var(--peso-fuerte);
-  line-height: var(--lh-normal);
+  line-height: 1;
   text-decoration: none;
   color: inherit;
+}
+
+/* Identidad (S193): la marca y, DEBAJO, la versión de la aplicación, alineadas a la
+   izquierda. El grupo ocupa en la barra el sitio de la marca, así que el `gap` de
+   `.app__barra` sigue separando la identidad de la navegación. Sin `gap` entre las dos
+   líneas: lo que el grupo apile entra en el alto de la barra, que puede encoger y no crecer
+   (restricción de arriba). */
+.app__identidad {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
 }
 
 .app__nav {

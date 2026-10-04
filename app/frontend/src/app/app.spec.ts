@@ -70,6 +70,21 @@ describe('App', () => {
     expect(hueco?.textContent).toContain('2026/2027');
   });
 
+  it('la identidad monta la línea de versión bajo la marca (S193)', async () => {
+    // El cableado, como el caso de S160 para la barra de curso: la línea tiene su propio
+    // spec, que la monta suelta, y quitarla de `app.html` no tumbaría ningún otro caso.
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+
+    const identidad = (fixture.nativeElement as HTMLElement).querySelector('.app__identidad');
+    expect(identidad?.querySelector('app-version-linea')).not.toBeNull();
+
+    http.expectOne('/api/version').flush({ version: '0.3.0' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(identidad?.textContent).toContain('versión 0.3.0');
+  });
+
   it('los enlaces de navegación están vivos (href resuelta por el router)', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

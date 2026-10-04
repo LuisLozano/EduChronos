@@ -1,0 +1,21 @@
+/* Dato secundario sobre el acento de la barra: la tinta es `--color-sobre-acento-tenue`, la
+   misma que los enlaces no activos de `.app__nav`, y no `--color-tinta-suave`, que es de
+   superficie clara.
+
+   La letra pequeña va también en el HOST, con interlineado 1 (S193): la línea va debajo de la
+   marca, en `.app__identidad`, y sin esto el host heredaría los 16 px de la página y su caja
+   mediría 16 px aunque el texto vaya a 12 (medido en S193: la barra salía de 58 px). Así la
+   línea mide 12 px y el grupo 18 + 12 = 30 (restricción de altura de `app.css`).
+
+   `nowrap`: la versión no se parte en dos líneas aunque falte ancho; una segunda línea SÍ
+   engordaría la barra. */
+:host {
+  font-size: var(--tam-xs);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.version-linea {
+  font-size: var(--tam-xs);
+  color: var(--color-sobre-acento-tenue);
+}

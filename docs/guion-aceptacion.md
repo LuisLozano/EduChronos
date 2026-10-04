@@ -53,7 +53,7 @@ carpeta de datos vacía y propia, en modo servidor (sin `-Deduchronos.escritorio
 ```bash
 D=/tmp/ensayo-aceptacion; mkdir -p $D/datos; ls -A $D/datos   # debe salir vacío
 ss -ltnH 'sport = :8080'                                        # debe salir vacío: puerto libre
-XDG_DATA_HOME=$D/datos nohup java -jar <raíz>/app/target/app-0.1.0-SNAPSHOT.jar > $D/app.log 2>&1 &
+XDG_DATA_HOME=$D/datos nohup java -jar <raíz>/app/target/app-*.jar > $D/app.log 2>&1 &
 echo $! > $D/app.pid
 ```
 
