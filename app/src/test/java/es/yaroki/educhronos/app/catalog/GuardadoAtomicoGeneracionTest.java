@@ -16,9 +16,12 @@ import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -44,6 +47,7 @@ import org.springframework.web.context.WebApplicationContext;
  * {@code educhronos-test.db} compartida.
  */
 @SpringBootTest
+@ExtendWith(OutputCaptureExtension.class)
 class GuardadoAtomicoGeneracionTest {
 
     @TempDir static Path carpeta;
@@ -79,7 +83,7 @@ class GuardadoAtomicoGeneracionTest {
     }
 
     @Test
-    void unFalloAlGuardarLasSesionesNoDejaCabeceraNiCambiaElVigente() throws Exception {
+    void unFalloAlGuardarLasSesionesNoDejaCabeceraNiCambiaElVigente(CapturedOutput salida) throws Exception {
         poblarCatalogo();
 
         mockMvc.perform(post("/api/horarios").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
@@ -103,6 +107,12 @@ class GuardadoAtomicoGeneracionTest {
         assertThat(service.idVigente())
                 .as("el vigente sigue siendo el de antes del fallo")
                 .isEqualTo(vigenteAntes);
+
+        // El rastro del fallo (C-version-y-rastro, condición 3, S192): línea ERROR de fin con la
+        // traza de la excepción del spy debajo.
+        assertThat(salida.getOut())
+                .containsPattern("ERROR.*Generación terminada desenlace=EXCEPCION duracionMs=\\d+\\R+"
+                        + "java\\.lang\\.RuntimeException: saveAll provocado por el test\\R\\s+at ");
     }
 
     /** Catálogo mínimo de una plaza y cinco tramos de lunes (el de PinTramoGeneracionRoundTripTest, sin el pin). */

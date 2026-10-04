@@ -29,6 +29,7 @@ import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
+import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
 import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
@@ -41,6 +42,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -66,13 +69,15 @@ import org.springframework.transaction.support.TransactionTemplate;
  * ViaSolver, String)} NO es transaccional: la transacción se abre y cierra en
  * {@code cargarProblema()}, y
  * la resolución (potencialmente larga) corre sobre un POJO ya desligado de JPA,
- * sin mantener abierta la conexión SQLite. La llamada interna a {@link #guardar} pasa por
- * una {@code TransactionTemplate} porque una llamada sobre {@code this} no atraviesa el
- * proxy y su {@code @Transactional} no se aplicaría (S192). {@code cargarProblema()} tiene el
- * mismo caso y queda fuera de esta condición.
+ * sin mantener abierta la conexión SQLite. La escritura interna (la de {@link #guardar})
+ * pasa por una {@code TransactionTemplate} porque una llamada sobre {@code this} no
+ * atraviesa el proxy y su {@code @Transactional} no se aplicaría (S192). {@code
+ * cargarProblema()} tiene el mismo caso y queda fuera de esta condición.
  */
 @Service
 public class GeneradorHorarioService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GeneradorHorarioService.class);
 
     private final TramoSemanalRepository tramoRepository;
     private final AulaRepository aulaRepository;
@@ -176,8 +181,8 @@ public class GeneradorHorarioService {
      * <p><b>Frontera transaccional (deliberada).</b> Este método NO es
      * {@code @Transactional}: {@code cargarProblema()} abre y cierra su transacción
      * de solo lectura, la resolución (potencialmente larga) corre FUERA de toda
-     * transacción sobre un POJO ya desligado de JPA, y {@code guardar()} corre al final
-     * dentro de la transacción de escritura de una {@code TransactionTemplate}: una llamada
+     * transacción sobre un POJO ya desligado de JPA, y la escritura de {@code guardar()} corre
+     * al final dentro de la transacción de una {@code TransactionTemplate}: una llamada
      * sobre {@code this} no atraviesa el proxy, así que su {@code @Transactional} no bastaría
      * (S192). {@code cargarProblema()} tiene el mismo caso y queda fuera de esta condición.
      * Envolver el solve en una transacción
@@ -229,7 +234,32 @@ public class GeneradorHorarioService {
             throw rechazoDeCurso(admision);
         }
         try {
-            return generarConElCursoTomado(maxSegundos, semilla, via, nombre);
+            // El rastro de la generación (C-version-y-rastro, condición 3, S192): una línea al
+            // empezar y otra al terminar, sea cual sea el desenlace, con la duración.
+            int seg = presupuestoSegundos(maxSegundos);
+            LOG.info("Generación iniciada version={} presupuestoSegundos={}", version, seg);
+            long inicio = System.nanoTime();
+            try {
+                Guardado guardado = generarConElCursoTomado(seg, semilla, via, nombre);
+                HorarioGenerado horario = guardado.horario();
+                LOG.info("Generación terminada desenlace=OK horario={} estado={} objetivo={}"
+                                + " sesiones={} duracionMs={}",
+                        horario.getId(), horario.getEstadoSolver(), horario.getObjetivo(),
+                        guardado.sesiones(), milisegundosDesde(inicio));
+                return horario;
+            } catch (HorarioInfactibleException e) {
+                LOG.warn("Generación terminada desenlace=SIN_HORARIO estado={} duracionMs={}",
+                        e.estado(), milisegundosDesde(inicio));
+                throw e;
+            } catch (PrevalidacionFallidaException e) {
+                LOG.warn("Generación terminada desenlace=PREVALIDACION motivo={} duracionMs={}",
+                        e.getMessage(), milisegundosDesde(inicio));
+                throw e;
+            } catch (RuntimeException e) {
+                LOG.error("Generación terminada desenlace=EXCEPCION duracionMs={}",
+                        milisegundosDesde(inicio), e);
+                throw e;
+            }
         } finally {
             // En un finally, también cuando el solve revienta o se declara infactible: un
             // fallo no puede dejar la cuenta alta, porque entonces no se podría volver a
@@ -274,8 +304,8 @@ public class GeneradorHorarioService {
      * nivel de sangrado en un método que ya era largo, y para que el alta y la baja queden a
      * la vista en un solo sitio.
      */
-    private HorarioGenerado generarConElCursoTomado(
-            Integer maxSegundos, Integer semilla, ViaSolver via, String nombre) {
+    private Guardado generarConElCursoTomado(
+            int seg, Integer semilla, ViaSolver via, String nombre) {
         ViaSolver viaEfectiva = via != null ? via : ViaSolver.OPTIMIZACION;
         String nombreEfectivo = (nombre != null && !nombre.isBlank())
                 ? nombre : "Horario " + Instant.now();
@@ -292,8 +322,8 @@ public class GeneradorHorarioService {
 
         // Defaults de la capa de aplicación (D-F8.1-3): presupuesto configurable y
         // semilla 42 cuando el body no los especifica. NO se delega en el constructor
-        // por defecto del solver (120 s), que no lo gobierna nadie desde fuera.
-        int seg = presupuestoSegundos(maxSegundos);
+        // por defecto del solver (120 s), que no lo gobierna nadie desde fuera. El presupuesto
+        // llega ya resuelto desde generar(), que lo escribe en la línea de inicio.
         int sem = semilla != null ? semilla : 42;
         SolverHorario solver = new SolverHorario(seg, sem);
 
@@ -301,7 +331,12 @@ public class GeneradorHorarioService {
             case OPTIMIZACION -> solver.resolverOptimizandoConDetalle(problema);
         };
 
-        return transaccion.execute(tx -> guardar(resultado, problema, nombreEfectivo));
+        return transaccion.execute(tx -> persistir(resultado, problema, nombreEfectivo));
+    }
+
+    /** Duración en milisegundos desde un {@link System#nanoTime()}, para la línea de fin. */
+    private static long milisegundosDesde(long inicioNanos) {
+        return (System.nanoTime() - inicioNanos) / 1_000_000;
     }
 
     /**
@@ -313,6 +348,14 @@ public class GeneradorHorarioService {
      */
     @Value("${educhronos.solver.max-segundos:600}")
     int maxSegundosDefecto;
+
+    /**
+     * Versión con la que se construyó el jar, para la línea de inicio de cada generación
+     * (S192). La publica {@code VersionEnvironmentPostProcessor}; se inyecta por campo, como
+     * {@link #maxSegundosDefecto}.
+     */
+    @Value("${educhronos.version:desconocida}")
+    String version;
 
     /**
      * Resuelve el presupuesto EFECTIVO: lo solicitado si viene, el defecto configurado
@@ -348,6 +391,18 @@ public class GeneradorHorarioService {
      */
     @Transactional
     public HorarioGenerado guardar(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre) {
+        return persistir(resultado, problema, nombre).horario();
+    }
+
+    /**
+     * Lo que se persiste de una generación y cuántas sesiones se escribieron (S192). El número
+     * sale de la lista que se pasa a {@code saveAll}, no de {@code horario.getSesiones()}: esa
+     * colección inversa no se mantiene al guardar y vale 0 aquí (D-post-horario-sin-sesiones).
+     */
+    private record Guardado(HorarioGenerado horario, int sesiones) {}
+
+    /** El cuerpo de {@link #guardar}, que además devuelve el recuento de sesiones escritas. */
+    private Guardado persistir(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre) {
         Objects.requireNonNull(resultado, "resultado no puede ser null");
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(nombre, "nombre no puede ser null");
@@ -369,7 +424,7 @@ public class GeneradorHorarioService {
                 horario, problema, resultado.solucion(), idxPlaza, idxAula, idxTramo);
         sesionRepository.saveAll(sesiones);
 
-        return horario;
+        return new Guardado(horario, sesiones.size());
     }
 
     /** Id del horario vigente del curso abierto (ver

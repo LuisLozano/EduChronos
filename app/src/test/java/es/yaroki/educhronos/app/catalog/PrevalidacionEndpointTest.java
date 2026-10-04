@@ -25,11 +25,14 @@ import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -65,6 +68,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({GeneradorHorarioService.class, EstadoCurso.class, PrevalidacionService.class})
+@ExtendWith(OutputCaptureExtension.class)
 class PrevalidacionEndpointTest {
 
     @Autowired private EntityManager entityManager;
@@ -118,6 +122,28 @@ class PrevalidacionEndpointTest {
                         .value(Matchers.hasItem("ERROR")))
                 .andExpect(jsonPath("$[?(@.regla=='REPETICIONES_EXCEDEN_DIAS')].entidadCodigo")
                         .value(Matchers.hasItem("Mat-1ºA")));
+    }
+
+    /**
+     * Rastro del 422 de pre-validación (C-version-y-rastro, condición 3, S192): la línea de fin
+     * dice PREVALIDACION con el mismo motivo que viaja en el cuerpo.
+     */
+    @Test
+    void elRechazoDePrevalidacionDejaSuLineaDeFin(CapturedOutput salida) throws Exception {
+        poblarCatalogoConErrorDeRepeticiones();
+        entityManager.flush();
+
+        MvcResult respuesta = mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+        String mensaje = JsonPath.read(
+                respuesta.getResponse().getContentAsString(StandardCharsets.UTF_8), "$.mensaje");
+
+        assertThat(mensaje).isNotBlank();
+        assertThat(salida.getOut())
+                .contains("Generación terminada desenlace=PREVALIDACION motivo=" + mensaje + " duracionMs=");
     }
 
     /**

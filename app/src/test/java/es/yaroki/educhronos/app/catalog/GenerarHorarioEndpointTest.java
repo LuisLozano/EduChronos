@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.ortools.sat.CpSolverStatus;
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
+import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -30,10 +31,13 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -71,13 +75,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * el caso 200 hace {@code flush()+clear()} (mismo patrón que {@code CierreFase6HumoTest})
  * y las lee por un GET posterior sobre contexto fresco.
  */
-@DataJpaTest
+@DataJpaTest(properties = "educhronos.version=7.7.7-rastro")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({GeneradorHorarioService.class, EstadoCurso.class, EstadoCurso.class})
+@ExtendWith(OutputCaptureExtension.class)
 class GenerarHorarioEndpointTest {
 
     @Autowired private EntityManager entityManager;
     @Autowired private GeneradorHorarioService service;
+    @Autowired private SesionRepository sesionRepository;
 
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
@@ -156,6 +162,47 @@ class GenerarHorarioEndpointTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.causa").value("CATALOGO_INFACTIBLE"))
                 .andExpect(jsonPath("$.estado").value("INFEASIBLE"));
+    }
+
+    /**
+     * Rastro de una generación buena (C-version-y-rastro, condición 3, S192): la línea de
+     * inicio lleva la versión fijada por la propiedad de la clase y el presupuesto pedido, y la
+     * de fin el id devuelto y las sesiones que hay en la base para ese horario.
+     */
+    @Test
+    void post_conCatalogoFactible_dejaRastroDeInicioYFinOK(CapturedOutput salida) throws Exception {
+        poblarCatalogoMinimo(1, 5);
+        entityManager.flush();
+
+        MvcResult respuesta = mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":7}"))
+                .andExpect(status().isOk())
+                .andReturn();
+        Number id = JsonPath.read(respuesta.getResponse().getContentAsString(), "$.id");
+        entityManager.flush();
+        int filas = sesionRepository.findByHorarioId(id.longValue()).size();
+
+        assertThat(filas).as("el horario tiene sesiones en la base").isPositive();
+        assertThat(salida.getOut())
+                .contains("Generación iniciada version=7.7.7-rastro presupuestoSegundos=7")
+                .containsPattern("Generación terminada desenlace=OK horario=" + id
+                        + " estado=\\S+ objetivo=\\S+ sesiones=" + filas + " duracionMs=\\d+");
+    }
+
+    /** Rastro del 422 del solver (S192): la línea de fin dice SIN_HORARIO con su estado. */
+    @Test
+    void post_conCatalogoInfactible_dejaRastroSinHorario(CapturedOutput salida) throws Exception {
+        poblarCatalogoInfactiblePorAula();
+        entityManager.flush();
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity());
+
+        assertThat(salida.getOut())
+                .containsPattern("Generación terminada desenlace=SIN_HORARIO estado=INFEASIBLE duracionMs=\\d+");
     }
 
     /**
