@@ -147,6 +147,8 @@ Por defecto la entrega queda en `$HOME/entrega-educhronos`. `--salida` acepta ru
 relativa: el guion la normaliza a absoluta nada más leerla, contra el directorio desde el
 que se lanza.
 
+`--version VER` (S192), opcional: versión del jar, que el script pasa a Maven como `-Drevision`; tiene que casar con `MAYOR.MENOR.PARCHE` y un sufijo opcional (por ejemplo `-rc.1`). Sin ella, el jar sale como `0.0.0-dev`. `bundle.yml` la pasa desde el tag `v*`.
+
 Qué hace, en orden:
 
 1. Avisa si el árbol de trabajo no está limpio (el jar no correspondería a un
