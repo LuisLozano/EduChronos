@@ -1,38 +1,9 @@
--- Esquema autoritativo de Educhronos (Bloque 8.5-C2a-DDL).
+-- Versión 1 del esquema, congelada en S191. No se edita nunca: los cambios van en esquema/NNN.sql.
 --
--- Gobierna el esquema en lugar de Hibernate (ddl-auto=none). Quién lo ejecuta, desde
--- S191: PreparadorEsquema, SOLO sobre una base vacía, y la sella con su versión
--- (PRAGMA user_version). Las bases existentes no lo reciben: se migran con
--- esquema/NNN.sql. Los @DataJpaTest siguen pasándolo con el inicializador de Boot
--- (spring.sql.init.mode=always en el application.properties de test). El cuerpo de cada
--- CREATE TABLE es el DDL que Hibernate genera VERBATIM (schema-generation.scripts
--- con el community SQLiteDialect 7.4.1); lo ÚNICO añadido son las 27 FK inline,
--- que el dialecto NO emite (de ahí que hasta 8.5-C1 no hubiera integridad real).
---
--- SQLite no soporta ALTER TABLE ADD CONSTRAINT: las FK van DENTRO del CREATE.
--- La integridad requiere ADEMÁS el pragma foreign_keys=ON por conexión, que lo
--- pone un customizer del pool por código (SqliteForeignKeysConfig); sin él estas
--- FK quedan declaradas pero inertes.
---
--- Cascadas (decididas): ON DELETE CASCADE en plaza.actividad_id, en las tres
--- columnas plaza_id de las join tables, en sesion.horario_id, en
--- asignatura_aula_compatible.asignatura_id y en profesor_tutoria.grupo_id (las
--- dos últimas son población PROPIA de su padre, no referencias entrantes: se van
--- con él). profesor_tutoria.profesor_id NO cascadea: un profesor tutor no se
--- borra en silencio, su borrado da 409. Todo lo demás
--- queda en NO ACTION (equivale a RESTRICT en SQLite), incluidas las autoref
--- nullables grupo_padre_id y siguiente_inmediato_id.
---
--- Idempotencia: sigue siéndolo por "if not exists", NO por demolición, porque los
--- @DataJpaTest lo pasan en cada contexto. Hasta S109 dropeaba las 21 tablas antes de
--- crearlas, lo que vaciaba los datos del usuario en cada arranque de la
--- aplicación (medido: un nivel creado por API desaparecía al reiniciar); por eso
--- se quitaron los DROP.
---
--- Regla de cambio (S191): se edita ESTE fichero, que es lo que reciben las bases
--- nuevas; se añade esquema/NNN.sql con el paso desde la versión anterior, que es lo
--- que reciben las existentes; y se sube PreparadorEsquema.VERSION_ESQUEMA a NNN.
--- esquema/001.sql no se toca nunca: es lo que reciben las bases sin número.
+-- La reciben las bases sin número (PRAGMA user_version = 0), que son todas las anteriores a
+-- S191: las de v0.2.0 y las de antes de S159, que no tienen tabla curso. Cada sentencia es la
+-- de schema.sql en S191, con su "if not exists": crea lo que falte y no toca lo que ya está.
+-- Después PreparadorEsquema sella la base como 1, en la misma transacción.
 
 create table if not exists actividad (duracion_tramos integer not null, repeticiones_por_semana integer not null, requiere_tutor boolean not null, asignatura_id bigint, id integer, codigo varchar(255) not null unique, patron_temporal varchar(255) not null check ((patron_temporal in ('DISTRIBUIDA','AGRUPADA','NEUTRA'))), primary key (id), foreign key (asignatura_id) references asignatura(id));
 create table if not exists asignatura (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, primary key (id));

@@ -84,7 +84,7 @@ export interface CursoCreadoDTO {
 export interface RechazoCursoDTO {
   /**
    * `NOMBRE_INVALIDO`, `CURSO_YA_EXISTE`, `CURSO_ARCHIVADO`, `CURSO_NO_EXISTE`,
-   * `CURSO_OCUPADO`, `CURSO_CAMBIANDO` o `CURSO_NO_ABRE`.
+   * `CURSO_OCUPADO`, `CURSO_CAMBIANDO`, `CURSO_NO_ABRE` o `CURSO_VERSION_POSTERIOR`.
    */
   causa: string;
   message: string;

@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
-import org.springframework.boot.sql.autoconfigure.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
 
@@ -33,20 +32,42 @@ import org.springframework.core.io.ResourceLoader;
 @AutoConfiguration(before = DataSourceAutoConfiguration.class)
 public class BaseConmutableConfig {
 
+    /**
+     * El que deja cualquier base en el esquema de esta versión (S191). Uno solo para el
+     * arranque y para el cambio de curso: así las dos puertas aplican las mismas reglas.
+     */
     @Bean
-    FabricaDeBases fabricaDeBases(
-            DataSourceProperties propiedades,
-            SqlInitializationProperties inicializacion,
-            ResourceLoader cargador) {
-        return new FabricaDeBases(propiedades, inicializacion, cargador);
+    PreparadorEsquema preparadorEsquema(ResourceLoader cargador) {
+        return new PreparadorEsquema(
+                cargador,
+                PreparadorEsquema.ESQUEMA_VIGENTE,
+                PreparadorEsquema.MIGRACIONES,
+                PreparadorEsquema.VERSION_ESQUEMA);
+    }
+
+    @Bean
+    FabricaDeBases fabricaDeBases(DataSourceProperties propiedades, PreparadorEsquema preparador) {
+        return new FabricaDeBases(propiedades, preparador);
+    }
+
+    /**
+     * El esquema de la base de arranque. Sustituye al inicializador de Boot, que se retira
+     * al ver este bean: ver {@link InicializadorEsquema}.
+     */
+    @Bean
+    InicializadorEsquema inicializadorEsquema(
+            BaseConmutable dataSource, PreparadorEsquema preparador) {
+        return new InicializadorEsquema(dataSource, preparador);
     }
 
     /**
      * El pool inicial y su envoltura conmutable.
      *
-     * <p>Aquí NO se corre {@code schema.sql}: de eso sigue encargándose Boot, con su propio
-     * inicializador, sobre este mismo bean. Correrlo también aquí lo ejecutaría dos veces en
-     * cada arranque.
+     * <p>Aquí NO se prepara el esquema: de eso se encarga {@link InicializadorEsquema}, sobre
+     * este mismo bean y antes de que JPA lo use. Desde S191 ya no es el inicializador de Boot
+     * —que se retira— sino {@link PreparadorEsquema}, que lee el {@code user_version} de la
+     * base y la crea, la migra o la rechaza. Prepararlo también aquí lo ejecutaría dos veces
+     * en cada arranque.
      *
      * <p>{@code destroyMethod = "close"} cierra el pool VIGENTE al cerrar el contexto, que es
      * el que puede no ser el inicial.

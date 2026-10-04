@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.escritorio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import es.yaroki.educhronos.app.config.EsquemaPosteriorException;
 import java.net.BindException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
@@ -92,6 +93,30 @@ class FalloArranqueTest {
     @Test
     void sinExcepcionSeDaElMensajeGenerico() {
         assertThat(FalloArranque.mensaje(null, LOG)).contains(LOG.toString());
+    }
+
+    /**
+     * (10, S191) Una base de una versión más nueva es el segundo caso que se explica: el
+     * usuario lo arregla instalando la última versión, y el texto de la excepción ya lo dice.
+     * Llega envuelta por Spring, así que va dos causas por debajo. El caso del puerto y el
+     * genérico siguen como estaban.
+     */
+    @Test
+    void conUnaBasePosteriorDosCausasAbajoSeEnsenaSuTexto() {
+        EsquemaPosteriorException posterior = new EsquemaPosteriorException(2, 1);
+        Throwable comoEnSpring =
+                new IllegalStateException(
+                        "Error creating bean with name 'inicializadorEsquema'",
+                        new RuntimeException("Invocation of init method failed", posterior));
+
+        assertThat(FalloArranque.mensaje(comoEnSpring, LOG))
+                .isEqualTo("Educhronos no ha podido arrancar. " + posterior.getMessage());
+        assertThat(FalloArranque.mensaje(new PortInUseException(8080), LOG))
+                .as("el puerto, igual")
+                .isEqualTo(FalloArranque.PUERTO_OCUPADO);
+        assertThat(FalloArranque.mensaje(new IllegalStateException("la base está rota"), LOG))
+                .as("el genérico, igual")
+                .isEqualTo("Educhronos no ha podido arrancar. El detalle está en: " + LOG);
     }
 
     // ------------------------------------------------ antes de que Spring exista

@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.escritorio;
 
+import es.yaroki.educhronos.app.config.EsquemaPosteriorException;
 import java.net.BindException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -11,11 +12,19 @@ import org.springframework.boot.web.server.PortInUseException;
  * Traduce el fallo de arranque a una frase que le sirva al usuario (condición 6 de
  * O-instalación).
  *
- * <p>La única distinción que se hace es la que el usuario puede ARREGLAR: el puerto ocupado.
- * Es además el fallo esperable en un ordenador de centro, donde el 8080 se lo lleva cualquier
- * otro programa. Todo lo demás —permisos, base corrupta, disco lleno— produce el mismo
- * mensaje, que no explica nada pero dice DÓNDE está escrito el detalle: inventar diagnósticos
- * a partir del tipo de excepción sería adivinar.
+ * <p>Se explican DOS casos, los dos porque el usuario puede ARREGLARLOS:
+ *
+ * <ul>
+ *   <li>El puerto ocupado. Es el fallo esperable en un ordenador de centro, donde el 8080 se
+ *       lo lleva cualquier otro programa.
+ *   <li>Una base guardada por una versión más nueva de Educhronos (S191,
+ *       {@link EsquemaPosteriorException}): la arregla instalar la última versión, y su
+ *       {@code message} ya está escrito para decirlo.
+ * </ul>
+ *
+ * <p>Todo lo demás —permisos, base corrupta, disco lleno— produce el mismo mensaje, que no
+ * explica nada pero dice DÓNDE está escrito el detalle: inventar diagnósticos a partir del
+ * tipo de excepción sería adivinar.
  *
  * <p><b>Por qué se mira la cadena entera y no la excepción de arriba.</b> Medido en el M2-A
  * de S154 sobre esta misma aplicación: con el 8080 ocupado, lo que llega arriba es
@@ -50,7 +59,30 @@ public final class FalloArranque {
         if (esPuertoOcupado(fallo)) {
             return PUERTO_OCUPADO;
         }
+        EsquemaPosteriorException posterior = esquemaPosterior(fallo);
+        if (posterior != null) {
+            return "Educhronos no ha podido arrancar. " + posterior.getMessage();
+        }
         return "Educhronos no ha podido arrancar. El detalle está en: " + rutaDelLog;
+    }
+
+    /**
+     * La {@link EsquemaPosteriorException} de la cadena de causas, o {@code null}. Llega
+     * envuelta por Spring —el inicializador de esquema falla dentro de la creación de un
+     * bean—, así que se recorre la cadena con la misma protección contra ciclos que
+     * {@link #esPuertoOcupado}.
+     */
+    static EsquemaPosteriorException esquemaPosterior(Throwable fallo) {
+        Set<Throwable> vistas = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable actual = fallo; actual != null; actual = actual.getCause()) {
+            if (!vistas.add(actual)) {
+                return null;
+            }
+            if (actual instanceof EsquemaPosteriorException posterior) {
+                return posterior;
+            }
+        }
+        return null;
     }
 
     /**

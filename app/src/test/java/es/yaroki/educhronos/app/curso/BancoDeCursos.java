@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import es.yaroki.educhronos.app.config.BaseConmutable;
 import es.yaroki.educhronos.app.config.FabricaDeBases;
+import es.yaroki.educhronos.app.config.PreparadorEsquema;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
-import org.springframework.boot.sql.autoconfigure.init.SqlInitializationProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
@@ -66,10 +66,11 @@ public final class BancoDeCursos {
     /**
      * Una {@link FabricaDeBases} igual que la del contexto, montada a mano.
      *
-     * <p>Los dos {@code …Properties} son POJOs de configuración y se instancian con
-     * {@code new}: lo que hacen es llevar valores por defecto, y los defectos son los mismos
-     * que tiene la aplicación salvo el {@code spring.sql.init.mode}, que aquí no se consulta
-     * porque {@code initializeDatabase()} se llama directamente.
+     * <p>El {@code DataSourceProperties} es un POJO de configuración y se instancia con
+     * {@code new}: lleva los valores por defecto, que son los mismos que tiene la aplicación.
+     * El esquema lo prepara un {@link PreparadorEsquema} con las mismas tres constantes que el
+     * bean de {@code main} (S191): la fábrica de aquí aplica las mismas reglas que la del
+     * contexto.
      */
     public static FabricaDeBases fabrica() throws Exception {
         DataSourceProperties propiedades = new DataSourceProperties();
@@ -78,7 +79,12 @@ public final class BancoDeCursos {
         propiedades.setBeanClassLoader(BancoDeCursos.class.getClassLoader());
         propiedades.afterPropertiesSet();
         return new FabricaDeBases(
-                propiedades, new SqlInitializationProperties(), new DefaultResourceLoader());
+                propiedades,
+                new PreparadorEsquema(
+                        new DefaultResourceLoader(),
+                        PreparadorEsquema.ESQUEMA_VIGENTE,
+                        PreparadorEsquema.MIGRACIONES,
+                        PreparadorEsquema.VERSION_ESQUEMA));
     }
 
     /** Una {@link BaseConmutable} abierta sobre {@code fichero}, con su pool recién hecho. */

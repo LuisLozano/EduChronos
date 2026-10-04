@@ -201,6 +201,26 @@ class DuplicadorCursoTest {
         assertThat(curso(origen)).as("el origen sigue archivado").isEqualTo(ACTUAL + "|true");
     }
 
+    /**
+     * (12, S191) El curso nuevo conserva el número de esquema del origen. El duplicado es un
+     * {@code VACUUM INTO}, y que conserve {@code user_version} se midió en S191 con la
+     * librería de la aplicación; esto lo fija: un destino a 0 se tomaría por una base anterior
+     * a S191 y recibiría {@code 001.sql} de nuevo al abrirse.
+     */
+    @Test
+    void elCursoNuevoConservaElNumeroDeEsquemaDelOrigen(@TempDir Path carpeta) throws Exception {
+        Path origen = baseFabricada(carpeta, ACTUAL, false);
+        try (Connection conexion = conectar(origen);
+                Statement sentencia = conexion.createStatement()) {
+            sentencia.execute("PRAGMA user_version = 1");
+        }
+        assertThat(version(origen)).as("precondición: el origen, sellado").isEqualTo(1);
+
+        Path destino = duplicador.duplicar(origen, null, NUEVO, null, NO_ARCHIVADO);
+
+        assertThat(version(destino)).isEqualTo(1);
+    }
+
     // ─────────────────────────────────────────────────────────────── bordes
 
     /**
@@ -358,6 +378,15 @@ class DuplicadorCursoTest {
                 filas.next();
                 return filas.getInt(1);
             }
+        }
+    }
+
+    private static int version(Path base) throws SQLException {
+        try (Connection conexion = conectar(base);
+                Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery("PRAGMA user_version")) {
+            fila.next();
+            return fila.getInt(1);
         }
     }
 

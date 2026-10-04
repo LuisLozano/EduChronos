@@ -2,18 +2,28 @@ package es.yaroki.educhronos.app.curso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
+import es.yaroki.educhronos.app.EduchronosApplication;
 import es.yaroki.educhronos.app.config.BaseConmutable;
+import es.yaroki.educhronos.app.config.EsquemaPosteriorException;
+import es.yaroki.educhronos.app.config.InicializadorEsquema;
+import es.yaroki.educhronos.app.config.PreparadorEsquema;
+import es.yaroki.educhronos.app.escritorio.FalloArranque;
 import es.yaroki.educhronos.app.web.dto.CursoListadoDTO;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -53,6 +63,8 @@ class CursoAperturaTest {
     @Autowired private EstadoCurso estado;
 
     @Autowired private BaseConmutable base;
+
+    @Autowired private ApplicationContext contexto;
 
     /**
      * Devuelve al contexto el estado exacto con el que arrancó: la base de partida abierta,
@@ -391,6 +403,98 @@ class CursoAperturaTest {
                 .contains("DESPUES_DEL_FALLO");
     }
 
+    // ─────────────────────────────────────────────────────── esquema versionado (S191)
+
+    /**
+     * (S191, caso 12) El esquema del arranque lo prepara {@link InicializadorEsquema}, y es el
+     * ÚNICO inicializador de scripts del contexto: el de Boot se ha retirado. Si no se
+     * retirara habría dos, y {@code schema.sql} se pasaría además sin mirar el número de la
+     * base. Y la base de arranque queda sellada.
+     */
+    @Test
+    void elEsquemaDelArranqueLoPreparaSoloInicializadorEsquema_yLaBaseQuedaSellada()
+            throws Exception {
+        Map<String, DataSourceScriptDatabaseInitializer> inicializadores =
+                contexto.getBeansOfType(DataSourceScriptDatabaseInitializer.class);
+
+        assertThat(inicializadores).as("un solo inicializador de scripts").hasSize(1);
+        assertThat(inicializadores.values())
+                .singleElement()
+                .isInstanceOf(InicializadorEsquema.class);
+        assertThat(version(carpeta.resolve(ABIERTA)))
+                .as("la base de arranque, sellada")
+                .isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
+    }
+
+    /**
+     * (S191, caso 13) Abrir una base de una versión más nueva es 409
+     * {@code CURSO_VERSION_POSTERIOR} con el texto de la excepción dentro; la aplicación
+     * sigue en la base anterior y el fichero rechazado NO se toca —aserto por md5—.
+     */
+    @Test
+    void abrir_unaBaseDeUnaVersionPosterior_409YNoLaToca() throws Exception {
+        int posterior = PreparadorEsquema.VERSION_ESQUEMA + 1;
+        Path futura = BancoDeCursos.fabricar(
+                carpeta.resolve("curso-2030-2031.db"), "2030/2031", false);
+        sellar(futura, posterior);
+        String huella = BancoDeCursos.huella(futura);
+        Path antes = base.baseAbierta();
+        String texto =
+                new EsquemaPosteriorException(posterior, PreparadorEsquema.VERSION_ESQUEMA)
+                        .getMessage();
+
+        assertThatThrownBy(() -> servicio.abrir("curso-2030-2031.db"))
+                .isInstanceOfSatisfying(
+                        RechazoCursoException.class,
+                        e -> {
+                            assertThat(e.causa())
+                                    .isEqualTo(CursoService.CURSO_VERSION_POSTERIOR);
+                            assertThat(e.status().value()).isEqualTo(409);
+                            assertThat(e.getMessage())
+                                    .contains("curso-2030-2031.db")
+                                    .contains(texto)
+                                    .contains("curso anterior");
+                        });
+
+        assertThat(base.baseAbierta()).as("la base NO ha cambiado").isEqualTo(antes);
+        assertThat(estado.cambiando()).isFalse();
+        assertThat(BancoDeCursos.huella(futura)).as("el fichero posterior, intacto").isEqualTo(huella);
+    }
+
+    /**
+     * (S191, caso 14) ARRANCAR sobre una base de una versión más nueva no arranca: la
+     * {@link EsquemaPosteriorException} viaja en la cadena de causas, el mensaje del
+     * escritorio la explica y el fichero no se toca. Se levanta una aplicación de verdad,
+     * aparte del contexto del test, porque lo que se mide es que el arranque entero se pare.
+     */
+    @Test
+    void arrancarSobreUnaBasePosterior_noArranca_yElMensajeLoExplica(@TempDir Path otra)
+            throws Exception {
+        int posterior = PreparadorEsquema.VERSION_ESQUEMA + 1;
+        Path futura = BancoDeCursos.fabricar(otra.resolve("posterior.db"), "2030/2031", false);
+        sellar(futura, posterior);
+        String huella = BancoDeCursos.huella(futura);
+        String texto =
+                new EsquemaPosteriorException(posterior, PreparadorEsquema.VERSION_ESQUEMA)
+                        .getMessage();
+
+        Throwable fallo =
+                catchThrowable(
+                        () -> new SpringApplication(EduchronosApplication.class)
+                                .run(
+                                        "--spring.datasource.url=jdbc:sqlite:"
+                                                + futura.toAbsolutePath(),
+                                        "--server.port=0"));
+
+        assertThat(fallo).as("el arranque se para").isNotNull();
+        assertThat(causas(fallo))
+                .as("la cadena de causas lleva la EsquemaPosteriorException")
+                .hasAtLeastOneElementOfType(EsquemaPosteriorException.class);
+        assertThat(FalloArranque.mensaje(fallo, otra.resolve("educhronos.log")))
+                .contains(texto);
+        assertThat(BancoDeCursos.huella(futura)).as("el fichero posterior, intacto").isEqualTo(huella);
+    }
+
     // ───────────────────────────────────────────────────────────── requisito (b) y duplicar
 
     /**
@@ -543,6 +647,35 @@ class CursoAperturaTest {
 
     private void archivarLaBaseAbierta(String nombre) throws Exception {
         ponerNombreALaBaseAbierta(nombre, true);
+    }
+
+    /** Pone a mano el número de esquema de un fichero, por JDBC directo. */
+    private static void sellar(Path fichero, int numero) throws Exception {
+        try (var conexion = BancoDeCursos.conectar(fichero);
+                var sentencia = conexion.createStatement()) {
+            sentencia.execute("PRAGMA user_version = " + numero);
+        }
+    }
+
+    /** El número de esquema de un fichero, por JDBC directo y fuera del pool. */
+    private static int version(Path fichero) throws Exception {
+        try (var conexion = BancoDeCursos.conectar(fichero);
+                var sentencia = conexion.createStatement();
+                var fila = sentencia.executeQuery("PRAGMA user_version")) {
+            fila.next();
+            return fila.getInt(1);
+        }
+    }
+
+    /** La cadena de causas, con la misma protección contra ciclos que {@link FalloArranque}. */
+    private static List<Throwable> causas(Throwable fallo) {
+        java.util.Set<Throwable> vistas =
+                java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        List<Throwable> cadena = new java.util.ArrayList<>();
+        for (Throwable actual = fallo; actual != null && vistas.add(actual); actual = actual.getCause()) {
+            cadena.add(actual);
+        }
+        return cadena;
     }
 
     /** Escribe un nivel POR EL POOL, que es lo que dice a qué fichero van las escrituras. */

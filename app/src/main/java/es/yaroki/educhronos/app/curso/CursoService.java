@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.curso;
 import com.zaxxer.hikari.HikariDataSource;
 import es.yaroki.educhronos.app.config.BaseConmutable;
 import es.yaroki.educhronos.app.config.CarpetaDatos;
+import es.yaroki.educhronos.app.config.EsquemaPosteriorException;
 import es.yaroki.educhronos.app.config.FabricaDeBases;
 import es.yaroki.educhronos.app.web.dto.CursoListadoDTO;
 import java.io.IOException;
@@ -60,6 +61,12 @@ public class CursoService {
 
     /** La base pedida no se ha podido abrir; se sigue en la anterior. */
     public static final String CURSO_NO_ABRE = "CURSO_NO_ABRE";
+
+    /**
+     * La base pedida la guardó una versión más nueva de Educhronos; no se toca y se sigue en
+     * la anterior (S191).
+     */
+    public static final String CURSO_VERSION_POSTERIOR = "CURSO_VERSION_POSTERIOR";
 
     /** Prefijo de los ficheros de curso archivado o creado: {@code curso-2026-2027.db}. */
     static final String PREFIJO_CURSO = "curso-";
@@ -273,9 +280,12 @@ public class CursoService {
      *   <li>Se toma el turno, o 409: mirar y marcar en el mismo bloque, sin ventana.
      *   <li>Se espera a que el pool vigente quede sin conexiones en uso, o 503.
      *   <li>Se construye el pool nuevo, con los ajustes del arranque.
-     *   <li>Se le pasa {@code schema.sql}. Esto es lo que ABRE de verdad el fichero, y por
-     *       tanto lo que descubre que no es una base de SQLite. Va ANTES de sustituir a
-     *       propósito: el fallo caro ocurre mientras nadie ha cambiado de suelo todavía.
+     *   <li>Se prepara el esquema, con el mismo {@code PreparadorEsquema} del arranque (S191):
+     *       se crea, se migra o se rechaza. Esto es lo que ABRE de verdad el fichero, y por
+     *       tanto lo que descubre que no es una base de SQLite —{@code CURSO_NO_ABRE}— o que
+     *       es de una versión más nueva —409 {@code CURSO_VERSION_POSTERIOR}, sin tocarla—.
+     *       Va ANTES de sustituir a propósito: el fallo caro ocurre mientras nadie ha
+     *       cambiado de suelo todavía.
      *   <li>Se sustituye, se recarga la identidad y se cierra el pool viejo. Si la recarga
      *       fallara con el pool ya puesto, se deshace la sustitución y se cierra el nuevo: es
      *       la única forma de que un fallo aquí no deje la aplicación hablando de un curso
@@ -308,6 +318,14 @@ public class CursoService {
                 // no es una base de SQLite. Con el pool viejo todavía puesto: si revienta,
                 // nadie ha cambiado de suelo.
                 fabrica.prepararEsquema(nuevo);
+            } catch (EsquemaPosteriorException e) {
+                // No es un fichero roto: es uno que esta versión no sabe leer. Se dice cuál y
+                // qué hacer, y la base no se ha tocado.
+                nuevo.close();
+                throw new RechazoCursoException(
+                        HttpStatus.CONFLICT, CURSO_VERSION_POSTERIOR,
+                        "No se puede abrir «" + destino.getFileName() + "». " + e.getMessage()
+                                + " Se sigue en el curso anterior.");
             } catch (RuntimeException e) {
                 nuevo.close();
                 throw noAbre(destino, e);
@@ -415,7 +433,8 @@ public class CursoService {
      * <p><b>Si la apertura falla, el duplicado QUEDA HECHO.</b> No se deshace: el fichero
      * nuevo es correcto y el origen ya está archivado, y borrar un curso recién creado por un
      * fallo al abrirlo sería destruir lo único que salió bien. Lo que sale es el error de la
-     * apertura —{@code CURSO_NO_ABRE} o {@code CURSO_OCUPADO}—, y la aplicación se queda
+     * apertura —{@code CURSO_NO_ABRE}, {@code CURSO_VERSION_POSTERIOR} o
+     * {@code CURSO_OCUPADO}—, y la aplicación se queda
      * sobre el origen archivado, desde donde el curso nuevo se abre a mano con
      * {@code POST /api/cursos/abrir}. Es un estado raro pero honesto: el listado lo enseña.
      *
