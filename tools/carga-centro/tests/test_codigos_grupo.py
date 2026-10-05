@@ -43,14 +43,12 @@ class FormaCorta(unittest.TestCase):
         self.assertEqual(sorted(titulos), sorted(ESPERADO))
         self.assertEqual({t: cg.forma_corta(t) for t in titulos}, ESPERADO)
 
-    def test_las_cinco_reglas_son_las_de_verificar_conservacion(self):
-        fuente = (RAIZ / "tools" / "carga-centro" / "verificar-conservacion.py").read_text(encoding="utf-8").splitlines()
-        propio = (RAIZ / "tools" / "carga-centro" / "codigos_grupo.py").read_text(encoding="utf-8").splitlines()
-
-        def bloque(lineas):
-            i = lineas.index("REGLAS_CODIGO = [")
-            return lineas[i:lineas.index("]", i) + 1]
-        self.assertEqual(bloque(propio), bloque(fuente))
+    def test_verificar_conservacion_no_define_reglas_propias(self):
+        # S199: las reglas viven solo aquí; una segunda copia ya divergió (le faltaba 1ºBACH).
+        fuente = (RAIZ / "tools" / "carga-centro" / "verificar-conservacion.py").read_text(encoding="utf-8")
+        self.assertNotIn("REGLAS_CODIGO =", fuente)
+        self.assertNotIn("re.compile(", fuente)
+        self.assertIn("from codigos_grupo import forma_corta", fuente)
 
     def test_sin_regla_aborta(self):
         for t in ("1ºBACH E", "1º ESO E", "2ºBACH A Ciencias", "1ºBACH A ciencias", ""):

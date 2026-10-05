@@ -18,6 +18,10 @@ QUE NO ASEVERA, y conviene tenerlo delante:
     esperadas.
   - NO compara aulas. El PDF omite el aula en 65 celdas y el solver elige libre.
 
+ENTRADAS (S199). --db, la base con el horario, y --volcados, la carpeta con los
+grupo-*.json del curso. Los dos obligatorios: con dos cursos en docs/horario-referencia/,
+una ruta fija comparaba la base contra los volcados de 2025/2026 en silencio.
+
 ORIGEN. Instrumento de la capa 2 de S119, que se construyo como arnes desechable
 y hubo que reconstruir en S135 leyendo la bitacora. Se versiona para que la
 tercera vez no haya que reconstruirlo: la especificacion esta en
@@ -42,22 +46,22 @@ construye esta capa.
 import argparse
 import glob
 import json
-import re
 import sqlite3
 import sys
 from collections import Counter
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[2]
-VOLCADOS = RAIZ / "docs" / "horario-referencia"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from codigos_grupo import forma_corta, SinFormaCorta  # noqa: E402
 
 
 # ------------------------------------------------------- mapa de codigos
 #
-# REGLA DETERMINISTA Y CIEGA A LA MEDICION. Sale de la tabla de normalizacion de
-# docs/horario-referencia/INFORME-RECONCILIACION.md mas el caso `3o ESO PDC`, que
-# S115 cerro por tres vias independientes y la nota posterior de ese mismo fichero
-# recoge.
+# REGLA DETERMINISTA Y CIEGA A LA MEDICION. Desde S199 las reglas viven SOLO en
+# codigos_grupo.py (forma_corta): las cinco de docs/horario-referencia/
+# INFORME-RECONCILIACION.md mas el caso `3o ESO PDC` que S115 cerro, y la de
+# 1oBACH con modalidad de S197. Aqui no se define ninguna: una segunda copia ya
+# divergio una vez (le faltaba la de 1oBACH).
 #
 # POR QUE ESTA ESCRITO A MANO Y NO DERIVADO. En S119 el mapa se dedujo primero
 # maximizando el solapamiento de (asignatura, profesor) entre los dos universos
@@ -67,21 +71,14 @@ VOLCADOS = RAIZ / "docs" / "horario-referencia"
 # divergencia. NO SUSTITUIR ESTAS REGLAS POR UNA DERIVACION AUTOMATICA: el mapa
 # debe ser ajeno a lo que se mide. `verificar_mapa` mira la base, pero solo para
 # comprobar la regla ya escrita, nunca para construirla.
-REGLAS_CODIGO = [
-    ("Nº ESO L PDC -> NºLDi", re.compile(r"^(\d)º ESO ([A-D]) PDC$"), r"\1º\2Di"),
-    ("Nº ESO PDC   -> 3ºCDi", re.compile(r"^3º ESO PDC$"),            "3ºCDi"),
-    ("Nº ESO L     -> NºL",   re.compile(r"^(\d)º ESO ([A-D])$"),     r"\1º\2"),
-    ("NºBACH L     -> NB-L",  re.compile(r"^(\d)ºBACH ([A-D])$"),     r"\1B-\2"),
-    ("Nº FPB       -> NFPB",  re.compile(r"^(\d)º FPB$"),             r"\1FPB"),
-]
 
 
 def normaliza(crudo):
-    """Forma larga del PDF -> forma corta de la base. (None, None) si no aplica."""
-    for nombre, patron, plantilla in REGLAS_CODIGO:
-        if patron.match(crudo):
-            return patron.sub(plantilla, crudo), nombre
-    return None, None
+    """Forma larga del PDF -> forma corta de la base. None si no casa exactamente una regla."""
+    try:
+        return forma_corta(crudo)
+    except SinFormaCorta:
+        return None
 
 
 # ------------------------------------------------------------- supuestos
@@ -122,16 +119,16 @@ def comprobar_supuestos(con, horario_id):
 
 # ----------------------------------------------------------- los dos lados
 
-def entradas_del_pdf():
+def entradas_del_pdf(volcados):
     """Conjunto de (grupo_corto, dia, tramo, asignatura, profesor) desde los volcados."""
-    ficheros = sorted(glob.glob(str(VOLCADOS / "grupo-*.json")))
+    ficheros = sorted(glob.glob(str(volcados / "grupo-*.json")))
     if not ficheros:
-        raise SystemExit("No hay grupo-*.json en %s" % VOLCADOS)
+        raise SystemExit("No hay grupo-*.json en %s" % volcados)
     entradas, mapa, sin_regla = set(), {}, []
     for f in ficheros:
         d = json.loads(Path(f).read_text(encoding="utf-8"))
         crudo = d["_meta"]["codigo_crudo"]
-        corto, _ = normaliza(crudo)
+        corto = normaliza(crudo)
         if corto is None:
             sin_regla.append(crudo)
             continue
@@ -187,11 +184,13 @@ def verificar_mapa(con, mapa, sin_regla):
 
 # ------------------------------------------------------------------- main
 
-def main():
+def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--db", required=True, help="base sqlite con el horario generado")
+    p.add_argument("--volcados", required=True, help="carpeta con los grupo-*.json del curso")
     p.add_argument("--horario", type=int, default=None, help="id del horario (por defecto, el unico)")
-    args = p.parse_args()
+    args = p.parse_args(argv)
+    volcados = Path(args.volcados).resolve()
 
     ruta = Path(args.db)
     if not ruta.is_file():
@@ -214,12 +213,12 @@ def main():
     print("CAPA 2 — CONSERVACION DE LA CARGA")
     print("  base:    %s" % ruta)
     print("  horario: %d de %s" % (horario_id, horarios))
-    print("  PDF:     %s/grupo-*.json" % VOLCADOS.relative_to(RAIZ))
+    print("  PDF:     %s/grupo-*.json" % volcados)
     print()
 
     rotos = comprobar_supuestos(con, horario_id)
 
-    pdf, mapa, sin_regla, n_ficheros = entradas_del_pdf()
+    pdf, mapa, sin_regla, n_ficheros = entradas_del_pdf(volcados)
     mapa_ok = verificar_mapa(con, mapa, sin_regla)
     base = entradas_de_la_base(con, horario_id)
 
