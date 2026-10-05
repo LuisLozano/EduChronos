@@ -94,6 +94,13 @@ objetivo bloquea (R-incidencia, §6 de `gestion_proyecto.md`). Antes de dar de a
 una incidencia se busca en §4 si ya existe como deuda: ningún instrumento detecta dos
 nombres para un mismo defecto (S166).
 
+**Lenguaje llano (S194, petición del usuario de S191).** Antes de las cuatro
+preguntas, el M0 escribe de 3 a 5 líneas en lenguaje llano, sin etiquetas del
+proyecto, sobre qué cambia para el usuario: qué podrá hacer o qué dejará de fallar, y
+cómo se notará. Si no cambia nada visible, lo dice y dice para qué sirve. Se saca del
+«Propósito» y el «Valor» de la ficha del objetivo, no de memoria; en una sesión sin
+objetivo (Higiene/Método), del registro que la propone.
+
 ---
 
 ## M1 — Cierre de sesión. Ocho pasos (aplicables según tipo de sesión, ver §Tipos)
@@ -137,6 +144,8 @@ rotación). Por eso lleva verificación propia:
 alcance: nombra los candidatos vivos con su estado leído del mapa y deja la
 elección para la apertura. NO copia lo que ya está en la documentación: remite a
 ella. Si supera ~60 líneas, está duplicando documentación y hay que podarlo.
+Cada candidato lleva una o dos líneas en lenguaje llano sobre qué cambiaría para
+el usuario, con el enfoque del M0 (S194).
 
 **EXCEPCIÓN (S131) — la sesión de Acabado visual.** Si la siguiente sesión es de
 ese tipo (M-visual), el prompt SÍ lleva alcance: un ACTA con la lista cerrada de
@@ -453,7 +462,14 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
 | **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
+| **Apertura de objetivo** | Abrir el objetivo siguiente del mapa y escribir su criterio sobre medición | Entre objetivos; avanza el Cambio de alcance del objetivo (`C-alcance-*`) | M0, M2 de solo lectura, decisiones del usuario, alta documental con corrida en seco, M1 | M3 y M4 (no hay código de la aplicación). Precedentes: S147 a S173, S180, S183 y S190 (S194) |
+| **Desarrollo reducido** | Avanzar un Cambio que se verifica fuera del código: versión, Release, VM, ensayo, demo | Bajo objetivo activo, cuando el Cambio no lleva código de la aplicación | M0, M2 de solo lectura, M4 con un humano o en la VM, M1 | M3 (no hay lógica nueva). Precedentes desde S156; el último, S189 (S194) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
+
+**Tipos combinados (S194).** Una sesión puede tener fases de tipos distintos (S193:
+Configuración/UI y una fase de Desarrollo reducido). El M0 nombra el tipo de cada
+fase, cada fase aplica su ritual y el registro de cierre los nombra todos.
+(`D-tipo-apertura-sin-fila`)
 
 Por qué Higiene/Método tiene excepción a R-apertura (S152): una sesión de método no
 avanza ningún Cambio, así que con la regla literal no podía abrirse NUNCA, y cuatro
@@ -545,3 +561,38 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
    norma 8 aborta sin escribir, pero el intento ya se ha pagado. Reúne el punto 6 de
    M-doc (S133) y la precisión 6 de S141; S153 (corrección d) y S178 (defecto 3)
    fallaron por no aplicarla.
+
+10. **Un paso que remite a un procedimiento lleva sus órdenes escritas** (S194). Antes
+    de remitir a un documento del repo, un acta, el material de otra sesión o el propio
+    M1, el arquitecto lo lee y copia en el guion sus órdenes literales. Si un paso
+    remite sin ellas, Claude Code para y las pide. El guion de cierre es un caso más:
+    lleva cada paso de M1 que aplique, con la frase de ventana (M1.4). Sale de S190,
+    de los defectos 1 y 5 de S193 y de la frase de ventana que omitió el guion de
+    cierre de S193. (`D-guion-lista-ordenes-incompleta`)
+11. **La lista de órdenes permitidas enumera solo las que tienen efecto** (S194): las
+    que escriben ficheros, las de git que cambian el repositorio o el remoto, las de
+    red y las que lanzan o paran procesos. Las de solo lectura y las utilidades de
+    texto (`ls`, `cat`, `grep`, `sed -n`, `head`, `wc`, `od`, `tr`, `cut`, `sort`,
+    `diff`, `sha256sum`, `git log`, `git status`, `sqlite3 -readonly`…) son libres.
+    Una orden fuera de la lista sin efecto no para el guion; una con efecto, sí, aunque
+    parezca de lectura (`sed -i`, `find -delete`). La lista completa dejó fuera órdenes
+    implícitas de S190 a S193, y repasar el guion paso a paso no bastó (S191).
+    (`D-guion-lista-ordenes-incompleta`)
+12. **Las condiciones de parada se escriben por lo que protegen, no por rutas** (S194):
+    «para si borra o modifica ficheros versionados, la carpeta de datos real del
+    usuario o un banco citado por su huella», y no «para si escribe fuera de X o Y».
+    Una JVM o un build escriben donde necesitan (`/tmp`, `target/`, `dist/`,
+    `.angular/`) sin riesgo detrás. Sale de S193, F2.6. (`D-guion-parada-por-rutas`)
+13. **A la conversación vuelve un resumen; la evidencia, a disco** (S194). El guion fija
+    un tope de 25 a 40 líneas para lo que devuelve y deja lo literal (salidas largas,
+    ficheros copiados, informes) en la carpeta de material de la fase, con su
+    `MANIFIESTO.sha256`. En la VM, las salidas de PowerShell se guardan en fichero, no
+    solo en la consola. Sale de S192, que devolvió 142 kB a la conversación.
+    (`D-guion-salida-sin-tope`)
+14. **El arquitecto no escribe huellas de fichero de capturas** (S194). El chat
+    recodifica las imágenes, así que la huella que calcula el arquitecto no es la del
+    fichero guardado. En un guion van, si hacen falta, huellas de píxeles (RGBA) con
+    dimensiones; las de fichero las calcula Claude Code sobre lo conservado. Es un caso
+    particular de la norma 3. Vocabulario: «captura» es una imagen de pantalla;
+    «instantánea», el snapshot de la VM. Sale de S181 y S182.
+    (`D-huella-captura-del-chat`)
