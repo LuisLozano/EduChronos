@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S193. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S194. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S193). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S194). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10075,3 +10075,17 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s193/`: `m2/` (7), `f2/` (13), `f2bis/` (22), `f2ter/` (19), `f3/` (12, con `b2/` y `b4/` aparte), `f4/` (9), `f4/vm/` (6) y `cierre/`, cada una con su `MANIFIESTO.sha256`, verificados con `sha256sum -c` en el cierre; los de `m2/` y `f3/` cubren por guion 3 y 4 ficheros (informe y salidas largas; informe, zip, su `.sha256` y jar). El zip de `v0.3.0` queda también en el USB, en `s193-f4/`. La VM `Win11`: restaurada `s187-demo-lista`, sustituida la versión y apagada sin instantánea; su estado ya no es el de ninguna instantánea.
   LIMPIEZA (M1-bis). Archivada S191 en la bitácora (15 líneas: las 14 de cuerpo, idénticas byte a byte a las del plan en `1bf9855` —`diff` sin diferencias y el mismo sha256—, y el título con el mismo texto tras el prefijo), promovida a H3. Degradada S192; S193, única cabecera H3 viva. Los tres censos, en S191. `D-version-invisible` movida a la deuda cerrada del plan. Condensación: ninguna.
   R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 16 de 16, 0 fallos duros; ventana S192/S193 por la sección 5; tablas por la sección 6, 0 descuadres y 0 filas fuera de tabla en los cuatro ficheros. Índices descuadrados antes de regenerar, gestión 14 de 39 y plan 18 de 68 (los dos fallos duros de esa corrida), después 0 y 0. H3 única (S193) por la sección 1; los tres censos, en S191. Censo de 369 a 371 tokens desde `3850982`: nacen 2, `D-migracion-sin-rastro` (5 apariciones) y `D-guion-parada-por-rutas` (2); 0 extinguidos, por la sección 2c; `O-base-tecnica` de 37 a 44. Tokens de una aparición: 39 antes y 39 después; no entra ni sale ninguno. Higiene/Método: 16 de 20 («Higiene/Método» en la columna de sede de §4: 25 filas, 9 tachadas; casando también «script de R4», 28 y 12, con las mismas 16 vivas); sube de 15 a 16 por la fila nueva de `D-guion-parada-por-rutas`. El censo tomado antes de regenerar el índice daba `O-base-tecnica` en 46 y una aparición más de `D-generacion-sin-exclusion` y de `D-generacion-sin-rastro`, que rescataba la línea de índice caducada de S192 (`D-censo-r4-rescate-por-indice`). Editado en copias de `s193/cierre/seco/`, revisado el diff y llevado al repo con `cp`; censo con una copia del `censo.py` de S192 con `BASE = "3850982"`. Salidas en `s193/cierre/`. Tocados en el cierre `plan_trabajo_horarios.md`, `gestion_proyecto.md` y `bitacora-sesiones.md`, con los índices.
+
+### Sesión 194 — Higiene/Método: **CINCO FICHAS DE GUIONES Y DE TIPOS DE SESIÓN SALDADAS EN `metodo.md`: NORMAS 10 A 14 DE M-GUION, DOS TIPOS NUEVOS Y LOS TIPOS COMBINADOS, CON EL LENGUAJE LLANO EN M0 Y M1-TER. HIGIENE/MÉTODO DE 16 A 11.**
+  TIPO Y RITUAL: HIGIENE/MÉTODO — M0 + F1 (ediciones en seco, revisadas y llevadas al repo, `ed4ed5c`) + M1. Sin autoprueba: no se tocó `scripts/`.
+  M0. Excepción a R-apertura (§6): entre objetivos, sin ninguno abierto, con el segundo disparador saltado en S193 (`D-guion-lista-ordenes-incompleta`, dos costes en la misma sesión). Alcance fijado en el M0: las cinco fichas de la familia de los guiones y de los tipos, de 16 a 11; fuera, por R-invalidación, las que tocan datos y catálogo que rehará `O-carga-2026` u `O-aulas`. Abrió con las líneas en lenguaje llano.
+  DECISIONES (del usuario a propuesta del arquitecto). (1) La lista de órdenes de un guion enumera solo las que tienen efecto (norma 11): repasar la lista completa paso a paso no bastó en S191. (2) La columna «¿Bloquea?» de una fila tachada lleva «—»: 32 de las 44 de la tabla de deuda técnica real ya lo hacían; las otras 12 conservan lo que decían en su disposición, tras «**Bloqueo:**», salvo las cuatro que decían «No».
+  F1 (`s194/f1/`, `s194/f1b/`). Normas 10 a 14 de M-guion; filas «Apertura de objetivo» y «Desarrollo reducido» y párrafo «Tipos combinados» en la tabla de tipos; lenguaje llano en M0 y M1-ter; convención de la columna y 12 filas convertidas en §4. En la primera corrida en seco, la etiqueta «Bloqueaba:» contradecía dos filas que decían «No bloquea…, pero…»; la segunda (`f1b/`) usa «Bloqueo:». Commit `ed4ed5c`.
+  CRITERIO. Cinco fichas CERRADAS; Higiene/Método de 16 a 11 de 20.
+  DEUDA. CERRADAS `D-guion-lista-ordenes-incompleta`, `D-guion-parada-por-rutas`, `D-guion-salida-sin-tope`, `D-huella-captura-del-chat` y `D-tipo-apertura-sin-fila` (pasan a la deuda cerrada del plan). No nace ninguna.
+  DEFECTOS DE INSTRUMENTO. Del asistente. (1) El M0 propuso unificar la columna de bloqueo a partir de una sola fila, sin medir; la medición previa al guion de F1 encontró 12 y la propuesta se rehízo antes de escribir (sin coste). (2) La conversión no contemplaba los valores «No bloquea…, pero…»; lo detectó Claude Code en el diff en seco (una corrida más). Defectos distintos: no disparan.
+  SUITES: sin cambios de código; conteo vigente solver 116, app 589, vitest 629 en 63 ficheros; e2e 3.
+  BANCOS: no se abrieron.
+  MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s194/`: `f1/`, `f1b/` y `cierre/`, cada una con su `MANIFIESTO.sha256`.
+  LIMPIEZA (M1-bis). Archivada S192 en la bitácora, promovida a H3, con el cuerpo idéntico al del plan en `2e66e07`; degradada S193; S194, única cabecera H3 viva. Censos de la bitácora a S192. Condensación: ninguna.
+  R4 / COSTURA. `verificar-cierre.py` con rc=0 y 0 fallos duros tras regenerar los índices; salidas y censo complementario desde `2e66e07` en `s194/cierre/`. Higiene/Método: 11 de 20. El censo dio un token falso de una aparición, cortado del comodín que la fila «Apertura de objetivo» ponía tras el prefijo de los Cambios de alcance; corregido tras el cierre en un commit propio, que cita `C-alcance-base-tecnica`, con el censo de nuevo en 371 tokens y 38 de una aparición: la cita saca de esa lista a `C-alcance-base-tecnica`, que tenía una sola (`s194/arreglo/`). La primera corrida del arreglo esperaba 39, una cifra escrita en el guion en vez de derivada (norma 3 de M-guion): una parada.
