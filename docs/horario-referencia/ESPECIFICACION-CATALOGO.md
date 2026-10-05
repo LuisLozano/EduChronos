@@ -1,14 +1,56 @@
 # Especificación del catálogo de entrada — centro de referencia
 
+## Reglas implementadas (S198)
+
+Desde S198 este catálogo lo produce `tools/carga-centro/derivar-catalogo.py`; ya no se deriva a mano. Las reglas que este documento cita como R1 a R11 quedan definidas aquí tal como las implementa el script. Con los volcados de 2025/2026 y `decisiones-catalogo.json`, el script reproduce byte a byte el `catalogo-derivado.json` de `894cf1e`, y esa igualdad es un test de `tools/carga-centro/tests/test_derivar_catalogo.py`.
+
+Entradas: los volcados de grupos del curso (y los `aula-*.json` si existen, solo para la lista de aulas); el fichero de decisiones del curso, con lo que el volcado no contiene, cada entrada con su motivo y su fuente o «sin fuente»; y el parche de aulas, opcional, que se aplica después de derivar. Los nombres completos no forman parte del catálogo: los produce `extraer-nombres.py` en `nombres-derivados.json`, a partir de los PDF de grupos, juntando las variantes de todos ellos y marcando con `conflicto: true` los que no se resuelven.
+
+Conservación: el script compara las horas clave a clave con los volcados y aborta ante cualquier divergencia que no explique una decisión. Compara horas, no aulas: los cambios de aula del parche se comprueban con su propia lista en el informe de conservación.
+
+| Regla | Qué fija | Función | Test |
+|---|---|---|---|
+| — | Toda decisión lleva id, fija, valor, motivo y fuente («sin fuente» si no la hay); si no, aborta | `validar_decision` | `test_decision_sin_motivo_aborta`, `test_decision_con_motivo_vacio_aborta`, `test_decision_sin_fuente_aborta`, `test_fija_desconocido_aborta` |
+| — | Celdas del volcado que una decisión saca de la derivación; sus claves quedan como divergencias explicadas | `excluir_celdas` | `test_divergencia_explicada_por_decision_pasa_y_se_cita`, `test_exclusion_de_celda_inexistente_aborta` |
+| — | Nivel del grupo por la forma de su código (NºX[Di] → NESO, NB-X[m] → NBACH, NFPB → NFPB) | `nivel_de_grupo` | `test_grupos_nivel_tipo_y_padre_y_subgrupo_automatico` |
+| R9 | Un código que acaba en «Di» es un grupo DIVERSIFICACION_PDC y su padre es el mismo código sin «Di» | `tipo_y_padre` | `test_grupos_nivel_tipo_y_padre_y_subgrupo_automatico` |
+| — | Niveles presentes en los grupos, con el orden de la decisión `niveles.orden` | `derivar_niveles` | `test_grupos_nivel_tipo_y_padre_y_subgrupo_automatico`, `test_nivel_sin_orden_aborta` |
+| — | Grupos ordenados por (orden del nivel, código) | `derivar_grupos` | `test_igual_en_json_al_catalogo_de_2025` |
+| R10 | Tramos del volcado con las horas de `jornada.horas` y el recreo de `jornada.recreo` insertado como tramo no lectivo | `derivar_jornada` | `test_jornada_con_recreo_insertado` |
+| R4 | En cada (día, tramo), las celdas unidas por grupo o por profesor son una sola sesión; la misma firma {(grupo, asignatura, profesor)} en varias franjas es una actividad | `particionar` | `test_particion_una_sesion_con_dos_grupos_y_sufijo_de_nivel`, `test_bloque_de_optativas_con_asignatura_nula` |
+| — | Plaza = (asignatura, profesores) con los grupos que cubre; co-docencia (misma asignatura en la celda, dos entradas, una con aula y otra nula) = una plaza con los dos profesores; aulas distintas = desdoble | `plazas_de`, `pares_de_codocencia` | `test_codocencia_una_plaza_con_dos_profesores`, `test_desdoble_dos_plazas_si_las_dos_aulas_son_distintas` |
+| R6 | Aula de cada celda traducida con la tabla de alias de la decisión `aulas.alias` | `aulas_de_plaza` | `test_alias_de_aula` |
+| — | Un aula → `aulaFija`; varias → `aulasCandidatas` con exactamente esas; ninguna → la decisión `plazas.aulaSinVolcado` por grupo, o aborta | `regla_de_aula` | `test_aula_una_sola_da_aula_fija`, `test_aula_dos_dan_candidatas_exactamente_esas_dos`, `test_plaza_sin_aula_y_sin_decision_aborta`, `test_plaza_sin_aula_la_fija_la_decision_por_grupo` |
+| — | `patronTemporal` (A11): NEUTRA con una repetición o dos el mismo día; DISTRIBUIDA si caen en días distintos | `patron_temporal` | `test_patron_temporal` |
+| — | Código de actividad: `[Bloque-]{asignaturas con _}-{nivel si cubre el nivel entero, si no grupos con +}` | `codigo_actividad` | `test_particion_una_sesion_con_dos_grupos_y_sufijo_de_nivel`, `test_codigo_con_grupos_si_no_cubre_el_nivel` |
+| — | `requiereTutor` (siempre emitido): true si alguna plaza es TUT*/Tut/PTVE/PTEV, salvo la decisión `actividades.requiereTutor` | `requiere_tutor` | `test_requiere_tutor_por_regla_y_por_decision`, `test_requiere_tutor_en_todas_las_actividades` |
+| R5 | Subgrupo `{grupo}-Completo` si el grupo está en una sola plaza; `{grupo}-{asignatura}` o `{grupo}-{asignatura}-{profesores}` si el par tiene varias combinaciones de profesores en el centro | `nombre_subgrupo` | `test_r5_profesor_en_el_nombre_si_hay_varias_combinaciones`, `test_codocencia_una_plaza_con_dos_profesores` |
+| — | Actividad: asignatura NULL si sus plazas son de asignaturas distintas; repeticiones = instancias; `duracionTramos` = 1 | `derivar_actividades` | `test_bloque_de_optativas_con_asignatura_nula`, `test_repeticiones_e_instancias` |
+| — | Subgrupos usados por las plazas más el `-Completo` de cada PDC, todos mono-grupo | `derivar_subgrupos` | `test_grupos_nivel_tipo_y_padre_y_subgrupo_automatico` |
+| R7 | Códigos de asignatura y de profesor tal cual los imprime el volcado, sin normalizar y en familias separadas, con sus celdas | `derivar_codigos` | `test_igual_en_json_al_catalogo_de_2025` |
+| — | Tutor = profesor único de TUT*/Tut/PTVE/PTEV del grupo; la decisión `tutorias.tutorPrincipal` lo fija y vacía `candidatos` | `derivar_tutorias` | `test_tutoria_derivada_y_fijada_por_decision`, `test_grupo_sin_tutor_y_sin_decision_aborta` |
+| — | Aulas: las del volcado (con alias), las de `aula-*.json` y las altas; tipo por la decisión `aulas.tipo`; `celdasEnVolcado` = sesiones distintas en el volcado | `derivar_aulas` | `test_aula_sin_tipo_aborta`, `test_alias_de_aula` |
+| — | Parche de aulas por sesión, después de derivar; recalcula la regla de aulas y aborta si una sesión no cae en una plaza única o si cambia una plaza que no nombra | `aplicar_parche` | `test_cambia_la_plaza_indicada_y_solo_esa_y_lo_lista`, `test_todas_las_sesiones_de_la_plaza_dan_aula_fija_nueva`, `test_sesion_que_no_cae_en_ninguna_plaza_aborta`, `test_aula_antes_que_no_es_la_del_volcado_aborta` |
+| — | Conservación clave a clave entre catálogo y volcado; toda divergencia, explicada por una decisión o aborta | `expandir`, `conservacion` | `test_hora_perdida_aborta_y_nombra_la_clave`, `test_hora_inventada_aborta_y_nombra_la_clave`, `test_divergencia_explicada_por_decision_pasa_y_se_cita` |
+| — | Invariantes I2, I4, I5, I7, S8 y S9 sobre el catálogo; rota alguna, aborta | `invariantes` | `test_tutor_fijado_que_no_imparte_la_tutoria_rompe_s8` |
+| — | El catálogo pasa la prevalidación de `cargar-centro.py` (los nombres van aparte) | `prevalidar_con_cargador` | `test_igual_en_json_al_catalogo_de_2025` |
+| R1 | no implementada (marcar el aula como DESCONOCIDA: el script exige aula o la decisión `plazas.aulaSinVolcado`, y si no, aborta) | — | — |
+| R2 | no implementada | — | — |
+| R3 | no implementada | — | — |
+| R8 | no implementada | — | — |
+| R11 | no implementada (prohíbe derivar compatibilidades de aula; el script no emite ninguna) | — | — |
+
+Clave de conservación: `clave(c)` → `(c["grupo"], c["dia"], c["tramo"], c["asignatura"], c["profesor"])` (`derivar-catalogo.py:163-165`), comparada como conjunto con la que `expandir(catalogo)` obtiene del catálogo (instancias × plazas × grupos de sus subgrupos × profesores) en `conservacion()`. Los tests son de `tools/carga-centro/tests/test_derivar_catalogo.py`.
+
 > **Qué es esto.** El guion para **teclear a mano**, por la interfaz de Educhronos, el
 > catálogo de entrada completo del IES de referencia, derivado de los volcados fieles de
 > `docs/horario-referencia/` (28 `grupo-*.json`, 43 `aula-*.json`).
 >
 > **Qué NO es.** No es un formato de importación. **No existe importador, ni runner, ni
-> script de carga**, y no está previsto escribirlos: el catálogo se teclea. El fichero
+> script de carga**, y no está previsto escribirlos: el catálogo se teclea (corregido en S198: existen `tools/carga-centro/cargar-centro.py`, que lo carga por la API REST, y `tools/carga-centro/derivar-catalogo.py`, que lo produce). El fichero
 > hermano `catalogo-derivado.json` es el mismo contenido en forma legible por máquina,
 > para ir tachando durante la carga y, más adelante, como **oráculo de regresión** contra
-> el que comparar lo que produzca el solver.
+> el que comparar lo que produzca el solver (corregido en S198: lo lee `cargar-centro.py`, que envía campo a campo y no los metadatos de derivación `celdas`, `celdasEnVolcado`, `usadaPorCatalogo`, `candidatos`, `_referencia` ni `tramoVolcado`).
 >
 > **Autoridad.** Manda `modelo_datos_fase1.md` §5 (I1–I7, S1–S9) y §6.1. Sobre los datos,
 > manda el volcado (jerarquía del `README.md` de esta carpeta). Todo lo que este documento
@@ -28,7 +70,7 @@ asignaturas, profesores, aulas y subgrupos).
 | 2 | **Niveles** | 8 | **8** | |
 | 3 | **Asignaturas** | 100 | **100** | `nombreCompleto` es obligatorio y no está en los volcados (→ A8) |
 | 4 | **Profesores** | 59 | **59** | ídem |
-| 5 | **Aulas** | 43 | **43** | 10 sin ninguna clase en el volcado, pero son espacios reales del centro |
+| 5 | **Aulas** | 43 | **43** | 10 sin ninguna clase en el volcado, pero son espacios reales del centro (corregido en S198: 44 aulas y 44 envíos, con el alta de Taller 5) |
 | 6 | **Grupos** | 28 (23 ordinarios + 5 PDC) | **23** | Solo los ordinarios; los PDC van en el paso 7 |
 | 7 | **PDC** | 5 | **5** | Sub-recurso del padre. Cada alta crea *además* su subgrupo `{código}-Completo` |
 | 8 | **Tutores** | 28 | **28** | Un envío por grupo (la lista de tutorías del grupo se reemplaza entera) |
@@ -37,7 +79,7 @@ asignaturas, profesores, aulas y subgrupos).
 
 <br>
 
-> # ⚠️ TOTAL: **815 envíos de formulario**
+> # ⚠️ TOTAL: **815 envíos de formulario** (corregido en S198: 816, `_meta.enviosDeFormulario.TOTAL`, por el alta de Taller 5)
 >
 > De los cuales **548 (67 %)** son los pasos 9 y 10 — subgrupos y actividades. Los ocho
 > primeros pasos suman 267 envíos, casi todos de un solo campo.
@@ -104,7 +146,7 @@ con la asignatura homónima, y `nombreCompleto` es obligatorio y no derivable.
 ### Paso 5 — Aulas (43 envíos)
 
 El `tipo` se ha derivado del nombre del espacio (R11 prohíbe derivar compatibilidades,
-no tipos). `capacidad`, `edificio`, `planta` y `sector` son nullable y **no** derivables
+no tipos) (corregido en S198: el tipo lo fija la decisión `aulas.tipo` de cada curso; en 2026/2027 es `ORDINARIA` para todas, sin fuente, y deja de ser inocuo si se declaran compatibilidades). `capacidad`, `edificio`, `planta` y `sector` son nullable y **no** derivables
 (→ A9).
 
 | Código | Tipo propuesto | ¿La usa alguna actividad? |
@@ -218,7 +260,7 @@ Hallazgo A.
 Derivados del profesor que imparte `TUT1`/`TUT2`/`TUT3`/`TUT4`/`Tut` en ESO y FPB, y
 `PTVE`/`PTEV` en Bachillerato (Hallazgo E: en Bach la tutoría no se llama TUT). Los 28
 grupos tienen un candidato único, pero cinco profesores salen como tutor de más de un
-grupo (→ A5).
+grupo (→ A5) (corregido en S198: los 7 tutores de Bachillerato son los de la lista oficial, `tutores-oficiales-centro.md` y decisión `tutores-bachillerato`, no los de esta tabla).
 
 | Grupo | Tutor principal | Aviso |
 |---|---|---|
@@ -310,10 +352,10 @@ Estructura derivada según R1–R4:
 - **59** actividades multi-grupo; **4** plazas con dos profesores (co-docencia intra-aula,
   I7 con `|profesores| = 2`: las LCL de 1º ESO A/B/C/D).
 - Aulas: **268** plazas con aula fija, **37** con candidatas, **11 sin aula** (→ A7, y
-  **caso inexpresable nº 1** de la §4).
+  **caso inexpresable nº 1** de la §4) (corregido en S198: 279 con aula fija y 37 con candidatas; las 11 de FPB llevan Taller 4 o Taller 5 por la decisión `fpb-aula-sin-volcado` y no queda ninguna plaza sin aula).
 - `patronTemporal`: 160 DISTRIBUIDA, 59 NEUTRA. `duracionTramos` = 1 en las 219 (→ A10).
 - `requiereTutor` = true en 22 actividades; las 28 tutorías de grupo quedan cubiertas y S8
-  se verifica en las 22.
+  se verifica en las 22 (corregido en S198: 16; los 6 bloques PTEV/PTVE-Religión pasaron a false en S137, decisión `requieretutor-ptve-ptev`, y S8 se verifica en las 16).
 - Repeticiones por semana: 45 actividades con 1, 44 con 2, 52 con 3, 67 con 4, 3 con 5,
   2 con 6, 3 con 7, 2 con 8 y 1 con 11 (`MEC-2FPB`).
 
@@ -579,7 +621,7 @@ esos subgrupos y el total del paso 9 sube.**
 ### A7. Once plazas de FPB sin aula (Hallazgo H)
 
 **Qué he supuesto.** Nada. R1 obliga a marcarlas como aula **DESCONOCIDA** y a no inventar,
-y así están en el JSON (`_aulaDesconocida: true`).
+y así están en el JSON (`_aulaDesconocida: true`) (corregido en S198: ya no; desde S135 ninguna plaza lleva el marcador y las 11 tienen aula fija).
 
 **Cuáles son.** `AMO`, `CA`, `IPE`, `MECSO`, `PS` y `Tut` de 1º FPB; `CA`, `ELE`, `MEC`,
 `PI` y `Tut` de 2º FPB. Son 49 de las 65 celdas sin aula del volcado.
@@ -598,7 +640,7 @@ como ficheros `aula-*.json` y están vacíos.
 
 ### A8. `nombreCompleto` de las 100 asignaturas y los 59 profesores
 
-**Qué he supuesto.** Nada: está a `null` en el JSON.
+**Qué he supuesto.** Nada: está a `null` en el JSON (corregido en S198: sigue a null en el catálogo; los nombres están en `nombres-derivados.json`, que produce `extraer-nombres.py` y lee `cargar-centro.py`).
 
 **Por qué importa.** `AsignaturaService` y `ProfesorService` exigen `nombreCompleto` no
 nulo ni en blanco. Sin ese dato **no se puede completar el paso 3 ni el paso 4**, que son
@@ -878,7 +920,7 @@ subgrupo, ni una invariante.
 | **I5** | ✅ Los 5 PDC tienen `grupoPadre` de tipo `ORDINARIO`. |
 | **I6** | 50 subgrupos parciales reutilizados en más de una actividad; 4 de ellos avalados por el Hallazgo D, el resto en A6. |
 | **I7** | ✅ 0 plazas sin profesor. 4 plazas con dos. |
-| **S8** | ✅ Las 22 actividades con `requiereTutor` tienen, en alguna plaza, un profesor que es tutor de un grupo cubierto por esa plaza. |
+| **S8** | ✅ Las 22 actividades con `requiereTutor` tienen, en alguna plaza, un profesor que es tutor de un grupo cubierto por esa plaza (corregido en S198: son 16). |
 | **S9** | ✅ Los 840 slots (28 grupos × 30 tramos) quedan cubiertos por **exactamente una** actividad cada uno. Ningún grupo aparece en dos actividades del mismo tramo. |
 
 S9 es la comprobación más fuerte del conjunto: significa que las 219 actividades reproducen
