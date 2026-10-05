@@ -115,6 +115,26 @@ class Oraculo(unittest.TestCase):
         self.assertEqual(sum(a["requiereTutor"] for a in self.catalogo["actividades"]), 16)
 
 
+class Curso2026(unittest.TestCase):
+    """Regresión: el catálogo versionado de 2026/2027 es lo que dan sus volcados, decisiones y parche."""
+
+    @classmethod
+    def setUpClass(cls):
+        d = HR / "2026-2027"
+        cls.catalogo, cls.ctx = dc.derivar(str(d), json.loads((d / "decisiones-catalogo.json").read_text(encoding="utf-8")),
+                                           json.loads((d / "parche-aulas.json").read_text(encoding="utf-8")))
+        cls.versionado = json.loads((d / "catalogo-derivado.json").read_text(encoding="utf-8"))
+
+    def test_igual_al_versionado(self):
+        self.assertEqual(self.catalogo, self.versionado)
+
+    def test_parche_18_sesiones_en_12_plazas_todas_con_aula_fija(self):
+        cambios = self.ctx["cambios"]
+        self.assertEqual(len(cambios), 18)
+        self.assertEqual(len({(c["actividad"], c["plaza"]) for c in cambios}), 12)
+        self.assertTrue(all(c["despues"][0] and not c["despues"][1] for c in cambios))
+
+
 # ---------------------------------------------------------- reglas, sintéticos
 
 class Reglas(Base):

@@ -1,0 +1,129 @@
+{
+ "_meta": {
+  "curso": "2026/2027",
+  "consumidor": "tools/carga-centro/derivar-catalogo.py",
+  "descripcion": "Lo que los volcados de grupos de 2026/2027 no contienen y el catalogo derivado necesita. Cada entrada: id, que fija, valor, motivo y fuente. No se copia ninguna decision de 2025/2026 por coincidir el codigo: 25 de 56 codigos de profesor comunes son otra persona (M2 de S198).",
+  "sesion": "S198",
+  "noSonDecision": {
+   "recreo": "Sale de la etiqueta 11:00-11:30 del PDF, no de la clave «recreo» de profesor-*.json: esa clave (38 entradas de guardia) prueba que la franja existe pero no trae horas, y el derivador no lee profesor-*.json. Por eso es la decision jornada-recreo, con fuente.",
+   "lcl-1eso": "Las 16 celdas de LCL de 1º ESO sin aula son co-docencia: en cada celda, dos profesores de LCL y la hermana con aula (p. ej. 1ºA L2: LEN4 A3 y LEN8 nula). La regla de co-docencia de S115 (bitacora-sesiones.md:6415-6417) les da el aula de la hermana, igual que en 2025/2026, donde tampoco fue decision."
+  }
+ },
+ "decisiones": [
+  {
+   "id": "jornada-horas",
+   "fija": "jornada.horas",
+   "valor": {
+    "1": [
+     "08:00",
+     "09:00"
+    ],
+    "2": [
+     "09:00",
+     "10:00"
+    ],
+    "3": [
+     "10:00",
+     "11:00"
+    ],
+    "4": [
+     "11:30",
+     "12:30"
+    ],
+    "5": [
+     "12:30",
+     "13:30"
+    ],
+    "6": [
+     "13:30",
+     "14:30"
+    ]
+   },
+   "motivo": "Los grupo-*.json numeran los tramos 1..6 sin horas; el extractor los numera por el valor de la etiqueta de hora del PDF.",
+   "fuente": "tools/carga-centro/extraer-horario.py:80-88 (TRAMOS, derivado de las etiquetas de P05 en S196)"
+  },
+  {
+   "id": "jornada-recreo",
+   "fija": "jornada.recreo",
+   "valor": {
+    "despuesDelTramo": 3,
+    "horaInicio": "11:00",
+    "horaFin": "11:30"
+   },
+   "motivo": "El extractor salta la etiqueta 11:00-11:30 como recreo y los grupo-*.json no lo traen; la jornada lo necesita como tramo no lectivo.",
+   "fuente": "tools/carga-centro/extraer-horario.py:84 y :29-30; las 38 entradas de la clave recreo de profesor-*.json confirman la franja"
+  },
+  {
+   "id": "niveles-orden",
+   "fija": "niveles.orden",
+   "valor": [
+    "1ESO",
+    "2ESO",
+    "3ESO",
+    "4ESO",
+    "1BACH",
+    "2BACH",
+    "1FPB",
+    "2FPB"
+   ],
+   "motivo": "Los codigos de nivel salen del codigo de grupo; su orden es una convencion de la aplicacion, no un dato del volcado ni de una persona.",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:68-79"
+  },
+  {
+   "id": "aulas-nombre-largo",
+   "fija": "aulas.alias",
+   "valor": {},
+   "motivo": "No hay vista de aulas de 2026/2027: el nombre largo de cada aula es su codigo del volcado (ningun alias).",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "aulas-tipo-neutro",
+   "fija": "aulas.tipo",
+   "valor": {
+    "porDefecto": "ORDINARIA",
+    "porCodigo": {}
+   },
+   "motivo": "Sin vista de aulas de 2026/2027. El solver no lee el tipo; la validación I3 (ActividadService.java:415-425) solo lo usa si la asignatura tiene compatibilidades de aula, y la carga no declara ninguna (R11). Deja de ser inocuo en cuanto se declare una compatibilidad: O-aulas fija los tipos antes de declararlas.",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "tutores-bachillerato",
+   "fija": "tutorias.tutorPrincipal",
+   "valor": {
+    "1B-Ac": "FIL2",
+    "1B-Am": "FIL2",
+    "1B-Bc": "EFI1",
+    "1B-Bm": "EFI1",
+    "1B-Ch": "FIL2",
+    "1B-Cs": "FIL2",
+    "2B-A": "FIL2",
+    "2B-B": "FIL2",
+    "2B-C": "FIL2"
+   },
+   "motivo": "Sin lista oficial de tutores de 2026/2027. En Bachillerato la regla (profesor de PTVE/PTEV) fallo 7 de 7 en 2025/2026 frente a la lista oficial, asi que su resultado no se da por derivado: se fija explicito, igual al profesor de PTVE/PTEV, a falta de fuente. ESO y FPB quedan por la regla (21/21 en 2025/2026).",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "requieretutor-ptve-ptev",
+   "fija": "actividades.requiereTutor",
+   "valor": {
+    "asignaturas": [
+     "PTEV",
+     "PTVE"
+    ],
+    "requiereTutor": false
+   },
+   "motivo": "En 2025/2026 el requiereTutor de los bloques PTEV/PTVE se bajo a false al refutarse que su profesor fuera el tutor (S137). Para 2026/2027 no hay lista oficial que lo confirme ni lo desmienta; se mantiene false para no atar esas actividades a un tutor que tambien es sin fuente.",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "notas-invariantes",
+   "fija": "meta.notasInvariantes",
+   "valor": {
+    "I4": "fijados sin fuente (decision tutores-bachillerato)"
+   },
+   "motivo": "Texto de _meta.verificacionInvariantes para los tutores fijados por decision.",
+   "fuente": "sin fuente"
+  }
+ ]
+}
