@@ -7,11 +7,12 @@ Nace en S197 (C-volcado-profesores) para el cruce grupos <-> profesores. Las reg
 SOLO al cruzar; los volcados conservan el código crudo.
 
 ORIGEN DE LAS REGLAS
-  - Las cinco primeras son copia LITERAL de REGLAS_CODIGO en
-    tools/carga-centro/verificar-conservacion.py (líneas 70-76 en ab5118f), que las sacó de la
-    tabla de docs/horario-referencia/INFORME-RECONCILIACION.md más el caso «3º ESO PDC» cerrado
-    en S115. Se aplican igual que allí: `patron.match` y luego `patron.sub(plantilla, crudo)`.
-    verificar-conservacion.py no se toca ni se importa (es un script con su propia CLI).
+  - Las cinco primeras vienen de REGLAS_CODIGO de tools/carga-centro/verificar-conservacion.py
+    (líneas 70-76 en ab5118f), que las sacó de la tabla de
+    docs/horario-referencia/INFORME-RECONCILIACION.md más el caso «3º ESO PDC» cerrado en S115.
+    Desde S199 verificar-conservacion.py ya no las define: las importa de aquí (forma_corta), y
+    este módulo es su única sede. Se aplican con `patron.match` y luego
+    `patron.sub(plantilla, crudo)`.
   - La sexta, «1ºBACH <letra> <Modalidad>» -> «1B-<letra><inicial de la modalidad en
     minúscula>», sale de S197: los seis títulos de 1ºBACH de 2026/2027 no casan ninguna de las
     cinco y la vista de profesores (P07) los imprime como 1B-Ac, 1B-Am, ... La correspondencia
