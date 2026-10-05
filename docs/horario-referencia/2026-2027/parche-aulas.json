@@ -1,0 +1,215 @@
+{
+  "_meta": {
+    "antes": {
+      "fichero": "Horarios de profesores (6).pdf",
+      "sha256": "5569ba866089859d7be18683aa3c1c8721da784222025e55539e0d50325bed56"
+    },
+    "despues": {
+      "fichero": "Horarios de profesores corregido sin B12.pdf",
+      "sha256": "4f5a62eed0e590a5e908f80da5081c003d97071282d5e66cfffb7b387c70e74c"
+    },
+    "fuera_de_rejilla_ignoradas": 0,
+    "sesion": "S197",
+    "fecha": "2026-10-05"
+  },
+  "entradas": [
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "DIG",
+      "grupos": "4ºC",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "TICO",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "DIG",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "DIG",
+      "grupos": "4ºC",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "grupos": "3ºA 3ºB 3ºC",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "TICO",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "DIG",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "DIG",
+      "grupos": "4ºC",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "DIG",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "grupos": "3ºA 3ºB 3ºC",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Barba Riquel, María Carmen",
+      "pagina": 2,
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Carbonell Coronado, Carmen",
+      "pagina": 4,
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Carbonell Coronado, Carmen",
+      "pagina": 4,
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "CyR",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula_antes": "B12",
+      "aula_despues": "A12",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Téllez Martínez, Olga",
+      "pagina": 57,
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "PLAS",
+      "grupos": "1ºB",
+      "aula_antes": "TALL1",
+      "aula_despues": "A4",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Téllez Martínez, Olga",
+      "pagina": 57,
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "PLAS",
+      "grupos": "1ºC",
+      "aula_antes": "TALL1",
+      "aula_despues": "A4",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Téllez Martínez, Olga",
+      "pagina": 57,
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "PLAS",
+      "grupos": "1ºD",
+      "aula_antes": "TALL1",
+      "aula_despues": "A5",
+      "confirmacion": "pendiente"
+    },
+    {
+      "profesor": "Téllez Martínez, Olga",
+      "pagina": 57,
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "PLAS",
+      "grupos": "1ºA",
+      "aula_antes": "TALL1",
+      "aula_despues": "A4",
+      "confirmacion": "pendiente"
+    }
+  ]
+}
