@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 """Puebla el centro real por la API REST a partir del catalogo derivado.
 
-ENTRADAS  docs/horario-referencia/catalogo-derivado.json  (estructura del centro)
-          docs/horario-referencia/nombres-derivados.json  (nombres largos del PDF)
+ENTRADAS  --catalogo  catalogo-derivado.json del curso   (estructura del centro)
+          --nombres   nombres-derivados.json del curso    (nombres largos del PDF)
+          Los dos son OBLIGATORIOS y sin valor por defecto (S199): con dos cursos en
+          docs/horario-referencia/, una ruta fija cargaba el de 2025/2026 en silencio.
 DESTINO   http://localhost:8080 por defecto, --base-url para cambiarlo
 
 MODOS
@@ -70,25 +72,12 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[2]
-CATALOGO = RAIZ / "docs" / "horario-referencia" / "catalogo-derivado.json"
-NOMBRES = RAIZ / "docs" / "horario-referencia" / "nombres-derivados.json"
-
 PATRONES_TEMPORALES = {"DISTRIBUIDA", "AGRUPADA", "NEUTRA"}
 TIPOS_AULA = {"ORDINARIA", "LAB_CIENCIAS", "INFORMATICA", "TALLER_TEC",
               "TALLER_PLASTICA", "GIMNASIO", "PISTA", "TALLER_FPB", "COMUN"}
 TIPOS_GRUPO = {"ORDINARIO", "DIVERSIFICACION_PDC", "VIRTUAL_OPTATIVA"}
 ROLES_TUTORIA = {"TUTOR_PRINCIPAL", "CO_TUTOR"}
 SUFIJO_SUBGRUPO_PDC = "-Completo"
-
-# Escrituras HTTP de una carga completa desde una base vacia:
-# 1 jornada + 8 niveles + 100 asignaturas + 59 profesores + 44 aulas + 23 grupos
-# + 5 PDC + 28 tutorias + 329 subgrupos + 219 actividades.
-# SE MANTIENE A MANO A PROPOSITO. No debe derivarse del catalogo: su valor esta
-# justamente en ser un oraculo INDEPENDIENTE de el. Derivada seria una tautologia
-# incapaz de detectar nunca un error del propio catalogo; a mano, cualquier
-# divergencia entre lo previsto y lo escrito sale en el informe final.
-ESCRITURAS_CARGA_COMPLETA = 816
 
 FAMILIAS = ["jornada", "niveles", "asignaturas", "profesores", "aulas", "grupos",
             "pdc", "tutorias", "subgrupos", "actividades", "plazas"]
@@ -350,6 +339,21 @@ def mapa_por_codigo(listado):
     return {x["codigo"]: x["id"] for x in listado}
 
 
+def escrituras_previstas(catalogo):
+    """Escrituras HTTP de cargar() sobre una base vacia, contadas del catalogo."""
+    # Cuenta cada PUT/POST de cargar(): jornada, niveles, asignaturas, profesores, aulas, grupos ORDINARIO, PDC, tutorias, subgrupos no automaticos y actividades.
+    return (1
+            + len(catalogo["niveles"])
+            + len(catalogo["asignaturas"])
+            + len(catalogo["profesores"])
+            + len(catalogo["aulas"])
+            + sum(1 for g in catalogo["grupos"] if g["tipo"] == "ORDINARIO")
+            + sum(1 for g in catalogo["grupos"] if g["tipo"] == "DIVERSIFICACION_PDC")
+            + len(catalogo["tutorias"])
+            + sum(1 for s in catalogo["subgrupos"] if not s.get("creadoAutomaticamentePorPDC"))
+            + len(catalogo["actividades"]))
+
+
 def cargar(cliente, catalogo, nombres):
     enviados = {}
     omitidos = {}
@@ -550,10 +554,11 @@ def informe_final(cliente, catalogo, enviados, omitidos):
         if marca != "OK":
             desajustes += 1
         print("  %-13s %9d %9d   %s" % (familia, esperado[familia], leido[familia], marca))
-    # Las 816 escrituras son las de una carga completa desde vacio. En una corrida
+    # Las escrituras previstas son las de una carga completa desde vacio. En una corrida
     # idempotente sobre un centro ya poblado solo quedan los PUT de tutoria, que se
     # envian siempre: eso no es un desajuste.
-    if cliente.escrituras == ESCRITURAS_CARGA_COMPLETA:
+    previstas = escrituras_previstas(catalogo)
+    if cliente.escrituras == previstas:
         marca_escrituras = "OK"
     elif cliente.escrituras == enviados["tutorias"]:
         marca_escrituras = "corrida idempotente: solo los %d PUT de tutoria" % enviados["tutorias"]
@@ -561,7 +566,7 @@ def informe_final(cliente, catalogo, enviados, omitidos):
         marca_escrituras = "DISTINTO DE LO PREVISTO"
         desajustes += 1
     print("  %-13s %9d %9d   %s"
-          % ("escrituras", ESCRITURAS_CARGA_COMPLETA, cliente.escrituras, marca_escrituras))
+          % ("escrituras", previstas, cliente.escrituras, marca_escrituras))
     print("  (lecturas GET en toda la corrida: %d)" % cliente.lecturas)
 
     print()
@@ -593,20 +598,26 @@ def informe_final(cliente, catalogo, enviados, omitidos):
 
 # --------------------------------------------------------------------- main
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--catalogo", required=True, help="catalogo-derivado.json del curso")
+    parser.add_argument("--nombres", required=True, help="nombres-derivados.json del curso")
     parser.add_argument("--base-url", default="http://localhost:8080")
     modo = parser.add_mutually_exclusive_group()
     modo.add_argument("--prevalidar", action="store_true",
                       help="solo valida en seco e informa (por defecto)")
     modo.add_argument("--cargar", action="store_true", help="ejecuta la carga")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
-    if not NOMBRES.is_file():
+    ruta_catalogo = Path(args.catalogo).resolve()
+    ruta_nombres = Path(args.nombres).resolve()
+    print("catalogo: %s" % ruta_catalogo)
+    print("nombres:  %s" % ruta_nombres)
+    catalogo = json.loads(ruta_catalogo.read_text(encoding="utf-8"))
+    if not ruta_nombres.is_file():
         raise SystemExit("Falta %s. Ejecuta antes tools/carga-centro/extraer-nombres.py"
-                         % NOMBRES.relative_to(RAIZ))
-    nombres = json.loads(NOMBRES.read_text(encoding="utf-8"))
+                         % ruta_nombres)
+    nombres = json.loads(ruta_nombres.read_text(encoding="utf-8"))
 
     violaciones = prevalidar(catalogo, nombres)
     informar_prevalidacion(violaciones)
