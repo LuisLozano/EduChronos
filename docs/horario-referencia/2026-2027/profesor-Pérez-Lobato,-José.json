@@ -1,0 +1,173 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 41,
+    "codigo_crudo": "Pérez Lobato, José",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "MEC",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "ELE",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

@@ -1,0 +1,136 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 34,
+    "codigo_crudo": "Mesa Guarnido, Eva María",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "EST",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "Matem",
+      "grupos": "1B-Ac",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "Matem",
+      "grupos": "1B-Ac",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RED",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "RefMt",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Matem",
+      "grupos": "1B-Ac",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Matem",
+      "grupos": "1B-Ac",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "EST",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": [
+    {
+      "dia": 3,
+      "asignatura": "GRBib",
+      "grupos": "",
+      "aula": "GrecB",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "asignatura": "GRBib",
+      "grupos": "",
+      "aula": "GrecB",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

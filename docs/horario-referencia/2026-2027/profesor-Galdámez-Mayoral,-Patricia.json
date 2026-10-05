@@ -1,0 +1,182 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 14,
+    "codigo_crudo": "Galdámez Mayoral, Patricia",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "MECSO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "MECSO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "MECSO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "AMO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "PS",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "PS",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "MECSO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "PS",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "PI",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "MECSO",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "Tut",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "PS",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "PI",
+      "grupos": "2FPB",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "PS",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 15,
+    "codigo_crudo": "García Bernal, María Teresa",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "CT",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "C00",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "CT",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "AmbSL",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

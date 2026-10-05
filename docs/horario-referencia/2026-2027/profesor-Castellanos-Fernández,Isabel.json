@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 6,
+    "codigo_crudo": "Castellanos Fernández,Isabel",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "RT12",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "TUT1",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

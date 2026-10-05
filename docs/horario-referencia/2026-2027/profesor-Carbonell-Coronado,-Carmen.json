@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 4,
+    "codigo_crudo": "Carbonell Coronado, Carmen",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Mat",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "MatAc",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "MatAc",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Mate2",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "RT12",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "CyR",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "B12",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "Mat",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Mat",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "MatAc",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "MatAc",
+      "grupos": "4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "CyR",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "B12",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "TUT2",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

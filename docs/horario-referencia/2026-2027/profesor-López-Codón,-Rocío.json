@@ -1,0 +1,155 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 26,
+    "codigo_crudo": "López Codón, Rocío",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "FOPP",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "FOPP",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "FOPP",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "FOPP",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "CEE",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "CEE",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "IPE",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "IPE",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "IPE",
+      "grupos": "1FPB",
+      "aula": "TAL41",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "FOPP",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "FOPP",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 24,
+    "codigo_crudo": "LEN9",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "3ºB",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "TUT3",
+      "grupos": "3ºB 3ºBDi",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "ALCT",
+      "grupos": "1ºC",
+      "aula": "C00",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "2ºC",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "2ºC",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "grupos": "3ºA 3ºB 3ºC",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "2ºC",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "RT34",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "3ºB",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "3ºB",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "3ºB",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "2ºD",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "2ºC",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "ALCT",
+      "grupos": "1ºC",
+      "aula": "A1",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

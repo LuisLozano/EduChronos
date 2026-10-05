@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 7,
+    "codigo_crudo": "Chacón Muñoz, Isabel María",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

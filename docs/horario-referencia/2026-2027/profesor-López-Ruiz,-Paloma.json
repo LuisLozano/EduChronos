@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 27,
+    "codigo_crudo": "López Ruiz, Paloma",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "Mat",
+      "grupos": "2ºB",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "MaCSa",
+      "grupos": "2B-C",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "MaCSa",
+      "grupos": "2B-C",
+      "aula": "B02",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "MaCSa",
+      "grupos": "2B-C",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "MCCSS",
+      "grupos": "1B-Cs",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "MaCSa",
+      "grupos": "2B-C",
+      "aula": "B02",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "RT12",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "MCCSS",
+      "grupos": "1B-Cs",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "MCCSS",
+      "grupos": "1B-Cs",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "Mat",
+      "grupos": "2ºB",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "MCCSS",
+      "grupos": "1B-Cs",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "CyR",
+      "grupos": "1ºA 1ºB 1ºC 1ºD",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Mat",
+      "grupos": "2ºB",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "RefMt",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "TUT2",
+      "grupos": "2ºB",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "ATED",
+      "grupos": "3ºA 3ºADi 3ºB 3ºBDi 3ºC 3ºCDi",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Mat",
+      "grupos": "2ºB",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

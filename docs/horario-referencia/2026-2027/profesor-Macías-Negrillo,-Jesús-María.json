@@ -1,0 +1,146 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 29,
+    "codigo_crudo": "Macías Negrillo, Jesús María",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "1B-Bc 1B-Bm",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "1B-Bc 1B-Bm",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "1B-Bc 1B-Bm",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "ALCT",
+      "grupos": "1ºA",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "2ºA",
+      "aula": "A1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "2ºA",
+      "aula": "A1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1B-Bc 1B-Bm",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "2ºA",
+      "aula": "A1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "2ºA",
+      "aula": "A1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "ALCT",
+      "grupos": "1ºA",
+      "aula": "B02",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

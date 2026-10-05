@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 45,
+    "codigo_crudo": "Religión Evangélica",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "REVAN",
+      "grupos": "1ºD",
+      "aula": "A18",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

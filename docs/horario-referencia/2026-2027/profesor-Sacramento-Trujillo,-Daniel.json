@@ -1,0 +1,182 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 54,
+    "codigo_crudo": "Sacramento Trujillo, Daniel",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "Gri2",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "MIT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Lat2",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Lat2",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Lat2",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "GRI",
+      "grupos": "1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Lat2",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "GRI",
+      "grupos": "1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "Latín",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "conv",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "GRI",
+      "grupos": "1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Latín",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "GRI",
+      "grupos": "1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "Gri2",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Gri2",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "MIT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Gri2",
+      "grupos": "2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "Latín",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Latín",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

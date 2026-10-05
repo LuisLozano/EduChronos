@@ -1,0 +1,209 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 22,
+    "codigo_crudo": "Jiménez Montes, María de los Ángele",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "HMC",
+      "grupos": "1B-Cs 1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "ATED",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "HMC",
+      "grupos": "1B-Cs 1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "HART",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "HART",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "HART",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "HART",
+      "grupos": "2B-B 2B-C",
+      "aula": "B06",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "Geo",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "PATRI",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "HMC",
+      "grupos": "1B-Cs 1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "PATRI",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "HMC",
+      "grupos": "1B-Cs 1B-Am 1B-Bm 1B-Ch",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "grupos": "1ºB",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "grupos": "1ºC",
+      "aula": "A5",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "grupos": "1ºB",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Geo",
+      "grupos": "1ºB",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

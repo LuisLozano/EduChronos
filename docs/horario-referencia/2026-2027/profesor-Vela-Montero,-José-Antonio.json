@@ -1,0 +1,119 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 61,
+    "codigo_crudo": "Vela Montero, José Antonio",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Geo",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "Geo",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "Geo",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "HESP",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "Geo",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "Geo",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "RT12",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RED",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "HESP",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "HESP",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Geo",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "HESP",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

@@ -1,0 +1,119 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 60,
+    "codigo_crudo": "Torres Villar, Myriam",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "1ºB",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1ºB",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RefLe",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "1ºB",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "1ºB",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "1ºA",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": [
+    {
+      "dia": 1,
+      "asignatura": "GRBib",
+      "grupos": "",
+      "aula": "GrecB",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

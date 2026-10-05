@@ -1,0 +1,190 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 57,
+    "codigo_crudo": "Téllez Martínez, Olga",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "EXPRE",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "DT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "DT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "PLAS",
+      "grupos": "1ºB",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "PLAS",
+      "grupos": "1ºA",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "EXPRE",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "PLAS",
+      "grupos": "1ºC",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "PEPA",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "EXPRE",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "EXPRE",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "DT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "EXPRE",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "EXPRE",
+      "grupos": "4ºCDi 4ºBDi",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "DART",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "DART",
+      "grupos": "1B-Ac 1B-Am 1B-Bc 1B-Bm 1B-Ch 1B-Cs",
+      "aula": "C01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "DT",
+      "grupos": "2B-A 2B-B 2B-C",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "PEPA",
+      "grupos": "2ºA 2ºB 2ºC 2ºD",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "PLAS",
+      "grupos": "1ºD",
+      "aula": "TALL1",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": [
+    {
+      "dia": 1,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

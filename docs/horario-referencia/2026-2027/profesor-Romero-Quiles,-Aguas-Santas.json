@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 50,
+    "codigo_crudo": "Romero Quiles, Aguas Santas",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "Físic",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "RED",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "Físic",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "Físic",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "Físic",
+      "grupos": "2B-A 2B-B",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

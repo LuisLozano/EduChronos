@@ -1,0 +1,215 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 3,
+    "codigo_crudo": "Barroso Rodríguez, José",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "ATEDU",
+      "grupos": "4ºC 4ºCDi",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "EF",
+      "grupos": "3ºC 3ºCDi",
+      "aula": "B02",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "EF",
+      "grupos": "3ºA 3ºADi",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "EF",
+      "grupos": "3ºA 3ºADi",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "EF",
+      "grupos": "3ºC 3ºCDi",
+      "aula": "B02",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "AFAVS",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "EFis",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "ATED",
+      "grupos": "1ºD",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "EFis",
+      "grupos": "4ºA",
+      "aula": "A2",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "RT34",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "EFis",
+      "grupos": "4ºC 4ºCDi",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "TUT4",
+      "grupos": "4ºC 4ºCDi",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "EFis",
+      "grupos": "4ºC 4ºCDi",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "AFAVS",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "EF",
+      "grupos": "3ºB 3ºBDi",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "EdFís",
+      "grupos": "1B-Ch 1B-Cs",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "EF",
+      "grupos": "3ºB 3ºBDi",
+      "aula": "B05",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "EdFís",
+      "grupos": "1B-Ch 1B-Cs",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": [
+    {
+      "dia": 2,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "asignatura": "GR",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}

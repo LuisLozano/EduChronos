@@ -1,0 +1,128 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 11,
+    "codigo_crudo": "Estepa Guillén, María Ángeles",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "Biol",
+      "grupos": "3ºB",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "Biol",
+      "grupos": "3ºC",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "BioNu",
+      "grupos": "3ºA 3ºB 3ºC",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "BioNu",
+      "grupos": "3ºA 3ºB 3ºC",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "Biol",
+      "grupos": "3ºC",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "Biol",
+      "grupos": "3ºA",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "grupos": "3ºA",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "Biol",
+      "grupos": "3ºB",
+      "aula": "A6",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

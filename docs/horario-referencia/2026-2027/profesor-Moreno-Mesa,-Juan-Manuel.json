@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 37,
+    "codigo_crudo": "Moreno Mesa, Juan Manuel",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "ReLen",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "C00",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LCL",
+      "grupos": "3ºA",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "3ºA",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Gbibl",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "3ºA",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "ÁmbSL",
+      "grupos": "3ºADi 3ºBDi 3ºCDi",
+      "aula": "B04",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "3ºA",
+      "aula": "B01",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "RefLe",
+      "grupos": "4ºA 4ºB 4ºBDi 4ºC 4ºCDi",
+      "aula": "A8",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "G",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "1B-Ac 1B-Am",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "1B-Ac 1B-Am",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "1B-Ac 1B-Am",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "LCL",
+      "grupos": "1B-Ac 1B-Am",
+      "aula": "TAL3a",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

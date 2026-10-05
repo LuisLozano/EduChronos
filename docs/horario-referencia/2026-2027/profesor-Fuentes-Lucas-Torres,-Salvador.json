@@ -1,0 +1,146 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 13,
+    "codigo_crudo": "Fuentes Lucas Torres, Salvador",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "Econ",
+      "grupos": "2B-B 2B-C",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "ECO",
+      "grupos": "1B-Am 1B-Bm",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "ECO",
+      "grupos": "4ºA 4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "ECO",
+      "grupos": "1B-Am 1B-Bm",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "ECO",
+      "grupos": "1B-Am 1B-Bm",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "ECO",
+      "grupos": "1B-Am 1B-Bm",
+      "aula": "A7",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "ECO",
+      "grupos": "1B-Cs",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "ECO",
+      "grupos": "1B-Cs",
+      "aula": "A14",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "Econ",
+      "grupos": "2B-B 2B-C",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "Econ",
+      "grupos": "2B-B 2B-C",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "Econ",
+      "grupos": "2B-B 2B-C",
+      "aula": "COM4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "ECO",
+      "grupos": "1B-Cs",
+      "aula": "A4",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "ECO",
+      "grupos": "1B-Cs",
+      "aula": "A11",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ECO",
+      "grupos": "4ºA 4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "ECO",
+      "grupos": "4ºA 4ºB",
+      "aula": "B03",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}

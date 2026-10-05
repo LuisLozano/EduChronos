@@ -1,0 +1,155 @@
+{
+  "_meta": {
+    "fuente": "Horarios de profesores (6).pdf",
+    "pagina": 36,
+    "codigo_crudo": "Moreno Araujo, Fco. Javier",
+    "modo": "profesores"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "LCL",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "CT",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "LU",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A9",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "LU",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "A3",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "ALCT",
+      "grupos": "1ºB",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "conv",
+      "grupos": "",
+      "aula": null,
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "LCL",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "CT",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "4ºC",
+      "aula": "A10",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "LCL",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "ALCT",
+      "grupos": "1ºB",
+      "aula": "A15",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "LU",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "LCL",
+      "grupos": "2B-A",
+      "aula": "COM1",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "LU",
+      "grupos": "1B-Am 1B-Bm 1B-Ch",
+      "aula": "TAL3b",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ],
+  "recreo": []
+}
