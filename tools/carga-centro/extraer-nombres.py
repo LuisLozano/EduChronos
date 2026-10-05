@@ -2,8 +2,22 @@
 # -*- coding: utf-8 -*-
 """Deriva los nombres completos de profesores y asignaturas del PDF de horarios de grupos.
 
-ENTRADA  docs_extra/Ejemplos_SJ/Horarios de grupos.pdf (28 paginas, una por grupo)
-SALIDA   docs/horario-referencia/nombres-derivados.json
+USO
+    python3 -B tools/carga-centro/extraer-nombres.py --pdf <pdf> [<pdf> ...] \
+        --catalogo <catalogo-derivado.json> --salida <nombres-derivados.json>
+
+    2025/2026: --pdf "docs/horario-referencia/pdf/Horarios de grupos.pdf"
+               --catalogo docs/horario-referencia/catalogo-derivado.json
+               --salida docs/horario-referencia/nombres-derivados.json
+    Sin argumentos no escribe nada (S198: las tres rutas eran fijas).
+
+VARIOS PDF (S198). Las variantes de todos los PDF se juntan por codigo y se aplica la
+misma regla de eleccion: el resultado no depende del orden de los PDF. Un truncamiento
+en un PDF y el nombre completo en otro se resuelven por prefijo; dos nombres que no son
+prefijo el uno del otro quedan como conflicto, igual que dentro de un PDF.
+
+CIERRE. Las claves tienen que ser las de --catalogo en las dos familias. La salida se
+escribe solo si el cierre pasa; si no, rc=1 y no se escribe nada.
 
 Cada pagina trae al pie dos leyendas, "Profesores:" y "Asignaturas:", que asocian
 codigo -> nombre en dos columnas, y arriba una linea "Tutor:" con el nombre del
@@ -52,6 +66,7 @@ TRANSCRIPCION FIEL
     Juan" (sic) porque asi esta impreso. Este script no corrige la fuente.
 """
 
+import argparse
 import json
 import re
 import subprocess
@@ -60,9 +75,6 @@ import unicodedata
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-PDF = RAIZ / "docs_extra" / "Ejemplos_SJ" / "Horarios de grupos.pdf"
-SALIDA = RAIZ / "docs" / "horario-referencia" / "nombres-derivados.json"
-CATALOGO = RAIZ / "docs" / "horario-referencia" / "catalogo-derivado.json"
 
 ANCHO_LEYENDA = 24
 ANCHO_TUTOR = 35
@@ -95,13 +107,22 @@ def cuenta_diacriticos(texto):
                if unicodedata.category(c) == "Mn")
 
 
-def leer_paginas():
+def leer_paginas(pdf):
     """Devuelve la lista de paginas del PDF como texto con la maqueta preservada."""
     salida = subprocess.run(
-        ["pdftotext", "-layout", str(PDF), "-"],
+        ["pdftotext", "-layout", str(pdf), "-"],
         check=True, capture_output=True,
     ).stdout.decode("utf-8")
     return [p for p in salida.split("\f") if p.strip()]
+
+
+def leer_varios(pdfs):
+    """Paginas de todos los PDF juntas. recolectar() reparte por codigo y construir()
+    ordena las variantes, asi que el orden de los PDF no cambia el resultado."""
+    paginas = []
+    for pdf in pdfs:
+        paginas.extend(leer_paginas(pdf))
+    return paginas
 
 
 def recolectar(paginas):
@@ -230,11 +251,21 @@ def construir(codigos_a_variantes, lineas_tutor=None):
     return entradas
 
 
-def main():
-    if not PDF.is_file():
-        raise SystemExit("No encuentro el PDF de entrada: %s" % PDF)
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--pdf", nargs="+", required=True, help="uno o varios PDF de horarios de grupos")
+    ap.add_argument("--catalogo", required=True, help="catalogo-derivado.json del curso (cierre)")
+    ap.add_argument("--salida", required=True, help="nombres-derivados.json que se escribe")
+    args = ap.parse_args(argv)
+    pdfs = [Path(p) for p in args.pdf]
+    salida, catalogo_ruta = Path(args.salida), Path(args.catalogo)
+    for pdf in pdfs:
+        if not pdf.is_file():
+            raise SystemExit("No encuentro el PDF de entrada: %s" % pdf)
+    if not catalogo_ruta.is_file():
+        raise SystemExit("No encuentro el catalogo: %s" % catalogo_ruta)
 
-    paginas = leer_paginas()
+    paginas = leer_varios(pdfs)
     crudos_prof, crudos_asig, lineas_tutor = recolectar(paginas)
 
     profesores = construir(crudos_prof, lineas_tutor)
@@ -247,7 +278,7 @@ def main():
 
     documento = {
         "_meta": {
-            "fuente": PDF.name,
+            "fuente": ", ".join(sorted(p.name for p in pdfs)),
             "generadoPor": "tools/carga-centro/extraer-nombres.py",
             "reglaDeEleccion": "prefijo > diacriticos > lexicografico; conflicto marcado",
             "avisoTruncamiento": "heuristica por ancho de corte y por corte de palabra; tiene falsos negativos",
@@ -262,29 +293,31 @@ def main():
         "asignaturas": asignaturas,
     }
 
-    SALIDA.write_text(
-        json.dumps(documento, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
+    print("PDF leidos:          %d (%s)" % (len(pdfs), ", ".join(p.name for p in pdfs)))
     print("Paginas leidas:      %d" % len(paginas))
     print("Lineas 'Tutor:':     %d" % len(lineas_tutor))
     print("Profesores:          %d" % len(profesores))
     print("Asignaturas:         %d" % len(asignaturas))
     print("Marcados truncados:  %d" % truncados)
     print("Conflictos:          %d" % conflictos)
-    print("Escrito: %s" % SALIDA.relative_to(RAIZ))
 
-    if CATALOGO.is_file():
-        catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
-        for familia, entradas in (("profesores", profesores), ("asignaturas", asignaturas)):
-            esperados = {x["codigo"] for x in catalogo[familia]}
-            if esperados != set(entradas):
-                print("DESAJUSTE en %s contra el catalogo derivado:" % familia)
-                print("  solo en el PDF: %s" % sorted(set(entradas) - esperados))
-                print("  solo en el catalogo: %s" % sorted(esperados - set(entradas)))
-                return 1
-        print("Claves identicas a las de catalogo-derivado.json en ambas familias.")
+    # Cierre ANTES de escribir (S198): un desajuste no deja salida a medias.
+    catalogo = json.loads(catalogo_ruta.read_text(encoding="utf-8"))
+    for familia, entradas in (("profesores", profesores), ("asignaturas", asignaturas)):
+        esperados = {x["codigo"] for x in catalogo[familia]}
+        if esperados != set(entradas):
+            print("DESAJUSTE en %s contra el catalogo derivado:" % familia)
+            print("  solo en el PDF: %s" % sorted(set(entradas) - esperados))
+            print("  solo en el catalogo: %s" % sorted(esperados - set(entradas)))
+            print("No se escribe %s." % salida)
+            return 1
+    print("Claves identicas a las de %s en ambas familias." % catalogo_ruta.name)
+
+    salida.write_text(
+        json.dumps(documento, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print("Escrito: %s" % salida)
     return 0
 
 
