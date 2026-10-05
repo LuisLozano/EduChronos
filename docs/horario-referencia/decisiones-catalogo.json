@@ -1,0 +1,196 @@
+{
+ "_meta": {
+  "curso": "2025/2026",
+  "consumidor": "tools/carga-centro/derivar-catalogo.py",
+  "descripcion": "Lo que los volcados de grupos de 2025/2026 no contienen y el catalogo derivado necesita. Cada entrada: id, que fija, valor, motivo y fuente.",
+  "sesion": "S198"
+ },
+ "decisiones": [
+  {
+   "id": "jornada-horas",
+   "fija": "jornada.horas",
+   "valor": {
+    "1": [
+     "08:00",
+     "09:00"
+    ],
+    "2": [
+     "09:00",
+     "10:00"
+    ],
+    "3": [
+     "10:00",
+     "11:00"
+    ],
+    "4": [
+     "11:30",
+     "12:30"
+    ],
+    "5": [
+     "12:30",
+     "13:30"
+    ],
+    "6": [
+     "13:30",
+     "14:30"
+    ]
+   },
+   "motivo": "Los grupo-*.json numeran los tramos 1..6 sin horas; las horas son las etiquetas del margen del PDF, que la extraccion de S19 convirtio en numeros de tramo.",
+   "fuente": "docs/horario-referencia/README.md:71-73; docs/horario-referencia/RESUMEN-EXTRACCION.md:56-59"
+  },
+  {
+   "id": "jornada-recreo",
+   "fija": "jornada.recreo",
+   "valor": {
+    "despuesDelTramo": 3,
+    "horaInicio": "11:00",
+    "horaFin": "11:30"
+   },
+   "motivo": "El recreo no esta en los volcados (la extraccion lo salta por su etiqueta 11:00) y la jornada lo necesita como tramo no lectivo (R10).",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:55-66; docs/horario-referencia/RESUMEN-EXTRACCION.md:59"
+  },
+  {
+   "id": "niveles-orden",
+   "fija": "niveles.orden",
+   "valor": [
+    "1ESO",
+    "2ESO",
+    "3ESO",
+    "4ESO",
+    "1BACH",
+    "2BACH",
+    "1FPB",
+    "2FPB"
+   ],
+   "motivo": "Los codigos de nivel salen del codigo de grupo; su orden es una convencion, no un dato del volcado.",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:68-79"
+  },
+  {
+   "id": "aulas-alias-r6",
+   "fija": "aulas.alias",
+   "valor": {
+    "A12In": "A12 Informática",
+    "A6": "A6 Laboratorio",
+    "C01": "C01 Aula Plástica",
+    "Gim": "Gimnasio",
+    "TALL1": "Taller 1 Aula Plástica",
+    "TALL3": "Taller 3"
+   },
+   "motivo": "El horario por grupos abrevia seis aulas; el catalogo usa el nombre largo de los aula-*.json. La tabla no es derivable por regla (A13).",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:156-159 y :697-709"
+  },
+  {
+   "id": "aulas-tipo",
+   "fija": "aulas.tipo",
+   "valor": {
+    "porDefecto": null,
+    "porCodigo": {
+     "A1": "ORDINARIA",
+     "A10": "ORDINARIA",
+     "A11": "ORDINARIA",
+     "A12 Informática": "INFORMATICA",
+     "A13": "ORDINARIA",
+     "A14": "ORDINARIA",
+     "A15": "ORDINARIA",
+     "A16": "ORDINARIA",
+     "A17": "ORDINARIA",
+     "A18": "ORDINARIA",
+     "A19 TUTOR": "ORDINARIA",
+     "A2": "ORDINARIA",
+     "A3": "ORDINARIA",
+     "A4": "ORDINARIA",
+     "A5": "ORDINARIA",
+     "A6 Laboratorio": "LAB_CIENCIAS",
+     "A7": "ORDINARIA",
+     "A8": "ORDINARIA",
+     "A9": "ORDINARIA",
+     "B01": "ORDINARIA",
+     "B02": "ORDINARIA",
+     "B03": "ORDINARIA",
+     "B04": "ORDINARIA",
+     "B05": "ORDINARIA",
+     "B06": "ORDINARIA",
+     "B07": "ORDINARIA",
+     "B08": "ORDINARIA",
+     "B09": "ORDINARIA",
+     "B10": "ORDINARIA",
+     "B11 Taller Tecnología": "TALLER_TEC",
+     "C00": "ORDINARIA",
+     "C01 Aula Plástica": "TALLER_PLASTICA",
+     "C02": "ORDINARIA",
+     "C03": "ORDINARIA",
+     "C04": "ORDINARIA",
+     "COM1": "COMUN",
+     "COM4": "COMUN",
+     "Gimnasio": "GIMNASIO",
+     "Pista": "PISTA",
+     "Taller 1 Aula Plástica": "TALLER_PLASTICA",
+     "Taller 2": "TALLER_FPB",
+     "Taller 3": "ORDINARIA",
+     "Taller 4": "TALLER_FPB",
+     "Taller 5": "TALLER_FPB"
+    }
+   },
+   "motivo": "El tipo de aula no esta en ningun volcado; se dedujo del nombre del espacio (A9). Taller 5 entra como TALLER_FPB con su alta.",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:104-155 y :625-628; commit beb044a (Taller 5)"
+  },
+  {
+   "id": "aula-alta-taller5",
+   "fija": "aulas.alta",
+   "valor": [
+    "Taller 5"
+   ],
+   "motivo": "Aula de uso exclusivo de 2FPB que ningun PDF nombra; dato de entrevista, sin segunda fuente.",
+   "fuente": "entrevista con el jefe de estudios (S134), registrada en el commit beb044a y en tools/carga-centro/cargar-centro.py:47-53"
+  },
+  {
+   "id": "fpb-aula-sin-volcado",
+   "fija": "plazas.aulaSinVolcado",
+   "valor": {
+    "1FPB": "Taller 4",
+    "2FPB": "Taller 5"
+   },
+   "motivo": "Las 11 plazas de FPB cuyas celdas no traen aula (Hallazgo H, A7): lo que el horario impreso no imprime va al Taller 4 (1FPB) y al Taller 5 (2FPB).",
+   "fuente": "entrevista con el jefe de estudios (S134), commit beb044a; tools/carga-centro/cargar-centro.py:47-53"
+  },
+  {
+   "id": "tutores-bachillerato",
+   "fija": "tutorias.tutorPrincipal",
+   "valor": {
+    "1B-A": "LEN7",
+    "1B-B": "MAT7",
+    "1B-C": "LEN2",
+    "1B-D": "LEN1",
+    "2B-A": "MAT2",
+    "2B-B": "GH3",
+    "2B-C": "GH5"
+   },
+   "motivo": "En Bachillerato el profesor de PTVE/PTEV no es el tutor (Hallazgo E refutado en S134); la lista oficial del centro fija los siete. Los candidatos derivados se vacian (89a1d36).",
+   "fuente": "docs/horario-referencia/tutores-oficiales-centro.md; tools/carga-centro/aplicar-tutores-oficiales.py:22-25; commits 2fd5e55 y 89a1d36"
+  },
+  {
+   "id": "requieretutor-ptve-ptev",
+   "fija": "actividades.requiereTutor",
+   "valor": {
+    "asignaturas": [
+     "PTEV",
+     "PTVE"
+    ],
+    "requiereTutor": false
+   },
+   "motivo": "El requiereTutor de los bloques PTEV/PTVE-Religion descendia del Hallazgo E, refutado; con los tutores oficiales esas actividades no exigen tutor (S137).",
+   "fuente": "tools/carga-centro/aplicar-tutores-oficiales.py:5-13; commit 2fd5e55"
+  },
+  {
+   "id": "notas-invariantes",
+   "fija": "meta.notasInvariantes",
+   "valor": {
+    "I1": "(ver ambiguedades A1-A4)",
+    "I4": "oficiales del centro (A5 resuelta: el centro entrego la lista oficial)",
+    "I6": "(ver ambiguedad A6)"
+   },
+   "motivo": "Texto de _meta.verificacionInvariantes que remite a las ambiguedades de la especificacion; no se deriva de los datos.",
+   "fuente": "docs/horario-referencia/ESPECIFICACION-CATALOGO.md:440-575; tools/carga-centro/aplicar-tutores-oficiales.py:9-10"
+  }
+ ]
+}
