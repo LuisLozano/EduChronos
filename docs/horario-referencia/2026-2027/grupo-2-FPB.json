@@ -1,0 +1,280 @@
+{
+  "_meta": {
+    "fuente": "Horarios de grupos.pdf",
+    "pagina": 32,
+    "codigo_crudo": "2º FPB",
+    "modo": "grupos"
+  },
+  "celdas": [
+    {
+      "dia": 1,
+      "tramo": 1,
+      "asignatura": "CA",
+      "profesor": "TEC1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 1,
+      "asignatura": "CA",
+      "profesor": "TEC1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 1,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 1,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 1,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 2,
+      "asignatura": "CA",
+      "profesor": "TEC1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 2,
+      "asignatura": "CA",
+      "profesor": "TEC1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 2,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 2,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 2,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 3,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 3,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 3,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 4,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 4,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 4,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 4,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 4,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 5,
+      "asignatura": "CyS",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 5,
+      "asignatura": "PI",
+      "profesor": "PAU1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 5,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 5,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 5,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 1,
+      "tramo": 6,
+      "asignatura": "Tut",
+      "profesor": "GH1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 2,
+      "tramo": 6,
+      "asignatura": "PI",
+      "profesor": "PAU1",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 3,
+      "tramo": 6,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 4,
+      "tramo": 6,
+      "asignatura": "MEC",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "dia": 5,
+      "tramo": 6,
+      "asignatura": "ELE",
+      "profesor": "PAU2",
+      "aula": "A17",
+      "confianza": "alta",
+      "nota": ""
+    }
+  ]
+}
