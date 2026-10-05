@@ -23,7 +23,7 @@ Un título sin regla, o que case más de una, es un error: no se adivina.
 """
 import re
 
-# Copia literal de verificar-conservacion.py (REGLAS_CODIGO, líneas 70-76 en ab5118f).
+# verificar-conservacion.py importa estas reglas desde S199; este módulo es su única sede.
 REGLAS_CODIGO = [
     ("Nº ESO L PDC -> NºLDi", re.compile(r"^(\d)º ESO ([A-D]) PDC$"), r"\1º\2Di"),
     ("Nº ESO PDC   -> 3ºCDi", re.compile(r"^3º ESO PDC$"),            "3ºCDi"),
