@@ -73,6 +73,7 @@ import urllib.request
 from pathlib import Path
 
 PATRONES_TEMPORALES = {"DISTRIBUIDA", "AGRUPADA", "NEUTRA"}
+TIPOS_ACTIVIDAD = {"CLASE", "REUNION", "FUNCION"}   # TipoActividad.java; sin «tipo» es CLASE (S204)
 TIPOS_AULA = {"ORDINARIA", "LAB_CIENCIAS", "INFORMATICA", "TALLER_TEC",
               "TALLER_PLASTICA", "GIMNASIO", "PISTA", "TALLER_FPB", "COMUN"}
 TIPOS_GRUPO = {"ORDINARIO", "DIVERSIFICACION_PDC", "VIRTUAL_OPTATIVA"}
@@ -259,6 +260,10 @@ def prevalidar(catalogo, nombres):
                   "repeticionesPorSemana debe ser >= 1, es %r" % a.get("repeticionesPorSemana"))
         if a.get("patronTemporal") not in PATRONES_TEMPORALES:
             fallo("actividades", codigo, "patronTemporal fuera del enum: %r" % a.get("patronTemporal"))
+        tipo = a.get("tipo", "CLASE")
+        if tipo not in TIPOS_ACTIVIDAD:
+            fallo("actividades", codigo, "tipo fuera del enum: %r" % tipo)
+        es_clase = tipo == "CLASE"
         plazas = a.get("plazas") or []
         if not plazas:
             fallo("actividades", codigo, "una actividad necesita al menos una plaza")
@@ -275,8 +280,8 @@ def prevalidar(catalogo, nombres):
             candidatas = p.get("aulasCandidatas") or []
             if tiene_fija and candidatas:
                 fallo("plazas", sujeto, "XOR de aula: tiene aula fija y aulas candidatas a la vez")
-            if not tiene_fija and not candidatas:
-                fallo("plazas", sujeto, "XOR de aula: necesita aula fija o al menos un aula candidata")
+            if es_clase and not tiene_fija and not candidatas:
+                fallo("plazas", sujeto, "XOR de aula: una clase necesita aula fija o al menos un aula candidata")
             if tiene_fija and p["aulaFija"] not in aulas:
                 fallo("plazas", sujeto, "aulaFija inexistente: %r" % p["aulaFija"])
             for aula in candidatas:

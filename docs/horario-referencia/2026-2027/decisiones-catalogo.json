@@ -124,6 +124,88 @@
    },
    "motivo": "Texto de _meta.verificacionInvariantes para los tutores fijados por decision.",
    "fuente": "sin fuente"
+  },
+  {
+   "id": "no-clase-tipos",
+   "fija": "noClase.tipos",
+   "valor": {
+    "REUNION": [
+     "RED",
+     "RT12",
+     "RT34"
+    ],
+    "FUNCION": [
+     "ORYCA",
+     "APSTE",
+     "FOREI",
+     "HUERT",
+     "PROAR",
+     "REYR"
+    ]
+   },
+   "motivo": "Celdas de profesor sin grupo ni aula que el horario oficial lleva y el modelo representa desde S201 como actividades sin alumnos. RED, RT12 y RT34 ocupan cada una un solo tramo con todos sus profesores (reunion conjunta); las funciones son horas sueltas de cada profesor (M2 de S204, P1b). RT12 y RT34 como reuniones de tutores es una hipotesis sin fuente, pendiente de la secretaria.",
+   "fuente": "Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18; criterio de O-datos-centro, condicion 5"
+  },
+  {
+   "id": "no-clase-ignorados",
+   "fija": "noClase.ignorados",
+   "valor": {
+    "G": "guardia lectiva: fuera del criterio de O-datos-centro, su modelo es de O-guardias",
+    "Gbibl": "guardia de biblioteca: fuera del criterio de O-datos-centro, su modelo es de O-guardias",
+    "conv": "R.Convivencia, contada con las guardias en S199 (150 = 139 + 9 + 2): O-guardias",
+    "GR": "guardia de recreo: fuera del criterio de O-datos-centro, su modelo es de O-guardias",
+    "GRBib": "guardia de recreo de biblioteca (en GrecB): fuera del criterio, O-guardias"
+   },
+   "motivo": "Codigos de profesor sin grupo (celdas y recreo) que no se cargan; cualquier otro codigo sin grupo aborta.",
+   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md)"
+  },
+  {
+   "id": "nombres-leyenda-profesores",
+   "fija": "asignaturas.nombre",
+   "valor": {
+    "RED": "Reunión de Equipo Direct",
+    "ORYCA": "Ordenación y Catalogació",
+    "APSTE": "Apoyo Steam",
+    "FOREI": "Formación e innovación",
+    "HUERT": "Huerto",
+    "PROAR": "Proyecto Artístico",
+    "REYR": "Redes y Radio"
+   },
+   "motivo": "Los PDF de grupos no traen estos codigos; su nombre es el literal de la leyenda «Asignaturas:» del PDF de profesores, truncado como lo imprime.",
+   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores)"
+  },
+  {
+   "id": "nombres-rt-sin-fuente",
+   "fija": "asignaturas.nombre",
+   "valor": {
+    "RT12": "RT12",
+    "RT34": "RT34"
+   },
+   "motivo": "La leyenda del PDF de profesores solo repite el codigo; el nombre es el codigo hasta que lo diga la secretaria.",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "profesor-lobato-provisional",
+   "fija": "profesores.alta",
+   "valor": {
+    "PROV1": {
+     "pagina": 25,
+     "titulo": "Lobato Montes, María Carmen",
+     "nombreCompleto": "Lobato Montes, María Carmen"
+    }
+   },
+   "motivo": "La pagina 25 del PDF de profesores no casa con ningun nombre de la leyenda «Profesores:» de los PDF de grupos y tiene una celda RED. Entra como profesor con un codigo provisional; el nombre es el titulo de su pagina.",
+   "fuente": "sin fuente"
+  },
+  {
+   "id": "paginas-sin-codigo-ignoradas",
+   "fija": "profesores.paginasIgnoradas",
+   "valor": {
+    "7": "Chacón Muñoz, Isabel María: solo 2 celdas G (guardias, fuera del criterio)",
+    "32": "Mateos-Cañero Maraver, Lourdes: pagina vacia"
+   },
+   "motivo": "Paginas sin codigo en la leyenda sin ninguna celda de clase ni de reunion o funcion: no aportan nada que cargar.",
+   "fuente": "docs/horario-referencia/2026-2027/INFORME-CRUCE-GRUPOS-PROFESORES.md (profesores sin codigo: paginas 7, 25 y 32)"
   }
  ]
 }

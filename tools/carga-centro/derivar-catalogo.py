@@ -19,6 +19,24 @@ ENTRADAS
                   («sin fuente» si no la hay). Sin motivo o sin fuente, aborta.
     --parche      opcional. Cambios de aula por sesión (parche-aulas.py, S197). Se aplica
                   DESPUÉS de derivar y la regla de aulas por plaza se recalcula.
+    --volcados-profesores <dir> --pdf-grupos <pdf>...   opcionales y juntos (S204). Añaden
+                  las reuniones y funciones de los profesor-*.json (sin grupo ni aula) y los
+                  totales declarados. Los PDF de grupos solo dan la leyenda «Profesores:» con la
+                  que cruzar-grupos-profesores.py pasa del título de página al código. Sin ellos
+                  la salida es la de S198 byte a byte.
+
+REUNIONES, FUNCIONES Y TOTALES (S204, con --volcados-profesores). Cada celda de profesor sin
+grupo tiene que tener su código en la decisión noClase.tipos (REUNION o FUNCION) o en
+noClase.ignorados (guardias, con su motivo); lo mismo las de recreo. Si no, aborta (D8).
+  - REUNION: una actividad por código, con una plaza que lleva a todos sus profesores;
+    repeticiones = tramos distintos; aborta si los profesores cambian de un tramo a otro.
+  - FUNCION: una actividad {código}-{profesor} por profesor; repeticiones = sus celdas.
+  - Las dos: duración 1, sin aula ni subgrupos, sin tutor, patrón por la regla A11 y «tipo».
+    Una actividad de clase no lleva «tipo» (D6).
+  - Totales (totalDeclarado): profesor = sus celdas con grupo en su página; grupo y PDC = sus
+    (día, tramo) distintos en su grupo-*.json. No pasan por la derivación del catálogo.
+  - Una página sin código en la leyenda entra por profesores.alta o se ignora por
+    profesores.paginasIgnoradas, con su motivo; si no, aborta.
 
 SALIDA (solo si todo cuadra; si algo aborta no se escribe nada)
     catalogo-derivado.json              mismo formato que el de 2025/2026 (indent=1)
@@ -77,7 +95,14 @@ FIJA = {
     "actividades.requiereTutor": False,
     "conservacion.excluirCeldas": True,
     "meta.notasInvariantes": False,
+    # S204 (C-carga-datos-centro): solo los lee --volcados-profesores.
+    "noClase.tipos": False,
+    "noClase.ignorados": False,
+    "asignaturas.nombre": True,
+    "profesores.alta": False,
+    "profesores.paginasIgnoradas": False,
 }
+TIPOS_NO_CLASE = ("REUNION", "FUNCION")
 CAMPOS_DECISION = ("id", "fija", "valor", "motivo", "fuente")
 
 
@@ -575,6 +600,259 @@ def _aula_de(actividades, k):
     return (p["aulaFija"], tuple(p["aulasCandidatas"]))
 
 
+# ------------------------------------------- reuniones, funciones y totales (S204)
+
+def _cruzar():
+    """cruzar-grupos-profesores.py, cargado solo si hace falta (arrastra extraer-horario.py)."""
+    spec = importlib.util.spec_from_file_location(
+        "cruzar_grupos_profesores", Path(__file__).resolve().parent / "cruzar-grupos-profesores.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)   # sin efectos al importar: main() va tras __main__
+    return mod
+
+
+def cargar_volcados_profesores(directorio):
+    """Los profesor-*.json, en orden de fichero. Sin ninguno, o con otro modo, aborta."""
+    ficheros = sorted(glob.glob(os.path.join(directorio, "profesor-*.json")))
+    if not ficheros:
+        raise Aborto(2, "no hay profesor-*.json en %s" % directorio)
+    paginas = [json.loads(Path(f).read_text(encoding="utf-8")) for f in ficheros]
+    if any(p["_meta"].get("modo") != "profesores" for p in paginas):
+        raise Aborto(2, "profesor-*.json con modo distinto de «profesores» en %s" % directorio)
+    if len({p["_meta"]["pagina"] for p in paginas}) != len(paginas):
+        raise Aborto(2, "dos profesor-*.json con la misma página en %s" % directorio)
+    return paginas
+
+
+def mapa_de_paginas(paginas, pdfs):
+    """Página -> código de profesor o «sin código», con la leyenda de los PDF de grupos y
+    las dos funciones de cruzar-grupos-profesores.py; la correspondencia no se reescribe."""
+    cr = _cruzar()
+    try:
+        leyenda = cr.leyenda_profesores([(os.path.basename(p), cr.eh.leer_pdf(p)) for p in pdfs])
+        return cr.mapa_profesores({p["_meta"]["pagina"]: p["_meta"]["codigo_crudo"] for p in paginas}, leyenda), cr.SIN_CODIGO
+    except (cr.ErrorCruce, cr.eh.ErrorExtraccion) as e:
+        raise Aborto(2, "leyenda de profesores de los PDF de grupos: %s" % e)
+
+
+def codigos_de_paginas(paginas, mapa, sin_codigo, dec):
+    """Página -> código para las páginas que cuentan. Una página sin código entra por
+    profesores.alta (casada por número y título) o se salta por profesores.paginasIgnoradas;
+    si no, aborta. Devuelve también las ignoradas, para comprobar luego sus celdas."""
+    alta = dec.una("profesores.alta")
+    ignoradas_d = dec.una("profesores.paginasIgnoradas")
+    altas = alta["valor"] if alta else {}
+    ignoradas = {int(k): v for k, v in (ignoradas_d["valor"] if ignoradas_d else {}).items()}
+    titulo = {p["_meta"]["pagina"]: p["_meta"]["codigo_crudo"] for p in paginas}
+    por_pagina_alta = {}
+    for cod, e in altas.items():
+        if e.get("pagina") not in titulo or titulo[e["pagina"]] != e.get("titulo"):
+            raise Aborto(2, "decisión %s: la página %r con título %r no está en los volcados de profesores"
+                         % (alta["id"], e.get("pagina"), e.get("titulo")))
+        if mapa[e["pagina"]] != sin_codigo:
+            raise Aborto(2, "decisión %s: la página %d ya tiene código %s" % (alta["id"], e["pagina"], mapa[e["pagina"]]))
+        if not (e.get("nombreCompleto") or "").strip():
+            raise Aborto(2, "decisión %s: %s sin nombreCompleto" % (alta["id"], cod))
+        por_pagina_alta[e["pagina"]] = cod
+    for pag in ignoradas:
+        if pag not in titulo:
+            raise Aborto(2, "decisión %s: la página %d no está en los volcados de profesores" % (ignoradas_d["id"], pag))
+        if mapa[pag] != sin_codigo or pag in por_pagina_alta:
+            raise Aborto(2, "decisión %s: la página %d no es una página sin código libre" % (ignoradas_d["id"], pag))
+    codigos = {}
+    for pag in sorted(titulo):
+        if mapa[pag] != sin_codigo:
+            codigos[pag] = mapa[pag]
+        elif pag in por_pagina_alta:
+            codigos[pag] = por_pagina_alta[pag]
+        elif pag not in ignoradas:
+            raise Aborto(2, "página %d (%s) sin código en la leyenda y sin decisión profesores.alta ni "
+                            "profesores.paginasIgnoradas" % (pag, titulo[pag]))
+    repetidos = [c for c, n in Counter(codigos.values()).items() if n > 1]
+    if repetidos:
+        raise Aborto(2, "códigos de profesor en más de una página: %s" % sorted(repetidos))
+    if alta:
+        dec.usar(alta, len(altas))
+    if ignoradas_d:
+        dec.usar(ignoradas_d, len(ignoradas))
+    return codigos, sorted(ignoradas)
+
+
+def clasificar_celdas_profesor(paginas, codigos, ignoradas, dec):
+    """D8. Celdas con grupo -> clase (cuentan para el total del profesor). Celdas sin grupo
+    y de recreo -> su código tiene que estar en noClase.tipos o en noClase.ignorados; si no,
+    aborta. Devuelve (clase por código de profesor, celdas no de clase tipadas, tipo por
+    código, celdas ignoradas por código)."""
+    tipos_d, ign_d = dec.una("noClase.tipos"), dec.una("noClase.ignorados")
+    if tipos_d is None:
+        raise Aborto(2, "falta la decisión noClase.tipos")
+    tipo_de = {}
+    for tipo, cods in tipos_d["valor"].items():
+        if tipo not in TIPOS_NO_CLASE:
+            raise Aborto(2, "decisión %s: tipo %r (válidos: %s)" % (tipos_d["id"], tipo, list(TIPOS_NO_CLASE)))
+        for c in cods:
+            if tipo_de.setdefault(c, tipo) != tipo:
+                raise Aborto(2, "decisión %s: el código %s tiene dos tipos" % (tipos_d["id"], c))
+    ignorados = ign_d["valor"] if ign_d else {}
+    for c, motivo in ignorados.items():
+        if not isinstance(motivo, str) or not motivo.strip():
+            raise Aborto(2, "decisión %s: el código ignorado %s no lleva motivo" % (ign_d["id"], c))
+    ambos = sorted(set(tipo_de) & set(ignorados))
+    if ambos:
+        raise Aborto(2, "códigos tipados e ignorados a la vez: %s" % ambos)
+    clase, tipadas, ignoradas_n = Counter(), [], Counter()
+    for p in paginas:
+        pag = p["_meta"]["pagina"]
+        if pag not in codigos and pag not in ignoradas:
+            continue
+        prof = codigos.get(pag)
+        donde = "página %d (%s)" % (pag, p["_meta"]["codigo_crudo"])
+        for c in p["celdas"]:
+            a = c["asignatura"]
+            if c["grupos"].strip():
+                if a in tipo_de or a in ignorados:
+                    raise Aborto(2, "%s: %s con grupo en día %d tramo %d, y es un código no de clase"
+                                 % (donde, a, c["dia"], c["tramo"]))
+                if prof is None:
+                    raise Aborto(2, "%s: página ignorada con una celda de clase (%s)" % (donde, a))
+                clase[prof] += 1
+            elif a in tipo_de:
+                if prof is None:
+                    raise Aborto(2, "%s: página ignorada con una celda de %s" % (donde, a))
+                tipadas.append((a, prof, c["dia"], c["tramo"]))
+            elif a in ignorados:
+                ignoradas_n[a] += 1
+            else:
+                raise Aborto(2, "%s: código %s sin grupo y sin decisión noClase (día %d tramo %d)"
+                             % (donde, a, c["dia"], c["tramo"]))
+        for c in p["recreo"]:
+            if c["asignatura"] not in ignorados:
+                raise Aborto(2, "%s: código %s en el recreo y sin decisión noClase.ignorados" % (donde, c["asignatura"]))
+            ignoradas_n[c["asignatura"]] += 1
+    sin_celdas = sorted((set(tipo_de) - {a for a, _, _, _ in tipadas}) | (set(ignorados) - set(ignoradas_n)))
+    if sin_celdas:
+        raise Aborto(2, "códigos de las decisiones noClase sin ninguna celda en los volcados: %s" % sin_celdas)
+    dec.usar(tipos_d, len(tipo_de))
+    if ign_d:
+        dec.usar(ign_d, len(ignorados))
+    return clase, tipadas, tipo_de, ignoradas_n
+
+
+def _actividad_no_clase(codigo, tipo, asignatura, profesores, instancias):
+    return {
+        "codigo": codigo,
+        "tipo": tipo,
+        "asignatura": asignatura,
+        "duracionTramos": 1,
+        "repeticionesPorSemana": len(instancias),
+        "patronTemporal": patron_temporal(instancias),
+        "requiereTutor": False,
+        "plazas": [{"asignatura": asignatura, "profesores": profesores, "aulaFija": None,
+                    "aulasCandidatas": [], "subgrupos": []}],
+        "_referencia": {"gruposTocados": [],
+                        "instanciasEnElHorarioReal": ["%s%d" % (DIAS[d - 1], t) for d, t in instancias]},
+    }
+
+
+def derivar_no_clase(tipadas, tipo_de):
+    """D1 y D2. REUNION: una por código, una plaza con todos sus profesores, repeticiones =
+    tramos distintos; aborta si los profesores no son los mismos en todos sus tramos.
+    FUNCION: una por (código, profesor), repeticiones = celdas."""
+    por_codigo = defaultdict(list)
+    for a, prof, d, t in tipadas:
+        por_codigo[a].append((prof, d, t))
+    actividades = []
+    for a in sorted(por_codigo):
+        if tipo_de[a] == "REUNION":
+            por_franja = defaultdict(set)
+            for prof, d, t in por_codigo[a]:
+                por_franja[(d, t)].add(prof)
+            grupos_de_profes = {frozenset(v) for v in por_franja.values()}
+            if len(grupos_de_profes) != 1:
+                raise Aborto(2, "reunión %s con profesores distintos según el tramo: %s"
+                             % (a, {"%s%d" % (DIAS[d - 1], t): sorted(v) for (d, t), v in sorted(por_franja.items())}))
+            actividades.append(_actividad_no_clase(a, "REUNION", a, sorted(next(iter(grupos_de_profes))),
+                                                   sorted(por_franja)))
+        else:
+            por_prof = defaultdict(list)
+            for prof, d, t in por_codigo[a]:
+                por_prof[prof].append((d, t))
+            for prof in sorted(por_prof):
+                actividades.append(_actividad_no_clase("%s-%s" % (a, prof), "FUNCION", a, [prof], sorted(por_prof[prof])))
+    return actividades
+
+
+def nombres_de_no_clase(tipo_de, dec):
+    """Cada código tipado lleva su nombre en una decisión asignaturas.nombre (lo lee
+    extraer-nombres.py --decisiones); aquí solo se comprueba que estén todos y nada más."""
+    nombres = {}
+    for d in dec.todas("asignaturas.nombre"):
+        for c, n in d["valor"].items():
+            if c in nombres:
+                raise Aborto(2, "el código %s tiene nombre en dos decisiones asignaturas.nombre" % c)
+            if not isinstance(n, str) or not n.strip():
+                raise Aborto(2, "decisión %s: nombre vacío para %s" % (d["id"], c))
+            nombres[c] = n
+        dec.usar(d, len(d["valor"]))
+    faltan, sobran = sorted(set(tipo_de) - set(nombres)), sorted(set(nombres) - set(tipo_de))
+    if faltan or sobran:
+        raise Aborto(2, "asignaturas.nombre no casa con noClase.tipos: faltan %s, sobran %s" % (faltan, sobran))
+    return nombres
+
+
+def totales_de_grupo(directorio):
+    """D7: (día, tramo) distintos de cada grupo-*.json, con el código por forma_corta. No pasa
+    por la derivación: no lee decisiones ni exclusiones."""
+    franjas = defaultdict(set)
+    for f in sorted(glob.glob(os.path.join(directorio, "grupo-*.json"))):
+        d = json.loads(Path(f).read_text(encoding="utf-8"))
+        g = forma_corta(d["_meta"]["codigo_crudo"])
+        for c in d["celdas"]:
+            franjas[g].add((c["dia"], c["tramo"]))
+    return {g: len(v) for g, v in franjas.items()}
+
+
+def anadir_no_clase(catalogo, celdas_volcado, prof, dec, volcados):
+    """Mete en el catálogo ya derivado las reuniones, funciones, sus asignaturas, los
+    profesores nuevos y los totales declarados. Devuelve el resumen para el informe."""
+    paginas, codigos, ignoradas = prof["paginas"], prof["codigos"], prof["ignoradas"]
+    clase, tipadas, tipo_de, ignoradas_n = clasificar_celdas_profesor(paginas, codigos, ignoradas, dec)
+    nuevas = derivar_no_clase(tipadas, tipo_de)
+    nombres_de_no_clase(tipo_de, dec)
+    existentes = {a["codigo"] for a in catalogo["actividades"]}
+    choques = sorted(a["codigo"] for a in nuevas if a["codigo"] in existentes)
+    if choques:
+        raise Aborto(2, "códigos de actividad de reunión o función que ya existen: %s" % choques)
+    asig_clase = {a["codigo"] for a in catalogo["asignaturas"]}
+    if set(tipo_de) & asig_clase:
+        raise Aborto(2, "códigos no de clase que ya son asignaturas de clase: %s" % sorted(set(tipo_de) & asig_clase))
+    catalogo["actividades"] = sorted(catalogo["actividades"] + nuevas, key=lambda a: a["codigo"])
+    cuenta = Counter(a for a, _, _, _ in tipadas)
+    catalogo["asignaturas"] = sorted(catalogo["asignaturas"] + [{"codigo": c, "nombreCompleto": None, "celdas": cuenta[c]}
+                                                                for c in sorted(set(cuenta))],
+                                     key=lambda a: a["codigo"])
+    en_catalogo = {p["codigo"] for p in catalogo["profesores"]}
+    con_pagina = set(codigos.values())
+    sin_pagina = sorted(en_catalogo - con_pagina)
+    if sin_pagina:
+        raise Aborto(2, "profesores del catálogo sin página en los volcados de profesores: %s" % sin_pagina)
+    celdas_grupo = Counter(c["profesor"] for c in celdas_volcado)
+    catalogo["profesores"] = sorted(catalogo["profesores"] + [{"codigo": c, "nombreCompleto": None, "celdas": celdas_grupo[c]}
+                                                              for c in sorted(con_pagina - en_catalogo)],
+                                    key=lambda p: p["codigo"])
+    for p in catalogo["profesores"]:
+        p["totalDeclarado"] = clase[p["codigo"]]
+    tg = totales_de_grupo(volcados)
+    if set(tg) != {g["codigo"] for g in catalogo["grupos"]}:
+        raise Aborto(2, "los grupos de los volcados no son los del catálogo: %s"
+                     % sorted(set(tg) ^ {g["codigo"] for g in catalogo["grupos"]}))
+    for g in catalogo["grupos"]:
+        g["totalDeclarado"] = tg[g["codigo"]]
+    return {"nuevas": nuevas, "ignoradas_celdas": ignoradas_n, "paginas_ignoradas": ignoradas,
+            "profesores_nuevos": sorted(con_pagina - en_catalogo),
+            "celdas_tipadas": len(tipadas)}
+
+
 # ------------------------------------------------------------------ conservación
 
 def expandir(catalogo):
@@ -721,7 +999,7 @@ def ruta_legible(p):
         return p.as_posix()
 
 
-def informe(cat, args, dec, cons, cambios, celdas_volcado, n_ficheros, aulas_fichero, crudos):
+def informe(cat, args, dec, cons, cambios, celdas_volcado, n_ficheros, aulas_fichero, crudos, no_clase=None):
     o = ["# Informe de conservación del catálogo derivado", ""]
     o.append("Generado por `tools/carga-centro/derivar-catalogo.py`. Volcados: `%s` (%d grupo-*.json, "
              "%d aula-*.json). Decisiones: `%s`. Parche: %s." % (
@@ -777,6 +1055,8 @@ def informe(cat, args, dec, cons, cambios, celdas_volcado, n_ficheros, aulas_fic
                 "+".join(c["profesores"]), fmt(c["antes"]), fmt(c["despues"]), e.get("confirmacion", "")))
         plazas_tocadas = sorted({(c["actividad"], c["plaza"]) for c in cambios})
         o += ["", "Plazas modificadas: %d." % len(plazas_tocadas)]
+    if no_clase is not None:
+        o += informe_no_clase(cat, args, no_clase)
     o += ["", "## Decisiones", "", "| id | fija | aplicaciones | fuente |", "|---|---|---|---|"]
     for d in dec.lista:
         o.append("| `%s` | %s | %d | %s |" % (d["id"], d["fija"], dec.usos[d["id"]], d["fuente"]))
@@ -791,11 +1071,37 @@ def informe(cat, args, dec, cons, cambios, celdas_volcado, n_ficheros, aulas_fic
     return "\n".join(o) + "\n"
 
 
+def informe_no_clase(cat, args, nc):
+    """Sección de S204: solo con --volcados-profesores."""
+    o = ["", "## Reuniones, funciones y totales declarados", "",
+         "Volcados de profesores: `%s`. PDF de grupos (leyenda «Profesores:»): %s." % (
+             ruta_legible(args.volcados_profesores), ", ".join("`%s`" % os.path.basename(p) for p in args.pdf_grupos)), "",
+         "| actividad | tipo | profesores | repeticiones | instancias |", "|---|---|---|---|---|"]
+    for a in nc["nuevas"]:
+        o.append("| %s | %s | %s | %d | %s |" % (a["codigo"], a["tipo"], " ".join(a["plazas"][0]["profesores"]),
+                                                 a["repeticionesPorSemana"], " ".join(a["_referencia"]["instanciasEnElHorarioReal"])))
+    representadas = sum(len(a["plazas"][0]["profesores"]) * a["repeticionesPorSemana"] for a in nc["nuevas"])
+    o += ["", "Celdas de profesor representadas (profesores × repeticiones): %d de %d sin grupo tipadas." % (
+        representadas, nc["celdas_tipadas"]),
+          "Celdas ignoradas por decisión: %s." % ", ".join("%s %d" % kv for kv in sorted(nc["ignoradas_celdas"].items())),
+          "Páginas ignoradas por decisión: %s. Profesores nuevos: %s." % (
+              ", ".join(str(p) for p in nc["paginas_ignoradas"]) or "ninguna", ", ".join(nc["profesores_nuevos"]) or "ninguno"),
+          "Totales declarados: %d profesores, suma %d; %d grupos y PDC, suma %d." % (
+              len(cat["profesores"]), sum(p["totalDeclarado"] for p in cat["profesores"]),
+              len(cat["grupos"]), sum(g["totalDeclarado"] for g in cat["grupos"]))]
+    return o
+
+
 # --------------------------------------------------------------------------- main
 
-def derivar(volcados, decisiones_doc, parche_doc=None):
-    """Toda la derivación en memoria. Devuelve (catálogo, contexto para el informe)."""
+def derivar(volcados, decisiones_doc, parche_doc=None, profesores=None):
+    """Toda la derivación en memoria. Devuelve (catálogo, contexto para el informe).
+    profesores (S204, opcional): {"paginas", "mapa", "sin_codigo"} de los profesor-*.json;
+    sin él, la salida es la de S198."""
     dec = Decisiones(decisiones_doc)
+    if profesores is not None:
+        codigos, ignoradas = codigos_de_paginas(profesores["paginas"], profesores["mapa"], profesores["sin_codigo"], dec)
+        profesores = dict(profesores, codigos=codigos, ignoradas=ignoradas)
     celdas_volcado, crudos, aulas_fichero, n_ficheros = cargar_volcados(volcados)
     indice_de_aulas(celdas_volcado)
     celdas, excluidas = excluir_celdas(celdas_volcado, dec)
@@ -821,6 +1127,7 @@ def derivar(volcados, decisiones_doc, parche_doc=None):
         "subgrupos": derivar_subgrupos(sg_grupo, grupos),
         "actividades": actividades,
     }
+    no_clase = anadir_no_clase(catalogo, celdas_volcado, profesores, dec, volcados) if profesores is not None else None
     cons = conservacion(catalogo, celdas_volcado, excluidas)
     invs = invariantes(catalogo, celdas, dec)
     fuente = "%s/ (%d grupo-*.json%s)" % (ruta_legible(volcados), n_ficheros,
@@ -828,7 +1135,8 @@ def derivar(volcados, decisiones_doc, parche_doc=None):
     catalogo["_meta"] = meta(catalogo, fuente, invs)
     prevalidar_con_cargador(catalogo)
     return catalogo, {"dec": dec, "cons": cons, "cambios": cambios, "celdas_volcado": celdas_volcado,
-                      "n_ficheros": n_ficheros, "aulas_fichero": aulas_fichero, "crudos": crudos}
+                      "n_ficheros": n_ficheros, "aulas_fichero": aulas_fichero, "crudos": crudos,
+                      "no_clase": no_clase}
 
 
 def main(argv=None):
@@ -837,17 +1145,26 @@ def main(argv=None):
     ap.add_argument("--decisiones", required=True)
     ap.add_argument("--parche")
     ap.add_argument("--salida", required=True)
+    ap.add_argument("--volcados-profesores")
+    ap.add_argument("--pdf-grupos", nargs="+")
     args = ap.parse_args(argv)
     try:
         if not os.path.isabs(args.salida):
             raise Aborto(2, "--salida debe ser una ruta absoluta: %s" % args.salida)
         if os.path.exists(args.salida) and os.listdir(args.salida):
             raise Aborto(2, "--salida no está vacía: %s" % args.salida)
+        if bool(args.volcados_profesores) != bool(args.pdf_grupos):
+            raise Aborto(2, "--volcados-profesores y --pdf-grupos van juntos")
         decisiones = json.loads(Path(args.decisiones).read_text(encoding="utf-8"))
         parche = json.loads(Path(args.parche).read_text(encoding="utf-8")) if args.parche else None
-        catalogo, ctx = derivar(args.volcados, decisiones, parche)
+        profesores = None
+        if args.volcados_profesores:
+            paginas = cargar_volcados_profesores(args.volcados_profesores)
+            mapa, sin_codigo = mapa_de_paginas(paginas, args.pdf_grupos)
+            profesores = {"paginas": paginas, "mapa": mapa, "sin_codigo": sin_codigo}
+        catalogo, ctx = derivar(args.volcados, decisiones, parche, profesores)
         texto = informe(catalogo, args, ctx["dec"], ctx["cons"], ctx["cambios"], ctx["celdas_volcado"],
-                        ctx["n_ficheros"], ctx["aulas_fichero"], ctx["crudos"])
+                        ctx["n_ficheros"], ctx["aulas_fichero"], ctx["crudos"], ctx["no_clase"])
     except Aborto as e:
         print("ABORTA (rc=%d): %s" % (e.rc, e), file=sys.stderr)
         return e.rc

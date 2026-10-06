@@ -5,11 +5,13 @@
     "reglaDeEleccion": "prefijo > diacriticos > lexicografico; conflicto marcado",
     "avisoTruncamiento": "heuristica por ancho de corte y por corte de palabra; tiene falsos negativos",
     "resumen": {
-      "profesores": 59,
-      "asignaturas": 101,
+      "profesores": 60,
+      "asignaturas": 110,
       "truncados": 38,
-      "conflictos": 1
-    }
+      "conflictos": 1,
+      "deDecisiones": 10
+    },
+    "decisiones": "decisiones-catalogo.json"
   },
   "profesores": {
     "BIO3t": {
@@ -282,6 +284,11 @@
       "procedencia": "leyenda",
       "truncado": false
     },
+    "PROV1": {
+      "nombreCompleto": "Lobato Montes, María Carmen",
+      "procedencia": "decision:profesor-lobato-provisional",
+      "truncado": false
+    },
     "REL1": {
       "nombreCompleto": "Rivas Prieto, Carmen",
       "procedencia": "leyenda",
@@ -327,6 +334,11 @@
     "ANAT": {
       "nombreCompleto": "Anatomía",
       "procedencia": "leyenda",
+      "truncado": false
+    },
+    "APSTE": {
+      "nombreCompleto": "Apoyo Steam",
+      "procedencia": "decision:nombres-leyenda-profesores",
       "truncado": false
     },
     "ATED": {
@@ -484,6 +496,11 @@
       "procedencia": "codigo",
       "truncado": false
     },
+    "FOREI": {
+      "nombreCompleto": "Formación e innovación",
+      "procedencia": "decision:nombres-leyenda-profesores",
+      "truncado": false
+    },
     "FQ": {
       "nombreCompleto": "Física y Química",
       "procedencia": "leyenda",
@@ -552,6 +569,11 @@
     "HMC": {
       "nombreCompleto": "Hist Mundo Cont.",
       "procedencia": "leyenda",
+      "truncado": false
+    },
+    "HUERT": {
+      "nombreCompleto": "Huerto",
+      "procedencia": "decision:nombres-leyenda-profesores",
       "truncado": false
     },
     "IPE": {
@@ -659,6 +681,11 @@
       "procedencia": "leyenda",
       "truncado": false
     },
+    "ORYCA": {
+      "nombreCompleto": "Ordenación y Catalogació",
+      "procedencia": "decision:nombres-leyenda-profesores",
+      "truncado": false
+    },
     "OyD": {
       "nombreCompleto": "Oratoria y Debate",
       "procedencia": "leyenda",
@@ -689,6 +716,11 @@
       "procedencia": "leyenda",
       "truncado": false
     },
+    "PROAR": {
+      "nombreCompleto": "Proyecto Artístico",
+      "procedencia": "decision:nombres-leyenda-profesores",
+      "truncado": false
+    },
     "PS": {
       "nombreCompleto": "Preparación de superfici",
       "procedencia": "leyenda",
@@ -709,9 +741,29 @@
       "procedencia": "leyenda",
       "truncado": false
     },
+    "RED": {
+      "nombreCompleto": "Reunión de Equipo Direct",
+      "procedencia": "decision:nombres-leyenda-profesores",
+      "truncado": false
+    },
     "REVAN": {
       "nombreCompleto": "Religión Evangélica",
       "procedencia": "leyenda",
+      "truncado": false
+    },
+    "REYR": {
+      "nombreCompleto": "Redes y Radio",
+      "procedencia": "decision:nombres-leyenda-profesores",
+      "truncado": false
+    },
+    "RT12": {
+      "nombreCompleto": "RT12",
+      "procedencia": "decision:nombres-rt-sin-fuente",
+      "truncado": false
+    },
+    "RT34": {
+      "nombreCompleto": "RT34",
+      "procedencia": "decision:nombres-rt-sin-fuente",
       "truncado": false
     },
     "ReLen": {

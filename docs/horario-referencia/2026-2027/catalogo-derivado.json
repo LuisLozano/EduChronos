@@ -19,26 +19,26 @@
   "enviosDeFormulario": {
    "jornada": 1,
    "niveles": 8,
-   "asignaturas": 101,
-   "profesores": 59,
+   "asignaturas": 110,
+   "profesores": 60,
    "aulas": 32,
    "grupos": 25,
    "pdc": 5,
    "tutores": 30,
    "subgrupos": 374,
-   "actividades": 217,
-   "TOTAL": 852
+   "actividades": 230,
+   "TOTAL": 875
   },
   "resumen": {
    "niveles": 8,
-   "asignaturas": 101,
-   "profesores": 59,
+   "asignaturas": 110,
+   "profesores": 60,
    "aulas": 32,
    "grupos": 30,
    "subgrupos": 379,
-   "actividades": 217,
-   "plazas": 310,
-   "sesionesSemanales": 629
+   "actividades": 230,
+   "plazas": 323,
+   "sesionesSemanales": 652
   },
   "verificacionInvariantes": {
    "I1": "cada grupo queda cubierto por sus subgrupos en cada bloque; poblacion real NO derivable",
@@ -165,6 +165,11 @@
    "codigo": "ANAT",
    "nombreCompleto": null,
    "celdas": 12
+  },
+  {
+   "codigo": "APSTE",
+   "nombreCompleto": null,
+   "celdas": 2
   },
   {
    "codigo": "ATED",
@@ -322,6 +327,11 @@
    "celdas": 18
   },
   {
+   "codigo": "FOREI",
+   "nombreCompleto": null,
+   "celdas": 2
+  },
+  {
    "codigo": "FQ",
    "nombreCompleto": null,
    "celdas": 23
@@ -390,6 +400,11 @@
    "codigo": "HMC",
    "nombreCompleto": null,
    "celdas": 32
+  },
+  {
+   "codigo": "HUERT",
+   "nombreCompleto": null,
+   "celdas": 2
   },
   {
    "codigo": "IPE",
@@ -497,6 +512,11 @@
    "celdas": 16
   },
   {
+   "codigo": "ORYCA",
+   "nombreCompleto": null,
+   "celdas": 10
+  },
+  {
    "codigo": "OyD",
    "nombreCompleto": null,
    "celdas": 14
@@ -527,6 +547,11 @@
    "celdas": 4
   },
   {
+   "codigo": "PROAR",
+   "nombreCompleto": null,
+   "celdas": 2
+  },
+  {
    "codigo": "PS",
    "nombreCompleto": null,
    "celdas": 5
@@ -547,9 +572,29 @@
    "celdas": 8
   },
   {
+   "codigo": "RED",
+   "nombreCompleto": null,
+   "celdas": 7
+  },
+  {
    "codigo": "REVAN",
    "nombreCompleto": null,
    "celdas": 1
+  },
+  {
+   "codigo": "REYR",
+   "nombreCompleto": null,
+   "celdas": 2
+  },
+  {
+   "codigo": "RT12",
+   "nombreCompleto": null,
+   "celdas": 11
+  },
+  {
+   "codigo": "RT34",
+   "nombreCompleto": null,
+   "celdas": 9
   },
   {
    "codigo": "ReLen",
@@ -656,297 +701,362 @@
   {
    "codigo": "BIO3t",
    "nombreCompleto": null,
-   "celdas": 12
+   "celdas": 12,
+   "totalDeclarado": 8
   },
   {
    "codigo": "BYG1",
    "nombreCompleto": null,
-   "celdas": 12
+   "celdas": 12,
+   "totalDeclarado": 12
   },
   {
    "codigo": "BYG2",
    "nombreCompleto": null,
-   "celdas": 34
+   "celdas": 34,
+   "totalDeclarado": 13
   },
   {
    "codigo": "CLA1",
    "nombreCompleto": null,
-   "celdas": 34
+   "celdas": 34,
+   "totalDeclarado": 18
   },
   {
    "codigo": "DIB1",
    "nombreCompleto": null,
-   "celdas": 69
+   "celdas": 69,
+   "totalDeclarado": 17
   },
   {
    "codigo": "DIB2",
    "nombreCompleto": null,
-   "celdas": 57
+   "celdas": 57,
+   "totalDeclarado": 18
   },
   {
    "codigo": "ECO",
    "nombreCompleto": null,
-   "celdas": 26
+   "celdas": 26,
+   "totalDeclarado": 15
   },
   {
    "codigo": "EFI1",
    "nombreCompleto": null,
-   "celdas": 32
+   "celdas": 32,
+   "totalDeclarado": 16
   },
   {
    "codigo": "EFI2",
    "nombreCompleto": null,
-   "celdas": 37
+   "celdas": 37,
+   "totalDeclarado": 17
   },
   {
    "codigo": "EFI3",
    "nombreCompleto": null,
-   "celdas": 17
+   "celdas": 17,
+   "totalDeclarado": 17
   },
   {
    "codigo": "FIL1",
    "nombreCompleto": null,
-   "celdas": 28
+   "celdas": 28,
+   "totalDeclarado": 15
   },
   {
    "codigo": "FIL2",
    "nombreCompleto": null,
-   "celdas": 13
+   "celdas": 13,
+   "totalDeclarado": 10
   },
   {
    "codigo": "FIL3",
    "nombreCompleto": null,
-   "celdas": 11
+   "celdas": 11,
+   "totalDeclarado": 5
   },
   {
    "codigo": "FIS1",
    "nombreCompleto": null,
-   "celdas": 8
+   "celdas": 8,
+   "totalDeclarado": 4
   },
   {
    "codigo": "FIS2",
    "nombreCompleto": null,
-   "celdas": 26
+   "celdas": 26,
+   "totalDeclarado": 16
   },
   {
    "codigo": "FIS3",
    "nombreCompleto": null,
-   "celdas": 42
+   "celdas": 42,
+   "totalDeclarado": 19
   },
   {
    "codigo": "FIS4",
    "nombreCompleto": null,
-   "celdas": 21
+   "celdas": 21,
+   "totalDeclarado": 17
   },
   {
    "codigo": "FOL2",
    "nombreCompleto": null,
-   "celdas": 24
+   "celdas": 24,
+   "totalDeclarado": 4
   },
   {
    "codigo": "FOL4",
    "nombreCompleto": null,
-   "celdas": 33
+   "celdas": 33,
+   "totalDeclarado": 11
   },
   {
    "codigo": "FRA1T",
    "nombreCompleto": null,
-   "celdas": 16
+   "celdas": 16,
+   "totalDeclarado": 10
   },
   {
    "codigo": "GH1",
    "nombreCompleto": null,
-   "celdas": 12
+   "celdas": 12,
+   "totalDeclarado": 12
   },
   {
    "codigo": "GH2",
    "nombreCompleto": null,
-   "celdas": 16
+   "celdas": 16,
+   "totalDeclarado": 16
   },
   {
    "codigo": "GH3",
    "nombreCompleto": null,
-   "celdas": 10
+   "celdas": 10,
+   "totalDeclarado": 10
   },
   {
    "codigo": "GH4",
    "nombreCompleto": null,
-   "celdas": 43
+   "celdas": 43,
+   "totalDeclarado": 17
   },
   {
    "codigo": "GH5",
    "nombreCompleto": null,
-   "celdas": 26
+   "celdas": 26,
+   "totalDeclarado": 18
   },
   {
    "codigo": "GH6",
    "nombreCompleto": null,
-   "celdas": 33
+   "celdas": 33,
+   "totalDeclarado": 17
   },
   {
    "codigo": "INF1",
    "nombreCompleto": null,
-   "celdas": 44
+   "celdas": 44,
+   "totalDeclarado": 12
   },
   {
    "codigo": "ING1",
    "nombreCompleto": null,
-   "celdas": 16
+   "celdas": 16,
+   "totalDeclarado": 16
   },
   {
    "codigo": "ING2",
    "nombreCompleto": null,
-   "celdas": 22
+   "celdas": 22,
+   "totalDeclarado": 16
   },
   {
    "codigo": "ING3",
    "nombreCompleto": null,
-   "celdas": 18
+   "celdas": 18,
+   "totalDeclarado": 13
   },
   {
    "codigo": "ING4",
    "nombreCompleto": null,
-   "celdas": 20
+   "celdas": 20,
+   "totalDeclarado": 12
   },
   {
    "codigo": "ING5",
    "nombreCompleto": null,
-   "celdas": 21
+   "celdas": 21,
+   "totalDeclarado": 17
   },
   {
    "codigo": "ING6",
    "nombreCompleto": null,
-   "celdas": 27
+   "celdas": 27,
+   "totalDeclarado": 17
   },
   {
    "codigo": "LEN1",
    "nombreCompleto": null,
-   "celdas": 23
+   "celdas": 23,
+   "totalDeclarado": 15
   },
   {
    "codigo": "LEN2",
    "nombreCompleto": null,
-   "celdas": 27
+   "celdas": 27,
+   "totalDeclarado": 17
   },
   {
    "codigo": "LEN3",
    "nombreCompleto": null,
-   "celdas": 19
+   "celdas": 19,
+   "totalDeclarado": 16
   },
   {
    "codigo": "LEN4",
    "nombreCompleto": null,
-   "celdas": 12
+   "celdas": 12,
+   "totalDeclarado": 9
   },
   {
    "codigo": "LEN5",
    "nombreCompleto": null,
-   "celdas": 21
+   "celdas": 21,
+   "totalDeclarado": 17
   },
   {
    "codigo": "LEN6",
    "nombreCompleto": null,
-   "celdas": 41
+   "celdas": 41,
+   "totalDeclarado": 17
   },
   {
    "codigo": "LEN7",
    "nombreCompleto": null,
-   "celdas": 18
+   "celdas": 18,
+   "totalDeclarado": 11
   },
   {
    "codigo": "LEN8",
    "nombreCompleto": null,
-   "celdas": 17
+   "celdas": 17,
+   "totalDeclarado": 17
   },
   {
    "codigo": "LEN9",
    "nombreCompleto": null,
-   "celdas": 23
+   "celdas": 23,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MAT1",
    "nombreCompleto": null,
-   "celdas": 22
+   "celdas": 22,
+   "totalDeclarado": 12
   },
   {
    "codigo": "MAT2",
    "nombreCompleto": null,
-   "celdas": 23
+   "celdas": 23,
+   "totalDeclarado": 11
   },
   {
    "codigo": "MAT3",
    "nombreCompleto": null,
-   "celdas": 27
+   "celdas": 27,
+   "totalDeclarado": 10
   },
   {
    "codigo": "MAT4",
    "nombreCompleto": null,
-   "celdas": 37
+   "celdas": 37,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MAT5",
    "nombreCompleto": null,
-   "celdas": 31
+   "celdas": 31,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MAT6",
    "nombreCompleto": null,
-   "celdas": 17
+   "celdas": 17,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MAT7",
    "nombreCompleto": null,
-   "celdas": 33
+   "celdas": 33,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MAT8",
    "nombreCompleto": null,
-   "celdas": 17
+   "celdas": 17,
+   "totalDeclarado": 17
   },
   {
    "codigo": "MUS1",
    "nombreCompleto": null,
-   "celdas": 17
+   "celdas": 17,
+   "totalDeclarado": 17
   },
   {
    "codigo": "ORI1",
    "nombreCompleto": null,
-   "celdas": 5
+   "celdas": 5,
+   "totalDeclarado": 2
   },
   {
    "codigo": "PAU1",
    "nombreCompleto": null,
-   "celdas": 19
+   "celdas": 19,
+   "totalDeclarado": 19
   },
   {
    "codigo": "PAU2",
    "nombreCompleto": null,
-   "celdas": 18
+   "celdas": 18,
+   "totalDeclarado": 18
+  },
+  {
+   "codigo": "PROV1",
+   "nombreCompleto": null,
+   "celdas": 0,
+   "totalDeclarado": 0
   },
   {
    "codigo": "REL1",
    "nombreCompleto": null,
-   "celdas": 28
+   "celdas": 28,
+   "totalDeclarado": 10
   },
   {
    "codigo": "REV",
    "nombreCompleto": null,
-   "celdas": 1
+   "celdas": 1,
+   "totalDeclarado": 1
   },
   {
    "codigo": "TEC1",
    "nombreCompleto": null,
-   "celdas": 4
+   "celdas": 4,
+   "totalDeclarado": 4
   },
   {
    "codigo": "TEC2",
    "nombreCompleto": null,
-   "celdas": 37
+   "celdas": 37,
+   "totalDeclarado": 14
   },
   {
    "codigo": "TEC3",
    "nombreCompleto": null,
-   "celdas": 24
+   "celdas": 24,
+   "totalDeclarado": 18
   }
  ],
  "aulas": [
@@ -1276,181 +1386,211 @@
    "codigo": "1ºA",
    "nivel": "1ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1ºB",
    "nivel": "1ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1ºC",
    "nivel": "1ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1ºD",
    "nivel": "1ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2ºA",
    "nivel": "2ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2ºB",
    "nivel": "2ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2ºC",
    "nivel": "2ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2ºD",
    "nivel": "2ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºA",
    "nivel": "3ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºADi",
    "nivel": "3ESO",
    "tipo": "DIVERSIFICACION_PDC",
-   "grupoPadre": "3ºA"
+   "grupoPadre": "3ºA",
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºB",
    "nivel": "3ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºBDi",
    "nivel": "3ESO",
    "tipo": "DIVERSIFICACION_PDC",
-   "grupoPadre": "3ºB"
+   "grupoPadre": "3ºB",
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºC",
    "nivel": "3ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "3ºCDi",
    "nivel": "3ESO",
    "tipo": "DIVERSIFICACION_PDC",
-   "grupoPadre": "3ºC"
+   "grupoPadre": "3ºC",
+   "totalDeclarado": 30
   },
   {
    "codigo": "4ºA",
    "nivel": "4ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "4ºB",
    "nivel": "4ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "4ºBDi",
    "nivel": "4ESO",
    "tipo": "DIVERSIFICACION_PDC",
-   "grupoPadre": "4ºB"
+   "grupoPadre": "4ºB",
+   "totalDeclarado": 30
   },
   {
    "codigo": "4ºC",
    "nivel": "4ESO",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "4ºCDi",
    "nivel": "4ESO",
    "tipo": "DIVERSIFICACION_PDC",
-   "grupoPadre": "4ºC"
+   "grupoPadre": "4ºC",
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Ac",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Am",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Bc",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Bm",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Ch",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1B-Cs",
    "nivel": "1BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2B-A",
    "nivel": "2BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2B-B",
    "nivel": "2BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2B-C",
    "nivel": "2BACH",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "1FPB",
    "nivel": "1FPB",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   },
   {
    "codigo": "2FPB",
    "nivel": "2FPB",
    "tipo": "ORDINARIO",
-   "grupoPadre": null
+   "grupoPadre": null,
+   "totalDeclarado": 30
   }
  ],
  "tutorias": [
@@ -4364,6 +4504,33 @@
      "X1",
      "X2",
      "X3"
+    ]
+   }
+  },
+  {
+   "codigo": "APSTE-TEC2",
+   "tipo": "FUNCION",
+   "asignatura": "APSTE",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "APSTE",
+     "profesores": [
+      "TEC2"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "M2",
+     "V4"
     ]
    }
   },
@@ -8016,6 +8183,33 @@
    }
   },
   {
+   "codigo": "FOREI-FIL2",
+   "tipo": "FUNCION",
+   "asignatura": "FOREI",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "FOREI",
+     "profesores": [
+      "FIL2"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "M4",
+     "J5"
+    ]
+   }
+  },
+  {
    "codigo": "FQ-1B-Ac",
    "asignatura": "FQ",
    "duracionTramos": 1,
@@ -9047,6 +9241,33 @@
      "X6",
      "J5",
      "V6"
+    ]
+   }
+  },
+  {
+   "codigo": "HUERT-GH2",
+   "tipo": "FUNCION",
+   "asignatura": "HUERT",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "HUERT",
+     "profesores": [
+      "GH2"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "X2",
+     "J3"
     ]
    }
   },
@@ -11334,6 +11555,141 @@
    }
   },
   {
+   "codigo": "ORYCA-FIL1",
+   "tipo": "FUNCION",
+   "asignatura": "ORYCA",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "ORYCA",
+     "profesores": [
+      "FIL1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "X5",
+     "J4"
+    ]
+   }
+  },
+  {
+   "codigo": "ORYCA-FRA1T",
+   "tipo": "FUNCION",
+   "asignatura": "ORYCA",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "ORYCA",
+     "profesores": [
+      "FRA1T"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "L4",
+     "J1"
+    ]
+   }
+  },
+  {
+   "codigo": "ORYCA-ING1",
+   "tipo": "FUNCION",
+   "asignatura": "ORYCA",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "ORYCA",
+     "profesores": [
+      "ING1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "L2",
+     "J2"
+    ]
+   }
+  },
+  {
+   "codigo": "ORYCA-ING2",
+   "tipo": "FUNCION",
+   "asignatura": "ORYCA",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "ORYCA",
+     "profesores": [
+      "ING2"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "X3",
+     "J4"
+    ]
+   }
+  },
+  {
+   "codigo": "ORYCA-REL1",
+   "tipo": "FUNCION",
+   "asignatura": "ORYCA",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "ORYCA",
+     "profesores": [
+      "REL1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "M3",
+     "V5"
+    ]
+   }
+  },
+  {
    "codigo": "OyD-3ºADi+3ºBDi+3ºCDi",
    "asignatura": "OyD",
    "duracionTramos": 1,
@@ -11514,6 +11870,33 @@
    }
   },
   {
+   "codigo": "PROAR-DIB1",
+   "tipo": "FUNCION",
+   "asignatura": "PROAR",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "PROAR",
+     "profesores": [
+      "DIB1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "X4",
+     "V3"
+    ]
+   }
+  },
+  {
    "codigo": "PS-1FPB",
    "asignatura": "PS",
    "duracionTramos": 1,
@@ -11543,6 +11926,135 @@
      "L6",
      "M4",
      "V6"
+    ]
+   }
+  },
+  {
+   "codigo": "RED",
+   "tipo": "REUNION",
+   "asignatura": "RED",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 1,
+   "patronTemporal": "NEUTRA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "RED",
+     "profesores": [
+      "FIS1",
+      "FOL2",
+      "GH3",
+      "MAT2",
+      "MAT3",
+      "PROV1",
+      "TEC1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "M3"
+    ]
+   }
+  },
+  {
+   "codigo": "REYR-GH1",
+   "tipo": "FUNCION",
+   "asignatura": "REYR",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 2,
+   "patronTemporal": "DISTRIBUIDA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "REYR",
+     "profesores": [
+      "GH1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "M5",
+     "X1"
+    ]
+   }
+  },
+  {
+   "codigo": "RT12",
+   "tipo": "REUNION",
+   "asignatura": "RT12",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 1,
+   "patronTemporal": "NEUTRA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "RT12",
+     "profesores": [
+      "EFI3",
+      "GH2",
+      "GH3",
+      "LEN5",
+      "LEN8",
+      "MAT5",
+      "MAT6",
+      "MAT7",
+      "MAT8",
+      "ORI1",
+      "TEC1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "L3"
+    ]
+   }
+  },
+  {
+   "codigo": "RT34",
+   "tipo": "REUNION",
+   "asignatura": "RT34",
+   "duracionTramos": 1,
+   "repeticionesPorSemana": 1,
+   "patronTemporal": "NEUTRA",
+   "requiereTutor": false,
+   "plazas": [
+    {
+     "asignatura": "RT34",
+     "profesores": [
+      "EFI2",
+      "FIS4",
+      "GH5",
+      "ING6",
+      "LEN9",
+      "MAT3",
+      "MAT4",
+      "ORI1",
+      "TEC1"
+     ],
+     "aulaFija": null,
+     "aulasCandidatas": [],
+     "subgrupos": []
+    }
+   ],
+   "_referencia": {
+    "gruposTocados": [],
+    "instanciasEnElHorarioReal": [
+     "J4"
     ]
    }
   },

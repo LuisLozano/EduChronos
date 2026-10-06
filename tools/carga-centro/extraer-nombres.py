@@ -19,6 +19,12 @@ prefijo el uno del otro quedan como conflicto, igual que dentro de un PDF.
 CIERRE. Las claves tienen que ser las de --catalogo en las dos familias. La salida se
 escribe solo si el cierre pasa; si no, rc=1 y no se escribe nada.
 
+--decisiones (S204, opcional): decisiones-catalogo.json del curso. Antes del cierre se
+anaden los nombres que el PDF de grupos no trae: los de las decisiones asignaturas.nombre
+y el nombreCompleto de profesores.alta, con procedencia «decision:<id>». Un codigo que ya
+viene del PDF, o que esta en dos decisiones, es un error. Sin --decisiones la salida no
+cambia.
+
 Cada pagina trae al pie dos leyendas, "Profesores:" y "Asignaturas:", que asocian
 codigo -> nombre en dos columnas, y arriba una linea "Tutor:" con el nombre del
 tutor del grupo. El mismo codigo aparece en varias paginas y no siempre con el
@@ -251,11 +257,45 @@ def construir(codigos_a_variantes, lineas_tutor=None):
     return entradas
 
 
+def nombres_de_decisiones(doc):
+    """decisiones-catalogo.json -> (asignaturas, profesores), cada uno {codigo: (nombre, id)}."""
+    asignaturas, profesores = {}, {}
+    for d in doc.get("decisiones", []):
+        if d.get("fija") == "asignaturas.nombre":
+            pares = d["valor"].items()
+            destino = asignaturas
+        elif d.get("fija") == "profesores.alta":
+            pares = ((c, e.get("nombreCompleto")) for c, e in d["valor"].items())
+            destino = profesores
+        else:
+            continue
+        for codigo, nombre in pares:
+            if codigo in destino:
+                raise SystemExit("El codigo %s tiene nombre en dos decisiones (%s y %s)"
+                                 % (codigo, destino[codigo][1], d["id"]))
+            if not isinstance(nombre, str) or not nombre.strip():
+                raise SystemExit("Decision %s: nombre vacio para %s" % (d["id"], codigo))
+            destino[codigo] = (nombre, d["id"])
+    return asignaturas, profesores
+
+
+def anadir_decisiones(entradas, de_decisiones, familia):
+    """Entradas del PDF + las de las decisiones, ordenadas por codigo. Un choque es un error."""
+    choques = sorted(set(entradas) & set(de_decisiones))
+    if choques:
+        raise SystemExit("%s: los codigos %s vienen del PDF y de una decision" % (familia, choques))
+    todas = dict(entradas)
+    for codigo, (nombre, ident) in de_decisiones.items():
+        todas[codigo] = {"nombreCompleto": nombre, "procedencia": "decision:%s" % ident, "truncado": False}
+    return {c: todas[c] for c in sorted(todas)}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--pdf", nargs="+", required=True, help="uno o varios PDF de horarios de grupos")
     ap.add_argument("--catalogo", required=True, help="catalogo-derivado.json del curso (cierre)")
     ap.add_argument("--salida", required=True, help="nombres-derivados.json que se escribe")
+    ap.add_argument("--decisiones", help="decisiones-catalogo.json del curso (S204, opcional)")
     args = ap.parse_args(argv)
     pdfs = [Path(p) for p in args.pdf]
     salida, catalogo_ruta = Path(args.salida), Path(args.catalogo)
@@ -270,6 +310,10 @@ def main(argv=None):
 
     profesores = construir(crudos_prof, lineas_tutor)
     asignaturas = construir(crudos_asig)
+    if args.decisiones:
+        dec_asig, dec_prof = nombres_de_decisiones(json.loads(Path(args.decisiones).read_text(encoding="utf-8")))
+        asignaturas = anadir_decisiones(asignaturas, dec_asig, "asignaturas")
+        profesores = anadir_decisiones(profesores, dec_prof, "profesores")
 
     truncados = sum(1 for e in list(profesores.values()) + list(asignaturas.values())
                     if e["truncado"])
@@ -292,6 +336,10 @@ def main(argv=None):
         "profesores": profesores,
         "asignaturas": asignaturas,
     }
+    if args.decisiones:
+        documento["_meta"]["decisiones"] = Path(args.decisiones).name
+        documento["_meta"]["resumen"]["deDecisiones"] = sum(
+            1 for e in list(profesores.values()) + list(asignaturas.values()) if e["procedencia"].startswith("decision:"))
 
     print("PDF leidos:          %d (%s)" % (len(pdfs), ", ".join(p.name for p in pdfs)))
     print("Paginas leidas:      %d" % len(paginas))

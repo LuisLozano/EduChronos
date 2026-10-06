@@ -46,7 +46,7 @@ class Base(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
-    def correr(self, pdfs, catalogo, salida=None):
+    def correr(self, pdfs, catalogo, salida=None, decisiones=None):
         """pdfs: {nombre: [páginas]}. Devuelve (rc, stdout, ruta de salida)."""
         rutas = []
         for nombre in pdfs:
@@ -59,7 +59,12 @@ class Base(unittest.TestCase):
         por_ruta = {str(self.tmp / n): p for n, p in pdfs.items()}
         out = io.StringIO()
         with mock.patch.object(en, "leer_paginas", lambda pdf: por_ruta[str(pdf)]), contextlib.redirect_stdout(out):
-            rc = en.main(["--pdf"] + rutas + ["--catalogo", str(cat), "--salida", str(salida)])
+            extra = []
+            if decisiones is not None:
+                fdec = self.tmp / "decisiones.json"
+                fdec.write_text(json.dumps({"decisiones": decisiones}, ensure_ascii=False), encoding="utf-8")
+                extra = ["--decisiones", str(fdec)]
+            rc = en.main(["--pdf"] + rutas + ["--catalogo", str(cat), "--salida", str(salida)] + extra)
         return rc, out.getvalue(), Path(salida)
 
 
@@ -146,6 +151,44 @@ class Cierre(Base):
             en.main([])
         self.assertEqual(e.exception.code, 2)
         self.assertEqual((HR / "nombres-derivados.json").read_bytes(), antes)
+
+
+
+class Decisiones(Base):
+    """S204: --decisiones añade los nombres que el PDF de grupos no trae."""
+
+    P = [pagina([("P1", "Uno")], [("Mat", "Matemáticas")])]
+    DEC = [{"id": "n", "fija": "asignaturas.nombre", "valor": {"RED": "Reunión de Equipo Direct"}},
+           {"id": "a", "fija": "profesores.alta", "valor": {"PROV1": {"pagina": 5, "titulo": "X", "nombreCompleto": "Lobato"}}},
+           {"id": "otra", "fija": "jornada.horas", "valor": {}}]
+
+    def test_anade_los_nombres_de_las_decisiones_y_cierra(self):
+        rc, _, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED"]), decisiones=self.DEC)
+        self.assertEqual(rc, 0)
+        d = json.loads(s.read_text(encoding="utf-8"))
+        self.assertEqual(d["asignaturas"]["RED"], {"nombreCompleto": "Reunión de Equipo Direct",
+                                                   "procedencia": "decision:n", "truncado": False})
+        self.assertEqual(d["profesores"]["PROV1"]["nombreCompleto"], "Lobato")
+        self.assertEqual(list(d["asignaturas"]), ["Mat", "RED"])
+        self.assertEqual(d["_meta"]["resumen"]["deDecisiones"], 2)
+
+    def test_sin_decisiones_el_cierre_falla_con_los_codigos_nuevos(self):
+        rc, out, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED"]))
+        self.assertEqual(rc, 1)
+        self.assertIn("DESAJUSTE", out)
+
+    def test_codigo_del_pdf_y_de_una_decision_es_error(self):
+        dec = [{"id": "n", "fija": "asignaturas.nombre", "valor": {"Mat": "Otra"}}]
+        with self.assertRaises(SystemExit) as e:
+            self.correr({"a.pdf": self.P}, catalogo(["P1"], ["Mat"]), decisiones=dec)
+        self.assertIn("vienen del PDF y de una decision", str(e.exception.code))
+
+    def test_codigo_en_dos_decisiones_es_error(self):
+        dec = [{"id": "n1", "fija": "asignaturas.nombre", "valor": {"RED": "A"}},
+               {"id": "n2", "fija": "asignaturas.nombre", "valor": {"RED": "B"}}]
+        with self.assertRaises(SystemExit) as e:
+            self.correr({"a.pdf": self.P}, catalogo(["P1"], ["Mat", "RED"]), decisiones=dec)
+        self.assertIn("dos decisiones", str(e.exception.code))
 
 
 if __name__ == "__main__":

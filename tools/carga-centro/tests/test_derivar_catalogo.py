@@ -13,6 +13,7 @@ import os
 import sys
 import tempfile
 import unittest
+from collections import Counter
 from pathlib import Path
 from unittest import mock
 
@@ -116,17 +117,48 @@ class Oraculo(unittest.TestCase):
 
 
 class Curso2026(unittest.TestCase):
-    """Regresión: el catálogo versionado de 2026/2027 es lo que dan sus volcados, decisiones y parche."""
+    """Regresión: el catálogo versionado de 2026/2027 es lo que dan sus volcados, decisiones y parche,
+    con los volcados de profesores y la leyenda de los dos PDF de grupos (S204)."""
 
     @classmethod
     def setUpClass(cls):
         d = HR / "2026-2027"
-        cls.catalogo, cls.ctx = dc.derivar(str(d), json.loads((d / "decisiones-catalogo.json").read_text(encoding="utf-8")),
-                                           json.loads((d / "parche-aulas.json").read_text(encoding="utf-8")))
+        decisiones = json.loads((d / "decisiones-catalogo.json").read_text(encoding="utf-8"))
+        parche = json.loads((d / "parche-aulas.json").read_text(encoding="utf-8"))
+        paginas = dc.cargar_volcados_profesores(str(d))
+        mapa, sin_codigo = dc.mapa_de_paginas(paginas, [str(d / "pdf" / "Horarios de grupos.pdf"),
+                                                        str(d / "pdf" / "Horarios de grupos (11).pdf")])
+        cls.catalogo, cls.ctx = dc.derivar(str(d), decisiones, parche,
+                                           {"paginas": paginas, "mapa": mapa, "sin_codigo": sin_codigo})
+        cls.sin_opcion, _ = dc.derivar(str(d), decisiones, parche)
         cls.versionado = json.loads((d / "catalogo-derivado.json").read_text(encoding="utf-8"))
 
     def test_igual_al_versionado(self):
         self.assertEqual(self.catalogo, self.versionado)
+
+    def test_reuniones_y_funciones_47_celdas(self):
+        nuevas = [a for a in self.catalogo["actividades"] if "tipo" in a]
+        self.assertEqual(Counter(a["tipo"] for a in nuevas), {"REUNION": 3, "FUNCION": 10})
+        self.assertEqual(sum(len(a["plazas"][0]["profesores"]) * a["repeticionesPorSemana"] for a in nuevas), 47)
+        self.assertEqual((len(self.catalogo["actividades"]), sum(len(a["plazas"]) for a in self.catalogo["actividades"]),
+                          len(self.catalogo["asignaturas"]), len(self.catalogo["profesores"])), (230, 323, 110, 60))
+
+    def test_totales_812_y_900_con_prov1_en_0(self):
+        tot = {p["codigo"]: p["totalDeclarado"] for p in self.catalogo["profesores"]}
+        self.assertEqual((sum(tot.values()), tot["PROV1"]), (812, 0))
+        self.assertEqual({g["totalDeclarado"] for g in self.catalogo["grupos"]}, {30})
+
+    def test_sin_la_opcion_es_el_versionado_sin_lo_nuevo(self):
+        quitar = {a["codigo"] for a in self.catalogo["actividades"] if "tipo" in a}
+        asig = {a["asignatura"] for a in self.catalogo["actividades"] if "tipo" in a}
+        esperado = json.loads(json.dumps(self.versionado))
+        esperado["actividades"] = [a for a in esperado["actividades"] if a["codigo"] not in quitar]
+        esperado["asignaturas"] = [a for a in esperado["asignaturas"] if a["codigo"] not in asig]
+        esperado["profesores"] = [{k: v for k, v in p.items() if k != "totalDeclarado"}
+                                  for p in esperado["profesores"] if p["codigo"] != "PROV1"]
+        esperado["grupos"] = [{k: v for k, v in g.items() if k != "totalDeclarado"} for g in esperado["grupos"]]
+        sin_meta = lambda c: {k: v for k, v in c.items() if k != "_meta"}  # noqa: E731
+        self.assertEqual(sin_meta(self.sin_opcion), sin_meta(esperado))
 
     def test_parche_18_sesiones_en_12_plazas_todas_con_aula_fija(self):
         cambios = self.ctx["cambios"]
@@ -380,6 +412,151 @@ class Parche(Base):
             self.derivar(BASE, parche={"entradas": [dict(self.ENTRADA, aula_antes="Z9")]})
 
 
+# ------------------------------------------- reuniones, funciones y totales (S204)
+
+SIN = "sin código"
+DEC_NC = [
+    {"id": "nc-tipos", "fija": "noClase.tipos", "valor": {"REUNION": ["RED"], "FUNCION": ["ORYCA"]},
+     "motivo": "prueba", "fuente": "sin fuente"},
+    {"id": "nc-ign", "fija": "noClase.ignorados", "valor": {"G": "guardia", "GR": "guardia de recreo"},
+     "motivo": "prueba", "fuente": "sin fuente"},
+    {"id": "nc-nombres", "fija": "asignaturas.nombre", "valor": {"RED": "Reunión", "ORYCA": "Ordenación"},
+     "motivo": "prueba", "fuente": "sin fuente"},
+    {"id": "nc-alta", "fija": "profesores.alta",
+     "valor": {"PROV1": {"pagina": 5, "titulo": "Sin Codigo Uno", "nombreCompleto": "Sin Codigo Uno"}},
+     "motivo": "prueba", "fuente": "sin fuente"},
+    {"id": "nc-ignoradas", "fija": "profesores.paginasIgnoradas", "valor": {"6": "solo guardias"},
+     "motivo": "prueba", "fuente": "sin fuente"},
+]
+# Páginas de profesor coherentes con BASE (1ºA: Mat L1 M1, TUT1 L2; 1ºB: Ing L1, TUT1 L2).
+PAGINAS = {
+    1: ("Prof Mat", [(1, 1, "Mat", "1ºA", "A1"), (2, 1, "Mat", "1ºA", "A1"), (3, 3, "RED", "", None),
+                     (1, 3, "ORYCA", "", None), (2, 4, "ORYCA", "", None)], []),
+    2: ("Prof Tua", [(1, 2, "TUT1", "1ºA", "A1"), (3, 3, "RED", "", None), (4, 4, "G", "", None)], [(1, "GR")]),
+    3: ("Prof Ing", [(1, 1, "Ing", "1ºB", "B1")], []),
+    4: ("Prof Tub", [(1, 2, "TUT1", "1ºB", "B1"), (3, 3, "RED", "", None)], []),
+    5: ("Sin Codigo Uno", [(3, 3, "RED", "", None)], []),
+    6: ("Sin Codigo Dos", [(5, 1, "G", "", None)], []),
+}
+MAPA = {1: "MAT1", 2: "TUA", 3: "ING1", 4: "TUB", 5: SIN, 6: SIN}
+
+
+def paginas(extra=None, quitar=()):
+    """profesor-*.json en memoria; extra = {página: [celdas]} que se añaden."""
+    res = []
+    for n, (titulo, celdas, recreo) in sorted(PAGINAS.items()):
+        celdas = list(celdas) + list((extra or {}).get(n, []))
+        res.append({"_meta": {"fuente": "sintetico", "pagina": n, "codigo_crudo": titulo, "modo": "profesores"},
+                    "celdas": [{"dia": d, "tramo": t, "asignatura": a, "grupos": g, "aula": au, "confianza": "alta",
+                                "nota": ""} for d, t, a, g, au in celdas if (n, a) not in quitar],
+                    "recreo": [{"dia": d, "asignatura": a, "grupos": "", "aula": None, "confianza": "alta", "nota": ""}
+                               for d, a in recreo]})
+    return res
+
+
+class NoClase(Base):
+
+    def derivar_nc(self, grupos=BASE, extra=None, decisiones=DEC_NC, mapa=MAPA, quitar=()):
+        escribir_volcado(self.volcados, grupos)
+        return dc.derivar(str(self.volcados), {"decisiones": DEC_BASE + list(decisiones)}, None,
+                          {"paginas": paginas(extra, quitar), "mapa": dict(mapa), "sin_codigo": SIN})
+
+    def aborta(self, texto, **kw):
+        with self.assertRaises(dc.Aborto) as cm:
+            self.derivar_nc(**kw)
+        self.assertEqual(cm.exception.rc, 2)
+        self.assertIn(texto, str(cm.exception))
+
+    def test_reunion_una_actividad_por_codigo_con_todos_sus_profesores(self):
+        cat, _ = self.derivar_nc()
+        a = self.act(cat, "RED")
+        self.assertEqual((a["tipo"], a["asignatura"], a["requiereTutor"], a["duracionTramos"]), ("REUNION", "RED", False, 1))
+        self.assertEqual(a["plazas"], [{"asignatura": "RED", "profesores": ["MAT1", "PROV1", "TUA", "TUB"],
+                                        "aulaFija": None, "aulasCandidatas": [], "subgrupos": []}])
+        self.assertEqual(len([x for x in cat["actividades"] if x["asignatura"] == "RED"]), 1)
+
+    def test_reunion_repeticiones_por_tramos_distintos(self):
+        cat, _ = self.derivar_nc()
+        self.assertEqual((self.act(cat, "RED")["repeticionesPorSemana"], self.act(cat, "RED")["patronTemporal"]), (1, "NEUTRA"))
+        otra = {n: [(4, 1, "RED", "", None)] for n in (1, 2, 4, 5)}
+        cat, _ = self.derivar_nc(extra=otra)
+        a = self.act(cat, "RED")
+        self.assertEqual((a["repeticionesPorSemana"], a["_referencia"]["instanciasEnElHorarioReal"]), (2, ["X3", "J1"]))
+
+    def test_reunion_con_profesores_distintos_entre_tramos_aborta(self):
+        self.aborta("profesores distintos según el tramo", extra={1: [(4, 1, "RED", "", None)]})
+
+    def test_funcion_una_actividad_por_codigo_y_profesor_con_repeticiones_por_celdas(self):
+        cat, _ = self.derivar_nc(extra={2: [(5, 5, "ORYCA", "", None)]})
+        a, b = self.act(cat, "ORYCA-MAT1"), self.act(cat, "ORYCA-TUA")
+        self.assertEqual((a["tipo"], a["repeticionesPorSemana"], a["patronTemporal"], a["plazas"][0]["profesores"]),
+                         ("FUNCION", 2, "DISTRIBUIDA", ["MAT1"]))
+        self.assertEqual((b["repeticionesPorSemana"], b["plazas"][0]["profesores"]), (1, ["TUA"]))
+        self.assertEqual((a["plazas"][0]["aulaFija"], a["plazas"][0]["aulasCandidatas"], a["plazas"][0]["subgrupos"]),
+                         (None, [], []))
+
+    def test_clase_sin_tipo_y_sin_la_opcion_nada_nuevo(self):
+        cat, _ = self.derivar_nc()
+        self.assertEqual({a.get("tipo") for a in cat["actividades"] if a["_referencia"]["gruposTocados"]}, {None})
+        self.assertTrue(all("tipo" not in a for a in cat["actividades"] if a["_referencia"]["gruposTocados"]))
+        sin, _ = self.derivar(BASE, DEC_NC)
+        self.assertTrue(all("tipo" not in a for a in sin["actividades"]))
+        self.assertTrue(all("totalDeclarado" not in x for x in sin["profesores"] + sin["grupos"]))
+
+    def test_total_de_profesor_son_sus_celdas_de_clase(self):
+        pdc = con({"1º ESO A PDC": [(1, 2, "TUT1", "TUA", "A1"), (3, 1, "Mat", "MAT1", "A1")]})
+        extra = {1: [(3, 1, "Mat", "1ºADi", "A1")]}
+        pags = dict(PAGINAS)
+        pags[2] = ("Prof Tua", [(1, 2, "TUT1", "1ºA 1ºADi", "A1"), (3, 3, "RED", "", None), (4, 4, "G", "", None)], [(1, "GR")])
+        with mock.patch.dict(PAGINAS, pags):
+            cat, _ = self.derivar_nc(grupos=pdc, extra=extra)
+        tot = {p["codigo"]: p["totalDeclarado"] for p in cat["profesores"]}
+        self.assertEqual(tot, {"MAT1": 3, "TUA": 1, "ING1": 1, "TUB": 1, "PROV1": 0})
+
+    def test_total_de_grupo_y_pdc_son_sus_tramos_ocupados(self):
+        pdc = con({"1º ESO A PDC": [(1, 2, "TUT1", "TUA", "A1"), (3, 1, "Mat", "MAT1", "A1")]})
+        pags = dict(PAGINAS)
+        pags[2] = ("Prof Tua", [(1, 2, "TUT1", "1ºA 1ºADi", "A1"), (3, 3, "RED", "", None), (4, 4, "G", "", None)], [(1, "GR")])
+        with mock.patch.dict(PAGINAS, pags):
+            cat, _ = self.derivar_nc(grupos=pdc, extra={1: [(3, 1, "Mat", "1ºADi", "A1")]})
+        self.assertEqual({g["codigo"]: g["totalDeclarado"] for g in cat["grupos"]}, {"1ºA": 3, "1ºB": 2, "1ºADi": 2})
+
+    def test_codigo_sin_grupo_desconocido_aborta(self):
+        self.aborta("sin decisión noClase", extra={3: [(5, 5, "XYZ", "", None)]})
+
+    def test_codigo_desconocido_en_el_recreo_aborta(self):
+        with mock.patch.dict(PAGINAS, {3: ("Prof Ing", [(1, 1, "Ing", "1ºB", "B1")], [(2, "OTRO")])}):
+            self.aborta("en el recreo")
+
+    def test_codigo_no_de_clase_con_grupo_aborta(self):
+        self.aborta("es un código no de clase", extra={3: [(5, 5, "ORYCA", "1ºB", None)]})
+
+    def test_pagina_sin_codigo_entra_por_alta_y_la_ignorada_no_cuenta(self):
+        cat, ctx = self.derivar_nc()
+        self.assertIn({"codigo": "PROV1", "nombreCompleto": None, "celdas": 0, "totalDeclarado": 0}, cat["profesores"])
+        self.assertEqual(ctx["no_clase"]["paginas_ignoradas"], [6])
+        self.assertEqual(ctx["no_clase"]["ignoradas_celdas"], {"G": 2, "GR": 1})
+
+    def test_pagina_sin_codigo_sin_decision_aborta(self):
+        self.aborta("sin código en la leyenda", decisiones=[d for d in DEC_NC if d["id"] != "nc-alta"],
+                    quitar={(5, "RED")})
+
+    def test_pagina_ignorada_con_clase_aborta(self):
+        self.aborta("página ignorada con una celda de clase", extra={6: [(2, 2, "Mat", "1ºA", "A1")]})
+
+    def test_alta_con_titulo_que_no_casa_aborta(self):
+        mal = [dict(d, valor={"PROV1": {"pagina": 5, "titulo": "Otro", "nombreCompleto": "X"}}) if d["id"] == "nc-alta" else d
+               for d in DEC_NC]
+        self.aborta("no está en los volcados de profesores", decisiones=mal)
+
+    def test_los_nombres_de_los_codigos_tipados_estan_y_su_asignatura_tambien(self):
+        cat, _ = self.derivar_nc()
+        self.assertIn({"codigo": "RED", "nombreCompleto": None, "celdas": 4}, cat["asignaturas"])
+        self.assertIn({"codigo": "ORYCA", "nombreCompleto": None, "celdas": 2}, cat["asignaturas"])
+        self.aborta("faltan ['ORYCA']", decisiones=[dict(d, valor={"RED": "Reunión"}) if d["id"] == "nc-nombres" else d
+                                                     for d in DEC_NC])
+
+
 # ----------------------------------------------------------------------- CLI
 
 class Salida(Base):
@@ -396,6 +573,17 @@ class Salida(Base):
     def test_salida_relativa_aborta(self):
         rc, _, _ = self.main(BASE, salida="relativa")
         self.assertEqual(rc, 2)
+
+    def test_pdf_grupos_sin_volcados_profesores_aborta(self):
+        escribir_volcado(self.volcados, BASE)
+        fdec = self.tmp / "decisiones.json"
+        fdec.write_text(json.dumps({"decisiones": DEC_BASE}), encoding="utf-8")
+        for extra in (["--pdf-grupos", "a.pdf"], ["--volcados-profesores", str(self.volcados)]):
+            with contextlib.redirect_stderr(io.StringIO()) as err, contextlib.redirect_stdout(io.StringIO()):
+                rc = dc.main(["--volcados", str(self.volcados), "--decisiones", str(fdec),
+                              "--salida", str(self.tmp / "s")] + extra)
+            self.assertEqual(rc, 2)
+            self.assertIn("van juntos", err.getvalue())
 
     def test_salida_escribe_los_dos_ficheros(self):
         rc, err, salida = self.main(BASE)

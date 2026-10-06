@@ -8,16 +8,16 @@ Generado por `tools/carga-centro/derivar-catalogo.py`. Volcados: `docs/horario-r
 |---|---|
 | grupos | 30 |
 | niveles | 8 |
-| asignaturas | 101 |
-| profesores | 59 |
+| asignaturas | 110 |
+| profesores | 60 |
 | aulas | 32 |
-| actividades | 217 |
-| plazas | 310 |
+| actividades | 230 |
+| plazas | 323 |
 | plazas con aulaFija | 287 |
 | plazas con aulasCandidatas | 23 |
 | subgrupos | 379 |
-| sesiones semanales | 629 |
-| envíos de la carga | 852 |
+| sesiones semanales | 652 |
+| envíos de la carga | 875 |
 
 Prevalidación de `cargar-centro.py` sobre el catálogo (nombres aparte): 0 violaciones.
 
@@ -97,6 +97,31 @@ Clave `(grupo, día, tramo, asignatura, profesor)`, como conjunto (M2 de S198).
 
 Plazas modificadas: 12.
 
+## Reuniones, funciones y totales declarados
+
+Volcados de profesores: `docs/horario-referencia/2026-2027`. PDF de grupos (leyenda «Profesores:»): `Horarios de grupos.pdf`, `Horarios de grupos (11).pdf`.
+
+| actividad | tipo | profesores | repeticiones | instancias |
+|---|---|---|---|---|
+| APSTE-TEC2 | FUNCION | TEC2 | 2 | M2 V4 |
+| FOREI-FIL2 | FUNCION | FIL2 | 2 | M4 J5 |
+| HUERT-GH2 | FUNCION | GH2 | 2 | X2 J3 |
+| ORYCA-FIL1 | FUNCION | FIL1 | 2 | X5 J4 |
+| ORYCA-FRA1T | FUNCION | FRA1T | 2 | L4 J1 |
+| ORYCA-ING1 | FUNCION | ING1 | 2 | L2 J2 |
+| ORYCA-ING2 | FUNCION | ING2 | 2 | X3 J4 |
+| ORYCA-REL1 | FUNCION | REL1 | 2 | M3 V5 |
+| PROAR-DIB1 | FUNCION | DIB1 | 2 | X4 V3 |
+| RED | REUNION | FIS1 FOL2 GH3 MAT2 MAT3 PROV1 TEC1 | 1 | M3 |
+| REYR-GH1 | FUNCION | GH1 | 2 | M5 X1 |
+| RT12 | REUNION | EFI3 GH2 GH3 LEN5 LEN8 MAT5 MAT6 MAT7 MAT8 ORI1 TEC1 | 1 | L3 |
+| RT34 | REUNION | EFI2 FIS4 GH5 ING6 LEN9 MAT3 MAT4 ORI1 TEC1 | 1 | J4 |
+
+Celdas de profesor representadas (profesores × repeticiones): 47 de 47 sin grupo tipadas.
+Celdas ignoradas por decisión: G 139, GR 33, GRBib 5, Gbibl 9, conv 2.
+Páginas ignoradas por decisión: 7, 32. Profesores nuevos: PROV1.
+Totales declarados: 60 profesores, suma 812; 30 grupos y PDC, suma 900.
+
 ## Decisiones
 
 | id | fija | aplicaciones | fuente |
@@ -109,8 +134,14 @@ Plazas modificadas: 12.
 | `tutores-bachillerato` | tutorias.tutorPrincipal | 9 | sin fuente |
 | `requieretutor-ptve-ptev` | actividades.requiereTutor | 4 | sin fuente |
 | `notas-invariantes` | meta.notasInvariantes | 1 | sin fuente |
+| `no-clase-tipos` | noClase.tipos | 9 | Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18; criterio de O-datos-centro, condicion 5 |
+| `no-clase-ignorados` | noClase.ignorados | 5 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md) |
+| `nombres-leyenda-profesores` | asignaturas.nombre | 7 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores) |
+| `nombres-rt-sin-fuente` | asignaturas.nombre | 2 | sin fuente |
+| `profesor-lobato-provisional` | profesores.alta | 1 | sin fuente |
+| `paginas-sin-codigo-ignoradas` | profesores.paginasIgnoradas | 2 | docs/horario-referencia/2026-2027/INFORME-CRUCE-GRUPOS-PROFESORES.md (profesores sin codigo: paginas 7, 25 y 32) |
 
-Entradas «sin fuente»: 5 (`aulas-nombre-largo`, `aulas-tipo-neutro`, `tutores-bachillerato`, `requieretutor-ptve-ptev`, `notas-invariantes`).
+Entradas «sin fuente»: 7 (`aulas-nombre-largo`, `aulas-tipo-neutro`, `tutores-bachillerato`, `requieretutor-ptve-ptev`, `notas-invariantes`, `nombres-rt-sin-fuente`, `profesor-lobato-provisional`).
 Decisiones sin ninguna aplicación: `aulas-nombre-largo`.
 
 ## Grupos
