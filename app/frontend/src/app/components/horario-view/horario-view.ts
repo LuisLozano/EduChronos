@@ -21,7 +21,10 @@ import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../
 import { reemplazarInstancia, textoViolacion } from '../../horario/ajuste';
 import { AjusteInstancia, HorarioGrid } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
-import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
+import {
+  ConfirmarGeneracion,
+  DatosConfirmarGeneracion,
+} from '../confirmar-generacion/confirmar-generacion';
 import { DatosGenerando, GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
 import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
@@ -596,9 +599,11 @@ export class HorarioView implements OnDestroy {
    * atrás. Lo que hay que confirmar no son los avisos —eso es un agravante—, es el
    * COSTE de la operación, y ese existe con lista vacía igual que con lista llena.
    *
-   * <p>Los errores se siguen filtrando y pasando por `data`: con lista vacía el
-   * diálogo pinta solo el coste, y con avisos añade el detalle. La firma es
-   * `open<number, AvisoPrevalidacion[]>` desde S184 (antes, `<boolean, …>`).
+   * <p>Los hallazgos se reparten por severidad y viajan por `data` como
+   * {@link DatosConfirmarGeneracion}: los ERROR, que deciden el rótulo del botón, y los AVISO,
+   * que el diálogo enseña en su propio bloque (S203; hasta entonces solo viajaban los ERROR y
+   * los avisos no llegaban al diálogo, D-aviso-fuera-del-dialogo). Con las dos listas vacías el
+   * diálogo pinta solo el coste.
    *
    * <p>Desde S184 el diálogo cierra con los MINUTOS elegidos, y solo un número lanza
    * la generación; cancelar, backdrop y Escape emiten `undefined` y abortan sin lanzar
@@ -609,9 +614,12 @@ export class HorarioView implements OnDestroy {
     if (avisos === null) {
       return;
     }
-    const errores = avisos.filter((a) => a.severidad === 'ERROR');
+    const datos: DatosConfirmarGeneracion = {
+      errores: avisos.filter((a) => a.severidad === 'ERROR'),
+      avisos: avisos.filter((a) => a.severidad === 'AVISO'),
+    };
     this.dialog
-      .open<number, AvisoPrevalidacion[]>(ConfirmarGeneracion, { data: errores })
+      .open<number, DatosConfirmarGeneracion>(ConfirmarGeneracion, { data: datos })
       .closed.subscribe((minutos) => {
         if (typeof minutos === 'number') {
           this.lanzarGeneracion(minutos);

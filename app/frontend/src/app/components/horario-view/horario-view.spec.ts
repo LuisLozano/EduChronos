@@ -1192,17 +1192,19 @@ describe('contenedor del horario', () => {
    * clic.
    *
    * <p>Las tres mitades discriminan: `open` recibe 1 (no 0: la regla vieja), el
-   * `data` va con la lista VACÍA —no con el aviso no-ERROR, que es lo que separa
-   * «filtra los ERROR» de «pasa lo que haya»— y `generar` recibe 0 antes del cierre.
+   * `data` lleva los errores VACÍOS y el aviso no-ERROR en su propia lista (S203: antes
+   * iba la lista vacía y el aviso se perdía) y `generar` recibe 0 antes del cierre.
    */
-  it('(27) sin ERROR en la pre-validación, generar abre el diálogo igualmente, con data vacío', async () => {
+  it('(27) sin ERROR en la pre-validación, generar abre el diálogo igualmente, sin errores', async () => {
     await montarConPrevalidacion([AVISO_NO_ERROR]);
 
     abrirDialogoGenerar();
     await fixture.whenStable();
 
     expect(dialog.open).toHaveBeenCalledTimes(1);
-    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, { data: [] });
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, {
+      data: { errores: [], avisos: [AVISO_NO_ERROR] },
+    });
     expect(horario.generar).toHaveBeenCalledTimes(0);
   });
 
@@ -1244,20 +1246,22 @@ describe('contenedor del horario', () => {
    * ese punto: sin ella, una implementación que generara Y abriera el diálogo
    * pasaría. El sujeto de cierre NO se emite en este test a propósito.
    *
-   * <p>Además fija el `data` del diálogo (hueco 2): el fixture lleva DOS avisos con
-   * textos distintos, uno ERROR y uno AVISO, y al diálogo llega SOLO el ERROR
-   * (`{ data: [AVISO_ERROR] }`). El AVISO no-ERROR en el fixture es lo que separa
-   * "pasa la lista entera" de "filtra": sin él, `[AVISO_ERROR]` y "todo" coinciden.
-   * Con `data: []` (no pasar nada) también cae.
+   * <p>Además fija el REPARTO del `data` del diálogo (hueco 2; reescrito en S203, cuando
+   * los AVISO empezaron a viajar): el fixture lleva un ERROR y un AVISO con textos
+   * distintos, y cada uno llega a SU lista, por igualdad: `errores` con el ERROR y `avisos`
+   * con el AVISO. Cae si los avisos no viajan, si los ERROR se cuelan en `avisos`, si las
+   * dos listas se cruzan o si se pasa todo junto.
    */
-  it('(28) con un ERROR, abre el diálogo con SOLO los errores y no llama al backend hasta el cierre', async () => {
+  it('(28) con un ERROR y un AVISO, cada uno llega a su lista y no se llama al backend hasta el cierre', async () => {
     await montarConPrevalidacion([AVISO_ERROR, AVISO_NO_ERROR]);
 
     abrirDialogoGenerar();
     await fixture.whenStable();
 
     expect(dialog.open).toHaveBeenCalledTimes(1);
-    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, { data: [AVISO_ERROR] });
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmarGeneracion, {
+      data: { errores: [AVISO_ERROR], avisos: [AVISO_NO_ERROR] },
+    });
     expect(horario.generar).toHaveBeenCalledTimes(0);
   });
 

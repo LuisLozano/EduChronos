@@ -47,7 +47,10 @@ describe('diálogo de confirmar generación', () => {
    * confirmación se pide en TODA generación, la lista vacía es el caso NORMAL —el
    * catálogo del centro real pre-valida limpio— y tiene que poder montarse.
    */
-  async function montar(avisos: AvisoPrevalidacion[]): Promise<void> {
+  async function montar(
+    errores: AvisoPrevalidacion[],
+    avisos: AvisoPrevalidacion[] = [],
+  ): Promise<void> {
     TestBed.resetTestingModule();
     ref = { close: vi.fn() };
 
@@ -55,7 +58,8 @@ describe('diálogo de confirmar generación', () => {
       imports: [ConfirmarGeneracion],
       providers: [
         { provide: DialogRef, useValue: ref },
-        { provide: DIALOG_DATA, useValue: avisos },
+        // S203: `data` lleva errores y avisos ya repartidos (DatosConfirmarGeneracion).
+        { provide: DIALOG_DATA, useValue: { errores, avisos } },
       ],
     }).compileComponents();
 
@@ -231,4 +235,53 @@ describe('diálogo de confirmar generación', () => {
       ),
     );
   }
+
+  // ─────────────────────────── S203 T3b: los AVISO llegan al diálogo
+
+  const AVISO_CUADRE: AvisoPrevalidacion = {
+    severidad: 'AVISO',
+    regla: 'PROFESOR_HORAS_DESCUADRADAS',
+    entidadCodigo: 'LEN1',
+    demanda: 0,
+    disponible: 5,
+    descripcion: 'LEN1: 0 horas de clase configuradas y 5 declaradas.',
+  };
+
+  const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const rotulo = (): string => raiz().querySelector('.confirmar')!.textContent!.trim();
+
+  it('(44) con avisos y sin errores: el bloque de avisos se ve y el botón no dice «de todos modos»', async () => {
+    await montar([], [AVISO_CUADRE]);
+
+    expect(raiz().querySelector('.avisos__titulo')!.textContent!.trim()).toBe(
+      'Avisos (no impiden generar)',
+    );
+    const entrada = raiz().querySelector('.avisos .aviso-entrada')!;
+    expect(entrada.querySelector('.entidad')!.textContent!.trim()).toBe('LEN1');
+    expect(entrada.querySelector('.descripcion')!.textContent!.trim()).toBe(
+      AVISO_CUADRE.descripcion,
+    );
+    expect(raiz().querySelector('.errores')).toBeNull();
+    expect(rotulo()).toBe('Generar horario');
+  });
+
+  it('(45) con errores y avisos: dos bloques separados y el botón según los errores', async () => {
+    await montar([ERROR_A], [AVISO_CUADRE]);
+
+    const errores = raiz().querySelector('.errores')!.textContent!;
+    const avisos = raiz().querySelector('.avisos')!.textContent!;
+    expect(errores).toContain(ERROR_A.descripcion);
+    expect(errores).not.toContain(AVISO_CUADRE.descripcion);
+    expect(avisos).toContain(AVISO_CUADRE.descripcion);
+    expect(avisos).not.toContain(ERROR_A.descripcion);
+    expect(rotulo()).toBe('Generar de todos modos');
+  });
+
+  it('(46) sin avisos no hay bloque de avisos', async () => {
+    await montar([ERROR_A], []);
+
+    expect(raiz().querySelector('.avisos')).toBeNull();
+    expect(raiz().querySelector('.avisos__titulo')).toBeNull();
+    expect(raiz().textContent).not.toContain('no impiden generar');
+  });
 });

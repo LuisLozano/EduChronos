@@ -73,6 +73,29 @@
   font-weight: var(--peso-medio);
 }
 
+/* Avisos (S203): el ámbar de aviso de `styles.css`, como la barra de curso. Su título dice
+   en texto que no impiden generar; el color solo acompaña. */
+.avisos__titulo {
+  margin: 0 0 var(--e2);
+  font-size: var(--tam-s);
+  color: var(--color-aviso);
+}
+
+.avisos {
+  margin: 0 0 var(--e3);
+  padding-left: var(--e4);
+}
+
+.aviso-entrada {
+  display: flex;
+  gap: var(--e2);
+  color: var(--color-aviso);
+}
+
+.aviso-entrada .entidad {
+  font-weight: var(--peso-medio);
+}
+
 .acciones {
   display: flex;
   gap: var(--e2);

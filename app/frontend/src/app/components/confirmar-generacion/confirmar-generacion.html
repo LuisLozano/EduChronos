@@ -55,6 +55,20 @@
     </ul>
   }
 
+  <!-- S203: los AVISO tienen su bloque, separado del de errores y solo si hay alguno. No
+       cambian el rótulo del botón, que sigue dependiendo solo de los errores. -->
+  @if (avisos.length > 0) {
+    <h3 class="avisos__titulo">Avisos (no impiden generar)</h3>
+    <ul class="avisos">
+      @for (a of avisos; track $index) {
+        <li class="aviso-entrada">
+          <span class="entidad">{{ a.entidadCodigo }}</span>
+          <span class="descripcion">{{ a.descripcion }}</span>
+        </li>
+      }
+    </ul>
+  }
+
   <div class="acciones">
     <button type="button" class="cancelar" (click)="cancelar()">Cancelar</button>
     <button type="button" class="confirmar accion-principal" (click)="confirmar()">
