@@ -42,9 +42,22 @@ contra el PDF solo re-examinaria la derivacion contra si misma.
 CUIDADO CON LAS UNIDADES: una fila de `sesion` es una PLAZA de una INSTANCIA, no
 una instancia. filas = suma(repeticiones x plazas). Es la trampa sobre la que se
 construye esta capa.
+
+REUNIONES Y FUNCIONES (S204, opcional: --volcados-profesores, --pdf-grupos y --decisiones,
+juntos). Las actividades que no son CLASE no tienen subgrupos, asi que la comparacion de
+arriba no las ve. Se cuentan aparte, por RECUENTO y no por tramo:
+  base    = sesiones de actividades no CLASE por (profesor de su plaza, asignatura),
+            sin pasar por subgrupos ni por aula;
+  volcado = celdas sin grupo de los profesor-*.json cuyo codigo esta en la decision
+            noClase.tipos, por (codigo del profesor, codigo). El codigo de la pagina sale
+            de la leyenda «Profesores:» de los PDF de grupos (cruzar-grupos-profesores.py)
+            o de la decision profesores.alta.
+Los supuestos «plazas sin subgrupo» y el aula nula de «FK nulas en sesion» solo cuentan
+las actividades CLASE (en una base anterior al esquema 2, sin columna tipo, todas lo son).
 """
 import argparse
 import glob
+import importlib.util
 import json
 import sqlite3
 import sys
@@ -83,26 +96,35 @@ def normaliza(crudo):
 
 # ------------------------------------------------------------- supuestos
 
+def tipo_de_actividad(con):
+    """Expresion SQL del tipo de la actividad `act`: la columna desde el esquema 2; antes, CLASE."""
+    columnas = {r[1] for r in con.execute("PRAGMA table_info(actividad)")}
+    return "act.tipo" if "tipo" in columnas else "'CLASE'"
+
+
 def comprobar_supuestos(con, horario_id):
     """Mide en vez de asumir. Devuelve la lista de supuestos rotos."""
     def uno(sql, *args):
         return con.execute(sql, args).fetchone()[0]
 
+    tipo = tipo_de_actividad(con)
     comprobaciones = [
         ("duracion_tramos distinta de 1", uno("SELECT COUNT(*) FROM actividad WHERE duracion_tramos <> 1"), 0),
         ("plazas sin asignatura", uno("SELECT COUNT(*) FROM plaza WHERE asignatura_id IS NULL"), 0),
         ("plazas sin profesor", uno("SELECT COUNT(*) FROM plaza p WHERE NOT EXISTS"
                                     " (SELECT 1 FROM plaza_profesor x WHERE x.plaza_id = p.id)"), 0),
-        ("plazas sin subgrupo", uno("SELECT COUNT(*) FROM plaza p WHERE NOT EXISTS"
-                                    " (SELECT 1 FROM plaza_subgrupo x WHERE x.plaza_id = p.id)"), 0),
+        ("plazas sin subgrupo", uno("SELECT COUNT(*) FROM plaza p JOIN actividad act ON act.id = p.actividad_id"
+                                    " WHERE %s = 'CLASE' AND NOT EXISTS"
+                                    " (SELECT 1 FROM plaza_subgrupo x WHERE x.plaza_id = p.id)" % tipo), 0),
         ("subgrupos sin grupo", uno("SELECT COUNT(*) FROM subgrupo s WHERE NOT EXISTS"
                                     " (SELECT 1 FROM subgrupo_grupo x WHERE x.subgrupo_id = s.id)"), 0),
         ("sesiones en tramo no lectivo",
          uno("SELECT COUNT(*) FROM sesion s JOIN tramo_semanal t ON t.id = s.tramo_inicio_id"
              " WHERE NOT t.es_lectivo AND s.horario_id = ?", horario_id), 0),
         ("FK nulas en sesion",
-         uno("SELECT COUNT(*) FROM sesion WHERE plaza_id IS NULL OR aula_id IS NULL"
-             " OR tramo_inicio_id IS NULL"), 0),
+         uno("SELECT COUNT(*) FROM sesion WHERE plaza_id IS NULL OR tramo_inicio_id IS NULL")
+         + uno("SELECT COUNT(*) FROM sesion s JOIN plaza p ON p.id = s.plaza_id"
+               " JOIN actividad act ON act.id = p.actividad_id WHERE s.aula_id IS NULL AND %s = 'CLASE'" % tipo), 0),
     ]
     rotos = []
     print("SUPUESTOS (medidos, no asumidos)")
@@ -156,6 +178,66 @@ def entradas_de_la_base(con, horario_id):
     return set(filas)
 
 
+def no_clase_de_la_base(con, horario_id):
+    """Counter (profesor, asignatura) -> sesiones de actividades no CLASE, por los profesores
+    de su plaza: sin subgrupos ni aula de por medio (S204)."""
+    filas = con.execute("""
+        SELECT pr.codigo, a.codigo, COUNT(*)
+        FROM sesion s
+        JOIN plaza            p   ON p.id  = s.plaza_id
+        JOIN actividad        act ON act.id = p.actividad_id
+        JOIN asignatura       a   ON a.id  = p.asignatura_id
+        JOIN plaza_profesor   pp  ON pp.plaza_id = p.id
+        JOIN profesor         pr  ON pr.id = pp.profesor_id
+        WHERE s.horario_id = ? AND %s <> 'CLASE'
+        GROUP BY pr.codigo, a.codigo
+    """ % tipo_de_actividad(con), (horario_id,)).fetchall()
+    return Counter({(prof, asig): n for prof, asig, n in filas})
+
+
+SIN_PAGINA = "(sin codigo)"
+
+
+def no_clase_del_volcado(paginas, mapa, sin_codigo, decisiones):
+    """Counter (profesor, codigo) de las celdas sin grupo cuyo codigo tipa noClase.tipos (S204).
+    Una pagina sin codigo en la leyenda toma el de profesores.alta; si no lo tiene, cuenta con
+    SIN_PAGINA, que no casara con nada de la base."""
+    tipados, altas = set(), {}
+    for d in decisiones.get("decisiones", []):
+        if d.get("fija") == "noClase.tipos":
+            tipados |= {c for codigos in d["valor"].values() for c in codigos}
+        elif d.get("fija") == "profesores.alta":
+            altas.update({e["pagina"]: c for c, e in d["valor"].items()})
+    cuenta = Counter()
+    for p in paginas:
+        pag = p["_meta"]["pagina"]
+        prof = mapa[pag] if mapa[pag] != sin_codigo else altas.get(pag, SIN_PAGINA)
+        for c in p["celdas"]:
+            if not c["grupos"].strip() and c["asignatura"] in tipados:
+                cuenta[(prof, c["asignatura"])] += 1
+    return cuenta
+
+
+def _cruzar():
+    """cruzar-grupos-profesores.py (la correspondencia pagina -> codigo no se reescribe)."""
+    spec = importlib.util.spec_from_file_location(
+        "cruzar_grupos_profesores", Path(__file__).resolve().parent / "cruzar-grupos-profesores.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def paginas_y_mapa(volcados_profesores, pdfs):
+    """profesor-*.json y su pagina -> codigo por la leyenda de los PDF de grupos."""
+    cr = _cruzar()
+    paginas = cr.cargar(str(volcados_profesores), "profesor-*.json")
+    if not paginas:
+        raise SystemExit("No hay profesor-*.json en %s" % volcados_profesores)
+    leyenda = cr.leyenda_profesores([(Path(p).name, cr.eh.leer_pdf(p)) for p in pdfs])
+    mapa = cr.mapa_profesores({p["_meta"]["pagina"]: p["_meta"]["codigo_crudo"] for p in paginas}, leyenda)
+    return paginas, mapa, cr.SIN_CODIGO
+
+
 def agrega(entradas):
     """(grupo, dia, tramo, asig, prof) -> Counter[(grupo, asig, prof)]."""
     c = Counter()
@@ -189,7 +271,13 @@ def main(argv=None):
     p.add_argument("--db", required=True, help="base sqlite con el horario generado")
     p.add_argument("--volcados", required=True, help="carpeta con los grupo-*.json del curso")
     p.add_argument("--horario", type=int, default=None, help="id del horario (por defecto, el unico)")
+    p.add_argument("--volcados-profesores", help="carpeta con los profesor-*.json (S204)")
+    p.add_argument("--pdf-grupos", nargs="+", help="PDF de grupos, para la leyenda «Profesores:» (S204)")
+    p.add_argument("--decisiones", help="decisiones-catalogo.json del curso (S204)")
     args = p.parse_args(argv)
+    no_clase = (args.volcados_profesores, args.pdf_grupos, args.decisiones)
+    if any(no_clase) and not all(no_clase):
+        p.error("--volcados-profesores, --pdf-grupos y --decisiones van juntos")
     volcados = Path(args.volcados).resolve()
 
     ruta = Path(args.db)
@@ -236,6 +324,21 @@ def main(argv=None):
           % (sum(a_pdf.values()), sum(a_base.values()),
              sum(a_pdf.values()) - sum(a_base.values())))
 
+    div_nc = []
+    if all(no_clase):
+        paginas, mapa_p, sin_codigo = paginas_y_mapa(args.volcados_profesores, args.pdf_grupos)
+        decisiones = json.loads(Path(args.decisiones).read_text(encoding="utf-8"))
+        v_nc, b_nc = no_clase_del_volcado(paginas, mapa_p, sin_codigo, decisiones), no_clase_de_la_base(con, horario_id)
+        claves_nc = sorted(set(v_nc) | set(b_nc))
+        div_nc = [k for k in claves_nc if v_nc.get(k, 0) != b_nc.get(k, 0)]
+        print("\nREUNIONES Y FUNCIONES (profesor, codigo), por recuento")
+        print("  celdas del volcado ............. %d" % sum(v_nc.values()))
+        print("  sesiones-profesor de la base ... %d" % sum(b_nc.values()))
+        print("  claves (profesor, codigo) ...... %d" % len(claves_nc))
+        print("  divergentes .................... %d" % len(div_nc))
+        for k in div_nc:
+            print("    %-10s %-8s volcado %3d base %3d" % (k[0], k[1], v_nc.get(k, 0), b_nc.get(k, 0)))
+
     if divergentes:
         print("\nDIVERGENCIAS")
         print("  %-10s %-10s %-8s %6s %6s %6s" % ("grupo", "asignatura", "profesor",
@@ -256,7 +359,9 @@ def main(argv=None):
         print("  %d claves divergentes. La carga NO se conserva por completo." % len(divergentes))
     else:
         print("  CERO divergentes sobre %d claves: la carga se conserva." % len(claves))
-    return 0 if (not divergentes and not rotos and mapa_ok) else 1
+    if div_nc:
+        print("  %d claves (profesor, codigo) de reuniones y funciones divergentes." % len(div_nc))
+    return 0 if (not divergentes and not div_nc and not rotos and mapa_ok) else 1
 
 
 if __name__ == "__main__":
