@@ -158,19 +158,27 @@ class Decisiones(Base):
     """S204: --decisiones añade los nombres que el PDF de grupos no trae."""
 
     P = [pagina([("P1", "Uno")], [("Mat", "Matemáticas")])]
-    DEC = [{"id": "n", "fija": "asignaturas.nombre", "valor": {"RED": "Reunión de Equipo Direct"}},
+    DEC = [{"id": "n", "fija": "asignaturas.nombre", "valor": {"RED": "Reunión de Equipo Direct", "REYR": "Redes y Radio"}},
            {"id": "a", "fija": "profesores.alta", "valor": {"PROV1": {"pagina": 5, "titulo": "X", "nombreCompleto": "Lobato"}}},
            {"id": "otra", "fija": "jornada.horas", "valor": {}}]
 
     def test_anade_los_nombres_de_las_decisiones_y_cierra(self):
-        rc, _, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED"]), decisiones=self.DEC)
+        rc, _, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED", "REYR"]), decisiones=self.DEC)
         self.assertEqual(rc, 0)
         d = json.loads(s.read_text(encoding="utf-8"))
-        self.assertEqual(d["asignaturas"]["RED"], {"nombreCompleto": "Reunión de Equipo Direct",
-                                                   "procedencia": "decision:n", "truncado": False})
+        self.assertEqual(d["asignaturas"]["REYR"], {"nombreCompleto": "Redes y Radio",
+                                                    "procedencia": "decision:n", "truncado": False})
         self.assertEqual(d["profesores"]["PROV1"]["nombreCompleto"], "Lobato")
-        self.assertEqual(list(d["asignaturas"]), ["Mat", "RED"])
-        self.assertEqual(d["_meta"]["resumen"]["deDecisiones"], 2)
+        self.assertEqual(list(d["asignaturas"]), ["Mat", "RED", "REYR"])
+        self.assertEqual(d["_meta"]["resumen"]["deDecisiones"], 3)
+
+    def test_un_nombre_de_decision_al_ancho_de_la_leyenda_es_truncado(self):
+        rc, _, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED", "REYR"]), decisiones=self.DEC)
+        self.assertEqual(rc, 0)
+        d = json.loads(s.read_text(encoding="utf-8"))
+        self.assertEqual(len("Reunión de Equipo Direct"), en.ANCHO_LEYENDA)
+        self.assertEqual((d["asignaturas"]["RED"]["truncado"], d["asignaturas"]["REYR"]["truncado"],
+                          d["profesores"]["PROV1"]["truncado"]), (True, False, False))
 
     def test_sin_decisiones_el_cierre_falla_con_los_codigos_nuevos(self):
         rc, out, s = self.correr({"a.pdf": self.P}, catalogo(["P1", "PROV1"], ["Mat", "RED"]))

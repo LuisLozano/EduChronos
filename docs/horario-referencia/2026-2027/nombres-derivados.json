@@ -7,7 +7,7 @@
     "resumen": {
       "profesores": 60,
       "asignaturas": 110,
-      "truncados": 38,
+      "truncados": 40,
       "conflictos": 1,
       "deDecisiones": 10
     },
@@ -684,7 +684,7 @@
     "ORYCA": {
       "nombreCompleto": "Ordenación y Catalogació",
       "procedencia": "decision:nombres-leyenda-profesores",
-      "truncado": false
+      "truncado": true
     },
     "OyD": {
       "nombreCompleto": "Oratoria y Debate",
@@ -744,7 +744,7 @@
     "RED": {
       "nombreCompleto": "Reunión de Equipo Direct",
       "procedencia": "decision:nombres-leyenda-profesores",
-      "truncado": false
+      "truncado": true
     },
     "REVAN": {
       "nombreCompleto": "Religión Evangélica",

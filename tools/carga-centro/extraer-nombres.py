@@ -23,7 +23,7 @@ escribe solo si el cierre pasa; si no, rc=1 y no se escribe nada.
 anaden los nombres que el PDF de grupos no trae: los de las decisiones asignaturas.nombre
 y el nombreCompleto de profesores.alta, con procedencia «decision:<id>». Un codigo que ya
 viene del PDF, o que esta en dos decisiones, es un error. Sin --decisiones la salida no
-cambia.
+cambia. Su «truncado» sale de la misma regla que el de la leyenda, con ANCHO_LEYENDA.
 
 Cada pagina trae al pie dos leyendas, "Profesores:" y "Asignaturas:", que asocian
 codigo -> nombre en dos columnas, y arriba una linea "Tutor:" con el nombre del
@@ -286,7 +286,10 @@ def anadir_decisiones(entradas, de_decisiones, familia):
         raise SystemExit("%s: los codigos %s vienen del PDF y de una decision" % (familia, choques))
     todas = dict(entradas)
     for codigo, (nombre, ident) in de_decisiones.items():
-        todas[codigo] = {"nombreCompleto": nombre, "procedencia": "decision:%s" % ident, "truncado": False}
+        # S204: misma bandera que un nombre de leyenda (los de asignaturas.nombre son literales de la
+        # leyenda «Asignaturas:» del PDF de profesores, que corta igual, a ANCHO_LEYENDA).
+        todas[codigo] = {"nombreCompleto": nombre, "procedencia": "decision:%s" % ident,
+                         "truncado": es_truncado(nombre, ANCHO_LEYENDA)}
     return {c: todas[c] for c in sorted(todas)}
 
 
