@@ -18,11 +18,14 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -43,6 +46,7 @@ import org.springframework.test.context.DynamicPropertySource;
  * de la suite, y lo que hace falta es una línea al terminar.
  */
 @SpringBootTest
+@ExtendWith(OutputCaptureExtension.class)
 class CursoAperturaTest {
 
     /** Carpeta de este contexto. Estática: la necesita el registro de propiedades. */
@@ -495,6 +499,43 @@ class CursoAperturaTest {
         assertThat(BancoDeCursos.huella(futura)).as("el fichero posterior, intacto").isEqualTo(huella);
     }
 
+    /**
+     * (S201, d1) Abrir una base histórica —esquema 1, sin número— la migra hasta la vigente y
+     * lo deja dicho en el log, con la ruta, de dónde partía, adónde ha llegado (leído de la
+     * base, no supuesto) y si estaba vacía.
+     */
+    @Test
+    void abrir_unaBaseHistorica_dejaRastroDeLaMigracion(CapturedOutput salida) throws Exception {
+        Path historica = BancoDeCursos.fabricarHistorica(
+                carpeta.resolve("curso-2019-2020.db"), null, false);
+
+        servicio.abrir("curso-2019-2020.db");
+
+        assertThat(salida.getOut())
+                .contains("Esquema preparado ruta=" + historica.toRealPath()
+                        + " versionInicial=0 versionFinal=2 baseVacia=false");
+    }
+
+    /**
+     * (S201, d2) Abrir una base de una versión posterior deja el rechazo en el log, con la ruta
+     * y los dos números. El mismo aviso sale al arrancar: los dos caminos pasan por el
+     * preparador.
+     */
+    @Test
+    void abrir_unaBasePosterior_dejaRastroDelRechazo(CapturedOutput salida) throws Exception {
+        int posterior = PreparadorEsquema.VERSION_ESQUEMA + 1;
+        Path futura = BancoDeCursos.fabricar(
+                carpeta.resolve("curso-2030-2031.db"), "2030/2031", false);
+        sellar(futura, posterior);
+
+        assertThatThrownBy(() -> servicio.abrir("curso-2030-2031.db"))
+                .isInstanceOf(RechazoCursoException.class);
+
+        assertThat(salida.getOut())
+                .contains("Esquema posterior rechazado ruta=" + futura.toRealPath()
+                        + " versionBase=3 versionAplicacion=2");
+    }
+
     // ───────────────────────────────────────────────────────────── requisito (b) y duplicar
 
     /**
@@ -702,9 +743,12 @@ class CursoAperturaTest {
         return codigos;
     }
 
-    /** Una base con el esquema MENOS la tabla curso: una de antes de S159 (condición 6). */
+    /**
+     * Una base con el esquema 1 MENOS la tabla curso y sin número: una de antes de S159
+     * (condición 6).
+     */
     private static void crearBaseSinTablaCurso(Path fichero) throws Exception {
-        BancoDeCursos.fabricar(fichero, null, false);
+        BancoDeCursos.fabricarHistorica(fichero, null, false);
         try (var conexion = BancoDeCursos.conectar(fichero);
                 var sentencia = conexion.createStatement()) {
             sentencia.executeUpdate("drop table curso");

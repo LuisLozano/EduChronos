@@ -5,7 +5,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
@@ -52,17 +56,22 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
  * NNN. {@code 001.sql} NO se toca nunca: es lo que reciben las bases sin número, y cambiarlo
  * cambiaría qué quiere decir «versión 1» para las que ya la tienen.
  *
- * <p><b>Aviso: una migración que reconstruya tablas no cabe tal cual.</b> En SQLite, cambiar
- * una columna o una FK exige crear la tabla nueva, copiar y renombrar, y eso pide
- * {@code PRAGMA foreign_keys} apagado mientras dura. Ese pragma NO se puede cambiar dentro de
- * una transacción —SQLite lo ignora sin avisar—, y aquí cada script corre dentro de una, con
- * la conexión del pool, que lo trae encendido. Este Cambio no lo resuelve: la primera
- * migración de ese tipo tendrá que resolverlo antes.
+ * <p><b>Migraciones que reconstruyen una tabla.</b> En SQLite, cambiar una columna obliga a crear la tabla de
+ * nuevo y copiar. Cabe dentro de la transacción de este preparador cuando ninguna otra tabla apunta a la
+ * reconstruida: se renombra primero la vieja, se crea la nueva con su DDL literal, se copia y se borra la vieja
+ * (así lo hace {@code esquema/002.sql} con {@code sesion}). El orden inverso —crear, borrar y renombrar la
+ * nueva— deja el nombre entrecomillado en {@code sqlite_master}, y la base migrada ya no coincide con una
+ * nueva. Si alguna tabla apuntara a la reconstruida, haría falta {@code PRAGMA foreign_keys} apagado, que
+ * SQLite ignora dentro de una transacción: esa migración tendría que resolverlo antes. Las claves foráneas no
+ * se dan por encendidas, porque en el cambio de curso la conexión llega sin ellas. Por eso cada migración
+ * comprueba al terminar que no deja filas huérfanas nuevas.
  */
 public class PreparadorEsquema {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PreparadorEsquema.class);
+
     /** El esquema que escribe esta versión. Se sube con cada {@code esquema/NNN.sql} nuevo. */
-    public static final int VERSION_ESQUEMA = 1;
+    public static final int VERSION_ESQUEMA = 2;
 
     /** Lo que reciben las bases vacías. */
     public static final String ESQUEMA_VIGENTE = "classpath:schema.sql";
@@ -101,26 +110,35 @@ public class PreparadorEsquema {
      */
     public void preparar(DataSource base) {
         try (Connection conexion = base.getConnection()) {
+            String ruta = ruta(conexion);
             int actual = leerVersion(conexion);
             if (actual > version) {
+                LOG.warn("Esquema posterior rechazado ruta={} versionBase={} versionAplicacion={}",
+                        ruta, actual, version);
                 throw new EsquemaPosteriorException(actual, version);
             }
+            int inicial = actual;
+            boolean vacia = estaVacia(conexion);
             boolean autocommit = conexion.getAutoCommit();
             try {
-                if (estaVacia(conexion)) {
+                if (vacia) {
                     aplicar(conexion, esquemaVigente, version);
-                    return;
-                }
-                if (actual == 0) {
-                    aplicar(conexion, migracion(1), 1);
-                    actual = 1;
-                }
-                for (int n = actual + 1; n <= version; n++) {
-                    aplicar(conexion, migracion(n), n);
+                } else {
+                    if (actual == 0) {
+                        aplicar(conexion, migracion(1), 1);
+                        actual = 1;
+                    }
+                    for (int n = actual + 1; n <= version; n++) {
+                        aplicar(conexion, migracion(n), n);
+                    }
                 }
             } finally {
                 conexion.setAutoCommit(autocommit);
             }
+            // La versión final se LEE de la base, no se deduce de lo que se ha aplicado.
+            int versionFinal = leerVersion(conexion);
+            LOG.info("Esquema preparado ruta={} versionInicial={} versionFinal={} baseVacia={}",
+                    ruta, inicial, versionFinal, vacia);
         } catch (SQLException e) {
             throw new IllegalStateException(
                     "No se ha podido preparar el esquema de la base: " + e.getMessage(), e);
@@ -143,8 +161,16 @@ public class PreparadorEsquema {
         }
         conexion.setAutoCommit(false);
         try {
+            Set<String> huerfanasAntes = filasHuerfanas(conexion);
             ScriptUtils.executeSqlScript(
                     conexion, new EncodedResource(script, StandardCharsets.UTF_8));
+            // Sólo cuentan las que ha dejado ESTE script: una base que ya trajera huérfanos de
+            // antes tiene que poder migrar.
+            Set<String> filasNuevas = filasHuerfanas(conexion);
+            filasNuevas.removeAll(huerfanasAntes);
+            if (!filasNuevas.isEmpty()) {
+                throw new IllegalStateException("La migración deja filas huérfanas: " + filasNuevas);
+            }
             try (Statement sentencia = conexion.createStatement()) {
                 sentencia.execute("PRAGMA user_version = " + numero);
             }
@@ -165,6 +191,36 @@ public class PreparadorEsquema {
         } catch (SQLException e) {
             original.addSuppressed(e);
         }
+    }
+
+    /**
+     * Las filas de {@code PRAGMA foreign_key_check}, cada una como {@code tabla|rowid|padre|fkid}.
+     * El pragma no depende de que {@code foreign_keys} esté encendido: mide igual por las dos
+     * puertas, el arranque y el cambio de curso.
+     */
+    private static Set<String> filasHuerfanas(Connection conexion) throws SQLException {
+        Set<String> filas = new TreeSet<>();
+        try (Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery("PRAGMA foreign_key_check")) {
+            while (fila.next()) {
+                filas.add(fila.getString(1) + "|" + fila.getString(2) + "|" + fila.getString(3)
+                        + "|" + fila.getString(4));
+            }
+        }
+        return filas;
+    }
+
+    /** El fichero de la base {@code main}, tal como lo dice {@code PRAGMA database_list}. */
+    private static String ruta(Connection conexion) throws SQLException {
+        try (Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery("PRAGMA database_list")) {
+            while (fila.next()) {
+                if ("main".equals(fila.getString("name"))) {
+                    return fila.getString("file");
+                }
+            }
+        }
+        return null;
     }
 
     private static int leerVersion(Connection conexion) throws SQLException {

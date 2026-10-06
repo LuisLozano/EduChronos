@@ -15,16 +15,19 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.sqlite.SQLiteDataSource;
 
 /**
  * Spec de {@link PreparadorEsquema} (O-base-tecnica, S191, C-esquema-versionado, condición 1).
  *
- * <p><b>Dos juegos de scripts.</b> El REAL —{@code schema.sql} y {@code esquema/}— sólo tiene
- * hoy la versión 1, así que con él no se puede ver una migración de verdad: los casos 1 a 5
- * y el 11 lo usan para fijar lo que pasa con las bases que existen. El de PRUEBA
- * ({@code esquema-prueba/}, versión 2) es el que ejerce el bucle de migraciones, y el ROTO
- * ({@code esquema-roto/}) el que mide que una migración que falla no deja nada a medias.
+ * <p><b>Varios juegos de scripts.</b> El REAL —{@code schema.sql} y {@code esquema/}— tiene
+ * desde S201 la versión 2, con una migración de verdad ({@code 002.sql}, que reconstruye
+ * {@code sesion}): los casos 1 a 5, el 11 y los de S201 lo usan para fijar lo que pasa con
+ * las bases que existen. El de PRUEBA ({@code esquema-prueba/}, versión 2) es el que ejerce el
+ * bucle de migraciones, el ROTO ({@code esquema-roto/}) el que mide que una migración que
+ * falla no deja nada a medias, y el HUÉRFANO ({@code esquema-huerfano/}) el que mide la
+ * guarda de filas huérfanas.
  *
  * <p>Sin Spring: un {@link SQLiteDataSource} sobre un fichero de un {@code @TempDir} y un
  * {@link DefaultResourceLoader}. Cada conexión es nueva, así que lo que se lee después de
@@ -33,6 +36,10 @@ import org.sqlite.SQLiteDataSource;
 class PreparadorEsquemaTest {
 
     private static final DefaultResourceLoader CARGADOR = new DefaultResourceLoader();
+
+    /** Las sesiones campo a campo, en orden estable. */
+    private static final String SESIONES =
+            "select indice, aula_id, horario_id, id, plaza_id, tramo_inicio_id from sesion order by id";
 
     private static PreparadorEsquema real() {
         return new PreparadorEsquema(
@@ -52,6 +59,11 @@ class PreparadorEsquemaTest {
                 CARGADOR, "classpath:esquema-roto/actual.sql", "classpath:esquema-roto/", 2);
     }
 
+    private static PreparadorEsquema huerfano() {
+        return new PreparadorEsquema(
+                CARGADOR, "classpath:esquema-huerfano/actual.sql", "classpath:esquema-huerfano/", 2);
+    }
+
     // ─────────────────────────────────────────────────────────────── juego real
 
     /**
@@ -66,7 +78,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(1);
+        assertThat(version(base)).isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
         assertThat(maestro(base))
                 .as("el DDL es el de schema.sql")
                 .isEqualTo(maestro(referencia))
@@ -75,11 +87,11 @@ class PreparadorEsquemaTest {
 
     /**
      * (2) Una base de antes de S159 —sin tabla {@code curso}, sin número— gana la tabla por
-     * {@code 001.sql}, conserva sus datos y queda en la versión 1.
+     * {@code 001.sql}, conserva sus datos y llega a la versión vigente.
      */
     @Test
     void unaBaseAnteriorAS159GanaCursoYConservaSusDatos(@TempDir Path carpeta) throws Exception {
-        Path base = BancoDeCursos.fabricar(carpeta.resolve("antigua.db"), null, false);
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("antigua.db"), null, false);
         ejecutar(
                 base,
                 "drop table curso",
@@ -91,25 +103,27 @@ class PreparadorEsquemaTest {
 
         assertThat(BancoDeCursos.tieneTabla(base, "curso")).isTrue();
         assertThat(BancoDeCursos.filas(base, "profesor")).as("la fila sigue").isOne();
-        assertThat(version(base)).isEqualTo(1);
+        assertThat(version(base)).isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
     }
 
     /**
-     * (3) Una base de {@code v0.2.0} —esquema entero, sin número— no cambia en nada salvo el
-     * sello: {@code sqlite_master} es el mismo antes y después.
+     * (3) Una base de {@code v0.2.0} —el esquema 1 entero, sin número— llega a la vigente: su
+     * {@code sqlite_master} queda IGUAL al de una base vacía preparada, que es lo que la regla
+     * de cambio promete (test (b) del contrato de S201). Hasta S201 sólo ganaba el sello.
      */
     @Test
-    void unaBaseDeV020SoloGanaElSello(@TempDir Path carpeta) throws Exception {
-        Path base = BancoDeCursos.fabricar(carpeta.resolve("v020.db"), null, false);
+    void unaBaseDeV020LlegaALaVigente(@TempDir Path carpeta) throws Exception {
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v020.db"), null, false);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (1, 'P1', 'Uno')");
-        List<String> antes = maestro(base);
         assertThat(version(base)).isZero();
+        Path vacia = carpeta.resolve("vacia.db");
+        real().preparar(origen(vacia));
 
         real().preparar(origen(base));
 
-        assertThat(maestro(base)).as("sqlite_master, idéntico").isEqualTo(antes);
+        assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
         assertThat(BancoDeCursos.filas(base, "profesor")).as("la fila sigue").isOne();
-        assertThat(version(base)).isEqualTo(1);
+        assertThat(version(base)).isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
     }
 
     /**
@@ -144,7 +158,8 @@ class PreparadorEsquemaTest {
      */
     @Test
     void prepararDosVecesNoEscribeLaSegunda(@TempDir Path carpeta) throws Exception {
-        Path base = BancoDeCursos.fabricar(carpeta.resolve("dos-veces.db"), null, false);
+        // Histórica, para que la PRIMERA preparación escriba de verdad (001 + 002 + sello).
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("dos-veces.db"), null, false);
 
         real().preparar(origen(base));
         String trasLaPrimera = BancoDeCursos.huella(base);
@@ -168,6 +183,57 @@ class PreparadorEsquemaTest {
         assertThat(migracionReal(siguiente).exists())
                 .as("esquema/%03d.sql no debe existir todavía", siguiente)
                 .isFalse();
+    }
+
+    /**
+     * (S201, a) Una base de la versión 1 CON DATOS —coherentes, sin huérfanos— llega a la 2 sin
+     * perder nada. {@code 002.sql} reconstruye {@code sesion} (renombrar, crear, copiar, borrar)
+     * y añade {@code actividad.tipo}: el esquema queda IGUAL al de una base nueva, las sesiones
+     * idénticas campo a campo, todas las actividades como CLASE y ningún huérfano.
+     */
+    @Test
+    void unaBaseV1ConDatosLlegaALaVigenteSinPerderNada(@TempDir Path carpeta) throws Exception {
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v1.db"), null, false);
+        ejecutar(
+                base,
+                "PRAGMA user_version = 1",
+                "insert into aula (id, codigo, tipo) values (1, 'A1', 'ORDINARIA')",
+                "insert into tramo_semanal (id, dia, orden, hora_inicio, hora_fin, es_lectivo)"
+                        + " values (1, 'LUNES', 1, '08:00:00', '09:00:00', 1)",
+                "insert into tramo_semanal (id, dia, orden, hora_inicio, hora_fin, es_lectivo)"
+                        + " values (2, 'LUNES', 2, '09:00:00', '10:00:00', 1)",
+                "insert into asignatura (id, codigo, nombre_completo) values (1, 'MAT', 'Matemáticas')",
+                "insert into actividad (id, codigo, asignatura_id, duracion_tramos,"
+                        + " repeticiones_por_semana, patron_temporal, requiere_tutor)"
+                        + " values (1, 'MAT-1A', 1, 1, 2, 'NEUTRA', 0)",
+                "insert into actividad (id, codigo, asignatura_id, duracion_tramos,"
+                        + " repeticiones_por_semana, patron_temporal, requiere_tutor)"
+                        + " values (2, 'TUT-1A', 1, 1, 1, 'NEUTRA', 1)",
+                "insert into plaza (id, codigo, actividad_id, asignatura_id, aula_fija_id)"
+                        + " values (1, 'MAT-1A-P1', 1, 1, 1)",
+                "insert into horario_generado (id, nombre, estado, estado_solver, fecha_generacion)"
+                        + " values (1, 'H1', 'BORRADOR', 'OPTIMAL', '2026-10-06 10:00:00')",
+                "insert into sesion (id, horario_id, plaza_id, indice, tramo_inicio_id, aula_id)"
+                        + " values (1, 1, 1, 1, 1, 1)",
+                "insert into sesion (id, horario_id, plaza_id, indice, tramo_inicio_id, aula_id)"
+                        + " values (2, 1, 1, 2, 2, 1)");
+        List<String> sesionesAntes = consulta(base, SESIONES);
+        int actividadesAntes = BancoDeCursos.filas(base, "actividad");
+        assertThat(sesionesAntes).as("precondición: dos sesiones").hasSize(2);
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
+        Path vacia = carpeta.resolve("vacia.db");
+        real().preparar(origen(vacia));
+
+        real().preparar(origen(base));
+
+        assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
+        assertThat(consulta(base, SESIONES)).as("las sesiones, campo a campo").isEqualTo(sesionesAntes);
+        assertThat(consulta(base, "select count(*) from actividad where tipo <> 'CLASE'"))
+                .as("todas las actividades, CLASE")
+                .containsExactly("0");
+        assertThat(BancoDeCursos.filas(base, "actividad")).isEqualTo(actividadesAntes);
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+        assertThat(version(base)).isEqualTo(2);
     }
 
     // ─────────────────────────────────────────────────────────────── juego de prueba
@@ -248,6 +314,55 @@ class PreparadorEsquemaTest {
                 .isFalse();
     }
 
+    // ─────────────────────────────────────────────────────────────── juego huérfano
+
+    /**
+     * (S201, c) Una migración que deja una fila huérfana se deshace entera, aunque la conexión
+     * llegue con las claves foráneas APAGADAS —como en el cambio de curso—: con ellas apagadas
+     * SQLite acepta la fila, y lo único que la para es la guarda del preparador. El
+     * {@link DataSource} de {@link #origen} no está envuelto, así que no enciende el pragma.
+     */
+    @Test
+    void unaMigracionQueDejaHuerfanosSeDeshace(@TempDir Path carpeta) throws Exception {
+        Path base = carpeta.resolve("v1.db");
+        try (Connection conexion = BancoDeCursos.conectar(base)) {
+            ScriptUtils.executeSqlScript(
+                    conexion, CARGADOR.getResource("classpath:esquema-huerfano/001.sql"));
+        }
+        ejecutar(base, "PRAGMA user_version = 1");
+
+        assertThatThrownBy(() -> huerfano().preparar(origen(base)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("huérfanas");
+
+        assertThat(version(base)).as("sigue en la última completa").isEqualTo(1);
+        assertThat(BancoDeCursos.filas(base, "hija")).as("la fila huérfana se deshizo").isZero();
+    }
+
+    /**
+     * (S201, c2) Un huérfano que la base YA traía no impide migrar: la guarda cuenta sólo las
+     * filas que deja la migración. Si mirara la base entera, una base con un huérfano antiguo
+     * no podría pasar nunca a la versión siguiente.
+     */
+    @Test
+    void unHuerfanoAnteriorNoImpideMigrar(@TempDir Path carpeta) throws Exception {
+        Path base = baseConUno(carpeta.resolve("v1.db"), 1);
+        ejecutar(
+                base,
+                "PRAGMA foreign_keys = OFF",
+                "create table padre (id integer primary key)",
+                "create table hija (id integer primary key, padre_id integer references padre(id))",
+                "insert into hija (id, padre_id) values (1, 99)");
+        assertThat(consulta(base, "PRAGMA foreign_key_check"))
+                .as("precondición: un huérfano de antes")
+                .hasSize(1);
+
+        deprueba().preparar(origen(base));
+
+        assertThat(version(base)).isEqualTo(2);
+        assertThat(BancoDeCursos.filas(base, "hija")).as("el huérfano de antes sigue ahí").isOne();
+    }
+
     // ─────────────────────────────────────────────────────────────── andamio
 
     private static DataSource origen(Path base) {
@@ -278,6 +393,27 @@ class PreparadorEsquemaTest {
                 sentencia.execute(orden);
             }
         }
+    }
+
+    /** Las filas de una consulta, cada una con sus columnas unidas por {@code |}. */
+    private static List<String> consulta(Path base, String sql) throws SQLException {
+        List<String> filas = new ArrayList<>();
+        try (Connection conexion = BancoDeCursos.conectar(base);
+                Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery(sql)) {
+            int columnas = fila.getMetaData().getColumnCount();
+            while (fila.next()) {
+                StringBuilder linea = new StringBuilder();
+                for (int i = 1; i <= columnas; i++) {
+                    if (i > 1) {
+                        linea.append('|');
+                    }
+                    linea.append(fila.getString(i));
+                }
+                filas.add(linea.toString());
+            }
+        }
+        return filas;
     }
 
     private static int version(Path base) throws SQLException {

@@ -42,16 +42,46 @@ public final class BancoDeCursos {
     private BancoDeCursos() {}
 
     /**
-     * Levanta una base con el esquema real y, si se pide, una fila de curso.
+     * Levanta una base VIGENTE: el esquema de {@code schema.sql}, sellada con
+     * {@link PreparadorEsquema#VERSION_ESQUEMA} y, si se pide, una fila de curso. Hasta S201
+     * no se sellaba y quedaba en {@code user_version} 0, que para el preparador es una base
+     * anterior a S191: en cuanto existió una migración de verdad, la habría migrado sobre un
+     * esquema que ya la tenía.
      *
      * @param base ruta del fichero a crear
      * @param nombreCurso nombre del curso, o {@code null} para una base sin fila (condición 6)
      * @param archivado si esa fila nace archivada
      */
     public static Path fabricar(Path base, String nombreCurso, boolean archivado) throws Exception {
+        levantar(base, "/schema.sql", nombreCurso, archivado);
         try (Connection conexion = conectar(base);
                 Statement sentencia = conexion.createStatement()) {
-            for (String orden : sentenciasDelEsquema()) {
+            sentencia.execute("PRAGMA user_version = " + PreparadorEsquema.VERSION_ESQUEMA);
+        }
+        return base;
+    }
+
+    /**
+     * Levanta una base de {@code v0.2.0}: el esquema 1 congelado ({@code esquema/001.sql}),
+     * SIN sellar ({@code user_version} 0) y, si se pide, una fila de curso. Es lo que el
+     * preparador recibe de una instalación anterior a S191.
+     *
+     * @param base ruta del fichero a crear
+     * @param nombreCurso nombre del curso, o {@code null} para una base sin fila
+     * @param archivado si esa fila nace archivada
+     */
+    public static Path fabricarHistorica(Path base, String nombreCurso, boolean archivado)
+            throws Exception {
+        levantar(base, "/esquema/001.sql", nombreCurso, archivado);
+        return base;
+    }
+
+    /** Ejecuta las sentencias de {@code script} sobre {@code base} y, si se pide, la fila de curso. */
+    private static void levantar(Path base, String script, String nombreCurso, boolean archivado)
+            throws Exception {
+        try (Connection conexion = conectar(base);
+                Statement sentencia = conexion.createStatement()) {
+            for (String orden : sentenciasDelEsquema(script)) {
                 sentencia.executeUpdate(orden);
             }
             if (nombreCurso != null) {
@@ -60,7 +90,6 @@ public final class BancoDeCursos {
                                 + nombreCurso + "', " + (archivado ? 1 : 0) + ")");
             }
         }
-        return base;
     }
 
     /**
@@ -139,11 +168,12 @@ public final class BancoDeCursos {
     }
 
     /**
-     * Las sentencias de {@code schema.sql}, sin los comentarios. El filtro es obligatorio: la
-     * cabecera lleva {@code ;} dentro de líneas {@code --} (medido en S159).
+     * Las sentencias de un script de esquema ({@code schema.sql} o {@code esquema/001.sql}),
+     * sin los comentarios. El filtro es obligatorio: la cabecera de {@code schema.sql} lleva
+     * {@code ;} dentro de líneas {@code --} (medido en S159).
      */
-    private static List<String> sentenciasDelEsquema() throws IOException {
-        try (InputStream entrada = BancoDeCursos.class.getResourceAsStream("/schema.sql")) {
+    private static List<String> sentenciasDelEsquema(String script) throws IOException {
+        try (InputStream entrada = BancoDeCursos.class.getResourceAsStream(script)) {
             String texto = new String(entrada.readAllBytes(), StandardCharsets.UTF_8);
             String sinComentarios =
                     texto.lines()
