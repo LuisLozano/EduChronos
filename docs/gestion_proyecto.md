@@ -30,19 +30,19 @@
 - L2172 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
 - L2207 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve."
 - L2236 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos."
-- L2272 — ## 4. Clasificación del trabajo pendiente
-- L2290 — ### Clasificación de las deudas vivas actuales
-- L2297 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
-- L2304 — #### Deuda técnica real, colgada de su objetivo
-- L2438 — #### Mejora futura, cuelga y espera
-- L2487 — #### Decisión arquitectónica consciente → sale de la cola
-- L2501 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L2513 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L2522 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L2589 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L2654 — ## 6. Reglas estratégicas
-- L2744 — ## 7. Métricas del sistema
-- L2765 — ## 8. El sistema respondiendo a las preguntas clave
+- L2274 — ## 4. Clasificación del trabajo pendiente
+- L2292 — ### Clasificación de las deudas vivas actuales
+- L2299 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
+- L2306 — #### Deuda técnica real, colgada de su objetivo
+- L2440 — #### Mejora futura, cuelga y espera
+- L2489 — #### Decisión arquitectónica consciente → sale de la cola
+- L2503 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L2515 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L2524 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L2591 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L2656 — ## 6. Reglas estratégicas
+- L2746 — ## 7. Métricas del sistema
+- L2767 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -2252,19 +2252,21 @@ La carga (2) se puede intercalar en cuanto termine el (1). Las sedes de §4 se r
   (G) Del usuario. Cargo del profesor, de un enumerado: Profesor/a (por defecto), Jefe/a de Estudios, Director/a, Vicedirector/a y Secretario/a. Varios profesores pueden tener el mismo cargo (el centro tiene tres jefes de estudio).
   (H) La primera migración real añade el rastro en el log y se verifica sobre copias de los bancos.
   (I) La verificación con datos reales amplía la cadena versionada (`derivar-catalogo.py` y `cargar-centro.py`), porque `O-prueba-secretaria` y `O-comparacion` contrastarán contra esa base.
+  (J) S202, del usuario a propuesta del arquitecto, tras el M2 de `C-totales-y-cargo`: las horas configuradas salen de la misma agregación que el ERROR de sobrecarga, con un filtro «solo CLASE», y ese ERROR sigue contando todas las actividades, porque una reunión ocupa al profesor; el tipo y los totales llegan a la prevalidación por un record de la capa app, y el solver no cambia; una regla AVISO de cuadre por entidad, que se emite si configuradas ≠ declaradas; los PDC admiten total, editable desde su diálogo; se cuentan tramos y se rotulan «horas». Resto en el contrato de `s202/b2`.
 - **Terminado cuando** — ESCRITO en S200 sobre esa medición. `O-datos-centro` termina cuando:
   1. **Tipos de actividad.** La actividad lleva tipo CLASE, REUNION o FUNCION, y las existentes quedan como CLASE. Una que no es CLASE se guarda sin subgrupos y sin aula, y se rechaza si pide tutor; una CLASE sin subgrupos da 400. El editor de Actividad permite elegir el tipo y la lista de Actividades lo muestra. El solver coloca las que no son CLASE sin solapar a sus profesores. Se ven con el nombre de su asignatura en la vista y el PDF de profesor y en el CSV; sin aula, ni la celda ni el CSV pintan un aula, y no aparecen en las vistas ni el PDF de aula. Con tests y campaña de mutación.
   2. **Totales declarados.** El profesor y el grupo admiten un total declarado opcional. Lo configurado es la demanda que ya calcula la prevalidación, contando solo actividades CLASE. Las listas de profesores y de grupos pintan «configuradas de declaradas» y marcan el descuadre. La prevalidación da un AVISO por descuadre en los dos sentidos, y ese aviso se ve en el diálogo de generar antes de confirmar. Con tests y campaña de mutación.
   3. **Cargo.** El profesor lleva un cargo del enumerado de (G), «Profesor/a» por defecto, editable en su formulario y visible en su lista.
-  4. **Migración con rastro.** Las migraciones llevan una base de versión 1 a la vigente sin perder nada. El log escribe una línea al preparar una base (versión de partida, de llegada y ruta) y otra al rechazar una base posterior al abrir un curso. Verificado sobre copias de `dfa4c077…` y de `f6c56947…`: se migran, los recuentos por GET no cambian y generan sin violaciones duras.
+  4. **Migración con rastro.** Las migraciones llevan una base de versión 1 a la vigente sin perder nada. El log escribe una línea al preparar una base (versión de partida, de llegada y ruta) y otra al rechazar una base posterior al abrir un curso. Verificado sobre copias de `dfa4c077…` y de `f6c56947…`: se migran, los recuentos por GET no cambian y generan sin violaciones duras. **✔ CUMPLIDA en S202** (`s202/a1a2` y `s202/a3`: copias nuevas de `dfa4c077…` (versión 0) y de `f6c56947…` (versión 1) llegan a la 2 por el arranque y por la apertura de curso, idénticas byte a byte por los dos caminos; recuentos por GET iguales; una línea INFO por base preparada; una base de versión 99 se rechaza con 409 y su WARN sin tocar un byte; generación de 600 s FEASIBLE con 0 violaciones en las dos, dfa al segundo intento tras un 503 reintentable. Prueba en navegador del usuario en `s202/a4`).
   5. **Datos reales.** La cadena versionada carga desde base vacía el horario oficial de 2026/2027 con sus reuniones (RED, RT12 y RT34, una actividad REUNION conjunta por código) y sus funciones (ORYCA, APSTE, FOREI, HUERT, PROAR y REYR, como FUNCION con horas sueltas de cada profesor), sin aula, y con los totales declarados sacados del volcado. Una generación sale sin violaciones duras; las 47 celdas se conservan por profesor y código, y las 1421 de clase como hasta ahora; los totales dan cero avisos; y borrar una actividad de clase da su aviso de profesor y de grupo en el diálogo de generar. md5 citado. `INFORME-NO-REPRESENTABLE.md` deja de listar lo que ya se representa.
 - **ESTADO en S200: 0 de 5.**
 - **ESTADO en S201: 1 de 5.** Condición 1 cumplida (`8537348`, `fb71cb4`, `d1c328d` y `074e940`; la CI del último la comprueba el usuario). Condición 4: migración `002`, guarda de huérfanos y rastro en el log, con tests y campaña; falta su verificación sobre copias de `dfa4c077…` y `f6c56947…`.
+- **ESTADO en S202: 2 de 5.** Condiciones 1 y 4 cumplidas. `C-actividad-sin-alumnos` hecho. `C-totales-y-cargo`: contrato cerrado y cotejado (`/home/luis/educhronos-aceptacion/s202/b2/contrato.md`), sin código.
 - **Fuera del criterio, con motivo:** las guardias, su número y su reparto, el tipo GUARDIA y `conv`, que S199 contó con las guardias (150 = 139 + 9 + 2): son de `O-guardias`. Fijar la hora de una reunión antes de generar (F). El cargo en los PDF. Aulas candidatas y tipos de aula (`O-aulas`). Versión, Release y VM, que llegan con `O-prueba-secretaria`. Un e2e nuevo (R-e2e). Sin medir y a resolver en sus Cambios: la reconstrucción de `sesion` con `foreign_keys` apagado, que SQLite no deja cambiar dentro de una transacción (aviso de `O-base-tecnica`); el cambio en la asignación de aula del modelo del solver; y si una sesión sin grupo se puede fijar desde la vista de profesor. **S201:** resueltos los tres en `C-actividad-sin-alumnos`: los dos primeros, como dice la corrección de (E); el tercero, sí, por lectura (el pin viaja sin aula), pendiente de verlo en el navegador. `RT12` y `RT34` siguen pendientes de confirmar con la secretaria; el volcado apoya que sean reuniones, y no bloquea.
 - **Deudas:** salda `D-totales-sin-contraste`, `D-borrado-sin-control-de-horas`, `D-cargos-sin-modelo` y `D-migracion-sin-rastro`. Toma sede y salda `D-plaza-sin-subgrupos` (antes `O-estructura`) y `D-aviso-fuera-del-dialogo` (antes sin sede).
 - **Depende de:** `O-base-tecnica` (migraciones) y `O-carga-2026` (base oficial y cadena).
 - **Valor:** la secretaria apunta las horas del centro y ve al momento si algo no cuadra, también después de borrar; mete reuniones y funciones como lo que son, sin asignaturas ni aulas inventadas; y sabe quién tiene cada cargo.
-- **Cambios que agrupa:** `C-alcance-datos-centro` ✔ HECHO (S200): el M0, la medición y este criterio. `C-actividad-sin-alumnos` EN CURSO (S201): condiciones 1 (cumplida) y 4 (falta su verificación). `C-totales-y-cargo`: condiciones 2 y 3. `C-carga-datos-centro`: condición 5.
+- **Cambios que agrupa:** `C-alcance-datos-centro` ✔ HECHO (S200): el M0, la medición y este criterio. `C-actividad-sin-alumnos` ✔ HECHO (S201-S202): condiciones 1 y 4. `C-totales-y-cargo` EN CURSO (S202, contrato): condiciones 2 y 3. `C-carga-datos-centro`: condición 5.
 - **Métrica de §7:** estimación de 5 a 7 sesiones (subida en S200 por el coste del aula); límite de 8.
 
 ---
