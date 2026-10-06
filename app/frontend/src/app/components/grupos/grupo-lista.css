@@ -22,3 +22,14 @@
   display: flex;
   gap: var(--e2);
 }
+
+/* Descuadre de horas (S203): el ámbar de aviso de `styles.css`, el mismo par de tokens que la
+   barra de curso. El texto «(no cuadra)» va en la celda: el color solo acompaña. */
+.horas--no-cuadra {
+  color: var(--color-aviso);
+  background: var(--color-aviso-fondo);
+}
+
+.grupos__error-horas {
+  color: var(--color-aviso);
+}

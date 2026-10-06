@@ -27,6 +27,10 @@
        las siete listas y verificable por grep (7 coincidencias). No lleva
        `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
        la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (errorHoras()) {
+    <p class="grupos__error-horas" role="alert">{{ errorHoras() }}</p>
+  }
+
   @if (!cargando() && visibles().length > 0) {
     <table class="grupos__tabla">
       <thead>
@@ -34,6 +38,7 @@
           <th>Código</th>
           <th>Nivel</th>
           <th>Tipo</th>
+          <th>Horas</th>
           <th></th>
         </tr>
       </thead>
@@ -43,6 +48,7 @@
             <td class="dato">{{ grupo.codigo }}</td>
             <td>{{ grupo.nivel }}</td>
             <td class="grupos__tipo">{{ etiquetaTipo(grupo.tipo) }}</td>
+            <td class="grupos__horas dato" [class.horas--no-cuadra]="horas(grupo)?.descuadre === true">{{ textoHoras(grupo) }}</td>
             <td class="grupos__acciones">
               <!-- Solo los ordinarios: sobre un PDC estas tres acciones acaban en un
                    error que el usuario no puede resolver. Ver el javadoc de la clase. -->

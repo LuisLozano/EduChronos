@@ -20,6 +20,23 @@
       }
     </label>
 
+    <label class="profesor-form__campo">
+      <span class="profesor-form__etiqueta">Horas de clase declaradas</span>
+      <input type="number" min="0" [formControl]="totalDeclarado" class="profesor-form__input profesor-form__total" />
+      @if (totalDeclarado.touched && totalDeclarado.invalid) {
+        <span class="profesor-form__error">Las horas no pueden ser negativas.</span>
+      }
+    </label>
+
+    <label class="profesor-form__campo">
+      <span class="profesor-form__etiqueta">Cargo</span>
+      <select [formControl]="cargo" class="profesor-form__input profesor-form__cargo">
+        @for (c of cargos; track c[0]) {
+          <option [value]="c[0]">{{ c[1] }}</option>
+        }
+      </select>
+    </label>
+
     @if (error()) {
       <p class="profesor-form__error-servidor" role="alert">{{ error() }}</p>
     }

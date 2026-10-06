@@ -20,6 +20,14 @@
           }
         </label>
 
+        <label class="pdc-dialogo__campo">
+          <span class="pdc-dialogo__etiqueta">Horas semanales declaradas</span>
+          <input type="number" min="0" [formControl]="totalAlta" class="pdc-dialogo__input pdc-dialogo__total-alta" />
+          @if (totalAlta.touched && totalAlta.invalid) {
+            <span class="pdc-dialogo__error">Las horas no pueden ser negativas.</span>
+          }
+        </label>
+
         @if (error()) {
           <p class="pdc-dialogo__error-servidor" role="alert">{{ error() }}</p>
         }
@@ -42,6 +50,22 @@
         <dt class="pdc-dialogo__etiqueta">Nivel</dt>
         <dd class="pdc-dialogo__valor">{{ pdc()?.nivel }}</dd>
       </dl>
+
+      <label class="pdc-dialogo__campo">
+        <span class="pdc-dialogo__etiqueta">Horas semanales declaradas</span>
+        <input type="number" min="0" [formControl]="totalPdc" class="pdc-dialogo__input pdc-dialogo__total-pdc" />
+        @if (totalPdc.touched && totalPdc.invalid) {
+          <span class="pdc-dialogo__error">Las horas no pueden ser negativas.</span>
+        }
+      </label>
+      <button
+        type="button"
+        class="pdc-dialogo__guardar-total"
+        [disabled]="guardando()"
+        (click)="guardarTotal()"
+      >
+        Guardar horas
+      </button>
 
       @if (error()) {
         <p class="pdc-dialogo__error-servidor" role="alert">{{ error() }}</p>

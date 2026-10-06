@@ -16,3 +16,21 @@ export interface AvisoPrevalidacion {
   disponible: number;
   descripcion: string;
 }
+
+/**
+ * Cuadre de horas de un profesor o un grupo (S203). Espejo de `CuadreEntidadDTO`: las horas de
+ * clase configuradas, las declaradas (null sin total) y si no casan. Lo calcula el backend; el
+ * frontend solo lo pinta.
+ */
+export interface CuadreEntidad {
+  codigo: string;
+  configuradas: number;
+  declaradas: number | null;
+  descuadre: boolean;
+}
+
+/** Espejo de `CuadreDTO`, la respuesta de `GET /api/prevalidacion/cuadre`. */
+export interface Cuadre {
+  profesores: CuadreEntidad[];
+  grupos: CuadreEntidad[];
+}

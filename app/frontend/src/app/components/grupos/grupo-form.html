@@ -25,6 +25,14 @@
       }
     </label>
 
+    <label class="grupo-form__campo">
+      <span class="grupo-form__etiqueta">Horas semanales declaradas</span>
+      <input type="number" min="0" [formControl]="totalDeclarado" class="grupo-form__input grupo-form__total" />
+      @if (totalDeclarado.touched && totalDeclarado.invalid) {
+        <span class="grupo-form__error">Las horas no pueden ser negativas.</span>
+      }
+    </label>
+
     @if (error()) {
       <p class="grupo-form__error-servidor" role="alert">{{ error() }}</p>
     }

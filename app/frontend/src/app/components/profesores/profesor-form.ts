@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProfesorService } from '../../services/profesor.service';
-import { Profesor, ProfesorRequest } from '../../models/profesor.model';
+import { Cargo, ETIQUETA_CARGO, Profesor, ProfesorRequest } from '../../models/profesor.model';
 
 /**
  * Alta y edición de un profesor en un mismo componente, presentado en diálogo.
@@ -18,6 +18,14 @@ import { Profesor, ProfesorRequest } from '../../models/profesor.model';
  * verdad es el backend (UNIQUE en esquema + findByCodigo). Un async validator
  * duplicaría esa comprobación con una race condition. El 400 de código duplicado
  * se PRESENTA cuando llega, no se anticipa.
+ *
+ * <p><b>Horas declaradas y cargo (S203) van en controles APARTE del `form`.</b> Los specs de
+ * antes hacen `form.setValue({codigo, nombreCompleto})`, que con dos controles más en el grupo
+ * fallaría (NG01002), y O-interfaz rehará los formularios. Las dos condiciones que eso exige
+ * están aquí: la validez de guardar incluye la del total (un negativo no se envía), y en
+ * edición los dos se cargan con lo que tiene el profesor, porque el PUT es reemplazo total y
+ * sin cargarlos guardar otro cambio borraría el total y devolvería el cargo a Profesor/a. Se
+ * mandan SIEMPRE, el total vacío como null.
  */
 @Component({
   selector: 'app-profesor-form',
@@ -40,23 +48,39 @@ export class ProfesorForm {
     nombreCompleto: ['', Validators.required],
   });
 
+  /** Opciones del select de cargo, en el orden del enum. */
+  protected readonly cargos = Object.entries(ETIQUETA_CARGO) as [Cargo, string][];
+
+  /** Horas de clase declaradas: opcional, ≥ 0. El input vacío da null (NumberValueAccessor). */
+  protected readonly totalDeclarado = this.fb.control<number | null>(null, Validators.min(0));
+
+  /** Cargo, por defecto Profesor/a. */
+  protected readonly cargo = this.fb.nonNullable.control<Cargo>('PROFESOR');
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
         codigo: this.editando.codigo,
         nombreCompleto: this.editando.nombreCompleto,
       });
+      this.totalDeclarado.setValue(this.editando.totalDeclarado ?? null);
+      this.cargo.setValue(this.editando.cargo ?? 'PROFESOR');
     }
   }
 
   protected guardar(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.totalDeclarado.invalid) {
       this.form.markAllAsTouched();
+      this.totalDeclarado.markAsTouched();
       return;
     }
     this.guardando.set(true);
     this.error.set('');
-    const req: ProfesorRequest = this.form.getRawValue();
+    const req: ProfesorRequest = {
+      ...this.form.getRawValue(),
+      totalDeclarado: this.totalDeclarado.value,
+      cargo: this.cargo.value,
+    };
 
     const peticion = this.editando
       ? this.service.editar(this.editando.id, req)

@@ -70,6 +70,8 @@ describe('GrupoLista', () => {
   function flushLista(filas: unknown[] = []): void {
     fixture.detectChanges(); // dispara ngOnInit → cargar()
     http.expectOne('/api/grupos').flush(filas);
+    // S203: cargar() pide también el cuadre de horas; sin atenderlo, http.verify() cae.
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
   }
 
   /** Dispara el borrado de una fila con el diálogo de confirmación aceptado. */
@@ -134,6 +136,7 @@ describe('GrupoLista', () => {
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/grupos').flush('', { status: 500, statusText: 'Server Error' });
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
@@ -177,7 +180,7 @@ describe('GrupoLista', () => {
 
     const cabeceras = [...raiz.querySelectorAll('thead th')].map((th) => th.textContent!.trim());
     // La última, vacía, es la de acciones.
-    expect(cabeceras).toEqual(['Código', 'Nivel', 'Tipo', '']);
+    expect(cabeceras).toEqual(['Código', 'Nivel', 'Tipo', 'Horas', '']);
 
     // Igualdad ESTRICTA de la celda, no `toContain`: '1ESO' está contenido en '1ESOA',
     // así que un `toContain('1ESO')` quedaría verde si la celda pintara el código.
@@ -239,6 +242,7 @@ describe('GrupoLista', () => {
 
     // La recarga es un segundo GET: el alta o el borrado de un PDC cambia la tabla.
     http.expectOne('/api/grupos').flush(FILAS_MIXTAS);
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('1ESOADI');
   });
@@ -389,5 +393,66 @@ describe('GrupoLista', () => {
     expect(sinResultados.textContent).toContain('zzz');
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
+
+  // ─────────────────────────── S203 T3a: columna Horas
+
+  /** Carga la lista y responde el cuadre con las entradas de grupos dadas. */
+  function flushConCuadre(filas: unknown[], grupos: unknown[]): void {
+    fixture.detectChanges();
+    http.expectOne('/api/grupos').flush(filas);
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos });
+  }
+
+  /** La celda «Horas» (cuarta columna) de la fila dada. */
+  function horas(fila: number): HTMLElement {
+    const filas = (fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr');
+    return filas[fila].querySelectorAll('td')[3] as HTMLElement;
+  }
+
+  it('(19) con total y no cuadra: «{c} de {d} (no cuadra)», con el color de aviso; el PDC, con las suyas', async () => {
+    flushConCuadre(FILAS_MIXTAS, [
+      { codigo: '1ESOA', configuradas: 30, declaradas: 30, descuadre: false },
+      { codigo: '1ESOADI', configuradas: 10, declaradas: 12, descuadre: true },
+    ]);
+    await fixture.whenStable();
+
+    expect(horas(0).textContent!.trim()).toBe('30 de 30');
+    expect(horas(0).classList.contains('horas--no-cuadra')).toBe(false);
+    expect(horas(1).textContent!.trim()).toBe('10 de 12 (no cuadra)');
+    expect(horas(1).classList.contains('horas--no-cuadra')).toBe(true);
+  });
+
+  it('(20) sin total: solo la cifra configurada', async () => {
+    flushConCuadre(FILAS, [{ codigo: '1ESOA', configuradas: 28, declaradas: null, descuadre: false }]);
+    await fixture.whenStable();
+
+    expect(horas(0).textContent!.trim()).toBe('28');
+  });
+
+  it('(21) empareja por código aunque el cuadre llegue en otro orden que la lista', async () => {
+    flushConCuadre(FILAS, [
+      { codigo: '2ESOB', configuradas: 25, declaradas: null, descuadre: false },
+      { codigo: '1ESOA', configuradas: 28, declaradas: 30, descuadre: true },
+    ]);
+    await fixture.whenStable();
+
+    expect(horas(0).textContent!.trim()).toBe('28 de 30 (no cuadra)');
+    expect(horas(1).textContent!.trim()).toBe('25');
+  });
+
+  it('(22) si falla el GET de cuadre, la tabla se pinta igual, Horas queda vacía y sale su mensaje', async () => {
+    fixture.detectChanges();
+    http.expectOne('/api/grupos').flush(FILAS);
+    http.expectOne('/api/prevalidacion/cuadre').flush('', { status: 500, statusText: 'Server Error' });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelectorAll('tbody tr').length).toBe(2);
+    expect(horas(0).textContent!.trim()).toBe('');
+    expect(raiz.querySelector('.grupos__error-horas')!.textContent!.trim()).toBe(
+      'No se pudieron cargar las horas.',
+    );
+    expect(raiz.querySelector('.estado-lista__error')).toBeNull();
   });
 });

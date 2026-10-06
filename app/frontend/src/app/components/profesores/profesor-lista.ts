@@ -2,18 +2,27 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProfesorService } from '../../services/profesor.service';
-import { Profesor } from '../../models/profesor.model';
+import { PrevalidacionService } from '../../services/prevalidacion.service';
+import { ETIQUETA_CARGO, Profesor } from '../../models/profesor.model';
+import { CuadreEntidad } from '../../models/prevalidacion.model';
 import { ProfesorForm } from './profesor-form';
 import { DisponibilidadDialogo } from './disponibilidad/disponibilidad-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
+import { textoHoras } from '../../catalogo/horas';
 
 /**
  * Lista del catálogo de profesores: carga en init, tabla con acciones por fila,
  * alta/edición en diálogo, borrado con confirmación previa. La escritura vive en
  * `ProfesorForm` (diálogo); esta lista lo abre y recarga tras un guardado.
+ *
+ * <p><b>Cargo y horas (S203).</b> «Cargo» pinta la etiqueta de {@link ETIQUETA_CARGO}.
+ * «Horas» sale de `GET /api/prevalidacion/cuadre`, que se pide en {@link cargar} a la vez que
+ * la lista y se empareja POR CÓDIGO: el frontend no recalcula nada. Si ese GET falla, la
+ * tabla se pinta igual, «Horas» queda vacía y sale un mensaje propio; un fallo del cuadre no
+ * vacía la lista.
  */
 @Component({
   selector: 'app-profesor-lista',
@@ -24,11 +33,17 @@ import { coincide } from '../../catalogo/busqueda';
 export class ProfesorLista implements OnInit {
   private readonly service = inject(ProfesorService);
   private readonly dialog = inject(Dialog);
+  private readonly prevalidacion = inject(PrevalidacionService);
 
   protected readonly profesores = signal<Profesor[]>([]);
   protected readonly cargando = signal(false);
   /** Error de la última operación de lista o borrado. Vacío = sin error. */
   protected readonly error = signal('');
+
+  /** Cuadre de horas por código de profesor; vacío hasta que llega o si el GET falla. */
+  protected readonly cuadre = signal<ReadonlyMap<string, CuadreEntidad>>(new Map());
+  /** Error del GET de cuadre, aparte del de la lista. Vacío = sin error. */
+  protected readonly errorHoras = signal('');
 
   /** Texto escrito en la caja de la cabecera. Vacío = se ven todas las filas. */
   protected readonly busqueda = signal('');
@@ -61,9 +76,25 @@ export class ProfesorLista implements OnInit {
     this.cargar();
   }
 
+  /** Etiqueta del cargo de una fila; vacía si el DTO no lo trae. */
+  protected etiquetaCargo(p: Profesor): string {
+    return p.cargo ? ETIQUETA_CARGO[p.cargo] : '';
+  }
+
+  /** La entrada del cuadre de una fila, buscada por su código. */
+  protected horas(p: Profesor): CuadreEntidad | undefined {
+    return this.cuadre().get(p.codigo);
+  }
+
+  /** El texto de la celda «Horas» de una fila (ver `catalogo/horas.ts`). */
+  protected textoHoras(p: Profesor): string {
+    return textoHoras(this.horas(p));
+  }
+
   protected cargar(): void {
     this.cargando.set(true);
     this.error.set('');
+    this.cargarCuadre();
     this.service.listar().subscribe({
       next: (lista) => {
         this.profesores.set(lista);
@@ -72,6 +103,22 @@ export class ProfesorLista implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.error.set(this.mensaje(err, 'No se pudo cargar la lista de profesores'));
         this.cargando.set(false);
+      },
+    });
+  }
+
+  /**
+   * El cuadre de horas, independiente de la lista: su fallo no toca `profesores` ni `error`,
+   * solo deja la columna vacía y pone su propio mensaje.
+   */
+  private cargarCuadre(): void {
+    this.errorHoras.set('');
+    this.prevalidacion.getCuadre().subscribe({
+      next: (cuadre) =>
+        this.cuadre.set(new Map(cuadre.profesores.map((e) => [e.codigo, e] as const))),
+      error: () => {
+        this.cuadre.set(new Map());
+        this.errorHoras.set('No se pudieron cargar las horas.');
       },
     });
   }

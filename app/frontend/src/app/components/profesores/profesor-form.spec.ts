@@ -118,4 +118,131 @@ describe('ProfesorForm', () => {
     expect(err).toContain('texto-de-message');
     expect(err).not.toContain('texto-de-error');
   });
+
+  // ─────────────────────────── S203 T3a: horas de clase declaradas y cargo
+
+  type ConCampos = {
+    form: { setValue: (v: unknown) => void };
+    guardar: () => void;
+  };
+
+  /** Escribe en un input como lo haría el usuario: valor y evento `input`. */
+  function teclear(selector: string, valor: string): void {
+    const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
+    input.value = valor;
+    input.dispatchEvent(new Event('input'));
+  }
+
+  /** Elige una opción del select de cargo por su valor, con el evento `change`. */
+  function elegirCargo(valor: string): void {
+    const select = fixture.nativeElement.querySelector('.profesor-form__cargo') as HTMLSelectElement;
+    select.value = valor;
+    select.dispatchEvent(new Event('change'));
+  }
+
+  it('(7) envía el total y el cargo elegidos', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__total', '18');
+    elegirCargo('DIRECTOR');
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.body).toEqual({
+      codigo: 'MAT8',
+      nombreCompleto: 'Ana Ruiz',
+      totalDeclarado: 18,
+      cargo: 'DIRECTOR',
+    });
+    req.flush({ id: 7 });
+  });
+
+  it('(8) sin tocarlos, el total viaja como null y el cargo como PROFESOR', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.body).toEqual({
+      codigo: 'MAT8',
+      nombreCompleto: 'Ana Ruiz',
+      totalDeclarado: null,
+      cargo: 'PROFESOR',
+    });
+    req.flush({ id: 7 });
+  });
+
+  it('(9) un total escrito y luego borrado vuelve a viajar como null, no como 0', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__total', '5');
+    teclear('.profesor-form__total', '');
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.body.totalDeclarado).toBeNull();
+    req.flush({ id: 7 });
+  });
+
+  it('(10) el total 0 es válido y viaja como 0', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__total', '0');
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.body.totalDeclarado).toBe(0);
+    req.flush({ id: 7 });
+  });
+
+  it('(11) con total negativo no se puede guardar ni se envía petición', async () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__total', '-1');
+    inst.guardar();
+    await fixture.whenStable();
+
+    http.expectNone('/api/profesores');
+    expect(fixture.nativeElement.textContent).toContain('Las horas no pueden ser negativas.');
+  });
+
+  it('(12) el select de cargo ofrece los cinco y nace en Profesor/a', () => {
+    montar(null);
+    const select = fixture.nativeElement.querySelector('.profesor-form__cargo') as HTMLSelectElement;
+
+    expect([...select.options].map((o) => o.textContent!.trim())).toEqual([
+      'Profesor/a',
+      'Jefe/a de Estudios',
+      'Director/a',
+      'Vicedirector/a',
+      'Secretario/a',
+    ]);
+    expect(select.options[select.selectedIndex].textContent!.trim()).toBe('Profesor/a');
+  });
+
+  it('(13) al editar un profesor con 18 y DIRECTOR, los controles los muestran y guardar sin tocarlos los manda', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, cargo: 'DIRECTOR' });
+    await fixture.whenStable();
+    const total = fixture.nativeElement.querySelector('.profesor-form__total') as HTMLInputElement;
+    const cargo = fixture.nativeElement.querySelector('.profesor-form__cargo') as HTMLSelectElement;
+    expect(total.value).toBe('18');
+    expect(cargo.options[cargo.selectedIndex].textContent!.trim()).toBe('Director/a');
+
+    (fixture.componentInstance as unknown as ConCampos).guardar();
+
+    const req = http.expectOne('/api/profesores/7');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({
+      codigo: 'MAT8',
+      nombreCompleto: 'Ana Ruiz',
+      totalDeclarado: 18,
+      cargo: 'DIRECTOR',
+    });
+    req.flush({ id: 7 });
+  });
 });

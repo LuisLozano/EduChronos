@@ -43,6 +43,7 @@ describe('PdcDialogo', () => {
     obtener: ReturnType<typeof vi.fn>;
     crear: ReturnType<typeof vi.fn>;
     borrar: ReturnType<typeof vi.fn>;
+    editar: ReturnType<typeof vi.fn>;
   };
 
   /** Monta el componente con la respuesta dada para el `obtener` del `ngOnInit`. */
@@ -53,6 +54,7 @@ describe('PdcDialogo', () => {
       obtener: vi.fn().mockReturnValue(respuesta),
       crear: vi.fn(),
       borrar: vi.fn(),
+      editar: vi.fn(),
     };
     TestBed.configureTestingModule({
       imports: [PdcDialogo],
@@ -153,7 +155,7 @@ describe('PdcDialogo', () => {
 
     // Los DOS argumentos, y el cuerpo por igualdad estricta: así cae tanto pasar el id
     // equivocado como colar en el cuerpo un `nivel` o un `tipo` que el backend no lee.
-    expect(service.crear).toHaveBeenCalledWith(7, { codigo: '3ADI' });
+    expect(service.crear).toHaveBeenCalledWith(7, { codigo: '3ADI', totalDeclarado: null });
     expect(ref.close).toHaveBeenCalledWith(true);
   });
 
@@ -207,5 +209,83 @@ describe('PdcDialogo', () => {
     expect(ref.close).not.toHaveBeenCalled();
     const err = raiz().querySelector('.pdc-dialogo__error-servidor')!.textContent!;
     expect(err).toContain('referenciada por 1 plaza(s)');
+  });
+
+  // ─────────────────────────── S203 T3a: horas declaradas del PDC
+
+  function teclear(selector: string, valor: string): void {
+    const input = raiz().querySelector(selector) as HTMLInputElement;
+    input.value = valor;
+    input.dispatchEvent(new Event('input'));
+  }
+
+  const conGuardarTotal = (): { guardarTotal: () => void } =>
+    fixture.componentInstance as unknown as { guardarTotal: () => void };
+
+  it('(S203-1) un alta con total llama a crear con el código y el total', async () => {
+    montar(fallo(404));
+    await fixture.whenStable();
+    service.crear.mockReturnValue(of(PDC));
+
+    instancia().form.setValue({ codigo: '3ADI' });
+    teclear('.pdc-dialogo__total-alta', '12');
+    instancia().guardar();
+    await fixture.whenStable();
+
+    expect(service.crear).toHaveBeenCalledWith(7, { codigo: '3ADI', totalDeclarado: 12 });
+    expect(ref.close).toHaveBeenCalledWith(true);
+  });
+
+  it('(S203-2) en con-pdc el total nace con el del PDC, y guardar hace el PUT con su código y el total nuevo', async () => {
+    montar(of({ ...PDC, totalDeclarado: 12 }));
+    await fixture.whenStable();
+    const input = raiz().querySelector('.pdc-dialogo__total-pdc') as HTMLInputElement;
+    expect(input.value).toBe('12');
+    service.editar.mockReturnValue(of({ ...PDC, totalDeclarado: 14 }));
+
+    teclear('.pdc-dialogo__total-pdc', '14');
+    conGuardarTotal().guardarTotal();
+    await fixture.whenStable();
+
+    expect(service.editar).toHaveBeenCalledWith(7, { codigo: '3ADI', totalDeclarado: 14 });
+    expect(ref.close).toHaveBeenCalledWith(true);
+  });
+
+  it('(S203-3) en con-pdc, borrar el total lo manda como null', async () => {
+    montar(of({ ...PDC, totalDeclarado: 12 }));
+    await fixture.whenStable();
+    service.editar.mockReturnValue(of(PDC));
+
+    teclear('.pdc-dialogo__total-pdc', '');
+    conGuardarTotal().guardarTotal();
+    await fixture.whenStable();
+
+    expect(service.editar).toHaveBeenCalledWith(7, { codigo: '3ADI', totalDeclarado: null });
+  });
+
+  it('(S203-4) en con-pdc, un total negativo no hace el PUT', async () => {
+    montar(of(PDC));
+    await fixture.whenStable();
+
+    teclear('.pdc-dialogo__total-pdc', '-1');
+    conGuardarTotal().guardarTotal();
+    await fixture.whenStable();
+
+    expect(service.editar).not.toHaveBeenCalled();
+    expect(raiz().textContent).toContain('Las horas no pueden ser negativas.');
+  });
+
+  it('(S203-5) un 400 del PUT presenta el mensaje y no cierra', async () => {
+    montar(of(PDC));
+    await fixture.whenStable();
+    service.editar.mockReturnValue(fallo(400, { message: 'totalDeclarado no puede ser negativo: -1' }));
+
+    conGuardarTotal().guardarTotal();
+    await fixture.whenStable();
+
+    expect(ref.close).not.toHaveBeenCalled();
+    expect(raiz().querySelector('.pdc-dialogo__error-servidor')!.textContent).toContain(
+      'totalDeclarado no puede ser negativo',
+    );
   });
 });

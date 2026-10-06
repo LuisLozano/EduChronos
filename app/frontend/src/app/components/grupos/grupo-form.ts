@@ -42,6 +42,12 @@ import { Nivel } from '../../models/nivel.model';
  * validator duplicaría esa comprobación con una race condition. El 400 de código
  * duplicado se PRESENTA cuando llega, no se anticipa.
  *
+ * <p><b>Horas declaradas (S203) en un control APARTE del `form`</b>, por la misma razón que
+ * en `ProfesorForm`: los specs de antes hacen `form.setValue({codigo, nivel})` y con un
+ * control más en el grupo fallaría (NG01002). La validez de guardar incluye la del total, y
+ * en edición se carga con el total del grupo: el PUT es reemplazo total. Se manda siempre,
+ * vacío como null.
+ *
  * <p>FUERA DE ALCANCE: el sub-recurso `tutoria` que {@code GrupoController} expone en
  * `GET/PUT /{id}/tutoria`. Mismo criterio con que S103 dejó fuera
  * `aulas-compatibles`: estirar el molde con un sub-recurso es objeto de sesión propia.
@@ -71,12 +77,16 @@ export class GrupoForm implements OnInit {
     nivel: ['', Validators.required],
   });
 
+  /** Horas semanales declaradas: opcional, ≥ 0. El input vacío da null. */
+  protected readonly totalDeclarado = this.fb.control<number | null>(null, Validators.min(0));
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
         codigo: this.editando.codigo,
         nivel: this.editando.nivel,
       });
+      this.totalDeclarado.setValue(this.editando.totalDeclarado ?? null);
     }
   }
 
@@ -103,8 +113,9 @@ export class GrupoForm implements OnInit {
   }
 
   protected guardar(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.totalDeclarado.invalid) {
       this.form.markAllAsTouched();
+      this.totalDeclarado.markAsTouched();
       return;
     }
     this.guardando.set(true);
@@ -112,7 +123,11 @@ export class GrupoForm implements OnInit {
     // `tipo` no sale del formulario: es constante de este flujo (ver javadoc). El
     // contrato lo exige, así que se inyecta aquí y no en el servicio, que es un
     // wrapper pelado y no debe conocer reglas de la pantalla.
-    const req: GrupoRequest = { ...this.form.getRawValue(), tipo: 'ORDINARIO' };
+    const req: GrupoRequest = {
+      ...this.form.getRawValue(),
+      tipo: 'ORDINARIO',
+      totalDeclarado: this.totalDeclarado.value,
+    };
 
     const peticion = this.editando
       ? this.service.editar(this.editando.id, req)

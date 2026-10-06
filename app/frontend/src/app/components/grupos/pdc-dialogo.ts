@@ -15,12 +15,12 @@ import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 export type EstadoPdc = 'cargando' | 'sin-pdc' | 'con-pdc' | 'error';
 
 /**
- * Diálogo del PDC de un grupo ordinario: consulta, alta y borrado del sub-recurso
- * `/api/grupos/{idPadre}/pdc` en una sola pantalla. `DIALOG_DATA` es el GRUPO PADRE
- * —el objeto de la fila pulsada, nunca un PDC y nunca null—, del que salen el id para
- * las tres llamadas y el código para titular.
+ * Diálogo del PDC de un grupo ordinario: consulta, alta, cambio de horas declaradas y
+ * borrado del sub-recurso `/api/grupos/{idPadre}/pdc` en una sola pantalla. `DIALOG_DATA`
+ * es el GRUPO PADRE —el objeto de la fila pulsada, nunca un PDC y nunca null—, del que
+ * salen el id para las cuatro llamadas y el código para titular.
  *
- * <p>Cierra con `true` si hubo cualquier ESCRITURA con éxito (alta o borrado) y con
+ * <p>Cierra con `true` si hubo cualquier ESCRITURA con éxito (alta, horas o borrado) y con
  * `false` si el usuario sale sin escribir: es el contrato que espera el `abrirForm` de
  * {@code GrupoLista}, que solo recarga con `true` estricto.
  *
@@ -42,9 +42,16 @@ export type EstadoPdc = 'cargando' | 'sin-pdc' | 'con-pdc' | 'error';
  * 500 no se sabe si el grupo tiene PDC o no, y ofrecer el alta a ciegas lleva a un 400
  * de «ya tiene un PDC» que el usuario no puede interpretar—.
  *
- * <p>No hay EDICIÓN, porque el backend no la tiene: {@code PdcController} expone POST,
- * GET y DELETE. Renombrar un PDC es borrarlo y volverlo a crear, y por eso la ficha
- * ofrece «Borrar» y no «Editar».
+ * <p><b>La única EDICIÓN es la de las horas declaradas</b> (S203, C-totales-y-cargo). En el
+ * estado {@code 'con-pdc'} la ficha deja cambiar el total y lo guarda con
+ * {@code PUT /api/grupos/{idPadre}/pdc}, que manda el código del PDC tal cual: el backend no
+ * renombra por ahí. Renombrar sigue siendo borrar y volver a crear, y por eso la ficha
+ * ofrece «Borrar» y no «Editar», y la fila del PDC en la lista tampoco gana «Editar»: la
+ * fila no sabe quién es su padre, que es la clave del recurso.
+ *
+ * <p>Los dos totales —el del alta y el de la ficha— van en controles APARTE del `form`, como
+ * en `GrupoForm`: los specs de antes hacen `form.setValue({codigo})`. Cada uno entra en la
+ * validez de su envío, y el de la ficha nace con el total del PDC cargado.
  */
 @Component({
   selector: 'app-pdc-dialogo',
@@ -79,6 +86,12 @@ export class PdcDialogo implements OnInit {
     codigo: ['', Validators.required],
   });
 
+  /** Horas semanales declaradas en el ALTA: opcional, ≥ 0; vacío viaja como null. */
+  protected readonly totalAlta = this.fb.control<number | null>(null, Validators.min(0));
+
+  /** Horas semanales declaradas del PDC ya creado, en {@code 'con-pdc'}; nace con las suyas. */
+  protected readonly totalPdc = this.fb.control<number | null>(null, Validators.min(0));
+
   /**
    * Consulta el PDC del padre y deriva el estado de la respuesta. Es la única petición
    * del montaje y la que decide qué rama ve el usuario.
@@ -87,6 +100,7 @@ export class PdcDialogo implements OnInit {
     this.service.obtener(this.padre.id).subscribe({
       next: (pdc) => {
         this.pdc.set(pdc);
+        this.totalPdc.setValue(pdc.totalDeclarado ?? null);
         this.estado.set('con-pdc');
       },
       error: (err: HttpErrorResponse) => {
@@ -111,13 +125,17 @@ export class PdcDialogo implements OnInit {
    * subgrupo derivado colisionado— se arreglan escribiendo otro código, sin salir.
    */
   protected guardar(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.totalAlta.invalid) {
       this.form.markAllAsTouched();
+      this.totalAlta.markAsTouched();
       return;
     }
     this.guardando.set(true);
     this.error.set('');
-    const peticion: PdcRequest = this.form.getRawValue();
+    const peticion: PdcRequest = {
+      ...this.form.getRawValue(),
+      totalDeclarado: this.totalAlta.value,
+    };
 
     this.service.crear(this.padre.id, peticion).subscribe({
       next: () => this.ref.close(true),
@@ -126,6 +144,33 @@ export class PdcDialogo implements OnInit {
         this.guardando.set(false);
       },
     });
+  }
+
+  /**
+   * Guarda las horas declaradas del PDC (S203): {@code PUT} con el código del PDC, que no
+   * cambia, y el total. En éxito cierra con `true`, porque la lista pinta esas horas; en error
+   * PRESENTA el mensaje y NO cierra.
+   */
+  protected guardarTotal(): void {
+    const actual = this.pdc();
+    if (actual === null) {
+      return;
+    }
+    if (this.totalPdc.invalid) {
+      this.totalPdc.markAsTouched();
+      return;
+    }
+    this.guardando.set(true);
+    this.error.set('');
+    this.service
+      .editar(this.padre.id, { codigo: actual.codigo, totalDeclarado: this.totalPdc.value })
+      .subscribe({
+        next: () => this.ref.close(true),
+        error: (err: HttpErrorResponse) => {
+          this.error.set(this.mensaje(err, 'No se pudieron guardar las horas del PDC'));
+          this.guardando.set(false);
+        },
+      });
   }
 
   /**

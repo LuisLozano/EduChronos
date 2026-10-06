@@ -14,15 +14,14 @@ import { Grupo, PdcRequest } from '../models/grupo.model';
  * `.pipe`/`catchError`. El servicio PROPAGA el error de Http; el componente lo
  * traduce en su `subscribe({ next, error })`.
  *
- * <p><b>TRES verbos, no cuatro: no hay EDICIÓN.</b> `PdcController` no expone `PUT`
- * ni `PATCH` —el ciclo del sub-recurso es alta / consulta / borrado—, así que este
- * cliente tampoco tiene un `editar`. Renombrar un PDC se hace BORRÁNDOLO y
- * volviéndolo a crear con el código nuevo, con la consecuencia que eso arrastra: el
- * borrado se lleva por delante el subgrupo mono-Di, y devuelve 409 si alguna plaza
- * lo está usando. No es una carencia que este cliente pueda tapar.
+ * <p><b>CUATRO verbos, y la edición solo toca el total.</b> Desde S203 `PdcController`
+ * expone `PUT`, pero solo cambia el `totalDeclarado`: el `codigo` del cuerpo tiene que ser
+ * el del PDC. Renombrar un PDC se sigue haciendo BORRÁNDOLO y volviéndolo a crear con el
+ * código nuevo, con la consecuencia que eso arrastra: el borrado se lleva por delante el
+ * subgrupo mono-Di, y devuelve 409 si alguna plaza lo está usando.
  *
  * <p><b>El tipo de respuesta es {@link Grupo}</b> porque el backend devuelve un
- * `GrupoDTO` en los tres verbos: mismo record, mismos cuatro campos.
+ * `GrupoDTO` en los cuatro verbos.
  */
 @Injectable({ providedIn: 'root' })
 export class PdcService {
@@ -55,6 +54,17 @@ export class PdcService {
    */
   crear(idPadre: number, peticion: PdcRequest): Observable<Grupo> {
     return this.http.post<Grupo>(`/api/grupos/${idPadre}/pdc`, peticion);
+  }
+
+  /**
+   * PUT /api/grupos/{idPadre}/pdc → cambia el total declarado del PDC (S203, 200).
+   *
+   * <p>`idPadre` es el id del grupo ORDINARIO PADRE, nunca el del PDC. El `codigo` de la
+   * petición tiene que ser el del PDC: si no, 400 (el PUT no renombra). 404 si el padre no
+   * existe o no tiene PDC; 400 si el total es negativo.
+   */
+  editar(idPadre: number, peticion: PdcRequest): Observable<Grupo> {
+    return this.http.put<Grupo>(`/api/grupos/${idPadre}/pdc`, peticion);
   }
 
   /**

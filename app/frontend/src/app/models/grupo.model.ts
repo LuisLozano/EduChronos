@@ -14,7 +14,10 @@
  * contrato: en este bloque es siempre null.
  */
 
-/** Espejo de `GrupoDTO(Long id, String codigo, String nivel, String tipo)`. */
+/**
+ * Espejo de `GrupoDTO(Long id, String codigo, String nivel, String tipo, Integer totalDeclarado)`.
+ * `totalDeclarado` (S203) es opcional en el tipo por la razón que da `Profesor`; null = sin total.
+ */
 export interface Grupo {
   /** `Long` en el backend; siempre presente en un DTO devuelto por el servidor. */
   id: number;
@@ -34,10 +37,11 @@ export interface Grupo {
    * precisamente para discriminar qué acciones ofrece cada fila.
    */
   tipo: string;
+  totalDeclarado?: number | null;
 }
 
 /**
- * Espejo de `GrupoRequest(String codigo, String nivel, String tipo)`.
+ * Espejo de `GrupoRequest(String codigo, String nivel, String tipo, Integer totalDeclarado)`.
  * Sin `id`: el id va en la URL (`PUT /{id}`), no en el cuerpo.
  *
  * <p>`tipo` es obligatorio en el contrato aunque el formulario no lo exponga:
@@ -47,13 +51,18 @@ export interface GrupoRequest {
   codigo: string;
   nivel: string;
   tipo: string;
+  /** S203. `GrupoForm` lo manda siempre, vacío como null: el PUT es reemplazo total. */
+  totalDeclarado?: number | null;
 }
 
 /**
- * Espejo de `PdcRequest(String codigo)`, el cuerpo del
- * `POST /api/grupos/{idPadre}/pdc` (Bloque 8.5-D1).
+ * Espejo de `PdcRequest(String codigo, Integer totalDeclarado)`, el cuerpo del
+ * `POST` y del `PUT /api/grupos/{idPadre}/pdc` (Bloque 8.5-D1; `PUT` y total desde S203).
  *
- * <p>UN SOLO CAMPO, y los tres que faltan no son un olvido: el PADRE viaja en la
+ * <p>En el `PUT` el `codigo` no cambia: tiene que ser el del PDC (si no, 400), y solo se
+ * guarda el `totalDeclarado`.
+ *
+ * <p>El código y el total, y los tres que faltan no son un olvido: el PADRE viaja en la
  * URL, el `nivel` lo HEREDA el backend del padre (I5) y el `tipo` es siempre
  * `DIVERSIFICACION_PDC`, fijado por el flujo y no por el cliente. Mandar cualquiera
  * de los tres en el cuerpo no haría nada: el backend no los lee.
@@ -64,4 +73,6 @@ export interface GrupoRequest {
  */
 export interface PdcRequest {
   codigo: string;
+  /** S203. Null = sin total; opcional en el tipo por la razón que da `Profesor`. */
+  totalDeclarado?: number | null;
 }

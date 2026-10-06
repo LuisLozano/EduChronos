@@ -40,6 +40,8 @@ describe('ProfesorLista', () => {
   function flushLista(filas: unknown[] = []): void {
     fixture.detectChanges(); // dispara ngOnInit → cargar()
     http.expectOne('/api/profesores').flush(filas);
+    // S203: cargar() pide también el cuadre de horas; sin atenderlo, http.verify() cae.
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
   }
 
   it('(1) carga la lista en init y la pinta', async () => {
@@ -59,6 +61,7 @@ describe('ProfesorLista', () => {
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush('', { status: 500, statusText: 'Server Error' });
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
@@ -226,5 +229,97 @@ describe('ProfesorLista', () => {
     // El diálogo se abrió de verdad: el expectNone mide la ausencia de recarga, no un
     // botón que no hiciera nada.
     expect(dialog.open).toHaveBeenCalledTimes(1);
+  });
+
+  // ─────────────────────────── S203 T3a: columnas Cargo y Horas
+
+  const DOS = [
+    { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, cargo: 'JEFE_ESTUDIOS' },
+    { id: 8, codigo: 'LEN2', nombreCompleto: 'Luis Gil', totalDeclarado: null, cargo: 'PROFESOR' },
+  ];
+
+  /** Carga la lista y responde el cuadre con las entradas dadas. */
+  function flushConCuadre(filas: unknown[], profesores: unknown[]): void {
+    fixture.detectChanges();
+    http.expectOne('/api/profesores').flush(filas);
+    http.expectOne('/api/prevalidacion/cuadre').flush({ profesores, grupos: [] });
+  }
+
+  /** La celda de la columna `indice` de la fila `fila`. */
+  function celda(fila: number, indice: number): HTMLElement {
+    const filas = (fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr');
+    return filas[fila].querySelectorAll('td')[indice] as HTMLElement;
+  }
+
+  const HORAS = 3;
+
+  it('(12) la tabla pinta Cargo y Horas entre el nombre y las acciones', async () => {
+    flushConCuadre(DOS, []);
+    await fixture.whenStable();
+
+    const cabeceras = [...(fixture.nativeElement as HTMLElement).querySelectorAll('thead th')].map(
+      (th) => th.textContent!.trim(),
+    );
+    expect(cabeceras).toEqual(['Código', 'Nombre completo', 'Cargo', 'Horas', '']);
+  });
+
+  it('(13) la columna Cargo pinta la etiqueta, no la constante', async () => {
+    flushConCuadre(DOS, []);
+    await fixture.whenStable();
+
+    expect(celda(0, 2).textContent!.trim()).toBe('Jefe/a de Estudios');
+    expect(celda(1, 2).textContent!.trim()).toBe('Profesor/a');
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('JEFE_ESTUDIOS');
+  });
+
+  it('(14) con total y cuadra: «{c} de {d}», sin marca', async () => {
+    flushConCuadre(DOS, [{ codigo: 'MAT8', configuradas: 18, declaradas: 18, descuadre: false }]);
+    await fixture.whenStable();
+
+    expect(celda(0, HORAS).textContent!.trim()).toBe('18 de 18');
+    expect(celda(0, HORAS).classList.contains('horas--no-cuadra')).toBe(false);
+  });
+
+  it('(15) con total y no cuadra: «{c} de {d} (no cuadra)», con el color de aviso', async () => {
+    flushConCuadre(DOS, [{ codigo: 'MAT8', configuradas: 20, declaradas: 18, descuadre: true }]);
+    await fixture.whenStable();
+
+    expect(celda(0, HORAS).textContent!.trim()).toBe('20 de 18 (no cuadra)');
+    expect(celda(0, HORAS).classList.contains('horas--no-cuadra')).toBe(true);
+  });
+
+  it('(16) sin total: solo la cifra configurada, sin marca', async () => {
+    flushConCuadre(DOS, [{ codigo: 'LEN2', configuradas: 16, declaradas: null, descuadre: false }]);
+    await fixture.whenStable();
+
+    expect(celda(1, HORAS).textContent!.trim()).toBe('16');
+    expect(celda(1, HORAS).classList.contains('horas--no-cuadra')).toBe(false);
+  });
+
+  it('(17) empareja por código aunque el cuadre llegue en otro orden que la lista', async () => {
+    flushConCuadre(DOS, [
+      { codigo: 'LEN2', configuradas: 16, declaradas: null, descuadre: false },
+      { codigo: 'MAT8', configuradas: 18, declaradas: 18, descuadre: false },
+    ]);
+    await fixture.whenStable();
+
+    expect(celda(0, HORAS).textContent!.trim()).toBe('18 de 18');
+    expect(celda(1, HORAS).textContent!.trim()).toBe('16');
+  });
+
+  it('(18) si falla el GET de cuadre, la tabla se pinta igual, Horas queda vacía y sale su mensaje', async () => {
+    fixture.detectChanges();
+    http.expectOne('/api/profesores').flush(DOS);
+    http.expectOne('/api/prevalidacion/cuadre').flush('', { status: 500, statusText: 'Server Error' });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelectorAll('tbody tr').length).toBe(2);
+    expect(celda(0, HORAS).textContent!.trim()).toBe('');
+    expect(celda(1, HORAS).textContent!.trim()).toBe('');
+    expect(raiz.querySelector('.profesores__error-horas')!.textContent!.trim()).toBe(
+      'No se pudieron cargar las horas.',
+    );
+    expect(raiz.querySelector('.estado-lista__error')).toBeNull();
   });
 });

@@ -27,12 +27,18 @@
        las siete listas y verificable por grep (7 coincidencias). No lleva
        `!error()`: con filas cargadas y un 409 de borrado la tabla SIGUE, que es
        la reversión medida de S124 —encadenar el error se llevaba 8 filas a 0—. -->
+  @if (errorHoras()) {
+    <p class="profesores__error-horas" role="alert">{{ errorHoras() }}</p>
+  }
+
   @if (!cargando() && visibles().length > 0) {
   <table class="profesores__tabla">
     <thead>
     <tr>
       <th>Código</th>
       <th>Nombre completo</th>
+      <th>Cargo</th>
+      <th>Horas</th>
       <th></th>
     </tr>
     </thead>
@@ -41,6 +47,8 @@
     <tr>
       <td class="dato">{{ p.codigo }}</td>
       <td>{{ p.nombreCompleto }}</td>
+      <td class="profesores__cargo">{{ etiquetaCargo(p) }}</td>
+      <td class="profesores__horas dato" [class.horas--no-cuadra]="horas(p)?.descuadre === true">{{ textoHoras(p) }}</td>
       <td class="profesores__acciones">
         <button type="button" class="profesores__editar accion-compacta" (click)="editar(p)">
           Editar

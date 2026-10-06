@@ -200,6 +200,7 @@ describe('GrupoForm', () => {
       codigo: '1ESOA',
       nivel: '1ESO',
       tipo: 'ORDINARIO',
+      totalDeclarado: null,
     });
     req.flush({ id: 7, codigo: '1ESOA', nivel: '1ESO', tipo: 'ORDINARIO' });
     // La rama de edición tiene su propio caso en (11): aunque hoy ambas ramas
@@ -240,7 +241,61 @@ describe('GrupoForm', () => {
       codigo: '2ESOC',
       nivel: '1ESO',
       tipo: 'ORDINARIO',
+      totalDeclarado: null,
     });
     req.flush({ id: 8, codigo: '2ESOC', nivel: '1ESO', tipo: 'ORDINARIO' });
+  });
+
+  // ─────────────────────────── S203 T3a: horas semanales declaradas
+
+  function teclearTotal(valor: string): void {
+    const input = fixture.nativeElement.querySelector('.grupo-form__total') as HTMLInputElement;
+    input.value = valor;
+    input.dispatchEvent(new Event('input'));
+  }
+
+  it('(12) envía el total escrito', () => {
+    montar(null);
+    instancia().form.setValue({ codigo: '1ESOA', nivel: '1ESO' });
+    teclearTotal('30');
+    instancia().guardar();
+
+    const req = http.expectOne('/api/grupos');
+    expect(req.request.body).toEqual({
+      codigo: '1ESOA',
+      nivel: '1ESO',
+      tipo: 'ORDINARIO',
+      totalDeclarado: 30,
+    });
+    req.flush({ id: 7 });
+  });
+
+  it('(13) al editar un grupo con total 30, guardar sin tocarlo envía 30', async () => {
+    montar({ id: 8, codigo: '2ESOB', nivel: '2ESO', tipo: 'ORDINARIO', totalDeclarado: 30 });
+    await fixture.whenStable();
+    const total = fixture.nativeElement.querySelector('.grupo-form__total') as HTMLInputElement;
+    expect(total.value).toBe('30');
+
+    instancia().guardar();
+
+    const req = http.expectOne('/api/grupos/8');
+    expect(req.request.body).toEqual({
+      codigo: '2ESOB',
+      nivel: '2ESO',
+      tipo: 'ORDINARIO',
+      totalDeclarado: 30,
+    });
+    req.flush({ id: 8 });
+  });
+
+  it('(14) con total negativo no se puede guardar', async () => {
+    montar(null);
+    instancia().form.setValue({ codigo: '1ESOA', nivel: '1ESO' });
+    teclearTotal('-1');
+    instancia().guardar();
+    await fixture.whenStable();
+
+    http.expectNone('/api/grupos');
+    expect(fixture.nativeElement.textContent).toContain('Las horas no pueden ser negativas.');
   });
 });

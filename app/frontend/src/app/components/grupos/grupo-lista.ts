@@ -2,7 +2,9 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { GrupoService } from '../../services/grupo.service';
+import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { Grupo } from '../../models/grupo.model';
+import { CuadreEntidad } from '../../models/prevalidacion.model';
 import { GrupoForm } from './grupo-form';
 import { PdcDialogo } from './pdc-dialogo';
 import { ReplicacionDialogo } from './replicacion-dialogo';
@@ -11,6 +13,7 @@ import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
+import { textoHoras } from '../../catalogo/horas';
 
 /** El único tipo que admite acciones en esta pantalla. Ver el javadoc de la clase. */
 const TIPO_ORDINARIO = 'ORDINARIO';
@@ -63,6 +66,11 @@ const ETIQUETAS_TIPO = new Map<string, string>([
  *
  * <p>El 409 de borrado sí es rico aquí: un grupo con subgrupos o con hijos PDC no se
  * borra, y el backend nombra cuántos de cada tipo lo impiden.
+ *
+ * <p><b>Horas (S203).</b> Sale de `GET /api/prevalidacion/cuadre`, pedido en {@link cargar} a
+ * la vez que la lista y emparejado POR CÓDIGO, PDC incluidos: el frontend no recalcula nada.
+ * Si ese GET falla, la tabla se pinta igual, «Horas» queda vacía y sale un mensaje propio. El
+ * total del PDC se edita en su diálogo, no en su fila, que sigue sin «Editar».
  */
 @Component({
   selector: 'app-grupo-lista',
@@ -73,11 +81,17 @@ const ETIQUETAS_TIPO = new Map<string, string>([
 export class GrupoLista implements OnInit {
   private readonly service = inject(GrupoService);
   private readonly dialog = inject(Dialog);
+  private readonly prevalidacion = inject(PrevalidacionService);
 
   protected readonly grupos = signal<Grupo[]>([]);
   protected readonly cargando = signal(false);
   /** Error de la última operación de lista o borrado. Vacío = sin error. */
   protected readonly error = signal('');
+
+  /** Cuadre de horas por código de grupo (también los PDC); vacío hasta que llega o si falla. */
+  protected readonly cuadre = signal<ReadonlyMap<string, CuadreEntidad>>(new Map());
+  /** Error del GET de cuadre, aparte del de la lista. Vacío = sin error. */
+  protected readonly errorHoras = signal('');
 
   /** Texto escrito en la caja de la cabecera. Vacío = se ven todas las filas. */
   protected readonly busqueda = signal('');
@@ -110,9 +124,20 @@ export class GrupoLista implements OnInit {
     this.cargar();
   }
 
+  /** La entrada del cuadre de una fila, buscada por su código. */
+  protected horas(grupo: Grupo): CuadreEntidad | undefined {
+    return this.cuadre().get(grupo.codigo);
+  }
+
+  /** El texto de la celda «Horas» de una fila (ver `catalogo/horas.ts`). */
+  protected textoHoras(grupo: Grupo): string {
+    return textoHoras(this.horas(grupo));
+  }
+
   protected cargar(): void {
     this.cargando.set(true);
     this.error.set('');
+    this.cargarCuadre();
     this.service.listar().subscribe({
       next: (lista) => {
         this.grupos.set(lista);
@@ -121,6 +146,22 @@ export class GrupoLista implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.error.set(this.mensaje(err, 'No se pudo cargar la lista de grupos'));
         this.cargando.set(false);
+      },
+    });
+  }
+
+  /**
+   * El cuadre de horas (S203), a la vez que la lista y emparejado por código. Su fallo no
+   * toca `grupos` ni `error`: deja «Horas» vacía y pone su propio mensaje.
+   */
+  private cargarCuadre(): void {
+    this.errorHoras.set('');
+    this.prevalidacion.getCuadre().subscribe({
+      next: (cuadre) =>
+        this.cuadre.set(new Map(cuadre.grupos.map((e) => [e.codigo, e] as const))),
+      error: () => {
+        this.cuadre.set(new Map());
+        this.errorHoras.set('No se pudieron cargar las horas.');
       },
     });
   }

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { AvisoPrevalidacion } from '../models/prevalidacion.model';
+import { AvisoPrevalidacion, Cuadre } from '../models/prevalidacion.model';
 
 /**
  * Cliente de la capa REST de pre-validación (Fase 8, Bloque 8.4-B1). Mismo
@@ -24,5 +24,14 @@ export class PrevalidacionService {
    */
   getPrevalidacion(): Observable<AvisoPrevalidacion[]> {
     return this.http.get<AvisoPrevalidacion[]>('/api/prevalidacion');
+  }
+
+  /**
+   * GET /api/prevalidacion/cuadre → el cuadre de horas declaradas de TODOS los profesores y
+   * grupos (S203), con y sin total. Lo piden las listas en su `cargar()` y lo emparejan por
+   * código. Wrapper pelado: el componente decide qué hacer si falla.
+   */
+  getCuadre(): Observable<Cuadre> {
+    return this.http.get<Cuadre>('/api/prevalidacion/cuadre');
   }
 }
