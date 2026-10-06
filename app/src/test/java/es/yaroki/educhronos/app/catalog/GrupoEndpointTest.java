@@ -1,6 +1,7 @@
 package es.yaroki.educhronos.app.catalog;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -306,6 +307,82 @@ class GrupoEndpointTest {
                 .andExpect(jsonPath("$.nivel").value("2ESO"));
     }
 
+    // ──────────────────────── S203 T1: total declarado (C-totales-y-cargo, T1.4)
+
+    @Test
+    void total_altaConTotal_201YLoDevuelve() throws Exception {
+        mockMvc.perform(post("/api/grupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("1ESO_A", "1ESO", "30")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalDeclarado").value(30));
+    }
+
+    @Test
+    void total_altaSinTotal_nulo() throws Exception {
+        mockMvc.perform(post("/api/grupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("1ESO_A", "1ESO", "ORDINARIO")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+    }
+
+    @Test
+    void total_altaTotalNegativo_400ConCampoEnMensaje() throws Exception {
+        mockMvc.perform(post("/api/grupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("1ESO_A", "1ESO", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("totalDeclarado")));
+    }
+
+    @Test
+    void total_edicionLoCambia_200() throws Exception {
+        long id = crear(body("1ESO_A", "1ESO", "ORDINARIO"));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("1ESO_A", "1ESO", "0")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDeclarado").value(0));
+    }
+
+    /** D7: el PUT reemplaza. Sin total, un grupo con 30 queda sin total. */
+    @Test
+    void total_edicionSinTotal_loDejaNulo() throws Exception {
+        long id = crear(bodyConTotal("1ESO_A", "1ESO", "30"));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("1ESO_A", "1ESO", "ORDINARIO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+        mockMvc.perform(get("/api/grupos/" + id))
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+    }
+
+    @Test
+    void total_edicionTotalNegativo_400() throws Exception {
+        long id = crear(bodyConTotal("1ESO_A", "1ESO", "30"));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("1ESO_A", "1ESO", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("totalDeclarado")));
+    }
+
+    @Test
+    void total_getLoDevuelve() throws Exception {
+        long id = crear(bodyConTotal("1ESO_A", "1ESO", "30"));
+
+        mockMvc.perform(get("/api/grupos/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDeclarado").value(30));
+        mockMvc.perform(get("/api/grupos"))
+                .andExpect(jsonPath("$[0].totalDeclarado").value(30));
+    }
+
     /** Da de alta un PDC por la red bajo el padre indicado y devuelve su id. */
     private long crearPdc(long idPadre, String codigo) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/grupos/" + idPadre + "/pdc")
@@ -326,6 +403,12 @@ class GrupoEndpointTest {
                 .andReturn();
         Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
         return id.longValue();
+    }
+
+    /** {@code {"codigo":..,"nivel":..,"tipo":"ORDINARIO","totalDeclarado":..}}, con el total literal JSON. */
+    private static String bodyConTotal(String codigo, String nivel, String total) {
+        return "{\"codigo\":\"" + codigo + "\",\"nivel\":\"" + nivel + "\""
+                + ",\"tipo\":\"ORDINARIO\",\"totalDeclarado\":" + total + "}";
     }
 
     /** {@code {"codigo":..,"nivel":..,"tipo":..}} */

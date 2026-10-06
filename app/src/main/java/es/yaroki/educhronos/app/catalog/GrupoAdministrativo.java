@@ -40,6 +40,10 @@ public class GrupoAdministrativo {
     @JoinColumn(name = "grupo_padre_id")
     private GrupoAdministrativo grupoPadre;
 
+    /** Horas semanales declaradas (S203), de un ordinario o de un PDC; null si no se han declarado. */
+    @Column(name = "total_declarado")
+    private Integer totalDeclarado;
+
     protected GrupoAdministrativo() {
         // requerido por JPA
     }
@@ -69,6 +73,14 @@ public class GrupoAdministrativo {
 
     public GrupoAdministrativo getGrupoPadre() {
         return grupoPadre;
+    }
+
+    public Integer getTotalDeclarado() {
+        return totalDeclarado;
+    }
+
+    public void setTotalDeclarado(Integer totalDeclarado) {
+        this.totalDeclarado = totalDeclarado;
     }
 
     /**

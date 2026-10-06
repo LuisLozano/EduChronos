@@ -7,8 +7,14 @@ package es.yaroki.educhronos.app.web.dto;
  *
  * <p>Solo datos, sin lógica (patrón de los DTO de 7A/8.2): la validación (código y
  * nombre no vacíos, unicidad de código) vive en {@code ProfesorService}.
+ *
+ * <p>{@code totalDeclarado} y {@code cargo} (S203) son opcionales: ausentes o null quieren decir
+ * «sin total» y {@code PROFESOR}, también en el {@code PUT}, que reemplaza el estado entero.
+ * {@code cargo} entra como {@code String} por la misma razón que {@code GrupoRequest.tipo}.
  */
 public record ProfesorRequest(
         String codigo,
-        String nombreCompleto) {
+        String nombreCompleto,
+        Integer totalDeclarado,
+        String cargo) {
 }

@@ -14,11 +14,14 @@ package es.yaroki.educhronos.app.web.dto;
  * <p>{@code grupoPadre} NO se expone: en este bloque es siempre null (los PDC que lo
  * usan son 8.5-D).
  *
+ * <p>{@code totalDeclarado} (S203) es null si no se ha declarado; lo lleva también el PDC.
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code GrupoService}.
  */
 public record GrupoDTO(
         Long id,
         String codigo,
         String nivel,
-        String tipo) {
+        String tipo,
+        Integer totalDeclarado) {
 }

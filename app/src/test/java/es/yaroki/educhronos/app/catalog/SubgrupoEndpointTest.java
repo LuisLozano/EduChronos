@@ -405,7 +405,7 @@ class SubgrupoEndpointTest {
      */
     private long crearPdcYDevolverIdDeSuMonoDi(String codigoPadre, String codigoPdc) {
         long idPadre = grupoRepository.findByCodigo(codigoPadre).orElseThrow().getId();
-        pdcService.crear(idPadre, new PdcRequest(codigoPdc));
+        pdcService.crear(idPadre, new PdcRequest(codigoPdc, null));
         entityManager.flush();
         entityManager.clear();
         return subgrupoRepository.findByCodigo(codigoPdc + "-Completo").orElseThrow().getId();

@@ -17,10 +17,14 @@ package es.yaroki.educhronos.app.web.dto;
  * (PDC → 8.5-D, virtuales de optativa → 8.5-C+) y aquí producen un 400 que nombra el
  * tipo rechazado.
  *
+ * <p>{@code totalDeclarado} (S203) es opcional: ausente o null quiere decir «sin total», también
+ * en el {@code PUT}, que reemplaza el estado entero.
+ *
  * <p>Solo datos, sin lógica: toda la validación vive en {@code GrupoService}.
  */
 public record GrupoRequest(
         String codigo,
         String nivel,
-        String tipo) {
+        String tipo,
+        Integer totalDeclarado) {
 }

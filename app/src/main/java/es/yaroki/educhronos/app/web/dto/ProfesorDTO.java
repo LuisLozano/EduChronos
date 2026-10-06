@@ -5,10 +5,15 @@ package es.yaroki.educhronos.app.web.dto;
  * SIMÉTRICA a {@link ProfesorRequest} más el {@code id} sintético que necesitan el
  * {@code GET/{id}}, el {@code PUT/{id}} y el {@code DELETE/{id}}.
  *
+ * <p>{@code totalDeclarado} es null si no se ha declarado; {@code cargo} viaja como el
+ * {@code name()} del {@code Cargo} (S203).
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code ProfesorService}.
  */
 public record ProfesorDTO(
         Long id,
         String codigo,
-        String nombreCompleto) {
+        String nombreCompleto,
+        Integer totalDeclarado,
+        String cargo) {
 }

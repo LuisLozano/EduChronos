@@ -1,11 +1,13 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.app.catalog.Cargo;
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorRequest;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,8 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>(a) {@code codigo} no nulo ni en blanco;
  *   <li>(b) {@code nombreCompleto} no nulo ni en blanco;
  *   <li>(c) unicidad de {@code codigo}: en el alta, ningún otro registro con ese
- *       código; en la edición, ninguno SALVO la propia entidad.
+ *       código; en la edición, ninguno SALVO la propia entidad;
+ *   <li>(d) {@code totalDeclarado} null o ≥ 0 (S203, {@link TotalDeclarado});
+ *   <li>(e) {@code cargo} null o ausente es {@code PROFESOR}; si viene, parseable a
+ *       {@link Cargo}, con un 400 que nombra el valor y lista los válidos.
  * </ul>
+ *
+ * <p>El {@code PUT} reemplaza el estado entero: un total o un cargo ausentes vuelven a «sin
+ * total» y a {@code PROFESOR}, no conservan lo que había (S203, D7).
  *
  * <p><b>Dos familias de excepción, dos códigos HTTP.</b> "No encontrado" lanza
  * {@link NoSuchElementException} (→ 404 en el controlador); un fallo de validación
@@ -69,12 +77,16 @@ public class ProfesorService {
     @Transactional
     public ProfesorDTO crear(ProfesorRequest peticion) {
         validar(peticion);
+        Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
+        Cargo cargo = parseCargo(peticion.cargo());
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un profesor con codigo " + peticion.codigo());
         });
-        Profesor guardado =
-                repositorio.save(new Profesor(peticion.codigo(), peticion.nombreCompleto()));
+        Profesor nuevo = new Profesor(peticion.codigo(), peticion.nombreCompleto());
+        nuevo.setTotalDeclarado(total);
+        nuevo.setCargo(cargo);
+        Profesor guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
 
@@ -89,6 +101,8 @@ public class ProfesorService {
         Profesor entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe profesor con id " + id));
         validar(peticion);
+        Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
+        Cargo cargo = parseCargo(peticion.cargo());
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -96,6 +110,8 @@ public class ProfesorService {
                             "Ya existe otro profesor con codigo " + peticion.codigo());
                 });
         entidad.actualizar(peticion.codigo(), peticion.nombreCompleto());
+        entidad.setTotalDeclarado(total);
+        entidad.setCargo(cargo);
         return aDTO(entidad);
     }
 
@@ -125,8 +141,26 @@ public class ProfesorService {
         }
     }
 
+    /**
+     * Regla (e) cargo: ausente o null es PROFESOR (S203); si viene, parseable a {@link Cargo},
+     * con el 400 de {@code ActividadService.parseTipo}: nombra el valor y lista los válidos.
+     */
+    private static Cargo parseCargo(String valor) {
+        if (valor == null) {
+            return Cargo.PROFESOR;
+        }
+        try {
+            return Cargo.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "cargo invalido: '" + valor + "'. Valores validos: "
+                            + Arrays.toString(Cargo.values()));
+        }
+    }
+
     private static ProfesorDTO aDTO(Profesor profesor) {
         return new ProfesorDTO(
-                profesor.getId(), profesor.getCodigo(), profesor.getNombreCompleto());
+                profesor.getId(), profesor.getCodigo(), profesor.getNombreCompleto(),
+                profesor.getTotalDeclarado(), profesor.getCargo().name());
     }
 }

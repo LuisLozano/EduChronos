@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,8 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
  * enruta y traduce excepciones a códigos HTTP POR TIPO (sin {@code @ControllerAdvice},
  * patrón vigente):
  * {@link NoSuchElementException} (padre inexistente o sin PDC) → {@code 404};
- * {@link IllegalArgumentException} (validación de alta) → {@code 400} con el mensaje en el
- * reason; {@link ReferenciaEntranteException} (subgrupo mono-Di en uso) → {@code 409}.
+ * {@link IllegalArgumentException} (validación de alta o de edición) → {@code 400} con el
+ * mensaje en el reason; {@link ReferenciaEntranteException} (subgrupo mono-Di en uso) → {@code 409}.
  */
 @RestController
 @RequestMapping("/api/grupos/{idPadre}/pdc")
@@ -57,6 +58,18 @@ public class PdcController {
             return service.obtener(idPadre);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    /** Cambia el total declarado del PDC (S203); el código no cambia. */
+    @PutMapping
+    public GrupoDTO editar(@PathVariable("idPadre") Long idPadre, @RequestBody PdcRequest peticion) {
+        try {
+            return service.editar(idPadre, peticion);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 

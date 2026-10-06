@@ -22,12 +22,12 @@ import org.sqlite.SQLiteDataSource;
  * Spec de {@link PreparadorEsquema} (O-base-tecnica, S191, C-esquema-versionado, condición 1).
  *
  * <p><b>Varios juegos de scripts.</b> El REAL —{@code schema.sql} y {@code esquema/}— tiene
- * desde S201 la versión 2, con una migración de verdad ({@code 002.sql}, que reconstruye
- * {@code sesion}): los casos 1 a 5, el 11 y los de S201 lo usan para fijar lo que pasa con
- * las bases que existen. El de PRUEBA ({@code esquema-prueba/}, versión 2) es el que ejerce el
- * bucle de migraciones, el ROTO ({@code esquema-roto/}) el que mide que una migración que
- * falla no deja nada a medias, y el HUÉRFANO ({@code esquema-huerfano/}) el que mide la
- * guarda de filas huérfanas.
+ * desde S201 migraciones de verdad ({@code 002.sql}, que reconstruye {@code sesion}) y desde
+ * S203 la versión 3 ({@code 003.sql}, totales declarados y cargo): los casos 1 a 5, el 11 y
+ * los de S201 y S203 lo usan para fijar lo que pasa con las bases que existen. El de PRUEBA
+ * ({@code esquema-prueba/}, versión 2) es el que ejerce el bucle de migraciones, el ROTO
+ * ({@code esquema-roto/}) el que mide que una migración que falla no deja nada a medias, y el
+ * HUÉRFANO ({@code esquema-huerfano/}) el que mide la guarda de filas huérfanas.
  *
  * <p>Sin Spring: un {@link SQLiteDataSource} sobre un fichero de un {@code @TempDir} y un
  * {@link DefaultResourceLoader}. Cada conexión es nueva, así que lo que se lee después de
@@ -186,10 +186,11 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S201, a) Una base de la versión 1 CON DATOS —coherentes, sin huérfanos— llega a la 2 sin
-     * perder nada. {@code 002.sql} reconstruye {@code sesion} (renombrar, crear, copiar, borrar)
-     * y añade {@code actividad.tipo}: el esquema queda IGUAL al de una base nueva, las sesiones
-     * idénticas campo a campo, todas las actividades como CLASE y ningún huérfano.
+     * (S201, a) Una base de la versión 1 CON DATOS —coherentes, sin huérfanos— llega a la vigente
+     * sin perder nada (hasta S203, a la 2). {@code 002.sql} reconstruye {@code sesion}
+     * (renombrar, crear, copiar, borrar) y añade {@code actividad.tipo}: el esquema queda IGUAL
+     * al de una base nueva, las sesiones idénticas campo a campo, todas las actividades como
+     * CLASE y ningún huérfano.
      */
     @Test
     void unaBaseV1ConDatosLlegaALaVigenteSinPerderNada(@TempDir Path carpeta) throws Exception {
@@ -233,7 +234,58 @@ class PreparadorEsquemaTest {
                 .containsExactly("0");
         assertThat(BancoDeCursos.filas(base, "actividad")).isEqualTo(actividadesAntes);
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
-        assertThat(version(base)).isEqualTo(2);
+        assertThat(version(base)).isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
+    }
+
+    /**
+     * (S203) Una base de la versión 2 CON DATOS llega a la 3 sin perder nada, calcado de (S201,
+     * a). La base se levanta con las migraciones reales hasta la 2 ({@code 001.sql} y
+     * {@code 002.sql}) y se sella a mano. {@code 003.sql} añade tres columnas: el esquema queda
+     * IGUAL al de una base nueva, los profesores y los grupos —un ordinario y su PDC— idénticos
+     * campo a campo, todos los profesores como PROFESOR y nadie con total declarado.
+     */
+    @Test
+    void unaBaseV2ConDatosLlegaALa3SinPerderNada(@TempDir Path carpeta) throws Exception {
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v2.db"), null, false);
+        try (Connection conexion = BancoDeCursos.conectar(base)) {
+            ScriptUtils.executeSqlScript(conexion, migracionReal(2));
+        }
+        ejecutar(
+                base,
+                "PRAGMA user_version = 2",
+                "insert into profesor (id, codigo, nombre_completo) values (1, 'MAT1', 'Uno')",
+                "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')",
+                "insert into nivel (id, codigo, orden) values (1, 'ESO3', 3)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo, grupo_padre_id)"
+                        + " values (1, '3A', 1, 'ORDINARIO', null)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo, grupo_padre_id)"
+                        + " values (2, '3ADI', 1, 'DIVERSIFICACION_PDC', 1)");
+        String profesores = "select id, codigo, nombre_completo from profesor order by id";
+        String grupos =
+                "select id, codigo, nivel_id, tipo, grupo_padre_id from grupo_administrativo order by id";
+        List<String> profesoresAntes = consulta(base, profesores);
+        List<String> gruposAntes = consulta(base, grupos);
+        assertThat(version(base)).as("precondición: versión 2").isEqualTo(2);
+        assertThat(profesoresAntes).as("precondición: dos profesores").hasSize(2);
+        assertThat(gruposAntes).as("precondición: dos grupos").hasSize(2);
+        Path vacia = carpeta.resolve("vacia.db");
+        real().preparar(origen(vacia));
+
+        real().preparar(origen(base));
+
+        assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
+        assertThat(consulta(base, profesores))
+                .as("los profesores, campo a campo")
+                .isEqualTo(profesoresAntes);
+        assertThat(consulta(base, grupos)).as("los grupos, campo a campo").isEqualTo(gruposAntes);
+        assertThat(consulta(base, "select id, cargo, total_declarado from profesor order by id"))
+                .as("todos PROFESOR y sin total")
+                .containsExactly("1|PROFESOR|null", "2|PROFESOR|null");
+        assertThat(consulta(base, "select id, total_declarado from grupo_administrativo order by id"))
+                .as("ningún grupo con total")
+                .containsExactly("1|null", "2|null");
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+        assertThat(version(base)).isEqualTo(3);
     }
 
     // ─────────────────────────────────────────────────────────────── juego de prueba

@@ -516,7 +516,8 @@ class CursoAperturaTest {
 
         assertThat(salida.getOut())
                 .contains("Esquema preparado ruta=" + historica.toRealPath()
-                        + " versionInicial=0 versionFinal=2 baseVacia=false");
+                        + " versionInicial=0 versionFinal=" + PreparadorEsquema.VERSION_ESQUEMA
+                        + " baseVacia=false");
     }
 
     /**
@@ -536,7 +537,8 @@ class CursoAperturaTest {
 
         assertThat(salida.getOut())
                 .contains("Esquema posterior rechazado ruta=" + futura.toRealPath()
-                        + " versionBase=3 versionAplicacion=2");
+                        + " versionBase=" + posterior
+                        + " versionAplicacion=" + PreparadorEsquema.VERSION_ESQUEMA);
     }
 
     // ───────────────────────────────────────────────────────────── requisito (b) y duplicar

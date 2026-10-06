@@ -19,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Servicio de aplicación del sub-recurso PDC (§4.1, Bloque 8.5-D1): alta/consulta/borrado
- * de un grupo de Diversificación ({@link TipoGrupo#DIVERSIFICACION_PDC}) COLGADO de su
- * grupo ordinario padre. Distinto y separado de {@link GrupoService} (que sigue
- * RESTRINGIDO a ORDINARIOS y no se toca): el PDC no se crea por el CRUD plano de grupos
- * sino por esta vía compuesta.
+ * y, desde S203, cambio del total declarado ({@link #editar}) de un grupo de Diversificación
+ * ({@link TipoGrupo#DIVERSIFICACION_PDC}) COLGADO de su grupo ordinario padre. Distinto y
+ * separado de {@link GrupoService} (que sigue RESTRINGIDO a ORDINARIOS y no se toca): el PDC
+ * no se crea por el CRUD plano de grupos sino por esta vía compuesta.
  *
  * <p><b>Alta compuesta en UNA transacción</b> ({@link #crear}): TRES cosas, no dos.
  * <ol>
@@ -41,8 +41,13 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>{@code codigo} nulo o en blanco → 400;
  *   <li>{@code codigo} ya usado por otro grupo → 400;
  *   <li>el padre YA tiene un PDC (vía {@code contarGruposHijos}) → 400;
- *   <li>el código derivado del subgrupo ya existe → 400 que NOMBRA el código chocado.
+ *   <li>el código derivado del subgrupo ya existe → 400 que NOMBRA el código chocado;
+ *   <li>{@code totalDeclarado} negativo → 400 (S203, {@link TotalDeclarado}); null es «sin total».
  * </ul>
+ *
+ * <p><b>Edición</b> ({@link #editar}, S203): SOLO el total declarado. El {@code codigo} del
+ * cuerpo tiene que ser el del PDC: cambiarlo dejaría su subgrupo mono-Di con el nombre viejo, y
+ * renombrar sigue siendo borrar y crear.
  *
  * <p><b>Borrado</b> ({@link #borrar}): borra el PDC y su subgrupo mono-Di, pero ANTES
  * comprueba la referencia ENTRANTE del subgrupo ({@code contarPlazas}); si está en alguna
@@ -85,6 +90,7 @@ public class PdcService {
             throw new IllegalArgumentException("codigo es obligatorio");
         }
         String codigo = peticion.codigo();
+        Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         grupoRepositorio.findByCodigo(codigo).ifPresent(existente -> {
             throw new IllegalArgumentException("Ya existe un grupo con codigo " + codigo);
         });
@@ -103,8 +109,10 @@ public class PdcService {
                     "El codigo de subgrupo derivado ya existe: " + codigoSubgrupo);
         });
 
-        GrupoAdministrativo pdc = grupoRepositorio.save(new GrupoAdministrativo(
-                codigo, padre.getNivel(), TipoGrupo.DIVERSIFICACION_PDC, padre));
+        GrupoAdministrativo nuevo = new GrupoAdministrativo(
+                codigo, padre.getNivel(), TipoGrupo.DIVERSIFICACION_PDC, padre);
+        nuevo.setTotalDeclarado(total);
+        GrupoAdministrativo pdc = grupoRepositorio.save(nuevo);
         // Población SOLO el PDC, nunca el padre (regla S23).
         subgrupoRepositorio.save(new Subgrupo(codigoSubgrupo, Set.of(pdc)));
         heredarTutorPrincipal(padre, pdc);
@@ -125,6 +133,26 @@ public class PdcService {
                 .map(PdcService::aDTO)
                 .orElseThrow(() -> new NoSuchElementException(
                         "El grupo con id " + idPadre + " no tiene PDC"));
+    }
+
+    /**
+     * Cambia el total declarado del PDC de un padre (S203, C-totales-y-cargo T1.5) y nada más.
+     * {@link NoSuchElementException} (→ 404) si el padre no existe o no tiene PDC, lo primero,
+     * porque es una precondición del recurso; {@link IllegalArgumentException} (→ 400) si el
+     * {@code codigo} del cuerpo no es el del PDC o si el total es negativo. Un total ausente o
+     * null deja el PDC sin total: el {@code PUT} reemplaza.
+     */
+    @Transactional
+    public GrupoDTO editar(Long idPadre, PdcRequest peticion) {
+        GrupoAdministrativo pdc = pdcDe(idPadre);
+        if (peticion == null || !pdc.getCodigo().equals(peticion.codigo())) {
+            throw new IllegalArgumentException(
+                    "El codigo del PDC no se cambia por aqui: el PDC de este grupo es "
+                            + pdc.getCodigo() + " y el cuerpo trae "
+                            + (peticion == null ? null : peticion.codigo()));
+        }
+        pdc.setTotalDeclarado(TotalDeclarado.validar(peticion.totalDeclarado()));
+        return aDTO(pdc);
     }
 
     /**
@@ -175,9 +203,23 @@ public class PdcService {
                         tutoria.getProfesor(), pdc, RolTutoria.TUTOR_PRINCIPAL)));
     }
 
+    /**
+     * El PDC de un padre, gestionado. {@link NoSuchElementException} (→ 404) si el padre no
+     * existe o no tiene PDC, con los mismos mensajes que {@link #obtener} y {@link #borrar}.
+     */
+    private GrupoAdministrativo pdcDe(Long idPadre) {
+        if (!grupoRepositorio.existsById(idPadre)) {
+            throw new NoSuchElementException("No existe grupo con id " + idPadre);
+        }
+        return grupoRepositorio.findByGrupoPadre_Id(idPadre)
+                .filter(hijo -> hijo.getTipo() == TipoGrupo.DIVERSIFICACION_PDC)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "El grupo con id " + idPadre + " no tiene PDC"));
+    }
+
     private static GrupoDTO aDTO(GrupoAdministrativo grupo) {
         return new GrupoDTO(
                 grupo.getId(), grupo.getCodigo(),
-                grupo.getNivel().getCodigo(), grupo.getTipo().name());
+                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado());
     }
 }

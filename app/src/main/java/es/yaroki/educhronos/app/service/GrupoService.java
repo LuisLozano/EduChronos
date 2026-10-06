@@ -33,7 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>(d) unicidad de {@code codigo}: en el alta ningún otro registro con ese
  *       código; en la edición ninguno SALVO la propia entidad (exclusión por id);
  *   <li>(e) SOLO EN LA EDICIÓN: la entidad EXISTENTE es {@code ORDINARIO}. Ver
- *       {@link #validarEntidadOrdinaria}.
+ *       {@link #validarEntidadOrdinaria};
+ *   <li>(f) {@code totalDeclarado} null o ≥ 0 (S203, {@link TotalDeclarado}). El {@code PUT}
+ *       reemplaza el estado entero: un total ausente vuelve a «sin total» (D7).
  * </ul>
  *
  * <p><b>(b) y (e) miran cosas distintas y las dos hacen falta.</b> (b) valida el tipo
@@ -90,12 +92,14 @@ public class GrupoService {
         validarCodigo(peticion);
         TipoGrupo tipo = validarTipo(peticion);
         Nivel nivel = resolverNivel(peticion);
+        Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un grupo con codigo " + peticion.codigo());
         });
-        GrupoAdministrativo guardado = repositorio.save(
-                new GrupoAdministrativo(peticion.codigo(), nivel, tipo, null));
+        GrupoAdministrativo nuevo = new GrupoAdministrativo(peticion.codigo(), nivel, tipo, null);
+        nuevo.setTotalDeclarado(total);
+        GrupoAdministrativo guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
 
@@ -118,6 +122,7 @@ public class GrupoService {
         validarCodigo(peticion);
         TipoGrupo tipo = validarTipo(peticion);
         Nivel nivel = resolverNivel(peticion);
+        Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -125,6 +130,7 @@ public class GrupoService {
                             "Ya existe otro grupo con codigo " + peticion.codigo());
                 });
         entidad.actualizar(peticion.codigo(), nivel, tipo);
+        entidad.setTotalDeclarado(total);
         return aDTO(entidad);
     }
 
@@ -212,6 +218,6 @@ public class GrupoService {
     private static GrupoDTO aDTO(GrupoAdministrativo grupo) {
         return new GrupoDTO(
                 grupo.getId(), grupo.getCodigo(),
-                grupo.getNivel().getCodigo(), grupo.getTipo().name());
+                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado());
     }
 }

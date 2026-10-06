@@ -3,9 +3,11 @@ package es.yaroki.educhronos.app.catalog;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -240,6 +242,119 @@ class PdcEndpointTest {
                 .andExpect(status().isNotFound());
     }
 
+    // ------------------------------------------- S203 T1: total declarado del PDC (T1.5)
+
+    @Test
+    void total_altaConTotal_201YLoDevuelveElGet() throws Exception {
+        mockMvc.perform(post("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "12")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalDeclarado").value(12));
+
+        mockMvc.perform(get("/api/grupos/" + padreId + "/pdc"))
+                .andExpect(jsonPath("$.totalDeclarado").value(12));
+    }
+
+    @Test
+    void total_altaSinTotal_nulo() throws Exception {
+        mockMvc.perform(post("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("3ADI")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+    }
+
+    @Test
+    void total_altaTotalNegativo_400() throws Exception {
+        mockMvc.perform(post("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("totalDeclarado")));
+    }
+
+    /** El PUT cambia el total (200) y el GET del PDC lo refleja; el código, el nivel y el tipo siguen. */
+    @Test
+    void put_total_200YElGetLoRefleja() throws Exception {
+        long idPdc = crearPdc("3ADI");
+
+        mockMvc.perform(put("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "14")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(idPdc))
+                .andExpect(jsonPath("$.codigo").value("3ADI"))
+                .andExpect(jsonPath("$.tipo").value("DIVERSIFICACION_PDC"))
+                .andExpect(jsonPath("$.totalDeclarado").value(14));
+
+        mockMvc.perform(get("/api/grupos/" + padreId + "/pdc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDeclarado").value(14));
+    }
+
+    /** D7: sin total, el PDC queda sin total. */
+    @Test
+    void put_sinTotal_loDejaNulo() throws Exception {
+        mockMvc.perform(post("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "12")))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(put("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("3ADI")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+    }
+
+    @Test
+    void put_totalNegativo_400() throws Exception {
+        crearPdc("3ADI");
+
+        mockMvc.perform(put("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("totalDeclarado")));
+    }
+
+    /**
+     * El código del cuerpo tiene que ser el del PDC: un PUT no renombra (su subgrupo mono-Di
+     * quedaría con el nombre viejo). 400 que nombra los dos, y el PDC sigue con su código.
+     */
+    @Test
+    void put_codigoDistinto_400YNoRenombra() throws Exception {
+        crearPdc("3ADI");
+
+        mockMvc.perform(put("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3BDI", "14")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("3ADI")))
+                .andExpect(status().reason(containsString("3BDI")));
+
+        mockMvc.perform(get("/api/grupos/" + padreId + "/pdc"))
+                .andExpect(jsonPath("$.codigo").value("3ADI"))
+                .andExpect(jsonPath("$.totalDeclarado").value(nullValue()));
+    }
+
+    @Test
+    void put_padreInexistente_404() throws Exception {
+        mockMvc.perform(put("/api/grupos/9999/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "14")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void put_padreSinPdc_404() throws Exception {
+        mockMvc.perform(put("/api/grupos/" + padreId + "/pdc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConTotal("3ADI", "14")))
+                .andExpect(status().isNotFound());
+    }
+
     // ------------------------------------------------------------------------- helpers
 
     /** Da de alta un PDC por la red bajo el padre de {@link #setUp} y devuelve su id. */
@@ -251,6 +366,11 @@ class PdcEndpointTest {
                 .andReturn();
         Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
         return id.longValue();
+    }
+
+    /** {@code {"codigo":"..","totalDeclarado":..}}, con el total literal JSON. */
+    private static String bodyConTotal(String codigo, String total) {
+        return "{\"codigo\":\"" + codigo + "\",\"totalDeclarado\":" + total + "}";
     }
 
     /** {@code {"codigo":".."}} */
