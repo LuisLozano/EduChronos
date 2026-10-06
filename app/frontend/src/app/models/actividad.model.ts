@@ -35,9 +35,20 @@ export interface Plaza {
   aulasCandidatas: string[];
   /** CÓDIGOS de los profesores; ≥1 por contrato (invariante I7). */
   profesores: string[];
-  /** CÓDIGOS de los subgrupos que pueblan la plaza. Puede venir VACÍA. */
+  /** CÓDIGOS de los subgrupos que pueblan la plaza. Vacía solo en una REUNION o una FUNCION
+   *  (no tienen alumnos); una CLASE lleva al menos uno. */
   subgrupos: string[];
 }
+
+/** Qué es una actividad (S201): solo una CLASE tiene alumnos. Espejo de `TipoActividad`. */
+export type TipoActividad = 'CLASE' | 'REUNION' | 'FUNCION';
+
+/** Texto visible de cada tipo, para el select del formulario y la columna de la lista. */
+export const ETIQUETA_TIPO_ACTIVIDAD: Record<TipoActividad, string> = {
+  CLASE: 'Clase',
+  REUNION: 'Reunión',
+  FUNCION: 'Función',
+};
 
 /** Espejo de `ActividadDTO(Long id, String codigo, String asignatura, int duracionTramos,
  *  int repeticionesPorSemana, String patronTemporal, boolean requiereTutor,
@@ -45,6 +56,7 @@ export interface Plaza {
 export interface Actividad {
   id: number;
   codigo: string;
+  tipo: TipoActividad;
   /** OPCIONAL (§4.6): `null` cuando las plazas tienen distintas asignaturas. */
   asignatura: string | null;
   duracionTramos: number;
@@ -87,6 +99,7 @@ export interface PlazaRequest {
  */
 export interface ActividadRequest {
   codigo: string;
+  tipo: TipoActividad;
   asignatura: string | null;
   duracionTramos: number;
   repeticionesPorSemana: number;

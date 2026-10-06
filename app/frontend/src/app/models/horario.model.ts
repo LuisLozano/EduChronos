@@ -17,8 +17,8 @@ export interface SesionVista {
   asignaturaNombre: string;
   /** Co-docencia: varios profesores en UNA entrada (D-F7-2). */
   profesores: string[];
-  /** Nunca null: `Sesion.aula` es optional=false (D-F7B-6). */
-  aulaCodigo: string;
+  /** null cuando la plaza no tiene aula (reuniones y funciones, S201). */
+  aulaCodigo: string | null;
   subgrupos: string[];
   /** Unión sin duplicados de los grupos de los subgrupos de la plaza (D-F7-1). */
   grupos: string[];

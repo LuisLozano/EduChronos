@@ -11,8 +11,9 @@ import { ActividadForm } from './actividad-form';
  * Congela el formulario de actividad de UNA plaza. Hereda del molde de `grupo-form` el
  * `montar()` que hace red y la traducción del 400, y del de `subgrupo-form` el
  * multiselect; los casos propios son el XOR de aula (4)(5)(6), el I7 en cliente (7), la
- * ausencia deliberada de regla sobre subgrupos (8), la derivación de `modoAula` en
- * edición (9), el cuerpo del PUT (10) y el 409 por camino distinto del 400 (12).
+ * regla de subgrupos de una CLASE (8), la derivación de `modoAula` en edición (9), el
+ * cuerpo del PUT (10), el 409 por camino distinto del 400 (12) y el tipo de actividad
+ * (f1)-(f7, S201).
  * Secuencia propia desde (1).
  *
  * <p><b>`montar()` hace CUATRO peticiones.</b> El `ngOnInit` pide asignaturas,
@@ -48,6 +49,7 @@ describe('ActividadForm', () => {
     form: {
       patchValue: (v: unknown) => void;
       invalid: boolean;
+      controls: Record<string, { setValue: (v: unknown) => void; value: unknown }>;
     };
     plazas: {
       at: (i: number) => {
@@ -98,7 +100,7 @@ describe('ActividadForm', () => {
   /** Rellena la plaza única con un contenido válido de la rama indicada. */
   function rellenarPlaza(
     indice: number,
-    modo: 'FIJA' | 'CANDIDATAS',
+    modo: 'FIJA' | 'CANDIDATAS' | 'NINGUNA',
     extra: Partial<Record<string, unknown>> = {},
   ): void {
     const fila = instancia().plazas.at(indice);
@@ -106,7 +108,7 @@ describe('ActividadForm', () => {
     fila.controls['modoAula'].setValue(modo);
     if (modo === 'FIJA') {
       fila.controls['aulaFija'].setValue('A1');
-    } else {
+    } else if (modo === 'CANDIDATAS') {
       fila.controls['aulasCandidatas'].setValue(['A1', 'INF1']);
     }
     fila.controls['profesores'].setValue(['MATA']);
@@ -161,6 +163,7 @@ describe('ActividadForm', () => {
   const ACTIVIDAD_SEIS = {
     id: 9,
     codigo: 'Bloque',
+    tipo: 'CLASE',
     asignatura: null as string | null,
     duracionTramos: 1,
     repeticionesPorSemana: 1,
@@ -172,6 +175,7 @@ describe('ActividadForm', () => {
   const ACTIVIDAD_FIJA = {
     id: 7,
     codigo: 'Mat-1ºA',
+    tipo: 'CLASE',
     asignatura: 'Mat',
     duracionTramos: 2,
     repeticionesPorSemana: 3,
@@ -201,6 +205,26 @@ describe('ActividadForm', () => {
         id: 12,
         aulaFija: null as string | null,
         aulasCandidatas: ['A1', 'INF1'],
+      },
+    ],
+  };
+
+  /** Una REUNIÓN sin aula (S201): ni aula fija ni candidatas, sin subgrupos y sin tutor. */
+  const ACTIVIDAD_REUNION = {
+    ...ACTIVIDAD_FIJA,
+    id: 20,
+    codigo: 'REU-Dpto',
+    tipo: 'REUNION',
+    requiereTutor: false,
+    plazas: [
+      {
+        id: 21,
+        codigo: 'REU-Dpto-P1',
+        asignatura: 'Mat',
+        aulaFija: null as string | null,
+        aulasCandidatas: [] as string[],
+        profesores: ['MATA', 'MAT6'],
+        subgrupos: [] as string[],
       },
     ],
   };
@@ -465,7 +489,8 @@ describe('ActividadForm', () => {
     await anadirFila();
     rellenarPlaza(1, 'FIJA', { aulaFija: 'INF1', profesores: ['MAT6'], subgrupos: ['1ºB-Completo'] });
     await anadirFila();
-    rellenarPlaza(2, 'CANDIDATAS', { profesores: ['MAT6'], subgrupos: [] });
+    // Con subgrupo: desde S201 una CLASE sin subgrupos no se envía.
+    rellenarPlaza(2, 'CANDIDATAS', { profesores: ['MAT6'], subgrupos: ['1ºC-Completo'] });
 
     await quitarFila(1);
     inst.guardar();
@@ -476,7 +501,7 @@ describe('ActividadForm', () => {
     // hubieran sobrevivido las dos equivocadas o en el orden cambiado.
     expect((req.request.body as { plazas: unknown[] }).plazas).toEqual([
       { asignatura: 'Mat', aulaFija: 'A1', aulasCandidatas: [], profesores: ['MATA'], subgrupos: ['1ºA-Completo'] },
-      { asignatura: 'Mat', aulaFija: null, aulasCandidatas: ['A1', 'INF1'], profesores: ['MAT6'], subgrupos: [] },
+      { asignatura: 'Mat', aulaFija: null, aulasCandidatas: ['A1', 'INF1'], profesores: ['MAT6'], subgrupos: ['1ºC-Completo'] },
     ]);
     req.flush(ACTIVIDAD_FIJA);
   });
@@ -549,6 +574,7 @@ describe('ActividadForm', () => {
     // como mandar las dos ramas del XOR a la vez.
     expect(req.request.body).toEqual({
       codigo: 'Mat-1ºA',
+      tipo: 'CLASE',
       asignatura: null,   // el select quedó en '' → null, no cadena vacía
       duracionTramos: 2,
       repeticionesPorSemana: 3,
@@ -628,20 +654,104 @@ describe('ActividadForm', () => {
     http.expectNone('/api/actividades');
   });
 
-  it('(8) D-plaza-sin-subgrupos: CERO subgrupos es válido y se envía como lista vacía', () => {
+  it('(8) f2: una CLASE con CERO subgrupos no se envía', () => {
     montar(null);
     const inst = instancia();
     inst.form.patchValue({ codigo: 'Mat-1ºA' });
     rellenarPlaza(0, 'FIJA', { subgrupos: [] });
     inst.guardar();
 
-    // El backend acepta una plaza sin subgrupos; poner aquí una regla que el contrato no
-    // tiene haría que el formulario rechazara cuerpos que la API acepta. Si alguien le
-    // añade `arrayNoVacio` a subgrupos, este caso se pone rojo: esa es su razón de ser.
+    // El formulario sigue reflejando el contrato, y el contrato ha cambiado (S201): una
+    // CLASE exige al menos un subgrupo por plaza (salda D-plaza-sin-subgrupos). Si alguien
+    // le quita `arrayNoVacio` a los subgrupos de una clase, este caso se pone rojo.
+    expect(inst.form.invalid).toBe(true);
+    http.expectNone('/api/actividades');
+  });
+
+  // ─────────────────────────────────────── tipo de actividad (S201)
+
+  it('(f1) un alta sin tocar el tipo viaja como CLASE', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'Mat-1ºA' });
+    rellenarPlaza(0, 'FIJA');
+    inst.guardar();
+
     const req = http.expectOne('/api/actividades');
-    expect((req.request.body as { plazas: { subgrupos: string[] }[] }).plazas[0].subgrupos)
-      .toEqual([]);
+    expect((req.request.body as { tipo: string }).tipo).toBe('CLASE');
     req.flush(ACTIVIDAD_FIJA);
+  });
+
+  it('(f3) una REUNION sin aula ni subgrupos viaja con aulaFija null y listas vacías', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'REU-Dpto', tipo: 'REUNION' });
+    rellenarPlaza(0, 'NINGUNA', { subgrupos: [] });
+    inst.guardar();
+
+    const req = http.expectOne('/api/actividades');
+    const cuerpo = req.request.body as { tipo: string; plazas: unknown[] };
+    expect(cuerpo.tipo).toBe('REUNION');
+    expect(cuerpo.plazas).toEqual([
+      { asignatura: 'Mat', aulaFija: null, aulasCandidatas: [], profesores: ['MATA'], subgrupos: [] },
+    ]);
+    req.flush(ACTIVIDAD_REUNION);
+  });
+
+  it('(f4) la opción «Sin aula» solo existe fuera de una CLASE', () => {
+    montar(null);
+    const inst = instancia();
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('input[type="radio"][value="NINGUNA"]')).toBeNull();
+
+    inst.form.patchValue({ tipo: 'REUNION' });
+    fixture.detectChanges();
+
+    expect(raiz.querySelector('input[type="radio"][value="NINGUNA"]')).not.toBeNull();
+  });
+
+  it('(f5) al pasar de REUNION a CLASE, una plaza sin aula vuelve a FIJA', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ tipo: 'REUNION' });
+    inst.plazas.at(0).controls['modoAula'].setValue('NINGUNA');
+
+    inst.form.patchValue({ tipo: 'CLASE' });
+
+    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('FIJA');
+  });
+
+  it('(f6) de CLASE a REUNION: el envío suelta el tutor y los subgrupos', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'Mat-1ºA', requiereTutor: true });
+    rellenarPlaza(0, 'FIJA'); // con subgrupo 1ºA-Completo
+    inst.form.patchValue({ tipo: 'REUNION' });
+    inst.plazas.at(0).controls['modoAula'].setValue('NINGUNA');
+    inst.guardar();
+
+    const req = http.expectOne('/api/actividades');
+    const cuerpo = req.request.body as { requiereTutor: boolean; plazas: { subgrupos: string[] }[] };
+    expect(cuerpo.requiereTutor).toBe(false);
+    expect(cuerpo.plazas[0].subgrupos).toEqual([]);
+    req.flush(ACTIVIDAD_REUNION);
+  });
+
+  it('(f7) editar una REUNION sin aula precarga el tipo y NINGUNA, y el PUT va sin aula', () => {
+    montar(ACTIVIDAD_REUNION);
+    const inst = instancia();
+
+    expect(inst.form.controls['tipo'].value).toBe('REUNION');
+    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('NINGUNA');
+    inst.guardar();
+
+    const req = http.expectOne('/api/actividades/20');
+    expect(req.request.method).toBe('PUT');
+    const plaza = (req.request.body as { plazas: { aulaFija: unknown; aulasCandidatas: unknown }[] })
+      .plazas[0];
+    expect(plaza.aulaFija).toBeNull();
+    expect(plaza.aulasCandidatas).toEqual([]);
+    req.flush(ACTIVIDAD_REUNION);
   });
 
   it('(9) en edición precarga los valores y DERIVA modoAula del dato', () => {
@@ -671,6 +781,7 @@ describe('ActividadForm', () => {
     // propiedad de la actividad en silencio, porque el PUT reemplaza el estado entero.
     expect(req.request.body).toEqual({
       codigo: 'Mat-1ºA',
+      tipo: 'CLASE',
       asignatura: 'Mat',
       duracionTramos: 2,
       repeticionesPorSemana: 3,

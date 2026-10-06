@@ -44,6 +44,7 @@ describe('ActividadLista', () => {
   const UNA_PLAZA = {
     id: 5,
     codigo: 'Mat-1ºA',
+    tipo: 'CLASE',
     asignatura: 'Mat',
     duracionTramos: 1,
     repeticionesPorSemana: 4,
@@ -55,6 +56,7 @@ describe('ActividadLista', () => {
   const DOS_PLAZAS = {
     id: 6,
     codigo: 'Bloque',
+    tipo: 'CLASE',
     asignatura: null,
     duracionTramos: 2,
     repeticionesPorSemana: 1,
@@ -148,14 +150,16 @@ describe('ActividadLista', () => {
     expect(err).toContain('No se pudo borrar la actividad Mat-1ºA (409)');
   });
 
-  it('(6) la tabla pinta las seis columnas y «varias» cuando la asignatura es null', async () => {
+  it('(6) la tabla pinta las siete columnas y «varias» cuando la asignatura es null', async () => {
     flushLista(FILAS);
     await fixture.whenStable();
     const raiz = fixture.nativeElement as HTMLElement;
 
+    // «Tipo» va justo después de «Código» desde S201: desplaza una celda todo lo demás.
     const cabeceras = [...raiz.querySelectorAll('thead th')].map((th) => th.textContent!.trim());
     expect(cabeceras).toEqual([
       'Código',
+      'Tipo',
       'Asignatura',
       'Patrón',
       'Duración',
@@ -166,16 +170,32 @@ describe('ActividadLista', () => {
 
     // Fila 1: asignatura propia, se pinta tal cual; y su recuento de plazas es 1.
     const primera = raiz.querySelectorAll('tbody tr:nth-child(1) td');
-    expect(primera[1].textContent!.trim()).toBe('Mat');
-    expect(primera[2].textContent!.trim()).toBe('DISTRIBUIDA');
-    expect(primera[3].textContent!.trim()).toBe('1');
-    expect(primera[4].textContent!.trim()).toBe('4');
-    expect(primera[5].textContent!.trim()).toBe('1');
+    expect(primera[2].textContent!.trim()).toBe('Mat');
+    expect(primera[3].textContent!.trim()).toBe('DISTRIBUIDA');
+    expect(primera[4].textContent!.trim()).toBe('1');
+    expect(primera[5].textContent!.trim()).toBe('4');
+    expect(primera[6].textContent!.trim()).toBe('1');
 
     // Fila 2: asignatura null → «varias» (no vacío, no 'null'), y 2 plazas.
     const segunda = raiz.querySelectorAll('tbody tr:nth-child(2) td');
-    expect(segunda[1].textContent!.trim()).toBe('varias');
-    expect(segunda[5].textContent).toContain('2');
+    expect(segunda[2].textContent!.trim()).toBe('varias');
+    expect(segunda[6].textContent).toContain('2');
+  });
+
+  it('(l1) la columna Tipo muestra la etiqueta, no el código: «Reunión» y «Clase»', async () => {
+    const reunion = { ...UNA_PLAZA, id: 9, codigo: 'REU-Dpto', tipo: 'REUNION' };
+    flushLista([UNA_PLAZA, reunion]);
+    await fixture.whenStable();
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    const tipoDe = (codigo: string): string => {
+      const fila = [...raiz.querySelectorAll('tbody tr')].find(
+        (tr) => tr.querySelector('td')!.textContent!.trim() === codigo,
+      );
+      return fila!.querySelectorAll('td')[1].textContent!.trim();
+    };
+    expect(tipoDe('REU-Dpto')).toBe('Reunión');
+    expect(tipoDe('Mat-1ºA')).toBe('Clase');
   });
 
   it('(12) toda actividad es editable: el botón no se deshabilita con varias plazas y editar() abre el diálogo', async () => {

@@ -16,6 +16,15 @@
       }
     </label>
 
+    <label class="actividad-form__campo">
+      <span class="actividad-form__etiqueta">Tipo</span>
+      <select formControlName="tipo" class="actividad-form__input actividad-form__tipo">
+        @for (t of tipos; track t[0]) {
+        <option [value]="t[0]">{{ t[1] }}</option>
+        }
+      </select>
+    </label>
+
     <app-filtro-opciones
       #fAsignatura
       etiqueta="asignaturas"
@@ -72,10 +81,13 @@
       </select>
     </label>
 
+    <!-- Solo una CLASE puede pedir tutor (S201): fuera de ella ni se pinta ni viaja. -->
+    @if (form.controls.tipo.value === 'CLASE') {
     <label class="actividad-form__campo actividad-form__campo--check">
       <input type="checkbox" formControlName="requiereTutor" />
       <span class="actividad-form__etiqueta">Requiere tutor</span>
     </label>
+    }
 
     <!-- El `track` va por el CONTROL, no por el índice. Con `track $index`, quitar una
          fila intermedia deja el DOM mostrando la fila borrada y lo que el usuario teclee
@@ -117,6 +129,13 @@
             <input type="radio" formControlName="modoAula" value="CANDIDATAS" />
             Aulas candidatas
           </label>
+          <!-- Una CLASE siempre tiene aula: «Sin aula» solo existe para reuniones y funciones. -->
+          @if (form.controls.tipo.value !== 'CLASE') {
+          <label class="actividad-form__radio">
+            <input type="radio" formControlName="modoAula" value="NINGUNA" />
+            Sin aula
+          </label>
+          }
         </div>
 
         @if (fila.controls.modoAula.value === 'FIJA') {
@@ -143,7 +162,7 @@
           <span class="actividad-form__error">Elige un aula.</span>
           }
         </label>
-        } @else {
+        } @else if (fila.controls.modoAula.value === 'CANDIDATAS') {
         <app-filtro-opciones
           #fAulasCandidatas
           etiqueta="aulas candidatas"
@@ -203,6 +222,8 @@
           }
         </label>
 
+        <!-- Subgrupos solo en una CLASE (S201): una reunión o una función no tiene alumnos. -->
+        @if (form.controls.tipo.value === 'CLASE') {
         <app-filtro-opciones
           #fSubgrupos
           etiqueta="subgrupos"
@@ -227,7 +248,11 @@
             </option>
             }
           </select>
+          @if (fila.controls.subgrupos.touched && fila.controls.subgrupos.invalid) {
+          <span class="actividad-form__error">Una clase necesita al menos un subgrupo.</span>
+          }
         </label>
+        }
 
         <div class="actividad-form__plaza-acciones">
           <button

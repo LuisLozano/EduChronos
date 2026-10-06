@@ -23,6 +23,7 @@ describe('ActividadService', () => {
 
   const PETICION: ActividadRequest = {
     codigo: 'Mat-1ºA',
+    tipo: 'CLASE',
     asignatura: 'Mat',
     duracionTramos: 1,
     repeticionesPorSemana: 4,
@@ -42,6 +43,7 @@ describe('ActividadService', () => {
   const RESPUESTA: Actividad = {
     id: 7,
     codigo: 'Mat-1ºA',
+    tipo: 'CLASE',
     asignatura: 'Mat',
     duracionTramos: 1,
     repeticionesPorSemana: 4,

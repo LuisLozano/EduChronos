@@ -1,4 +1,11 @@
-import { agruparPorActividad, agruparPorSlot, claveSlot, filtrar, tramosCubiertos } from './proyeccion';
+import {
+  agruparPorActividad,
+  agruparPorSlot,
+  claveSlot,
+  entidadesDeVista,
+  filtrar,
+  tramosCubiertos,
+} from './proyeccion';
 import { SesionVista } from '../models/horario.model';
 import { PROYECCION_1ESO } from '../testing/proyeccion-1eso.fixture';
 
@@ -168,5 +175,16 @@ describe('tramos que cubre una sesión', () => {
 
     expect([...celdas.keys()]).toEqual(['1-1']);
     expect(celdas.get('1-1')?.[0].continuacion).toBe(false);
+  });
+});
+
+describe('vista de aula con sesiones sin aula (S201)', () => {
+  it('(pr1) una sesión sin aula —una reunión— no aporta entidad a la vista de aula', () => {
+    const sinAula: SesionVista = { ...entrada('REU', 1, 'REU-P1'), aulaCodigo: null };
+
+    const entidades = entidadesDeVista([sinAula, entrada('Mat-1ºA', 1, 'Mat-1ºA-P1')], 'aula');
+
+    expect(entidades).not.toContain(null);
+    expect(entidades).toEqual(['A1']);
   });
 });

@@ -304,7 +304,10 @@ export class HorarioGrid {
 
   /** Detalle de todas las plazas, para el `title` de la marca de D11. */
   protected detalleInstancia(inst: InstanciaCelda): string {
-    return inst.entradas.map((e) => `${e.asignaturaCodigo} (${e.aulaCodigo})`).join(', ');
+    // Sin aula (reunión o función, S201) la entrada es solo la asignatura.
+    return inst.entradas
+      .map((e) => (e.aulaCodigo === null ? e.asignaturaCodigo : `${e.asignaturaCodigo} (${e.aulaCodigo})`))
+      .join(', ');
   }
 
   /** Plazas ocultas de una instancia, o `null` si no esconde ninguna (D11). */

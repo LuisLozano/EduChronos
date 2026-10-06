@@ -19,9 +19,11 @@ import { SubgrupoService } from '../../services/subgrupo.service';
 import {
   Actividad,
   ActividadRequest,
+  ETIQUETA_TIPO_ACTIVIDAD,
   PATRONES_TEMPORALES,
   Plaza,
   PlazaRequest,
+  TipoActividad,
 } from '../../models/actividad.model';
 import { Asignatura } from '../../models/asignatura.model';
 import { Aula } from '../../models/aula.model';
@@ -63,8 +65,9 @@ function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
   return null;
 }
 
-/** Rama del XOR de aula que el usuario ha elegido. Control de UI: NO viaja al backend. */
-export type ModoAula = 'FIJA' | 'CANDIDATAS';
+/** Rama de aula que el usuario ha elegido. Control de UI: NO viaja al backend. NINGUNA solo
+ *  existe fuera de una CLASE (reuniones y funciones, S201). */
+export type ModoAula = 'FIJA' | 'CANDIDATAS' | 'NINGUNA';
 
 /**
  * Controles de UNA plaza. Alias al estilo de `FilaTramo` (molde `Jornada`), para que el
@@ -98,17 +101,17 @@ type PlazaFila = FormGroup<{
  * Y porque el PUT rechaza con 409 si hay sesiones o bloqueos colgando: cuando se
  * reconcilia, no hay nadie apuntando por id a esas filas.
  *
- * <p><b>El XOR de aula se resuelve POR FILA</b> con un control de UI que no viaja.
- * `modoAula` ('FIJA' | 'CANDIDATAS') decide qué rama está activa; al cambiar, la rama
- * inactiva se LIMPIA y pierde su validación. La suscripción vive en la fábrica, con la
- * fila capturada en el closure, para que cada fila gobierne SOLO la suya.
+ * <p><b>El aula se resuelve POR FILA</b> con un control de UI que no viaja.
+ * `modoAula` ('FIJA' | 'CANDIDATAS' | 'NINGUNA') decide qué rama está activa; al cambiar,
+ * las inactivas se LIMPIAN y pierden su validación. NINGUNA solo se ofrece fuera de una CLASE
+ * (S201). La suscripción vive en la fábrica, con la fila capturada en el closure, para que
+ * cada fila gobierne SOLO la suya.
  *
- * <p><b>Los subgrupos NO llevan validador de fila, a propósito.</b> El contrato ACEPTA
- * una plaza con cero subgrupos. Exigir aquí ≥1 sería inventar una regla que el contrato
- * no tiene. Queda anotado como deuda **D-plaza-sin-subgrupos**: si el dominio decide que
- * una plaza sin población no tiene sentido, la regla se añade EN EL BACKEND y este
- * formulario la sigue, no al revés. Lo que sí se valida entre filas es I2, que el backend
- * sí tiene (ver {@link subgruposDisjuntos}).
+ * <p><b>Los subgrupos dependen del TIPO</b> (S201, {@link #aplicarTipo}). El contrato exige
+ * al menos un subgrupo por plaza en una CLASE (salda D-plaza-sin-subgrupos) y ninguno en una
+ * REUNIÓN o una FUNCIÓN, y el formulario lo refleja: en una CLASE la fila exige subgrupos; en
+ * las otras dos ni se pintan y se envían vacíos. Lo que se valida entre filas es I2 (ver
+ * {@link subgruposDisjuntos}).
  *
  * <p><b>Las aulas NO se filtran por compatibilidad I3.</b> Decisión tomada: el select
  * ofrece todas las aulas y habla el 400 del backend, que ya nombra asignatura, aula, tipo
@@ -151,12 +154,16 @@ export class ActividadForm implements OnInit {
 
   protected readonly patrones = PATRONES_TEMPORALES;
 
+  /** Opciones del select de tipo: el código que viaja y su texto visible. */
+  protected readonly tipos = Object.entries(ETIQUETA_TIPO_ACTIVIDAD) as [TipoActividad, string][];
+
   /** Accesores del filtro de selectores (S185): código y texto visible de cada opción. */
   protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
   protected readonly textoAula = (a: Aula): string => `${a.codigo} (${a.tipo})`;
 
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],
+    tipo: ['CLASE' as TipoActividad, Validators.required],
     /** '' = sin asignatura de actividad; {@link #aRequest} lo traduce a `null`. */
     asignatura: [''],
     duracionTramos: [1, [Validators.required, Validators.min(1)]],
@@ -174,6 +181,8 @@ export class ActividadForm implements OnInit {
   }
 
   constructor() {
+    // Antes de la precarga: precargar fija el tipo y la regla de subgrupos tiene que seguirlo.
+    this.form.controls.tipo.valueChanges.subscribe(() => this.aplicarTipo());
     const editando = this.editando;
     if (editando) {
       this.precargar(editando);
@@ -198,12 +207,35 @@ export class ActividadForm implements OnInit {
       aulaFija: ['', Validators.required],
       aulasCandidatas: [[] as string[]],
       profesores: [[] as string[], arrayNoVacio],
-      // subgrupos SIN validador de fila: ver D-plaza-sin-subgrupos en el javadoc de la
-      // clase. La regla que SÍ existe (I2) es del array, no de la fila.
+      // Su validador de fila lo pone aplicarTipo: en una CLASE, al menos un subgrupo (el
+      // contrato lo exige desde S201); fuera de ella, ninguno. I2 sigue siendo del array.
       subgrupos: [[] as string[]],
     }) as PlazaFila;
     fila.controls.modoAula.valueChanges.subscribe(() => this.aplicarModo(fila));
+    this.aplicarTipo([fila]);
     return fila;
+  }
+
+  /**
+   * La regla de subgrupos según el TIPO, en un solo sitio (S201). Se llama al cambiar el tipo
+   * —sobre todas las filas— y al nacer cada fila —sobre esa—. En una CLASE cada plaza exige al
+   * menos un subgrupo, y una plaza que estuviera sin aula vuelve a FIJA, porque una clase
+   * siempre tiene aula. En una REUNIÓN o una FUNCIÓN los subgrupos no se validan: ni se pintan
+   * ni viajan (ver {@link #aPlazaRequest}).
+   */
+  private aplicarTipo(filas: PlazaFila[] = this.plazas.controls): void {
+    const clase = this.form.controls.tipo.value === 'CLASE';
+    for (const fila of filas) {
+      if (clase) {
+        fila.controls.subgrupos.setValidators(arrayNoVacio);
+        if (fila.controls.modoAula.value === 'NINGUNA') {
+          fila.controls.modoAula.setValue('FIJA');
+        }
+      } else {
+        fila.controls.subgrupos.clearValidators();
+      }
+      fila.controls.subgrupos.updateValueAndValidity();
+    }
   }
 
   /**
@@ -221,15 +253,21 @@ export class ActividadForm implements OnInit {
    * detecta, porque I2 depende de `subgrupos` y este método no lo toca).
    */
   private aplicarModo(fila: PlazaFila): void {
-    const fija = fila.controls.modoAula.value === 'FIJA';
-    if (fija) {
+    const modo = fila.controls.modoAula.value;
+    if (modo === 'FIJA') {
       fila.controls.aulasCandidatas.setValue([]);
       fila.controls.aulasCandidatas.clearValidators();
       fila.controls.aulaFija.setValidators(Validators.required);
-    } else {
+    } else if (modo === 'CANDIDATAS') {
       fila.controls.aulaFija.setValue('');
       fila.controls.aulaFija.clearValidators();
       fila.controls.aulasCandidatas.setValidators(arrayNoVacio);
+    } else {
+      // NINGUNA (S201): ni aula fija ni candidatas, y ninguna de las dos se valida.
+      fila.controls.aulaFija.setValue('');
+      fila.controls.aulaFija.clearValidators();
+      fila.controls.aulasCandidatas.setValue([]);
+      fila.controls.aulasCandidatas.clearValidators();
     }
     fila.controls.aulaFija.updateValueAndValidity();
     fila.controls.aulasCandidatas.updateValueAndValidity();
@@ -263,6 +301,9 @@ export class ActividadForm implements OnInit {
    * revalidar el formulario vivo desde fuera—.
    */
   private precargar(actividad: Actividad): void {
+    // El tipo va PRIMERO y antes de reconstruir las plazas: cada fila nace con la regla de
+    // subgrupos de SU tipo (aplicarTipo en la fábrica) y no con la de CLASE por defecto.
+    this.form.controls.tipo.setValue(actividad.tipo);
     this.form.patchValue({
       codigo: actividad.codigo,
       asignatura: actividad.asignatura ?? '',
@@ -296,7 +337,9 @@ export class ActividadForm implements OnInit {
    * equivalente en cuanto el backend devuelva una plaza con las dos ramas llenas.
    */
   private volcar(fila: PlazaFila, plaza: Plaza): void {
-    fila.controls.modoAula.setValue(plaza.aulaFija !== null ? 'FIJA' : 'CANDIDATAS');
+    fila.controls.modoAula.setValue(
+      plaza.aulaFija !== null ? 'FIJA' : plaza.aulasCandidatas.length > 0 ? 'CANDIDATAS' : 'NINGUNA',
+    );
     fila.controls.asignatura.setValue(plaza.asignatura);
     fila.controls.aulaFija.setValue(plaza.aulaFija ?? '');
     fila.controls.aulasCandidatas.setValue([...plaza.aulasCandidatas]);
@@ -403,28 +446,31 @@ export class ActividadForm implements OnInit {
    */
   private aRequest(): ActividadRequest {
     const v = this.form.getRawValue();
+    const clase = v.tipo === 'CLASE';
     return {
       codigo: v.codigo,
+      tipo: v.tipo,
       asignatura: v.asignatura === '' ? null : v.asignatura,
       duracionTramos: v.duracionTramos,
       repeticionesPorSemana: v.repeticionesPorSemana,
       patronTemporal: v.patronTemporal,
-      requiereTutor: v.requiereTutor,
-      plazas: this.plazas.controls.map((fila) => this.aPlazaRequest(fila)),
+      // Fuera de una CLASE el control está oculto y el contrato no admite tutor (S201).
+      requiereTutor: clase ? v.requiereTutor : false,
+      plazas: this.plazas.controls.map((fila) => this.aPlazaRequest(fila, clase)),
     };
   }
 
-  /** Una fila → `PlazaRequest`, resolviendo el XOR por el modo elegido. Sin `id` ni
-   *  `codigo`: el código de plaza lo deriva el backend. */
-  private aPlazaRequest(fila: PlazaFila): PlazaRequest {
+  /** Una fila → `PlazaRequest`, resolviendo el aula por el modo elegido y los subgrupos por
+   *  el tipo. Sin `id` ni `codigo`: el código de plaza lo deriva el backend. */
+  private aPlazaRequest(fila: PlazaFila, clase: boolean): PlazaRequest {
     const v = fila.getRawValue();
-    const fija = v.modoAula === 'FIJA';
     return {
       asignatura: v.asignatura,
-      aulaFija: fija ? v.aulaFija : null,
-      aulasCandidatas: fija ? [] : v.aulasCandidatas,
+      aulaFija: v.modoAula === 'FIJA' ? v.aulaFija : null,
+      aulasCandidatas: v.modoAula === 'CANDIDATAS' ? v.aulasCandidatas : [],
       profesores: v.profesores,
-      subgrupos: v.subgrupos,
+      // Fuera de una CLASE no hay alumnos: los subgrupos ni se pintan ni viajan (S201).
+      subgrupos: clase ? v.subgrupos : [],
     };
   }
 

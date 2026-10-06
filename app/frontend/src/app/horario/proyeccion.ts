@@ -18,7 +18,10 @@ export function entidadesDeVista(sesiones: readonly SesionVista[], vista: Vista)
   const set = new Set<string>();
   for (const s of sesiones) {
     if (vista === 'aula') {
-      set.add(s.aulaCodigo);
+      // Una reunión o una función sin aula (S201) no aporta aula a la vista.
+      if (s.aulaCodigo !== null) {
+        set.add(s.aulaCodigo);
+      }
     } else {
       for (const v of vista === 'grupo' ? s.grupos : s.profesores) {
         set.add(v);

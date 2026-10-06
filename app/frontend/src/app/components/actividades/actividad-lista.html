@@ -32,6 +32,7 @@
     <thead>
     <tr>
       <th>Código</th>
+      <th>Tipo</th>
       <th>Asignatura</th>
       <th>Patrón</th>
       <th>Duración</th>
@@ -44,6 +45,7 @@
     @for (actividad of visibles(); track actividad.id) {
     <tr>
       <td class="dato">{{ actividad.codigo }}</td>
+      <td class="actividades__tipo">{{ etiquetaTipo[actividad.tipo] }}</td>
       <td>{{ asignaturaDe(actividad) }}</td>
       <td>{{ actividad.patronTemporal }}</td>
       <td>{{ actividad.duracionTramos }}</td>

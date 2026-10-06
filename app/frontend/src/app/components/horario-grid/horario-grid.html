@@ -144,7 +144,9 @@
                     >
                       <span class="linea">
                         <span class="asig">{{ e.asignaturaCodigo }}</span>
+                        @if (e.aulaCodigo !== null) {
                         <span class="aula">{{ e.aulaCodigo }}</span>
+                        }
                       </span>
                       <span class="linea linea--sec">
                         <span class="prof">{{ e.profesores.join(', ') }}</span>

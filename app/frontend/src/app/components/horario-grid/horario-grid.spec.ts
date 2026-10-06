@@ -802,6 +802,24 @@ describe('rejilla de horario', () => {
   });
 
   /**
+   * (S201, hg1) Una entrada SIN aula —una reunión o una función— no pinta el hueco del aula
+   * y su detalle en el `title` de la marca es solo la asignatura, sin «(…)». Mismo escenario
+   * que (28): es el único que hace existir ese `title`.
+   */
+  it('(hg1) una entrada sin aula no pinta .aula y su detalle no lleva paréntesis', async () => {
+    instalarStubDeRects();
+    const sinAula: SesionVista[] = BLOQUE_6.map((s) => ({ ...s, aulaCodigo: null }));
+    fixture.componentRef.setInput('sesiones', sinAula);
+    await fixture.whenStable();
+
+    const instancia = instanciaDe(fixture, 'Mat');
+    expect(instancia.querySelectorAll('.aula').length).toBe(0);
+    const title = instancia.querySelector('.oculta')?.getAttribute('title') ?? '';
+    expect(title).toContain('Mat');
+    expect(title).not.toContain('(');
+  });
+
+  /**
    * D11 · la marca vive DENTRO de la banda del rótulo, que `.instancia.bloque` ya
    * reserva y es `absolute`. De ahí sale la garantía de que no realimenta la
    * medición: si colgara de la instancia ocuparía alto, cambiaría los rectángulos

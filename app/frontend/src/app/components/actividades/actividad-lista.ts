@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActividadService } from '../../services/actividad.service';
-import { Actividad } from '../../models/actividad.model';
+import { Actividad, ETIQUETA_TIPO_ACTIVIDAD } from '../../models/actividad.model';
 import { ActividadForm } from './actividad-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
@@ -39,6 +39,8 @@ export class ActividadLista implements OnInit {
   private readonly dialog = inject(Dialog);
 
   protected readonly actividades = signal<Actividad[]>([]);
+  /** Texto visible de la columna Tipo (S201). */
+  protected readonly etiquetaTipo = ETIQUETA_TIPO_ACTIVIDAD;
   protected readonly cargando = signal(false);
   /** Error de la última operación de lista o borrado. Vacío = sin error. */
   protected readonly error = signal('');
