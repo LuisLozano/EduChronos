@@ -86,7 +86,7 @@ class ActividadEndpointTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new ActividadController(service)).build();
 
-        for (String cod : List.of("CyR", "OyD", "RefMt", "Mat")) {
+        for (String cod : List.of("CyR", "OyD", "RefMt", "Mat", "RED")) {
             asignaturaRepository.save(new Asignatura(cod, "Asignatura " + cod));
         }
         for (String cod : List.of("TEC3", "INF1", "FIL3", "MAT6", "MAT7", "MAT4", "MATA")) {
@@ -465,7 +465,7 @@ class ActividadEndpointTest {
 
         ReferenciaEntranteException error = catchThrowableOfType(
                 () -> service.editar(t.actividad().getId(),
-                        new ActividadRequest("ACT-EDITADA", "Mat", 1, 1, "NEUTRA", false,
+                        new ActividadRequest("ACT-EDITADA", null, "Mat", 1, 1, "NEUTRA", false,
                                 List.of(new PlazaRequest("Mat", "A5", List.of(),
                                         List.of("MATA"), List.of("1ºA-Completo"))))),
                 ReferenciaEntranteException.class);
@@ -645,6 +645,115 @@ class ActividadEndpointTest {
     // ─────────────────────────────────────────────────── helpers de fixture
 
     /** Actividad Mat de 1 plaza fija (A1, prof MATA, subgrupo 1ºA-Completo). */
+    // ─────────────────────────────────────── tipo de actividad (S201)
+
+    @Test
+    void tipo_v1_sinTipoEsClase() throws Exception {
+        long id = crear(actividadMat("Mat-1ºA"));
+
+        mockMvc.perform(get("/api/actividades/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("CLASE"));
+    }
+
+    @Test
+    void tipo_v2_valorFueraDelEnum_400() throws Exception {
+        String plaza = plazaJson("Mat", "A1", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividadTipada("X", "OTRO", false, plaza)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tipo_v3_claseConUnaPlazaSinSubgrupos_400() throws Exception {
+        String plaza = plazaJson("Mat", "A1", List.of(), List.of("MATA"), List.of());
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividad("X", null, "NEUTRA", plaza)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tipo_v4_reunionSinAulaNiSubgrupos_201() throws Exception {
+        String plaza = plazaJson("RED", null, List.of(), List.of("MATA", "MAT6"), List.of());
+        long id = crear(actividadTipada("REU", "REUNION", false, plaza));
+
+        mockMvc.perform(get("/api/actividades/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("REUNION"))
+                .andExpect(jsonPath("$.plazas[0].aulaFija").doesNotExist())
+                .andExpect(jsonPath("$.plazas[0].aulasCandidatas", empty()))
+                .andExpect(jsonPath("$.plazas[0].subgrupos", empty()))
+                .andExpect(jsonPath("$.plazas[0].profesores", containsInAnyOrder("MATA", "MAT6")));
+    }
+
+    @Test
+    void tipo_v5_reunionConUnSubgrupo_400() throws Exception {
+        String plaza = plazaJson("RED", null, List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividadTipada("REU", "REUNION", false, plaza)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tipo_v6_reunionConTutor_400() throws Exception {
+        String plaza = plazaJson("RED", null, List.of(), List.of("MATA"), List.of());
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividadTipada("REU", "REUNION", true, plaza)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tipo_v7_funcionConAulaFijaYSinSubgrupos_201() throws Exception {
+        String plaza = plazaJson("RED", "A1", List.of(), List.of("MATA"), List.of());
+        long id = crear(actividadTipada("FUN", "FUNCION", false, plaza));
+
+        mockMvc.perform(get("/api/actividades/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("FUNCION"))
+                .andExpect(jsonPath("$.plazas[0].aulaFija").value("A1"));
+    }
+
+    @Test
+    void tipo_v8_reunionConAulaFijaYCandidatas_400() throws Exception {
+        String plaza = plazaJson("RED", "A1", List.of("A5"), List.of("MATA"), List.of());
+        mockMvc.perform(post("/api/actividades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividadTipada("REU", "REUNION", false, plaza)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tipo_v9_editarUnaClaseAReunion_aplicaElTipo() throws Exception {
+        long id = crear(actividadMat("Mat-1ºA"));
+        String plaza = plazaJson("RED", null, List.of(), List.of("MATA"), List.of());
+
+        mockMvc.perform(put("/api/actividades/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(actividadTipada("Mat-1ºA", "REUNION", false, plaza)))
+                .andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(get("/api/actividades/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("REUNION"));
+    }
+
+    /** Como {@link #actividad}, pero con {@code tipo} y {@code requiereTutor} (S201). */
+    private static String actividadTipada(String codigo, String tipo, boolean requiereTutor,
+            String... plazas) {
+        return "{\"codigo\":\"" + codigo + "\""
+                + ",\"tipo\":" + quotedOrNull(tipo)
+                + ",\"asignatura\":null"
+                + ",\"duracionTramos\":1"
+                + ",\"repeticionesPorSemana\":1"
+                + ",\"patronTemporal\":\"NEUTRA\""
+                + ",\"requiereTutor\":" + requiereTutor
+                + ",\"plazas\":[" + String.join(",", plazas) + "]}";
+    }
+
     private static String actividadMat(String codigo) {
         String plaza = plazaJson("Mat", "A1", List.of(), List.of("MATA"), List.of("1ºA-Completo"));
         return actividad(codigo, "Mat", "DISTRIBUIDA", plaza);

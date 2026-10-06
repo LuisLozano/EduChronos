@@ -63,6 +63,19 @@ class VistaPdfTest {
                 .isEqualTo("DTec Taller 1 Aula Plástica 1B-A/1B-B");
     }
 
+    /**
+     * (S201, p1) Sin aula —una reunión o una función— la entrada de profesor no lleva el
+     * tramo del aula: ni un {@code "null"} ni un espacio de más.
+     */
+    @Test
+    void laEntradaDeProfesorSinAulaNoLlevaElTramoDelAula() {
+        SesionVistaDTO sesion = sesion("RED", List.of("P1", "P2"), null, List.of("1B-A"));
+
+        String texto = VistaPdf.PROFESOR.textoDeEntrada(sesion);
+
+        assertThat(texto).doesNotContain("null").endsWith("1B-A").isEqualTo("RED 1B-A");
+    }
+
     /** El de grupo no se mueve: asignatura, profesor y aula, como desde S149. */
     @Test
     void laEntradaDeGrupoSigueEnOrdenAsignaturaProfesorAula() {
@@ -98,8 +111,8 @@ class VistaPdfTest {
 
     /**
      * Una sesión sin código de aula no aporta página en vez de abrir una titulada con un
-     * hueco. No puede pasar con los datos del esquema, pero ésta es una función pura que
-     * recibe DTOs de quien sea.
+     * hueco. Desde S201 pasa con datos reales: una reunión o una función sin aula no aparece
+     * en el PDF de aula (p2 del contrato de S201).
      */
     @Test
     void enVistaDeAulaUnaSesionSinAulaNoAportaRecurso() {

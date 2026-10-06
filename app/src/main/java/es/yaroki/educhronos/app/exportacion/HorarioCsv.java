@@ -70,7 +70,7 @@ public final class HorarioCsv {
                         sesion.asignaturaCodigo(),
                         sesion.asignaturaNombre(),
                         unir(sesion.profesores(), "Profesores"),
-                        sesion.aulaCodigo(),
+                        sesion.aulaCodigo() == null ? "" : sesion.aulaCodigo(),
                         unir(sesion.grupos(), "Grupos"),
                         unir(sesion.subgrupos(), "Subgrupos"),
                         sesion.actividadCodigo(),

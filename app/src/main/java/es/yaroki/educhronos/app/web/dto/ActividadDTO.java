@@ -13,11 +13,15 @@ import java.util.List;
  * {@code name()} del enum), por coherencia con el patrón de borde de 7A/8.5-A' (ver
  * {@link AulaDTO}).
  *
+ * <p>{@code tipo} es el {@code name()} de {@code TipoActividad} (CLASE, REUNION o FUNCION,
+ * S201), como String por el mismo patrón de borde que {@code patronTemporal}.
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code ActividadService}.
  */
 public record ActividadDTO(
         Long id,
         String codigo,
+        String tipo,
         String asignatura,
         int duracionTramos,
         int repeticionesPorSemana,

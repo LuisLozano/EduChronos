@@ -14,6 +14,7 @@ import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.catalog.TipoActividad;
 import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ActividadDTO;
@@ -48,9 +49,12 @@ import org.springframework.transaction.annotation.Transactional;
  *       {@code repeticionesPorSemana}≥1; {@code patronTemporal} parseable a
  *       {@link PatronTemporal} (valor malo → 400 que lo nombra y lista los válidos);
  *       la {@code asignatura} de la actividad es opcional, pero si viene debe existir;
+ *       {@code tipo} ausente es CLASE, y si viene debe ser un {@link TipoActividad} (S201);
  *   <li>≥1 plaza por actividad;
- *   <li>XOR de aula por plaza: {@code aulaFija} y {@code aulasCandidatas} son mutuamente
- *       excluyentes y exactamente una está presente;
+ *   <li>aula por plaza: {@code aulaFija} y {@code aulasCandidatas} son mutuamente
+ *       excluyentes; en una CLASE exactamente una está presente, en una REUNIÓN o una
+ *       FUNCIÓN puede no haber ninguna. Una CLASE lleva ≥1 subgrupo por plaza; una REUNIÓN o
+ *       una FUNCIÓN, ninguno y sin tutor;
  *   <li>I7: cada plaza necesita ≥1 profesor;
  *   <li>I2: ningún subgrupo puede aparecer en dos plazas de la misma actividad (400 que lo
  *       NOMBRA, detectado CRUZANDO plazas, no dentro de una);
@@ -122,7 +126,8 @@ public class ActividadService {
     public ActividadDTO crear(ActividadRequest peticion) {
         validarEscalares(peticion);
         PatronTemporal patron = parsePatron(peticion.patronTemporal());
-        validarPlazas(peticion.plazas());
+        TipoActividad tipo = parseTipo(peticion.tipo());
+        validarPlazas(peticion.plazas(), tipo, peticion.requiereTutor());
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe una actividad con codigo " + peticion.codigo());
@@ -131,6 +136,7 @@ public class ActividadService {
         Actividad actividad = new Actividad(peticion.codigo(), asignatura,
                 peticion.duracionTramos(), peticion.repeticionesPorSemana(),
                 patron, peticion.requiereTutor());
+        actividad.setTipo(tipo);
         agregarPlazas(actividad, peticion, new HashMap<>());
         Actividad guardada = repositorio.save(actividad);
         return aDTO(guardada);
@@ -166,7 +172,8 @@ public class ActividadService {
         exigirSinDependientes(id, "editar");
         validarEscalares(peticion);
         PatronTemporal patron = parsePatron(peticion.patronTemporal());
-        validarPlazas(peticion.plazas());
+        TipoActividad tipo = parseTipo(peticion.tipo());
+        validarPlazas(peticion.plazas(), tipo, peticion.requiereTutor());
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otra -> !otra.getId().equals(id))
                 .ifPresent(otra -> {
@@ -176,6 +183,7 @@ public class ActividadService {
         Asignatura asignatura = resolverAsignaturaActividad(peticion.asignatura());
         entidad.actualizar(peticion.codigo(), asignatura, peticion.duracionTramos(),
                 peticion.repeticionesPorSemana(), patron, peticion.requiereTutor());
+        entidad.setTipo(tipo);
         reconciliarPlazas(entidad, peticion.plazas(), new HashMap<>());
         return aDTO(entidad);
     }
@@ -248,21 +256,57 @@ public class ActividadService {
     }
 
     /**
+     * Regla (1) tipo: ausente o null es CLASE (S201); si viene, parseable a
+     * {@link TipoActividad}, con el mismo 400 que {@link #parsePatron}: nombra el valor y lista
+     * los válidos.
+     */
+    private static TipoActividad parseTipo(String valor) {
+        if (valor == null) {
+            return TipoActividad.CLASE;
+        }
+        try {
+            return TipoActividad.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "tipo invalido: '" + valor + "'. Valores validos: "
+                            + Arrays.toString(TipoActividad.values()));
+        }
+    }
+
+    /**
      * Reglas (2), (3), (4) y (5), sobre los CÓDIGOS del request (sin tocar la BD): ≥1
-     * plaza; por plaza el XOR de aula y el I7 de profesores; y el I2 CRUZANDO plazas —los
+     * plaza; por plaza el aula y el I7 de profesores; y el I2 CRUZANDO plazas —los
      * subgrupos de cada plaza se deduplican dentro de la plaza (un repetido en la propia
      * lista NO cuenta) y se comprueba que no reaparezcan en otra plaza.
+     *
+     * <p><b>Según el tipo</b> (S201). Una CLASE tiene alumnos: exactamente una rama de aula y
+     * al menos un subgrupo por plaza (salda D-plaza-sin-subgrupos). Una REUNIÓN o una FUNCIÓN
+     * no los tiene: aula opcional —las dos ramas a la vez siguen sin valer—, ningún subgrupo y
+     * sin tutor.
      */
-    private static void validarPlazas(List<PlazaRequest> plazas) {
+    private static void validarPlazas(
+            List<PlazaRequest> plazas, TipoActividad tipo, boolean requiereTutor) {
         if (plazas == null || plazas.isEmpty()) {
             throw new IllegalArgumentException("una actividad necesita al menos una plaza");
         }
+        boolean clase = tipo == TipoActividad.CLASE;
+        if (!clase && requiereTutor) {
+            throw new IllegalArgumentException("una reunión o una función no puede pedir tutor");
+        }
         Set<String> subgruposDeOtrasPlazas = new HashSet<>();
         for (PlazaRequest plaza : plazas) {
-            validarXor(plaza);
+            validarXor(plaza, clase);
             validarProfesores(plaza);
-            Set<String> deEstaPlaza = new LinkedHashSet<>(
-                    plaza.subgrupos() == null ? List.of() : plaza.subgrupos());
+            List<String> subgrupos = plaza.subgrupos() == null ? List.of() : plaza.subgrupos();
+            if (clase && subgrupos.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "una plaza de una clase necesita al menos un subgrupo");
+            }
+            if (!clase && !subgrupos.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "una reunión o una función no lleva subgrupos: no tiene alumnos");
+            }
+            Set<String> deEstaPlaza = new LinkedHashSet<>(subgrupos);
             for (String codigo : deEstaPlaza) {
                 if (!subgruposDeOtrasPlazas.add(codigo)) {
                     throw new IllegalArgumentException(
@@ -272,15 +316,18 @@ public class ActividadService {
         }
     }
 
-    /** Regla (3) XOR: exactamente una de aulaFija / aulasCandidatas. */
-    private static void validarXor(PlazaRequest plaza) {
+    /**
+     * Regla (3) aula: a lo sumo una de aulaFija / aulasCandidatas; si {@code aulaObligatoria}
+     * (una CLASE), exactamente una.
+     */
+    private static void validarXor(PlazaRequest plaza, boolean aulaObligatoria) {
         boolean tieneFija = plaza.aulaFija() != null && !plaza.aulaFija().isBlank();
         boolean tieneCandidatas = plaza.aulasCandidatas() != null && !plaza.aulasCandidatas().isEmpty();
         if (tieneFija && tieneCandidatas) {
             throw new IllegalArgumentException(
                     "una plaza no puede tener aula fija y aulas candidatas a la vez");
         }
-        if (!tieneFija && !tieneCandidatas) {
+        if (aulaObligatoria && !tieneFija && !tieneCandidatas) {
             throw new IllegalArgumentException(
                     "una plaza necesita aula fija o al menos un aula candidata");
         }
@@ -520,6 +567,7 @@ public class ActividadService {
         return new ActividadDTO(
                 actividad.getId(),
                 actividad.getCodigo(),
+                actividad.getTipo().name(),
                 actividad.getAsignatura() == null ? null : actividad.getAsignatura().getCodigo(),
                 actividad.getDuracionTramos(),
                 actividad.getRepeticionesPorSemana(),

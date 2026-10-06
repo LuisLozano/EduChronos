@@ -505,7 +505,7 @@ public class GeneradorHorarioService {
                     sesion.getId(), sesion.getIndice(), dia, ordenTramo,
                     sesion.getPlaza().getActividad().getDuracionTramos(),
                     asignatura.getCodigo(), asignatura.getNombreCompleto(),
-                    profesores, sesion.getAula().getCodigo(),
+                    profesores, sesion.getAula() == null ? null : sesion.getAula().getCodigo(),
                     subgrupos, grupos,
                     plaza.getActividad().getCodigo(), plaza.getCodigo()));
         }

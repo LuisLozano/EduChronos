@@ -475,7 +475,7 @@ public class MovimientoInstanciaService {
                     sesion.getPlaza().getActividad().getDuracionTramos(),
                     asignatura.getCodigo(), asignatura.getNombreCompleto(),
                     plaza.getProfesores().stream().map(p -> p.getCodigo()).sorted().toList(),
-                    sesion.getAula().getCodigo(),
+                    sesion.getAula() == null ? null : sesion.getAula().getCodigo(),
                     plaza.getSubgrupos().stream().map(sg -> sg.getCodigo()).sorted().toList(),
                     plaza.getSubgrupos().stream()
                             .flatMap(sg -> sg.getGrupos().stream())

@@ -50,8 +50,9 @@ public class Sesion {
     @JoinColumn(name = "tramo_inicio_id", nullable = false)
     private TramoSemanal tramoInicio;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "aula_id", nullable = false)
+    // Null cuando la plaza no tiene aula: reuniones y funciones (S201, esquema 2).
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "aula_id")
     private Aula aula;
 
     protected Sesion() {

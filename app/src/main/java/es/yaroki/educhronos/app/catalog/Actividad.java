@@ -63,6 +63,10 @@ public class Actividad {
     @Column(name = "requiere_tutor", nullable = false)
     private boolean requiereTutor = false;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "tipo", nullable = false)
+    private TipoActividad tipo = TipoActividad.CLASE;
+
     // Plaza es dependiente de Actividad: cascade ALL + orphanRemoval.
     @OneToMany(mappedBy = "actividad", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Plaza> plazas = new ArrayList<>();
@@ -168,6 +172,14 @@ public class Actividad {
 
     public void setRequiereTutor(boolean requiereTutor) {
         this.requiereTutor = requiereTutor;
+    }
+
+    public TipoActividad getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoActividad tipo) {
+        this.tipo = tipo;
     }
 
     public List<Plaza> getPlazas() {

@@ -127,8 +127,10 @@ public enum VistaPdf {
 
         @Override
         public String textoDeEntrada(SesionVistaDTO sesion) {
+            // Sin aula (reunión o función, S201) no hay tramo de aula que poner.
+            String aula = sesion.aulaCodigo() == null ? "" : " " + sesion.aulaCodigo();
             return sesion.asignaturaCodigo()
-                    + " " + sesion.aulaCodigo()
+                    + aula
                     + " " + String.join(SEPARADOR_LISTA, sesion.grupos());
         }
 

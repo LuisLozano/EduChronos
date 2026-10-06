@@ -85,7 +85,8 @@ public final class SolucionMapper {
      * Materializa las {@link Sesion} de un {@link HorarioGenerado} a partir de la
      * solución. Una fila por plaza colocada. Aborta si una instancia no está
      * colocada (sin tramo), si una plaza/aula/tramo no tiene correspondencia en su
-     * índice, o si una plaza no tiene aula asignada.
+     * índice, o si una plaza CON aula no tiene aula asignada. Una plaza sin aula fija ni
+     * candidatas (reunión o función, S201) da una sesión con aula null.
      *
      * @param horario   cabecera dueña de las sesiones (ya persistida o a persistir)
      * @param problema  problema de dominio (fuente de actividades × índices × plazas)
@@ -136,6 +137,11 @@ public final class SolucionMapper {
                     Optional<es.yaroki.educhronos.solver.domain.Aula> aulaOpt =
                             solucion.aulaElegida(instancia, plaza);
                     if (aulaOpt.isEmpty()) {
+                        if (plaza.aulaFija().isEmpty() && plaza.aulasCandidatas().isEmpty()) {
+                            // Plaza sin aula (reunión o función, S201): la sesión no ocupa ninguna.
+                            sesiones.add(new Sesion(horario, plazaJpa, indice, tramoJpa, null));
+                            continue;
+                        }
                         throw new IllegalArgumentException("La plaza " + plaza.codigo()
                                 + " de la instancia " + actividad.codigo() + "#" + indice
                                 + " no tiene aula asignada (aulaElegida vacío)");
@@ -186,7 +192,9 @@ public final class SolucionMapper {
      * @throws IllegalArgumentException si el índice de tramos no es invertible, si una
      *         actividad/plaza/aula de una fila no está en el problema, si un
      *         {@code TramoSemanal} no tiene {@code Tramo} inverso, si una instancia cae en
-     *         tramos distintos, o si el aula de una plaza fija no coincide con su aulaFija.
+     *         tramos distintos, si el aula de una plaza fija no coincide con su aulaFija, o
+     *         si una sesión sin aula pertenece a una plaza que sí la tiene. Una sesión sin
+     *         aula de una plaza sin aula (S201) conserva su tramo y no añade entrada de aula.
      */
     public static SolucionHorario aSolucionHorario(
             ProblemaHorario problema,
@@ -254,6 +262,15 @@ public final class SolucionMapper {
                         + " de una sesion no está en la actividad " + actCodigo + " del problema");
             }
 
+            if (sesion.getAula() == null) {
+                // Sesión sin aula. Su tramo ya está asignado arriba: sólo falta decidir si la
+                // plaza podía ir sin aula (reunión o función, S201) o si es una incoherencia.
+                if (plazaDominio.aulaFija().isPresent() || !plazaDominio.aulasCandidatas().isEmpty()) {
+                    throw new IllegalArgumentException("La sesion de la plaza " + plazaCodigo
+                            + " no tiene aula y su plaza sí (corrupción de datos)");
+                }
+                continue;
+            }
             String aulaCodigoFila = sesion.getAula().getCodigo();
             if (plazaDominio.aulaFija().isPresent()) {
                 // Fidelidad (D-F8.3-C-3): plaza fija -> NO se añade entrada; se GUARDA la

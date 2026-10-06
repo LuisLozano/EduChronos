@@ -188,6 +188,58 @@ class DiagnosticoRoundTripTest {
                 .hasMessageContaining("no coincide con su aulaFija");
     }
 
+    /**
+     * (S201, s1) Una sesión SIN aula sólo vale si su plaza tampoco la tiene (reunión o
+     * función). Si la plaza tiene aula fija, es una incoherencia de datos y se aborta: la rama
+     * de la sesión sin aula no se salta la comprobación de la plaza.
+     */
+    @Test
+    void aSolucionHorarioAbortaSiUnaSesionSinAulaEsDeUnaPlazaConAula() {
+        Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
+        GrupoAdministrativo g =
+                grupoRepository.save(new GrupoAdministrativo("1ºA", eso1, TipoGrupo.ORDINARIO, null));
+        Subgrupo sg = subgrupoRepository.save(new Subgrupo("1ºA-Comp", Set.of(g)));
+        Asignatura mat = asignaturaRepository.save(new Asignatura("MAT", "Matematicas"));
+        Profesor prof = profesorRepository.save(new Profesor("MAT1", "Prof MAT1"));
+        Aula a1 = aulaRepository.save(new Aula("A1", TipoAula.ORDINARIA, null, null, null, null));
+        TramoSemanal l1 = tramoRepository.save(new TramoSemanal(
+                Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+
+        Actividad act = new Actividad();
+        act.setCodigo("MAT-1ESO");
+        act.setRepeticionesPorSemana(1);
+        act.setDuracionTramos(1);
+        act.setPatronTemporal(PatronTemporal.NEUTRA);
+        Plaza plaza = new Plaza();
+        plaza.setCodigo("MAT-1ESO-P1");
+        plaza.setActividad(act);
+        plaza.setAsignatura(mat);
+        plaza.setProfesores(Set.of(prof));
+        plaza.setAulaFija(a1);
+        plaza.setSubgrupos(Set.of(sg));
+        act.getPlazas().add(plaza);
+        actividadRepository.save(act);
+
+        Plaza plazaJpa = actividadRepository.findByCodigo("MAT-1ESO").orElseThrow()
+                .getPlazas().stream()
+                .filter(p -> p.getCodigo().equals("MAT-1ESO-P1")).findFirst().orElseThrow();
+
+        // Sesion CORRUPTA: sin aula, aunque su plaza tiene aula fija A1.
+        HorarioGenerado horario = horarioRepository.save(new HorarioGenerado(
+                "corrupto", Instant.now(), "OPTIMAL", 0.0, 0.0));
+        Sesion sinAula = sesionRepository.save(new Sesion(horario, plazaJpa, 1, l1, null));
+        entityManager.flush();
+
+        ProblemaHorario problema = service.cargarProblema();
+        Map<Tramo, TramoSemanal> idxTramo =
+                SolucionMapper.indiceTramos(problema, tramoRepository.findAll());
+
+        assertThatThrownBy(() ->
+                SolucionMapper.aSolucionHorario(problema, List.of(sinAula), idxTramo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("corrupción de datos");
+    }
+
     // ----------------------------------------------------------------- Test 4: endpoint
 
     @Test
