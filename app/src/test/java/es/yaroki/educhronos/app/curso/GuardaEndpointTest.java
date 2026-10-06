@@ -30,8 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
  * {@link EstadoCurso} que usa el servicio al duplicar.
  *
  * <p>Contexto y base propios por la misma razón que {@code CursoEndpointTest}: este test
- * archiva la base que abre, y hacerlo sobre la {@code educhronos-test.db} compartida dejaría
- * al resto de la suite escribiendo contra un curso de solo lectura.
+ * archiva la base que abre. Hasta S201 la URL de test era una {@code educhronos-test.db} fija y
+ * compartida, y archivarla dejaba al resto de la suite escribiendo contra un curso de solo
+ * lectura; desde S201 los {@code @DataJpaTest} usan una base nueva por contexto en
+ * {@code target/}.
  *
  * <p><b>Desde S160 hace falta un gesto más para llegar al 403.</b> Duplicar ya no deja la
  * aplicación dentro del curso archivado: deja abierto el NUEVO, que está activo y acepta

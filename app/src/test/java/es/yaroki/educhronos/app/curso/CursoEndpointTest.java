@@ -27,10 +27,12 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Contrato HTTP de {@code /api/curso} y {@code /api/cursos} (O-curso, S159).
  *
- * <p><b>Contexto y base PROPIOS, y es obligatorio.</b> Duplicar archiva la base abierta: si
- * este test corriera sobre la {@code educhronos-test.db} que comparte el resto de la suite,
- * la dejaría marcada como archivada y de solo lectura, y los demás tests fallarían según el
- * orden en que corrieran. De ahí el {@code @TempDir} estático y el
+ * <p><b>Contexto y base PROPIOS, y es obligatorio.</b> Duplicar archiva la base abierta. Hasta
+ * S201 la URL de test era una {@code educhronos-test.db} fija que compartía el resto de la
+ * suite: este test la habría dejado archivada y de solo lectura, y los demás habrían fallado
+ * según el orden en que corrieran. Desde S201 los {@code @DataJpaTest} usan una base nueva por
+ * contexto en {@code target/}, y el caso necesita además una carpeta propia donde duplicar.
+ * De ahí el {@code @TempDir} estático y el
  * {@code @DynamicPropertySource}, que son el PRIMER {@code @SpringBootTest} y el primer
  * {@code @DynamicPropertySource} de la suite: los tests de endpoint del proyecto son
  * {@code @DataJpaTest} + {@code standaloneSetup}, que aquí no sirve porque lo que se prueba

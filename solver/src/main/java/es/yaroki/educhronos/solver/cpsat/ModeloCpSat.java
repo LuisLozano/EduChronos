@@ -982,7 +982,7 @@ final class ModeloCpSat {
         Map<Plaza, List<AulaOpcion>> porPlaza = new LinkedHashMap<>();
         for (Plaza plaza : inst.actividad().plazas()) {
             if (plaza.aulasCandidatas().isEmpty()) {
-                continue; // plaza con aulaFija: aula no variable
+                continue; // plaza con aulaFija (aula no variable) o sin aula (no ocupa ninguna, S201)
             }
             List<AulaOpcion> opciones = new ArrayList<>();
             List<Literal> presencias = new ArrayList<>();

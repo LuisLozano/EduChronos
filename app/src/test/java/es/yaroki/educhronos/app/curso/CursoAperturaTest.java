@@ -34,8 +34,11 @@ import org.springframework.test.context.DynamicPropertySource;
  * Listar y abrir cursos sobre un contexto de verdad (O-curso, S160, C-selector-curso fase A).
  *
  * <p><b>Contexto y carpeta propios, como {@code CursoEndpointTest}.</b> Abrir cambia la base
- * que el pool tiene puesta: hacerlo sobre la {@code educhronos-test.db} que comparte la suite
- * dejaría a los demás tests apuntando a otro fichero según el orden en que corrieran. La base
+ * que el pool tiene puesta. Hasta S201 la URL de test era una {@code educhronos-test.db} fija
+ * que compartía la suite, y abrir sobre ella dejaba a los demás tests apuntando a otro fichero
+ * según el orden en que corrieran; desde S201 los {@code @DataJpaTest} usan una base nueva por
+ * contexto en {@code target/}, y este caso necesita además una carpeta propia donde listar y
+ * abrir cursos. La base
  * de este contexto se llama {@code abierta.db} a propósito y no {@code educhronos.db}: así el
  * listado tiene que incluir la base ABIERTA se llame como se llame, que es el caso del
  * arranque con {@code --spring.datasource.url} y el que el e2e usa.

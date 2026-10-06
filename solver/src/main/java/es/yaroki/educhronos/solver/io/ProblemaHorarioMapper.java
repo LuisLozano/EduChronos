@@ -37,8 +37,8 @@ import java.util.function.Supplier;
  *    integridad referencial por codigo (incluida la resolucion de
  *    aulasCandidatas a entidades de dominio, Fase 3), e I2 (subgrupos
  *    disjuntos por actividad).
- *  - Los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas
- *    y los rangos (diaSemana, ordenEnDia, repeticiones, duracion). El mapper
+ *  - Los records de dominio auto-validan I5, I7, la exclusión aulaFija/aulasCandidatas
+ *    (a lo sumo una; desde S201 una plaza puede no tener ninguna) y los rangos (diaSemana, ordenEnDia, repeticiones, duracion). El mapper
  *    solo envuelve esas excepciones en ProblemaInvalidoException con contexto.
  *
  * Las invariantes de particion I1, I3 e I6 NO se validan aqui: el JSON del solver

@@ -43,8 +43,9 @@ import org.springframework.web.context.WebApplicationContext;
  * mismo sitio: {@code POST /api/horarios} con el contexto completo.
  *
  * <p><b>Base propia.</b> Las escrituras llegan a la base de verdad, así que la clase usa un
- * fichero en un {@code @TempDir}, como {@code GeneracionDuranteCambioTest}, y no la
- * {@code educhronos-test.db} compartida.
+ * fichero en un {@code @TempDir}, como {@code GeneracionDuranteCambioTest}, y no la de la URL
+ * del {@code application.properties} de test (desde S201, un fichero nuevo por contexto de
+ * Spring en {@code target/}; antes, una {@code educhronos-test.db} fija y compartida).
  */
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
