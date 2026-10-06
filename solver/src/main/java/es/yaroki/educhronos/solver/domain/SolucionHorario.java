@@ -50,8 +50,9 @@ public class SolucionHorario {
      * Aula de una plaza concreta dentro de una instancia. Punto único de verdad
      * para consumidores (verificador, materializador): devuelve el aula que el
      * solver eligió si la plaza tenía {@code aulasCandidatas}, o su
-     * {@code aulaFija} si era fija. Empty solo si la plaza no tiene aula fija y
-     * tampoco se registró elección (no debería ocurrir en una solución válida).
+     * {@code aulaFija} si era fija. Empty si la plaza no tiene aula (ni fija ni
+     * candidatas), que es válido desde S201, o si tenía candidatas y no se registró
+     * elección, que no debería ocurrir en una solución válida.
      */
     public Optional<Aula> aulaElegida(ActividadInstancia instancia, Plaza plaza) {
         Map<Plaza, Aula> porPlaza = aulasElegidas.get(instancia);
