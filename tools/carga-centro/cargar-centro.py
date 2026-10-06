@@ -34,6 +34,9 @@ PAYLOADS
     Se construyen campo a campo. NUNCA se reenvia el objeto del catalogo: ese
     lleva metadatos de derivacion (celdas, celdasEnVolcado, _referencia,
     tramoVolcado) que la API no conoce y que no tienen por que viajar.
+    S204: «tipo» de actividad (REUNION o FUNCION; sin el es CLASE) y «totalDeclarado»
+    de profesor, grupo y PDC viajan solo si el catalogo los trae; el del PDC va en su
+    POST de alta. Una plaza sin aula solo vale fuera de CLASE (lo comprueba prevalidar).
 
 OMISIONES DELIBERADAS
     - Los 5 subgrupos con creadoAutomaticamentePorPDC=true. Los crea la propia
@@ -344,9 +347,17 @@ def mapa_por_codigo(listado):
     return {x["codigo"]: x["id"] for x in listado}
 
 
+def con_total(cuerpo, entidad):
+    """El cuerpo con «totalDeclarado» si el catalogo lo trae (S204); si no, tal cual."""
+    if "totalDeclarado" in entidad:
+        cuerpo["totalDeclarado"] = entidad["totalDeclarado"]
+    return cuerpo
+
+
 def escrituras_previstas(catalogo):
     """Escrituras HTTP de cargar() sobre una base vacia, contadas del catalogo."""
     # Cuenta cada PUT/POST de cargar(): jornada, niveles, asignaturas, profesores, aulas, grupos ORDINARIO, PDC, tutorias, subgrupos no automaticos y actividades.
+    # S204: los totales y el tipo viajan dentro de esos mismos POST (el del PDC, en su alta): no suman escrituras.
     return (1
             + len(catalogo["niveles"])
             + len(catalogo["asignaturas"])
@@ -407,10 +418,10 @@ def cargar(cliente, catalogo, nombres):
     for p in catalogo["profesores"]:
         if p["codigo"] in existentes:
             continue
-        cliente.post("/api/profesores", {
+        cliente.post("/api/profesores", con_total({
             "codigo": p["codigo"],
             "nombreCompleto": nombres["profesores"][p["codigo"]]["nombreCompleto"],
-        })
+        }, p))
         n += 1
     enviados["profesores"] = n
     print("  profesores: %d altas (%d ya estaban)" % (n, len(existentes)))
@@ -439,9 +450,9 @@ def cargar(cliente, catalogo, nombres):
     for g in catalogo["grupos"]:
         if g["tipo"] != "ORDINARIO" or g["codigo"] in existentes:
             continue
-        creado = cliente.post("/api/grupos", {
+        creado = cliente.post("/api/grupos", con_total({
             "codigo": g["codigo"], "nivel": g["nivel"], "tipo": g["tipo"],
-        })
+        }, g))
         existentes[creado["codigo"]] = creado["id"]
         n += 1
     enviados["grupos"] = n
@@ -452,7 +463,7 @@ def cargar(cliente, catalogo, nombres):
         if g["tipo"] != "DIVERSIFICACION_PDC" or g["codigo"] in existentes:
             continue
         creado = cliente.post("/api/grupos/%d/pdc" % existentes[g["grupoPadre"]],
-                              {"codigo": g["codigo"]})
+                              con_total({"codigo": g["codigo"]}, g))
         existentes[creado["codigo"]] = creado["id"]
         n += 1
     enviados["pdc"] = n
@@ -490,7 +501,7 @@ def cargar(cliente, catalogo, nombres):
     for a in catalogo["actividades"]:
         if a["codigo"] in presentes:
             continue
-        cliente.post("/api/actividades", {
+        cuerpo = {
             "codigo": a["codigo"],
             "asignatura": a.get("asignatura"),
             "duracionTramos": a["duracionTramos"],
@@ -504,7 +515,10 @@ def cargar(cliente, catalogo, nombres):
                 "profesores": list(p.get("profesores") or []),
                 "subgrupos": list(p.get("subgrupos") or []),
             } for p in a["plazas"]],
-        })
+        }
+        if "tipo" in a:
+            cuerpo["tipo"] = a["tipo"]
+        cliente.post("/api/actividades", cuerpo)
         plazas_enviadas += len(a["plazas"])
         n += 1
     enviados["actividades"] = n
