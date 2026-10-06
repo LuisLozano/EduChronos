@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-09-24
-- Commit: `206b754`
+- Fecha: 2026-10-06
+- Commit: `074e940`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -848,7 +848,7 @@ Métodos:
 - `void pinDesdoble_lasDosPlazasCaenEnAulasDistintasPinadas() throws Exception`
 - `void sinPinDeAula_elSolverEsLibre() throws Exception`
 
-Consume: `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SesionBloqueada`, `SolucionHorario`
+Consume: `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
 
 ### `SolverHorarioPinTramoTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -858,7 +858,14 @@ Métodos:
 - `void pinDesdoble_lasDosPlazasCaenSimultaneasEnElTramoPinado() throws Exception`
 - `void pinInfactible_lanzaHorarioInfactibleException() throws Exception`
 
-Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SesionBloqueada`, `SolucionHorario`, `Tramo`
+Consume: `ActividadInstancia`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`, `Tramo`
+
+### `SolverHorarioPlazaSinAulaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void unaReunionSinAulaSeColocaEnOtroTramoQueLaClaseDeSuProfesor()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
 ### `SolverHorarioReligionParejasTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
@@ -956,6 +963,14 @@ Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTempor
 ---
 
 ## Tests — paquete `domain`
+
+### `PlazaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.domain`
+Métodos:
+- `void unaPlazaSinAulaFijaNiCandidatasSeConstruye()`
+- `void aulaFijaYCandidatasALaVezSiguenSinPoderse()`
+
+Consume: (ninguno)
 
 ### `ProblemaHorarioTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.domain`
