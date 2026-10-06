@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.app.web.dto.CuadreDTO;
+import es.yaroki.educhronos.app.web.dto.CuadreEntidadDTO;
 import es.yaroki.educhronos.solver.cpsat.ReglaDura;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.cpsat.Violacion;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,17 +59,20 @@ import org.springframework.transaction.annotation.Transactional;
  * </ol>
  *
  * <p><b>Por qué demanda 1 y disponible 0.</b> {@link AvisoPrevalidacion} contractualiza
- * que el hallazgo se emite cuando {@code demanda > disponible} (y que la igualdad NO es
- * fallo). S8 no es una comparación de conteo, así que se codifica su cardinalidad real:
+ * que las reglas de capacidad se emiten cuando {@code demanda > disponible} (y que la
+ * igualdad NO es fallo). S8 no es una comparación de conteo, así que se codifica su cardinalidad real:
  * hace falta UN tutor principal que imparta la actividad, y hay CERO. 1 &gt; 0 respeta el
  * contrato sin inventar una aritmética que no existe.
  *
  * <p><b>Qué NO es.</b> No es una validación de integridad del catálogo (huérfanos,
  * códigos duplicados): eso ya lo hace {@link es.yaroki.educhronos.app.mapper.CatalogoMapper}
- * al mapear. Aquí el catálogo YA es referencialmente sano; lo que comparan las tres
- * primeras reglas es DEMANDA contra DISPONIBILIDAD (la cuarta, S8, no: es una propiedad
- * del catálogo, y por eso avisa en vez de abortar). Son condiciones NECESARIAS, no
- * suficientes: pasarlas no garantiza que el problema sea factible. La (f) sí es una
+ * al mapear. Aquí el catálogo YA es referencialmente sano. Las reglas de CAPACIDAD —(a),
+ * (c) y (d)— comparan DEMANDA contra DISPONIBILIDAD y fallan si la demanda la supera. S8
+ * no compara nada: es una propiedad del catálogo, y por eso avisa en vez de abortar. Las
+ * de CUADRE (S203) comparan las horas de CLASE configuradas con las DECLARADAS y avisan si
+ * no son iguales, por exceso o por defecto: también son AVISO, porque no impiden que haya
+ * horario y se corrigen editando el catálogo. Las de capacidad son condiciones
+ * NECESARIAS, no suficientes: pasarlas no garantiza que el problema sea factible. La (f) sí es una
  * infactibilidad garantizada: un pin sobre un tramo DURA de un profesor de la sesión
  * pinada. La (e), un cortafuegos contra restricciones horarias con bloques (S165), se
  * retiró en S166, cuando el solver pasó a vetar y penalizar todos los tramos que ocupa
@@ -82,7 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Se delega por método público; NO se heredan sus repositorios
  * (D-F8.2b-iii-A-a: 12 repos inyectados).
  *
- * <p><b>Por qué el núcleo es estático.</b> {@link #prevalidar(ProblemaHorario)} es un
+ * <p><b>Por qué el núcleo es estático.</b> {@link #prevalidar(ProblemaHorario, DatosCuadre)} es un
  * método estático puro, y {@code GeneradorHorarioService.generar()} lo invoca así, sin
  * inyectar este bean. Dos razones: (1) inyectarlo crearía un CICLO de beans —este
  * servicio ya depende de {@code GeneradorHorarioService} para cargar—, que Spring Boot
@@ -124,9 +130,24 @@ public class PrevalidacionService {
     public static final String REGLA_TUTORIA_SIN_TUTOR = ReglaDura.TUTORIA_SIN_TUTOR.name();
 
     /**
+     * Las horas de CLASE configuradas de un profesor con total declarado no son las
+     * declaradas (S203, C-totales-y-cargo). AVISO, ver {@link #profesoresDescuadrados}.
+     */
+    public static final String REGLA_PROFESOR_HORAS_DESCUADRADAS = "PROFESOR_HORAS_DESCUADRADAS";
+
+    /**
+     * Las horas configuradas de un grupo con total declarado no son las declaradas (S203).
+     * AVISO, ver {@link #gruposDescuadrados}.
+     */
+    public static final String REGLA_GRUPO_HORAS_DESCUADRADAS = "GRUPO_HORAS_DESCUADRADAS";
+
+    /** Filtro de actividades de las reglas de capacidad: todas cuentan, también REUNION y FUNCION. */
+    private static final Predicate<Actividad> TODAS = actividad -> true;
+
+    /**
      * Verificador del solver, dueño de la implementación de S8. {@code new} y no bean
      * (patrón de {@code DiagnosticoService}); {@code static} porque el núcleo
-     * {@link #prevalidar(ProblemaHorario)} que lo usa es estático. No guarda estado.
+     * {@link #prevalidar(ProblemaHorario, DatosCuadre)} que lo usa es estático. No guarda estado.
      */
     private static final VerificadorSolucion VERIFICADOR = new VerificadorSolucion();
 
@@ -147,7 +168,17 @@ public class PrevalidacionService {
      */
     @Transactional(readOnly = true)
     public List<AvisoPrevalidacion> prevalidar() {
-        return prevalidar(generadorService.cargarProblema());
+        return prevalidar(generadorService.cargarProblema(), generadorService.cargarDatosCuadre());
+    }
+
+    /**
+     * Carga el catálogo y devuelve el cuadre de horas de todos los profesores y grupos
+     * ({@code GET /api/prevalidacion/cuadre}, S203). Misma frontera transaccional que
+     * {@link #prevalidar()}; el cálculo es el núcleo estático {@link #cuadre(ProblemaHorario, DatosCuadre)}.
+     */
+    @Transactional(readOnly = true)
+    public CuadreDTO cuadre() {
+        return cuadre(generadorService.cargarProblema(), generadorService.cargarDatosCuadre());
     }
 
     /**
@@ -156,13 +187,18 @@ public class PrevalidacionService {
      * {@code GeneradorHorarioService.generar()} lo llame con el problema que YA cargó,
      * sin volver a leer el catálogo y sin inyectar este bean (ver javadoc de clase).
      *
-     * <p>El orden de salida es estable: primero profesores, luego actividades, luego
-     * grupos, luego los pines sobre DURA y por último tutorías (S8), y dentro de cada bloque el orden del catálogo.
-     * S8 va LA ÚLTIMA a propósito: es la única de severidad AVISO, así que los hallazgos
-     * que abortan la generación quedan agrupados al principio de la lista.
+     * <p>{@code datos} trae lo que el cuadre necesita y el problema no lleva (S203). El GET y
+     * la generación pasan los de {@code GeneradorHorarioService.cargarDatosCuadre()}; con
+     * {@link DatosCuadre#VACIO} las reglas de cuadre no emiten nada.
+     *
+     * <p>El orden de salida es estable. Primero los ERROR: profesores, actividades, grupos y
+     * pines sobre DURA. Después los AVISO: tutorías (S8), cuadre de profesores y cuadre de
+     * grupos. Dentro de cada bloque, el orden del problema. Así los hallazgos que abortan la
+     * generación quedan agrupados al principio de la lista.
      */
-    public static List<AvisoPrevalidacion> prevalidar(ProblemaHorario problema) {
+    public static List<AvisoPrevalidacion> prevalidar(ProblemaHorario problema, DatosCuadre datos) {
         Objects.requireNonNull(problema, "problema no puede ser null");
+        Objects.requireNonNull(datos, "datos no puede ser null");
 
         // Ambos techos salen del PROBLEMA, nunca de una constante: el catálogo real trae
         // los tramos ya sin recreos (CatalogoMapper los excluye) y los días que existan.
@@ -172,11 +208,13 @@ public class PrevalidacionService {
                 .map(Tramo::diaSemana).distinct().count();
 
         List<AvisoPrevalidacion> avisos = new ArrayList<>();
-        avisos.addAll(sobrecargaProfesor(problema, tramosLectivos));
+        avisos.addAll(sobrecargaProfesor(problema, tramosLectivos, TODAS));
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
-        avisos.addAll(sobrecargaGrupo(problema, tramosLectivos));
+        avisos.addAll(sobrecargaGrupo(problema, tramosLectivos, TODAS));
         avisos.addAll(pinSobreTramoDura(problema));
         avisos.addAll(tutoriasSinTutor(problema));
+        avisos.addAll(profesoresDescuadrados(problema, datos));
+        avisos.addAll(gruposDescuadrados(problema, datos));
         return List.copyOf(avisos);
     }
 
@@ -201,20 +239,15 @@ public class PrevalidacionService {
      *
      * <p>Las restricciones DURA se cuentan por TRAMO DISTINTO: dos filas DURA sobre el
      * mismo tramo no restan dos veces.
+     *
+     * <p>Cuenta TODAS las actividades ({@code filtro} es {@link #TODAS}): una REUNIÓN o una
+     * FUNCIÓN ocupa al profesor igual que una clase. La agregación es la misma que la del
+     * cuadre, {@link #demandaPorProfesor}, con otro filtro.
      */
     private static List<AvisoPrevalidacion> sobrecargaProfesor(
-            ProblemaHorario problema, int tramosLectivos) {
+            ProblemaHorario problema, int tramosLectivos, Predicate<Actividad> filtro) {
 
-        Map<Profesor, Set<Actividad>> actividadesPorProfesor = new LinkedHashMap<>();
-        for (Actividad actividad : problema.actividades()) {
-            for (Plaza plaza : actividad.plazas()) {
-                for (Profesor profesor : plaza.profesores()) {
-                    actividadesPorProfesor
-                            .computeIfAbsent(profesor, p -> new LinkedHashSet<>())
-                            .add(actividad);
-                }
-            }
-        }
+        Map<Profesor, Integer> demandaPorProfesor = demandaPorProfesor(problema, filtro);
 
         Map<Profesor, Set<Tramo>> durasPorProfesor = new LinkedHashMap<>();
         for (RestriccionHoraria restriccion : problema.restriccionesHorarias()) {
@@ -227,8 +260,7 @@ public class PrevalidacionService {
 
         List<AvisoPrevalidacion> avisos = new ArrayList<>();
         for (Profesor profesor : problema.profesores()) {
-            int demanda = actividadesPorProfesor.getOrDefault(profesor, Set.of()).stream()
-                    .mapToInt(PrevalidacionService::tramosQueOcupa).sum();
+            int demanda = demandaPorProfesor.getOrDefault(profesor, 0);
             int duras = durasPorProfesor.getOrDefault(profesor, Set.of()).size();
             int disponible = tramosLectivos - duras;
 
@@ -324,28 +356,17 @@ public class PrevalidacionService {
      *
      * <p>La pertenencia se toma de {@code Subgrupo.grupos()} directamente; NO se propaga
      * por {@code grupoPadre} (un grupo PDC no hereda las horas de su padre a efectos de
-     * este conteo).
+     * este conteo). La agregación es {@link #demandaPorGrupo}, la misma del cuadre, con el
+     * filtro {@link #TODAS}.
      */
     private static List<AvisoPrevalidacion> sobrecargaGrupo(
-            ProblemaHorario problema, int tramosLectivos) {
+            ProblemaHorario problema, int tramosLectivos, Predicate<Actividad> filtro) {
 
-        Map<GrupoAdministrativo, Set<Actividad>> actividadesPorGrupo = new LinkedHashMap<>();
-        for (Actividad actividad : problema.actividades()) {
-            for (Plaza plaza : actividad.plazas()) {
-                for (Subgrupo subgrupo : plaza.subgrupos()) {
-                    for (GrupoAdministrativo grupo : subgrupo.grupos()) {
-                        actividadesPorGrupo
-                                .computeIfAbsent(grupo, g -> new LinkedHashSet<>())
-                                .add(actividad);
-                    }
-                }
-            }
-        }
+        Map<GrupoAdministrativo, Integer> demandaPorGrupo = demandaPorGrupo(problema, filtro);
 
         List<AvisoPrevalidacion> avisos = new ArrayList<>();
         for (GrupoAdministrativo grupo : problema.grupos()) {
-            int demanda = actividadesPorGrupo.getOrDefault(grupo, Set.of()).stream()
-                    .mapToInt(PrevalidacionService::tramosQueOcupa).sum();
+            int demanda = demandaPorGrupo.getOrDefault(grupo, 0);
 
             if (demanda > tramosLectivos) {
                 avisos.add(new AvisoPrevalidacion(
@@ -474,10 +495,166 @@ public class PrevalidacionService {
     }
 
     /**
+     * (S203) PROFESOR CON HORAS DESCUADRADAS — AVISO. Un profesor con total declarado cuyas
+     * horas de CLASE configuradas no son las declaradas, por exceso o por defecto
+     * ({@link #descuadra}). Recorre {@code problema.profesores()} entero, así que un profesor
+     * declarado sin ninguna actividad tiene 0 configuradas y avisa.
+     *
+     * <p>Por qué AVISO: el horario existe igual y se arregla editando el catálogo, vía (2)
+     * de {@link Severidad}. {@code demanda} son las configuradas y {@code disponible} las
+     * declaradas.
+     *
+     * <p>Solo CLASE: las reuniones y funciones ocupan al profesor —las cuenta (a)— pero no son
+     * horas de clase. Misma agregación que (a), {@link #demandaPorProfesor}, con el filtro
+     * {@link #soloClase}.
+     */
+    private static List<AvisoPrevalidacion> profesoresDescuadrados(
+            ProblemaHorario problema, DatosCuadre datos) {
+        Map<Profesor, Integer> configuradasPorProfesor = demandaPorProfesor(problema, soloClase(datos));
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (Profesor profesor : problema.profesores()) {
+            Integer declaradas = datos.declaradasProfesor().get(profesor.codigo());
+            int configuradas = configuradasPorProfesor.getOrDefault(profesor, 0);
+            if (descuadra(declaradas, configuradas)) {
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.AVISO,
+                        REGLA_PROFESOR_HORAS_DESCUADRADAS,
+                        profesor.codigo(),
+                        configuradas,
+                        declaradas,
+                        profesor.codigo() + ": " + configuradas
+                                + " horas de clase configuradas y " + declaradas + " declaradas."));
+            }
+        }
+        return avisos;
+    }
+
+    /**
+     * (S203) GRUPO CON HORAS DESCUADRADAS — AVISO. Como {@link #profesoresDescuadrados} para
+     * los grupos, ordinarios y PDC. Cada grupo cuenta SUS actividades: un PDC no hereda las de
+     * su padre, igual que en (c), con la misma agregación {@link #demandaPorGrupo}.
+     */
+    private static List<AvisoPrevalidacion> gruposDescuadrados(
+            ProblemaHorario problema, DatosCuadre datos) {
+        Map<GrupoAdministrativo, Integer> configuradasPorGrupo = demandaPorGrupo(problema, soloClase(datos));
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (GrupoAdministrativo grupo : problema.grupos()) {
+            Integer declaradas = datos.declaradasGrupo().get(grupo.codigo());
+            int configuradas = configuradasPorGrupo.getOrDefault(grupo, 0);
+            if (descuadra(declaradas, configuradas)) {
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.AVISO,
+                        REGLA_GRUPO_HORAS_DESCUADRADAS,
+                        grupo.codigo(),
+                        configuradas,
+                        declaradas,
+                        grupo.codigo() + ": " + configuradas
+                                + " horas configuradas y " + declaradas + " declaradas."));
+            }
+        }
+        return avisos;
+    }
+
+    /**
+     * NÚCLEO del cuadre ({@code GET /api/prevalidacion/cuadre}, S203): TODOS los profesores y
+     * TODOS los grupos, con total declarado o sin él, en el orden del problema. Las cifras
+     * salen de la misma agregación que las reglas de cuadre y la marca de {@link #descuadra},
+     * así que una entidad lleva {@code descuadre} si y solo si su regla emite un AVISO.
+     */
+    public static CuadreDTO cuadre(ProblemaHorario problema, DatosCuadre datos) {
+        Objects.requireNonNull(problema, "problema no puede ser null");
+        Objects.requireNonNull(datos, "datos no puede ser null");
+        Map<Profesor, Integer> configuradasPorProfesor = demandaPorProfesor(problema, soloClase(datos));
+        Map<GrupoAdministrativo, Integer> configuradasPorGrupo = demandaPorGrupo(problema, soloClase(datos));
+        List<CuadreEntidadDTO> profesores = problema.profesores().stream()
+                .map(p -> entidadDeCuadre(p.codigo(), configuradasPorProfesor.getOrDefault(p, 0),
+                        datos.declaradasProfesor().get(p.codigo())))
+                .toList();
+        List<CuadreEntidadDTO> grupos = problema.grupos().stream()
+                .map(g -> entidadDeCuadre(g.codigo(), configuradasPorGrupo.getOrDefault(g, 0),
+                        datos.declaradasGrupo().get(g.codigo())))
+                .toList();
+        return new CuadreDTO(profesores, grupos);
+    }
+
+    private static CuadreEntidadDTO entidadDeCuadre(String codigo, int configuradas, Integer declaradas) {
+        return new CuadreEntidadDTO(codigo, configuradas, declaradas, descuadra(declaradas, configuradas));
+    }
+
+    /**
+     * La única definición de descuadre (S203): hay total declarado y las configuradas no son
+     * esas. Sin total no hay nada con qué cuadrar. La usan las dos reglas y el GET de cuadre.
+     */
+    static boolean descuadra(Integer declaradas, int configuradas) {
+        return declaradas != null && configuradas != declaradas;
+    }
+
+    /** Filtro del cuadre: solo las CLASE; fuera las actividades que {@code datos} marca como no CLASE. */
+    private static Predicate<Actividad> soloClase(DatosCuadre datos) {
+        return actividad -> !datos.actividadesNoClase().contains(actividad.codigo());
+    }
+
+    /**
+     * Tramos semanales de cada profesor, sumando UNA VEZ cada actividad que pasa el
+     * {@code filtro} aunque figure en varias de sus plazas (plazas simultáneas, ver (a)).
+     * Solo aparecen los profesores con alguna actividad. La comparten (a), con {@link #TODAS},
+     * y el cuadre, con {@link #soloClase}.
+     */
+    private static Map<Profesor, Integer> demandaPorProfesor(
+            ProblemaHorario problema, Predicate<Actividad> filtro) {
+        Map<Profesor, Set<Actividad>> actividadesPorProfesor = new LinkedHashMap<>();
+        for (Actividad actividad : problema.actividades()) {
+            if (!filtro.test(actividad)) {
+                continue;
+            }
+            for (Plaza plaza : actividad.plazas()) {
+                for (Profesor profesor : plaza.profesores()) {
+                    actividadesPorProfesor
+                            .computeIfAbsent(profesor, p -> new LinkedHashSet<>())
+                            .add(actividad);
+                }
+            }
+        }
+        Map<Profesor, Integer> demanda = new LinkedHashMap<>();
+        actividadesPorProfesor.forEach((profesor, actividades) -> demanda.put(profesor,
+                actividades.stream().mapToInt(PrevalidacionService::tramosQueOcupa).sum()));
+        return demanda;
+    }
+
+    /**
+     * Tramos semanales de cada grupo por la ruta {@code actividad → plazas → subgrupos →
+     * grupos}, UNA VEZ por actividad que pasa el {@code filtro} (desdobles, ver (c)). Sin
+     * herencia por {@code grupoPadre}. Solo aparecen los grupos con alguna actividad. La
+     * comparten (c), con {@link #TODAS}, y el cuadre, con {@link #soloClase}.
+     */
+    private static Map<GrupoAdministrativo, Integer> demandaPorGrupo(
+            ProblemaHorario problema, Predicate<Actividad> filtro) {
+        Map<GrupoAdministrativo, Set<Actividad>> actividadesPorGrupo = new LinkedHashMap<>();
+        for (Actividad actividad : problema.actividades()) {
+            if (!filtro.test(actividad)) {
+                continue;
+            }
+            for (Plaza plaza : actividad.plazas()) {
+                for (Subgrupo subgrupo : plaza.subgrupos()) {
+                    for (GrupoAdministrativo grupo : subgrupo.grupos()) {
+                        actividadesPorGrupo
+                                .computeIfAbsent(grupo, g -> new LinkedHashSet<>())
+                                .add(actividad);
+                    }
+                }
+            }
+        }
+        Map<GrupoAdministrativo, Integer> demanda = new LinkedHashMap<>();
+        actividadesPorGrupo.forEach((grupo, actividades) -> demanda.put(grupo,
+                actividades.stream().mapToInt(PrevalidacionService::tramosQueOcupa).sum()));
+        return demanda;
+    }
+
+    /**
      * Tramos que una actividad ocupa a lo largo de la semana en CUALQUIERA de los
      * recursos que toca: {@code duracionTramos × repeticionesPorSemana}. Fuente única de
-     * la aritmética de (a) y (c); ambas cuentan por actividad, así que ambas cuentan
-     * igual.
+     * la aritmética de (a), (c) y el cuadre; todas cuentan por actividad, así que todas
+     * cuentan igual.
      */
     private static int tramosQueOcupa(Actividad actividad) {
         return actividad.duracionTramos() * actividad.repeticionesPorSemana();

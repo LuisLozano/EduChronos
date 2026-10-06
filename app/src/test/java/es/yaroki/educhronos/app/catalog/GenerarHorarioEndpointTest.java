@@ -303,7 +303,8 @@ class GenerarHorarioEndpointTest {
         entityManager.flush();
 
         List<AvisoPrevalidacion> avisos =
-                PrevalidacionService.prevalidar(service.cargarProblema());
+                PrevalidacionService.prevalidar(
+                        service.cargarProblema(), service.cargarDatosCuadre());
         assertThat(avisos).singleElement().satisfies(a -> {
             assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR);
             assertThat(a.severidad()).isEqualTo(Severidad.AVISO);

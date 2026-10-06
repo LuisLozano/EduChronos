@@ -3,9 +3,11 @@ package es.yaroki.educhronos.app.service;
 import java.util.Objects;
 
 /**
- * Un hallazgo de la pre-validación de condiciones necesarias (Fase 8, Bloque 8.4-A,
- * deuda D18): una comparación {@code demanda > disponible} que falló, con la entidad
- * concreta que la provoca.
+ * Un hallazgo de la pre-validación del catálogo (Fase 8, Bloque 8.4-A, deuda D18): una
+ * comparación entre {@code demanda} y {@code disponible} que falló, con la entidad concreta
+ * que la provoca. Las reglas de CAPACIDAD se emiten si {@code demanda > disponible} (la
+ * igualdad NO es un fallo); las de CUADRE (S203), si {@code demanda ≠ disponible}, por
+ * exceso o por defecto. S8 y el pin sobre DURA codifican 1 contra 0.
  *
  * <p>Es el equivalente estructurado de
  * {@link ReferenciaEntranteException.Referencia}: existe para que los tests y la UI
@@ -17,9 +19,9 @@ import java.util.Objects;
  *                      {@code REGLA_*} de {@link PrevalidacionService})
  * @param entidadCodigo código natural de la entidad señalada (profesor, actividad o
  *                      grupo); es el {@code codigo} del dominio del solver, no un id JPA
- * @param demanda       tramos que la entidad NECESITA según el catálogo
- * @param disponible    tramos que la entidad TIENE; el aviso se emite si
- *                      {@code demanda > disponible} (la igualdad NO es un fallo)
+ * @param demanda       tramos que la entidad NECESITA según el catálogo; en el cuadre, las
+ *                      horas de clase configuradas
+ * @param disponible    tramos que la entidad TIENE; en el cuadre, las horas declaradas
  * @param descripcion   texto legible que explica el hallazgo
  */
 public record AvisoPrevalidacion(

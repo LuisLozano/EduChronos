@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
@@ -16,6 +17,7 @@ import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
 import es.yaroki.educhronos.app.catalog.SesionBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
+import es.yaroki.educhronos.app.catalog.TipoActividad;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
 import es.yaroki.educhronos.app.curso.CursoService;
@@ -37,10 +39,12 @@ import es.yaroki.educhronos.solver.domain.Tramo;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,6 +174,39 @@ public class GeneradorHorarioService {
                 sesionBloqueadaRepository.findAll(),
                 aulaBloqueadaRepository.findAll(),
                 profesorTutoriaRepository.findAll());
+    }
+
+    /**
+     * Los datos del cuadre de horas declaradas (S203, C-totales-y-cargo, T2.1): totales de
+     * profesores y grupos y actividades que no son CLASE, por código. Lo que el
+     * {@code ProblemaHorario} no lleva porque el solver no lo usa.
+     *
+     * <p>Lo llaman la generación, junto a {@link #cargarProblema()}, y
+     * {@code PrevalidacionService}, que lo pide por este bean. Solo lee columnas simples, sin
+     * relaciones perezosas, así que vale también fuera de transacción, que es como lo llama la
+     * generación (sobre {@code this}). Son dos lecturas sin transacción común con
+     * {@code cargarProblema()}; con un solo usuario no se pisan (premisa de
+     * {@code CursoService}).
+     */
+    @Transactional(readOnly = true)
+    public DatosCuadre cargarDatosCuadre() {
+        Map<String, Integer> declaradasProfesor = new HashMap<>();
+        for (Profesor profesor : profesorRepository.findAll()) {
+            if (profesor.getTotalDeclarado() != null) {
+                declaradasProfesor.put(profesor.getCodigo(), profesor.getTotalDeclarado());
+            }
+        }
+        Map<String, Integer> declaradasGrupo = new HashMap<>();
+        for (GrupoAdministrativo grupo : grupoRepository.findAll()) {
+            if (grupo.getTotalDeclarado() != null) {
+                declaradasGrupo.put(grupo.getCodigo(), grupo.getTotalDeclarado());
+            }
+        }
+        Set<String> actividadesNoClase = actividadRepository.findAll().stream()
+                .filter(actividad -> actividad.getTipo() != TipoActividad.CLASE)
+                .map(Actividad::getCodigo)
+                .collect(Collectors.toSet());
+        return new DatosCuadre(declaradasProfesor, declaradasGrupo, actividadesNoClase);
     }
 
     /**
@@ -311,11 +348,13 @@ public class GeneradorHorarioService {
                 ? nombre : "Horario " + Instant.now();
 
         ProblemaHorario problema = cargarProblema();
+        DatosCuadre cuadre = cargarDatosCuadre();
 
         // Condiciones necesarias ANTES del solve (8.4-A, D18): un catálogo que las viola
         // no tiene horario posible, y fallar aquí nombra al recurso culpable en vez de
-        // devolver un CpSolverStatus opaco tras agotar el presupuesto.
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        // devolver un CpSolverStatus opaco tras agotar el presupuesto. Los datos del cuadre
+        // son los mismos que ve el GET (S203): sus AVISO viajan en la excepción si hay ERROR.
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, cuadre);
         if (avisos.stream().anyMatch(a -> a.severidad() == Severidad.ERROR)) {
             throw new PrevalidacionFallidaException(avisos);
         }

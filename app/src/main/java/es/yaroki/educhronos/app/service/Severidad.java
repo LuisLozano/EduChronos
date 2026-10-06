@@ -20,9 +20,12 @@ package es.yaroki.educhronos.app.service;
  *       falsear el dato para poder generar. Eso es {@code AVISO}.</li>
  * </ol>
  *
- * <p><b>Hoy la produce S8</b>, la cuarta regla (S146): una actividad {@code requiereTutor}
- * sin TUTOR_PRINCIPAL entre sus profesores. Falla la vía (2) —el solver la coloca sin
- * problema y se arregla con un {@code PUT} de tutoría—, así que avisa y no aborta.
+ * <p><b>Hoy la producen S8 y las dos de cuadre.</b> S8 (S146): una actividad
+ * {@code requiereTutor} sin TUTOR_PRINCIPAL entre sus profesores. Falla la vía (2) —el solver
+ * la coloca sin problema y se arregla con un {@code PUT} de tutoría—, así que avisa y no
+ * aborta. Las de cuadre (S203, {@code PROFESOR_HORAS_DESCUADRADAS} y
+ * {@code GRUPO_HORAS_DESCUADRADAS}) también fallan la vía (2): unas horas configuradas que no
+ * casan con las declaradas no impiden que exista horario y se corrigen editando el catálogo.
  *
  * <p>Las tres primeras —(a) profesor, (c) grupo, (d) repeticiones— siguen siendo
  * condiciones necesarias exactas y son {@code ERROR}. (c) nació como {@code AVISO} y se

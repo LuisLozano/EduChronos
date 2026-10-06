@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.catalog;
 
 import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.hamcrest.Matchers.containsString;
@@ -10,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
+import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.service.PrevalidacionService;
 import es.yaroki.educhronos.app.web.HorarioController;
 import es.yaroki.educhronos.app.web.PrevalidacionController;
@@ -315,6 +318,142 @@ class PrevalidacionEndpointTest {
                 .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
                 .andExpect(jsonPath("$.mensaje").value(containsString(deRepeticiones)))
                 .andExpect(jsonPath("$.mensaje").value(containsString(delPin)));
+    }
+
+    // ─────────────────────────────── (S203) cuadre de horas declaradas, por la red
+
+    private static final Set<String> REGLAS_DE_CUADRE = Set.of(
+            PrevalidacionService.REGLA_PROFESOR_HORAS_DESCUADRADAS,
+            PrevalidacionService.REGLA_GRUPO_HORAS_DESCUADRADAS);
+
+    /**
+     * (S203-1) Del catálogo PERSISTIDO a los dos GET. Los datos de cuadre salen de la base por
+     * {@code GeneradorHorarioService.cargarDatosCuadre()}: totales de profesor y de grupo, y el
+     * tipo de actividad.
+     * <ul>
+     *   <li>MAT8 declara 3 y da 3 de clase más 1 de reunión: cuadra, porque la reunión no es
+     *       clase (con «todas» serían 4);</li>
+     *   <li>LEN1 declara 5 y no tiene actividades: 0 ≠ 5;</li>
+     *   <li>1ºA declara 4 y tiene 3: descuadra.</li>
+     * </ul>
+     * {@code GET /api/prevalidacion} trae exactamente esos dos AVISO, profesor antes que grupo,
+     * y {@code GET /api/prevalidacion/cuadre} las tres entidades con sus cifras y su marca.
+     * Mata que el GET de prevalidación pase {@code DatosCuadre.VACIO}.
+     */
+    @Test
+    void cuadre_losDosGetLeenLosDatosDeCuadreDeLaBase() throws Exception {
+        Contexto ctx = contextoBase(5);
+        crearActividad("Mat-1ºA", 3, PatronTemporal.NEUTRA, ctx.asignatura(),
+                ctx.aula1(), Set.of(ctx.prof1()), Set.of(ctx.completo()));
+        crearActividad("Reu-Dpto", 1, PatronTemporal.NEUTRA, ctx.asignatura(),
+                null, Set.of(ctx.prof1()), Set.of());
+        actividadRepository.findByCodigo("Reu-Dpto").orElseThrow().setTipo(TipoActividad.REUNION);
+        ctx.prof1().setTotalDeclarado(3);
+        Profesor len1 = profesorRepository.save(new Profesor("LEN1", "Dos"));
+        len1.setTotalDeclarado(5);
+        ctx.grupo().setTotalDeclarado(4);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].severidad").value("AVISO"))
+                .andExpect(jsonPath("$[0].regla").value("PROFESOR_HORAS_DESCUADRADAS"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("LEN1"))
+                .andExpect(jsonPath("$[0].demanda").value(0))
+                .andExpect(jsonPath("$[0].disponible").value(5))
+                .andExpect(jsonPath("$[1].severidad").value("AVISO"))
+                .andExpect(jsonPath("$[1].regla").value("GRUPO_HORAS_DESCUADRADAS"))
+                .andExpect(jsonPath("$[1].entidadCodigo").value("1ºA"))
+                .andExpect(jsonPath("$[1].descripcion").value("1ºA: 3 horas configuradas y 4 declaradas."));
+
+        mockMvc.perform(get("/api/prevalidacion/cuadre"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.profesores.length()").value(2))
+                .andExpect(jsonPath("$.profesores[0].codigo").value("MAT8"))
+                .andExpect(jsonPath("$.profesores[0].configuradas").value(3))
+                .andExpect(jsonPath("$.profesores[0].declaradas").value(3))
+                .andExpect(jsonPath("$.profesores[0].descuadre").value(false))
+                .andExpect(jsonPath("$.profesores[1].codigo").value("LEN1"))
+                .andExpect(jsonPath("$.profesores[1].configuradas").value(0))
+                .andExpect(jsonPath("$.profesores[1].declaradas").value(5))
+                .andExpect(jsonPath("$.profesores[1].descuadre").value(true))
+                .andExpect(jsonPath("$.grupos.length()").value(1))
+                .andExpect(jsonPath("$.grupos[0].codigo").value("1ºA"))
+                .andExpect(jsonPath("$.grupos[0].configuradas").value(3))
+                .andExpect(jsonPath("$.grupos[0].declaradas").value(4))
+                .andExpect(jsonPath("$.grupos[0].descuadre").value(true));
+    }
+
+    /**
+     * (S203-2) El GET de cuadre con entidades SIN total: salen igual, con {@code declaradas}
+     * null y {@code descuadre} false.
+     */
+    @Test
+    void cuadre_getConEntidadesSinTotal_lasListaConNullYFalse() throws Exception {
+        poblarCatalogoSano();
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion/cuadre"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.profesores.length()").value(1))
+                .andExpect(jsonPath("$.profesores[0].codigo").value("MAT8"))
+                .andExpect(jsonPath("$.profesores[0].configuradas").value(3))
+                .andExpect(jsonPath("$.profesores[0].declaradas").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.profesores[0].descuadre").value(false))
+                .andExpect(jsonPath("$.grupos.length()").value(1))
+                .andExpect(jsonPath("$.grupos[0].declaradas").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.grupos[0].descuadre").value(false));
+    }
+
+    /**
+     * (S203-3) UN DESCUADRE NO ABORTA. Catálogo sano salvo que MAT8 declara 99: el POST pasa
+     * con {@code 200}. Guarda anti-tautología, como (G1) de {@code GenerarHorarioEndpointTest}:
+     * antes se comprueba que el GET sí trae el AVISO de cuadre y nada más.
+     */
+    @Test
+    void cuadre_unDescuadreSinErrorNoAbortaLaGeneracion() throws Exception {
+        poblarCatalogoSano();
+        profesorRepository.findByCodigo("MAT8").orElseThrow().setTotalDeclarado(99);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].regla").value("PROFESOR_HORAS_DESCUADRADAS"))
+                .andExpect(jsonPath("$[0].severidad").value("AVISO"));
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * (S203-4) LA GENERACIÓN USA LOS MISMOS DATOS DE CUADRE QUE EL GET. El único canal por el
+     * que salen de la generación los AVISO es la excepción de rechazo: cuando hay un ERROR,
+     * {@link PrevalidacionFallidaException#getAvisos()} lleva la lista completa (el cuerpo del
+     * 422 y el log solo llevan los ERROR). Catálogo con el ERROR de (d) y dos descuadres:
+     * los AVISO de cuadre de la excepción son los del GET, y no están vacíos. Mata que la
+     * generación pase {@code DatosCuadre.VACIO}.
+     */
+    @Test
+    void cuadre_laGeneracionUsaLosMismosDatosDeCuadreQueElGet() {
+        poblarCatalogoConErrorDeRepeticiones();
+        profesorRepository.findByCodigo("MAT8").orElseThrow().setTotalDeclarado(99);
+        grupoRepository.findByCodigo("1ºA").orElseThrow().setTotalDeclarado(1);
+        entityManager.flush();
+        List<AvisoPrevalidacion> delGet = prevalidacionService.prevalidar().stream()
+                .filter(a -> REGLAS_DE_CUADRE.contains(a.regla())).toList();
+        assertThat(delGet).as("precondición: el GET ve los dos descuadres").hasSize(2);
+
+        PrevalidacionFallidaException rechazo = catchThrowableOfType(
+                () -> generadorService.generar(5, null, null, null), PrevalidacionFallidaException.class);
+
+        assertThat(rechazo).isNotNull();
+        assertThat(rechazo.getAvisos().stream()
+                        .filter(a -> REGLAS_DE_CUADRE.contains(a.regla())).toList())
+                .isEqualTo(delGet);
     }
 
     /** La descripción del ÚNICO hallazgo de la regla dada en la respuesta del GET. */

@@ -1,7 +1,10 @@
 package es.yaroki.educhronos.app.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
+import es.yaroki.educhronos.app.web.dto.CuadreDTO;
+import es.yaroki.educhronos.app.web.dto.CuadreEntidadDTO;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.ActividadInstancia;
@@ -29,7 +32,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests del NÚCLEO de la pre-validación (Fase 8, Bloque 8.4-A, deuda D18):
- * {@link PrevalidacionService#prevalidar(ProblemaHorario)}, el método estático puro.
+ * {@link PrevalidacionService#prevalidar(ProblemaHorario, DatosCuadre)}, el método estático puro.
  * Se ejercita con {@code ProblemaHorario} construidos a mano —no hay JPA, ni Spring, ni
  * solver— porque es exactamente la entrada que el servicio recibe en producción tras
  * {@code cargarProblema()}.
@@ -69,7 +72,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of(dura(mat1, tramos.get(0))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     /**
@@ -91,7 +94,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of(dura(mat1, tramos.get(0))));
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(avisos).singleElement().satisfies(a -> {
             assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
@@ -127,7 +130,7 @@ class PrevalidacionServiceTest {
                 List.of());
 
         List<AvisoPrevalidacion> deProfesor = soloRegla(
-                PrevalidacionService.prevalidar(problema),
+                PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO),
                 PrevalidacionService.REGLA_PROFESOR_SOBRECARGADO);
 
         assertThat(deProfesor).singleElement()
@@ -178,7 +181,7 @@ class PrevalidacionServiceTest {
                                 plaza("Mat-1ºA-P1", mat1, completo))),
                 List.of());
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(soloRegla(avisos, PrevalidacionService.REGLA_GRUPO_SOBRECARGADO))
                 .singleElement().satisfies(a -> {
@@ -214,7 +217,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of());
 
-        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).singleElement().satisfies(a -> {
             assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
             assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_REPETICIONES_EXCEDEN_DIAS);
             assertThat(a.entidadCodigo()).isEqualTo("Mat-1ºA");
@@ -243,7 +246,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of());
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     /** Catálogo sano: ninguna de las tres reglas dispara. */
@@ -259,7 +262,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of());
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     // ----------------------------------------------------------------- (S8) tutorías
@@ -290,7 +293,7 @@ class PrevalidacionServiceTest {
         String descripcionDelSolver = new VerificadorSolucion()
                 .verificarTutorias(problema).get(0).descripcion();
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(avisos).singleElement().satisfies(a -> {
             assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
@@ -327,7 +330,7 @@ class PrevalidacionServiceTest {
                         actividadTutorial("Tut-1ºA", len1, sg)),  // S8: LEN1 no es tutor
                 List.of(), List.of());
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(avisos).hasSize(2);
         assertThat(avisos.get(0).regla())
@@ -355,7 +358,7 @@ class PrevalidacionServiceTest {
                 List.of(),
                 List.of(new ProfesorTutoria(len1, grupo, RolTutoria.TUTOR_PRINCIPAL)));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     // ------------------------------------ restricciones horarias con bloques (S166)
@@ -381,7 +384,7 @@ class PrevalidacionServiceTest {
                         plaza("Mat-1ºA-P1", mat1, sg))),
                 List.of(dura(mat1, tramos.get(1)), blanda(mat1, tramos.get(3))));
 
-        assertThat(PrevalidacionService.prevalidar(problema))
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO))
                 .filteredOn(a -> a.severidad() == Severidad.ERROR)
                 .isEmpty();
     }
@@ -409,7 +412,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, tramos.get(0))),
                 List.of(pin(mat, 1, tramos.get(0))));
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(avisos).extracting(AvisoPrevalidacion::regla).containsExactly(
                 PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA,
@@ -438,7 +441,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, tramos.get(0))),
                 List.of(pin(mat, 1, tramos.get(0))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).singleElement().satisfies(a -> {
             assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
             assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
             assertThat(a.entidadCodigo()).isEqualTo("MAT1");
@@ -464,7 +467,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, tramos.get(1))),
                 List.of(pin(mat, 1, tramos.get(0))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     /**
@@ -485,7 +488,7 @@ class PrevalidacionServiceTest {
                 List.of(blanda(mat1, tramos.get(0))),
                 List.of(pin(mat, 1, tramos.get(0))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
     }
 
     /**
@@ -508,7 +511,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(len1, tramos.get(0))),
                 List.of(pin(amb, 1, tramos.get(0))));
 
-        assertThat(PrevalidacionService.prevalidar(problema)).singleElement().satisfies(a -> {
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).singleElement().satisfies(a -> {
             assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
             assertThat(a.entidadCodigo()).isEqualTo("LEN1");
             assertThat(a.descripcion()).contains("'LEN1'").doesNotContain("MAT1");
@@ -535,7 +538,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, tramos.get(1))),
                 List.of(pin(bloque, 1, tramos.get(0))));
 
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
 
         assertThat(avisos).extracting(AvisoPrevalidacion::regla).containsExactly(
                 PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA);
@@ -560,7 +563,7 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, tramos.get(0)), dura(mat1, tramos.get(0))),
                 List.of(pin(mat, 1, tramos.get(0))));
 
-        assertThat(soloRegla(PrevalidacionService.prevalidar(problema),
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO),
                 PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA)).hasSize(1);
     }
 
@@ -585,13 +588,345 @@ class PrevalidacionServiceTest {
                 List.of(dura(mat1, d1t6)),
                 List.of(pin(bloque, 1, d1t6)));
 
-        assertThat(soloRegla(PrevalidacionService.prevalidar(problema),
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO),
                 PrevalidacionService.REGLA_PIN_SOBRE_TRAMO_DURA))
                 .singleElement().extracting(AvisoPrevalidacion::descripcion)
                 .asString().contains("D1T6");
     }
 
+    // ------------------------------------------------- (S203) cuadre de horas declaradas
+
+    private static final String PROF_DESCUADRADO = PrevalidacionService.REGLA_PROFESOR_HORAS_DESCUADRADAS;
+    private static final String GRUPO_DESCUADRADO = PrevalidacionService.REGLA_GRUPO_HORAS_DESCUADRADAS;
+
+    /**
+     * (C1) EXCESO: MAT1 tiene 4 horas de clase configuradas y declara 3. AVISO a su nombre con
+     * las configuradas como demanda y las declaradas como disponible. 5 tramos en 5 días y una
+     * NEUTRA de 4: ninguna otra regla habla, y el {@code hasSize(1)} lo fija.
+     */
+    @Test
+    void cuadre_exceso_avisaConConfiguradasYDeclaradas() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(
+                problema, datos(Map.of("MAT1", 3), Map.of(), Set.of()));
+
+        assertThat(avisos).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+            assertThat(a.regla()).isEqualTo(PROF_DESCUADRADO);
+            assertThat(a.entidadCodigo()).isEqualTo("MAT1");
+            assertThat(a.demanda()).isEqualTo(4);
+            assertThat(a.disponible()).isEqualTo(3);
+        });
+    }
+
+    /** (C2) DEFECTO: 2 configuradas y 3 declaradas también avisa. Mata «!=» → «>». */
+    @Test
+    void cuadre_defecto_avisa() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 2, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, datos(Map.of("MAT1", 3), Map.of(), Set.of())))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.regla()).isEqualTo(PROF_DESCUADRADO);
+                    assertThat(a.demanda()).isEqualTo(2);
+                    assertThat(a.disponible()).isEqualTo(3);
+                });
+    }
+
+    /** (C3) La igualdad cuadra: 3 y 3 no avisan, ni el profesor ni el grupo. */
+    @Test
+    void cuadre_igualdad_noAvisa() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 3, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(
+                problema, datos(Map.of("MAT1", 3), Map.of("1ºA", 3), Set.of()))).isEmpty();
+    }
+
+    /** (C4) SIN DECLARAR no avisa: sin total no hay con qué cuadrar, tenga las horas que tenga. */
+    @Test
+    void cuadre_sinDeclarar_noAvisa() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, datos(Map.of(), Map.of(), Set.of())))
+                .isEmpty();
+    }
+
+    /**
+     * (C5) DECLARADO SIN ACTIVIDADES avisa con 0 configuradas: LEN1 y el grupo 1ºB declaran
+     * horas y no figuran en ninguna plaza. Mata recorrer solo las entidades con actividades.
+     */
+    @Test
+    void cuadre_declaradoSinActividades_avisaConCero() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        GrupoAdministrativo grupoA = grupo("1ºA");
+        GrupoAdministrativo grupoB = grupo("1ºB");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupoA));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1, len1),
+                List.of(grupoA, grupoB), List.of(sg),
+                List.of(actividad("Mat-1ºA", 3, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(
+                problema, datos(Map.of("LEN1", 18), Map.of("1ºB", 30), Set.of()));
+
+        assertThat(avisos).extracting(AvisoPrevalidacion::regla, AvisoPrevalidacion::entidadCodigo,
+                        AvisoPrevalidacion::demanda, AvisoPrevalidacion::disponible)
+                .containsExactly(
+                        tuple(PROF_DESCUADRADO, "LEN1", 0, 18),
+                        tuple(GRUPO_DESCUADRADO, "1ºB", 0, 30));
+    }
+
+    /**
+     * (C6) SOLO CUENTA CLASE: MAT1 da 3 de clase y 2 de reunión de departamento, y declara 3.
+     * La reunión le ocupa —(a) la cuenta— pero no es hora de clase: el cuadre casa. Con
+     * «todas» serían 5 ≠ 3. La reunión no tiene subgrupos ni aula (S201).
+     */
+    @Test
+    void cuadre_soloCuentaClase() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg),
+                List.of(actividad("Mat-1ºA", 3, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg)),
+                        actividad("Reu-Dpto", 2, 1, PatronTemporal.NEUTRA, plazaSinAlumnos("Reu-Dpto-P1", mat1))),
+                List.of());
+
+        assertThat(PrevalidacionService.prevalidar(
+                problema, datos(Map.of("MAT1", 3), Map.of("1ºA", 3), Set.of("Reu-Dpto")))).isEmpty();
+    }
+
+    /**
+     * (C7) UNA VEZ POR ACTIVIDAD con plazas simultáneas: MAT1 está en las dos plazas de un
+     * desdoble de 3 repeticiones y 1ºA en sus dos subgrupos. Profesor y grupo ocupan 3, no 6, y
+     * declaran 3: nada que avisar. Contando por plaza los dos avisarían con 6.
+     */
+    @Test
+    void cuadre_unaVezPorActividadConPlazasSimultaneas() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo desd1 = new Subgrupo("1ºA-Desd1", Set.of(grupo));
+        Subgrupo desd2 = new Subgrupo("1ºA-Desd2", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(desd1, desd2),
+                List.of(actividad("Mat-desdoble", 3, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-desdoble-P1", mat1, desd1), plaza("Mat-desdoble-P2", mat1, desd2))),
+                List.of());
+
+        assertThat(PrevalidacionService.prevalidar(
+                problema, datos(Map.of("MAT1", 3), Map.of("1ºA", 3), Set.of()))).isEmpty();
+    }
+
+    /**
+     * (C8) LA SOBRECARGA SIGUE CONTANDO LAS REUNIONES: con 5 tramos, MAT1 da 4 de clase y 2 de
+     * reunión: (a) ve 6 &gt; 5 aunque los datos de cuadre marquen la reunión como no CLASE. Mata
+     * que (a) use el filtro «solo CLASE» (vería 4 ≤ 5 y callaría).
+     */
+    @Test
+    void sobrecarga_sigueContandoLasReuniones() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg)),
+                        actividad("Reu-Dpto", 2, 1, PatronTemporal.NEUTRA, plazaSinAlumnos("Reu-Dpto-P1", mat1))),
+                List.of());
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(
+                        problema, datos(Map.of(), Map.of(), Set.of("Reu-Dpto"))),
+                PrevalidacionService.REGLA_PROFESOR_SOBRECARGADO))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.entidadCodigo()).isEqualTo("MAT1");
+                    assertThat(a.demanda()).isEqualTo(6);
+                    assertThat(a.disponible()).isEqualTo(5);
+                });
+    }
+
+    /**
+     * (C9) ORDEN Y SEVERIDAD: un ERROR de (d), un AVISO de S8 y un descuadre de profesor y otro
+     * de grupo. Por índice: el ERROR, S8, el profesor y el grupo; los tres últimos AVISO. Mata
+     * las reglas de cuadre como ERROR y el orden invertido entre ellas o respecto de S8.
+     *
+     * <p>Calibrado como (P2): 6 tramos en 3 días; MAT1 4 de una DISTRIBUIDA (4 &gt; 3 días) y
+     * LEN1 1 tutorial sin ser tutor; el grupo suma 5 ≤ 6. MAT1 declara 2 y 1ºA declara 4.
+     */
+    @Test
+    void cuadre_esAvisoYVaDespuesDeS8_profesorAntesQueGrupo() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(
+                tramosEnDias(3, 2), List.of(mat1, len1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.DISTRIBUIDA, plaza("Mat-1ºA-P1", mat1, sg)),
+                        actividadTutorial("Tut-1ºA", len1, sg)),
+                List.of(), List.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(
+                problema, datos(Map.of("MAT1", 2), Map.of("1ºA", 4), Set.of()));
+
+        assertThat(avisos).extracting(AvisoPrevalidacion::regla, AvisoPrevalidacion::severidad)
+                .containsExactly(
+                        tuple(PrevalidacionService.REGLA_REPETICIONES_EXCEDEN_DIAS, Severidad.ERROR),
+                        tuple(PrevalidacionService.REGLA_TUTORIA_SIN_TUTOR, Severidad.AVISO),
+                        tuple(PROF_DESCUADRADO, Severidad.AVISO),
+                        tuple(GRUPO_DESCUADRADO, Severidad.AVISO));
+    }
+
+    /** (C10) Las dos descripciones, literales (T2.4): {código}: {c} … {d} declaradas. */
+    @Test
+    void cuadre_descripcionesLiterales() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(
+                        problema, datos(Map.of("MAT1", 3), Map.of("1ºA", 5), Set.of())))
+                .extracting(AvisoPrevalidacion::descripcion)
+                .containsExactly(
+                        "MAT1: 4 horas de clase configuradas y 3 declaradas.",
+                        "1ºA: 4 horas configuradas y 5 declaradas.");
+    }
+
+    /**
+     * (C11) UN PDC CUENTA SOLO SUS ACTIVIDADES: 1ºA tiene 4 horas propias y su PDC 1ºADi 2
+     * propias; cada uno declara las suyas y ninguno avisa. Si el PDC heredara las del padre
+     * vería 6 ≠ 2.
+     */
+    @Test
+    void cuadre_pdcConTotal_cuentaSoloSusActividades() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        GrupoAdministrativo padre = grupo("1ºA");
+        GrupoAdministrativo pdc = new GrupoAdministrativo(
+                "1ºADi", TipoGrupo.DIVERSIFICACION_PDC, Optional.of(padre));
+        Subgrupo sgPadre = new Subgrupo("1ºA-Completo", Set.of(padre));
+        Subgrupo sgPdc = new Subgrupo("1ºADi-Completo", Set.of(pdc));
+        ProblemaHorario problema = problema(tramosEnDias(5, 2), List.of(mat1, len1), List.of(padre, pdc),
+                List.of(sgPadre, sgPdc),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sgPadre)),
+                        actividad("Amb-1ºADi", 2, 1, PatronTemporal.NEUTRA, plaza("Amb-1ºADi-P1", len1, sgPdc))),
+                List.of());
+
+        assertThat(PrevalidacionService.prevalidar(
+                problema, datos(Map.of(), Map.of("1ºA", 4, "1ºADi", 2), Set.of()))).isEmpty();
+    }
+
+    /**
+     * (C12) EL CUADRE DEL GET lista TODAS las entidades, en el orden del problema: las que no
+     * tienen total salen con {@code declaradas} null y {@code descuadre} false; las que lo
+     * tienen, con su marca. Igualdad completa de los registros.
+     */
+    @Test
+    void cuadreGet_listaTodasLasEntidades_lasSinTotalConNullYFalse() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        Profesor ing1 = new Profesor("ING1", "Tres");
+        GrupoAdministrativo grupoA = grupo("1ºA");
+        GrupoAdministrativo grupoB = grupo("1ºB");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupoA));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1, len1, ing1),
+                List.of(grupoA, grupoB), List.of(sg),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of());
+
+        CuadreDTO cuadre = PrevalidacionService.cuadre(
+                problema, datos(Map.of("MAT1", 3, "ING1", 0), Map.of("1ºA", 4), Set.of()));
+
+        assertThat(cuadre.profesores()).containsExactly(
+                new CuadreEntidadDTO("MAT1", 4, 3, true),
+                new CuadreEntidadDTO("LEN1", 0, null, false),
+                new CuadreEntidadDTO("ING1", 0, 0, false));
+        assertThat(cuadre.grupos()).containsExactly(
+                new CuadreEntidadDTO("1ºA", 4, 4, false),
+                new CuadreEntidadDTO("1ºB", 0, null, false));
+    }
+
+    /**
+     * (C13) EL GET DE CUADRE COINCIDE CON LOS AVISO: en un catálogo con exceso, defecto, cuadre
+     * exacto, sin total y sin actividades, las entidades marcadas son exactamente las que
+     * avisan, con las mismas cifras (configuradas = demanda, declaradas = disponible).
+     */
+    @Test
+    void cuadreGet_coincideConLosAvisos() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        Profesor len1 = new Profesor("LEN1", "Dos");
+        Profesor ing1 = new Profesor("ING1", "Tres");
+        Profesor fis1 = new Profesor("FIS1", "Cuatro");
+        GrupoAdministrativo grupoA = grupo("1ºA");
+        GrupoAdministrativo grupoB = grupo("1ºB");
+        Subgrupo sgA = new Subgrupo("1ºA-Completo", Set.of(grupoA));
+        Subgrupo sgB = new Subgrupo("1ºB-Completo", Set.of(grupoB));
+        ProblemaHorario problema = problema(tramosEnDias(5, 2), List.of(mat1, len1, ing1, fis1),
+                List.of(grupoA, grupoB), List.of(sgA, sgB),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sgA)),
+                        actividad("Len-1ºB", 2, 1, PatronTemporal.NEUTRA, plaza("Len-1ºB-P1", len1, sgB))),
+                List.of());
+        DatosCuadre datos = datos(Map.of("MAT1", 3, "LEN1", 2, "FIS1", 5), Map.of("1ºA", 5), Set.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, datos);
+        CuadreDTO cuadre = PrevalidacionService.cuadre(problema, datos);
+
+        List<String> marcadosProfesor = cuadre.profesores().stream().filter(CuadreEntidadDTO::descuadre)
+                .map(e -> e.codigo() + "|" + e.configuradas() + "|" + e.declaradas()).toList();
+        List<String> marcadosGrupo = cuadre.grupos().stream().filter(CuadreEntidadDTO::descuadre)
+                .map(e -> e.codigo() + "|" + e.configuradas() + "|" + e.declaradas()).toList();
+        assertThat(marcadosProfesor).containsExactly("MAT1|4|3", "FIS1|0|5");
+        assertThat(marcadosGrupo).containsExactly("1ºA|4|5");
+        assertThat(soloRegla(avisos, PROF_DESCUADRADO).stream()
+                .map(a -> a.entidadCodigo() + "|" + a.demanda() + "|" + a.disponible()).toList())
+                .isEqualTo(marcadosProfesor);
+        assertThat(soloRegla(avisos, GRUPO_DESCUADRADO).stream()
+                .map(a -> a.entidadCodigo() + "|" + a.demanda() + "|" + a.disponible()).toList())
+                .isEqualTo(marcadosGrupo);
+    }
+
+    /** {@code descuadra} sola, en sus cuatro casos: sin total nunca; con total, solo si difiere. */
+    @Test
+    void descuadra_sinTotalNunca_conTotalSoloSiDifiere() {
+        assertThat(PrevalidacionService.descuadra(null, 0)).isFalse();
+        assertThat(PrevalidacionService.descuadra(null, 7)).isFalse();
+        assertThat(PrevalidacionService.descuadra(3, 3)).isFalse();
+        assertThat(PrevalidacionService.descuadra(3, 2)).isTrue();
+        assertThat(PrevalidacionService.descuadra(3, 4)).isTrue();
+    }
+
     // ------------------------------------------------------------------- helpers
+
+    private static DatosCuadre datos(
+            Map<String, Integer> profesores, Map<String, Integer> grupos, Set<String> noClase) {
+        return new DatosCuadre(profesores, grupos, noClase);
+    }
+
+    /** Plaza de una reunión o una función (S201): sin subgrupos y sin aula. */
+    private static Plaza plazaSinAlumnos(String codigo, Profesor profesor) {
+        return new Plaza(codigo, MAT, Set.of(profesor), Optional.empty(), Set.of(), Set.of());
+    }
 
     private static List<Tramo> tramosEnDias(int dias, int porDia) {
         List<Tramo> tramos = new ArrayList<>();

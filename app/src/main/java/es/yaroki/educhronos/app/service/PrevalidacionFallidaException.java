@@ -31,7 +31,7 @@ public class PrevalidacionFallidaException extends RuntimeException {
     private final transient List<AvisoPrevalidacion> avisos;
 
     /**
-     * @param avisos la salida completa de {@code PrevalidacionService.prevalidar()}
+     * @param avisos la salida completa de {@code PrevalidacionService.prevalidar(problema, datos)}
      *     (errores y avisos), en el orden en que se computó.
      * @throws IllegalArgumentException si la lista está vacía o no contiene ningún
      *     {@link Severidad#ERROR}: abortar la generación sin un motivo que lo justifique

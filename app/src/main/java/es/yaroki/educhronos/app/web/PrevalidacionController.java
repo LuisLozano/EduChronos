@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.PrevalidacionService;
 import es.yaroki.educhronos.app.web.dto.AvisoPrevalidacionDTO;
+import es.yaroki.educhronos.app.web.dto.CuadreDTO;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,10 +36,21 @@ public class PrevalidacionController {
 
     /**
      * Pre-valida el catálogo actual y devuelve todos los hallazgos, en el orden estable
-     * que produce el servicio (profesores, actividades, grupos).
+     * que produce el servicio: primero los ERROR (profesores, actividades, grupos y pines
+     * sobre DURA) y después los AVISO (tutorías, cuadre de profesores y cuadre de grupos).
      */
     @GetMapping
     public List<AvisoPrevalidacionDTO> prevalidar() {
         return service.prevalidar().stream().map(AvisoPrevalidacionDTO::de).toList();
+    }
+
+    /**
+     * Cuadre de horas declaradas de todos los profesores y grupos (S203, C-totales-y-cargo):
+     * {@code 200} siempre, con las entidades sin total incluidas. Un GET, así que la guarda de
+     * solo lectura lo deja pasar en un curso archivado.
+     */
+    @GetMapping("/cuadre")
+    public CuadreDTO cuadre() {
+        return service.cuadre();
     }
 }
