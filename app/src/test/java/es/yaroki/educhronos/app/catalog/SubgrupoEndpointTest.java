@@ -396,6 +396,69 @@ class SubgrupoEndpointTest {
                 .andExpect(status().isNoContent());
     }
 
+    // ============== S206 T2: el mono-Di admite cambiar sus alumnos, y nada más ==============
+
+    /** (8) Mismo código y mismos grupos, alumnos nuevos → 200, y los alumnos quedan en la base. */
+    @Test
+    void monoDi_soloCambianLosAlumnos_200YPersistido() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+
+        mockMvc.perform(put("/api/subgrupos/" + idMonoDi)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("G_A_DI-Completo", "12", "G_A_DI")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.alumnos").value(12))
+                .andExpect(jsonPath("$.delPdc").value(true));
+        entityManager.flush();
+        entityManager.clear();
+        assertEquals(12, subgrupoRepository.findById(idMonoDi).orElseThrow().getAlumnos());
+    }
+
+    /** (9) Código cambiado, aunque traiga alumnos → el mismo 400 de G2, y no toca nada. */
+    @Test
+    void monoDi_cambiaElCodigo_400YNoToca() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+
+        mockMvc.perform(put("/api/subgrupos/" + idMonoDi)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("OTRO_NOMBRE", "12", "G_A_DI")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("G_A_DI-Completo")));
+        entityManager.clear();
+        Subgrupo monoDi = subgrupoRepository.findById(idMonoDi).orElseThrow();
+        assertEquals("G_A_DI-Completo", monoDi.getCodigo());
+        assertEquals(null, monoDi.getAlumnos());
+    }
+
+    /**
+     * (10) Grupos cambiados con el mismo código → el mismo 400. Se le AÑADE un grupo a la
+     * población guardada: una comparación que solo mirase si los guardados están entre los
+     * pedidos, o solo el código, lo dejaría pasar.
+     */
+    @Test
+    void monoDi_cambianLosGrupos_400() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+
+        mockMvc.perform(put("/api/subgrupos/" + idMonoDi)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("G_A_DI-Completo", "12", "G_A_DI", "G_B")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("G_A_DI-Completo")));
+    }
+
+    /** (11) El DTO dice cuáles son mono-Di: el de un PDC sí; un ordinario y el ámbito compartido, no. */
+    @Test
+    void delPdc_soloEnElMonoDi() throws Exception {
+        long idMonoDi = crearPdcYDevolverIdDeSuMonoDi("G_A", "G_A_DI");
+        crearPdcYDevolverIdDeSuMonoDi("G_B", "G_B_DI");
+        long idOrdinario = crear(body("SG1", "G_C"));
+        long idAmbito = crear(body("AMBITO_DI", "G_A_DI", "G_B_DI"));
+
+        mockMvc.perform(get("/api/subgrupos/" + idMonoDi)).andExpect(jsonPath("$.delPdc").value(true));
+        mockMvc.perform(get("/api/subgrupos/" + idOrdinario)).andExpect(jsonPath("$.delPdc").value(false));
+        mockMvc.perform(get("/api/subgrupos/" + idAmbito)).andExpect(jsonPath("$.delPdc").value(false));
+    }
+
     /**
      * Cuelga un PDC del grupo ordinario indicado por el alta compuesta REAL y devuelve el id
      * de su subgrupo mono-Di, que el alta deriva como {@code codigoPdc + "-Completo"}.

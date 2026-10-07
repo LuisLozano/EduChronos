@@ -9,11 +9,13 @@ import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.SubgrupoDTO;
 import es.yaroki.educhronos.app.web.dto.SubgrupoRequest;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>(d) unicidad de {@code codigo}: en el alta ningún otro registro con ese
  *       código; en la edición ninguno SALVO la propia entidad (exclusión por id);
  *   <li>(e) SOLO EN EDICIÓN Y BORRADO: la entidad existente no es el subgrupo mono-Di
- *       de un PDC. Ver {@link #esMonoDiDePdc}.
+ *       de un PDC. Ver {@link #esMonoDiDePdc}. Desde S206 la edición sí admite un PUT que
+ *       deja código y grupos como están y solo cambia los alumnos ({@link #mismaIdentidad});
+ *       el borrado sigue rechazado siempre.
  *   <li>(f) {@code alumnos} (S206) null o ≥ 0; un negativo es un 400 que nombra el campo. El
  *       {@code PUT} reemplaza el estado entero: unos alumnos ausentes vuelven a «sin indicar».
  * </ul>
@@ -106,16 +110,17 @@ public class SubgrupoService {
      * entidad con su mismo código es válido: la unicidad se excluye a sí misma por id.
      * La población de grupos se reemplaza por completo.
      *
-     * <p>(e) va PRIMERA, antes de mirar el cuerpo: es una precondición del RECURSO, no
+     * <p>(e) va PRIMERA, antes de validar el cuerpo: es una precondición del RECURSO, no
      * del payload. Renombrar el mono-Di es lo más dañino que se puede hacer aquí —el
      * agregado PDC lo localiza por código derivado, no por FK—, así que se ataja antes
-     * de validar nada más.
+     * de validar nada más. Desde S206 solo mira si el PUT cambia código o grupos: si los
+     * deja como están, el mono-Di pasa y lo único que cambia son sus alumnos.
      */
     @Transactional
     public SubgrupoDTO editar(Long id, SubgrupoRequest peticion) {
         Subgrupo entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe subgrupo con id " + id));
-        if (esMonoDiDePdc(entidad)) {
+        if (esMonoDiDePdc(entidad) && !mismaIdentidad(entidad, peticion)) {
             throw new IllegalArgumentException(
                     "El subgrupo " + entidad.getCodigo() + " es el subgrupo mono-Di de un grupo"
                             + " PDC y no se edita por este flujo: se gestiona con su PDC, en"
@@ -184,6 +189,22 @@ public class SubgrupoService {
      * el lado propietario del N:M, así que navegarlo dentro de la transacción es una
      * lectura que la sesión ya sabe hacer. No hace falta query ni repositorio nuevo.
      */
+    /**
+     * ¿Deja el PUT el código y la población de grupos como están? Es lo que la regla (e) le
+     * permite a un mono-Di (S206): cambiar sus alumnos y nada más. Los grupos se comparan como
+     * conjunto de códigos, sin orden; una lista nula o con otros grupos no coincide.
+     */
+    private static boolean mismaIdentidad(Subgrupo entidad, SubgrupoRequest peticion) {
+        if (peticion == null || peticion.grupos() == null) {
+            return false;
+        }
+        Set<String> guardados = entidad.getGrupos().stream()
+                .map(GrupoAdministrativo::getCodigo)
+                .collect(Collectors.toSet());
+        return entidad.getCodigo().equals(peticion.codigo())
+                && guardados.equals(new HashSet<>(peticion.grupos()));
+    }
+
     private static boolean esMonoDiDePdc(Subgrupo subgrupo) {
         Set<GrupoAdministrativo> poblacion = subgrupo.getGrupos();
         return poblacion.size() == 1
@@ -230,6 +251,7 @@ public class SubgrupoService {
                 .map(GrupoAdministrativo::getCodigo)
                 .sorted()
                 .toList();
-        return new SubgrupoDTO(subgrupo.getId(), subgrupo.getCodigo(), codigos, subgrupo.getAlumnos());
+        return new SubgrupoDTO(subgrupo.getId(), subgrupo.getCodigo(), codigos, subgrupo.getAlumnos(),
+                esMonoDiDePdc(subgrupo));
     }
 }

@@ -15,11 +15,17 @@ import java.util.List;
  *
  * <p>{@code alumnos} (S206) es null si no se ha indicado.
  *
+ * <p>{@code delPdc} (S206) dice si el subgrupo es el mono-Di de un PDC: su única población es un
+ * grupo {@code DIVERSIFICACION_PDC}. Es el mismo predicado con que {@code SubgrupoService} rechaza
+ * cambiar su código o sus grupos y borrarlo; lo lleva el DTO para que el cliente no lo adivine
+ * (D-monodi-botones-inertes).
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code SubgrupoService}.
  */
 public record SubgrupoDTO(
         Long id,
         String codigo,
         List<String> grupos,
-        Integer alumnos) {
+        Integer alumnos,
+        boolean delPdc) {
 }
