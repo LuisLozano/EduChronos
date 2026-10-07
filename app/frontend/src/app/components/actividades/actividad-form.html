@@ -129,13 +129,12 @@
             <input type="radio" formControlName="modoAula" value="CANDIDATAS" />
             Aulas candidatas
           </label>
-          <!-- Una CLASE siempre tiene aula: «Sin aula» solo existe para reuniones y funciones. -->
-          @if (form.controls.tipo.value !== 'CLASE') {
+          <!-- Sin aula escrita: en una CLASE la elige el generador (S207); en una reunión o una
+               función no hay aula (S201). Mismo valor de modo, distinta etiqueta. -->
           <label class="actividad-form__radio">
             <input type="radio" formControlName="modoAula" value="NINGUNA" />
-            Sin aula
+            {{ etiquetaSinAula() }}
           </label>
-          }
         </div>
 
         @if (fila.controls.modoAula.value === 'FIJA') {

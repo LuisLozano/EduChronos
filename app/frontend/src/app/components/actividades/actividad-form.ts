@@ -65,8 +65,9 @@ function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
   return null;
 }
 
-/** Rama de aula que el usuario ha elegido. Control de UI: NO viaja al backend. NINGUNA solo
- *  existe fuera de una CLASE (reuniones y funciones, S201). */
+/** Rama de aula que el usuario ha elegido. Control de UI: NO viaja al backend. NINGUNA es la
+ *  plaza sin aula escrita: en una CLASE, «La elige el generador» (S207); en una reunión o una
+ *  función, «Sin aula» (S201). Se envía igual en los dos casos. */
 export type ModoAula = 'FIJA' | 'CANDIDATAS' | 'NINGUNA';
 
 /**
@@ -103,9 +104,10 @@ type PlazaFila = FormGroup<{
  *
  * <p><b>El aula se resuelve POR FILA</b> con un control de UI que no viaja.
  * `modoAula` ('FIJA' | 'CANDIDATAS' | 'NINGUNA') decide qué rama está activa; al cambiar,
- * las inactivas se LIMPIAN y pierden su validación. NINGUNA solo se ofrece fuera de una CLASE
- * (S201). La suscripción vive en la fábrica, con la fila capturada en el closure, para que
- * cada fila gobierne SOLO la suya.
+ * las inactivas se LIMPIAN y pierden su validación. NINGUNA se ofrece en todos los tipos, con
+ * etiqueta según el tipo ({@link #etiquetaSinAula}): en una CLASE el aula la elige el generador
+ * con las reglas de aulas (S207); fuera, la plaza no ocupa aula (S201). La suscripción vive en la
+ * fábrica, con la fila capturada en el closure, para que cada fila gobierne SOLO la suya.
  *
  * <p><b>Los subgrupos dependen del TIPO</b> (S201, {@link #aplicarTipo}). El contrato exige
  * al menos un subgrupo por plaza en una CLASE (salda D-plaza-sin-subgrupos) y ninguno en una
@@ -219,18 +221,16 @@ export class ActividadForm implements OnInit {
   /**
    * La regla de subgrupos según el TIPO, en un solo sitio (S201). Se llama al cambiar el tipo
    * —sobre todas las filas— y al nacer cada fila —sobre esa—. En una CLASE cada plaza exige al
-   * menos un subgrupo, y una plaza que estuviera sin aula vuelve a FIJA, porque una clase
-   * siempre tiene aula. En una REUNIÓN o una FUNCIÓN los subgrupos no se validan: ni se pintan
-   * ni viajan (ver {@link #aPlazaRequest}).
+   * menos un subgrupo; en una REUNIÓN o una FUNCIÓN los subgrupos no se validan: ni se pintan
+   * ni viajan (ver {@link #aPlazaRequest}). El modo de aula NO se toca: desde S207 una CLASE
+   * también puede ir sin aula escrita, así que una plaza en NINGUNA conserva el modo y solo
+   * cambia su etiqueta.
    */
   private aplicarTipo(filas: PlazaFila[] = this.plazas.controls): void {
     const clase = this.form.controls.tipo.value === 'CLASE';
     for (const fila of filas) {
       if (clase) {
         fila.controls.subgrupos.setValidators(arrayNoVacio);
-        if (fila.controls.modoAula.value === 'NINGUNA') {
-          fila.controls.modoAula.setValue('FIJA');
-        }
       } else {
         fila.controls.subgrupos.clearValidators();
       }
@@ -263,7 +263,8 @@ export class ActividadForm implements OnInit {
       fila.controls.aulaFija.clearValidators();
       fila.controls.aulasCandidatas.setValidators(arrayNoVacio);
     } else {
-      // NINGUNA (S201): ni aula fija ni candidatas, y ninguna de las dos se valida.
+      // NINGUNA: ni aula fija ni candidatas, y ninguna de las dos se valida. En una CLASE el
+      // aula la elige el generador (S207); fuera, la plaza no ocupa aula (S201).
       fila.controls.aulaFija.setValue('');
       fila.controls.aulaFija.clearValidators();
       fila.controls.aulasCandidatas.setValue([]);
@@ -271,6 +272,14 @@ export class ActividadForm implements OnInit {
     }
     fila.controls.aulaFija.updateValueAndValidity();
     fila.controls.aulasCandidatas.updateValueAndValidity();
+  }
+
+  /**
+   * Etiqueta del modo NINGUNA según el tipo (S207): en una CLASE el aula no falta, la elige el
+   * generador con las reglas de aulas; en una reunión o una función, no hay aula.
+   */
+  protected etiquetaSinAula(): string {
+    return this.form.controls.tipo.value === 'CLASE' ? 'La elige el generador' : 'Sin aula';
   }
 
   /** Añade una fila VACÍA al final. Nace por la fábrica: no hereda nada de la anterior. */

@@ -698,27 +698,103 @@ describe('ActividadForm', () => {
     req.flush(ACTIVIDAD_REUNION);
   });
 
-  it('(f4) la opción «Sin aula» solo existe fuera de una CLASE', () => {
+  /** Texto de la etiqueta del radio NINGUNA de la primera plaza, o null si no se pinta. */
+  function etiquetaNinguna(): string | null {
+    const radio = (fixture.nativeElement as HTMLElement).querySelector(
+      'input[type="radio"][value="NINGUNA"]',
+    );
+    return radio === null ? null : (radio.closest('label')?.textContent ?? '').trim();
+  }
+
+  // (f4) y (f5) reescritos en S207 (C-deduccion-aulas, E): bajas declaradas. Antes «Sin aula»
+  // solo existía fuera de una CLASE y pasar a CLASE devolvía la plaza a FIJA.
+  it('(f4) «sin aula» se ofrece en todos los tipos: «La elige el generador» en una CLASE y «Sin aula» fuera', () => {
     montar(null);
     const inst = instancia();
-    const raiz = fixture.nativeElement as HTMLElement;
-    expect(raiz.querySelector('input[type="radio"][value="NINGUNA"]')).toBeNull();
+    expect(etiquetaNinguna()).toBe('La elige el generador');
 
     inst.form.patchValue({ tipo: 'REUNION' });
     fixture.detectChanges();
+    expect(etiquetaNinguna()).toBe('Sin aula');
 
-    expect(raiz.querySelector('input[type="radio"][value="NINGUNA"]')).not.toBeNull();
+    inst.form.patchValue({ tipo: 'FUNCION' });
+    fixture.detectChanges();
+    expect(etiquetaNinguna()).toBe('Sin aula');
   });
 
-  it('(f5) al pasar de REUNION a CLASE, una plaza sin aula vuelve a FIJA', () => {
+  it('(f5) cambiar el tipo conserva el modo «sin aula» y solo cambia la etiqueta', () => {
     montar(null);
     const inst = instancia();
     inst.form.patchValue({ tipo: 'REUNION' });
     inst.plazas.at(0).controls['modoAula'].setValue('NINGUNA');
 
     inst.form.patchValue({ tipo: 'CLASE' });
+    fixture.detectChanges();
+    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('NINGUNA');
+    expect(etiquetaNinguna()).toBe('La elige el generador');
 
-    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('FIJA');
+    inst.form.patchValue({ tipo: 'REUNION' });
+    fixture.detectChanges();
+    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('NINGUNA');
+    expect(etiquetaNinguna()).toBe('Sin aula');
+  });
+
+  it('(f8) una CLASE que deja el aula al generador viaja sin aula fija ni candidatas y con sus subgrupos', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'Mat-1ºA' });
+    rellenarPlaza(0, 'NINGUNA');
+    inst.guardar();
+
+    const req = http.expectOne('/api/actividades');
+    const cuerpo = req.request.body as { tipo: string; plazas: unknown[] };
+    expect(cuerpo.tipo).toBe('CLASE');
+    expect(cuerpo.plazas).toEqual([
+      { asignatura: 'Mat', aulaFija: null, aulasCandidatas: [], profesores: ['MATA'], subgrupos: ['1ºA-Completo'] },
+    ]);
+    req.flush(ACTIVIDAD_FIJA);
+  });
+
+  it('(f9) editar una CLASE guardada sin aula precarga «La elige el generador»', () => {
+    const claseSinAula = {
+      ...ACTIVIDAD_FIJA,
+      plazas: [{ ...ACTIVIDAD_FIJA.plazas[0], aulaFija: null as string | null, aulasCandidatas: [] as string[] }],
+    };
+    montar(claseSinAula);
+    const inst = instancia();
+    fixture.detectChanges();
+
+    expect(inst.form.controls['tipo'].value).toBe('CLASE');
+    expect(inst.plazas.at(0).controls['modoAula'].value).toBe('NINGUNA');
+    expect(etiquetaNinguna()).toBe('La elige el generador');
+    const radio = (fixture.nativeElement as HTMLElement).querySelector(
+      'input[type="radio"][value="NINGUNA"]',
+    ) as HTMLInputElement;
+    expect(radio.checked).toBe(true);
+  });
+
+  it('(f11) pasar por «La elige el generador» LIMPIA el aula fija: al volver a «aula fija» no reaparece', () => {
+    montar(null);
+    const inst = instancia();
+    rellenarPlaza(0, 'FIJA'); // aula fija A1
+    const fila = inst.plazas.at(0);
+
+    fila.controls['modoAula'].setValue('NINGUNA');
+    fila.controls['modoAula'].setValue('FIJA');
+
+    expect(fila.controls['aulaFija'].value).toBe('');
+  });
+
+  it('(f10) una plaza en «aula fija» con el selector vacío deja el formulario inválido y no se envía', () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'Mat-1ºA' });
+    rellenarPlaza(0, 'FIJA', { aulaFija: '' });
+    inst.guardar();
+
+    // Todo lo demás de la plaza es válido: lo único que falta es el aula fija de su rama.
+    expect(inst.form.invalid).toBe(true);
+    http.expectNone('/api/actividades');
   });
 
   it('(f6) de CLASE a REUNION: el envío suelta el tutor y los subgrupos', () => {
