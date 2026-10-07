@@ -135,7 +135,9 @@ public class AulaService {
                 new Referencia("aula(s) bloqueada(s)", repositorio.contarAulasBloqueadas(id)),
                 new Referencia("sesion(es)", repositorio.contarSesiones(id)),
                 new Referencia("grupo(s) con esta aula de referencia",
-                        repositorio.contarGruposConAulaDeReferencia(id)));
+                        repositorio.contarGruposConAulaDeReferencia(id)),
+                new Referencia("asignatura(s) con esta aula",
+                        repositorio.contarAsignaturasConEstaAula(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }

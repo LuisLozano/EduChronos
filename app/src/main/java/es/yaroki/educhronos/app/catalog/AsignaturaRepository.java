@@ -10,7 +10,8 @@ import org.springframework.data.repository.query.Param;
  * apuntan a {@code asignatura} en {@code schema.sql} (Bloque 8.5-C2b; ver
  * {@link AulaRepository} para el porqué de las nativas). La FK de
  * {@code asignatura_aula_compatible} dejó de ser referencia entrante en 8.5-C3: pasa a
- * {@code on delete cascade} (las compatibilidades son subordinadas de la asignatura).
+ * {@code on delete cascade} (las compatibilidades son subordinadas de la asignatura). La de
+ * {@code asignatura_aula} (S206) nace igual: borrar la asignatura borra sus aulas.
  */
 public interface AsignaturaRepository extends JpaRepository<Asignatura, Long> {
     Optional<Asignatura> findByCodigo(String codigo);

@@ -1,16 +1,25 @@
 package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Asignatura;
+import es.yaroki.educhronos.app.catalog.AsignaturaAula;
 import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatible;
 import es.yaroki.educhronos.app.catalog.AsignaturaAulaCompatibleRepository;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
+import es.yaroki.educhronos.app.catalog.Aula;
+import es.yaroki.educhronos.app.catalog.AulaRepository;
+import es.yaroki.educhronos.app.catalog.RolAulaAsignatura;
 import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
+import es.yaroki.educhronos.app.web.dto.AsignaturaAulaDTO;
+import es.yaroki.educhronos.app.web.dto.AsignaturaAulaRequest;
 import es.yaroki.educhronos.app.web.dto.AsignaturaDTO;
 import es.yaroki.educhronos.app.web.dto.AsignaturaRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -49,11 +58,17 @@ public class AsignaturaService {
 
     private final AsignaturaRepository repositorio;
     private final AsignaturaAulaCompatibleRepository compatibilidadRepositorio;
+    private final AsignaturaAulaRepository aulasRepositorio;
+    private final AulaRepository aulaRepositorio;
 
     public AsignaturaService(AsignaturaRepository repositorio,
-            AsignaturaAulaCompatibleRepository compatibilidadRepositorio) {
+            AsignaturaAulaCompatibleRepository compatibilidadRepositorio,
+            AsignaturaAulaRepository aulasRepositorio,
+            AulaRepository aulaRepositorio) {
         this.repositorio = repositorio;
         this.compatibilidadRepositorio = compatibilidadRepositorio;
+        this.aulasRepositorio = aulasRepositorio;
+        this.aulaRepositorio = aulaRepositorio;
     }
 
     /** Todas las asignaturas como {@link AsignaturaDTO}, ORDENADAS por código. */
@@ -164,6 +179,118 @@ public class AsignaturaService {
             compatibilidadRepositorio.save(new AsignaturaAulaCompatible(entidad, tipo));
         }
         return ordenar(nuevos);
+    }
+
+    // ------------------------------------- aulas de la asignatura (S206, C-reglas-aulas)
+
+    /**
+     * Las aulas de una asignatura con su rol, ORDENADAS por código de aula.
+     * {@link NoSuchElementException} (→ 404) si la asignatura no existe. Lista vacía = la
+     * asignatura no tiene aulas propias.
+     */
+    @Transactional(readOnly = true)
+    public List<AsignaturaAulaDTO> obtenerAulas(Long id) {
+        Asignatura entidad = repositorio.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
+        return ordenarAulas(aulasRepositorio.findByAsignatura(entidad));
+    }
+
+    /**
+     * REEMPLAZO TOTAL e idempotente de las aulas de una asignatura, con el patrón de la tutoría
+     * ({@code TutoriaService.reemplazar}): valida la lista ENTERA y solo después borra las filas
+     * actuales y crea las nuevas, todo en la misma transacción. Lista vacía o nula = borrar todas.
+     *
+     * <p>{@link NoSuchElementException} (→ 404) si la asignatura no existe. {@link
+     * IllegalArgumentException} (→ 400), en este orden: un aula en blanco o que no existe (la
+     * nombra, como el aula de referencia del grupo); un rol en blanco o inválido (lo nombra y
+     * lista los válidos); un aula repetida (la nombra); y la mezcla de {@code EXCLUSIVA} y
+     * {@code PREFERIDA} en la misma asignatura. Devuelve la lista resultante ordenada por aula.
+     */
+    @Transactional
+    public List<AsignaturaAulaDTO> reemplazarAulas(Long id, List<AsignaturaAulaRequest> peticiones) {
+        Asignatura entidad = repositorio.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
+        List<AsignaturaAulaRequest> entrantes =
+                peticiones == null ? List.<AsignaturaAulaRequest>of() : peticiones;
+
+        // Pasada 1a: resolver el aula de TODOS los elementos.
+        List<Aula> aulas = new ArrayList<>();
+        for (AsignaturaAulaRequest peticion : entrantes) {
+            aulas.add(resolverAula(peticion));
+        }
+
+        // Pasada 1b: parsear el rol de TODOS los elementos.
+        List<AsignaturaAula> nuevas = new ArrayList<>();
+        for (int i = 0; i < entrantes.size(); i++) {
+            RolAulaAsignatura rol =
+                    parseRolAula(entrantes.get(i) == null ? null : entrantes.get(i).rol());
+            nuevas.add(new AsignaturaAula(entidad, aulas.get(i), rol));
+        }
+
+        // Pasada 2: ningún aula repetida (la PK compuesta lo rechazaría con un error opaco).
+        Set<String> vistas = new LinkedHashSet<>();
+        for (AsignaturaAula fila : nuevas) {
+            if (!vistas.add(fila.getAula().getCodigo())) {
+                throw new IllegalArgumentException(
+                        "aula repetida en las aulas de la asignatura " + entidad.getCodigo() + ": "
+                                + fila.getAula().getCodigo());
+            }
+        }
+
+        // Pasada 3: una asignatura tiene aulas exclusivas o preferidas, no de los dos tipos.
+        Set<RolAulaAsignatura> roles = nuevas.stream()
+                .map(AsignaturaAula::getRol)
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(RolAulaAsignatura.class)));
+        if (roles.size() > 1) {
+            throw new IllegalArgumentException(
+                    "la asignatura " + entidad.getCodigo() + " no puede tener a la vez aulas "
+                            + RolAulaAsignatura.EXCLUSIVA.name() + " y "
+                            + RolAulaAsignatura.PREFERIDA.name()
+                            + ": todas sus aulas tienen que tener el mismo rol");
+        }
+
+        // Borra lo actual y FLUSHEA antes de insertar, como reemplazarAulasCompatibles: así el
+        // DELETE precede al INSERT y no choca con la PK cuando la lista repite un aula ya presente.
+        aulasRepositorio.deleteAll(aulasRepositorio.findByAsignatura(entidad));
+        aulasRepositorio.flush();
+        for (AsignaturaAula fila : nuevas) {
+            aulasRepositorio.save(fila);
+        }
+        return ordenarAulas(nuevas);
+    }
+
+    /** El aula de un elemento por su código; en blanco o inexistente → 400 que lo nombra. */
+    private Aula resolverAula(AsignaturaAulaRequest peticion) {
+        String codigo = peticion == null ? null : peticion.aula();
+        if (codigo == null || codigo.isBlank()) {
+            throw new IllegalArgumentException("aula es obligatoria en cada elemento");
+        }
+        return aulaRepositorio.findByCodigo(codigo)
+                .orElseThrow(() -> new IllegalArgumentException("No existe aula con codigo " + codigo));
+    }
+
+    /** Parsea un nombre a {@link RolAulaAsignatura}; valor malo → 400 que lo nombra y lista los
+     * válidos (mismo patrón que {@link #parseTipoAula}). */
+    private static RolAulaAsignatura parseRolAula(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException(
+                    "rol en blanco. Valores validos: " + Arrays.toString(RolAulaAsignatura.values()));
+        }
+        try {
+            return RolAulaAsignatura.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "rol invalido: '" + valor + "'. Valores validos: "
+                            + Arrays.toString(RolAulaAsignatura.values()));
+        }
+    }
+
+    /** Las aulas ordenadas por código, para que la respuesta sea determinista. */
+    private static List<AsignaturaAulaDTO> ordenarAulas(List<AsignaturaAula> filas) {
+        return filas.stream()
+                .sorted(Comparator.comparing(fila -> fila.getAula().getCodigo()))
+                .map(fila -> new AsignaturaAulaDTO(fila.getAula().getCodigo(), fila.getRol().name()))
+                .toList();
     }
 
     /** Los {@link TipoAula} compatibles de una asignatura (sin orden intrínseco). */

@@ -41,6 +41,8 @@ class AsignaturaEndpointTest {
     @Autowired private AsignaturaService service;
     @Autowired private AsignaturaAulaCompatibleRepository compatibilidades;
     @Autowired private TestEntityManager entityManager;
+    @Autowired private AsignaturaAulaRepository aulasDeAsignatura;
+    @Autowired private AulaRepository aulaRepository;
 
     private MockMvc mockMvc;
 
@@ -299,6 +301,208 @@ class AsignaturaEndpointTest {
         assertThat(compatibilidades.count()).isEqualTo(0);
         mockMvc.perform(get("/api/asignaturas/" + id))
                 .andExpect(status().isNotFound());
+    }
+
+    // ─────────────────── sub-recurso aulas (S206, C-reglas-aulas, punto 4)
+
+    @Test
+    void aulas_getInicial_200ListaVacia() throws Exception {
+        long id = crear("ByG", "Biologia");
+        mockMvc.perform(get("/api/asignaturas/" + id + "/aulas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void aulas_putYGetDeVuelta_ordenadasPorAula() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB2", "LAB1");
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("LAB2", "EXCLUSIVA", "LAB1", "EXCLUSIVA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].aula").value("LAB1"))
+                .andExpect(jsonPath("$[0].rol").value("EXCLUSIVA"))
+                .andExpect(jsonPath("$[1].aula").value("LAB2"));
+
+        mockMvc.perform(get("/api/asignaturas/" + id + "/aulas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].aula").value("LAB1"))
+                .andExpect(jsonPath("$[1].aula").value("LAB2"))
+                .andExpect(jsonPath("$[1].rol").value("EXCLUSIVA"));
+    }
+
+    @Test
+    void aulas_putEsReemplazoTotal_noSuma() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1", "A13");
+        putAulas(id, lista("LAB1", "EXCLUSIVA"));
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("A13", "PREFERIDA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].aula").value("A13"))
+                .andExpect(jsonPath("$[0].rol").value("PREFERIDA"));
+        mockMvc.perform(get("/api/asignaturas/" + id + "/aulas"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].aula").value("A13"));
+    }
+
+    @Test
+    void aulas_putListaVacia_borraTodas() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1");
+        putAulas(id, lista("LAB1", "EXCLUSIVA"));
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+        mockMvc.perform(get("/api/asignaturas/" + id + "/aulas"))
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void aulas_putDosVecesLoMismo_idempotente() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1", "LAB2");
+        String cuerpo = lista("LAB1", "PREFERIDA", "LAB2", "PREFERIDA");
+        putAulas(id, cuerpo);
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    /** Un PUT rechazado no escribe nada: la asignatura conserva las aulas que tenía. */
+    @Test
+    void aulas_putAulaRepetida_400ConElCodigoYNoTocaLasQueHabia() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1", "LAB2");
+        putAulas(id, lista("LAB2", "EXCLUSIVA"));
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("LAB1", "EXCLUSIVA", "LAB1", "EXCLUSIVA")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("repetida")))
+                .andExpect(status().reason(containsString("LAB1")));
+        mockMvc.perform(get("/api/asignaturas/" + id + "/aulas"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].aula").value("LAB2"));
+    }
+
+    @Test
+    void aulas_putRolInvalido_400ConElValorYLosValidos() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1");
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("LAB1", "OBLIGATORIA")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("OBLIGATORIA")))
+                .andExpect(status().reason(containsString("PREFERIDA")));
+    }
+
+    @Test
+    void aulas_putMezclaExclusivaYPreferida_400QueLoDice() throws Exception {
+        long id = crear("ByG", "Biologia");
+        aulas("LAB1", "A13");
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("LAB1", "EXCLUSIVA", "A13", "PREFERIDA")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("a la vez")))
+                .andExpect(status().reason(containsString("EXCLUSIVA")))
+                .andExpect(status().reason(containsString("PREFERIDA")));
+        assertThat(aulasDeAsignatura.count()).isZero();
+    }
+
+    @Test
+    void aulas_putAulaInexistente_400ConElCodigo() throws Exception {
+        long id = crear("ByG", "Biologia");
+
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("NOEXISTE", "EXCLUSIVA")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("NOEXISTE")));
+    }
+
+    @Test
+    void aulas_getIdInexistente_404() throws Exception {
+        mockMvc.perform(get("/api/asignaturas/9999/aulas"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void aulas_putIdInexistente_404() throws Exception {
+        aulas("LAB1");
+        mockMvc.perform(put("/api/asignaturas/9999/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lista("LAB1", "EXCLUSIVA")))
+                .andExpect(status().isNotFound());
+    }
+
+    /** Como las compatibilidades: borrar la asignatura (204) se lleva sus aulas por la cascada. */
+    @Test
+    void aulas_borrarAsignaturaConAulas_204YCascadaBorraFilas() throws Exception {
+        long id = crear("ByG", "Biologia");
+        long otra = crear("FyQ", "Fisica");
+        aulas("LAB1", "LAB2");
+        putAulas(id, lista("LAB1", "EXCLUSIVA", "LAB2", "EXCLUSIVA"));
+        putAulas(otra, lista("LAB1", "PREFERIDA"));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(aulasDeAsignatura.count()).isEqualTo(3);
+
+        mockMvc.perform(delete("/api/asignaturas/" + id))
+                .andExpect(status().isNoContent());
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(aulasDeAsignatura.count()).as("solo quedan las de la otra asignatura").isEqualTo(1);
+        mockMvc.perform(get("/api/asignaturas/" + otra + "/aulas"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].aula").value("LAB1"));
+    }
+
+    /** Aulas de apoyo, ORDINARIA y sin más datos. */
+    private void aulas(String... codigos) {
+        for (String codigo : codigos) {
+            aulaRepository.save(new Aula(codigo, TipoAula.ORDINARIA, null, null, null, null));
+        }
+    }
+
+    /** PUT de aulas esperando 200 (helper de fixture). */
+    private void putAulas(long id, String cuerpo) throws Exception {
+        mockMvc.perform(put("/api/asignaturas/" + id + "/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo))
+                .andExpect(status().isOk());
+    }
+
+    /** {@code [{"aula":..,"rol":..},..]} a partir de pares aula, rol. */
+    private static String lista(String... aulaYRol) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < aulaYRol.length; i += 2) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("{\"aula\":\"").append(aulaYRol[i]).append("\",\"rol\":\"")
+                    .append(aulaYRol[i + 1]).append("\"}");
+        }
+        return sb.append("]").toString();
     }
 
     /** PUT de compatibilidades esperando 200 (helper de fixture). */

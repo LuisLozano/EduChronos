@@ -116,6 +116,40 @@ class DuplicadorCursoTest {
      * (3) Un nombre con guion no es un nombre de curso, y el rechazo ocurre ANTES de tocar
      * el disco: en la carpeta no aparece nada, ni el fichero nuevo ni el temporal.
      */
+    /**
+     * (S206) Las reglas de aulas pasan al curso nuevo: las filas de {@code asignatura_aula} y las
+     * columnas del esquema 4 (aula de referencia del grupo, alumnos del subgrupo y aula fuera de
+     * uso). El duplicado es un {@code VACUUM INTO} y solo vacía las tablas del horario, así que
+     * esto fija que ninguna de ellas entra en esa lista.
+     */
+    @Test
+    void lasReglasDeAulasPasanAlCursoNuevo(@TempDir Path carpeta) throws Exception {
+        Path origen = baseFabricada(carpeta, ACTUAL, false);
+        try (Connection conexion = conectar(origen);
+                Statement sentencia = conexion.createStatement()) {
+            sentencia.executeUpdate("insert into aula (id, codigo, tipo, en_uso) values (1, 'A13', 'ORDINARIA', 1)");
+            sentencia.executeUpdate("insert into aula (id, codigo, tipo, en_uso) values (2, 'T1', 'TALLER_TEC', 0)");
+            sentencia.executeUpdate("insert into nivel (id, codigo, orden) values (1, 'ESO1', 1)");
+            sentencia.executeUpdate("insert into grupo_administrativo (id, codigo, nivel_id, tipo,"
+                    + " aula_referencia_id) values (1, '1A', 1, 'ORDINARIO', 1)");
+            sentencia.executeUpdate("insert into subgrupo (id, codigo, alumnos) values (1, '1A-Completo', 27)");
+            sentencia.executeUpdate("insert into asignatura (id, codigo, nombre_completo) values (1, 'TEC', 'Tecnología')");
+            sentencia.executeUpdate("insert into asignatura (id, codigo, nombre_completo) values (2, 'MUS', 'Música')");
+            sentencia.executeUpdate("insert into asignatura_aula (asignatura_id, aula_id, rol) values (1, 2, 'EXCLUSIVA')");
+            sentencia.executeUpdate("insert into asignatura_aula (asignatura_id, aula_id, rol) values (2, 1, 'PREFERIDA')");
+        }
+
+        Path destino = duplicador.duplicar(origen, null, NUEVO, null, NO_ARCHIVADO);
+
+        assertThat(valores(destino, "select asignatura_id, aula_id, rol from asignatura_aula order by asignatura_id"))
+                .containsExactly("1|2|EXCLUSIVA", "2|1|PREFERIDA");
+        assertThat(valores(destino, "select codigo, en_uso from aula order by id"))
+                .containsExactly("A13|1", "T1|0");
+        assertThat(valores(destino, "select codigo, aula_referencia_id from grupo_administrativo"))
+                .containsExactly("1A|1");
+        assertThat(valores(destino, "select codigo, alumnos from subgrupo")).containsExactly("1A-Completo|27");
+    }
+
     @Test
     void nombreConFormaInvalidaSeRechazaSinCrearNada(@TempDir Path carpeta) throws Exception {
         Path origen = baseFabricada(carpeta, ACTUAL, false);
@@ -388,6 +422,27 @@ class DuplicadorCursoTest {
             fila.next();
             return fila.getInt(1);
         }
+    }
+
+    /** Las filas de una consulta, cada una con sus columnas unidas por {@code |}. */
+    private static List<String> valores(Path base, String sql) throws SQLException {
+        List<String> filas = new ArrayList<>();
+        try (Connection conexion = conectar(base);
+                Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery(sql)) {
+            int columnas = fila.getMetaData().getColumnCount();
+            while (fila.next()) {
+                StringBuilder linea = new StringBuilder();
+                for (int i = 1; i <= columnas; i++) {
+                    if (i > 1) {
+                        linea.append('|');
+                    }
+                    linea.append(fila.getString(i));
+                }
+                filas.add(linea.toString());
+            }
+        }
+        return filas;
     }
 
     private static int filas(Path base, String tabla) throws SQLException {

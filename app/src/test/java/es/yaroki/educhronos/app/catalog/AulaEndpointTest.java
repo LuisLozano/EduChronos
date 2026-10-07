@@ -67,6 +67,7 @@ class AulaEndpointTest {
     @Autowired private TestEntityManager entityManager;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
+    @Autowired private AsignaturaAulaRepository aulasDeAsignatura;
 
     private MockMvc mockMvc;
 
@@ -360,6 +361,32 @@ class AulaEndpointTest {
         assertThat(error).isNotNull();
         assertThat(error.getReferencias())
                 .containsExactly(new Referencia("grupo(s) con esta aula de referencia", 2));
+        assertThat(aulaRepository.findById(id)).isPresent();
+    }
+
+    /**
+     * (S206) Un aula que dos asignaturas tienen como suya no se borra: 409 con su desglose y
+     * conteo real, con el id del aula desalineado como en los otros dos.
+     */
+    @Test
+    void borrado_aulaDeDosAsignaturas_409YDesgloseConElConteoReal() throws Exception {
+        desalinearIdsDeAula();
+        long id = crear(bodySoloTipo("LAB1", "LAB_CIENCIAS"));
+        Aula aula = aulaRepository.findById(id).orElseThrow();
+        Asignatura biologia = asignaturaRepository.save(new Asignatura("ByG", "Biologia"));
+        Asignatura fisica = asignaturaRepository.save(new Asignatura("FyQ", "Fisica"));
+        aulasDeAsignatura.save(new AsignaturaAula(biologia, aula, RolAulaAsignatura.EXCLUSIVA));
+        aulasDeAsignatura.save(new AsignaturaAula(fisica, aula, RolAulaAsignatura.PREFERIDA));
+        entityManager.flush();
+
+        mockMvc.perform(delete("/api/aulas/" + id))
+                .andExpect(status().isConflict());
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(id), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias())
+                .containsExactly(new Referencia("asignatura(s) con esta aula", 2));
         assertThat(aulaRepository.findById(id)).isPresent();
     }
 

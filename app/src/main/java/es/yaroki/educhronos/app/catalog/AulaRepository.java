@@ -44,4 +44,8 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
     @Query(value = "select count(*) from grupo_administrativo where aula_referencia_id = :id",
             nativeQuery = true)
     long contarGruposConAulaDeReferencia(@Param("id") Long id);
+
+    /** FK {@code asignatura_aula.aula_id} → aula (aulas de una asignatura, S206). */
+    @Query(value = "select count(*) from asignatura_aula where aula_id = :id", nativeQuery = true)
+    long contarAsignaturasConEstaAula(@Param("id") Long id);
 }

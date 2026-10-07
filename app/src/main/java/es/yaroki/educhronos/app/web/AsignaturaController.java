@@ -2,6 +2,8 @@ package es.yaroki.educhronos.app.web;
 
 import es.yaroki.educhronos.app.service.AsignaturaService;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException;
+import es.yaroki.educhronos.app.web.dto.AsignaturaAulaDTO;
+import es.yaroki.educhronos.app.web.dto.AsignaturaAulaRequest;
 import es.yaroki.educhronos.app.web.dto.AsignaturaDTO;
 import es.yaroki.educhronos.app.web.dto.AsignaturaRequest;
 import java.util.List;
@@ -103,6 +105,29 @@ public class AsignaturaController {
             @PathVariable("id") Long id, @RequestBody List<String> tipos) {
         try {
             return service.reemplazarAulasCompatibles(id, tipos);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    // ------------------------- sub-recurso: aulas de la asignatura (S206, C-reglas-aulas)
+
+    @GetMapping("/{id}/aulas")
+    public List<AsignaturaAulaDTO> aulas(@PathVariable("id") Long id) {
+        try {
+            return service.obtenerAulas(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/{id}/aulas")
+    public List<AsignaturaAulaDTO> reemplazarAulas(
+            @PathVariable("id") Long id, @RequestBody List<AsignaturaAulaRequest> peticiones) {
+        try {
+            return service.reemplazarAulas(id, peticiones);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
