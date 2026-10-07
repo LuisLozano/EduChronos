@@ -59,17 +59,17 @@
 - L1119 — ### Fases completadas
 - L1223 — ### Cierre del modelo — Sesión 8
 - L1271 — ### Decisiones permanentes (no reabrir sin razón de peso)
-- L1319 — ### Método de trabajo (procedimiento vigente)
-- L1352 — ### Deuda consciente VIVA
-- L3170 — ### Deuda consciente CERRADA (histórico)
-- L3565 — ### Notas técnicas validadas en Fase 0
-- L3578 — ### Notas técnicas validadas en Fase 6
-- L3623 — ### Notas técnicas validadas en Fase 9
-- L3632 — ### Notas técnicas validadas en Fase 11
-- L3776 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3785 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3812 — ### Registro detallado de sesiones S10–S31
-- L3821 — ## Señales globales de alerta
+- L1320 — ### Método de trabajo (procedimiento vigente)
+- L1353 — ### Deuda consciente VIVA
+- L3171 — ### Deuda consciente CERRADA (histórico)
+- L3566 — ### Notas técnicas validadas en Fase 0
+- L3579 — ### Notas técnicas validadas en Fase 6
+- L3624 — ### Notas técnicas validadas en Fase 9
+- L3633 — ### Notas técnicas validadas en Fase 11
+- L3777 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3786 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3813 — ### Registro detallado de sesiones S10–S31
+- L3822 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -1299,6 +1299,7 @@ autoritativa de Fase 1 y queda listo para empezar Fase 2.
 | Restricciones del profesorado | Tabla única con tipo (DURA/BLANDA) y peso |
 | Distancia entre aulas | Fórmula sobre (edificio, planta, sector) + excepciones |
 | Distribución temporal | Campo `patron_temporal` en Actividad (DISTRIBUIDA/AGRUPADA/NEUTRA) |
+| Conservación del material de aceptación (S204, fuera de sesión tras S203) | El material de `/home/luis/educhronos-aceptacion/` se conserva: es la prueba de lo que afirman plan, gestión y bitácora. Única excepción: un binario de distribución (zip o jar) se puede borrar si existe una copia con el mismo sha256 en un asset de una Release publicada o dentro de otro fichero que se conserva; antes se anota en `BORRADOS.txt` de su carpeta (fecha, ruta, bytes, sha256 y copia superviviente), y los manifiestos no se tocan: se comprueban con `sha256sum -c --ignore-missing`. Aplicada tras S203: borrados los zips de `s177`, `s186/f2b/release` y `s193/f3` (Releases `v0.1.0`, `v0.2.0` y `v0.3.0`) y los jars de `s177` y `s193/f3` (dentro de esos zips), 802 MiB; se queda `s172/app-0.1.0-SNAPSHOT.jar`, sin copia idéntica. |
 
 - Separación loader/mapper: Jackson queda aislado en ProblemaHorarioJsonLoader; el ProblemaHorarioMapper es puro y testeable sin I/O.
 - Reparto de validación en la carga: los records de dominio auto-validan I5, I7, el XOR aulaFija/aulasCandidatas y los rangos. El mapper posee en exclusiva: integridad referencial por código, códigos duplicados, I2 y la política "aulasCandidatas rechazado hasta Fase 3".

@@ -75,6 +75,20 @@ sostienen M2 y M4.
 
 ---
 
+## M-decisión — Quién decide qué (S204)
+
+**Lo que se reserva el usuario:** (1) lo que cambia el comportamiento que ve el usuario final; (2) abrir, cerrar, recortar o aceptar con salvedad un objetivo o hito, y replanificar; (3) la interpretación de un criterio de terminado dudoso; (4) lo irreversible o externo: push, Release, VM, borrados y contacto con el centro; (5) los cambios al método; (6) todo caso en que el arquitecto no tenga certeza o en que Claude Code y el arquitecto discrepen.
+
+**Lo demás lo decide el arquitecto sin esperar confirmación:** el tipo de sesión cuando sale de la tabla de §Tipos; el alcance dentro del Cambio activo; el diseño técnico dentro de un contrato aprobado; reescribir un spec cuyo aserto contradice lo que el contrato aprobado cambia expresamente (un spec que fija comportamiento que el contrato no menciona sigue siendo del usuario, por la regla de parada); y el encadenamiento de fases.
+
+**Registro.** Cada decisión delegada va a DECISIONES como «Del arquitecto», con su motivo. En el cierre, el arquitecto presenta esa lista al usuario antes del commit de documentación, y el usuario puede revertir cualquiera.
+
+**Amplitud de sesión.** Por defecto, una sesión de Desarrollo hace el Cambio entero si su contrato está cerrado (precedente: S203, tramos T1 a T3); la sesión que abre un objetivo cierra también el contrato de su primer Cambio cuando su M2 es pequeño; las verificaciones (bancos, VM, navegador) van como fase de una sesión de código (tipos combinados), no como sesión propia. No se fuerza cuando la medición destapa decisiones del usuario.
+
+**Por qué (S204).** En S202 y S203 casi todas las confirmaciones aprobaban la recomendación sin cambios, y el control cruzado (arquitecto, Claude Code, tests, mutación y CI) cazó dentro de la sesión los siete errores del asistente de esas dos sesiones. Lo que ese control no ve —los errores de premisa compartida y la deriva acumulada— lo cubren las decisiones reservadas y la revisión de la lista al cierre (precedente: el defecto (29) de S203, una decisión del arquitecto que Claude Code siguió y guardó en su memoria).
+
+---
+
 ## M0 — Apertura: la sesión nombra su lugar en el mapa
 
 Antes de fijar alcance, la sesión responde OBLIGATORIAMENTE:
@@ -127,6 +141,10 @@ objetivo (Higiene/Método), del registro que la propone.
 7. PROPONER EL NOMBRE DE SESIÓN: «Educhronos. Sesión NN. <breve resumen>».
 8. ENTREGAR EL PROMPT DE LA SESIÓN SIGUIENTE sin que el usuario lo pida. Ver M1-ter.
 
+**Decisiones delegadas (S204).** Antes del commit de documentación, el cierre presenta al
+usuario la lista «Del arquitecto» de la sesión (M-decisión), y el usuario puede revertir
+cualquiera.
+
 **M1-bis — El archivado, con verificación propia.** Único paso con fallos
 registrados (S59 dejó copia truncada; S68 dejó el censo desfasado; S88 omitió una
 rotación). Por eso lleva verificación propia:
@@ -146,6 +164,10 @@ elección para la apertura. NO copia lo que ya está en la documentación: remit
 ella. Si supera ~60 líneas, está duplicando documentación y hay que podarlo.
 Cada candidato lleva una o dos líneas en lenguaje llano sobre qué cambiaría para
 el usuario, con el enfoque del M0 (S194).
+El prompt lleva SIEMPRE, en su bloque de convenciones, esta línea literal (S204): «Decisiones:
+las reparte M-decisión de metodo.md (S204); sustituye a la viñeta "Fase a fase" de las reglas de
+trabajo. Lo reservado, lo confirmo yo; lo demás lo decides tú y lo registras como "Del
+arquitecto", y me presentas esa lista en el cierre antes del commit de documentación.»
 
 **EXCEPCIÓN (S131) — la sesión de Acabado visual.** Si la siguiente sesión es de
 ese tipo (M-visual), el prompt SÍ lleva alcance: un ACTA con la lista cerrada de
