@@ -3,7 +3,7 @@
 Índice de API generado exclusivamente a partir del código fuente.
 
 - Fecha: 2026-10-07
-- Commit: `03d08f8`
+- Commit: `05c18b1`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -942,7 +942,8 @@ Métodos:
 - `void candidatasXYYSolucionEnZ_violacion()`
 - `void fijaXYSolucionEnX_sinViolacion_registradaONo()`
 - `void candidatasXYYSolucionEnY_sinViolacion()`
-- `void plazaSinAulaEnElProblema_nuncaViola()`
+- `void plazaSinAulaEnElProblemaNiEnLaSolucion_nuncaViola()`
+- `void plazaSinAulaEnElProblemaConAulaEnLaSolucion_violacion()`
 - `void instanciaSinColocar_noDuplicaElAvisoDeSinColocar()`
 
 Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
