@@ -144,7 +144,7 @@
     ]
    },
    "motivo": "Celdas de profesor sin grupo ni aula que el horario oficial lleva y el modelo representa desde S201 como actividades sin alumnos. RED, RT12 y RT34 ocupan cada una un solo tramo con todos sus profesores (reunion conjunta); las funciones son horas sueltas de cada profesor (M2 de S204, P1b). RT12 y RT34 como reuniones de tutores es una hipotesis sin fuente, pendiente de la secretaria.",
-   "fuente": "Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18; criterio de O-datos-centro, condicion 5"
+   "fuente": "Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 16-18; criterio de O-datos-centro, condicion 5"
   },
   {
    "id": "no-clase-ignorados",
@@ -157,7 +157,7 @@
     "GRBib": "guardia de recreo de biblioteca (en GrecB): fuera del criterio, O-guardias"
    },
    "motivo": "Codigos de profesor sin grupo (celdas y recreo) que no se cargan; cualquier otro codigo sin grupo aborta.",
-   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md)"
+   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md)"
   },
   {
    "id": "nombres-leyenda-profesores",
@@ -172,7 +172,7 @@
     "REYR": "Redes y Radio"
    },
    "motivo": "Los PDF de grupos no traen estos codigos; su nombre es el literal de la leyenda «Asignaturas:» del PDF de profesores, truncado como lo imprime.",
-   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores)"
+   "fuente": "docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores)"
   },
   {
    "id": "nombres-rt-sin-fuente",

@@ -134,9 +134,9 @@ Totales declarados: 60 profesores, suma 812; 30 grupos y PDC, suma 900.
 | `tutores-bachillerato` | tutorias.tutorPrincipal | 9 | sin fuente |
 | `requieretutor-ptve-ptev` | actividades.requiereTutor | 4 | sin fuente |
 | `notas-invariantes` | meta.notasInvariantes | 1 | sin fuente |
-| `no-clase-tipos` | noClase.tipos | 9 | Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18; criterio de O-datos-centro, condicion 5 |
-| `no-clase-ignorados` | noClase.ignorados | 5 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md) |
-| `nombres-leyenda-profesores` | asignaturas.nombre | 7 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md:16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores) |
+| `no-clase-tipos` | noClase.tipos | 9 | Volcados profesor-*.json de este directorio (47 celdas); docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 16-18; criterio de O-datos-centro, condicion 5 |
+| `no-clase-ignorados` | noClase.ignorados | 5 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 14-15; ficha de O-datos-centro, «Fuera del criterio» (docs/gestion_proyecto.md) |
+| `nombres-leyenda-profesores` | asignaturas.nombre | 7 | docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md en d95c382, líneas 16-18 y /home/luis/educhronos-aceptacion/s200/m2/informe.md:485-493 (leyenda del PDF de profesores) |
 | `nombres-rt-sin-fuente` | asignaturas.nombre | 2 | sin fuente |
 | `profesor-lobato-provisional` | profesores.alta | 1 | sin fuente |
 | `paginas-sin-codigo-ignoradas` | profesores.paginasIgnoradas | 2 | docs/horario-referencia/2026-2027/INFORME-CRUCE-GRUPOS-PROFESORES.md (profesores sin codigo: paginas 7, 25 y 32) |
