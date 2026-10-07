@@ -52,9 +52,9 @@ import org.springframework.transaction.annotation.Transactional;
  *       {@code tipo} ausente es CLASE, y si viene debe ser un {@link TipoActividad} (S201);
  *   <li>≥1 plaza por actividad;
  *   <li>aula por plaza: {@code aulaFija} y {@code aulasCandidatas} son mutuamente
- *       excluyentes; en una CLASE exactamente una está presente, en una REUNIÓN o una
- *       FUNCIÓN puede no haber ninguna. Una CLASE lleva ≥1 subgrupo por plaza; una REUNIÓN o
- *       una FUNCIÓN, ninguno y sin tutor;
+ *       excluyentes, y puede no haber ninguna: en una REUNIÓN o una FUNCIÓN no ocupa aula, y
+ *       en una CLASE la elige el generador con las reglas de aulas (S207). Una CLASE lleva ≥1
+ *       subgrupo por plaza; una REUNIÓN o una FUNCIÓN, ninguno y sin tutor;
  *   <li>I7: cada plaza necesita ≥1 profesor;
  *   <li>I2: ningún subgrupo puede aparecer en dos plazas de la misma actividad (400 que lo
  *       NOMBRA, detectado CRUZANDO plazas, no dentro de una);
@@ -279,10 +279,11 @@ public class ActividadService {
      * subgrupos de cada plaza se deduplican dentro de la plaza (un repetido en la propia
      * lista NO cuenta) y se comprueba que no reaparezcan en otra plaza.
      *
-     * <p><b>Según el tipo</b> (S201). Una CLASE tiene alumnos: exactamente una rama de aula y
-     * al menos un subgrupo por plaza (salda D-plaza-sin-subgrupos). Una REUNIÓN o una FUNCIÓN
-     * no los tiene: aula opcional —las dos ramas a la vez siguen sin valer—, ningún subgrupo y
-     * sin tutor.
+     * <p><b>Según el tipo</b> (S201). Una CLASE tiene alumnos: al menos un subgrupo por plaza
+     * (salda D-plaza-sin-subgrupos). Una REUNIÓN o una FUNCIÓN no los tiene: ningún subgrupo y
+     * sin tutor. El aula es opcional en todos los tipos —desde S207 también en una CLASE, cuya
+     * aula elige el generador a partir de las reglas de aulas (C-deduccion-aulas, E)—, y las dos
+     * ramas a la vez siguen sin valer.
      */
     private static void validarPlazas(
             List<PlazaRequest> plazas, TipoActividad tipo, boolean requiereTutor) {
@@ -295,7 +296,7 @@ public class ActividadService {
         }
         Set<String> subgruposDeOtrasPlazas = new HashSet<>();
         for (PlazaRequest plaza : plazas) {
-            validarXor(plaza, clase);
+            validarXor(plaza);
             validarProfesores(plaza);
             List<String> subgrupos = plaza.subgrupos() == null ? List.of() : plaza.subgrupos();
             if (clase && subgrupos.isEmpty()) {
@@ -317,19 +318,17 @@ public class ActividadService {
     }
 
     /**
-     * Regla (3) aula: a lo sumo una de aulaFija / aulasCandidatas; si {@code aulaObligatoria}
-     * (una CLASE), exactamente una.
+     * Regla (3) aula: a lo sumo una de aulaFija / aulasCandidatas, en cualquier tipo. Ninguna
+     * es válida: en una REUNIÓN o una FUNCIÓN, no ocupa aula (S201); en una CLASE, la elige el
+     * generador con las reglas de aulas (S207, C-deduccion-aulas, E). Si las reglas no le dejan
+     * ninguna, lo dice la prevalidación ({@code CLASE_SIN_AULA_POSIBLE}), no el guardado.
      */
-    private static void validarXor(PlazaRequest plaza, boolean aulaObligatoria) {
+    private static void validarXor(PlazaRequest plaza) {
         boolean tieneFija = plaza.aulaFija() != null && !plaza.aulaFija().isBlank();
         boolean tieneCandidatas = plaza.aulasCandidatas() != null && !plaza.aulasCandidatas().isEmpty();
         if (tieneFija && tieneCandidatas) {
             throw new IllegalArgumentException(
                     "una plaza no puede tener aula fija y aulas candidatas a la vez");
-        }
-        if (aulaObligatoria && !tieneFija && !tieneCandidatas) {
-            throw new IllegalArgumentException(
-                    "una plaza necesita aula fija o al menos un aula candidata");
         }
     }
 
@@ -450,7 +449,8 @@ public class ActividadService {
      *   <li>T no vacío y aulaFija → su tipo debe estar en T.
      *   <li>T no vacío y aulasCandidatas → TODAS deben tener tipo en T (la primera mala aborta).
      * </ul>
-     * El XOR aula ya está garantizado por {@code validarPlazas}: exactamente una rama aplica.
+     * El XOR aula ya está garantizado por {@code validarPlazas}: a lo sumo una rama aplica, y
+     * sin ninguna (plaza sin aula escrita) no hay nada que comprobar.
      * Una consulta por asignatura distinta, memoizada en {@code cacheI3} (local a la operación).
      */
     private void validarI3(Asignatura asignatura, Aula aulaFija, Set<Aula> aulasCandidatas,

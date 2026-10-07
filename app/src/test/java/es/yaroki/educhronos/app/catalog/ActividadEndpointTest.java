@@ -166,14 +166,34 @@ class ActividadEndpointTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /**
+     * XOR-b, invertido en S207 (C-deduccion-aulas, E; baja declarada de
+     * {@code xorB_sinAulaFijaNiCandidatas_400}): una plaza de CLASE sin aula fija ni candidatas
+     * se guarda, para que el aula la elija el generador. Se guarda tal cual: sin aula escrita y
+     * con sus subgrupos.
+     */
     @Test
-    void xorB_sinAulaFijaNiCandidatas_400() throws Exception {
-        // XOR-b: una plaza sin aula fija Y con candidatas vacías → 400.
+    void xorB_claseSinAulaFijaNiCandidatas_201_laEligeElGenerador() throws Exception {
         String plaza = plazaJson("Mat", null, List.of(), List.of("MATA"), List.of("1ºA-Completo"));
+        long id = crear(actividadTipada("X", "CLASE", false, plaza));
+
+        mockMvc.perform(get("/api/actividades/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("CLASE"))
+                .andExpect(jsonPath("$.plazas[0].aulaFija").doesNotExist())
+                .andExpect(jsonPath("$.plazas[0].aulasCandidatas", empty()))
+                .andExpect(jsonPath("$.plazas[0].subgrupos", containsInAnyOrder("1ºA-Completo")));
+    }
+
+    /** XOR-a en una CLASE explícita (S207): aula fija y candidatas a la vez siguen dando 400. */
+    @Test
+    void xorA_claseConAulaFijaYCandidatasALaVez_sigue400() throws Exception {
+        String plaza = plazaJson("Mat", "A1", List.of("A5"), List.of("MATA"), List.of("1ºA-Completo"));
         mockMvc.perform(post("/api/actividades")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(actividad("X", null, "DISTRIBUIDA", plaza)))
-                .andExpect(status().isBadRequest());
+                        .content(actividadTipada("X", "CLASE", false, plaza)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("a la vez")));
     }
 
     @Test
