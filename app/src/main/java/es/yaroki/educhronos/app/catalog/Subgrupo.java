@@ -47,6 +47,10 @@ public class Subgrupo {
             inverseJoinColumns = @JoinColumn(name = "grupo_id"))
     private Set<GrupoAdministrativo> grupos = new HashSet<>();
 
+    /** Alumnos del subgrupo (S206, esquema 4), para la capacidad de las aulas; null si no se han indicado. */
+    @Column(name = "alumnos")
+    private Integer alumnos;
+
     protected Subgrupo() {
         // requerido por JPA
     }
@@ -66,6 +70,14 @@ public class Subgrupo {
 
     public Set<GrupoAdministrativo> getGrupos() {
         return grupos;
+    }
+
+    public Integer getAlumnos() {
+        return alumnos;
+    }
+
+    public void setAlumnos(Integer alumnos) {
+        this.alumnos = alumnos;
     }
 
     /**

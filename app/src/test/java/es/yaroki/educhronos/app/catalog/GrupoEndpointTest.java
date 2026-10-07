@@ -57,6 +57,7 @@ class GrupoEndpointTest {
     @Autowired private TutoriaService tutoriaService;
     @Autowired private PdcService pdcService;
     @Autowired private NivelRepository nivelRepository;
+    @Autowired private AulaRepository aulaRepository;
 
     private MockMvc mockMvc;
 
@@ -383,6 +384,98 @@ class GrupoEndpointTest {
                 .andExpect(jsonPath("$[0].totalDeclarado").value(30));
     }
 
+    // ──────────────────────── S206 T1: aula de referencia (C-reglas-aulas, punto 1)
+
+    @Test
+    void aulaRef_altaConAula_201YDevuelveSuCodigo() throws Exception {
+        aulaRepository.save(new Aula("A13", TipoAula.ORDINARIA, null, null, null, null));
+
+        long id = crear(bodyConAula("1ESO_A", "1ESO", "\"A13\""));
+
+        mockMvc.perform(get("/api/grupos/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aulaReferencia").value("A13"));
+    }
+
+    @Test
+    void aulaRef_altaSinAula_nula() throws Exception {
+        mockMvc.perform(post("/api/grupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("1ESO_A", "1ESO", "ORDINARIO")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.aulaReferencia").value(nullValue()));
+    }
+
+    @Test
+    void aulaRef_altaAulaInexistente_400ConElCodigo() throws Exception {
+        mockMvc.perform(post("/api/grupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAula("1ESO_A", "1ESO", "\"NOEXISTE\"")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("NOEXISTE")));
+        mockMvc.perform(get("/api/grupos"))
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void aulaRef_edicionLaPoneYLaCambia_200() throws Exception {
+        aulaRepository.save(new Aula("A13", TipoAula.ORDINARIA, null, null, null, null));
+        aulaRepository.save(new Aula("A14", TipoAula.ORDINARIA, null, null, null, null));
+        long id = crear(body("1ESO_A", "1ESO", "ORDINARIO"));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAula("1ESO_A", "1ESO", "\"A13\"")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aulaReferencia").value("A13"));
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAula("1ESO_A", "1ESO", "\"A14\"")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aulaReferencia").value("A14"));
+    }
+
+    /** El PUT reemplaza el estado entero: sin el campo, el grupo se queda sin aula de referencia. */
+    @Test
+    void aulaRef_edicionSinElCampo_laQuita() throws Exception {
+        aulaRepository.save(new Aula("A13", TipoAula.ORDINARIA, null, null, null, null));
+        long id = crear(bodyConAula("1ESO_A", "1ESO", "\"A13\""));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("1ESO_A", "1ESO", "ORDINARIO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aulaReferencia").value(nullValue()));
+        mockMvc.perform(get("/api/grupos/" + id))
+                .andExpect(jsonPath("$.aulaReferencia").value(nullValue()));
+    }
+
+    @Test
+    void aulaRef_edicionConNullExplicito_laQuita() throws Exception {
+        aulaRepository.save(new Aula("A13", TipoAula.ORDINARIA, null, null, null, null));
+        long id = crear(bodyConAula("1ESO_A", "1ESO", "\"A13\""));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAula("1ESO_A", "1ESO", "null")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aulaReferencia").value(nullValue()));
+    }
+
+    @Test
+    void aulaRef_edicionAulaInexistente_400YNoTocaLaQueTenia() throws Exception {
+        aulaRepository.save(new Aula("A13", TipoAula.ORDINARIA, null, null, null, null));
+        long id = crear(bodyConAula("1ESO_A", "1ESO", "\"A13\""));
+
+        mockMvc.perform(put("/api/grupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAula("1ESO_A", "1ESO", "\"NOEXISTE\"")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("NOEXISTE")));
+        mockMvc.perform(get("/api/grupos/" + id))
+                .andExpect(jsonPath("$.aulaReferencia").value("A13"));
+    }
+
     /** Da de alta un PDC por la red bajo el padre indicado y devuelve su id. */
     private long crearPdc(long idPadre, String codigo) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/grupos/" + idPadre + "/pdc")
@@ -409,6 +502,12 @@ class GrupoEndpointTest {
     private static String bodyConTotal(String codigo, String nivel, String total) {
         return "{\"codigo\":\"" + codigo + "\",\"nivel\":\"" + nivel + "\""
                 + ",\"tipo\":\"ORDINARIO\",\"totalDeclarado\":" + total + "}";
+    }
+
+    /** {@code {"codigo":..,"nivel":..,"tipo":"ORDINARIO","aulaReferencia":..}}, con el aula literal JSON. */
+    private static String bodyConAula(String codigo, String nivel, String aula) {
+        return "{\"codigo\":\"" + codigo + "\",\"nivel\":\"" + nivel + "\""
+                + ",\"tipo\":\"ORDINARIO\",\"aulaReferencia\":" + aula + "}";
     }
 
     /** {@code {"codigo":..,"nivel":..,"tipo":..}} */

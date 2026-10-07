@@ -65,6 +65,8 @@ class AulaEndpointTest {
     @Autowired private ProfesorRepository profesorRepository;
     @Autowired private ActividadRepository actividadRepository;
     @Autowired private TestEntityManager entityManager;
+    @Autowired private NivelRepository nivelRepository;
+    @Autowired private GrupoAdministrativoRepository grupoRepository;
 
     private MockMvc mockMvc;
 
@@ -277,6 +279,90 @@ class AulaEndpointTest {
                 .containsExactly(new Referencia("plaza(s)", plazasMontadas));
     }
 
+    // ──────────────────────── S206 T1: aula en uso y aula de referencia (C-reglas-aulas, puntos 3 y 5)
+
+    @Test
+    void enUso_altaSinElCampo_verdadero() throws Exception {
+        mockMvc.perform(post("/api/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodySoloTipo("A1", "ORDINARIA")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.enUso").value(true));
+    }
+
+    @Test
+    void enUso_altaConNullExplicito_verdadero() throws Exception {
+        mockMvc.perform(post("/api/aulas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConEnUso("A1", "null")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.enUso").value(true));
+    }
+
+    @Test
+    void enUso_altaConFalso_falso() throws Exception {
+        long id = crear(bodyConEnUso("A1", "false"));
+
+        mockMvc.perform(get("/api/aulas/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enUso").value(false));
+        assertThat(aulaRepository.findById(id).orElseThrow().isEnUso()).isFalse();
+    }
+
+    @Test
+    void enUso_edicionConFalso_laDejaFueraDeUso() throws Exception {
+        long id = crear(bodySoloTipo("A1", "ORDINARIA"));
+
+        mockMvc.perform(put("/api/aulas/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConEnUso("A1", "false")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enUso").value(false));
+    }
+
+    /** Contrato del punto 3: editar un aula SIN enUso la deja en uso, aunque no lo estuviera. */
+    @Test
+    void enUso_edicionSinElCampo_laDejaEnUso() throws Exception {
+        long id = crear(bodyConEnUso("A1", "false"));
+
+        mockMvc.perform(put("/api/aulas/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodySoloTipo("A1", "ORDINARIA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enUso").value(true));
+        mockMvc.perform(get("/api/aulas/" + id))
+                .andExpect(jsonPath("$.enUso").value(true));
+    }
+
+    /**
+     * (S206) El aula de referencia de dos grupos no se borra: 409 con su desglose y conteo real.
+     * El id del aula se desalinea como en el 409 de las plazas, para que una consulta que mirase
+     * otra columna de {@code grupo_administrativo} cuente 0.
+     */
+    @Test
+    void borrado_aulaDeReferenciaDeDosGrupos_409YDesgloseConElConteoReal() throws Exception {
+        desalinearIdsDeAula();
+        long id = crear(bodySoloTipo("A13", "ORDINARIA"));
+        Aula aula = aulaRepository.findById(id).orElseThrow();
+        Nivel nivel = nivelRepository.save(new Nivel("1ESO", 1));
+        for (String codigo : new String[] {"1ESO_A", "1ESO_B"}) {
+            GrupoAdministrativo grupo = new GrupoAdministrativo(codigo, nivel, TipoGrupo.ORDINARIO, null);
+            grupo.setAulaReferencia(aula);
+            grupoRepository.save(grupo);
+        }
+        entityManager.flush();
+
+        mockMvc.perform(delete("/api/aulas/" + id))
+                .andExpect(status().isConflict());
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(id), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias())
+                .containsExactly(new Referencia("grupo(s) con esta aula de referencia", 2));
+        assertThat(aulaRepository.findById(id)).isPresent();
+    }
+
     /**
      * DESALINEA el id del aula del test respecto de todos los ids del fixture, sembrando
      * {@code AULAS_RELLENO} aulas antes de crear la del test: así esta recibe un id ALTO
@@ -336,6 +422,11 @@ class AulaEndpointTest {
     /** {@code {"codigo":..,"tipo":..}} — los cuatro campos nullable AUSENTES (D-4). */
     private static String bodySoloTipo(String codigo, String tipo) {
         return "{\"codigo\":\"" + codigo + "\",\"tipo\":\"" + tipo + "\"}";
+    }
+
+    /** {@code {"codigo":..,"tipo":"ORDINARIA","enUso":..}}, con enUso literal JSON. */
+    private static String bodyConEnUso(String codigo, String enUso) {
+        return "{\"codigo\":\"" + codigo + "\",\"tipo\":\"ORDINARIA\",\"enUso\":" + enUso + "}";
     }
 
     /** {@code {"codigo":..,"tipo":..,"capacidad":..,"edificio":..,"planta":..,"sector":..}} */

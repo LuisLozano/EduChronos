@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Repositorio de {@link Aula}. Además del CRUD, porta el MAPA INVERSO de las cuatro FK
+ * Repositorio de {@link Aula}. Además del CRUD, porta el MAPA INVERSO de las FK
  * RESTRICT que apuntan a {@code aula} en {@code schema.sql} (Bloque 8.5-C2b): son las
  * consultas que {@code AulaService.borrar} ejecuta antes del {@code delete} para dar un
  * 409 con desglose en vez del 500 opaco del mordisco de la FK.
@@ -39,4 +39,9 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
     /** FK {@code sesion.aula_id} → aula (sesión de un horario generado). */
     @Query(value = "select count(*) from sesion where aula_id = :id", nativeQuery = true)
     long contarSesiones(@Param("id") Long id);
+
+    /** FK {@code grupo_administrativo.aula_referencia_id} → aula (aula de referencia, S206). */
+    @Query(value = "select count(*) from grupo_administrativo where aula_referencia_id = :id",
+            nativeQuery = true)
+    long contarGruposConAulaDeReferencia(@Param("id") Long id);
 }

@@ -20,11 +20,16 @@ package es.yaroki.educhronos.app.web.dto;
  * <p>{@code totalDeclarado} (S203) es opcional: ausente o null quiere decir «sin total», también
  * en el {@code PUT}, que reemplaza el estado entero.
  *
+ * <p>{@code aulaReferencia} (S206) es el CÓDIGO del aula de referencia del grupo, como las aulas
+ * de una plaza en {@code PlazaRequest}. Opcional: ausente o null quiere decir «sin aula», también
+ * en el {@code PUT}. Un código que no existe es un {@code 400} que lo nombra.
+ *
  * <p>Solo datos, sin lógica: toda la validación vive en {@code GrupoService}.
  */
 public record GrupoRequest(
         String codigo,
         String nivel,
         String tipo,
-        Integer totalDeclarado) {
+        Integer totalDeclarado,
+        String aulaReferencia) {
 }

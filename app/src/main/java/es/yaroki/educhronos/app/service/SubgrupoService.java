@@ -33,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
  *       código; en la edición ninguno SALVO la propia entidad (exclusión por id);
  *   <li>(e) SOLO EN EDICIÓN Y BORRADO: la entidad existente no es el subgrupo mono-Di
  *       de un PDC. Ver {@link #esMonoDiDePdc}.
+ *   <li>(f) {@code alumnos} (S206) null o ≥ 0; un negativo es un 400 que nombra el campo. El
+ *       {@code PUT} reemplaza el estado entero: unos alumnos ausentes vuelven a «sin indicar».
  * </ul>
  *
  * <p>La edición REEMPLAZA por completo la población de grupos (D-nueva, vía
@@ -86,11 +88,14 @@ public class SubgrupoService {
     public SubgrupoDTO crear(SubgrupoRequest peticion) {
         validarCodigo(peticion);
         Set<GrupoAdministrativo> grupos = resolverGrupos(peticion);
+        Integer alumnos = validarAlumnos(peticion.alumnos());
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un subgrupo con codigo " + peticion.codigo());
         });
-        Subgrupo guardado = repositorio.save(new Subgrupo(peticion.codigo(), grupos));
+        Subgrupo nuevo = new Subgrupo(peticion.codigo(), grupos);
+        nuevo.setAlumnos(alumnos);
+        Subgrupo guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
 
@@ -118,6 +123,7 @@ public class SubgrupoService {
         }
         validarCodigo(peticion);
         Set<GrupoAdministrativo> grupos = resolverGrupos(peticion);
+        Integer alumnos = validarAlumnos(peticion.alumnos());
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -125,6 +131,7 @@ public class SubgrupoService {
                             "Ya existe otro subgrupo con codigo " + peticion.codigo());
                 });
         entidad.actualizar(peticion.codigo(), grupos);
+        entidad.setAlumnos(alumnos);
         return aDTO(entidad);
     }
 
@@ -210,11 +217,19 @@ public class SubgrupoService {
         return resueltos;
     }
 
+    /** Regla (f): los alumnos tal cual si son null o ≥ 0; un negativo es un 400 que nombra el campo. */
+    private static Integer validarAlumnos(Integer alumnos) {
+        if (alumnos != null && alumnos < 0) {
+            throw new IllegalArgumentException("alumnos no puede ser negativo: " + alumnos);
+        }
+        return alumnos;
+    }
+
     private static SubgrupoDTO aDTO(Subgrupo subgrupo) {
         List<String> codigos = subgrupo.getGrupos().stream()
                 .map(GrupoAdministrativo::getCodigo)
                 .sorted()
                 .toList();
-        return new SubgrupoDTO(subgrupo.getId(), subgrupo.getCodigo(), codigos);
+        return new SubgrupoDTO(subgrupo.getId(), subgrupo.getCodigo(), codigos, subgrupo.getAlumnos());
     }
 }

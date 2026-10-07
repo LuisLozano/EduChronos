@@ -41,6 +41,10 @@ public class Aula {
     @Column(nullable = true)
     private String sector;
 
+    /** Si el aula se usa (S206, esquema 4). Un aula nueva lo está; la base pone 1 por defecto. */
+    @Column(name = "en_uso", nullable = false)
+    private boolean enUso = true;
+
     protected Aula() {
         // requerido por JPA
     }
@@ -81,6 +85,14 @@ public class Aula {
 
     public String getSector() {
         return sector;
+    }
+
+    public boolean isEnUso() {
+        return enUso;
+    }
+
+    public void setEnUso(boolean enUso) {
+        this.enUso = enUso;
     }
 
     /**

@@ -17,6 +17,9 @@ package es.yaroki.educhronos.app.web.dto;
  * obligatorios: {@code codigo} (no en blanco) y {@code tipo} (no en blanco y
  * parseable a {@code TipoAula}).
  *
+ * <p>{@code enUso} (S206) dice si el aula se usa. Ausente o null quiere decir {@code true}, en el
+ * alta y también en el {@code PUT}: solo un {@code false} explícito la deja fuera de uso.
+ *
  * <p>Solo datos, sin lógica (patrón de los DTO de 7A/8.2): toda la validación vive
  * en {@code AulaService}.
  */
@@ -26,5 +29,6 @@ public record AulaRequest(
         Integer capacidad,
         String edificio,
         Integer planta,
-        String sector) {
+        String sector,
+        Boolean enUso) {
 }

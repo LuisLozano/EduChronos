@@ -17,6 +17,8 @@ package es.yaroki.educhronos.app.web.dto;
  * <p>{@code capacidad}/{@code edificio}/{@code planta}/{@code sector} son nullable
  * de verdad (D-4): llegan y viajan null sin validarse.
  *
+ * <p>{@code enUso} (S206) nunca es null: un aula está en uso o no.
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code AulaService}.
  */
 public record AulaDTO(
@@ -26,5 +28,6 @@ public record AulaDTO(
         Integer capacidad,
         String edificio,
         Integer planta,
-        String sector) {
+        String sector,
+        boolean enUso) {
 }

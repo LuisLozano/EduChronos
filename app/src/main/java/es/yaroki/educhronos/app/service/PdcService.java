@@ -220,6 +220,7 @@ public class PdcService {
     private static GrupoDTO aDTO(GrupoAdministrativo grupo) {
         return new GrupoDTO(
                 grupo.getId(), grupo.getCodigo(),
-                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado());
+                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado(),
+                GrupoService.codigoDeAula(grupo.getAulaReferencia()));
     }
 }

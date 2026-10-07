@@ -13,10 +13,13 @@ import java.util.List;
  * intrínseco, {@code SubgrupoService} ordena los códigos de forma estable (por código)
  * para que la proyección sea determinista.
  *
+ * <p>{@code alumnos} (S206) es null si no se ha indicado.
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code SubgrupoService}.
  */
 public record SubgrupoDTO(
         Long id,
         String codigo,
-        List<String> grupos) {
+        List<String> grupos,
+        Integer alumnos) {
 }

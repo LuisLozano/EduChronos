@@ -1,9 +1,11 @@
 package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -425,6 +427,98 @@ class SubgrupoEndpointTest {
         return filas.longValue();
     }
 
+    // ──────────────────────── S206 T1: alumnos del subgrupo (C-reglas-aulas, punto 2)
+
+    @Test
+    void alumnos_altaConAlumnos_201YLosDevuelve() throws Exception {
+        mockMvc.perform(post("/api/subgrupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("S1", "25", "G_A")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.alumnos").value(25));
+    }
+
+    @Test
+    void alumnos_altaSinAlumnos_nulo() throws Exception {
+        mockMvc.perform(post("/api/subgrupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("S1", "G_A")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.alumnos").value(nullValue()));
+    }
+
+    @Test
+    void alumnos_altaConCero_vale() throws Exception {
+        mockMvc.perform(post("/api/subgrupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("S1", "0", "G_A")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.alumnos").value(0));
+    }
+
+    @Test
+    void alumnos_altaNegativos_400ConCampoEnMensajeYNoCrea() throws Exception {
+        mockMvc.perform(post("/api/subgrupos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("S1", "-1", "G_A")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("alumnos")));
+        assertThat(subgrupoRepository.findByCodigo("S1")).isEmpty();
+    }
+
+    @Test
+    void alumnos_edicionLosCambia_200() throws Exception {
+        long id = crear(bodyConAlumnos("S1", "25", "G_A"));
+
+        mockMvc.perform(put("/api/subgrupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("S1", "12", "G_A")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.alumnos").value(12));
+    }
+
+    /** El PUT reemplaza el estado entero: sin el campo, los alumnos vuelven a «sin indicar». */
+    @Test
+    void alumnos_edicionSinElCampo_losDejaNulos() throws Exception {
+        long id = crear(bodyConAlumnos("S1", "25", "G_A"));
+
+        mockMvc.perform(put("/api/subgrupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("S1", "G_A")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.alumnos").value(nullValue()));
+        mockMvc.perform(get("/api/subgrupos/" + id))
+                .andExpect(jsonPath("$.alumnos").value(nullValue()));
+    }
+
+    @Test
+    void alumnos_edicionNegativos_400YNoTocaLosQueTenia() throws Exception {
+        long id = crear(bodyConAlumnos("S1", "25", "G_A"));
+
+        mockMvc.perform(put("/api/subgrupos/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConAlumnos("S1", "-3", "G_A")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("alumnos")));
+        mockMvc.perform(get("/api/subgrupos/" + id))
+                .andExpect(jsonPath("$.alumnos").value(25));
+    }
+
+    /**
+     * La base también los rechaza: el CHECK (alumnos >= 0) de {@code schema.sql} ataja un
+     * negativo que llegue sin pasar por el servicio.
+     */
+    @Test
+    void alumnos_elCheckDeLaBaseRechazaUnNegativo() throws Exception {
+        long id = crear(bodyConAlumnos("S1", "25", "G_A"));
+        entityManager.flush();
+
+        assertThatThrownBy(() -> entityManager.getEntityManager()
+                        .createNativeQuery("update subgrupo set alumnos = -1 where id = " + id)
+                        .executeUpdate())
+                .hasStackTraceContaining("CHECK constraint failed");
+    }
+
     /** Da de alta por la red con el body dado y devuelve el id sintético asignado. */
     private long crear(String body) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/subgrupos")
@@ -434,6 +528,12 @@ class SubgrupoEndpointTest {
                 .andReturn();
         Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
         return id.longValue();
+    }
+
+    /** {@code {"codigo":..,"grupos":[..],"alumnos":..}}, con los alumnos literal JSON. */
+    private static String bodyConAlumnos(String codigo, String alumnos, String... grupos) {
+        String sinAlumnos = body(codigo, grupos);
+        return sinAlumnos.substring(0, sinAlumnos.length() - 1) + ",\"alumnos\":" + alumnos + "}";
     }
 
     /** {@code {"codigo":..,"grupos":["..",..]}} a partir de los códigos de grupo. */

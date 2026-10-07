@@ -44,6 +44,11 @@ public class GrupoAdministrativo {
     @Column(name = "total_declarado")
     private Integer totalDeclarado;
 
+    /** Aula de referencia del grupo (S206, esquema 4); null si no tiene. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "aula_referencia_id")
+    private Aula aulaReferencia;
+
     protected GrupoAdministrativo() {
         // requerido por JPA
     }
@@ -81,6 +86,14 @@ public class GrupoAdministrativo {
 
     public void setTotalDeclarado(Integer totalDeclarado) {
         this.totalDeclarado = totalDeclarado;
+    }
+
+    public Aula getAulaReferencia() {
+        return aulaReferencia;
+    }
+
+    public void setAulaReferencia(Aula aulaReferencia) {
+        this.aulaReferencia = aulaReferencia;
     }
 
     /**

@@ -15,9 +15,13 @@ import java.util.List;
  *
  * <p>En la edición el conjunto se REEMPLAZA por completo (D-nueva, no unión ni deltas).
  *
+ * <p>{@code alumnos} (S206) es opcional: ausente o null quiere decir «sin indicar», también en el
+ * {@code PUT}. 0 vale; un negativo es un {@code 400} que nombra el campo.
+ *
  * <p>Solo datos, sin lógica: toda la validación vive en {@code SubgrupoService}.
  */
 public record SubgrupoRequest(
         String codigo,
-        List<String> grupos) {
+        List<String> grupos,
+        Integer alumnos) {
 }

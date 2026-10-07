@@ -29,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>{@code capacidad}/{@code edificio}/{@code planta}/{@code sector} son nullable
  * de verdad (D-4): llegan y se persisten null sin validarse.
  *
+ * <p>{@code enUso} (S206): ausente o null es {@code true}, en el alta y en la edición (ver
+ * {@link #enUso}). Solo un {@code false} explícito deja el aula fuera de uso.
+ *
  * <p><b>El tipo se parsea con {@link TipoAula#valueOf} DENTRO de {@link #validar}</b>
  * (que devuelve el enum ya resuelto): si el valor no existe, se relanza como
  * {@link IllegalArgumentException} con un mensaje accionable que NOMBRA el valor
@@ -83,9 +86,11 @@ public class AulaService {
             throw new IllegalArgumentException(
                     "Ya existe un aula con codigo " + peticion.codigo());
         });
-        Aula guardada = repositorio.save(new Aula(
+        Aula nueva = new Aula(
                 peticion.codigo(), tipo, peticion.capacidad(),
-                peticion.edificio(), peticion.planta(), peticion.sector()));
+                peticion.edificio(), peticion.planta(), peticion.sector());
+        nueva.setEnUso(enUso(peticion));
+        Aula guardada = repositorio.save(nueva);
         return aDTO(guardada);
     }
 
@@ -108,6 +113,7 @@ public class AulaService {
                 });
         entidad.actualizar(peticion.codigo(), tipo, peticion.capacidad(),
                 peticion.edificio(), peticion.planta(), peticion.sector());
+        entidad.setEnUso(enUso(peticion));
         return aDTO(entidad);
     }
 
@@ -115,7 +121,7 @@ public class AulaService {
      * Borra un aula por id. {@link NoSuchElementException} (→ 404) si no existe;
      * {@link ReferenciaEntranteException} (→ 409) si alguien la referencia todavía.
      *
-     * <p>PILOTO del borrado amable (8.5-C2b): consulta las CUATRO FK entrantes del mapa
+     * <p>PILOTO del borrado amable (8.5-C2b): consulta las FK entrantes del mapa
      * ({@code schema.sql}) antes del {@code delete} y, si alguna tiene filas, aborta
      * nombrándolas con su conteo real en vez de dejar morder a la FK (500 opaco).
      */
@@ -127,7 +133,9 @@ public class AulaService {
                 new Referencia("plaza(s)", repositorio.contarPlazasConAulaFija(id)),
                 new Referencia("plaza(s) candidata(s)", repositorio.contarPlazasCandidatas(id)),
                 new Referencia("aula(s) bloqueada(s)", repositorio.contarAulasBloqueadas(id)),
-                new Referencia("sesion(es)", repositorio.contarSesiones(id)));
+                new Referencia("sesion(es)", repositorio.contarSesiones(id)),
+                new Referencia("grupo(s) con esta aula de referencia",
+                        repositorio.contarGruposConAulaDeReferencia(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }
@@ -157,9 +165,15 @@ public class AulaService {
         }
     }
 
+    /** {@code enUso} del request: ausente o null es {@code true} (S206). */
+    private static boolean enUso(AulaRequest peticion) {
+        return peticion.enUso() == null || peticion.enUso();
+    }
+
     private static AulaDTO aDTO(Aula aula) {
         return new AulaDTO(
                 aula.getId(), aula.getCodigo(), aula.getTipo().name(),
-                aula.getCapacidad(), aula.getEdificio(), aula.getPlanta(), aula.getSector());
+                aula.getCapacidad(), aula.getEdificio(), aula.getPlanta(), aula.getSector(),
+                aula.isEnUso());
     }
 }

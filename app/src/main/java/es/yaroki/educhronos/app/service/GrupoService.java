@@ -1,5 +1,7 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.app.catalog.Aula;
+import es.yaroki.educhronos.app.catalog.AulaRepository;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
 import es.yaroki.educhronos.app.catalog.Nivel;
@@ -36,6 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
  *       {@link #validarEntidadOrdinaria};
  *   <li>(f) {@code totalDeclarado} null o ≥ 0 (S203, {@link TotalDeclarado}). El {@code PUT}
  *       reemplaza el estado entero: un total ausente vuelve a «sin total» (D7).
+ *   <li>(g) {@code aulaReferencia} (S206) null o el código de un aula que existe; si no existe,
+ *       un 400 que lo nombra, como el nivel en (c). Como en (f), un aula ausente en el
+ *       {@code PUT} deja el grupo sin aula de referencia.
  * </ul>
  *
  * <p><b>(b) y (e) miran cosas distintas y las dos hacen falta.</b> (b) valida el tipo
@@ -60,10 +65,13 @@ public class GrupoService {
 
     private final GrupoAdministrativoRepository repositorio;
     private final NivelRepository nivelRepositorio;
+    private final AulaRepository aulaRepositorio;
 
-    public GrupoService(GrupoAdministrativoRepository repositorio, NivelRepository nivelRepositorio) {
+    public GrupoService(GrupoAdministrativoRepository repositorio, NivelRepository nivelRepositorio,
+            AulaRepository aulaRepositorio) {
         this.repositorio = repositorio;
         this.nivelRepositorio = nivelRepositorio;
+        this.aulaRepositorio = aulaRepositorio;
     }
 
     /** Todos los grupos como {@link GrupoDTO}, ORDENADOS por código. */
@@ -93,12 +101,14 @@ public class GrupoService {
         TipoGrupo tipo = validarTipo(peticion);
         Nivel nivel = resolverNivel(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
+        Aula aulaReferencia = resolverAulaReferencia(peticion);
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un grupo con codigo " + peticion.codigo());
         });
         GrupoAdministrativo nuevo = new GrupoAdministrativo(peticion.codigo(), nivel, tipo, null);
         nuevo.setTotalDeclarado(total);
+        nuevo.setAulaReferencia(aulaReferencia);
         GrupoAdministrativo guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
@@ -123,6 +133,7 @@ public class GrupoService {
         TipoGrupo tipo = validarTipo(peticion);
         Nivel nivel = resolverNivel(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
+        Aula aulaReferencia = resolverAulaReferencia(peticion);
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -131,6 +142,7 @@ public class GrupoService {
                 });
         entidad.actualizar(peticion.codigo(), nivel, tipo);
         entidad.setTotalDeclarado(total);
+        entidad.setAulaReferencia(aulaReferencia);
         return aDTO(entidad);
     }
 
@@ -215,9 +227,28 @@ public class GrupoService {
                         "No existe nivel con codigo " + peticion.nivel()));
     }
 
+    /**
+     * Regla (g): el aula de referencia por su código, o null si no viene (ausente, null o en
+     * blanco, como el aula fija de una plaza). Un código que no existe es un 400 que lo nombra.
+     */
+    private Aula resolverAulaReferencia(GrupoRequest peticion) {
+        String codigo = peticion.aulaReferencia();
+        if (codigo == null || codigo.isBlank()) {
+            return null;
+        }
+        return aulaRepositorio.findByCodigo(codigo)
+                .orElseThrow(() -> new IllegalArgumentException("No existe aula con codigo " + codigo));
+    }
+
     private static GrupoDTO aDTO(GrupoAdministrativo grupo) {
         return new GrupoDTO(
                 grupo.getId(), grupo.getCodigo(),
-                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado());
+                grupo.getNivel().getCodigo(), grupo.getTipo().name(), grupo.getTotalDeclarado(),
+                codigoDeAula(grupo.getAulaReferencia()));
+    }
+
+    /** El código de un aula, o null. Lo usa también {@code PdcService} para su DTO. */
+    static String codigoDeAula(Aula aula) {
+        return aula == null ? null : aula.getCodigo();
     }
 }

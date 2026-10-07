@@ -16,6 +16,8 @@ package es.yaroki.educhronos.app.web.dto;
  *
  * <p>{@code totalDeclarado} (S203) es null si no se ha declarado; lo lleva también el PDC.
  *
+ * <p>{@code aulaReferencia} (S206) es el código del aula de referencia, o null si no tiene.
+ *
  * <p>Solo datos, sin lógica: lo ensambla {@code GrupoService}.
  */
 public record GrupoDTO(
@@ -23,5 +25,6 @@ public record GrupoDTO(
         String codigo,
         String nivel,
         String tipo,
-        Integer totalDeclarado) {
+        Integer totalDeclarado,
+        String aulaReferencia) {
 }
