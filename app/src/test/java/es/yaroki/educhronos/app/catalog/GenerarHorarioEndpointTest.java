@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -314,6 +315,54 @@ class GenerarHorarioEndpointTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isOk());
+    }
+
+    /**
+     * (S207, B1) Una CLASE sin aula escrita, sin aula de grupo y sin aulas de su asignatura no
+     * tiene aula posible: la generación no llega al solver y devuelve el 422 de la
+     * pre-validación, con la plaza y el motivo en el cuerpo que ve el cliente.
+     */
+    @Test
+    void post_conUnaClaseSinAulaPosible_devuelve422ConElMotivo() throws Exception {
+        poblarCatalogoMinimo(1, 5);
+        Plaza plaza = actividadRepository.findByCodigo("Mat-1ºA").orElseThrow().getPlazas().get(0);
+        plaza.setAulaFija(null);
+        entityManager.flush();
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString(
+                        "La plaza 'Mat-1ºA-P1' de la actividad 'Mat-1ºA' no tiene ninguna aula posible:"
+                                + " sin aula de grupo ni aulas de la asignatura")));
+    }
+
+    /**
+     * (S207, B2) Dos plazas de la misma actividad fijas en la misma aula: no pueden ir a aulas
+     * distintas. 422 de la pre-validación, antes del solver, que desde S207 (C1) también lo
+     * declararía infactible pero sin decir por qué.
+     */
+    @Test
+    void post_conDosPlazasDeUnaSesionEnLaMismaAula_devuelve422ConElReparto() throws Exception {
+        poblarCatalogoMinimo(1, 5);
+        Actividad act = actividadRepository.findByCodigo("Mat-1ºA").orElseThrow();
+        Plaza primera = act.getPlazas().get(0);
+        Subgrupo otro = subgrupoRepository.save(
+                new Subgrupo("1ºA-Desd2", Set.of(grupoRepository.findAll().get(0))));
+        Profesor otroProfesor = profesorRepository.save(new Profesor("ING1", "Inés"));
+        act.agregarPlaza("Mat-1ºA-P2", primera.getAsignatura(), primera.getAulaFija(),
+                Set.of(otroProfesor), Set.of(), Set.of(otro));
+        entityManager.flush();
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString(
+                        "La actividad 'Mat-1ºA' tiene 2 plazas a la vez y solo 1 pueden ir a aulas distintas")));
     }
 
     /**

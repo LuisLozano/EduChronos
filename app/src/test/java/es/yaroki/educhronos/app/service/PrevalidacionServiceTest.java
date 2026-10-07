@@ -50,6 +50,8 @@ class PrevalidacionServiceTest {
 
     private static final Asignatura MAT = new Asignatura("Mat", "Matemáticas");
     private static final Aula A1 = new Aula("A1", "A1");
+    private static final Aula A2 = new Aula("A2", "A2");
+    private static final Aula A3 = new Aula("A3", "A3");
 
     // ---------------------------------------------------------------- (a) profesor
 
@@ -174,9 +176,11 @@ class PrevalidacionServiceTest {
                 tramosEnDias(5, 1), List.of(ing1, ing2, mat1), List.of(grupo),
                 List.of(desd1, desd2, completo),
                 List.of(
+                        // Cada plaza del desdoble en su aula (S207): con las dos en A1 el reparto de
+                        // aulas sería imposible y este test dejaría de aislar la regla (c).
                         actividad("Ing-desdoble", 3, 1, PatronTemporal.NEUTRA,
                                 plaza("Ing-desdoble-P1", ing1, desd1),
-                                plaza("Ing-desdoble-P2", ing2, desd2)),
+                                plazaEn("Ing-desdoble-P2", ing2, desd2, A2)),
                         actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
                                 plaza("Mat-1ºA-P1", mat1, completo))),
                 List.of());
@@ -730,8 +734,9 @@ class PrevalidacionServiceTest {
         Subgrupo desd2 = new Subgrupo("1ºA-Desd2", Set.of(grupo));
         ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
                 List.of(desd1, desd2),
+                // Cada plaza en su aula (S207), para no disparar el reparto de aulas imposible.
                 List.of(actividad("Mat-desdoble", 3, 1, PatronTemporal.NEUTRA,
-                        plaza("Mat-desdoble-P1", mat1, desd1), plaza("Mat-desdoble-P2", mat1, desd2))),
+                        plaza("Mat-desdoble-P1", mat1, desd1), plazaEn("Mat-desdoble-P2", mat1, desd2, A2))),
                 List.of());
 
         assertThat(PrevalidacionService.prevalidar(
@@ -916,6 +921,169 @@ class PrevalidacionServiceTest {
         assertThat(PrevalidacionService.descuadra(3, 4)).isTrue();
     }
 
+    // ------------------------------------------------- (S207) aulas: B1 y B2
+
+    /** (B1) Una plaza sin aula posible da UN ERROR que nombra actividad, plaza y motivo. */
+    @Test
+    void claseSinAulaPosible_unErrorConActividadPlazaYMotivo() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+        DatosAulas aulas = new DatosAulas(List.of(new DatosAulas.PlazaSinAula(
+                "Mat-1ºA", "Mat-1ºA-P1", "sin aula de grupo ni aulas de la asignatura")));
+
+        List<AvisoPrevalidacion> avisos =
+                PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, aulas);
+
+        assertThat(avisos).singleElement().satisfies(a -> {
+            assertThat(a.regla()).isEqualTo(PrevalidacionService.REGLA_CLASE_SIN_AULA_POSIBLE);
+            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+            assertThat(a.entidadCodigo()).isEqualTo("Mat-1ºA");
+            assertThat(a.demanda()).isEqualTo(1);
+            assertThat(a.disponible()).isZero();
+            assertThat(a.descripcion())
+                    .contains("Mat-1ºA-P1").contains("Mat-1ºA")
+                    .contains("sin aula de grupo ni aulas de la asignatura");
+        });
+    }
+
+    /** (B1, negativo) Sin plazas sin aula, ni la regla de dos argumentos ni la de tres dicen nada. */
+    @Test
+    void claseSinAulaPosible_sinPlazasSinAula_nada() {
+        Profesor mat1 = new Profesor("MAT1", "Uno");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(mat1), List.of(grupo),
+                List.of(sg), List.of(actividad("Mat-1ºA", 1, 1, PatronTemporal.NEUTRA,
+                        plaza("Mat-1ºA-P1", mat1, sg))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO)).isEmpty();
+    }
+
+    /** (B2) Dos plazas de una sesión fijas en la misma aula: ERROR con la actividad y el aula. */
+    @Test
+    void reparto_dosPlazasFijasEnLaMismaAula_error() {
+        Profesor p1 = new Profesor("P1", "Uno");
+        Profesor p2 = new Profesor("P2", "Dos");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo d1 = new Subgrupo("1ºA-D1", Set.of(grupo));
+        Subgrupo d2 = new Subgrupo("1ºA-D2", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(p1, p2), List.of(grupo),
+                List.of(d1, d2), List.of(actividad("Ing-desd", 1, 1, PatronTemporal.NEUTRA,
+                        plaza("Ing-desd-P1", p1, d1), plaza("Ing-desd-P2", p2, d2))), List.of());
+
+        List<AvisoPrevalidacion> avisos = soloRegla(
+                PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO),
+                PrevalidacionService.REGLA_REPARTO_DE_AULAS_IMPOSIBLE);
+
+        assertThat(avisos).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+            assertThat(a.entidadCodigo()).isEqualTo("Ing-desd");
+            assertThat(a.demanda()).isEqualTo(2);
+            assertThat(a.disponible()).isEqualTo(1);
+            assertThat(a.descripcion()).contains("Ing-desd").contains("A1");
+        });
+    }
+
+    /**
+     * (B2) Desdoble con una sola aula posible común: P1 y P2 solo pueden ir a A1 (una fija, otra
+     * candidata única) y P3 tiene A1 o A2. Caben 2 de 3. El conteo de aulas distintas (A1, A2:
+     * dos para tres plazas) también lo vería; el caso de abajo distingue el emparejamiento.
+     */
+    @Test
+    void reparto_desdobleConUnaSolaAulaComun_error() {
+        Profesor p1 = new Profesor("P1", "Uno");
+        Profesor p2 = new Profesor("P2", "Dos");
+        Profesor p3 = new Profesor("P3", "Tres");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo d1 = new Subgrupo("1ºA-D1", Set.of(grupo));
+        Subgrupo d2 = new Subgrupo("1ºA-D2", Set.of(grupo));
+        Subgrupo d3 = new Subgrupo("1ºA-D3", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(p1, p2, p3), List.of(grupo),
+                List.of(d1, d2, d3), List.of(actividad("Ing-desd", 1, 1, PatronTemporal.NEUTRA,
+                        plaza("Ing-desd-P1", p1, d1),
+                        plazaCandidatas("Ing-desd-P2", p2, d2, A1),
+                        plazaCandidatas("Ing-desd-P3", p3, d3, A1, A2))), List.of());
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO),
+                PrevalidacionService.REGLA_REPARTO_DE_AULAS_IMPOSIBLE))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.demanda()).isEqualTo(3);
+                    assertThat(a.disponible()).isEqualTo(2);
+                    assertThat(a.descripcion()).contains("A1").contains("A2");
+                });
+    }
+
+    /**
+     * (B2, negativo y discriminante) Tres plazas, tres aulas, pero el reparto solo sale por
+     * caminos de aumento: P1 {A1, A2}, P2 {A1}, P3 {A2, A3}. Un reparto voraz que diera A1 a P1
+     * dejaría a P2 sin aula; el emparejamiento máximo encuentra P1→A2, P2→A1, P3→A3.
+     */
+    @Test
+    void reparto_posibleSoloConCaminosDeAumento_nada() {
+        Profesor p1 = new Profesor("P1", "Uno");
+        Profesor p2 = new Profesor("P2", "Dos");
+        Profesor p3 = new Profesor("P3", "Tres");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo d1 = new Subgrupo("1ºA-D1", Set.of(grupo));
+        Subgrupo d2 = new Subgrupo("1ºA-D2", Set.of(grupo));
+        Subgrupo d3 = new Subgrupo("1ºA-D3", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(p1, p2, p3), List.of(grupo),
+                List.of(d1, d2, d3), List.of(actividad("Ing-desd", 1, 1, PatronTemporal.NEUTRA,
+                        plazaCandidatas("Ing-desd-P1", p1, d1, A1, A2),
+                        plazaCandidatas("Ing-desd-P2", p2, d2, A1),
+                        plazaCandidatas("Ing-desd-P3", p3, d3, A2, A3))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO)).isEmpty();
+        assertThat(PrevalidacionService.emparejamientoMaximo(List.of(
+                Set.of(A1, A2), Set.of(A1), Set.of(A2, A3)))).isEqualTo(3);
+    }
+
+    /** (B2) Las plazas sin aula (reuniones) no necesitan aula: dos en una actividad, nada. */
+    @Test
+    void reparto_plazasSinAulaNoCuentan() {
+        Profesor p1 = new Profesor("P1", "Uno");
+        Profesor p2 = new Profesor("P2", "Dos");
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(p1, p2), List.of(), List.of(),
+                List.of(actividad("Reu", 1, 1, PatronTemporal.NEUTRA,
+                        plazaSinAlumnos("Reu-P1", p1), plazaSinAlumnos("Reu-P2", p2))), List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO)).isEmpty();
+    }
+
+    /**
+     * (B2) Una actividad con una plaza sin aula posible no se evalúa: ya tiene su B1. Sus otras
+     * dos plazas, fijas en A1, darían B2 si se evaluara.
+     */
+    @Test
+    void reparto_noSeEvaluaEnUnaActividadQueYaTieneUnaClaseSinAula() {
+        Profesor p1 = new Profesor("P1", "Uno");
+        Profesor p2 = new Profesor("P2", "Dos");
+        Profesor p3 = new Profesor("P3", "Tres");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo d1 = new Subgrupo("1ºA-D1", Set.of(grupo));
+        Subgrupo d2 = new Subgrupo("1ºA-D2", Set.of(grupo));
+        Subgrupo d3 = new Subgrupo("1ºA-D3", Set.of(grupo));
+        Plaza sinAula = new Plaza("Ing-desd-P3", MAT, Set.of(p3), Optional.empty(), Set.of(), Set.of(d3));
+        ProblemaHorario problema = problema(tramosEnDias(5, 1), List.of(p1, p2, p3), List.of(grupo),
+                List.of(d1, d2, d3), List.of(actividad("Ing-desd", 1, 1, PatronTemporal.NEUTRA,
+                        plaza("Ing-desd-P1", p1, d1), plaza("Ing-desd-P2", p2, d2), sinAula)), List.of());
+        DatosAulas aulas = new DatosAulas(List.of(new DatosAulas.PlazaSinAula(
+                "Ing-desd", "Ing-desd-P3", "sin aula de grupo ni aulas de la asignatura")));
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, aulas);
+
+        assertThat(avisos).extracting(AvisoPrevalidacion::regla)
+                .containsExactly(PrevalidacionService.REGLA_CLASE_SIN_AULA_POSIBLE);
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO),
+                PrevalidacionService.REGLA_REPARTO_DE_AULAS_IMPOSIBLE))
+                .as("discriminante: sin el B1 la actividad sí se evalúa").hasSize(1);
+    }
+
     // ------------------------------------------------------------------- helpers
 
     private static DatosCuadre datos(
@@ -943,7 +1111,16 @@ class PrevalidacionServiceTest {
     }
 
     private static Plaza plaza(String codigo, Profesor profesor, Subgrupo subgrupo) {
-        return new Plaza(codigo, MAT, Set.of(profesor), Optional.of(A1), Set.of(), Set.of(subgrupo));
+        return plazaEn(codigo, profesor, subgrupo, A1);
+    }
+
+    private static Plaza plazaEn(String codigo, Profesor profesor, Subgrupo subgrupo, Aula aula) {
+        return new Plaza(codigo, MAT, Set.of(profesor), Optional.of(aula), Set.of(), Set.of(subgrupo));
+    }
+
+    private static Plaza plazaCandidatas(String codigo, Profesor profesor, Subgrupo subgrupo,
+                                         Aula... aulas) {
+        return new Plaza(codigo, MAT, Set.of(profesor), Optional.empty(), Set.of(aulas), Set.of(subgrupo));
     }
 
     private static Actividad actividad(
@@ -978,7 +1155,7 @@ class PrevalidacionServiceTest {
             List<Tramo> tramos, List<Profesor> profesores, List<GrupoAdministrativo> grupos,
             List<Subgrupo> subgrupos, List<Actividad> actividades,
             List<RestriccionHoraria> restricciones, List<ProfesorTutoria> tutorias) {
-        return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
+        return new ProblemaHorario(tramos, List.of(A1, A2, A3), List.of(MAT), profesores, grupos,
                 subgrupos, actividades, restricciones, List.of(), tutorias);
     }
 
@@ -987,7 +1164,7 @@ class PrevalidacionServiceTest {
             List<Tramo> tramos, List<Profesor> profesores, List<GrupoAdministrativo> grupos,
             List<Subgrupo> subgrupos, List<Actividad> actividades,
             List<RestriccionHoraria> restricciones, List<SesionBloqueada> pines) {
-        return new ProblemaHorario(tramos, List.of(A1), List.of(MAT), profesores, grupos,
+        return new ProblemaHorario(tramos, List.of(A1, A2, A3), List.of(MAT), profesores, grupos,
                 subgrupos, actividades, restricciones, pines, List.of());
     }
 

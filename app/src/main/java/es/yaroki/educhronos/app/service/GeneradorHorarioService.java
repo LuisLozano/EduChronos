@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
+import es.yaroki.educhronos.app.catalog.AsignaturaAula;
 import es.yaroki.educhronos.app.catalog.AsignaturaAulaRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
@@ -25,6 +26,7 @@ import es.yaroki.educhronos.app.curso.CursoService;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.curso.RechazoCursoException;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
+import es.yaroki.educhronos.app.mapper.DeduccionAulas;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
@@ -215,6 +217,36 @@ public class GeneradorHorarioService {
     }
 
     /**
+     * Las plazas de CLASE sin ninguna aula posible y por qué (S207, C-deduccion-aulas, B1), con el
+     * mismo componente que construye el problema ({@link DeduccionAulas}), para que no discrepen.
+     * Lo llaman la generación, junto a {@link #cargarProblema()} y {@link #cargarDatosCuadre()}, y
+     * {@code PrevalidacionService}. Como {@code cargarProblema()}, recorre relaciones perezosas
+     * (plazas, subgrupos, grupos): la generación lo llama sobre {@code this}, sin pasar por el
+     * proxy, y vale porque la sesión la pone quien llama (open-in-view en la petición, o la
+     * transacción del test), igual que en {@code cargarProblema()}.
+     */
+    @Transactional(readOnly = true)
+    public DatosAulas cargarDatosAulas() {
+        Map<Long, List<AsignaturaAula>> aulasPorAsignatura =
+                DeduccionAulas.indicePorAsignatura(asignaturaAulaRepository.findAll());
+        List<DatosAulas.PlazaSinAula> sinAula = new ArrayList<>();
+        for (Actividad actividad : actividadRepository.findAll()) {
+            if (!DeduccionAulas.aplica(actividad)) {
+                continue;
+            }
+            for (Plaza plaza : actividad.getPlazas()) {
+                DeduccionAulas.Dominio dominio =
+                        DeduccionAulas.dominio(actividad, plaza, aulasPorAsignatura);
+                if (dominio.vacio()) {
+                    sinAula.add(new DatosAulas.PlazaSinAula(
+                            actividad.getCodigo(), plaza.getCodigo(), dominio.motivo()));
+                }
+            }
+        }
+        return new DatosAulas(sinAula);
+    }
+
+    /**
      * Orquesta la generación completa de un horario y lo PERSISTE (Fase 8,
      * Bloque 8.1; cierra D29 para la vía de OPTIMIZACIÓN). Encadena
      * {@link #cargarProblema()} → resolución del solver → {@link #guardar} y
@@ -354,12 +386,13 @@ public class GeneradorHorarioService {
 
         ProblemaHorario problema = cargarProblema();
         DatosCuadre cuadre = cargarDatosCuadre();
+        DatosAulas aulas = cargarDatosAulas();
 
         // Condiciones necesarias ANTES del solve (8.4-A, D18): un catálogo que las viola
         // no tiene horario posible, y fallar aquí nombra al recurso culpable en vez de
         // devolver un CpSolverStatus opaco tras agotar el presupuesto. Los datos del cuadre
         // son los mismos que ve el GET (S203): sus AVISO viajan en la excepción si hay ERROR.
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, cuadre);
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, cuadre, aulas);
         if (avisos.stream().anyMatch(a -> a.severidad() == Severidad.ERROR)) {
             throw new PrevalidacionFallidaException(avisos);
         }

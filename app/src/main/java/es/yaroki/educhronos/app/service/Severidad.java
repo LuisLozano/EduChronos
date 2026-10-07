@@ -27,6 +27,10 @@ package es.yaroki.educhronos.app.service;
  * {@code GRUPO_HORAS_DESCUADRADAS}) también fallan la vía (2): unas horas configuradas que no
  * casan con las declaradas no impiden que exista horario y se corrigen editando el catálogo.
  *
+ * <p>Las dos de aulas de S207 —clase sin aula posible y reparto de aulas imposible— son
+ * {@code ERROR}: sin aula para una clase, o sin aulas distintas para plazas simultáneas, no existe
+ * horario, y lo deciden con certeza (dominio vacío, emparejamiento exacto).
+ *
  * <p>Las tres primeras —(a) profesor, (c) grupo, (d) repeticiones— siguen siendo
  * condiciones necesarias exactas y son {@code ERROR}. (c) nació como {@code AVISO} y se
  * corrigió a {@code ERROR} en S79 al comprobar que su supuesta sobrestimación no existía

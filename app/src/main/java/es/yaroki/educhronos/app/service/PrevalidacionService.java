@@ -7,6 +7,7 @@ import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.cpsat.Violacion;
 import es.yaroki.educhronos.solver.domain.Actividad;
 import es.yaroki.educhronos.solver.domain.ActividadInstancia;
+import es.yaroki.educhronos.solver.domain.Aula;
 import es.yaroki.educhronos.solver.domain.GrupoAdministrativo;
 import es.yaroki.educhronos.solver.domain.PatronTemporal;
 import es.yaroki.educhronos.solver.domain.Plaza;
@@ -19,12 +20,15 @@ import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,7 +102,9 @@ import org.springframework.transaction.annotation.Transactional;
  * cargando el problema y otro reutilizando el que ya tiene en la mano. Ninguna regla
  * se escribe dos veces (familia D-F8.2b-iv-a).
  *
- * <p><b>Palomar de aulas: fuera de alcance</b> por decisión explícita de S79. Comparar
+ * <p><b>Palomar de aulas: fuera de alcance</b> por decisión explícita de S79. Lo que sí entra
+ * desde S207 es más estrecho y exacto: una clase sin ninguna aula posible y una actividad cuyas
+ * plazas simultáneas no caben en aulas distintas (emparejamiento, no palomar global). Comparar
  * plazas forzosamente simultáneas contra aulas compatibles produce falsos positivos
  * probables con el catálogo actual (aulas candidatas amplias, aula fija implícita), y
  * un falso positivo en un ERROR bloquea un problema resoluble.
@@ -141,6 +147,18 @@ public class PrevalidacionService {
      */
     public static final String REGLA_GRUPO_HORAS_DESCUADRADAS = "GRUPO_HORAS_DESCUADRADAS";
 
+    /**
+     * Una plaza de CLASE se queda sin ninguna aula posible tras aplicar las reglas de aulas (S207,
+     * C-deduccion-aulas, B1). ERROR, ver {@link #clasesSinAulaPosible}.
+     */
+    public static final String REGLA_CLASE_SIN_AULA_POSIBLE = "CLASE_SIN_AULA_POSIBLE";
+
+    /**
+     * Las plazas de una actividad, que ocurren a la vez, no pueden recibir aulas distintas (S207,
+     * B2). ERROR, ver {@link #repartoDeAulasImposible}.
+     */
+    public static final String REGLA_REPARTO_DE_AULAS_IMPOSIBLE = "REPARTO_DE_AULAS_IMPOSIBLE";
+
     /** Filtro de actividades de las reglas de capacidad: todas cuentan, también REUNION y FUNCION. */
     private static final Predicate<Actividad> TODAS = actividad -> true;
 
@@ -168,7 +186,8 @@ public class PrevalidacionService {
      */
     @Transactional(readOnly = true)
     public List<AvisoPrevalidacion> prevalidar() {
-        return prevalidar(generadorService.cargarProblema(), generadorService.cargarDatosCuadre());
+        return prevalidar(generadorService.cargarProblema(), generadorService.cargarDatosCuadre(),
+                generadorService.cargarDatosAulas());
     }
 
     /**
@@ -191,14 +210,25 @@ public class PrevalidacionService {
      * la generación pasan los de {@code GeneradorHorarioService.cargarDatosCuadre()}; con
      * {@link DatosCuadre#VACIO} las reglas de cuadre no emiten nada.
      *
-     * <p>El orden de salida es estable. Primero los ERROR: profesores, actividades, grupos y
-     * pines sobre DURA. Después los AVISO: tutorías (S8), cuadre de profesores y cuadre de
+     * <p>El orden de salida es estable. Primero los ERROR: profesores, actividades, grupos,
+     * pines sobre DURA, clases sin aula posible y repartos de aulas imposibles (S207). Después
+     * los AVISO: tutorías (S8), cuadre de profesores y cuadre de
      * grupos. Dentro de cada bloque, el orden del problema. Así los hallazgos que abortan la
      * generación quedan agrupados al principio de la lista.
      */
     public static List<AvisoPrevalidacion> prevalidar(ProblemaHorario problema, DatosCuadre datos) {
+        return prevalidar(problema, datos, DatosAulas.VACIO);
+    }
+
+    /**
+     * Como el de arriba, con los datos de aulas que el problema no lleva (S207): qué plazas de
+     * CLASE se han quedado sin aula posible y por qué. Los ERROR de aulas van tras los pines.
+     */
+    public static List<AvisoPrevalidacion> prevalidar(
+            ProblemaHorario problema, DatosCuadre datos, DatosAulas aulas) {
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(datos, "datos no puede ser null");
+        Objects.requireNonNull(aulas, "aulas no puede ser null");
 
         // Ambos techos salen del PROBLEMA, nunca de una constante: el catálogo real trae
         // los tramos ya sin recreos (CatalogoMapper los excluye) y los días que existan.
@@ -212,6 +242,8 @@ public class PrevalidacionService {
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
         avisos.addAll(sobrecargaGrupo(problema, tramosLectivos, TODAS));
         avisos.addAll(pinSobreTramoDura(problema));
+        avisos.addAll(clasesSinAulaPosible(aulas));
+        avisos.addAll(repartoDeAulasImposible(problema, aulas));
         avisos.addAll(tutoriasSinTutor(problema));
         avisos.addAll(profesoresDescuadrados(problema, datos));
         avisos.addAll(gruposDescuadrados(problema, datos));
@@ -457,6 +489,114 @@ public class PrevalidacionService {
             }
         }
         return avisos;
+    }
+
+    /**
+     * (S207, B1) CLASE SIN AULA POSIBLE — ERROR. Una por plaza de CLASE cuyo dominio de aulas,
+     * escrito o deducido de las reglas, se ha quedado vacío. Sin aula no hay horario posible para
+     * esa clase, y el problema la llevaría al solver como si fuera una reunión: abortar es la única
+     * respuesta correcta. Señala la ACTIVIDAD, que es lo que se abre para arreglarlo; la plaza y el
+     * motivo, que escribe {@code DeduccionAulas}, van en la descripción. 1 contra 0, como S8.
+     */
+    private static List<AvisoPrevalidacion> clasesSinAulaPosible(DatosAulas aulas) {
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (DatosAulas.PlazaSinAula sinAula : aulas.sinAulaPosible()) {
+            avisos.add(new AvisoPrevalidacion(
+                    Severidad.ERROR,
+                    REGLA_CLASE_SIN_AULA_POSIBLE,
+                    sinAula.actividadCodigo(),
+                    1,
+                    0,
+                    "La plaza '" + sinAula.plazaCodigo() + "' de la actividad '"
+                            + sinAula.actividadCodigo() + "' no tiene ninguna aula posible: "
+                            + sinAula.motivo() + "."));
+        }
+        return avisos;
+    }
+
+    /**
+     * (S207, B2) REPARTO DE AULAS IMPOSIBLE — ERROR. Las plazas de una actividad ocurren a la vez
+     * y cada una necesita un aula distinta (C1); si el emparejamiento máximo plazas → aulas
+     * posibles es menor que el número de plazas con aula, no hay horario. Es certeza, no
+     * estimación: el emparejamiento es exacto. {@code demanda} = plazas con aula,
+     * {@code disponible} = las que pueden emparejarse.
+     *
+     * <p>Las plazas sin aula en el problema (reuniones, funciones) no necesitan aula y no cuentan.
+     * Una actividad con alguna plaza en {@link #clasesSinAulaPosible} no se evalúa: ya tiene su
+     * ERROR, y aquí esa plaza parecería una reunión. Implementación propia por caminos de aumento.
+     */
+    private static List<AvisoPrevalidacion> repartoDeAulasImposible(
+            ProblemaHorario problema, DatosAulas aulas) {
+        Set<String> actividadesConPlazaSinAula = new HashSet<>();
+        for (DatosAulas.PlazaSinAula sinAula : aulas.sinAulaPosible()) {
+            actividadesConPlazaSinAula.add(sinAula.actividadCodigo());
+        }
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (Actividad actividad : problema.actividades()) {
+            if (actividadesConPlazaSinAula.contains(actividad.codigo())) {
+                continue;
+            }
+            List<Plaza> conAula = new ArrayList<>();
+            List<Set<Aula>> dominios = new ArrayList<>();
+            for (Plaza plaza : actividad.plazas()) {
+                Set<Aula> dominio = new HashSet<>(plaza.aulasCandidatas());
+                plaza.aulaFija().ifPresent(dominio::add);
+                if (!dominio.isEmpty()) {
+                    conAula.add(plaza);
+                    dominios.add(dominio);
+                }
+            }
+            int emparejadas = emparejamientoMaximo(dominios);
+            if (emparejadas < conAula.size()) {
+                StringBuilder detalle = new StringBuilder();
+                Set<String> enJuego = new TreeSet<>();
+                for (int i = 0; i < conAula.size(); i++) {
+                    List<String> codigos = dominios.get(i).stream().map(Aula::codigo).sorted().toList();
+                    enJuego.addAll(codigos);
+                    detalle.append(i == 0 ? "" : "; ").append(conAula.get(i).codigo()).append(": ")
+                            .append(String.join(", ", codigos));
+                }
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.ERROR,
+                        REGLA_REPARTO_DE_AULAS_IMPOSIBLE,
+                        actividad.codigo(),
+                        conAula.size(),
+                        emparejadas,
+                        "La actividad '" + actividad.codigo() + "' tiene " + conAula.size()
+                                + " plazas a la vez y solo " + emparejadas
+                                + " pueden ir a aulas distintas. Aulas en juego: "
+                                + String.join(", ", enJuego) + " (" + detalle + ")."));
+            }
+        }
+        return avisos;
+    }
+
+    /** Tamaño del emparejamiento máximo de cada plaza (índice) a un aula de su dominio. */
+    static int emparejamientoMaximo(List<Set<Aula>> dominios) {
+        Map<Aula, Integer> duenoDe = new HashMap<>();
+        int emparejadas = 0;
+        for (int i = 0; i < dominios.size(); i++) {
+            if (aumentar(i, dominios, duenoDe, new HashSet<>())) {
+                emparejadas++;
+            }
+        }
+        return emparejadas;
+    }
+
+    /** Camino de aumento desde la plaza {@code i} (algoritmo de Kuhn). */
+    private static boolean aumentar(int i, List<Set<Aula>> dominios, Map<Aula, Integer> duenoDe,
+                                    Set<Aula> visitadas) {
+        for (Aula aula : dominios.get(i)) {
+            if (!visitadas.add(aula)) {
+                continue;
+            }
+            Integer dueno = duenoDe.get(aula);
+            if (dueno == null || aumentar(dueno, dominios, duenoDe, visitadas)) {
+                duenoDe.put(aula, i);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
