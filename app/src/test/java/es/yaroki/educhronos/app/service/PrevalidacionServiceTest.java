@@ -24,6 +24,7 @@ import es.yaroki.educhronos.solver.domain.TipoGrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1041,6 +1042,25 @@ class PrevalidacionServiceTest {
         assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO)).isEmpty();
         assertThat(PrevalidacionService.emparejamientoMaximo(List.of(
                 Set.of(A1, A2), Set.of(A1), Set.of(A2, A3)))).isEqualTo(3);
+    }
+
+    /**
+     * (B2, discriminante del voraz) Dos casos simétricos: P1 {A1, A2} y, después, P2 y P3 que
+     * necesitan el aula que P1 NO debe quedarse. Un reparto voraz sin caminos de aumento da a P1 la
+     * primera aula que encuentre al recorrer su conjunto; sea cual sea, en uno de los dos casos es
+     * la que necesita P2 y el voraz se queda en 2. El emparejamiento máximo da 3 en los dos.
+     * (Mata el mutante B2-2 de S207 T2, que el caso de arriba dejaba vivo según el orden de
+     * iteración del conjunto.)
+     */
+    @Test
+    void reparto_elEmparejamientoReasigna_seaCualSeaLaPrimeraAulaQueTomeP1() {
+        List<Set<Aula>> casoA1 = List.of(new HashSet<>(List.of(A1, A2)), new HashSet<>(List.of(A1)),
+                new HashSet<>(List.of(A2, A3)));
+        List<Set<Aula>> casoA2 = List.of(new HashSet<>(List.of(A1, A2)), new HashSet<>(List.of(A2)),
+                new HashSet<>(List.of(A1, A3)));
+
+        assertThat(PrevalidacionService.emparejamientoMaximo(casoA1)).isEqualTo(3);
+        assertThat(PrevalidacionService.emparejamientoMaximo(casoA2)).isEqualTo(3);
     }
 
     /** (B2) Las plazas sin aula (reuniones) no necesitan aula: dos en una actividad, nada. */

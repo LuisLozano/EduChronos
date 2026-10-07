@@ -149,6 +149,32 @@ class HorarioConAulaFueraDeReglasTest {
                 });
     }
 
+    /**
+     * Capacidad que cambia después de guardar: el aula de LEN pasa a tener 5 plazas y su subgrupo
+     * 10 alumnos. El diagnóstico marca {@code CAPACIDAD_AULA}, que lleva el tramo pero no depende
+     * de él: mover LEN a un tramo libre se acepta. (Mata el mutante D-4 de S207 T2.)
+     */
+    @Test
+    void mover_conUnaCapacidadAulaPreexistente_200() throws Exception {
+        poblar();
+        Aula aLen = aulaRepository.findByCodigo("A-LEN").orElseThrow();
+        aLen.actualizar(aLen.getCodigo(), aLen.getTipo(), 5, null, null, null);
+        subgrupoRepository.findByCodigo("1ºA-s2").orElseThrow().setAlumnos(10);
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/horarios/" + horarioId + "/diagnostico"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.violaciones.length()").value(1))
+                .andExpect(jsonPath("$.violaciones[0].regla").value("CAPACIDAD_AULA"))
+                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("A-LEN"));
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoMover("LEN", 1, 2, 2)))
+                .andExpect(status().isOk());
+    }
+
     /** Mover MAT al tramo de LEN (mismo grupo): violación NUEVA, 409, y solo esa. */
     @Test
     void mover_creandoUnaViolacionNueva_409ConSoloLaNueva() throws Exception {
