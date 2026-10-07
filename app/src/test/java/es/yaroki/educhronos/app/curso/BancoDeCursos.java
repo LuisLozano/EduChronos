@@ -185,7 +185,13 @@ public final class BancoDeCursos {
                     ordenes.add(trozo.strip());
                 }
             }
-            assertThat(ordenes).as("el esquema trae sus 22 tablas").hasSize(22);
+            // schema.sql es el esquema vigente (23 tablas y 4 índices únicos desde S206);
+            // esquema/001.sql, la foto de S191, que no cambia nunca (22 tablas).
+            if (script.equals("/schema.sql")) {
+                assertThat(ordenes).as("el esquema trae sus 23 tablas y sus 4 índices únicos").hasSize(27);
+            } else {
+                assertThat(ordenes).as("%s trae sus 22 tablas", script).hasSize(22);
+            }
             return ordenes;
         }
     }

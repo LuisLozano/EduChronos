@@ -341,7 +341,7 @@ class DuplicadorCursoTest {
                     ordenes.add(trozo.strip());
                 }
             }
-            assertThat(ordenes).as("el esquema trae sus 22 tablas").hasSize(22);
+            assertThat(ordenes).as("el esquema trae sus 23 tablas y sus 4 índices únicos").hasSize(27);
             return ordenes;
         }
     }
@@ -362,7 +362,7 @@ class DuplicadorCursoTest {
                 nombres.add(filas.getString(1));
             }
         }
-        assertThat(nombres).as("las 22 tablas del esquema").hasSize(22);
+        assertThat(nombres).as("las 23 tablas del esquema").hasSize(23);
         return nombres;
     }
 

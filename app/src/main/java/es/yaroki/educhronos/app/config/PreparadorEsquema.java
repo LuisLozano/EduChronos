@@ -71,7 +71,7 @@ public class PreparadorEsquema {
     private static final Logger LOG = LoggerFactory.getLogger(PreparadorEsquema.class);
 
     /** El esquema que escribe esta versión. Se sube con cada {@code esquema/NNN.sql} nuevo. */
-    public static final int VERSION_ESQUEMA = 3;
+    public static final int VERSION_ESQUEMA = 4;
 
     /** Lo que reciben las bases vacías. */
     public static final String ESQUEMA_VIGENTE = "classpath:schema.sql";

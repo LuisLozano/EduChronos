@@ -14,6 +14,8 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.sqlite.SQLiteDataSource;
@@ -238,14 +240,14 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S203) Una base de la versión 2 CON DATOS llega a la 3 sin perder nada, calcado de (S201,
-     * a). La base se levanta con las migraciones reales hasta la 2 ({@code 001.sql} y
+     * (S203) Una base de la versión 2 CON DATOS llega a la vigente sin perder nada (hasta S206, a
+     * la 3), calcado de (S201, a). La base se levanta con las migraciones reales hasta la 2 ({@code 001.sql} y
      * {@code 002.sql}) y se sella a mano. {@code 003.sql} añade tres columnas: el esquema queda
      * IGUAL al de una base nueva, los profesores y los grupos —un ordinario y su PDC— idénticos
      * campo a campo, todos los profesores como PROFESOR y nadie con total declarado.
      */
     @Test
-    void unaBaseV2ConDatosLlegaALa3SinPerderNada(@TempDir Path carpeta) throws Exception {
+    void unaBaseV2ConDatosLlegaALaVigenteSinPerderNada(@TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v2.db"), null, false);
         try (Connection conexion = BancoDeCursos.conectar(base)) {
             ScriptUtils.executeSqlScript(conexion, migracionReal(2));
@@ -285,7 +287,7 @@ class PreparadorEsquemaTest {
                 .as("ningún grupo con total")
                 .containsExactly("1|null", "2|null");
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
-        assertThat(version(base)).isEqualTo(3);
+        assertThat(version(base)).isEqualTo(PreparadorEsquema.VERSION_ESQUEMA);
     }
 
     // ─────────────────────────────────────────────────────────────── juego de prueba
@@ -415,7 +417,130 @@ class PreparadorEsquemaTest {
         assertThat(BancoDeCursos.filas(base, "hija")).as("el huérfano de antes sigue ahí").isOne();
     }
 
+    /**
+     * (S206) Una base de la versión 0, 1 o 3 CON DATOS en todas las tablas de la 1 llega a la 4
+     * sin perder nada. La base se levanta con {@code 001.sql}, se puebla y, para la 3, se le
+     * pasan {@code 002.sql} y {@code 003.sql} reales antes de sellarla. {@code 004.sql} añade el
+     * aula de referencia del grupo, los alumnos del subgrupo, el aula en uso, la tabla
+     * {@code asignatura_aula} y las cuatro únicas: cada tabla conserva sus filas, todas las aulas
+     * quedan en uso, las columnas nuevas nulas, {@code asignatura_aula} vacía, los cuatro índices
+     * únicos presentes y el esquema IGUAL al de una base nueva.
+     */
+    @ParameterizedTest(name = "desde la versión {0}")
+    @ValueSource(ints = {0, 1, 3})
+    void unaBaseConDatosLlegaALa4SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v" + desde + ".db"), "2025/2026", false);
+        poblarTodasLasTablasDeLaVersion1(base);
+        if (desde == 3) {
+            try (Connection conexion = BancoDeCursos.conectar(base)) {
+                ScriptUtils.executeSqlScript(conexion, migracionReal(2));
+                ScriptUtils.executeSqlScript(conexion, migracionReal(3));
+            }
+        }
+        ejecutar(base, "PRAGMA user_version = " + desde);
+        List<String> tablas = consulta(base,
+                "select name from sqlite_master where type = 'table' and name not like 'sqlite_%' order by name");
+        List<String> filasAntes = new ArrayList<>();
+        for (String tabla : tablas) {
+            filasAntes.add(tabla + "=" + BancoDeCursos.filas(base, tabla));
+        }
+        assertThat(version(base)).as("precondición: versión %d", desde).isEqualTo(desde);
+        assertThat(tablas).as("precondición: sin la tabla nueva").doesNotContain("asignatura_aula");
+        assertThat(filasAntes).as("precondición: ninguna tabla vacía").noneMatch(f -> f.endsWith("=0"));
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
+        Path vacia = carpeta.resolve("vacia.db");
+        real().preparar(origen(vacia));
+
+        real().preparar(origen(base));
+
+        assertThat(version(base)).isEqualTo(4);
+        assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
+        List<String> filasDespues = new ArrayList<>();
+        for (String tabla : tablas) {
+            filasDespues.add(tabla + "=" + BancoDeCursos.filas(base, tabla));
+        }
+        assertThat(filasDespues).as("las filas de cada tabla que ya existía").isEqualTo(filasAntes);
+        assertThat(consulta(base, "select count(*), sum(en_uso = 1) from aula"))
+                .as("todas las aulas, en uso")
+                .containsExactly("2|2");
+        assertThat(consulta(base, "select count(*) from grupo_administrativo where aula_referencia_id is not null"))
+                .as("ningún grupo con aula de referencia")
+                .containsExactly("0");
+        assertThat(consulta(base, "select count(*) from subgrupo where alumnos is not null"))
+                .as("ningún subgrupo con alumnos")
+                .containsExactly("0");
+        assertThat(BancoDeCursos.filas(base, "asignatura_aula")).as("asignatura_aula, vacía").isZero();
+        assertThat(indicesUnicos(base, "sesion")).contains("uk_sesion_horario_plaza_indice");
+        assertThat(indicesUnicos(base, "sesion_bloqueada")).contains("uk_sesion_bloqueada_actividad_indice");
+        assertThat(indicesUnicos(base, "aula_bloqueada")).contains("uk_aula_bloqueada_actividad_indice_plaza");
+        assertThat(indicesUnicos(base, "asignatura_aula_compatible"))
+                .contains("uk_asignatura_aula_compatible_asignatura_tipo");
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+    }
+
     // ─────────────────────────────────────────────────────────────── andamio
+
+    /**
+     * Una o dos filas coherentes en cada tabla de {@code 001.sql} (la de {@code curso} la pone
+     * {@link BancoDeCursos#fabricarHistorica}). Las columnas son las de la versión 1: la sesión
+     * lleva aula y la actividad no tiene tipo.
+     */
+    private static void poblarTodasLasTablasDeLaVersion1(Path base) throws SQLException {
+        ejecutar(
+                base,
+                "insert into configuracion (clave, valor) values ('centro', 'IES')",
+                "insert into aula (id, codigo, tipo, capacidad) values (1, 'A1', 'ORDINARIA', 30)",
+                "insert into aula (id, codigo, tipo) values (2, 'LAB', 'LAB_CIENCIAS')",
+                "insert into tramo_semanal (id, dia, orden, hora_inicio, hora_fin, es_lectivo)"
+                        + " values (1, 'LUNES', 1, '08:00:00', '09:00:00', 1)",
+                "insert into tramo_semanal (id, dia, orden, hora_inicio, hora_fin, es_lectivo,"
+                        + " siguiente_inmediato_id) values (2, 'LUNES', 2, '09:00:00', '10:00:00', 1, null)",
+                "insert into nivel (id, codigo, orden) values (1, 'ESO3', 3)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo, grupo_padre_id)"
+                        + " values (1, '3A', 1, 'ORDINARIO', null)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo, grupo_padre_id)"
+                        + " values (2, '3ADI', 1, 'DIVERSIFICACION_PDC', 1)",
+                "insert into subgrupo (id, codigo) values (1, '3A-Completo')",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (1, 1)",
+                "insert into profesor (id, codigo, nombre_completo) values (1, 'MAT1', 'Uno')",
+                "insert into profesor_tutoria (profesor_id, grupo_id, rol) values (1, 1, 'TUTOR_PRINCIPAL')",
+                "insert into profesor_restriccion_horaria (id, profesor_id, tramo_id, tipo, peso)"
+                        + " values (1, 1, 1, 'DURA', 0)",
+                "insert into asignatura (id, codigo, nombre_completo) values (1, 'BIO', 'Biología')",
+                "insert into asignatura_aula_compatible (id, asignatura_id, tipo_aula)"
+                        + " values (1, 1, 'LAB_CIENCIAS')",
+                "insert into actividad (id, codigo, asignatura_id, duracion_tramos,"
+                        + " repeticiones_por_semana, patron_temporal, requiere_tutor)"
+                        + " values (1, 'BIO-3A', 1, 1, 2, 'NEUTRA', 0)",
+                "insert into plaza (id, codigo, actividad_id, asignatura_id, aula_fija_id)"
+                        + " values (1, 'BIO-3A-P1', 1, 1, null)",
+                "insert into plaza_aula_candidata (plaza_id, aula_id) values (1, 2)",
+                "insert into plaza_profesor (plaza_id, profesor_id) values (1, 1)",
+                "insert into plaza_subgrupo (plaza_id, subgrupo_id) values (1, 1)",
+                "insert into sesion_bloqueada (id, actividad_id, indice, tramo_inicio_id) values (1, 1, 1, 1)",
+                "insert into aula_bloqueada (id, actividad_id, indice, plaza_id, aula_id) values (1, 1, 1, 1, 2)",
+                "insert into horario_generado (id, nombre, estado, estado_solver, fecha_generacion)"
+                        + " values (1, 'H1', 'BORRADOR', 'OPTIMAL', '2026-10-07 10:00:00')",
+                "insert into sesion (id, horario_id, plaza_id, indice, tramo_inicio_id, aula_id)"
+                        + " values (1, 1, 1, 1, 1, 2)",
+                "insert into sesion (id, horario_id, plaza_id, indice, tramo_inicio_id, aula_id)"
+                        + " values (2, 1, 1, 2, 2, 2)");
+    }
+
+    /** Los nombres de los índices ÚNICOS de {@code tabla}, por {@code PRAGMA index_list}. */
+    private static List<String> indicesUnicos(Path base, String tabla) throws SQLException {
+        List<String> nombres = new ArrayList<>();
+        try (Connection conexion = BancoDeCursos.conectar(base);
+                Statement sentencia = conexion.createStatement();
+                ResultSet fila = sentencia.executeQuery("PRAGMA index_list(" + tabla + ")")) {
+            while (fila.next()) {
+                if (fila.getInt("unique") == 1) {
+                    nombres.add(fila.getString("name"));
+                }
+            }
+        }
+        return nombres;
+    }
 
     private static DataSource origen(Path base) {
         SQLiteDataSource fuente = new SQLiteDataSource();
