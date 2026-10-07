@@ -1046,8 +1046,11 @@ final class ModeloCpSat {
         for (Aula aula : problema.aulas()) {
             List<IntervalVar> intervalos = new ArrayList<>();
             for (InstanciaProgramada ip : instancias) {
-                if (usaAula(ip, aula)) {
-                    intervalos.add(ip.intervalo());        // rama aulaFija (como en Fase 2)
+                // Rama aulaFija, POR PLAZA (S207, C1): dos plazas de la misma instancia con la
+                // misma aula fija aportan dos veces el mismo intervalo, que solapa consigo mismo
+                // y hace el problema infactible. Contarlas por instancia lo dejaba pasar.
+                for (int i = 0; i < plazasConAulaFija(ip, aula); i++) {
+                    intervalos.add(ip.intervalo());
                 }
                 intervalos.addAll(intervalosOpcionalesEn(ip, aula)); // rama aulasCandidatas
             }
@@ -1148,15 +1151,17 @@ final class ModeloCpSat {
         return false;
     }
 
-    private boolean usaAula(InstanciaProgramada ip, Aula aula) {
+    /** Plazas de la instancia con este aula como aula fija (S207, C1: se cuentan, no se marcan). */
+    private int plazasConAulaFija(InstanciaProgramada ip, Aula aula) {
+        int n = 0;
         for (Plaza plaza : ip.instancia().actividad().plazas()) {
             // Solo rama aulaFija. Las aulasCandidatas las aporta a la lista de
             // no-solape el helper intervalosOpcionalesEn (intervalos opcionales).
             if (plaza.aulaFija().isPresent() && plaza.aulaFija().get().equals(aula)) {
-                return true;
+                n++;
             }
         }
-        return false;
+        return n;
     }
 
     private boolean cubreSubgrupo(InstanciaProgramada ip, Subgrupo subgrupo) {
