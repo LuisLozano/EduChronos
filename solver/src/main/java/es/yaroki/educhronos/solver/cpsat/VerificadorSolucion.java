@@ -641,8 +641,10 @@ public final class VerificadorSolucion {
                 // plaza con varios profesores, nunca dos plazas. Contar por
                 // instancia (Set) enmascararia esa colision; contar por plaza la
                 // detecta. La cara de configuracion (dos aulaFija iguales en una
-                // actividad) la rechaza el mapper antes del solver; aqui se cubre
-                // tambien el caso de dos candidatas que resuelvan al mismo aula.
+                // actividad) solo la rechaza el cargador JSON del solver; en la ruta de
+                // la aplicacion la hace infactible el modelo (S207, 9f2424d) y la
+                // prevalidacion la para antes (REPARTO_DE_AULAS_IMPOSIBLE). Aqui se cubre
+                // ademas el caso de dos candidatas que resuelvan al mismo aula.
                 Set<Profesor> ps = new HashSet<>();
                 Set<Subgrupo> ss = new HashSet<>();
                 for (Plaza plaza : inst.actividad().plazas()) {

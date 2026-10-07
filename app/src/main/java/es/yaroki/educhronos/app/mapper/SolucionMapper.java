@@ -180,11 +180,14 @@ public final class SolucionMapper {
      * FIDELIDAD no equivalencia): {@link SolucionHorario#aulaElegida} cae a
      * {@code plaza.aulaFija()} cuando no hay entrada, así que meter las fijas daría una
      * solución EQUIVALENTE pero NO IDÉNTICA y mentiría a quien inspeccione
-     * {@code aulasElegidas} esperando "solo lo que el solver eligió". Para una plaza fija,
-     * si el aula de la fila no coincide con su {@code aulaFija} se ABORTA (corrupción de
-     * datos, no un caso a tolerar). Para una plaza de aulas candidatas SÍ se añade la
-     * entrada {@code instancia → (plaza → aula de la fila)}, con el aula tomada del conjunto
-     * de candidatas del problema.
+     * {@code aulasElegidas} esperando "solo lo que el solver eligió". Para una plaza de aulas
+     * candidatas SÍ se añade la entrada {@code instancia → (plaza → aula de la fila)}.
+     *
+     * <p><b>Aula guardada fuera de las reglas (S207, C-deduccion-aulas, D).</b> Si el aula de la
+     * fila no es la fija de la plaza ni una de sus candidatas —el horario se generó con otras
+     * reglas de aulas—, ya no se aborta: se conserva el aula GUARDADA como entrada de
+     * {@code aulasElegidas}, también en una plaza fija, para que el verificador la marque
+     * {@code AULA_FUERA_DE_REGLAS}. El aula se toma de {@code problema.aulas()} por código.
      *
      * @param problema  problema de dominio (fuente de actividades × plazas × aulas)
      * @param sesiones  filas persistidas del horario a reconstruir
@@ -192,8 +195,8 @@ public final class SolucionMapper {
      * @throws IllegalArgumentException si el índice de tramos no es invertible, si una
      *         actividad/plaza/aula de una fila no está en el problema, si un
      *         {@code TramoSemanal} no tiene {@code Tramo} inverso, si una instancia cae en
-     *         tramos distintos, si el aula de una plaza fija no coincide con su aulaFija, o
-     *         si una sesión sin aula pertenece a una plaza que sí la tiene. Una sesión sin
+     *         tramos distintos, o si una sesión sin aula pertenece a una plaza que sí la
+     *         tiene. Una sesión sin
      *         aula de una plaza sin aula (S201) conserva su tramo y no añade entrada de aula.
      */
     public static SolucionHorario aSolucionHorario(
@@ -214,6 +217,13 @@ public final class SolucionMapper {
                         + "dominio " + previo.codigo() + " y " + e.getKey().codigo()
                         + " mapean al mismo TramoSemanal id=" + e.getValue().getId());
             }
+        }
+
+        // Índice de aulas de dominio por código: un aula guardada fuera de las reglas se resuelve
+        // aquí y no en el dominio de la plaza (S207, D).
+        Map<String, es.yaroki.educhronos.solver.domain.Aula> aulaPorCodigo = new HashMap<>();
+        for (es.yaroki.educhronos.solver.domain.Aula a : problema.aulas()) {
+            aulaPorCodigo.put(a.codigo(), a);
         }
 
         // Índice de actividades de dominio por código, para cruzar cada Sesion.
@@ -272,33 +282,24 @@ public final class SolucionMapper {
                 continue;
             }
             String aulaCodigoFila = sesion.getAula().getCodigo();
-            if (plazaDominio.aulaFija().isPresent()) {
-                // Fidelidad (D-F8.3-C-3): plaza fija -> NO se añade entrada; se GUARDA la
-                // coherencia entre el aula de la fila y la aulaFija de la plaza.
-                String aulaFijaCodigo = plazaDominio.aulaFija().get().codigo();
-                if (!aulaFijaCodigo.equals(aulaCodigoFila)) {
-                    throw new IllegalArgumentException("La sesion de la plaza " + plazaCodigo
-                            + " tiene aula '" + aulaCodigoFila + "' que no coincide con su aulaFija '"
-                            + aulaFijaCodigo + "' (corrupción de datos)");
-                }
-            } else {
-                // Aula variable: el aula elegida DEBE estar entre las candidatas del problema.
-                es.yaroki.educhronos.solver.domain.Aula aulaDominio = null;
-                for (es.yaroki.educhronos.solver.domain.Aula candidata : plazaDominio.aulasCandidatas()) {
-                    if (candidata.codigo().equals(aulaCodigoFila)) {
-                        aulaDominio = candidata;
-                        break;
-                    }
-                }
-                if (aulaDominio == null) {
-                    throw new IllegalArgumentException("El aula '" + aulaCodigoFila
-                            + "' de la plaza " + plazaCodigo
-                            + " no está entre sus aulasCandidatas en el problema");
-                }
-                aulasElegidas
-                        .computeIfAbsent(instancia, k -> new HashMap<>())
-                        .put(plazaDominio, aulaDominio);
+            boolean esSuFija = plazaDominio.aulaFija()
+                    .map(fija -> fija.codigo().equals(aulaCodigoFila)).orElse(false);
+            if (esSuFija) {
+                // Fidelidad (D-F8.3-C-3): plaza fija en su aula -> NO se añade entrada.
+                continue;
             }
+            // Aula variable elegida entre las candidatas, o aula guardada FUERA de las reglas
+            // actuales (S207, C-deduccion-aulas, D): ya no se aborta. Se conserva el aula
+            // guardada como elegida, también si la plaza tiene aula fija, para que el
+            // verificador la vea y la marque AULA_FUERA_DE_REGLAS.
+            es.yaroki.educhronos.solver.domain.Aula aulaDominio = aulaPorCodigo.get(aulaCodigoFila);
+            if (aulaDominio == null) {
+                throw new IllegalArgumentException("El aula '" + aulaCodigoFila
+                        + "' de la plaza " + plazaCodigo + " no está en el problema");
+            }
+            aulasElegidas
+                    .computeIfAbsent(instancia, k -> new HashMap<>())
+                    .put(plazaDominio, aulaDominio);
         }
 
         return new SolucionHorario(asignaciones, aulasElegidas);

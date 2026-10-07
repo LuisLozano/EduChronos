@@ -105,9 +105,9 @@ public class HorarioController {
 
     /**
      * Un rechazo previsto del curso sale con su status y su causa en el cuerpo, igual que en
-     * {@code CursoController}. No pasa por {@code ResponseStatusException} por el motivo de
-     * siempre: su {@code reason} no llega al navegador de forma que un test pueda aseverarla
-     * (D-F8.6-ii-a).
+     * {@code CursoController}. No pasa por {@code ResponseStatusException} porque el cliente
+     * necesita la {@code causa} como campo propio del cuerpo, que el JSON de error de Spring no
+     * tiene; el texto sí llegaría en {@code message} desde S167 (D-F8.6-ii-a saldada).
      */
     @ExceptionHandler(RechazoCursoException.class)
     ResponseEntity<RechazoCursoDTO> rechazoDeCurso(RechazoCursoException e) {
@@ -119,12 +119,13 @@ public class HorarioController {
      * Traduce un fallo del solver a su respuesta, con el cuerpo que verá el navegador.
      *
      * <p>Ni esta rama ni la de la pre-validación (la sobrecarga de abajo) lanzan
-     * {@code ResponseStatusException}: esa vía deja el cuerpo en manos del mecanismo de
-     * error de Spring, que aquí está medido como mudo (D-F8.6-ii-a, ver
-     * {@link FalloGeneracionDTO}). Un {@code ResponseEntity} es lo único que garantiza que
-     * la causa llegue por la red. D-F8.6-ii-a sigue viva para el resto de
-     * {@code ResponseStatusException} del proyecto, incluidos el 400 de esta misma
-     * generación y los 404 de este controlador: su motivo no viaja.
+     * {@code ResponseStatusException}: aquí el cuerpo lleva campos propios ({@code causa},
+     * {@code estado}, {@code segundos}, ver {@link FalloGeneracionDTO}) que el JSON de error de
+     * Spring no tiene, y un {@code ResponseEntity} es lo que los hace viajar. El motivo de las
+     * {@code ResponseStatusException} del proyecto —el 400 de esta misma generación y los 404 de
+     * este controlador— SÍ llega al cliente, en la clave {@code message}, desde que S167 saldó
+     * D-F8.6-ii-a con {@code spring.web.error.include-message=always} (lo mide
+     * {@code MensajeDeErrorHttpTest}).
      */
     private ResponseEntity<Object> respuestaDeFallo(HorarioInfactibleException e) {
         MapeoFalloSolver.RespuestaFallo fallo = MapeoFalloSolver.mapear(e.estado());

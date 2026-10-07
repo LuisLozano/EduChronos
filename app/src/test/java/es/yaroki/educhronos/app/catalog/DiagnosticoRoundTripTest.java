@@ -18,9 +18,12 @@ import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.HorarioController;
+import es.yaroki.educhronos.solver.cpsat.CeldaRef;
+import es.yaroki.educhronos.solver.cpsat.ReglaDura;
 import es.yaroki.educhronos.solver.cpsat.ResultadoOptimizacion;
 import es.yaroki.educhronos.solver.cpsat.SolverHorario;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
+import es.yaroki.educhronos.solver.domain.ActividadInstancia;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Tramo;
@@ -136,10 +139,16 @@ class DiagnosticoRoundTripTest {
         assertThat(recon.aulasElegidas()).isEqualTo(solucionOrig.aulasElegidas());
     }
 
-    // ---------------------------------------------------- Test 3: guarda de corrupción
+    // ---------------------------------------- Test 3: aula guardada fuera de las reglas
 
+    /**
+     * Hasta S207 esta sesión abortaba la reconstrucción («corrupción de datos»). Desde S207
+     * (C-deduccion-aulas, D) es un horario generado con otras reglas de aulas: se conserva el aula
+     * GUARDADA como elegida, aunque la plaza sea fija, y el verificador la marca
+     * {@code AULA_FUERA_DE_REGLAS}.
+     */
     @Test
-    void aSolucionHorarioAbortaSiElAulaDeUnaPlazaFijaNoCoincideConSuAulaFija() {
+    void aSolucionHorarioConservaElAulaGuardadaDistintaDeLaFija_yElVerificadorLaMarca() {
         // Catálogo con una plaza de aula FIJA (A1) y un aula distinta (A2).
         Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
         GrupoAdministrativo g =
@@ -171,21 +180,28 @@ class DiagnosticoRoundTripTest {
                 .getPlazas().stream()
                 .filter(p -> p.getCodigo().equals("MAT-1ESO-P1")).findFirst().orElseThrow();
 
-        // Sesion CORRUPTA: aula A2, que NO es la aulaFija (A1) de la plaza. Se inyecta
-        // saltándose la vía normal (el solver nunca produciría esto).
+        // Sesión en A2, que NO es la aulaFija (A1) de la plaza: guardada con otras reglas.
         HorarioGenerado horario = horarioRepository.save(new HorarioGenerado(
-                "corrupto", Instant.now(), "OPTIMAL", 0.0, 0.0));
-        Sesion corrupta = sesionRepository.save(new Sesion(horario, plazaJpa, 1, l1, a2));
+                "otras reglas", Instant.now(), "OPTIMAL", 0.0, 0.0));
+        Sesion enA2 = sesionRepository.save(new Sesion(horario, plazaJpa, 1, l1, a2));
         entityManager.flush();
 
         ProblemaHorario problema = service.cargarProblema();
         Map<Tramo, TramoSemanal> idxTramo =
                 SolucionMapper.indiceTramos(problema, tramoRepository.findAll());
 
-        assertThatThrownBy(() ->
-                SolucionMapper.aSolucionHorario(problema, List.of(corrupta), idxTramo))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("no coincide con su aulaFija");
+        SolucionHorario recon = SolucionMapper.aSolucionHorario(problema, List.of(enA2), idxTramo);
+
+        es.yaroki.educhronos.solver.domain.Plaza plazaFija = plazaDominio(problema, "MAT-1ESO-P1");
+        ActividadInstancia inst = new ActividadInstancia(problema.actividades().get(0), 1);
+        assertThat(recon.aulaElegida(inst, plazaFija))
+                .map(es.yaroki.educhronos.solver.domain.Aula::codigo).contains("A2");
+        assertThat(new VerificadorSolucion().verificar(problema, recon).violaciones())
+                .singleElement().satisfies(v -> {
+                    assertThat(v.regla()).isEqualTo(ReglaDura.AULA_FUERA_DE_REGLAS);
+                    assertThat(v.recursoCodigo()).isEqualTo("A2");
+                    assertThat(v.celdas()).containsExactly(new CeldaRef("MAT-1ESO", 1, "MAT-1ESO-P1"));
+                });
     }
 
     /**

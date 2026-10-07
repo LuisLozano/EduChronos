@@ -14,6 +14,7 @@ import es.yaroki.educhronos.app.web.dto.IntercambioRealizadoDTO;
 import es.yaroki.educhronos.app.web.dto.MoverInstanciaRequest;
 import es.yaroki.educhronos.app.web.dto.ReferenciaInstancia;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
+import es.yaroki.educhronos.solver.cpsat.ReglaDura;
 import es.yaroki.educhronos.solver.cpsat.ResultadoVerificacion;
 import es.yaroki.educhronos.solver.cpsat.VerificadorSolucion;
 import es.yaroki.educhronos.solver.cpsat.Violacion;
@@ -23,10 +24,12 @@ import es.yaroki.educhronos.solver.domain.SolucionHorario;
 import es.yaroki.educhronos.solver.domain.Tramo;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -426,18 +429,36 @@ public class MovimientoInstanciaService {
     private static List<Violacion> soloNuevas(List<Violacion> despues, List<Violacion> antes) {
         Map<Violacion, Integer> disponibles = new HashMap<>();
         for (Violacion v : antes) {
-            disponibles.merge(v, 1, Integer::sum);
+            disponibles.merge(sinTramoSiNoDependeDeEl(v), 1, Integer::sum);
         }
         List<Violacion> nuevas = new ArrayList<>();
         for (Violacion v : despues) {
-            Integer quedan = disponibles.get(v);
+            Violacion clave = sinTramoSiNoDependeDeEl(v);
+            Integer quedan = disponibles.get(clave);
             if (quedan != null && quedan > 0) {
-                disponibles.put(v, quedan - 1);
+                disponibles.put(clave, quedan - 1);
             } else {
                 nuevas.add(v);
             }
         }
         return nuevas;
+    }
+
+    /** Reglas de aula de S207 que dependen de (plaza, aula) y no del tramo, aunque lo lleven. */
+    private static final Set<ReglaDura> REGLAS_SIN_TRAMO =
+            EnumSet.of(ReglaDura.CAPACIDAD_AULA, ReglaDura.AULA_FUERA_DE_REGLAS);
+
+    /**
+     * Clave de comparación del veredicto (S207, C-deduccion-aulas, D). {@code CAPACIDAD_AULA} y
+     * {@code AULA_FUERA_DE_REGLAS} llevan el tramo de inicio como información, pero no dependen
+     * de él: mover la sesión no cambia ni su aula ni sus alumnos. Comparadas con el tramo, la
+     * violación preexistente de la instancia movida saldría «nueva» en el tramo destino y
+     * bloquearía todo movimiento de esa sesión. Se comparan sin él; las demás, tal cual.
+     */
+    private static Violacion sinTramoSiNoDependeDeEl(Violacion v) {
+        return REGLAS_SIN_TRAMO.contains(v.regla())
+                ? new Violacion(v.regla(), v.recursoCodigo(), null, v.celdas(), v.descripcion())
+                : v;
     }
 
     /**
