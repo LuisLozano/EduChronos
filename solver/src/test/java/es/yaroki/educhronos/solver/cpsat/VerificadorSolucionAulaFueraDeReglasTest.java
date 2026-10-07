@@ -127,12 +127,33 @@ class VerificadorSolucionAulaFueraDeReglasTest {
         assertThat(fuera(problema, en(problema, X))).isEmpty();
     }
 
+    /** Plaza sin aula en el problema y sin aula en la solución (FUNCION, REUNION): nunca viola. */
     @Test
-    void plazaSinAulaEnElProblema_nuncaViola() {
+    void plazaSinAulaEnElProblemaNiEnLaSolucion_nuncaViola() {
         ProblemaHorario problema = problema(sinAula());
 
-        assertThat(fuera(problema, en(problema, null))).as("sin aula en la solución").isEmpty();
-        assertThat(fuera(problema, en(problema, X))).as("con un aula en la solución").isEmpty();
+        assertThat(fuera(problema, en(problema, null))).isEmpty();
+    }
+
+    /**
+     * S207 T2b: una plaza que el problema deja sin ningún aula —una clase cuyas aulas posibles
+     * desaparecieron tras generar— y que en la solución SÍ trae un aula viola: cualquier aula
+     * está fuera de un dominio vacío. Sustituye a la mitad «con un aula en la solución» del caso
+     * de T1, que decía lo contrario.
+     */
+    @Test
+    void plazaSinAulaEnElProblemaConAulaEnLaSolucion_violacion() {
+        ProblemaHorario problema = problema(sinAula());
+
+        List<Violacion> vs = fuera(problema, en(problema, X));
+
+        assertThat(vs).singleElement().satisfies(v -> {
+            assertThat(v.recursoCodigo()).isEqualTo("X");
+            assertThat(v.tramoCodigo()).isEqualTo("L1");
+            assertThat(v.celdas()).containsExactly(new CeldaRef("ACT", 1, "ACT-P1"));
+            assertThat(v.descripcion()).contains("ACT-P1").contains("X")
+                    .contains("no tiene ninguna aula posible");
+        });
     }
 
     @Test

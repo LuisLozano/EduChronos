@@ -23,7 +23,8 @@ package es.yaroki.educhronos.solver.cpsat;
  *   <li>{@code CAPACIDAD_AULA} — la suma de los alumnos de los subgrupos de una plaza supera
  *       la capacidad de su aula (S207). Por plaza, como {@code SOLAPE_AULA}.</li>
  *   <li>{@code AULA_FUERA_DE_REGLAS} — el aula de una plaza en la solución no es su aula fija
- *       ni una de sus candidatas (S207): un horario guardado con otras reglas. Por plaza.</li>
+ *       ni una de sus candidatas, o la plaza no tiene ningún aula en el problema (S207): un
+ *       horario guardado con otras reglas. Por plaza.</li>
  * </ul>
  */
 public enum ReglaDura {

@@ -1,6 +1,9 @@
 package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -104,6 +107,26 @@ class HorarioConAulaFueraDeReglasTest {
                 .andExpect(jsonPath("$.violaciones[0].celdas[0].plazaCodigo").value("MAT-P1"));
     }
 
+    /**
+     * S207 T2b: el único aula posible de MAT (A-R, la de su grupo) se marca «No se usa» con MAT ya
+     * colocada en ella. En el problema MAT queda sin ningún aula, como una reunión, pero su sesión
+     * guardada sigue en A-R: el diagnóstico la marca igualmente.
+     */
+    @Test
+    void diagnostico_unicaAulaPosibleMarcadaNoSeUsa_200ConAulaFueraDeReglasEnEsaPlaza() throws Exception {
+        poblar();
+        aulaRepository.findByCodigo("A-R").orElseThrow().setEnUso(false);
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/horarios/" + horarioId + "/diagnostico"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.violaciones.length()").value(1))
+                .andExpect(jsonPath("$.violaciones[0].regla").value("AULA_FUERA_DE_REGLAS"))
+                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("A-R"))
+                .andExpect(jsonPath("$.violaciones[0].celdas[0].plazaCodigo").value("MAT-P1"));
+    }
+
     /** La rama de candidatas: LEN se guardó en una candidata que ya no lo es. */
     @Test
     void diagnostico_candidatasCambiadas_200ConLaViolacionEnEsaPlaza() throws Exception {
@@ -152,7 +175,9 @@ class HorarioConAulaFueraDeReglasTest {
     /**
      * Capacidad que cambia después de guardar: el aula de LEN pasa a tener 5 plazas y su subgrupo
      * 10 alumnos. El diagnóstico marca {@code CAPACIDAD_AULA}, que lleva el tramo pero no depende
-     * de él: mover LEN a un tramo libre se acepta. (Mata el mutante D-4 de S207 T2.)
+     * de él: mover LEN a un tramo libre se acepta. (Mata el mutante D-4 de S207 T2.) Desde T2b
+     * marca además {@code AULA_FUERA_DE_REGLAS}: sin sitio en su única aula, LEN se queda sin
+     * aulas posibles y la sesión guardada sigue en A-LEN.
      */
     @Test
     void mover_conUnaCapacidadAulaPreexistente_200() throws Exception {
@@ -165,9 +190,10 @@ class HorarioConAulaFueraDeReglasTest {
 
         mockMvc.perform(get("/api/horarios/" + horarioId + "/diagnostico"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.violaciones.length()").value(1))
-                .andExpect(jsonPath("$.violaciones[0].regla").value("CAPACIDAD_AULA"))
-                .andExpect(jsonPath("$.violaciones[0].recursoCodigo").value("A-LEN"));
+                .andExpect(jsonPath("$.violaciones.length()").value(2))
+                .andExpect(jsonPath("$.violaciones[*].regla",
+                        containsInAnyOrder("CAPACIDAD_AULA", "AULA_FUERA_DE_REGLAS")))
+                .andExpect(jsonPath("$.violaciones[*].recursoCodigo", everyItem(is("A-LEN"))));
 
         mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
                         .contentType(MediaType.APPLICATION_JSON)

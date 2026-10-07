@@ -831,8 +831,10 @@ public final class VerificadorSolucion {
      *
      * <p>El solver no puede producirla: solo elige entre las candidatas. Aparece al leer un
      * horario guardado con unas reglas de aulas que después cambiaron, y existe para nombrarlo
-     * en vez de abortar. Una plaza sin aula en el problema (reunión, función) no la viola nunca,
-     * tenga o no un aula en la solución. Una instancia sin colocar se salta: ya la reporta
+     * en vez de abortar. Una plaza sin aula en el problema la viola si la solución le trae un
+     * aula (S207 T2b: una clase que se quedó sin aulas posibles tras generar; cualquier aula
+     * está fuera de un dominio vacío); sin aula en el problema ni en la solución (reunión,
+     * función) no la viola nunca. Una instancia sin colocar se salta: ya la reporta
      * {@link #verificarTodasColocadas}.
      */
     private void verificarAulaDentroDeReglas(List<ActividadInstancia> esperadas,
@@ -846,20 +848,22 @@ public final class VerificadorSolucion {
             for (Plaza plaza : inst.actividad().plazas()) {
                 Set<Aula> permitidas = new HashSet<>(plaza.aulasCandidatas());
                 plaza.aulaFija().ifPresent(permitidas::add);
-                if (permitidas.isEmpty()) {
-                    continue; // plaza sin aula en el problema
-                }
                 Optional<Aula> aula = solucion.aulaElegida(inst, plaza);
-                if (aula.isPresent() && !permitidas.contains(aula.get())) {
-                    List<String> codigos = permitidas.stream().map(Aula::codigo).sorted().toList();
-                    violaciones.add(new Violacion(ReglaDura.AULA_FUERA_DE_REGLAS,
-                            aula.get().codigo(), inicio.get().codigo(),
-                            List.of(new CeldaRef(inst.actividad().codigo(), inst.indice(),
-                                    plaza.codigo())),
-                            "La plaza " + plaza.codigo() + " (" + etiqueta(inst) + ") está en el aula "
-                                    + aula.get().codigo() + ", que no es ninguna de sus aulas "
-                                    + codigos));
+                if (aula.isEmpty() || permitidas.contains(aula.get())) {
+                    continue; // sin aula en la solución, o en una de las suyas
                 }
+                // Fuera de un dominio vacío está cualquier aula (S207 T2b): una plaza que el
+                // problema deja sin aula y que la solución trae en una viola igual.
+                String cuales = permitidas.isEmpty()
+                        ? ", y no tiene ninguna aula posible"
+                        : ", que no es ninguna de sus aulas "
+                                + permitidas.stream().map(Aula::codigo).sorted().toList();
+                violaciones.add(new Violacion(ReglaDura.AULA_FUERA_DE_REGLAS,
+                        aula.get().codigo(), inicio.get().codigo(),
+                        List.of(new CeldaRef(inst.actividad().codigo(), inst.indice(),
+                                plaza.codigo())),
+                        "La plaza " + plaza.codigo() + " (" + etiqueta(inst) + ") está en el aula "
+                                + aula.get().codigo() + cuales));
             }
         }
     }
