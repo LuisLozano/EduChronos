@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-10-06
-- Commit: `074e940`
+- Fecha: 2026-10-07
+- Commit: `03d08f8`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -90,8 +90,15 @@ Componentes:
 - `List<RestriccionHoraria> restriccionesHorarias`
 - `List<SesionBloqueada> bloqueos`
 - `List<ProfesorTutoria> tutorias`
+- `Map<String, Integer> capacidadesDeAula`
+- `Map<String, Integer> alumnosDeSubgrupo`
+
+Constructores:
+- `public ProblemaHorario(List<Tramo> tramos, List<Aula> aulas, List<Asignatura> asignaturas, List<Profesor> profesores, List<GrupoAdministrativo> grupos, List<Subgrupo> subgrupos, List<Actividad> actividades, List<RestriccionHoraria> restriccionesHorarias, List<SesionBloqueada> bloqueos, List<ProfesorTutoria> tutorias)`
 
 Métodos:
+- `public Optional<Integer> capacidadDe(Aula aula)`
+- `public Optional<Integer> alumnosDe(Subgrupo subgrupo)`
 - `public int indiceDeTramo(Tramo tramo)`
 
 Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
@@ -286,7 +293,7 @@ Consume: (ninguno)
 
 ### `ReglaDura` — public enum
 Paquete: `es.yaroki.educhronos.solver.cpsat`
-Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`, `TUTORIA_SIN_TUTOR`, `INDISPONIBILIDAD_PROFESOR`
+Constantes: `INSTANCIA_SIN_COLOCAR`, `BLOQUE_IMPOSIBLE`, `SOLAPE_PROFESOR`, `SOLAPE_AULA`, `SOLAPE_SUBGRUPO`, `SOLAPE_GRUPO`, `DISTRIBUCION_MISMO_DIA`, `TUTORIA_SIN_TUTOR`, `INDISPONIBILIDAD_PROFESOR`, `CAPACIDAD_AULA`, `AULA_FUERA_DE_REGLAS`
 
 Consume: (ninguno)
 
@@ -665,6 +672,16 @@ Métodos:
 
 Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
 
+### `SolverHorarioAulasDistintasEnSesionTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void dosPlazasConLasMismasDosCandidatasRecibenAulasDistintas()`
+- `void dosPlazasConLaMismaCandidataUnicaSonInfactibles()`
+- `void fijaYCandidatasQueLaIncluyen_laVariableRecibeLaOtra()`
+- `void dosPlazasConLaMismaAulaFijaSonInfactibles()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
 ### `SolverHorarioBloqueD13Test` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -918,6 +935,33 @@ Métodos:
 
 Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
+### `VerificadorSolucionAulaFueraDeReglasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void fijaXYSolucionEnY_unaViolacionConAulaTramoYCelda()`
+- `void candidatasXYYSolucionEnZ_violacion()`
+- `void fijaXYSolucionEnX_sinViolacion_registradaONo()`
+- `void candidatasXYYSolucionEnY_sinViolacion()`
+- `void plazaSinAulaEnElProblema_nuncaViola()`
+- `void instanciaSinColocar_noDuplicaElAvisoDeSinColocar()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
+### `VerificadorSolucionCapacidadAulaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void doceMasDiezEnCapacidadVeinte_unaViolacionConAulaTramoYCelda()`
+- `void doceMasOchoEnCapacidadVeinte_igualALaCapacidadCabe()`
+- `void capacidadDesconocida_sinViolacionAunqueHayaAlumnos()`
+- `void alumnosDesconocidosCuentanCero_doceMasNadaEnOnce_violacion()`
+- `void alumnosDesconocidosCuentanCero_diezMasNadaEnOnce_sinViolacion()`
+- `void aulaElegidaEntreCandidatas_seJuzgaLaElegida()`
+- `void candidatasEnFronteraYConAlumnosDesconocidos_mismasReglasQueLaFija()`
+- `void dosPlazas_soloLaQueNoCabe_yCadaUnaConSuCelda()`
+- `void instanciaSinColocar_noDuplicaElAvisoDeSinColocar()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
 ### `VerificadorSolucionGrupoTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -969,6 +1013,18 @@ Paquete: `es.yaroki.educhronos.solver.domain`
 Métodos:
 - `void unaPlazaSinAulaFijaNiCandidatasSeConstruye()`
 - `void aulaFijaYCandidatasALaVezSiguenSinPoderse()`
+
+Consume: (ninguno)
+
+### `ProblemaHorarioDatosDeAulaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.domain`
+Métodos:
+- `void elConstructorDeDiezListas_noTraeNingunDato()`
+- `void losDatosSeLeenPorCodigo_yUnCodigoSinDatoEsVacio()`
+- `void losDatosNoCambianLaIdentidadDeAulaNiDeSubgrupo()`
+- `void unaCapacidadDeUnAulaQueNoEstaEnElProblema_seRechaza()`
+- `void unosAlumnosDeUnSubgrupoQueNoEstaEnElProblema_seRechazan()`
+- `void unValorNegativo_seRechaza()`
 
 Consume: (ninguno)
 
