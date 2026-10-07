@@ -42,7 +42,8 @@ import java.util.function.Function;
  * día de las actividades {@code DISTRIBUIDA} (con la misma guarda anti-palomar
  * D12 que el modelo); indisponibilidad DURA del profesorado, por tramo OCUPADO;
  * S8 (una actividad {@code requiereTutor} la imparte un TUTOR_PRINCIPAL de un
- * grupo que cubre); y la capacidad del aula de cada plaza (S207). S8 es la única
+ * grupo que cubre); la capacidad del aula de cada plaza y que esa aula sea su fija o
+ * una de sus candidatas (S207). S8 es la única
  * comprobación que NO mira la {@link SolucionHorario}: es propiedad del catálogo, no
  * del horario.
  */
@@ -59,6 +60,7 @@ public final class VerificadorSolucion {
         verificarDistribucion(problema, esperadas, solucion, violaciones);
         verificarTutorias(problema, violaciones); // S8: propiedad del catálogo, no usa la solución
         verificarCapacidadAula(problema, esperadas, solucion, violaciones); // S207, C3
+        verificarAulaDentroDeReglas(esperadas, solucion, violaciones);       // S207, C4
 
         return new ResultadoVerificacion(violaciones);
     }
@@ -813,6 +815,48 @@ public final class VerificadorSolucion {
                             "Aula " + aula.get().codigo() + " con capacidad " + capacidad.get()
                                     + " para la plaza " + plaza.codigo() + " (" + etiqueta(inst)
                                     + "), que reúne " + alumnos + " alumnos"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Aula fuera de las reglas ({@link ReglaDura#AULA_FUERA_DE_REGLAS}, S207, C-deduccion-aulas,
+     * C4). Por cada instancia colocada y cada plaza que tiene aula en el problema, si el aula de
+     * la solución no es su aula fija ni una de sus candidatas, UNA violación con
+     * {@code recursoCodigo = aula de la solución}, {@code tramoCodigo = tramo de inicio} y la
+     * celda de la PLAZA.
+     *
+     * <p>El solver no puede producirla: solo elige entre las candidatas. Aparece al leer un
+     * horario guardado con unas reglas de aulas que después cambiaron, y existe para nombrarlo
+     * en vez de abortar. Una plaza sin aula en el problema (reunión, función) no la viola nunca,
+     * tenga o no un aula en la solución. Una instancia sin colocar se salta: ya la reporta
+     * {@link #verificarTodasColocadas}.
+     */
+    private void verificarAulaDentroDeReglas(List<ActividadInstancia> esperadas,
+                                             SolucionHorario solucion,
+                                             List<Violacion> violaciones) {
+        for (ActividadInstancia inst : esperadas) {
+            Optional<Tramo> inicio = solucion.tramoDeInstancia(inst);
+            if (inicio.isEmpty()) {
+                continue;
+            }
+            for (Plaza plaza : inst.actividad().plazas()) {
+                Set<Aula> permitidas = new HashSet<>(plaza.aulasCandidatas());
+                plaza.aulaFija().ifPresent(permitidas::add);
+                if (permitidas.isEmpty()) {
+                    continue; // plaza sin aula en el problema
+                }
+                Optional<Aula> aula = solucion.aulaElegida(inst, plaza);
+                if (aula.isPresent() && !permitidas.contains(aula.get())) {
+                    List<String> codigos = permitidas.stream().map(Aula::codigo).sorted().toList();
+                    violaciones.add(new Violacion(ReglaDura.AULA_FUERA_DE_REGLAS,
+                            aula.get().codigo(), inicio.get().codigo(),
+                            List.of(new CeldaRef(inst.actividad().codigo(), inst.indice(),
+                                    plaza.codigo())),
+                            "La plaza " + plaza.codigo() + " (" + etiqueta(inst) + ") está en el aula "
+                                    + aula.get().codigo() + ", que no es ninguna de sus aulas "
+                                    + codigos));
                 }
             }
         }

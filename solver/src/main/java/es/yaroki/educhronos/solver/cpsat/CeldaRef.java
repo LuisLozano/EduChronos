@@ -18,7 +18,8 @@ import java.util.Objects;
  *
  * <p>{@code plazaCodigo} es NULLABLE. No-null SOLO en las reglas de aula, que se
  * cuentan por plaza: {@link ReglaDura#SOLAPE_AULA} (D15: dos plazas de la misma
- * instancia con la misma aula son colisión) y {@link ReglaDura#CAPACIDAD_AULA} (S207).
+ * instancia con la misma aula son colisión), {@link ReglaDura#CAPACIDAD_AULA} y
+ * {@link ReglaDura#AULA_FUERA_DE_REGLAS} (S207).
  * Null en todas las demás reglas, que se atribuyen a nivel de instancia.
  */
 public record CeldaRef(String actividadCodigo, int indice, String plazaCodigo) {

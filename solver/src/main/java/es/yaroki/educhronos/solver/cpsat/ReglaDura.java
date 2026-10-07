@@ -22,6 +22,8 @@ package es.yaroki.educhronos.solver.cpsat;
  *       Es propiedad del CATÁLOGO, no de la solución: no depende del tramo.</li>
  *   <li>{@code CAPACIDAD_AULA} — la suma de los alumnos de los subgrupos de una plaza supera
  *       la capacidad de su aula (S207). Por plaza, como {@code SOLAPE_AULA}.</li>
+ *   <li>{@code AULA_FUERA_DE_REGLAS} — el aula de una plaza en la solución no es su aula fija
+ *       ni una de sus candidatas (S207): un horario guardado con otras reglas. Por plaza.</li>
  * </ul>
  */
 public enum ReglaDura {
@@ -34,5 +36,6 @@ public enum ReglaDura {
     DISTRIBUCION_MISMO_DIA,
     TUTORIA_SIN_TUTOR,
     INDISPONIBILIDAD_PROFESOR,
-    CAPACIDAD_AULA
+    CAPACIDAD_AULA,
+    AULA_FUERA_DE_REGLAS
 }
