@@ -146,10 +146,12 @@ class GuardarHorarioServiceTest {
         Profesor prof = profesorRepository.save(new Profesor("MAT8", "María Martínez"));
         Asignatura mat = asignaturaRepository.save(new Asignatura("Mat", "Matemáticas"));
         Aula a5 = aulaRepository.save(new Aula("A5", TipoAula.ORDINARIA, null, null, null, null));
+        Aula a6 = aulaRepository.save(new Aula("A6", TipoAula.ORDINARIA, null, null, null, null));
         tramoRepository.save(
                 new TramoSemanal(Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
 
-        // Plaza con aula VARIABLE (aulasCandidatas, sin aula fija).
+        // Plaza con aula VARIABLE (aulasCandidatas, sin aula fija). Dos candidatas: desde S207 una
+        // sola candidata de una CLASE llega al problema como aula fija (C-deduccion-aulas, A4).
         Actividad actividad = new Actividad();
         actividad.setCodigo("NEG");
         actividad.setAsignatura(mat);
@@ -161,7 +163,7 @@ class GuardarHorarioServiceTest {
         plaza.setActividad(actividad);
         plaza.setAsignatura(mat);
         plaza.setProfesores(Set.of(prof));
-        plaza.setAulasCandidatas(Set.of(a5)); // variable, no fija
+        plaza.setAulasCandidatas(Set.of(a5, a6)); // variable, no fija
         plaza.setSubgrupos(Set.of(sg));
         actividad.getPlazas().add(plaza);
         actividadRepository.save(actividad);

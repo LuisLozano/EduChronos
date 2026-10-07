@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.mapper;
 
+import es.yaroki.educhronos.app.catalog.AsignaturaAula;
 import es.yaroki.educhronos.app.catalog.AulaBloqueada;
 import es.yaroki.educhronos.app.catalog.Dia;
 import es.yaroki.educhronos.app.catalog.PatronTemporal;
@@ -19,6 +20,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,9 +48,11 @@ import java.util.stream.Collectors;
  *       se lanza excepción explícita, no se degrada a ORDINARIO ni se filtra.
  *   <li>Los {@code TramoSemanal} de recreo ({@code esLectivo=false}) se excluyen:
  *       {@code domain.Tramo} no tiene ese concepto y numera 1..6 sin hueco.
- *   <li>Campos de {@code Aula} (tipo/capacidad/edificio/planta/sector),
+ *   <li>Campos de {@code Aula} (tipo/edificio/planta/sector),
  *       {@code Nivel} y {@code Tramo.siguienteInmediato} no se mapean: el dominio
- *       del solver no los consume todavía (deuda consciente).
+ *       del solver no los consume todavía (deuda consciente). La capacidad del aula y
+ *       los alumnos del subgrupo viajan desde S207 en el {@code ProblemaHorario}, por
+ *       código, no en {@code domain.Aula} ni en {@code domain.Subgrupo}.
  * </ul>
  */
 public final class CatalogoMapper {
@@ -82,6 +86,9 @@ public final class CatalogoMapper {
      * {@link BloqueoMapper#aBloqueos}, que reutiliza estos mismos índices por código
      * y el puente {@code TramoSemanal → Tramo} (D30, no se duplica). Deja de ser el
      * placeholder de {@code List.of()} de los bloques previos.
+     *
+     * <p>Sin aulas de asignatura: equivale a {@link #aProblemaHorario(List, List, List, List, List,
+     * List, List, List, List, List, List, List)} con la lista vacía.
      */
     public static ProblemaHorario aProblemaHorario(
             List<TramoSemanal> tramos,
@@ -95,6 +102,30 @@ public final class CatalogoMapper {
             List<SesionBloqueada> pinesTramo,
             List<AulaBloqueada> pinesAula,
             List<es.yaroki.educhronos.app.catalog.ProfesorTutoria> tutorias) {
+        return aProblemaHorario(tramos, aulas, asignaturas, profesores, grupos, subgrupos,
+                actividades, restricciones, pinesTramo, pinesAula, tutorias, List.of());
+    }
+
+    /**
+     * Como el de arriba, con las aulas de cada asignatura (S207, C-deduccion-aulas). Las plazas de
+     * CLASE reciben las aulas posibles de {@link DeduccionAulas} (una → aula fija, varias →
+     * candidatas, ninguna → sin aula, que la prevalidación convierte en un ERROR); las demás, lo
+     * escrito, como siempre. El problema lleva además la capacidad de cada aula y los alumnos de
+     * cada subgrupo que los tengan, por código.
+     */
+    public static ProblemaHorario aProblemaHorario(
+            List<TramoSemanal> tramos,
+            List<es.yaroki.educhronos.app.catalog.Aula> aulas,
+            List<es.yaroki.educhronos.app.catalog.Asignatura> asignaturas,
+            List<es.yaroki.educhronos.app.catalog.Profesor> profesores,
+            List<es.yaroki.educhronos.app.catalog.GrupoAdministrativo> grupos,
+            List<es.yaroki.educhronos.app.catalog.Subgrupo> subgrupos,
+            List<es.yaroki.educhronos.app.catalog.Actividad> actividades,
+            List<ProfesorRestriccionHoraria> restricciones,
+            List<SesionBloqueada> pinesTramo,
+            List<AulaBloqueada> pinesAula,
+            List<es.yaroki.educhronos.app.catalog.ProfesorTutoria> tutorias,
+            List<AsignaturaAula> aulasDeAsignatura) {
 
         Objects.requireNonNull(tramos,       "tramos no puede ser null");
         Objects.requireNonNull(aulas,        "aulas no puede ser null");
@@ -107,6 +138,9 @@ public final class CatalogoMapper {
         Objects.requireNonNull(pinesTramo,   "pinesTramo no puede ser null");
         Objects.requireNonNull(pinesAula,    "pinesAula no puede ser null");
         Objects.requireNonNull(tutorias,     "tutorias no puede ser null");
+        Objects.requireNonNull(aulasDeAsignatura, "aulasDeAsignatura no puede ser null");
+        Map<Long, List<AsignaturaAula>> aulasPorAsignatura =
+                DeduccionAulas.indicePorAsignatura(aulasDeAsignatura);
 
         TramosMapeados tramosMapeados = aTramosConIndice(tramos);
         List<Tramo> tramosDom = tramosMapeados.lista();
@@ -139,7 +173,8 @@ public final class CatalogoMapper {
         List<es.yaroki.educhronos.solver.domain.Actividad> actividadesDom =
                 actividades.stream()
                         .map(act -> aActividad(act, asignaturasPorCodigo,
-                                profesoresPorCodigo, aulasPorCodigo, subgruposPorCodigo))
+                                profesoresPorCodigo, aulasPorCodigo, subgruposPorCodigo,
+                                aulasPorAsignatura))
                         .toList();
 
         // Índices por código para los bloqueos: la actividad, y sus plazas aplanadas.
@@ -168,10 +203,24 @@ public final class CatalogoMapper {
                 .map(t -> aProfesorTutoria(t, profesoresPorCodigo, gruposPorCodigo))
                 .toList();
 
+        // Capacidad y alumnos por código (S207, C2): solo los que no son nulos.
+        Map<String, Integer> capacidades = new LinkedHashMap<>();
+        for (es.yaroki.educhronos.app.catalog.Aula aula : aulas) {
+            if (aula.getCapacidad() != null) {
+                capacidades.put(aula.getCodigo(), aula.getCapacidad());
+            }
+        }
+        Map<String, Integer> alumnos = new LinkedHashMap<>();
+        for (es.yaroki.educhronos.app.catalog.Subgrupo subgrupo : subgrupos) {
+            if (subgrupo.getAlumnos() != null) {
+                alumnos.put(subgrupo.getCodigo(), subgrupo.getAlumnos());
+            }
+        }
+
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
                 gruposDom, subgruposDom, actividadesDom, restriccionesDom,
-                bloqueosDom, tutoriasDom);
+                bloqueosDom, tutoriasDom, capacidades, alumnos);
     }
 
     /**
@@ -328,6 +377,18 @@ public final class CatalogoMapper {
             Map<String, Profesor> profesoresPorCodigo,
             Map<String, Aula> aulasPorCodigo,
             Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo) {
+        return aActividad(entidad, asignaturasPorCodigo, profesoresPorCodigo, aulasPorCodigo,
+                subgruposPorCodigo, Map.of());
+    }
+
+    /** Como el de arriba, con las aulas de cada asignatura por id para la deducción (S207). */
+    public static es.yaroki.educhronos.solver.domain.Actividad aActividad(
+            es.yaroki.educhronos.app.catalog.Actividad entidad,
+            Map<String, Asignatura> asignaturasPorCodigo,
+            Map<String, Profesor> profesoresPorCodigo,
+            Map<String, Aula> aulasPorCodigo,
+            Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo,
+            Map<Long, List<AsignaturaAula>> aulasPorAsignatura) {
 
         Objects.requireNonNull(entidad, "actividad no puede ser null");
 
@@ -339,8 +400,8 @@ public final class CatalogoMapper {
         List<es.yaroki.educhronos.solver.domain.Plaza> plazas =
                 new ArrayList<>(entidad.getPlazas().size());
         for (es.yaroki.educhronos.app.catalog.Plaza p : entidad.getPlazas()) {
-            plazas.add(aPlaza(p, asignaturasPorCodigo, profesoresPorCodigo,
-                    aulasPorCodigo, subgruposPorCodigo));
+            plazas.add(aPlaza(entidad, p, asignaturasPorCodigo, profesoresPorCodigo,
+                    aulasPorCodigo, subgruposPorCodigo, aulasPorAsignatura));
         }
 
         return new es.yaroki.educhronos.solver.domain.Actividad(
@@ -359,13 +420,18 @@ public final class CatalogoMapper {
      * aula_fija / aulasCandidatas lo hace cumplir el record del dominio; aquí
      * solo se traduce (aula_fija presente → aulaFija con candidatas vacías;
      * ausente → aulasCandidatas resueltas y aulaFija vacía).
+     *
+     * <p>Desde S207, en una plaza de CLASE el aula sale de {@link DeduccionAulas} (A4: una aula →
+     * fija, varias → candidatas, ninguna → sin aula). Las demás plazas, como antes (A5).
      */
     private static es.yaroki.educhronos.solver.domain.Plaza aPlaza(
+            es.yaroki.educhronos.app.catalog.Actividad actividad,
             es.yaroki.educhronos.app.catalog.Plaza entidad,
             Map<String, Asignatura> asignaturasPorCodigo,
             Map<String, Profesor> profesoresPorCodigo,
             Map<String, Aula> aulasPorCodigo,
-            Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo) {
+            Map<String, es.yaroki.educhronos.solver.domain.Subgrupo> subgruposPorCodigo,
+            Map<Long, List<AsignaturaAula>> aulasPorAsignatura) {
 
         Asignatura asignatura = resolver(asignaturasPorCodigo,
                 entidad.getAsignatura().getCodigo(), "asignatura", entidad.getCodigo());
@@ -376,15 +442,30 @@ public final class CatalogoMapper {
                     "profesor", entidad.getCodigo()));
         }
 
-        Optional<Aula> aulaFija = entidad.getAulaFija() == null
-                ? Optional.empty()
-                : Optional.of(resolver(aulasPorCodigo, entidad.getAulaFija().getCodigo(),
-                "aula fija", entidad.getCodigo()));
-
+        Optional<Aula> aulaFija;
         java.util.Set<Aula> aulasCandidatas = new java.util.HashSet<>();
-        for (es.yaroki.educhronos.app.catalog.Aula a : entidad.getAulasCandidatas()) {
-            aulasCandidatas.add(resolver(aulasPorCodigo, a.getCodigo(),
-                    "aula candidata", entidad.getCodigo()));
+        if (DeduccionAulas.aplica(actividad)) {
+            List<es.yaroki.educhronos.app.catalog.Aula> posibles =
+                    DeduccionAulas.dominio(actividad, entidad, aulasPorAsignatura).aulas();
+            aulaFija = posibles.size() == 1
+                    ? Optional.of(resolver(aulasPorCodigo, posibles.get(0).getCodigo(),
+                            "aula fija", entidad.getCodigo()))
+                    : Optional.empty();
+            if (posibles.size() > 1) {
+                for (es.yaroki.educhronos.app.catalog.Aula a : posibles) {
+                    aulasCandidatas.add(resolver(aulasPorCodigo, a.getCodigo(),
+                            "aula candidata", entidad.getCodigo()));
+                }
+            }
+        } else {
+            aulaFija = entidad.getAulaFija() == null
+                    ? Optional.empty()
+                    : Optional.of(resolver(aulasPorCodigo, entidad.getAulaFija().getCodigo(),
+                    "aula fija", entidad.getCodigo()));
+            for (es.yaroki.educhronos.app.catalog.Aula a : entidad.getAulasCandidatas()) {
+                aulasCandidatas.add(resolver(aulasPorCodigo, a.getCodigo(),
+                        "aula candidata", entidad.getCodigo()));
+            }
         }
 
         java.util.Set<es.yaroki.educhronos.solver.domain.Subgrupo> subgrupos =

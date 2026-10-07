@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
+import es.yaroki.educhronos.app.catalog.AsignaturaAulaRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaBloqueadaRepository;
@@ -96,6 +97,7 @@ public class GeneradorHorarioService {
     private final SesionBloqueadaRepository sesionBloqueadaRepository;
     private final AulaBloqueadaRepository aulaBloqueadaRepository;
     private final ProfesorTutoriaRepository profesorTutoriaRepository;
+    private final AsignaturaAulaRepository asignaturaAulaRepository;
 
     /**
      * La identidad del curso abierto, sólo para los indicadores (S160). Este servicio no la
@@ -121,6 +123,7 @@ public class GeneradorHorarioService {
             SesionBloqueadaRepository sesionBloqueadaRepository,
             AulaBloqueadaRepository aulaBloqueadaRepository,
             ProfesorTutoriaRepository profesorTutoriaRepository,
+            AsignaturaAulaRepository asignaturaAulaRepository,
             EstadoCurso estadoCurso,
             PlatformTransactionManager gestorTransacciones) {
         this.tramoRepository = tramoRepository;
@@ -136,6 +139,7 @@ public class GeneradorHorarioService {
         this.sesionBloqueadaRepository = sesionBloqueadaRepository;
         this.aulaBloqueadaRepository = aulaBloqueadaRepository;
         this.profesorTutoriaRepository = profesorTutoriaRepository;
+        this.asignaturaAulaRepository = asignaturaAulaRepository;
         this.estadoCurso = estadoCurso;
         this.transaccion = new TransactionTemplate(gestorTransacciones);
     }
@@ -173,7 +177,8 @@ public class GeneradorHorarioService {
                 restriccionRepository.findAll(),
                 sesionBloqueadaRepository.findAll(),
                 aulaBloqueadaRepository.findAll(),
-                profesorTutoriaRepository.findAll());
+                profesorTutoriaRepository.findAll(),
+                asignaturaAulaRepository.findAll());
     }
 
     /**
