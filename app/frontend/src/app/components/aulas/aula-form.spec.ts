@@ -97,7 +97,8 @@ describe('AulaForm', () => {
     montar(null);
     expect(fixture.nativeElement.querySelector('.aula-form__titulo').textContent)
       .toContain('Nueva aula');
-    const inputs = fixture.nativeElement.querySelectorAll('input');
+    // Los campos de texto y número; la casilla «No se usa» (S206) tiene su caso en (12).
+    const inputs = fixture.nativeElement.querySelectorAll('input:not([type=checkbox])');
     expect([...inputs].every((i: HTMLInputElement) => i.value === '')).toBe(true);
   });
 
@@ -201,6 +202,7 @@ describe('AulaForm', () => {
       edificio: null,
       planta: null,
       sector: null,
+      enUso: true,
     });
     req.flush({ id: 7, codigo: 'A12', tipo: 'ORDINARIA' });
   });
@@ -221,5 +223,66 @@ describe('AulaForm', () => {
     (fixture.componentInstance as unknown as Interna).guardar();
     // http.verify() del afterEach es el aserto: cualquier petición lo pondría rojo.
     expect(ref.close).not.toHaveBeenCalled();
+  });
+
+  // ─────────────────────────── S206 T2: «No se usa», el inverso de enUso
+
+  const casilla = (): HTMLInputElement =>
+    fixture.nativeElement.querySelector('.aula-form__no-se-usa') as HTMLInputElement;
+
+  it('(12) en alta la casilla nace desmarcada y el aula viaja en uso', () => {
+    montar(null);
+    expect(casilla().checked).toBe(false);
+    guardarMinimo();
+
+    const req = http.expectOne('/api/aulas');
+    expect(req.request.body.enUso).toBe(true);
+    req.flush({ id: 7 });
+  });
+
+  it('(13) marcar «No se usa» manda enUso:false (el inverso, no el mismo valor)', async () => {
+    montar(null);
+    casilla().click();
+    await fixture.whenStable();
+    guardarMinimo();
+
+    const req = http.expectOne('/api/aulas');
+    expect(req.request.body.enUso).toBe(false);
+    req.flush({ id: 7 });
+  });
+
+  it('(14) al editar un aula fuera de uso, la casilla llega marcada y guardar sin tocarla la reenvía', async () => {
+    // Es el defecto que dejó abierto el T1: en el backend un enUso ausente es true también en
+    // el PUT, así que no reenviarlo pondría el aula otra vez en uso sin que nadie lo pidiera.
+    montar({ ...aulaCompleta, enUso: false });
+    await fixture.whenStable();
+    expect(casilla().checked).toBe(true);
+
+    (fixture.componentInstance as unknown as Interna).guardar();
+
+    const req = http.expectOne('/api/aulas/7');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({
+      codigo: 'A12',
+      tipo: 'INFORMATICA',
+      capacidad: 30,
+      edificio: 'Norte',
+      planta: 1,
+      sector: 'B',
+      enUso: false,
+    });
+    req.flush(aulaCompleta);
+  });
+
+  it('(15) al editar un aula en uso, la casilla llega desmarcada y guardar sin tocarla manda true', async () => {
+    montar({ ...aulaCompleta, enUso: true });
+    await fixture.whenStable();
+    expect(casilla().checked).toBe(false);
+
+    (fixture.componentInstance as unknown as Interna).guardar();
+
+    const req = http.expectOne('/api/aulas/7');
+    expect(req.request.body.enUso).toBe(true);
+    req.flush(aulaCompleta);
   });
 });

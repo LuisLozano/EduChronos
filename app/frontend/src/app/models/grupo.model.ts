@@ -38,6 +38,8 @@ export interface Grupo {
    */
   tipo: string;
   totalDeclarado?: number | null;
+  /** S206. CÓDIGO del aula de referencia, o null si no tiene. Opcional en el tipo como el total. */
+  aulaReferencia?: string | null;
 }
 
 /**
@@ -53,6 +55,8 @@ export interface GrupoRequest {
   tipo: string;
   /** S203. `GrupoForm` lo manda siempre, vacío como null: el PUT es reemplazo total. */
   totalDeclarado?: number | null;
+  /** S206. CÓDIGO del aula o null. `GrupoForm` lo manda siempre: ausente, el PUT lo quitaría. */
+  aulaReferencia?: string | null;
 }
 
 /**

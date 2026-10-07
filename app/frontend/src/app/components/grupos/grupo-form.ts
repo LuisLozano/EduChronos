@@ -4,8 +4,11 @@ import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { GrupoService } from '../../services/grupo.service';
 import { NivelService } from '../../services/nivel.service';
+import { AulaService } from '../../services/aula.service';
 import { Grupo, GrupoRequest } from '../../models/grupo.model';
 import { Nivel } from '../../models/nivel.model';
+import { Aula } from '../../models/aula.model';
+import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
 
 /**
  * Alta y edición de un grupo administrativo en un mismo componente, presentado en
@@ -54,13 +57,14 @@ import { Nivel } from '../../models/nivel.model';
  */
 @Component({
   selector: 'app-grupo-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './grupo-form.html',
   styleUrl: './grupo-form.css',
 })
 export class GrupoForm implements OnInit {
   private readonly service = inject(GrupoService);
   private readonly nivelService = inject(NivelService);
+  private readonly aulaService = inject(AulaService);
   private readonly fb = inject(FormBuilder);
   protected readonly ref = inject<DialogRef<boolean>>(DialogRef);
   private readonly editando = inject<Grupo | null>(DIALOG_DATA);
@@ -72,6 +76,11 @@ export class GrupoForm implements OnInit {
   /** Opciones del desplegable, en el orden en que llegan del backend. */
   protected readonly niveles = signal<Nivel[]>([]);
 
+  /** Opciones del selector de aula (S206): TODAS las aulas, en el orden en que llegan. */
+  protected readonly aulas = signal<Aula[]>([]);
+  /** Accesor del filtro de selectores (S185): el código es a la vez texto y valor. */
+  protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
+
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],
     nivel: ['', Validators.required],
@@ -80,6 +89,13 @@ export class GrupoForm implements OnInit {
   /** Horas semanales declaradas: opcional, ≥ 0. El input vacío da null. */
   protected readonly totalDeclarado = this.fb.control<number | null>(null, Validators.min(0));
 
+  /**
+   * Aula del grupo (S206): el CÓDIGO del aula, o `''` para «— sin aula —», que viaja como null.
+   * Fuera del grupo, como el total. Se envía siempre: en el backend un aula ausente en el PUT
+   * deja el grupo sin aula, así que omitirla al editar otro campo la borraría.
+   */
+  protected readonly aulaReferencia = this.fb.nonNullable.control('');
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
@@ -87,6 +103,7 @@ export class GrupoForm implements OnInit {
         nivel: this.editando.nivel,
       });
       this.totalDeclarado.setValue(this.editando.totalDeclarado ?? null);
+      this.aulaReferencia.setValue(this.editando.aulaReferencia ?? '');
     }
   }
 
@@ -110,6 +127,13 @@ export class GrupoForm implements OnInit {
         this.error.set(this.mensaje(err, 'No se pudieron cargar los niveles'));
       },
     });
+    // Como los niveles: el valor guardado ya está puesto y el select lo reconcilia al pintar.
+    this.aulaService.listar().subscribe({
+      next: (lista) => this.aulas.set(lista),
+      error: (err: HttpErrorResponse) => {
+        this.error.set(this.mensaje(err, 'No se pudieron cargar las aulas'));
+      },
+    });
   }
 
   protected guardar(): void {
@@ -127,6 +151,7 @@ export class GrupoForm implements OnInit {
       ...this.form.getRawValue(),
       tipo: 'ORDINARIO',
       totalDeclarado: this.totalDeclarado.value,
+      aulaReferencia: this.aulaReferencia.value === '' ? null : this.aulaReferencia.value,
     };
 
     const peticion = this.editando

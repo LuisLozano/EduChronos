@@ -180,7 +180,7 @@ describe('SubgrupoForm', () => {
     inst.guardar();
     const req = http.expectOne('/api/subgrupos');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'] });
+    expect(req.request.body).toEqual({ codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], alumnos: null });
     req.flush({ id: 7, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'] });
   });
 
@@ -202,7 +202,7 @@ describe('SubgrupoForm', () => {
     inst.guardar();
     const req = http.expectOne('/api/subgrupos/6');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ codigo: '1ºAB-Agrup', grupos: ['1ºA', '1ºB'] });
+    expect(req.request.body).toEqual({ codigo: '1ºAB-Agrup', grupos: ['1ºA', '1ºB'], alumnos: null });
     req.flush({ id: 6, codigo: '1ºAB-Agrup', grupos: ['1ºA', '1ºB'] });
   });
 
@@ -250,5 +250,98 @@ describe('SubgrupoForm', () => {
       }).form.controls.grupos.value;
       expect(valor).toEqual(['G05']);
     });
+  });
+
+  // ─────────────────────────── S206 T2: alumnos y subgrupos de un PDC
+
+  const campoAlumnos = (): HTMLInputElement =>
+    fixture.nativeElement.querySelector('.subgrupo-form__alumnos') as HTMLInputElement;
+  const campoCodigo = (): HTMLInputElement =>
+    fixture.nativeElement.querySelector('input[formcontrolname="codigo"]') as HTMLInputElement;
+  const multiselect = (): HTMLSelectElement =>
+    fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+
+  function teclearAlumnos(valor: string): void {
+    campoAlumnos().value = valor;
+    campoAlumnos().dispatchEvent(new Event('input'));
+  }
+
+  it('(13) en alta envía los alumnos escritos', () => {
+    montar(null);
+    instancia().form.setValue({ codigo: '1ºA-Completo', grupos: [] });
+    seleccionarEnDom('1ºA');
+    teclearAlumnos('27');
+    instancia().guardar();
+
+    const req = http.expectOne('/api/subgrupos');
+    expect(req.request.body).toEqual({ codigo: '1ºA-Completo', grupos: ['1ºA'], alumnos: 27 });
+    req.flush({ id: 7 });
+  });
+
+  it('(14) al editar un subgrupo con 25 alumnos, llegan precargados y guardar sin tocarlos los reenvía', async () => {
+    // Es el defecto que dejó abierto el T1: en el backend unos alumnos ausentes en el PUT
+    // quedan en null, así que no reenviarlos los borraría al cambiar cualquier otra cosa.
+    montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], alumnos: 25 });
+    await fixture.whenStable();
+    expect(campoAlumnos().value).toBe('25');
+
+    instancia().guardar();
+
+    const req = http.expectOne('/api/subgrupos/6');
+    expect(req.request.body).toEqual({ codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], alumnos: 25 });
+    req.flush({ id: 6 });
+  });
+
+  it('(15) vaciar el campo manda alumnos:null', async () => {
+    montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], alumnos: 25 });
+    await fixture.whenStable();
+    teclearAlumnos('');
+    instancia().guardar();
+
+    const req = http.expectOne('/api/subgrupos/6');
+    expect(req.request.body.alumnos).toBeNull();
+    req.flush({ id: 6 });
+  });
+
+  it('(16) un negativo NO se ataja en cliente: viaja y se presenta el 400 del backend', async () => {
+    montar(null);
+    instancia().form.setValue({ codigo: '1ºA-Completo', grupos: [] });
+    seleccionarEnDom('1ºA');
+    teclearAlumnos('-1');
+    instancia().guardar();
+
+    http.expectOne('/api/subgrupos').flush(
+      { message: 'alumnos no puede ser negativo: -1' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.subgrupo-form__error-servidor').textContent)
+      .toContain('alumnos no puede ser negativo: -1');
+  });
+
+  it('(17) un subgrupo de PDC se abre con código y grupos deshabilitados, y guardar los reenvía tal cual', async () => {
+    montar({ id: 9, codigo: '3ºADi-Completo', grupos: ['1ºB'], alumnos: null, delPdc: true });
+    await fixture.whenStable();
+    expect(campoCodigo().disabled).toBe(true);
+    expect(multiselect().disabled).toBe(true);
+    expect(campoAlumnos().disabled).toBe(false);
+    expect(fixture.nativeElement.querySelector('.subgrupo-form__nota').textContent)
+      .toContain('solo se cambian los alumnos');
+
+    teclearAlumnos('9');
+    instancia().guardar();
+
+    const req = http.expectOne('/api/subgrupos/9');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ codigo: '3ºADi-Completo', grupos: ['1ºB'], alumnos: 9 });
+    req.flush({ id: 9 });
+  });
+
+  it('(18) DISCRIMINANTE: un subgrupo que no es de PDC se abre con todo habilitado y sin nota', async () => {
+    montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], delPdc: false });
+    await fixture.whenStable();
+    expect(campoCodigo().disabled).toBe(false);
+    expect(multiselect().disabled).toBe(false);
+    expect(fixture.nativeElement.querySelector('.subgrupo-form__nota')).toBeNull();
   });
 });

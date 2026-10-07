@@ -69,6 +69,13 @@ export class AulaForm {
     sector: [''],
   });
 
+  /**
+   * «No se usa» (S206): el INVERSO de `enUso`, fuera del grupo como el total de `GrupoForm`.
+   * Se envía siempre: en el backend un `enUso` ausente es `true` también en el PUT, así que
+   * omitirlo al editar volvería a poner en uso un aula que no lo estaba.
+   */
+  protected readonly noSeUsa = this.fb.nonNullable.control(false);
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
@@ -81,6 +88,8 @@ export class AulaForm {
         planta: this.editando.planta,
         sector: this.editando.sector ?? '',
       });
+      // Ausente cuenta como en uso, que es lo que el backend pone por defecto.
+      this.noSeUsa.setValue(this.editando.enUso === false);
     }
   }
 
@@ -126,6 +135,7 @@ export class AulaForm {
       edificio: this.vacioANull(v.edificio),
       planta: v.planta,
       sector: this.vacioANull(v.sector),
+      enUso: !this.noSeUsa.value,
     };
   }
 

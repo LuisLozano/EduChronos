@@ -33,6 +33,25 @@
       }
     </label>
 
+    <div class="grupo-form__campo">
+      <label class="grupo-form__etiqueta" for="grupo-aula">Aula del grupo</label>
+      <app-filtro-opciones
+        #fAulas
+        etiqueta="aulas"
+        [opciones]="aulas()"
+        [texto]="codigoDe"
+        [codigo]="codigoDe"
+        [seleccionados]="[aulaReferencia.value]"
+      />
+      <select id="grupo-aula" [formControl]="aulaReferencia" class="grupo-form__input grupo-form__aula">
+        <!-- Seleccionable: '' no es «aún no has elegido», es «este grupo no tiene aula». -->
+        <option value="">— sin aula —</option>
+        @for (a of fAulas.visibles(); track a.id) {
+          <option [value]="a.codigo">{{ a.codigo }}</option>
+        }
+      </select>
+    </div>
+
     @if (error()) {
       <p class="grupo-form__error-servidor" role="alert">{{ error() }}</p>
     }

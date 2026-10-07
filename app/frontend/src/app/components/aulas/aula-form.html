@@ -45,6 +45,11 @@
       <input type="text" formControlName="sector" class="aula-form__input" />
     </label>
 
+    <label class="aula-form__campo">
+      <input type="checkbox" [formControl]="noSeUsa" class="aula-form__no-se-usa" />
+      <span class="aula-form__etiqueta">No se usa</span>
+    </label>
+
     @if (error()) {
       <p class="aula-form__error-servidor" role="alert">{{ error() }}</p>
     }

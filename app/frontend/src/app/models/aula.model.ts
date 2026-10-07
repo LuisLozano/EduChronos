@@ -12,7 +12,11 @@
 
 /**
  * Espejo de `AulaDTO(Long id, String codigo, String tipo, Integer capacidad,
- * String edificio, Integer planta, String sector)`.
+ * String edificio, Integer planta, String sector, boolean enUso)`.
+ *
+ * <p>`enUso` (S206) es OPCIONAL en el tipo aunque el servidor lo mande siempre, por la razón
+ * que da `Profesor` con sus campos de S203: los specs anteriores construyen aulas sin él.
+ * Ausente se lee como «en uso», que es lo que el backend pone por defecto.
  */
 export interface Aula {
   /** `Long` en el backend; siempre presente en un DTO devuelto por el servidor. */
@@ -24,12 +28,16 @@ export interface Aula {
   edificio: string | null;
   planta: number | null;
   sector: string | null;
+  enUso?: boolean;
 }
 
 /**
  * Espejo de `AulaRequest(String codigo, String tipo, Integer capacidad,
- * String edificio, Integer planta, String sector)`.
+ * String edificio, Integer planta, String sector, Boolean enUso)`.
  * Sin `id`: el id va en la URL (`PUT /{id}`), no en el cuerpo.
+ *
+ * <p>`enUso` (S206): `AulaForm` lo manda siempre. En el backend, ausente o null es `true` también
+ * en el PUT, así que omitirlo al editar volvería a poner en uso un aula que no lo estaba.
  */
 export interface AulaRequest {
   codigo: string;
@@ -38,6 +46,7 @@ export interface AulaRequest {
   edificio: string | null;
   planta: number | null;
   sector: string | null;
+  enUso?: boolean;
 }
 
 /**

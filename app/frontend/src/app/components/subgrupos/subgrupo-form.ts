@@ -71,6 +71,12 @@ export class SubgrupoForm implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly error = signal('');
   protected readonly esEdicion = this.editando !== null;
+  /**
+   * S206: el subgrupo es el mono-Di de un PDC (`delPdc`, lo calcula el backend). Su código y sus
+   * grupos no se cambian por aquí —el backend lo rechaza con un 400—, solo sus alumnos: el
+   * formulario los abre DESHABILITADOS y los reenvía tal cual llegaron.
+   */
+  protected readonly delPdc = this.editando?.delPdc === true;
 
   /** Opciones del multiselect, en el orden en que llegan del backend. */
   protected readonly grupos = signal<Grupo[]>([]);
@@ -82,12 +88,25 @@ export class SubgrupoForm implements OnInit {
     grupos: [[] as string[], [Validators.required, arrayNoVacio]],
   });
 
+  /**
+   * Alumnos del subgrupo (S206): opcional; el input vacío da null. Fuera del grupo, como el
+   * total de `GrupoForm`, y SIN validador propio: un negativo lo rechaza el backend con su
+   * 400, que se presenta como cualquier otro. Se envía siempre: en el backend unos alumnos
+   * ausentes en el PUT quedan en null.
+   */
+  protected readonly alumnos = this.fb.control<number | null>(null);
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
         codigo: this.editando.codigo,
         grupos: [...this.editando.grupos],
       });
+      this.alumnos.setValue(this.editando.alumnos ?? null);
+      if (this.delPdc) {
+        // getRawValue() sigue incluyendo el código: viaja tal cual, que es lo que pide el backend.
+        this.form.controls.codigo.disable();
+      }
     }
   }
 
@@ -133,7 +152,7 @@ export class SubgrupoForm implements OnInit {
     }
     this.guardando.set(true);
     this.error.set('');
-    const req: SubgrupoRequest = this.form.getRawValue();
+    const req: SubgrupoRequest = { ...this.form.getRawValue(), alumnos: this.alumnos.value };
     const peticion = this.editando
       ? this.service.editar(this.editando.id, req)
       : this.service.crear(req);
