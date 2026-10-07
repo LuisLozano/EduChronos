@@ -16,10 +16,10 @@ import java.util.Objects;
  * bug silencioso frente al puente de {@code app/} y a {@code SesionVistaDTO.indice},
  * que vienen del mismo origen.
  *
- * <p>{@code plazaCodigo} es NULLABLE. No-null SOLO en {@link ReglaDura#SOLAPE_AULA}
- * (D15: el aula se cuenta por plaza, no por instancia, porque dos plazas de la
- * misma instancia con la misma aula son colisión). Null en todas las demás reglas,
- * que se atribuyen a nivel de instancia.
+ * <p>{@code plazaCodigo} es NULLABLE. No-null SOLO en las reglas de aula, que se
+ * cuentan por plaza: {@link ReglaDura#SOLAPE_AULA} (D15: dos plazas de la misma
+ * instancia con la misma aula son colisión) y {@link ReglaDura#CAPACIDAD_AULA} (S207).
+ * Null en todas las demás reglas, que se atribuyen a nivel de instancia.
  */
 public record CeldaRef(String actividadCodigo, int indice, String plazaCodigo) {
 
@@ -29,6 +29,6 @@ public record CeldaRef(String actividadCodigo, int indice, String plazaCodigo) {
             throw new IllegalArgumentException(
                     "indice debe ser >= 1 (1-based del dominio): " + indice);
         }
-        // plazaCodigo intencionadamente nullable (no-null solo en SOLAPE_AULA).
+        // plazaCodigo intencionadamente nullable (no-null solo en las reglas de aula).
     }
 }

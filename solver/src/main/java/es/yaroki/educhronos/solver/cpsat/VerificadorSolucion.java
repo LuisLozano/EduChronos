@@ -41,9 +41,10 @@ import java.util.function.Function;
  * agrupa por subgrupo.grupo() directo, ciega al grupoPadre); distribución por
  * día de las actividades {@code DISTRIBUIDA} (con la misma guarda anti-palomar
  * D12 que el modelo); indisponibilidad DURA del profesorado, por tramo OCUPADO;
- * y S8 (una actividad {@code requiereTutor} la imparte un TUTOR_PRINCIPAL de un
- * grupo que cubre). S8 es la única comprobación que NO mira la
- * {@link SolucionHorario}: es propiedad del catálogo, no del horario.
+ * S8 (una actividad {@code requiereTutor} la imparte un TUTOR_PRINCIPAL de un
+ * grupo que cubre); y la capacidad del aula de cada plaza (S207). S8 es la única
+ * comprobación que NO mira la {@link SolucionHorario}: es propiedad del catálogo, no
+ * del horario.
  */
 public final class VerificadorSolucion {
 
@@ -57,6 +58,7 @@ public final class VerificadorSolucion {
         verificarIndisponibilidadDura(problema, esperadas, solucion, violaciones);
         verificarDistribucion(problema, esperadas, solucion, violaciones);
         verificarTutorias(problema, violaciones); // S8: propiedad del catálogo, no usa la solución
+        verificarCapacidadAula(problema, esperadas, solucion, violaciones); // S207, C3
 
         return new ResultadoVerificacion(violaciones);
     }
@@ -762,6 +764,55 @@ public final class VerificadorSolucion {
                                         + " (" + etiqueta(inst) + "), en el que tiene"
                                         + " indisponibilidad DURA"));
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Capacidad de aula ({@link ReglaDura#CAPACIDAD_AULA}, S207, C-deduccion-aulas, C3). Por
+     * cada instancia colocada y cada plaza con aula, si el aula tiene capacidad conocida y la
+     * suma de los alumnos de los subgrupos de la plaza la supera, UNA violación con
+     * {@code recursoCodigo = aula}, {@code tramoCodigo = tramo de inicio} y la celda de la
+     * PLAZA (como {@code SOLAPE_AULA}: el aula es de la plaza, no de la instancia).
+     *
+     * <p>Alumnos desconocidos cuentan 0; capacidad desconocida no limita; igual a la capacidad
+     * cabe. El aula es la de {@link SolucionHorario#aulaElegida}: la fija o la elegida entre
+     * candidatas. Código propio, sin reutilizar el filtro de capacidad con que la aplicación
+     * deduce las aulas posibles: el verificador es un oráculo independiente (decisión G de
+     * {@code O-disponibilidad}). Una instancia sin colocar se salta: ya la reporta
+     * {@link #verificarTodasColocadas}.
+     */
+    private void verificarCapacidadAula(ProblemaHorario problema,
+                                        List<ActividadInstancia> esperadas,
+                                        SolucionHorario solucion,
+                                        List<Violacion> violaciones) {
+        for (ActividadInstancia inst : esperadas) {
+            Optional<Tramo> inicio = solucion.tramoDeInstancia(inst);
+            if (inicio.isEmpty()) {
+                continue;
+            }
+            for (Plaza plaza : inst.actividad().plazas()) {
+                Optional<Aula> aula = solucion.aulaElegida(inst, plaza);
+                if (aula.isEmpty()) {
+                    continue; // plaza sin aula (reunión, función)
+                }
+                Optional<Integer> capacidad = problema.capacidadDe(aula.get());
+                if (capacidad.isEmpty()) {
+                    continue;
+                }
+                int alumnos = 0;
+                for (Subgrupo subgrupo : plaza.subgrupos()) {
+                    alumnos += problema.alumnosDe(subgrupo).orElse(0);
+                }
+                if (alumnos > capacidad.get()) {
+                    violaciones.add(new Violacion(ReglaDura.CAPACIDAD_AULA,
+                            aula.get().codigo(), inicio.get().codigo(),
+                            List.of(new CeldaRef(inst.actividad().codigo(), inst.indice(),
+                                    plaza.codigo())),
+                            "Aula " + aula.get().codigo() + " con capacidad " + capacidad.get()
+                                    + " para la plaza " + plaza.codigo() + " (" + etiqueta(inst)
+                                    + "), que reúne " + alumnos + " alumnos"));
                 }
             }
         }

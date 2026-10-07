@@ -20,6 +20,8 @@ package es.yaroki.educhronos.solver.cpsat;
  *   <li>{@code TUTORIA_SIN_TUTOR} — una actividad {@code requiereTutor} no la
  *       imparte ningún TUTOR_PRINCIPAL de un grupo que cubre (§4.6, invariante S8).
  *       Es propiedad del CATÁLOGO, no de la solución: no depende del tramo.</li>
+ *   <li>{@code CAPACIDAD_AULA} — la suma de los alumnos de los subgrupos de una plaza supera
+ *       la capacidad de su aula (S207). Por plaza, como {@code SOLAPE_AULA}.</li>
  * </ul>
  */
 public enum ReglaDura {
@@ -31,5 +33,6 @@ public enum ReglaDura {
     SOLAPE_GRUPO,
     DISTRIBUCION_MISMO_DIA,
     TUTORIA_SIN_TUTOR,
-    INDISPONIBILIDAD_PROFESOR
+    INDISPONIBILIDAD_PROFESOR,
+    CAPACIDAD_AULA
 }
