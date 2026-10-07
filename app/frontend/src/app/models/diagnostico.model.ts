@@ -17,7 +17,10 @@
 export interface CeldaRef {
   actividadCodigo: string;
   indice: number;
-  /** Nullable de verdad: no-null solo en `SOLAPE_AULA` (el aula se cuenta por plaza). */
+  /**
+   * Nullable de verdad: no-null solo en las reglas de aula, que se cuentan por plaza —`SOLAPE_AULA`,
+   * y desde S207 `CAPACIDAD_AULA` y `AULA_FUERA_DE_REGLAS`—.
+   */
   plazaCodigo: string | null;
 }
 

@@ -8,7 +8,8 @@ import { clavePin } from './pines';
  * Existe porque una `Violacion` con N celdas se indexa N veces, y bajo cada
  * clave hay que saber con qué `plazaCodigo` entró —el de ESA celda, no el de la
  * primera—: es lo que permite distinguir después un resalte de sub-entrada
- * (`SOLAPE_AULA`, plaza no-null) de uno de celda entera (plaza null).
+ * (reglas de aula, plaza no-null: `SOLAPE_AULA`, `CAPACIDAD_AULA`, `AULA_FUERA_DE_REGLAS`)
+ * de uno de celda entera (plaza null). La distinción es por la plaza, nunca por la regla.
  */
 export interface ViolacionEnCelda {
   violacion: Violacion;

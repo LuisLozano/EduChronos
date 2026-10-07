@@ -123,7 +123,7 @@ describe('lógica pura del ajuste manual', () => {
   });
 
   /**
-   * `plazaCodigo` no-null solo en `SOLAPE_AULA` (asimetría D15): cuando lo hay se
+   * `plazaCodigo` no-null solo en las reglas de aula (asimetría D15): cuando lo hay se
    * nombra, y cuando no, no se escribe «(null)». El fixture mezcla las DOS formas en
    * la misma violación, que es lo único que separa "nombra la plaza si la hay" de
    * "la nombra siempre" o "nunca".

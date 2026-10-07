@@ -40,8 +40,9 @@ export function reemplazarInstancia(
 
 /**
  * Una celda culpable, en el vocabulario de la instancia. `plazaCodigo` solo se
- * nombra cuando lo hay —no-null únicamente en `SOLAPE_AULA`, asimetría D15—:
- * escribirlo siempre pondría «(null)» en las otras cinco reglas.
+ * nombra cuando lo hay —no-null únicamente en las reglas de aula (`SOLAPE_AULA`, asimetría
+ * D15, y desde S207 `CAPACIDAD_AULA` y `AULA_FUERA_DE_REGLAS`)—: escribirlo siempre pondría
+ * «(null)» en las demás.
  */
 function textoCelda(c: CeldaRef): string {
   const plaza = c.plazaCodigo === null ? '' : ` (${c.plazaCodigo})`;
