@@ -1,13 +1,24 @@
 package es.yaroki.educhronos.solver.domain;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Entrada completa del solver. Agrupa todas las colecciones del dominio.
  * Los tramos deben estar ordenados por (diaSemana, ordenEnDia) y sin dos con el mismo par;
  * el constructor lo comprueba (S166, ver {@code comprobarOrdenDeTramos}).
+ *
+ * <p>{@code capacidadesDeAula} y {@code alumnosDeSubgrupo} (S207, C-deduccion-aulas, C2): plazas
+ * de cada aula y alumnos de cada subgrupo, POR CÓDIGO. Viven aquí y no en {@link Aula} ni en
+ * {@link Subgrupo} para no tocar su identidad: los dos se usan como clave de mapas en el modelo,
+ * el verificador y la solución. Un código ausente es «sin dato» (lo que en la base es nulo); un
+ * código que no está en {@code aulas} o {@code subgrupos}, o un valor negativo, se rechaza. El
+ * constructor de diez listas equivale a no tener ningún dato.
  */
 public record ProblemaHorario(
         List<Tramo> tramos,
@@ -19,7 +30,25 @@ public record ProblemaHorario(
         List<Actividad> actividades,
         List<RestriccionHoraria> restriccionesHorarias,
         List<SesionBloqueada> bloqueos,
-        List<ProfesorTutoria> tutorias) {
+        List<ProfesorTutoria> tutorias,
+        Map<String, Integer> capacidadesDeAula,
+        Map<String, Integer> alumnosDeSubgrupo) {
+
+    /** Problema sin capacidades de aula ni alumnos de subgrupo: el de antes de S207. */
+    public ProblemaHorario(
+            List<Tramo> tramos,
+            List<Aula> aulas,
+            List<Asignatura> asignaturas,
+            List<Profesor> profesores,
+            List<GrupoAdministrativo> grupos,
+            List<Subgrupo> subgrupos,
+            List<Actividad> actividades,
+            List<RestriccionHoraria> restriccionesHorarias,
+            List<SesionBloqueada> bloqueos,
+            List<ProfesorTutoria> tutorias) {
+        this(tramos, aulas, asignaturas, profesores, grupos, subgrupos, actividades,
+                restriccionesHorarias, bloqueos, tutorias, Map.of(), Map.of());
+    }
 
     public ProblemaHorario {
         Objects.requireNonNull(tramos,      "tramos no puede ser null");
@@ -32,6 +61,8 @@ public record ProblemaHorario(
         Objects.requireNonNull(restriccionesHorarias, "restriccionesHorarias no puede ser null");
         Objects.requireNonNull(bloqueos,    "bloqueos no puede ser null");
         Objects.requireNonNull(tutorias,    "tutorias no puede ser null");
+        Objects.requireNonNull(capacidadesDeAula, "capacidadesDeAula no puede ser null (usa Map.of())");
+        Objects.requireNonNull(alumnosDeSubgrupo, "alumnosDeSubgrupo no puede ser null (usa Map.of())");
 
         tramos      = List.copyOf(tramos);
         comprobarOrdenDeTramos(tramos);
@@ -44,6 +75,41 @@ public record ProblemaHorario(
         restriccionesHorarias = List.copyOf(restriccionesHorarias);
         bloqueos    = List.copyOf(bloqueos);
         tutorias    = List.copyOf(tutorias);
+        capacidadesDeAula = Map.copyOf(capacidadesDeAula);
+        alumnosDeSubgrupo = Map.copyOf(alumnosDeSubgrupo);
+        comprobarDatosPorCodigo("capacidad", capacidadesDeAula,
+                codigos(aulas.stream().map(Aula::codigo).toList()), "aula");
+        comprobarDatosPorCodigo("alumnos", alumnosDeSubgrupo,
+                codigos(subgrupos.stream().map(Subgrupo::codigo).toList()), "subgrupo");
+    }
+
+    /** Plazas del aula, o vacío si no se conocen (sin límite). */
+    public Optional<Integer> capacidadDe(Aula aula) {
+        return Optional.ofNullable(capacidadesDeAula.get(aula.codigo()));
+    }
+
+    /** Alumnos del subgrupo, o vacío si no se conocen. */
+    public Optional<Integer> alumnosDe(Subgrupo subgrupo) {
+        return Optional.ofNullable(alumnosDeSubgrupo.get(subgrupo.codigo()));
+    }
+
+    private static Set<String> codigos(List<String> lista) {
+        return new HashSet<>(lista);
+    }
+
+    /** Cada clave es un código del problema y cada valor, no negativo. */
+    private static void comprobarDatosPorCodigo(String dato, Map<String, Integer> porCodigo,
+                                                Set<String> codigosValidos, String entidad) {
+        for (Map.Entry<String, Integer> e : porCodigo.entrySet()) {
+            if (!codigosValidos.contains(e.getKey()))
+                throw new IllegalArgumentException(
+                        dato + " de un " + entidad + " que no está en el problema: '" + e.getKey()
+                                + "'");
+            if (e.getValue() < 0)
+                throw new IllegalArgumentException(
+                        "valor negativo de " + dato + " en el " + entidad + " '" + e.getKey() + "': "
+                                + e.getValue());
+        }
     }
 
     /** Orden de la invariante: por día y, dentro del día, por {@code ordenEnDia}. */
