@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { Asignatura } from '../../models/asignatura.model';
 import { AsignaturaForm } from './asignatura-form';
+import { AulasAsignaturaDialogo } from './aulas-asignatura-dialogo';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
@@ -93,6 +94,15 @@ export class AsignaturaLista implements OnInit {
           this.cargar();
         }
       });
+  }
+
+  /**
+   * Abre el diálogo de las aulas de la asignatura (S206). Como la tutoría en `GrupoLista`, no se
+   * suscribe a `closed` ni recarga: esta tabla no pinta ninguna aula, así que tras guardar no hay
+   * nada que refrescar.
+   */
+  protected aulas(asig: Asignatura): void {
+    this.dialog.open<boolean, Asignatura>(AulasAsignaturaDialogo, { data: asig });
   }
 
   protected borrar(asig: Asignatura): void {

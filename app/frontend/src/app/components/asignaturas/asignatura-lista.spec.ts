@@ -6,6 +6,8 @@ import {
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { AsignaturaLista } from './asignatura-lista';
+import { AulasAsignaturaDialogo } from './aulas-asignatura-dialogo';
+import { AsignaturaForm } from './asignatura-form';
 
 /**
  * Congela el comportamiento de la lista. El foco de M3 (traducción de error) son
@@ -247,5 +249,40 @@ describe('AsignaturaLista', () => {
     expect(contador).not.toBeNull();
     expect(contador.textContent.trim()).toBe(antes);
     expect(fixture.nativeElement.querySelectorAll('tbody tr').length).toBe(1);
+  });
+
+  // ─────────────────────────── S206 T2: acción «Aulas»
+
+  const FILAS = [
+    { id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
+    { id: 9, codigo: 'ByG', nombreCompleto: 'Biología' },
+  ];
+
+  it('(11) cada fila ofrece «Aulas» y pulsarla abre AulasAsignaturaDialogo con la asignatura DE ESA FILA', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    const botones = fixture.nativeElement.querySelectorAll('.asignaturas__aulas');
+    expect(botones.length).toBe(2);
+    expect(botones[1].textContent.trim()).toBe('Aulas');
+
+    dialog.open.mockReturnValue({ closed: { subscribe: () => undefined } });
+    botones[1].click();
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    // ESTE diálogo y no otro (ni el formulario de la asignatura), con la fila 2 y no la 1.
+    expect(dialog.open.mock.calls[0][0]).toBe(AulasAsignaturaDialogo);
+    expect(dialog.open.mock.calls[0][0]).not.toBe(AsignaturaForm);
+    expect(dialog.open.mock.calls[0][1]).toEqual({ data: FILAS[1] });
+  });
+
+  it('(12) al cerrar el diálogo de aulas la lista NO recarga, ni siquiera con true', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ closed: { subscribe: (fn: (v: boolean) => void) => fn(true) } });
+
+    fixture.nativeElement.querySelectorAll('.asignaturas__aulas')[0].click();
+
+    // La tabla no pinta aulas: nada que refrescar. http.verify() del afterEach caza el GET.
+    http.expectNone('/api/asignaturas');
   });
 });

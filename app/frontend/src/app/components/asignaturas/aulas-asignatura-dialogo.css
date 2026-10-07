@@ -1,0 +1,46 @@
+/* Solo maquetación: el acabado es de O-interfaz. Mismos tokens que tutoria-dialogo. */
+.aulas-asignatura {
+  padding: var(--e5);
+  min-width: 22rem;
+  background: var(--color-superficie);
+  border-radius: var(--radio-m);
+}
+
+.aulas-asignatura__titulo {
+  margin: 0 0 var(--e4);
+}
+
+.aulas-asignatura__marca,
+.aulas-asignatura__campo,
+.aulas-asignatura__lista {
+  margin: 0 0 var(--e4);
+}
+
+.aulas-asignatura__marca label {
+  display: block;
+}
+
+.aulas-asignatura__lista {
+  padding: 0;
+  list-style: none;
+}
+
+.aulas-asignatura__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--e1) 0;
+}
+
+.aulas-asignatura__error-servidor,
+.aulas-asignatura__aviso {
+  color: var(--color-error);
+  margin: var(--e2) 0;
+}
+
+.aulas-asignatura__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}

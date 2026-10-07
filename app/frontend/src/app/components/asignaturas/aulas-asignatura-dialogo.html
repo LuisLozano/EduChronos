@@ -1,0 +1,94 @@
+<div class="aulas-asignatura">
+  <h2 class="aulas-asignatura__titulo">Aulas de {{ asignatura.codigo }}</h2>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aulas-asignatura__cargando">Cargando…</p>
+      <div class="aulas-asignatura__acciones">
+        <button type="button" class="aulas-asignatura__cancelar" (click)="cancelar()">Cancelar</button>
+      </div>
+    }
+
+    @case ('listo') {
+      <div class="aulas-asignatura__form">
+        <fieldset class="aulas-asignatura__marca">
+          <legend class="aulas-asignatura__etiqueta">Cómo usa la asignatura estas aulas</legend>
+          <label>
+            <input type="radio" name="marca-aulas" value="EXCLUSIVA" [formControl]="marca" class="aulas-asignatura__exclusiva" />
+            Solo puede ir a estas aulas
+          </label>
+          <label>
+            <input type="radio" name="marca-aulas" value="PREFERIDA" [formControl]="marca" class="aulas-asignatura__preferida" />
+            Mejor en estas aulas, si se puede
+          </label>
+        </fieldset>
+
+        @if (mezcla() && marca.value === '') {
+          <p class="aulas-asignatura__aviso" role="alert">
+            Esta asignatura tiene aulas con las dos marcas a la vez. Elige una para poder guardar:
+            se aplicará a todas.
+          </p>
+        }
+
+        @if (filas().length === 0) {
+          <p class="aulas-asignatura__vacia">Sin aulas propias.</p>
+        } @else {
+          <ul class="aulas-asignatura__lista">
+            @for (codigo of filas(); track codigo) {
+              <li class="aulas-asignatura__fila">
+                <span class="dato">{{ codigo }}</span>
+                <button type="button" class="aulas-asignatura__quitar accion-compacta" (click)="quitar(codigo)">
+                  Quitar
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="aulas-asignatura__campo">
+          <label class="aulas-asignatura__etiqueta" for="aulas-asignatura-nueva">Añadir aula</label>
+          <app-filtro-opciones
+            #fAulas
+            etiqueta="aulas"
+            [opciones]="disponibles()"
+            [texto]="codigoDe"
+            [codigo]="codigoDe"
+            [seleccionados]="[nueva.value]"
+          />
+          <select id="aulas-asignatura-nueva" [formControl]="nueva" class="aulas-asignatura__input aulas-asignatura__nueva">
+            <option value="">— elige un aula —</option>
+            @for (a of fAulas.visibles(); track a.id) {
+              <option [value]="a.codigo">{{ a.codigo }}</option>
+            }
+          </select>
+          <button type="button" class="aulas-asignatura__anadir accion-compacta" (click)="anadir()">
+            Añadir
+          </button>
+        </div>
+
+        @if (error()) {
+          <p class="aulas-asignatura__error-servidor" role="alert">{{ error() }}</p>
+        }
+
+        <div class="aulas-asignatura__acciones">
+          <button type="button" class="aulas-asignatura__cancelar" (click)="cancelar()">Cancelar</button>
+          <button
+            type="button"
+            class="aulas-asignatura__guardar accion-principal"
+            [disabled]="!puedeGuardar()"
+            (click)="guardar()"
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    }
+
+    @case ('error') {
+      <p class="aulas-asignatura__error-servidor" role="alert">{{ error() }}</p>
+      <div class="aulas-asignatura__acciones">
+        <button type="button" class="aulas-asignatura__cancelar" (click)="cancelar()">Cerrar</button>
+      </div>
+    }
+  }
+</div>
