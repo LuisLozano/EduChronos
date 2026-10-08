@@ -36,15 +36,15 @@
 - L2362 — ### Clasificación de las deudas vivas actuales
 - L2369 — #### Objetivos disfrazados de deuda → se PROMUEVEN a objetivo (§3)
 - L2376 — #### Deuda técnica real, colgada de su objetivo
-- L2513 — #### Mejora futura, cuelga y espera
-- L2563 — #### Decisión arquitectónica consciente → sale de la cola
-- L2577 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
-- L2589 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
-- L2598 — #### Deuda ya CERRADA (histórico, no pendiente)
-- L2665 — ## 5. Revisión del roadmap: por qué H2 va primero
-- L2730 — ## 6. Reglas estratégicas
-- L2820 — ## 7. Métricas del sistema
-- L2841 — ## 8. El sistema respondiendo a las preguntas clave
+- L2514 — #### Mejora futura, cuelga y espera
+- L2564 — #### Decisión arquitectónica consciente → sale de la cola
+- L2578 — #### Limitación conocida → sale de la cola, se documenta el "no se hará"
+- L2590 — #### Deuda de MÉTODO → se integra en `metodo.md`, no en el producto
+- L2599 — #### Deuda ya CERRADA (histórico, no pendiente)
+- L2666 — ## 5. Revisión del roadmap: por qué H2 va primero
+- L2731 — ## 6. Reglas estratégicas
+- L2821 — ## 7. Métricas del sistema
+- L2842 — ## 8. El sistema respondiendo a las preguntas clave
 
 <!-- INDICE:FIN -->
 
@@ -2509,6 +2509,7 @@ en «¿Bloquea?»; si decía algo más que «No», su disposición lo conserva t
 | D-pin-aula-fuera-de-dominio (un pin de aula cuya aula deja de ser posible rompe la carga del problema) | Sin sede | No | Nace en S207 (T2 de `C-deduccion-aulas`): el mapper exige que el aula pinada esté en las candidatas de su plaza (validación 4C de S60), y desde S207 el dominio de una clase se deduce de reglas que cambian sin guarda, así que un pin de aula puede quedar fuera y la generación falla al montar el problema, sin el mensaje de la prevalidación. Hoy inalcanzable desde la interfaz (el candado fija el tramo con `aulas: []`) y la base oficial de 2026/2027 no tiene pines de aula. Arreglo candidato, no medido: que la prevalidación compruebe el pin contra el dominio deducido, como `PIN_SOBRE_TRAMO_DURA`. **S209:** `O-aulas` termina sin pagarla (no bloquea); queda sin sede hasta planificar lo siguiente. **S211:** `O-aulas` terminó en S209 y su ficha la dejó sin sede; la columna pasa a «Sin sede» al abrir `O-guardias`. |
 | ~~D-contrato-sobre-forma-no-medida~~ (el contrato de un guion afirma la forma del código sin haberla medido) **CERRADA S210** | Transversal, con la sesión de Higiene/Método | — | Nace en S208. De método. El contrato de un guion afirma la forma del código (qué tipo tiene qué campo, dónde se calcula algo) sin haberla volcado en el M2. Dos paradas en S208 (T1 y T2); disparador saltado, aplazado hasta cerrar `O-aulas`. Familia de `D-declarado-sin-artefacto`. **S209:** tres instancias, dos con parada: S4 del contrato de T1 (la comparación de escrituras se afirmó previa y es posterior), la guarda de F0.3 del M4 escrita sobre una orden no vista (faltaba `--base-url`) y, sin coste, la casación por nombre que dio por hecho que el catálogo traía nombres. El F0 de volcado de forma, añadido por esta deuda, cazó las tres. **CERRADA en S210:** norma 15 de M-guion en `metodo.md`. |
 | D-infactible-sin-aviso-residual (un catálogo infactible por coincidencia de horas sigue llegando como «catálogo infactible» sin causa) | `O-prueba-secretaria` | No | Nace en S209 (T4). `CARGA_DE_AULAS_EXCEDIDA` comprueba que las horas de las clases caben en las aulas de su dominio sin mirar cuándo se dan: es condición necesaria, no suficiente. Un conflicto que solo aparece al cruzar horas sigue respondiendo 422 del solver sin nombrar aulas ni clases, que es lo que el principio de §1 (S209) pide evitar. En la base de prueba de S209 no ocurre: la prevalidación para antes. Arreglo candidato, no medido: ante un INFEASIBLE, pedir al solver un núcleo de restricciones incompatibles. Texto íntegro en el plan. |
+| D-forma-afirmada-sin-volcado (el asistente escribe guardas y órdenes de un guion desde el resumen de Claude Code o de memoria, y no desde lo volcado) | Transversal, con la sesión de Higiene/Método | No | Nace en S211: dos paradas por incumplir la norma 15 de M-guion, una guarda de sede distinta de la que el M2 ya había volcado y un `git apply` sobre un parche `-U0`. Mismo defecto con coste dos veces en la sesión: dispara Higiene/Método, aplazada hasta cerrar `O-guardias`. Arreglo candidato, no medido: la guarda deriva su valor esperado del F0 del guion, y toda orden con efecto se ensaya en seco. Texto íntegro en el plan. |
 
 #### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
