@@ -88,8 +88,15 @@ class PrevalidacionEndpointTest {
     @Autowired private ActividadRepository actividadRepository;
     @Autowired private ProfesorRestriccionHorariaRepository restriccionRepository;
     @Autowired private SesionBloqueadaRepository pinTramoRepository;
+    @Autowired private ConfiguracionRepository configuracionRepository;
 
     private MockMvc mockMvc;
+
+    /** Centro sin guardias (S212): con el mínimo 4 por defecto, generar daría GUARDIAS_INSUFICIENTES. */
+    @BeforeEach
+    void centroSinGuardias(@Autowired ConfiguracionRepository configuraciones) {
+        MinimoGuardias.fijar(configuraciones, 0);
+    }
 
     @BeforeEach
     void setUp() {
@@ -474,6 +481,76 @@ class PrevalidacionEndpointTest {
         mockMvc.perform(get("/api/prevalidacion"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+
+    // ------------------------------------------- guardias (S212, C-dato-guardias)
+
+    /**
+     * T4: sin fila en Configuracion vale el mínimo por defecto, 4. Catálogo sano de 5 tramos y un
+     * profesor sin guardias: el GET da GUARDIAS_INSUFICIENTES con demanda 4 × 5 = 20 y la
+     * generación lo rechaza con 422.
+     */
+    @Test
+    void guardias_sinConfiguracionNiGuardias_errorDelCentroConElMinimoPorDefecto() throws Exception {
+        configuracionRepository.deleteAll();
+        poblarCatalogoSano();
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].severidad").value("ERROR"))
+                .andExpect(jsonPath("$[0].regla").value("GUARDIAS_INSUFICIENTES"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("CENTRO"))
+                .andExpect(jsonPath("$[0].demanda").value(20))
+                .andExpect(jsonPath("$[0].disponible").value(0));
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString("hacen falta 20")));
+    }
+
+    /**
+     * Las guardias de la base llegan a la prevalidación. Mínimo 1 y 5 tramos piden 5: MAT8 con 2
+     * (3 horas + 2 = 5, cabe) y LEN1 con 3 suman 5 y no sale nada. Si la carga no trajera las
+     * guardias, S = 0 y saldría GUARDIAS_INSUFICIENTES.
+     */
+    @Test
+    void guardias_lasDeLaBaseCubrenElMinimo_listaVacia() throws Exception {
+        poblarCatalogoSano();
+        MinimoGuardias.fijar(configuracionRepository, 1);
+        profesorRepository.findByCodigo("MAT8").orElseThrow().setGuardiasOrdinarias(2);
+        profesorRepository.save(new Profesor("LEN1", "Dos")).setGuardiasOrdinarias(3);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    /**
+     * GUARDIAS_SIN_HUECO por la red: MAT8 tiene 3 horas en 5 tramos y 3 guardias de la base (6).
+     * Mínimo 0, así que es el único hallazgo.
+     */
+    @Test
+    void guardias_unProfesorSinHueco_errorConSuNombre() throws Exception {
+        poblarCatalogoSano();
+        profesorRepository.findByCodigo("MAT8").orElseThrow().setGuardiasOrdinarias(3);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].severidad").value("ERROR"))
+                .andExpect(jsonPath("$[0].regla").value("GUARDIAS_SIN_HUECO"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("MAT8"))
+                .andExpect(jsonPath("$[0].demanda").value(6))
+                .andExpect(jsonPath("$[0].disponible").value(5))
+                .andExpect(jsonPath("$[0].descripcion").value(
+                        "Uno tiene 3 horas ocupadas y 3 guardias ordinarias (6), pero solo 5 tramos de"
+                                + " clase sin “No puede”."));
     }
 
     // ------------------------------------------------------------------- fixtures

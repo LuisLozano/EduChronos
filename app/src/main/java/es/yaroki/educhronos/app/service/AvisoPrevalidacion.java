@@ -18,7 +18,9 @@ import java.util.Objects;
  * @param regla         identificador estable de la comprobación (ver las constantes
  *                      {@code REGLA_*} de {@link PrevalidacionService})
  * @param entidadCodigo código natural de la entidad señalada (profesor, actividad o
- *                      grupo); es el {@code codigo} del dominio del solver, no un id JPA
+ *                      grupo); es el {@code codigo} del dominio del solver, no un id JPA. Los
+ *                      avisos del centro, que no señalan una entidad, llevan {@code "CENTRO"}
+ *                      (S212, {@code GUARDIAS_INSUFICIENTES})
  * @param demanda       tramos que la entidad NECESITA según el catálogo; en el cuadre, las
  *                      horas de clase configuradas
  * @param disponible    tramos que la entidad TIENE; en el cuadre, las horas declaradas

@@ -418,24 +418,33 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S206) Una base de la versión 0, 1 o 3 CON DATOS en todas las tablas de la 1 llega a la 4
-     * sin perder nada. La base se levanta con {@code 001.sql}, se puebla y, para la 3, se le
-     * pasan {@code 002.sql} y {@code 003.sql} reales antes de sellarla. {@code 004.sql} añade el
+     * (S206, S212) Una base de la versión 0, 1, 3 o 4 CON DATOS en todas las tablas de la 1 llega a
+     * la 5 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos profesores y,
+     * para la 3 y la 4, se le pasan {@code 002.sql} y {@code 003.sql} reales (y {@code 004.sql} para
+     * la 4, con una fila en {@code asignatura_aula}) antes de sellarla. {@code 004.sql} añade el
      * aula de referencia del grupo, los alumnos del subgrupo, el aula en uso, la tabla
-     * {@code asignatura_aula} y las cuatro únicas: cada tabla conserva sus filas, todas las aulas
-     * quedan en uso, las columnas nuevas nulas, {@code asignatura_aula} vacía, los cuatro índices
-     * únicos presentes y el esquema IGUAL al de una base nueva.
+     * {@code asignatura_aula} y las cuatro únicas; {@code 005.sql}, las guardias ordinarias del
+     * profesor. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
+     * nulas, {@code asignatura_aula} como estaba, los cuatro índices únicos presentes, la columna
+     * {@code guardias_ordinarias} a 0 en cada profesor y el esquema IGUAL al de una base nueva.
      */
     @ParameterizedTest(name = "desde la versión {0}")
-    @ValueSource(ints = {0, 1, 3})
-    void unaBaseConDatosLlegaALa4SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
+    @ValueSource(ints = {0, 1, 3, 4})
+    void unaBaseConDatosLlegaALa5SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v" + desde + ".db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
-        if (desde == 3) {
+        ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
+        if (desde >= 3) {
             try (Connection conexion = BancoDeCursos.conectar(base)) {
                 ScriptUtils.executeSqlScript(conexion, migracionReal(2));
                 ScriptUtils.executeSqlScript(conexion, migracionReal(3));
+                if (desde == 4) {
+                    ScriptUtils.executeSqlScript(conexion, migracionReal(4));
+                }
             }
+        }
+        if (desde == 4) {
+            ejecutar(base, "insert into asignatura_aula (asignatura_id, aula_id, rol) values (1, 1, 'EXCLUSIVA')");
         }
         ejecutar(base, "PRAGMA user_version = " + desde);
         List<String> tablas = consulta(base,
@@ -445,7 +454,13 @@ class PreparadorEsquemaTest {
             filasAntes.add(tabla + "=" + BancoDeCursos.filas(base, tabla));
         }
         assertThat(version(base)).as("precondición: versión %d", desde).isEqualTo(desde);
-        assertThat(tablas).as("precondición: sin la tabla nueva").doesNotContain("asignatura_aula");
+        if (desde < 4) {
+            assertThat(tablas).as("precondición: sin la tabla nueva").doesNotContain("asignatura_aula");
+        }
+        assertThat(consulta(base, "select count(*) from pragma_table_info('profesor')"
+                        + " where name = 'guardias_ordinarias'"))
+                .as("precondición: sin la columna de guardias")
+                .containsExactly("0");
         assertThat(filasAntes).as("precondición: ninguna tabla vacía").noneMatch(f -> f.endsWith("=0"));
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
         Path vacia = carpeta.resolve("vacia.db");
@@ -453,7 +468,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(4);
+        assertThat(version(base)).isEqualTo(5);
         assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
         List<String> filasDespues = new ArrayList<>();
         for (String tabla : tablas) {
@@ -469,7 +484,12 @@ class PreparadorEsquemaTest {
         assertThat(consulta(base, "select count(*) from subgrupo where alumnos is not null"))
                 .as("ningún subgrupo con alumnos")
                 .containsExactly("0");
-        assertThat(BancoDeCursos.filas(base, "asignatura_aula")).as("asignatura_aula, vacía").isZero();
+        assertThat(BancoDeCursos.filas(base, "asignatura_aula"))
+                .as("asignatura_aula, como estaba")
+                .isEqualTo(desde == 4 ? 1 : 0);
+        assertThat(consulta(base, "select count(*), sum(guardias_ordinarias = 0) from profesor"))
+                .as("los dos profesores, con 0 guardias")
+                .containsExactly("2|2");
         assertThat(indicesUnicos(base, "sesion")).contains("uk_sesion_horario_plaza_indice");
         assertThat(indicesUnicos(base, "sesion_bloqueada")).contains("uk_sesion_bloqueada_actividad_indice");
         assertThat(indicesUnicos(base, "aula_bloqueada")).contains("uk_aula_bloqueada_actividad_indice_plaza");

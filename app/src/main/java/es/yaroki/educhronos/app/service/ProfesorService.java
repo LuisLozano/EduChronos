@@ -27,11 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
  *       código; en la edición, ninguno SALVO la propia entidad;
  *   <li>(d) {@code totalDeclarado} null o ≥ 0 (S203, {@link TotalDeclarado});
  *   <li>(e) {@code cargo} null o ausente es {@code PROFESOR}; si viene, parseable a
- *       {@link Cargo}, con un 400 que nombra el valor y lista los válidos.
+ *       {@link Cargo}, con un 400 que nombra el valor y lista los válidos;
+ *   <li>(f) {@code guardiasOrdinarias} null o ausente es 0; si viene, ≥ 0, con un 400 que nombra
+ *       el campo, como el total (S212, C-dato-guardias).
  * </ul>
  *
- * <p>El {@code PUT} reemplaza el estado entero: un total o un cargo ausentes vuelven a «sin
- * total» y a {@code PROFESOR}, no conservan lo que había (S203, D7).
+ * <p>El {@code PUT} reemplaza el estado entero: un total, un cargo o unas guardias ausentes vuelven
+ * a «sin total», a {@code PROFESOR} y a 0, no conservan lo que había (S203, D7; S212).
  *
  * <p><b>Dos familias de excepción, dos códigos HTTP.</b> "No encontrado" lanza
  * {@link NoSuchElementException} (→ 404 en el controlador); un fallo de validación
@@ -79,6 +81,7 @@ public class ProfesorService {
         validar(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         Cargo cargo = parseCargo(peticion.cargo());
+        int guardias = guardiasOrdinarias(peticion.guardiasOrdinarias());
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un profesor con codigo " + peticion.codigo());
@@ -86,6 +89,7 @@ public class ProfesorService {
         Profesor nuevo = new Profesor(peticion.codigo(), peticion.nombreCompleto());
         nuevo.setTotalDeclarado(total);
         nuevo.setCargo(cargo);
+        nuevo.setGuardiasOrdinarias(guardias);
         Profesor guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
@@ -103,6 +107,7 @@ public class ProfesorService {
         validar(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         Cargo cargo = parseCargo(peticion.cargo());
+        int guardias = guardiasOrdinarias(peticion.guardiasOrdinarias());
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -112,6 +117,7 @@ public class ProfesorService {
         entidad.actualizar(peticion.codigo(), peticion.nombreCompleto());
         entidad.setTotalDeclarado(total);
         entidad.setCargo(cargo);
+        entidad.setGuardiasOrdinarias(guardias);
         return aDTO(entidad);
     }
 
@@ -158,9 +164,24 @@ public class ProfesorService {
         }
     }
 
+    /**
+     * Regla (f): ausente o null es 0 (S212); un negativo es un 400 que nombra el campo, con el mismo
+     * mecanismo que {@link TotalDeclarado}, cuyo mensaje nombra el suyo.
+     */
+    private static int guardiasOrdinarias(Integer valor) {
+        if (valor == null) {
+            return 0;
+        }
+        if (valor < 0) {
+            throw new IllegalArgumentException("guardiasOrdinarias no puede ser negativo: " + valor);
+        }
+        return valor;
+    }
+
     private static ProfesorDTO aDTO(Profesor profesor) {
         return new ProfesorDTO(
                 profesor.getId(), profesor.getCodigo(), profesor.getNombreCompleto(),
-                profesor.getTotalDeclarado(), profesor.getCargo().name());
+                profesor.getTotalDeclarado(), profesor.getCargo().name(),
+                profesor.getGuardiasOrdinarias());
     }
 }

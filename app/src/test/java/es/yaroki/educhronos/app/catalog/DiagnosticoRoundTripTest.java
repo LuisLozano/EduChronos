@@ -85,6 +85,12 @@ class DiagnosticoRoundTripTest {
 
     private MockMvc mockMvc;
 
+    /** Centro sin guardias (S212): con el mínimo 4 por defecto, generar daría GUARDIAS_INSUFICIENTES. */
+    @BeforeEach
+    void centroSinGuardias(@Autowired ConfiguracionRepository configuraciones) {
+        MinimoGuardias.fijar(configuraciones, 0);
+    }
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders

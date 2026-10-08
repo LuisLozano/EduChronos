@@ -234,6 +234,13 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   await plaza.locator('.actividad-form__subgrupos').selectOption(['1ESOA-TODO']);
   await guardar(page);
 
+  // 8b. Un centro sin guardias (S212, C-dato-guardias): mínimo de profesores de guardia por
+  //     tramo a 0, como lo pondría el usuario. Sin esto vale el 4 por defecto y la
+  //     prevalidación saca GUARDIAS_INSUFICIENTES. Va antes de abrir /horario, que es quien
+  //     pide la prevalidación. Por `page.request`, que comparte baseURL y proxy de `/api`.
+  const minimo = await page.request.put('/api/configuracion-guardias', { data: { minimoPorTramo: 0 } });
+  expect(minimo.status(), await minimo.text()).toBe(200);
+
   // 9. Al horario por el enlace del header. En /configuracion es ÚNICO; desde la
   //    landing sería ambiguo, porque allí «Horario» aparece además como tarjeta de
   //    la página (es el motivo por el que humo.spec.ts no lo usa como ancla).

@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -53,6 +54,12 @@ class PinTramoGeneracionRoundTripTest {
     @Autowired private SesionBloqueadaRepository pinTramoRepository;
 
     private static final String ACTIVIDAD = "MAT-1ESO";
+
+    /** Centro sin guardias (S212): con el mínimo 4 por defecto, generar daría GUARDIAS_INSUFICIENTES. */
+    @BeforeEach
+    void centroSinGuardias(@Autowired ConfiguracionRepository configuraciones) {
+        MinimoGuardias.fijar(configuraciones, 0);
+    }
 
     @Test
     void elSolveDeLaViaRealRespetaElPinDeTramoPersistido() {

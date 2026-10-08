@@ -69,7 +69,7 @@ class ExportacionHorarioServiceTest {
     void elTutorSeImprimeConSuNombreDeCatalogoYNoConSuCodigo() throws IOException {
         cablearUnGrupo("1ºA", 10L);
         when(profesorService.listar()).thenReturn(
-                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR")));
+                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR", 0)));
         when(tutoriaService.obtener(10L)).thenReturn(
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
 
@@ -89,7 +89,7 @@ class ExportacionHorarioServiceTest {
     void elMismoMapaDeNombresAlimentaElTutorYLaLeyenda() throws IOException {
         cablearUnGrupo("1ºA", 10L);
         when(profesorService.listar()).thenReturn(
-                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR")));
+                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR", 0)));
         when(tutoriaService.obtener(10L)).thenReturn(
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
 
@@ -115,7 +115,7 @@ class ExportacionHorarioServiceTest {
                 new GrupoDTO(10L, "1ºA", "ESO1", "ORDINARIO", null, null),
                 new GrupoDTO(11L, "1ºB", "ESO1", "ORDINARIO", null, null)));
         when(profesorService.listar()).thenReturn(
-                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR")));
+                List.of(new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR", 0)));
         when(tutoriaService.obtener(10L)).thenReturn(
                 List.of(new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
         when(tutoriaService.obtener(11L)).thenReturn(List.of());
@@ -141,8 +141,8 @@ class ExportacionHorarioServiceTest {
     void entreVariasTutoriasSoloElPrincipalDaLaLinea() throws IOException {
         cablearUnGrupo("1ºA", 10L);
         when(profesorService.listar()).thenReturn(List.of(
-                new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR"),
-                new ProfesorDTO(8L, "LEN1", "Crespo Saborido, Ana María", null, "PROFESOR")));
+                new ProfesorDTO(7L, "MAT1", "Macías Magro, Sonia", null, "PROFESOR", 0),
+                new ProfesorDTO(8L, "LEN1", "Crespo Saborido, Ana María", null, "PROFESOR", 0)));
         when(tutoriaService.obtener(10L)).thenReturn(List.of(
                 new TutoriaDTO("LEN1", "CO_TUTOR"),
                 new TutoriaDTO("MAT1", "TUTOR_PRINCIPAL")));
@@ -190,7 +190,7 @@ class ExportacionHorarioServiceTest {
                 sesion(1, 1, "BIO", "Biología", List.of("BYG2"), "A6", "3ºB"))));
         when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
         when(profesorService.listar()).thenReturn(List.of(
-                new ProfesorDTO(7L, "BYG2", "Afán Herencia, María Trinidad", null, "PROFESOR")));
+                new ProfesorDTO(7L, "BYG2", "Afán Herencia, María Trinidad", null, "PROFESOR", 0)));
         when(grupoService.listar()).thenReturn(List.of(
                 new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO", null, null),
                 new GrupoDTO(11L, "3ºBDi", "ESO3", "DIVERSIFICACION_PDC", null, null)));
@@ -214,7 +214,7 @@ class ExportacionHorarioServiceTest {
                 sesion(1, 1, "BIO", "Biología", List.of("BYG1"), "A6", "3ºB"))));
         when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
         when(profesorService.listar()).thenReturn(List.of(
-                new ProfesorDTO(7L, "BYG1", "Crespo Saborido, Ana María", null, "PROFESOR")));
+                new ProfesorDTO(7L, "BYG1", "Crespo Saborido, Ana María", null, "PROFESOR", 0)));
         when(grupoService.listar()).thenReturn(List.of(
                 new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO", null, null)));
         when(tutoriaService.obtener(10L)).thenReturn(List.of());
@@ -239,7 +239,7 @@ class ExportacionHorarioServiceTest {
                 sesion(1, 1, "BIO", "Biología", List.of("BYG1"), "A6", "3ºB"))));
         when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
         when(profesorService.listar()).thenReturn(List.of(
-                new ProfesorDTO(7L, "BYG1", "Macías Magro, Sonia", null, "PROFESOR")));
+                new ProfesorDTO(7L, "BYG1", "Macías Magro, Sonia", null, "PROFESOR", 0)));
         when(grupoService.listar()).thenReturn(List.of(
                 new GrupoDTO(10L, "3ºB", "ESO3", "ORDINARIO", null, null)));
         when(tutoriaService.obtener(10L)).thenReturn(List.of(
@@ -266,7 +266,7 @@ class ExportacionHorarioServiceTest {
                 sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA"))));
         when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
         when(profesorService.listar()).thenReturn(List.of(
-                new ProfesorDTO(3L, "MAT1", "Ríos Palomo, María del Carmen", null, "PROFESOR")));
+                new ProfesorDTO(3L, "MAT1", "Ríos Palomo, María del Carmen", null, "PROFESOR", 0)));
         when(aulaService.listar()).thenReturn(List.of(
                 new AulaDTO(1L, "A5", "ORDINARIA", 30, "Principal", 1, "Norte", true),
                 new AulaDTO(2L, "B08", "ORDINARIA", 30, "Principal", 0, "Sur", true)));

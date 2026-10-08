@@ -1106,11 +1106,157 @@ class PrevalidacionServiceTest {
                 .as("discriminante: sin el B1 la actividad sí se evalúa").hasSize(1);
     }
 
+    // ------------------------------------------------- guardias (S212, C-dato-guardias)
+
+    private static final String INSUFICIENTES = PrevalidacionService.REGLA_GUARDIAS_INSUFICIENTES;
+    private static final String SIN_HUECO = PrevalidacionService.REGLA_GUARDIAS_SIN_HUECO;
+
+    /** P1, frontera: con m = 2 y T = 5 hacen falta 10, y 10 guardias bastan. Mata «<» → «<=». */
+    @Test
+    void guardiasInsuficientes_sumaIgualAlMinimoPorTramos_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1),
+                new Profesor("MAT1", "Ana Ruiz"), new Profesor("LEN1", "Luis Gil"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                guardias(2, Map.of("MAT1", 5, "LEN1", 5))), INSUFICIENTES)).isEmpty();
+    }
+
+    /** P1: una guardia por debajo, un ERROR del centro con los tres números en el texto. */
+    @Test
+    void guardiasInsuficientes_unaPorDebajo_unErrorDelCentroConLosTresNumeros() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1),
+                new Profesor("MAT1", "Ana Ruiz"), new Profesor("LEN1", "Luis Gil"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                guardias(2, Map.of("MAT1", 5, "LEN1", 4))), INSUFICIENTES)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+            assertThat(a.entidadCodigo()).isEqualTo("CENTRO");
+            assertThat(a.demanda()).isEqualTo(10);
+            assertThat(a.disponible()).isEqualTo(9);
+            assertThat(a.descripcion()).isEqualTo("Las guardias ordinarias de los profesores suman 9 y hacen"
+                    + " falta 10: 2 profesores de guardia en cada uno de los 5 tramos de clase. Añade guardias"
+                    + " a los profesores o baja el mínimo por tramo.");
+        });
+    }
+
+    /** P1: mínimo 0 es un centro sin guardias, y con 0 guardias no sale nada de nada. */
+    @Test
+    void guardiasInsuficientes_minimoCeroYNingunaGuardia_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(PrevalidacionService.prevalidar(problema, guardias(0, Map.of("MAT1", 0)))).isEmpty();
+    }
+
+    /**
+     * P2, frontera: O = 2, L = 5 − 1 DURA = 4 y g = 2, así que O + g = L y no sale. Mata «>» → «>=».
+     */
+    @Test
+    void guardiasSinHueco_ocupadasMasGuardiasIgualALibres_nada() {
+        Profesor mat1 = new Profesor("MAT1", "Ana Ruiz");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 1);
+        ProblemaHorario problema = problema(tramos, List.of(mat1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 2, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of(dura(mat1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema, guardias(0, Map.of("MAT1", 2)))).isEmpty();
+    }
+
+    /**
+     * P2: con g = 3, O + g = 5 y L = 4. Un ERROR del profesor, por su código y con su nombre. La L
+     * resta la DURA: sin restarla sería 5 y no saldría (mata «sin restar las No puede»).
+     */
+    @Test
+    void guardiasSinHueco_unaPorEncima_unErrorDelProfesorConSuNombre() {
+        Profesor mat1 = new Profesor("MAT1", "Ana Ruiz");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        List<Tramo> tramos = tramosEnDias(5, 1);
+        ProblemaHorario problema = problema(tramos, List.of(mat1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 2, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of(dura(mat1, tramos.get(0))));
+
+        assertThat(PrevalidacionService.prevalidar(problema, guardias(0, Map.of("MAT1", 3))))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+                    assertThat(a.regla()).isEqualTo(SIN_HUECO);
+                    assertThat(a.entidadCodigo()).isEqualTo("MAT1");
+                    assertThat(a.demanda()).isEqualTo(5);
+                    assertThat(a.disponible()).isEqualTo(4);
+                    assertThat(a.descripcion()).isEqualTo("Ana Ruiz tiene 2 horas ocupadas y 3 guardias"
+                            + " ordinarias (5), pero solo 4 tramos de clase sin “No puede”.");
+                });
+    }
+
+    /**
+     * P2: «ocupado» es cualquier actividad. Dos clases y una reunión dan O = 3; con g = 2 y L = 4
+     * sale. Contando solo las CLASE, O = 2 y no saldría.
+     */
+    @Test
+    void guardiasSinHueco_unaReunionCuentaComoOcupada() {
+        Profesor mat1 = new Profesor("MAT1", "Ana Ruiz");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(4, 1), List.of(mat1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 2, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg)),
+                        actividad("RED", 1, 1, PatronTemporal.NEUTRA, plazaSinAlumnos("RED-P1", mat1))),
+                List.of());
+        DatosCuadre datos = new DatosCuadre(Map.of(), Map.of(), Set.of("RED"), 0, Map.of("MAT1", 2));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, datos), SIN_HUECO))
+                .extracting(AvisoPrevalidacion::entidadCodigo, AvisoPrevalidacion::demanda,
+                        AvisoPrevalidacion::disponible)
+                .containsExactly(tuple("MAT1", 5, 4));
+    }
+
+    /** P2: sin guardias no hay nada que no quepa, aunque el profesor esté justo lleno (O = L). */
+    @Test
+    void guardiasSinHueco_sinGuardias_nada() {
+        Profesor mat1 = new Profesor("MAT1", "Ana Ruiz");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(4, 1), List.of(mat1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of());
+
+        assertThat(PrevalidacionService.prevalidar(problema, guardias(0, Map.of("MAT1", 0)))).isEmpty();
+    }
+
+    /**
+     * P2 con O > L: avisa PROFESOR_SOBRECARGADO y no GUARDIAS_SIN_HUECO, para no repetir el aviso.
+     * Mata la guarda O ≤ L quitada.
+     */
+    @Test
+    void guardiasSinHueco_conElProfesorYaSobrecargado_soloSaleLaSobrecarga() {
+        Profesor mat1 = new Profesor("MAT1", "Ana Ruiz");
+        GrupoAdministrativo grupo = grupo("1ºA");
+        Subgrupo sg = new Subgrupo("1ºA-Completo", Set.of(grupo));
+        ProblemaHorario problema = problema(tramosEnDias(4, 1), List.of(mat1), List.of(grupo), List.of(sg),
+                List.of(actividad("Mat-1ºA", 5, 1, PatronTemporal.NEUTRA, plaza("Mat-1ºA-P1", mat1, sg))),
+                List.of());
+
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, guardias(0, Map.of("MAT1", 2)));
+
+        assertThat(soloRegla(avisos, PrevalidacionService.REGLA_PROFESOR_SOBRECARGADO)).hasSize(1);
+        assertThat(soloRegla(avisos, SIN_HUECO)).isEmpty();
+    }
+
     // ------------------------------------------------------------------- helpers
 
     private static DatosCuadre datos(
             Map<String, Integer> profesores, Map<String, Integer> grupos, Set<String> noClase) {
         return new DatosCuadre(profesores, grupos, noClase);
+    }
+
+    /** Sin totales y todo CLASE, con el mínimo por tramo y las guardias de cada profesor (S212). */
+    private static DatosCuadre guardias(int minimo, Map<String, Integer> porProfesor) {
+        return new DatosCuadre(Map.of(), Map.of(), Set.of(), minimo, porProfesor);
+    }
+
+    /** Solo tramos y profesores, sin grupos ni actividades (S212: las guardias del centro). */
+    private static ProblemaHorario problemaSinActividades(List<Tramo> tramos, Profesor... profesores) {
+        return problema(tramos, List.of(profesores), List.of(), List.of(), List.of(), List.of());
     }
 
     /** Plaza de una reunión o una función (S201): sin subgrupos y sin aula. */

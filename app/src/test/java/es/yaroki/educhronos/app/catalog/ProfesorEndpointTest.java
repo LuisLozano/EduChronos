@@ -311,6 +311,66 @@ class ProfesorEndpointTest {
                 .andExpect(jsonPath("$[0].cargo").value("JEFE_ESTUDIOS"));
     }
 
+    // ------------------------------------------- guardias ordinarias (S212, C-dato-guardias)
+
+    /** Alta sin el campo: 0 guardias, en la respuesta y en el GET. */
+    @Test
+    void guardias_altaSinElCampo_cero() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(0));
+    }
+
+    /** PUT con 3: el GET devuelve 3. */
+    @Test
+    void guardias_edicionConTres_elGetDevuelveTres() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+
+        mockMvc.perform(put("/api/profesores/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConGuardias("MAT8", "Ada Lovelace", "3")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(3));
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(3));
+    }
+
+    /** PUT con −1: 400 que nombra el campo, y el profesor conserva las que tenía. */
+    @Test
+    void guardias_edicionNegativa_400ConCampoEnMensaje() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        mockMvc.perform(put("/api/profesores/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bodyConGuardias("MAT8", "Ada Lovelace", "2")));
+
+        mockMvc.perform(put("/api/profesores/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConGuardias("MAT8", "Ada Lovelace", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("guardiasOrdinarias")));
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(2));
+    }
+
+    /** El PUT reemplaza: sin el campo, un profesor con 3 guardias vuelve a 0. */
+    @Test
+    void guardias_edicionSinElCampo_vuelveACero() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        mockMvc.perform(put("/api/profesores/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bodyConGuardias("MAT8", "Ada Lovelace", "3")));
+
+        mockMvc.perform(put("/api/profesores/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("MAT8", "Ada Lovelace")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(0));
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(0));
+    }
+
     /** Da de alta por la red y devuelve el id sintético asignado. */
     private long crear(String codigo, String nombre) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/profesores")
@@ -339,6 +399,12 @@ class ProfesorEndpointTest {
             String codigo, String nombreCompleto, String total, String cargo) {
         return "{\"codigo\":\"" + codigo + "\",\"nombreCompleto\":\"" + nombreCompleto + "\""
                 + ",\"totalDeclarado\":" + total + ",\"cargo\":" + cargo + "}";
+    }
+
+    /** {@code {"codigo":..,"nombreCompleto":..,"guardiasOrdinarias":..}}, las guardias en JSON. */
+    private static String bodyConGuardias(String codigo, String nombreCompleto, String guardias) {
+        return "{\"codigo\":\"" + codigo + "\",\"nombreCompleto\":\"" + nombreCompleto + "\""
+                + ",\"guardiasOrdinarias\":" + guardias + "}";
     }
 
     /** {@code {"codigo":..,"nombreCompleto":..}} */

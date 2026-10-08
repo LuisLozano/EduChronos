@@ -8,6 +8,7 @@ import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
+import es.yaroki.educhronos.app.catalog.ConfiguracionRepository;
 import es.yaroki.educhronos.app.catalog.Asignatura;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativo;
 import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
@@ -101,6 +102,9 @@ public class GeneradorHorarioService {
     private final ProfesorTutoriaRepository profesorTutoriaRepository;
     private final AsignaturaAulaRepository asignaturaAulaRepository;
 
+    /** El mínimo de guardias por tramo del centro (S212), que lee {@link ConfiguracionGuardias}. */
+    private final ConfiguracionRepository configuracionRepository;
+
     /**
      * La identidad del curso abierto, sólo para los indicadores (S160). Este servicio no la
      * lee ni la escribe: se da de alta al entrar en {@link #generar} y de baja al salir, y
@@ -126,6 +130,7 @@ public class GeneradorHorarioService {
             AulaBloqueadaRepository aulaBloqueadaRepository,
             ProfesorTutoriaRepository profesorTutoriaRepository,
             AsignaturaAulaRepository asignaturaAulaRepository,
+            ConfiguracionRepository configuracionRepository,
             EstadoCurso estadoCurso,
             PlatformTransactionManager gestorTransacciones) {
         this.tramoRepository = tramoRepository;
@@ -142,6 +147,7 @@ public class GeneradorHorarioService {
         this.aulaBloqueadaRepository = aulaBloqueadaRepository;
         this.profesorTutoriaRepository = profesorTutoriaRepository;
         this.asignaturaAulaRepository = asignaturaAulaRepository;
+        this.configuracionRepository = configuracionRepository;
         this.estadoCurso = estadoCurso;
         this.transaccion = new TransactionTemplate(gestorTransacciones);
     }
@@ -185,8 +191,10 @@ public class GeneradorHorarioService {
 
     /**
      * Los datos del cuadre de horas declaradas (S203, C-totales-y-cargo, T2.1): totales de
-     * profesores y grupos y actividades que no son CLASE, por código. Lo que el
-     * {@code ProblemaHorario} no lleva porque el solver no lo usa.
+     * profesores y grupos y actividades que no son CLASE, por código. Desde S212
+     * (C-dato-guardias), también las guardias ordinarias de cada profesor y el mínimo por tramo
+     * del centro, leído por {@link ConfiguracionGuardias}. Lo que el {@code ProblemaHorario} no
+     * lleva porque el solver no lo usa.
      *
      * <p>Lo llaman la generación, junto a {@link #cargarProblema()}, y
      * {@code PrevalidacionService}, que lo pide por este bean. Solo lee columnas simples, sin
@@ -198,10 +206,12 @@ public class GeneradorHorarioService {
     @Transactional(readOnly = true)
     public DatosCuadre cargarDatosCuadre() {
         Map<String, Integer> declaradasProfesor = new HashMap<>();
+        Map<String, Integer> guardiasPorProfesor = new HashMap<>();
         for (Profesor profesor : profesorRepository.findAll()) {
             if (profesor.getTotalDeclarado() != null) {
                 declaradasProfesor.put(profesor.getCodigo(), profesor.getTotalDeclarado());
             }
+            guardiasPorProfesor.put(profesor.getCodigo(), profesor.getGuardiasOrdinarias());
         }
         Map<String, Integer> declaradasGrupo = new HashMap<>();
         for (GrupoAdministrativo grupo : grupoRepository.findAll()) {
@@ -213,7 +223,8 @@ public class GeneradorHorarioService {
                 .filter(actividad -> actividad.getTipo() != TipoActividad.CLASE)
                 .map(Actividad::getCodigo)
                 .collect(Collectors.toSet());
-        return new DatosCuadre(declaradasProfesor, declaradasGrupo, actividadesNoClase);
+        return new DatosCuadre(declaradasProfesor, declaradasGrupo, actividadesNoClase,
+                ConfiguracionGuardias.minimoPorTramo(configuracionRepository), guardiasPorProfesor);
     }
 
     /**

@@ -8,7 +8,7 @@
 -- CREATE TABLE es el DDL que Hibernate genera VERBATIM (schema-generation.scripts
 -- con el community SQLiteDialect 7.4.1); lo ÚNICO añadido son las 27 FK inline,
 -- que el dialecto NO emite (de ahí que hasta 8.5-C1 no hubiera integridad real).
--- Desde las migraciones (S201, S203, S206), las columnas añadidas con ADD COLUMN se
+-- Desde las migraciones (S201, S203, S206, S212), las columnas añadidas con ADD COLUMN se
 -- escriben aquí tal como las deja SQLite tras la migración, para que una base nueva y
 -- una migrada tengan el mismo sqlite_master: grupo_administrativo.aula_referencia_id
 -- lleva su FK en la columna, no al final.
@@ -52,7 +52,7 @@ create table if not exists plaza (actividad_id bigint not null, asignatura_id bi
 create table if not exists plaza_aula_candidata (aula_id bigint not null, plaza_id bigint not null, primary key (aula_id, plaza_id), foreign key (aula_id) references aula(id), foreign key (plaza_id) references plaza(id) on delete cascade);
 create table if not exists plaza_profesor (plaza_id bigint not null, profesor_id bigint not null, primary key (plaza_id, profesor_id), foreign key (plaza_id) references plaza(id) on delete cascade, foreign key (profesor_id) references profesor(id));
 create table if not exists plaza_subgrupo (plaza_id bigint not null, subgrupo_id bigint not null, primary key (plaza_id, subgrupo_id), foreign key (plaza_id) references plaza(id) on delete cascade, foreign key (subgrupo_id) references subgrupo(id));
-create table if not exists profesor (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, total_declarado integer, cargo varchar(255) not null default 'PROFESOR' check ((cargo in ('PROFESOR','JEFE_ESTUDIOS','DIRECTOR','VICEDIRECTOR','SECRETARIO'))), primary key (id));
+create table if not exists profesor (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, total_declarado integer, cargo varchar(255) not null default 'PROFESOR' check ((cargo in ('PROFESOR','JEFE_ESTUDIOS','DIRECTOR','VICEDIRECTOR','SECRETARIO'))), guardias_ordinarias integer not null default 0, primary key (id));
 create table if not exists profesor_restriccion_horaria (peso integer not null, id integer, profesor_id bigint not null, tramo_id bigint not null, motivo varchar(255), tipo varchar(255) not null check ((tipo in ('DURA','BLANDA'))), primary key (id), foreign key (profesor_id) references profesor(id), foreign key (tramo_id) references tramo_semanal(id));
 create table if not exists profesor_tutoria (grupo_id bigint not null, profesor_id bigint not null, rol varchar(255) not null check ((rol in ('TUTOR_PRINCIPAL','CO_TUTOR'))), primary key (profesor_id, grupo_id), foreign key (profesor_id) references profesor(id), foreign key (grupo_id) references grupo_administrativo(id) on delete cascade);
 create table if not exists sesion (indice integer not null, aula_id bigint, horario_id bigint not null, id integer, plaza_id bigint not null, tramo_inicio_id bigint not null, primary key (id), foreign key (aula_id) references aula(id), foreign key (horario_id) references horario_generado(id) on delete cascade, foreign key (plaza_id) references plaza(id), foreign key (tramo_inicio_id) references tramo_semanal(id));

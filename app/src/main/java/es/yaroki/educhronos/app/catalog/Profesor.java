@@ -32,6 +32,10 @@ public class Profesor {
     @Column(name = "cargo", nullable = false)
     private Cargo cargo = Cargo.PROFESOR;
 
+    /** Guardias ordinarias semanales (S212, C-dato-guardias): un número, 0 si no tiene. */
+    @Column(name = "guardias_ordinarias", nullable = false)
+    private int guardiasOrdinarias;
+
     protected Profesor() {
         // requerido por JPA
     }
@@ -67,6 +71,14 @@ public class Profesor {
 
     public void setCargo(Cargo cargo) {
         this.cargo = cargo;
+    }
+
+    public int getGuardiasOrdinarias() {
+        return guardiasOrdinarias;
+    }
+
+    public void setGuardiasOrdinarias(int guardiasOrdinarias) {
+        this.guardiasOrdinarias = guardiasOrdinarias;
     }
 
     /**

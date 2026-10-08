@@ -165,6 +165,21 @@ public class PrevalidacionService {
      */
     public static final String REGLA_CARGA_DE_AULAS_EXCEDIDA = "CARGA_DE_AULAS_EXCEDIDA";
 
+    /**
+     * Las guardias ordinarias de todos los profesores no llegan al mínimo de profesores de guardia
+     * en cada tramo de clase (S212, C-dato-guardias). ERROR, ver {@link #guardiasInsuficientes}.
+     */
+    public static final String REGLA_GUARDIAS_INSUFICIENTES = "GUARDIAS_INSUFICIENTES";
+
+    /**
+     * Las horas ocupadas de un profesor más sus guardias ordinarias no caben en sus tramos de clase
+     * sin «No puede» (S212). ERROR, ver {@link #sobrecargaProfesor}.
+     */
+    public static final String REGLA_GUARDIAS_SIN_HUECO = "GUARDIAS_SIN_HUECO";
+
+    /** {@code entidadCodigo} de los avisos que son del centro y no de una entidad (S212). */
+    public static final String ENTIDAD_CENTRO = "CENTRO";
+
     /** Filtro de actividades de las reglas de capacidad: todas cuentan, también REUNION y FUNCION. */
     private static final Predicate<Actividad> TODAS = actividad -> true;
 
@@ -216,8 +231,9 @@ public class PrevalidacionService {
      * la generación pasan los de {@code GeneradorHorarioService.cargarDatosCuadre()}; con
      * {@link DatosCuadre#VACIO} las reglas de cuadre no emiten nada.
      *
-     * <p>El orden de salida es estable. Primero los ERROR: profesores, actividades, grupos,
-     * pines sobre DURA, clases sin aula posible y repartos de aulas imposibles (S207). Después
+     * <p>El orden de salida es estable. Primero los ERROR: profesores (con sus guardias sin hueco,
+     * S212), actividades, grupos, pines sobre DURA, clases sin aula posible, repartos de aulas
+     * imposibles (S207), carga de aulas (S209) y guardias insuficientes del centro (S212). Después
      * los AVISO: tutorías (S8), cuadre de profesores y cuadre de
      * grupos. Dentro de cada bloque, el orden del problema. Así los hallazgos que abortan la
      * generación quedan agrupados al principio de la lista.
@@ -244,13 +260,14 @@ public class PrevalidacionService {
                 .map(Tramo::diaSemana).distinct().count();
 
         List<AvisoPrevalidacion> avisos = new ArrayList<>();
-        avisos.addAll(sobrecargaProfesor(problema, tramosLectivos, TODAS));
+        avisos.addAll(sobrecargaProfesor(problema, tramosLectivos, TODAS, datos));
         avisos.addAll(repeticionesExcedenDias(problema, diasLectivos));
         avisos.addAll(sobrecargaGrupo(problema, tramosLectivos, TODAS));
         avisos.addAll(pinSobreTramoDura(problema));
         avisos.addAll(clasesSinAulaPosible(aulas));
         avisos.addAll(repartoDeAulasImposible(problema, aulas));
         avisos.addAll(cargaDeAulasExcedida(problema, tramosLectivos, soloClase(datos)));
+        avisos.addAll(guardiasInsuficientes(tramosLectivos, datos));
         avisos.addAll(tutoriasSinTutor(problema));
         avisos.addAll(profesoresDescuadrados(problema, datos));
         avisos.addAll(gruposDescuadrados(problema, datos));
@@ -261,12 +278,19 @@ public class PrevalidacionService {
      * (a) SOBRECARGA DE PROFESOR — ERROR. Falla si un profesor debe impartir más tramos
      * de los que le quedan libres.
      *
-     * <p>La disponibilidad se computa como (tramos lectivos − restricciones DURA). Que
-     * guardias y reducciones se declaren como DURA es DECISIÓN DEL ARQUITECTO (S79), no
-     * dato derivado: los volcados de docs/horario-referencia/ no contienen ocupación no
-     * docente y no pueden contenerla (sus fuentes son rejillas por grupo y por aula; una
-     * guardia no ocupa ninguno de los dos). Si el centro no las declara, esta
+     * <p>La disponibilidad se computa como (tramos lectivos − restricciones DURA). Desde S212
+     * (C-dato-guardias) las guardias ORDINARIAS son un dato y no una DURA: un número por profesor
+     * y un mínimo por tramo del centro, que comprueban {@link #REGLA_GUARDIAS_SIN_HUECO} (en este
+     * mismo bucle) y {@link #REGLA_GUARDIAS_INSUFICIENTES}. Las de biblioteca y convivencia, y las
+     * reducciones, se siguen marcando como «No puede» hasta O-guardias-especiales. Los volcados de
+     * profesor de 2026/2027 sí traen celdas de guardia; si el centro no las declara, esta
      * comprobación produce falsos NEGATIVOS, nunca falsos positivos.
+     *
+     * <p><b>Guardias sin hueco (S212), en el mismo bucle y con la misma O y la misma L.</b> Si la
+     * demanda O ya supera lo disponible L, avisa esta regla y no la de guardias, para no repetir
+     * el aviso. Si no, y O más las guardias ordinarias g del profesor supera L, sale
+     * {@link #REGLA_GUARDIAS_SIN_HUECO}: {@code demanda} = O + g, {@code disponible} = L. Con
+     * g = 0 no puede salir, porque O ≤ L.
      *
      * <p><b>La demanda se cuenta por ACTIVIDAD, no por plaza</b> (decisión S79). Las
      * plazas de una actividad OCURREN SIMULTÁNEAMENTE (javadoc de {@code domain.Actividad})
@@ -284,7 +308,8 @@ public class PrevalidacionService {
      * cuadre, {@link #demandaPorProfesor}, con otro filtro.
      */
     private static List<AvisoPrevalidacion> sobrecargaProfesor(
-            ProblemaHorario problema, int tramosLectivos, Predicate<Actividad> filtro) {
+            ProblemaHorario problema, int tramosLectivos, Predicate<Actividad> filtro,
+            DatosCuadre datos) {
 
         Map<Profesor, Integer> demandaPorProfesor = demandaPorProfesor(problema, filtro);
 
@@ -314,9 +339,52 @@ public class PrevalidacionService {
                                 + " tramos y solo dispone de " + disponible + " ("
                                 + tramosLectivos + " tramos lectivos - " + duras
                                 + " restricciones DURA)"));
+                continue;
+            }
+            int guardias = datos.guardiasPorProfesor().getOrDefault(profesor.codigo(), 0);
+            int conGuardias = demanda + guardias;
+            if (conGuardias > disponible) {
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.ERROR,
+                        REGLA_GUARDIAS_SIN_HUECO,
+                        profesor.codigo(),
+                        conGuardias,
+                        disponible,
+                        profesor.nombre() + " tiene " + demanda + " horas ocupadas y " + guardias
+                                + " guardias ordinarias (" + conGuardias + "), pero solo "
+                                + disponible + " tramos de clase sin “No puede”."));
             }
         }
         return avisos;
+    }
+
+    /**
+     * GUARDIAS INSUFICIENTES (S212, C-dato-guardias) — ERROR. Con S la suma de las guardias
+     * ordinarias de todos los profesores, m el mínimo de profesores de guardia por tramo del
+     * centro y T los tramos de clase del problema (los lectivos), falla si S &lt; m × T. Con
+     * m = 0 (el centro no usa guardias) no sale nunca.
+     *
+     * <p>Es un aviso del CENTRO, no de una entidad: {@code entidadCodigo} es
+     * {@link #ENTIDAD_CENTRO}, {@code demanda} = m × T y {@code disponible} = S, la forma
+     * {@code demanda > disponible} de {@link AvisoPrevalidacion}.
+     */
+    private static List<AvisoPrevalidacion> guardiasInsuficientes(int tramosLectivos, DatosCuadre datos) {
+        int minimo = datos.minimoGuardiasPorTramo();
+        int necesarias = minimo * tramosLectivos;
+        int suma = datos.guardiasPorProfesor().values().stream().mapToInt(Integer::intValue).sum();
+        if (suma < necesarias) {
+            return List.of(new AvisoPrevalidacion(
+                    Severidad.ERROR,
+                    REGLA_GUARDIAS_INSUFICIENTES,
+                    ENTIDAD_CENTRO,
+                    necesarias,
+                    suma,
+                    "Las guardias ordinarias de los profesores suman " + suma + " y hacen falta "
+                            + necesarias + ": " + minimo + " profesores de guardia en cada uno de los "
+                            + tramosLectivos + " tramos de clase. Añade guardias a los profesores o"
+                            + " baja el mínimo por tramo."));
+        }
+        return List.of();
     }
 
     /**
