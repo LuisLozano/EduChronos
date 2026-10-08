@@ -110,7 +110,8 @@ public class DiagnosticoService {
                 .mapToInt(Integer::intValue).sum();
         int consecutivas = verificador.contarPenalizacionConsecutivasProfesor(problema, solucion);
         int indispBlanda = verificador.contarPenalizacionIndisponibilidadBlanda(problema, solucion);
-        TotalesDTO totales = new TotalesDTO(ventanas, consecutivas, indispBlanda);
+        int aulaNoPreferida = verificador.contarPenalizacionAulaNoPreferida(problema, solucion);
+        TotalesDTO totales = new TotalesDTO(ventanas, consecutivas, indispBlanda, aulaNoPreferida);
 
         return new DiagnosticoDTO(violaciones, penalizaciones, totales);
     }
