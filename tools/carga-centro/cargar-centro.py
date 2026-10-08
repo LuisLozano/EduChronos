@@ -14,6 +14,17 @@ MODOS
                   pide otra cosa: cargar es la accion explicita, no el descuido.
     --cargar      ejecuta la carga.
 
+    --sin-aulas   (S209, base de prueba de O-aulas) las plazas de las actividades CLASE
+                  viajan sin aulaFija ni aulasCandidatas: el aula la elige el generador
+                  con las reglas de aulas. Las de REUNION y FUNCION no cambian. La
+                  prevalidacion admite entonces una CLASE sin aula; sin el modo, no.
+    --conservar-aulas RUTA
+                  solo junto a --sin-aulas. JSON con la clave «conservarAula»: lista de
+                  {"actividad": codigo, "motivo": texto}; las demas claves se ignoran.
+                  Esas actividades CLASE conservan el aula del catalogo en todas sus
+                  plazas. Un codigo desconocido o repetido, un motivo vacio o una
+                  actividad que no es CLASE son violaciones: abortan sin enviar nada.
+
 ORDEN DE CARGA
     jornada, niveles, asignaturas, profesores, aulas, grupos ORDINARIO, PDC,
     tutorias, subgrupos, actividades. Es el orden de dependencias: nada se envia
@@ -147,11 +158,11 @@ class Cliente:
 
 # ------------------------------------------------------------- prevalidacion
 
-def prevalidar(catalogo, nombres):
+def prevalidar(catalogo, nombres, sin_aulas=False):
     """Valida el catalogo en seco. Devuelve la lista de violaciones.
 
     Cada violacion es (familia, sujeto, motivo). No se envia nada: esta funcion
-    no toca la red.
+    no toca la red. Con sin_aulas (S209) una plaza de CLASE sin aula no es violacion.
     """
     v = []
 
@@ -283,7 +294,7 @@ def prevalidar(catalogo, nombres):
             candidatas = p.get("aulasCandidatas") or []
             if tiene_fija and candidatas:
                 fallo("plazas", sujeto, "XOR de aula: tiene aula fija y aulas candidatas a la vez")
-            if es_clase and not tiene_fija and not candidatas:
+            if es_clase and not tiene_fija and not candidatas and not sin_aulas:
                 fallo("plazas", sujeto, "XOR de aula: una clase necesita aula fija o al menos un aula candidata")
             if tiene_fija and p["aulaFija"] not in aulas:
                 fallo("plazas", sujeto, "aulaFija inexistente: %r" % p["aulaFija"])
@@ -308,6 +319,47 @@ def prevalidar(catalogo, nombres):
     return v
 
 
+def leer_conservar(ruta):
+    """Lee la clave «conservarAula» de RUTA (S209). Devuelve (ruta absoluta, lista).
+
+    Las demas claves del fichero se ignoran: la lista puede vivir dentro de
+    reglas-aulas.json. Sin la clave, o si no es una lista, sale sin enviar nada.
+    """
+    ruta = Path(ruta).resolve()
+    datos = json.loads(ruta.read_text(encoding="utf-8"))
+    lista = datos.get("conservarAula") if isinstance(datos, dict) else None
+    if not isinstance(lista, list):
+        raise SystemExit("%s no trae una lista en la clave «conservarAula»" % ruta)
+    return ruta, lista
+
+
+def validar_conservar(catalogo, lista):
+    """Violaciones de la lista de conservar (S209), en la familia «conservarAula».
+
+    Cada una nombra el identificador: desconocido, repetido, sin motivo o no CLASE.
+    """
+    v = []
+    tipos = {a["codigo"]: a.get("tipo", "CLASE") for a in catalogo["actividades"]}
+    vistos = set()
+    for i, entrada in enumerate(lista):
+        if not isinstance(entrada, dict):
+            v.append(("conservarAula", "entrada %d" % (i + 1), "no es un objeto: %r" % (entrada,)))
+            continue
+        codigo = entrada.get("actividad")
+        motivo = entrada.get("motivo")
+        if not isinstance(codigo, str) or codigo not in tipos:
+            v.append(("conservarAula", repr(codigo), "actividad inexistente en el catalogo"))
+        else:
+            if tipos[codigo] != "CLASE":
+                v.append(("conservarAula", codigo, "es %s: solo se conserva el aula de una CLASE" % tipos[codigo]))
+            if codigo in vistos:
+                v.append(("conservarAula", codigo, "aparece mas de una vez en la lista"))
+            vistos.add(codigo)
+        if not isinstance(motivo, str) or not motivo.strip():
+            v.append(("conservarAula", repr(codigo), "motivo vacio"))
+    return v
+
+
 def informar_prevalidacion(violaciones):
     print("PREVALIDACION EN SECO (no se ha enviado nada)")
     print("  familias comprobadas: %s" % ", ".join(FAMILIAS))
@@ -315,7 +367,7 @@ def informar_prevalidacion(violaciones):
     por_familia = {}
     for familia, _, _ in violaciones:
         por_familia[familia] = por_familia.get(familia, 0) + 1
-    for familia in FAMILIAS:
+    for familia in FAMILIAS + [f for f in por_familia if f not in FAMILIAS]:
         if familia in por_familia:
             print("    %-12s %d" % (familia, por_familia[familia]))
     for familia, sujeto, motivo in violaciones:
@@ -370,7 +422,19 @@ def escrituras_previstas(catalogo):
             + len(catalogo["actividades"]))
 
 
-def cargar(cliente, catalogo, nombres):
+def cuerpo_plaza(p, sin_aula):
+    """Cuerpo de una plaza. Con sin_aula (S209) no lleva ninguna clave de aula."""
+    cuerpo = {"asignatura": p["asignatura"]}
+    if not sin_aula:
+        cuerpo["aulaFija"] = p.get("aulaFija")
+        cuerpo["aulasCandidatas"] = list(p.get("aulasCandidatas") or [])
+    cuerpo["profesores"] = list(p.get("profesores") or [])
+    cuerpo["subgrupos"] = list(p.get("subgrupos") or [])
+    return cuerpo
+
+
+def cargar(cliente, catalogo, nombres, sin_aulas=False, conservar=frozenset()):
+    """Con sin_aulas (S209), las plazas de CLASE van sin aula salvo las de las actividades de conservar."""
     enviados = {}
     omitidos = {}
 
@@ -498,9 +562,12 @@ def cargar(cliente, catalogo, nombres):
     presentes = mapa_por_codigo(cliente.get("/api/actividades"))
     n = 0
     plazas_enviadas = 0
+    plazas_sin_aula = plazas_conservan = 0
     for a in catalogo["actividades"]:
         if a["codigo"] in presentes:
             continue
+        es_clase = a.get("tipo", "CLASE") == "CLASE"
+        sin_aula = sin_aulas and es_clase and a["codigo"] not in conservar
         cuerpo = {
             "codigo": a["codigo"],
             "asignatura": a.get("asignatura"),
@@ -508,21 +575,22 @@ def cargar(cliente, catalogo, nombres):
             "repeticionesPorSemana": a["repeticionesPorSemana"],
             "patronTemporal": a["patronTemporal"],
             "requiereTutor": a["requiereTutor"],
-            "plazas": [{
-                "asignatura": p["asignatura"],
-                "aulaFija": p.get("aulaFija"),
-                "aulasCandidatas": list(p.get("aulasCandidatas") or []),
-                "profesores": list(p.get("profesores") or []),
-                "subgrupos": list(p.get("subgrupos") or []),
-            } for p in a["plazas"]],
+            "plazas": [cuerpo_plaza(p, sin_aula) for p in a["plazas"]],
         }
         if "tipo" in a:
             cuerpo["tipo"] = a["tipo"]
         cliente.post("/api/actividades", cuerpo)
         plazas_enviadas += len(a["plazas"])
+        if sin_aulas and es_clase:
+            if sin_aula:
+                plazas_sin_aula += len(a["plazas"])
+            else:
+                plazas_conservan += len(a["plazas"])
         n += 1
     enviados["actividades"] = n
     enviados["plazas"] = plazas_enviadas
+    enviados["plazasClaseSinAula"] = plazas_sin_aula
+    enviados["plazasConservanAula"] = plazas_conservan
     print("  actividades: %d altas (%d plazas)" % (n, plazas_enviadas))
 
     return enviados, omitidos
@@ -626,7 +694,13 @@ def main(argv=None):
     modo.add_argument("--prevalidar", action="store_true",
                       help="solo valida en seco e informa (por defecto)")
     modo.add_argument("--cargar", action="store_true", help="ejecuta la carga")
+    parser.add_argument("--sin-aulas", action="store_true",
+                        help="las plazas de CLASE viajan sin aula (S209)")
+    parser.add_argument("--conservar-aulas", metavar="RUTA",
+                        help="JSON con «conservarAula»: actividades que conservan el aula (solo con --sin-aulas)")
     args = parser.parse_args(argv)
+    if args.conservar_aulas is not None and not args.sin_aulas:
+        parser.error("--conservar-aulas solo vale junto a --sin-aulas")
 
     ruta_catalogo = Path(args.catalogo).resolve()
     ruta_nombres = Path(args.nombres).resolve()
@@ -638,7 +712,16 @@ def main(argv=None):
                          % ruta_nombres)
     nombres = json.loads(ruta_nombres.read_text(encoding="utf-8"))
 
-    violaciones = prevalidar(catalogo, nombres)
+    violaciones = prevalidar(catalogo, nombres, sin_aulas=args.sin_aulas)
+    conservar = frozenset()
+    if args.sin_aulas:
+        print("modo sin aulas: las plazas de CLASE viajan sin aula")
+    if args.conservar_aulas is not None:
+        ruta_conservar, lista = leer_conservar(args.conservar_aulas)
+        print("conservar aulas: %s (%d actividades)" % (ruta_conservar, len(lista)))
+        violaciones += validar_conservar(catalogo, lista)
+        conservar = frozenset(e["actividad"] for e in lista
+                              if isinstance(e, dict) and isinstance(e.get("actividad"), str))
     informar_prevalidacion(violaciones)
     limpia, razon = prevalidacion_limpia(violaciones)
     print("  veredicto: %s" % razon)
@@ -660,12 +743,18 @@ def main(argv=None):
     print("CARGA contra %s" % args.base_url)
     cliente = Cliente(args.base_url)
     try:
-        enviados, omitidos = cargar(cliente, catalogo, nombres)
+        enviados, omitidos = cargar(cliente, catalogo, nombres,
+                                    sin_aulas=args.sin_aulas, conservar=conservar)
         desajustes = informe_final(cliente, catalogo, enviados, omitidos)
     except ErrorFatal as e:
         print()
         print(str(e))
         return 2
+    if args.sin_aulas:
+        print()
+        print("  MODO SIN AULAS: %d plazas de CLASE sin aula, %d plazas conservan aula, "
+              "%d actividades en la lista de conservar"
+              % (enviados["plazasClaseSinAula"], enviados["plazasConservanAula"], len(conservar)))
     return 0 if desajustes == 0 else 1
 
 
