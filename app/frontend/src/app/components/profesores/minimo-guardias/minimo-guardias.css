@@ -1,0 +1,29 @@
+.minimo-guardias {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--e2) var(--e3);
+  margin-bottom: var(--e4);
+}
+
+.minimo-guardias__etiqueta {
+  display: block;
+  margin-bottom: var(--e1);
+  font-size: var(--tam-s);
+}
+
+.minimo-guardias__input {
+  width: 6rem;
+  padding: var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  box-sizing: border-box;
+}
+
+.minimo-guardias__error-campo,
+.minimo-guardias__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--tam-s);
+}

@@ -1,0 +1,20 @@
+<div class="minimo-guardias">
+  <label class="minimo-guardias__campo">
+    <span class="minimo-guardias__etiqueta">Mínimo de profesores de guardia por tramo</span>
+    <input type="number" min="0" step="1" [formControl]="minimo" class="minimo-guardias__input dato" />
+  </label>
+  <button
+    type="button"
+    class="minimo-guardias__guardar"
+    [disabled]="minimo.invalid || cargando() || guardando()"
+    (click)="guardar()"
+  >
+    Guardar
+  </button>
+  @if (minimo.dirty && minimo.invalid) {
+    <span class="minimo-guardias__error-campo">Tiene que ser un número entero, 0 o más.</span>
+  }
+  @if (error()) {
+    <p class="minimo-guardias__error" role="alert">{{ error() }}</p>
+  }
+</div>

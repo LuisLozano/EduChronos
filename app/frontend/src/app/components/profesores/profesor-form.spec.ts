@@ -154,6 +154,7 @@ describe('ProfesorForm', () => {
       nombreCompleto: 'Ana Ruiz',
       totalDeclarado: 18,
       cargo: 'DIRECTOR',
+      guardiasOrdinarias: 0,
     });
     req.flush({ id: 7 });
   });
@@ -170,6 +171,7 @@ describe('ProfesorForm', () => {
       nombreCompleto: 'Ana Ruiz',
       totalDeclarado: null,
       cargo: 'PROFESOR',
+      guardiasOrdinarias: 0,
     });
     req.flush({ id: 7 });
   });
@@ -242,7 +244,57 @@ describe('ProfesorForm', () => {
       nombreCompleto: 'Ana Ruiz',
       totalDeclarado: 18,
       cargo: 'DIRECTOR',
+      guardiasOrdinarias: 0,
     });
     req.flush({ id: 7 });
+  });
+
+  // ─────────────────────────── S212: guardias ordinarias (C-dato-guardias, F1)
+
+  it('(14) al editar un profesor con 18 horas y 0 guardias, poner 3 guardias viaja en el PUT sin tocar el total', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, guardiasOrdinarias: 0 });
+    await fixture.whenStable();
+    const guardias = fixture.nativeElement.querySelector('.profesor-form__guardias') as HTMLInputElement;
+    expect(guardias.value).toBe('0');
+    teclear('.profesor-form__guardias', '3');
+    (fixture.componentInstance as unknown as ConCampos).guardar();
+
+    const req = http.expectOne('/api/profesores/7');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body.guardiasOrdinarias).toBe(3);
+    expect(req.request.body.totalDeclarado).toBe(18);
+    req.flush({ id: 7 });
+  });
+
+  it('(15) en edición carga las guardias que tiene el profesor', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, guardiasOrdinarias: 2 });
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement.querySelector('.profesor-form__guardias') as HTMLInputElement).value).toBe('2');
+  });
+
+  it('(16) el alta lleva las guardias escritas', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__guardias', '4');
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.guardiasOrdinarias).toBe(4);
+    req.flush({ id: 7 });
+  });
+
+  it('(17) con −1 guardias el formulario es inválido, avisa y no se envía petición', async () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__guardias', '-1');
+    inst.guardar();
+    await fixture.whenStable();
+
+    http.expectNone('/api/profesores');
+    expect(fixture.nativeElement.textContent).toContain('Las guardias tienen que ser un número entero, 0 o más.');
   });
 });

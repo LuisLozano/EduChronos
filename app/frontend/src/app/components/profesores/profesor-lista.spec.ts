@@ -42,6 +42,8 @@ describe('ProfesorLista', () => {
     http.expectOne('/api/profesores').flush(filas);
     // S203: cargar() pide también el cuadre de horas; sin atenderlo, http.verify() cae.
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
+    // S212: el mínimo de guardias de encima de la lista hace su GET al montar.
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
   }
 
   it('(1) carga la lista en init y la pinta', async () => {
@@ -62,6 +64,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush('', { status: 500, statusText: 'Server Error' });
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
@@ -234,8 +237,8 @@ describe('ProfesorLista', () => {
   // ─────────────────────────── S203 T3a: columnas Cargo y Horas
 
   const DOS = [
-    { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, cargo: 'JEFE_ESTUDIOS' },
-    { id: 8, codigo: 'LEN2', nombreCompleto: 'Luis Gil', totalDeclarado: null, cargo: 'PROFESOR' },
+    { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', totalDeclarado: 18, cargo: 'JEFE_ESTUDIOS', guardiasOrdinarias: 2 },
+    { id: 8, codigo: 'LEN2', nombreCompleto: 'Luis Gil', totalDeclarado: null, cargo: 'PROFESOR', guardiasOrdinarias: 0 },
   ];
 
   /** Carga la lista y responde el cuadre con las entradas dadas. */
@@ -243,6 +246,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush(filas);
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores, grupos: [] });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
   }
 
   /** La celda de la columna `indice` de la fila `fila`. */
@@ -252,6 +256,7 @@ describe('ProfesorLista', () => {
   }
 
   const HORAS = 3;
+  const GUARDIAS = 4;
 
   it('(12) la tabla pinta Cargo y Horas entre el nombre y las acciones', async () => {
     flushConCuadre(DOS, []);
@@ -260,7 +265,7 @@ describe('ProfesorLista', () => {
     const cabeceras = [...(fixture.nativeElement as HTMLElement).querySelectorAll('thead th')].map(
       (th) => th.textContent!.trim(),
     );
-    expect(cabeceras).toEqual(['Código', 'Nombre completo', 'Cargo', 'Horas', '']);
+    expect(cabeceras).toEqual(['Código', 'Nombre completo', 'Cargo', 'Horas', 'Guardias', '']);
   });
 
   it('(13) la columna Cargo pinta la etiqueta, no la constante', async () => {
@@ -311,6 +316,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush(DOS);
     http.expectOne('/api/prevalidacion/cuadre').flush('', { status: 500, statusText: 'Server Error' });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
@@ -321,5 +327,26 @@ describe('ProfesorLista', () => {
       'No se pudieron cargar las horas.',
     );
     expect(raiz.querySelector('.estado-lista__error')).toBeNull();
+  });
+
+  // ─────────────────────────── S212: columna Guardias y mínimo encima (C-dato-guardias, F2-F3)
+
+  it('(19) la columna Guardias pinta las guardias ordinarias de cada profesor, no su total', async () => {
+    flushConCuadre(DOS, [{ codigo: 'MAT8', configuradas: 18, declaradas: 18, descuadre: false }]);
+    await fixture.whenStable();
+
+    expect(celda(0, GUARDIAS).textContent!.trim()).toBe('2');
+    expect(celda(1, GUARDIAS).textContent!.trim()).toBe('0');
+  });
+
+  it('(20) el mínimo de guardias va encima de la tabla', async () => {
+    flushConCuadre(DOS, []);
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const minimo = raiz.querySelector('app-minimo-guardias')!;
+    const tabla = raiz.querySelector('.profesores__tabla')!;
+    expect(minimo).not.toBeNull();
+    expect(minimo.compareDocumentPosition(tabla) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

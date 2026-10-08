@@ -32,7 +32,7 @@ describe('ProfesorService', () => {
 
   it('(1) listar → GET /api/profesores', () => {
     const esperado: Profesor[] = [
-      { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' },
+      { id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 0 },
     ];
     let recibido: Profesor[] | undefined;
     service.listar().subscribe((r) => (recibido = r));
@@ -51,7 +51,7 @@ describe('ProfesorService', () => {
   });
 
   it('(3) crear → POST /api/profesores con el body de request', () => {
-    const cuerpo: ProfesorRequest = { codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' };
+    const cuerpo: ProfesorRequest = { codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 0 };
     service.crear(cuerpo).subscribe();
     const req = http.expectOne('/api/profesores');
     expect(req.request.method).toBe('POST');
@@ -60,7 +60,7 @@ describe('ProfesorService', () => {
   });
 
   it('(4) editar → PUT /api/profesores/{id} con el body de request', () => {
-    const cuerpo: ProfesorRequest = { codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' };
+    const cuerpo: ProfesorRequest = { codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 0 };
     service.editar(7, cuerpo).subscribe();
     const req = http.expectOne('/api/profesores/7');
     expect(req.request.method).toBe('PUT');

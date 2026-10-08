@@ -29,6 +29,14 @@
     </label>
 
     <label class="profesor-form__campo">
+      <span class="profesor-form__etiqueta">Guardias ordinarias</span>
+      <input type="number" min="0" step="1" [formControl]="guardiasOrdinarias" class="profesor-form__input profesor-form__guardias" />
+      @if (guardiasOrdinarias.touched && guardiasOrdinarias.invalid) {
+        <span class="profesor-form__error">Las guardias tienen que ser un número entero, 0 o más.</span>
+      }
+    </label>
+
+    <label class="profesor-form__campo">
       <span class="profesor-form__etiqueta">Cargo</span>
       <select [formControl]="cargo" class="profesor-form__input profesor-form__cargo">
         @for (c of cargos; track c[0]) {

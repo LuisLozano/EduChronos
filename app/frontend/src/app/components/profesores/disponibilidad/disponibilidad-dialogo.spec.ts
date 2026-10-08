@@ -23,7 +23,7 @@ import { RestriccionHoraria } from '../../../models/restriccion-horaria.model';
  * el componente caería en (1).
  */
 
-const PROFESOR: Profesor = { id: 7, codigo: 'MAT1', nombreCompleto: 'Profesor de ejemplo' };
+const PROFESOR: Profesor = { id: 7, codigo: 'MAT1', nombreCompleto: 'Profesor de ejemplo', guardiasOrdinarias: 0 };
 
 const DIAS_API = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
 
@@ -327,5 +327,16 @@ describe('DisponibilidadDialogo', () => {
     expect(ref.close).toHaveBeenCalledWith();
     expect(ref.close).not.toHaveBeenCalledWith(true);
     expect(service.reemplazar).not.toHaveBeenCalled();
+  });
+
+  it('(17) S212: la nota dice que las guardias ordinarias no se marcan aquí, y ya no la frase de antes', async () => {
+    await montar();
+
+    const nota = raiz().querySelector('.disponibilidad-dialogo__nota')!.textContent!.trim();
+    expect(nota).toBe(
+      'Las guardias ordinarias no se marcan aquí: se indican con su número en la ficha del profesor.'
+        + ' Las de biblioteca y convivencia, y las reducciones en tramos lectivos, se marcan como “No puede”.',
+    );
+    expect(raiz().textContent).not.toContain('Las guardias y reducciones');
   });
 });

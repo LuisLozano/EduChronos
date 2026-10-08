@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProfesorService } from '../../services/profesor.service';
@@ -26,7 +26,15 @@ import { Cargo, ETIQUETA_CARGO, Profesor, ProfesorRequest } from '../../models/p
  * edición los dos se cargan con lo que tiene el profesor, porque el PUT es reemplazo total y
  * sin cargarlos guardar otro cambio borraría el total y devolvería el cargo a Profesor/a. Se
  * mandan SIEMPRE, el total vacío como null.
+ *
+ * <p><b>Guardias ordinarias (S212, C-dato-guardias)</b>, con el mismo patrón y por la misma razón:
+ * control aparte, cargado en edición y enviado siempre. A diferencia del total es obligatorio y
+ * entero: 0 por defecto, vacío o decimal no se guarda.
  */
+/** Vacío (lo coge `required`) o un número entero; los decimales no son guardias. */
+const entero: ValidatorFn = (control) =>
+  control.value === null || Number.isInteger(control.value) ? null : { entero: true };
+
 @Component({
   selector: 'app-profesor-form',
   imports: [ReactiveFormsModule],
@@ -57,6 +65,13 @@ export class ProfesorForm {
   /** Cargo, por defecto Profesor/a. */
   protected readonly cargo = this.fb.nonNullable.control<Cargo>('PROFESOR');
 
+  /** Guardias ordinarias semanales (S212): obligatorio, entero, ≥ 0, 0 por defecto. */
+  protected readonly guardiasOrdinarias = this.fb.control<number | null>(0, [
+    Validators.required,
+    Validators.min(0),
+    entero,
+  ]);
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
@@ -65,13 +80,15 @@ export class ProfesorForm {
       });
       this.totalDeclarado.setValue(this.editando.totalDeclarado ?? null);
       this.cargo.setValue(this.editando.cargo ?? 'PROFESOR');
+      this.guardiasOrdinarias.setValue(this.editando.guardiasOrdinarias ?? 0);
     }
   }
 
   protected guardar(): void {
-    if (this.form.invalid || this.totalDeclarado.invalid) {
+    if (this.form.invalid || this.totalDeclarado.invalid || this.guardiasOrdinarias.invalid) {
       this.form.markAllAsTouched();
       this.totalDeclarado.markAsTouched();
+      this.guardiasOrdinarias.markAsTouched();
       return;
     }
     this.guardando.set(true);
@@ -80,6 +97,7 @@ export class ProfesorForm {
       ...this.form.getRawValue(),
       totalDeclarado: this.totalDeclarado.value,
       cargo: this.cargo.value,
+      guardiasOrdinarias: this.guardiasOrdinarias.value ?? 0,
     };
 
     const peticion = this.editando

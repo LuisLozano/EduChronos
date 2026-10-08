@@ -14,6 +14,9 @@
     (alta)="nuevo()"
   />
 
+  <!-- Dato del centro, no de la lista (S212): su propio GET al montar y su PUT. -->
+  <app-minimo-guardias />
+
   <app-estado-lista
     [cargando]="cargando()"
     [error]="error()"
@@ -39,6 +42,7 @@
       <th>Nombre completo</th>
       <th>Cargo</th>
       <th>Horas</th>
+      <th>Guardias</th>
       <th></th>
     </tr>
     </thead>
@@ -49,6 +53,7 @@
       <td>{{ p.nombreCompleto }}</td>
       <td class="profesores__cargo">{{ etiquetaCargo(p) }}</td>
       <td class="profesores__horas dato" [class.horas--no-cuadra]="horas(p)?.descuadre === true">{{ textoHoras(p) }}</td>
+      <td class="profesores__guardias dato">{{ p.guardiasOrdinarias }}</td>
       <td class="profesores__acciones">
         <button type="button" class="profesores__editar accion-compacta" (click)="editar(p)">
           Editar

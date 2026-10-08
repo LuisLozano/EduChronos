@@ -35,9 +35,9 @@ import { Tutoria } from '../../models/tutoria.model';
 const GRUPO: Grupo = { id: 7, codigo: '3A', nivel: '3ESO', tipo: 'ORDINARIO' };
 
 const PROFESORES: Profesor[] = [
-  { id: 11, codigo: 'MAT1', nombreCompleto: 'Ana Matemáticas' },
-  { id: 12, codigo: 'LEN2', nombreCompleto: 'Luis Lengua' },
-  { id: 13, codigo: 'FIS3', nombreCompleto: 'Eva Física' },
+  { id: 11, codigo: 'MAT1', nombreCompleto: 'Ana Matemáticas', guardiasOrdinarias: 0 },
+  { id: 12, codigo: 'LEN2', nombreCompleto: 'Luis Lengua', guardiasOrdinarias: 0 },
+  { id: 13, codigo: 'FIS3', nombreCompleto: 'Eva Física', guardiasOrdinarias: 0 },
 ];
 
 /** El principal existente: el SEGUNDO de la lista. Ver la nota de cabecera. */
@@ -306,6 +306,7 @@ describe('TutoriaDialogo', () => {
       id: 100 + i,
       codigo: `P${String(i + 1).padStart(2, '0')}`,
       nombreCompleto: i === 9 ? 'Eva Ruiz' : i === 10 ? 'Juan Ruiz' : `Docente ${i + 1}`,
+      guardiasOrdinarias: 0,
     }));
 
     it('tutor: filtrar conserva visible la elegida y no cambia el valor', async () => {

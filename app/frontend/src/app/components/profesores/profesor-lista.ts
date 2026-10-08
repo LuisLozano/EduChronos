@@ -7,6 +7,7 @@ import { ETIQUETA_CARGO, Profesor } from '../../models/profesor.model';
 import { CuadreEntidad } from '../../models/prevalidacion.model';
 import { ProfesorForm } from './profesor-form';
 import { DisponibilidadDialogo } from './disponibilidad/disponibilidad-dialogo';
+import { MinimoGuardias } from './minimo-guardias/minimo-guardias';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
@@ -23,10 +24,15 @@ import { textoHoras } from '../../catalogo/horas';
  * la lista y se empareja POR CÓDIGO: el frontend no recalcula nada. Si ese GET falla, la
  * tabla se pinta igual, «Horas» queda vacía y sale un mensaje propio; un fallo del cuadre no
  * vacía la lista.
+ *
+ * <p><b>Guardias (S212, C-dato-guardias).</b> «Guardias» pinta `guardiasOrdinarias` del propio
+ * profesor. Encima de la tabla va {@link MinimoGuardias}, el mínimo de profesores de guardia por
+ * tramo del centro: es un componente aparte, con su servicio y sus errores, y esta lista no
+ * sabe nada de él más que dónde ponerlo.
  */
 @Component({
   selector: 'app-profesor-lista',
-  imports: [CabeceraLista, EstadoLista],
+  imports: [CabeceraLista, EstadoLista, MinimoGuardias],
   templateUrl: './profesor-lista.html',
   styleUrl: './profesor-lista.css',
 })
