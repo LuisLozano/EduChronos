@@ -102,7 +102,7 @@ public class DuplicadorCurso {
      * el catálogo y NO el horario: un horario generado pertenece al curso en que se generó.
      */
     static final List<String> TABLAS_DEL_HORARIO =
-            List.of("sesion_bloqueada", "aula_bloqueada", "sesion", "horario_generado");
+            List.of("sesion_bloqueada", "aula_bloqueada", "sesion", "guardia", "horario_generado");
 
     /**
      * Duplica el curso de {@code origen} en un fichero nuevo de su misma carpeta y archiva

@@ -129,7 +129,8 @@ public class ProfesorService {
         List<Referencia> entrantes = List.of(
                 new Referencia("plaza(s)", repositorio.contarPlazas(id)),
                 new Referencia("restriccion(es) horaria(s)", repositorio.contarRestriccionesHorarias(id)),
-                new Referencia("tutoria(s)", tutoriaRepositorio.contarTutorias(id)));
+                new Referencia("tutoria(s)", tutoriaRepositorio.contarTutorias(id)),
+                new Referencia("guardia(s)", repositorio.contarGuardias(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }

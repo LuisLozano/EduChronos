@@ -58,8 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
  * El día ya no se valida: no viaja en la petición. El techo de 5 días lo garantiza la
  * expansión sobre {@code Dia.values()}, no una comprobación.
  *
- * <p><b>Por qué el 409 es global.</b> Tres FK not-null apuntan a {@code tramo_semanal}
- * (restricciones horarias, sesiones de horario, sesiones bloqueadas) y el reemplazo borra
+ * <p><b>Por qué el 409 es global.</b> Cuatro FK not-null apuntan a {@code tramo_semanal}
+ * (restricciones horarias, sesiones de horario, sesiones bloqueadas y, desde S213, guardias de
+ * horario) y el reemplazo borra
  * la tabla entera, así que basta con que exista UN dependiente para que la operación sea
  * imposible. Además de la FK, hay una razón semántica: {@code ordenEnDia} es POSICIONAL
  * —se deriva de {@code orden} y del filtro {@code esLectivo}, no se persiste—, de modo
@@ -268,7 +269,8 @@ public class JornadaService {
         List<Referencia> entrantes = List.of(
                 new Referencia("restricciones horarias", repositorio.contarRestriccionesHorarias()),
                 new Referencia("sesiones de horario", repositorio.contarSesiones()),
-                new Referencia("sesiones bloqueadas", repositorio.contarSesionesBloqueadas()));
+                new Referencia("sesiones bloqueadas", repositorio.contarSesionesBloqueadas()),
+                new Referencia("guardias de horario", repositorio.contarGuardias()));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
             throw new ReferenciaEntranteException(entrantes);
         }

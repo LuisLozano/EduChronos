@@ -418,19 +418,21 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S206, S212) Una base de la versión 0, 1, 3 o 4 CON DATOS en todas las tablas de la 1 llega a
-     * la 5 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos profesores y,
-     * para la 3 y la 4, se le pasan {@code 002.sql} y {@code 003.sql} reales (y {@code 004.sql} para
-     * la 4, con una fila en {@code asignatura_aula}) antes de sellarla. {@code 004.sql} añade el
+     * (S206, S212, S213) Una base de la versión 0, 1, 3, 4 o 5 CON DATOS en todas las tablas de la 1
+     * llega a la 6 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos profesores y,
+     * para la 3, la 4 y la 5, se le pasan {@code 002.sql} y {@code 003.sql} reales (y {@code 004.sql}
+     * para la 4 y la 5, con una fila en {@code asignatura_aula}, y {@code 005.sql} para la 5) antes de
+     * sellarla. {@code 004.sql} añade el
      * aula de referencia del grupo, los alumnos del subgrupo, el aula en uso, la tabla
      * {@code asignatura_aula} y las cuatro únicas; {@code 005.sql}, las guardias ordinarias del
-     * profesor. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
+     * profesor; {@code 006.sql}, la tabla {@code guardia}. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
      * nulas, {@code asignatura_aula} como estaba, los cuatro índices únicos presentes, la columna
-     * {@code guardias_ordinarias} a 0 en cada profesor y el esquema IGUAL al de una base nueva.
+     * {@code guardias_ordinarias} a 0 en cada profesor, {@code guardia} vacía y con su única, y el
+     * esquema IGUAL al de una base nueva.
      */
     @ParameterizedTest(name = "desde la versión {0}")
-    @ValueSource(ints = {0, 1, 3, 4})
-    void unaBaseConDatosLlegaALa5SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
+    @ValueSource(ints = {0, 1, 3, 4, 5})
+    void unaBaseConDatosLlegaALa6SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v" + desde + ".db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
@@ -438,12 +440,15 @@ class PreparadorEsquemaTest {
             try (Connection conexion = BancoDeCursos.conectar(base)) {
                 ScriptUtils.executeSqlScript(conexion, migracionReal(2));
                 ScriptUtils.executeSqlScript(conexion, migracionReal(3));
-                if (desde == 4) {
+                if (desde >= 4) {
                     ScriptUtils.executeSqlScript(conexion, migracionReal(4));
+                }
+                if (desde == 5) {
+                    ScriptUtils.executeSqlScript(conexion, migracionReal(5));
                 }
             }
         }
-        if (desde == 4) {
+        if (desde >= 4) {
             ejecutar(base, "insert into asignatura_aula (asignatura_id, aula_id, rol) values (1, 1, 'EXCLUSIVA')");
         }
         ejecutar(base, "PRAGMA user_version = " + desde);
@@ -459,8 +464,9 @@ class PreparadorEsquemaTest {
         }
         assertThat(consulta(base, "select count(*) from pragma_table_info('profesor')"
                         + " where name = 'guardias_ordinarias'"))
-                .as("precondición: sin la columna de guardias")
-                .containsExactly("0");
+                .as("precondición: con la columna de guardias solo desde la 5")
+                .containsExactly(desde == 5 ? "1" : "0");
+        assertThat(tablas).as("precondición: sin la tabla de guardias").doesNotContain("guardia");
         assertThat(filasAntes).as("precondición: ninguna tabla vacía").noneMatch(f -> f.endsWith("=0"));
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
         Path vacia = carpeta.resolve("vacia.db");
@@ -468,7 +474,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(5);
+        assertThat(version(base)).isEqualTo(6);
         assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
         List<String> filasDespues = new ArrayList<>();
         for (String tabla : tablas) {
@@ -486,7 +492,7 @@ class PreparadorEsquemaTest {
                 .containsExactly("0");
         assertThat(BancoDeCursos.filas(base, "asignatura_aula"))
                 .as("asignatura_aula, como estaba")
-                .isEqualTo(desde == 4 ? 1 : 0);
+                .isEqualTo(desde >= 4 ? 1 : 0);
         assertThat(consulta(base, "select count(*), sum(guardias_ordinarias = 0) from profesor"))
                 .as("los dos profesores, con 0 guardias")
                 .containsExactly("2|2");
@@ -495,7 +501,32 @@ class PreparadorEsquemaTest {
         assertThat(indicesUnicos(base, "aula_bloqueada")).contains("uk_aula_bloqueada_actividad_indice_plaza");
         assertThat(indicesUnicos(base, "asignatura_aula_compatible"))
                 .contains("uk_asignatura_aula_compatible_asignatura_tipo");
+        assertThat(BancoDeCursos.filas(base, "guardia")).as("guardia, vacía").isZero();
+        assertThat(indicesUnicos(base, "guardia")).contains("uk_guardia_horario_profesor_tramo");
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+    }
+
+    /**
+     * (S213) Como mucho una guardia por profesor y tramo en un horario: lo garantiza la única de
+     * {@code guardia} y no el diagnóstico. Una base nueva rechaza la segunda fila igual.
+     */
+    @Test
+    void laUnicaDeGuardiaRechazaLaMismaGuardiaDosVeces(@TempDir Path carpeta) throws Exception {
+        Path base = carpeta.resolve("vacia.db");
+        real().preparar(origen(base));
+        ejecutar(base,
+                "insert into profesor (id, codigo, nombre_completo) values (1, 'P1', 'Uno')",
+                "insert into tramo_semanal (id, dia, hora_inicio, hora_fin, es_lectivo, orden)"
+                        + " values (1, 'LUNES', 0, 1, 1, 1)",
+                "insert into horario_generado (id, nombre, estado, estado_solver, fecha_generacion)"
+                        + " values (1, 'H', 'BORRADOR', 'OPTIMAL', 0)",
+                "insert into guardia (horario_id, profesor_id, tramo_id) values (1, 1, 1)");
+
+        assertThatThrownBy(() -> ejecutar(base,
+                        "insert into guardia (horario_id, profesor_id, tramo_id) values (1, 1, 1)"))
+                .isInstanceOf(SQLException.class)
+                .hasMessageContaining("UNIQUE");
+        assertThat(BancoDeCursos.filas(base, "guardia")).isOne();
     }
 
     // ─────────────────────────────────────────────────────────────── andamio

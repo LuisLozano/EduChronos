@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -10,9 +11,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import es.yaroki.educhronos.app.persistence.Guardia;
+import es.yaroki.educhronos.app.persistence.GuardiaRepository;
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
+import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.service.ProfesorService;
 import es.yaroki.educhronos.app.service.RestriccionHorariaService;
 import es.yaroki.educhronos.app.web.ProfesorController;
+import java.time.Instant;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +47,10 @@ class ProfesorEndpointTest {
 
     @Autowired private ProfesorService service;
     @Autowired private RestriccionHorariaService restriccionService;
+    @Autowired private ProfesorRepository profesores;
+    @Autowired private TramoSemanalRepository tramos;
+    @Autowired private HorarioGeneradoRepository horarios;
+    @Autowired private GuardiaRepository guardias;
 
     private MockMvc mockMvc;
 
@@ -157,6 +168,39 @@ class ProfesorEndpointTest {
 
         mockMvc.perform(get("/api/profesores/" + id))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * (S213, E1) Un profesor con guardias repartidas en un horario no se borra: 409 que las nombra,
+     * igual que con plazas, restricciones o tutorías. Sin la guarda, el borrado chocaría con la FK
+     * NO ACTION de {@code guardia.profesor_id} en vez de dar el 409.
+     */
+    @Test
+    void borrado_conGuardiasEnUnHorario_409QueLasNombra() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        guardiaDe(id);
+
+        mockMvc.perform(delete("/api/profesores/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(containsString("1 guardia(s)")));
+
+        assertThat(profesores.existsById(id)).isTrue();
+    }
+
+    /**
+     * (S213, E1) La cuenta es la de ESE profesor: otro con guardias no impide borrar a uno que no
+     * tiene ni guardias ni otros dependientes.
+     */
+    @Test
+    void borrado_sinGuardiasPropiasAunqueOtroLasTenga_204() throws Exception {
+        long conGuardias = crear("MAT8", "Ada Lovelace");
+        long sinNada = crear("LEN1", "Rosalía de Castro");
+        guardiaDe(conGuardias);
+
+        mockMvc.perform(delete("/api/profesores/" + sinNada))
+                .andExpect(status().isNoContent());
+
+        assertThat(profesores.existsById(sinNada)).isFalse();
     }
 
     @Test
@@ -372,6 +416,14 @@ class ProfesorEndpointTest {
     }
 
     /** Da de alta por la red y devuelve el id sintético asignado. */
+    /** Una guardia del profesor {@code id} en un horario y un tramo nuevos. */
+    private void guardiaDe(long id) {
+        TramoSemanal tramo = tramos.save(
+                new TramoSemanal(Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+        HorarioGenerado horario = horarios.save(new HorarioGenerado("H", Instant.now(), "OPTIMAL", null, null));
+        guardias.saveAndFlush(new Guardia(horario, profesores.findById(id).orElseThrow(), tramo));
+    }
+
     private long crear(String codigo, String nombre) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/profesores")
                         .contentType(MediaType.APPLICATION_JSON)

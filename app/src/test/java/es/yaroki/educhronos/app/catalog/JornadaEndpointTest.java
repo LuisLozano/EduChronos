@@ -7,10 +7,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import es.yaroki.educhronos.app.persistence.Guardia;
+import es.yaroki.educhronos.app.persistence.GuardiaRepository;
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
+import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.service.JornadaService;
 import es.yaroki.educhronos.app.web.JornadaController;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
 import es.yaroki.educhronos.app.web.dto.TramoJornadaDTO;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +56,8 @@ class JornadaEndpointTest {
     @Autowired private TramoSemanalRepository tramos;
     @Autowired private ProfesorRepository profesores;
     @Autowired private ProfesorRestriccionHorariaRepository restricciones;
+    @Autowired private HorarioGeneradoRepository horarios;
+    @Autowired private GuardiaRepository guardias;
     @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
@@ -331,6 +338,30 @@ class JornadaEndpointTest {
 
         // La guarda corre ANTES de borrar y de expandir: el tramo sembrado sigue ahí.
         assertThat(tramos.count()).isEqualTo(1);
+    }
+
+    /**
+     * (S213, E1) Una guardia repartida en un horario apunta a un tramo: el reemplazo da el mismo 409
+     * con su desglose, y no choca con la FK NO ACTION de {@code guardia.tramo_id}.
+     */
+    @Test
+    void put_conGuardiaViva_409QueLaNombra() throws Exception {
+        TramoSemanal tramo = tramos.saveAndFlush(
+                new TramoSemanal(Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+        Profesor profesor = profesores.saveAndFlush(new Profesor("XX", "Profesor XX"));
+        HorarioGenerado horario = horarios.saveAndFlush(
+                new HorarioGenerado("H", Instant.now(), "OPTIMAL", null, null));
+        guardias.saveAndFlush(new Guardia(horario, profesor, tramo));
+        entityManager.clear();
+        long tramosAntes = tramos.count();
+
+        mockMvc.perform(put("/api/jornada")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(diaTipoMinimo()))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(containsString("1 guardias de horario")));
+
+        assertThat(tramos.count()).isEqualTo(tramosAntes);
     }
 
     @Test

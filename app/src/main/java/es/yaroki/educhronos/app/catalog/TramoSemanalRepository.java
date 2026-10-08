@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 /**
- * Repositorio de {@link TramoSemanal}. Porta el mapa inverso de las tres FK que apuntan
+ * Repositorio de {@link TramoSemanal}. Porta el mapa inverso de las cuatro FK que apuntan
  * a {@code tramo_semanal} en {@code schema.sql} (C-jornada M3; ver {@link AulaRepository}
  * para el porqué de las nativas).
  *
@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.Query;
  * tramo?". Una variante por-id sería código muerto y sugeriría un borrado selectivo que
  * este recurso no ofrece.
  *
- * <p>La cuarta FK que llega a la tabla es la autorreferencial
+ * <p>La quinta FK que llega a la tabla es la autorreferencial
  * {@code tramo_semanal.siguiente_inmediato_id}, que NO se cuenta: siempre vale null
  * (deuda registrada; poblarla es semántica del solver —invariante S6— y queda fuera de
  * C-jornada), y el reemplazo total borra la tabla entera de una vez.
@@ -37,4 +37,8 @@ public interface TramoSemanalRepository extends JpaRepository<TramoSemanal, Long
     /** FK {@code sesion_bloqueada.tramo_inicio_id} → tramo_semanal (not null). */
     @Query(value = "select count(*) from sesion_bloqueada", nativeQuery = true)
     long contarSesionesBloqueadas();
+
+    /** FK {@code guardia.tramo_id} → tramo_semanal (not null, S213). */
+    @Query(value = "select count(*) from guardia", nativeQuery = true)
+    long contarGuardias();
 }

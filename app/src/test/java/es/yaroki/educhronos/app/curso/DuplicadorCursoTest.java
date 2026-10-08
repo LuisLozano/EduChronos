@@ -89,6 +89,11 @@ class DuplicadorCursoTest {
             assertThat(filas(destino, tabla)).as("%s de la copia", tabla).isZero();
             assertThat(filas(origen, tabla)).as("%s del origen", tabla).isOne();
         }
+        // (S213) Las guardias son del horario: el curso nuevo sale sin ninguna. Se nombra la tabla
+        // y no se fía de la lista, porque el vaciado corre sin FK activas (sin cascada desde el
+        // horario) y una guardia que la lista olvidara llegaría a la copia sin que el bucle de
+        // arriba lo viera.
+        assertThat(filas(destino, "guardia")).as("guardia de la copia").isZero();
         assertThat(curso(destino)).isEqualTo(NUEVO + "|false");
     }
 
@@ -344,6 +349,8 @@ class DuplicadorCursoTest {
                     "insert into sesion (id, indice, aula_id, horario_id, plaza_id,"
                             + " tramo_inicio_id) values (1, 0, 1, 1, 1, 1)");
             sentencia.executeUpdate(
+                    "insert into guardia (id, horario_id, profesor_id, tramo_id) values (1, 1, 1, 1)");
+            sentencia.executeUpdate(
                     "insert into sesion_bloqueada (id, indice, actividad_id, tramo_inicio_id)"
                             + " values (1, 0, 1, 1)");
             sentencia.executeUpdate(
@@ -375,7 +382,7 @@ class DuplicadorCursoTest {
                     ordenes.add(trozo.strip());
                 }
             }
-            assertThat(ordenes).as("el esquema trae sus 23 tablas y sus 4 índices únicos").hasSize(27);
+            assertThat(ordenes).as("el esquema trae sus 24 tablas y sus 5 índices únicos").hasSize(29);
             return ordenes;
         }
     }
@@ -396,7 +403,7 @@ class DuplicadorCursoTest {
                 nombres.add(filas.getString(1));
             }
         }
-        assertThat(nombres).as("las 23 tablas del esquema").hasSize(23);
+        assertThat(nombres).as("las 24 tablas del esquema").hasSize(24);
         return nombres;
     }
 
