@@ -1,0 +1,305 @@
+{
+ "conservarAula": [
+  {
+   "actividad": "AMO-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "AmbCT-4ºBDi+4ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "AmbSL-4ºBDi+4ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-AFAVS_CeH_DT_RefLe-4ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-AFAVS_CeH_DT_RefMt-4ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ALCT_Fr2-1ºA",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ALCT_Fr2-1ºB",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ALCT_Fr2-1ºC",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ALCT_Fr2-1ºD",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ANAT_CEE_DART_DTec_TES2-1BACH",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATEDU_Rel-2ºA+2ºC",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATEDU_Rel-2ºB+2ºD",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATEDU_Rel-4ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATED_REVAN_Relig-1ºA+1ºD",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATED_Rel-3ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-ATED_Relig-1ºB+1ºC",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-B1_BioNu_CyR_RefLe-3ºA+3ºB+3ºC",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-B1_BioNu_CyR_RefMt-3ºA+3ºB+3ºC",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-BIOL_Físic_Geogr_HART-2BACH",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-Bio_TecIn-1B-Ac+1B-Bc",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-CT_DT-2BACH",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-CyR_OyD_RefMt-1ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-CyR_PEPA_RefLe-2ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-CyR_PEPA_RefMt-2ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-DIG_EXPRE_FOPP_TEC-4ESO",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-DT_EST_MIT-2BACH",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-DTec_PATRI_PLAB_TES1_TICO-1BACH",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-HMC_LU-1B-Am+1B-Bm+1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-Lat2_MaCSa_Mate2-2BACH",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-PTEV_Relig-2B-C",
+   "motivo": "REPARTO_DE_AULAS_IMPOSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-PTVE_Relig-1B-Ac+1B-Am+1B-Bc+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Bloque-PTVE_Relig-1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "CA-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "CA-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "CS-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "CyS-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ECO-1B-Am+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ECO-1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ELE-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "EXPRE-4ºBDi+4ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "EdFís-1B-Ac+1B-Am",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "EdFís-1B-Bc+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "EdFís-1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "FQ-1B-Ac",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "FQ-1B-Bc",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Filos-1B-Ac+1B-Am",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Filos-1B-Bc+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Filos-1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "GRI-1B-Ch",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "IPE-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Ing-4ºBDi+4ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Ing1-1B-Ac+1B-Am",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Ing1-1B-Bc+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Ing1-1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "IngDi-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "LCL-1B-Ac+1B-Am",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "LCL-1B-Bc+1B-Bm",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "LCL-1B-Ch+1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Latín-1B-Am+1B-Bm+1B-Ch",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "MCCSS-1B-Cs",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "MEC-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "MECSO-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Matem-1B-Ac",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Matem-1B-Bc",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "OyD-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "PI-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "PS-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ReLen-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "RefMt-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "TPMAR-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "TPMAR-4ºBDi+4ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Tut-1FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "Tut-2FPB",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ÁmbCM-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  },
+  {
+   "actividad": "ÁmbSL-3ºADi+3ºBDi+3ºCDi",
+   "motivo": "CLASE_SIN_AULA_POSIBLE en la prevalidación de S209"
+  }
+ ],
+ "origen": "prevalidación de S209 sobre la carga con reglas-aulas.json sha256 417a62123cb3e7c08fa555942f8f5378b7ab99e0b9256b32345e84355475f055"
+}
