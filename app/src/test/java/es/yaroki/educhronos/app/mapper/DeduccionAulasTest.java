@@ -125,18 +125,24 @@ class DeduccionAulasTest {
 
     // ───────────────────────────────────────────────────── A2, sin aula escrita
 
+    /**
+     * En una plaza con algún grupo ordinario, el PDC cuenta como su padre. Desde S209 (T3) una plaza
+     * SOLO de PDC ya no toma el aula del padre: está en {@link DeduccionAulasPdcTest}.
+     */
     @Test
     void a2_unPdcCuentaComoSuPadre_recibeElAulaDelPadre() {
         Aula delPadre = aula("R3A");
         Aula delPdc = aula("R3ADi");
+        Aula deOtro = aula("R3B");
         Asignatura mat = asignatura("Mat");
         GrupoAdministrativo padre = grupo("3ºA", delPadre);
         GrupoAdministrativo pdc = new GrupoAdministrativo("3ºADi", NIVEL, TipoGrupo.DIVERSIFICACION_PDC, padre);
         pdc.setAulaReferencia(delPdc);
         Actividad act = actividad(mat, TipoActividad.CLASE);
-        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("3ºADi-Completo", null, pdc));
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("3ºADi-Completo", null, pdc),
+                subgrupo("3ºB-Mat", null, grupo("3ºB", deOtro)));
 
-        assertThat(codigos(DeduccionAulas.dominio(act, plaza, Map.of()))).containsExactly("R3A");
+        assertThat(codigos(DeduccionAulas.dominio(act, plaza, Map.of()))).containsExactly("R3A", "R3B");
     }
 
     @Test
@@ -636,25 +642,28 @@ class DeduccionAulasTest {
     }
 
     /**
-     * (h) La plaza de un PDC se comporta como la de su padre: posibles {aula del padre, L} (no la
-     * del PDC) y preferidas {L}.
+     * (h) En una plaza con algún grupo ordinario, el PDC se comporta como su padre: posibles {aula
+     * del padre, aula del otro grupo, L} (no la del PDC) y preferidas {L}. Desde S209 (T3) una
+     * plaza SOLO de PDC no toma el aula del padre ({@link DeduccionAulasPdcTest}).
      */
     @Test
     void s208h_pdc_comoSuPadre() {
         Aula delPadre = aula("R3A");
         Aula delPdc = aula("R3ADi");
         Aula l = aula("L");
+        Aula deOtro = aula("R3B");
         Asignatura mat = asignatura("Mat");
         GrupoAdministrativo padre = grupo("3ºA", delPadre);
         GrupoAdministrativo pdc = new GrupoAdministrativo("3ºADi", NIVEL, TipoGrupo.DIVERSIFICACION_PDC, padre);
         pdc.setAulaReferencia(delPdc);
         Actividad act = actividad(mat, TipoActividad.CLASE);
-        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("3ºADi-Completo", null, pdc));
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("3ºADi-Completo", null, pdc),
+                subgrupo("3ºB-Mat", null, grupo("3ºB", deOtro)));
 
         DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza,
                 reglas(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA)));
 
-        assertThat(codigos(d)).containsExactly("R3A", "L");
+        assertThat(codigos(d)).containsExactly("R3A", "L", "R3B");
         assertThat(preferidas(d)).containsExactly("L");
     }
 

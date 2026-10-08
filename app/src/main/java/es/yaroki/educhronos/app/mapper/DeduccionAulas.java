@@ -28,7 +28,10 @@ import java.util.TreeSet;
  *   <li>A1. Plaza con aula escrita (fija o candidatas): su dominio es lo escrito.</li>
  *   <li>A2. Sin aula escrita: S = grupos efectivos de sus subgrupos (un PDC cuenta como su
  *       padre). Si la asignatura de la plaza tiene aulas EXCLUSIVAS, el dominio son ellas; si
- *       no, el aula de grupo de cada G de S que la tenga más las PREFERIDAS de la asignatura.</li>
+ *       no, el aula de grupo de cada G de S que la tenga más las PREFERIDAS de la asignatura.
+ *       Una clase SOLO de PDC (todos sus grupos son PDC, de uno o de varios; S209, T3) no toma el
+ *       aula de grupo: el padre la ocupa a esa hora. Le quedan las reglas de su asignatura, y si
+ *       no tiene ninguna, el motivo es {@link #SOLO_PDC}.</li>
  *   <li>A3. Fuera, sobre el dominio escrito o deducido, las aulas marcadas «No se usa» y las de
  *       capacidad conocida menor que la suma de alumnos conocidos de los subgrupos de la plaza
  *       (alumnos desconocidos cuentan 0; capacidad desconocida no limita; igual cabe).</li>
@@ -58,6 +61,12 @@ public final class DeduccionAulas {
     public static final String SIN_REGLAS = "sin aula de grupo ni aulas de la asignatura";
     /** Todas las aulas posibles, escritas o deducidas, eliminadas por «No se usa». */
     public static final String TODAS_NO_SE_USAN = "todas sus aulas posibles están marcadas No se usa";
+    /**
+     * Una clase solo de PDC sin reglas de su asignatura (S209, T3). Sin punto final: la descripción
+     * del aviso lo pone, como en los demás motivos.
+     */
+    public static final String SOLO_PDC = "es una clase solo de PDC: no usa el aula del grupo padre, que a esa"
+            + " hora está ocupada. Marca un aula para su asignatura o escríbela en la clase";
 
     private DeduccionAulas() { }
 
@@ -144,7 +153,7 @@ public final class DeduccionAulas {
             preferidasDeLaAsignatura.addAll(deducidas.preferidas());
         }
         if (previas.isEmpty()) {
-            return new Dominio(List.of(), SIN_REGLAS);
+            return new Dominio(List.of(), esSoloDePdc(plaza) ? SOLO_PDC : SIN_REGLAS);
         }
 
         int alumnos = alumnosDe(plaza);
@@ -191,9 +200,11 @@ public final class DeduccionAulas {
             return new Deducidas(exclusivas, List.of());
         }
         List<Aula> resultado = new ArrayList<>();
-        for (Subgrupo subgrupo : plaza.getSubgrupos()) {
-            for (GrupoAdministrativo grupo : subgrupo.getGrupos()) {
-                Optional.ofNullable(efectivo(grupo).getAulaReferencia()).ifPresent(resultado::add);
+        if (!esSoloDePdc(plaza)) {                                             // S209, T3
+            for (Subgrupo subgrupo : plaza.getSubgrupos()) {
+                for (GrupoAdministrativo grupo : subgrupo.getGrupos()) {
+                    Optional.ofNullable(efectivo(grupo).getAulaReferencia()).ifPresent(resultado::add);
+                }
             }
         }
         List<Aula> preferidas = deLaAsignatura.stream()
@@ -202,6 +213,23 @@ public final class DeduccionAulas {
                 .toList();
         resultado.addAll(preferidas);
         return new Deducidas(resultado, preferidas);
+    }
+
+    /**
+     * Clase solo de PDC (S209, T3): tiene algún grupo y todos los grupos de todos sus subgrupos son
+     * PDC, de uno o de varios. Una plaza con algún grupo ordinario no lo es.
+     */
+    static boolean esSoloDePdc(Plaza plaza) {
+        boolean alguno = false;
+        for (Subgrupo subgrupo : plaza.getSubgrupos()) {
+            for (GrupoAdministrativo grupo : subgrupo.getGrupos()) {
+                if (grupo.getTipo() != TipoGrupo.DIVERSIFICACION_PDC) {
+                    return false;
+                }
+                alguno = true;
+            }
+        }
+        return alguno;
     }
 
     /** Grupo efectivo: un PDC cuenta como su padre; cualquier otro, como él mismo. */
