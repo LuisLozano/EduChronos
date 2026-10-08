@@ -131,12 +131,12 @@ class GenerarHorarioEndpointTest {
 
     /**
      * El 422 que llega DEL SOLVER, no de la pre-validación de 8.4-A. El fixture es
-     * infactible por una vía que la pre-validación NO cubre a propósito —el palomar de
-     * AULAS, fuera de alcance por decisión de S79—: dos actividades de 2 repeticiones
-     * comparten una única aula fija y solo hay 2 tramos, así que las 4 sesiones no caben
-     * en el aula. Todas las cuentas que sí se pre-validan salen justas (cada profesor 2 de
-     * 2, cada grupo 2 de 2, 2 repeticiones en 2 días), de modo que la petición ATRAVIESA la
-     * pre-validación y es el solver quien la declara infactible.
+     * infactible por una vía que la pre-validación NO cubre: tres actividades de una sesión
+     * que chocan dos a dos (aula, profesor y grupo) y solo 2 tramos. Todas las cuentas que sí
+     * se pre-validan salen justas (cada aula, profesor y grupo, 2 de 2 como mucho), de modo
+     * que la petición ATRAVIESA la pre-validación y es el solver quien la declara infactible.
+     * Hasta S209 el fixture era el palomar de un aula (4 sesiones en 2 tramos de A1); desde
+     * T4 lo detecta CARGA_DE_AULAS_EXCEDIDA, y este aserto de la causa es lo que lo descubrió.
      *
      * <p>El aserto sobre la CAUSA es lo que mantiene honesto al test: sin él, el día que
      * una regla nueva de pre-validación cubriera este caso, el test seguiría verde
@@ -154,7 +154,7 @@ class GenerarHorarioEndpointTest {
      */
     @Test
     void post_conCatalogoInfactible_devuelve422DelSolver() throws Exception {
-        poblarCatalogoInfactiblePorAula();
+        poblarCatalogoInfactibleSoloParaElSolver();
         entityManager.flush();
 
         mockMvc.perform(post("/api/horarios")
@@ -194,7 +194,7 @@ class GenerarHorarioEndpointTest {
     /** Rastro del 422 del solver (S192): la línea de fin dice SIN_HORARIO con su estado. */
     @Test
     void post_conCatalogoInfactible_dejaRastroSinHorario(CapturedOutput salida) throws Exception {
-        poblarCatalogoInfactiblePorAula();
+        poblarCatalogoInfactibleSoloParaElSolver();
         entityManager.flush();
 
         mockMvc.perform(post("/api/horarios")
@@ -366,11 +366,30 @@ class GenerarHorarioEndpointTest {
     }
 
     /**
-     * Infactible SOLO por el aula: 2 tramos lectivos (lunes, martes), dos actividades de 2
+     * (S209, T4) Cuatro sesiones que solo pueden ir a A1 y dos tramos: 422 de la
+     * pre-validación, CARGA_DE_AULAS_EXCEDIDA, antes del solver, con el mensaje que lo explica.
+     */
+    @Test
+    void post_conLaCargaDeUnAulaExcedida_devuelve422ConElMensaje() throws Exception {
+        poblarCatalogoInfactiblePorAula();
+        entityManager.flush();
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString(
+                        "Las aulas A1 tienen 2 horas de clase y las clases que solo pueden ir a ellas suman 4."
+                                + " Actividades: Mat-1ºA, Mat-1ºB.")));
+    }
+
+    /**
+     * Infactible por la carga del aula: 2 tramos lectivos (lunes, martes), dos actividades de 2
      * repeticiones cada una, con profesores, subgrupos y grupos DISTINTOS pero la MISMA
-     * aula fija. Las cuentas pre-validables cuadran justas —cada profesor necesita 2 de sus
-     * 2 tramos, cada grupo 2 de 2, y 2 repeticiones caben en 2 días—, así que solo el
-     * no-solape de aula del solver detecta que 4 sesiones no entran en 2 tramos de A1.
+     * aula fija. Las demás cuentas pre-validables cuadran justas —cada profesor necesita 2 de
+     * sus 2 tramos, cada grupo 2 de 2, y 2 repeticiones caben en 2 días—; desde S209 (T4) lo
+     * detecta CARGA_DE_AULAS_EXCEDIDA: 4 sesiones no entran en 2 tramos de A1.
      */
     private void poblarCatalogoInfactiblePorAula() {
         Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
@@ -394,13 +413,49 @@ class GenerarHorarioEndpointTest {
         crearActividadDeUnaPlaza("Mat-1ºB", mat, a1, len1, sgB);
     }
 
+    /**
+     * Infactible SOLO para el solver (S209, T4): 2 tramos lectivos y tres actividades de una
+     * sesión que chocan dos a dos —X y Y comparten el aula A1, Y y Z el profesor LEN1, X y Z el
+     * grupo 1ºA—, así que necesitan tres tramos distintos. Cada aula, profesor y grupo pide 2 de
+     * 2 como mucho: ninguna regla de la pre-validación, tampoco la carga de aulas, lo ve.
+     */
+    private void poblarCatalogoInfactibleSoloParaElSolver() {
+        Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
+        GrupoAdministrativo grupoA =
+                grupoRepository.save(new GrupoAdministrativo("1ºA", eso1, TipoGrupo.ORDINARIO, null));
+        GrupoAdministrativo grupoB =
+                grupoRepository.save(new GrupoAdministrativo("1ºB", eso1, TipoGrupo.ORDINARIO, null));
+        Subgrupo sgA = subgrupoRepository.save(new Subgrupo("1ºA-Completo", Set.of(grupoA)));
+        Subgrupo sgB = subgrupoRepository.save(new Subgrupo("1ºB-Completo", Set.of(grupoB)));
+        Profesor mat8 = profesorRepository.save(new Profesor("MAT8", "María Martínez"));
+        Profesor len1 = profesorRepository.save(new Profesor("LEN1", "Luis Lopez"));
+        Asignatura mat = asignaturaRepository.save(new Asignatura("Mat", "Matemáticas"));
+        Aula a1 = aulaRepository.save(new Aula("A1", TipoAula.ORDINARIA, null, null, null, null));
+        Aula a2 = aulaRepository.save(new Aula("A2", TipoAula.ORDINARIA, null, null, null, null));
+
+        tramoRepository.save(new TramoSemanal(
+                Dia.LUNES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 1, null));
+        tramoRepository.save(new TramoSemanal(
+                Dia.MARTES, LocalTime.of(8, 0), LocalTime.of(9, 0), true, 2, null));
+
+        crearActividadDeUnaPlaza("X-1ºA", mat, a1, mat8, sgA, 1);
+        crearActividadDeUnaPlaza("Y-1ºB", mat, a1, len1, sgB, 1);
+        crearActividadDeUnaPlaza("Z-1ºA", mat, a2, len1, sgA, 1);
+    }
+
     /** Actividad DISTRIBUIDA de 2 repeticiones y una sola plaza, con aula fija. */
     private void crearActividadDeUnaPlaza(
             String codigo, Asignatura asignatura, Aula aula, Profesor profesor, Subgrupo subgrupo) {
+        crearActividadDeUnaPlaza(codigo, asignatura, aula, profesor, subgrupo, 2);
+    }
+
+    /** Actividad DISTRIBUIDA de una sola plaza, con aula fija y {@code repeticiones} repeticiones. */
+    private void crearActividadDeUnaPlaza(String codigo, Asignatura asignatura, Aula aula, Profesor profesor,
+                                          Subgrupo subgrupo, int repeticiones) {
         Actividad act = new Actividad();
         act.setCodigo(codigo);
         act.setAsignatura(asignatura);
-        act.setRepeticionesPorSemana(2);
+        act.setRepeticionesPorSemana(repeticiones);
         act.setDuracionTramos(1);
         act.setPatronTemporal(PatronTemporal.DISTRIBUIDA);
         Plaza plaza = new Plaza();

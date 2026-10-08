@@ -159,6 +159,12 @@ public class PrevalidacionService {
      */
     public static final String REGLA_REPARTO_DE_AULAS_IMPOSIBLE = "REPARTO_DE_AULAS_IMPOSIBLE";
 
+    /**
+     * Las clases que solo pueden ir a un conjunto de aulas suman más tramos que los que esas aulas
+     * tienen en la semana (S209, T4). ERROR, ver {@link #cargaDeAulasExcedida}.
+     */
+    public static final String REGLA_CARGA_DE_AULAS_EXCEDIDA = "CARGA_DE_AULAS_EXCEDIDA";
+
     /** Filtro de actividades de las reglas de capacidad: todas cuentan, también REUNION y FUNCION. */
     private static final Predicate<Actividad> TODAS = actividad -> true;
 
@@ -244,6 +250,7 @@ public class PrevalidacionService {
         avisos.addAll(pinSobreTramoDura(problema));
         avisos.addAll(clasesSinAulaPosible(aulas));
         avisos.addAll(repartoDeAulasImposible(problema, aulas));
+        avisos.addAll(cargaDeAulasExcedida(problema, tramosLectivos, soloClase(datos)));
         avisos.addAll(tutoriasSinTutor(problema));
         avisos.addAll(profesoresDescuadrados(problema, datos));
         avisos.addAll(gruposDescuadrados(problema, datos));
@@ -597,6 +604,201 @@ public class PrevalidacionService {
             }
         }
         return false;
+    }
+
+    /**
+     * (S209, T4) CARGA DE AULAS EXCEDIDA — ERROR. Cada sesión de una clase ocupa un aula de su
+     * dominio durante un tramo, y un aula da como mucho un tramo lectivo a una sesión: si las
+     * clases que solo pueden ir a un conjunto de aulas suman más tramos que los de esas aulas en la
+     * semana, no hay horario. Flujo máximo (Edmonds-Karp): fuente → cada plaza de CLASE con aula
+     * posible, capacidad {@link #tramosQueOcupa} de su actividad; plaza → cada aula de su dominio,
+     * sin límite; aula → sumidero, capacidad {@code tramosLectivos}. Si el flujo no cubre la
+     * demanda, el lado de la FUENTE del corte mínimo (lo alcanzable en el residual) se parte en
+     * componentes por las aristas plaza-aula, y sale un aviso por componente con demanda (tramos
+     * de sus plazas) mayor que lo disponible (aulas × tramos lectivos).
+     *
+     * <p>El dominio es el del problema, que ya trae lo que dedujo {@code DeduccionAulas} (A4: aula
+     * fija o candidatas): no se recalcula nada. Las plazas sin aula —las que nombra
+     * {@link #clasesSinAulaPosible} y las de reuniones y funciones— no entran; las actividades que
+     * no son CLASE se filtran con {@code filtro}. Es condición necesaria, no suficiente: no mira a
+     * qué hora va cada sesión. {@code entidadCodigo} son los códigos de las aulas, ordenados.
+     */
+    private static List<AvisoPrevalidacion> cargaDeAulasExcedida(
+            ProblemaHorario problema, int tramosLectivos, Predicate<Actividad> filtro) {
+        Comparator<Aula> porCodigo = Comparator.comparing(Aula::codigo);
+        List<Actividad> actividadDe = new ArrayList<>();
+        List<List<Aula>> dominios = new ArrayList<>();
+        TreeSet<Aula> enJuego = new TreeSet<>(porCodigo);
+        for (Actividad actividad : problema.actividades()) {
+            if (!filtro.test(actividad)) {
+                continue;
+            }
+            for (Plaza plaza : actividad.plazas()) {
+                TreeSet<Aula> dominio = new TreeSet<>(porCodigo);
+                dominio.addAll(plaza.aulasCandidatas());
+                plaza.aulaFija().ifPresent(dominio::add);
+                if (!dominio.isEmpty()) {
+                    actividadDe.add(actividad);
+                    dominios.add(List.copyOf(dominio));
+                    enJuego.addAll(dominio);
+                }
+            }
+        }
+        List<Aula> aulas = List.copyOf(enJuego);
+        Map<Aula, Integer> nodoDeAula = new HashMap<>();
+        int plazas = dominios.size();
+        for (int j = 0; j < aulas.size(); j++) {
+            nodoDeAula.put(aulas.get(j), 1 + plazas + j);
+        }
+        int sumidero = 1 + plazas + aulas.size();
+        int demandaTotal = 0;
+        for (Actividad actividad : actividadDe) {
+            demandaTotal += tramosQueOcupa(actividad);
+        }
+        RedDeFlujo red = new RedDeFlujo(sumidero + 1);
+        for (int i = 0; i < plazas; i++) {
+            red.arista(0, 1 + i, tramosQueOcupa(actividadDe.get(i)));
+            for (Aula aula : dominios.get(i)) {
+                red.arista(1 + i, nodoDeAula.get(aula), demandaTotal + 1);
+            }
+        }
+        for (Aula aula : aulas) {
+            red.arista(nodoDeAula.get(aula), sumidero, tramosLectivos);
+        }
+        if (red.flujoMaximo(0, sumidero) >= demandaTotal) {
+            return List.of();
+        }
+
+        boolean[] alcanzable = red.alcanzables(0);
+        int[] raiz = new int[sumidero + 1];
+        for (int v = 0; v <= sumidero; v++) {
+            raiz[v] = v;
+        }
+        for (int i = 0; i < plazas; i++) {
+            if (!alcanzable[1 + i]) {
+                continue;
+            }
+            for (Aula aula : dominios.get(i)) {
+                if (alcanzable[nodoDeAula.get(aula)]) {
+                    raiz[raizDe(raiz, 1 + i)] = raizDe(raiz, nodoDeAula.get(aula));
+                }
+            }
+        }
+        Map<Integer, Integer> demandaDe = new HashMap<>();
+        Map<Integer, Set<String>> actividadesDe = new HashMap<>();
+        Map<Integer, Set<String>> aulasDe = new HashMap<>();
+        for (int i = 0; i < plazas; i++) {
+            if (alcanzable[1 + i]) {
+                int r = raizDe(raiz, 1 + i);
+                demandaDe.merge(r, tramosQueOcupa(actividadDe.get(i)), Integer::sum);
+                actividadesDe.computeIfAbsent(r, k -> new TreeSet<>()).add(actividadDe.get(i).codigo());
+            }
+        }
+        for (Aula aula : aulas) {
+            int nodo = nodoDeAula.get(aula);
+            if (alcanzable[nodo]) {
+                aulasDe.computeIfAbsent(raizDe(raiz, nodo), k -> new TreeSet<>()).add(aula.codigo());
+            }
+        }
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> componente : demandaDe.entrySet()) {
+            Set<String> codigos = aulasDe.getOrDefault(componente.getKey(), Set.of());
+            int demanda = componente.getValue();
+            int disponible = codigos.size() * tramosLectivos;
+            if (demanda > disponible) {
+                String lista = String.join(", ", codigos);
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.ERROR,
+                        REGLA_CARGA_DE_AULAS_EXCEDIDA,
+                        lista,
+                        demanda,
+                        disponible,
+                        "Las aulas " + lista + " tienen " + disponible + " horas de clase y las clases que"
+                                + " solo pueden ir a ellas suman " + demanda + ". Actividades: "
+                                + String.join(", ", actividadesDe.get(componente.getKey())) + "."));
+            }
+        }
+        avisos.sort(Comparator.comparing(AvisoPrevalidacion::entidadCodigo));
+        return avisos;
+    }
+
+    /** Raíz de {@code v} en la partición por componentes, comprimiendo el camino. */
+    private static int raizDe(int[] raiz, int v) {
+        while (raiz[v] != v) {
+            raiz[v] = raiz[raiz[v]];
+            v = raiz[v];
+        }
+        return v;
+    }
+
+    /**
+     * Red de flujo con capacidades enteras y Edmonds-Karp (caminos de aumento más cortos por BFS),
+     * para {@link #cargaDeAulasExcedida}. Implementación propia, sin dependencias.
+     */
+    private static final class RedDeFlujo {
+        private final List<List<int[]>> salientes = new ArrayList<>();   // {destino, capacidad, inversa}
+
+        RedDeFlujo(int nodos) {
+            for (int v = 0; v < nodos; v++) {
+                salientes.add(new ArrayList<>());
+            }
+        }
+
+        void arista(int desde, int hasta, int capacidad) {
+            salientes.get(desde).add(new int[] {hasta, capacidad, salientes.get(hasta).size()});
+            salientes.get(hasta).add(new int[] {desde, 0, salientes.get(desde).size() - 1});
+        }
+
+        int flujoMaximo(int fuente, int sumidero) {
+            int total = 0;
+            while (true) {
+                int[] previo = new int[salientes.size()];
+                int[] porArista = new int[salientes.size()];
+                java.util.Arrays.fill(previo, -1);
+                previo[fuente] = fuente;
+                java.util.ArrayDeque<Integer> cola = new java.util.ArrayDeque<>(List.of(fuente));
+                while (!cola.isEmpty() && previo[sumidero] < 0) {
+                    int u = cola.poll();
+                    for (int k = 0; k < salientes.get(u).size(); k++) {
+                        int[] e = salientes.get(u).get(k);
+                        if (e[1] > 0 && previo[e[0]] < 0) {
+                            previo[e[0]] = u;
+                            porArista[e[0]] = k;
+                            cola.add(e[0]);
+                        }
+                    }
+                }
+                if (previo[sumidero] < 0) {
+                    return total;
+                }
+                int cuello = Integer.MAX_VALUE;
+                for (int v = sumidero; v != fuente; v = previo[v]) {
+                    cuello = Math.min(cuello, salientes.get(previo[v]).get(porArista[v])[1]);
+                }
+                for (int v = sumidero; v != fuente; v = previo[v]) {
+                    int[] e = salientes.get(previo[v]).get(porArista[v]);
+                    e[1] -= cuello;
+                    salientes.get(v).get(e[2])[1] += cuello;
+                }
+                total += cuello;
+            }
+        }
+
+        /** Nodos alcanzables desde {@code origen} por aristas con capacidad residual. */
+        boolean[] alcanzables(int origen) {
+            boolean[] vistos = new boolean[salientes.size()];
+            vistos[origen] = true;
+            java.util.ArrayDeque<Integer> cola = new java.util.ArrayDeque<>(List.of(origen));
+            while (!cola.isEmpty()) {
+                for (int[] e : salientes.get(cola.poll())) {
+                    if (e[1] > 0 && !vistos[e[0]]) {
+                        vistos[e[0]] = true;
+                        cola.add(e[0]);
+                    }
+                }
+            }
+            return vistos;
+        }
     }
 
     /**

@@ -182,8 +182,10 @@ class PrevalidacionServiceTest {
                         actividad("Ing-desdoble", 3, 1, PatronTemporal.NEUTRA,
                                 plaza("Ing-desdoble-P1", ing1, desd1),
                                 plazaEn("Ing-desdoble-P2", ing2, desd2, A2)),
+                        // Y Mat en otra aula (S209, T4): con 3 + 4 tramos en A1, la carga de aulas
+                        // también saltaría y el test dejaría de aislar (c).
                         actividad("Mat-1ºA", 4, 1, PatronTemporal.NEUTRA,
-                                plaza("Mat-1ºA-P1", mat1, completo))),
+                                plazaEn("Mat-1ºA-P1", mat1, completo, A3))),
                 List.of());
 
         List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO);
