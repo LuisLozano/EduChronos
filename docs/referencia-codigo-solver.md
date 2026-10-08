@@ -2,8 +2,8 @@
 
 Índice de API generado exclusivamente a partir del código fuente.
 
-- Fecha: 2026-10-07
-- Commit: `05c18b1`
+- Fecha: 2026-10-08
+- Commit: `4e8a45e`
 
 Visibilidad: `public`, package-private (sin modificador). Se omiten todos los
 miembros `private`. La línea **Consume** lista los tipos del módulo
@@ -92,16 +92,19 @@ Componentes:
 - `List<ProfesorTutoria> tutorias`
 - `Map<String, Integer> capacidadesDeAula`
 - `Map<String, Integer> alumnosDeSubgrupo`
+- `Map<String, Set<String>> preferidasDePlaza`
 
 Constructores:
 - `public ProblemaHorario(List<Tramo> tramos, List<Aula> aulas, List<Asignatura> asignaturas, List<Profesor> profesores, List<GrupoAdministrativo> grupos, List<Subgrupo> subgrupos, List<Actividad> actividades, List<RestriccionHoraria> restriccionesHorarias, List<SesionBloqueada> bloqueos, List<ProfesorTutoria> tutorias)`
+- `public ProblemaHorario(List<Tramo> tramos, List<Aula> aulas, List<Asignatura> asignaturas, List<Profesor> profesores, List<GrupoAdministrativo> grupos, List<Subgrupo> subgrupos, List<Actividad> actividades, List<RestriccionHoraria> restriccionesHorarias, List<SesionBloqueada> bloqueos, List<ProfesorTutoria> tutorias, Map<String, Integer> capacidadesDeAula, Map<String, Integer> alumnosDeSubgrupo)`
 
 Métodos:
+- `public Set<String> preferidasDe(Plaza plaza)`
 - `public Optional<Integer> capacidadDe(Aula aula)`
 - `public Optional<Integer> alumnosDe(Subgrupo subgrupo)`
 - `public int indiceDeTramo(Tramo tramo)`
 
-Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
+Consume: `Actividad`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `Plaza`, `Profesor`, `ProfesorTutoria`, `RestriccionHoraria`, `SesionBloqueada`, `Subgrupo`, `Tramo`
 
 ### `Profesor` — public record
 Paquete: `es.yaroki.educhronos.solver.domain`
@@ -287,7 +290,7 @@ Consume: `ReglaBlanda`
 
 ### `ReglaBlanda` — public enum
 Paquete: `es.yaroki.educhronos.solver.cpsat`
-Constantes: `VENTANA_PROFESOR`, `INDISPONIBILIDAD_BLANDA`, `EXCESO_CONSECUTIVAS`
+Constantes: `VENTANA_PROFESOR`, `INDISPONIBILIDAD_BLANDA`, `EXCESO_CONSECUTIVAS`, `AULA_NO_PREFERIDA`
 
 Consume: (ninguno)
 
@@ -341,6 +344,7 @@ Métodos:
 - `public Map<Profesor, Integer> contarVentanasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionIndisponibilidadBlanda(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarPenalizacionConsecutivasProfesor(ProblemaHorario problema, SolucionHorario solucion)`
+- `public int contarPenalizacionAulaNoPreferida(ProblemaHorario problema, SolucionHorario solucion)`
 - `public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarBloqueosViolados(ProblemaHorario problema, SolucionHorario solucion)`
 - `public int contarAulasBloqueadasVioladas(ProblemaHorario problema, SolucionHorario solucion)`
@@ -672,6 +676,17 @@ Métodos:
 
 Consume: `Actividad`, `ActividadInstancia`, `Aula`, `Plaza`, `ProblemaHorario`, `ProblemaHorarioJsonLoader`, `SolucionHorario`
 
+### `SolverHorarioAulaPreferidaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void a_unaPlazaConUnaPreferida_vaALaPreferidaConObjetivoCero()`
+- `void b_dosClasesCompitenPorLaPreferida_objetivoUno()`
+- `void c_comoBConDuracionDos_objetivoDos()`
+- `void d_plazaSinPreferidas_enCualquieraDeSusAulas_costeCero()`
+- `void e_elObjetivoEsLaSumaDeLosCuatroContadores()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SesionBloqueada`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
 ### `SolverHorarioAulasDistintasEnSesionTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -948,6 +963,15 @@ Métodos:
 
 Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
 
+### `VerificadorSolucionAulaPreferidaTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.cpsat`
+Métodos:
+- `void e_cuentaPorInstanciaPlazaYTramo_sobreUnaSolucionHechaAMano()`
+- `void d_plazasSinPreferidas_noCuentanEnNingunaAula()`
+- `void f_laReglaNuevaNoProducePenalizacionesPorCelda()`
+
+Consume: `Actividad`, `ActividadInstancia`, `Asignatura`, `Aula`, `GrupoAdministrativo`, `PatronTemporal`, `Plaza`, `ProblemaHorario`, `Profesor`, `SolucionHorario`, `Subgrupo`, `TipoGrupo`, `Tramo`
+
 ### `VerificadorSolucionCapacidadAulaTest` — package-private class
 Paquete: `es.yaroki.educhronos.solver.cpsat`
 Métodos:
@@ -1026,6 +1050,21 @@ Métodos:
 - `void unaCapacidadDeUnAulaQueNoEstaEnElProblema_seRechaza()`
 - `void unosAlumnosDeUnSubgrupoQueNoEstaEnElProblema_seRechazan()`
 - `void unValorNegativo_seRechaza()`
+
+Consume: (ninguno)
+
+### `ProblemaHorarioPreferidasTest` — package-private class
+Paquete: `es.yaroki.educhronos.solver.domain`
+Métodos:
+- `void losConstructoresSinElDato_noTraenPreferidas()`
+- `void lasPreferidasSeLeenPorCodigoDePlaza()`
+- `void unConjuntoVacio_esUnaPlazaSinPreferidas()`
+- `void elDatoEsInmutable()`
+- `void unaPreferidaFueraDeLasCandidatas_seRechaza()`
+- `void unaPreferidaDistintaDelAulaFija_seRechaza()`
+- `void unaPreferidaEnUnaPlazaSinAula_seRechaza()`
+- `void preferidasDeUnaPlazaQueNoEstaEnElProblema_seRechazan()`
+- `void preferidasDeUnCodigoDePlazaRepetido_seRechazan()`
 
 Consume: (ninguno)
 
