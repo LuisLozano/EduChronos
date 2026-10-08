@@ -488,6 +488,15 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo reducido** | Avanzar un Cambio que se verifica fuera del código: versión, Release, VM, ensayo, demo | Bajo objetivo activo, cuando el Cambio no lleva código de la aplicación | M0, M2 de solo lectura, M4 con un humano o en la VM, M1 | M3 (no hay lógica nueva). Precedentes desde S156; el último, S189 (S194) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
 
+**Cómo se cuenta el umbral de Higiene/Método (S210).** Se leen las tablas de §4 de
+`gestion_proyecto.md` cuya segunda columna es la sede («Objetivo» o «Destino»). Cuenta
+toda fila cuya sede contenga «Higiene» o «script de R4»; no cuentan las filas
+tachadas (primera celda que empieza por `~~`). Las celdas se parten por `|`, salvo
+la barra escapada o dentro de código. Aplicada por primera vez en S210, dio 12 antes
+de saldar y 9 después (`/home/luis/educhronos-aceptacion/s210/m0/p3-recuento.txt` y
+`s210/f1/`). Hasta S210 no estaba escrita (`D-declarado-sin-artefacto`, instancia de
+S179).
+
 **Tipos combinados (S194).** Una sesión puede tener fases de tipos distintos (S193:
 Configuración/UI y una fase de Desarrollo reducido). El M0 nombra el tipo de cada
 fase, cada fase aplica su ritual y el registro de cierre los nombra todos.
@@ -618,3 +627,29 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     particular de la norma 3. Vocabulario: «captura» es una imagen de pantalla;
     «instantánea», el snapshot de la VM. Sale de S181 y S182.
     (`D-huella-captura-del-chat`)
+
+15. **Lo que un contrato o una guarda afirma sobre la forma del código o de un dato
+    se ha volcado antes** (S210). Forma es qué campos tiene un tipo, la firma y los
+    llamadores de un método, dónde se calcula algo, qué argumentos exige una orden y
+    qué trae un fichero de datos. Antes de escribir el contrato, el M2 o un F0 del
+    propio guion vuelca literal esa forma (campos, firma, llamadores, la orden ya
+    usada o su `--help`, la cabecera del fichero), y el contrato solo nombra
+    estructura que aparece en ese volcado; lo que no se ha volcado se escribe como
+    pregunta para el F0, no como hecho. Generaliza la norma 3 de los nombres a la
+    estructura. En S208 y S209 costó cuatro paradas: un verificador sin «totales»,
+    un `TotalesDTO` sin suma, una comparación que se creía previa y era posterior, y
+    una orden escrita sin `--base-url`. El F0 de volcado de forma de S209 cazó las
+    tres instancias de esa sesión. (`D-contrato-sobre-forma-no-medida`)
+16. **Lo que un documento dice haber declarado o calculado se puede leer donde lo
+    dice** (S210). «Se declara», «queda escrito» o «censo completo» significan que
+    existe una lista enumerada en un sitio que se cita (ruta, sección o commit), no
+    una frase que diga que se hizo; para un redondeo, la lista lleva fichero,
+    propiedad, literal y delta. Un número que gobierna una decisión se escribe con su
+    derivación al lado: la fórmula con sus operandos, o la orden que lo produjo. Si
+    el artefacto que lo produjo es desechable, se conserva su salida, no la promesa
+    de que existió. La memoria propia de Claude Code no es un sitio citable. Sale de
+    S128 (cuatro redondeos declarados como tres y sin lista), S144 (un censo de cinco
+    pares con uno escrito y el arnés borrado), S154 y S179 (notas guardadas solo en
+    la memoria de Claude Code; en S179, cómo se cuenta el umbral de Higiene/Método) y
+    de los 748 px de la altura de la rejilla, que nadie pudo derivar después.
+    (`D-declarado-sin-artefacto`, `D-748-sin-derivacion`)
