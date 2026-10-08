@@ -299,6 +299,43 @@ public final class VerificadorSolucion {
     }
 
     /**
+     * Cuenta la penalización por clases fuera de su aula preferida sobre una solución dada (S208,
+     * C-preferencias-aulas, C4), de forma <b>independiente del solver</b>: recorre el dominio y
+     * el aula de la solución ({@link SolucionHorario#aulaElegida}), no las opciones de aula ni
+     * los literales del modelo. Recomputo gemelo del término que
+     * {@code ModeloCpSat.objetivoAulaNoPreferida} minimiza.
+     *
+     * <p>Definición: por cada instancia colocada y cada plaza suya con preferidas efectivas
+     * ({@link ProblemaHorario#preferidasDe} no vacío) cuya aula en la solución no es ninguna de
+     * ellas, suma la duración en tramos de la actividad. Las plazas sin preferidas efectivas no
+     * cuentan nunca (C3). Una plaza sin aula en la solución no está «colocada en un aula» y no
+     * cuenta; una instancia sin colocar se salta, como en los otros contadores.
+     *
+     * @return unidades de penalización SIN ponderar: con {@code PESO_AULA_NO_PREFERIDA = 1}
+     *         coincide con el valor del término.
+     */
+    public int contarPenalizacionAulaNoPreferida(ProblemaHorario problema,
+                                                 SolucionHorario solucion) {
+        int total = 0;
+        for (ActividadInstancia inst : Expansion.todas(problema)) {
+            if (solucion.tramoDeInstancia(inst).isEmpty()) {
+                continue; // instancia sin colocar: ya lo reporta verificar()
+            }
+            for (Plaza plaza : inst.actividad().plazas()) {
+                Set<String> preferidas = problema.preferidasDe(plaza);
+                if (preferidas.isEmpty()) {
+                    continue; // sin preferidas efectivas: coste 0 (C3)
+                }
+                Optional<Aula> aula = solucion.aulaElegida(inst, plaza);
+                if (aula.isPresent() && !preferidas.contains(aula.get().codigo())) {
+                    total += inst.actividad().duracionTramos();
+                }
+            }
+        }
+        return total;
+    }
+
+    /**
      * Atribuye a cada celda su aportación CONTRAFACTUAL a los tres términos blandos
      * del objetivo (Fase 8, Bloque 8.3-B; cierra D19 en backend). No es
      * culpabilidad: {@code delta = penalización_actual − penalización_si_esa_celda_no
@@ -322,6 +359,14 @@ public final class VerificadorSolucion {
      * plazas comparten tramo). {@code tramoCodigo} es no-null solo en la
      * indisponibilidad blanda (el tramo vetado); null en ventanas y consecutivas,
      * que penalizan una configuración de día.
+     *
+     * <p><b>{@link ReglaBlanda#AULA_NO_PREFERIDA} no se atribuye nunca (S208, C5).</b> Lo que mide
+     * cada delta es lo que se gana moviendo la sesión a otro tramo, y es lo que la insignia de la
+     * rejilla promete («moverla a otro hueco mejoraría el horario»). Mover e intercambiar no
+     * cambian el aula ({@code MovimientoInstanciaService}: «El aula no cambia»), así que el delta
+     * de este término es siempre 0, y una celda con delta 0 no se emite. Emitir la aportación de
+     * la sesión diría que moverla mejora el horario, y sería falso. El término cuenta en
+     * {@link #contarPenalizacionAulaNoPreferida}.
      */
     public AtribucionBlanda atribuirBlandas(ProblemaHorario problema, SolucionHorario solucion) {
         final int n = 3; // MAX_CONSECUTIVAS (mismo literal que el gemelo; deuda D21c, no de este bloque)

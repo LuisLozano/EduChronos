@@ -104,6 +104,13 @@ final class ModeloCpSat {
      */
     private static final long PESO_CONSECUTIVAS = 1L;
     /**
+     * Peso de la penalización por clase fuera de su aula preferida (S208, C-preferencias-aulas,
+     * C1): cada tramo de una sesión colocada en un aula que no está entre las preferidas
+     * efectivas de su plaza cuesta {@code PESO_AULA_NO_PREFERIDA}. Constante hardcodeada a 1,
+     * mismo criterio que los otros pesos blandos; calibración relativa diferida (deuda D21).
+     */
+    private static final long PESO_AULA_NO_PREFERIDA = 1L;
+    /**
      * Umbral de poda de aulas candidatas (Fase 5, Bloque 16, palanca (b) de la
      * deuda D23). Una plaza con MÁS de {@code UMBRAL_PODA_AULA} aulas candidatas
      * se considera de "cola larga" y se poda a {@link #MAX_AULAS_PODA} candidatas;
@@ -235,6 +242,7 @@ final class ModeloCpSat {
         objetivoVentanasProfesor();
         objetivoIndisponibilidadBlandaProfesor(); // Fase 5, Bloque 6c
         objetivoConsecutivasProfesor(); // Fase 5, Bloque 6d-c
+        objetivoAulaNoPreferida(); // S208, C-preferencias-aulas
         ensamblarObjetivo();
         return this;
     }
@@ -711,6 +719,44 @@ final class ModeloCpSat {
                 model.addLinearExpressionInDomain(ip.tramoIndex(), noCubreVetado)
                         .onlyEnforceIf(penaliza.not());
                 terminosObjetivo.add(LinearExpr.term(penaliza, PESO_INDISP_BLANDA));
+            }
+        }
+    }
+
+    /**
+     * Penalización por clase fuera de su aula preferida (S208, C-preferencias-aulas, C1-C3). Por
+     * cada plaza con preferidas efectivas ({@link ProblemaHorario#preferidasDe}) y cada opción de
+     * aula que NO es una de ellas, el literal {@code presencia} de esa opción, ya creado en
+     * {@link #crearOpcionesDeAula}, entra en el objetivo con coeficiente
+     * {@link #PESO_AULA_NO_PREFERIDA} × duración de la actividad: una sesión de dos tramos fuera
+     * de su preferida cuesta 2. Cuenta por (instancia, plaza), no por instancia.
+     *
+     * <p><b>Sin variables nuevas.</b> {@code addExactlyOne} ya obliga a que exactamente una
+     * presencia por (instancia, plaza) valga 1, así que la suma de las presencias de las aulas no
+     * preferidas vale 0 si la plaza está en una preferida y 1 si no.
+     *
+     * <p><b>Plazas con aula fija:</b> no tienen opciones y no aportan. Es exacto y no una omisión:
+     * el problema exige que sus preferidas estén dentro de sus aulas posibles, así que una plaza
+     * fija con preferidas tiene como única preferida su aula fija, y nunca paga. Las plazas sin
+     * preferidas efectivas (sin entrada o con el conjunto vacío) tampoco aportan (C3).
+     *
+     * <p>Como la indisponibilidad blanda y las consecutivas, no mira primero/último/span: D17 no se
+     * reactiva. Con el mapa de preferidas vacío no se añade ningún término, y el modelo es el de
+     * antes de S208.
+     */
+    private void objetivoAulaNoPreferida() {
+        for (InstanciaProgramada ip : instancias) {
+            long coste = PESO_AULA_NO_PREFERIDA * ip.instancia().actividad().duracionTramos();
+            for (Map.Entry<Plaza, List<AulaOpcion>> e : ip.opcionesDeAula().entrySet()) {
+                Set<String> preferidas = problema.preferidasDe(e.getKey());
+                if (preferidas.isEmpty()) {
+                    continue; // sin preferidas efectivas: coste 0 (C3)
+                }
+                for (AulaOpcion opcion : e.getValue()) {
+                    if (!preferidas.contains(opcion.aula().codigo())) {
+                        terminosObjetivo.add(LinearExpr.term(opcion.presencia(), coste));
+                    }
+                }
             }
         }
     }

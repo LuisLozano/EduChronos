@@ -3,7 +3,7 @@ package es.yaroki.educhronos.solver.cpsat;
 /**
  * Categoría tipada de una regla BLANDA (término del objetivo que el solver
  * minimiza), para atribución CONTRAFACTUAL por celda (Fase 8, Bloque 8.3-B).
- * Espejo de los tres términos blandos que {@code ModeloCpSat} añade a su objetivo
+ * Espejo de los cuatro términos blandos que {@code ModeloCpSat} añade a su objetivo
  * y que {@link VerificadorSolucion} recomputa de forma independiente:
  * <ul>
  *   <li>{@code VENTANA_PROFESOR} — huecos de un profesor en un día
@@ -16,6 +16,11 @@ package es.yaroki.educhronos.solver.cpsat;
  *       sesiones seguidas de un profesor en un día
  *       ({@link VerificadorSolucion#contarPenalizacionConsecutivasProfesor}).
  *       Propiedad de la configuración DEL DÍA: {@code tramoCodigo} null.</li>
+ *   <li>{@code AULA_NO_PREFERIDA} — plaza con preferidas efectivas colocada en un aula que
+ *       no es ninguna de ellas, un punto por tramo de la sesión (S208,
+ *       {@link VerificadorSolucion#contarPenalizacionAulaNoPreferida}). Es la única que
+ *       NUNCA se atribuye por celda: depende del aula y no del tramo, y mover o intercambiar
+ *       una sesión no cambia su aula (ver {@link VerificadorSolucion#atribuirBlandas}).</li>
  * </ul>
  *
  * <p>A diferencia de {@link ReglaDura}, una regla blanda NO invalida la solución:
@@ -26,5 +31,6 @@ package es.yaroki.educhronos.solver.cpsat;
 public enum ReglaBlanda {
     VENTANA_PROFESOR,
     INDISPONIBILIDAD_BLANDA,
-    EXCESO_CONSECUTIVAS
+    EXCESO_CONSECUTIVAS,
+    AULA_NO_PREFERIDA
 }
