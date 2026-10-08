@@ -1,0 +1,2468 @@
+{
+ "_meta": {
+  "generadoPor": "tools/carga-centro/derivar-reglas-aulas.py",
+  "entradas": {
+   "hoja1_rejilla": {
+    "fichero": "p1-Distribución_aulas_2026-27_def-hoja1-rejilla.tsv",
+    "sha256": "cdbc9e14b6a4091ff537b577247d40673b2cc91f2eabf7461c699767187c2fda"
+   },
+   "hoja1_celdas": {
+    "fichero": "p1-Distribución_aulas_2026-27_def-hoja1-celdas.tsv",
+    "sha256": "7aea12910a8f8db2926d54a658278114a2bc0966cf77a2b26931fca6c0065a4f"
+   },
+   "hoja2_rejilla": {
+    "fichero": "p1-Distribución_aulas_2026-27_def-hoja2-rejilla.tsv",
+    "sha256": "e4d860afea078d6df75d4858f4bce269e0b2f5d75250c5389a421eeda69c3bc5"
+   },
+   "catalogo": {
+    "fichero": "catalogo-derivado.json",
+    "sha256": "2ba036ac256835cb389398ee946b5fafce4d7fc46069fea24968abb3411ed700"
+   },
+   "nombres": {
+    "fichero": "nombres-derivados.json",
+    "sha256": "4aed049f33edd3e96367ffd879c1a43d36f0cbec59b82a5f7e85df2a4a09d0f4"
+   }
+  },
+  "normas": "N1-N8 con N2', N3' y N3'' de S209 T2 (cabecera del script)"
+ },
+ "aulaReferencia": [
+  {
+   "grupo": "1B-Ac",
+   "aula": "TAL3a",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E20",
+      "F20"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  },
+  {
+   "grupo": "1B-Am",
+   "aula": "TAL3a",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E20",
+      "F20"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  },
+  {
+   "grupo": "1B-Bc",
+   "aula": "TAL3b",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E17",
+      "F17"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  },
+  {
+   "grupo": "1B-Bm",
+   "aula": "TAL3b",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E17",
+      "F17"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  },
+  {
+   "grupo": "1B-Ch",
+   "aula": "A15",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E16",
+      "F16"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "1B-Cs",
+   "aula": "A15",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E16",
+      "F16"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "1ºA",
+   "aula": "A3",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E4",
+      "F4"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "1ºB",
+   "aula": "A11",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E12",
+      "F12"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "1ºC",
+   "aula": "A5",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E6",
+      "F6"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "1ºD",
+   "aula": "A14",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E15",
+      "F15"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2B-A",
+   "aula": "COM1",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E28",
+      "F28"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2B-B",
+   "aula": "COM4",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E29",
+      "F29"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2B-C",
+   "aula": "B06",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E26",
+      "F26"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "grupo": "2ºA",
+   "aula": "A1",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E2",
+      "F2"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2ºB",
+   "aula": "A7",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E8",
+      "F8"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2ºC",
+   "aula": "A9",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E10",
+      "F10"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "2ºD",
+   "aula": "A4",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E5",
+      "F5"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "3ºA",
+   "aula": "B01",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E21",
+      "F21"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "grupo": "3ºB",
+   "aula": "B05",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E25",
+      "F25"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "grupo": "3ºC",
+   "aula": "B02",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E22",
+      "F22"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "grupo": "4ºA",
+   "aula": "A2",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E3",
+      "F3"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "grupo": "4ºB",
+   "aula": "B03",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E23",
+      "F23"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "grupo": "4ºC",
+   "aula": "A10",
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E11",
+      "F11"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  }
+ ],
+ "aulasAsignatura": [
+  {
+   "asignatura": "ANAT",
+   "aulas": [
+    {
+     "aula": "A6",
+     "rol": "PREFERIDA",
+     "procedencia": [
+      {
+       "hoja": 1,
+       "celdas": [
+        "E7",
+        "F7",
+        "G7"
+       ],
+       "casacion": "EXACTA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "asignatura": "Mús",
+   "aulas": [
+    {
+     "aula": "A13",
+     "rol": "PREFERIDA",
+     "procedencia": [
+      {
+       "hoja": 1,
+       "celdas": [
+        "E14",
+        "F14",
+        "G14"
+       ],
+       "casacion": "EXACTA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "asignatura": "PLAB",
+   "aulas": [
+    {
+     "aula": "A6",
+     "rol": "PREFERIDA",
+     "procedencia": [
+      {
+       "hoja": 1,
+       "celdas": [
+        "E7",
+        "F7",
+        "G7"
+       ],
+       "casacion": "EXACTA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "asignatura": "REVAN",
+   "aulas": [
+    {
+     "aula": "A18",
+     "rol": "PREFERIDA",
+     "procedencia": [
+      {
+       "hoja": 1,
+       "celdas": [
+        "E31",
+        "F31",
+        "H31"
+       ],
+       "casacion": "EXACTA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "asignatura": "TEC",
+   "aulas": [
+    {
+     "aula": "B07",
+     "rol": "EXCLUSIVA",
+     "procedencia": [
+      {
+       "hoja": 1,
+       "celdas": [
+        "E27",
+        "F27",
+        "H27"
+       ],
+       "casacion": "V2"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "usoAula": [],
+ "capacidad": [
+  {
+   "aula": "A1",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E2",
+      "D2",
+      "C2"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A10",
+   "capacidad": 29,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E11",
+      "D11",
+      "C11"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A11",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E12",
+      "D12",
+      "C12"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A13",
+   "capacidad": 31,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E14",
+      "D14",
+      "C14"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A14",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E15",
+      "D15",
+      "C15"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A15",
+   "capacidad": 30,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E16",
+      "D16",
+      "C16"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A2",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E3",
+      "D3",
+      "C3"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A3",
+   "capacidad": 33,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E4",
+      "D4",
+      "C4"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A4",
+   "capacidad": 36,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E5",
+      "D5",
+      "C5"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A5",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E6",
+      "D6",
+      "C6"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A6",
+   "capacidad": 33,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E7",
+      "D7",
+      "C7"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A7",
+   "capacidad": 30,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E8",
+      "D8",
+      "C8"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A8",
+   "capacidad": 12,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E9",
+      "G9",
+      "C9",
+      "D9"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "A9",
+   "capacidad": 31,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E10",
+      "D10",
+      "C10"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "B01",
+   "capacidad": 32,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E21",
+      "D21",
+      "C21"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "B02",
+   "capacidad": 33,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E22",
+      "D22",
+      "C22"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "B03",
+   "capacidad": 31,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E23",
+      "D23",
+      "C23"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "B04",
+   "capacidad": 18,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E24",
+      "G24",
+      "C24",
+      "D24"
+     ],
+     "casacion": "V1+V2"
+    }
+   ]
+  },
+  {
+   "aula": "B05",
+   "capacidad": 33,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E25",
+      "D25",
+      "C25"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "B06",
+   "capacidad": 29,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E26",
+      "D26",
+      "C26"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "B07",
+   "capacidad": 30,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E27",
+      "D27",
+      "C27"
+     ],
+     "casacion": "V2"
+    }
+   ]
+  },
+  {
+   "aula": "COM1",
+   "capacidad": 30,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E28",
+      "D28",
+      "C28"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "COM4",
+   "capacidad": 26,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E29",
+      "D29",
+      "C29"
+     ],
+     "casacion": "EXACTA"
+    }
+   ]
+  },
+  {
+   "aula": "TAL3a",
+   "capacidad": 31,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E20",
+      "D20",
+      "C20"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  },
+  {
+   "aula": "TAL3b",
+   "capacidad": 30,
+   "procedencia": [
+    {
+     "hoja": 1,
+     "celdas": [
+      "E17",
+      "D17",
+      "C17"
+     ],
+     "casacion": "V3"
+    }
+   ]
+  }
+ ],
+ "alumnos": [
+  {
+   "subgrupo": "1ºA-ALCT",
+   "alumnos": 8,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A12",
+      "B12"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºA-ATED",
+   "alumnos": 21,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A5",
+      "B5"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºA-Fr2",
+   "alumnos": 20,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A16",
+      "B16"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºB-ALCT",
+   "alumnos": 8,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A13",
+      "B13"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºB-ATED",
+   "alumnos": 17,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A6",
+      "B6"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºB-Fr2",
+   "alumnos": 21,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A17",
+      "B17"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºC-ALCT",
+   "alumnos": 9,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A14",
+      "B14"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºC-ATED",
+   "alumnos": 17,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A7",
+      "B7"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºC-Fr2",
+   "alumnos": 19,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A18",
+      "B18"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºD-ALCT",
+   "alumnos": 7,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A15",
+      "B15"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºD-ATED",
+   "alumnos": 17,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A8",
+      "B8"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "1ºD-Fr2",
+   "alumnos": 22,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A19",
+      "B19"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-A-CT",
+   "alumnos": 14,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A122",
+      "B122"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-B-CT",
+   "alumnos": 31,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A123",
+      "B123"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-C-CT",
+   "alumnos": 32,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A124",
+      "B124"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-C-Gri2",
+   "alumnos": 7,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A116",
+      "B116"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-C-PTEV",
+   "alumnos": 10,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A132",
+      "B132"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2B-C-Relig",
+   "alumnos": 22,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A129",
+      "B129"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2ºA-ATEDU",
+   "alumnos": 24,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A24",
+      "B24"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2ºB-ATEDU",
+   "alumnos": 22,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A25",
+      "B25"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "2ºC-ATEDU",
+   "alumnos": 25,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A26",
+      "B26"
+     ]
+    }
+   ]
+  },
+  {
+   "subgrupo": "4ºA-ATEDU",
+   "alumnos": 26,
+   "procedencia": [
+    {
+     "hoja": 2,
+     "celdas": [
+      "A52",
+      "B52"
+     ]
+    }
+   ]
+  }
+ ],
+ "conservarAula": [],
+ "omitidas": [
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E13"
+    ]
+   },
+   "motivo": "aula fuera del rango que da el propio Excel"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E18"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E19"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E30"
+    ]
+   },
+   "motivo": "aula fuera del rango que da el propio Excel"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E32"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E33"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E35"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E37"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E39"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "nota",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "B42"
+    ]
+   },
+   "motivo": "nota sin aula con lectura segura"
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E9",
+     "F9"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "el PDC no admite aula de referencia; cuenta como su grupo padre",
+   "grupos": [
+    "4ºBDi",
+    "4ºCDi"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E24",
+     "F24"
+    ],
+    "casacion": "V1+V2"
+   },
+   "motivo": "el PDC no admite aula de referencia; cuenta como su grupo padre",
+   "grupos": [
+    "3ºADi",
+    "3ºBDi",
+    "3ºCDi"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E36",
+     "F36"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "relleno de la fila que no es amarillo ni naranja",
+   "grupos": [
+    "2FPB"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E37",
+     "F37"
+    ]
+   },
+   "motivo": "aula sin lectura segura",
+   "grupos": [
+    "1FPB"
+   ]
+  },
+  {
+   "regla": "aulasAsignatura",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E7",
+     "F7",
+     "G7"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "calificativo «si es necesario»: no da rol",
+   "aula": "A6"
+  },
+  {
+   "regla": "aulasAsignatura",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E13",
+     "F13",
+     "G13"
+    ]
+   },
+   "motivo": "aula fuera del rango que da el propio Excel"
+  },
+  {
+   "regla": "aulasAsignatura",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E32",
+     "F32",
+     "H32"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aulasAsignatura",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E33",
+     "F33",
+     "H33"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "aulasAsignatura",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E34",
+     "F34",
+     "H34"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "ninguna asignatura con ese nombre exacto",
+   "aula": "C00"
+  },
+  {
+   "regla": "usoAula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E18",
+     "F18"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "usoAula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E19",
+     "F19"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "usoAula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E35",
+     "F35",
+     "H35"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "usoAula",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E39"
+    ]
+   },
+   "motivo": "aula sin lectura segura"
+  },
+  {
+   "regla": "capacidad",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E31",
+     "D31"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "ni «caben N» en G ni un número de sillas en D",
+   "aula": "A18"
+  },
+  {
+   "regla": "capacidad",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E34",
+     "D34"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "ni «caben N» en G ni un número de sillas en D",
+   "aula": "C00"
+  },
+  {
+   "regla": "capacidad",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E36",
+     "D36"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "ni «caben N» en G ni un número de sillas en D",
+   "aula": "A17"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A2",
+     "B2"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A3",
+     "B3"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A4",
+     "B4"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A9",
+     "B9"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A10",
+     "B10"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A11",
+     "B11"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A23",
+     "B23"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A27",
+     "B27"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A28",
+     "B28"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A29",
+     "B29"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A30",
+     "B30"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A31",
+     "B31"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A32",
+     "B32"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: ningún subgrupo de esa asignatura en esos grupos"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A36",
+     "B36"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A37",
+     "B37"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A38",
+     "B38"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A39",
+     "B39"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A40",
+     "B40"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A41",
+     "B41"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A42",
+     "B42"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A43",
+     "B43"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A44",
+     "B44"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A45",
+     "B45"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A46",
+     "B46"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A47",
+     "B47"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A48",
+     "B48"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A53",
+     "B53"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A54",
+     "B54"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A55",
+     "B55"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A56",
+     "B56"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A57",
+     "B57"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A58",
+     "B58"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A59",
+     "B59"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A60",
+     "B60"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A61",
+     "B61"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A62",
+     "B62"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A63",
+     "B63"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A64",
+     "B64"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: ningún subgrupo de esa asignatura en esos grupos"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A65",
+     "B65"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A66",
+     "B66"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A67",
+     "B67"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A68",
+     "B68"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A69",
+     "B69"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A70",
+     "B70"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: ningún subgrupo de esa asignatura en esos grupos"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A71",
+     "B71"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A72",
+     "B72"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A73",
+     "B73"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A74",
+     "B74"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A75",
+     "B75"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A76",
+     "B76"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A77",
+     "B77"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A78",
+     "B78"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: el catálogo no tiene ese grupo en el nivel"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A79",
+     "B79"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A83",
+     "B83"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A84",
+     "B84"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A85",
+     "B85"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A86",
+     "B86"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A87",
+     "B87"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A88",
+     "B88"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A89",
+     "B89"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A90",
+     "B90"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A91",
+     "B91"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A92",
+     "B92"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A93",
+     "B93"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A94",
+     "B94"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A95",
+     "B95"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A96",
+     "B96"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A97",
+     "B97"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A98",
+     "B98"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A99",
+     "B99"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A100",
+     "B100"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A101",
+     "B101"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A102",
+     "B102"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A103",
+     "B103"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A104",
+     "B104"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A105",
+     "B105"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A106",
+     "B106"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: 1º BTO: el Excel usa A-D y el catálogo otras letras"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A110",
+     "B110"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A111",
+     "B111"
+    ]
+   },
+   "motivo": "SIN CASACIÓN: ningún subgrupo de esa asignatura en esos grupos"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A112",
+     "B112"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A113",
+     "B113"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A114",
+     "B114"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A115",
+     "B115"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A117",
+     "B117"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A118",
+     "B118"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A119",
+     "B119"
+    ]
+   },
+   "motivo": "INCOMPLETA: la fila nombra un grupo sin subgrupo de esa asignatura"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A120",
+     "B120"
+    ]
+   },
+   "motivo": "CASA-PLAZA: plaza entera con varios subgrupos: el número es el total y su reparto no tiene fuente"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A121",
+     "B121"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A125",
+     "B125"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A126",
+     "B126"
+    ]
+   },
+   "motivo": "AMBIGUA: la fila cae en varias plazas"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A127",
+     "B127"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A128",
+     "B128"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A130",
+     "B130"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A131",
+     "B131"
+    ]
+   },
+   "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  }
+ ]
+}
