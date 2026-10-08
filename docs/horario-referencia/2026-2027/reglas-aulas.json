@@ -1002,32 +1002,6 @@
    ]
   },
   {
-   "subgrupo": "2B-B-CT",
-   "alumnos": 31,
-   "procedencia": [
-    {
-     "hoja": 2,
-     "celdas": [
-      "A123",
-      "B123"
-     ]
-    }
-   ]
-  },
-  {
-   "subgrupo": "2B-C-CT",
-   "alumnos": 32,
-   "procedencia": [
-    {
-     "hoja": 2,
-     "celdas": [
-      "A124",
-      "B124"
-     ]
-    }
-   ]
-  },
-  {
    "subgrupo": "2B-C-Gri2",
    "alumnos": 7,
    "procedencia": [
@@ -2397,6 +2371,42 @@
     ]
    },
    "motivo": "PARCIAL: la fila cubre parte de una plaza"
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A123",
+     "B123"
+    ]
+   },
+   "motivo": "contradice la capacidad del aula oficial (hoja 1 frente a hoja 2)",
+   "subgrupo": "2B-B-CT",
+   "plaza": "Bloque-CT_DT-2BACH-P3",
+   "aulas": [
+    "COM4"
+   ],
+   "capacidad": 26,
+   "suma": 31
+  },
+  {
+   "regla": "alumnos",
+   "origen": {
+    "hoja": 2,
+    "celdas": [
+     "A124",
+     "B124"
+    ]
+   },
+   "motivo": "contradice la capacidad del aula oficial (hoja 1 frente a hoja 2)",
+   "subgrupo": "2B-C-CT",
+   "plaza": "Bloque-CT_DT-2BACH-P2",
+   "aulas": [
+    "B06"
+   ],
+   "capacidad": 29,
+   "suma": 32
   },
   {
    "regla": "alumnos",

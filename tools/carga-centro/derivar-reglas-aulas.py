@@ -42,6 +42,10 @@ N6  Alumnos (hoja 2): solo las filas que casan con UN subgrupo que es la plaza e
     (CASA-1, M2 de S209 P5.4); el resto se omite con su clase. Tabla TERMINOS del M2.
 N7  Cada regla lleva su procedencia: hoja, celdas y la casacion del aula (EXACTA, V1-V3).
 N8  `conservarAula` vacia (la llena el M4) y `omitidas` con regla, origen y motivo.
+N9  Coherencia de alumnos con el aula oficial (S209 T2b). Para cada plaza de CLASE del catalogo
+    con subgrupos que tienen alumnos derivados (N6) y cuyas aulas tienen TODAS capacidad
+    derivada (N5): si la suma de esos alumnos supera la capacidad del aula fija, o la MAYOR de
+    las candidatas, se omiten los alumnos de todos esos subgrupos. Las capacidades no se tocan.
 """
 
 import argparse
@@ -436,6 +440,34 @@ def derivar_hoja2(h2, cat, omitidas):
     return alumnos
 
 
+M_N9 = "contradice la capacidad del aula oficial (hoja 1 frente a hoja 2)"
+
+
+def coherencia_alumnos(cat, capacidad, alumnos, omitidas):
+    """N9: quita de `alumnos` los subgrupos de las plazas cuya suma supera la capacidad de su aula."""
+    cap = {r["aula"]: r["capacidad"] for r in capacidad}
+    por_sub = {r["subgrupo"]: r for r in alumnos}
+    quitados = {}
+    for a in cat["actividades"]:
+        if a.get("tipo", "CLASE") != "CLASE":
+            continue
+        for i, p in enumerate(a["plazas"], 1):
+            subs = [s for s in p.get("subgrupos") or [] if s in por_sub]
+            aulas = [p["aulaFija"]] if p.get("aulaFija") else list(p.get("aulasCandidatas") or [])
+            if not subs or not aulas or any(x not in cap for x in aulas):
+                continue
+            limite = max(cap[x] for x in aulas)
+            suma = sum(por_sub[s]["alumnos"] for s in subs)
+            if suma > limite:
+                for s in subs:
+                    quitados.setdefault(s, {"plaza": "%s-P%d" % (a["codigo"], i), "aulas": sorted(aulas),
+                                            "capacidad": limite, "suma": suma})
+    for s in sorted(quitados):
+        for o in por_sub[s]["procedencia"]:
+            omitidas.append(dict({"regla": "alumnos", "origen": o, "motivo": M_N9, "subgrupo": s}, **quitados[s]))
+    return [r for r in alumnos if r["subgrupo"] not in quitados]
+
+
 # ---------------------------------------------------------------- salida
 
 def derivar(rutas):
@@ -446,7 +478,7 @@ def derivar(rutas):
     nombres = json.loads(rutas["nombres"].read_text(encoding="utf-8"))
     omitidas = []
     reglas = derivar_hoja1(h1, rellenos, cat, nombres, omitidas)
-    reglas["alumnos"] = derivar_hoja2(h2, cat, omitidas)
+    reglas["alumnos"] = coherencia_alumnos(cat, reglas["capacidad"], derivar_hoja2(h2, cat, omitidas), omitidas)
     orden = {"aula": 0, "nota": 1, "aulaReferencia": 2, "aulasAsignatura": 3, "usoAula": 4, "capacidad": 5, "alumnos": 6}
     omitidas.sort(key=lambda o: (orden[o["regla"]], o["origen"]["hoja"],
                                  [(re.sub(r"\d", "", c), int(re.sub(r"\D", "", c))) for c in o["origen"]["celdas"]],
