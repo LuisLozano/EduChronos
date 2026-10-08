@@ -8,6 +8,7 @@ import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
+import es.yaroki.educhronos.app.service.GuardiasSinRepartoException;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
@@ -68,6 +69,9 @@ public class HorarioController {
     /** Causa del 422 de la pre-validación: contrato con la vista, no texto para el usuario. */
     static final String CAUSA_PREVALIDACION_FALLIDA = "PREVALIDACION_FALLIDA";
 
+    /** Causa del 422 del reparto de guardias (S213): hubo solve, pero no se llega al mínimo por tramo. */
+    static final String CAUSA_GUARDIAS_SIN_REPARTO = "GUARDIAS_SIN_REPARTO";
+
     private final GeneradorHorarioService service;
     private final DiagnosticoService diagnosticoService;
     private final ExportacionHorarioService exportacionService;
@@ -97,6 +101,8 @@ public class HorarioController {
         } catch (PrevalidacionFallidaException e) {
             return respuestaDeFallo(e);
         } catch (HorarioInfactibleException e) {
+            return respuestaDeFallo(e);
+        } catch (GuardiasSinRepartoException e) {
             return respuestaDeFallo(e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -159,6 +165,17 @@ public class HorarioController {
     private ResponseEntity<Object> respuestaDeFallo(PrevalidacionFallidaException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new FalloGeneracionDTO(CAUSA_PREVALIDACION_FALLIDA, e.getMessage(), null, null));
+    }
+
+    /**
+     * El 422 del reparto de guardias (S213, C-reparto-guardias), por el mismo camino que el de la
+     * pre-validación: causa propia, {@code mensaje} con el texto para el usuario, que nombra los
+     * tramos que no llegan al mínimo, y {@code estado} y {@code segundos} nulos. Hubo solve, pero no
+     * hay horario: no se guardó nada, y el veredicto del solver no le dice nada al usuario.
+     */
+    private ResponseEntity<Object> respuestaDeFallo(GuardiasSinRepartoException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new FalloGeneracionDTO(CAUSA_GUARDIAS_SIN_REPARTO, e.getMessage(), null, null));
     }
 
     /**

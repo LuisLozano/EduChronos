@@ -29,6 +29,8 @@ import es.yaroki.educhronos.app.curso.RechazoCursoException;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.DeduccionAulas;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
+import es.yaroki.educhronos.app.persistence.Guardia;
+import es.yaroki.educhronos.app.persistence.GuardiaRepository;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.Sesion;
@@ -102,6 +104,9 @@ public class GeneradorHorarioService {
     private final ProfesorTutoriaRepository profesorTutoriaRepository;
     private final AsignaturaAulaRepository asignaturaAulaRepository;
 
+    /** Las guardias repartidas, que {@link #persistir} escribe tras las sesiones (S213). */
+    private final GuardiaRepository guardiaRepository;
+
     /** El mínimo de guardias por tramo del centro (S212), que lee {@link ConfiguracionGuardias}. */
     private final ConfiguracionRepository configuracionRepository;
 
@@ -131,6 +136,7 @@ public class GeneradorHorarioService {
             ProfesorTutoriaRepository profesorTutoriaRepository,
             AsignaturaAulaRepository asignaturaAulaRepository,
             ConfiguracionRepository configuracionRepository,
+            GuardiaRepository guardiaRepository,
             EstadoCurso estadoCurso,
             PlatformTransactionManager gestorTransacciones) {
         this.tramoRepository = tramoRepository;
@@ -148,6 +154,7 @@ public class GeneradorHorarioService {
         this.profesorTutoriaRepository = profesorTutoriaRepository;
         this.asignaturaAulaRepository = asignaturaAulaRepository;
         this.configuracionRepository = configuracionRepository;
+        this.guardiaRepository = guardiaRepository;
         this.estadoCurso = estadoCurso;
         this.transaccion = new TransactionTemplate(gestorTransacciones);
     }
@@ -294,6 +301,8 @@ public class GeneradorHorarioService {
      *         necesaria: el problema no puede tener solución y no se gasta el solver.
      * @throws es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException si el
      *         problema no admite un horario factible.
+     * @throws GuardiasSinRepartoException si las guardias ordinarias no llegan al mínimo por
+     *         tramo sobre el horario resuelto (S213): no se guarda nada.
      * @throws RechazoCursoException 409 si otra operación de curso está en marcha (S160,
      *         invariante I2): {@code CURSO_CAMBIANDO} si se está abriendo otra base,
      *         {@code CURSO_OCUPADO} si se está duplicando el curso,
@@ -339,6 +348,10 @@ public class GeneradorHorarioService {
             } catch (PrevalidacionFallidaException e) {
                 LOG.warn("Generación terminada desenlace=PREVALIDACION motivo={} duracionMs={}",
                         e.getMessage(), milisegundosDesde(inicio));
+                throw e;
+            } catch (GuardiasSinRepartoException e) {
+                LOG.warn("Generación terminada desenlace=GUARDIAS_SIN_REPARTO tramos={} duracionMs={}",
+                        e.resumen(), milisegundosDesde(inicio));
                 throw e;
             } catch (RuntimeException e) {
                 LOG.error("Generación terminada desenlace=EXCEPCION duracionMs={}",
@@ -419,7 +432,15 @@ public class GeneradorHorarioService {
             case OPTIMIZACION -> solver.resolverOptimizandoConDetalle(problema);
         };
 
-        return transaccion.execute(tx -> persistir(resultado, problema, nombreEfectivo));
+        // El reparto de las guardias (S213), tras el solve y ANTES de escribir nada: si no llega al
+        // mínimo en algún tramo, no queda horario y el controlador responde 422 GUARDIAS_SIN_REPARTO.
+        RepartoGuardias.Resultado reparto = RepartoGuardias.repartir(problema, resultado.solucion(),
+                cuadre.guardiasPorProfesor(), cuadre.minimoGuardiasPorTramo());
+        if (reparto.fallo()) {
+            throw new GuardiasSinRepartoException(reparto.deficits());
+        }
+
+        return transaccion.execute(tx -> persistir(resultado, problema, nombreEfectivo, reparto.asignaciones()));
     }
 
     /** Duración en milisegundos desde un {@link System#nanoTime()}, para la línea de fin. */
@@ -479,7 +500,7 @@ public class GeneradorHorarioService {
      */
     @Transactional
     public HorarioGenerado guardar(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre) {
-        return persistir(resultado, problema, nombre).horario();
+        return persistir(resultado, problema, nombre, List.of()).horario();
     }
 
     /**
@@ -489,8 +510,15 @@ public class GeneradorHorarioService {
      */
     private record Guardado(HorarioGenerado horario, int sesiones) {}
 
-    /** El cuerpo de {@link #guardar}, que además devuelve el recuento de sesiones escritas. */
-    private Guardado persistir(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre) {
+    /**
+     * El cuerpo de {@link #guardar}, que además devuelve el recuento de sesiones escritas. Desde S213
+     * escribe también las {@code guardias} repartidas, después de las sesiones y en la misma
+     * transacción; {@link #guardar} no reparte y pasa la lista vacía. Cada guardia se traduce a
+     * entidades como las sesiones: el tramo, por su posición en el problema y {@code idxTramo}; el
+     * profesor, por código, como la plaza y el aula.
+     */
+    private Guardado persistir(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre,
+                               List<RepartoGuardias.Asignacion> guardias) {
         Objects.requireNonNull(resultado, "resultado no puede ser null");
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(nombre, "nombre no puede ser null");
@@ -512,6 +540,21 @@ public class GeneradorHorarioService {
                 horario, problema, resultado.solucion(), idxPlaza, idxAula, idxTramo);
         sesionRepository.saveAll(sesiones);
 
+        Map<String, Profesor> idxProfesor = profesorRepository.findAll().stream()
+                .collect(Collectors.toMap(Profesor::getCodigo, p -> p));
+        List<Guardia> filas = new ArrayList<>(guardias.size());
+        for (RepartoGuardias.Asignacion guardia : guardias) {
+            Profesor profesor = idxProfesor.get(guardia.profesorCodigo());
+            TramoSemanal tramo = idxTramo.get(problema.tramos().get(guardia.tramo()));
+            if (profesor == null || tramo == null) {
+                throw new IllegalArgumentException("La guardia de " + guardia.profesorCodigo()
+                        + " en el tramo " + problema.tramos().get(guardia.tramo()).codigo()
+                        + " no tiene profesor o tramo persistido");
+            }
+            filas.add(new Guardia(horario, profesor, tramo));
+        }
+        guardiaRepository.saveAll(filas);
+
         return new Guardado(horario, sesiones.size());
     }
 
@@ -520,6 +563,17 @@ public class GeneradorHorarioService {
     @Transactional(readOnly = true)
     public Optional<Long> idVigente() {
         return horarioRepository.findFirstByOrderByIdDesc().map(HorarioGenerado::getId);
+    }
+
+    /**
+     * Las guardias repartidas de un horario (S213), por consulta y no por una colección inversa
+     * (D-post-horario-sin-sesiones). Las lee el diagnóstico, que colabora con este servicio solo
+     * por sus métodos públicos de carga y no hereda sus repositorios; sus relaciones perezosas
+     * (profesor y tramo) se resuelven dentro de la transacción de quien llama.
+     */
+    @Transactional(readOnly = true)
+    public List<Guardia> cargarGuardias(Long horarioId) {
+        return guardiaRepository.findByHorarioId(horarioId);
     }
 
     /**

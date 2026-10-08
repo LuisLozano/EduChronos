@@ -545,9 +545,9 @@ public class PrevalidacionService {
                         continue;
                     }
                     String donde = tramo.equals(pin.tramo())
-                            ? "en el tramo " + tramo.codigo()
+                            ? "en el " + nombreDeTramo(tramo)
                             : "desde el tramo " + pin.tramo().codigo()
-                                    + ", y la sesión ocupa el tramo " + tramo.codigo();
+                                    + ", y la sesión ocupa el " + nombreDeTramo(tramo);
                     avisos.add(new AvisoPrevalidacion(
                             Severidad.ERROR,
                             REGLA_PIN_SOBRE_TRAMO_DURA,
@@ -556,14 +556,23 @@ public class PrevalidacionService {
                             0,
                             "La sesión '" + instancia.actividad().codigo() + "' #"
                                     + instancia.indice() + " está fijada " + donde
-                                    + " (día " + tramo.diaSemana() + ", tramo "
-                                    + tramo.ordenEnDia() + "), en el que el profesor '"
+                                    + ", en el que el profesor '"
                                     + profesor.codigo() + "' no puede dar clase"
                                     + " (restricción DURA)"));
                 }
             }
         }
         return avisos;
+    }
+
+    /**
+     * El nombre de un tramo en los mensajes para el usuario: «tramo L1 (día 1, tramo 1)». Lo
+     * escribía en línea {@link #pinSobreTramoDura} (S165); sale aquí en S213 para que el reparto
+     * de guardias y su diagnóstico nombren los tramos igual.
+     */
+    static String nombreDeTramo(Tramo tramo) {
+        return "tramo " + tramo.codigo() + " (día " + tramo.diaSemana() + ", tramo "
+                + tramo.ordenEnDia() + ")";
     }
 
     /**
