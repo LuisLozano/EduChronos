@@ -19,8 +19,13 @@ import es.yaroki.educhronos.app.catalog.TipoActividad;
 import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.catalog.TipoGrupo;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
+import es.yaroki.educhronos.app.service.AvisoPrevalidacion;
+import es.yaroki.educhronos.app.service.DatosAulas;
+import es.yaroki.educhronos.app.service.DatosCuadre;
+import es.yaroki.educhronos.app.service.PrevalidacionService;
 import es.yaroki.educhronos.solver.domain.ProblemaHorario;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -471,5 +476,282 @@ class DeduccionAulasTest {
 
         assertThat(problema.capacidadesDeAula()).containsExactlyEntriesOf(Map.of("A1", 25));
         assertThat(problema.alumnosDeSubgrupo()).containsExactlyEntriesOf(Map.of("G-1", 12));
+    }
+
+    // ─────────────────────────── Preferidas efectivas (S208, C-preferencias-aulas, A1-A5)
+
+    private static List<String> preferidas(DeduccionAulas.Dominio d) {
+        return d.preferidas().stream().map(Aula::getCodigo).toList();
+    }
+
+    private static List<TramoSemanal> cincoTramos() {
+        return java.util.stream.IntStream.rangeClosed(1, 5)
+                .mapToObj(o -> new TramoSemanal(Dia.LUNES, LocalTime.of(7 + o, 0),
+                        LocalTime.of(8 + o, 0), true, o, null))
+                .toList();
+    }
+
+    /** (a) P1: aula de grupo A y PREFERIDA L → posibles {A, L}, preferidas {L}. */
+    @Test
+    void s208a_p1_unGrupo_posiblesAulaDeGrupoYPreferida_preferidasSoloLaPreferida() {
+        Aula a = aula("A");
+        Aula l = aula("L");
+        Asignatura mat = asignatura("Mat");
+        Actividad act = actividad(mat, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("G-1", null, grupo("G", a)));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza,
+                reglas(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA)));
+
+        assertThat(codigos(d)).containsExactly("A", "L");
+        assertThat(preferidas(d)).containsExactly("L");
+    }
+
+    /** (b) P2: dos grupos con aulas A y B y PREFERIDA L → preferidas {L}. */
+    @Test
+    void s208b_p2_variosGrupos_preferidasSoloLaPreferida() {
+        Aula a = aula("A");
+        Aula b = aula("B");
+        Aula l = aula("L");
+        Asignatura mat = asignatura("Mat");
+        Actividad act = actividad(mat, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mat, null, Set.of(),
+                subgrupo("G-1", null, grupo("G", a)), subgrupo("H-1", null, grupo("H", b)));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza,
+                reglas(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA)));
+
+        assertThat(codigos(d)).containsExactly("A", "B", "L");
+        assertThat(preferidas(d)).containsExactly("L");
+    }
+
+    /**
+     * (c) G1 y G2: la asignatura de la plaza no tiene PREFERIDAS (otra sí) → sin preferidas, ni
+     * las aulas de grupo, que son posibles pero no preferidas.
+     */
+    @Test
+    void s208c_g1YG2_sinPreferidas() {
+        Aula a = aula("A");
+        Aula b = aula("B");
+        Aula l = aula("L");
+        Asignatura mat = asignatura("Mat");
+        Asignatura bio = asignatura("Bio");
+        Map<Long, List<AsignaturaAula>> conReglaDeOtra =
+                reglas(new AsignaturaAula(bio, l, RolAulaAsignatura.PREFERIDA));
+        Actividad g1 = actividad(mat, TipoActividad.CLASE);
+        Plaza unGrupo = plaza(g1, mat, null, Set.of(), subgrupo("G-1", null, grupo("G", a)));
+        Actividad g2 = actividad(mat, TipoActividad.CLASE);
+        Plaza dosGrupos = plaza(g2, mat, null, Set.of(),
+                subgrupo("G-2", null, grupo("G", a)), subgrupo("H-1", null, grupo("H", b)));
+
+        DeduccionAulas.Dominio d1 = DeduccionAulas.dominio(g1, unGrupo, conReglaDeOtra);
+        DeduccionAulas.Dominio d2 = DeduccionAulas.dominio(g2, dosGrupos, conReglaDeOtra);
+
+        assertThat(codigos(d1)).containsExactly("A");
+        assertThat(preferidas(d1)).isEmpty();
+        assertThat(codigos(d2)).containsExactly("A", "B");
+        assertThat(preferidas(d2)).isEmpty();
+    }
+
+    /**
+     * (d) Aula escrita (decisión L): sin preferidas aunque la asignatura las tenga, y aunque el
+     * aula escrita sea una de ellas.
+     */
+    @Test
+    void s208d_aulaEscrita_fijaOCandidatas_sinPreferidas() {
+        Aula a = aula("A");
+        Aula l = aula("L");
+        Aula y = aula("Y");
+        Asignatura mat = asignatura("Mat");
+        Map<Long, List<AsignaturaAula>> conPreferida =
+                reglas(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA));
+        Actividad conFija = actividad(mat, TipoActividad.CLASE);
+        Plaza fija = plaza(conFija, mat, l, Set.of(), subgrupo("G-1", null, grupo("G", a)));
+        Actividad conCandidatas = actividad(mat, TipoActividad.CLASE);
+        Plaza candidatas = plaza(conCandidatas, mat, null, Set.of(l, y),
+                subgrupo("G-2", null, grupo("G", a)));
+
+        DeduccionAulas.Dominio dFija = DeduccionAulas.dominio(conFija, fija, conPreferida);
+        DeduccionAulas.Dominio dCand = DeduccionAulas.dominio(conCandidatas, candidatas, conPreferida);
+
+        assertThat(codigos(dFija)).containsExactly("L");
+        assertThat(preferidas(dFija)).isEmpty();
+        assertThat(codigos(dCand)).containsExactly("L", "Y");
+        assertThat(preferidas(dCand)).isEmpty();
+    }
+
+    /** (e) Una PREFERIDA «No se usa» sale del dominio y de las preferidas; la otra queda. */
+    @Test
+    void s208e_preferidaNoSeUsa_fueraDeLasPreferidas() {
+        Aula a = aula("A");
+        Aula l = aula("L");
+        l.setEnUso(false);
+        Aula m = aula("M");
+        Asignatura mat = asignatura("Mat");
+        Actividad act = actividad(mat, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("G-1", null, grupo("G", a)));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza, reglas(
+                new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA),
+                new AsignaturaAula(mat, m, RolAulaAsignatura.PREFERIDA)));
+
+        assertThat(codigos(d)).containsExactly("A", "M");
+        assertThat(preferidas(d)).containsExactly("M");
+    }
+
+    /** (f) Una PREFERIDA sin sitio para los alumnos sale de las preferidas; la otra queda. */
+    @Test
+    void s208f_preferidaSinCapacidad_fueraDeLasPreferidas() {
+        Aula a = aula("A");
+        Aula l = aula("L", 10);
+        Aula m = aula("M", 30);
+        Asignatura mat = asignatura("Mat");
+        Actividad act = actividad(mat, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("G-1", 20, grupo("G", a)));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza, reglas(
+                new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA),
+                new AsignaturaAula(mat, m, RolAulaAsignatura.PREFERIDA)));
+
+        assertThat(codigos(d)).containsExactly("A", "M");
+        assertThat(preferidas(d)).containsExactly("M");
+    }
+
+    /** (g) Asignatura con EXCLUSIVAS: el dominio son ellas y ninguna es preferida. */
+    @Test
+    void s208g_exclusivas_sinPreferidas() {
+        Aula a = aula("A");
+        Aula e1 = aula("E1");
+        Aula e2 = aula("E2");
+        Asignatura mus = asignatura("Mús");
+        Actividad act = actividad(mus, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mus, null, Set.of(), subgrupo("G-1", null, grupo("G", a)));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza, reglas(
+                new AsignaturaAula(mus, e1, RolAulaAsignatura.EXCLUSIVA),
+                new AsignaturaAula(mus, e2, RolAulaAsignatura.EXCLUSIVA)));
+
+        assertThat(codigos(d)).containsExactly("E1", "E2");
+        assertThat(preferidas(d)).isEmpty();
+    }
+
+    /**
+     * (h) La plaza de un PDC se comporta como la de su padre: posibles {aula del padre, L} (no la
+     * del PDC) y preferidas {L}.
+     */
+    @Test
+    void s208h_pdc_comoSuPadre() {
+        Aula delPadre = aula("R3A");
+        Aula delPdc = aula("R3ADi");
+        Aula l = aula("L");
+        Asignatura mat = asignatura("Mat");
+        GrupoAdministrativo padre = grupo("3ºA", delPadre);
+        GrupoAdministrativo pdc = new GrupoAdministrativo("3ºADi", NIVEL, TipoGrupo.DIVERSIFICACION_PDC, padre);
+        pdc.setAulaReferencia(delPdc);
+        Actividad act = actividad(mat, TipoActividad.CLASE);
+        Plaza plaza = plaza(act, mat, null, Set.of(), subgrupo("3ºADi-Completo", null, pdc));
+
+        DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, plaza,
+                reglas(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA)));
+
+        assertThat(codigos(d)).containsExactly("R3A", "L");
+        assertThat(preferidas(d)).containsExactly("L");
+    }
+
+    /**
+     * Catálogo de (i) y (j): UNA (P1, aula de grupo A, PREFERIDA L de Mat), DOS (P2, grupos G y
+     * H con A y B, Mat), G1 (Bio, sin preferidas) y SIN (Len, grupo sin aula y su única PREFERIDA
+     * N marcada «No se usa»: dominio vacío). Cinco tramos, para que ninguna regla aritmética salte.
+     */
+    private record Catalogo(List<Aula> aulas, List<Asignatura> asignaturas,
+                            List<GrupoAdministrativo> grupos, List<Subgrupo> subgrupos,
+                            List<Actividad> actividades, List<AsignaturaAula> reglas) {
+        ProblemaHorario problema() {
+            return CatalogoMapper.aProblemaHorario(cincoTramos(), aulas, asignaturas,
+                    List.of(PROF), grupos, subgrupos, actividades, List.of(), List.of(), List.of(),
+                    List.of(), reglas);
+        }
+    }
+
+    private Catalogo catalogoConPreferidas() {
+        Aula a = aula("A");
+        Aula b = aula("B");
+        Aula l = aula("L");
+        Aula n = aula("N");
+        n.setEnUso(false);
+        Asignatura mat = asignatura("Mat");
+        Asignatura bio = asignatura("Bio");
+        Asignatura len = asignatura("Len");
+        GrupoAdministrativo g = grupo("G", a);
+        GrupoAdministrativo h = grupo("H", b);
+        GrupoAdministrativo k = grupo("K", null);
+        Subgrupo sg = subgrupo("G-1", null, g);
+        Subgrupo sh = subgrupo("H-1", null, h);
+        Subgrupo sk = subgrupo("K-1", null, k);
+        Actividad una = actividad(mat, TipoActividad.CLASE);
+        una.setCodigo("UNA");
+        plaza(una, mat, null, Set.of(), sg).setCodigo("UNA-P1");
+        Actividad dos = actividad(mat, TipoActividad.CLASE);
+        dos.setCodigo("DOS");
+        plaza(dos, mat, null, Set.of(), sg, sh).setCodigo("DOS-P1");
+        Actividad g1 = actividad(bio, TipoActividad.CLASE);
+        g1.setCodigo("G1");
+        plaza(g1, bio, null, Set.of(), sh).setCodigo("G1-P1");
+        Actividad sin = actividad(len, TipoActividad.CLASE);
+        sin.setCodigo("SIN");
+        plaza(sin, len, null, Set.of(), sk).setCodigo("SIN-P1");
+        return new Catalogo(List.of(a, b, l, n), List.of(mat, bio, len), List.of(g, h, k),
+                List.of(sg, sh, sk), List.of(una, dos, g1, sin),
+                List.of(new AsignaturaAula(mat, l, RolAulaAsignatura.PREFERIDA),
+                        new AsignaturaAula(len, n, RolAulaAsignatura.PREFERIDA)));
+    }
+
+    /**
+     * (i) La prevalidación no cambia con las preferidas: sobre el catálogo con preferidas da lo
+     * mismo que sobre el mismo problema sin ellas, y lo de siempre (la plaza SIN sin aula
+     * posible). Los datos de aulas se arman como {@code GeneradorHorarioService.cargarDatosAulas}.
+     */
+    @Test
+    void s208i_laPrevalidacionNoCambiaConLasPreferidas() {
+        Catalogo c = catalogoConPreferidas();
+        ProblemaHorario conPreferidas = c.problema();
+        ProblemaHorario sinPreferidas = new ProblemaHorario(conPreferidas.tramos(),
+                conPreferidas.aulas(), conPreferidas.asignaturas(), conPreferidas.profesores(),
+                conPreferidas.grupos(), conPreferidas.subgrupos(), conPreferidas.actividades(),
+                conPreferidas.restriccionesHorarias(), conPreferidas.bloqueos(),
+                conPreferidas.tutorias(), conPreferidas.capacidadesDeAula(),
+                conPreferidas.alumnosDeSubgrupo());
+        Map<Long, List<AsignaturaAula>> indice = DeduccionAulas.indicePorAsignatura(c.reglas());
+        List<DatosAulas.PlazaSinAula> sinAula = new ArrayList<>();
+        for (Actividad act : c.actividades()) {
+            for (Plaza p : act.getPlazas()) {
+                DeduccionAulas.Dominio d = DeduccionAulas.dominio(act, p, indice);
+                if (d.vacio()) {
+                    sinAula.add(new DatosAulas.PlazaSinAula(act.getCodigo(), p.getCodigo(), d.motivo()));
+                }
+            }
+        }
+        DatosAulas datos = new DatosAulas(sinAula);
+
+        List<AvisoPrevalidacion> avisos =
+                PrevalidacionService.prevalidar(conPreferidas, DatosCuadre.VACIO, datos);
+
+        assertThat(avisos).isEqualTo(
+                PrevalidacionService.prevalidar(sinPreferidas, DatosCuadre.VACIO, datos));
+        assertThat(avisos).extracting(AvisoPrevalidacion::regla)
+                .containsExactly(PrevalidacionService.REGLA_CLASE_SIN_AULA_POSIBLE);
+        assertThat(sinAula).singleElement().satisfies(s -> {
+            assertThat(s.plazaCodigo()).isEqualTo("SIN-P1");
+            assertThat(s.motivo()).isEqualTo(DeduccionAulas.TODAS_NO_SE_USAN);
+        });
+    }
+
+    /** (j) El problema lleva las preferidas por código de plaza: solo UNA y DOS, con {L}. */
+    @Test
+    void s208j_elProblemaLlevaLasPreferidasPorCodigoDePlaza() {
+        ProblemaHorario problema = catalogoConPreferidas().problema();
+
+        assertThat(problema.preferidasDePlaza()).containsExactlyInAnyOrderEntriesOf(
+                Map.of("UNA-P1", Set.of("L"), "DOS-P1", Set.of("L")));
     }
 }

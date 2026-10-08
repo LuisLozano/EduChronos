@@ -220,7 +220,35 @@ public final class CatalogoMapper {
         return new ProblemaHorario(
                 tramosDom, aulasDom, asignaturasDom, profesoresDom,
                 gruposDom, subgruposDom, actividadesDom, restriccionesDom,
-                bloqueosDom, tutoriasDom, capacidades, alumnos);
+                bloqueosDom, tutoriasDom, capacidades, alumnos,
+                preferidasPorPlaza(actividades, aulasPorAsignatura));
+    }
+
+    /**
+     * Preferidas efectivas por código de plaza (S208, C-preferencias-aulas, A5): las de
+     * {@link DeduccionAulas.Dominio#preferidas()} de cada plaza de CLASE, por código de aula. Solo
+     * entran las plazas que tienen alguna, como la capacidad y los alumnos solo entran si no son
+     * nulos. Es la misma deducción que da las aulas de la plaza en {@link #aPlaza}, y no otra.
+     */
+    private static Map<String, java.util.Set<String>> preferidasPorPlaza(
+            List<es.yaroki.educhronos.app.catalog.Actividad> actividades,
+            Map<Long, List<AsignaturaAula>> aulasPorAsignatura) {
+        Map<String, java.util.Set<String>> porPlaza = new LinkedHashMap<>();
+        for (es.yaroki.educhronos.app.catalog.Actividad actividad : actividades) {
+            if (!DeduccionAulas.aplica(actividad)) {
+                continue;
+            }
+            for (es.yaroki.educhronos.app.catalog.Plaza plaza : actividad.getPlazas()) {
+                List<es.yaroki.educhronos.app.catalog.Aula> preferidas =
+                        DeduccionAulas.dominio(actividad, plaza, aulasPorAsignatura).preferidas();
+                if (!preferidas.isEmpty()) {
+                    porPlaza.put(plaza.getCodigo(), preferidas.stream()
+                            .map(es.yaroki.educhronos.app.catalog.Aula::getCodigo)
+                            .collect(Collectors.toCollection(java.util.LinkedHashSet::new)));
+                }
+            }
+        }
+        return porPlaza;
     }
 
     /**

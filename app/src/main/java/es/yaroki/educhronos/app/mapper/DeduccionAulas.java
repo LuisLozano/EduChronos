@@ -38,6 +38,14 @@ import java.util.TreeSet;
  * </ul>
  * A4 (una aula → fija, varias → candidatas) lo aplica el mapper sobre el resultado.
  *
+ * <p><b>Preferidas efectivas (S208, C-preferencias-aulas).</b> {@link Dominio#preferidas()} son
+ * las PREFERIDAS de la asignatura que siguen en el dominio tras A3 («No se usa» y capacidad).
+ * Solo las tiene una plaza cuyo dominio sale de A2 sin EXCLUSIVAS: con aula escrita (A1,
+ * decisión L) o con EXCLUSIVAS no hay ninguna, y una asignatura sin PREFERIDAS tampoco las da.
+ * El aula de grupo es posible pero no preferida. Se calculan aquí, en el mismo paso que el
+ * dominio, para que el rol no se pierda; la prevalidación sigue mirando solo {@link Dominio#vacio()}
+ * y {@link Dominio#motivo()}.
+ *
  * <p>Si el dominio queda vacío, {@link Dominio#motivo()} dice por qué, en el texto que verá el
  * usuario. Si lo vació más de una causa, manda la que eliminó la ÚLTIMA aula, en orden de id; y
  * de un aula «No se usa» que además no tiene sitio se dice que no se usa. Los motivos del aula
@@ -54,15 +62,27 @@ public final class DeduccionAulas {
     private DeduccionAulas() { }
 
     /**
-     * Dominio de aulas de una plaza: la lista ordenada (vacía si no hay ninguna posible) y, solo
-     * si está vacía, el motivo.
+     * Dominio de aulas de una plaza: la lista ordenada (vacía si no hay ninguna posible), sus
+     * PREFERIDAS EFECTIVAS (S208) y, solo si está vacía, el motivo. Las preferidas son siempre
+     * parte de las aulas, en el mismo orden.
      */
-    public record Dominio(List<Aula> aulas, String motivo) {
+    public record Dominio(List<Aula> aulas, List<Aula> preferidas, String motivo) {
         public Dominio {
             aulas = List.copyOf(aulas);
+            preferidas = List.copyOf(preferidas);
             if (aulas.isEmpty() == (motivo == null)) {
                 throw new IllegalArgumentException("un dominio vacío lleva motivo, y uno con aulas no");
             }
+            TreeSet<Aula> posibles = new TreeSet<>(ORDEN);
+            posibles.addAll(aulas);
+            if (!posibles.containsAll(preferidas)) {
+                throw new IllegalArgumentException("las preferidas tienen que ser aulas del dominio");
+            }
+        }
+
+        /** Dominio sin preferidas. */
+        public Dominio(List<Aula> aulas, String motivo) {
+            this(aulas, List.of(), motivo);
         }
 
         public boolean vacio() {
@@ -112,13 +132,16 @@ public final class DeduccionAulas {
         }
 
         TreeSet<Aula> previas = new TreeSet<>(ORDEN);
+        TreeSet<Aula> preferidasDeLaAsignatura = new TreeSet<>(ORDEN);       // S208: el rol
         boolean escrita = plaza.getAulaFija() != null || !plaza.getAulasCandidatas().isEmpty();
         if (plaza.getAulaFija() != null) {
             previas.add(plaza.getAulaFija());                                   // A1
         } else if (escrita) {
             previas.addAll(plaza.getAulasCandidatas());                         // A1
         } else {
-            previas.addAll(deducidas(plaza, aulasPorAsignatura));               // A2
+            Deducidas deducidas = deducidas(plaza, aulasPorAsignatura);         // A2
+            previas.addAll(deducidas.aulas());
+            preferidasDeLaAsignatura.addAll(deducidas.preferidas());
         }
         if (previas.isEmpty()) {
             return new Dominio(List.of(), SIN_REGLAS);
@@ -140,11 +163,24 @@ public final class DeduccionAulas {
                 posibles.add(aula);
             }
         }
-        return posibles.isEmpty() ? new Dominio(List.of(), motivo) : new Dominio(posibles, null);
+        if (posibles.isEmpty()) {
+            return new Dominio(List.of(), motivo);
+        }
+        List<Aula> preferidas = posibles.stream()                              // S208: tras A3
+                .filter(preferidasDeLaAsignatura::contains)
+                .toList();
+        return new Dominio(posibles, preferidas, null);
     }
 
-    /** A2: exclusivas de la asignatura, o aula de grupo de cada grupo efectivo más preferidas. */
-    private static List<Aula> deducidas(Plaza plaza, Map<Long, List<AsignaturaAula>> aulasPorAsignatura) {
+    /** Lo que deduce A2: las aulas y, de ellas, cuáles son PREFERIDAS de la asignatura. */
+    private record Deducidas(List<Aula> aulas, List<Aula> preferidas) {
+    }
+
+    /**
+     * A2: exclusivas de la asignatura (ninguna preferida: exclusiva no es preferida), o aula de
+     * grupo de cada grupo efectivo más preferidas, conservando cuáles son las preferidas.
+     */
+    private static Deducidas deducidas(Plaza plaza, Map<Long, List<AsignaturaAula>> aulasPorAsignatura) {
         List<AsignaturaAula> deLaAsignatura =
                 aulasPorAsignatura.getOrDefault(plaza.getAsignatura().getId(), List.of());
         List<Aula> exclusivas = deLaAsignatura.stream()
@@ -152,7 +188,7 @@ public final class DeduccionAulas {
                 .map(AsignaturaAula::getAula)
                 .toList();
         if (!exclusivas.isEmpty()) {
-            return exclusivas;
+            return new Deducidas(exclusivas, List.of());
         }
         List<Aula> resultado = new ArrayList<>();
         for (Subgrupo subgrupo : plaza.getSubgrupos()) {
@@ -160,11 +196,12 @@ public final class DeduccionAulas {
                 Optional.ofNullable(efectivo(grupo).getAulaReferencia()).ifPresent(resultado::add);
             }
         }
-        deLaAsignatura.stream()
+        List<Aula> preferidas = deLaAsignatura.stream()
                 .filter(f -> f.getRol() == RolAulaAsignatura.PREFERIDA)
                 .map(AsignaturaAula::getAula)
-                .forEach(resultado::add);
-        return resultado;
+                .toList();
+        resultado.addAll(preferidas);
+        return new Deducidas(resultado, preferidas);
     }
 
     /** Grupo efectivo: un PDC cuenta como su padre; cualquier otro, como él mismo. */
