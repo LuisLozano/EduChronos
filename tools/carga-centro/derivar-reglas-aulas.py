@@ -22,8 +22,9 @@ N1  Aula (columna E de la hoja 1): EXACTA si es un codigo del catalogo; si no, V
     («de las b01 a la b07», «de la A1 a la A18»): sin lectura. Lo demas, sin lectura segura;
     toda regla que use un aula sin lectura se omite.
 N2  Aula de referencia: E con relleno amarillo (FFFFFF00) o naranja (FFFF9900) y F que nombra
-    grupos ORDINARIO del catalogo (un 1º BCH da a sus dos grupos). Una fila DIVER (PDC) se omite:
-    el PDC no admite aula de referencia y cuenta como su grupo padre. Otro color, omitida (N2').
+    UN grupo ORDINARIO del catalogo. Una fila DIVER (PDC) se omite: el PDC no admite aula de
+    referencia y cuenta como su grupo padre. Otro color, omitida (N2'). Una fila que casa con
+    varios grupos (un 1º BCH con sus dos grupos) se omite entera (N2'', S209 T2c).
 N3  Aulas de una asignatura, en las filas de uso (F no nombra grupos), con el texto de G y H
     partido en frases por «.», «,» y «;»:
       rol (N3''): «si es necesario» -> la frase se omite; «si es posible» (aunque diga «solo»)
@@ -83,6 +84,7 @@ TERMINOS = {
 
 M_AULA_SIN_LECTURA = "aula sin lectura segura"
 M_FUERA_DE_RANGO = "aula fuera del rango que da el propio Excel"
+M_VARIOS_GRUPOS = "la fila casa con varios grupos de la base"
 
 
 # ---------------------------------------------------------------- lectura
@@ -247,6 +249,8 @@ def derivar_hoja1(h1, rellenos, cat, nombres, omitidas):
                 omitir("aulaReferencia", origen, cas, grupos=gs)
             elif rellenos.get("E%d" % fila, "") not in (AMARILLO, NARANJA):
                 omitir("aulaReferencia", origen, "relleno de la fila que no es amarillo ni naranja", grupos=gs)
+            elif len(gs) > 1:
+                omitir("aulaReferencia", origen, M_VARIOS_GRUPOS, grupos=gs)
             else:
                 for k in gs:
                     ref.setdefault(k, []).append((cod, origen))

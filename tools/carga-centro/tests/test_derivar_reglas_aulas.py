@@ -156,7 +156,8 @@ class N1Aulas(Base):
         self.assertEqual(dr.casar_aula("B4(Ant. Empr)", {"B04"}, {}), ("B04", "V1+V2"))
         self.assertEqual(dr.casar_aula("Taller3 A", {"TAL3a"}, {}), ("TAL3a", "V3"))
         ref = {r["grupo"]: r for r in self.j["aulaReferencia"]}
-        self.assertEqual((ref["1B-Ac"]["aula"], ref["1B-Ac"]["procedencia"][0]["casacion"]), ("TAL3a", "V3"))
+        fila3 = self.omitidas("aulaReferencia", "E3")                    # N2'': casa con dos grupos (S209 T2c)
+        self.assertEqual([o["origen"]["casacion"] for o in fila3], ["V3"])
         self.assertEqual((ref["3ºA"]["aula"], ref["3ºA"]["procedencia"][0]["casacion"]), ("B01", "V2"))
         self.assertEqual(self.asig()["Mús"], [("A13", "PREFERIDA")])
         self.assertEqual(self.j["aulasAsignatura"][[r["asignatura"] for r in self.j["aulasAsignatura"]].index("Mús")]
@@ -181,7 +182,7 @@ class N2Referencia(Base):
 
     def test_amarillas_y_naranjas_dan_aula_de_referencia(self):
         self.assertEqual({(r["grupo"], r["aula"]) for r in self.j["aulaReferencia"]},
-                         {("1ºA", "A1"), ("1B-Ac", "TAL3a"), ("1B-Am", "TAL3a"), ("3ºA", "B01")})
+                         {("1ºA", "A1"), ("3ºA", "B01")})
 
     def test_fila_pdc_omitida(self):
         o = self.omitidas("aulaReferencia", "E5")

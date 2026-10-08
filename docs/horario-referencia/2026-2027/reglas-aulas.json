@@ -27,90 +27,6 @@
  },
  "aulaReferencia": [
   {
-   "grupo": "1B-Ac",
-   "aula": "TAL3a",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E20",
-      "F20"
-     ],
-     "casacion": "V3"
-    }
-   ]
-  },
-  {
-   "grupo": "1B-Am",
-   "aula": "TAL3a",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E20",
-      "F20"
-     ],
-     "casacion": "V3"
-    }
-   ]
-  },
-  {
-   "grupo": "1B-Bc",
-   "aula": "TAL3b",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E17",
-      "F17"
-     ],
-     "casacion": "V3"
-    }
-   ]
-  },
-  {
-   "grupo": "1B-Bm",
-   "aula": "TAL3b",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E17",
-      "F17"
-     ],
-     "casacion": "V3"
-    }
-   ]
-  },
-  {
-   "grupo": "1B-Ch",
-   "aula": "A15",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E16",
-      "F16"
-     ],
-     "casacion": "EXACTA"
-    }
-   ]
-  },
-  {
-   "grupo": "1B-Cs",
-   "aula": "A15",
-   "procedencia": [
-    {
-     "hoja": 1,
-     "celdas": [
-      "E16",
-      "F16"
-     ],
-     "casacion": "EXACTA"
-    }
-   ]
-  },
-  {
    "grupo": "1ºA",
    "aula": "A3",
    "procedencia": [
@@ -1209,6 +1125,54 @@
    "grupos": [
     "4ºBDi",
     "4ºCDi"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E16",
+     "F16"
+    ],
+    "casacion": "EXACTA"
+   },
+   "motivo": "la fila casa con varios grupos de la base",
+   "grupos": [
+    "1B-Ch",
+    "1B-Cs"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E17",
+     "F17"
+    ],
+    "casacion": "V3"
+   },
+   "motivo": "la fila casa con varios grupos de la base",
+   "grupos": [
+    "1B-Bc",
+    "1B-Bm"
+   ]
+  },
+  {
+   "regla": "aulaReferencia",
+   "origen": {
+    "hoja": 1,
+    "celdas": [
+     "E20",
+     "F20"
+    ],
+    "casacion": "V3"
+   },
+   "motivo": "la fila casa con varios grupos de la base",
+   "grupos": [
+    "1B-Ac",
+    "1B-Am"
    ]
   },
   {
