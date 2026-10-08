@@ -1922,6 +1922,59 @@ describe('contenedor del horario', () => {
     );
   });
 
+  /**
+   * S213 · el 422 del reparto de guardias trae su motivo en `mensaje`, como el de la
+   * pre-validación (83), y la vista lo enseña tal cual: nombra los tramos que no llegan al
+   * mínimo y dice qué cambiar. El genérico «no tiene solución» le mentiría: el horario
+   * existe, lo que falla es el reparto.
+   */
+  it('(95) un 422 de reparto de guardias enseña su motivo tal cual, no «no tiene solución»', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    const mensaje =
+      'No se pueden repartir las guardias ordinarias: en estas horas no se llega al mínimo de 2 ' +
+      'profesores de guardia: tramo L1 (día 1, tramo 1): 1 de 2. Los profesores libres en esas ' +
+      'horas no tienen guardias suficientes. Baja el mínimo, da más guardias a esos profesores o ' +
+      'deja libres a más profesores en esas horas.';
+    ultimoGenerar.error({
+      status: 422,
+      error: { causa: 'GUARDIAS_SIN_REPARTO', mensaje, estado: null, segundos: null },
+    });
+    await fixture.whenStable();
+
+    const texto = (fixture.nativeElement as HTMLElement)
+      .querySelector('.error-generacion')!
+      .textContent!.trim();
+    expect(texto).toBe(mensaje);
+    expect(texto).toContain('tramo L1 (día 1, tramo 1): 1 de 2');
+    expect(texto).not.toContain('Esta configuración no tiene solución');
+  });
+
+  /**
+   * S213 · control del (95): una causa que la vista no conoce, con `mensaje`, sigue en el
+   * genérico del 422. La rama nueva es de GUARDIAS_SIN_REPARTO y no de todo 422.
+   */
+  it('(96) un 422 con una causa desconocida sigue dando el texto del catálogo infactible', async () => {
+    await montarConPrevalidacion([AVISO_NO_ERROR]);
+
+    pulsarGenerar();
+    await fixture.whenStable();
+
+    ultimoGenerar.error({
+      status: 422,
+      error: { causa: 'CAUSA_NUEVA', mensaje: 'tramo L1 (día 1, tramo 1): 1 de 2', estado: null, segundos: null },
+    });
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-generacion');
+    expect(aviso!.textContent?.trim()).toBe(
+      'Esta configuración no tiene solución. Revisa el catálogo.',
+    );
+  });
+
   // --- S184 · rechazos con `message` (condición 4 de O-pre-demo) ----------------
   // Los rechazos que no son del solver traen su motivo en `message`, ya escrito para
   // el usuario. Cada caso asevera el texto EXACTO del servidor, y los de 503 además que

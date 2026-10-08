@@ -723,7 +723,7 @@ export class HorarioView implements OnDestroy {
    * de O-pre-demo):
    *
    * <ol>
-   *   <li>`PREVALIDACION_FALLIDA` con `mensaje` → ese `mensaje`.
+   *   <li>`PREVALIDACION_FALLIDA` o `GUARDIAS_SIN_REPARTO` con `mensaje` → ese `mensaje`.
    *   <li>`PRESUPUESTO_AGOTADO` → «Se agotó el tiempo de cálculo…».
    *   <li>`CONFIGURACION_INCOMPLETA` → falta la jornada.
    *   <li>`CATALOGO_INFACTIBLE` o status 422 → el catálogo no tiene solución.
@@ -735,9 +735,10 @@ export class HorarioView implements OnDestroy {
    * la `causa` y nunca por su prosa, que es log en bruto ("Estado CP-SAT: UNKNOWN"). Los
    * cuatro textos existen para que cada uno diga qué HACER: ante un presupuesto agotado,
    * reintentar; ante un catálogo infactible reintentar NO sirve; ante una jornada sin
-   * definir, el sitio donde ir es otro. ÚNICA excepción (S166): el `mensaje` de la
-   * pre-validación, que son las descripciones de los hallazgos ERROR y lo único que dice
-   * QUÉ tocar.
+   * definir, el sitio donde ir es otro. Excepciones: el `mensaje` de la pre-validación
+   * (S166), que son las descripciones de los hallazgos ERROR y lo único que dice QUÉ tocar,
+   * y el del reparto de guardias (S213), que nombra los tramos que no llegan al mínimo y
+   * dice qué cambiar; los dos están escritos para el usuario.
    *
    * <p><b>Por qué el 503 ya no basta para decir «se agotó el tiempo»</b> (S184). Hasta
    * aquí todo 503 lo decía, y la guarda también contesta 503 (`CURSO_CAMBIANDO`) cuando
@@ -758,7 +759,7 @@ export class HorarioView implements OnDestroy {
   }): string {
     const causa = err?.error?.causa;
     const mensaje = err?.error?.mensaje;
-    if (causa === 'PREVALIDACION_FALLIDA' && mensaje) {
+    if ((causa === 'PREVALIDACION_FALLIDA' || causa === 'GUARDIAS_SIN_REPARTO') && mensaje) {
       return mensaje;
     }
     if (causa === 'PRESUPUESTO_AGOTADO') {
