@@ -63,13 +63,15 @@ export interface Penalizacion {
  *
  * Son conteos SIN signo del coste ACTUAL, y NO tienen por qué coincidir con la
  * suma de los `delta` contrafactuales de {@link Penalizacion}: contrastarlos es
- * la trampa obvia de este contrato. Los tres son `int` en Java, nunca null:
+ * la trampa obvia de este contrato. Los cuatro son `int` en Java, nunca null:
  * ensanchar la nullabilidad sería tan infiel como estrecharla.
  */
 export interface Totales {
   ventanas: number;
   consecutivas: number;
   indispBlanda: number;
+  /** S208: tramos de clases fuera de su aula preferida. Sin penalizaciones por celda. */
+  aulaNoPreferida: number;
 }
 
 /** Espejo de `DiagnosticoDTO`. Duras atribuidas + blandas atribuidas + totales. */

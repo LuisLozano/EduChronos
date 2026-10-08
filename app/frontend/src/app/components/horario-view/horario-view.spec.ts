@@ -429,7 +429,7 @@ describe('contenedor del horario', () => {
         },
       ],
       penalizaciones: [],
-      totales: { ventanas: 0, consecutivas: 0, indispBlanda: 0 },
+      totales: { ventanas: 0, consecutivas: 0, indispBlanda: 0, aulaNoPreferida: 0 },
     };
     sujetoDiagnostico.next(diag);
     await fixture.whenStable();
