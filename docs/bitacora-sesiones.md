@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S209. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S210. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S209). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S210). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10354,3 +10354,17 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s209/`: `m2/`, `t1/`, `t2/`, `m4/`, `t2b/`, `m2b/`, `t2c/`, `t3/`, `t4/`, `m4b/` y `cierre/`, cada una con su manifiesto.
   LIMPIEZA (M1-bis). Archivada S207 en la bitácora, promovida a H3, con el cuerpo idéntico byte a byte al del plan en `4d6e179` y el título con el mismo texto tras el prefijo. Degradada S208; S209, única cabecera H3 viva. Los dos censos de la bitácora y la crónica, en S207. Condensación: ninguna.
   R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 16 de 16, 0 fallos duros; ventana S208/S209, los dos censos y la crónica en S207 y tablas sin descuadres, por el verificador, con los índices regenerados tras editar (42 y 68 entradas, 0 descuadradas). H3 única (S209); la marca de plantilla del plan, una vez. Censo desde `4495411` (copia de `censo.py` de S208 con la base y la raíz cambiadas): 389 tokens antes y 392 después; nacen `C-prueba-aulas-2026` (4 apariciones), `D-infactible-sin-aviso-residual` (4) y `D-aula-sin-rol-de-uso` (3); no se extingue ninguno, y ninguno queda solo en esta entrada; de una aparición, 38 antes y 38 después (no entra ni sale ninguno). Higiene/Método: 12 vivas (29 filas, 17 tachadas; con el filtro «Higiene/Método» solo, 26 filas, 14 tachadas, las mismas 12). Salidas en `s209/cierre/`.
+
+### Sesión 210 — Higiene/Método: **NORMAS 15 Y 16 DE M-GUION (LA FORMA SE VUELCA ANTES DE AFIRMARLA; LO DECLARADO Y LO CALCULADO SE LEEN DONDE SE DICE) Y REGLA DE RECUENTO DEL UMBRAL EN `metodo.md`. TRES FICHAS SALDADAS; HIGIENE/MÉTODO DE 12 A 9.**
+  TIPO Y RITUAL: HIGIENE/MÉTODO — M0 con medición de solo lectura (`s210/m0/`) + F1 (ediciones con guardas, aplicadas y verificadas en un solo guion, `47a584d`) + M1. Sin autoprueba: no se tocó `scripts/`.
+  M0. Excepción a R-apertura (§6): entre objetivos (`O-aulas` terminado en S209, ninguno abierto), con el segundo disparador saltado en S208 y de nuevo en S209 (`D-contrato-sobre-forma-no-medida`, dos paradas en cada una). Medido: HEAD `dd11ece` con el árbol limpio; CI `tests` en verde sobre `dd11ece` (ejecución 37772421049); la regla de recuento del umbral no estaba escrita en ninguna parte; con el filtro «Higiene» o «script de R4», 12 vivas. Alcance: tres fichas de la familia «afirmar sin la fuente delante», de 12 a 9. Fuera: `D-arranque-no-literal` (su arreglo es un `.sh` con autoprueba, y está mitigada) y `D-preguntas-sin-cola` (pide decidir dónde viven las preguntas, no una norma; candidata para la apertura de `O-guardias`).
+  DECISIONES. Del usuario: alcance y textos aprobados en una sola autorización, sin revisión del diff en seco (la revisión pasa al cierre, antes del push); en la parada de F1, las entradas nuevas de la sección de cerradas del plan van en su orden, descendente por sesión de cierre. Del arquitecto: (1) dos normas y no tres: `D-declarado-sin-artefacto` y `D-748-sin-derivacion` comparten la 16; (2) sede en M-guion, porque los documentos se escriben por guion (M-doc); (3) la regla de recuento, en un párrafo tras la tabla de tipos de `metodo.md`, con el filtro literal «Higiene» o «script de R4»; (4) `D-higiene-sin-apertura` no se tacha en §4, porque su tabla no tacha las cerradas; en el plan, su cabecera pasa de «VIVA» a «CERRADA S152» y la entrada pasa a cerradas; (5) una ficha cerrada sin entrada en el plan (`D-declarado-sin-artefacto`) recibe una línea condensada en cerradas; (6) el orden de la sección de cerradas se escribe bajo su encabezado (norma 16); (7) un solo push, tras el commit del cierre.
+  F1 (`s210/f1/`). Normas 15 y 16 al final de M-guion; párrafo «Cómo se cuenta el umbral de Higiene/Método» tras la tabla de tipos; tres filas de §4 tachadas; tres entradas del plan en cerradas y `D-higiene-sin-apertura` corregida. Con la regla escrita, 12 → 9; `verificar-cierre.py` idéntico antes y después (rc=0, 0 fallos duros); diff solo en las regiones previstas. Commit `47a584d`.
+  CRITERIO. Tres fichas CERRADAS; Higiene/Método de 12 a 9 de 20.
+  DEUDA. CERRADAS `D-contrato-sobre-forma-no-medida` (norma 15), `D-declarado-sin-artefacto` y `D-748-sin-derivacion` (norma 16); pasan a la deuda cerrada del plan. Corregida la cabecera de `D-higiene-sin-apertura` en el plan, cerrada desde S152. No nace ninguna.
+  DEFECTOS DE INSTRUMENTO. Del asistente: (1) el guion de F1 fijó el punto de inserción y el orden de la sección de cerradas del plan sin haberlos volcado; el F0 del propio guion (P1.e) lo cazó antes de escribir; una parada. Es una instancia de `D-contrato-sobre-forma-no-medida`, la primera de la sesión: no dispara. (2) El M0 propuso tachar `D-higiene-sin-apertura` en §4 sin mirar la convención de su tabla; corregido antes del guion, sin coste. De Claude Code: guardó en su memoria el orden de la sección de cerradas y la regla de recuento; la memoria no es sitio citable (norma 16), y las dos quedan escritas en el repo. Añadido en el cierre de S211, sin coste: el guion de cierre delimitaba el bloque de S208 «hasta el siguiente encabezado» sin haber volcado su forma; Claude Code usó la forma del trozo que retiró `dd11ece`.
+  SUITES: sin cambios de código; conteo vigente solver 162, app 775, vitest 708 en 65 ficheros; e2e 3; python 216.
+  BANCOS: no se abrieron.
+  MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s210/`: `m0/`, `f1/` y `cierre/`, cada una con su `MANIFIESTO.sha256`.
+  LIMPIEZA (M1-bis). Archivada S208 en la bitácora, promovida a H3, con el cuerpo idéntico al del plan en `47a584d`; degradada S209; S210, única cabecera H3 viva. Censos de la bitácora a S208. Condensación: ninguna.
+  R4 / COSTURA. `verificar-cierre.py` con rc=0 y 0 fallos duros tras regenerar los índices; censo complementario desde `dd11ece` en `s210/cierre/`, sin tokens a 0 ni nacidos. Higiene/Método: 9 de 20.
