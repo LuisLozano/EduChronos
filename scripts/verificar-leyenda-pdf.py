@@ -48,8 +48,15 @@ COSTE: dos llamadas a `pdftotext` por página, unos 2 min para las 44 de la vist
 Mejora posible si molesta: una sola llamada a `-bbox-layout` para el documento entero,
 cacheando las palabras por página en vez de invocarlo página a página.
 
+DESDE S215 T2 (E7), la vista `guardias`, escrita sobre la página real: la página de guardias
+es UNA, titulada «Guardias ordinarias», y su leyenda —tres bloques «Profesores», que aquí se
+leen como uno solo, columna a columna— trae EXACTAMENTE a los profesores con guardia en el
+horario, una vez cada uno, con su «CÓDIGO — nombre» de catálogo, en orden de código y sin
+bloque de asignaturas. Sin guardias, sin leyenda. Que esos profesores son los que aparecen en
+las celdas lo coteja `oraculo-exportacion.py --vista guardias` contra la misma tabla.
+
 Uso:
-  verificar-leyenda-pdf.py <copia.db> <horario_id> <fichero.pdf> <grupo|profesor|aula>
+  verificar-leyenda-pdf.py <copia.db> <horario_id> <fichero.pdf> <grupo|profesor|aula|guardias>
 """
 import collections, re, sqlite3, subprocess, sys
 import xml.etree.ElementTree as ET
@@ -68,9 +75,16 @@ def palabras_de(ruta, pagina):
 
 
 def leyenda_de(ruta, pagina):
-    """{encabezado: [lineas]} de una página. Vacío si no hay leyenda."""
+    """{encabezado: [lineas]} de una página. Vacío si no hay leyenda.
+
+    Solo son encabezados de leyenda los que están por DEBAJO de la cabecera de días: la página
+    de guardias lleva «Profesores» en su clave de lectura, encima de la rejilla (S215). Si un
+    encabezado se repite —los tres «Profesores» de la página de guardias—, sus columnas se
+    juntan en una lista, de izquierda a derecha."""
     ws = palabras_de(ruta, pagina)
-    cabeceras = [(x, y, t) for x, y, t in ws if t in ("Profesores", "Asignaturas")]
+    techo = min((y for _, y, t in ws if t == "Lunes"), default=-1.0)
+    cabeceras = [(x, y, t) for x, y, t in ws
+                 if t in ("Profesores", "Asignaturas") and y > techo]
     if not cabeceras:
         return {}
     suelo = min(y for _, y, _ in cabeceras)
@@ -89,7 +103,7 @@ def leyenda_de(ruta, pagina):
                 lineas.append(texto)
             else:
                 lineas[-1] += " " + texto   # continuación de un nombre largo
-        bloques[rotulo] = lineas
+        bloques.setdefault(rotulo, []).extend(lineas)
     return bloques
 
 
@@ -136,7 +150,66 @@ def datos(ruta_db, horario_id, vista):
     return porRecurso, nAsig, nProf
 
 
+TITULO_GUARDIAS = "Guardias ordinarias"
+
+
+def verificar_guardias(ruta_db, horario_id, ruta_pdf):
+    """La leyenda de la página de guardias contra la tabla `guardia` (S215 T2, E7)."""
+    con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
+    try:
+        nProf = dict(con.execute("select codigo, nombre_completo from profesor"))
+        hay_tabla = con.execute("select count(*) from sqlite_master where type = 'table' "
+                                "and name = 'guardia'").fetchone()[0]
+        esperados = sorted({c for (c,) in con.execute(
+            "select p.codigo from guardia g join profesor p on p.id = g.profesor_id "
+            "where g.horario_id = ?", (horario_id,))}) if hay_tabla else []
+    finally:
+        con.close()
+    paginas = int(re.search(r"Pages:\s+(\d+)", subprocess.run(
+        ["pdfinfo", ruta_pdf], capture_output=True, text=True, check=True).stdout).group(1))
+    print("--- LEYENDA (vista guardias, %d páginas) ---" % paginas)
+    print("  profesores con guardia en la BD %d" % len(esperados))
+    malas = []
+    if paginas != 1:
+        malas.append("la página de guardias es UNA y el fichero trae %d" % paginas)
+    titulo = titulo_de(ruta_pdf, 1)
+    if titulo != TITULO_GUARDIAS:
+        malas.append("título %r, esperado %r" % (titulo, TITULO_GUARDIAS))
+    bloques = leyenda_de(ruta_pdf, 1)
+    if "Asignaturas" in bloques:
+        malas.append("lleva bloque de asignaturas, que esta página no tiene")
+    lineas = bloques.get("Profesores", [])
+    print("  líneas de leyenda leídas ....... %d" % len(lineas))
+    leidos = []
+    for linea in lineas:
+        if RAYA not in linea:
+            malas.append("línea de leyenda sin raya: %r" % linea)
+            continue
+        cod = linea.split(RAYA, 1)[0].strip()
+        leidos.append(cod)
+        if cod in nProf and linea != cod + RAYA + nProf[cod]:
+            malas.append("no cuadra el nombre de %r (esperado %r)" % (cod, cod + RAYA + nProf[cod]))
+    faltan = sorted(set(esperados) - set(leidos))
+    sobran = sorted(set(leidos) - set(esperados))
+    repetidos = sorted({c for c in leidos if leidos.count(c) > 1})
+    for cod in faltan:
+        malas.append("falta el profesor %r" % cod)
+    for cod in sobran:
+        malas.append("sobra el profesor %r, sin guardia en el horario" % cod)
+    for cod in repetidos:
+        malas.append("el profesor %r sale %d veces" % (cod, leidos.count(cod)))
+    if leidos != sorted(leidos):
+        malas.append("los códigos no van en orden, leídos columna a columna")
+    for m in malas:
+        print("        %s" % m)
+    print("  leyenda: leídos %d, FALTAN %d, SOBRAN %d, repetidos %d   %s"
+          % (len(leidos), len(faltan), len(sobran), len(repetidos), "OK" if not malas else "FALLA"))
+    return not malas
+
+
 def verificar(ruta_db, horario_id, ruta_pdf, vista):
+    if vista == "guardias":
+        return verificar_guardias(ruta_db, horario_id, ruta_pdf)
     porRecurso, nAsig, nProf = datos(ruta_db, horario_id, vista)
     paginas = int(re.search(r"Pages:\s+(\d+)", subprocess.run(
         ["pdfinfo", ruta_pdf], capture_output=True, text=True, check=True).stdout).group(1))

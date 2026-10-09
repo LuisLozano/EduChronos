@@ -46,10 +46,14 @@ Desde S215 (C-exportacion-guardias):
     asignatura» «Guardia»; va tras todas las de sesión y sus faltan y sobran se cuentan
     aparte. En el PDF de profesor, cada guardia es una entrada «Guardia» en su celda,
     después de las sesiones, y un profesor con solo guardias tiene página.
+  - `--vista guardias` verifica la página de guardias ordinarias (escrito sobre la página real,
+    S215 T2 E7): UNA página titulada «Guardias ordinarias» con la clave «Profesores de
+    guardia», y en cada celda el conjunto EXACTO de códigos que la tabla `guardia` pone en
+    ese día y tramo, leídos partiendo el texto de la celda por la coma.
 
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
-  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor|aula]
+  oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor|aula|guardias]
 """
 import argparse
 import collections
@@ -549,8 +553,11 @@ def celdas_de_pagina(ruta_pdf, pagina):
     # este corte se tragaría la leyenda entera —y no basta con filtrar por x: una línea de
     # leyenda empieza en la columna izquierda pero sus palabras siguen hacia la derecha y
     # caen dentro de las columnas de día—. El corte es una COORDENADA; el rótulo de la
-    # leyenda solo sirve para localizarla.
-    suelo = min((y for _, y, _, t in palabras if t in ("Profesores", "Asignaturas")),
+    # leyenda solo sirve para localizarla. Solo cuenta un rótulo POR DEBAJO del primer tramo:
+    # la página de guardias lleva «Profesores» ya en su clave de lectura, encima de la
+    # rejilla (S215), y tomarla por la leyenda dejaría la rejilla vacía.
+    suelo = min((y for _, y, _, t in palabras
+                 if t in ("Profesores", "Asignaturas") and y > topes[0]),
                 default=float("inf"))
 
     def fila_de(centro):
@@ -765,6 +772,67 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
             and not sin_pagina and paginas == len(esperadas))
 
 
+# --------------------------------------------------------------------------- página de guardias (S215)
+
+VISTA_GUARDIAS = "guardias"
+TITULO_GUARDIAS = "Guardias ordinarias"
+CLAVE_GUARDIAS = "Profesores de guardia"
+
+
+def verificar_pagina_guardias(ruta_db, horario_id, ruta_pdf):
+    """Coteja la página de guardias contra la tabla `guardia`. Devuelve True si cuadra.
+
+    Escrito sobre la página REAL (S215 T2, E6.d), no sobre lo que el exportador dice hacer:
+      - el fichero tiene UNA página; su primera línea es el título y la segunda la clave;
+      - las celdas se reconstruyen con `celdas_de_pagina`, por región, igual que en las otras
+        vistas: en el texto plano, las columnas de lunes y martes se entremezclan;
+      - el texto de una celda son códigos separados por coma; el salto de línea cae tras la
+        coma y su espacio, así que partir por la coma y quitar espacios da los códigos;
+      - por celda se compara el MULTICONJUNTO leído con el esperado: un código de más SOBRA, uno
+        que no está FALTA y un código repetido en la celda también sobra.
+    El orden de los códigos dentro de la celda no se coteja aquí: lo fija el test de D3."""
+    esperadas = collections.defaultdict(collections.Counter)
+    for (profesor, dia, tramo), n in guardias_esperadas(ruta_db, horario_id).items():
+        esperadas[(dia, tramo)][profesor] += n
+    paginas = paginas_de(ruta_pdf)
+    lineas = [l.strip() for l in texto_de_pagina(ruta_pdf, 1).splitlines() if l.strip()]
+
+    print("--- ORÁCULO PDF (horario %s, vista guardias) ---" % horario_id)
+    print("  guardias que exige la BD ..... %d"
+          % sum(sum(c.values()) for c in esperadas.values()))
+    print("  celdas con guardia en la BD .. %d" % len(esperadas))
+    print("  páginas del PDF .............. %d" % paginas)
+    bien = True
+    if paginas != 1:
+        print("  FALLO: la página de guardias es UNA y el fichero trae %d" % paginas)
+        bien = False
+    if lineas[:2] != [TITULO_GUARDIAS, CLAVE_GUARDIAS]:
+        print("  FALLO: título y clave %r, se esperaba %r"
+              % (lineas[:2], [TITULO_GUARDIAS, CLAVE_GUARDIAS]))
+        bien = False
+
+    leidas = {}
+    for clave, texto in celdas_de_pagina(ruta_pdf, 1).items():
+        leidas[clave] = collections.Counter(c.strip() for c in texto.split(",") if c.strip())
+    halladas, faltan, sobran = 0, 0, 0
+    for clave in sorted(set(esperadas) | set(leidas)):
+        exige = esperadas.get(clave, collections.Counter())
+        lee = leidas.get(clave, collections.Counter())
+        falta, sobra = exige - lee, lee - exige
+        halladas += sum((exige & lee).values())
+        faltan += sum(falta.values())
+        sobran += sum(sobra.values())
+        if falta or sobra:
+            print("  dia %d tramo %d  exige %d  lee %d   <<< DESCUADRE"
+                  % (clave[0], clave[1], sum(exige.values()), sum(lee.values())))
+            for codigo, n in sorted(falta.items()):
+                print("        FALTA x%d: %s" % (n, codigo))
+            for codigo, n in sorted(sobra.items()):
+                print("        SOBRA x%d: %s" % (n, codigo))
+    print("  TOTAL guardias: halladas %d, FALTAN %d, SOBRAN %d" % (halladas, faltan, sobran))
+    return bien and not faltan and not sobran
+
+
 def censo_de_cuerpos(ruta_pdf):
     """Censo de los tamaños de fuente del documento, leyendo los operadores Tf del flujo
     DESCOMPRIMIDO. Esto sí se lee del flujo —es geometría, no texto— y a propósito no se
@@ -790,7 +858,7 @@ def main():
     parser.add_argument("db", help="copia de la BD (se abre en modo ro)")
     parser.add_argument("horario_id", type=int)
     parser.add_argument("fichero", help="fichero exportado a verificar")
-    parser.add_argument("--vista", choices=sorted(VISTAS), default="grupo",
+    parser.add_argument("--vista", choices=sorted(list(VISTAS) + [VISTA_GUARDIAS]), default="grupo",
                         help="modo pdf: qué vista se espera en el fichero (por defecto grupo)")
     args = parser.parse_args()
 
@@ -799,6 +867,14 @@ def main():
     except Fallo as e:
         print("FALLO: %s" % e, file=sys.stderr)
         return 1
+
+    if args.modo == "pdf" and args.vista == VISTA_GUARDIAS:
+        try:
+            return 0 if verificar_pagina_guardias(
+                    args.db, args.horario_id, args.fichero) else 1
+        except Fallo as e:
+            print("FALLO: %s" % e, file=sys.stderr)
+            return 1
 
     if args.modo == "pdf":
         try:
