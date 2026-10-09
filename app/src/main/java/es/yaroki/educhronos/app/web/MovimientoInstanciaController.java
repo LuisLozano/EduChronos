@@ -90,7 +90,7 @@ public class MovimientoInstanciaController {
         HttpStatus status = switch (e.causa()) {
             case TRAMO_INEXISTENTE, INSTANCIAS_IGUALES -> HttpStatus.BAD_REQUEST;
             case HORARIO_INEXISTENTE, INSTANCIA_INEXISTENTE -> HttpStatus.NOT_FOUND;
-            case VIOLA_REGLA_DURA, INSTANCIA_PINADA -> HttpStatus.CONFLICT;
+            case VIOLA_REGLA_DURA, INSTANCIA_PINADA, GUARDIAS_SIN_REPARTO -> HttpStatus.CONFLICT;
         };
         return ResponseEntity.status(status).body(new FalloMovimientoDTO(
                 e.causa().name(), e.getMessage(), aViolacionDTO(e.violaciones())));

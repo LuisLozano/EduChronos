@@ -2,11 +2,15 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
+import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.SesionBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
 import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
+import es.yaroki.educhronos.app.persistence.Guardia;
+import es.yaroki.educhronos.app.persistence.GuardiaRepository;
+import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.web.dto.IntercambiarInstanciasRequest;
@@ -70,6 +74,14 @@ import org.springframework.transaction.annotation.Transactional;
  * solo reasigna el tramo, así que un {@code SOLAPE_AULA} en el destino es una
  * violación nueva legítima y el movimiento se rechaza. Cambiar de aula es otra
  * operación.
+ *
+ * <p><b>Las guardias se recalculan enteras</b> (S214, C-ajuste-guardias, condición 5 de
+ * O-guardias). Si las clases admiten el ajuste, se reparten las guardias sobre la CANDIDATA,
+ * con las guardias por profesor y el mínimo de la configuración actual, ANTES de escribir nada.
+ * Sin reparto, el ajuste se rechaza con {@link CausaMovimiento#GUARDIAS_SIN_REPARTO} y no se
+ * escribe nada; con reparto, se escriben las sesiones y se sustituyen las guardias del horario,
+ * en la misma transacción. Vale igual para un horario sin filas de guardia: recibe las suyas en
+ * el primer ajuste aceptado. Las ramas que devuelven 200 sin escribir no recalculan.
  */
 @Service
 public class MovimientoInstanciaService {
@@ -79,19 +91,29 @@ public class MovimientoInstanciaService {
     private final SesionRepository sesionRepository;
     private final SesionBloqueadaRepository sesionBloqueadaRepository;
     private final ActividadRepository actividadRepository;
+    private final GuardiaRepository guardiaRepository;
+    private final ProfesorRepository profesorRepository;
     private final VerificadorSolucion verificador = new VerificadorSolucion();
+
+    /** Texto del rechazo sin reparto de guardias (S214, X); le sigue la lista de tramos sin mínimo. */
+    static final String MENSAJE_GUARDIAS_SIN_REPARTO = "No se puede hacer este cambio: después de él no hay"
+            + " forma de repartir las guardias. Tramos que no llegan al mínimo de profesores de guardia: ";
 
     public MovimientoInstanciaService(
             GeneradorHorarioService generadorService,
             TramoSemanalRepository tramoRepository,
             SesionRepository sesionRepository,
             SesionBloqueadaRepository sesionBloqueadaRepository,
-            ActividadRepository actividadRepository) {
+            ActividadRepository actividadRepository,
+            GuardiaRepository guardiaRepository,
+            ProfesorRepository profesorRepository) {
         this.generadorService = generadorService;
         this.tramoRepository = tramoRepository;
         this.sesionRepository = sesionRepository;
         this.sesionBloqueadaRepository = sesionBloqueadaRepository;
         this.actividadRepository = actividadRepository;
+        this.guardiaRepository = guardiaRepository;
+        this.profesorRepository = profesorRepository;
     }
 
     /**
@@ -118,10 +140,11 @@ public class MovimientoInstanciaService {
                     "indice debe ser >= 1 (1-based del dominio); recibido " + peticion.indice());
         }
 
-        // Solo para decidir el 404: las filas se reconsultan aparte, no se leen de su
-        // colección inversa.
+        // Para decidir el 404 y como dueño de las guardias recalculadas: las filas se
+        // reconsultan aparte, no se leen de su colección inversa.
+        HorarioGenerado horario;
         try {
-            generadorService.cargarHorario(horarioId);
+            horario = generadorService.cargarHorario(horarioId);
         } catch (IllegalArgumentException e) {
             throw new MovimientoRechazadoException(
                     CausaMovimiento.HORARIO_INEXISTENTE, e.getMessage());
@@ -187,12 +210,16 @@ public class MovimientoInstanciaService {
                     nuevas);
         }
 
+        // ---- GUARDIAS, sobre la candidata y antes de escribir: sin reparto no se escribe nada.
+        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo);
+
         // ---- ESCRITURA. Solo aquí, y solo el tramo: el aula de cada fila se conserva.
         for (Sesion s : filas) {
             s.moverA(destino);
         }
         sesionRepository.saveAll(filas);
         sesionRepository.flush();
+        sustituirGuardias(horarioId, guardias);
 
         return releerInstancia(
                 horarioId, peticion.actividadCodigo(), peticion.indice(), ordenEnDia);
@@ -247,9 +274,11 @@ public class MovimientoInstanciaService {
                             + " una operación");
         }
 
-        // Solo para decidir el 404 del horario; las filas se reconsultan aparte.
+        // Para decidir el 404 del horario y como dueño de las guardias recalculadas; las filas
+        // se reconsultan aparte.
+        HorarioGenerado horario;
         try {
-            generadorService.cargarHorario(horarioId);
+            horario = generadorService.cargarHorario(horarioId);
         } catch (IllegalArgumentException e) {
             throw new MovimientoRechazadoException(
                     CausaMovimiento.HORARIO_INEXISTENTE, e.getMessage());
@@ -301,6 +330,9 @@ public class MovimientoInstanciaService {
                     nuevas);
         }
 
+        // ---- GUARDIAS, sobre la candidata y antes de escribir: sin reparto no se escribe nada.
+        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo);
+
         // ---- ESCRITURA. Solo aquí, y solo el tramo: el aula de cada fila se conserva.
         for (Sesion s : filasPrimera) {
             s.moverA(tramoSegunda);
@@ -311,8 +343,39 @@ public class MovimientoInstanciaService {
         sesionRepository.saveAll(filasPrimera);
         sesionRepository.saveAll(filasSegunda);
         sesionRepository.flush();
+        sustituirGuardias(horarioId, guardias);
 
         return releerAmbas(horarioId, primera, segunda, ordenEnDia);
+    }
+
+    /**
+     * Las guardias del horario tras el ajuste, repartidas sobre la {@code candidata} con las
+     * guardias por profesor y el mínimo de la configuración ACTUAL (S214, W). No escribe: si no
+     * hay reparto, aborta con {@link CausaMovimiento#GUARDIAS_SIN_REPARTO} antes de que se toque
+     * ninguna fila. El invariante roto de la segunda fase sale como en la generación
+     * ({@code IllegalStateException}, un 500).
+     */
+    private List<Guardia> guardiasTras(HorarioGenerado horario, ProblemaHorario problema,
+            SolucionHorario candidata, Map<Tramo, TramoSemanal> idxTramo) {
+        RepartoGuardias.Resultado reparto = ViaRepartoGuardias.repartir(
+                problema, candidata, generadorService.cargarDatosCuadre());
+        if (reparto.fallo()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.GUARDIAS_SIN_REPARTO,
+                    MENSAJE_GUARDIAS_SIN_REPARTO + ViaRepartoGuardias.listaDeTramos(reparto.deficits()));
+        }
+        return ViaRepartoGuardias.filas(
+                horario, problema, idxTramo, profesorRepository.findAll(), reparto.asignaciones());
+    }
+
+    /**
+     * Sustituye las guardias del horario por las recalculadas: borrado masivo, en el acto, y
+     * después el alta (E2). Al revés, la única (horario, profesor, tramo) saltaría en las que
+     * coinciden con las de antes, que son casi todas.
+     */
+    private void sustituirGuardias(Long horarioId, List<Guardia> guardias) {
+        guardiaRepository.borrarDeHorario(horarioId);
+        guardiaRepository.saveAll(guardias);
+        guardiaRepository.flush();
     }
 
     /** Cuerpo del 200 del intercambio: {@link #releerInstancia} una vez por lado. */

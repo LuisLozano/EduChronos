@@ -72,6 +72,15 @@ class HorarioConAulaFueraDeReglasTest {
     private MockMvc mockMvc;
     private Long horarioId;
 
+    /**
+     * Centro sin guardias (S214, D1): desde C-ajuste-guardias el ajuste reparte las guardias, y con el
+     * mínimo 4 por defecto y ningún profesor de guardia todo ajuste aceptado se rechazaría.
+     */
+    @BeforeEach
+    void centroSinGuardias(@Autowired ConfiguracionRepository configuraciones) {
+        MinimoGuardias.fijar(configuraciones, 0);
+    }
+
     @BeforeEach
     void montar() {
         mockMvc = MockMvcBuilders

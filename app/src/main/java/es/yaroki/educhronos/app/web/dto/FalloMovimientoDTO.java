@@ -14,9 +14,12 @@ import java.util.List;
  *
  * @param causa      símbolo estable del hecho ({@code TRAMO_INEXISTENTE},
  *                   {@code HORARIO_INEXISTENTE}, {@code INSTANCIA_INEXISTENTE},
- *                   {@code VIOLA_REGLA_DURA}, {@code INSTANCIA_PINADA}). Es lo que la
+ *                   {@code VIOLA_REGLA_DURA}, {@code INSTANCIA_PINADA},
+ *                   {@code INSTANCIAS_IGUALES}, {@code GUARDIAS_SIN_REPARTO}). Es lo que la
  *                   vista lee para decidir qué decir; NO es texto para el usuario.
  * @param mensaje    prosa para el log y para quien depure. La vista no decide con ella.
+ *                   En {@code GUARDIAS_SIN_REPARTO} (S214) es además el texto para el usuario,
+ *                   con los tramos que no llegan al mínimo de profesores de guardia.
  * @param violaciones violaciones duras que APARECEN por causa del movimiento y no
  *                   estaban antes. Lista vacía en toda causa que no sea
  *                   {@code VIOLA_REGLA_DURA}; nunca null.

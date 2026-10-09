@@ -25,5 +25,11 @@ public enum CausaMovimiento {
      * existen— ni un 409 —no hay conflicto con el estado—: es una petición mal formada,
      * porque intercambiar algo consigo mismo no es una operación. → 400
      */
-    INSTANCIAS_IGUALES
+    INSTANCIAS_IGUALES,
+    /**
+     * Las clases admiten el ajuste, pero después de él no hay reparto de las guardias ordinarias: algún
+     * tramo no llega al mínimo de profesores de guardia (S214, C-ajuste-guardias). No se escribe nada.
+     * Mismo estado que {@link #VIOLA_REGLA_DURA}. → 409
+     */
+    GUARDIAS_SIN_REPARTO
 }
