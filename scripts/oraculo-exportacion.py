@@ -37,6 +37,16 @@ una guarda aborta antes de comparar si algún bloque del horario desborda el dí
 recreo, y el CSV admite varias filas por sesión (una por tramo) siempre que no repitan un
 mismo (Sesión, Día, Tramo) ni difieran en otra columna que «Tramo».
 
+Desde S215 (C-exportacion-guardias):
+  - Una sesión SIN AULA (reuniones y funciones, S201) cuenta en las vistas de grupo y de
+    profesor, con el aula vacía, y NO cuenta en la de aula: ni en lo esperado ni en lo leído
+    del CSV. Su profesor tiene página en el PDF.
+  - Las guardias ordinarias se esperan desde la tabla `guardia` del horario, con SQL propio
+    (`v_guardia`). En el CSV, una fila de guardia es la que trae «Sesión» vacía y «Nombre
+    asignatura» «Guardia»; va tras todas las de sesión y sus faltan y sobran se cuentan
+    aparte. En el PDF de profesor, cada guardia es una entrada «Guardia» en su celda,
+    después de las sesiones, y un profesor con solo guardias tiene página.
+
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
   oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor|aula]
@@ -59,6 +69,15 @@ CABECERA = [
 
 SEPARADOR_CAMPO = ";"
 SEPARADOR_LISTA = "/"
+
+# El texto con el que una guardia aparece en el CSV («Nombre asignatura») y como entrada de
+# celda en el PDF de profesor (S215, puntos B2 y C1 del contrato).
+ENTRADA_GUARDIA = "Guardia"
+
+# Columnas que una fila de guardia del CSV lleva VACÍAS (B2): todas salvo Día, Tramo,
+# Nombre asignatura y Profesores.
+VACIAS_EN_GUARDIA = ("Asignatura", "Aula", "Grupos", "Subgrupos", "Actividad", "Plaza",
+                     "Índice", "Sesión")
 
 # Vistas del oráculo. Se crean como TEMP VIEW: una base abierta en modo ro admite
 # objetos temporales porque viven en la BD temporal, no en el fichero. Si alguna
@@ -157,6 +176,41 @@ def nombre_dia(dia):
     return "fuera de 1..5"
 
 
+# Guardias del horario (S215), con el día y el tramo LECTIVO de `v_tramo`. El `left join`
+# es a propósito: una guardia en un tramo que no es lectivo sale con día nulo y aborta en
+# `guardias_esperadas`, en vez de desaparecer de lo esperado sin decir nada.
+SQL_GUARDIAS = """
+select p.codigo, t.dia, t.tramo, g.tramo_id
+from guardia g
+join profesor p   on p.id = g.profesor_id
+left join v_tramo t on t.tramo_id = g.tramo_id
+where g.horario_id = ?
+"""
+
+
+def guardias_esperadas(ruta_db, horario_id):
+    """Las guardias que la BD exige, como multiconjunto de (profesor, día, tramo).
+
+    Una base anterior al esquema 6 no tiene la tabla `guardia`, y su horario no tiene
+    guardias: se espera la lista vacía. Una guardia en un tramo no lectivo es un invariante
+    roto que la exportación no puede pintar (enmienda EA2): aborta con Fallo."""
+    con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
+    try:
+        if con.execute("select count(*) from sqlite_master where type = 'table' "
+                       "and name = 'guardia'").fetchone()[0] == 0:
+            return collections.Counter()
+        con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
+        filas = con.execute(SQL_GUARDIAS, (int(horario_id),)).fetchall()
+    finally:
+        con.close()
+    no_lectivas = [(p, tid) for p, d, t, tid in filas if d is None]
+    if no_lectivas:
+        raise Fallo("%d guardia(s) del horario %s en un tramo no lectivo: %s" % (
+            len(no_lectivas), horario_id,
+            ", ".join("%s en el tramo %d" % (p, tid) for p, tid in no_lectivas)))
+    return collections.Counter((p, d, t) for p, d, t, _ in filas)
+
+
 def oraculo(ruta_db, horario_id):
     """Las tres vistas calculadas en SQL, como conjuntos de tuplas."""
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
@@ -192,11 +246,19 @@ def oraculo(ruta_db, horario_id):
 
 
 def desde_csv(ruta_csv):
-    """Las tres vistas reconstruidas leyendo SÓLO el fichero.
+    """Las tres vistas y las guardias reconstruidas leyendo SÓLO el fichero.
 
     Comprueba de paso el BOM, la cabecera exacta y que ninguna Sesión se repita:
     son condiciones del formato, y sin ellas la comparación de conjuntos podría
     salir verde sobre un fichero que Excel no abriría.
+
+    Desde S215 devuelve `(vistas, guardias)`. Una fila de guardia —«Sesión» vacía y «Nombre
+    asignatura» «Guardia»— se aparta ANTES de tocar la Sesión, que no es un número, y va al
+    multiconjunto de guardias (profesor, día, tramo): una guardia duplicada es una que sobra.
+    Su forma es la de B2: el resto de columnas, vacías, y un solo código en «Profesores».
+    Una fila de sesión tras una de guardia aborta (B1: las guardias van al final), igual que
+    una «Sesión» vacía en una fila que no es de guardia. Una fila de sesión con el «Aula»
+    vacía no aporta entrada a la vista de aula (EE6).
     """
     with open(ruta_csv, "rb") as f:
         crudo = f.read()
@@ -223,6 +285,8 @@ def desde_csv(ruta_csv):
     # misma Sesión digan cosas distintas fuera de «Tramo»: serían dos sesiones con un id.
     celdas_vistas = set()
     primera_fila = {}
+    guardias = collections.Counter()
+    primera_guardia = None
 
     for n, fila in enumerate(filas[1:], start=2):
         if len(fila) != len(CABECERA):
@@ -231,6 +295,30 @@ def desde_csv(ruta_csv):
         dia = fila[col["Día"]]
         tramo = fila[col["Tramo"]]
         sesion = fila[col["Sesión"]]
+
+        if sesion == "" and fila[col["Nombre asignatura"]] == ENTRADA_GUARDIA:
+            llenas = [c for c in VACIAS_EN_GUARDIA if fila[col[c]] != ""]
+            profesor = fila[col["Profesores"]]
+            if llenas:
+                raise Fallo("la fila de guardia de la línea %d trae valor en %s"
+                            % (n, ", ".join("«%s»" % c for c in llenas)))
+            if not profesor or SEPARADOR_LISTA in profesor:
+                raise Fallo("la fila de guardia de la línea %d no trae UN código de profesor: %r"
+                            % (n, profesor))
+            if not (dia.isdigit() and tramo.isdigit()):
+                raise Fallo("la fila de guardia de la línea %d no trae día y tramo numéricos: "
+                            "%r, %r" % (n, dia, tramo))
+            guardias[(profesor, int(dia), int(tramo))] += 1
+            if primera_guardia is None:
+                primera_guardia = n
+            continue
+        if sesion == "":
+            raise Fallo("la línea %d trae la «Sesión» vacía y no es una fila de guardia "
+                        "(«Nombre asignatura» %r)" % (n, fila[col["Nombre asignatura"]]))
+        if primera_guardia is not None:
+            raise Fallo("la línea %d es de sesión y va tras la fila de guardia de la línea %d: "
+                        "las guardias van tras TODAS las sesiones" % (n, primera_guardia))
+
         if (sesion, dia, tramo) in celdas_vistas:
             raise Fallo("la Sesión %s aparece repetida en el día %s (%s), tramo %s (línea %d)"
                         % (sesion, dia, nombre_dia(dia), tramo, n))
@@ -250,14 +338,18 @@ def desde_csv(ruta_csv):
             elementos = crudo_col.split(SEPARADOR_LISTA) if crudo_col else []
             for e in elementos:
                 vistas[vista].add((e, int(dia), int(tramo), int(sesion)))
-        vistas["aula"].add((fila[col["Aula"]], int(dia), int(tramo), int(sesion)))
+        # Sin aula (reunión o función, S201), la sesión no ocupa ninguna: no entra en la
+        # vista de aula, como tampoco entra en `v_aula`.
+        if fila[col["Aula"]]:
+            vistas["aula"].add((fila[col["Aula"]], int(dia), int(tramo), int(sesion)))
 
     print("--- CSV (%s) ---" % ruta_csv)
     print("  filas de datos ............... %d" % (len(filas) - 1))
     print("  grupo: entradas .............. %d" % len(vistas["grupo"]))
     print("  profesor: entradas ........... %d" % len(vistas["profesor"]))
     print("  aula: entradas ............... %d" % len(vistas["aula"]))
-    return vistas
+    print("  guardias: filas .............. %d" % sum(guardias.values()))
+    return vistas, guardias
 
 
 def comparar(nombre, del_oraculo, del_csv):
@@ -276,6 +368,22 @@ def comparar(nombre, del_oraculo, del_csv):
     if not del_csv:
         print("  FALLO: el CSV no aporta ninguna entrada a esta vista")
         return False
+    return not faltan and not sobran
+
+
+def comparar_guardias(del_oraculo, del_csv):
+    """Coteja las guardias como MULTICONJUNTOS de (profesor, día, tramo), aparte de las
+    vistas de sesiones (S215). A diferencia de `comparar`, una lista vacía en los dos lados
+    es lo correcto: un horario sin guardias no exporta ninguna fila de guardia."""
+    faltan = del_oraculo - del_csv
+    sobran = del_csv - del_oraculo
+    print("--- guardias ---")
+    print("  oráculo %d   csv %d   faltan %d   sobran %d"
+          % (sum(del_oraculo.values()), sum(del_csv.values()),
+             sum(faltan.values()), sum(sobran.values())))
+    for etiqueta, multiconjunto in (("falta", faltan), ("sobra", sobran)):
+        for ejemplo in sorted(multiconjunto)[:5]:
+            print("    %s x%d: %s" % (etiqueta, multiconjunto[ejemplo], ejemplo))
     return not faltan and not sobran
 
 
@@ -334,8 +442,17 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
     grupo» en la de profesor—, que es el de los horarios del centro. Devuelve un Counter
     por recurso: la MULTIPLICIDAD importa, porque la misma clase puede repetirse en la
     semana.
+
+    Desde S215, el aula va por `left join`: una sesión sin aula cuenta en grupo y profesor
+    con el aula vacía (EE6), y el texto se compone con los campos NO vacíos separados por un
+    espacio —una entrada impresa no lleva dos espacios seguidos ni uno al final—. En la de
+    aula no aparece, porque `v_aula` solo trae sesiones con aula. En la vista de profesor
+    cada guardia de `v_guardia` es una entrada «Guardia» en su celda, y un profesor con solo
+    guardias tiene así su página.
     """
     conf = VISTAS[vista]
+    guardias = (guardias_esperadas(ruta_db, horario_id) if vista == "profesor"
+                else collections.Counter())
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
     try:
         con.executescript(SQL_VISTAS.replace(":horario_id", str(int(horario_id))))
@@ -362,11 +479,13 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
                 join sesion s on s.id = v.sesion_id
                 join plaza pl on pl.id = s.plaza_id
                 join asignatura a on a.id = pl.asignatura_id
-                join aula au on au.id = s.aula_id""" % (conf["recurso"], conf["sql"])):
+                left join aula au on au.id = s.aula_id""" % (conf["recurso"], conf["sql"])):
             campos = {"asignatura": asignatura, "profesores": profesores or "",
-                      "aula": aula, "grupos": grupos or ""}
-            texto = " ".join(campos[c] for c in conf["orden"])
+                      "aula": aula or "", "grupos": grupos or ""}
+            texto = " ".join(campos[c] for c in conf["orden"] if campos[c])
             por_recurso[recurso][(dia, tramo)][texto] += 1
+        for (profesor, dia, tramo), cuantas in guardias.items():
+            por_recurso[profesor][(dia, tramo)][ENTRADA_GUARDIA] += cuantas
         return por_recurso
     finally:
         con.close()
@@ -491,33 +610,50 @@ def unir(palabras):
 
 
 def cotejar_celdas(celdas, esperadas_por_celda):
-    """Coteja celda a celda. Devuelve (halladas, faltan, sobra).
+    """Coteja celda a celda. Devuelve un dict con lo de las SESIONES (`halladas`, `faltan`,
+    `sobra`) y, aparte, lo de las GUARDIAS (`halladas_g`, `faltan_g`, `sobra_g`,
+    `fuera_de_orden`).
 
     Dentro de una celda se tachan las entradas que la BD exige, de la más larga a la más
     corta —así una que sea subcadena de otra no se cobra las apariciones de aquélla—. Lo
     que la BD exige y no se pudo tachar FALTA; lo que queda en la celda tras tachar todo
     SOBRA, y es texto de rejilla que la base no respalda.
+
+    Desde S215 la entrada «Guardia» se tacha con su propia marca: así se cuenta aparte, un
+    «Guardia» que quede sin tachar es una guardia que SOBRA, y se comprueba que va DESPUÉS
+    de todas las sesiones de su celda (C2): una sesión tachada tras ella es fuera de orden.
+    El texto de la celda viene de arriba abajo (`celdas_de_pagina` ordena por la y).
     """
-    halladas = 0
-    faltan = collections.Counter()
-    sobra = []
+    r = {"halladas": 0, "faltan": collections.Counter(), "sobra": [],
+         "halladas_g": 0, "faltan_g": collections.Counter(), "sobra_g": [],
+         "fuera_de_orden": []}
     for clave in set(celdas) | set(esperadas_por_celda):
         texto = celdas.get(clave, "")
         exige = esperadas_por_celda.get(clave, collections.Counter())
         encontradas = collections.Counter()
         for entrada in sorted(exige, key=len, reverse=True):
+            marca = "\x01" if entrada == ENTRADA_GUARDIA else "\x00"
             while encontradas[entrada] < exige[entrada] and entrada in texto:
-                texto = texto.replace(entrada, "\x00", 1)
+                texto = texto.replace(entrada, marca, 1)
                 encontradas[entrada] += 1
-        halladas += sum(encontradas.values())
+        donde = "dia %d tramo %d" % clave
         for entrada, cuantas in exige.items():
+            es_guardia = entrada == ENTRADA_GUARDIA
+            r["halladas_g" if es_guardia else "halladas"] += encontradas[entrada]
             if encontradas[entrada] < cuantas:
-                faltan["%s @dia %d tramo %d" % (entrada, clave[0], clave[1])] += (
+                r["faltan_g" if es_guardia else "faltan"]["%s @%s" % (entrada, donde)] += (
                     cuantas - encontradas[entrada])
-        resto = " ".join(texto.replace("\x00", " ").split())
+        if "\x01" in texto and "\x00" in texto[texto.index("\x01"):]:
+            r["fuera_de_orden"].append("%s: una sesión va después de «%s»"
+                                       % (donde, ENTRADA_GUARDIA))
+        palabras = texto.replace("\x00", " ").replace("\x01", " ").split()
+        sobran_g = [w for w in palabras if w == ENTRADA_GUARDIA]
+        resto = " ".join(w for w in palabras if w != ENTRADA_GUARDIA)
+        if sobran_g:
+            r["sobra_g"].append("%s: %d «%s»" % (donde, len(sobran_g), ENTRADA_GUARDIA))
         if resto:
-            sobra.append("dia %d tramo %d: %r" % (clave[0], clave[1], resto))
-    return halladas, faltan, sobra
+            r["sobra"].append("%s: %r" % (donde, resto))
+    return r
 
 
 def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
@@ -531,7 +667,8 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
     # Con catálogo, `esperadas` son TODOS los recursos y no solo los que dan clase: el
     # rótulo lo dice, porque «con clases» sería falso y el número no cuadraría con las 35
     # aulas que sí tienen horario.
-    rotulo = "del catálogo" if conf["catalogo"] else "con clases en la BD"
+    rotulo = ("del catálogo" if conf["catalogo"] else
+              "con clases o guardias en la BD" if vista == "profesor" else "con clases en la BD")
     print("  %s %s %s %d"
           % (varios, rotulo, "." * max(1, 22 - len(varios) - len(rotulo)), len(esperadas)))
     print("  entradas que exige la BD ..... %d"
@@ -546,6 +683,10 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
         print("  FALLO: %d páginas para %d %s %s" % (paginas, len(esperadas), varios, rotulo))
 
     vistos, total_faltan, total_sobran, total_halladas = set(), 0, 0, 0
+    # Las guardias, aparte (S215): solo las espera la vista de profesor, pero un «Guardia»
+    # colado en otra vista también se cuenta aquí como sobrante.
+    total_exige_g, total_halladas_g, total_faltan_g, total_sobran_g = 0, 0, 0, 0
+    total_fuera_de_orden = 0
     # Contador APARTE. Una página vacía con leyenda no es una entrada de más: no hay
     # ninguna entrada en esa página. Sumarla a SOBRAN mezclaba dos defectos distintos
     # en un número, y encima contaba dos —un encabezado colado por cada rótulo— donde
@@ -561,13 +702,15 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
         recurso = titulo.split(" — ", 1)[0].strip()
         vistos.add(recurso)
         if recurso not in esperadas:
-            print("  pág %2d: FALLO, el %s %r no tiene clases en la BD"
-                  % (pagina, uno, recurso))
+            print("  pág %2d: FALLO, el %s %r no tiene %s en la BD"
+                  % (pagina, uno, recurso,
+                     "clases ni guardias" if vista == "profesor" else "clases"))
             total_sobran += 1
             continue
-        halladas, faltan, sobra = cotejar_celdas(
-            celdas_de_pagina(ruta_pdf, pagina), esperadas[recurso])
+        cotejo = cotejar_celdas(celdas_de_pagina(ruta_pdf, pagina), esperadas[recurso])
+        halladas, faltan, sobra = cotejo["halladas"], cotejo["faltan"], cotejo["sobra"]
         exige = sum(sum(c.values()) for c in esperadas[recurso].values())
+        exige_g = sum(c[ENTRADA_GUARDIA] for c in esperadas[recurso].values())
 
         # Una página que la BD deja SIN NINGUNA entrada no puede llevar leyenda: sus
         # encabezados anunciarían una lista que no existe. Solo se puede comprobar donde
@@ -581,16 +724,30 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
                 total_vacias_con_leyenda += 1
         n_faltan = sum(faltan.values())
         n_sobran = len(sobra)
+        n_faltan_g = sum(cotejo["faltan_g"].values())
+        n_sobran_g = len(cotejo["sobra_g"])
+        n_fuera = len(cotejo["fuera_de_orden"])
         total_halladas += halladas
         total_faltan += n_faltan
         total_sobran += n_sobran
-        marca = "" if not (n_faltan or n_sobran) else "   <<< DESCUADRE"
-        print("  pág %2d  %-7s  exige %3d  halla %3d  faltan %d  sobran %d%s"
-              % (pagina, recurso, exige, halladas, n_faltan, n_sobran, marca))
-        for entrada, cuantas in sorted(faltan.items()):
+        total_exige_g += exige_g
+        total_halladas_g += cotejo["halladas_g"]
+        total_faltan_g += n_faltan_g
+        total_sobran_g += n_sobran_g
+        total_fuera_de_orden += n_fuera
+        marca = ("" if not (n_faltan or n_sobran or n_faltan_g or n_sobran_g or n_fuera)
+                 else "   <<< DESCUADRE")
+        guardias = ("" if not (exige_g or n_sobran_g or n_fuera) else
+                    "  guardias: exige %d halla %d" % (exige_g, cotejo["halladas_g"]))
+        print("  pág %2d  %-7s  exige %3d  halla %3d  faltan %d  sobran %d%s%s"
+              % (pagina, recurso, exige - exige_g, halladas, n_faltan, n_sobran, guardias,
+                 marca))
+        for entrada, cuantas in sorted(faltan.items()) + sorted(cotejo["faltan_g"].items()):
             print("        FALTA x%d: %s" % (cuantas, entrada))
-        for celda in sobra:
+        for celda in sobra + cotejo["sobra_g"]:
             print("        SOBRA en %s" % celda)
+        for celda in cotejo["fuera_de_orden"]:
+            print("        FUERA DE ORDEN en %s" % celda)
 
     sin_pagina = sorted(set(esperadas) - vistos)
     if sin_pagina:
@@ -598,9 +755,13 @@ def verificar_pdf(ruta_db, horario_id, ruta_pdf, vista="grupo"):
 
     print("  TOTAL: halladas %d, FALTAN %d, SOBRAN %d"
           % (total_halladas, total_faltan, total_sobran))
+    print("  TOTAL guardias: exigidas %d, halladas %d, FALTAN %d, SOBRAN %d, fuera de orden %d"
+          % (total_exige_g, total_halladas_g, total_faltan_g, total_sobran_g,
+             total_fuera_de_orden))
     if conf["catalogo"]:
         print("  TOTAL: páginas vacías con leyenda: %d" % total_vacias_con_leyenda)
     return (not total_faltan and not total_sobran and not total_vacias_con_leyenda
+            and not total_faltan_g and not total_sobran_g and not total_fuera_de_orden
             and not sin_pagina and paginas == len(esperadas))
 
 
@@ -649,17 +810,20 @@ def main():
 
     vistas_oraculo = oraculo(args.db, args.horario_id)
     try:
-        vistas_csv = desde_csv(args.fichero)
+        guardias_oraculo = guardias_esperadas(args.db, args.horario_id)
+        print("  guardias del horario ......... %d" % sum(guardias_oraculo.values()))
+        vistas_csv, guardias_csv = desde_csv(args.fichero)
     except Fallo as e:
         print("FALLO: %s" % e, file=sys.stderr)
         return 1
 
     iguales = [comparar(n, vistas_oraculo[n], vistas_csv[n])
                for n in ("grupo", "profesor", "aula")]
+    iguales.append(comparar_guardias(guardias_oraculo, guardias_csv))
     if all(iguales):
         print("OK: las tres vistas coinciden")
         return 0
-    print("FALLO: alguna vista no coincide (detalle arriba)", file=sys.stderr)
+    print("FALLO: alguna vista o las guardias no coinciden (detalle arriba)", file=sys.stderr)
     return 1
 
 

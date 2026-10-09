@@ -35,6 +35,15 @@ VALIDADO CON TRES MUTACIONES en S150, sobre copias de la base y antes de creerle
       NOMBRES y no códigos, y sin ella esa cuarta comprobación quedaba escrita pero sin
       probar.
 
+DESDE S215 (C-exportacion-guardias):
+  - una sesión SIN AULA (reuniones y funciones, S201) aporta su asignatura a las páginas de
+    sus grupos y de sus profesores, y a ninguna de aula: lo esperado va con `left join` al
+    aula y en la vista de aula esa sesión no tiene recurso;
+  - «Guardia» no es una asignatura: la entrada que el PDF de profesor pinta por cada guardia
+    no se busca en la leyenda, porque lo esperado sale SOLO de las sesiones de la base y
+    ninguna guardia es una sesión. Si la leyenda trajera una línea «Guardia — …», la
+    EXCLUSIVIDAD la denunciaría, que es lo que pide el contrato (C4: sin entrada para ella).
+
 COSTE: dos llamadas a `pdftotext` por página, unos 2 min para las 44 de la vista de aula.
 Mejora posible si molesta: una sola llamada a `-bbox-layout` para el documento entero,
 cacheando las palabras por página en vez de invocarlo página a página.
@@ -110,7 +119,7 @@ def datos(ruta_db, horario_id, vista):
     porRecurso = collections.defaultdict(lambda: {"asig": set(), "prof": set()})
     for plaza, aula, asig in con.execute(
             "select s.plaza_id, a.codigo, g.codigo from sesion s "
-            "join aula a on a.id = s.aula_id join plaza pl on pl.id = s.plaza_id "
+            "left join aula a on a.id = s.aula_id join plaza pl on pl.id = s.plaza_id "
             "join asignatura g on g.id = pl.asignatura_id where s.horario_id = ?",
             (horario_id,)):
         if vista == "grupo":
@@ -118,7 +127,8 @@ def datos(ruta_db, horario_id, vista):
         elif vista == "profesor":
             recursos = profs.get(plaza, set())
         else:
-            recursos = {aula}
+            # Sin aula (S201), la sesión no tiene página de aula a la que aportar.
+            recursos = {aula} if aula is not None else set()
         for r in recursos:
             porRecurso[r]["asig"].add(asig)
             porRecurso[r]["prof"].update(profs.get(plaza, set()))
