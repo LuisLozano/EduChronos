@@ -122,13 +122,16 @@ public class ExportacionHorarioService {
             // Un aula no tiene tutor ni nada que quepa bajo el título, así que el mapa de
             // líneas va VACÍO: es lo que hace que esas páginas no lleven ninguna. Y el
             // listado de aulas manda más aquí que en las otras vistas, porque
-            // `AULA.incluyeRecursosSinSesiones()` es true y por tanto decide qué páginas
+            // `PaginaPorRecurso.AULA.incluyeRecursosSinSesiones()` es true y por tanto decide qué páginas
             // existen, no solo en qué orden salen.
             case AULA -> new ContextoPdf(
                     jornada,
                     aulaService.listar().stream().map(AulaDTO::codigo).toList(),
                     nombres,
                     Map.of());
+            // La página de guardias (S215) es UNA, sin recursos que ordenar ni línea bajo el
+            // título: del contexto solo usa la jornada y los nombres, para la leyenda.
+            case GUARDIAS -> new ContextoPdf(jornada, List.of(), nombres, Map.of());
         };
         return HorarioPdf.escribir(proyeccion, vista, contexto);
     }

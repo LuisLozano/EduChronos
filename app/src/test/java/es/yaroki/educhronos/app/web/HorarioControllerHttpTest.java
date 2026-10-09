@@ -166,6 +166,22 @@ class HorarioControllerHttpTest {
         assertThat(cuerpo).isEqualTo(esperado);
     }
 
+    /** La cuarta vista (S215): {@code vista=guardias} enruta a GUARDIAS y nombra el fichero. */
+    @Test
+    void getPdf_conVistaGuardias_devuelve200YFilenameDeGuardias() throws Exception {
+        byte[] esperado = {'%', 'P', 'D', 'F', '-', 'g'};
+        when(exportacionService.pdf(1L, VistaPdf.GUARDIAS)).thenReturn(esperado);
+
+        byte[] cuerpo = mockMvc.perform(get("/api/horarios/1/pdf").param("vista", "guardias"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "application/pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=\"horario-1-guardias.pdf\""))
+                .andReturn().getResponse().getContentAsByteArray();
+
+        assertThat(cuerpo).isEqualTo(esperado);
+    }
+
     @Test
     void getPdf_conIdInexistente_devuelve404() throws Exception {
         when(exportacionService.pdf(9999L, VistaPdf.GRUPO))

@@ -387,7 +387,7 @@ class HorarioPdfTest {
         }
         assertThat(celdas).as("celdas (día-fila) con texto").containsExactlyInAnyOrder("2-1", "2-2");
 
-        String entrada = VistaPdf.GRUPO.textoDeEntrada(bloque);
+        String entrada = PaginaPorRecurso.GRUPO.textoDeEntrada(bloque);
         String pagina = normalizado(texto(reader, 1));
         assertThat(pagina.split(Pattern.quote(entrada), -1).length - 1)
                 .as("veces que sale la entrada «%s»", entrada).isEqualTo(2);

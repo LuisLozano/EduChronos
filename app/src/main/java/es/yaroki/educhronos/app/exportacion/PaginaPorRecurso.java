@@ -1,0 +1,329 @@
+package es.yaroki.educhronos.app.exportacion;
+
+import es.yaroki.educhronos.app.exportacion.VistaPdf.BloqueLeyenda;
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
+import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+/**
+ * Por qué recurso se pagina un PDF de horario de UNA PÁGINA POR RECURSO —grupo, profesor o
+ * aula—, y todo lo que ese recurso decide de la página (S150, C-exportacion-pdf-profesor-aula).
+ * Hasta S215 era el propio {@link VistaPdf}; se separó cuando llegó la página de guardias,
+ * que no se pagina por recurso ni tiene sesiones (ver {@link VistaPdf#GUARDIAS}).
+ *
+ * <p><b>Qué decide una paginación por recurso.</b> La rejilla, la jornada, las fuentes, las
+ * bandas, el corte de línea y las constantes de maqueta son las MISMAS para cualquier
+ * paginación: un horario impreso es un horario impreso. Lo que cambia de una a otra es
+ * exactamente lo que este enum declara: por qué se agrupa una sesión y una guardia, qué dice
+ * el título, qué dice la clave de lectura, qué texto lleva una entrada, qué rótulo lleva la
+ * línea bajo el título, qué bloques tiene la leyenda y si el catálogo entero tiene página o
+ * solo lo que tiene clases. El nombre del parámetro HTTP es de {@link VistaPdf}.
+ * {@link HorarioPdf} pregunta; no sabe cuál es la respuesta.
+ *
+ * <p><b>Por qué métodos abstractos por constante y no un {@code switch} sobre
+ * {@code this}.</b> Con métodos abstractos, una constante nueva NO COMPILA hasta
+ * implementarlos todos: el compilador es quien exige que una paginación se añada entera. Un
+ * {@code switch} —con {@code default}, o con una rama olvidada— dejaría añadir una a
+ * medias y el hueco saldría en tiempo de ejecución, o peor, como una página plausible y
+ * equivocada. El precio es un cuerpo por constante, que es donde de todos modos hay que
+ * leer qué hace cada una.
+ *
+ * <p><b>El orden de los tres datos de una entrada es el del CENTRO</b>, no uno inventado
+ * aquí: en los horarios que el centro imprime hoy, la página de un grupo lee
+ * «asignatura, profesor, aula» y la de un profesor «asignatura, aula, grupo». Es decir,
+ * lo que NO es el recurso de la página, en ese orden. Medido en el M2 de S150 sobre
+ * {@code docs/horario-referencia/pdf/} y sobre el PDF por profesor del centro.
+ */
+public enum PaginaPorRecurso {
+
+    /**
+     * Una página por GRUPO administrativo. La que existe desde S149.
+     *
+     * <p>La línea bajo el título es el TUTOR del grupo, y la leyenda lleva los profesores
+     * a la izquierda y las asignaturas a la derecha: en la página de un grupo el profesor
+     * es un dato que hay que traducir, porque la celda solo trae su código.
+     */
+    GRUPO {
+
+        @Override
+        public List<String> recursosDe(SesionVistaDTO sesion) {
+            return sesion.grupos();
+        }
+
+        /** El código del grupo, tal cual. No hay nombre largo que añadirle. */
+        @Override
+        public String tituloDe(String recurso, ContextoPdf contexto) {
+            return recurso;
+        }
+
+        @Override
+        public String claveDeLectura() {
+            return "Asignatura - Profesor - Aula";
+        }
+
+        @Override
+        public String textoDeEntrada(SesionVistaDTO sesion) {
+            return sesion.asignaturaCodigo()
+                    + " " + String.join(VistaPdf.SEPARADOR_LISTA, sesion.profesores())
+                    + " " + sesion.aulaCodigo();
+        }
+
+        @Override
+        public String rotuloDeLinea() {
+            return "Tutor: ";
+        }
+
+        @Override
+        public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
+                                             Map<String, String> nombresDeProfesor) {
+            return List.of(bloqueDeProfesores(sesiones, nombresDeProfesor),
+                    bloqueDeAsignaturas(sesiones));
+        }
+
+        /** Un grupo sin clases no tiene horario que imprimir. */
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return false;
+        }
+        /** Una guardia no es de ningún grupo: la página de un grupo no las pinta (S215). */
+        @Override
+        public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
+            return List.of();
+        }
+    },
+
+    /**
+     * Una página por PROFESOR (S150).
+     *
+     * <p>Una sesión de co-docencia sale en la página de CADA uno de sus profesores: las
+     * dos personas dan esa clase, y una página que se la callara a una de ellas estaría
+     * mintiendo sobre su horario.
+     *
+     * <p>La línea bajo el título son los grupos que TUTELA, que es el reverso exacto de
+     * la línea de tutor de {@link #GRUPO} y sale de la misma fuente. La leyenda lleva UN
+     * solo bloque, el de asignaturas: los profesores que aparecerían en él serían uno
+     * solo —el de la página, que ya está en el título— y el aula y el grupo se imprimen
+     * con el código que el centro usa al hablar, no con un nombre que traducir.
+     */
+    PROFESOR {
+
+        @Override
+        public List<String> recursosDe(SesionVistaDTO sesion) {
+            return sesion.profesores();
+        }
+
+        /**
+         * {@code "COD — Nombre completo"}, con el mismo formato que una entrada de
+         * leyenda. Un código sin nombre en catálogo se queda SOLO con su código, sin raya
+         * suelta detrás: igual que en la leyenda, lo que no tiene fuente no se rellena.
+         */
+        @Override
+        public String tituloDe(String recurso, ContextoPdf contexto) {
+            String nombre = contexto.nombresDeProfesor().get(recurso);
+            return nombre == null ? recurso : VistaPdf.entrada(recurso, nombre);
+        }
+
+        @Override
+        public String claveDeLectura() {
+            return "Asignatura - Aula - Grupo";
+        }
+
+        @Override
+        public String textoDeEntrada(SesionVistaDTO sesion) {
+            // Sin aula (reunión o función, S201) no hay tramo de aula que poner.
+            String aula = sesion.aulaCodigo() == null ? "" : " " + sesion.aulaCodigo();
+            return sesion.asignaturaCodigo()
+                    + aula
+                    + " " + String.join(VistaPdf.SEPARADOR_LISTA, sesion.grupos());
+        }
+
+        @Override
+        public String rotuloDeLinea() {
+            return "Tutor de: ";
+        }
+
+        @Override
+        public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
+                                             Map<String, String> nombresDeProfesor) {
+            return List.of(bloqueDeAsignaturas(sesiones));
+        }
+
+        /**
+         * Un profesor sin clases no tiene horario que imprimir. En el banco de referencia
+         * no hay ninguno —los 59 dan clase—, pero la regla no depende de ese dato.
+         */
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return false;
+        }
+        /**
+         * La guardia es de SU profesor: sale en su página como una entrada más, tras las
+         * sesiones de la celda, y da página a quien solo tiene guardias (S215, C1-C3).
+         */
+        @Override
+        public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
+            return List.of(guardia.profesorCodigo());
+        }
+    },
+
+    /**
+     * Una página por AULA (S150).
+     *
+     * <p><b>Ésta sí imprime el catálogo ENTERO</b>, aulas sin una sola clase incluidas, y
+     * es la única de las tres. No es un capricho de simetría: el horario de aulas se usa
+     * para VER QUÉ ESTÁ LIBRE, y un aula que no aparece no se distingue de un aula que no
+     * existe. El PDF de aulas del centro hace exactamente esto —43 páginas para 43 aulas,
+     * 10 de ellas sin ninguna clase, medido en el M2 sobre
+     * {@code docs/horario-referencia/pdf/Horarios de aulas.pdf}—, así que además es lo que
+     * su gente espera encontrar.
+     *
+     * <p>No lleva línea bajo el título: un aula no tiene tutor ni nada equivalente.
+     */
+    AULA {
+
+        /**
+         * El aula de la sesión, que es UNA. Si viniera sin código, la sesión no aporta
+         * página en vez de abrir una titulada con un hueco. En la práctica no puede
+         * pasar —{@code sesion.aula_id} es {@code not null} y {@code aula.codigo} es
+         * {@code not null unique} en el esquema, y la proyección lo copia de
+         * {@code sesion.getAula().getCodigo()}—, pero esto es una función pura que recibe
+         * DTOs de quien sea, y una guarda barata es más honesta que una página rota.
+         */
+        @Override
+        public List<String> recursosDe(SesionVistaDTO sesion) {
+            String aula = sesion.aulaCodigo();
+            return aula == null || aula.isBlank() ? List.of() : List.of(aula);
+        }
+
+        /** El código del aula, tal cual. No tiene otro nombre en el catálogo. */
+        @Override
+        public String tituloDe(String recurso, ContextoPdf contexto) {
+            return recurso;
+        }
+
+        @Override
+        public String claveDeLectura() {
+            return "Asignatura - Profesor - Grupo";
+        }
+
+        @Override
+        public String textoDeEntrada(SesionVistaDTO sesion) {
+            return sesion.asignaturaCodigo()
+                    + " " + String.join(VistaPdf.SEPARADOR_LISTA, sesion.profesores())
+                    + " " + String.join(VistaPdf.SEPARADOR_LISTA, sesion.grupos());
+        }
+
+        /**
+         * VACÍO: esta vista no lleva línea bajo el título. El rótulo no llega a usarse
+         * nunca porque el contexto de aula no trae valores en
+         * {@link ContextoPdf#lineaPorRecurso()}, y {@link HorarioPdf} solo imprime la
+         * línea cuando hay valor. Devolver {@code ""} y no {@code null} deja el contrato
+         * del método sin excepciones: siempre devuelve una cadena.
+         */
+        @Override
+        public String rotuloDeLinea() {
+            return "";
+        }
+
+        /**
+         * Profesores y asignaturas, como en la página de un grupo: en la de un aula
+         * también son códigos que hay que traducir. El grupo no necesita bloque, que es
+         * el mismo criterio que deja fuera al aula en la vista de grupo.
+         */
+        @Override
+        public List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
+                                             Map<String, String> nombresDeProfesor) {
+            return List.of(bloqueDeProfesores(sesiones, nombresDeProfesor),
+                    bloqueDeAsignaturas(sesiones));
+        }
+
+        @Override
+        public boolean incluyeRecursosSinSesiones() {
+            return true;
+        }
+        /** Una guardia no es de ninguna aula: la página de un aula no las pinta (S215). */
+        @Override
+        public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
+            return List.of();
+        }
+    };
+
+    /** Los recursos a cuya página pertenece una sesión. Uno solo, varios, o ninguno. */
+    public abstract List<String> recursosDe(SesionVistaDTO sesion);
+
+    /** El título de la página de un recurso, ya compuesto. */
+    public abstract String tituloDe(String recurso, ContextoPdf contexto);
+
+    /** Dice cómo se lee el texto de una celda, que va sin separadores. */
+    public abstract String claveDeLectura();
+
+    /** El texto de UNA entrada de celda: una cadena, nunca campos que luego se partan. */
+    public abstract String textoDeEntrada(SesionVistaDTO sesion);
+
+    /**
+     * Rótulo de la línea que va bajo el título, delante del valor que trae
+     * {@link ContextoPdf#lineaPorRecurso()}. Incluye su separador: se concatena tal cual.
+     */
+    public abstract String rotuloDeLinea();
+
+    /** Los bloques de la leyenda de una página, con los códigos de ESA página. */
+    public abstract List<BloqueLeyenda> leyendaDe(List<SesionVistaDTO> sesiones,
+                                                  Map<String, String> nombresDeProfesor);
+
+    /**
+     * Si el catálogo ENTERO tiene página, o solo lo que tiene clases.
+     *
+     * <p>Con {@code false}, un recurso del catálogo sin sesiones no se imprime. Con
+     * {@code true}, se imprime su página vacía: hay vistas —la de aula— donde el hueco
+     * ES la información.
+     */
+    public abstract boolean incluyeRecursosSinSesiones();
+
+    /**
+     * Los recursos a cuya página pertenece una guardia (S215): los mismos que para una
+     * sesión, pero de una guardia. Se declara aquí, con un cuerpo por constante, por la misma
+     * razón que los demás: una paginación nueva no compila sin decir qué hace con ellas.
+     */
+    public abstract List<String> recursosDeGuardia(GuardiaVistaDTO guardia);
+
+    /**
+     * El bloque de profesores, que comparten las vistas donde el profesor aparece en la
+     * celda como CÓDIGO y hay que traducirlo. Un código sin nombre en catálogo se queda
+     * solo con su código, sin raya suelta detrás.
+     */
+    static BloqueLeyenda bloqueDeProfesores(List<SesionVistaDTO> sesiones,
+                                            Map<String, String> nombresDeProfesor) {
+        Set<String> profesores = new TreeSet<>();
+        for (SesionVistaDTO s : sesiones) {
+            profesores.addAll(s.profesores());
+        }
+        List<String> lineas = new ArrayList<>(profesores.size());
+        for (String codigo : profesores) {
+            String nombre = nombresDeProfesor.get(codigo);
+            lineas.add(nombre == null ? codigo : VistaPdf.entrada(codigo, nombre));
+        }
+        return new BloqueLeyenda("Profesores", lineas);
+    }
+
+    /**
+     * El bloque de asignaturas, que lo tienen TODAS las vistas: el código que va en la
+     * celda es una abreviatura del centro y sin traducir no se lee. El nombre viaja en la
+     * proyección, así que no hace falta cruzarlo con nada.
+     */
+    static BloqueLeyenda bloqueDeAsignaturas(List<SesionVistaDTO> sesiones) {
+        Map<String, String> asignaturas = new TreeMap<>();
+        for (SesionVistaDTO s : sesiones) {
+            asignaturas.put(s.asignaturaCodigo(), s.asignaturaNombre());
+        }
+        List<String> lineas = new ArrayList<>(asignaturas.size());
+        for (Map.Entry<String, String> e : asignaturas.entrySet()) {
+            lineas.add(VistaPdf.entrada(e.getKey(), e.getValue()));
+        }
+        return new BloqueLeyenda("Asignaturas", lineas);
+    }
+}

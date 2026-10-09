@@ -8,8 +8,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * Lo que {@link VistaPdf} decide por su cuenta: la traducción del query param y las
- * piezas de texto que cada vista compone. La maqueta se prueba en {@code HorarioPdfTest},
+ * Lo que {@link VistaPdf} y {@link PaginaPorRecurso} deciden por su cuenta: la traducción
+ * del query param y las piezas de texto que cada vista compone (desde S215 las de grupo,
+ * profesor y aula viven en {@link PaginaPorRecurso}). La maqueta se prueba en {@code HorarioPdfTest},
  * que es quien la dibuja.
  */
 class VistaPdfTest {
@@ -37,6 +38,11 @@ class VistaPdfTest {
     }
 
     @Test
+    void elParametroGuardiasDevuelveLaVistaDeGuardias() {
+        assertThat(VistaPdf.desdeParametro("guardias")).contains(VistaPdf.GUARDIAS);
+    }
+
+    @Test
     void unParametroDesconocidoNoDevuelveNingunaVista() {
         assertThat(VistaPdf.desdeParametro("trimestre")).isEmpty();
     }
@@ -59,7 +65,7 @@ class VistaPdfTest {
         SesionVistaDTO sesion = sesion("DTec", List.of("DIB2"), "Taller 1 Aula Plástica",
                 List.of("1B-A", "1B-B"));
 
-        assertThat(VistaPdf.PROFESOR.textoDeEntrada(sesion))
+        assertThat(PaginaPorRecurso.PROFESOR.textoDeEntrada(sesion))
                 .isEqualTo("DTec Taller 1 Aula Plástica 1B-A/1B-B");
     }
 
@@ -71,7 +77,7 @@ class VistaPdfTest {
     void laEntradaDeProfesorSinAulaNoLlevaElTramoDelAula() {
         SesionVistaDTO sesion = sesion("RED", List.of("P1", "P2"), null, List.of("1B-A"));
 
-        String texto = VistaPdf.PROFESOR.textoDeEntrada(sesion);
+        String texto = PaginaPorRecurso.PROFESOR.textoDeEntrada(sesion);
 
         assertThat(texto).doesNotContain("null").endsWith("1B-A").isEqualTo("RED 1B-A");
     }
@@ -82,7 +88,7 @@ class VistaPdfTest {
         SesionVistaDTO sesion = sesion("DTec", List.of("DIB2"), "Taller 1 Aula Plástica",
                 List.of("1B-A", "1B-B"));
 
-        assertThat(VistaPdf.GRUPO.textoDeEntrada(sesion))
+        assertThat(PaginaPorRecurso.GRUPO.textoDeEntrada(sesion))
                 .isEqualTo("DTec DIB2 Taller 1 Aula Plástica");
     }
 
@@ -96,7 +102,7 @@ class VistaPdfTest {
         SesionVistaDTO sesion = sesion("LCL", List.of("LEN2", "LEN8"), "A5",
                 List.of("2ºA", "2ºB"));
 
-        assertThat(VistaPdf.AULA.textoDeEntrada(sesion)).isEqualTo("LCL LEN2/LEN8 2ºA/2ºB");
+        assertThat(PaginaPorRecurso.AULA.textoDeEntrada(sesion)).isEqualTo("LCL LEN2/LEN8 2ºA/2ºB");
     }
 
     // ------------------------------------------------------------------ recursos y catálogo
@@ -104,9 +110,9 @@ class VistaPdfTest {
     /** Solo la de aula imprime el catálogo entero; las otras dos, lo que tiene clases. */
     @Test
     void soloLaVistaDeAulaIncluyeRecursosSinSesiones() {
-        assertThat(VistaPdf.GRUPO.incluyeRecursosSinSesiones()).isFalse();
-        assertThat(VistaPdf.PROFESOR.incluyeRecursosSinSesiones()).isFalse();
-        assertThat(VistaPdf.AULA.incluyeRecursosSinSesiones()).isTrue();
+        assertThat(PaginaPorRecurso.GRUPO.incluyeRecursosSinSesiones()).isFalse();
+        assertThat(PaginaPorRecurso.PROFESOR.incluyeRecursosSinSesiones()).isFalse();
+        assertThat(PaginaPorRecurso.AULA.incluyeRecursosSinSesiones()).isTrue();
     }
 
     /**
@@ -116,11 +122,11 @@ class VistaPdfTest {
      */
     @Test
     void enVistaDeAulaUnaSesionSinAulaNoAportaRecurso() {
-        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), null, List.of("2ºA"))))
+        assertThat(PaginaPorRecurso.AULA.recursosDe(sesion("LCL", List.of("LEN2"), null, List.of("2ºA"))))
                 .isEmpty();
-        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "  ", List.of("2ºA"))))
+        assertThat(PaginaPorRecurso.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "  ", List.of("2ºA"))))
                 .isEmpty();
-        assertThat(VistaPdf.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "A5", List.of("2ºA"))))
+        assertThat(PaginaPorRecurso.AULA.recursosDe(sesion("LCL", List.of("LEN2"), "A5", List.of("2ºA"))))
                 .containsExactly("A5");
     }
 
@@ -130,21 +136,21 @@ class VistaPdfTest {
     void elTituloDeProfesorLlevaSuCodigoYSuNombreSeparadosPorRaya() {
         ContextoPdf contexto = contexto(Map.of("DIB2", "Ramírez Soto, Ana"));
 
-        assertThat(VistaPdf.PROFESOR.tituloDe("DIB2", contexto))
+        assertThat(PaginaPorRecurso.PROFESOR.tituloDe("DIB2", contexto))
                 .isEqualTo("DIB2 — Ramírez Soto, Ana");
     }
 
     /** Sin nombre en catálogo queda el código SOLO: ni raya suelta ni hueco detrás. */
     @Test
     void elTituloDeUnProfesorSinNombreEsSoloSuCodigo() {
-        assertThat(VistaPdf.PROFESOR.tituloDe("DIB2", contexto(Map.of())))
+        assertThat(PaginaPorRecurso.PROFESOR.tituloDe("DIB2", contexto(Map.of())))
                 .isEqualTo("DIB2");
     }
 
     /** La página de un grupo se titula con su código tal cual, y el contexto no pinta. */
     @Test
     void elTituloDeGrupoEsSuCodigoTalCual() {
-        assertThat(VistaPdf.GRUPO.tituloDe("1B-A", contexto(Map.of("DIB2", "Ramírez Soto, Ana"))))
+        assertThat(PaginaPorRecurso.GRUPO.tituloDe("1B-A", contexto(Map.of("DIB2", "Ramírez Soto, Ana"))))
                 .isEqualTo("1B-A");
     }
 
@@ -159,7 +165,7 @@ class VistaPdfTest {
         List<SesionVistaDTO> sesiones = List.of(
                 sesion("DTec", List.of("DIB2"), "Taller 1", List.of("1B-A")));
 
-        assertThat(VistaPdf.PROFESOR.leyendaDe(sesiones, Map.of("DIB2", "Ramírez Soto, Ana")))
+        assertThat(PaginaPorRecurso.PROFESOR.leyendaDe(sesiones, Map.of("DIB2", "Ramírez Soto, Ana")))
                 .singleElement()
                 .satisfies(bloque -> {
                     assertThat(bloque.encabezado()).isEqualTo("Asignaturas");

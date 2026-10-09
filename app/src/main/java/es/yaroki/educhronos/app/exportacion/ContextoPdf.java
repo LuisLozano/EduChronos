@@ -26,7 +26,7 @@ import java.util.Map;
  *     tal como los lista el catálogo de esa vista (ver {@link HorarioPdf#escribir})
  * @param nombresDeProfesor código de profesor → nombre de catálogo, para la leyenda
  * @param lineaPorRecurso código de recurso → VALOR de la línea que va bajo el título, SIN
- *     su rótulo, que lo pone {@link VistaPdf#rotuloDeLinea()}. Un recurso AUSENTE del
+ *     su rótulo, que lo pone {@link PaginaPorRecurso#rotuloDeLinea()}. Un recurso AUSENTE del
  *     mapa es un recurso sin ese dato, y su página no lleva la línea: lo que no tiene
  *     fuente se calla, no se rellena
  */

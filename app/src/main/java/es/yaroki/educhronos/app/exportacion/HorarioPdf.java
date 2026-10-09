@@ -14,6 +14,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import es.yaroki.educhronos.app.exportacion.VistaPdf.BloqueLeyenda;
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
@@ -29,19 +30,24 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.BiFunction;
 
 /**
  * Serializa un {@link HorarioProyeccionDTO} a PDF, una página A4 vertical por RECURSO
  * (S149, C-exportacion-pdf-grupo; generalizado en S150). Función PURA, misma filosofía
- * que {@link HorarioCsv}: entran la proyección, la {@link VistaPdf} que dice por qué
- * recurso se pagina y un {@link ContextoPdf} con los datos de catálogo ya resueltos, y
- * salen los bytes del fichero. No toca JPA, no navega entidades, no consulta nada.
+ * que {@link HorarioCsv}: entran la proyección, la {@link VistaPdf} pedida y un
+ * {@link ContextoPdf} con los datos de catálogo ya resueltos, y salen los bytes del fichero.
+ * No toca JPA, no navega entidades, no consulta nada. Desde S215 hay dos caminos: el de una
+ * página por recurso (grupo, profesor, aula), que pregunta a su {@link PaginaPorRecurso}, y
+ * el de la página de guardias, que es una sola (ver {@link #escribir}).
  *
  * <p><b>Qué sabe esta clase y qué no.</b> Sabe MAQUETAR: la rejilla, la jornada, las
  * fuentes empotradas, las bandas de una celda de varias entradas y el presupuesto de
  * página. NO sabe por qué recurso se agrupa, qué dice la clave de lectura, qué texto
  * lleva una entrada, qué rótulo lleva la línea bajo el título ni qué bloques tiene la
- * leyenda: todo eso lo pregunta a la {@link VistaPdf}. Lo que sigue aquí es lo que es
+ * leyenda: todo eso lo pregunta a la {@link PaginaPorRecurso}. Lo que sigue aquí es lo que es
  * igual en cualquier paginación de un horario.
  *
  * <p><b>Por qué necesita un contexto, y el CSV no.</b> La proyección lleva el par
@@ -77,7 +83,7 @@ import java.util.Set;
  * de modo que partir por espacios para maquetar rompería el dato. El salto de línea lo
  * decide el ancho medido por la fuente. Como esa cadena no lleva separadores, la página
  * imprime bajo el título la CLAVE DE LECTURA que dicta la vista
- * ({@link VistaPdf#claveDeLectura()}): sin ella una celda de tres palabras es ambigua.
+ * ({@link PaginaPorRecurso#claveDeLectura()}): sin ella una celda de tres palabras es ambigua.
  *
  * <p>Los fallos de integridad abortan con {@link IllegalStateException} y NUNCA con
  * {@link IllegalArgumentException}: el controlador traduce esta última a 404 para el id
@@ -178,7 +184,27 @@ public final class HorarioPdf {
     }
 
     /**
-     * Bytes del PDF: una página por recurso de la {@code vista}.
+     * Bytes del PDF de la {@code vista} pedida. Es la ÚNICA entrada, y elige el camino de
+     * dibujo con un {@code switch} exhaustivo y sin {@code default} (S215, enmienda ED1): las
+     * vistas de grupo, profesor y aula se paginan por recurso con su {@link PaginaPorRecurso};
+     * la de guardias es una página propia ({@link #paginaDeGuardias}). Una constante nueva
+     * en {@link VistaPdf} no compila hasta tener aquí su rama.
+     *
+     * @throws IllegalStateException si la jornada no trae tramos, o si un tramo lectivo
+     *     no tiene {@code ordenEnDia}
+     */
+    public static byte[] escribir(HorarioProyeccionDTO proyeccion, VistaPdf vista,
+                                  ContextoPdf contexto) {
+        return switch (vista) {
+            case GRUPO -> porRecurso(proyeccion, PaginaPorRecurso.GRUPO, contexto);
+            case PROFESOR -> porRecurso(proyeccion, PaginaPorRecurso.PROFESOR, contexto);
+            case AULA -> porRecurso(proyeccion, PaginaPorRecurso.AULA, contexto);
+            case GUARDIAS -> paginaDeGuardias(proyeccion, contexto);
+        };
+    }
+
+    /**
+     * Una página por recurso de la paginación {@code vista}.
      *
      * <p><b>El orden de las páginas es el del catálogo, no el de la proyección.</b> Lo
      * manda {@link ContextoPdf#ordenDeRecursos()}, que el servicio toma del listado con
@@ -192,8 +218,8 @@ public final class HorarioPdf {
      * @throws IllegalStateException si la jornada no trae tramos, o si un tramo lectivo
      *     no tiene {@code ordenEnDia}
      */
-    public static byte[] escribir(HorarioProyeccionDTO proyeccion, VistaPdf vista,
-                                  ContextoPdf contexto) {
+    private static byte[] porRecurso(HorarioProyeccionDTO proyeccion, PaginaPorRecurso vista,
+                                     ContextoPdf contexto) {
 
         List<TramoJornadaDTO> filas = filasDeTramo(contexto.jornada());
         List<String> recursos = ordenarRecursos(proyeccion, vista, contexto.ordenDeRecursos());
@@ -217,6 +243,9 @@ public final class HorarioPdf {
             List<SesionVistaDTO> delRecurso = proyeccion.sesiones().stream()
                     .filter(s -> vista.recursosDe(s).contains(recurso))
                     .toList();
+            List<GuardiaVistaDTO> guardiasDelRecurso = proyeccion.guardias().stream()
+                    .filter(g -> vista.recursosDeGuardia(g).contains(recurso))
+                    .toList();
 
             doc.add(titulo(vista.tituloDe(recurso, contexto), fTitulo));
             String linea = contexto.lineaPorRecurso().get(recurso);
@@ -224,7 +253,9 @@ public final class HorarioPdf {
                 doc.add(lineaSuelta(vista.rotuloDeLinea() + linea, fCuerpo));
             }
             doc.add(lineaSuelta(vista.claveDeLectura(), fCuerpo));
-            doc.add(rejilla(delRecurso, filas, vista, fCuerpo, fNegrita));
+            doc.add(rejilla(filas,
+                    (dia, tramo) -> entradasDe(delRecurso, guardiasDelRecurso, vista, dia, tramo),
+                    fCuerpo, fNegrita));
 
             // Una leyenda sin una sola línea NO se imprime, ni siquiera sus encabezados:
             // en una página vacía —las que la vista de aula sí saca— «Profesores» y
@@ -240,6 +271,109 @@ public final class HorarioPdf {
 
         doc.close();
         return salida.toByteArray();
+    }
+
+    // ------------------------------------------------------------------ guardias (S215)
+
+    /** Cuántas columnas de «Profesores» lleva la leyenda de la página de guardias (ED4). */
+    static final int COLUMNAS_LEYENDA_GUARDIAS = 3;
+
+    /**
+     * La página de GUARDIAS ORDINARIAS (S215, C-exportacion-guardias, puntos D y enmiendas
+     * ED1, ED2, ED4): UNA página A4 vertical, siempre, con el mismo título, la misma rejilla,
+     * la misma columna de horas, el mismo recreo y los mismos cuerpos que las demás vistas.
+     *
+     * <ul>
+     *   <li>Título {@value VistaPdf#TITULO_GUARDIAS}; sin línea bajo él; clave de lectura
+     *       {@value VistaPdf#CLAVE_GUARDIAS}.
+     *   <li>Cada celda lectiva, UNA entrada: los códigos de los profesores de guardia en ese
+     *       tramo, ordenados y unidos por {@value VistaPdf#SEPARADOR_CODIGOS} (D3). Al ser una
+     *       sola entrada no lleva bandas, y el corte de línea es el de siempre: tras el espacio
+     *       del separador, nunca dentro de un código.
+     *   <li>Leyenda: «CÓDIGO — Nombre» de los profesores que aparecen, por código, repartidos
+     *       en {@value #COLUMNAS_LEYENDA_GUARDIAS} bloques «Profesores» de tercios consecutivos
+     *       con el molde de bloques de siempre ({@link #leyendaDeGuardias}).
+     *   <li>Sin guardias: la página sale igual, con la rejilla vacía y sin leyenda (D5). No
+     *       depende de ningún recurso, así que nunca es un documento sin páginas.
+     * </ul>
+     */
+    private static byte[] paginaDeGuardias(HorarioProyeccionDTO proyeccion, ContextoPdf contexto) {
+        List<TramoJornadaDTO> filas = filasDeTramo(contexto.jornada());
+        Map<String, List<String>> porCelda = codigosPorCelda(proyeccion.guardias());
+
+        BaseFont normal = cargarFuente("DejaVuSansCondensed.ttf");
+        BaseFont negrita = cargarFuente("DejaVuSansCondensed-Bold.ttf");
+        Font fCuerpo = new Font(normal, CUERPO);
+        Font fNegrita = new Font(negrita, CUERPO);
+        Font fTitulo = new Font(negrita, TITULO);
+
+        ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4, MARGEN, MARGEN, MARGEN, MARGEN);
+        PdfWriter.getInstance(doc, salida);
+        doc.open();
+
+        doc.add(titulo(VistaPdf.TITULO_GUARDIAS, fTitulo));
+        doc.add(lineaSuelta(VistaPdf.CLAVE_GUARDIAS, fCuerpo));
+        doc.add(rejilla(filas, (dia, tramo) -> {
+            List<String> codigos = porCelda.get(dia + "-" + tramo);
+            return codigos == null
+                    ? List.of()
+                    : List.of(String.join(VistaPdf.SEPARADOR_CODIGOS, codigos));
+        }, fCuerpo, fNegrita));
+
+        List<BloqueLeyenda> bloques =
+                leyendaDeGuardias(proyeccion.guardias(), contexto.nombresDeProfesor());
+        if (!bloques.isEmpty()) {
+            doc.add(leyenda(bloques, fCuerpo, fNegrita));
+        }
+
+        doc.close();
+        return salida.toByteArray();
+    }
+
+    /** {@code "dia-tramo"} → los códigos de guardia de esa celda, ORDENADOS (D3). */
+    private static Map<String, List<String>> codigosPorCelda(List<GuardiaVistaDTO> guardias) {
+        Map<String, List<String>> porCelda = new TreeMap<>();
+        for (GuardiaVistaDTO g : guardias) {
+            porCelda.computeIfAbsent(g.dia() + "-" + g.tramo(), k -> new ArrayList<>())
+                    .add(g.profesorCodigo());
+        }
+        porCelda.values().forEach(codigos -> codigos.sort(Comparator.naturalOrder()));
+        return porCelda;
+    }
+
+    /**
+     * La leyenda de la página de guardias (ED4): los profesores que APARECEN en ella, por
+     * código, con su nombre de catálogo —«CÓDIGO — Nombre», o el código solo si no tiene,
+     * igual que en las otras leyendas—, en {@value #COLUMNAS_LEYENDA_GUARDIAS} bloques
+     * «Profesores» de tercios CONSECUTIVOS: el primero lleva los primeros códigos, y así. Con
+     * {@code n} profesores, los primeros {@code n % 3} bloques llevan uno más. Un bloque que
+     * quedaría vacío (menos de tres profesores) no se crea, para no imprimir un encabezado
+     * sobre nada; sin profesores no hay leyenda.
+     */
+    static List<BloqueLeyenda> leyendaDeGuardias(List<GuardiaVistaDTO> guardias,
+                                                 Map<String, String> nombresDeProfesor) {
+        Set<String> codigos = new TreeSet<>();
+        for (GuardiaVistaDTO g : guardias) {
+            codigos.add(g.profesorCodigo());
+        }
+        List<String> lineas = new ArrayList<>(codigos.size());
+        for (String codigo : codigos) {
+            String nombre = nombresDeProfesor.get(codigo);
+            lineas.add(nombre == null ? codigo : VistaPdf.entrada(codigo, nombre));
+        }
+        List<BloqueLeyenda> bloques = new ArrayList<>(COLUMNAS_LEYENDA_GUARDIAS);
+        int base = lineas.size() / COLUMNAS_LEYENDA_GUARDIAS;
+        int resto = lineas.size() % COLUMNAS_LEYENDA_GUARDIAS;
+        int desde = 0;
+        for (int i = 0; i < COLUMNAS_LEYENDA_GUARDIAS; i++) {
+            int hasta = desde + base + (i < resto ? 1 : 0);
+            if (hasta > desde) {
+                bloques.add(new BloqueLeyenda("Profesores", List.copyOf(lineas.subList(desde, hasta))));
+            }
+            desde = hasta;
+        }
+        return bloques;
     }
 
     // ------------------------------------------------------------------ fuentes
@@ -287,8 +421,12 @@ public final class HorarioPdf {
      * Los recursos que tienen página, en el orden del catálogo. Se recorre
      * {@code ordenDeRecursos} y se queda con los que de verdad aparecen en la proyección
      * —un recurso del catálogo sin clases no tiene nada que imprimir—, SALVO que la vista
-     * pida el catálogo entero ({@link VistaPdf#incluyeRecursosSinSesiones()}), en cuyo
+     * pida el catálogo entero ({@link PaginaPorRecurso#incluyeRecursosSinSesiones()}), en cuyo
      * caso todos tienen página y las de los que no dan clase salen vacías.
+     *
+     * <p>Desde S215 cuenta como «con horario» también quien tiene GUARDIAS en esa
+     * paginación ({@link PaginaPorRecurso#recursosDeGuardia}): en la de profesor, quien solo
+     * tiene guardias tiene página (C3), en el mismo orden de catálogo que los demás.
      *
      * <p>Los que están en la proyección pero NO en el catálogo van al final, por
      * aparición, y eso vale para las dos políticas: es la regla de S149 y dice que callar
@@ -296,11 +434,15 @@ public final class HorarioPdf {
      * imposible —el catálogo es la fuente de la que salen los recursos—, pero si pasara,
      * un recurso descolocado sigue siendo mejor que un recurso perdido.
      */
-    private static List<String> ordenarRecursos(HorarioProyeccionDTO proyeccion, VistaPdf vista,
+    private static List<String> ordenarRecursos(HorarioProyeccionDTO proyeccion,
+                                                PaginaPorRecurso vista,
                                                 List<String> ordenDeRecursos) {
         Set<String> conHorario = new LinkedHashSet<>();
         for (SesionVistaDTO sesion : proyeccion.sesiones()) {
             conHorario.addAll(vista.recursosDe(sesion));
+        }
+        for (GuardiaVistaDTO guardia : proyeccion.guardias()) {
+            conHorario.addAll(vista.recursosDeGuardia(guardia));
         }
         List<String> ordenados = new ArrayList<>(conHorario.size());
         for (String recurso : ordenDeRecursos) {
@@ -334,10 +476,13 @@ public final class HorarioPdf {
      * porque no hay nada que colocar en ella y cinco celdas vacías dirían lo contrario.
      * Esa fila va SOMBREADA de punta a punta, columna de horas incluida: el gris es lo
      * que hace que el ojo salte el corte sin leerlo.
+     *
+     * <p>Lo que va en cada celda lectiva lo dice {@code entradasEn(dia, tramo)}: es lo único
+     * que cambia entre los dos caminos (S215), y así la rejilla, la columna de horas y el
+     * recreo son los mismos en la página de un recurso y en la de guardias.
      */
-    private static PdfPTable rejilla(List<SesionVistaDTO> sesiones,
-                                     List<TramoJornadaDTO> filas,
-                                     VistaPdf vista,
+    private static PdfPTable rejilla(List<TramoJornadaDTO> filas,
+                                     BiFunction<Integer, Integer, List<String>> entradasEn,
                                      Font fCuerpo, Font fNegrita) {
 
         PdfPTable tabla = new PdfPTable(6);
@@ -372,7 +517,7 @@ public final class HorarioPdf {
                         "El tramo lectivo de orden " + fila.orden() + " no trae ordenEnDia");
             }
             for (int dia = 1; dia <= DIAS.length; dia++) {
-                tabla.addCell(celdaDeHorario(entradasDe(sesiones, vista, dia, tramo), fCuerpo));
+                tabla.addCell(celdaDeHorario(entradasEn.apply(dia, tramo), fCuerpo));
             }
         }
         return tabla;
@@ -380,20 +525,31 @@ public final class HorarioPdf {
 
     /**
      * Las entradas de una celda, en el orden en que vienen de la proyección. Cada una es
-     * la cadena que compone {@link VistaPdf#textoDeEntrada}, montada allí y nunca vuelta
-     * a partir aquí.
+     * la cadena que compone {@link PaginaPorRecurso#textoDeEntrada}, montada allí y nunca
+     * vuelta a partir aquí.
+     *
+     * <p>Tras TODAS las sesiones de la celda, una entrada {@value VistaPdf#ROTULO_GUARDIA}
+     * por cada guardia del recurso en ese tramo (S215, C1 y C2). Si coincidiera con una
+     * sesión se pintarían las dos: la condición 2 de O-guardias lo impide y, si pasara, lo
+     * denuncia el diagnóstico; el papel no lo esconde.
      *
      * <p>Una sesión entra en TODAS las celdas de su día que cubre
      * ({@link SesionVistaDTO#tramosCubiertos()}), no solo en la de su tramo de inicio: un
      * bloque de dos tramos se pinta en las dos filas, con la misma entrada en cada una.
      * Es común a las tres vistas.
      */
-    private static List<String> entradasDe(List<SesionVistaDTO> sesiones, VistaPdf vista,
-                                           int dia, int tramo) {
+    private static List<String> entradasDe(List<SesionVistaDTO> sesiones,
+                                           List<GuardiaVistaDTO> guardias,
+                                           PaginaPorRecurso vista, int dia, int tramo) {
         List<String> entradas = new ArrayList<>();
         for (SesionVistaDTO s : sesiones) {
             if (s.dia() == dia && s.tramosCubiertos().contains(tramo)) {
                 entradas.add(vista.textoDeEntrada(s));
+            }
+        }
+        for (GuardiaVistaDTO g : guardias) {
+            if (g.dia() == dia && g.tramo() == tramo) {
+                entradas.add(VistaPdf.ROTULO_GUARDIA);
             }
         }
         return entradas;
@@ -447,7 +603,7 @@ public final class HorarioPdf {
 
     /**
      * La leyenda del pie: UNA COLUMNA POR BLOQUE de los que declara la vista
-     * ({@link VistaPdf#leyendaDe}), con encabezado en negrita sobre cada una. Solo los
+     * ({@link PaginaPorRecurso#leyendaDe}), con encabezado en negrita sobre cada una. Solo los
      * códigos QUE APARECEN EN ESA PÁGINA, que es cosa de la vista; aquí solo se reparte
      * el ancho y se apilan las líneas.
      *

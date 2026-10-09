@@ -11,6 +11,7 @@ import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import es.yaroki.educhronos.app.exportacion.VistaPdf;
 import es.yaroki.educhronos.app.web.dto.AulaDTO;
 import es.yaroki.educhronos.app.web.dto.GrupoDTO;
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.JornadaDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
@@ -285,6 +286,53 @@ class ExportacionHorarioServiceTest {
         }
     }
 
+    // ------------------------------------------------------------------ rama GUARDIAS (S215)
+
+    /**
+     * La rama de guardias da UNA página, y su leyenda sale del MISMO mapa de nombres que las
+     * demás: el código de la celda se traduce con el nombre de catálogo. No pide grupos ni
+     * aulas —no ordena recursos ni lleva línea bajo el título—, y el doble estricto lo
+     * denunciaría si los pidiera sin usarlos.
+     */
+    @Test
+    void laRamaDeGuardiasDaUnaPaginaConLosNombresDelCatalogoEnLaLeyenda() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(conGuardias(List.of(
+                sesion(1, 1, "MAT", "Matemáticas", List.of("MAT1"), "A5", "1ºA")),
+                List.of(new GuardiaVistaDTO("MAT1", 1, 1))));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of(
+                new ProfesorDTO(3L, "MAT1", "Ríos Palomo, María del Carmen", null, "PROFESOR", 0)));
+
+        PdfReader reader = new PdfReader(servicio.pdf(1L, VistaPdf.GUARDIAS));
+        try {
+            assertThat(reader.getNumberOfPages()).isEqualTo(1);
+            String pagina = new PdfTextExtractor(reader).getTextFromPage(1);
+            assertThat(pagina).contains("Guardias ordinarias", "Profesores de guardia",
+                    "MAT1 — Ríos Palomo, María del Carmen");
+            assertThat(pagina).doesNotContain("MAT A5");
+        } finally {
+            reader.close();
+        }
+    }
+
+    /** D5 por el servicio: un horario sin guardias da su página, vacía y sin leyenda. */
+    @Test
+    void laRamaDeGuardiasSinGuardiasDaLaPaginaConLaRejillaVacia() throws IOException {
+        when(generador.proyectar(1L)).thenReturn(conGuardias(List.of(), List.of()));
+        when(jornadaService.obtenerJornada()).thenReturn(JORNADA);
+        when(profesorService.listar()).thenReturn(List.of());
+
+        PdfReader reader = new PdfReader(servicio.pdf(1L, VistaPdf.GUARDIAS));
+        try {
+            assertThat(reader.getNumberOfPages()).isEqualTo(1);
+            String pagina = new PdfTextExtractor(reader).getTextFromPage(1);
+            assertThat(pagina).contains("Guardias ordinarias", "08:00-09:00");
+            assertThat(pagina).doesNotContain("—");
+        } finally {
+            reader.close();
+        }
+    }
+
     // ------------------------------------------------------------------ utilidades
 
     /** Cablea el caso mínimo de un solo grupo con una clase. */
@@ -309,6 +357,13 @@ class ExportacionHorarioServiceTest {
         return new HorarioProyeccionDTO(
                 1L, "Horario de prueba", "BORRADOR", "FEASIBLE", 0.0, 0.0,
                 "2026-09-15T00:00:00Z", sesiones, List.of());
+    }
+
+    private static HorarioProyeccionDTO conGuardias(List<SesionVistaDTO> sesiones,
+                                                    List<GuardiaVistaDTO> guardias) {
+        return new HorarioProyeccionDTO(
+                1L, "Horario de prueba", "BORRADOR", "FEASIBLE", 0.0, 0.0,
+                "2026-09-15T00:00:00Z", sesiones, guardias);
     }
 
     private static SesionVistaDTO sesion(int dia, int tramo, String codigo, String nombre,
