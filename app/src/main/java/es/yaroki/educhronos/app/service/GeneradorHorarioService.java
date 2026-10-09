@@ -434,8 +434,7 @@ public class GeneradorHorarioService {
 
         // El reparto de las guardias (S213), tras el solve y ANTES de escribir nada: si no llega al
         // mínimo en algún tramo, no queda horario y el controlador responde 422 GUARDIAS_SIN_REPARTO.
-        RepartoGuardias.Resultado reparto = RepartoGuardias.repartir(problema, resultado.solucion(),
-                cuadre.guardiasPorProfesor(), cuadre.minimoGuardiasPorTramo());
+        RepartoGuardias.Resultado reparto = ViaRepartoGuardias.repartir(problema, resultado.solucion(), cuadre);
         if (reparto.fallo()) {
             throw new GuardiasSinRepartoException(reparto.deficits());
         }
@@ -540,20 +539,8 @@ public class GeneradorHorarioService {
                 horario, problema, resultado.solucion(), idxPlaza, idxAula, idxTramo);
         sesionRepository.saveAll(sesiones);
 
-        Map<String, Profesor> idxProfesor = profesorRepository.findAll().stream()
-                .collect(Collectors.toMap(Profesor::getCodigo, p -> p));
-        List<Guardia> filas = new ArrayList<>(guardias.size());
-        for (RepartoGuardias.Asignacion guardia : guardias) {
-            Profesor profesor = idxProfesor.get(guardia.profesorCodigo());
-            TramoSemanal tramo = idxTramo.get(problema.tramos().get(guardia.tramo()));
-            if (profesor == null || tramo == null) {
-                throw new IllegalArgumentException("La guardia de " + guardia.profesorCodigo()
-                        + " en el tramo " + problema.tramos().get(guardia.tramo()).codigo()
-                        + " no tiene profesor o tramo persistido");
-            }
-            filas.add(new Guardia(horario, profesor, tramo));
-        }
-        guardiaRepository.saveAll(filas);
+        guardiaRepository.saveAll(ViaRepartoGuardias.filas(
+                horario, problema, idxTramo, profesorRepository.findAll(), guardias));
 
         return new Guardado(horario, sesiones.size());
     }

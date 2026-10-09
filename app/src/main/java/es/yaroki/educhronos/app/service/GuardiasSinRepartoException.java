@@ -40,10 +40,7 @@ public class GuardiasSinRepartoException extends RuntimeException {
             throw new IllegalArgumentException("GuardiasSinRepartoException exige al menos un tramo con déficit");
         }
         int minimo = deficits.get(0).minimo();
-        String lista = deficits.stream()
-                .map(d -> PrevalidacionService.nombreDeTramo(d.tramo()) + ": " + d.alcanzadas() + " de "
-                        + d.minimo())
-                .collect(Collectors.joining("; "));
+        String lista = ViaRepartoGuardias.listaDeTramos(deficits);
         return "No se pueden repartir las guardias ordinarias: en estas horas no se llega al mínimo de "
                 + minimo + " profesores de guardia: " + lista + ". Los profesores libres en esas horas no"
                 + " tienen guardias suficientes. Baja el mínimo, da más guardias a esos profesores o deja"
