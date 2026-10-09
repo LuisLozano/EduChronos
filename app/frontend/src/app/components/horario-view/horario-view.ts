@@ -484,13 +484,21 @@ export class HorarioView implements OnDestroy {
    * no es alcanzable desde esta rejilla, que solo pinta tramos lectivos—, y también
    * cualquier causa que el backend añada después.
    *
-   * <p>`INSTANCIA_INEXISTENTE` es la ÚNICA que arrastra la prosa del servidor, y es
-   * deliberado: cuál de las dos instancias falta viaja SOLO ahí —el servidor la
-   * interpola como `La instancia 'primera' (…)`— y no hay campo estructurado que lo
-   * diga. Callarla dejaría al usuario con «una de las dos» sin saber cuál.
+   * <p>`INSTANCIA_INEXISTENTE` arrastra la prosa del servidor, y es deliberado: cuál
+   * de las dos instancias falta viaja SOLO ahí —el servidor la interpola como
+   * `La instancia 'primera' (…)`— y no hay campo estructurado que lo diga. Callarla
+   * dejaría al usuario con «una de las dos» sin saber cuál.
+   *
+   * <p>`GUARDIAS_SIN_REPARTO` con `mensaje` (S214, C-ajuste-guardias) enseña ese
+   * `mensaje` tal cual, por la misma regla que el 422 de las guardias en
+   * {@link mensajeGeneracion}: está escrito para el usuario y nombra los tramos que no
+   * llegan al mínimo de profesores de guardia, que no viajan en ningún otro campo.
    */
   private mensajeAjuste(err: { status?: number; error?: FalloMovimiento }): string {
     const cuerpo = err?.error;
+    if (cuerpo?.causa === 'GUARDIAS_SIN_REPARTO' && cuerpo.mensaje) {
+      return cuerpo.mensaje;
+    }
     switch (cuerpo?.causa) {
       case 'VIOLA_REGLA_DURA':
         return 'Ese cambio provoca conflictos que antes no existían:';

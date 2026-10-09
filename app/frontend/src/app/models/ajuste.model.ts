@@ -89,16 +89,19 @@ export interface FalloMovimiento {
   /**
    * Símbolo estable del hecho: `TRAMO_INEXISTENTE`, `HORARIO_INEXISTENTE`,
    * `INSTANCIA_INEXISTENTE`, `VIOLA_REGLA_DURA`, `INSTANCIA_PINADA`,
-   * `INSTANCIAS_IGUALES`. Es lo que la vista lee para decidir qué decir; NO es
+   * `INSTANCIAS_IGUALES`, `GUARDIAS_SIN_REPARTO` (S214). Es lo que la vista lee para
+   * decidir qué decir; NO es
    * texto para el usuario. String pelado, igual que `Violacion.regla`: estrechar a
    * unión de literales afirmaría que el servidor no puede añadir causas.
    */
   causa: string;
   /**
    * Prosa del servidor, para el log y para quien depure. La vista NO decide con
-   * ella —decide con {@link causa}—, con UNA excepción documentada: en
+   * ella —decide con {@link causa}—, con DOS excepciones documentadas: en
    * `INSTANCIA_INEXISTENTE` es el único sitio donde viaja CUÁL de las dos
-   * instancias falta (el servidor lo interpola como `La instancia 'primera' (…)`).
+   * instancias falta (el servidor lo interpola como `La instancia 'primera' (…)`), y
+   * en `GUARDIAS_SIN_REPARTO` (S214) es el texto para el usuario, con los tramos que
+   * no llegan al mínimo de profesores de guardia.
    */
   mensaje: string;
   /**

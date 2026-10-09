@@ -1075,6 +1075,62 @@ describe('contenedor del horario', () => {
   });
 
   /**
+   * 409 `GUARDIAS_SIN_REPARTO` (S214, C-ajuste-guardias): las clases admitían el ajuste,
+   * pero después de él no hay reparto de guardias. El `mensaje` del servidor es el texto
+   * para el usuario y nombra los tramos sin mínimo: se enseña TAL CUAL, y no el genérico
+   * con el status, que no diría ni qué pasa ni dónde.
+   */
+  it('(97) un 409 GUARDIAS_SIN_REPARTO al mover enseña el mensaje del servidor con el tramo', async () => {
+    const grid = await montarConSesiones([fila(1, 'Mat-1ºA', 2, 1, 1)]);
+    const mensaje =
+      'No se puede hacer este cambio: después de él no hay forma de repartir las guardias.' +
+      ' Tramos que no llegan al mínimo de profesores de guardia: tramo L1 (día 1, tramo 1): 0 de 1';
+
+    grid.soltar.emit({ actividadCodigo: 'Mat-1ºA', indice: 2, dia: 1, orden: 2, ocupantes: [] });
+    await fixture.whenStable();
+
+    ultimoMover.error({
+      status: 409,
+      error: { causa: 'GUARDIAS_SIN_REPARTO', mensaje, violaciones: [] },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    const texto = raiz.querySelector('.error-ajuste')?.textContent?.trim();
+    expect(texto).toBe(mensaje);
+    expect(texto).not.toContain('El servidor rechazó el cambio');
+    expect(raiz.querySelector('.violaciones-ajuste')).toBeNull();
+    expect([grid.sesiones()[0].dia, grid.sesiones()[0].tramo]).toEqual([1, 1]);
+  });
+
+  /** Lo mismo por el intercambio, con dos tramos en la lista. */
+  it('(98) un 409 GUARDIAS_SIN_REPARTO al intercambiar enseña el mensaje del servidor', async () => {
+    const grid = await montar([]);
+    const mensaje =
+      'No se puede hacer este cambio: después de él no hay forma de repartir las guardias.' +
+      ' Tramos que no llegan al mínimo de profesores de guardia: tramo L2 (día 1, tramo 2): 1 de 2;' +
+      ' tramo J4 (día 4, tramo 4): 0 de 2';
+
+    grid.soltar.emit({
+      actividadCodigo: 'Mat-1ºA',
+      indice: 2,
+      dia: 3,
+      orden: 4,
+      ocupantes: [ocupante('LCL-1ºA', 1)],
+    });
+    await fixture.whenStable();
+
+    ultimoIntercambiar.error({
+      status: 409,
+      error: { causa: 'GUARDIAS_SIN_REPARTO', mensaje, violaciones: [] },
+    });
+    await fixture.whenStable();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.error-ajuste')?.textContent?.trim()).toBe(mensaje);
+  });
+
+  /**
    * Mientras el ajuste vuela se reutiliza el estado de espera de S118 —la misma
    * señal y el mismo `<p class="generando">`—, pero con SU frase: anunciarle los
    * minutos de un solve sería falso. El botón «Generar» queda cerrado, que es
