@@ -15,6 +15,7 @@
           <td
             cdkDropList
             (cdkDropListDropped)="alSoltar($event, i + 1, t)"
+            [cdkDropListDisabled]="soloGuardias()"
             [class.ocupado]="slotsOcupados().has(claveSlot(i + 1, t))"
           >
             <!-- Envoltorio de altura (D2): en una tabla, `height` sobre `tr` o
@@ -23,6 +24,18 @@
                  definida no recorta: el defecto `none` deja la rejilla como
                  estaba hasta que la vista fije el presupuesto (D1). -->
             <div class="celda">
+              <!--
+                S215 · modo guardias (F4): la celda es UN texto con los códigos de guardia
+                ordenados y unidos por «, ». Sin instancias no hay origen de arrastre, y el
+                cdkDropList va deshabilitado arriba, así que tampoco es destino.
+              -->
+              @if (soloGuardias()) {
+                @if (guardiasEn(i + 1, t).length > 0) {
+                  <div class="guardias">{{ codigosEn(i + 1, t) }}</div>
+                } @else {
+                  <span class="vacio">·</span>
+                }
+              } @else {
               @for (inst of instancias(i + 1, t); track clave(inst)) {
                 <div
                   class="instancia"
@@ -166,8 +179,18 @@
                     </div>
                   }
                 </div>
-              } @empty {
+              }
+              <!--
+                S215 · cada guardia del profesor (F2), DESPUÉS de las instancias: un elemento
+                que no es `.instancia` —sin cdkDrag, sin candado ni insignia— y que, al no salir
+                de `instancias()`, no cuenta como ocupante al soltar.
+              -->
+              @for (g of guardiasEn(i + 1, t); track $index) {
+                <div class="guardia">{{ rotuloGuardia }}</div>
+              }
+              @if (instancias(i + 1, t).length === 0 && guardiasEn(i + 1, t).length === 0) {
                 <span class="vacio">·</span>
+              }
               }
             </div>
           </td>

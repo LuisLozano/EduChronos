@@ -1,6 +1,7 @@
 /**
  * Modelos TS del contrato de proyección de Fase 7 (Bloque 7A). Reflejan campo a
- * campo los records de `app.web.dto`: SesionVistaDTO y HorarioProyeccionDTO.
+ * campo los records de `app.web.dto`: SesionVistaDTO, GuardiaVistaDTO (S215) y
+ * HorarioProyeccionDTO.
  */
 
 /** Espejo de `SesionVistaDTO`. Proyección plana de una sesión colocada. */
@@ -26,7 +27,21 @@ export interface SesionVista {
   plazaCodigo: string;
 }
 
-/** Espejo de `HorarioProyeccionDTO`. Cabecera + sesiones. */
+/**
+ * Espejo de `GuardiaVistaDTO` (S215, 120089e). Una guardia ordinaria repartida: el
+ * profesor que está de guardia y su tramo, con la MISMA numeración que {@link SesionVista}.
+ * Forma copiada del JSON real de `GET /api/horarios/2/proyeccion` (s215/t2/val/real/h2):
+ * `{"profesorCodigo": "BIO3t", "dia": 1, "tramo": 1}`.
+ */
+export interface GuardiaVista {
+  profesorCodigo: string;
+  /** 1..5 (lunes..viernes). */
+  dia: number;
+  /** ordenEnDia 1..6 (recreos excluidos). */
+  tramo: number;
+}
+
+/** Espejo de `HorarioProyeccionDTO`. Cabecera + sesiones + guardias. */
 export interface HorarioProyeccion {
   id: number;
   nombre: string;
@@ -38,4 +53,6 @@ export interface HorarioProyeccion {
   /** Instant ISO-8601 serializado como texto. */
   fechaGeneracion: string;
   sesiones: SesionVista[];
+  /** Ordenadas por (dia, tramo, profesorCodigo); `[]` si el horario no tiene. Nunca null. */
+  guardias: GuardiaVista[];
 }

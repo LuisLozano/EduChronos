@@ -241,6 +241,30 @@
   color: var(--color-borde);
 }
 
+/* S215 · la guardia en la celda de su profesor (F2): se lee como una entrada más pero
+   no es una clase, así que no lleva el filete de acento de `.entrada` sino uno de tinta
+   suave, discontinuo, y el cursor no promete arrastre. Solo tokens existentes. */
+.guardia {
+  margin-top: 0.2rem;
+  padding: 0.2rem;
+  line-height: var(--lh-apretado);
+  border-left: 3px dashed var(--color-tinta-suave);
+  color: var(--color-tinta-suave);
+  cursor: default;
+}
+
+.guardia:first-child {
+  margin-top: 0;
+}
+
+/* S215 · modo guardias (F4): los códigos de la celda, uno tras otro; parten en el
+   espacio tras la coma, nunca dentro de un código. */
+.guardias {
+  line-height: var(--lh-apretado);
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
 /* Resalte de violación DURA (8.6-iii-B2-b). outline y NO border-left (ocupado:
    3px var(--color-acento) estructural) ni background (ocupado en dos capas, la segunda es la
    señal de pinada). outline no ocupa layout, así que las dos granularidades de

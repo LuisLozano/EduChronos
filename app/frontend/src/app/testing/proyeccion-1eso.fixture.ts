@@ -82,4 +82,5 @@ export const PROYECCION_1ESO: HorarioProyeccion = {
     ...mat('D', 'A7', 'MATD'),
     lclCoDocencia(), // co-docencia real de 1ºA (LEN2 + LEN8) en (dia 3, tramo 1)
   ],
+  guardias: [],
 };

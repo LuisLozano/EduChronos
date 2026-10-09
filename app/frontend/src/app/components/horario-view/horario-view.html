@@ -14,9 +14,12 @@
       <option value="grupo" [selected]="vista() === 'grupo'">Grupo</option>
       <option value="profesor" [selected]="vista() === 'profesor'">Profesor</option>
       <option value="aula" [selected]="vista() === 'aula'">Aula</option>
+      <option value="guardias" [selected]="vista() === 'guardias'">Guardias</option>
     </select>
   </label>
 
+  <!-- S215 (F4): el modo guardias no tiene recurso que elegir, así que ni filtro ni selector. -->
+  @if (vista() !== 'guardias') {
   <app-filtro-opciones
     #fEntidad
     [etiqueta]="vista() === 'grupo' ? 'grupos' : vista() === 'profesor' ? 'profesores' : 'aulas'"
@@ -33,6 +36,7 @@
       }
     </select>
   </label>
+  }
 
   <button
     type="button"
@@ -71,6 +75,8 @@
     <a class="boton" [href]="'/api/horarios/' + p.id + '/pdf?vista=grupo'" download>PDF por grupo</a>
     <a class="boton" [href]="'/api/horarios/' + p.id + '/pdf?vista=profesor'" download>PDF por profesor</a>
     <a class="boton" [href]="'/api/horarios/' + p.id + '/pdf?vista=aula'" download>PDF por aula</a>
+    <!-- S215 (F6): la página de guardias ordinarias, mismo molde que los otros tres. -->
+    <a class="boton" [href]="'/api/horarios/' + p.id + '/pdf?vista=guardias'" download>PDF guardias</a>
   }
 </section>
 
@@ -90,6 +96,18 @@
 
 @if (pinadas().size > 0) {
   <p class="aviso">{{ pinadas().size }} pines sin aplicar — regenerar</p>
+}
+
+<!--
+  S215 (F5): el aviso de las guardias, con el MISMO patrón y en el mismo sitio que el de
+  pines —un <p class="aviso"> de una línea encima de la rejilla, cuya altura absorbe el
+  reparto de D1—, en cualquier modo. Cuenta SOLO `violacionesGuardia`; los mensajes van en
+  el `title`, uno por línea.
+-->
+@if (violacionesGuardia().length > 0) {
+  <p class="aviso aviso-guardias" [title]="detalleGuardias()">
+    Las guardias no cumplen la configuración actual: {{ violacionesGuardia().length }} incumplimientos.
+  </p>
 }
 
 @if (errorPin(); as msg) {
@@ -143,6 +161,8 @@
     [pinadas]="pinadas()"
     [badges]="badges()"
     [violaciones]="violaciones()"
+    [guardias]="guardiasDeRejilla()"
+    [soloGuardias]="vista() === 'guardias'"
     (soltar)="alSoltar($event)"
     (pinar)="alPinar($event)"
     (despinar)="alDespinar($event)"

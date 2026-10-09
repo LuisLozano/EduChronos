@@ -2,11 +2,13 @@ import {
   agruparPorActividad,
   agruparPorSlot,
   claveSlot,
+  codigosDeGuardiaPorSlot,
   entidadesDeVista,
   filtrar,
+  guardiasDeVista,
   tramosCubiertos,
 } from './proyeccion';
-import { SesionVista } from '../models/horario.model';
+import { GuardiaVista, SesionVista } from '../models/horario.model';
 import { PROYECCION_1ESO } from '../testing/proyeccion-1eso.fixture';
 
 const SESIONES = PROYECCION_1ESO.sesiones;
@@ -186,5 +188,36 @@ describe('vista de aula con sesiones sin aula (S201)', () => {
 
     expect(entidades).not.toContain(null);
     expect(entidades).toEqual(['A1']);
+  });
+});
+
+describe('guardias en las vistas (S215)', () => {
+  const GUARDIAS: GuardiaVista[] = [
+    { profesorCodigo: 'ZZZ1', dia: 1, tramo: 1 },
+    { profesorCodigo: 'AAA1', dia: 1, tramo: 1 },
+    { profesorCodigo: 'MATA', dia: 2, tramo: 3 },
+  ];
+
+  it('(pr2) F3: en la vista de profesor cuentan los profesores de las guardias, en orden', () => {
+    const conClase: SesionVista = { ...entrada('Mat-1ºA', 1, 'Mat-1ºA-P1'), profesores: ['MATB'] };
+    // MATB da la clase; AAA1, MATA y ZZZ1 solo tienen guardias. Todos, en orden.
+    expect(entidadesDeVista([conClase], 'profesor', GUARDIAS)).toEqual(['AAA1', 'MATA', 'MATB', 'ZZZ1']);
+    expect(entidadesDeVista([], 'grupo', GUARDIAS)).toEqual([]);
+    expect(entidadesDeVista([], 'guardias', GUARDIAS)).toEqual([]);
+  });
+
+  it('(pr3) las guardias de cada vista: las del profesor, todas o ninguna', () => {
+    expect(guardiasDeVista(GUARDIAS, 'profesor', 'MATA')).toEqual([GUARDIAS[2]]);
+    expect(guardiasDeVista(GUARDIAS, 'guardias', '')).toEqual(GUARDIAS);
+    expect(guardiasDeVista(GUARDIAS, 'grupo', '1ºA')).toEqual([]);
+    expect(guardiasDeVista(GUARDIAS, 'aula', 'A1')).toEqual([]);
+    expect(filtrar([entrada('Mat-1ºA', 1, 'Mat-1ºA-P1')], 'guardias', '')).toEqual([]);
+  });
+
+  it('(pr4) F4: los códigos de cada slot salen ordenados', () => {
+    const slots = codigosDeGuardiaPorSlot(GUARDIAS);
+    expect(slots.get(claveSlot(1, 1))).toEqual(['AAA1', 'ZZZ1']);
+    expect(slots.get(claveSlot(2, 3))).toEqual(['MATA']);
+    expect(slots.size).toBe(2);
   });
 });

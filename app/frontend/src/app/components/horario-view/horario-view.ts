@@ -2,8 +2,8 @@ import { Component, OnDestroy, computed, inject, signal, viewChild } from '@angu
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
-import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
-import { Diagnostico, Violacion } from '../../models/diagnostico.model';
+import { GuardiaVista, HorarioProyeccion, SesionVista } from '../../models/horario.model';
+import { Diagnostico, Violacion, ViolacionGuardia } from '../../models/diagnostico.model';
 import { FalloMovimiento, ReferenciaInstancia } from '../../models/ajuste.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 import { TramoJornadaDTO } from '../../models/jornada.model';
@@ -13,7 +13,7 @@ import { AjusteService } from '../../services/ajuste.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { JornadaService } from '../../services/jornada.service';
-import { Vista, entidadesDeVista, filtrar } from '../../horario/proyeccion';
+import { Vista, entidadesDeVista, filtrar, guardiasDeVista } from '../../horario/proyeccion';
 import { clavePin, filaDeClave, indicePines } from '../../horario/pines';
 import { tituloHorario } from '../../horario/titulo';
 import { recreoTrasTramo } from '../../horario/recreo';
@@ -195,8 +195,33 @@ export class HorarioView implements OnDestroy {
 
   protected readonly entidades = computed(() => {
     const p = this.proyeccion();
-    return p ? entidadesDeVista(p.sesiones, this.vista()) : [];
+    return p ? entidadesDeVista(p.sesiones, this.vista(), p.guardias) : [];
   });
+
+  /**
+   * Las guardias que pinta la rejilla (S215): las del profesor elegido en la vista de
+   * profesor (F2), todas en la de guardias (F4), ninguna en las demás. La elección es
+   * LÓGICA PURA ({@link guardiasDeVista}), como {@link filtrar} para las sesiones.
+   */
+  protected readonly guardiasDeRejilla = computed<readonly GuardiaVista[]>(() => {
+    const p = this.proyeccion();
+    return p ? guardiasDeVista(p.guardias, this.vista(), this.entidad()) : [];
+  });
+
+  /**
+   * Las violaciones de las guardias del diagnóstico (F5). Lista PROPIA del DTO desde
+   * S213, aparte de las de las clases: el aviso cuenta esta y ninguna otra.
+   */
+  protected readonly violacionesGuardia = computed<readonly ViolacionGuardia[]>(
+    () => this.diagnostico()?.violacionesGuardia ?? [],
+  );
+
+  /** Los mensajes de {@link violacionesGuardia}, uno por línea, para el `title` del aviso. */
+  protected readonly detalleGuardias = computed(() =>
+    this.violacionesGuardia()
+      .map((v) => v.mensaje)
+      .join('\n'),
+  );
 
   protected readonly sesionesFiltradas = computed(() => {
     const p = this.proyeccion();
@@ -318,7 +343,7 @@ export class HorarioView implements OnDestroy {
     this.service.getProyeccion(id).subscribe({
       next: (p) => {
         this.proyeccion.set(p);
-        this.entidad.set(entidadesDeVista(p.sesiones, this.vista())[0] ?? '');
+        this.entidad.set(entidadesDeVista(p.sesiones, this.vista(), p.guardias)[0] ?? '');
       },
       error: (err) => {
         this.proyeccion.set(null);

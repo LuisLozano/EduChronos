@@ -1,8 +1,14 @@
-import { SesionVista } from '../models/horario.model';
+import { GuardiaVista, SesionVista } from '../models/horario.model';
 import { clavePin } from './pines';
 
-/** Las tres vistas de Fase 7. */
-export type Vista = 'grupo' | 'profesor' | 'aula';
+/** Las tres vistas de Fase 7 y, desde S215, la de guardias, que no tiene recurso. */
+export type Vista = 'grupo' | 'profesor' | 'aula' | 'guardias';
+
+/** La entrada con la que se pinta una guardia en la celda de su profesor (F2). */
+export const ROTULO_GUARDIA = 'Guardia';
+
+/** Une los códigos de una celda del modo guardias (F4), como el PDF de guardias. */
+export const SEPARADOR_CODIGOS_GUARDIA = ', ';
 
 /** Etiquetas de los 5 días lectivos (índice 0 = dia 1 = lunes). */
 export const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
@@ -13,9 +19,25 @@ export const TRAMOS = [1, 2, 3, 4, 5, 6] as const;
  * Entidades seleccionables de una vista, DERIVADAS de la propia proyección
  * (sin endpoint nuevo): la unión ordenada de grupos / profesores / aulas que
  * aparecen en las sesiones. Una sub-entrada aporta varios grupos o profesores.
+ *
+ * <p>Desde S215 (F3), en la de profesor cuentan también los profesores de las
+ * `guardias`: quien solo tiene guardias aparece, en el mismo orden que los demás. La
+ * de guardias no tiene recurso que elegir y devuelve la lista vacía.
  */
-export function entidadesDeVista(sesiones: readonly SesionVista[], vista: Vista): string[] {
+export function entidadesDeVista(
+  sesiones: readonly SesionVista[],
+  vista: Vista,
+  guardias: readonly GuardiaVista[] = [],
+): string[] {
+  if (vista === 'guardias') {
+    return [];
+  }
   const set = new Set<string>();
+  if (vista === 'profesor') {
+    for (const g of guardias) {
+      set.add(g.profesorCodigo);
+    }
+  }
   for (const s of sesiones) {
     if (vista === 'aula') {
       // Una reunión o una función sin aula (S201) no aporta aula a la vista.
@@ -45,7 +67,51 @@ export function filtrar(sesiones: readonly SesionVista[], vista: Vista, entidad:
       return sesiones.filter((s) => s.profesores.includes(entidad));
     case 'aula':
       return sesiones.filter((s) => s.aulaCodigo === entidad);
+    case 'guardias':
+      // El modo guardias no pinta clases (F4): su rejilla son los códigos de guardia.
+      return [];
   }
+}
+
+/**
+ * Las guardias que se pintan en la rejilla de la vista (S215): en la de profesor, las
+ * del profesor elegido (F2); en la de guardias, todas (F4); en las demás, ninguna.
+ */
+export function guardiasDeVista(
+  guardias: readonly GuardiaVista[],
+  vista: Vista,
+  entidad: string,
+): GuardiaVista[] {
+  switch (vista) {
+    case 'profesor':
+      return guardias.filter((g) => g.profesorCodigo === entidad);
+    case 'guardias':
+      return [...guardias];
+    case 'grupo':
+    case 'aula':
+      return [];
+  }
+}
+
+/**
+ * Los códigos de guardia de cada slot `(dia, tramo)`, ORDENADOS (F4, como D3 del PDF).
+ * La clave es {@link claveSlot}.
+ */
+export function codigosDeGuardiaPorSlot(guardias: readonly GuardiaVista[]): Map<string, string[]> {
+  const slots = new Map<string, string[]>();
+  for (const g of guardias) {
+    const k = claveSlot(g.dia, g.tramo);
+    const arr = slots.get(k);
+    if (arr) {
+      arr.push(g.profesorCodigo);
+    } else {
+      slots.set(k, [g.profesorCodigo]);
+    }
+  }
+  for (const codigos of slots.values()) {
+    codigos.sort();
+  }
+  return slots;
 }
 
 /** Clave estable de un slot de la rejilla. */

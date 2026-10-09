@@ -74,9 +74,29 @@ export interface Totales {
   aulaNoPreferida: number;
 }
 
-/** Espejo de `DiagnosticoDTO`. Duras atribuidas + blandas atribuidas + totales. */
+/**
+ * Espejo de `ViolacionGuardiaDTO` (S213). Una violación de las guardias del horario, en su
+ * propia lista: una guardia no es una celda. Forma copiada del JSON real de
+ * `GET /api/horarios/1/diagnostico` (s215/t2/val/real/h1), que trae las dos nulabilidades:
+ * `{"regla": "GUARDIAS_BAJO_MINIMO", "profesorCodigo": null, "tramoCodigo": "L1", "mensaje": …}`
+ * y `{"regla": "GUARDIAS_NUMERO_DISTINTO", "profesorCodigo": "BIO3t", "tramoCodigo": null, …}`.
+ */
+export interface ViolacionGuardia {
+  /** Nombre de la regla. String pelado, igual que en {@link Violacion}. */
+  regla: string;
+  /** Null cuando la regla no habla de un profesor (p. ej. el mínimo por tramo). */
+  profesorCodigo: string | null;
+  /** Null cuando la regla no habla de un tramo (p. ej. el número de guardias de un profesor). */
+  tramoCodigo: string | null;
+  /** Texto para el usuario, tal cual lo compone el servidor. */
+  mensaje: string;
+}
+
+/** Espejo de `DiagnosticoDTO`. Duras atribuidas + blandas atribuidas + totales + guardias. */
 export interface Diagnostico {
   violaciones: Violacion[];
   penalizaciones: Penalizacion[];
   totales: Totales;
+  /** Desde S213: las violaciones de las guardias ordinarias, en lista propia. */
+  violacionesGuardia: ViolacionGuardia[];
 }

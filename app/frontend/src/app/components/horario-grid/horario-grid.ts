@@ -12,8 +12,17 @@ import {
   signal,
 } from '@angular/core';
 
-import { SesionVista } from '../../models/horario.model';
-import { DIAS, InstanciaCelda, TRAMOS, agruparPorActividad, claveSlot } from '../../horario/proyeccion';
+import { GuardiaVista, SesionVista } from '../../models/horario.model';
+import {
+  DIAS,
+  InstanciaCelda,
+  ROTULO_GUARDIA,
+  SEPARADOR_CODIGOS_GUARDIA,
+  TRAMOS,
+  agruparPorActividad,
+  claveSlot,
+  codigosDeGuardiaPorSlot,
+} from '../../horario/proyeccion';
 import { clavePin } from '../../horario/pines';
 import { altoDeCelda } from '../../horario/reparto';
 import { ocultasEnCelda } from '../../horario/oculto';
@@ -138,6 +147,23 @@ export class HorarioGrid {
    * recreo. Una fila de recreo en el sitio equivocado es peor que ninguna.
    */
   readonly recreoTras = input<number | null>(null);
+
+  /**
+   * Guardias que se pintan en la rejilla (S215). Llegan YA elegidas por el contenedor
+   * (`guardiasDeVista`): en la vista de profesor, las de ese profesor; en la de guardias,
+   * todas. Es un input APARTE de `sesiones` a propósito: no entran en {@link celdas}, así
+   * que no son instancias, no se arrastran, no llevan candado ni insignia y NO cuentan como
+   * ocupantes en {@link alSoltar} ni en {@link slotsOcupados} (F2).
+   */
+  readonly guardias = input<readonly GuardiaVista[]>([]);
+
+  /**
+   * Modo guardias (F4): cada celda lectiva pinta los códigos de {@link guardias} de su
+   * tramo, ordenados y unidos por «, », y ninguna celda es destino de arrastre —ni origen:
+   * en este modo no hay instancias—. Fuera de él, cada guardia es una entrada «Guardia»
+   * tras las instancias de su celda.
+   */
+  readonly soloGuardias = input<boolean>(false);
 
   readonly soltar = output<AjusteInstancia>();
   /** Petición de quitar el pin de una instancia, por CLAVE de {@link clavePin}. */
@@ -342,6 +368,12 @@ export class HorarioGrid {
 
   private readonly celdas = computed(() => agruparPorActividad(this.sesiones()));
 
+  /** Códigos de guardia por slot, ordenados (S215). */
+  private readonly codigosDeGuardia = computed(() => codigosDeGuardiaPorSlot(this.guardias()));
+
+  /** El rótulo de la entrada de una guardia, para la plantilla. */
+  protected readonly rotuloGuardia = ROTULO_GUARDIA;
+
   /**
    * Clave de {@link clavePin} de la instancia que se está arrastrando; `null` en
    * reposo. La fija {@link alIniciarArrastre} y la limpia {@link alTerminarArrastre};
@@ -386,6 +418,16 @@ export class HorarioGrid {
   /** Instancias del slot (dia, tramo); vacío si no hay ninguna. */
   protected instancias(dia: number, tramo: number): InstanciaCelda[] {
     return this.celdas().get(claveSlot(dia, tramo)) ?? [];
+  }
+
+  /** Los códigos de profesor de guardia en el slot (dia, tramo), ordenados; vacío si no hay. */
+  protected guardiasEn(dia: number, tramo: number): string[] {
+    return this.codigosDeGuardia().get(claveSlot(dia, tramo)) ?? [];
+  }
+
+  /** El texto de una celda del modo guardias: los códigos unidos por «, ». */
+  protected codigosEn(dia: number, tramo: number): string {
+    return this.guardiasEn(dia, tramo).join(SEPARADOR_CODIGOS_GUARDIA);
   }
 
   /** Registra la instancia que empieza a arrastrarse: abre la marca de ocupación. */

@@ -15,7 +15,7 @@ import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { JornadaService } from '../../services/jornada.service';
 import { Bloqueo } from '../../models/bloqueo.model';
-import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
+import { GuardiaVista, HorarioProyeccion, SesionVista } from '../../models/horario.model';
 import { IntercambioRealizado } from '../../models/ajuste.model';
 import { InstanciaCelda } from '../../horario/proyeccion';
 import { Diagnostico } from '../../models/diagnostico.model';
@@ -87,6 +87,7 @@ const PROYECCION_VACIA: HorarioProyeccion = {
   cotaInferior: null,
   fechaGeneracion: '2026-07-21T00:00:00Z',
   sesiones: [],
+  guardias: [],
 };
 
 describe('contenedor del horario', () => {
@@ -430,6 +431,7 @@ describe('contenedor del horario', () => {
       ],
       penalizaciones: [],
       totales: { ventanas: 0, consecutivas: 0, indispBlanda: 0, aulaNoPreferida: 0 },
+      violacionesGuardia: [],
     };
     sujetoDiagnostico.next(diag);
     await fixture.whenStable();
@@ -2275,6 +2277,8 @@ describe('contenedor del horario', () => {
       ['PDF por grupo', '/api/horarios/7/pdf?vista=grupo', 'boton'],
       ['PDF por profesor', '/api/horarios/7/pdf?vista=profesor', 'boton'],
       ['PDF por aula', '/api/horarios/7/pdf?vista=aula', 'boton'],
+      // S215 (F6): la página de guardias, tras los tres PDF por recurso.
+      ['PDF guardias', '/api/horarios/7/pdf?vista=guardias', 'boton'],
     ]);
   });
 
@@ -2285,7 +2289,7 @@ describe('contenedor del horario', () => {
    * ojo entre cuatro filas casi iguales. Aquí se afirma la propiedad directamente —tres
    * vistas, tres valores diferentes— y el fallo se lee solo.
    */
-  it('(54) los tres enlaces de PDF piden tres vistas distintas del mismo horario', async () => {
+  it('(54) los cuatro enlaces de PDF piden cuatro vistas distintas del mismo horario', async () => {
     sujetoParam.next(convertToParamMap({ id: '1' }));
     ultimoListar.next([]);
     sujetoProyeccion.next({ ...PROYECCION_VACIA, id: 7 });
@@ -2298,8 +2302,9 @@ describe('contenedor del horario', () => {
       .filter((href) => href.includes('/pdf'))
       .map((href) => new URL(href, 'http://localhost').searchParams.get('vista'));
 
-    expect(vistas).toEqual(['grupo', 'profesor', 'aula']);
-    expect(new Set(vistas).size).toBe(3);
+    // S215 (F6): cuatro vistas, la de guardias incluida.
+    expect(vistas).toEqual(['grupo', 'profesor', 'aula', 'guardias']);
+    expect(new Set(vistas).size).toBe(4);
   });
 
   /**
@@ -2450,6 +2455,168 @@ describe('contenedor del horario', () => {
       expect(Array.from(selectEntidad().options).map((o) => o.value)).toEqual(
         Array.from({ length: 12 }, (_, i) => `P${dos(i)}`),
       );
+    });
+  });
+
+  // --- Guardias (S215, C-exportacion-guardias, F1-F5) --------------------------
+
+  describe('guardias (S215)', () => {
+    const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    const selectVista = (): HTMLSelectElement =>
+      Array.from(raiz().querySelectorAll<HTMLSelectElement>('select')).find((s) =>
+        Array.from(s.options).some((o) => o.value === 'profesor'),
+      )!;
+    const selectEntidad = (): HTMLSelectElement | null =>
+      raiz().querySelector<HTMLSelectElement>('app-filtro-opciones + label select');
+
+    async function elegirVista(v: string): Promise<void> {
+      selectVista().value = v;
+      selectVista().dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+    }
+
+    async function elegirEntidad(e: string): Promise<void> {
+      selectEntidad()!.value = e;
+      selectEntidad()!.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+    }
+
+    /** P1 da la clase de `fila` en (1,1); AAA9 solo tiene guardias; P1 tiene una en (1,3). */
+    const GUARDIAS: GuardiaVista[] = [
+      { profesorCodigo: 'AAA9', dia: 1, tramo: 2 },
+      { profesorCodigo: 'P1', dia: 1, tramo: 3 },
+    ];
+
+    async function montarConGuardias(sesiones: SesionVista[], guardias: GuardiaVista[]): Promise<HorarioGrid> {
+      sujetoParam.next(convertToParamMap({ id: '1' }));
+      ultimoListar.next([]);
+      sujetoProyeccion.next({ ...PROYECCION_VACIA, sesiones, guardias });
+      await fixture.whenStable();
+      return rejilla();
+    }
+
+    function diagnostico(violacionesGuardia: Diagnostico['violacionesGuardia'], clases = 0): Diagnostico {
+      return {
+        violaciones: Array.from({ length: clases }, (_, i) => ({
+          regla: 'SOLAPE_PROFESOR',
+          recursoCodigo: 'P1',
+          tramoCodigo: 'L1',
+          celdas: [{ actividadCodigo: `Act${i}`, indice: 1, plazaCodigo: null }],
+          descripcion: `violación de clases ${i}`,
+        })),
+        penalizaciones: [],
+        totales: { ventanas: 0, consecutivas: 0, indispBlanda: 0, aulaNoPreferida: 0 },
+        violacionesGuardia,
+      };
+    }
+
+    /**
+     * F1 y F4: el selector de vista ofrece «Guardias»; en ese modo no hay filtro ni selector
+     * de recurso, la rejilla va en modo guardias, recibe TODAS las guardias y ninguna sesión.
+     */
+    it('(99) la vista Guardias existe, no tiene selector de recurso y pasa todas las guardias', async () => {
+      const grid = await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      const opcion = Array.from(selectVista().options).find((o) => o.value === 'guardias');
+      expect(opcion?.textContent?.trim()).toBe('Guardias');
+      expect(grid.soloGuardias()).toBe(false);
+
+      await elegirVista('guardias');
+
+      expect(grid.soloGuardias()).toBe(true);
+      expect(grid.guardias()).toEqual(GUARDIAS);
+      expect(grid.sesiones()).toEqual([]);
+      expect(raiz().querySelector('app-filtro-opciones')).toBeNull();
+      expect(selectEntidad()).toBeNull();
+    });
+
+    /**
+     * F3: en la vista de profesor la lista incluye a quien SOLO tiene guardias (AAA9), en el
+     * mismo orden que los demás —alfabético—; en la de grupo, no.
+     */
+    it('(100) la lista de profesores incluye a quien solo tiene guardias, en orden', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['1ºA']);
+
+      await elegirVista('profesor');
+
+      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['AAA9', 'P1']);
+    });
+
+    /**
+     * F2: en la vista de profesor la rejilla recibe SOLO las guardias del profesor elegido, y
+     * cambian con él; en la de grupo, ninguna.
+     */
+    it('(101) la rejilla recibe las guardias del profesor elegido y ninguna en la vista de grupo', async () => {
+      const grid = await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      expect(grid.guardias()).toEqual([]);
+
+      await elegirVista('profesor');
+      expect((fixture.componentInstance as unknown as { entidad(): string }).entidad()).toBe('AAA9');
+      expect(grid.guardias()).toEqual([GUARDIAS[0]]);
+
+      await elegirEntidad('P1');
+      expect(grid.guardias()).toEqual([GUARDIAS[1]]);
+      expect(grid.soloGuardias()).toBe(false);
+    });
+
+    /**
+     * F2, la decisión: en la vista de P1, soltar su clase sobre la celda donde solo hay su
+     * guardia es un MOVIMIENTO. Lo decide el contenedor por `ocupantes.length`
+     * (`alSoltar`): con la guardia contada como ocupante sería un intercambio.
+     */
+    it('(102) soltar sobre una celda con solo una guardia mueve y no intercambia', async () => {
+      const clase = fila(1, 'Mat-1ºA', 1, 1, 1);
+      await montarConGuardias([clase], GUARDIAS);
+      await elegirVista('profesor');
+      await elegirEntidad('P1');
+
+      const td = fixture.debugElement.queryAll(By.css('app-horario-grid tbody tr'))[3 - 1]
+        .queryAll(By.css('td'))[1 - 1];
+      expect((td.nativeElement as HTMLElement).querySelector('.guardia')).not.toBeNull();
+      const inst: InstanciaCelda = { actividadCodigo: 'Mat-1ºA', indice: 1, entradas: [clase], continuacion: false };
+      td.triggerEventHandler('cdkDropListDropped', { item: { data: inst } });
+      await fixture.whenStable();
+
+      expect(ajustes.mover).toHaveBeenCalledTimes(1);
+      expect(ajustes.intercambiar).not.toHaveBeenCalled();
+    });
+
+    /**
+     * F5: con violaciones de guardias, UN aviso de una línea con el recuento EXACTO de esa
+     * lista —no el de las violaciones de clases, que aquí son 3— y los mensajes en el
+     * `title`, uno por línea. Sigue en cualquier modo.
+     */
+    it('(103) el aviso de guardias cuenta violacionesGuardia, lleva los mensajes y sale en todos los modos', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      sujetoDiagnostico.next(diagnostico(
+        [
+          { regla: 'GUARDIAS_BAJO_MINIMO', profesorCodigo: null, tramoCodigo: 'L1', mensaje: 'primer mensaje' },
+          { regla: 'GUARDIAS_NUMERO_DISTINTO', profesorCodigo: 'P1', tramoCodigo: null, mensaje: 'segundo mensaje' },
+        ],
+        3,
+      ));
+      await fixture.whenStable();
+
+      for (const v of ['grupo', 'profesor', 'aula', 'guardias']) {
+        await elegirVista(v);
+        const avisos = raiz().querySelectorAll('p.aviso-guardias');
+        expect(avisos.length, `vista ${v}`).toBe(1);
+        expect(avisos[0].classList.contains('aviso')).toBe(true);
+        expect(avisos[0].textContent?.trim()).toBe(
+          'Las guardias no cumplen la configuración actual: 2 incumplimientos.',
+        );
+        expect(avisos[0].getAttribute('title')).toBe('primer mensaje\nsegundo mensaje');
+      }
+    });
+
+    /** F5: sin violaciones de guardias no hay aviso, aunque haya violaciones de clases. */
+    it('(104) sin violaciones de guardias no hay aviso, aunque las haya de clases', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      sujetoDiagnostico.next(diagnostico([], 2));
+      await fixture.whenStable();
+
+      expect(raiz().querySelector('p.aviso-guardias')).toBeNull();
+      expect(raiz().textContent).not.toContain('Las guardias no cumplen');
     });
   });
 });

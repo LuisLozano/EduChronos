@@ -1009,4 +1009,115 @@ describe('rejilla de horario', () => {
     expect(inicio.querySelector('.badge')?.textContent?.trim()).toBe('2');
     expect(segunda.querySelector('.badge')).toBeNull();
   });
+
+  // --- Guardias (S215, C-exportacion-guardias, F2 y F4) ------------------------
+  //
+  // Las guardias llegan por un input APARTE de `sesiones`: no son instancias. En el modo
+  // normal (vista de profesor) cada una es una entrada «Guardia» tras las instancias de su
+  // celda; en el modo guardias, cada celda es el texto de sus códigos.
+
+  /** El hijo directo de la `.celda` del slot, en orden de DOM. */
+  function hijosDeCelda(dia: number, tramo: number): HTMLElement[] {
+    return Array.from(tdDe(fixture, dia, tramo).querySelector('.celda')!.children) as HTMLElement[];
+  }
+
+  /**
+   * F2: la guardia va DESPUÉS de las instancias de su celda, con el rótulo «Guardia», y no es
+   * una instancia: ni `.instancia`, ni `cdkDrag` (el CDK marca `.cdk-drag`), ni candado ni
+   * insignia. La celda conserva sus dos instancias: la guardia no se cuela entre ellas.
+   */
+  it('(hg-g1) la guardia es una entrada «Guardia» tras las instancias, sin arrastre, candado ni insignia', async () => {
+    fixture.componentRef.setInput('badges', new Map<string, number>([['Mat-1ºA|2', 3]]));
+    fixture.componentRef.setInput('guardias', [{ profesorCodigo: 'PROF1', dia: DIA, tramo: TRAMO }]);
+    await fixture.whenStable();
+
+    const hijos = hijosDeCelda(DIA, TRAMO);
+    // Por clase y no por la primera del atributo: el CDK antepone `cdk-drag` a las suyas.
+    const tipo = (h: HTMLElement): string =>
+      h.classList.contains('instancia') ? 'instancia' : h.classList.contains('guardia') ? 'guardia' : h.className;
+    expect(hijos.map(tipo)).toEqual(['instancia', 'instancia', 'guardia']);
+    const guardia = hijos[2];
+    expect(guardia.textContent?.trim()).toBe('Guardia');
+    expect(guardia.classList.contains('instancia')).toBe(false);
+    expect(guardia.classList.contains('cdk-drag')).toBe(false);
+    expect(guardia.querySelector('.cdk-drag, .candado, .badge, button')).toBeNull();
+    // Control: las instancias de esa misma celda SÍ son arrastrables.
+    expect(hijos[0].classList.contains('cdk-drag')).toBe(true);
+  });
+
+  /**
+   * F2, la ocupación: soltar sobre una celda con SOLO una guardia emite ocupantes vacíos
+   * —el contenedor manda `mover`, no `intercambiar`— y, durante el arrastre, esa celda no
+   * se marca ocupada. Una celda sin nada más que la guardia no pinta el punto de vacío.
+   */
+  it('(hg-g2) una celda con solo una guardia no tiene ocupantes ni se marca ocupada', async () => {
+    fixture.componentRef.setInput('sesiones', [MAT_PINADA]);
+    fixture.componentRef.setInput('guardias', [{ profesorCodigo: 'PROF1', dia: 2, tramo: 3 }]);
+    await fixture.whenStable();
+
+    debugDe(fixture, 'Mat').triggerEventHandler('cdkDragStarted', {});
+    await fixture.whenStable();
+    expect(tdDe(fixture, 2, 3).classList.contains('ocupado')).toBe(false);
+
+    const emitidos: AjusteInstancia[] = [];
+    fixture.componentInstance.soltar.subscribe((a) => emitidos.push(a));
+    soltarEn(fixture, arrastre(MAT_PINADA), 2, 3);
+    await fixture.whenStable();
+
+    expect(emitidos.length).toBe(1);
+    expect(emitidos[0].ocupantes).toEqual([]);
+    expect(tdDe(fixture, 2, 3).querySelector('.vacio')).toBeNull();
+    expect(tdDe(fixture, 2, 3).querySelector('.guardia')?.textContent?.trim()).toBe('Guardia');
+  });
+
+  /**
+   * F4: en modo guardias la celda pinta los códigos ORDENADOS y unidos por «, », aunque
+   * lleguen desordenados; una celda sin guardias pinta el punto de vacío; no hay instancias
+   * ni entradas «Guardia».
+   */
+  it('(hg-g3) en modo guardias cada celda pinta sus códigos ordenados y unidos por coma', async () => {
+    fixture.componentRef.setInput('sesiones', []);
+    fixture.componentRef.setInput('soloGuardias', true);
+    fixture.componentRef.setInput('guardias', [
+      { profesorCodigo: 'ZZZ1', dia: 1, tramo: 1 },
+      { profesorCodigo: 'AAA1', dia: 1, tramo: 1 },
+      { profesorCodigo: 'MMM1', dia: 1, tramo: 1 },
+      { profesorCodigo: 'BBB2', dia: 3, tramo: 4 },
+    ]);
+    await fixture.whenStable();
+
+    expect(tdDe(fixture, 1, 1).querySelector('.guardias')?.textContent?.trim()).toBe('AAA1, MMM1, ZZZ1');
+    expect(tdDe(fixture, 3, 4).querySelector('.guardias')?.textContent?.trim()).toBe('BBB2');
+    expect(tdDe(fixture, 2, 2).querySelector('.guardias')).toBeNull();
+    expect(tdDe(fixture, 2, 2).querySelector('.vacio')).not.toBeNull();
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelectorAll('.instancia').length).toBe(0);
+    expect(raiz.querySelectorAll('.guardia').length).toBe(0);
+  });
+
+  /**
+   * F4: en modo guardias NINGUNA celda es destino —las treinta llevan el `cdkDropList`
+   * deshabilitado— ni origen —no hay ningún `.cdk-drag`—. El control, fuera del modo:
+   * ninguna deshabilitada.
+   */
+  it('(hg-g4) en modo guardias ninguna celda es origen ni destino de arrastre', async () => {
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelectorAll('td.cdk-drop-list-disabled').length).toBe(0);
+
+    fixture.componentRef.setInput('sesiones', []);
+    fixture.componentRef.setInput('soloGuardias', true);
+    fixture.componentRef.setInput('guardias', [{ profesorCodigo: 'AAA1', dia: 1, tramo: 1 }]);
+    await fixture.whenStable();
+
+    const celdas = raiz.querySelectorAll('td.cdk-drop-list');
+    expect(celdas.length).toBe(30);
+    expect(raiz.querySelectorAll('td.cdk-drop-list-disabled').length).toBe(30);
+    expect(raiz.querySelectorAll('.cdk-drag').length).toBe(0);
+  });
+
+  /** Sin guardias, la rejilla de siempre: ninguna entrada «Guardia» ni texto de códigos. */
+  it('(hg-g5) sin guardias no se pinta ninguna entrada de guardia', () => {
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelectorAll('.guardia, .guardias').length).toBe(0);
+  });
 });
