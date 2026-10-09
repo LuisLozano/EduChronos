@@ -216,6 +216,12 @@ export class HorarioView implements OnDestroy {
     () => this.diagnostico()?.violacionesGuardia ?? [],
   );
 
+  /** «1 incumplimiento.» con uno, «N incumplimientos.» con más (S215 T3b, E1). */
+  protected readonly recuentoGuardias = computed(() => {
+    const n = this.violacionesGuardia().length;
+    return n === 1 ? '1 incumplimiento.' : `${n} incumplimientos.`;
+  });
+
   /** Los mensajes de {@link violacionesGuardia}, uno por línea, para el `title` del aviso. */
   protected readonly detalleGuardias = computed(() =>
     this.violacionesGuardia()
@@ -345,10 +351,46 @@ export class HorarioView implements OnDestroy {
         this.proyeccion.set(p);
         this.entidad.set(entidadesDeVista(p.sesiones, this.vista(), p.guardias)[0] ?? '');
       },
-      error: (err) => {
-        this.proyeccion.set(null);
-        this.error.set(`No se pudo cargar el horario ${id} (${err?.status ?? 'error'}).`);
+      error: (err) => this.fallarProyeccion(id, err),
+    });
+  }
+
+  /**
+   * Lo que hace la vista cuando falla el GET de la proyección: la vacía —la rejilla deja de
+   * pintarse, porque la cadena `@if` de la plantilla la gatea con {@link error}— y dice cuál
+   * y con qué status. UNO para {@link cargar} y para {@link refrescarTrasAjuste} (S215 T3b):
+   * el mismo fallo, el mismo comportamiento y el mismo texto.
+   */
+  private fallarProyeccion(id: number, err: { status?: number } | null | undefined): void {
+    this.proyeccion.set(null);
+    this.error.set(`No se pudo cargar el horario ${id} (${err?.status ?? 'error'}).`);
+  }
+
+  /**
+   * Tras un ajuste ACEPTADO (S215 T3b), pone al día lo que el servidor recalculó y la
+   * respuesta del PUT no trae: las GUARDIAS, que el ajuste reparte de nuevo (S214), y el
+   * DIAGNÓSTICO —insignias, resaltes y el aviso de guardias—. Con las mismas llamadas que
+   * {@link cargar} y sus mismos fallos:
+   * <ul>
+   *   <li>el diagnóstico, por {@link cargarDiagnostico}, que sustituye al anterior y, si
+   *       falla, rellena {@link errorDiagnostico} con su texto de siempre;
+   *   <li>la proyección, por el mismo `getProyeccion`, de la que se toman SOLO las guardias:
+   *       las sesiones ya vienen de la respuesta del PUT ({@link aplicarAjuste}). Si falla,
+   *       {@link fallarProyeccion}, como en la carga.
+   * </ul>
+   * NO toca ni la vista ni la entidad elegidas, a diferencia de {@link cargar}. Si entretanto
+   * se cargó otro horario, la respuesta ya no es de la vista y se descarta.
+   */
+  private refrescarTrasAjuste(id: number): void {
+    this.cargarDiagnostico(id);
+    this.service.getProyeccion(id).subscribe({
+      next: (p) => {
+        const actual = this.proyeccion();
+        if (this.idCargado === id && actual !== null) {
+          this.proyeccion.set({ ...actual, guardias: p.guardias });
+        }
       },
+      error: (err) => this.fallarProyeccion(id, err),
     });
   }
   /**
@@ -401,8 +443,8 @@ export class HorarioView implements OnDestroy {
    * la que `slotsOcupados` se queda en «hay clase» y no crece hacia una verificación).
    *
    * <p>Pintado NO optimista, como el despinado (D-F8.6-ii-5): la rejilla no se mueve
-   * hasta el 200. Con el 200 se refresca solo lo afectado, sin recargar la proyección
-   * entera y sin regenerar nada.
+   * hasta el 200. Con el 200 se refresca lo afectado con la respuesta, y después las
+   * guardias y el diagnóstico ({@link refrescarTrasAjuste}); un rechazo no pide nada.
    */
   protected alSoltar(a: AjusteInstancia): void {
     this.limpiarAjuste();
@@ -428,6 +470,7 @@ export class HorarioView implements OnDestroy {
           next: (filas) => {
             this.enVuelo.set(null);
             this.aplicarAjuste([{ ref: arrastrada, filas }]);
+            this.refrescarTrasAjuste(id);
           },
           error: (err) => this.fallarAjuste(err),
         });
@@ -449,6 +492,7 @@ export class HorarioView implements OnDestroy {
           { ref: arrastrada, filas: r.primera },
           { ref: segunda, filas: r.segunda },
         ]);
+        this.refrescarTrasAjuste(id);
       },
       error: (err) => this.fallarAjuste(err),
     });
@@ -463,9 +507,10 @@ export class HorarioView implements OnDestroy {
 
   /**
    * Aplica al horario vigente las filas que devolvió el servidor, una entrada por
-   * instancia afectada. NO recarga la proyección: el servidor ya devolvió el estado
-   * nuevo de lo único que cambió, y un GET entero descartaría esa respuesta para
-   * volver a pedir lo mismo.
+   * instancia afectada. Las SESIONES no se recargan: el servidor ya devolvió el estado
+   * nuevo de las que cambiaron, y tomarlas de un GET entero descartaría esa respuesta.
+   * Lo que el PUT no trae —guardias y diagnóstico— lo pone al día después
+   * {@link refrescarTrasAjuste} (S215 T3b).
    *
    * <p>Con `proyeccion()` en null no hay nada que refrescar y se calla: solo puede
    * pasar si la carga falló entre el gesto y la respuesta, y en ese caso la rejilla

@@ -2618,5 +2618,167 @@ describe('contenedor del horario', () => {
       expect(raiz().querySelector('p.aviso-guardias')).toBeNull();
       expect(raiz().textContent).not.toContain('Las guardias no cumplen');
     });
+
+    /** E1 de T3b: con UN incumplimiento, singular; el plural lo fija (103). */
+    it('(105) con un solo incumplimiento el aviso va en singular', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
+      sujetoDiagnostico.next(diagnostico([
+        { regla: 'GUARDIAS_BAJO_MINIMO', profesorCodigo: null, tramoCodigo: 'L1', mensaje: 'único' },
+      ]));
+      await fixture.whenStable();
+
+      expect(raiz().querySelector('p.aviso-guardias')?.textContent?.trim()).toBe(
+        'Las guardias no cumplen la configuración actual: 1 incumplimiento.',
+      );
+    });
+
+    // --- Tras un ajuste aceptado (S215 T3b, E2) --------------------------------
+    //
+    // La proyección inicial llega por `sujetoProyeccion`, que es COMPARTIDO y no se completa:
+    // si la segunda petición devolviera el mismo sujeto, su emisión llegaría también a la
+    // suscripción de `cargar()`. Por eso, ya montada la vista, `getProyeccion` y
+    // `getDiagnostico` pasan a devolver sujetos NUEVOS (patrón del (40)), sin perder el
+    // contador de llamadas.
+
+    const CLASE = fila(1, 'Mat-1ºA', 1, 1, 1);
+    let refrescoProyeccion: Subject<HorarioProyeccion>;
+    let refrescoDiagnostico: Subject<Diagnostico>;
+
+    /** Monta en vista de profesor con P1 elegido —NO el primero de la lista, que es AAA9—. */
+    async function montarEnP1(): Promise<HorarioGrid> {
+      const grid = await montarConGuardias([CLASE], GUARDIAS);
+      sujetoDiagnostico.next(diagnostico([]));
+      await elegirVista('profesor');
+      await elegirEntidad('P1');
+      refrescoProyeccion = new Subject<HorarioProyeccion>();
+      refrescoDiagnostico = new Subject<Diagnostico>();
+      horario.getProyeccion.mockImplementation(() => refrescoProyeccion);
+      diagnosticos.getDiagnostico.mockImplementation(() => refrescoDiagnostico);
+      return grid;
+    }
+
+    /** Suelta la clase de P1 en (dia, tramo) del lunes, por el handler real de la rejilla. */
+    async function soltarClaseEn(dia: number, tramo: number): Promise<void> {
+      const td = fixture.debugElement.queryAll(By.css('app-horario-grid tbody tr'))[tramo - 1]
+        .queryAll(By.css('td'))[dia - 1];
+      const inst: InstanciaCelda = { actividadCodigo: 'Mat-1ºA', indice: 1, entradas: [CLASE], continuacion: false };
+      td.triggerEventHandler('cdkDropListDropped', { item: { data: inst } });
+      await fixture.whenStable();
+    }
+
+    /**
+     * E2: tras un MOVER aceptado se piden otra vez proyección y diagnóstico del horario. De la
+     * proyección nueva se toman SOLO las guardias —trae además una sesión que el PUT no movió
+     * y que no debe aparecer—; las sesiones siguen siendo las de la respuesta del PUT. El
+     * diagnóstico nuevo sustituye al anterior y su aviso se pinta.
+     */
+    it('(106) tras un movimiento aceptado se ven las guardias y el aviso nuevos', async () => {
+      const grid = await montarEnP1();
+      expect(grid.guardias()).toEqual([GUARDIAS[1]]);
+      expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+      expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(1);
+
+      await soltarClaseEn(1, 4);
+      const movida = { ...CLASE, tramo: 4 };
+      ultimoMover.next([movida]);
+      await fixture.whenStable();
+
+      expect(horario.getProyeccion).toHaveBeenCalledTimes(2);
+      expect(horario.getProyeccion).toHaveBeenLastCalledWith(1);
+      expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(2);
+      expect(diagnosticos.getDiagnostico).toHaveBeenLastCalledWith(1);
+
+      refrescoProyeccion.next({
+        ...PROYECCION_VACIA,
+        sesiones: [movida, fila(9, 'Otra-1ºA', 1, 5, 6)],
+        guardias: [GUARDIAS[0], { profesorCodigo: 'P1', dia: 1, tramo: 5 }],
+      });
+      refrescoDiagnostico.next(diagnostico([
+        { regla: 'GUARDIAS_NUMERO_DISTINTO', profesorCodigo: 'P1', tramoCodigo: null, mensaje: 'tras el ajuste' },
+      ]));
+      await fixture.whenStable();
+
+      expect(grid.guardias()).toEqual([{ profesorCodigo: 'P1', dia: 1, tramo: 5 }]);
+      expect(grid.sesiones()).toEqual([movida]);
+      const aviso = raiz().querySelector('p.aviso-guardias');
+      expect(aviso?.textContent?.trim()).toBe('Las guardias no cumplen la configuración actual: 1 incumplimiento.');
+      expect(aviso?.getAttribute('title')).toBe('tras el ajuste');
+    });
+
+    /** E2: un INTERCAMBIO aceptado pide lo mismo que un movimiento. */
+    it('(107) tras un intercambio aceptado también se piden proyección y diagnóstico', async () => {
+      const grid = await montarEnP1();
+      const otra = { ...fila(2, 'Len-1ºA', 1, 1, 4), profesores: ['P1'] };
+      // El intercambio lo decide el contenedor con UN ocupante; el evento de la rejilla se
+      // emite ya formado, como en los casos del ajuste de más arriba.
+      grid.soltar.emit({
+        actividadCodigo: 'Mat-1ºA', indice: 1, dia: 1, orden: 4,
+        ocupantes: [{ actividadCodigo: otra.actividadCodigo, indice: 1, entradas: [otra], continuacion: false }],
+      });
+      await fixture.whenStable();
+      expect(ajustes.intercambiar).toHaveBeenCalledTimes(1);
+
+      ultimoIntercambiar.next({ primera: [{ ...CLASE, tramo: 4 }], segunda: [{ ...otra, tramo: 1 }] });
+      await fixture.whenStable();
+
+      expect(horario.getProyeccion).toHaveBeenCalledTimes(2);
+      expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(2);
+    });
+
+    /** E2: un RECHAZO no pide nada nuevo, ni la proyección ni el diagnóstico. */
+    it('(108) tras un rechazo no se pide ni la proyección ni el diagnóstico', async () => {
+      await montarEnP1();
+
+      await soltarClaseEn(1, 4);
+      ultimoMover.error({ status: 409, error: { causa: 'GUARDIAS_SIN_REPARTO', mensaje: 'x', violaciones: [] } });
+      await fixture.whenStable();
+
+      expect(horario.getProyeccion).toHaveBeenCalledTimes(1);
+      expect(diagnosticos.getDiagnostico).toHaveBeenCalledTimes(1);
+    });
+
+    /**
+     * E2: la recarga NO toca el modo ni el recurso. P1 no es el primero de la lista (AAA9 lo
+     * es), así que una recarga que reiniciara la entidad como hace `cargar()` lo dejaría ver.
+     */
+    it('(109) tras el ajuste se conservan el modo y el recurso elegidos', async () => {
+      const grid = await montarEnP1();
+
+      await soltarClaseEn(1, 4);
+      ultimoMover.next([{ ...CLASE, tramo: 4 }]);
+      await fixture.whenStable();
+      refrescoProyeccion.next({ ...PROYECCION_VACIA, sesiones: [], guardias: GUARDIAS });
+      refrescoDiagnostico.next(diagnostico([]));
+      await fixture.whenStable();
+
+      const vista = fixture.componentInstance as unknown as { vista(): string; entidad(): string };
+      expect(vista.vista()).toBe('profesor');
+      expect(vista.entidad()).toBe('P1');
+      expect(selectEntidad()!.value).toBe('P1');
+      expect(grid.guardias()).toEqual([GUARDIAS[1]]);
+    });
+
+    /**
+     * E2: si una de las dos peticiones del refresco falla, la vista hace lo mismo que cuando
+     * falla en la carga y con el mismo texto: el diagnóstico, su aviso propio; la proyección,
+     * el error de carga y sin rejilla.
+     */
+    it('(110) si el refresco falla, la vista reacciona como en la carga', async () => {
+      await montarEnP1();
+
+      await soltarClaseEn(1, 4);
+      ultimoMover.next([{ ...CLASE, tramo: 4 }]);
+      await fixture.whenStable();
+      refrescoDiagnostico.error({ status: 500 });
+      await fixture.whenStable();
+      expect(raiz().querySelector('.error-diagnostico')?.textContent?.trim()).toBe(
+        'No se pudo cargar el diagnóstico.',
+      );
+
+      refrescoProyeccion.error({ status: 503 });
+      await fixture.whenStable();
+      expect(raiz().querySelector('p.error')?.textContent?.trim()).toBe('No se pudo cargar el horario 1 (503).');
+      expect(fixture.debugElement.query(By.directive(HorarioGrid))).toBeNull();
+    });
   });
 });

@@ -106,7 +106,7 @@
 -->
 @if (violacionesGuardia().length > 0) {
   <p class="aviso aviso-guardias" [title]="detalleGuardias()">
-    Las guardias no cumplen la configuración actual: {{ violacionesGuardia().length }} incumplimientos.
+    Las guardias no cumplen la configuración actual: {{ recuentoGuardias() }}
   </p>
 }
 
