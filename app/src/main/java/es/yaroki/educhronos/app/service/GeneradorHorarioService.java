@@ -35,6 +35,7 @@ import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import es.yaroki.educhronos.solver.cpsat.HorarioInfactibleException;
@@ -599,6 +600,15 @@ public class GeneradorHorarioService {
      * {@link SesionVistaDTO} con varios {@code profesores} (D-F7-2). Profesores,
      * subgrupos y grupos van ordenados alfabéticamente para salida estable; las
      * sesiones, por {@code (dia, tramo, asignaturaCodigo)}.
+     *
+     * <p>Desde S215 lleva también las GUARDIAS del horario, leídas con
+     * {@link GuardiaRepository#findByHorarioId} y ordenadas por
+     * {@code (dia, tramo, profesorCodigo)}. Su día y su tramo salen de {@link #posicion}, la
+     * MISMA conversión que la de las sesiones, y una guardia en un tramo sin
+     * {@code ordenEnDia} aborta igual que una sesión: es un invariante roto que ninguna vista
+     * puede pintar (enmienda EA2), no un dato que se pueda callar. El profesor y el tramo de
+     * cada guardia son relaciones perezosas que se resuelven aquí, dentro de la transacción
+     * (EA3: se acepta su N+1 antes que una consulta nueva).
      */
     @Transactional(readOnly = true)
     public HorarioProyeccionDTO proyectar(Long horarioId) {
@@ -609,14 +619,8 @@ public class GeneradorHorarioService {
 
         List<SesionVistaDTO> sesiones = new ArrayList<>();
         for (Sesion sesion : horario.getSesiones()) {
-            TramoSemanal tramo = sesion.getTramoInicio();
-            int dia = tramo.getDia().ordinal() + 1;
-            Integer ordenTramo = ordenEnDia.get(tramo.getId());
-            if (ordenTramo == null) {
-                throw new IllegalStateException("El tramoInicio " + tramo.getId()
-                        + " de una sesion del horario " + horarioId
-                        + " no está en el índice de tramos lectivos (¿recreo o ausente del catálogo?)");
-            }
+            Posicion posicion = posicion(
+                    sesion.getTramoInicio(), ordenEnDia, "tramoInicio", "sesion", horarioId);
 
             Plaza plaza = sesion.getPlaza();
             Asignatura asignatura = plaza.getAsignatura();
@@ -631,7 +635,7 @@ public class GeneradorHorarioService {
                     .distinct().sorted().toList();
 
             sesiones.add(new SesionVistaDTO(
-                    sesion.getId(), sesion.getIndice(), dia, ordenTramo,
+                    sesion.getId(), sesion.getIndice(), posicion.dia(), posicion.tramo(),
                     sesion.getPlaza().getActividad().getDuracionTramos(),
                     asignatura.getCodigo(), asignatura.getNombreCompleto(),
                     profesores, sesion.getAula() == null ? null : sesion.getAula().getCodigo(),
@@ -643,9 +647,43 @@ public class GeneradorHorarioService {
                 .thenComparingInt(SesionVistaDTO::tramo)
                 .thenComparing(SesionVistaDTO::asignaturaCodigo));
 
+        List<GuardiaVistaDTO> guardias = new ArrayList<>();
+        for (Guardia guardia : guardiaRepository.findByHorarioId(horarioId)) {
+            Posicion posicion = posicion(guardia.getTramo(), ordenEnDia, "tramo", "guardia", horarioId);
+            guardias.add(new GuardiaVistaDTO(
+                    guardia.getProfesor().getCodigo(), posicion.dia(), posicion.tramo()));
+        }
+        guardias.sort(Comparator.comparingInt(GuardiaVistaDTO::dia)
+                .thenComparingInt(GuardiaVistaDTO::tramo)
+                .thenComparing(GuardiaVistaDTO::profesorCodigo));
+
         return new HorarioProyeccionDTO(
                 horario.getId(), horario.getNombre(), horario.getEstado().name(),
                 horario.getEstadoSolver(), horario.getObjetivo(), horario.getCotaInferior(),
-                horario.getFechaGeneracion().toString(), sesiones);
+                horario.getFechaGeneracion().toString(), sesiones, guardias);
+    }
+
+    /** El día (1..5) y el ordenEnDia lectivo (1..6) de un tramo de la proyección. */
+    private record Posicion(int dia, int tramo) {
+    }
+
+    /**
+     * La ÚNICA conversión de un {@link TramoSemanal} a la posición que usan las vistas: día
+     * por el ordinal de su {@code Dia} y tramo por el índice de {@code ordenEnDia}. La usan
+     * las sesiones y las guardias de {@link #proyectar}. Un tramo fuera del índice (recreo o
+     * ausente del catálogo) aborta: nunca se proyecta con un valor por defecto.
+     *
+     * @param campo el nombre del campo del tramo en el mensaje ({@code tramoInicio}, {@code tramo})
+     * @param fila la fila a la que pertenece ({@code sesion}, {@code guardia})
+     */
+    private static Posicion posicion(TramoSemanal tramo, Map<Long, Integer> ordenEnDia,
+                                     String campo, String fila, Long horarioId) {
+        Integer ordenTramo = ordenEnDia.get(tramo.getId());
+        if (ordenTramo == null) {
+            throw new IllegalStateException("El " + campo + " " + tramo.getId()
+                    + " de una " + fila + " del horario " + horarioId
+                    + " no está en el índice de tramos lectivos (¿recreo o ausente del catálogo?)");
+        }
+        return new Posicion(tramo.getDia().ordinal() + 1, ordenTramo);
     }
 }

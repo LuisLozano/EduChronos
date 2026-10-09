@@ -83,21 +83,22 @@ class ProyeccionDtoContratoTest {
     }
 
     @Test
-    void horarioProyeccionDto_serializaExactamenteLas8ClavesConSusTipos() throws Exception {
+    void horarioProyeccionDto_serializaExactamenteLas9ClavesConSusTipos() throws Exception {
         // CENTINELA D-F8.1-8: este contrato refleja app.web.dto.HorarioProyeccionDTO. Si cambias el
         // DTO (añadir/quitar/renombrar/re-tipar un campo), este test salta A PROPÓSITO.
         // Al actualizarlo, actualiza TAMBIÉN app/frontend/src/app/models/horario.model.ts
         // (interfaz espejo, no atada automáticamente).
+        // S215 (EA4): de 8 a 9 claves, con «guardias». Cambio buscado.
         List<String> clavesEsperadas = List.of(
                 "id", "nombre", "estado", "estadoSolver",
-                "objetivo", "cotaInferior", "fechaGeneracion", "sesiones");
+                "objetivo", "cotaInferior", "fechaGeneracion", "sesiones", "guardias");
 
         SesionVistaDTO sesion = new SesionVistaDTO(
                 10L, 1, 2, 3, 1, "Mat", "Matematicas", List.of("MATA"), "A1",
                 List.of("1ºA-Completo"), List.of("1ºA"), "Mat-1ºA", "Mat-1ºA-P1");
         HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
                 1L, "Horario seed 7B", "BORRADOR", "OPTIMAL", 12.0, 8.0,
-                "2026-07-05T00:00:00Z", List.of(sesion));
+                "2026-07-05T00:00:00Z", List.of(sesion), List.of(new GuardiaVistaDTO("MATA", 1, 2)));
 
         JsonNode json = mapper.readTree(mapper.writeValueAsString(dto));
 
@@ -113,6 +114,32 @@ class ProyeccionDtoContratoTest {
         assertThat(json.get("fechaGeneracion").isTextual()).isTrue();
 
         assertThat(json.get("sesiones").isArray()).isTrue();
+        assertThat(json.get("guardias").isArray()).isTrue();
+    }
+
+    @Test
+    void guardiaVistaDto_serializaExactamenteLas3ClavesConSusTipos() throws Exception {
+        // CENTINELA D-F8.1-8, como los de arriba: refleja app.web.dto.GuardiaVistaDTO (S215).
+        // Si cambia, actualiza también su espejo en app/frontend/src/app/models/horario.model.ts.
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(new GuardiaVistaDTO("MATA", 1, 2)));
+
+        assertThat(clavesRaiz(json)).containsExactlyInAnyOrder("profesorCodigo", "dia", "tramo");
+        assertThat(json.get("profesorCodigo").isTextual()).isTrue();
+        assertThat(json.get("dia").isNumber()).isTrue();
+        assertThat(json.get("tramo").isNumber()).isTrue();
+    }
+
+    /** Sin guardias, la clave está y es una lista vacía: no se omite ni sale null (A5). */
+    @Test
+    void horarioProyeccionDto_sinGuardias_serializaUnaListaVacia() throws Exception {
+        HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
+                1L, "Horario sin guardias", "BORRADOR", "OPTIMAL", 0.0, 0.0,
+                "2026-07-05T00:00:00Z", List.of(), List.of());
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(dto));
+
+        assertThat(json.get("guardias").isArray()).isTrue();
+        assertThat(json.get("guardias")).isEmpty();
     }
 
     @Test
@@ -122,7 +149,7 @@ class ProyeccionDtoContratoTest {
         // (punto 2 de la parada de lectura): habría que parar, no "arreglar" el test.
         HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
                 1L, "Horario sin medir", "BORRADOR", "UNKNOWN", null, null,
-                "2026-07-05T00:00:00Z", List.of());
+                "2026-07-05T00:00:00Z", List.of(), List.of());
 
         JsonNode json = mapper.readTree(mapper.writeValueAsString(dto));
 

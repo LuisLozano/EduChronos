@@ -12,6 +12,9 @@ import java.util.List;
  * (§4.7). {@code objetivo}/{@code cotaInferior} son {@code Double} nullable
  * reales (0.0 es válido, distinto de "no medido"). {@code fechaGeneracion} es el
  * {@code Instant} serializado como texto ISO-8601.
+ *
+ * <p>Desde S215, {@code guardias}: las guardias ordinarias del horario, ordenadas por
+ * {@code (dia, tramo, profesorCodigo)}. Nunca null; vacía si el horario no tiene ninguna.
  */
 public record HorarioProyeccionDTO(
         Long id,
@@ -21,5 +24,6 @@ public record HorarioProyeccionDTO(
         Double objetivo,
         Double cotaInferior,
         String fechaGeneracion,
-        List<SesionVistaDTO> sesiones) {
+        List<SesionVistaDTO> sesiones,
+        List<GuardiaVistaDTO> guardias) {
 }

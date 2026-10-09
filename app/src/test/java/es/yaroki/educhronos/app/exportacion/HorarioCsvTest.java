@@ -3,6 +3,7 @@ package es.yaroki.educhronos.app.exportacion;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import java.nio.charset.StandardCharsets;
@@ -235,12 +236,56 @@ class HorarioCsvTest {
                 .hasMessageContaining("Subgrupos");
     }
 
+    // ------------------------------------------------------------------ S215 · guardias (B1, B2)
+
+    /**
+     * B2: la fila de guardia lleva Día y Tramo como las de sesión, «Guardia» en «Nombre
+     * asignatura», el código en «Profesores» y TODO lo demás vacío, Sesión incluida, que es lo
+     * que la distingue. B1: va tras la última sesión aunque su tramo sea anterior.
+     */
+    @Test
+    void laFilaDeGuardiaVaTrasLasSesionesConLaFormaDeB2() {
+        HorarioProyeccionDTO proyeccion = new HorarioProyeccionDTO(
+                1L, "Horario de prueba", "BORRADOR", "OPTIMAL", 0.0, 0.0,
+                "2026-09-11T00:00:00Z", List.of(sesion(7L, 1, 4, "MAT", "Matematicas")),
+                List.of(new GuardiaVistaDTO("P-GUA", 1, 2)));
+
+        String[] lineas = lineas(HorarioCsv.escribir(proyeccion));
+
+        assertThat(lineas).hasSize(3);
+        assertThat(columna(lineas[1], "Sesión")).isEqualTo("7");
+        String guardia = lineas[2];
+        assertThat(columna(guardia, "Día")).isEqualTo("1");
+        assertThat(columna(guardia, "Tramo")).isEqualTo("2");
+        assertThat(columna(guardia, "Nombre asignatura")).isEqualTo("Guardia");
+        assertThat(columna(guardia, "Profesores")).isEqualTo("P-GUA");
+        for (String vacia : List.of("Asignatura", "Aula", "Grupos", "Subgrupos", "Actividad",
+                "Plaza", "Índice", "Sesión")) {
+            assertThat(columna(guardia, vacia)).as("columna %s", vacia).isEmpty();
+        }
+    }
+
+    /** Las guardias salen en el orden de la lista: el CSV no reordena (el orden lo fija A1). */
+    @Test
+    void lasFilasDeGuardiaSalenEnElOrdenDeLaLista() {
+        HorarioProyeccionDTO proyeccion = new HorarioProyeccionDTO(
+                1L, "Horario de prueba", "BORRADOR", "OPTIMAL", 0.0, 0.0,
+                "2026-09-11T00:00:00Z", List.of(),
+                List.of(new GuardiaVistaDTO("ZZZ1", 1, 1), new GuardiaVistaDTO("AAA1", 1, 1)));
+
+        String[] lineas = lineas(HorarioCsv.escribir(proyeccion));
+
+        assertThat(lineas).hasSize(3);
+        assertThat(columna(lineas[1], "Profesores")).isEqualTo("ZZZ1");
+        assertThat(columna(lineas[2], "Profesores")).isEqualTo("AAA1");
+    }
+
     // ------------------------------------------------------------------ fixture
 
     private static HorarioProyeccionDTO proyeccion(List<SesionVistaDTO> sesiones) {
         return new HorarioProyeccionDTO(
                 1L, "Horario de prueba", "BORRADOR", "OPTIMAL", 0.0, 0.0,
-                "2026-09-11T00:00:00Z", sesiones);
+                "2026-09-11T00:00:00Z", sesiones, List.of());
     }
 
     private static SesionVistaDTO sesion(

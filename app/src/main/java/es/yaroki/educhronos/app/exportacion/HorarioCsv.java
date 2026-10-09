@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.exportacion;
 
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,14 @@ import java.util.List;
  * se recomienda para forzar el separador: al no ser el BOM lo primero del fichero,
  * Excel lo ignora y se vuelve al problema que el BOM resuelve. Se verifica sobre
  * Excel en Windows en H4; hasta entonces es una decisión razonada, no medida.
+ *
+ * <p><b>Guardias (S215).</b> Tras TODAS las filas de sesión va una fila por guardia de
+ * {@link HorarioProyeccionDTO#guardias()}, en su orden: Día y Tramo con la misma forma que
+ * las de sesión, «Nombre asignatura» {@value VistaPdf#ROTULO_GUARDIA}, «Profesores» con el
+ * código del profesor y el resto de columnas vacías. La cabecera no cambia, y un horario sin
+ * guardias sale con los mismos bytes que antes. Al final y no intercaladas por tramo para que
+ * quien lea el fichero sin filtrar encuentre las clases donde estaban, y para que una fila
+ * de guardia se distinga sin mirar más que su «Sesión» vacía.
  *
  * <p>Escape RFC 4180, y sólo cuando hace falta: un campo va entre comillas si y sólo
  * si contiene el separador, una comilla doble o un salto de línea, y dentro cada
@@ -78,6 +87,15 @@ public final class HorarioCsv {
                         Integer.toString(sesion.indice()),
                         Long.toString(sesion.sesionId()));
             }
+        }
+        for (GuardiaVistaDTO guardia : proyeccion.guardias()) {
+            registro(texto,
+                    Integer.toString(guardia.dia()),
+                    Integer.toString(guardia.tramo()),
+                    "",
+                    VistaPdf.ROTULO_GUARDIA,
+                    unir(List.of(guardia.profesorCodigo()), "Profesores"),
+                    "", "", "", "", "", "", "");
         }
 
         byte[] cuerpo = texto.toString().getBytes(StandardCharsets.UTF_8);

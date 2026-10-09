@@ -65,7 +65,7 @@ class HorarioControllerHttpTest {
                 List.of("1ºA-Completo"), List.of("1ºA"), "Mat-1ºA", "Mat-1ºA-P1");
         HorarioProyeccionDTO dto = new HorarioProyeccionDTO(
                 1L, "Horario seed 7B", "BORRADOR", "OPTIMAL", 0.0, 0.0,
-                "2026-07-05T00:00:00Z", List.of(sesion));
+                "2026-07-05T00:00:00Z", List.of(sesion), List.of());
         when(service.proyectar(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/horarios/1/proyeccion"))

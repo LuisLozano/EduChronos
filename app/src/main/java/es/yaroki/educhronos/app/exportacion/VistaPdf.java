@@ -243,6 +243,13 @@ public enum VistaPdf {
     /** Separa el código del nombre en la leyenda y en el título. Raya, no guion. */
     static final String SEPARADOR_LEYENDA = " — ";
 
+    /**
+     * La palabra con la que la exportación nombra una guardia ordinaria (S215): el «Nombre
+     * asignatura» de su fila en el CSV y su entrada de celda en el PDF de profesor. No es una
+     * asignatura y no tiene línea de leyenda.
+     */
+    static final String ROTULO_GUARDIA = "Guardia";
+
     private final String parametro;
 
     VistaPdf(String parametro) {

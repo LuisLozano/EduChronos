@@ -1111,7 +1111,7 @@ class HorarioPdfTest {
     private static HorarioProyeccionDTO proyeccion(List<SesionVistaDTO> sesiones) {
         return new HorarioProyeccionDTO(
                 1L, "Horario de prueba", "BORRADOR", "FEASIBLE", 0.0, 0.0,
-                "2026-09-15T00:00:00Z", sesiones);
+                "2026-09-15T00:00:00Z", sesiones, List.of());
     }
 
     private static SesionVistaDTO sesion(int dia, int tramo, String codigo, String nombre,

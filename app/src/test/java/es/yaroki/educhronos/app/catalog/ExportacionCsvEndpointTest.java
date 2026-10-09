@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
+import es.yaroki.educhronos.app.persistence.Guardia;
+import es.yaroki.educhronos.app.persistence.GuardiaRepository;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
@@ -71,6 +73,7 @@ class ExportacionCsvEndpointTest {
     @Autowired private ActividadRepository actividadRepository;
     @Autowired private HorarioGeneradoRepository horarioRepository;
     @Autowired private SesionRepository sesionRepository;
+    @Autowired private GuardiaRepository guardiaRepository;
 
     private MockMvc mockMvc;
     private Long horarioId;
@@ -162,6 +165,58 @@ class ExportacionCsvEndpointTest {
                 .containsExactlyElementsOf(esperados);
     }
 
+    // ------------------------------------------------------------------ S215 · guardias (EB4)
+
+    /**
+     * EB4: con guardias, el fichero trae una fila más por guardia, y son las ÚLTIMAS. Montaje
+     * propio ({@link #poblarConGuardias}): {@code poblar()} y los casos de arriba siguen siendo
+     * de un horario sin guardias. Las guardias se insertan fuera del orden de A1 —el tramo 3
+     * antes que el 1, y en el tramo 3 el código mayor primero— y salen en ese orden; una de
+     * ellas es de un profesor sin ninguna clase.
+     */
+    @Test
+    void conGuardiasLasFilasDeGuardiaVanTrasLasDeSesionYCuentanEnElTotal() throws Exception {
+        poblarConGuardias();
+        long sesiones = sesionRepository.count();
+        long guardias = guardiaRepository.count();
+        assertThat(sesiones).as("la fixture tiene sesiones").isEqualTo(2);
+        assertThat(guardias).as("la fixture tiene guardias").isEqualTo(3);
+
+        byte[] csv = mockMvc.perform(get("/api/horarios/" + horarioId + "/csv"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        List<String> registros = registros(csv);
+        assertThat(registros).hasSize((int) (sesiones + guardias) + 1);
+        assertThat(registros.get(0)).isEqualTo(CABECERA);
+        assertThat(registros.subList(1, 3))
+                .as("las dos primeras filas de datos son las de sesión")
+                .allSatisfy(fila -> assertThat(fila).doesNotEndWith(";"));
+        assertThat(registros.subList(3, registros.size())).containsExactly(
+                "1;1;;Guardia;P-LEN;;;;;;;",
+                "1;3;;Guardia;P-GUA;;;;;;;",
+                "1;3;;Guardia;P-MAT;;;;;;;");
+    }
+
+    /** A5: el JSON de la proyección lleva {@code "guardias": []} sin guardias y la lista con ellas. */
+    @Test
+    void elJsonDeLaProyeccionTraeLasGuardiasYUnaListaVaciaSinEllas() throws Exception {
+        poblar();
+        String sin = mockMvc.perform(get("/api/horarios/" + horarioId + "/proyeccion"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(JsonPath.<List<Object>>read(sin, "$.guardias")).isEmpty();
+
+        poblarGuardias();
+        String con = mockMvc.perform(get("/api/horarios/" + horarioId + "/proyeccion"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(JsonPath.<List<String>>read(con, "$.guardias[*].profesorCodigo"))
+                .containsExactly("P-LEN", "P-GUA", "P-MAT");
+        assertThat(JsonPath.<List<Integer>>read(con, "$.guardias[*].tramo")).containsExactly(1, 3, 3);
+        assertThat(JsonPath.<List<Integer>>read(con, "$.guardias[*].dia")).containsExactly(1, 1, 1);
+    }
+
     // ------------------------------------------------------------------ E3
 
     @Test
@@ -235,6 +290,28 @@ class ExportacionCsvEndpointTest {
         entityManager.flush();
         // clear() para que todo se lea de la TABLA: las filas se insertaron sin tocar
         // la colección inversa del horario (mismo motivo que en la fixture hermana).
+        entityManager.clear();
+    }
+
+    /** {@link #poblar} y, encima, tres guardias del horario (S215). */
+    private void poblarConGuardias() {
+        poblar();
+        poblarGuardias();
+    }
+
+    /**
+     * Tres guardias del horario ya poblado, insertadas fuera del orden de A1. P-GUA es un
+     * profesor sin ninguna clase: solo tiene esta guardia.
+     */
+    private void poblarGuardias() {
+        HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
+        Profesor pGua = profesorRepository.save(new Profesor("P-GUA", "Profesor GUA"));
+        Profesor pMat = profesorRepository.findByCodigo("P-MAT").orElseThrow();
+        Profesor pLen = profesorRepository.findByCodigo("P-LEN").orElseThrow();
+        guardiaRepository.save(new Guardia(horario, pMat, tramoDe(3)));
+        guardiaRepository.save(new Guardia(horario, pLen, tramoDe(1)));
+        guardiaRepository.save(new Guardia(horario, pGua, tramoDe(3)));
+        entityManager.flush();
         entityManager.clear();
     }
 
