@@ -1,0 +1,601 @@
+{
+ "_meta": {
+  "generadoPor": "tools/carga-centro/derivar-guardias.py",
+  "entradas": {
+   "volcadosProfesores": [
+    {
+     "fichero": "profesor-Afán-Herencia,-María-Trinidad.json",
+     "sha256": "3c5790ef38e87e4374156ac435c03bf476e4750f59f8d563e4675fee1807128c"
+    },
+    {
+     "fichero": "profesor-Barba-Riquel,-María-Carmen.json",
+     "sha256": "57571d565d0364c692d7527ccef2f00d27b47d7c12587256fddba26e8a109879"
+    },
+    {
+     "fichero": "profesor-Barroso-Rodríguez,-José.json",
+     "sha256": "6f1373e55a05584059555ddd9ab0e7e33576501bb8490eff8613d99aace706dd"
+    },
+    {
+     "fichero": "profesor-Carbonell-Coronado,-Carmen.json",
+     "sha256": "e4c5bea51af29b52808cee3ee8ff34a7bc137f3cb667f6fbd690eee0835f428a"
+    },
+    {
+     "fichero": "profesor-Carrasco-López,-Héctor.json",
+     "sha256": "a355dfeddddd012dcc9d0404099c016d15c24db067ce9dbfed2486b03a428249"
+    },
+    {
+     "fichero": "profesor-Castellanos-Fernández,Isabel.json",
+     "sha256": "62369376f7860a80bd690cd46d9858bdb9947992a1f254ce18d1bb0be0f4fdf1"
+    },
+    {
+     "fichero": "profesor-Chacón-Muñoz,-Isabel-María.json",
+     "sha256": "29ef624ee62aefa0c2ddce7b480af7464dfca8a193e2ab5c917848ae5f93fb17"
+    },
+    {
+     "fichero": "profesor-Dorador-de-los-Santos,-María-de-los.json",
+     "sha256": "1a6675022b170bab6269d3264f3d9c01e9aaae2cfe816241e400e0fe0b7cba7c"
+    },
+    {
+     "fichero": "profesor-Doña-Alcaide,-Jesús.json",
+     "sha256": "95d39f726617b1e0cb4fa59b86e48c915e6df831e31f1a329978a0ba22492621"
+    },
+    {
+     "fichero": "profesor-Esteban-Parra,-Ginés-MIguel.json",
+     "sha256": "f2b1ff96be7864bb8bc33760eb77c0114a7b94d94e2644b3f36772dbf2897ddd"
+    },
+    {
+     "fichero": "profesor-Estepa-Guillén,-María-Ángeles.json",
+     "sha256": "316a00213ba1d2c6dcf7d927e42d79577bec0a73170d28e9bcc7ea3bef9df945"
+    },
+    {
+     "fichero": "profesor-Fernández-García,-Felipe-Manuel.json",
+     "sha256": "4cda513ae197b29dc6335cd94f2bf479d37bd526948d9a6932ffed84ccacf7d3"
+    },
+    {
+     "fichero": "profesor-Fuentes-Lucas-Torres,-Salvador.json",
+     "sha256": "2bffb7639c8904df5868bd38d911b80c3159dfb659766c0e45bc5ed206e28b98"
+    },
+    {
+     "fichero": "profesor-Galdámez-Mayoral,-Patricia.json",
+     "sha256": "8071101d9bb92503f0ee085c72a59fc97770bf4da47170f546615e67bfd51887"
+    },
+    {
+     "fichero": "profesor-García-Baquero-Vega,-José-Antonio.json",
+     "sha256": "f67a6cf3eae93a2bef11a27ca072dfe6600809440b85d811947e8a23c71778aa"
+    },
+    {
+     "fichero": "profesor-García-Bernal,-María-Teresa.json",
+     "sha256": "6e87253dfa65252da4e9d5b35556f8195db0b39ca5c555b8cc42521d4ae142b3"
+    },
+    {
+     "fichero": "profesor-García-Rodríguez,-Lina-María.json",
+     "sha256": "606c03ab29cb123dff46630caec60a22507e47ae27830ee6551e2b7032cb06e2"
+    },
+    {
+     "fichero": "profesor-Gutiérrez-Sánchez,-Carlos-Alberto.json",
+     "sha256": "773163355a3c6df605210b3068ab0c283d925458653fdb933a9c7cc19f4887f7"
+    },
+    {
+     "fichero": "profesor-Henajeros-Luque,-Inés.json",
+     "sha256": "576aada43fe2504e26c82c4dabb2764ed402b77b6724d767c45a3325bdbae38d"
+    },
+    {
+     "fichero": "profesor-Huerta-Rodríguez,-Joaquín-de-la.json",
+     "sha256": "109159d1bc7017c6e810b446dfb8072fe9d4dd252666428453e5ee5f03c57df1"
+    },
+    {
+     "fichero": "profesor-Jiménez-López,-Juan.json",
+     "sha256": "db02200410808659b80a908596541ff32f289e51c4a10cb19f61f635c92f2d13"
+    },
+    {
+     "fichero": "profesor-Jiménez-Montes,-María-de-los-Ángele.json",
+     "sha256": "a6af079b5adc61383ef8e8b2e7f5a7d9cc03faba98ec5c842fe0a57a32d0b7ff"
+    },
+    {
+     "fichero": "profesor-Jiménez-Morgaz,-Elena-María.json",
+     "sha256": "50207bcec3b02fc7776e6a0569e1eeac0bdf419fc498c4eb41c8c13f541849bb"
+    },
+    {
+     "fichero": "profesor-LEN9.json",
+     "sha256": "b9f432311ed72f09df6c53855ac44e713af48e0dfb543c5875c1671f24690887"
+    },
+    {
+     "fichero": "profesor-Lobato-Montes,-María-Carmen.json",
+     "sha256": "8fe4fc40ee515e4ec8feb0d40557e5c204c1025fbee4b05130cfe7a5d085d055"
+    },
+    {
+     "fichero": "profesor-López-Codón,-Rocío.json",
+     "sha256": "c1498092d145e8594c79d5c696dd453e1b882fe55a450ec08f41c6d094b9397a"
+    },
+    {
+     "fichero": "profesor-López-Ruiz,-Paloma.json",
+     "sha256": "3b29721cdf8e249e774f18d5f2c0d797603998ef9d79e8c8324d2f232378c61d"
+    },
+    {
+     "fichero": "profesor-Macías-Magro,-Sonia.json",
+     "sha256": "6ab2cd226783654325bf077d29ca45d9bedcc417f2f5a4d24dd73fdc0694222e"
+    },
+    {
+     "fichero": "profesor-Macías-Negrillo,-Jesús-María.json",
+     "sha256": "b1295f962b173c128ff0f519e4df4f001dc1106aba6e6eb4a4e635fa8bd30784"
+    },
+    {
+     "fichero": "profesor-Martín-Ginés,-Almudena.json",
+     "sha256": "278ecefb0c2c5d76230b73f6117f11cb02e7c5fd36a78ce69ab0b331bd9bea9e"
+    },
+    {
+     "fichero": "profesor-Marín-Rodríguez,-Rafael.json",
+     "sha256": "0cbf1b46c8a84d93820dda4134a8d13bb5d984feb5c90a8c74760ad5d82ae2f6"
+    },
+    {
+     "fichero": "profesor-Mateos-Cañero-Maraver,-Lourdes.json",
+     "sha256": "e1fb27ad72db14ab2979b6e9b8660bb3cacc3e1827eb913c74c7f1ee096c38e8"
+    },
+    {
+     "fichero": "profesor-Mejías-Márquez,-Manuela.json",
+     "sha256": "8c84db023b1b0e1989502da25fc902b108b7bec5a3fc8b1f32d6ac44b7df19cb"
+    },
+    {
+     "fichero": "profesor-Mesa-Guarnido,-Eva-María.json",
+     "sha256": "e0bd4a1a5e1052e783eef1fb9a7611439d0869d5ea63f3a2d4b980f6b589e5a2"
+    },
+    {
+     "fichero": "profesor-Montes-García,-Antonio.json",
+     "sha256": "221aca9f94b0e46bfd8022266a687c105c4dcb55cd554df2fa7b98cd71344f5d"
+    },
+    {
+     "fichero": "profesor-Moreno-Araujo,-Fco.-Javier.json",
+     "sha256": "0d85875e9c86e97b5ff72ce14b9e4bb561313839231bd495446776f7dc056d6c"
+    },
+    {
+     "fichero": "profesor-Moreno-Mesa,-Juan-Manuel.json",
+     "sha256": "1fad83a240fd22ca6ee49b7949fa31a033fa86c180356382403140f816e9bbd5"
+    },
+    {
+     "fichero": "profesor-Ortega-Roda,-Pedro-Juan.json",
+     "sha256": "0acaa1ff41339f4d5b1f8777f6cfe8bc6c14c300521a9abdb705ec592dc6ca58"
+    },
+    {
+     "fichero": "profesor-Painta-Lesiak,-Bárbara-Anna.json",
+     "sha256": "c7a72b5a1629cb6c75307b3fd5e6f63d77f07bff1b630c1ee6541a371777c0ad"
+    },
+    {
+     "fichero": "profesor-Piqueras-Mateos,-Alejandro.json",
+     "sha256": "c2512b629d96deb4fe1af78f9c8a9337a525383a5fcd4f5a69ff81baac2581c0"
+    },
+    {
+     "fichero": "profesor-Pérez-Alvarez,-Adolfo-Luis.json",
+     "sha256": "867ac21626d0a2b92cae719081ea2396ed96642894be3dd8c59931f65e5e903b"
+    },
+    {
+     "fichero": "profesor-Pérez-Lobato,-José.json",
+     "sha256": "a60c71177ff535c31ff06535173806e70993905763ae2135e971ddbc2bb22193"
+    },
+    {
+     "fichero": "profesor-Pérez-Morales,-Cristina.json",
+     "sha256": "0bd8c31bcd18b6bf9e984f24f06035da1f63950de69379b2959fce10bff3811f"
+    },
+    {
+     "fichero": "profesor-Redondo-Ceballos,-María-Ángeles.json",
+     "sha256": "feac9f5b7edd4a86e10afdc213eaa4d98e5b2ac3f755077836cf2328ef340935"
+    },
+    {
+     "fichero": "profesor-Religión-Evangélica.json",
+     "sha256": "b829c63aa1f05c4a54484aea3e1027326df310d0f986675d9c67a7840fc9ca6f"
+    },
+    {
+     "fichero": "profesor-Rivas-Prieto,-Carmen.json",
+     "sha256": "7da6ee4d3f4e7e331452c7f4280bfce5f32c5d35b9c90171a52ef1f778381af8"
+    },
+    {
+     "fichero": "profesor-Rodríguez-Rodríguez,-Esperanza.json",
+     "sha256": "492255b64925ee675c7088507563852a333a5ec9ba31adfe4df6b87d095ec664"
+    },
+    {
+     "fichero": "profesor-Rodríguez-Tirado,-Joaquín.json",
+     "sha256": "092ab2dcb1990e7c0ca71777693f83c7617a22219aadbfa231ef0f45f669b291"
+    },
+    {
+     "fichero": "profesor-Romero-Quiles,-Aguas-Santas.json",
+     "sha256": "bdcc4f4b890f3bab338cec74d47aaad3370b6be11ad3242f51dafcb1642d7a0d"
+    },
+    {
+     "fichero": "profesor-Rosales-Jiménez,-Fco.-Javier.json",
+     "sha256": "fb5e728c0ac6387cf256a7bbeba04f589aed4ca3fca76a21a959bcdef8a6d81e"
+    },
+    {
+     "fichero": "profesor-Ruiz-del-Castillo,-María-Azucena.json",
+     "sha256": "deb6b77ff6a7b200f885d7fe0c85b8448ccf98f500a5e990b37bcdd192eb5cf1"
+    },
+    {
+     "fichero": "profesor-Ríos-Palomo,-María-del-Carmen.json",
+     "sha256": "b94857b51c36bd7b035e4e595468763e2fe1b2cec658f810db884b7bff5a330b"
+    },
+    {
+     "fichero": "profesor-Rúiz-Arjona,-Carmen-María.json",
+     "sha256": "c58612b9ab79d7cd01c06270939a9e4e5554dc4713ab9d4729171314e0f78f48"
+    },
+    {
+     "fichero": "profesor-Sacramento-Trujillo,-Daniel.json",
+     "sha256": "ec88835d15063d008b742e1461fadfef350a42016f9066b46b99223087c16f31"
+    },
+    {
+     "fichero": "profesor-Sierra-Naranjo,-Rubén.json",
+     "sha256": "3af146bb9d0749d12ee0c95e3de2abed059511588990109bb232704e352c225c"
+    },
+    {
+     "fichero": "profesor-Solís-Vázquez,-José-David.json",
+     "sha256": "6adbfb70ebe3c1aa1e485f579c571816251710d3f186d50df69c02969358d2f4"
+    },
+    {
+     "fichero": "profesor-Torres-Bravo,-Adoración.json",
+     "sha256": "914c42ff97ebd93a517cd282fa938a2fb390f6ab296c31b57328aa47580a4ab2"
+    },
+    {
+     "fichero": "profesor-Torres-Cubillo,-Mariano-José.json",
+     "sha256": "9858b1bc42b79146d3c57b59346a8db450e351d7415ec069ea936f3672b30658"
+    },
+    {
+     "fichero": "profesor-Torres-Villar,-Myriam.json",
+     "sha256": "c9aad8bfbc19b71452abda42f0b9f882355b2a8089ee3f314c4e1878e6049d12"
+    },
+    {
+     "fichero": "profesor-Téllez-Martínez,-Olga.json",
+     "sha256": "ec92c16506f023a7cc765ae35e8f626a869b6a19077479915662c7d78fd2cbfe"
+    },
+    {
+     "fichero": "profesor-Vela-Montero,-José-Antonio.json",
+     "sha256": "649c034488d04c482470e16b4f860a1ccf41e716f90f493802a9d731731ba3ea"
+    },
+    {
+     "fichero": "profesor-Velázquez-Barba,-Trinidad.json",
+     "sha256": "e11e318df9bbd4bdc83fcbd72a81c18932741a9bbc3abb8bbfdb9d5aaf086194"
+    }
+   ],
+   "pdfGrupos": [
+    {
+     "fichero": "Horarios de grupos.pdf",
+     "sha256": "992f0d729e1d234c28bb1a681fd9ef1f5ac610932b1d0da0984101ee4b676321"
+    },
+    {
+     "fichero": "Horarios de grupos (11).pdf",
+     "sha256": "864a7022e4da24dd9aa2a1bbc4da16bcddc885b923877603f8103e5fcf04552c"
+    }
+   ],
+   "decisiones": {
+    "fichero": "decisiones-catalogo.json",
+    "sha256": "7ec93a8154bf926b401bc69546d9d5742f0b9d091d6284e58e2fa4bc53e3cf26"
+   },
+   "catalogo": {
+    "fichero": "catalogo-derivado.json",
+    "sha256": "2ba036ac256835cb389398ee946b5fafce4d7fc46069fea24968abb3411ed700"
+   }
+  },
+  "omitidos": [
+   {
+    "pagina": 7,
+    "titulo": "Chacón Muñoz, Isabel María",
+    "G": 2,
+    "Gbibl": 0,
+    "conv": 0
+   },
+   {
+    "pagina": 32,
+    "titulo": "Mateos-Cañero Maraver, Lourdes",
+    "G": 0,
+    "Gbibl": 0,
+    "conv": 0
+   }
+  ]
+ },
+ "profesores": [
+  {
+   "codigo": "BIO3t",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "BYG1",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "BYG2",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "CLA1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "DIB1",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "DIB2",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "ECO",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "EFI1",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "EFI2",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "EFI3",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "FIL1",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "FIL2",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "FIL3",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "FIS1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "FIS2",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "FIS3",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "FIS4",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "FOL2",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "FOL4",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "FRA1T",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "GH1",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "GH2",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "GH3",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "GH4",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "GH5",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "GH6",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "INF1",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "ING1",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "ING2",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "ING3",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "ING4",
+   "guardiasOrdinarias": 5
+  },
+  {
+   "codigo": "ING5",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "ING6",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "LEN1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "LEN2",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "LEN3",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "LEN4",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "LEN5",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "LEN6",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "LEN7",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "LEN8",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "LEN9",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MAT1",
+   "guardiasOrdinarias": 2
+  },
+  {
+   "codigo": "MAT2",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "MAT3",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "MAT4",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MAT5",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MAT6",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MAT7",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MAT8",
+   "guardiasOrdinarias": 3
+  },
+  {
+   "codigo": "MUS1",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "ORI1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "PAU1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "PAU2",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "PROV1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "REL1",
+   "guardiasOrdinarias": 1
+  },
+  {
+   "codigo": "REV",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "TEC1",
+   "guardiasOrdinarias": 0
+  },
+  {
+   "codigo": "TEC2",
+   "guardiasOrdinarias": 4
+  },
+  {
+   "codigo": "TEC3",
+   "guardiasOrdinarias": 5
+  }
+ ],
+ "noPuede": [
+  {
+   "codigo": "CLA1",
+   "dia": 4,
+   "ordenEnDia": 3,
+   "motivo": "conv"
+  },
+  {
+   "codigo": "LEN1",
+   "dia": 4,
+   "ordenEnDia": 3,
+   "motivo": "conv"
+  },
+  {
+   "codigo": "LEN2",
+   "dia": 4,
+   "ordenEnDia": 3,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN3",
+   "dia": 3,
+   "ordenEnDia": 4,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN3",
+   "dia": 5,
+   "ordenEnDia": 3,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN4",
+   "dia": 1,
+   "ordenEnDia": 1,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN5",
+   "dia": 2,
+   "ordenEnDia": 1,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN6",
+   "dia": 1,
+   "ordenEnDia": 5,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN6",
+   "dia": 5,
+   "ordenEnDia": 4,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN7",
+   "dia": 5,
+   "ordenEnDia": 2,
+   "motivo": "Gbibl"
+  },
+  {
+   "codigo": "LEN8",
+   "dia": 3,
+   "ordenEnDia": 4,
+   "motivo": "Gbibl"
+  }
+ ]
+}
