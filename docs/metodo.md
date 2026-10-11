@@ -77,7 +77,7 @@ sostienen M2 y M4.
 
 ## M-decisión — Quién decide qué (S204)
 
-**Lo que se reserva el usuario:** (1) lo que cambia el comportamiento que ve el usuario final; (2) abrir, cerrar, recortar o aceptar con salvedad un objetivo o hito, y replanificar; (3) la interpretación de un criterio de terminado dudoso; (4) lo irreversible o externo: push, Release, VM, borrados y contacto con el centro; (5) los cambios al método; (6) todo caso en que el arquitecto no tenga certeza o en que Claude Code y el arquitecto discrepen.
+**Lo que se reserva el usuario:** (1) lo que cambia el comportamiento que ve el usuario final; (2) abrir, cerrar, recortar o aceptar con salvedad un objetivo o hito, y replanificar; (3) la interpretación de un criterio de terminado dudoso; (4) lo irreversible o externo: push, Release, VM, borrados y contacto con el centro; (5) los cambios al método; (6) todo caso en que el arquitecto no tenga certeza o en que Claude Code y el arquitecto discrepen. Lo reservado al usuario se confirma ANTES de entregar el guion que lo escribe (S217; lección del cierre de S216 que solo constaba en el prompt de apertura de S217).
 
 **Lo demás lo decide el arquitecto sin esperar confirmación:** el tipo de sesión cuando sale de la tabla de §Tipos; el alcance dentro del Cambio activo; el diseño técnico dentro de un contrato aprobado; reescribir un spec cuyo aserto contradice lo que el contrato aprobado cambia expresamente (un spec que fija comportamiento que el contrato no menciona sigue siendo del usuario, por la regla de parada); y el encadenamiento de fases.
 
@@ -164,6 +164,8 @@ elección para la apertura. NO copia lo que ya está en la documentación: remit
 ella. Si supera ~60 líneas, está duplicando documentación y hay que podarlo.
 Cada candidato lleva una o dos líneas en lenguaje llano sobre qué cambiaría para
 el usuario, con el enfoque del M0 (S194).
+El prompt no lleva lecciones sin sede: cada lección cita la norma de `metodo.md`
+que la recoge, o se escribe antes en `metodo.md` (S217).
 El prompt lleva SIEMPRE, en su bloque de convenciones, esta línea literal (S204): «Decisiones:
 las reparte M-decisión de metodo.md (S204); sustituye a la viñeta "Fase a fase" de las reglas de
 trabajo. Lo reservado, lo confirmo yo; lo demás lo decides tú y lo registras como "Del
@@ -573,7 +575,7 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
 5. **Un proceso se identifica por el PID guardado al lanzarlo, por
    `/proc/<pid>/exe` o por el puerto**, nunca con `pkill -f` ni `pgrep -f` por
    patrón: el patrón casa con el envoltorio del propio guion, y la aplicación
-   empaquetada no se llama `java`. (`D-guion-pkill-casa-su-propio-envoltorio`)
+   empaquetada no se llama `java`. El backend de desarrollo se arranca y se para con `scripts/arrancar-backend.py` (S217), que guarda el grupo del proceso y no el del shell. (`D-guion-pkill-casa-su-propio-envoltorio`)
 6. **Todo parámetro de ruta se normaliza a absoluta nada más leerse, o el guion
    aborta si no lo es.** Hecho en `empaquetar-linux.sh` (`--salida`) y en
    `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
@@ -628,18 +630,26 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     «instantánea», el snapshot de la VM. Sale de S181 y S182.
     (`D-huella-captura-del-chat`)
 
-15. **Lo que un contrato o una guarda afirma sobre la forma del código o de un dato
-    se ha volcado antes** (S210). Forma es qué campos tiene un tipo, la firma y los
-    llamadores de un método, dónde se calcula algo, qué argumentos exige una orden y
-    qué trae un fichero de datos. Antes de escribir el contrato, el M2 o un F0 del
-    propio guion vuelca literal esa forma (campos, firma, llamadores, la orden ya
-    usada o su `--help`, la cabecera del fichero), y el contrato solo nombra
-    estructura que aparece en ese volcado; lo que no se ha volcado se escribe como
-    pregunta para el F0, no como hecho. Generaliza la norma 3 de los nombres a la
-    estructura. En S208 y S209 costó cuatro paradas: un verificador sin «totales»,
-    un `TotalesDTO` sin suma, una comparación que se creía previa y era posterior, y
-    una orden escrita sin `--base-url`. El F0 de volcado de forma de S209 cazó las
-    tres instancias de esa sesión. (`D-contrato-sobre-forma-no-medida`)
+15. **Un guion que construye o edita sobre una forma pasa antes por un T0: volcado, contrato con
+    citas y contraste** (S210; reescrita en S217). Forma es qué campos tiene un tipo, la firma y los
+    llamadores de un método, dónde se calcula algo, qué argumentos exige una orden, qué trae un fichero
+    de datos y, en un documento, cuántas columnas tiene una tabla y en qué línea exacta está un ancla.
+    El orden es fijo:
+    (a) un guion de solo lectura vuelca literal esa forma a la carpeta de material;
+    (b) el contrato afirma forma solo con su cita (`fichero:línea` del material), y lo que no la tiene
+        se escribe como pregunta;
+    (c) Claude Code contrasta el contrato punto por punto y clasifica cada punto como coincide,
+        discrepa o pregunta; una afirmación de forma sin cita cuenta como discrepancia;
+    (d) lo que no coincide se resuelve en una enmienda numerada antes de ejecutar.
+    Una duda de forma que surja después se resuelve con una regla («como sus vecinas en el volcado»), no con una posición o un texto reescritos desde el resumen: la aplica quien tiene el volcado delante.
+    En un cierre, la forma de cada región de un documento se deriva del commit de documentación
+    anterior (`git show <commit>:<fichero>`), y las ediciones se ensayan en seco sobre un clon del repo
+    (norma 8) antes de aplicarlas al árbol.
+    Sale de S208 y S209 (cuatro paradas) y de S211 a S215, donde la norma ya escrita no impidió siete
+    paradas más, porque el contrato podía afirmar sin citar. En S216 el contraste cazó sin coste dos de
+    las tres instancias de esa sesión, y la tercera tampoco costó parada. En S217, el contraste de su
+    propio contrato cazó seis afirmaciones del arquitecto sin cita o con una cita que no las sostenía,
+    todas antes de ejecutar. En su propio cierre, dos resoluciones de dudas escritas desde el resumen volvieron a fallar, y el ensayo paró antes de editar. (`D-contrato-sobre-forma-no-medida`, `D-forma-afirmada-sin-volcado`)
 16. **Lo que un documento dice haber declarado o calculado se puede leer donde lo
     dice** (S210). «Se declara», «queda escrito» o «censo completo» significan que
     existe una lista enumerada en un sitio que se cita (ruta, sección o commit), no
@@ -653,3 +663,5 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     la memoria de Claude Code; en S179, cómo se cuenta el umbral de Higiene/Método) y
     de los 748 px de la altura de la rejilla, que nadie pudo derivar después.
     (`D-declarado-sin-artefacto`, `D-748-sin-derivacion`)
+17. **Los pasos humanos de una verificación se dan de uno en uno, cada uno con lo que hay que
+    observar** (S215). Una lista entera produjo un «todo OK» sin los pasos hechos y dos paradas.
