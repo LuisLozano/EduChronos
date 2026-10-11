@@ -157,8 +157,17 @@ class Carga(unittest.TestCase):
         self.assertIn(texto, out)
 
     def test_codigo_del_json_ausente_en_la_base_aborta(self):
+        # Sin el aborto, plan() pide el id de ZOE y revienta con KeyError: el test lo convierte en
+        # un fallo que dice qué capacidad falta, en vez de un error (N8 de S216).
+        api = ApiFalsa()
         datos = con(profesores=GUARDIAS["profesores"] + [{"codigo": "ZOE", "guardiasOrdinarias": 1}])
-        self.aborta_sin_put(datos, "profesores del JSON que no existen en la base: ['ZOE']")
+        try:
+            rc, out = aplicar(api, datos)
+        except Exception as e:
+            self.fail("el código ausente no abortó en la prevalidación nombrándolo: %r" % e)
+        self.assertEqual((rc, api.escrituras, api.puts), (1, 0, []), out)
+        self.assertIn("ZOE", out)
+        self.assertIn("profesores del JSON que no existen en la base: ['ZOE']", out)
 
     def test_profesor_de_la_base_ausente_del_json_aborta(self):
         datos = con(profesores=[p for p in GUARDIAS["profesores"] if p["codigo"] != "BEA"])
