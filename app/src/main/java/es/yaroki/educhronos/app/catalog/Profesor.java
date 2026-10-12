@@ -36,6 +36,13 @@ public class Profesor {
     @Column(name = "guardias_ordinarias", nullable = false)
     private int guardiasOrdinarias;
 
+    /**
+     * Guardias de recreo semanales (S219, C-dato-guardias-especiales): un número, 0 si no tiene.
+     * Como mucho una por recreo; la prevalidación avisa si pasa del número de recreos.
+     */
+    @Column(name = "guardias_recreo", nullable = false)
+    private int guardiasRecreo;
+
     protected Profesor() {
         // requerido por JPA
     }
@@ -79,6 +86,14 @@ public class Profesor {
 
     public void setGuardiasOrdinarias(int guardiasOrdinarias) {
         this.guardiasOrdinarias = guardiasOrdinarias;
+    }
+
+    public int getGuardiasRecreo() {
+        return guardiasRecreo;
+    }
+
+    public void setGuardiasRecreo(int guardiasRecreo) {
+        this.guardiasRecreo = guardiasRecreo;
     }
 
     /**

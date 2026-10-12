@@ -12,13 +12,14 @@ package es.yaroki.educhronos.app.web.dto;
  * «sin total» y {@code PROFESOR}, también en el {@code PUT}, que reemplaza el estado entero.
  * {@code cargo} entra como {@code String} por la misma razón que {@code GrupoRequest.tipo}.
  *
- * <p>{@code guardiasOrdinarias} (S212, C-dato-guardias) también es opcional: ausente o null es 0,
- * también en el {@code PUT}.
+ * <p>{@code guardiasOrdinarias} (S212, C-dato-guardias) y {@code guardiasRecreo} (S219,
+ * C-dato-guardias-especiales) también son opcionales: ausente o null es 0, también en el {@code PUT}.
  */
 public record ProfesorRequest(
         String codigo,
         String nombreCompleto,
         Integer totalDeclarado,
         String cargo,
-        Integer guardiasOrdinarias) {
+        Integer guardiasOrdinarias,
+        Integer guardiasRecreo) {
 }

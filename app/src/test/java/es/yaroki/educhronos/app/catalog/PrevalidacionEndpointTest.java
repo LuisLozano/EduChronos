@@ -553,7 +553,61 @@ class PrevalidacionEndpointTest {
                                 + " clase sin “No puede”."));
     }
 
+    // ------------------------------------- guardias de recreo (S219, C-dato-guardias-especiales)
+
+    /**
+     * T-d: R sale de la jornada guardada. 5 días de 6 lectivos y 1 recreo, mínimo por recreo 2 y
+     * ninguna guardia de recreo: el GET da GUARDIAS_RECREO_INSUFICIENTES con demanda 2 × 5 = 10. Si R
+     * contara los tramos lectivos, la demanda sería 2 × 30 = 60.
+     */
+    @Test
+    void guardiasRecreo_jornadaConCincoRecreosYMinimoDos_errorDelCentroConDemandaDiez() throws Exception {
+        poblarCatalogoConRecreos();
+        configuracionRepository.save(new Configuracion("guardias.minimoPorRecreo", "2"));
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].severidad").value("ERROR"))
+                .andExpect(jsonPath("$[0].regla").value("GUARDIAS_RECREO_INSUFICIENTES"))
+                .andExpect(jsonPath("$[0].entidadCodigo").value("CENTRO"))
+                .andExpect(jsonPath("$[0].demanda").value(10))
+                .andExpect(jsonPath("$[0].disponible").value(0));
+    }
+
+    /** T-e: el mismo ERROR de recreo aborta la generación con 422, como el de las ordinarias. */
+    @Test
+    void guardiasRecreo_unErrorDeRecreoAbortaLaGeneracion() throws Exception {
+        poblarCatalogoConRecreos();
+        configuracionRepository.save(new Configuracion("guardias.minimoPorRecreo", "2"));
+        entityManager.flush();
+
+        mockMvc.perform(post("/api/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxSegundos\":5}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.causa").value("PREVALIDACION_FALLIDA"))
+                .andExpect(jsonPath("$.mensaje").value(containsString("hacen falta 10")));
+    }
+
     // ------------------------------------------------------------------- fixtures
+
+    /**
+     * La jornada de la propuesta (S219): 5 días de 3 lectivos, un recreo y 3 lectivos, con su
+     * {@code orden} global; el catálogo común sin tramos propios y sin actividades.
+     */
+    private void poblarCatalogoConRecreos() {
+        contextoBase(0);
+        Dia[] dias = {Dia.LUNES, Dia.MARTES, Dia.MIERCOLES, Dia.JUEVES, Dia.VIERNES};
+        int orden = 1;
+        for (Dia dia : dias) {
+            for (int i = 0; i < 7; i++) {
+                LocalTime inicio = LocalTime.of(8, 0).plusMinutes(60L * i);
+                tramoRepository.save(new TramoSemanal(dia, inicio, inicio.plusMinutes(60), i != 3, orden++, null));
+            }
+        }
+    }
 
     /**
      * 2 tramos lectivos en 2 días y una actividad DISTRIBUIDA de 3 repeticiones: (d)

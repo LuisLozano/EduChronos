@@ -6,8 +6,8 @@ package es.yaroki.educhronos.app.web.dto;
  * {@code GET/{id}}, el {@code PUT/{id}} y el {@code DELETE/{id}}.
  *
  * <p>{@code totalDeclarado} es null si no se ha declarado; {@code cargo} viaja como el
- * {@code name()} del {@code Cargo} (S203). {@code guardiasOrdinarias} (S212) siempre viene, 0 si
- * el profesor no tiene.
+ * {@code name()} del {@code Cargo} (S203). {@code guardiasOrdinarias} (S212) y
+ * {@code guardiasRecreo} (S219) siempre vienen, 0 si el profesor no tiene.
  *
  * <p>Solo datos, sin lógica: lo ensambla {@code ProfesorService}.
  */
@@ -17,5 +17,6 @@ public record ProfesorDTO(
         String nombreCompleto,
         Integer totalDeclarado,
         String cargo,
-        Integer guardiasOrdinarias) {
+        Integer guardiasOrdinarias,
+        Integer guardiasRecreo) {
 }

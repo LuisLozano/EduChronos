@@ -418,21 +418,23 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S206, S212, S213) Una base de la versión 0, 1, 3, 4 o 5 CON DATOS en todas las tablas de la 1
-     * llega a la 6 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos profesores y,
-     * para la 3, la 4 y la 5, se le pasan {@code 002.sql} y {@code 003.sql} reales (y {@code 004.sql}
-     * para la 4 y la 5, con una fila en {@code asignatura_aula}, y {@code 005.sql} para la 5) antes de
-     * sellarla. {@code 004.sql} añade el
+     * (S206, S212, S213, S219) Una base de la versión 0, 1, 3, 4, 5 o 6 CON DATOS en todas las tablas de
+     * la 1 llega a la 7 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos
+     * profesores y, para la 3 en adelante, se le pasan {@code 002.sql} y {@code 003.sql} reales (y
+     * {@code 004.sql} desde la 4, con una fila en {@code asignatura_aula}, {@code 005.sql} desde la 5 y
+     * {@code 006.sql} para la 6) antes de sellarla. {@code 004.sql} añade el
      * aula de referencia del grupo, los alumnos del subgrupo, el aula en uso, la tabla
      * {@code asignatura_aula} y las cuatro únicas; {@code 005.sql}, las guardias ordinarias del
-     * profesor; {@code 006.sql}, la tabla {@code guardia}. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
-     * nulas, {@code asignatura_aula} como estaba, los cuatro índices únicos presentes, la columna
-     * {@code guardias_ordinarias} a 0 en cada profesor, {@code guardia} vacía y con su única, y el
-     * esquema IGUAL al de una base nueva.
+     * profesor; {@code 006.sql}, la tabla {@code guardia}; {@code 007.sql}, las guardias de recreo del
+     * profesor. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
+     * nulas, {@code asignatura_aula} como estaba, los cuatro índices únicos presentes, las columnas
+     * {@code guardias_ordinarias} y {@code guardias_recreo} a 0 en cada profesor, {@code guardia} vacía
+     * y con su única, y el esquema IGUAL al de una base nueva. La de la versión 6 ya trae la tabla
+     * {@code guardia}, vacía: es la única tabla que la precondición deja vacía.
      */
     @ParameterizedTest(name = "desde la versión {0}")
-    @ValueSource(ints = {0, 1, 3, 4, 5})
-    void unaBaseConDatosLlegaALa6SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
+    @ValueSource(ints = {0, 1, 3, 4, 5, 6})
+    void unaBaseConDatosLlegaALa7SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v" + desde + ".db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
@@ -443,8 +445,11 @@ class PreparadorEsquemaTest {
                 if (desde >= 4) {
                     ScriptUtils.executeSqlScript(conexion, migracionReal(4));
                 }
-                if (desde == 5) {
+                if (desde >= 5) {
                     ScriptUtils.executeSqlScript(conexion, migracionReal(5));
+                }
+                if (desde == 6) {
+                    ScriptUtils.executeSqlScript(conexion, migracionReal(6));
                 }
             }
         }
@@ -465,16 +470,24 @@ class PreparadorEsquemaTest {
         assertThat(consulta(base, "select count(*) from pragma_table_info('profesor')"
                         + " where name = 'guardias_ordinarias'"))
                 .as("precondición: con la columna de guardias solo desde la 5")
-                .containsExactly(desde == 5 ? "1" : "0");
-        assertThat(tablas).as("precondición: sin la tabla de guardias").doesNotContain("guardia");
-        assertThat(filasAntes).as("precondición: ninguna tabla vacía").noneMatch(f -> f.endsWith("=0"));
+                .containsExactly(desde >= 5 ? "1" : "0");
+        assertThat(consulta(base, "select count(*) from pragma_table_info('profesor')"
+                        + " where name = 'guardias_recreo'"))
+                .as("precondición: sin la columna de guardias de recreo")
+                .containsExactly("0");
+        if (desde < 6) {
+            assertThat(tablas).as("precondición: sin la tabla de guardias").doesNotContain("guardia");
+        }
+        assertThat(filasAntes)
+                .as("precondición: ninguna tabla vacía, salvo guardia en la 6")
+                .noneMatch(f -> f.endsWith("=0") && !(desde == 6 && f.equals("guardia=0")));
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
         Path vacia = carpeta.resolve("vacia.db");
         real().preparar(origen(vacia));
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(6);
+        assertThat(version(base)).isEqualTo(7);
         assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
         List<String> filasDespues = new ArrayList<>();
         for (String tabla : tablas) {
@@ -496,6 +509,9 @@ class PreparadorEsquemaTest {
         assertThat(consulta(base, "select count(*), sum(guardias_ordinarias = 0) from profesor"))
                 .as("los dos profesores, con 0 guardias")
                 .containsExactly("2|2");
+        assertThat(consulta(base, "select count(*), sum(guardias_recreo = 0) from profesor"))
+                .as("los dos profesores, con 0 guardias de recreo")
+                .containsExactly("2|2");
         assertThat(indicesUnicos(base, "sesion")).contains("uk_sesion_horario_plaza_indice");
         assertThat(indicesUnicos(base, "sesion_bloqueada")).contains("uk_sesion_bloqueada_actividad_indice");
         assertThat(indicesUnicos(base, "aula_bloqueada")).contains("uk_aula_bloqueada_actividad_indice_plaza");
@@ -504,6 +520,33 @@ class PreparadorEsquemaTest {
         assertThat(BancoDeCursos.filas(base, "guardia")).as("guardia, vacía").isZero();
         assertThat(indicesUnicos(base, "guardia")).contains("uk_guardia_horario_profesor_tramo");
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+    }
+
+    /**
+     * (S219, T-f) Una base de la versión 6 con profesores que ya tienen guardias ordinarias llega a la 7
+     * con las guardias de recreo a 0 en todas las filas y las ordinarias intactas: 3 y 0, no 0 y 0,
+     * para que un {@code 007.sql} que reescribiera la columna vecina caiga.
+     */
+    @Test
+    void unaBaseDeLa6ConGuardiasLlegaALa7ConLasDeRecreoACero(@TempDir Path carpeta) throws Exception {
+        Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v6.db"), "2025/2026", false);
+        poblarTodasLasTablasDeLaVersion1(base);
+        ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
+        try (Connection conexion = BancoDeCursos.conectar(base)) {
+            for (int n = 2; n <= 6; n++) {
+                ScriptUtils.executeSqlScript(conexion, migracionReal(n));
+            }
+        }
+        ejecutar(base, "update profesor set guardias_ordinarias = 3 where id = 1", "PRAGMA user_version = 6");
+        assertThat(version(base)).as("precondición: versión 6").isEqualTo(6);
+
+        real().preparar(origen(base));
+
+        assertThat(version(base)).isEqualTo(7);
+        assertThat(consulta(base, "select codigo || '|' || guardias_ordinarias || '|' || guardias_recreo"
+                        + " from profesor order by id"))
+                .as("ordinarias intactas y de recreo a 0")
+                .containsExactly("MAT1|3|0", "LEN1|0|0");
     }
 
     /**

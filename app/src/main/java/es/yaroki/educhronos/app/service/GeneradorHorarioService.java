@@ -201,8 +201,10 @@ public class GeneradorHorarioService {
      * Los datos del cuadre de horas declaradas (S203, C-totales-y-cargo, T2.1): totales de
      * profesores y grupos y actividades que no son CLASE, por código. Desde S212
      * (C-dato-guardias), también las guardias ordinarias de cada profesor y el mínimo por tramo
-     * del centro, leído por {@link ConfiguracionGuardias}. Lo que el {@code ProblemaHorario} no
-     * lleva porque el solver no lo usa.
+     * del centro, leído por {@link ConfiguracionGuardias}. Desde S219 (C-dato-guardias-especiales),
+     * las guardias de recreo y el nombre de cada profesor, los dos mínimos por recreo y los recreos:
+     * los tramos no lectivos de la jornada, que el problema no trae porque {@code CatalogoMapper}
+     * los excluye. Lo que el {@code ProblemaHorario} no lleva porque el solver no lo usa.
      *
      * <p>Lo llaman la generación, junto a {@link #cargarProblema()}, y
      * {@code PrevalidacionService}, que lo pide por este bean. Solo lee columnas simples, sin
@@ -215,11 +217,15 @@ public class GeneradorHorarioService {
     public DatosCuadre cargarDatosCuadre() {
         Map<String, Integer> declaradasProfesor = new HashMap<>();
         Map<String, Integer> guardiasPorProfesor = new HashMap<>();
+        Map<String, Integer> guardiasRecreoPorProfesor = new HashMap<>();
+        Map<String, String> nombresProfesor = new HashMap<>();
         for (Profesor profesor : profesorRepository.findAll()) {
             if (profesor.getTotalDeclarado() != null) {
                 declaradasProfesor.put(profesor.getCodigo(), profesor.getTotalDeclarado());
             }
             guardiasPorProfesor.put(profesor.getCodigo(), profesor.getGuardiasOrdinarias());
+            guardiasRecreoPorProfesor.put(profesor.getCodigo(), profesor.getGuardiasRecreo());
+            nombresProfesor.put(profesor.getCodigo(), profesor.getNombreCompleto());
         }
         Map<String, Integer> declaradasGrupo = new HashMap<>();
         for (GrupoAdministrativo grupo : grupoRepository.findAll()) {
@@ -231,8 +237,15 @@ public class GeneradorHorarioService {
                 .filter(actividad -> actividad.getTipo() != TipoActividad.CLASE)
                 .map(Actividad::getCodigo)
                 .collect(Collectors.toSet());
+        int recreos = (int) tramoRepository.findAllByOrderByOrdenAsc().stream()
+                .filter(tramo -> !tramo.isEsLectivo())
+                .count();
         return new DatosCuadre(declaradasProfesor, declaradasGrupo, actividadesNoClase,
-                ConfiguracionGuardias.minimoPorTramo(configuracionRepository), guardiasPorProfesor);
+                ConfiguracionGuardias.minimoPorTramo(configuracionRepository), guardiasPorProfesor,
+                guardiasRecreoPorProfesor, nombresProfesor,
+                ConfiguracionGuardias.minimoPorRecreo(configuracionRepository),
+                ConfiguracionGuardias.minimoBibliotecaPorRecreo(configuracionRepository),
+                recreos);
     }
 
     /**

@@ -1242,6 +1242,161 @@ class PrevalidacionServiceTest {
         assertThat(soloRegla(avisos, SIN_HUECO)).isEmpty();
     }
 
+    // ------------------------------------- guardias de recreo (S219, C-dato-guardias-especiales)
+
+    private static final String BIBLIOTECA = PrevalidacionService.REGLA_BIBLIOTECA_SUPERA_RECREO;
+    private static final String RECREO_INSUFICIENTES = PrevalidacionService.REGLA_GUARDIAS_RECREO_INSUFICIENTES;
+    private static final String RECREO_EXCEDEN = PrevalidacionService.REGLA_GUARDIAS_RECREO_EXCEDEN;
+
+    /** (a), frontera: b = m = 1 no sale. Mata «>» → «>=». */
+    @Test
+    void bibliotecaSuperaRecreo_igualAlMinimo_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(1, 1, 5, Map.of("MAT1", 5), Map.of())), BIBLIOTECA)).isEmpty();
+    }
+
+    /** (a): b = 2 y m = 1, un ERROR del centro con demanda b y disponible m. */
+    @Test
+    void bibliotecaSuperaRecreo_unoPorEncima_unErrorDelCentro() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(1, 2, 5, Map.of("MAT1", 5), Map.of())), BIBLIOTECA)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+            assertThat(a.entidadCodigo()).isEqualTo("CENTRO");
+            assertThat(a.demanda()).isEqualTo(2);
+            assertThat(a.disponible()).isEqualTo(1);
+            assertThat(a.descripcion()).isEqualTo("El mínimo de guardias de biblioteca por recreo (2) es mayor"
+                    + " que el mínimo de guardias por recreo (1). Las de biblioteca cuentan dentro de las de"
+                    + " recreo: sube el mínimo por recreo o baja el de biblioteca.");
+        });
+    }
+
+    /** (b), frontera: con m = 7 y R = 5 hacen falta 35, y 35 bastan. Mata «<» → «<=». */
+    @Test
+    void guardiasRecreoInsuficientes_sumaIgualAlMinimoPorRecreos_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1),
+                new Profesor("MAT1", "Ana Ruiz"), new Profesor("LEN1", "Luis Gil"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(7, 0, 5, Map.of("MAT1", 5, "LEN1", 30), Map.of())), RECREO_INSUFICIENTES)).isEmpty();
+    }
+
+    /** (b): una por debajo, un ERROR del centro con demanda m × R y disponible S. */
+    @Test
+    void guardiasRecreoInsuficientes_unaPorDebajo_unErrorDelCentroConLosTresNumeros() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1),
+                new Profesor("MAT1", "Ana Ruiz"), new Profesor("LEN1", "Luis Gil"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(7, 0, 5, Map.of("MAT1", 5, "LEN1", 29), Map.of())), RECREO_INSUFICIENTES))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+                    assertThat(a.entidadCodigo()).isEqualTo("CENTRO");
+                    assertThat(a.demanda()).isEqualTo(35);
+                    assertThat(a.disponible()).isEqualTo(34);
+                    assertThat(a.descripcion()).isEqualTo("Las guardias de recreo de los profesores suman 34 y"
+                            + " hacen falta 35: 7 profesores de guardia en cada uno de los 5 recreos. Añade"
+                            + " guardias de recreo a los profesores o baja el mínimo por recreo.");
+                });
+    }
+
+    /** (b): mínimo 0 y ninguna guardia de recreo, nada de nada. */
+    @Test
+    void guardiasRecreoInsuficientes_minimoCeroYNingunaGuardia_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(PrevalidacionService.prevalidar(problema, recreo(0, 0, 5, Map.of("MAT1", 0), Map.of())))
+                .isEmpty();
+    }
+
+    /** (c), frontera: g = R = 5 cabe, una por recreo. Mata «>» → «>=». */
+    @Test
+    void guardiasRecreoExceden_tantasComoRecreos_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(0, 0, 5, Map.of("MAT1", 5), Map.of("MAT1", "Ana Ruiz"))), RECREO_EXCEDEN)).isEmpty();
+    }
+
+    /** (c): g = 6 y R = 5, un ERROR del profesor, por su código y con su nombre en el texto. */
+    @Test
+    void guardiasRecreoExceden_unaMasQueRecreos_unErrorDelProfesorConSuNombre() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(0, 0, 5, Map.of("MAT1", 6), Map.of("MAT1", "Ana Ruiz"))), RECREO_EXCEDEN))
+                .singleElement().satisfies(a -> {
+                    assertThat(a.severidad()).isEqualTo(Severidad.ERROR);
+                    assertThat(a.entidadCodigo()).isEqualTo("MAT1");
+                    assertThat(a.demanda()).isEqualTo(6);
+                    assertThat(a.disponible()).isEqualTo(5);
+                    assertThat(a.descripcion()).isEqualTo("Ana Ruiz tiene 6 guardias de recreo, pero solo hay 5"
+                            + " recreos y no puede hacer más de una en cada uno.");
+                });
+    }
+
+    /** (c): una jornada sin recreos y una guardia de recreo, ERROR con disponible 0. */
+    @Test
+    void guardiasRecreoExceden_sinRecreosYUnaGuardia_unError() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(0, 0, 0, Map.of("MAT1", 1), Map.of("MAT1", "Ana Ruiz"))), RECREO_EXCEDEN))
+                .extracting(AvisoPrevalidacion::severidad, AvisoPrevalidacion::entidadCodigo,
+                        AvisoPrevalidacion::demanda, AvisoPrevalidacion::disponible)
+                .containsExactly(tuple(Severidad.ERROR, "MAT1", 1, 0));
+    }
+
+    /** (c): ZZ1 y AA1 exceden y salen en orden de código, AA1 primero. */
+    @Test
+    void guardiasRecreoExceden_dosProfesores_enOrdenDeCodigo() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1),
+                new Profesor("ZZ1", "Zoe Zamora"), new Profesor("AA1", "Ana Alba"));
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema,
+                recreo(0, 0, 5, Map.of("ZZ1", 6, "AA1", 7), Map.of("ZZ1", "Zoe Zamora", "AA1", "Ana Alba"))),
+                RECREO_EXCEDEN))
+                .extracting(AvisoPrevalidacion::entidadCodigo, AvisoPrevalidacion::demanda)
+                .containsExactly(tuple("AA1", 7), tuple("ZZ1", 6));
+    }
+
+    /**
+     * (c): con seis profesores el orden de código no sale por casualidad del orden de un
+     * {@code Map.copyOf} (1 entre 720), así que una ordenación quitada cae siempre o casi.
+     */
+    @Test
+    void guardiasRecreoExceden_seisProfesores_enOrdenDeCodigo() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+        Map<String, Integer> porProfesor = Map.of("FF1", 6, "BB1", 6, "EE1", 6, "AA1", 6, "DD1", 6, "CC1", 6);
+
+        assertThat(soloRegla(PrevalidacionService.prevalidar(problema, recreo(0, 0, 5, porProfesor, Map.of())),
+                RECREO_EXCEDEN))
+                .extracting(AvisoPrevalidacion::entidadCodigo)
+                .containsExactly("AA1", "BB1", "CC1", "DD1", "EE1", "FF1");
+    }
+
+    /** (d): todo a 0, ningún aviso. */
+    @Test
+    void guardiasRecreo_todoACero_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(PrevalidacionService.prevalidar(problema, recreo(0, 0, 0, Map.of("MAT1", 0), Map.of())))
+                .isEmpty();
+    }
+
+    /** (d): biblioteca por encima y guardias que no llegan, salen las dos y en ese orden. */
+    @Test
+    void guardiasRecreo_bibliotecaEInsuficientes_salenLasDosEnOrden() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1), new Profesor("MAT1", "Ana Ruiz"));
+
+        assertThat(PrevalidacionService.prevalidar(problema, recreo(1, 2, 5, Map.of("MAT1", 0), Map.of())))
+                .extracting(AvisoPrevalidacion::regla)
+                .containsExactly(BIBLIOTECA, RECREO_INSUFICIENTES);
+    }
+
     // ------------------------------------------------------------------- helpers
 
     private static DatosCuadre datos(
@@ -1252,6 +1407,16 @@ class PrevalidacionServiceTest {
     /** Sin totales y todo CLASE, con el mínimo por tramo y las guardias de cada profesor (S212). */
     private static DatosCuadre guardias(int minimo, Map<String, Integer> porProfesor) {
         return new DatosCuadre(Map.of(), Map.of(), Set.of(), minimo, porProfesor);
+    }
+
+    /**
+     * Sin totales, todo CLASE y sin guardias ordinarias, con los mínimos por recreo y de biblioteca,
+     * los recreos y las guardias de recreo y el nombre de cada profesor (S219).
+     */
+    private static DatosCuadre recreo(int minimo, int biblioteca, int recreos,
+                                      Map<String, Integer> porProfesor, Map<String, String> nombres) {
+        return new DatosCuadre(Map.of(), Map.of(), Set.of(), 0, Map.of(), porProfesor, nombres,
+                minimo, biblioteca, recreos);
     }
 
     /** Solo tramos y profesores, sin grupos ni actividades (S212: las guardias del centro). */

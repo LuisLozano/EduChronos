@@ -238,7 +238,9 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   //     tramo a 0, como lo pondría el usuario. Sin esto vale el 4 por defecto y la
   //     prevalidación saca GUARDIAS_INSUFICIENTES. Va antes de abrir /horario, que es quien
   //     pide la prevalidación. Por `page.request`, que comparte baseURL y proxy de `/api`.
-  const minimo = await page.request.put('/api/configuracion-guardias', { data: { minimoPorTramo: 0 } });
+  const minimo = await page.request.put('/api/configuracion-guardias', {
+    data: { minimoPorTramo: 0, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 },
+  });
   expect(minimo.status(), await minimo.text()).toBe(200);
 
   // 9. Al horario por el enlace del header. En /configuracion es ÚNICO; desde la

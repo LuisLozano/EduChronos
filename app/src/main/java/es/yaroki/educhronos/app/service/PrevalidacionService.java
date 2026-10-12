@@ -177,6 +177,24 @@ public class PrevalidacionService {
      */
     public static final String REGLA_GUARDIAS_SIN_HUECO = "GUARDIAS_SIN_HUECO";
 
+    /**
+     * Las guardias de recreo de todos los profesores no llegan al mínimo de profesores de guardia
+     * en cada recreo (S219, C-dato-guardias-especiales). ERROR, ver {@link #guardiasRecreo}.
+     */
+    public static final String REGLA_GUARDIAS_RECREO_INSUFICIENTES = "GUARDIAS_RECREO_INSUFICIENTES";
+
+    /**
+     * El mínimo de guardias de biblioteca por recreo supera al mínimo de guardias por recreo, en el
+     * que va incluido (S219). ERROR, ver {@link #guardiasRecreo}.
+     */
+    public static final String REGLA_BIBLIOTECA_SUPERA_RECREO = "BIBLIOTECA_SUPERA_RECREO";
+
+    /**
+     * Un profesor tiene más guardias de recreo que recreos tiene la jornada: como mucho hace una en
+     * cada uno (S219). ERROR, ver {@link #guardiasRecreo}.
+     */
+    public static final String REGLA_GUARDIAS_RECREO_EXCEDEN = "GUARDIAS_RECREO_EXCEDEN";
+
     /** {@code entidadCodigo} de los avisos que son del centro y no de una entidad (S212). */
     public static final String ENTIDAD_CENTRO = "CENTRO";
 
@@ -233,7 +251,8 @@ public class PrevalidacionService {
      *
      * <p>El orden de salida es estable. Primero los ERROR: profesores (con sus guardias sin hueco,
      * S212), actividades, grupos, pines sobre DURA, clases sin aula posible, repartos de aulas
-     * imposibles (S207), carga de aulas (S209) y guardias insuficientes del centro (S212). Después
+     * imposibles (S207), carga de aulas (S209), guardias insuficientes del centro (S212) y guardias
+     * de recreo (S219). Después
      * los AVISO: tutorías (S8), cuadre de profesores y cuadre de
      * grupos. Dentro de cada bloque, el orden del problema. Así los hallazgos que abortan la
      * generación quedan agrupados al principio de la lista.
@@ -268,6 +287,7 @@ public class PrevalidacionService {
         avisos.addAll(repartoDeAulasImposible(problema, aulas));
         avisos.addAll(cargaDeAulasExcedida(problema, tramosLectivos, soloClase(datos)));
         avisos.addAll(guardiasInsuficientes(tramosLectivos, datos));
+        avisos.addAll(guardiasRecreo(datos));
         avisos.addAll(tutoriasSinTutor(problema));
         avisos.addAll(profesoresDescuadrados(problema, datos));
         avisos.addAll(gruposDescuadrados(problema, datos));
@@ -385,6 +405,77 @@ public class PrevalidacionService {
                             + " baja el mínimo por tramo."));
         }
         return List.of();
+    }
+
+    /**
+     * GUARDIAS DE RECREO (S219, C-dato-guardias-especiales) — tres ERROR. Con m el mínimo de
+     * profesores de guardia por recreo del centro, b el de biblioteca (que va dentro de m), R los
+     * recreos de la jornada, S la suma de las guardias de recreo de todos los profesores y g las de
+     * uno, salen en este orden:
+     *
+     * <ol>
+     *   <li>{@link #REGLA_BIBLIOTECA_SUPERA_RECREO} si b &gt; m: aviso del centro con
+     *       {@code demanda} = b y {@code disponible} = m;
+     *   <li>{@link #REGLA_GUARDIAS_RECREO_INSUFICIENTES} si S &lt; m × R: aviso del centro con
+     *       {@code demanda} = m × R y {@code disponible} = S. Con m = 0 no sale nunca;
+     *   <li>{@link #REGLA_GUARDIAS_RECREO_EXCEDEN} por cada profesor con g &gt; R, en orden de
+     *       código: {@code entidadCodigo} es el profesor, {@code demanda} = g y {@code disponible} = R.
+     *       Como mucho una guardia por recreo.
+     * </ol>
+     *
+     * <p>Un «recreo» es todo tramo no lectivo de la jornada (decisión del usuario en S219). R no se
+     * puede contar en el problema, que trae los tramos ya sin recreos ({@code CatalogoMapper} los
+     * excluye, como dice el cálculo de los techos en {@code prevalidar}): viene en
+     * {@link DatosCuadre#recreos()}. Con los dos mínimos a 0 y ninguna guardia de recreo, no sale nada.
+     */
+    private static List<AvisoPrevalidacion> guardiasRecreo(DatosCuadre datos) {
+        int minimo = datos.minimoGuardiasPorRecreo();
+        int biblioteca = datos.minimoBibliotecaPorRecreo();
+        int recreos = datos.recreos();
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        if (biblioteca > minimo) {
+            avisos.add(new AvisoPrevalidacion(
+                    Severidad.ERROR,
+                    REGLA_BIBLIOTECA_SUPERA_RECREO,
+                    ENTIDAD_CENTRO,
+                    biblioteca,
+                    minimo,
+                    "El mínimo de guardias de biblioteca por recreo (" + biblioteca
+                            + ") es mayor que el mínimo de guardias por recreo (" + minimo
+                            + "). Las de biblioteca cuentan dentro de las de recreo: sube el mínimo por"
+                            + " recreo o baja el de biblioteca."));
+        }
+        int necesarias = minimo * recreos;
+        int suma = datos.guardiasRecreoPorProfesor().values().stream().mapToInt(Integer::intValue).sum();
+        if (suma < necesarias) {
+            avisos.add(new AvisoPrevalidacion(
+                    Severidad.ERROR,
+                    REGLA_GUARDIAS_RECREO_INSUFICIENTES,
+                    ENTIDAD_CENTRO,
+                    necesarias,
+                    suma,
+                    "Las guardias de recreo de los profesores suman " + suma + " y hacen falta "
+                            + necesarias + ": " + minimo + " profesores de guardia en cada uno de los "
+                            + recreos + " recreos. Añade guardias de recreo a los profesores o"
+                            + " baja el mínimo por recreo."));
+        }
+        List<String> codigos = new ArrayList<>(datos.guardiasRecreoPorProfesor().keySet());
+        codigos.sort(Comparator.naturalOrder());
+        for (String codigo : codigos) {
+            int guardias = datos.guardiasRecreoPorProfesor().get(codigo);
+            if (guardias > recreos) {
+                String nombre = datos.nombresProfesor().getOrDefault(codigo, codigo);
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.ERROR,
+                        REGLA_GUARDIAS_RECREO_EXCEDEN,
+                        codigo,
+                        guardias,
+                        recreos,
+                        nombre + " tiene " + guardias + " guardias de recreo, pero solo hay " + recreos
+                                + " recreos y no puede hacer más de una en cada uno."));
+            }
+        }
+        return avisos;
     }
 
     /**

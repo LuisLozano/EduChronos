@@ -415,6 +415,61 @@ class ProfesorEndpointTest {
                 .andExpect(jsonPath("$.guardiasOrdinarias").value(0));
     }
 
+    // ------------------------------- guardias de recreo (S219, C-dato-guardias-especiales)
+
+    /** Alta con 2 ordinarias y 5 de recreo, valores distintos: un cruce de campos falla. */
+    @Test
+    void guardiasRecreo_altaConDosYCinco_elGetDevuelveDosYCinco() throws Exception {
+        MvcResult resultado = mockMvc.perform(post("/api/profesores")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConDosGuardias("MAT8", "Ada Lovelace", "2", "5")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(2))
+                .andExpect(jsonPath("$.guardiasRecreo").value(5))
+                .andReturn();
+        Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
+
+        mockMvc.perform(get("/api/profesores/" + id.longValue()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(2))
+                .andExpect(jsonPath("$.guardiasRecreo").value(5));
+    }
+
+    /** El PUT reemplaza: sin guardiasRecreo, un profesor con 5 vuelve a 0 y las ordinarias quedan. */
+    @Test
+    void guardiasRecreo_edicionSinElCampo_vuelveACero() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        mockMvc.perform(put("/api/profesores/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bodyConDosGuardias("MAT8", "Ada Lovelace", "2", "5")));
+
+        mockMvc.perform(put("/api/profesores/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConGuardias("MAT8", "Ada Lovelace", "2")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardiasRecreo").value(0));
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(jsonPath("$.guardiasOrdinarias").value(2))
+                .andExpect(jsonPath("$.guardiasRecreo").value(0));
+    }
+
+    /** PUT con guardiasRecreo −1: 400 que nombra el campo, y el profesor conserva las que tenía. */
+    @Test
+    void guardiasRecreo_edicionNegativa_400ConCampoEnMensaje() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        mockMvc.perform(put("/api/profesores/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bodyConDosGuardias("MAT8", "Ada Lovelace", "2", "5")));
+
+        mockMvc.perform(put("/api/profesores/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyConDosGuardias("MAT8", "Ada Lovelace", "2", "-1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("guardiasRecreo")));
+        mockMvc.perform(get("/api/profesores/" + id))
+                .andExpect(jsonPath("$.guardiasRecreo").value(5));
+    }
+
     /** Da de alta por la red y devuelve el id sintético asignado. */
     /** Una guardia del profesor {@code id} en un horario y un tramo nuevos. */
     private void guardiaDe(long id) {
@@ -457,6 +512,16 @@ class ProfesorEndpointTest {
     private static String bodyConGuardias(String codigo, String nombreCompleto, String guardias) {
         return "{\"codigo\":\"" + codigo + "\",\"nombreCompleto\":\"" + nombreCompleto + "\""
                 + ",\"guardiasOrdinarias\":" + guardias + "}";
+    }
+
+    /**
+     * {@code {"codigo":..,"nombreCompleto":..,"guardiasOrdinarias":..,"guardiasRecreo":..}}, las dos
+     * guardias en JSON (S219).
+     */
+    private static String bodyConDosGuardias(
+            String codigo, String nombreCompleto, String ordinarias, String recreo) {
+        return "{\"codigo\":\"" + codigo + "\",\"nombreCompleto\":\"" + nombreCompleto + "\""
+                + ",\"guardiasOrdinarias\":" + ordinarias + ",\"guardiasRecreo\":" + recreo + "}";
     }
 
     /** {@code {"codigo":..,"nombreCompleto":..}} */

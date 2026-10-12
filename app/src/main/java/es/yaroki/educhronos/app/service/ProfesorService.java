@@ -28,12 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>(d) {@code totalDeclarado} null o ≥ 0 (S203, {@link TotalDeclarado});
  *   <li>(e) {@code cargo} null o ausente es {@code PROFESOR}; si viene, parseable a
  *       {@link Cargo}, con un 400 que nombra el valor y lista los válidos;
- *   <li>(f) {@code guardiasOrdinarias} null o ausente es 0; si viene, ≥ 0, con un 400 que nombra
- *       el campo, como el total (S212, C-dato-guardias).
+ *   <li>(f) {@code guardiasOrdinarias} y {@code guardiasRecreo} null o ausentes son 0; si vienen, ≥ 0,
+ *       con un 400 que nombra el campo, como el total (S212, C-dato-guardias; S219,
+ *       C-dato-guardias-especiales).
  * </ul>
  *
  * <p>El {@code PUT} reemplaza el estado entero: un total, un cargo o unas guardias ausentes vuelven
- * a «sin total», a {@code PROFESOR} y a 0, no conservan lo que había (S203, D7; S212).
+ * a «sin total», a {@code PROFESOR} y a 0, no conservan lo que había (S203, D7; S212; S219).
  *
  * <p><b>Dos familias de excepción, dos códigos HTTP.</b> "No encontrado" lanza
  * {@link NoSuchElementException} (→ 404 en el controlador); un fallo de validación
@@ -81,7 +82,8 @@ public class ProfesorService {
         validar(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         Cargo cargo = parseCargo(peticion.cargo());
-        int guardias = guardiasOrdinarias(peticion.guardiasOrdinarias());
+        int guardias = guardias(peticion.guardiasOrdinarias(), "guardiasOrdinarias");
+        int guardiasRecreo = guardias(peticion.guardiasRecreo(), "guardiasRecreo");
         repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
             throw new IllegalArgumentException(
                     "Ya existe un profesor con codigo " + peticion.codigo());
@@ -90,6 +92,7 @@ public class ProfesorService {
         nuevo.setTotalDeclarado(total);
         nuevo.setCargo(cargo);
         nuevo.setGuardiasOrdinarias(guardias);
+        nuevo.setGuardiasRecreo(guardiasRecreo);
         Profesor guardado = repositorio.save(nuevo);
         return aDTO(guardado);
     }
@@ -107,7 +110,8 @@ public class ProfesorService {
         validar(peticion);
         Integer total = TotalDeclarado.validar(peticion.totalDeclarado());
         Cargo cargo = parseCargo(peticion.cargo());
-        int guardias = guardiasOrdinarias(peticion.guardiasOrdinarias());
+        int guardias = guardias(peticion.guardiasOrdinarias(), "guardiasOrdinarias");
+        int guardiasRecreo = guardias(peticion.guardiasRecreo(), "guardiasRecreo");
         repositorio.findByCodigo(peticion.codigo())
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
@@ -118,6 +122,7 @@ public class ProfesorService {
         entidad.setTotalDeclarado(total);
         entidad.setCargo(cargo);
         entidad.setGuardiasOrdinarias(guardias);
+        entidad.setGuardiasRecreo(guardiasRecreo);
         return aDTO(entidad);
     }
 
@@ -167,14 +172,15 @@ public class ProfesorService {
 
     /**
      * Regla (f): ausente o null es 0 (S212); un negativo es un 400 que nombra el campo, con el mismo
-     * mecanismo que {@link TotalDeclarado}, cuyo mensaje nombra el suyo.
+     * mecanismo que {@link TotalDeclarado}, cuyo mensaje nombra el suyo. La misma para las guardias
+     * ordinarias y las de recreo (S219); {@code campo} es el nombre que sale en el mensaje.
      */
-    private static int guardiasOrdinarias(Integer valor) {
+    private static int guardias(Integer valor, String campo) {
         if (valor == null) {
             return 0;
         }
         if (valor < 0) {
-            throw new IllegalArgumentException("guardiasOrdinarias no puede ser negativo: " + valor);
+            throw new IllegalArgumentException(campo + " no puede ser negativo: " + valor);
         }
         return valor;
     }
@@ -183,6 +189,6 @@ public class ProfesorService {
         return new ProfesorDTO(
                 profesor.getId(), profesor.getCodigo(), profesor.getNombreCompleto(),
                 profesor.getTotalDeclarado(), profesor.getCargo().name(),
-                profesor.getGuardiasOrdinarias());
+                profesor.getGuardiasOrdinarias(), profesor.getGuardiasRecreo());
     }
 }
