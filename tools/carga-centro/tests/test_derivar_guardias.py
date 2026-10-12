@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Tests de derivar-guardias.py (S216 T1) con páginas de profesor fabricadas aquí.
+"""Tests de derivar-guardias.py (S216 T1; S222 T1: recreo y funciones) con páginas de profesor fabricadas aquí.
 
 La leyenda «Profesores:» es un diccionario y pasa por el mapa_profesores de verdad; en main se
 sustituye mapa_de_paginas para no leer PDF.
@@ -47,9 +47,9 @@ def paginas_base():
         pagina(1, "Ana Uno, María José", [(1, 1, "G"), (1, 2, "Geo"), (2, 3, "Gbibl"), (3, 4, "GeH"), (4, 5, "G")],
                recreo=[(2, "GR"), (3, "GRBib"), (4, "G"), (5, "Gbibl")]),
         pagina(2, "Bea Dos Tres", [(5, 6, "Mat"), (2, 1, "conv"), (1, 6, "GRI")]),
-        pagina(3, "Cid Tres, Rosa", [(3, 3, "G"), (3, 2, "Gbibl"), (1, 1, "Lengua")]),
+        pagina(3, "Cid Tres, Rosa", [(3, 3, "G"), (3, 2, "Gbibl"), (1, 1, "Lengua")], recreo=[(1, "GRBib")]),
         pagina(4, "Lobato Sin Leyenda", [(1, 1, "RED")]),
-        pagina(5, "Ignorada Con Guardias", [(2, 2, "G"), (3, 3, "G"), (4, 4, "conv")]),
+        pagina(5, "Ignorada Con Guardias", [(2, 2, "G"), (3, 3, "G"), (4, 4, "conv")], recreo=[(1, "GR")]),
     ]
 
 
@@ -78,21 +78,42 @@ class Derivar(unittest.TestCase):
 
     def test_los_de_cero_guardias_salen(self):
         r = derivar()
-        self.assertIn({"codigo": "BEA", "guardiasOrdinarias": 0}, r["profesores"])
-        self.assertIn({"codigo": "PRV", "guardiasOrdinarias": 0}, r["profesores"])
+        self.assertIn({"codigo": "BEA", "guardiasOrdinarias": 0, "guardiasRecreo": 0}, r["profesores"])
+        self.assertIn({"codigo": "PRV", "guardiasOrdinarias": 0, "guardiasRecreo": 0}, r["profesores"])
 
-    def test_no_puede_con_motivo_literal_y_ordenado(self):
-        self.assertEqual(derivar()["noPuede"], [
-            {"codigo": "ANA", "dia": 2, "ordenEnDia": 3, "motivo": "Gbibl"},
-            {"codigo": "BEA", "dia": 2, "ordenEnDia": 1, "motivo": "conv"},
-            {"codigo": "CID", "dia": 3, "ordenEnDia": 2, "motivo": "Gbibl"},
+    def test_recreo_cuenta_gr_y_grbib_y_nada_mas(self):
+        # K1 (S222). ANA: GR y GRBib cuentan, G y Gbibl en «recreo» no; CID solo tiene GRBib (M1).
+        self.assertEqual({p["codigo"]: p["guardiasRecreo"] for p in derivar()["profesores"]},
+                         {"ANA": 2, "BEA": 0, "CID": 1, "PRV": 0})
+
+    def test_recreo_dia_fuera_de_rango_aborta(self):
+        paginas = paginas_base()
+        paginas[1]["recreo"].append({"dia": 6, "asignatura": "GR", "grupos": "", "aula": None})
+        self.aborta("recreo fuera de rango", paginas=paginas)
+
+    def test_dos_guardias_de_recreo_el_mismo_dia_aborta(self):
+        # El volcado no trae franja: un recreo es un día (s218/m2/INFORME-M2.md:41).
+        paginas = paginas_base()
+        paginas[0]["recreo"].append({"dia": 2, "asignatura": "GRBib", "grupos": "", "aula": None})
+        self.aborta("dos guardias de recreo el mismo día: [2]", paginas=paginas)
+
+    def test_funciones_una_por_profesor_y_asignatura(self):
+        # K2 (S222): Gbibl y conv ya no son «No puede».
+        r = derivar()
+        self.assertNotIn("noPuede", r)
+        self.assertEqual(r["funciones"], [
+            {"profesor": "ANA", "asignatura": "Gbibl", "celdas": [{"dia": 2, "ordenEnDia": 3}]},
+            {"profesor": "BEA", "asignatura": "conv", "celdas": [{"dia": 2, "ordenEnDia": 1}]},
+            {"profesor": "CID", "asignatura": "Gbibl", "celdas": [{"dia": 3, "ordenEnDia": 2}]},
         ])
 
-    def test_no_puede_ordenado_por_codigo_dia_y_tramo(self):
+    def test_funciones_ordenadas_y_celdas_por_dia_y_tramo(self):
         paginas = paginas_base()
         paginas[0]["celdas"] = [celda(4, 2, "Gbibl"), celda(1, 5, "conv"), celda(1, 3, "Gbibl")]
-        self.assertEqual([(x["dia"], x["ordenEnDia"]) for x in derivar(paginas)["noPuede"] if x["codigo"] == "ANA"],
-                         [(1, 3), (1, 5), (4, 2)])
+        self.assertEqual([f for f in derivar(paginas)["funciones"] if f["profesor"] == "ANA"], [
+            {"profesor": "ANA", "asignatura": "Gbibl", "celdas": [{"dia": 1, "ordenEnDia": 3}, {"dia": 4, "ordenEnDia": 2}]},
+            {"profesor": "ANA", "asignatura": "conv", "celdas": [{"dia": 1, "ordenEnDia": 5}]},
+        ])
 
     def test_profesores_por_codigo_aunque_las_paginas_vengan_en_otro_orden(self):
         r = derivar(list(reversed(paginas_base())))
@@ -107,7 +128,8 @@ class Derivar(unittest.TestCase):
 
     def test_omitidos_con_sus_cuentas(self):
         self.assertEqual(derivar()["omitidos"],
-                         [{"pagina": 5, "titulo": "Ignorada Con Guardias", "G": 2, "Gbibl": 0, "conv": 1}])
+                         [{"pagina": 5, "titulo": "Ignorada Con Guardias", "G": 2, "Gbibl": 0, "conv": 1,
+                           "GR": 1, "GRBib": 0}])
 
     def aborta(self, texto, **kw):
         with self.assertRaises(dg.dc.Aborto) as ctx:
@@ -193,7 +215,7 @@ class Main(unittest.TestCase):
             self.assertNotIn(t, texto)
             salida = json.loads(texto)
             self.assertEqual(texto, json.dumps(salida, ensure_ascii=False, indent=1))
-            self.assertEqual(list(salida), ["_meta", "profesores", "noPuede"])
+            self.assertEqual(list(salida), ["_meta", "profesores", "funciones"])
             self.assertEqual(list(salida["_meta"]), ["generadoPor", "entradas", "omitidos"])
             self.assertEqual(salida["_meta"]["generadoPor"], "tools/carga-centro/derivar-guardias.py")
             entradas = salida["_meta"]["entradas"]

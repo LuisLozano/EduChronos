@@ -277,325 +277,421 @@
     "titulo": "Chacón Muñoz, Isabel María",
     "G": 2,
     "Gbibl": 0,
-    "conv": 0
+    "conv": 0,
+    "GR": 0,
+    "GRBib": 0
    },
    {
     "pagina": 32,
     "titulo": "Mateos-Cañero Maraver, Lourdes",
     "G": 0,
     "Gbibl": 0,
-    "conv": 0
+    "conv": 0,
+    "GR": 0,
+    "GRBib": 0
    }
   ]
  },
  "profesores": [
   {
    "codigo": "BIO3t",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "BYG1",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "BYG2",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 3
   },
   {
    "codigo": "CLA1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "DIB1",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 2
   },
   {
    "codigo": "DIB2",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 2
   },
   {
    "codigo": "ECO",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "EFI1",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "EFI2",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "EFI3",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "FIL1",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIL2",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIL3",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIS1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIS2",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIS3",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FIS4",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FOL2",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FOL4",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "FRA1T",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH1",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH2",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH3",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH4",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH5",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "GH6",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "INF1",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING1",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING2",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING3",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING4",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING5",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ING6",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN2",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN3",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 2
   },
   {
    "codigo": "LEN4",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 1
   },
   {
    "codigo": "LEN5",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN6",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN7",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN8",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "LEN9",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT1",
-   "guardiasOrdinarias": 2
+   "guardiasOrdinarias": 2,
+   "guardiasRecreo": 2
   },
   {
    "codigo": "MAT2",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 2
   },
   {
    "codigo": "MAT3",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT4",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT5",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT6",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT7",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MAT8",
-   "guardiasOrdinarias": 3
+   "guardiasOrdinarias": 3,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "MUS1",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "ORI1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "PAU1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "PAU2",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "PROV1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "REL1",
-   "guardiasOrdinarias": 1
+   "guardiasOrdinarias": 1,
+   "guardiasRecreo": 4
   },
   {
    "codigo": "REV",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "TEC1",
-   "guardiasOrdinarias": 0
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "TEC2",
-   "guardiasOrdinarias": 4
+   "guardiasOrdinarias": 4,
+   "guardiasRecreo": 0
   },
   {
    "codigo": "TEC3",
-   "guardiasOrdinarias": 5
+   "guardiasOrdinarias": 5,
+   "guardiasRecreo": 0
   }
  ],
- "noPuede": [
+ "funciones": [
   {
-   "codigo": "CLA1",
-   "dia": 4,
-   "ordenEnDia": 3,
-   "motivo": "conv"
+   "profesor": "CLA1",
+   "asignatura": "conv",
+   "celdas": [
+    {
+     "dia": 4,
+     "ordenEnDia": 3
+    }
+   ]
   },
   {
-   "codigo": "LEN1",
-   "dia": 4,
-   "ordenEnDia": 3,
-   "motivo": "conv"
+   "profesor": "LEN1",
+   "asignatura": "conv",
+   "celdas": [
+    {
+     "dia": 4,
+     "ordenEnDia": 3
+    }
+   ]
   },
   {
-   "codigo": "LEN2",
-   "dia": 4,
-   "ordenEnDia": 3,
-   "motivo": "Gbibl"
+   "profesor": "LEN2",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 4,
+     "ordenEnDia": 3
+    }
+   ]
   },
   {
-   "codigo": "LEN3",
-   "dia": 3,
-   "ordenEnDia": 4,
-   "motivo": "Gbibl"
+   "profesor": "LEN3",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 3,
+     "ordenEnDia": 4
+    },
+    {
+     "dia": 5,
+     "ordenEnDia": 3
+    }
+   ]
   },
   {
-   "codigo": "LEN3",
-   "dia": 5,
-   "ordenEnDia": 3,
-   "motivo": "Gbibl"
+   "profesor": "LEN4",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 1,
+     "ordenEnDia": 1
+    }
+   ]
   },
   {
-   "codigo": "LEN4",
-   "dia": 1,
-   "ordenEnDia": 1,
-   "motivo": "Gbibl"
+   "profesor": "LEN5",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 2,
+     "ordenEnDia": 1
+    }
+   ]
   },
   {
-   "codigo": "LEN5",
-   "dia": 2,
-   "ordenEnDia": 1,
-   "motivo": "Gbibl"
+   "profesor": "LEN6",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 1,
+     "ordenEnDia": 5
+    },
+    {
+     "dia": 5,
+     "ordenEnDia": 4
+    }
+   ]
   },
   {
-   "codigo": "LEN6",
-   "dia": 1,
-   "ordenEnDia": 5,
-   "motivo": "Gbibl"
+   "profesor": "LEN7",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 5,
+     "ordenEnDia": 2
+    }
+   ]
   },
   {
-   "codigo": "LEN6",
-   "dia": 5,
-   "ordenEnDia": 4,
-   "motivo": "Gbibl"
-  },
-  {
-   "codigo": "LEN7",
-   "dia": 5,
-   "ordenEnDia": 2,
-   "motivo": "Gbibl"
-  },
-  {
-   "codigo": "LEN8",
-   "dia": 3,
-   "ordenEnDia": 4,
-   "motivo": "Gbibl"
+   "profesor": "LEN8",
+   "asignatura": "Gbibl",
+   "celdas": [
+    {
+     "dia": 3,
+     "ordenEnDia": 4
+    }
+   ]
   }
  ]
 }
