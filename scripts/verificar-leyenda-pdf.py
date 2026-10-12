@@ -55,6 +55,13 @@ horario, una vez cada uno, con su «CÓDIGO — nombre» de catálogo, en orden 
 bloque de asignaturas. Sin guardias, sin leyenda. Que esos profesores son los que aparecen en
 las celdas lo coteja `oraculo-exportacion.py --vista guardias` contra la misma tabla.
 
+DESDE S221 (C-exportacion-guardias-recreo, D7): la página de guardias se titula «Guardias»
+(X4) y lleva también las guardias de recreo y de biblioteca, en las bandas. La consulta lee
+`guardia.tipo` (una base anterior al esquema 8 no lo tiene: todas son ORDINARIA) y cuenta
+aparte a quien tiene ordinarias y a quien solo tiene de recreo; lo esperado en la leyenda son
+los profesores que aparecen en la página, que son los de los dos grupos. «Biblioteca», como
+«Guardia», no es una asignatura y no se busca en la leyenda de la página de profesor.
+
 Uso:
   verificar-leyenda-pdf.py <copia.db> <horario_id> <fichero.pdf> <grupo|profesor|aula|guardias>
 """
@@ -150,25 +157,38 @@ def datos(ruta_db, horario_id, vista):
     return porRecurso, nAsig, nProf
 
 
-TITULO_GUARDIAS = "Guardias ordinarias"
+TITULO_GUARDIAS = "Guardias"          # X4 (S221); hasta S220, «Guardias ordinarias»
+TIPOS_GUARDIA = ("ORDINARIA", "RECREO", "BIBLIOTECA")
 
 
 def verificar_guardias(ruta_db, horario_id, ruta_pdf):
-    """La leyenda de la página de guardias contra la tabla `guardia` (S215 T2, E7)."""
+    """La leyenda de la página de guardias contra la tabla `guardia` (S215 T2, E7; el tipo,
+    S221)."""
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
     try:
         nProf = dict(con.execute("select codigo, nombre_completo from profesor"))
         hay_tabla = con.execute("select count(*) from sqlite_master where type = 'table' "
                                 "and name = 'guardia'").fetchone()[0]
-        esperados = sorted({c for (c,) in con.execute(
-            "select p.codigo from guardia g join profesor p on p.id = g.profesor_id "
-            "where g.horario_id = ?", (horario_id,))}) if hay_tabla else []
+        con_tipo = hay_tabla and any(
+            c[1] == "tipo" for c in con.execute("pragma table_info(guardia)"))
+        filas = list(con.execute(
+            "select p.codigo, %s from guardia g join profesor p on p.id = g.profesor_id "
+            "where g.horario_id = ?" % ("g.tipo" if con_tipo else "'ORDINARIA'"),
+            (horario_id,))) if hay_tabla else []
     finally:
         con.close()
+    desconocidos = sorted({t for _, t in filas if t not in TIPOS_GUARDIA})
+    if desconocidos:
+        raise SystemExit("FALLO: guardias con un tipo desconocido: %s"
+                         % ", ".join(map(repr, desconocidos)))
+    con_ordinaria = {c for c, t in filas if t == "ORDINARIA"}
+    solo_recreo = {c for c, _ in filas} - con_ordinaria
+    esperados = sorted(con_ordinaria | solo_recreo)
     paginas = int(re.search(r"Pages:\s+(\d+)", subprocess.run(
         ["pdfinfo", ruta_pdf], capture_output=True, text=True, check=True).stdout).group(1))
     print("--- LEYENDA (vista guardias, %d páginas) ---" % paginas)
-    print("  profesores con guardia en la BD %d" % len(esperados))
+    print("  profesores con guardia en la BD %d (con ordinarias %d, solo de recreo %d)"
+          % (len(esperados), len(con_ordinaria), len(solo_recreo)))
     malas = []
     if paginas != 1:
         malas.append("la página de guardias es UNA y el fichero trae %d" % paginas)
@@ -193,7 +213,8 @@ def verificar_guardias(ruta_db, horario_id, ruta_pdf):
     sobran = sorted(set(leidos) - set(esperados))
     repetidos = sorted({c for c in leidos if leidos.count(c) > 1})
     for cod in faltan:
-        malas.append("falta el profesor %r" % cod)
+        malas.append("falta el profesor %r%s"
+                     % (cod, " (solo tiene guardias de recreo)" if cod in solo_recreo else ""))
     for cod in sobran:
         malas.append("sobra el profesor %r, sin guardia en el horario" % cod)
     for cod in repetidos:
