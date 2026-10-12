@@ -280,6 +280,50 @@ class HorarioCsvTest {
         assertThat(columna(lineas[2], "Profesores")).isEqualTo("AAA1");
     }
 
+    // ------------------------------------------------------------------ S221 · guardias de recreo (D4, X5)
+
+    /**
+     * D4 y X5: una fila de recreo lleva Día como las demás, «Recreo» en Tramo para el recreo 1 y
+     * «Recreo n» para el n-ésimo, «Guardia» (RECREO) o «Biblioteca» (BIBLIOTECA) en «Nombre
+     * asignatura», el código en «Profesores» y todo lo demás vacío. Línea entera, byte a byte.
+     */
+    @Test
+    void lasFilasDeRecreoLlevanRecreoORecreoNYGuardiaOBiblioteca() {
+        HorarioProyeccionDTO proyeccion = new HorarioProyeccionDTO(
+                1L, "Horario de prueba", "BORRADOR", "OPTIMAL", 0.0, 0.0,
+                "2026-09-11T00:00:00Z", List.of(),
+                List.of(new GuardiaVistaDTO("P-ORD", 1, 2),
+                        new GuardiaVistaDTO("P-REC", 1, null, 1, GuardiaVistaDTO.RECREO),
+                        new GuardiaVistaDTO("P-BIB", 1, null, 1, GuardiaVistaDTO.BIBLIOTECA),
+                        new GuardiaVistaDTO("P-DOS", 3, null, 2, GuardiaVistaDTO.RECREO)));
+
+        assertThat(lineas(HorarioCsv.escribir(proyeccion))).containsExactly(
+                CABECERA,
+                "1;2;;Guardia;P-ORD;;;;;;;",
+                "1;Recreo;;Guardia;P-REC;;;;;;;",
+                "1;Recreo;;Biblioteca;P-BIB;;;;;;;",
+                "3;Recreo 2;;Guardia;P-DOS;;;;;;;");
+    }
+
+    /**
+     * D4: las filas de recreo van DETRÁS de las ordinarias, en el orden de la lista, aunque su
+     * día sea anterior: el CSV no las intercala por día.
+     */
+    @Test
+    void lasFilasDeRecreoNoSeIntercalanConLasOrdinariasPorDia() {
+        HorarioProyeccionDTO proyeccion = new HorarioProyeccionDTO(
+                1L, "Horario de prueba", "BORRADOR", "OPTIMAL", 0.0, 0.0,
+                "2026-09-11T00:00:00Z", List.of(sesion(7L, 1, 4, "MAT", "Matematicas")),
+                List.of(new GuardiaVistaDTO("P-ORD", 2, 1),
+                        new GuardiaVistaDTO("P-REC", 1, null, 1, GuardiaVistaDTO.RECREO)));
+
+        String[] lineas = lineas(HorarioCsv.escribir(proyeccion));
+
+        assertThat(lineas).hasSize(4);
+        assertThat(lineas[2]).isEqualTo("2;1;;Guardia;P-ORD;;;;;;;");
+        assertThat(lineas[3]).isEqualTo("1;Recreo;;Guardia;P-REC;;;;;;;");
+    }
+
     // ------------------------------------------------------------------ fixture
 
     private static HorarioProyeccionDTO proyeccion(List<SesionVistaDTO> sesiones) {

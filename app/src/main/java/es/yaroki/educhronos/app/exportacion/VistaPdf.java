@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.exportacion;
 
+import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +34,20 @@ public enum VistaPdf {
     AULA("aula"),
 
     /**
-     * Una sola página con las guardias ordinarias del horario (S215): en cada celda, los
-     * códigos de los profesores de guardia, y en la leyenda sus nombres. Ver
-     * {@link HorarioPdf} para lo que la dibuja.
+     * Una sola página con las guardias del horario (S215; las de recreo, S221): en cada celda,
+     * los códigos de los profesores de guardia, en cada recreo los de recreo y, aparte, los de
+     * biblioteca, y en la leyenda sus nombres. Ver {@link HorarioPdf} para lo que la dibuja.
      */
     GUARDIAS("guardias");
 
-    /** Título de la página de guardias (D2). */
-    static final String TITULO_GUARDIAS = "Guardias ordinarias";
+    /** Título de la página de guardias (D2; «Guardias» desde S221, X4). */
+    static final String TITULO_GUARDIAS = "Guardias";
+
+    /**
+     * Delante de los códigos de biblioteca en la celda de un recreo de la página de guardias,
+     * que van en línea aparte (S221, X3): «Biblioteca: COD».
+     */
+    static final String PREFIJO_BIBLIOTECA = "Biblioteca: ";
 
     /** Clave de lectura de la página de guardias (enmienda ED2). */
     static final String CLAVE_GUARDIAS = "Profesores de guardia";
@@ -71,6 +78,24 @@ public enum VistaPdf {
      * asignatura y no tiene línea de leyenda.
      */
     static final String ROTULO_GUARDIA = "Guardia";
+
+    /**
+     * La palabra con la que la exportación nombra una guardia de BIBLIOTECA (S221, X2), en los
+     * mismos sitios que {@link #ROTULO_GUARDIA}. Una de RECREO se nombra como una ordinaria:
+     * lo que la distingue es dónde va, un recreo y no un tramo de clase.
+     */
+    static final String ROTULO_BIBLIOTECA = "Biblioteca";
+
+    /**
+     * El rótulo del recreo: el texto de su banda en el PDF y el «Tramo» de una fila de recreo en
+     * el CSV, que para el recreo n &gt; 1 lleva el número detrás (S221, X5).
+     */
+    static final String ROTULO_RECREO = "Recreo";
+
+    /** El rótulo de una guardia según su tipo: «Biblioteca» o «Guardia» (S221, X1 y X2). */
+    static String rotuloDe(GuardiaVistaDTO guardia) {
+        return GuardiaVistaDTO.BIBLIOTECA.equals(guardia.tipo()) ? ROTULO_BIBLIOTECA : ROTULO_GUARDIA;
+    }
 
     /**
      * Un bloque de la leyenda del pie: su encabezado en negrita y sus líneas ya

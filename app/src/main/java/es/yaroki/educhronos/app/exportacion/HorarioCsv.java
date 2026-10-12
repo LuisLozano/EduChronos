@@ -39,6 +39,12 @@ import java.util.List;
  * quien lea el fichero sin filtrar encuentre las clases donde estaban, y para que una fila
  * de guardia se distinga sin mirar más que su «Sesión» vacía.
  *
+ * <p><b>Guardias de recreo (S221, C-exportacion-guardias-recreo, D4).</b> Las de RECREO y de
+ * BIBLIOTECA van detrás de las ordinarias, porque así vienen en la proyección, y con la misma
+ * forma salvo dos columnas: «Tramo» es {@value VistaPdf#ROTULO_RECREO} para el recreo 1 del día
+ * y «Recreo n» para el n-ésimo, y «Nombre asignatura» es {@value VistaPdf#ROTULO_BIBLIOTECA} en
+ * las de biblioteca. Un horario sin guardias de recreo sale con los mismos bytes que antes.
+ *
  * <p>Escape RFC 4180, y sólo cuando hace falta: un campo va entre comillas si y sólo
  * si contiene el separador, una comilla doble o un salto de línea, y dentro cada
  * comilla se dobla. Espacios y tildes NO entrecomillan —no lo necesitan, y hacerlo
@@ -91,9 +97,9 @@ public final class HorarioCsv {
         for (GuardiaVistaDTO guardia : proyeccion.guardias()) {
             registro(texto,
                     Integer.toString(guardia.dia()),
-                    Integer.toString(guardia.tramo()),
+                    tramoDe(guardia),
                     "",
-                    VistaPdf.ROTULO_GUARDIA,
+                    VistaPdf.rotuloDe(guardia),
                     unir(List.of(guardia.profesorCodigo()), "Profesores"),
                     "", "", "", "", "", "", "");
         }
@@ -103,6 +109,19 @@ public final class HorarioCsv {
         System.arraycopy(BOM, 0, salida, 0, BOM.length);
         System.arraycopy(cuerpo, 0, salida, BOM.length, cuerpo.length);
         return salida;
+    }
+
+    /**
+     * El «Tramo» de una fila de guardia (S221, X5): el ordenEnDia de una ORDINARIA, como el de
+     * una sesión; «Recreo» para el recreo 1 de su día y «Recreo n» para el n-ésimo.
+     */
+    private static String tramoDe(GuardiaVistaDTO guardia) {
+        if (!guardia.esDeRecreo()) {
+            return Integer.toString(guardia.tramo());
+        }
+        return guardia.recreo() == 1
+                ? VistaPdf.ROTULO_RECREO
+                : VistaPdf.ROTULO_RECREO + " " + guardia.recreo();
     }
 
     /** Una línea: los campos escapados, unidos por el separador, y CRLF al final. */
