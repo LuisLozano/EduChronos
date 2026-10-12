@@ -8,7 +8,7 @@
 -- CREATE TABLE es el DDL que Hibernate genera VERBATIM (schema-generation.scripts
 -- con el community SQLiteDialect 7.4.1); lo ÚNICO añadido son las FK inline (35 en S213),
 -- que el dialecto NO emite (de ahí que hasta 8.5-C1 no hubiera integridad real).
--- Desde las migraciones (S201, S203, S206, S212, S219), las columnas añadidas con ADD COLUMN se
+-- Desde las migraciones (S201, S203, S206, S212, S219, S220), las columnas añadidas con ADD COLUMN se
 -- escriben aquí tal como las deja SQLite tras la migración, para que una base nueva y
 -- una migrada tengan el mismo sqlite_master: grupo_administrativo.aula_referencia_id
 -- lleva su FK en la columna, no al final.
@@ -46,7 +46,7 @@ create table if not exists aula (capacidad integer, planta integer, id integer, 
 create table if not exists aula_bloqueada (indice integer not null, actividad_id bigint not null, aula_id bigint not null, id integer, plaza_id bigint not null, primary key (id), foreign key (actividad_id) references actividad(id), foreign key (aula_id) references aula(id), foreign key (plaza_id) references plaza(id));
 create table if not exists configuracion (clave varchar(255) not null, valor varchar(255) not null, primary key (clave));
 create table if not exists grupo_administrativo (grupo_padre_id bigint, id integer, nivel_id bigint not null, codigo varchar(255) not null unique, tipo varchar(255) not null check ((tipo in ('ORDINARIO','DIVERSIFICACION_PDC','VIRTUAL_OPTATIVA'))), total_declarado integer, aula_referencia_id integer references aula(id), primary key (id), foreign key (grupo_padre_id) references grupo_administrativo(id), foreign key (nivel_id) references nivel(id));
-create table if not exists guardia (horario_id bigint not null, id integer, profesor_id bigint not null, tramo_id bigint not null, primary key (id), foreign key (horario_id) references horario_generado(id) on delete cascade, foreign key (profesor_id) references profesor(id), foreign key (tramo_id) references tramo_semanal(id));
+create table if not exists guardia (horario_id bigint not null, id integer, profesor_id bigint not null, tramo_id bigint not null, tipo varchar(255) not null default 'ORDINARIA' check ((tipo in ('ORDINARIA','RECREO','BIBLIOTECA'))), primary key (id), foreign key (horario_id) references horario_generado(id) on delete cascade, foreign key (profesor_id) references profesor(id), foreign key (tramo_id) references tramo_semanal(id));
 create table if not exists horario_generado (cota_inferior float, objetivo float, fecha_generacion timestamp not null, id integer, estado varchar(255) not null check ((estado in ('BORRADOR','DEFINITIVO','DESCARTADO'))), estado_solver varchar(255) not null, nombre varchar(255) not null, primary key (id));
 create table if not exists nivel (orden integer not null, id integer, codigo varchar(255) not null unique, primary key (id));
 create table if not exists plaza (actividad_id bigint not null, asignatura_id bigint not null, aula_fija_id bigint, id integer, codigo varchar(255) not null unique, primary key (id), foreign key (actividad_id) references actividad(id) on delete cascade, foreign key (asignatura_id) references asignatura(id), foreign key (aula_fija_id) references aula(id));
