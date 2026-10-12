@@ -30,6 +30,9 @@ export const ETIQUETA_CARGO: Record<Cargo, string> = {
  *
  * <p>`guardiasOrdinarias` (S212, C-dato-guardias) es OBLIGATORIO: el backend lo manda siempre, 0 si
  * el profesor no tiene, y los fixtures tipados de los specs lo llevan.
+ *
+ * <p>`guardiasRecreo` (S219, C-dato-guardias-especiales) es OPCIONAL en el tipo, por el precedente
+ * de S203: los specs anteriores no lo llevan. El servidor lo manda siempre, 0 si no tiene.
  */
 export interface Profesor {
   /** `Long` en el backend; siempre presente en un DTO devuelto por el servidor. */
@@ -39,6 +42,7 @@ export interface Profesor {
   totalDeclarado?: number | null;
   cargo?: Cargo;
   guardiasOrdinarias: number;
+  guardiasRecreo?: number;
 }
 
 /**
@@ -49,7 +53,8 @@ export interface Profesor {
  * <p>El PUT es reemplazo total: ausentes, el backend deja el profesor sin total, como PROFESOR y
  * con 0 guardias. Por eso `ProfesorForm` manda siempre los tres (el total vacío como null). Total
  * y cargo, opcionales en el tipo por la misma razón que en {@link Profesor}; las guardias,
- * obligatorias (S212).
+ * obligatorias (S212). Las de recreo (S219), opcionales en el tipo por la misma razón que en
+ * {@link Profesor}, aunque `ProfesorForm` las envía siempre: ausentes, el PUT las vuelve a 0.
  */
 export interface ProfesorRequest {
   codigo: string;
@@ -57,4 +62,5 @@ export interface ProfesorRequest {
   totalDeclarado?: number | null;
   cargo?: Cargo;
   guardiasOrdinarias: number;
+  guardiasRecreo?: number;
 }

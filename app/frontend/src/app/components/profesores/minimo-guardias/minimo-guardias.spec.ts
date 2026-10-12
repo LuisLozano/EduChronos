@@ -32,7 +32,9 @@ describe('MinimoGuardias', () => {
   }
 
   /** Monta el componente y responde el GET de arranque. */
-  async function montar(respuesta: object = { minimoPorTramo: 5 }): Promise<void> {
+  async function montar(
+    respuesta: object = { minimoPorTramo: 5, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 },
+  ): Promise<void> {
     montarSinResponder().flush(respuesta);
     await fixture.whenStable();
   }
@@ -50,23 +52,35 @@ describe('MinimoGuardias', () => {
     await fixture.whenStable();
   }
 
+  /** Como `teclear`, en el campo de `selector` (S219: recreo y biblioteca). */
+  async function teclearEn(selector: string, valor: string): Promise<void> {
+    const campo = raiz().querySelector(selector) as HTMLInputElement;
+    campo.value = valor;
+    campo.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  }
+
+  const recreo = (): HTMLInputElement => raiz().querySelector('.minimo-guardias__recreo') as HTMLInputElement;
+  const biblioteca = (): HTMLInputElement =>
+    raiz().querySelector('.minimo-guardias__biblioteca') as HTMLInputElement;
+
   it('(1) pinta la etiqueta y el valor que responde el GET de arranque', async () => {
-    await montar({ minimoPorTramo: 5 });
+    await montar({ minimoPorTramo: 5, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
 
     expect(raiz().textContent).toContain('Mínimo de profesores de guardia por tramo');
     expect(input().value).toBe('5');
     expect(boton().disabled).toBe(false);
   });
 
-  it('(2) poner 6 y Guardar hace un PUT con el cuerpo exacto { minimoPorTramo: 6 }', async () => {
+  it('(2) poner 6 y Guardar hace un PUT con el cuerpo exacto de los tres mínimos', async () => {
     await montar();
     await teclear('6');
     boton().click();
 
     const req = http.expectOne('/api/configuracion-guardias');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ minimoPorTramo: 6 });
-    req.flush({ minimoPorTramo: 6 });
+    expect(req.request.body).toEqual({ minimoPorTramo: 6, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
+    req.flush({ minimoPorTramo: 6, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
     await fixture.whenStable();
     expect(input().value).toBe('6');
   });
@@ -103,5 +117,55 @@ describe('MinimoGuardias', () => {
       'No se pudo cargar el mínimo de guardias (500).',
     );
     expect(boton().disabled).toBe(true);
+  });
+
+  // ─────────────────────────── S219: mínimos por recreo y de biblioteca (C-dato-guardias-especiales)
+
+  it('(6) pinta las etiquetas y los tres valores que responde el GET de arranque', async () => {
+    await montar({ minimoPorTramo: 4, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
+
+    expect(input().value).toBe('4');
+    expect(recreo().value).toBe('7');
+    expect(biblioteca().value).toBe('1');
+    expect(raiz().textContent).toContain('Mínimo de profesores de guardia por recreo');
+    expect(raiz().textContent).toContain('De ellos, mínimo en la biblioteca');
+  });
+
+  it('(7) poner 8 en recreo y Guardar hace un PUT con los tres, y los campos muestran la respuesta', async () => {
+    await montar({ minimoPorTramo: 4, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
+    await teclearEn('.minimo-guardias__recreo', '8');
+    boton().click();
+
+    const req = http.expectOne('/api/configuracion-guardias');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ minimoPorTramo: 4, minimoPorRecreo: 8, minimoBibliotecaPorRecreo: 1 });
+    req.flush({ minimoPorTramo: 4, minimoPorRecreo: 8, minimoBibliotecaPorRecreo: 1 });
+    await fixture.whenStable();
+    expect(input().value).toBe('4');
+    expect(recreo().value).toBe('8');
+    expect(biblioteca().value).toBe('1');
+  });
+
+  it('(8) con −1 en biblioteca Guardar está deshabilitado, avisa y no sale ningún PUT', async () => {
+    await montar({ minimoPorTramo: 4, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
+    await teclearEn('.minimo-guardias__biblioteca', '-1');
+
+    expect(boton().disabled).toBe(true);
+    boton().click();
+    http.expectNone('/api/configuracion-guardias');
+    expect(raiz().querySelector('.minimo-guardias__error-campo')!.textContent!.trim()).toBe(
+      'Tiene que ser un número entero, 0 o más.',
+    );
+  });
+
+  it('(9) biblioteca mayor que recreo se puede guardar: lo juzga la prevalidación', async () => {
+    await montar({ minimoPorTramo: 4, minimoPorRecreo: 1, minimoBibliotecaPorRecreo: 0 });
+    await teclearEn('.minimo-guardias__biblioteca', '2');
+
+    expect(boton().disabled).toBe(false);
+    boton().click();
+    const req = http.expectOne('/api/configuracion-guardias');
+    expect(req.request.body).toEqual({ minimoPorTramo: 4, minimoPorRecreo: 1, minimoBibliotecaPorRecreo: 2 });
+    req.flush({ minimoPorTramo: 4, minimoPorRecreo: 1, minimoBibliotecaPorRecreo: 2 });
   });
 });

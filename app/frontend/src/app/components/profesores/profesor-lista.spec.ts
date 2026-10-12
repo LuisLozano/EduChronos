@@ -43,7 +43,7 @@ describe('ProfesorLista', () => {
     // S203: cargar() pide también el cuadre de horas; sin atenderlo, http.verify() cae.
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
     // S212: el mínimo de guardias de encima de la lista hace su GET al montar.
-    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
   }
 
   it('(1) carga la lista en init y la pinta', async () => {
@@ -64,7 +64,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush('', { status: 500, statusText: 'Server Error' });
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores: [], grupos: [] });
-    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
@@ -246,7 +246,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush(filas);
     http.expectOne('/api/prevalidacion/cuadre').flush({ profesores, grupos: [] });
-    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
   }
 
   /** La celda de la columna `indice` de la fila `fila`. */
@@ -265,7 +265,15 @@ describe('ProfesorLista', () => {
     const cabeceras = [...(fixture.nativeElement as HTMLElement).querySelectorAll('thead th')].map(
       (th) => th.textContent!.trim(),
     );
-    expect(cabeceras).toEqual(['Código', 'Nombre completo', 'Cargo', 'Horas', 'Guardias', '']);
+    expect(cabeceras).toEqual([
+      'Código',
+      'Nombre completo',
+      'Cargo',
+      'Horas',
+      'Guardias ordinarias',
+      'Guardias de recreo',
+      '',
+    ]);
   });
 
   it('(13) la columna Cargo pinta la etiqueta, no la constante', async () => {
@@ -316,7 +324,7 @@ describe('ProfesorLista', () => {
     fixture.detectChanges();
     http.expectOne('/api/profesores').flush(DOS);
     http.expectOne('/api/prevalidacion/cuadre').flush('', { status: 500, statusText: 'Server Error' });
-    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4 });
+    http.expectOne('/api/configuracion-guardias').flush({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
     await fixture.whenStable();
 
     const raiz = fixture.nativeElement as HTMLElement;
@@ -348,5 +356,18 @@ describe('ProfesorLista', () => {
     const tabla = raiz.querySelector('.profesores__tabla')!;
     expect(minimo).not.toBeNull();
     expect(minimo.compareDocumentPosition(tabla) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  // ─────────────────────────── S219: columna Guardias de recreo (C-dato-guardias-especiales)
+
+  const GUARDIAS_RECREO = 5;
+
+  it('(21) la columna Guardias de recreo pinta las de recreo, no las ordinarias, y 0 si no vienen', async () => {
+    flushConCuadre([{ ...DOS[0], guardiasRecreo: 5 }, DOS[1]], []);
+    await fixture.whenStable();
+
+    expect(celda(0, GUARDIAS).textContent!.trim()).toBe('2');
+    expect(celda(0, GUARDIAS_RECREO).textContent!.trim()).toBe('5');
+    expect(celda(1, GUARDIAS_RECREO).textContent!.trim()).toBe('0');
   });
 });

@@ -30,6 +30,10 @@ import { Cargo, ETIQUETA_CARGO, Profesor, ProfesorRequest } from '../../models/p
  * <p><b>Guardias ordinarias (S212, C-dato-guardias)</b>, con el mismo patrón y por la misma razón:
  * control aparte, cargado en edición y enviado siempre. A diferencia del total es obligatorio y
  * entero: 0 por defecto, vacío o decimal no se guarda.
+ *
+ * <p><b>Guardias de recreo (S219, C-dato-guardias-especiales)</b>, con el mismo patrón y por la
+ * misma razón: control aparte, obligatorio y entero, cargado en edición (0 si el profesor no lo
+ * trae) y enviado siempre, porque el PUT es reemplazo total y ausente las devolvería a 0.
  */
 /** Vacío (lo coge `required`) o un número entero; los decimales no son guardias. */
 const entero: ValidatorFn = (control) =>
@@ -72,6 +76,13 @@ export class ProfesorForm {
     entero,
   ]);
 
+  /** Guardias de recreo semanales (S219): obligatorio, entero, ≥ 0, 0 por defecto. */
+  protected readonly guardiasRecreo = this.fb.control<number | null>(0, [
+    Validators.required,
+    Validators.min(0),
+    entero,
+  ]);
+
   constructor() {
     if (this.editando) {
       this.form.setValue({
@@ -81,14 +92,21 @@ export class ProfesorForm {
       this.totalDeclarado.setValue(this.editando.totalDeclarado ?? null);
       this.cargo.setValue(this.editando.cargo ?? 'PROFESOR');
       this.guardiasOrdinarias.setValue(this.editando.guardiasOrdinarias ?? 0);
+      this.guardiasRecreo.setValue(this.editando.guardiasRecreo ?? 0);
     }
   }
 
   protected guardar(): void {
-    if (this.form.invalid || this.totalDeclarado.invalid || this.guardiasOrdinarias.invalid) {
+    if (
+      this.form.invalid ||
+      this.totalDeclarado.invalid ||
+      this.guardiasOrdinarias.invalid ||
+      this.guardiasRecreo.invalid
+    ) {
       this.form.markAllAsTouched();
       this.totalDeclarado.markAsTouched();
       this.guardiasOrdinarias.markAsTouched();
+      this.guardiasRecreo.markAsTouched();
       return;
     }
     this.guardando.set(true);
@@ -98,6 +116,7 @@ export class ProfesorForm {
       totalDeclarado: this.totalDeclarado.value,
       cargo: this.cargo.value,
       guardiasOrdinarias: this.guardiasOrdinarias.value ?? 0,
+      guardiasRecreo: this.guardiasRecreo.value ?? 0,
     };
 
     const peticion = this.editando

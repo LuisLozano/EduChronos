@@ -8,8 +8,8 @@ import { ConfiguracionGuardias, ConfiguracionGuardiasService } from './configura
 
 /**
  * Congela el CONTRATO REST de ConfiguracionGuardiasService (S212): verbo, URL y cuerpo de los
- * dos endpoints de `/api/configuracion-guardias`. El cuerpo del PUT se compara ENTERO: la clave
- * es `minimoPorTramo` y no otra. Secuencia propia del fichero desde (1).
+ * dos endpoints de `/api/configuracion-guardias`. El cuerpo del PUT se compara ENTERO: las claves
+ * son `minimoPorTramo`, `minimoPorRecreo` y `minimoBibliotecaPorRecreo` (S219) y no otras. Secuencia propia del fichero desde (1).
  */
 describe('ConfiguracionGuardiasService', () => {
   let service: ConfiguracionGuardiasService;
@@ -31,18 +31,18 @@ describe('ConfiguracionGuardiasService', () => {
 
     const req = http.expectOne('/api/configuracion-guardias');
     expect(req.request.method).toBe('GET');
-    req.flush({ minimoPorTramo: 4 });
-    expect(recibido).toEqual({ minimoPorTramo: 4 });
+    req.flush({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
+    expect(recibido).toEqual({ minimoPorTramo: 4, minimoPorRecreo: 0, minimoBibliotecaPorRecreo: 0 });
   });
 
-  it('(2) guardar → PUT /api/configuracion-guardias con el cuerpo exacto { minimoPorTramo }', () => {
+  it('(2) guardar → PUT /api/configuracion-guardias con el cuerpo exacto de los tres mínimos', () => {
     let recibido: ConfiguracionGuardias | undefined;
-    service.guardar(6).subscribe((r) => (recibido = r));
+    service.guardar({ minimoPorTramo: 6, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 }).subscribe((r) => (recibido = r));
 
     const req = http.expectOne('/api/configuracion-guardias');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ minimoPorTramo: 6 });
-    req.flush({ minimoPorTramo: 6 });
-    expect(recibido).toEqual({ minimoPorTramo: 6 });
+    expect(req.request.body).toEqual({ minimoPorTramo: 6, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
+    req.flush({ minimoPorTramo: 6, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
+    expect(recibido).toEqual({ minimoPorTramo: 6, minimoPorRecreo: 7, minimoBibliotecaPorRecreo: 1 });
   });
 });

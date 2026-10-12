@@ -1,19 +1,24 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ConfiguracionGuardiasService } from '../../../services/configuracion-guardias.service';
+import {
+  ConfiguracionGuardias,
+  ConfiguracionGuardiasService,
+} from '../../../services/configuracion-guardias.service';
 
 /** Vacío (lo coge `required`) o un número entero: no hay medio profesor de guardia. */
 const entero: ValidatorFn = (control) =>
   control.value === null || Number.isInteger(control.value) ? null : { entero: true };
 
 /**
- * El mínimo de profesores de guardia por tramo del centro (S212, C-dato-guardias, E8). Va en la
- * pantalla de profesores, encima de la lista, pero es un dato del CENTRO: lo lee al montar
- * (`GET /api/configuracion-guardias`) y lo guarda con su botón (`PUT`). 0 quiere decir que el
- * centro no usa guardias.
+ * Los tres mínimos de guardia del CENTRO: profesores de guardia por tramo (S212, C-dato-guardias,
+ * E8) y, por recreo, profesores de guardia y, de ellos, en la biblioteca (S219,
+ * C-dato-guardias-especiales). Van en la pantalla de profesores, encima de la lista, pero son datos
+ * del centro: los lee al montar (`GET /api/configuracion-guardias`) y los guarda los tres con su
+ * botón (`PUT`, reemplazo total). 0 en el de tramo quiere decir que el centro no usa guardias.
+ * Que el de biblioteca supere al de recreo no se impide aquí: lo juzga la prevalidación.
  *
- * <p>Guardar solo se puede con un entero ≥ 0, y el botón lo dice deshabilitándose. Los errores,
+ * <p>Guardar solo se puede con tres enteros ≥ 0, y el botón lo dice deshabilitándose. Los errores,
  * con el molde de `ProfesorLista`: un signal propio y `mensaje(err, degradado)`, el texto del
  * backend primero.
  */
@@ -31,6 +36,18 @@ export class MinimoGuardias implements OnInit {
     Validators.min(0),
     entero,
   ]);
+  /** Mínimo de profesores de guardia por recreo (S219). */
+  protected readonly minimoRecreo = new FormControl<number | null>(null, [
+    Validators.required,
+    Validators.min(0),
+    entero,
+  ]);
+  /** De ellos, mínimo en la biblioteca (S219). */
+  protected readonly minimoBiblioteca = new FormControl<number | null>(null, [
+    Validators.required,
+    Validators.min(0),
+    entero,
+  ]);
   /** Hasta que responde el GET no hay nada que guardar. */
   protected readonly cargando = signal(true);
   protected readonly guardando = signal(false);
@@ -40,7 +57,7 @@ export class MinimoGuardias implements OnInit {
   ngOnInit(): void {
     this.service.obtener().subscribe({
       next: (configuracion) => {
-        this.minimo.setValue(configuracion.minimoPorTramo);
+        this.asignar(configuracion);
         this.cargando.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -51,15 +68,24 @@ export class MinimoGuardias implements OnInit {
   }
 
   protected guardar(): void {
-    const valor = this.minimo.value;
-    if (this.minimo.invalid || valor === null) {
+    const minimoPorTramo = this.minimo.value;
+    const minimoPorRecreo = this.minimoRecreo.value;
+    const minimoBibliotecaPorRecreo = this.minimoBiblioteca.value;
+    if (
+      this.minimo.invalid ||
+      this.minimoRecreo.invalid ||
+      this.minimoBiblioteca.invalid ||
+      minimoPorTramo === null ||
+      minimoPorRecreo === null ||
+      minimoBibliotecaPorRecreo === null
+    ) {
       return;
     }
     this.guardando.set(true);
     this.error.set('');
-    this.service.guardar(valor).subscribe({
+    this.service.guardar({ minimoPorTramo, minimoPorRecreo, minimoBibliotecaPorRecreo }).subscribe({
       next: (configuracion) => {
-        this.minimo.setValue(configuracion.minimoPorTramo);
+        this.asignar(configuracion);
         this.guardando.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -67,6 +93,13 @@ export class MinimoGuardias implements OnInit {
         this.guardando.set(false);
       },
     });
+  }
+
+  /** Los tres mínimos, tal como los responde el servidor. */
+  private asignar(configuracion: ConfiguracionGuardias): void {
+    this.minimo.setValue(configuracion.minimoPorTramo);
+    this.minimoRecreo.setValue(configuracion.minimoPorRecreo);
+    this.minimoBiblioteca.setValue(configuracion.minimoBibliotecaPorRecreo);
   }
 
   /** Mismo patrón que `ProfesorLista.mensaje()`, con texto propio. */

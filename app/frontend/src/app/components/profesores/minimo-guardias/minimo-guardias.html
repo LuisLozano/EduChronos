@@ -3,15 +3,39 @@
     <span class="minimo-guardias__etiqueta">Mínimo de profesores de guardia por tramo</span>
     <input type="number" min="0" step="1" [formControl]="minimo" class="minimo-guardias__input dato" />
   </label>
+  <label class="minimo-guardias__campo">
+    <span class="minimo-guardias__etiqueta">Mínimo de profesores de guardia por recreo</span>
+    <input
+      type="number"
+      min="0"
+      step="1"
+      [formControl]="minimoRecreo"
+      class="minimo-guardias__input minimo-guardias__recreo dato"
+    />
+  </label>
+  <label class="minimo-guardias__campo">
+    <span class="minimo-guardias__etiqueta">De ellos, mínimo en la biblioteca</span>
+    <input
+      type="number"
+      min="0"
+      step="1"
+      [formControl]="minimoBiblioteca"
+      class="minimo-guardias__input minimo-guardias__biblioteca dato"
+    />
+  </label>
   <button
     type="button"
     class="minimo-guardias__guardar"
-    [disabled]="minimo.invalid || cargando() || guardando()"
+    [disabled]="minimo.invalid || minimoRecreo.invalid || minimoBiblioteca.invalid || cargando() || guardando()"
     (click)="guardar()"
   >
     Guardar
   </button>
-  @if (minimo.dirty && minimo.invalid) {
+  @if (
+    (minimo.dirty && minimo.invalid) ||
+    (minimoRecreo.dirty && minimoRecreo.invalid) ||
+    (minimoBiblioteca.dirty && minimoBiblioteca.invalid)
+  ) {
     <span class="minimo-guardias__error-campo">Tiene que ser un número entero, 0 o más.</span>
   }
   @if (error()) {

@@ -25,10 +25,11 @@ import { textoHoras } from '../../catalogo/horas';
  * tabla se pinta igual, «Horas» queda vacía y sale un mensaje propio; un fallo del cuadre no
  * vacía la lista.
  *
- * <p><b>Guardias (S212, C-dato-guardias).</b> «Guardias» pinta `guardiasOrdinarias` del propio
- * profesor. Encima de la tabla va {@link MinimoGuardias}, el mínimo de profesores de guardia por
- * tramo del centro: es un componente aparte, con su servicio y sus errores, y esta lista no
- * sabe nada de él más que dónde ponerlo.
+ * <p><b>Guardias (S212, C-dato-guardias; S219, C-dato-guardias-especiales).</b> «Guardias
+ * ordinarias» pinta `guardiasOrdinarias` del propio profesor y «Guardias de recreo»,
+ * `guardiasRecreo` (0 si no viene). Encima de la tabla va {@link MinimoGuardias}, los tres mínimos
+ * del centro (por tramo, por recreo y de biblioteca por recreo): es un componente aparte, con su
+ * servicio y sus errores, y esta lista no sabe nada de él más que dónde ponerlo.
  */
 @Component({
   selector: 'app-profesor-lista',

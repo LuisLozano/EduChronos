@@ -155,6 +155,7 @@ describe('ProfesorForm', () => {
       totalDeclarado: 18,
       cargo: 'DIRECTOR',
       guardiasOrdinarias: 0,
+      guardiasRecreo: 0,
     });
     req.flush({ id: 7 });
   });
@@ -172,6 +173,7 @@ describe('ProfesorForm', () => {
       totalDeclarado: null,
       cargo: 'PROFESOR',
       guardiasOrdinarias: 0,
+      guardiasRecreo: 0,
     });
     req.flush({ id: 7 });
   });
@@ -245,6 +247,7 @@ describe('ProfesorForm', () => {
       totalDeclarado: 18,
       cargo: 'DIRECTOR',
       guardiasOrdinarias: 0,
+      guardiasRecreo: 0,
     });
     req.flush({ id: 7 });
   });
@@ -296,5 +299,70 @@ describe('ProfesorForm', () => {
 
     http.expectNone('/api/profesores');
     expect(fixture.nativeElement.textContent).toContain('Las guardias tienen que ser un número entero, 0 o más.');
+  });
+
+  // ─────────────────────────── S219: guardias de recreo (C-dato-guardias-especiales)
+
+  it('(18) en edición carga las guardias de recreo que tiene el profesor', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 1, guardiasRecreo: 2 });
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement.querySelector('.profesor-form__guardias-recreo') as HTMLInputElement).value).toBe(
+      '2',
+    );
+  });
+
+  it('(19) editar solo el nombre conserva las guardias ordinarias y de recreo en el PUT', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 1, guardiasRecreo: 2 });
+    await fixture.whenStable();
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz López' });
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores/7');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body.nombreCompleto).toBe('Ana Ruiz López');
+    expect(req.request.body.guardiasOrdinarias).toBe(1);
+    expect(req.request.body.guardiasRecreo).toBe(2);
+    req.flush({ id: 7 });
+  });
+
+  it('(20) el alta lleva las guardias de recreo escritas, aparte de las ordinarias', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__guardias-recreo', '4');
+    inst.guardar();
+
+    const req = http.expectOne('/api/profesores');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.guardiasRecreo).toBe(4);
+    expect(req.request.body.guardiasOrdinarias).toBe(0);
+    req.flush({ id: 7 });
+  });
+
+  it('(21) con −1 guardias de recreo el formulario es inválido, avisa y no se envía petición', async () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as ConCampos;
+    inst.form.setValue({ codigo: 'MAT8', nombreCompleto: 'Ana Ruiz' });
+    teclear('.profesor-form__guardias-recreo', '-1');
+    inst.guardar();
+    await fixture.whenStable();
+
+    http.expectNone('/api/profesores');
+    expect(fixture.nativeElement.textContent).toContain('Las guardias tienen que ser un número entero, 0 o más.');
+  });
+
+  it('(22) un profesor del servidor sin guardiasRecreo muestra 0 y el PUT lleva 0', async () => {
+    montar({ id: 7, codigo: 'MAT8', nombreCompleto: 'Ana Ruiz', guardiasOrdinarias: 1 });
+    await fixture.whenStable();
+    expect((fixture.nativeElement.querySelector('.profesor-form__guardias-recreo') as HTMLInputElement).value).toBe(
+      '0',
+    );
+    (fixture.componentInstance as unknown as ConCampos).guardar();
+
+    const req = http.expectOne('/api/profesores/7');
+    expect(req.request.body.guardiasRecreo).toBe(0);
+    req.flush({ id: 7 });
   });
 });
