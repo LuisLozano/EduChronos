@@ -638,16 +638,22 @@ public class GeneradorHorarioService {
      * cada guardia son relaciones perezosas que se resuelven aquí, dentro de la transacción
      * (EA3: se acepta su N+1 antes que una consulta nueva).
      *
-     * <p>Desde S220 solo entran las guardias ORDINARIA: las de RECREO y BIBLIOTECA están en un recreo,
-     * que no tiene {@code ordenEnDia}, y no se muestran hasta la condición 5 de O-guardias-especiales.
-     * Una ORDINARIA en un recreo sigue abortando.
+     * <p>Desde S221 (C-exportacion-guardias-recreo, D3) entran también las de RECREO y de
+     * BIBLIOTECA, con su número de recreo en el día ({@link CatalogoMapper#indiceRecreoEnDia}) y
+     * sin tramo. Una ORDINARIA en un recreo sigue abortando, y una de recreo en un tramo de clase
+     * aborta igual ({@link #posicionDeRecreo}). La lista lleva primero las ORDINARIA, con el
+     * orden de siempre, y detrás las de recreo por (día, recreo, tipo, profesorCodigo), con el
+     * tipo por el ORDINAL de {@link TipoGuardia}: RECREO antes que BIBLIOTECA. Ese es el orden en
+     * que las escribe el CSV, que no reordena.
      */
     @Transactional(readOnly = true)
     public HorarioProyeccionDTO proyectar(Long horarioId) {
         HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow(() ->
                 new IllegalArgumentException("No existe HorarioGenerado con id " + horarioId));
 
-        Map<Long, Integer> ordenEnDia = CatalogoMapper.indiceOrdenEnDia(tramoRepository.findAll());
+        List<TramoSemanal> tramos = tramoRepository.findAll();
+        Map<Long, Integer> ordenEnDia = CatalogoMapper.indiceOrdenEnDia(tramos);
+        Map<Long, Integer> recreoEnDia = CatalogoMapper.indiceRecreoEnDia(tramos);
 
         List<SesionVistaDTO> sesiones = new ArrayList<>();
         for (Sesion sesion : horario.getSesiones()) {
@@ -679,18 +685,28 @@ public class GeneradorHorarioService {
                 .thenComparingInt(SesionVistaDTO::tramo)
                 .thenComparing(SesionVistaDTO::asignaturaCodigo));
 
-        List<GuardiaVistaDTO> guardias = new ArrayList<>();
+        List<GuardiaVistaDTO> ordinarias = new ArrayList<>();
+        List<GuardiaVistaDTO> deRecreo = new ArrayList<>();
         for (Guardia guardia : guardiaRepository.findByHorarioId(horarioId)) {
-            if (guardia.getTipo() != TipoGuardia.ORDINARIA) {
-                continue;
+            String profesor = guardia.getProfesor().getCodigo();
+            if (guardia.getTipo() == TipoGuardia.ORDINARIA) {
+                Posicion posicion = posicion(guardia.getTramo(), ordenEnDia, "tramo", "guardia", horarioId);
+                ordinarias.add(new GuardiaVistaDTO(profesor, posicion.dia(), posicion.tramo()));
+            } else {
+                Posicion posicion = posicionDeRecreo(guardia.getTramo(), recreoEnDia, horarioId);
+                deRecreo.add(new GuardiaVistaDTO(
+                        profesor, posicion.dia(), null, posicion.tramo(), guardia.getTipo().name()));
             }
-            Posicion posicion = posicion(guardia.getTramo(), ordenEnDia, "tramo", "guardia", horarioId);
-            guardias.add(new GuardiaVistaDTO(
-                    guardia.getProfesor().getCodigo(), posicion.dia(), posicion.tramo()));
         }
-        guardias.sort(Comparator.comparingInt(GuardiaVistaDTO::dia)
+        ordinarias.sort(Comparator.comparingInt(GuardiaVistaDTO::dia)
                 .thenComparingInt(GuardiaVistaDTO::tramo)
                 .thenComparing(GuardiaVistaDTO::profesorCodigo));
+        deRecreo.sort(Comparator.comparingInt(GuardiaVistaDTO::dia)
+                .thenComparingInt(GuardiaVistaDTO::recreo)
+                .thenComparingInt((GuardiaVistaDTO g) -> TipoGuardia.valueOf(g.tipo()).ordinal())
+                .thenComparing(GuardiaVistaDTO::profesorCodigo));
+        List<GuardiaVistaDTO> guardias = new ArrayList<>(ordinarias);
+        guardias.addAll(deRecreo);
 
         return new HorarioProyeccionDTO(
                 horario.getId(), horario.getNombre(), horario.getEstado().name(),
@@ -698,7 +714,10 @@ public class GeneradorHorarioService {
                 horario.getFechaGeneracion().toString(), sesiones, guardias);
     }
 
-    /** El día (1..5) y el ordenEnDia lectivo (1..6) de un tramo de la proyección. */
+    /**
+     * El día (1..5) y el ordenEnDia lectivo (1..6) de un tramo de la proyección; para una
+     * guardia de recreo, el número de recreo en el día ({@link #posicionDeRecreo}).
+     */
     private record Posicion(int dia, int tramo) {
     }
 
@@ -720,5 +739,22 @@ public class GeneradorHorarioService {
                     + " no está en el índice de tramos lectivos (¿recreo o ausente del catálogo?)");
         }
         return new Posicion(tramo.getDia().ordinal() + 1, ordenTramo);
+    }
+
+    /**
+     * El espejo de {@link #posicion} para una guardia de RECREO o de BIBLIOTECA (S221, D3): día
+     * por el ordinal de su {@code Dia} y, en el campo {@code tramo} de {@link Posicion}, su
+     * número de recreo en el día. Un tramo fuera del índice de recreos (un tramo de clase, o
+     * ausente del catálogo) aborta con el mismo trato que una ORDINARIA en un recreo.
+     */
+    private static Posicion posicionDeRecreo(TramoSemanal tramo, Map<Long, Integer> recreoEnDia,
+                                             Long horarioId) {
+        Integer recreo = recreoEnDia.get(tramo.getId());
+        if (recreo == null) {
+            throw new IllegalStateException("El tramo " + tramo.getId()
+                    + " de una guardia de recreo del horario " + horarioId
+                    + " no está en el índice de recreos (¿tramo de clase o ausente del catálogo?)");
+        }
+        return new Posicion(tramo.getDia().ordinal() + 1, recreo);
     }
 }

@@ -100,22 +100,69 @@ class ProyeccionGuardiasTest {
     }
 
     /**
-     * (S220) Las guardias de RECREO y de BIBLIOTECA están en un recreo y no se proyectan hasta la
-     * condición 5 de O-guardias-especiales: no abortan y no salen. Las ORDINARIA salen como siempre.
+     * (S221, D3) Las guardias de RECREO y de BIBLIOTECA se proyectan con su recreo y sin tramo,
+     * DETRÁS de todas las ORDINARIA —aunque la ordinaria del martes vaya después del recreo del
+     * lunes—, y entre ellas por (día, recreo, tipo, profesor) con RECREO antes que BIBLIOTECA:
+     * MAT1 (RECREO) va antes que BIO1 (BIBLIOTECA) aunque su código sea mayor.
      */
     @Test
-    void lasGuardiasDeRecreoYBibliotecaNoAbortanYNoSeProyectan() {
+    void lasGuardiasDeRecreoSeProyectanDetrasConSuRecreoYEnElOrdenDeD3() {
         poblarMalla();
         HorarioGenerado horario = horario();
-        guardia(horario, "MAT1", "LUNES 08:00");
-        guardia(horario, "BIO1", "LUNES 10:00", TipoGuardia.RECREO);
-        guardia(horario, "LEN1", "LUNES 10:00", TipoGuardia.BIBLIOTECA);
-        guardia(horario, "MAT1", "MARTES 10:00", TipoGuardia.RECREO);
+        guardia(horario, "LEN1", "MARTES 10:00", TipoGuardia.RECREO);
+        guardia(horario, "BIO1", "LUNES 10:00", TipoGuardia.BIBLIOTECA);
+        guardia(horario, "MAT1", "MARTES 08:00");
+        guardia(horario, "MAT1", "LUNES 10:00", TipoGuardia.RECREO);
+        guardia(horario, "LEN1", "LUNES 08:00");
         entityManager.flush();
         entityManager.clear();
 
-        assertThat(service.proyectar(horario.getId()).guardias())
-                .containsExactly(new GuardiaVistaDTO("MAT1", 1, 1));
+        assertThat(service.proyectar(horario.getId()).guardias()).containsExactly(
+                new GuardiaVistaDTO("LEN1", 1, 1),
+                new GuardiaVistaDTO("MAT1", 2, 1),
+                new GuardiaVistaDTO("MAT1", 1, null, 1, GuardiaVistaDTO.RECREO),
+                new GuardiaVistaDTO("BIO1", 1, null, 1, GuardiaVistaDTO.BIBLIOTECA),
+                new GuardiaVistaDTO("LEN1", 2, null, 1, GuardiaVistaDTO.RECREO));
+    }
+
+    /**
+     * (S221, D2) Con DOS recreos en el día, cada guardia lleva el número de SU recreo, contado
+     * por {@code orden} entre los no lectivos del día: el de las 09:00 es el 1 y el de las 10:30
+     * el 2, en los dos días. La lista sale por recreo, no por el orden de inserción.
+     */
+    @Test
+    void conDosRecreosAlDiaCadaGuardiaLlevaElNumeroDeSuRecreo() {
+        poblarMallaConDosRecreos();
+        HorarioGenerado horario = horario();
+        guardia(horario, "MAT1", "LUNES 10:30", TipoGuardia.RECREO);
+        guardia(horario, "BIO1", "LUNES 09:00", TipoGuardia.RECREO);
+        guardia(horario, "LEN1", "MARTES 10:30", TipoGuardia.BIBLIOTECA);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(service.proyectar(horario.getId()).guardias()).containsExactly(
+                new GuardiaVistaDTO("BIO1", 1, null, 1, GuardiaVistaDTO.RECREO),
+                new GuardiaVistaDTO("MAT1", 1, null, 2, GuardiaVistaDTO.RECREO),
+                new GuardiaVistaDTO("LEN1", 2, null, 2, GuardiaVistaDTO.BIBLIOTECA));
+    }
+
+    /**
+     * (S221, D3) Una guardia de RECREO en un tramo de clase aborta, como una ORDINARIA en un
+     * recreo: no se omite ni se pinta en una celda de clase.
+     */
+    @Test
+    void unaGuardiaDeRecreoEnUnTramoLectivoAbortaLaProyeccion() {
+        poblarMalla();
+        HorarioGenerado horario = horario();
+        guardia(horario, "BIO1", "LUNES 09:00", TipoGuardia.RECREO);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> service.proyectar(horario.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("El tramo " + tramos.get("LUNES 09:00").getId()
+                        + " de una guardia de recreo del horario " + horario.getId())
+                .hasMessageContaining("no está en el índice de recreos");
     }
 
     // ------------------------------------------------------------------ fixture
@@ -130,6 +177,24 @@ class ProyeccionGuardiasTest {
             orden = tramo(dia, 9, 0, 10, 0, true, orden);
             orden = tramo(dia, 10, 0, 10, 30, false, orden);
             orden = tramo(dia, 10, 30, 11, 30, true, orden);
+        }
+    }
+
+    /**
+     * Lunes y martes con 08:00, un recreo de 09:00 a 09:30, 09:30, otro recreo de 10:30 a 11:00
+     * y 11:00 (S221): dos recreos al día, el 1 y el 2 por {@code orden}.
+     */
+    private void poblarMallaConDosRecreos() {
+        for (String codigo : new String[] {"MAT1", "LEN1", "BIO1"}) {
+            profesores.put(codigo, profesorRepository.save(new Profesor(codigo, "Profesor " + codigo)));
+        }
+        int orden = 1;
+        for (Dia dia : new Dia[] {Dia.LUNES, Dia.MARTES}) {
+            orden = tramo(dia, 8, 0, 9, 0, true, orden);
+            orden = tramo(dia, 9, 0, 9, 30, false, orden);
+            orden = tramo(dia, 9, 30, 10, 30, true, orden);
+            orden = tramo(dia, 10, 30, 11, 0, false, orden);
+            orden = tramo(dia, 11, 0, 12, 0, true, orden);
         }
     }
 

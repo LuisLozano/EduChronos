@@ -592,6 +592,30 @@ public final class CatalogoMapper {
     }
 
     /**
+     * Índice {@code TramoSemanal.getId() → número de recreo en su día} (S221,
+     * C-exportacion-guardias-recreo, D2): el número de orden, desde 1, de cada tramo NO lectivo
+     * entre los no lectivos de su día, por {@code orden}. Es el espejo de
+     * {@link #indiceOrdenEnDia} para los recreos, con el mismo comparador (día, {@code orden}
+     * global), y lo consume la proyección para situar una guardia de recreo. Los tramos
+     * lectivos no entran. Exige tramos persistidos, como aquél.
+     */
+    public static Map<Long, Integer> indiceRecreoEnDia(List<TramoSemanal> tramos) {
+        Objects.requireNonNull(tramos, "tramos no puede ser null");
+        List<TramoSemanal> recreos = tramos.stream()
+                .filter(t -> !t.isEsLectivo())
+                .sorted(Comparator.comparingInt((TramoSemanal t) -> t.getDia().ordinal())
+                        .thenComparingInt(TramoSemanal::getOrden))
+                .toList();
+
+        Map<Dia, Integer> recreoPorDia = new EnumMap<>(Dia.class);
+        Map<Long, Integer> indice = new HashMap<>();
+        for (TramoSemanal t : recreos) {
+            indice.put(t.getId(), recreoPorDia.merge(t.getDia(), 1, Integer::sum));
+        }
+        return indice;
+    }
+
+    /**
      * Núcleo ÚNICO de la renumeración {@code ordenEnDia} (deuda D30): excluye los
      * recreos ({@code esLectivo=false}), ordena por (día, {@code orden} global) y
      * numera 1..6 reiniciando en cada día. Devuelve la lista ordenada de pares

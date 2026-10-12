@@ -118,15 +118,32 @@ class ProyeccionDtoContratoTest {
     }
 
     @Test
-    void guardiaVistaDto_serializaExactamenteLas3ClavesConSusTipos() throws Exception {
-        // CENTINELA D-F8.1-8, como los de arriba: refleja app.web.dto.GuardiaVistaDTO (S215).
-        // Si cambia, actualiza también su espejo en app/frontend/src/app/models/horario.model.ts.
+    void guardiaVistaDto_serializaExactamenteLas5ClavesConSusTipos() throws Exception {
+        // CENTINELA D-F8.1-8, como los de arriba: refleja app.web.dto.GuardiaVistaDTO (S215; cinco
+        // claves desde S221). Si cambia, actualiza también su espejo en
+        // app/frontend/src/app/models/horario.model.ts.
         JsonNode json = mapper.readTree(mapper.writeValueAsString(new GuardiaVistaDTO("MATA", 1, 2)));
 
-        assertThat(clavesRaiz(json)).containsExactlyInAnyOrder("profesorCodigo", "dia", "tramo");
+        assertThat(clavesRaiz(json)).containsExactlyInAnyOrder("profesorCodigo", "dia", "tramo",
+                "recreo", "tipo");
         assertThat(json.get("profesorCodigo").isTextual()).isTrue();
         assertThat(json.get("dia").isNumber()).isTrue();
-        assertThat(json.get("tramo").isNumber()).isTrue();
+        assertThat(json.get("tramo").intValue()).isEqualTo(2);
+        assertThat(json.get("recreo").isNull()).as("la ORDINARIA lleva recreo null, no lo omite").isTrue();
+        assertThat(json.get("tipo").textValue()).isEqualTo("ORDINARIA");
+    }
+
+    /** (S221) Una guardia de recreo lleva el recreo y el tramo a null, sin omitirlo. */
+    @Test
+    void guardiaVistaDto_deRecreo_serializaElRecreoYElTramoANull() throws Exception {
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(
+                new GuardiaVistaDTO("MATA", 3, null, 2, GuardiaVistaDTO.BIBLIOTECA)));
+
+        assertThat(clavesRaiz(json)).containsExactlyInAnyOrder("profesorCodigo", "dia", "tramo",
+                "recreo", "tipo");
+        assertThat(json.get("tramo").isNull()).isTrue();
+        assertThat(json.get("recreo").intValue()).isEqualTo(2);
+        assertThat(json.get("tipo").textValue()).isEqualTo("BIBLIOTECA");
     }
 
     /** Sin guardias, la clave está y es una lista vacía: no se omite ni sale null (A5). */

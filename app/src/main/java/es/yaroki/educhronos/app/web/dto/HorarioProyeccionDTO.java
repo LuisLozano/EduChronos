@@ -15,6 +15,8 @@ import java.util.List;
  *
  * <p>Desde S215, {@code guardias}: las guardias ordinarias del horario, ordenadas por
  * {@code (dia, tramo, profesorCodigo)}. Nunca null; vacía si el horario no tiene ninguna.
+ * Desde S221, detrás de ellas las de RECREO y BIBLIOTECA, ordenadas por
+ * {@code (dia, recreo, tipo, profesorCodigo)} con RECREO antes que BIBLIOTECA.
  */
 public record HorarioProyeccionDTO(
         Long id,
