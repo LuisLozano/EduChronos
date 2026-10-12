@@ -191,6 +191,10 @@ abierto con un mensaje, el alta ha fallado: el paso falla.
 2. **Nivel.** «Niveles» › «Nuevo nivel» › «Código» `3ESO`, «Orden» `3` › «Guardar».
 3. **Profesores.** «Profesores» › «Nuevo profesor» › «Código» y «Nombre completo» de la §4 › «Guardar».
    Cuatro veces.
+   En la misma pantalla, encima de la lista, pon «Mínimo de profesores de guardia por tramo» a 0,
+   comprueba que «Mínimo de profesores de guardia por recreo» y «De ellos, mínimo en la biblioteca»
+   están a 0 y pulsa «Guardar». Resultado: tras recargar la página, los tres siguen a 0. El centro de
+   aceptación no reparte guardias, porque §1 no las pide.
 4. **Aulas.** «Aulas» › «Nueva aula» › «Código», «Tipo» (desplegable «— elige un tipo —») › «Guardar».
    Tres veces.
 5. **Asignaturas.** «Asignaturas» › «Nueva asignatura» › «Código», «Nombre completo» › «Guardar». Siete
@@ -489,12 +493,14 @@ cp $T/educhronos.db $W/copia.db && cp $T/curso-2026-2027.db $W/copia-nuevo.db; e
 ```bash
 for t in actividad asignatura asignatura_aula_compatible aula configuracion grupo_administrativo nivel plaza plaza_aula_candidata plaza_profesor plaza_subgrupo profesor profesor_restriccion_horaria profesor_tutoria subgrupo subgrupo_grupo tramo_semanal; do
   printf '%-30s %s\n' $t "$(sqlite3 "file:$W/copia.db?mode=ro" "select count(*) from $t")"; done
+sqlite3 "file:$W/copia.db?mode=ro" "select clave, valor from configuracion order by clave"
 ```
 
 Esperado, igual que en el ensayo: actividad 8, asignatura 7, asignatura_aula_compatible 0, aula 3,
-configuracion 0, grupo_administrativo 3, nivel 1, plaza 10, plaza_aula_candidata 0, plaza_profesor 10,
+configuracion 3, grupo_administrativo 3, nivel 1, plaza 10, plaza_aula_candidata 0, plaza_profesor 10,
 plaza_subgrupo 10, profesor 4, profesor_restriccion_horaria 7, profesor_tutoria 3, subgrupo 7,
-subgrupo_grupo 9 y tramo_semanal 35.
+subgrupo_grupo 9 y tramo_semanal 35. La consulta de `configuracion` da tres filas, todas con valor 0:
+`guardias.minimoBibliotecaPorRecreo|0`, `guardias.minimoPorRecreo|0` y `guardias.minimoPorTramo|0`.
 
 ```bash
 sqlite3 "file:$W/copia.db?mode=ro" <<'EOF'
