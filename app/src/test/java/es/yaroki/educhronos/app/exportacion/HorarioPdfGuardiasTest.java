@@ -142,9 +142,9 @@ class HorarioPdfGuardiasTest {
     // ------------------------------------------------------------------ D2, D6: la página de guardias
 
     /**
-     * D2 y D6: UNA página A4 vertical, con el título «Guardias ordinarias», la clave «Profesores
-     * de guardia», la cabecera de días, la columna de horas y el recreo; y solo los dos cuerpos
-     * de las demás vistas, 7,99 y 10.
+     * D2 y D6: UNA página A4 vertical, con el título «Guardias» (S221, X4; hasta S220
+     * «Guardias ordinarias»), la clave «Profesores de guardia», la cabecera de días, la columna
+     * de horas y el recreo; y solo los dos cuerpos de las demás vistas, 7,99 y 10.
      */
     @Test
     void laPaginaDeGuardiasEsUnaA4ConTituloClaveRejillaYLosCuerposDeSiempre() throws IOException {
@@ -159,11 +159,12 @@ class HorarioPdfGuardiasTest {
             assertThat(hoja.getWidth()).isEqualTo(595f);
             assertThat(hoja.getHeight()).isEqualTo(842f);
             String[] lineas = texto(reader, 1).split("\\R");
-            assertThat(lineas[0].trim()).isEqualTo("Guardias ordinarias");
+            assertThat(lineas[0].trim()).isEqualTo("Guardias");
             assertThat(lineas[1].trim()).isEqualTo("Profesores de guardia");
             assertThat(texto(reader, 1)).contains(
-                    "Lunes Martes Miércoles Jueves Viernes", "08:00-09:00", "11:00-11:30 Recreo",
-                    "13:30-14:30");
+                    "Lunes Martes Miércoles Jueves Viernes", "08:00-09:00", "13:30-14:30");
+            assertThat(filas(texto(reader, 1))).as("banda de días: la hora y «Recreo» en dos líneas")
+                    .contains("\n11:00-11:30\nRecreo\n11:30-12:30\n");
             assertThat(cuerpos(reader)).containsExactlyInAnyOrder("7.99", "10");
         } finally {
             reader.close();
@@ -272,12 +273,122 @@ class HorarioPdfGuardiasTest {
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
             String pagina = texto(reader, 1);
-            assertThat(titulo(pagina)).isEqualTo("Guardias ordinarias");
-            assertThat(pagina).contains("Lunes", "08:00-09:00", "11:00-11:30 Recreo");
+            assertThat(titulo(pagina)).isEqualTo("Guardias");
+            assertThat(pagina).contains("Lunes", "08:00-09:00");
+            assertThat(filas(pagina)).contains("\n11:00-11:30\nRecreo\n11:30-12:30\n");
             assertThat(pagina).doesNotContain("Profesores —", "—");
             assertThat(pagina.split("Profesores", -1)).as("solo la clave de lectura").hasSize(2);
         } finally {
             reader.close();
+        }
+    }
+
+    // ------------------------------------------------------------------ S221: guardias de recreo
+
+    /** Jornada con DOS recreos el lunes: 10:00-10:30 (recreo 1) y 11:30-12:00 (recreo 2). */
+    private static final JornadaDTO JORNADA_DOS_RECREOS = new JornadaDTO(true, List.of(
+            tramo(1, true, 1, "08:00", "09:00"),
+            tramo(2, true, 2, "09:00", "10:00"),
+            tramo(3, false, null, "10:00", "10:30"),
+            tramo(4, true, 3, "10:30", "11:30"),
+            tramo(5, false, null, "11:30", "12:00"),
+            tramo(6, true, 4, "12:00", "13:00")));
+
+    private static GuardiaVistaDTO recreo(String profesor, int dia, int recreo) {
+        return new GuardiaVistaDTO(profesor, dia, null, recreo, GuardiaVistaDTO.RECREO);
+    }
+
+    private static GuardiaVistaDTO biblioteca(String profesor, int dia, int recreo) {
+        return new GuardiaVistaDTO(profesor, dia, null, recreo, GuardiaVistaDTO.BIBLIOTECA);
+    }
+
+    /**
+     * D5 (S221): en la página de un profesor, el recreo es una banda de días: la hora y «Recreo»
+     * en la columna de horas y, en la celda del día, «Guardia» por su guardia de RECREO y
+     * «Biblioteca» por la de BIBLIOTECA. Con dos recreos, cada guardia va en la banda de SU
+     * recreo: la de biblioteca del martes en el segundo, la de recreo del lunes en el primero.
+     */
+    @Test
+    void enLaPaginaDelProfesorCadaGuardiaDeRecreoVaEnLaBandaDeSuRecreoYSuDia() throws IOException {
+        byte[] pdf = HorarioPdf.escribir(
+                proyeccion(List.of(MAT_LUNES_1), List.of(recreo("MAT1", 1, 1), biblioteca("MAT1", 2, 2))),
+                VistaPdf.PROFESOR, new ContextoPdf(JORNADA_DOS_RECREOS, List.of("MAT1"), NOMBRES, Map.of()));
+
+        PdfReader reader = new PdfReader(pdf);
+        try {
+            String pagina = texto(reader, 1);
+            assertThat(filas(pagina)).contains("\n10:00-10:30\nRecreo\nGuardia\n10:30-11:30\n");
+            assertThat(filas(pagina)).contains("\n11:30-12:00\nRecreo\nBiblioteca\n12:00-13:00\n");
+            assertThat(pagina.split("Guardia", -1)).as("una sola «Guardia»").hasSize(2);
+            assertThat(pagina.split("Biblioteca", -1)).as("una sola «Biblioteca»").hasSize(2);
+        } finally {
+            reader.close();
+        }
+    }
+
+    /**
+     * D5 (S221): un profesor con SOLO guardias de recreo tiene página, con su banda; y la
+     * leyenda de la página de guardias lo nombra.
+     */
+    @Test
+    void quienSoloTieneGuardiasDeRecreoTienePaginaYEstaEnLaLeyendaDeGuardias() throws IOException {
+        HorarioProyeccionDTO proyeccion = proyeccion(List.of(MAT_LUNES_1), List.of(recreo("GUA1", 3, 1)));
+
+        PdfReader reader = new PdfReader(HorarioPdf.escribir(
+                proyeccion, VistaPdf.PROFESOR, contextoProfesor(List.of("GUA1", "MAT1"))));
+        try {
+            assertThat(reader.getNumberOfPages()).isEqualTo(2);
+            assertThat(titulo(texto(reader, 1))).isEqualTo("GUA1 — Profesor Cuatro");
+            assertThat(filas(texto(reader, 1))).contains("\n11:00-11:30\nRecreo\nGuardia\n11:30-12:30\n");
+        } finally {
+            reader.close();
+        }
+        assertThat(texto(new PdfReader(HorarioPdf.escribir(proyeccion, VistaPdf.GUARDIAS, contextoGuardias())), 1))
+                .contains("GUA1 — Profesor Cuatro");
+    }
+
+    /**
+     * D5 y X3 (S221): en la página de guardias, la celda del recreo de un día lleva los códigos
+     * de RECREO ordenados y unidos por «, » y, en línea aparte, «Biblioteca: COD». El código de
+     * biblioteca NO entra en la lista de recreo.
+     */
+    @Test
+    void enLaPaginaDeGuardiasElRecreoLlevaLosCodigosYAparteLaBiblioteca() throws IOException {
+        byte[] pdf = HorarioPdf.escribir(
+                proyeccion(List.of(), List.of(
+                        recreo("MAT1", 1, 1), recreo("GUA1", 1, 1), biblioteca("LEN1", 1, 1))),
+                VistaPdf.GUARDIAS, contextoGuardias());
+
+        PdfReader reader = new PdfReader(pdf);
+        try {
+            String pagina = texto(reader, 1);
+            assertThat(filas(pagina)).contains("\n11:00-11:30\nRecreo\nGUA1, MAT1\nBiblioteca: LEN1\n11:30-12:30\n");
+            assertThat(pagina).doesNotContain("GUA1, LEN1", "LEN1, MAT1");
+        } finally {
+            reader.close();
+        }
+    }
+
+    /**
+     * D5 (S221): con dos recreos, la página de guardias pinta cada código en la banda de su
+     * recreo, y las de grupo y aula siguen con la banda única de siempre, una por recreo: la
+     * hora y «Recreo» en la MISMA línea.
+     */
+    @Test
+    void conDosRecreosGuardiasVaPorBandaYGrupoYAulaSiguenConLaBandaUnica() throws IOException {
+        HorarioProyeccionDTO proyeccion = proyeccion(List.of(MAT_LUNES_1), List.of(
+                recreo("GUA1", 2, 1), recreo("LEN1", 2, 2)));
+
+        String guardias = texto(new PdfReader(HorarioPdf.escribir(proyeccion, VistaPdf.GUARDIAS,
+                new ContextoPdf(JORNADA_DOS_RECREOS, List.of(), NOMBRES, Map.of()))), 1);
+        assertThat(filas(guardias)).contains(
+                "\n10:00-10:30\nRecreo\nGUA1\n10:30-11:30\n", "\n11:30-12:00\nRecreo\nLEN1\n12:00-13:00\n");
+
+        for (VistaPdf vista : List.of(VistaPdf.GRUPO, VistaPdf.AULA)) {
+            String pagina = texto(new PdfReader(HorarioPdf.escribir(proyeccion, vista,
+                    new ContextoPdf(JORNADA_DOS_RECREOS, List.of("1ºA", "A5"), NOMBRES, Map.of()))), 1);
+            assertThat(filas(pagina)).as("vista %s", vista)
+                    .contains("\n10:00-10:30 Recreo\n10:30-11:30", "\n11:30-12:00 Recreo\n12:00-13:00");
         }
     }
 
@@ -318,6 +429,15 @@ class HorarioPdfGuardiasTest {
 
     private static String titulo(String pagina) {
         return pagina.split("\\R")[0].trim();
+    }
+
+    /**
+     * Las líneas del texto extraído, cada una sin los blancos de los bordes, unidas por un salto
+     * (S221): el extractor antepone un espacio a cada línea salvo la primera, y los asertos de
+     * las bandas de recreo comparan líneas seguidas.
+     */
+    private static String filas(String texto) {
+        return String.join("\n", texto.lines().map(String::trim).toList());
     }
 
     private static String normalizado(String texto) {

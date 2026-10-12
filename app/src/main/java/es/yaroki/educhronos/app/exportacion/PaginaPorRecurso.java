@@ -95,6 +95,12 @@ public enum PaginaPorRecurso {
         public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
             return List.of();
         }
+
+        /** Nada que pintar en el recreo de un grupo: la banda única de siempre (S221). */
+        @Override
+        public boolean recreoPorDias() {
+            return false;
+        }
     },
 
     /**
@@ -168,6 +174,15 @@ public enum PaginaPorRecurso {
         @Override
         public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
             return List.of(guardia.profesorCodigo());
+        }
+
+        /**
+         * La guardia de recreo de un profesor va en la celda de su día en la banda del recreo
+         * (S221, D5): la banda lleva la hora y «Recreo» en la columna de horas y cinco celdas.
+         */
+        @Override
+        public boolean recreoPorDias() {
+            return true;
         }
     },
 
@@ -251,6 +266,12 @@ public enum PaginaPorRecurso {
         public List<String> recursosDeGuardia(GuardiaVistaDTO guardia) {
             return List.of();
         }
+
+        /** Nada que pintar en el recreo de un aula: la banda única de siempre (S221). */
+        @Override
+        public boolean recreoPorDias() {
+            return false;
+        }
     };
 
     /** Los recursos a cuya página pertenece una sesión. Uno solo, varios, o ninguno. */
@@ -290,6 +311,14 @@ public enum PaginaPorRecurso {
      * razón que los demás: una paginación nueva no compila sin decir qué hace con ellas.
      */
     public abstract List<String> recursosDeGuardia(GuardiaVistaDTO guardia);
+
+    /**
+     * Cómo se pinta la fila de cada recreo (S221, C-exportacion-guardias-recreo, D5). Con
+     * {@code false}, la banda única de siempre: la hora y una celda «Recreo» de cinco columnas.
+     * Con {@code true}, la columna de horas lleva la hora y «Recreo» y siguen cinco celdas de
+     * día, donde van las guardias de recreo de la página. Por constante, como lo demás.
+     */
+    public abstract boolean recreoPorDias();
 
     /**
      * El bloque de profesores, que comparten las vistas donde el profesor aparece en la

@@ -255,6 +255,9 @@ public final class HorarioPdf {
             doc.add(lineaSuelta(vista.claveDeLectura(), fCuerpo));
             doc.add(rejilla(filas,
                     (dia, tramo) -> entradasDe(delRecurso, guardiasDelRecurso, vista, dia, tramo),
+                    vista.recreoPorDias()
+                            ? (dia, recreo) -> entradasDeRecreo(guardiasDelRecurso, dia, recreo)
+                            : null,
                     fCuerpo, fNegrita));
 
             // Una leyenda sin una sola línea NO se imprime, ni siquiera sus encabezados:
@@ -296,10 +299,19 @@ public final class HorarioPdf {
      *   <li>Sin guardias: la página sale igual, con la rejilla vacía y sin leyenda (D5). No
      *       depende de ningún recurso, así que nunca es un documento sin páginas.
      * </ul>
+     *
+     * <p>Desde S221 (C-exportacion-guardias-recreo, D5) lleva también las guardias de recreo, y
+     * se titula {@value VistaPdf#TITULO_GUARDIAS}. Cada recreo es una banda de días, como en la
+     * página de profesor: en la celda de un día, los códigos de RECREO ordenados y unidos por
+     * {@value VistaPdf#SEPARADOR_CODIGOS} y, en línea aparte, «Biblioteca: COD». La leyenda
+     * nombra a todos los que aparecen, también a quien solo tiene guardias de recreo.
      */
     private static byte[] paginaDeGuardias(HorarioProyeccionDTO proyeccion, ContextoPdf contexto) {
         List<TramoJornadaDTO> filas = filasDeTramo(contexto.jornada());
         Map<String, List<String>> porCelda = codigosPorCelda(proyeccion.guardias());
+        Map<String, List<String>> porRecreo = codigosPorRecreo(proyeccion.guardias(), GuardiaVistaDTO.RECREO);
+        Map<String, List<String>> porBiblioteca =
+                codigosPorRecreo(proyeccion.guardias(), GuardiaVistaDTO.BIBLIOTECA);
 
         BaseFont normal = cargarFuente("DejaVuSansCondensed.ttf");
         BaseFont negrita = cargarFuente("DejaVuSansCondensed-Bold.ttf");
@@ -319,6 +331,20 @@ public final class HorarioPdf {
             return codigos == null
                     ? List.of()
                     : List.of(String.join(VistaPdf.SEPARADOR_CODIGOS, codigos));
+        }, (dia, recreo) -> {
+            // Celda de un recreo (S221, X3): los códigos de RECREO en una entrada y, si hay,
+            // los de BIBLIOTECA en otra, «Biblioteca: COD», que la celda pinta en línea aparte.
+            List<String> entradas = new ArrayList<>(2);
+            List<String> deRecreo = porRecreo.get(dia + "-" + recreo);
+            if (deRecreo != null) {
+                entradas.add(String.join(VistaPdf.SEPARADOR_CODIGOS, deRecreo));
+            }
+            List<String> deBiblioteca = porBiblioteca.get(dia + "-" + recreo);
+            if (deBiblioteca != null) {
+                entradas.add(VistaPdf.PREFIJO_BIBLIOTECA
+                        + String.join(VistaPdf.SEPARADOR_CODIGOS, deBiblioteca));
+            }
+            return entradas;
         }, fCuerpo, fNegrita));
 
         List<BloqueLeyenda> bloques =
@@ -331,15 +357,38 @@ public final class HorarioPdf {
         return salida.toByteArray();
     }
 
-    /** {@code "dia-tramo"} → los códigos de guardia de esa celda, ORDENADOS (D3). */
+    /**
+     * {@code "dia-tramo"} → los códigos de guardia ORDINARIA de esa celda, ORDENADOS (D3). Las de
+     * recreo no tienen tramo: van por {@link #codigosPorRecreo} (S221).
+     */
     private static Map<String, List<String>> codigosPorCelda(List<GuardiaVistaDTO> guardias) {
         Map<String, List<String>> porCelda = new TreeMap<>();
         for (GuardiaVistaDTO g : guardias) {
+            if (g.esDeRecreo()) {
+                continue;
+            }
             porCelda.computeIfAbsent(g.dia() + "-" + g.tramo(), k -> new ArrayList<>())
                     .add(g.profesorCodigo());
         }
         porCelda.values().forEach(codigos -> codigos.sort(Comparator.naturalOrder()));
         return porCelda;
+    }
+
+    /**
+     * {@code "dia-recreo"} → los códigos de las guardias de ese {@code tipo} (RECREO o
+     * BIBLIOTECA) en ese recreo, ORDENADOS como los de una celda (S221, X3).
+     */
+    private static Map<String, List<String>> codigosPorRecreo(List<GuardiaVistaDTO> guardias,
+                                                              String tipo) {
+        Map<String, List<String>> porRecreo = new TreeMap<>();
+        for (GuardiaVistaDTO g : guardias) {
+            if (tipo.equals(g.tipo())) {
+                porRecreo.computeIfAbsent(g.dia() + "-" + g.recreo(), k -> new ArrayList<>())
+                        .add(g.profesorCodigo());
+            }
+        }
+        porRecreo.values().forEach(codigos -> codigos.sort(Comparator.naturalOrder()));
+        return porRecreo;
     }
 
     /**
@@ -480,9 +529,15 @@ public final class HorarioPdf {
      * <p>Lo que va en cada celda lectiva lo dice {@code entradasEn(dia, tramo)}: es lo único
      * que cambia entre los dos caminos (S215), y así la rejilla, la columna de horas y el
      * recreo son los mismos en la página de un recurso y en la de guardias.
+     *
+     * <p>Desde S221 (D5), con {@code entradasEnRecreo} no nulo el recreo n de la jornada —el
+     * n-ésimo no lectivo del día, de arriba abajo— es una BANDA DE DÍAS: la columna de horas
+     * lleva la hora y «Recreo», y siguen cinco celdas con {@code entradasEnRecreo(dia, n)}, todo
+     * sombreado. Con null, la banda única de siempre: grupo y aula no cambian.
      */
     private static PdfPTable rejilla(List<TramoJornadaDTO> filas,
                                      BiFunction<Integer, Integer, List<String>> entradasEn,
+                                     BiFunction<Integer, Integer, List<String>> entradasEnRecreo,
                                      Font fCuerpo, Font fNegrita) {
 
         PdfPTable tabla = new PdfPTable(6);
@@ -496,14 +551,33 @@ public final class HorarioPdf {
             tabla.addCell(celdaTexto(dia, fNegrita, Element.ALIGN_CENTER));
         }
 
+        int recreos = 0;
         for (TramoJornadaDTO fila : filas) {
             PdfPCell horas = celdaTexto(fila.horaInicio() + "-" + fila.horaFin(),
                     fNegrita, Element.ALIGN_CENTER);
 
+            if (!fila.esLectivo() && entradasEnRecreo != null) {
+                recreos++;
+                Phrase rotulo = new Phrase(fila.horaInicio() + "-" + fila.horaFin(), fNegrita);
+                rotulo.add(Chunk.NEWLINE);
+                rotulo.add(new Chunk(VistaPdf.ROTULO_RECREO, fCuerpo));
+                PdfPCell horasDeRecreo = new PdfPCell(rotulo);
+                horasDeRecreo.setPadding(PADDING);
+                horasDeRecreo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                horasDeRecreo.setLeading(0f, INTERLINEADO);
+                horasDeRecreo.setBackgroundColor(GRIS_RECREO);
+                tabla.addCell(horasDeRecreo);
+                for (int dia = 1; dia <= DIAS.length; dia++) {
+                    PdfPCell celda = celdaDeHorario(entradasEnRecreo.apply(dia, recreos), fCuerpo);
+                    celda.setBackgroundColor(GRIS_RECREO);
+                    tabla.addCell(celda);
+                }
+                continue;
+            }
             if (!fila.esLectivo()) {
                 horas.setBackgroundColor(GRIS_RECREO);
                 tabla.addCell(horas);
-                PdfPCell recreo = celdaTexto("Recreo", fCuerpo, Element.ALIGN_CENTER);
+                PdfPCell recreo = celdaTexto(VistaPdf.ROTULO_RECREO, fCuerpo, Element.ALIGN_CENTER);
                 recreo.setColspan(DIAS.length);
                 recreo.setBackgroundColor(GRIS_RECREO);
                 tabla.addCell(recreo);
@@ -548,8 +622,23 @@ public final class HorarioPdf {
             }
         }
         for (GuardiaVistaDTO g : guardias) {
-            if (g.dia() == dia && g.tramo() == tramo) {
+            if (!g.esDeRecreo() && g.dia() == dia && g.tramo() == tramo) {
                 entradas.add(VistaPdf.ROTULO_GUARDIA);
+            }
+        }
+        return entradas;
+    }
+
+    /**
+     * Las entradas de la celda de un día en la banda del recreo n de la página de un profesor
+     * (S221, D5): una por cada guardia de recreo suya ese día en ese recreo, «Guardia» la de
+     * RECREO y «Biblioteca» la de BIBLIOTECA, en el orden de la proyección.
+     */
+    private static List<String> entradasDeRecreo(List<GuardiaVistaDTO> guardias, int dia, int recreo) {
+        List<String> entradas = new ArrayList<>();
+        for (GuardiaVistaDTO g : guardias) {
+            if (g.esDeRecreo() && g.dia() == dia && g.recreo() == recreo) {
+                entradas.add(VistaPdf.rotuloDe(g));
             }
         }
         return entradas;

@@ -91,6 +91,10 @@ class ExportacionSinGuardiasTest {
      * extractor colapsa las columnas, así que cada fila de la rejilla es una línea con lo que
      * haya en ella de lunes a viernes. SIN1 está en el catálogo y no tiene clases: no tiene
      * página. La reunión sin aula sale como su asignatura sola.
+     *
+     * <p>S221 (C-exportacion-guardias-recreo, D5): lo único que cambia es la fila del recreo,
+     * que en la página de profesor es una banda de días aunque no haya guardias: la hora y
+     * «Recreo» en la columna de horas, en dos líneas, y cinco celdas vacías.
      */
     private static final String PAGINA_LEN1 =
             "LEN1 — Profesor Uno\n"
@@ -99,7 +103,8 @@ class ExportacionSinGuardiasTest {
             + " 08:00-09:00\n"
             + " 09:00-10:00\n"
             + " 10:00-11:00\n"
-            + " 11:00-11:30 Recreo\n"
+            + " 11:00-11:30\n"
+            + " Recreo\n"
             + " 11:30-12:30 LEN A6 1ºA/1ºB\n"
             + " 12:30-13:30\n"
             + " 13:30-14:30 RED\n"
@@ -114,7 +119,8 @@ class ExportacionSinGuardiasTest {
             + " 08:00-09:00 MAT A5 1ºA\n"
             + " 09:00-10:00\n"
             + " 10:00-11:00\n"
-            + " 11:00-11:30 Recreo\n"
+            + " 11:00-11:30\n"
+            + " Recreo\n"
             + " 11:30-12:30 LEN A6 1ºA/1ºB\n"
             + " 12:30-13:30\n"
             + " 13:30-14:30\n"
@@ -128,7 +134,8 @@ class ExportacionSinGuardiasTest {
             + " 08:00-09:00\n"
             + " 09:00-10:00 TEC Taller 1 1ºA\n"
             + " 10:00-11:00 TEC Taller 1 1ºA\n"
-            + " 11:00-11:30 Recreo\n"
+            + " 11:00-11:30\n"
+            + " Recreo\n"
             + " 11:30-12:30\n"
             + " 12:30-13:30\n"
             + " 13:30-14:30\n"

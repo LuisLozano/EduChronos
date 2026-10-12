@@ -307,7 +307,8 @@ class ExportacionHorarioServiceTest {
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
             String pagina = new PdfTextExtractor(reader).getTextFromPage(1);
-            assertThat(pagina).contains("Guardias ordinarias", "Profesores de guardia",
+            assertThat(pagina.split("\\R")[0].trim()).isEqualTo("Guardias");
+            assertThat(pagina).contains("Profesores de guardia",
                     "MAT1 — Ríos Palomo, María del Carmen");
             assertThat(pagina).doesNotContain("MAT A5");
         } finally {
@@ -326,7 +327,8 @@ class ExportacionHorarioServiceTest {
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
             String pagina = new PdfTextExtractor(reader).getTextFromPage(1);
-            assertThat(pagina).contains("Guardias ordinarias", "08:00-09:00");
+            assertThat(pagina.split("\\R")[0].trim()).isEqualTo("Guardias");
+            assertThat(pagina).contains("08:00-09:00");
             assertThat(pagina).doesNotContain("—");
         } finally {
             reader.close();
