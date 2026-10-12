@@ -83,7 +83,7 @@ sostienen M2 y M4.
 
 **Registro.** Cada decisión delegada va a DECISIONES como «Del arquitecto», con su motivo. En el cierre, el arquitecto presenta esa lista al usuario antes del commit de documentación, y el usuario puede revertir cualquiera.
 
-**Amplitud de sesión.** Por defecto, una sesión de Desarrollo hace el Cambio entero si su contrato está cerrado (precedente: S203, tramos T1 a T3); la sesión que abre un objetivo cierra también el contrato de su primer Cambio cuando su M2 es pequeño; las verificaciones (bancos, VM, navegador) van como fase de una sesión de código (tipos combinados), no como sesión propia. No se fuerza cuando la medición destapa decisiones del usuario.
+**Amplitud de sesión.** Por defecto, una sesión de Desarrollo hace el Cambio entero si su contrato está cerrado (precedente: S203, tramos T1 a T3); la sesión que abre un objetivo cierra también el contrato de su primer Cambio cuando su M2 es pequeño; las verificaciones (bancos, VM, navegador) van como fase de una sesión de código (tipos combinados), no como sesión propia. No se fuerza cuando la medición destapa decisiones del usuario. **Fases con un solo cierre (S221).** Los Cambios pequeños del objetivo activo se hacen como fases de una misma sesión, con un único cierre, en vez de una sesión por Cambio (`D-coste-documental-por-sesion`).
 
 **Por qué (S204).** En S202 y S203 casi todas las confirmaciones aprobaban la recomendación sin cambios, y el control cruzado (arquitecto, Claude Code, tests, mutación y CI) cazó dentro de la sesión los siete errores del asistente de esas dos sesiones. Lo que ese control no ve —los errores de premisa compartida y la deriva acumulada— lo cubren las decisiones reservadas y la revisión de la lista al cierre (precedente: el defecto (29) de S203, una decisión del arquitecto que Claude Code siguió y guardó en su memoria).
 
@@ -126,8 +126,20 @@ objetivo (Higiene/Método), del registro que la propone.
    cierra dice QUÉ quedó implementado y DÓNDE; una que sobrevive con matices dice
    cuáles. La deuda nueva nace CLASIFICADA (§4 de `gestion_proyecto.md`): técnica
    real / mejora futura / decisión consciente / limitación conocida.
+   **Entrada corta y estado en un solo sitio (S223).** La entrada viva del plan
+   cabe en 3 500 bytes y lleva, una línea cada uno: TIPO, HECHO (fases y commits),
+   CRITERIO, DECISIONES (título y quién decide; el texto vive en su ficha), DEUDA,
+   DEFECTOS, SUITES y CIERRE (verificador, censo, higiene, líneas del commit de
+   cierre sin índice, bytes de la entrada y paradas del cierre). Lo demás va a la
+   carpeta de material, citado por ruta. El estado de un objetivo vive en su ficha
+   y en la entrada; §2 de `gestion_proyecto.md` solo se toca al abrir o cerrar un
+   objetivo. Al cerrar un objetivo su ficha pasa a `gestion-historico.md` §1 y en
+   §3 queda su línea; una fila de §4 que se tacha pasa a su §2. Así
+   `gestion_proyecto.md` sigue cabiendo entero en la lectura del Project (262 144
+   bytes).
 2. ARCHIVAR la cabecera más antigua de la ventana a la bitácora, para que el plan
-   conserve siempre las 4 últimas. Ver M1-bis: único paso con fallos históricos.
+   conserve siempre las 2 últimas, la viva y la degradada, como comprueba
+   `verificar-cierre.py` (S223). Ver M1-bis: único paso con fallos históricos.
 3. ACTUALIZAR el censo de la bitácora. Su cabecera declara el rango DOS veces (la
    línea de descripción y la de orden cronológico). Las dos.
 4. ACTUALIZAR en el plan la crónica de archivado y la frase de ventana.
@@ -266,6 +278,8 @@ sostiene los casos heredados del molde plano. Es la regla para toda entidad con
 dependencia de red en construcción, que el molde plano (formularios sin carga
 inicial) no necesitaba.
 
+Un mutante se revierte desde una copia del fichero ya modificado y se comprueba con `cmp`; nunca con `git checkout` sobre trabajo sin commit (S222).
+
 ---
 
 ## M4 — Contraste antes de teclear, y artefactos derivados
@@ -380,10 +394,10 @@ del repo (`/tmp`) salvo decisión expresa de conservarla.
 
 ## M-doc-3 — Índice generado (S122)
 
-`gestion_proyecto.md` y `plan_trabajo_horarios.md` llevan al principio un índice
-GENERADO, delimitado por `<!-- INDICE:INICIO -->` y `<!-- INDICE:FIN -->`, con cada
-encabezado y su línea. Existe para poder leer por secciones en la apertura en vez
-de leer el documento entero.
+`gestion_proyecto.md`, `plan_trabajo_horarios.md` y `gestion-historico.md` (S223)
+llevan al principio un índice GENERADO, delimitado por `<!-- INDICE:INICIO -->` y
+`<!-- INDICE:FIN -->`, con cada encabezado y su línea. Existe para poder leer por
+secciones en la apertura en vez de leer el documento entero.
 
 Los números de línea son INDICATIVOS: se regeneran en el cierre (ver §Automatización
 del cierre). Si no cuadran, manda el TEXTO del encabezado, que es lo que se busca
@@ -485,7 +499,7 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo** | Avanzar un Cambio con lógica | Caso normal bajo objetivo activo | M0, M2, M3, M4 (si >1 módulo), M1 completo | Ninguno |
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
-| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
+| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178), o programada por una decisión escrita del usuario (S223) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
 | **Apertura de objetivo** | Abrir el objetivo siguiente del mapa y escribir su criterio sobre medición | Entre objetivos; avanza el Cambio de alcance del objetivo (como `C-alcance-base-tecnica`) | M0, M2 de solo lectura, decisiones del usuario, alta documental con corrida en seco, M1 | M3 y M4 (no hay código de la aplicación). Precedentes: S147 a S173, S180, S183 y S190 (S194) |
 | **Desarrollo reducido** | Avanzar un Cambio que se verifica fuera del código: versión, Release, VM, ensayo, demo | Bajo objetivo activo, cuando el Cambio no lleva código de la aplicación | M0, M2 de solo lectura, M4 con un humano o en la VM, M1 | M3 (no hay lógica nueva). Precedentes desde S156; el último, S189 (S194) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
@@ -523,7 +537,8 @@ El paso M1.6 es mecánico y verificable; no requiere el modelo principal razonan
 Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
 - `grep -c "^### Sesión" plan_trabajo_horarios.md` → debe dar 1 (invariante H3).
 - Censo de tokens R4: `D-*`, `Dnn`, `C-*` y `O-*` sobre el plan SIN su entrada de
-  sesión ni las líneas del índice que copian su cabecera (S179), gestión y método.
+  sesión ni las líneas del índice que copian su cabecera (S179), gestión, método y
+  `gestion-historico.md` (S223).
   Lista los de una sola aparición y los que sólo viven en la entrada, e informa de
   los que había en HEAD y ya no hay (extinción, sin sumar a fallos). Cobertura y
   exclusiones en R4 (S157).
@@ -532,12 +547,12 @@ Un script corrido por Claude Code lo ejecuta y REPORTA (no corrige):
 - Frase de ventana (S179): se deriva de la cabecera H3 viva y de la previa degradada;
   si no las nombra, falta o se repite a principio de línea, es fallo duro. Deja de
   comprobarse a mano.
-- Tablas de plan, gestión, método y bitácora (S179): cada fila con tantas celdas
-  como su cabecera, contando la barra sin escapar dentro de código, y ninguna fila
-  `|` fuera de toda tabla; fallo duro.
+- Tablas de plan, gestión, método, `gestion-historico.md` (S223) y bitácora (S179):
+  cada fila con tantas celdas como su cabecera, contando la barra sin escapar dentro
+  de código, y ninguna fila `|` fuera de toda tabla; fallo duro.
 - Diff de costura: que las regiones tocadas sean solo las previstas.
-- Regenerar el índice de `gestion_proyecto.md` y `plan_trabajo_horarios.md`
-  (M-doc-3): los números de línea caducan en cada cierre.
+- Regenerar el índice de `gestion_proyecto.md`, `plan_trabajo_horarios.md` y
+  `gestion-historico.md` (M-doc-3; S223): los números de línea caducan en cada cierre.
 
 El script solo reporta; el arquitecto lee su salida. Su cobertura se valida una vez
 contra un cierre hecho a mano (el de S99 sirve de test de oro).
@@ -581,8 +596,9 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
    `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
    otros. (`D-guion-escribe-donde-no-se-dijo`)
 7. **Una herramienta se invoca sólo con los argumentos que interpreta**:
-   `regenerar-indice.py` no lee argumentos y escribe los índices aunque se le pase
-   `--help`. Ante la duda, se lee el fuente. (`D-guion-escribe-donde-no-se-dijo`)
+   `regenerar-indice.py` no lee argumentos. Desde S223 sale con rc=2 y sin escribir
+   ante cualquier argumento. Ante la duda, se lee el fuente.
+   (`D-guion-escribe-donde-no-se-dijo`)
 8. **Toda escritura va precedida de una corrida en seco revisada fuera del repo**,
    y el guion que escribe aborta si su ancla no aparece exactamente una vez
    (M-doc). (`D-guion-busca-token-esperado`)
@@ -665,3 +681,8 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     (`D-declarado-sin-artefacto`, `D-748-sin-derivacion`)
 17. **Los pasos humanos de una verificación se dan de uno en uno, cada uno con lo que hay que
     observar** (S215). Una lista entera produjo un «todo OK» sin los pasos hechos y dos paradas.
+18. **El informe de un guion es corto** (S223): una línea de veredicto por comprobación (OK o
+    FALLO, con la cifra que decide), los hashes de los commits y las desviaciones del guion. Las
+    salidas quedan en la carpeta de material y solo se pegan ante un FALLO o si el guion las
+    pide por nombre. Sale de S223: un informe de unas 460 líneas, más de la mitad un diff que la
+    autoprueba ya garantizaba.
