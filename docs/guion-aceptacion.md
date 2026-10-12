@@ -496,7 +496,7 @@ for t in actividad asignatura asignatura_aula_compatible aula configuracion grup
 sqlite3 "file:$W/copia.db?mode=ro" "select clave, valor from configuracion order by clave"
 ```
 
-Esperado, igual que en el ensayo: actividad 8, asignatura 7, asignatura_aula_compatible 0, aula 3,
+Esperado: actividad 8, asignatura 7, asignatura_aula_compatible 0, aula 3,
 configuracion 3, grupo_administrativo 3, nivel 1, plaza 10, plaza_aula_candidata 0, plaza_profesor 10,
 plaza_subgrupo 10, profesor 4, profesor_restriccion_horaria 7, profesor_tutoria 3, subgrupo 7,
 subgrupo_grupo 9 y tramo_semanal 35. La consulta de `configuracion` da tres filas, todas con valor 0:
