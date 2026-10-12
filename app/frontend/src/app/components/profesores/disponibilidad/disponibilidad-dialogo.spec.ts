@@ -329,13 +329,15 @@ describe('DisponibilidadDialogo', () => {
     expect(service.reemplazar).not.toHaveBeenCalled();
   });
 
-  it('(17) S212: la nota dice que las guardias ordinarias no se marcan aquí, y ya no la frase de antes', async () => {
+  it('(17) S212 y S222: la nota manda las guardias a la ficha y la biblioteca y la convivencia a Actividades', async () => {
     await montar();
 
     const nota = raiz().querySelector('.disponibilidad-dialogo__nota')!.textContent!.trim();
     expect(nota).toBe(
-      'Las guardias ordinarias no se marcan aquí: se indican con su número en la ficha del profesor.'
-        + ' Las de biblioteca y convivencia, y las reducciones en tramos lectivos, se marcan como “No puede”.',
+      'Las guardias, ordinarias y de recreo, no se marcan aquí: se indican con su número en la ficha del profesor.'
+        + ' Las horas de biblioteca y de convivencia en tramos de clase se dan de alta en Actividades,'
+        + ' con tipo «Función» y el profesor.'
+        + ' Las reducciones en tramos lectivos se marcan como «No puede».',
     );
     expect(raiz().textContent).not.toContain('Las guardias y reducciones');
   });
