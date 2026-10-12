@@ -9,6 +9,7 @@ import es.yaroki.educhronos.app.persistence.GuardiaRepository;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
+import es.yaroki.educhronos.app.persistence.TipoGuardia;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.dto.ViolacionGuardiaDTO;
@@ -146,6 +147,94 @@ class DiagnosticoGuardiasTest {
                         "GUA1 tiene guardia en tramo LUNES 10:00-10:30, que no es hora de clase."));
     }
 
+    // ─────────────────────────────────────────────────────────── recreo (S220)
+
+    /**
+     * (S220) Una guardia de RECREO en el recreo, con su número y sin mínimos: ninguna violación. En
+     * particular, ni GUARDIAS_NUMERO_DISTINTO (no es una ordinaria) ni GUARDIA_EN_TRAMO_NO_LECTIVO.
+     */
+    @Test
+    void unaGuardiaDeRecreoEnElRecreo_ningunaViolacion() {
+        guardiasRecreo("GUA1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.RECREO);
+
+        assertThat(diagnostico()).isEmpty();
+    }
+
+    @Test
+    void recreoNumeroDistinto_soloElProfesorQueNoTieneLasQueLeCorresponden() {
+        guardiasRecreo("GUA1", 2);
+        guardiasRecreo("MAT1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.RECREO);
+        guardia("MAT1", lectivo(4), TipoGuardia.RECREO);
+
+        assertThat(de(DiagnosticoService.REGLA_GUARDIAS_RECREO_NUMERO_DISTINTO))
+                .extracting(ViolacionGuardiaDTO::profesorCodigo, ViolacionGuardiaDTO::tramoCodigo,
+                        ViolacionGuardiaDTO::mensaje)
+                .containsExactly(tuple("GUA1", null, "GUA1 tiene 1 guardias de recreo y le corresponden 2."));
+    }
+
+    @Test
+    void recreoBajoMinimo_saltaConUnaDeDos() {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 2, 0);
+        guardiasRecreo("GUA1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.RECREO);
+
+        assertThat(de(DiagnosticoService.REGLA_RECREO_BAJO_MINIMO))
+                .extracting(ViolacionGuardiaDTO::profesorCodigo, ViolacionGuardiaDTO::tramoCodigo,
+                        ViolacionGuardiaDTO::mensaje)
+                .containsExactly(tuple(null, "LUNES 10:00-10:30",
+                        "LUNES 10:00-10:30: 1 profesores de guardia y el mínimo es 2."));
+    }
+
+    /** Justo en el mínimo calla; la de BIBLIOTECA cuenta también como guardia de recreo. */
+    @Test
+    void recreoBajoMinimo_callaJustoEnElMinimo() {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 2, 1);
+        guardiasRecreo("GUA1", 1);
+        guardiasRecreo("MAT1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.RECREO);
+        guardia("MAT1", recreo(), TipoGuardia.BIBLIOTECA);
+
+        assertThat(diagnostico()).isEmpty();
+    }
+
+    @Test
+    void bibliotecaBajoMinimo_saltaSinNingunaEnLaBibliotecaYCallaConUna() {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 1, 1);
+        guardiasRecreo("GUA1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.RECREO);
+
+        assertThat(diagnostico())
+                .extracting(ViolacionGuardiaDTO::regla, ViolacionGuardiaDTO::tramoCodigo, ViolacionGuardiaDTO::mensaje)
+                .containsExactly(tuple(DiagnosticoService.REGLA_BIBLIOTECA_BAJO_MINIMO, "LUNES 10:00-10:30",
+                        "LUNES 10:00-10:30: 0 profesores de guardia en la biblioteca y el mínimo es 1."));
+    }
+
+    @Test
+    void bibliotecaBajoMinimo_callaConUnaEnLaBiblioteca() {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 1, 1);
+        guardiasRecreo("GUA1", 1);
+        guardia("GUA1", recreo(), TipoGuardia.BIBLIOTECA);
+
+        assertThat(diagnostico()).isEmpty();
+    }
+
+    @Test
+    void recreoEnTramoLectivo_laDelTramoDeClaseSiYLaDelRecreoNo() {
+        guardiasRecreo("GUA1", 1);
+        guardiasRecreo("MAT1", 1);
+        guardia("GUA1", lectivo(1), TipoGuardia.RECREO);
+        guardia("MAT1", recreo(), TipoGuardia.RECREO);
+
+        assertThat(de(DiagnosticoService.REGLA_GUARDIA_RECREO_EN_TRAMO_LECTIVO))
+                .extracting(ViolacionGuardiaDTO::profesorCodigo, ViolacionGuardiaDTO::tramoCodigo,
+                        ViolacionGuardiaDTO::mensaje)
+                .containsExactly(tuple("GUA1", "L1",
+                        "GUA1 tiene guardia de recreo en LUNES 08:00-09:00, que es hora de clase."));
+        assertThat(de(DiagnosticoService.REGLA_GUARDIA_EN_TRAMO_NO_LECTIVO)).isEmpty();
+    }
+
     // ─────────────────────────────────────────────────────────────── andamio
 
     private List<ViolacionGuardiaDTO> diagnostico() {
@@ -167,6 +256,18 @@ class DiagnosticoGuardiasTest {
     private void guardia(String codigo, TramoSemanal tramo) {
         HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
         guardiaRepository.save(new Guardia(horario, profesorRepository.findByCodigo(codigo).orElseThrow(), tramo));
+    }
+
+    private void guardia(String codigo, TramoSemanal tramo, TipoGuardia tipo) {
+        HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow();
+        guardiaRepository.save(new Guardia(horario, profesorRepository.findByCodigo(codigo).orElseThrow(), tramo,
+                tipo));
+    }
+
+    private void guardiasRecreo(String codigo, int n) {
+        Profesor profesor = profesorRepository.findByCodigo(codigo).orElseThrow();
+        profesor.setGuardiasRecreo(n);
+        profesorRepository.save(profesor);
     }
 
     /** El tramo lectivo {@code n} del lunes (1..4), saltando el recreo. */

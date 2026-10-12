@@ -16,4 +16,12 @@ public final class MinimoGuardias {
     public static void fijar(ConfiguracionRepository configuraciones, int minimo) {
         configuraciones.save(new Configuracion(ConfiguracionGuardias.CLAVE, Integer.toString(minimo)));
     }
+
+    /** Los dos mínimos de cada recreo (S219): profesores de guardia y, de ellos, en la biblioteca. */
+    public static void fijarRecreo(ConfiguracionRepository configuraciones, int minimoRecreo, int minimoBiblioteca) {
+        configuraciones.save(new Configuracion(ConfiguracionGuardias.CLAVE_MINIMO_RECREO,
+                Integer.toString(minimoRecreo)));
+        configuraciones.save(new Configuracion(ConfiguracionGuardias.CLAVE_MINIMO_BIBLIOTECA,
+                Integer.toString(minimoBiblioteca)));
+    }
 }
