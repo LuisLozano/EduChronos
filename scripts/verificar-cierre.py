@@ -7,7 +7,8 @@ Comprueba:
   1. Invariante H3: `plan_trabajo_horarios.md` tiene exactamente UNA cabecera
      `### Sesión`.
   2. Censo de tokens R4: cuenta `D-*`, `Dnn`, `C-*` y `O-*` sobre el corpus vivo,
-     que es el plan SIN su entrada de sesión, más gestión y método. `§x.y` y `Cx`
+     que es el plan SIN su entrada de sesión, más gestión, método y el histórico de
+     gestión (S223). `§x.y` y `Cx`
      NO se cuentan: no son identificadores únicos —el mismo `§4` existe en varios
      documentos— y quedan a comprobación humana al archivar (ver metodo.md, R4).
      Aproximación declarada: un token que aparece UNA SOLA VEZ en todo el corpus
@@ -28,16 +29,21 @@ Comprueba:
      DERIVA de las cabeceras —la previa degradada y la H3 viva— y es FALLO DURO si
      no cuadra, falta o se repite a principio de línea (sección 5 de la salida;
      D-verificar-cierre-ciego-a-la-ventana, S179).
-  7. Tablas de los cuatro ficheros (plan, gestión, método y bitácora): cada fila
+  7. Tablas de los cinco ficheros (plan, gestión, método, histórico de gestión y
+     bitácora): cada fila
      tiene tantas celdas como su cabecera, contando la barra sin escapar dentro de
      código, y ninguna fila `|` queda fuera de toda tabla. Cada descuadre y cada
      fila fuera de tabla es FALLO DURO (sección 6 de la salida;
      D-verificar-cierre-ciego-a-las-tablas, S179).
 
-El corpus VIVO son los tres documentos de estado: plan, gestión y método.
+El corpus VIVO son los documentos de estado: plan, gestión y método, más
+`gestion-historico.md` (S223).
 `bitacora-sesiones.md` es histórico de solo lectura (R4/R5) y NO cuenta como
 citante vivo: ésa es justo la trampa que R4 existe para evitar. Desde S157
 tampoco cuenta la entrada de sesión viva del plan, por la misma razón.
+`gestion-historico.md`, en cambio, es corpus vivo y cuenta como definición y como
+citante, igual que la sección «Deuda consciente CERRADA» del plan: lo que se
+archiva ya contaba así en gestión, y archivar no debe cambiar el censo (S223).
 
 RAIZ se puede fijar por la variable de entorno EDUCHRONOS_RAIZ, para correr el
 guion desde fuera del repo sin escribir en él.
@@ -55,8 +61,14 @@ PLAN = os.path.join(RAIZ, "docs", "plan_trabajo_horarios.md")
 GESTION = os.path.join(RAIZ, "docs", "gestion_proyecto.md")
 METODO = os.path.join(RAIZ, "docs", "metodo.md")
 BITACORA = os.path.join(RAIZ, "docs", "bitacora-sesiones.md")
-VIVOS = [PLAN, GESTION, METODO]
-NOMBRES_VIVOS = ["plan_trabajo_horarios.md", "gestion_proyecto.md", "metodo.md"]
+HISTORICO = os.path.join(RAIZ, "docs", "gestion-historico.md")
+# Qué fichero entra en cada comprobación (S223). main() y la autoprueba recorren
+# ESTAS listas, así que quitar un fichero de una lo ve la autoprueba (A13–A15).
+CORPUS_VIVO = [PLAN, GESTION, METODO, HISTORICO]
+CON_INDICE = [GESTION, PLAN, HISTORICO]
+CON_TABLAS = [PLAN, GESTION, METODO, HISTORICO, BITACORA]
+VIVOS = list(CORPUS_VIVO)
+NOMBRES_VIVOS = [os.path.basename(p) for p in CORPUS_VIVO]
 
 # --- a) patrones -----------------------------------------------------------
 BASE_TOKEN = (r"\bD-[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9._-]*[A-Za-zÀ-ÿ0-9]"
@@ -163,21 +175,55 @@ def censo_r4(textos_vivos, texto_entradas="", rx=None):
     return sospechosos, solo_entrada, len(vivos)
 
 
+def corpus(textos):
+    """Función PURA: los textos de CORPUS_VIVO, en su orden, desde {ruta: texto}.
+
+    El plan llega ya SIN su entrada de sesión. Un fichero ausente cuenta vacío.
+    """
+    return [textos.get(p, "") for p in CORPUS_VIVO]
+
+
 # --- d) extinción ----------------------------------------------------------
 def extintos(cuenta_head, cuenta_actual):
     """Función PURA: tokens con ≥1 en HEAD y 0 ahora. Se prueba sin git."""
     return sorted(t for t, n in cuenta_head.items() if n >= 1 and cuenta_actual.get(t, 0) == 0)
 
 
+def texto_head(rc_head, rc_fichero, texto):
+    """Función PURA: qué cuenta de HEAD para un documento (S223).
+
+    rc_head ≠ 0 → None (no hay referencia HEAD); rc_fichero ≠ 0 → "" (el fichero
+    no está en HEAD: el commit que lo crea pasa); si no, el texto.
+    """
+    if rc_head != 0:
+        return None
+    if rc_fichero != 0:
+        return ""
+    return texto
+
+
 def docs_de_head():
-    """Los tres documentos vivos tal y como están en HEAD, o None si git falla."""
-    textos = []
-    for nombre in NOMBRES_VIVOS:
-        r = subprocess.run(["git", "-C", RAIZ, "show", "HEAD:docs/" + nombre],
-                           capture_output=True, text=True)
-        if r.returncode != 0:
+    """Los documentos de CORPUS_VIVO tal y como están en HEAD, como {ruta: texto}.
+
+    None si no hay referencia HEAD; "" para el que no está en HEAD (texto_head).
+    """
+    rc_head = subprocess.run(["git", "-C", RAIZ, "rev-parse", "--verify", "-q", "HEAD"],
+                             capture_output=True).returncode
+    textos = {}
+    for ruta, nombre in zip(CORPUS_VIVO, NOMBRES_VIVOS):
+        rc_fichero = subprocess.run(["git", "-C", RAIZ, "cat-file", "-e", "HEAD:docs/" + nombre],
+                                    capture_output=True).returncode
+        texto = ""
+        if rc_head == 0 and rc_fichero == 0:
+            r = subprocess.run(["git", "-C", RAIZ, "show", "HEAD:docs/" + nombre],
+                               capture_output=True, text=True)
+            if r.returncode != 0:
+                return None
+            texto = r.stdout
+        t = texto_head(rc_head, rc_fichero, texto)
+        if t is None:
             return None
-        textos.append(r.stdout)
+        textos[ruta] = t
     return textos
 
 
@@ -215,12 +261,14 @@ def analizar_indice(texto):
     return (total, malas)
 
 
-def indices_ok(ruta):
-    return analizar_indice(leer(ruta))
-
-
 def problema_indice(res):
     return res is None or res[1] > 0
+
+
+def problemas_de_indice(textos):
+    """Función PURA: -> ([(ruta, res)] de CON_INDICE, nº de problemas), desde {ruta: texto}."""
+    informe = [(p, analizar_indice(textos.get(p, ""))) for p in CON_INDICE]
+    return informe, sum(1 for _, res in informe if problema_indice(res))
 
 
 # --- f) frase de ventana: se DERIVA del plan, no se lee a mano --------------
@@ -311,6 +359,13 @@ def analizar_con_huerfanas(texto):
             continue
         i += 1
     return tablas, filas, malas, huerfanas
+
+
+def problemas_de_tablas(textos):
+    """Función PURA: -> ([(ruta, tablas, filas, descuadres, huérfanas)] de CON_TABLAS,
+    nº de problemas), desde {ruta: texto}."""
+    informe = [(p,) + analizar_con_huerfanas(textos.get(p, "")) for p in CON_TABLAS]
+    return informe, sum(len(m) + len(h) for _, _, _, m, h in informe)
 
 
 def tramos(nums):
@@ -524,11 +579,59 @@ def _a12():
         return "A12b: una tabla con separadora produce huérfanas"
 
 
+def _a13():
+    # Archivar no extingue: un token que en HEAD vive en gestión y ahora sólo en el
+    # histórico sigue en el corpus vivo (S223).
+    head = {GESTION: "define D-archivado y D-borrado"}
+    actual = {HISTORICO: "define D-archivado"}
+    ext = extintos(acumular(corpus(head)), acumular(corpus(actual)))
+    if "D-archivado" in ext:
+        return "A13: da por extinto un token que sólo se ha movido al histórico"
+    if "D-borrado" not in ext:
+        return "A13b: no ve extinto un token que desaparece de todo el corpus"
+
+
+def _a14():
+    bueno = "<!-- INDICE:INICIO -->\n- L4 — cuarta\n\ncuarta\n"
+    malo = "<!-- INDICE:INICIO -->\n- L4 — otra cosa\n\ncuarta\n"
+    todos_buenos = {r: bueno for r in (GESTION, PLAN, HISTORICO)}
+    con_malo = dict(todos_buenos)
+    con_malo[HISTORICO] = malo
+    if problemas_de_indice(con_malo)[1] < 1:
+        return "A14: no ve un índice descuadrado en el histórico"
+    if problemas_de_indice(todos_buenos)[1] != 0:
+        return "A14b (control): da problema con los tres índices cuadrando"
+
+
+TABLA_PARTIDA = ("| a | b | c |\n"
+                 "|---|---|---|\n"
+                 "| 1 | 2 | 3 |\n"
+                 "| 1 | dos\n"           # fila partida en dos líneas
+                 "tres |\n")
+
+
+def _a15():
+    sana = "| a | b | c |\n|---|---|---|\n| 1 | 2 | 3 |\n"
+    if problemas_de_tablas({HISTORICO: TABLA_PARTIDA})[1] < 1:
+        return "A15: no ve una fila partida en una tabla del histórico"
+    if problemas_de_tablas({HISTORICO: sana})[1] != 0:
+        return "A15b (control): da problema con una tabla sana en el histórico"
+
+
+def _a16():
+    if texto_head(0, 1, "x") != "":
+        return "A16: un fichero que no está en HEAD no cuenta como vacío"
+    if texto_head(1, 0, "x") is not None:
+        return "A16b: sin referencia HEAD no devuelve None"
+    if texto_head(0, 0, "x") != "x":
+        return "A16c: no devuelve el texto de HEAD"
+
+
 COMPROBACIONES = [
     ("A1", _a1), ("A1b", _a1b), ("A2", _a2), ("A2b", _a2b), ("A3", _a3),
     ("A4", _a4), ("A4b", _a4b), ("A5", _a5), ("A5b", _a5b), ("A6", _a6),
     ("A7", _a7), ("A8", _a8), ("A9", _a9), ("A10", _a10), ("A11", _a11),
-    ("A12", _a12),
+    ("A12", _a12), ("A13", _a13), ("A14", _a14), ("A15", _a15), ("A16", _a16),
 ]
 
 
@@ -556,7 +659,9 @@ def main(argv):
     if solo_autoprueba:
         return 0
 
-    plan, gestion, metodo, bita = (leer(p) for p in (PLAN, GESTION, METODO, BITACORA))
+    # Cada fichero se lee UNA vez; las comprobaciones recorren sus listas (S223).
+    textos = {p: leer(p) for p in dict.fromkeys(CORPUS_VIVO + CON_INDICE + CON_TABLAS)}
+    plan, bita = textos[PLAN], textos[BITACORA]
     problemas = 0
 
     print("=== 1. INVARIANTE H3 (cabecera viva única) ===")
@@ -565,7 +670,7 @@ def main(argv):
           % (n, "OK" if n == 1 else "FALLO, se esperaba 1"))
     problemas += (n != 1)
 
-    print("\n=== 2. CENSO DE TOKENS R4 (corpus vivo: plan SIN entrada + gestión + método) ===")
+    print("\n=== 2. CENSO DE TOKENS R4 (corpus vivo: plan SIN entrada + gestión + método + histórico) ===")
     print("   patrón: D-*, Dnn, C-*, O-*   (§x.y y Cx NO se cuentan: ver metodo.md R4)")
     try:
         plan_sin, indice_quitadas = _retirar_entradas(plan)
@@ -575,11 +680,13 @@ def main(argv):
     quitadas = plan.count("\n") - plan_sin.count("\n") - indice_quitadas
     print("   entrada de sesión retirada del corpus: %d líneas, y %d línea(s) de índice que copian su cabecera"
           % (quitadas, indice_quitadas))
-    sospechosos, solo_entrada, total = censo_r4([plan_sin, gestion, metodo], plan_entrada)
+    vivos = dict(textos)
+    vivos[PLAN] = plan_sin
+    sospechosos, solo_entrada, total = censo_r4(corpus(vivos), plan_entrada)
     print("   %d tokens distintos en el corpus vivo." % total)
     print("   -- 2a. UNA sola aparición en el corpus vivo (%d):" % len(sospechosos))
     for t in sospechosos:
-        sedes = [os.path.basename(p) for p, txt in zip(VIVOS, (plan_sin, gestion, metodo)) if t in txt]
+        sedes = [os.path.basename(p) for p, txt in zip(VIVOS, corpus(vivos)) if t in txt]
         print("     %-44s en %s" % (t, ", ".join(sedes)))
     print("   -- 2b. CERO apariciones fuera, sólo en la entrada de sesión (%d):" % len(solo_entrada))
     for t in solo_entrada:
@@ -592,13 +699,15 @@ def main(argv):
         print("   sin referencia HEAD")
     else:
         try:
-            head_plan_sin = sin_entradas(head[0])
+            head_plan_sin = sin_entradas(head[PLAN])
         except ValueError as e:
             head_plan_sin = None
             print("   sin referencia HEAD (el plan de HEAD no aísla su entrada: %s)" % e)
         if head_plan_sin is not None:
-            cuenta_head = acumular([head_plan_sin, head[1], head[2]])
-            cuenta_actual = acumular([plan_sin, gestion, metodo])
+            head_vivos = dict(head)
+            head_vivos[PLAN] = head_plan_sin
+            cuenta_head = acumular(corpus(head_vivos))
+            cuenta_actual = acumular(corpus(vivos))
             ext = extintos(cuenta_head, cuenta_actual)
             print("   %d token(s) con ≥1 aparición en HEAD y 0 ahora:" % len(ext))
             for t in ext:
@@ -617,14 +726,13 @@ def main(argv):
         problemas += 1
 
     print("\n=== 4. ÍNDICES GENERADOS (M-doc-3) ===")
-    for r in (GESTION, PLAN):
-        res = indices_ok(r)
+    informe, n_indice = problemas_de_indice(textos)
+    for r, res in informe:
         if res is None:
             print("   %-28s SIN ÍNDICE" % os.path.basename(r))
         else:
             print("   %-28s %d entradas, %d descuadradas" % (os.path.basename(r), res[0], res[1]))
-        if problema_indice(res):
-            problemas += 1
+    problemas += n_indice
 
     print("\n=== 5. FRASE DE VENTANA DEL PLAN (derivada de las cabeceras) ===")
     pv = ventana(plan)
@@ -637,8 +745,8 @@ def main(argv):
         print("   la frase dice S%s (previa) y S%s (viva), como las cabeceras del plan -> OK" % (m, n))
 
     print("\n=== 6. TABLAS (celdas por fila y filas fuera de tabla) ===")
-    for ruta, txt in ((PLAN, plan), (GESTION, gestion), (METODO, metodo), (BITACORA, bita)):
-        t, f, malas, huerfanas = analizar_con_huerfanas(txt)
+    informe, n_tablas = problemas_de_tablas(textos)
+    for ruta, t, f, malas, huerfanas in informe:
         nombre = os.path.basename(ruta)
         print("   %-28s %d tablas, %d filas, %d descuadres, %d fuera de tabla"
               % (nombre, t, f, len(malas), len(huerfanas)))
@@ -646,7 +754,7 @@ def main(argv):
             print("     FALLO %s:%d  %s con %d celdas, esperadas %d" % (nombre, ln, tipo, c, e))
         if huerfanas:
             print("     FALLO %s: filas fuera de tabla en líneas %s" % (nombre, ", ".join(tramos(huerfanas))))
-        problemas += len(malas) + len(huerfanas)
+    problemas += n_tablas
 
     print("\n=== RESUMEN ===")
     print("   comprobaciones duras con fallo: %d" % problemas)

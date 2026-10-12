@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Regenera el índice de M-doc-3 en los documentos grandes. IDEMPOTENTE.
 
-`gestion_proyecto.md` y `plan_trabajo_horarios.md` llevan al principio un índice
-GENERADO entre `<!-- INDICE:INICIO -->` y `<!-- INDICE:FIN -->` con cada encabezado
+`gestion_proyecto.md`, `plan_trabajo_horarios.md` y `gestion-historico.md` (S223)
+llevan al principio un índice GENERADO entre `<!-- INDICE:INICIO -->` y `<!-- INDICE:FIN -->` con cada encabezado
 y su línea. Los números caducan en cuanto alguien edita, así que esto se corre en
 cada cierre (metodo.md, §Automatización del cierre).
 
@@ -16,7 +16,8 @@ import re
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCS = [os.path.join(RAIZ, "docs", n) for n in ("gestion_proyecto.md", "plan_trabajo_horarios.md")]
+DOCS = [os.path.join(RAIZ, "docs", n)
+        for n in ("gestion_proyecto.md", "plan_trabajo_horarios.md", "gestion-historico.md")]
 INI, FIN = "<!-- INDICE:INICIO -->", "<!-- INDICE:FIN -->"
 CABECERA = re.compile(r"^#{2,4} ")
 
@@ -63,7 +64,12 @@ def comprobar(ruta):
     return total, malas
 
 
-def main():
+def main(argv=()):
+    # No interpreta argumentos: con cualquiera sale sin escribir (S223). Antes un
+    # `--help` exploratorio regeneraba los índices (norma 7 de M-guion).
+    if argv:
+        print("uso: regenerar-indice.py   (sin argumentos; regenera los índices de docs/)", file=sys.stderr)
+        return 2
     fallo = 0
     for r in DOCS:
         n = indexar(r)
@@ -81,4 +87,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
