@@ -440,10 +440,7 @@ public class PrevalidacionService {
                     ENTIDAD_CENTRO,
                     biblioteca,
                     minimo,
-                    "El mínimo de guardias de biblioteca por recreo (" + biblioteca
-                            + ") es mayor que el mínimo de guardias por recreo (" + minimo
-                            + "). Las de biblioteca cuentan dentro de las de recreo: sube el mínimo por"
-                            + " recreo o baja el de biblioteca."));
+                    textoBibliotecaSuperaRecreo(biblioteca, minimo)));
         }
         int necesarias = minimo * recreos;
         int suma = datos.guardiasRecreoPorProfesor().values().stream().mapToInt(Integer::intValue).sum();
@@ -471,11 +468,30 @@ public class PrevalidacionService {
                         codigo,
                         guardias,
                         recreos,
-                        nombre + " tiene " + guardias + " guardias de recreo, pero solo hay " + recreos
-                                + " recreos y no puede hacer más de una en cada uno."));
+                        textoGuardiasRecreoExceden(nombre, guardias, recreos)));
             }
         }
         return avisos;
+    }
+
+    /**
+     * El texto de {@link #REGLA_BIBLIOTECA_SUPERA_RECREO}. Lo comparte el reparto de las guardias de
+     * recreo, que da el mismo fallo cuando un ajuste llega con esa configuración (S220).
+     */
+    static String textoBibliotecaSuperaRecreo(int biblioteca, int minimo) {
+        return "El mínimo de guardias de biblioteca por recreo (" + biblioteca
+                + ") es mayor que el mínimo de guardias por recreo (" + minimo
+                + "). Las de biblioteca cuentan dentro de las de recreo: sube el mínimo por"
+                + " recreo o baja el de biblioteca.";
+    }
+
+    /**
+     * El texto de {@link #REGLA_GUARDIAS_RECREO_EXCEDEN}, con el nombre completo del profesor. Lo
+     * comparte el reparto de las guardias de recreo, como {@link #textoBibliotecaSuperaRecreo} (S220).
+     */
+    static String textoGuardiasRecreoExceden(String nombre, int guardias, int recreos) {
+        return nombre + " tiene " + guardias + " guardias de recreo, pero solo hay " + recreos
+                + " recreos y no puede hacer más de una en cada uno.";
     }
 
     /**

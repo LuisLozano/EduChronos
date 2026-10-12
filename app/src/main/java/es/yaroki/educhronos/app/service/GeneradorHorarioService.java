@@ -449,12 +449,21 @@ public class GeneradorHorarioService {
 
         // El reparto de las guardias (S213), tras el solve y ANTES de escribir nada: si no llega al
         // mínimo en algún tramo, no queda horario y el controlador responde 422 GUARDIAS_SIN_REPARTO.
-        RepartoGuardias.Resultado reparto = ViaRepartoGuardias.repartir(problema, resultado.solucion(), cuadre);
-        if (reparto.fallo()) {
-            throw new GuardiasSinRepartoException(reparto.deficits());
+        // Desde S220 reparte también el recreo en el mismo paso, y su fallo sale por el mismo 422.
+        List<TramoSemanal> recreos = ViaRepartoGuardias.recreos(tramoRepository.findAll());
+        ViaRepartoGuardias.Reparto reparto =
+                ViaRepartoGuardias.repartir(problema, resultado.solucion(), cuadre, recreos);
+        if (reparto.ordinarias().fallo()) {
+            throw new GuardiasSinRepartoException(reparto.ordinarias().deficits());
+        }
+        if (reparto.recreo().fallo()) {
+            throw GuardiasSinRepartoException.deRecreo(
+                    ViaRepartoGuardias.mensajeRecreoAlGenerar(reparto.recreo(), recreos, cuadre),
+                    ViaRepartoGuardias.resumenRecreo(reparto.recreo()));
         }
 
-        return transaccion.execute(tx -> persistir(resultado, problema, nombreEfectivo, reparto.asignaciones()));
+        return transaccion.execute(tx -> persistir(resultado, problema, nombreEfectivo,
+                reparto.ordinarias().asignaciones(), reparto.recreo().asignaciones()));
     }
 
     /** Duración en milisegundos desde un {@link System#nanoTime()}, para la línea de fin. */
@@ -514,7 +523,7 @@ public class GeneradorHorarioService {
      */
     @Transactional
     public HorarioGenerado guardar(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre) {
-        return persistir(resultado, problema, nombre, List.of()).horario();
+        return persistir(resultado, problema, nombre, List.of(), List.of()).horario();
     }
 
     /**
@@ -527,12 +536,15 @@ public class GeneradorHorarioService {
     /**
      * El cuerpo de {@link #guardar}, que además devuelve el recuento de sesiones escritas. Desde S213
      * escribe también las {@code guardias} repartidas, después de las sesiones y en la misma
-     * transacción; {@link #guardar} no reparte y pasa la lista vacía. Cada guardia se traduce a
+     * transacción; {@link #guardar} no reparte y pasa las listas vacías. Cada guardia se traduce a
      * entidades como las sesiones: el tramo, por su posición en el problema y {@code idxTramo}; el
-     * profesor, por código, como la plaza y el aula.
+     * profesor, por código, como la plaza y el aula. Desde S220 escribe también las de recreo, con el
+     * recreo por su posición en {@link ViaRepartoGuardias#recreos}, sobre los tramos de esta misma
+     * transacción.
      */
     private Guardado persistir(ResultadoOptimizacion resultado, ProblemaHorario problema, String nombre,
-                               List<RepartoGuardias.Asignacion> guardias) {
+                               List<RepartoGuardias.Asignacion> guardias,
+                               List<RepartoGuardias.AsignacionRecreo> guardiasRecreo) {
         Objects.requireNonNull(resultado, "resultado no puede ser null");
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(nombre, "nombre no puede ser null");
@@ -542,8 +554,8 @@ public class GeneradorHorarioService {
                 .collect(Collectors.toMap(Plaza::getCodigo, p -> p));
         Map<String, Aula> idxAula = aulaRepository.findAll().stream()
                 .collect(Collectors.toMap(Aula::getCodigo, a -> a));
-        Map<Tramo, es.yaroki.educhronos.app.catalog.TramoSemanal> idxTramo =
-                SolucionMapper.indiceTramos(problema, tramoRepository.findAll());
+        List<TramoSemanal> tramos = tramoRepository.findAll();
+        Map<Tramo, TramoSemanal> idxTramo = SolucionMapper.indiceTramos(problema, tramos);
 
         HorarioGenerado horario = new HorarioGenerado(
                 nombre, Instant.now(), resultado.estado().name(),
@@ -554,8 +566,10 @@ public class GeneradorHorarioService {
                 horario, problema, resultado.solucion(), idxPlaza, idxAula, idxTramo);
         sesionRepository.saveAll(sesiones);
 
-        guardiaRepository.saveAll(ViaRepartoGuardias.filas(
-                horario, problema, idxTramo, profesorRepository.findAll(), guardias));
+        List<Profesor> profesores = profesorRepository.findAll();
+        guardiaRepository.saveAll(ViaRepartoGuardias.filas(horario, problema, idxTramo, profesores, guardias));
+        guardiaRepository.saveAll(ViaRepartoGuardias.filasDeRecreo(
+                horario, ViaRepartoGuardias.recreos(tramos), profesores, guardiasRecreo));
 
         return new Guardado(horario, sesiones.size());
     }

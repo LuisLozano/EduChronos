@@ -201,6 +201,58 @@ class AjusteGuardiasTest {
         assertThat(diagnostico().violacionesGuardia()).isEmpty();
     }
 
+    // ------------------------------------------------------------------ (f) recreo (S220)
+
+    private static final String MENSAJE_RECREO = "No se puede hacer este cambio: las guardias de recreo no se"
+            + " pueden repartir con la configuración actual. Recreos que no llegan al mínimo de profesores de"
+            + " guardia: ";
+
+    /**
+     * (f, S220) Un ajuste aceptado reparte también el recreo en el mismo paso: el horario no tenía
+     * guardias de recreo, y tras el ajuste las tiene, con la de biblioteca, y el diagnóstico no ve
+     * ninguna violación de guardia.
+     */
+    @Test
+    void ajusteAceptado_reparteTambienElRecreoEnElMismoPaso() throws Exception {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 2, 1);
+        poblarX(List.of("PA@2", "PB@1", "PG@3"));
+        conRecreo(Map.of("PA", 1, "PB", 1, "PG", 1));
+        assertThat(guardiasConTipo()).as("precondición: ninguna de recreo")
+                .containsExactly("PA@2:ORDINARIA", "PB@1:ORDINARIA", "PG@3:ORDINARIA");
+        assertThat(diagnostico().violacionesGuardia()).as("precondición: el diagnóstico lo ve").isNotEmpty();
+
+        mockMvc.perform(put(urlIntercambio()).contentType(MediaType.APPLICATION_JSON).content(cuerpo("A", "B")))
+                .andExpect(status().isOk());
+
+        assertThat(guardiasConTipo())
+                .filteredOn(g -> g.contains("@4:"))
+                .containsExactly("PA@4:BIBLIOTECA", "PB@4:RECREO", "PG@4:RECREO");
+        assertThat(guardiasConTipo()).filteredOn(g -> g.endsWith(":ORDINARIA")).hasSize(3);
+        assertThat(diagnostico().violacionesGuardia()).isEmpty();
+    }
+
+    /**
+     * (f, S220) Con una configuración que deja el recreo corto —mínimo 2 y una sola guardia de
+     * recreo—, el ajuste se rechaza con 409 GUARDIAS_SIN_REPARTO y el texto del recreo, sin escribir.
+     */
+    @Test
+    void ajusteConElRecreoCorto_rechazaConElRecreoYNoEscribeNada() throws Exception {
+        MinimoGuardias.fijarRecreo(configuracionRepository, 2, 0);
+        poblarX(List.of("PA@2", "PB@1", "PG@3"));
+        conRecreo(Map.of("PA", 1));
+        List<String> sesionesAntes = sesiones();
+        List<String> guardiasAntes = guardiasConId();
+
+        mockMvc.perform(put(urlIntercambio()).contentType(MediaType.APPLICATION_JSON).content(cuerpo("A", "B")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.causa").value("GUARDIAS_SIN_REPARTO"))
+                .andExpect(jsonPath("$.mensaje").value(MENSAJE_RECREO + "LUNES 11:00-11:30: 1 de 2."))
+                .andExpect(jsonPath("$.violaciones.length()").value(0));
+
+        assertThat(sesiones()).isEqualTo(sesionesAntes);
+        assertThat(guardiasConId()).isEqualTo(guardiasAntes);
+    }
+
     // ------------------------------------------------------------------ montaje
 
     /**
@@ -253,6 +305,22 @@ class AjusteGuardiasTest {
             tramos.put(orden, tramoRepository.save(new TramoSemanal(
                     Dia.LUNES, LocalTime.of(7 + orden, 0), LocalTime.of(8 + orden, 0), true, orden, null)));
         }
+    }
+
+    /**
+     * Un recreo tras el tercer tramo, de 11:00 a 11:30 (orden 4), y las guardias de recreo que se
+     * dan; los demás profesores, con 0.
+     */
+    private void conRecreo(Map<String, Integer> guardiasRecreo) {
+        tramos.put(4, tramoRepository.save(new TramoSemanal(
+                Dia.LUNES, LocalTime.of(11, 0), LocalTime.of(11, 30), false, 4, null)));
+        guardiasRecreo.forEach((codigo, n) -> {
+            Profesor profesor = profesorRepository.findByCodigo(codigo).orElseThrow();
+            profesor.setGuardiasRecreo(n);
+            profesorRepository.save(profesor);
+        });
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private GrupoAdministrativo grupo(String codigo) {
@@ -309,6 +377,13 @@ class AjusteGuardiasTest {
     private List<String> guardias() {
         return guardiaRepository.findByHorarioId(horarioId).stream()
                 .map(g -> g.getProfesor().getCodigo() + "@" + g.getTramo().getOrden())
+                .sorted().toList();
+    }
+
+    /** «PROFESOR@orden:TIPO» de las guardias del horario, leídas de la tabla y ordenadas (S220). */
+    private List<String> guardiasConTipo() {
+        return guardiaRepository.findByHorarioId(horarioId).stream()
+                .map(g -> g.getProfesor().getCodigo() + "@" + g.getTramo().getOrden() + ":" + g.getTipo())
                 .sorted().toList();
     }
 

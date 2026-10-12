@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.persistence.Guardia;
 import es.yaroki.educhronos.app.persistence.GuardiaRepository;
+import es.yaroki.educhronos.app.persistence.TipoGuardia;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
 import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
@@ -67,6 +68,44 @@ class RepartoGuardiasGeneracionTest {
                 .filteredOn(g -> g.getProfesor().getCodigo().equals("MAT1"))
                 .noneMatch(g -> g.getTramo().getId().equals(tramoDeLaClase));
 
+        assertThat(diagnosticoService.diagnosticar(id).violacionesGuardia()).isEmpty();
+    }
+
+    /**
+     * (S220) Con dos recreos al final del lunes, dos guardias de recreo para cada profesor, mínimo 2 por
+     * recreo y 1 de biblioteca: la generación escribe las ordinarias en tramos de clase y las de recreo
+     * en los recreos, una de biblioteca en cada uno, y el diagnóstico no da ninguna violación de guardia.
+     */
+    @Test
+    void generarConGuardiasDeRecreo_dejaRecreoYBibliotecaEnLosRecreosYElDiagnosticoSinViolaciones() {
+        poblar();
+        Profesor mat1 = profesorRepository.findByCodigo("MAT1").orElseThrow();
+        mat1.setGuardiasRecreo(2);
+        profesorRepository.save(mat1);
+        Profesor gua1 = profesorRepository.findByCodigo("GUA1").orElseThrow();
+        gua1.setGuardiasRecreo(2);
+        profesorRepository.save(gua1);
+        tramoRepository.save(new TramoSemanal(Dia.LUNES, LocalTime.of(13, 0), LocalTime.of(13, 30), false, 6, null));
+        tramoRepository.save(new TramoSemanal(Dia.LUNES, LocalTime.of(13, 30), LocalTime.of(14, 0), false, 7, null));
+        MinimoGuardias.fijar(configuracionRepository, 1);
+        MinimoGuardias.fijarRecreo(configuracionRepository, 2, 1);
+        entityManager.flush();
+        entityManager.clear();
+
+        Long id = service.generar(10, 42, null, "s220-recreo").getId();
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Guardia> guardias = guardiaRepository.findByHorarioId(id);
+        assertThat(guardias.stream().collect(Collectors.groupingBy(Guardia::getTipo, Collectors.counting())))
+                .isEqualTo(Map.of(TipoGuardia.ORDINARIA, 6L, TipoGuardia.RECREO, 2L, TipoGuardia.BIBLIOTECA, 2L));
+        assertThat(guardias).filteredOn(g -> g.getTipo() == TipoGuardia.ORDINARIA)
+                .allMatch(g -> g.getTramo().isEsLectivo());
+        assertThat(guardias).filteredOn(g -> g.getTipo() != TipoGuardia.ORDINARIA)
+                .allMatch(g -> !g.getTramo().isEsLectivo());
+        assertThat(guardias.stream().filter(g -> g.getTipo() == TipoGuardia.BIBLIOTECA)
+                .map(g -> g.getTramo().getOrden()).sorted().toList())
+                .as("una de biblioteca en cada recreo").containsExactly(6, 7);
         assertThat(diagnosticoService.diagnosticar(id).violacionesGuardia()).isEmpty();
     }
 

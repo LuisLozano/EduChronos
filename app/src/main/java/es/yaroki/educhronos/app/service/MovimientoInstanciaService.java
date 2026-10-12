@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.service;
 
 import es.yaroki.educhronos.app.catalog.Actividad;
 import es.yaroki.educhronos.app.catalog.ActividadRepository;
+import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.SesionBloqueadaRepository;
 import es.yaroki.educhronos.app.catalog.TramoSemanal;
@@ -211,7 +212,7 @@ public class MovimientoInstanciaService {
         }
 
         // ---- GUARDIAS, sobre la candidata y antes de escribir: sin reparto no se escribe nada.
-        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo);
+        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo, tramos);
 
         // ---- ESCRITURA. Solo aquí, y solo el tramo: el aula de cada fila se conserva.
         for (Sesion s : filas) {
@@ -331,7 +332,7 @@ public class MovimientoInstanciaService {
         }
 
         // ---- GUARDIAS, sobre la candidata y antes de escribir: sin reparto no se escribe nada.
-        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo);
+        List<Guardia> guardias = guardiasTras(horario, problema, candidata, idxTramo, tramos);
 
         // ---- ESCRITURA. Solo aquí, y solo el tramo: el aula de cada fila se conserva.
         for (Sesion s : filasPrimera) {
@@ -354,17 +355,31 @@ public class MovimientoInstanciaService {
      * hay reparto, aborta con {@link CausaMovimiento#GUARDIAS_SIN_REPARTO} antes de que se toque
      * ninguna fila. El invariante roto de la segunda fase sale como en la generación
      * ({@code IllegalStateException}, un 500).
+     *
+     * <p>Desde S220 reparte también el recreo en el mismo paso, porque {@link #sustituirGuardias} las
+     * borra todas: primero las ordinarias, con su rechazo de siempre, y después las de recreo, cuyo
+     * fallo rechaza el ajuste con la misma causa y su propio texto. El ajuste no pasa por la
+     * pre-validación: si la configuración cambió después de generar, el fallo de configuración del
+     * recreo (biblioteca por encima del recreo, profesores excedidos) sale aquí.
      */
     private List<Guardia> guardiasTras(HorarioGenerado horario, ProblemaHorario problema,
-            SolucionHorario candidata, Map<Tramo, TramoSemanal> idxTramo) {
-        RepartoGuardias.Resultado reparto = ViaRepartoGuardias.repartir(
-                problema, candidata, generadorService.cargarDatosCuadre());
-        if (reparto.fallo()) {
+            SolucionHorario candidata, Map<Tramo, TramoSemanal> idxTramo, List<TramoSemanal> tramos) {
+        DatosCuadre cuadre = generadorService.cargarDatosCuadre();
+        List<TramoSemanal> recreos = ViaRepartoGuardias.recreos(tramos);
+        ViaRepartoGuardias.Reparto reparto = ViaRepartoGuardias.repartir(problema, candidata, cuadre, recreos);
+        if (reparto.ordinarias().fallo()) {
             throw new MovimientoRechazadoException(CausaMovimiento.GUARDIAS_SIN_REPARTO,
-                    MENSAJE_GUARDIAS_SIN_REPARTO + ViaRepartoGuardias.listaDeTramos(reparto.deficits()));
+                    MENSAJE_GUARDIAS_SIN_REPARTO + ViaRepartoGuardias.listaDeTramos(reparto.ordinarias().deficits()));
         }
-        return ViaRepartoGuardias.filas(
-                horario, problema, idxTramo, profesorRepository.findAll(), reparto.asignaciones());
+        if (reparto.recreo().fallo()) {
+            throw new MovimientoRechazadoException(CausaMovimiento.GUARDIAS_SIN_REPARTO,
+                    ViaRepartoGuardias.mensajeRecreoAlAjustar(reparto.recreo(), recreos, cuadre));
+        }
+        List<Profesor> profesores = profesorRepository.findAll();
+        List<Guardia> filas = new ArrayList<>(ViaRepartoGuardias.filas(
+                horario, problema, idxTramo, profesores, reparto.ordinarias().asignaciones()));
+        filas.addAll(ViaRepartoGuardias.filasDeRecreo(horario, recreos, profesores, reparto.recreo().asignaciones()));
+        return filas;
     }
 
     /**
