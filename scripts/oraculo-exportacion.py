@@ -281,11 +281,6 @@ def guardias_esperadas(ruta_db, horario_id):
         for p, d, t, r, tipo, _ in filas)
 
 
-def lugar_legible(lugar):
-    """«tramo 3» o «recreo 1», para los mensajes."""
-    return "%s %d" % lugar
-
-
 def oraculo(ruta_db, horario_id):
     """Las tres vistas calculadas en SQL, como conjuntos de tuplas."""
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
