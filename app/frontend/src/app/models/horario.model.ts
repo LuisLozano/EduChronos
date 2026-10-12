@@ -28,17 +28,24 @@ export interface SesionVista {
 }
 
 /**
- * Espejo de `GuardiaVistaDTO` (S215, 120089e). Una guardia ordinaria repartida: el
- * profesor que está de guardia y su tramo, con la MISMA numeración que {@link SesionVista}.
- * Forma copiada del JSON real de `GET /api/horarios/2/proyeccion` (s215/t2/val/real/h2):
- * `{"profesorCodigo": "BIO3t", "dia": 1, "tramo": 1}`.
+ * Espejo de `GuardiaVistaDTO` (S215, 120089e; las de recreo, S221, 9990939). Una guardia
+ * repartida: el profesor que está de guardia y dónde. Una ORDINARIA lleva su tramo, con la
+ * MISMA numeración que {@link SesionVista}, y `recreo` null; una de RECREO o BIBLIOTECA lleva
+ * el número de su recreo en el día, desde 1, y `tramo` null. Forma copiada del JSON real de
+ * `GET /api/horarios/2/proyeccion` (s221/t2/exp/proyeccion-2.json):
+ * `{"profesorCodigo": "BIO3t", "dia": 1, "tramo": 1, "recreo": null, "tipo": "ORDINARIA"}` y
+ * `{"profesorCodigo": "BYG1", "dia": 1, "tramo": null, "recreo": 1, "tipo": "RECREO"}`.
  */
 export interface GuardiaVista {
   profesorCodigo: string;
   /** 1..5 (lunes..viernes). */
   dia: number;
-  /** ordenEnDia 1..6 (recreos excluidos). */
-  tramo: number;
+  /** ordenEnDia 1..6 (recreos excluidos) de una ORDINARIA; null en una de recreo. */
+  tramo: number | null;
+  /** Número del recreo en el día, desde 1, de una de RECREO o BIBLIOTECA; null en una ORDINARIA. */
+  recreo: number | null;
+  /** `ORDINARIA`, `RECREO` o `BIBLIOTECA` (el `name()` de `TipoGuardia`). */
+  tipo: string;
 }
 
 /** Espejo de `HorarioProyeccionDTO`. Cabecera + sesiones + guardias. */
@@ -53,6 +60,9 @@ export interface HorarioProyeccion {
   /** Instant ISO-8601 serializado como texto. */
   fechaGeneracion: string;
   sesiones: SesionVista[];
-  /** Ordenadas por (dia, tramo, profesorCodigo); `[]` si el horario no tiene. Nunca null. */
+  /**
+   * Las ORDINARIA por (dia, tramo, profesorCodigo) y, detrás, las de recreo por (dia, recreo,
+   * tipo, profesorCodigo); `[]` si el horario no tiene. Nunca null.
+   */
   guardias: GuardiaVista[];
 }

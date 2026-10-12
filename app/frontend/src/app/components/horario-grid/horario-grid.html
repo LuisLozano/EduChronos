@@ -203,10 +203,28 @@
         declarado y no se rellena.
       -->
       @if (recreoTras() === t) {
-        <tr class="recreo">
-          <th class="tramo"></th>
-          <td [attr.colspan]="dias.length">Recreo</td>
-        </tr>
+        <!--
+          S221 (D6): en las vistas de profesor y de guardias (`recreoPorDias`), la fila lleva
+          el rótulo «Recreo» en la columna de tramos —sin hora, por lo mismo que arriba— y una
+          celda por día con las guardias del recreo 1. En grupo y aula, como siempre.
+        -->
+        @if (recreoPorDias()) {
+          <tr class="recreo recreo-por-dias">
+            <th class="tramo">Recreo</th>
+            @for (d of dias; track d; let i = $index) {
+              <td>
+                @for (linea of lineasDeRecreo(i + 1); track $index) {
+                  <div [class]="soloGuardias() ? 'guardias' : 'guardia'">{{ linea }}</div>
+                }
+              </td>
+            }
+          </tr>
+        } @else {
+          <tr class="recreo">
+            <th class="tramo"></th>
+            <td [attr.colspan]="dias.length">Recreo</td>
+          </tr>
+        }
       }
     }
   </tbody>

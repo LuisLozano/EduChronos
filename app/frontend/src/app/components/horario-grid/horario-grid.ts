@@ -12,9 +12,11 @@ import {
   signal,
 } from '@angular/core';
 
-import { GuardiaVista, SesionVista } from '../../models/horario.model';
+import { SesionVista } from '../../models/horario.model';
 import {
   DIAS,
+  GuardiaDeRecreo,
+  GuardiaDeTramo,
   InstanciaCelda,
   ROTULO_GUARDIA,
   SEPARADOR_CODIGOS_GUARDIA,
@@ -22,6 +24,8 @@ import {
   agruparPorActividad,
   claveSlot,
   codigosDeGuardiaPorSlot,
+  lineasDeRecreoEnGuardias,
+  rotulosDeRecreo,
 } from '../../horario/proyeccion';
 import { clavePin } from '../../horario/pines';
 import { altoDeCelda } from '../../horario/reparto';
@@ -155,7 +159,23 @@ export class HorarioGrid {
    * que no son instancias, no se arrastran, no llevan candado ni insignia y NO cuentan como
    * ocupantes en {@link alSoltar} ni en {@link slotsOcupados} (F2).
    */
-  readonly guardias = input<readonly GuardiaVista[]>([]);
+  readonly guardias = input<readonly GuardiaDeTramo[]>([]);
+
+  /**
+   * Guardias de RECREO y de BIBLIOTECA de la vista (S221, D6), ya separadas de las de tramo
+   * por `guardiasDeVista`. Solo se pintan con {@link recreoPorDias} activo, y solo las del
+   * recreo 1: la fila del recreo es UNA ({@link recreoTras} da el primero del día).
+   */
+  readonly guardiasDeRecreo = input<readonly GuardiaDeRecreo[]>([]);
+
+  /**
+   * Cómo se pinta la fila del recreo (S221, D6). Con `false`, como siempre: una celda
+   * «Recreo» que ocupa los cinco días. Con `true` —vistas de profesor y de guardias—, una
+   * celda de rótulo «Recreo» y cinco celdas de día con las guardias de recreo: «Guardia» o
+   * «Biblioteca» en la de profesor, y los códigos con «Biblioteca: COD» aparte en la de
+   * guardias ({@link soloGuardias}).
+   */
+  readonly recreoPorDias = input<boolean>(false);
 
   /**
    * Modo guardias (F4): cada celda lectiva pinta los códigos de {@link guardias} de su
@@ -428,6 +448,20 @@ export class HorarioGrid {
   /** El texto de una celda del modo guardias: los códigos unidos por «, ». */
   protected codigosEn(dia: number, tramo: number): string {
     return this.guardiasEn(dia, tramo).join(SEPARADOR_CODIGOS_GUARDIA);
+  }
+
+  /** Las guardias del recreo que pinta la fila: el 1 (S221, H5 del contrato). */
+  private readonly guardiasDeLaFilaDeRecreo = computed(() =>
+    this.guardiasDeRecreo().filter((g) => g.recreo === 1),
+  );
+
+  /**
+   * Las líneas de la celda de un día en la fila del recreo (S221, D6): en el modo guardias,
+   * los códigos y aparte la biblioteca; si no, un rótulo por guardia.
+   */
+  protected lineasDeRecreo(dia: number): string[] {
+    const guardias = this.guardiasDeLaFilaDeRecreo();
+    return this.soloGuardias() ? lineasDeRecreoEnGuardias(guardias, dia) : rotulosDeRecreo(guardias, dia);
   }
 
   /** Registra la instancia que empieza a arrastrarse: abre la marca de ocupación. */

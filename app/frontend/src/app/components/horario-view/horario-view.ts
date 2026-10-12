@@ -2,7 +2,7 @@ import { Component, OnDestroy, computed, inject, signal, viewChild } from '@angu
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
-import { GuardiaVista, HorarioProyeccion, SesionVista } from '../../models/horario.model';
+import { HorarioProyeccion, SesionVista } from '../../models/horario.model';
 import { Diagnostico, Violacion, ViolacionGuardia } from '../../models/diagnostico.model';
 import { FalloMovimiento, ReferenciaInstancia } from '../../models/ajuste.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
@@ -13,7 +13,13 @@ import { AjusteService } from '../../services/ajuste.service';
 import { DiagnosticoService } from '../../services/diagnostico.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
 import { JornadaService } from '../../services/jornada.service';
-import { Vista, entidadesDeVista, filtrar, guardiasDeVista } from '../../horario/proyeccion';
+import {
+  GuardiasDeVista,
+  Vista,
+  entidadesDeVista,
+  filtrar,
+  guardiasDeVista,
+} from '../../horario/proyeccion';
 import { clavePin, filaDeClave, indicePines } from '../../horario/pines';
 import { tituloHorario } from '../../horario/titulo';
 import { recreoTrasTramo } from '../../horario/recreo';
@@ -202,11 +208,22 @@ export class HorarioView implements OnDestroy {
    * Las guardias que pinta la rejilla (S215): las del profesor elegido en la vista de
    * profesor (F2), todas en la de guardias (F4), ninguna en las demás. La elección es
    * LÓGICA PURA ({@link guardiasDeVista}), como {@link filtrar} para las sesiones.
+   *
+   * <p>Desde S221 salen separadas: las de tramo van a las celdas lectivas y las de recreo a
+   * la fila del recreo, que solo las pinta en las vistas de {@link recreoPorDias}.
    */
-  protected readonly guardiasDeRejilla = computed<readonly GuardiaVista[]>(() => {
+  protected readonly guardiasDeRejilla = computed<GuardiasDeVista>(() => {
     const p = this.proyeccion();
-    return p ? guardiasDeVista(p.guardias, this.vista(), this.entidad()) : [];
+    return p ? guardiasDeVista(p.guardias, this.vista(), this.entidad()) : { deTramo: [], deRecreo: [] };
   });
+
+  /**
+   * Si la fila del recreo va por días (S221, D6): en las vistas de profesor y de guardias,
+   * que son las que tienen guardias de recreo que pintar. En grupo y aula, la de siempre.
+   */
+  protected readonly recreoPorDias = computed(
+    () => this.vista() === 'profesor' || this.vista() === 'guardias',
+  );
 
   /**
    * Las violaciones de las guardias del diagnóstico (F5). Lista PROPIA del DTO desde

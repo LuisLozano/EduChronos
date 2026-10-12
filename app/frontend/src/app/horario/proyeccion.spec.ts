@@ -6,6 +6,10 @@ import {
   entidadesDeVista,
   filtrar,
   guardiasDeVista,
+  GuardiaDeRecreo,
+  GuardiaDeTramo,
+  lineasDeRecreoEnGuardias,
+  rotulosDeRecreo,
   tramosCubiertos,
 } from './proyeccion';
 import { GuardiaVista, SesionVista } from '../models/horario.model';
@@ -192,10 +196,10 @@ describe('vista de aula con sesiones sin aula (S201)', () => {
 });
 
 describe('guardias en las vistas (S215)', () => {
-  const GUARDIAS: GuardiaVista[] = [
-    { profesorCodigo: 'ZZZ1', dia: 1, tramo: 1 },
-    { profesorCodigo: 'AAA1', dia: 1, tramo: 1 },
-    { profesorCodigo: 'MATA', dia: 2, tramo: 3 },
+  const GUARDIAS: GuardiaDeTramo[] = [
+    { profesorCodigo: 'ZZZ1', dia: 1, tramo: 1, recreo: null, tipo: 'ORDINARIA' },
+    { profesorCodigo: 'AAA1', dia: 1, tramo: 1, recreo: null, tipo: 'ORDINARIA' },
+    { profesorCodigo: 'MATA', dia: 2, tramo: 3, recreo: null, tipo: 'ORDINARIA' },
   ];
 
   it('(pr2) F3: en la vista de profesor cuentan los profesores de las guardias, en orden', () => {
@@ -207,10 +211,10 @@ describe('guardias en las vistas (S215)', () => {
   });
 
   it('(pr3) las guardias de cada vista: las del profesor, todas o ninguna', () => {
-    expect(guardiasDeVista(GUARDIAS, 'profesor', 'MATA')).toEqual([GUARDIAS[2]]);
-    expect(guardiasDeVista(GUARDIAS, 'guardias', '')).toEqual(GUARDIAS);
-    expect(guardiasDeVista(GUARDIAS, 'grupo', '1ºA')).toEqual([]);
-    expect(guardiasDeVista(GUARDIAS, 'aula', 'A1')).toEqual([]);
+    expect(guardiasDeVista(GUARDIAS, 'profesor', 'MATA')).toEqual({ deTramo: [GUARDIAS[2]], deRecreo: [] });
+    expect(guardiasDeVista(GUARDIAS, 'guardias', '')).toEqual({ deTramo: GUARDIAS, deRecreo: [] });
+    expect(guardiasDeVista(GUARDIAS, 'grupo', '1ºA')).toEqual({ deTramo: [], deRecreo: [] });
+    expect(guardiasDeVista(GUARDIAS, 'aula', 'A1')).toEqual({ deTramo: [], deRecreo: [] });
     expect(filtrar([entrada('Mat-1ºA', 1, 'Mat-1ºA-P1')], 'guardias', '')).toEqual([]);
   });
 
@@ -219,5 +223,51 @@ describe('guardias en las vistas (S215)', () => {
     expect(slots.get(claveSlot(1, 1))).toEqual(['AAA1', 'ZZZ1']);
     expect(slots.get(claveSlot(2, 3))).toEqual(['MATA']);
     expect(slots.size).toBe(2);
+  });
+});
+
+describe('guardias de recreo en las vistas (S221)', () => {
+  const ORD: GuardiaVista = { profesorCodigo: 'MATA', dia: 1, tramo: 2, recreo: null, tipo: 'ORDINARIA' };
+  const REC: GuardiaVista = { profesorCodigo: 'MATA', dia: 2, tramo: null, recreo: 1, tipo: 'RECREO' };
+  const BIB: GuardiaVista = { profesorCodigo: 'MATA', dia: 4, tramo: null, recreo: 1, tipo: 'BIBLIOTECA' };
+  const SOLO_RECREO: GuardiaVista = { profesorCodigo: 'REC9', dia: 3, tramo: null, recreo: 2, tipo: 'RECREO' };
+
+  it('(pr5) D8: guardiasDeVista separa las de tramo de las de recreo antes de claveSlot', () => {
+    expect(guardiasDeVista([ORD, REC, BIB, SOLO_RECREO], 'profesor', 'MATA')).toEqual({
+      deTramo: [ORD],
+      deRecreo: [REC, BIB],
+    });
+    const todas = guardiasDeVista([ORD, REC, BIB, SOLO_RECREO], 'guardias', '');
+    expect(todas.deTramo).toEqual([ORD]);
+    expect(todas.deRecreo).toEqual([REC, BIB, SOLO_RECREO]);
+    // Sin la separación, la de recreo llegaría a claveSlot con tramo null: «2-null».
+    expect([...codigosDeGuardiaPorSlot(todas.deTramo).keys()]).toEqual(['1-2']);
+  });
+
+  it('(pr6) D8: un profesor con solo guardias de recreo sale en el selector de profesores', () => {
+    expect(entidadesDeVista([], 'profesor', [ORD, SOLO_RECREO])).toEqual(['MATA', 'REC9']);
+  });
+
+  it('(pr7) X1 y X2: en la vista de profesor, «Guardia» la de RECREO y «Biblioteca» la de BIBLIOTECA, por día', () => {
+    const deRecreo = [REC, BIB] as GuardiaDeRecreo[];
+    expect([1, 2, 3, 4, 5].map((dia) => rotulosDeRecreo(deRecreo, dia))).toEqual([
+      [],
+      ['Guardia'],
+      [],
+      ['Biblioteca'],
+      [],
+    ]);
+  });
+
+  it('(pr8) X3: en la vista de guardias, los códigos de RECREO con «, » y aparte «Biblioteca: COD», por día', () => {
+    const g = (profesorCodigo: string, dia: number, tipo: string): GuardiaDeRecreo => ({
+      profesorCodigo, dia, tramo: null, recreo: 1, tipo,
+    });
+    const deRecreo = [g('ZZZ1', 1, 'RECREO'), g('BIB1', 1, 'BIBLIOTECA'), g('AAA1', 1, 'RECREO'), g('CCC1', 3, 'BIBLIOTECA')];
+    expect([1, 2, 3].map((dia) => lineasDeRecreoEnGuardias(deRecreo, dia))).toEqual([
+      ['AAA1, ZZZ1', 'Biblioteca: BIB1'],
+      [],
+      ['Biblioteca: CCC1'],
+    ]);
   });
 });

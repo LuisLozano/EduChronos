@@ -22,7 +22,8 @@ export const TRAMOS = [1, 2, 3, 4, 5, 6] as const;
  *
  * <p>Desde S215 (F3), en la de profesor cuentan también los profesores de las
  * `guardias`: quien solo tiene guardias aparece, en el mismo orden que los demás. La
- * de guardias no tiene recurso que elegir y devuelve la lista vacía.
+ * de guardias no tiene recurso que elegir y devuelve la lista vacía. Desde S221 cuentan
+ * también las de recreo: quien solo tiene guardias de recreo aparece igual (D8).
  */
 export function entidadesDeVista(
   sesiones: readonly SesionVista[],
@@ -73,11 +74,42 @@ export function filtrar(sesiones: readonly SesionVista[], vista: Vista, entidad:
   }
 }
 
+/** Una guardia ORDINARIA, que está en un tramo de clase (S221): su `tramo` no es null. */
+export type GuardiaDeTramo = GuardiaVista & { tramo: number };
+
+/** Una guardia de RECREO o BIBLIOTECA, que está en un recreo (S221): su `recreo` no es null. */
+export type GuardiaDeRecreo = GuardiaVista & { recreo: number };
+
+/** Las guardias de una vista, ya separadas por dónde van en la rejilla (S221, D8). */
+export interface GuardiasDeVista {
+  /** Las de tramo: van en las celdas lectivas, por {@link claveSlot}. */
+  deTramo: GuardiaDeTramo[];
+  /** Las de recreo: van en la fila del recreo, por (día, recreo). */
+  deRecreo: GuardiaDeRecreo[];
+}
+
 /**
  * Las guardias que se pintan en la rejilla de la vista (S215): en la de profesor, las
  * del profesor elegido (F2); en la de guardias, todas (F4); en las demás, ninguna.
+ *
+ * <p>Desde S221 (D8) salen SEPARADAS: las de tramo, que siguen como hasta ahora hacia
+ * {@link claveSlot}, y las de recreo, que no tienen tramo y van a la fila del recreo. La
+ * separación va aquí, antes de cualquier clave de slot: una de recreo que llegara a
+ * {@link codigosDeGuardiaPorSlot} daría la clave `dia-null` y no se vería en ninguna parte.
  */
 export function guardiasDeVista(
+  guardias: readonly GuardiaVista[],
+  vista: Vista,
+  entidad: string,
+): GuardiasDeVista {
+  const elegidas = elegirGuardias(guardias, vista, entidad);
+  return {
+    deTramo: elegidas.filter((g): g is GuardiaDeTramo => g.tramo !== null),
+    deRecreo: elegidas.filter((g): g is GuardiaDeRecreo => g.recreo !== null),
+  };
+}
+
+function elegirGuardias(
   guardias: readonly GuardiaVista[],
   vista: Vista,
   entidad: string,
@@ -93,11 +125,50 @@ export function guardiasDeVista(
   }
 }
 
+/** El `tipo` de una guardia de biblioteca, el `name()` de `TipoGuardia.BIBLIOTECA`. */
+export const TIPO_BIBLIOTECA = 'BIBLIOTECA';
+
+/** La entrada con la que se pinta una guardia de biblioteca en la celda de su profesor (S221, X2). */
+export const ROTULO_BIBLIOTECA = 'Biblioteca';
+
+/** Delante de los códigos de biblioteca en la celda de un recreo del modo guardias (S221, X3). */
+export const PREFIJO_BIBLIOTECA = 'Biblioteca: ';
+
+/**
+ * Las entradas de la celda de un día en la fila del recreo, en la vista de profesor (S221,
+ * D6): una por guardia de ese día, «Guardia» la de RECREO y «Biblioteca» la de BIBLIOTECA,
+ * como en el PDF. Recibe las guardias del recreo que pinta la fila.
+ */
+export function rotulosDeRecreo(guardias: readonly GuardiaDeRecreo[], dia: number): string[] {
+  return guardias
+    .filter((g) => g.dia === dia)
+    .map((g) => (g.tipo === TIPO_BIBLIOTECA ? ROTULO_BIBLIOTECA : ROTULO_GUARDIA));
+}
+
+/**
+ * Las líneas de la celda de un día en la fila del recreo, en el modo guardias (S221, D6 y
+ * X3): los códigos de RECREO ordenados y unidos por «, » y, en línea aparte, «Biblioteca:»
+ * con los de BIBLIOTECA. Sin guardias, ninguna línea.
+ */
+export function lineasDeRecreoEnGuardias(guardias: readonly GuardiaDeRecreo[], dia: number): string[] {
+  const delDia = guardias.filter((g) => g.dia === dia);
+  const deRecreo = delDia.filter((g) => g.tipo !== TIPO_BIBLIOTECA).map((g) => g.profesorCodigo).sort();
+  const deBiblioteca = delDia.filter((g) => g.tipo === TIPO_BIBLIOTECA).map((g) => g.profesorCodigo).sort();
+  const lineas: string[] = [];
+  if (deRecreo.length > 0) {
+    lineas.push(deRecreo.join(SEPARADOR_CODIGOS_GUARDIA));
+  }
+  if (deBiblioteca.length > 0) {
+    lineas.push(PREFIJO_BIBLIOTECA + deBiblioteca.join(SEPARADOR_CODIGOS_GUARDIA));
+  }
+  return lineas;
+}
+
 /**
  * Los códigos de guardia de cada slot `(dia, tramo)`, ORDENADOS (F4, como D3 del PDF).
- * La clave es {@link claveSlot}.
+ * La clave es {@link claveSlot}. Solo recibe guardias de tramo ({@link guardiasDeVista}).
  */
-export function codigosDeGuardiaPorSlot(guardias: readonly GuardiaVista[]): Map<string, string[]> {
+export function codigosDeGuardiaPorSlot(guardias: readonly GuardiaDeTramo[]): Map<string, string[]> {
   const slots = new Map<string, string[]>();
   for (const g of guardias) {
     const k = claveSlot(g.dia, g.tramo);

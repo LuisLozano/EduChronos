@@ -2483,8 +2483,8 @@ describe('contenedor del horario', () => {
 
     /** P1 da la clase de `fila` en (1,1); AAA9 solo tiene guardias; P1 tiene una en (1,3). */
     const GUARDIAS: GuardiaVista[] = [
-      { profesorCodigo: 'AAA9', dia: 1, tramo: 2 },
-      { profesorCodigo: 'P1', dia: 1, tramo: 3 },
+      { profesorCodigo: 'AAA9', dia: 1, tramo: 2, recreo: null, tipo: 'ORDINARIA' },
+      { profesorCodigo: 'P1', dia: 1, tramo: 3, recreo: null, tipo: 'ORDINARIA' },
     ];
 
     async function montarConGuardias(sesiones: SesionVista[], guardias: GuardiaVista[]): Promise<HorarioGrid> {
@@ -2691,14 +2691,14 @@ describe('contenedor del horario', () => {
       refrescoProyeccion.next({
         ...PROYECCION_VACIA,
         sesiones: [movida, fila(9, 'Otra-1ºA', 1, 5, 6)],
-        guardias: [GUARDIAS[0], { profesorCodigo: 'P1', dia: 1, tramo: 5 }],
+        guardias: [GUARDIAS[0], { profesorCodigo: 'P1', dia: 1, tramo: 5, recreo: null, tipo: 'ORDINARIA' }],
       });
       refrescoDiagnostico.next(diagnostico([
         { regla: 'GUARDIAS_NUMERO_DISTINTO', profesorCodigo: 'P1', tramoCodigo: null, mensaje: 'tras el ajuste' },
       ]));
       await fixture.whenStable();
 
-      expect(grid.guardias()).toEqual([{ profesorCodigo: 'P1', dia: 1, tramo: 5 }]);
+      expect(grid.guardias()).toEqual([{ profesorCodigo: 'P1', dia: 1, tramo: 5, recreo: null, tipo: 'ORDINARIA' }]);
       expect(grid.sesiones()).toEqual([movida]);
       const aviso = raiz().querySelector('p.aviso-guardias');
       expect(aviso?.textContent?.trim()).toBe('Las guardias no cumplen la configuración actual: 1 incumplimiento.');
@@ -2779,6 +2779,102 @@ describe('contenedor del horario', () => {
       await fixture.whenStable();
       expect(raiz().querySelector('p.error')?.textContent?.trim()).toBe('No se pudo cargar el horario 1 (503).');
       expect(fixture.debugElement.query(By.directive(HorarioGrid))).toBeNull();
+    });
+
+    // ------------------------------------------------------------------ S221 · guardias de recreo (D6)
+
+    /** Jornada con el recreo tras el tercer tramo lectivo: la fila del recreo va tras la 3. */
+    function jornadaConRecreoTrasLaTercera(): void {
+      sujetoJornada.next({
+        persistida: true,
+        tramos: [
+          { dia: 'LUNES', orden: 1, esLectivo: true, ordenEnDia: 1, horaInicio: '08:00', horaFin: '09:00' },
+          { dia: 'LUNES', orden: 2, esLectivo: true, ordenEnDia: 2, horaInicio: '09:00', horaFin: '10:00' },
+          { dia: 'LUNES', orden: 3, esLectivo: true, ordenEnDia: 3, horaInicio: '10:00', horaFin: '11:00' },
+          { dia: 'LUNES', orden: 4, esLectivo: false, ordenEnDia: null, horaInicio: '11:00', horaFin: '11:30' },
+          { dia: 'LUNES', orden: 5, esLectivo: true, ordenEnDia: 4, horaInicio: '11:30', horaFin: '12:30' },
+        ],
+      });
+    }
+
+    const recreo = (profesorCodigo: string, dia: number, n: number, tipo = 'RECREO'): GuardiaVista => ({
+      profesorCodigo, dia, tramo: null, recreo: n, tipo,
+    });
+
+    /** El rótulo de la primera columna y, por día, las líneas de cada celda de la fila del recreo. */
+    function filaDeRecreo(): { rotulo: string; celdas: string[][]; colspan: string | null } {
+      const tr = raiz().querySelector<HTMLElement>('app-horario-grid tbody tr.recreo')!;
+      const tds = Array.from(tr.querySelectorAll<HTMLElement>('td'));
+      return {
+        rotulo: tr.querySelector('th')!.textContent!.trim(),
+        celdas: tds.map((td) => Array.from(td.querySelectorAll('div')).map((d) => d.textContent!.trim())),
+        colspan: tds[0].getAttribute('colspan'),
+      };
+    }
+
+    /**
+     * D6, X1 y X2: en la vista de un profesor la fila del recreo lleva «Recreo» y una celda por
+     * día, con «Guardia» por su guardia de RECREO y «Biblioteca» por la de BIBLIOTECA, cada una
+     * en SU día; la del recreo 2 del martes, el mismo día que una del 1, no sale. Y quien solo tiene
+     * guardias de recreo está en el selector.
+     */
+    it('(111) la vista de profesor pinta sus guardias del recreo 1 por día con su rótulo', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], [
+        ...GUARDIAS,
+        recreo('P1', 2, 1),
+        recreo('P1', 4, 1, 'BIBLIOTECA'),
+        recreo('P1', 2, 2),
+        recreo('REC9', 5, 1),
+      ]);
+      jornadaConRecreoTrasLaTercera();
+      await elegirVista('profesor');
+      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['AAA9', 'P1', 'REC9']);
+      await elegirEntidad('P1');
+
+      expect(filaDeRecreo()).toEqual({
+        rotulo: 'Recreo',
+        celdas: [[], ['Guardia'], [], ['Biblioteca'], []],
+        colspan: null,
+      });
+    });
+
+    /**
+     * D6 y X3: en la vista de guardias, la celda del recreo de un día lleva los códigos de
+     * RECREO ordenados y unidos por «, » y, en línea aparte, «Biblioteca: COD»; DOS1, del recreo 2 del lunes, no.
+     */
+    it('(112) la vista de guardias pinta los códigos del recreo 1 y aparte la biblioteca', async () => {
+      await montarConGuardias([], [
+        recreo('ZZZ1', 1, 1),
+        recreo('AAA1', 1, 1),
+        recreo('BIB1', 1, 1, 'BIBLIOTECA'),
+        recreo('CCC1', 3, 1, 'BIBLIOTECA'),
+        recreo('DOS1', 1, 2),
+      ]);
+      jornadaConRecreoTrasLaTercera();
+      await elegirVista('guardias');
+
+      expect(filaDeRecreo()).toEqual({
+        rotulo: 'Recreo',
+        celdas: [['AAA1, ZZZ1', 'Biblioteca: BIB1'], [], ['Biblioteca: CCC1'], [], []],
+        colspan: null,
+      });
+    });
+
+    /** D6: en las vistas de grupo y de aula la fila del recreo sigue siendo UNA celda «Recreo». */
+    it('(113) en grupo y aula la fila del recreo sigue como siempre aunque haya guardias de recreo', async () => {
+      await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], [recreo('P1', 1, 1), recreo('P1', 2, 1, 'BIBLIOTECA')]);
+      jornadaConRecreoTrasLaTercera();
+      await fixture.whenStable();
+
+      for (const vista of ['grupo', 'aula']) {
+        await elegirVista(vista);
+        const tr = raiz().querySelector<HTMLElement>('app-horario-grid tbody tr.recreo')!;
+        expect(tr.querySelector('th')!.textContent!.trim(), vista).toBe('');
+        expect(
+          Array.from(tr.querySelectorAll('td')).map((td) => [td.getAttribute('colspan'), td.textContent!.trim()]),
+          vista,
+        ).toEqual([['5', 'Recreo']]);
+      }
     });
   });
 });
