@@ -8,6 +8,7 @@ import es.yaroki.educhronos.app.persistence.Guardia;
 import es.yaroki.educhronos.app.persistence.GuardiaRepository;
 import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
+import es.yaroki.educhronos.app.persistence.TipoGuardia;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import jakarta.persistence.EntityManager;
@@ -98,6 +99,25 @@ class ProyeccionGuardiasTest {
                 .hasMessageContaining("no está en el índice de tramos lectivos");
     }
 
+    /**
+     * (S220) Las guardias de RECREO y de BIBLIOTECA están en un recreo y no se proyectan hasta la
+     * condición 5 de O-guardias-especiales: no abortan y no salen. Las ORDINARIA salen como siempre.
+     */
+    @Test
+    void lasGuardiasDeRecreoYBibliotecaNoAbortanYNoSeProyectan() {
+        poblarMalla();
+        HorarioGenerado horario = horario();
+        guardia(horario, "MAT1", "LUNES 08:00");
+        guardia(horario, "BIO1", "LUNES 10:00", TipoGuardia.RECREO);
+        guardia(horario, "LEN1", "LUNES 10:00", TipoGuardia.BIBLIOTECA);
+        guardia(horario, "MAT1", "MARTES 10:00", TipoGuardia.RECREO);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(service.proyectar(horario.getId()).guardias())
+                .containsExactly(new GuardiaVistaDTO("MAT1", 1, 1));
+    }
+
     // ------------------------------------------------------------------ fixture
 
     private void poblarMalla() {
@@ -127,5 +147,9 @@ class ProyeccionGuardiasTest {
 
     private void guardia(HorarioGenerado horario, String profesor, String tramo) {
         guardiaRepository.save(new Guardia(horario, profesores.get(profesor), tramos.get(tramo)));
+    }
+
+    private void guardia(HorarioGenerado horario, String profesor, String tramo, TipoGuardia tipo) {
+        guardiaRepository.save(new Guardia(horario, profesores.get(profesor), tramos.get(tramo), tipo));
     }
 }

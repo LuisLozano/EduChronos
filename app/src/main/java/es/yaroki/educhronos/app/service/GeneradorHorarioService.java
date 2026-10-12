@@ -35,6 +35,7 @@ import es.yaroki.educhronos.app.persistence.HorarioGenerado;
 import es.yaroki.educhronos.app.persistence.HorarioGeneradoRepository;
 import es.yaroki.educhronos.app.persistence.Sesion;
 import es.yaroki.educhronos.app.persistence.SesionRepository;
+import es.yaroki.educhronos.app.persistence.TipoGuardia;
 import es.yaroki.educhronos.app.web.dto.GuardiaVistaDTO;
 import es.yaroki.educhronos.app.web.dto.HorarioProyeccionDTO;
 import es.yaroki.educhronos.app.web.dto.SesionVistaDTO;
@@ -622,6 +623,10 @@ public class GeneradorHorarioService {
      * puede pintar (enmienda EA2), no un dato que se pueda callar. El profesor y el tramo de
      * cada guardia son relaciones perezosas que se resuelven aquí, dentro de la transacción
      * (EA3: se acepta su N+1 antes que una consulta nueva).
+     *
+     * <p>Desde S220 solo entran las guardias ORDINARIA: las de RECREO y BIBLIOTECA están en un recreo,
+     * que no tiene {@code ordenEnDia}, y no se muestran hasta la condición 5 de O-guardias-especiales.
+     * Una ORDINARIA en un recreo sigue abortando.
      */
     @Transactional(readOnly = true)
     public HorarioProyeccionDTO proyectar(Long horarioId) {
@@ -662,6 +667,9 @@ public class GeneradorHorarioService {
 
         List<GuardiaVistaDTO> guardias = new ArrayList<>();
         for (Guardia guardia : guardiaRepository.findByHorarioId(horarioId)) {
+            if (guardia.getTipo() != TipoGuardia.ORDINARIA) {
+                continue;
+            }
             Posicion posicion = posicion(guardia.getTramo(), ordenEnDia, "tramo", "guardia", horarioId);
             guardias.add(new GuardiaVistaDTO(
                     guardia.getProfesor().getCodigo(), posicion.dia(), posicion.tramo()));
