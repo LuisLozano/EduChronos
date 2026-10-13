@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S223. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S224. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S223). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S224). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10585,3 +10585,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, sin coste: el contrato v1 de F2, cuatro formas sin cita; los guiones de F1 y F2 pidieron salidas largas sin necesidad. De S222: (1) a M3; (2) y (4) a `D-contrato-desde-resumen`; (3) instancia de la norma 10.
   SUITES. Sin cambios de producto: solver 162, app 927, vitest 763 en 67 ficheros, e2e 3, python 267.
   CIERRE. `verificar-cierre.py` rc=0, autoprueba 20 de 20, 0 fallos duros, ventana S222/S223, censos y crónica en S221; censo desde `f737610` (copia de `censo-c1.py` con el histórico): 418 tokens antes y después, ninguno nace ni se extingue, 38 de una aparición; Higiene/Método 10 vivas; líneas del commit de cierre sin índice 126; entrada 2 080 bytes; paradas del cierre 0.
+
+### Sesión 224 — O-interfaz abierto y tablas sin partirse
+  TIPO. Apertura de objetivo (F1) y Configuración/UI (F2), con un solo cierre.
+  HECHO. F1, M2 de las 9 deudas de `O-interfaz` y criterio de 10 condiciones (`s224/f1`). F2, `C-anchos-legibles`: T0 (`s224/f2/t0`), `c049a6f` (Configuración sin el límite de 60rem, «Horas» sin partirse y aviso de prevalidación con la descripción en su propia línea) y `06b7e8a` (comentario de `configuracion.css`). M4 en `s224/f2/c1`.
+  CRITERIO. `O-interfaz` ABIERTO, 2 de 10 (condiciones 1 y 2). A 1920 px, 0 filas partidas en los 8 destinos y el aviso de S204 en 1 línea; a 1366 px (dato), 1 y 6 filas partidas y el aviso en 2.
+  DECISIONES. Del usuario, A (1920 px), B (vista de horario y editor de actividades en el criterio, con su juicio), C (enlace y 409 con plazas) y D (sin el grupo PDC). Del arquitecto, E (Cambios), F (alta en el cierre), G (sin límite de 60rem), H (aviso en dos líneas), I (M4 con Playwright) y J (comentarios de `configuracion.css`). Texto en la ficha.
+  DEUDA. Cierran `D-tabla-configuracion-estrecha` y `D-aviso-largo-se-parte`. Corregidas por medición: `D-actividad-ux`, `D-incoherencia-como-404` y `D-filtro-por-codigo`. Notas en `D-ng-serve-sin-literal`, `D-m4-navegador-sin-norma` y `D-bundle-sobre-techo-550`.
+  DEFECTOS. (1) La autoprueba del guion de F1 ensanchaba la columna y no aislaba el caso; la corrigió Claude Code. (2) El contrato K1 no previó los dos comentarios de `configuracion.css`; dos correcciones (J y `06b7e8a`). (3) El guion de F2 dependía de Claude in Chrome, que no estaba en la sesión nueva (decisión I). (4) El contrato del cierre fijó la forma de la entrada y la posición de la ficha sin volcado delante; el contraste lo cazó antes de escribir (enmienda 1, una parada).
+  SUITES. Solver 162, app 927, vitest 763 en 67, e2e 3 y python 267, sin cambios. Bundle 630,24 kB. CI verde en `06b7e8a`.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 124 líneas del commit de cierre sin índice, 2 117 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`).
