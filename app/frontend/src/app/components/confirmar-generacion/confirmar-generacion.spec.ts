@@ -203,7 +203,11 @@ describe('diálogo de confirmar generación', () => {
     expect(radios().map((r) => r.checked)).toEqual([true, false, false, false]);
     expect(radios().every((r) => r.name === 'minutos')).toBe(true);
     expect(raiz.querySelector('.tiempo__ayuda')?.textContent?.trim()).toBe(
-      'Con más tiempo es más probable que salga horario, y suele salir mejor.',
+      'El programa busca el mejor horario que puede encontrar en el tiempo que le des. '
+        + 'Con más tiempo es más probable que encuentre uno, y suele respetar mejor las preferencias, '
+        + 'como las horas que un profesor prefiere no tener. Con poco tiempo puede terminar sin horario. '
+        + 'Si con 10 minutos no sale, prueba con 30 o con 60. '
+        + 'Mientras se genera no se puede usar la aplicación.',
     );
   });
 
