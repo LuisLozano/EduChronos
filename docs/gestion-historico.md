@@ -2,38 +2,39 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L47 — ## 1. Objetivos terminados
-- L49 — ### H2 — Configurar un centro desde cero
-- L51 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L67 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L139 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L389 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L676 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L777 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L876 — ### H1 — Ajustar (cierre)
-- L878 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1055 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1346 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1536 — ### H3 — Exportar
-- L1538 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1599 — ### H4 — Instalar y pasar de curso
-- L1601 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1775 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1870 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1939 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1975 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1977 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2026 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2061 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2096 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2125 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2164 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2202 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2239 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2276 — ## 2. Deuda cerrada de §4
-- L2278 — ### Deuda técnica real, colgada de su objetivo
-- L2348 — ### Mejora futura, cuelga y espera
-- L2363 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L48 — ## 1. Objetivos terminados
+- L50 — ### H2 — Configurar un centro desde cero
+- L52 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L68 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L140 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L390 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L677 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L778 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L877 — ### H1 — Ajustar (cierre)
+- L879 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1056 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1347 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1537 — ### H3 — Exportar
+- L1539 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1600 — ### H4 — Instalar y pasar de curso
+- L1602 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1776 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1871 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1940 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1976 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1978 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2027 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2062 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2097 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2126 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2165 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2203 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2240 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2277 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2313 — ## 2. Deuda cerrada de §4
+- L2315 — ### Deuda técnica real, colgada de su objetivo
+- L2385 — ### Mejora futura, cuelga y espera
+- L2400 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2272,6 +2273,42 @@ terminado (§6).
 - **ESTADO en S221: 6 de 7** (condiciones 5 y 6). Queda la 7, la prueba con datos reales, que trae también la generación en la aplicación pendiente de la condición 2.
 - **ESTADO en S222: 7 de 7. TERMINADO** (condición 7). Cinco sesiones (S218–S222) y seis Cambios, dentro de la estimación de 5 a 7 y del techo de ocho de §7.
 - **Métrica de §7:** si pasa de ocho sesiones, esconde dos objetivos. Estimación al abrir: de 5 a 7.
+
+#### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- **Propósito:** resolver las incidencias de interfaz de la demo de S188 y las que se añadieron después (lista cerrada del mapa de S190, punto 6): que la secretaria encuentre sin ayuda el horario, las actividades de un profesor o de un grupo y la causa de un error, y que tablas y avisos se lean sin partirse. Sexto objetivo del mapa de S190, abierto en S224.
+- **Por qué va ahora:** `O-guardias-especiales` terminó en S222 y los objetivos de datos de H5 están cerrados, que es lo que el mapa pedía para no pulir formularios que iban a cambiar (R-invalidación). Va antes de `O-prueba-secretaria`.
+- **Medido al abrir (S224, Claude Code, HEAD `bdfeab5`, solo lectura, con la base de S222 en copia; material en `/home/luis/educhronos-aceptacion/s224/f1/` y `s224/f2/t0/`):**
+  (a) Tablas a 1920 px: en Profesores, 60 de 60 filas partidas por «Horas»; en Actividades, 17 de 239 por el código y la tabla 37 px más ancha que su contenedor. El contenido estaba limitado a 60rem (`configuracion.css:72`).
+  (b) La base de S222 no da avisos de prevalidación; el banco de S204 da `GUARDIAS_INSUFICIENTES`, 191 caracteres en 2 líneas.
+  (c) En Actividades, «4ºC» da 13 filas frente a 12 por pertenencia, y «Música» 0 frente a 8.
+  (d) El 409 de borrar BYG1 cuenta «4 plaza(s), 8 guardia(s)» sin nombrarlas; el error es texto #A32014 de 16 px sin fondo, visible sin scroll.
+  (e) El horario tiene dos entradas visibles: la barra y la portada.
+  (f) El diálogo de generación ofrece 10, 20, 30 y 60 minutos con una línea de ayuda.
+  (g) Por lectura, solo el diagnóstico convierte una incoherencia de datos en 404.
+  (h) Cada selector del editor de actividad va dentro de su propio `<label>`.
+- **Decisiones (S224):** (A, del usuario) Ancho de referencia: ventana de 1920 px; a 1366 px se toma el dato en el M4, sin condición. (B, del usuario) `D-vista-horario-no-se-descubre` y lo engorroso de `D-actividad-ux` quedan en el criterio, con el usuario como juez sobre una lista escrita y cerrada antes de tocar nada; lo que señale después va a mejora futura. (C, del usuario) Desde la entidad, enlace a sus actividades, y además el 409 nombra las plazas. (D, del usuario) Buscar un grupo no incluye a su grupo PDC. (E, del arquitecto) Cinco Cambios, en el orden de la lista de Cambios. (F, del arquitecto) El alta documental del objetivo va en el cierre único de S224. (G, del arquitecto) Se retira el límite de 60rem en vez de subirlo: con 80rem, Actividades no cabía (estimación, comprobada en el M4). (H, del arquitecto) La descripción del aviso va en su propia línea, sin cambiar ningún texto. (I, del arquitecto) El M4 contable se mide con Playwright sin interfaz y el Chromium del proyecto, con autoprueba. (J, del arquitecto) Los comentarios de `configuracion.css` se corrigen y el `margin: 0 auto` sin efecto se retira.
+- **Decisiones (S226):** (K, del arquitecto) La condición 8 pasa a `C-errores-legibles`; `C-editor-actividad` queda con la 10. (L, del arquitecto) La jornada pasa a la acción «guardar» en su 409, sin la frase de qué hacer. Resto en `s226/cierre/c1/decisiones.txt`.
+- **Decisiones (S227):** (M, del usuario) El usuario hace el recorrido; acta cerrada de tres puntos: editor más ancho, profesor con código y nombre en las plazas, y aviso tras guardar cuando la actividad deja de cumplir el filtro. Las asignaturas de nombre parecido van a `D-asignatura-sin-nivel` (`s227/f2/t0/acta.md`). (N, del usuario) Se añade la condición 11, duplicar curso. (O, del usuario) El objetivo se cierra en una sola sesión. Resto, del arquitecto, en `s227/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S224 sobre esa medición (texto en `s224/f1/criterio-o-interfaz.md`). `O-interfaz` termina cuando:
+  1. **Tablas.** Ninguna de las 8 tablas de Configuración tiene filas partidas ni es más ancha que su contenedor, a 1920 px, con la base de S222 y el instrumento de líneas de S224 con su autoprueba. **✔ CUMPLIDA en S224** (`C-anchos-legibles`): 0 filas partidas en los 8 destinos; Profesores y Actividades, 1584 px en un contenedor de 1616.
+  2. **Avisos.** Los avisos de guardias del panel de prevalidación no se parten, sobre el banco de S204. **✔ CUMPLIDA en S224** (`C-anchos-legibles`): `GUARDIAS_INSUFICIENTES` y su cuenta en 1 línea cada una; los otros dos códigos comparten plantilla.
+  3. **Filtro por pertenencia.** En Actividades, el código de un grupo encuentra exactamente las actividades con alguna plaza de ese grupo, sin su grupo PDC (decisión D), y el nombre de una asignatura encuentra las suyas. Oráculo: la consulta por API de `s224/f1` (P3.3). **✔ CUMPLIDA en S225** (`C-actividades-por-pertenencia`): «4ºC» da 12 de 12, «Música» 8 de 8, sin faltas ni sobras contra el oráculo.
+  4. **De la entidad a sus actividades.** Desde la fila de un profesor, una asignatura, un grupo o un subgrupo se llega en un clic a Actividades filtrada por esa entidad, y el 409 de borrado nombra las plazas que lo impiden (decisión C). **✔ CUMPLIDA en S225** (`C-actividades-por-pertenencia`): el botón «Actividades» de las cuatro listas, verificado en BYG1, Mús, 4ºCDi y 4ºC-Completo; el 409 de BYG1 nombra sus 4 plazas.
+  5. **Errores visibles.** El error de las listas se distingue por algo más que el color y dice qué hacer (estilos calculados y juicio del usuario). **✔ CUMPLIDA en S226** (`C-errores-legibles`): fondo `--color-error-fondo`, borde izquierdo de 4 px e icono, medidos en el 409 de BYG1 (K1); el 409 de borrado termina diciendo qué hacer; el usuario lo juzgó visible y comprensible.
+  6. **Diagnóstico.** Una incoherencia de datos en el diagnóstico no responde 404, y un id inexistente sí (test con mutante). **✔ CUMPLIDA en S226** (`C-errores-legibles`): 500 con texto propio ante datos incoherentes y 404 con id inexistente; mutantes M6a y M6b cazados.
+  7. **Diálogo de generación.** Explica qué se gana con más tiempo, con un texto aprobado por el usuario. **✔ CUMPLIDA en S226** (`C-generacion-y-horario`): texto aprobado por el usuario, presente en el diálogo (K5).
+  8. **Editor de actividad.** El error de servidor anterior no sigue pintado junto a un error nuevo (síntoma por confirmar). **✔ CUMPLIDA en S226** (`C-errores-legibles`): editar un campo borra el error de guardado (K4, con un 409); mutantes M8a, M8c y M8d cazados.
+  9. **Descubrir el horario.** El usuario aprueba en navegador un cambio concreto, escrito antes de tocar nada (decisión B). **✔ CUMPLIDA en S226** (`C-generacion-y-horario`): botón «Horario» en Profesores, Grupos y Aulas que abre esa entidad en pantalla (K6 y K7); aprobado por el usuario en navegador.
+  10. **Editor de actividades.** Se aplica el acta cerrada del recorrido de juicio del usuario y él la aprueba (decisión B). **✔ CUMPLIDA en S227** (`C-editor-actividad`): acta de tres puntos (decisión M) en `41e88e1` y `78975a6`, aprobada por el usuario en navegador; mutantes M2a, M2b, M3a y M3b cazados.
+  11. **Duplicar curso.** Cuando el diálogo de duplicar no puede enviar porque un nombre falta o tiene mal formato, dice en ese campo qué está mal (test con mutante y comprobación en navegador). Añadida en S227 por el usuario (decisión N): en el recorrido, «Duplicar» no hacía nada con el nombre vacío y no lo decía. **✔ CUMPLIDA en S227** (`C-duplicar-legible`, `565609d`): mensaje de obligatorio y de forma en los dos nombres; mutantes M4a, M4b y M4c cazados; comprobado por el usuario en navegador.
+- **ESTADO en S226: 9 de 10** (condiciones 1 a 9).
+- **ESTADO en S227: TERMINADO, 11 de 11.**
+- **Fuera del criterio, con motivo:** anchos menores de 1920 px (decisión A; a 1366 px, 1 y 6 filas partidas y el aviso en 2 líneas, medido en S224); los selectores que no son la lista de Actividades (el casado por partes de `D-filtro-por-codigo` sigue vivo); y lo que el usuario señale después de cerrar las listas de las condiciones 9 y 10 (decisión B).
+- **Deudas:** las nueve de la lista del mapa (punto 6). Cierran `D-tabla-configuracion-estrecha` y `D-aviso-largo-se-parte` (S224). Cierra `D-entidad-sin-actividades` (S225). Cierran `D-incoherencia-como-404`, `D-error-poco-visible`, `D-tiempo-generacion-poco-claro` y `D-vista-horario-no-se-descubre` (S226). Se estrecha `D-actividad-ux` a los selectores sin `id`, `for` ni `aria-*` (S227).
+- **Depende de:** los objetivos de datos de H5 (R-invalidación).
+- **Valor:** que la prueba de `O-prueba-secretaria` mida si la secretaria hace su horario, y no si tropieza con lo que ya vio en la demo.
+- **Cambios que agrupa:** `C-alcance-interfaz` ✔ HECHO (S224): el M0, la medición y este criterio. `C-anchos-legibles` ✔ HECHO (S224): condiciones 1 y 2 (`c049a6f` y `06b7e8a`). `C-actividades-por-pertenencia` ✔ HECHO (S225): condiciones 3 y 4 (`3566e39` y `d247072`). `C-errores-legibles` ✔ HECHO (S226): condiciones 5, 6 y 8 (`480d14c`, `66aa4e4` y `e5183d6`). `C-generacion-y-horario` ✔ HECHO (S226): condiciones 7 y 9 (`5d9cfe9`, `ee86abe` y `03349c7`). `C-editor-actividad` ✔ HECHO (S227): condición 10 (`41e88e1` y `78975a6`). `C-duplicar-legible` ✔ HECHO (S227): condición 11 (`565609d`).
+- **Métrica de §7:** estimación de 3 a 5 sesiones (sin medir); límite de 8. Real: 4 sesiones (S224 a S227).
 
 ## 2. Deuda cerrada de §4
 

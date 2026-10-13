@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S224. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S225. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S224). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S225). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10595,3 +10595,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) La autoprueba del guion de F1 ensanchaba la columna y no aislaba el caso; la corrigió Claude Code. (2) El contrato K1 no previó los dos comentarios de `configuracion.css`; dos correcciones (J y `06b7e8a`). (3) El guion de F2 dependía de Claude in Chrome, que no estaba en la sesión nueva (decisión I). (4) El contrato del cierre fijó la forma de la entrada y la posición de la ficha sin volcado delante; el contraste lo cazó antes de escribir (enmienda 1, una parada).
   SUITES. Solver 162, app 927, vitest 763 en 67, e2e 3 y python 267, sin cambios. Bundle 630,24 kB. CI verde en `06b7e8a`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 124 líneas del commit de cierre sin índice, 2 117 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`).
+
+### Sesión 225 — C-actividades-por-pertenencia: Actividades busca por pertenencia y cada entidad lleva a sus actividades (O-interfaz 4 de 10)
+  TIPO. Desarrollo: M2, T0 con contraste, M3, M4 en navegador con Claude in Chrome, juicio de aspecto del usuario sobre capturas, M1.
+  HECHO. M2 (`s225/m2`), T0 y oráculo (`s225/t0`). F1: `3566e39` (el 409 de borrar profesor, asignatura o subgrupo nombra sus plazas) y `d247072` (búsqueda por pertenencia con línea bajo la caja, botón «Actividades» en Profesores, Asignaturas, Grupos y Subgrupos, parámetro `buscar`). F2: K0-K9 contra el oráculo, 0 faltan y 0 sobran (`s225/f2`).
+  CRITERIO. `O-interfaz` 4 de 10: condiciones 3 y 4 cumplidas.
+  DECISIONES. Del usuario U1-U3; del arquitecto 1-12 (`s225/cierre/c1/decisiones.txt`).
+  DEUDA. Cierra `D-entidad-sin-actividades`; `D-filtro-por-codigo` sigue viva en los selectores; `D-bundle-sobre-techo-550` en 633,90 kB.
+  DEFECTOS. (1) S224 no guardó el script de su P3.3 (norma 16); se reconstruyó id a id en `s225/m2` y `s225/t0`. (2) El guion C0 nombró los documentos sin `docs/`: un `git show` falló, sin coste. (3) El contrato v1 afirmó `montar()` y una normalización a minúsculas; el contraste lo cazó antes de ejecutar. (4) `ProfesorEndpointTest:185` mira el 409 por subcadena; lo destapó el mutante b3 y se añadió un caso que fija el mensaje entero.
+  SUITES. Solver 162, app 932 (+5), vitest 783 en 68 ficheros (+20), e2e 3, python 267; bundle 633,90 kB (+3,66). CI de `d247072`: verde (`tests` #94).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 63 líneas del commit de cierre sin índice, 1 781 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
