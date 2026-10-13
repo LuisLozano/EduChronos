@@ -10,6 +10,7 @@ import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
 import es.yaroki.educhronos.app.catalog.RolAulaAsignatura;
 import es.yaroki.educhronos.app.catalog.TipoAula;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Nombrados;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.AsignaturaAulaDTO;
 import es.yaroki.educhronos.app.web.dto.AsignaturaAulaRequest;
@@ -134,7 +135,10 @@ public class AsignaturaService {
                 new Referencia("actividad(es)", repositorio.contarActividades(id)),
                 new Referencia("plaza(s)", repositorio.contarPlazas(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            // Se nombra todo lo que se cuenta: las dos cosas se corrigen en Actividades (S225).
+            throw new ReferenciaEntranteException(entrantes, List.of(
+                    new Nombrados("Actividades", repositorio.codigosDeActividades(id)),
+                    new Nombrados("Plazas", repositorio.codigosDePlazas(id))));
         }
         repositorio.delete(entidad);
     }

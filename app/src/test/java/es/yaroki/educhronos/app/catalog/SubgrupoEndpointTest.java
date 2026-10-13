@@ -303,6 +303,25 @@ class SubgrupoEndpointTest {
                 .containsExactly(new Referencia("plaza(s)", 1L));
     }
 
+    /** (S225) El 409 del subgrupo nombra sus plazas, ordenadas por código y no por alta. */
+    @Test
+    void borrado_subgrupoUsadoPorPlazas_409QueLasNombraOrdenadas() throws Exception {
+        Subgrupo subgrupo = subgrupoRepository.save(new Subgrupo("SG1",
+                Set.of(grupoRepository.findByCodigo("G_A").orElseThrow())));
+        Asignatura mat = asignaturaRepository.save(new Asignatura("MAT", "Matematicas"));
+        for (String codigo : List.of("ACT-B", "ACT-A")) {
+            Actividad actividad = new Actividad(codigo, mat, 1, 1, PatronTemporal.NEUTRA, false);
+            actividad.agregarPlaza(codigo + "-P1", mat, null, Set.of(), Set.of(), Set.of(subgrupo));
+            actividadRepository.save(actividad);
+        }
+        entityManager.flush();
+
+        mockMvc.perform(delete("/api/subgrupos/" + subgrupo.getId()))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(
+                        "No se puede borrar: referenciada por 2 plaza(s). Plazas: ACT-A-P1, ACT-B-P1"));
+    }
+
     // ============== GUARDA G2: el mono-Di de un PDC no se edita ni se borra aquí ==============
 
     /**

@@ -5,6 +5,7 @@ import es.yaroki.educhronos.app.catalog.GrupoAdministrativoRepository;
 import es.yaroki.educhronos.app.catalog.Subgrupo;
 import es.yaroki.educhronos.app.catalog.SubgrupoRepository;
 import es.yaroki.educhronos.app.catalog.TipoGrupo;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Nombrados;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.SubgrupoDTO;
 import es.yaroki.educhronos.app.web.dto.SubgrupoRequest;
@@ -165,7 +166,8 @@ public class SubgrupoService {
         List<Referencia> entrantes = List.of(
                 new Referencia("plaza(s)", repositorio.contarPlazas(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            throw new ReferenciaEntranteException(entrantes,
+                    List.of(new Nombrados("Plazas", repositorio.codigosDePlazas(id))));
         }
         repositorio.delete(entidad);
     }

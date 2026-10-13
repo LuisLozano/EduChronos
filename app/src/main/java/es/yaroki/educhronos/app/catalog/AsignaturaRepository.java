@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +21,15 @@ public interface AsignaturaRepository extends JpaRepository<Asignatura, Long> {
     @Query(value = "select count(*) from actividad where asignatura_id = :id", nativeQuery = true)
     long contarActividades(@Param("id") Long id);
 
+    /** Códigos de esas actividades, sin orden: los ordena y corta {@code ReferenciaEntranteException} (S225). */
+    @Query(value = "select codigo from actividad where asignatura_id = :id", nativeQuery = true)
+    List<String> codigosDeActividades(@Param("id") Long id);
+
     /** FK {@code plaza.asignatura_id} → asignatura (obligatoria en cada plaza). */
     @Query(value = "select count(*) from plaza where asignatura_id = :id", nativeQuery = true)
     long contarPlazas(@Param("id") Long id);
+
+    /** Códigos de esas plazas, sin orden (S225). */
+    @Query(value = "select codigo from plaza where asignatura_id = :id", nativeQuery = true)
+    List<String> codigosDePlazas(@Param("id") Long id);
 }

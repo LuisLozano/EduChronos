@@ -4,6 +4,7 @@ import es.yaroki.educhronos.app.catalog.Cargo;
 import es.yaroki.educhronos.app.catalog.Profesor;
 import es.yaroki.educhronos.app.catalog.ProfesorRepository;
 import es.yaroki.educhronos.app.catalog.ProfesorTutoriaRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Nombrados;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.ProfesorDTO;
 import es.yaroki.educhronos.app.web.dto.ProfesorRequest;
@@ -137,7 +138,9 @@ public class ProfesorService {
                 new Referencia("tutoria(s)", tutoriaRepositorio.contarTutorias(id)),
                 new Referencia("guardia(s)", repositorio.contarGuardias(id)));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            // Se nombran las plazas, que se corrigen en Actividades (S225); las guardias no.
+            throw new ReferenciaEntranteException(entrantes,
+                    List.of(new Nombrados("Plazas", repositorio.codigosDePlazas(id))));
         }
         repositorio.delete(entidad);
     }

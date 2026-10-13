@@ -20,6 +20,7 @@ import es.yaroki.educhronos.app.service.RestriccionHorariaService;
 import es.yaroki.educhronos.app.web.ProfesorController;
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,8 @@ class ProfesorEndpointTest {
     @Autowired private TramoSemanalRepository tramos;
     @Autowired private HorarioGeneradoRepository horarios;
     @Autowired private GuardiaRepository guardias;
+    @Autowired private AsignaturaRepository asignaturas;
+    @Autowired private ActividadRepository actividades;
 
     private MockMvc mockMvc;
 
@@ -201,6 +204,54 @@ class ProfesorEndpointTest {
                 .andExpect(status().isNoContent());
 
         assertThat(profesores.existsById(sinNada)).isFalse();
+    }
+
+    /**
+     * (S225) El 409 por plazas las NOMBRA, ordenadas por código aunque se crearon en otro orden: la
+     * consulta las devuelve sin orden y lo pone la excepción.
+     */
+    @Test
+    void borrado_conPlazas_409QueLasNombraOrdenadas() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        plazaDe(id, "C");
+        plazaDe(id, "A");
+        plazaDe(id, "B");
+
+        mockMvc.perform(delete("/api/profesores/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason(
+                        "No se puede borrar: referenciada por 3 plaza(s). Plazas: A-P1, B-P1, C-P1"));
+
+        assertThat(profesores.existsById(id)).isTrue();
+    }
+
+    /** (S225) Con 11 plazas nombra las 10 primeras por código y dice cuántas quedan. */
+    @Test
+    void borrado_conOncePlazas_409NombraDiezYCuentaElResto() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        for (int n = 11; n >= 1; n--) {
+            plazaDe(id, String.format("A%02d", n));
+        }
+
+        mockMvc.perform(delete("/api/profesores/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason("No se puede borrar: referenciada por 11 plaza(s). Plazas: "
+                        + "A01-P1, A02-P1, A03-P1, A04-P1, A05-P1, A06-P1, A07-P1, A08-P1, A09-P1, A10-P1"
+                        + " (y 1 más)"));
+    }
+
+    /**
+     * (S225) Sin plazas no se añade nada: el 409 solo por guardias es el de siempre, ENTERO. El test
+     * de S213 lo mira por subcadena y no vería un «. Plazas: » vacío colgando.
+     */
+    @Test
+    void borrado_soloConGuardias_409SinListaDePlazas() throws Exception {
+        long id = crear("MAT8", "Ada Lovelace");
+        guardiaDe(id);
+
+        mockMvc.perform(delete("/api/profesores/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason("No se puede borrar: referenciada por 1 guardia(s)"));
     }
 
     @Test
@@ -471,6 +522,16 @@ class ProfesorEndpointTest {
     }
 
     /** Da de alta por la red y devuelve el id sintético asignado. */
+    /** Una actividad {@code codigo} con una sola plaza, {@code codigo-P1}, que da el profesor {@code id}. */
+    private void plazaDe(long id, String codigo) {
+        Asignatura asignatura = asignaturas.findByCodigo("MAT")
+                .orElseGet(() -> asignaturas.save(new Asignatura("MAT", "Matemáticas")));
+        Actividad actividad = new Actividad(codigo, asignatura, 1, 1, PatronTemporal.NEUTRA, false);
+        actividad.agregarPlaza(codigo + "-P1", asignatura, null,
+                Set.of(profesores.findById(id).orElseThrow()), Set.of(), Set.of());
+        actividades.saveAndFlush(actividad);
+    }
+
     /** Una guardia del profesor {@code id} en un horario y un tramo nuevos. */
     private void guardiaDe(long id) {
         TramoSemanal tramo = tramos.save(

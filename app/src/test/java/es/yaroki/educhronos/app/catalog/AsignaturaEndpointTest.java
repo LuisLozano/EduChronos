@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import es.yaroki.educhronos.app.service.AsignaturaService;
 import es.yaroki.educhronos.app.web.AsignaturaController;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ class AsignaturaEndpointTest {
     @Autowired private TestEntityManager entityManager;
     @Autowired private AsignaturaAulaRepository aulasDeAsignatura;
     @Autowired private AulaRepository aulaRepository;
+    @Autowired private AsignaturaRepository asignaturas;
+    @Autowired private ActividadRepository actividades;
 
     private MockMvc mockMvc;
 
@@ -159,6 +162,27 @@ class AsignaturaEndpointTest {
 
         mockMvc.perform(get("/api/asignaturas/" + id))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * (S225) El 409 nombra todo lo que cuenta, cada lista ordenada por código: las actividades cuya
+     * asignatura propia es esta (no la de null, que la tiene solo en su plaza) y todas sus plazas.
+     */
+    @Test
+    void borrado_conActividadYPlazas_409QueNombraActividadesYPlazas() throws Exception {
+        long id = crear("MUS", "Música");
+        Asignatura musica = asignaturas.findById(id).orElseThrow();
+        Actividad propia = new Actividad("MUS-2", musica, 1, 1, PatronTemporal.NEUTRA, false);
+        propia.agregarPlaza("MUS-2-P1", musica, null, Set.of(), Set.of(), Set.of());
+        actividades.saveAndFlush(propia);
+        Actividad mixta = new Actividad("MUS-1", null, 1, 1, PatronTemporal.NEUTRA, false);
+        mixta.agregarPlaza("MUS-1-P1", musica, null, Set.of(), Set.of(), Set.of());
+        actividades.saveAndFlush(mixta);
+
+        mockMvc.perform(delete("/api/asignaturas/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(status().reason("No se puede borrar: referenciada por 1 actividad(es), 2 plaza(s)"
+                        + ". Actividades: MUS-2. Plazas: MUS-1-P1, MUS-2-P1"));
     }
 
     @Test

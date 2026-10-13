@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,13 +26,25 @@ import java.util.stream.Collectors;
  * <p><b>Desglose estructurado.</b> Además del mensaje, expone la lista de
  * {@link Referencia} que lo motivaron ({@link #getReferencias()}), para que los tests
  * aseveren estructura (referente + conteo real) en vez de hacer substring del texto.
+ *
+ * <p><b>Códigos nombrados</b> (S225, condición 4 de O-interfaz). El conteo dice cuántas filas
+ * impiden el borrado, pero no cuáles, y el usuario tiene que ir a buscarlas. El tercer
+ * constructor recibe además listas de {@link Nombrados} que el mensaje añade al final, cada una
+ * SOLO si no está vacía: {@code ". Plazas: A-P1, B-P1 (y 3 más)"}. Los códigos se ordenan aquí y
+ * se cortan en {@link #MAXIMO_NOMBRADOS}; quien llama los pasa tal cual salen de la consulta.
  */
 public class ReferenciaEntranteException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    /** Tope de códigos por lista en el mensaje; del resto solo se dice cuántos son. */
+    static final int MAXIMO_NOMBRADOS = 10;
+
     /** Un referente que impide el borrado, con su conteo REAL de filas apuntando. */
     public record Referencia(String referente, long conteo) { }
+
+    /** Códigos de las filas de un referente, con el rótulo que los presenta («Plazas»). */
+    public record Nombrados(String rotulo, List<String> codigos) { }
 
     private final transient List<Referencia> referencias;
 
@@ -58,6 +71,17 @@ public class ReferenciaEntranteException extends RuntimeException {
         this.referencias = referencias.stream().filter(r -> r.conteo() > 0).toList();
     }
 
+    /**
+     * Borrado rechazado que, además de contar, NOMBRA las filas que lo impiden: cada lista de
+     * {@code nombrados} no vacía añade {@code ". <rótulo>: a, b, … (y N más)"} al mensaje de los
+     * otros constructores. Las vacías no añaden nada, así que un rechazo sin esas filas (un
+     * profesor que solo tiene guardias) da el mismo texto que antes.
+     */
+    public ReferenciaEntranteException(List<Referencia> referencias, List<Nombrados> nombrados) {
+        super(construirMensaje(referencias, "borrar") + nombrar(nombrados));
+        this.referencias = referencias.stream().filter(r -> r.conteo() > 0).toList();
+    }
+
     /** Los referentes que impiden el borrado (conteo > 0), en el orden del mapa de FK. */
     public List<Referencia> getReferencias() {
         return referencias;
@@ -73,5 +97,29 @@ public class ReferenciaEntranteException extends RuntimeException {
         return vivas.stream()
                 .map(r -> r.conteo() + " " + r.referente())
                 .collect(Collectors.joining(", ", "No se puede " + accion + ": referenciada por ", ""));
+    }
+
+    /** {@code ". Plazas: A-P1, B-P1 (y 2 más)"} por cada lista no vacía, en el orden recibido. */
+    private static String nombrar(List<Nombrados> nombrados) {
+        StringBuilder texto = new StringBuilder();
+        for (Nombrados lista : nombrados) {
+            if (lista.codigos().isEmpty()) {
+                continue;
+            }
+            List<String> ordenados = lista.codigos().stream().sorted().toList();
+            List<String> visibles = new ArrayList<>();
+            for (String codigo : ordenados) {
+                if (visibles.size() >= MAXIMO_NOMBRADOS) {
+                    break;
+                }
+                visibles.add(codigo);
+            }
+            texto.append(". ").append(lista.rotulo()).append(": ").append(String.join(", ", visibles));
+            int resto = ordenados.size() - visibles.size();
+            if (resto > 0) {
+                texto.append(" (y ").append(resto).append(" más)");
+            }
+        }
+        return texto.toString();
     }
 }

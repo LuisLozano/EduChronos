@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +24,9 @@ public interface SubgrupoRepository extends JpaRepository<Subgrupo, Long> {
     @Query(value = "select count(*) from plaza_subgrupo where subgrupo_id = :id",
             nativeQuery = true)
     long contarPlazas(@Param("id") Long id);
+
+    /** Códigos de esas plazas, sin orden: los ordena y corta {@code ReferenciaEntranteException} (S225). */
+    @Query(value = "select p.codigo from plaza p join plaza_subgrupo ps on ps.plaza_id = p.id"
+            + " where ps.subgrupo_id = :id", nativeQuery = true)
+    List<String> codigosDePlazas(@Param("id") Long id);
 }
