@@ -11,8 +11,8 @@
   box-sizing: border-box;
 }
 
-/* El marco SALE del límite de 60rem: ocupa el ancho disponible. Las 60rem se
-   conservan, pero para el CONTENIDO de cada destino (`.configuracion__contenido`). */
+/* El marco ocupa el ancho disponible, y desde S224 el CONTENIDO de cada destino
+   también: ya no hay límite de 60rem (ver `.configuracion__contenido`). */
 .configuracion__indice {
   flex: 0 0 auto;
   width: 14rem;
