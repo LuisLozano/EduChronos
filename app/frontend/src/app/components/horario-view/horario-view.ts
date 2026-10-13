@@ -960,6 +960,8 @@ export class HorarioView implements OnDestroy {
   }
 
   protected cambiarEntidad(e: string): void {
+    // El aviso de la URL habla de la entidad que se mostró en lugar de la pedida (S226).
+    this.avisoEntidad.set(null);
     this.entidad.set(e);
   }
 }

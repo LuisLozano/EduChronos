@@ -3019,5 +3019,19 @@ describe('contenedor del horario', () => {
       expect(sel().vista()).toBe('aula');
       expect(aviso()).toBeNull();
     });
+
+    it('(123) con el aviso visible, elegir otra entidad borra el aviso', async () => {
+      await remontarCon({ vista: 'profesor', entidad: 'ZZZ9' });
+      expect(aviso()).not.toBeNull();
+
+      const selects = (fixture.nativeElement as HTMLElement).querySelectorAll('.controles select');
+      const selectEntidad = selects[selects.length - 1] as HTMLSelectElement;
+      selectEntidad.value = 'MAT6';
+      selectEntidad.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      expect(sel().entidad()).toBe('MAT6');
+      expect(aviso()).toBeNull();
+    });
   });
 });
