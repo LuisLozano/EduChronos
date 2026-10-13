@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, ParamMap, Router, convertToParamMap } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { HorarioView } from './horario-view';
 import { HorarioGrid } from '../horario-grid/horario-grid';
@@ -398,6 +399,42 @@ describe('contenedor del horario', () => {
     // (3) su aviso propio, con su texto y su clase.
     const aviso = raiz.querySelector('.error-diagnostico');
     expect(aviso).not.toBeNull();
+    expect(aviso!.textContent?.trim()).toBe('No se pudo cargar el diagnóstico.');
+  });
+
+  /**
+   * (S226, condición 6 de O-interfaz) Un 500 del diagnóstico con `message` —unos datos del curso
+   * que no casan con el horario guardado— enseña ese motivo, en el mismo aviso propio.
+   */
+  it('(114) si el diagnóstico falla con un message, el aviso propio enseña ese message', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+
+    sujetoDiagnostico.error(new HttpErrorResponse({
+      status: 500,
+      error: { message: 'No se puede hacer el diagnóstico: los datos del curso tienen una incoherencia (x)' },
+    }));
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-diagnostico');
+    expect(aviso!.textContent?.trim()).toBe(
+      'No se puede hacer el diagnóstico: los datos del curso tienen una incoherencia (x)',
+    );
+  });
+
+  /** (S226) Un fallo sin cuerpo —la red, un proxy— sigue con el texto de siempre. */
+  it('(115) si el diagnóstico falla sin cuerpo, el aviso propio dice el texto de siempre', async () => {
+    sujetoParam.next(convertToParamMap({ id: '1' }));
+    ultimoListar.next([]);
+    sujetoProyeccion.next(PROYECCION_VACIA);
+    await fixture.whenStable();
+
+    sujetoDiagnostico.error(new HttpErrorResponse({ status: 0, error: null }));
+    await fixture.whenStable();
+
+    const aviso = (fixture.nativeElement as HTMLElement).querySelector('.error-diagnostico');
     expect(aviso!.textContent?.trim()).toBe('No se pudo cargar el diagnóstico.');
   });
 

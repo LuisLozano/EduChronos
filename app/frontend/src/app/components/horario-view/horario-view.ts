@@ -305,14 +305,26 @@ export class HorarioView implements OnDestroy {
    * plantilla la gatea con `error()`— y la proyección vigente sigue siendo válida
    * sin diagnóstico. Tampoco {@link errorPin}, que habla de otra cosa. Se limpia
    * el diagnóstico anterior al empezar para no arrastrar badges de otro horario.
+   *
+   * <p>Desde S226 el texto es el `message` del servidor si lo trae —el 500 de unos datos del
+   * curso que no casan dice cuál es la incoherencia— y, si no, el de siempre.
    */
   private cargarDiagnostico(id: number): void {
     this.errorDiagnostico.set(null);
     this.diagnostico.set(null);
     this.diagnosticos.getDiagnostico(id).subscribe({
       next: (d) => this.diagnostico.set(d),
-      error: () => this.errorDiagnostico.set('No se pudo cargar el diagnóstico.'),
+      error: (err) => this.errorDiagnostico.set(this.mensajeDiagnostico(err)),
     });
+  }
+
+  /**
+   * Texto del fallo del diagnóstico (S226): el `message` del servidor o el texto de siempre. Dos
+   * ramas y no {@link mensaje}: aquel cae a `error` —con el cuerpo de Spring, «Internal Server
+   * Error»— y su degradado habla del pin.
+   */
+  private mensajeDiagnostico(err: { error?: { message?: string } | null }): string {
+    return err?.error?.message || 'No se pudo cargar el diagnóstico.';
   }
 
   /**

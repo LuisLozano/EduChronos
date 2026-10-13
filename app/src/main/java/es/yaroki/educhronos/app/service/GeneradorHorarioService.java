@@ -601,7 +601,7 @@ public class GeneradorHorarioService {
     @Transactional(readOnly = true)
     public HorarioGenerado cargarHorario(Long id) {
         HorarioGenerado horario = horarioRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("No existe HorarioGenerado con id " + id));
+                new HorarioInexistenteException("No existe HorarioGenerado con id " + id));
         horario.getSesiones().size(); // fuerza la carga LAZY dentro de la transacción
         return horario;
     }
@@ -649,7 +649,7 @@ public class GeneradorHorarioService {
     @Transactional(readOnly = true)
     public HorarioProyeccionDTO proyectar(Long horarioId) {
         HorarioGenerado horario = horarioRepository.findById(horarioId).orElseThrow(() ->
-                new IllegalArgumentException("No existe HorarioGenerado con id " + horarioId));
+                new HorarioInexistenteException("No existe HorarioGenerado con id " + horarioId));
 
         List<TramoSemanal> tramos = tramoRepository.findAll();
         Map<Long, Integer> ordenEnDia = CatalogoMapper.indiceOrdenEnDia(tramos);

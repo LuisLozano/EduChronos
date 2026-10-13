@@ -9,6 +9,7 @@ import es.yaroki.educhronos.app.service.DiagnosticoService;
 import es.yaroki.educhronos.app.service.ExportacionHorarioService;
 import es.yaroki.educhronos.app.service.GeneradorHorarioService;
 import es.yaroki.educhronos.app.service.GuardiasSinRepartoException;
+import es.yaroki.educhronos.app.service.HorarioInexistenteException;
 import es.yaroki.educhronos.app.service.PrevalidacionFallidaException;
 import es.yaroki.educhronos.app.web.dto.DiagnosticoDTO;
 import es.yaroki.educhronos.app.web.dto.FalloGeneracionDTO;
@@ -204,14 +205,20 @@ public class HorarioController {
     /**
      * Diagnostica un horario generado (Fase 8, Bloque 8.3-C): violaciones duras y
      * penalizaciones blandas atribuidas por celda, más los totales blandos. {@code 404}
-     * si el id no existe (misma traducción que {@link #proyeccion}).
+     * si el id no existe; {@code 500} con el motivo si los datos del curso no casan con el
+     * horario guardado (S226).
      */
     @GetMapping("/{id}/diagnostico")
     public DiagnosticoDTO diagnostico(@PathVariable("id") Long id) {
         try {
             return diagnosticoService.diagnosticar(id);
-        } catch (IllegalArgumentException e) {
+        } catch (HorarioInexistenteException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            // Otra IAE es una incoherencia de los datos al reconstruir el horario, no un id que falta (S226).
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se puede hacer el diagnóstico: los datos del curso tienen una incoherencia ("
+                            + e.getMessage() + ")", e);
         }
     }
 

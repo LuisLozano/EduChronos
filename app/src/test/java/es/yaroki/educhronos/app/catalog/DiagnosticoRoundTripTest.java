@@ -1,5 +1,6 @@
 package es.yaroki.educhronos.app.catalog;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -217,6 +218,23 @@ class DiagnosticoRoundTripTest {
      */
     @Test
     void aSolucionHorarioAbortaSiUnaSesionSinAulaEsDeUnaPlazaConAula() {
+        Sesion sinAula = poblarSesionSinAulaDePlazaConAulaFija();
+
+        ProblemaHorario problema = service.cargarProblema();
+        Map<Tramo, TramoSemanal> idxTramo =
+                SolucionMapper.indiceTramos(problema, tramoRepository.findAll());
+
+        assertThatThrownBy(() ->
+                SolucionMapper.aSolucionHorario(problema, List.of(sinAula), idxTramo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("corrupción de datos");
+    }
+
+    /**
+     * Precedente de {@link #aSolucionHorarioAbortaSiUnaSesionSinAulaEsDeUnaPlazaConAula}: un horario
+     * guardado con una sesión sin aula de una plaza con aula fija. Devuelve esa sesión.
+     */
+    private Sesion poblarSesionSinAulaDePlazaConAulaFija() {
         Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
         GrupoAdministrativo g =
                 grupoRepository.save(new GrupoAdministrativo("1ºA", eso1, TipoGrupo.ORDINARIO, null));
@@ -251,15 +269,7 @@ class DiagnosticoRoundTripTest {
                 "corrupto", Instant.now(), "OPTIMAL", 0.0, 0.0));
         Sesion sinAula = sesionRepository.save(new Sesion(horario, plazaJpa, 1, l1, null));
         entityManager.flush();
-
-        ProblemaHorario problema = service.cargarProblema();
-        Map<Tramo, TramoSemanal> idxTramo =
-                SolucionMapper.indiceTramos(problema, tramoRepository.findAll());
-
-        assertThatThrownBy(() ->
-                SolucionMapper.aSolucionHorario(problema, List.of(sinAula), idxTramo))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("corrupción de datos");
+        return sinAula;
     }
 
     // ----------------------------------------------------------------- Test 4: endpoint
@@ -298,7 +308,23 @@ class DiagnosticoRoundTripTest {
     @Test
     void endpointDiagnosticoDevuelve404SiElHorarioNoExiste() throws Exception {
         mockMvc.perform(get("/api/horarios/999999/diagnostico"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason(containsString("No existe HorarioGenerado")));
+    }
+
+    /**
+     * (S226, condición 6 de O-interfaz) Un horario que EXISTE pero cuyos datos no casan con el
+     * catálogo no es un 404: es un 500 que dice que hay una incoherencia y cuál.
+     */
+    @Test
+    void endpointDiagnosticoDevuelve500SiLosDatosSonIncoherentes() throws Exception {
+        Long id = poblarSesionSinAulaDePlazaConAulaFija().getHorario().getId();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/horarios/" + id + "/diagnostico"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(status().reason(containsString("tienen una incoherencia")))
+                .andExpect(status().reason(containsString("corrupción de datos")));
     }
 
     // ------------------------------------------------------------------ fixtures
