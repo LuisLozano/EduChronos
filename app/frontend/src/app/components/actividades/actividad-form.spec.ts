@@ -930,6 +930,66 @@ describe('ActividadForm', () => {
     expect(fixture.nativeElement.querySelectorAll('.actividad-form__aula-fija option').length).toBe(1);
   });
 
+  /**
+   * (S226, condición 8 de O-interfaz) Escribe en el campo Código como lo haría el usuario: por
+   * el DOM, con su evento `input`, para que el cambio pase por `valueChanges` y no por el TS.
+   */
+  async function escribirCodigo(texto: string): Promise<void> {
+    const input = fixture.nativeElement.querySelector('input[formcontrolname="codigo"]') as HTMLInputElement;
+    input.value = texto;
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  it('(29) tras un 400 al guardar, editar un campo borra el mensaje del servidor', async () => {
+    montar(null);
+    const inst = instancia();
+    inst.form.patchValue({ codigo: 'Mat-1ºA' });
+    rellenarPlaza(0, 'FIJA');
+    inst.guardar();
+    http.expectOne('/api/actividades').flush(
+      { message: 'la asignatura Mat no admite el aula INF1 de tipo INFORMATICA' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.actividad-form__error-servidor')).not.toBeNull();
+
+    await escribirCodigo('Mat-1ºB');
+
+    // El mensaje hablaba de lo que había antes de corregir: ya no se pinta.
+    expect(fixture.nativeElement.querySelector('.actividad-form__error-servidor')).toBeNull();
+  });
+
+  it('(30) un fallo de CARGA no se borra al editar un campo: editar no lo arregla', async () => {
+    montar(null, true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await escribirCodigo('Mat-1ºA');
+
+    const err = fixture.nativeElement.querySelector('.actividad-form__error-servidor');
+    expect(err).not.toBeNull();
+    expect(err.textContent).toContain('No se pudieron cargar las aulas');
+  });
+
+  it('(31) tras un 409, editar un campo borra el aviso del conflicto', async () => {
+    montar(ACTIVIDAD_FIJA);
+    instancia().guardar();
+    http.expectOne('/api/actividades/7').flush(
+      { message: 'No se puede editar: referenciada por 1 sesion(es), 1 aula(s) bloqueada(s)' },
+      { status: 409, statusText: 'Conflict' },
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.actividad-form__conflicto')).not.toBeNull();
+
+    await escribirCodigo('ACT-OTRA');
+
+    expect(fixture.nativeElement.querySelector('.actividad-form__conflicto')).toBeNull();
+  });
+
   it('(15) el multiselect vuelca al control lo que el usuario marca en el DOM', () => {
     montar(null);
     const select = fixture.nativeElement.querySelector(

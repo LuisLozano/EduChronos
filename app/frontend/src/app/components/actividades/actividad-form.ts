@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -146,6 +146,12 @@ export class ActividadForm implements OnInit {
   protected readonly error = signal('');
   /** Texto del 409 del PUT. No vacío ⇒ aviso rojo aparte, el formulario no lo arregla. */
   protected readonly conflicto = signal('');
+  /**
+   * Si {@link error} viene de GUARDAR (S226, condición 8 de O-interfaz). Solo ese se borra al
+   * editar: habla del formulario que el usuario está corrigiendo. Un fallo de CARGA no lo
+   * arregla editar —el desplegable sigue vacío— y se queda.
+   */
+  private errorDeGuardado = false;
   protected readonly esEdicion = this.editando !== null;
 
   /** Opciones de los desplegables, en el orden en que llegan del backend. */
@@ -191,6 +197,15 @@ export class ActividadForm implements OnInit {
     } else {
       this.plazas.push(this.crearPlaza());
     }
+    // DESPUÉS de precargar, que también emite: editar borra el error de guardado y el 409, que ya
+    // no hablan de lo que hay en pantalla (S226). Cancelada como en generando-dialogo.
+    const cambios = this.form.valueChanges.subscribe(() => {
+      if (this.errorDeGuardado) {
+        this.ponerError('', false);
+      }
+      this.conflicto.set('');
+    });
+    inject(DestroyRef).onDestroy(() => cambios.unsubscribe());
   }
 
   /**
@@ -364,22 +379,22 @@ export class ActividadForm implements OnInit {
     this.asignaturaService.listar().subscribe({
       next: (lista) => this.asignaturas.set(lista),
       error: (err: HttpErrorResponse) =>
-        this.error.set(this.mensaje(err, 'No se pudieron cargar las asignaturas')),
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar las asignaturas'), false),
     });
     this.profesorService.listar().subscribe({
       next: (lista) => this.profesores.set(lista),
       error: (err: HttpErrorResponse) =>
-        this.error.set(this.mensaje(err, 'No se pudieron cargar los profesores')),
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar los profesores'), false),
     });
     this.aulaService.listar().subscribe({
       next: (lista) => this.aulas.set(lista),
       error: (err: HttpErrorResponse) =>
-        this.error.set(this.mensaje(err, 'No se pudieron cargar las aulas')),
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar las aulas'), false),
     });
     this.subgrupoService.listar().subscribe({
       next: (lista) => this.subgrupos.set(lista),
       error: (err: HttpErrorResponse) =>
-        this.error.set(this.mensaje(err, 'No se pudieron cargar los subgrupos')),
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar los subgrupos'), false),
     });
   }
 
@@ -421,7 +436,7 @@ export class ActividadForm implements OnInit {
       return;
     }
     this.guardando.set(true);
-    this.error.set('');
+    this.ponerError('', false);
     this.conflicto.set('');
     const req = this.aRequest();
     const peticion = this.editando
@@ -435,7 +450,7 @@ export class ActividadForm implements OnInit {
         } else {
           // 400 = validación del backend (XOR, I7, I2, I3, código duplicado o no
           // resoluble). El texto que compone es accionable y viaja en `message`.
-          this.error.set(this.mensaje(err, 'No se pudo guardar la actividad'));
+          this.ponerError(this.mensaje(err, 'No se pudo guardar la actividad'), true);
         }
         this.guardando.set(false);
       },
@@ -491,6 +506,12 @@ export class ActividadForm implements OnInit {
   private textoConflicto(err: HttpErrorResponse): string {
     const delServidor = this.mensaje(err, 'Hay datos que dependen de esta actividad');
     return `${delServidor} Borra el horario generado y los bloqueos que dependen de ella antes de editarla.`;
+  }
+
+  /** Fija {@link error} y recuerda si viene de guardar; vacío lo limpia (S226). */
+  private ponerError(texto: string, deGuardado: boolean): void {
+    this.error.set(texto);
+    this.errorDeGuardado = deGuardado;
   }
 
   /** Traduce error Http a texto de usuario. Mismo patrón que O-catálogo, copiado con
