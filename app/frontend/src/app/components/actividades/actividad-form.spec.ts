@@ -1165,4 +1165,68 @@ describe('ActividadForm', () => {
       expect(new Set(valorPlaza('subgrupos') as string[])).toEqual(new Set(['S05', 'S10']));
     });
   });
+
+  /**
+   * Profesores de la plaza con código Y nombre (S227, condición 10 de O-interfaz). ONCE
+   * profesores para que el filtro se pinte (más de UMBRAL_FILTRO); los nueve de relleno se
+   * llaman «Ruiz», que no contiene «Pérez», igual que LEN2.
+   */
+  describe('profesores con código y nombre (S227)', () => {
+    const PROFESORES_NOMBRE = [
+      { id: 1, codigo: 'BYG1', nombreCompleto: 'Pérez, Ana' },
+      { id: 2, codigo: 'LEN2', nombreCompleto: 'Gómez, Luis' },
+      { id: 3, codigo: 'SIN1', nombreCompleto: '' },
+      ...Array.from({ length: 8 }, (_, i) => ({ id: i + 4, codigo: `R0${i + 1}`, nombreCompleto: 'Ruiz' })),
+    ];
+
+    function montarConNombres(): void {
+      ref = { close: vi.fn() };
+      TestBed.configureTestingModule({
+        imports: [ActividadForm],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: DialogRef, useValue: ref },
+          { provide: DIALOG_DATA, useValue: null },
+        ],
+      });
+      fixture = TestBed.createComponent(ActividadForm);
+      http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      http.expectOne('/api/asignaturas').flush(ASIGNATURAS);
+      http.expectOne('/api/profesores').flush(PROFESORES_NOMBRE);
+      http.expectOne('/api/aulas').flush(AULAS);
+      http.expectOne('/api/subgrupos').flush(SUBGRUPOS);
+      fixture.detectChanges();
+    }
+
+    const opcion = (codigo: string): HTMLOptionElement | undefined =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('.actividad-form__profesores')!
+          .options,
+      ).find((o) => o.value === codigo);
+
+    it('T2a la opción de un profesor dice «código — nombre»', () => {
+      montarConNombres();
+      expect(opcion('BYG1')!.textContent!.trim()).toBe('BYG1 — Pérez, Ana');
+    });
+
+    it('T2b el filtro de profesores encuentra por el nombre', async () => {
+      montarConNombres();
+      const caja = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+        'input[aria-label="Filtrar profesores"]',
+      )!;
+      caja.value = 'Pérez';
+      caja.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+
+      expect(opcion('BYG1')).toBeDefined();
+      expect(opcion('LEN2')).toBeUndefined();
+    });
+
+    it('T2c un profesor sin nombre se muestra solo con su código', () => {
+      montarConNombres();
+      expect(opcion('SIN1')!.textContent!.trim()).toBe('SIN1');
+    });
+  });
 });

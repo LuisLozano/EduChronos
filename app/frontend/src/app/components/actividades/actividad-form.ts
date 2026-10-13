@@ -168,6 +168,13 @@ export class ActividadForm implements OnInit {
   /** Accesores del filtro de selectores (S185): código y texto visible de cada opción. */
   protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
   protected readonly textoAula = (a: Aula): string => `${a.codigo} (${a.tipo})`;
+  /**
+   * Texto de un profesor en el selector de la plaza (S227, condición 10): el código solo no
+   * dice quién es. Es también lo que recorre el filtro, así que se encuentra por nombre. La
+   * identidad sigue siendo {@link codigoDe}: el valor que viaja y el de la elegida.
+   */
+  protected readonly textoProfesor = (p: Profesor): string =>
+    p.nombreCompleto?.trim() ? `${p.codigo} — ${p.nombreCompleto}` : p.codigo;
 
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],

@@ -1,6 +1,9 @@
 .actividad-form {
   padding: var(--e5);
   min-width: 26rem;
+  /* S227 (condición 10 de O-interfaz): a 26rem el editor se quedaba en ~464 px y sobraba
+     pantalla. Ancho fijo con tope en el viewport; el min-width sigue mandando si es mayor. */
+  width: min(60rem, calc(100vw - 4rem));
   max-height: 80vh;
   overflow-y: auto;
   background: var(--color-superficie);

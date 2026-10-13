@@ -196,7 +196,7 @@
           #fProfesores
           etiqueta="profesores"
           [opciones]="profesores()"
-          [texto]="codigoDe"
+          [texto]="textoProfesor"
           [codigo]="codigoDe"
           [seleccionados]="seleccionados(fila, 'profesores')"
         />
@@ -212,7 +212,7 @@
               [value]="p.codigo"
               [selected]="seleccionados(fila, 'profesores').includes(p.codigo)"
             >
-              {{ p.codigo }}
+              {{ textoProfesor(p) }}
             </option>
             }
           </select>
