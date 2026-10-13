@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SubgrupoService } from '../../services/subgrupo.service';
 import { Subgrupo } from '../../models/subgrupo.model';
@@ -24,7 +25,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-subgrupo-lista',
-  imports: [CabeceraLista, EstadoLista],
+  imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './subgrupo-lista.html',
   styleUrl: './subgrupo-lista.css',
 })

@@ -5,6 +5,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ActividadLista } from './actividad-lista';
 
 /**
@@ -19,11 +20,34 @@ import { ActividadLista } from './actividad-lista';
  * <p>Los datos discriminan: la primera fila es de UNA plaza y con asignatura propia, la
  * segunda de DOS y con asignatura `null` («varias»). Con una sola fila no se distinguiría
  * un botón habilitado por la retirada de la guarda de uno habilitado siempre.
+ *
+ * <p><b>Búsqueda por pertenencia (S225).</b> El init pide CINCO cosas: las actividades y las
+ * cuatro listas de catálogo. {@link flushLista} las atiende todas por URL, con el catálogo vacío
+ * salvo que el caso pase uno; así los casos de antes no ven ninguna coincidencia exacta y siguen
+ * midiendo la búsqueda por texto. De (15) a (18), lo nuevo: la línea, la búsqueda por texto con
+ * el nombre de la asignatura, `?buscar=` y el aviso si falla un GET de catálogo. La lógica de la
+ * pertenencia la mide su propio spec (`catalogo/pertenencia.spec.ts`).
  */
 describe('ActividadLista', () => {
   let fixture: ComponentFixture<ActividadLista>;
   let http: HttpTestingController;
   let dialog: { open: ReturnType<typeof vi.fn> };
+  /** Parámetros de consulta de la ruta; los lee el init a través del doble de `ActivatedRoute`. */
+  let consulta: Record<string, string>;
+
+  /** Las cuatro listas que el init pide además de las actividades; vacías salvo que el caso diga. */
+  interface CatalogoFixture {
+    profesores?: unknown[];
+    asignaturas?: unknown[];
+    grupos?: unknown[];
+    subgrupos?: unknown[];
+  }
+  const URL_CATALOGO = {
+    profesores: '/api/profesores',
+    asignaturas: '/api/asignaturas',
+    grupos: '/api/grupos',
+    subgrupos: '/api/subgrupos',
+  } as const;
 
   interface Interna {
     nuevo: () => void;
@@ -67,14 +91,38 @@ describe('ActividadLista', () => {
 
   const FILAS = [UNA_PLAZA, DOS_PLAZAS];
 
+  /** Una tercera fila de OTRO profesor, subgrupo y asignatura: la que la pertenencia separa. */
+  const DE_LENGUA = {
+    ...UNA_PLAZA,
+    id: 7,
+    codigo: 'Len-1ºB',
+    asignatura: 'Len',
+    plazas: [{ ...PLAZA, id: 13, codigo: 'Len-1ºB-P1', asignatura: 'Len', profesores: ['LENB'], subgrupos: ['1ºB-Completo'] }],
+  };
+  const TRES_FILAS = [UNA_PLAZA, DOS_PLAZAS, DE_LENGUA];
+  const CATALOGO: CatalogoFixture = {
+    profesores: [{ id: 1, codigo: 'MATA' }, { id: 2, codigo: 'LENB' }],
+    asignaturas: [{ id: 1, codigo: 'Mat', nombreCompleto: 'Matemáticas' }, { id: 2, codigo: 'Len', nombreCompleto: 'Lengua' }],
+    grupos: [{ id: 1, codigo: '1ºA' }, { id: 2, codigo: '1ºB' }],
+    subgrupos: [
+      { id: 1, codigo: '1ºA-Completo', grupos: ['1ºA'] },
+      { id: 2, codigo: '1ºB-Completo', grupos: ['1ºB'] },
+    ],
+  };
+
   beforeEach(() => {
     dialog = { open: vi.fn() };
+    consulta = {};
     TestBed.configureTestingModule({
       imports: [ActividadLista],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: Dialog, useValue: dialog },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { get queryParamMap() { return convertToParamMap(consulta); } } },
+        },
       ],
     });
     fixture = TestBed.createComponent(ActividadLista);
@@ -83,9 +131,25 @@ describe('ActividadLista', () => {
 
   afterEach(() => http.verify());
 
-  function flushLista(filas: unknown[] = []): void {
-    fixture.detectChanges(); // dispara ngOnInit → cargar()
+  function flushLista(filas: unknown[] = [], catalogo: CatalogoFixture = {}): void {
+    fixture.detectChanges(); // dispara ngOnInit → cargar() y cargarCatalogo()
     http.expectOne('/api/actividades').flush(filas);
+    flushCatalogo(catalogo);
+  }
+
+  function flushCatalogo(catalogo: CatalogoFixture = {}): void {
+    for (const clave of Object.keys(URL_CATALOGO) as (keyof CatalogoFixture)[]) {
+      http.expectOne(URL_CATALOGO[clave]).flush(catalogo[clave] ?? []);
+    }
+  }
+
+  function linea(): string | null {
+    return fixture.nativeElement.querySelector('.actividades__pertenencia')?.textContent.trim() ?? null;
+  }
+
+  function codigosVisibles(): string[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('tbody tr td:first-child') as NodeListOf<HTMLElement>)
+      .map((td) => td.textContent!.trim());
   }
 
   /** Hace que el próximo diálogo abierto cierre con el valor dado. */
@@ -118,6 +182,7 @@ describe('ActividadLista', () => {
   it('(3) error de carga cae al degradado con status', async () => {
     fixture.detectChanges();
     http.expectOne('/api/actividades').flush('', { status: 500, statusText: 'Server Error' });
+    flushCatalogo();
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.estado-lista__error').textContent;
     expect(err).toContain('No se pudo cargar');
@@ -329,5 +394,67 @@ describe('ActividadLista', () => {
     expect(sinResultados.textContent).toContain('zzz');
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
+
+  /**
+   * (15) El código EXACTO de un profesor trae sus actividades y la línea lo dice. Por texto,
+   * «lenb» no casa con ninguna fila (la tabla no pinta profesores): la fila que queda solo puede
+   * venir de la pertenencia.
+   */
+  it('(15) un código exacto filtra por pertenencia y la línea nombra la entidad', async () => {
+    flushLista(TRES_FILAS, CATALOGO);
+    await fixture.whenStable();
+    expect(linea()).toBeNull();
+
+    await buscar('lenb');
+
+    expect(codigosVisibles()).toEqual(['Len-1ºB']);
+    expect(linea()).toBe('Actividades del profesor LENB');
+  });
+
+  /**
+   * (16) Sin coincidencia exacta no hay línea, y el texto de la fila lleva el NOMBRE de la
+   * asignatura: «Matemát» no está en ninguna celda (la columna pinta «Mat» o «varias») y aun
+   * así encuentra las dos de Matemáticas, la segunda solo por la asignatura de sus plazas.
+   */
+  it('(16) la búsqueda por texto no pinta línea y encuentra por el nombre de la asignatura', async () => {
+    flushLista(TRES_FILAS, CATALOGO);
+    await fixture.whenStable();
+
+    await buscar('Matemát');
+
+    expect(codigosVisibles()).toEqual(['Mat-1ºA', 'Bloque']);
+    expect(linea()).toBeNull();
+  });
+
+  it('(17) ?buscar= llega a la caja y filtra desde el primer pintado', async () => {
+    consulta = { buscar: '1ºB' };
+    flushLista(TRES_FILAS, CATALOGO);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.cabecera-lista__busqueda').value).toBe('1ºB');
+    expect(codigosVisibles()).toEqual(['Len-1ºB']);
+    expect(linea()).toBe('Actividades del grupo 1ºB');
+  });
+
+  /**
+   * (18) Si falla un GET de catálogo, el forkJoin cancela los otros tres: se casan con
+   * `expectOne` sin atenderlos (no se puede atender una petición cancelada) para que el
+   * `verify()` no los cuente. La lista y la búsqueda por texto siguen; la exacta no.
+   */
+  it('(18) si falla un GET de catálogo se avisa y queda la búsqueda por texto', async () => {
+    fixture.detectChanges();
+    http.expectOne('/api/actividades').flush(TRES_FILAS);
+    http.expectOne(URL_CATALOGO.profesores).flush('', { status: 500, statusText: 'Server Error' });
+    for (const url of [URL_CATALOGO.asignaturas, URL_CATALOGO.grupos, URL_CATALOGO.subgrupos]) {
+      expect(http.expectOne(url).cancelled).toBe(true);
+    }
+    await fixture.whenStable();
+    expect(linea()).toBe('No se pudo cargar la búsqueda por pertenencia; se busca solo por texto.');
+
+    await buscar('Len-1ºB');
+
+    expect(codigosVisibles()).toEqual(['Len-1ºB']);
+    expect(linea()).toBe('No se pudo cargar la búsqueda por pertenencia; se busca solo por texto.');
   });
 });

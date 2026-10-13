@@ -71,6 +71,11 @@
               <button type="button" class="grupos__tutoria accion-compacta" (click)="tutoria(grupo)">
                 Tutoría
               </button>
+              <!-- S225: a las actividades de esta fila, con su código en la búsqueda de Actividades. -->
+              <button type="button" class="grupos__actividades accion-compacta"
+                      routerLink="/configuracion/actividades" [queryParams]="{ buscar: grupo.codigo }">
+                Actividades
+              </button>
             </td>
           </tr>
         }

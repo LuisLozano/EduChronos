@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink, provideRouter } from '@angular/router';
 import { SubgrupoLista } from './subgrupo-lista';
 
 /**
@@ -41,6 +43,7 @@ describe('SubgrupoLista', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Dialog, useValue: dialog },
       ],
     });
@@ -226,5 +229,26 @@ describe('SubgrupoLista', () => {
     expect(sinResultados.textContent).toContain('zzz');
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')).toBeNull();
     expect(fixture.nativeElement.querySelector('tbody tr')).toBeNull();
+  });
+
+  /**
+   * (12) (S225) El último botón de cada fila lleva a Actividades con el código DE ESA FILA en
+   * `?buscar=`. Se lee el `UrlTree` del `RouterLink` de cada botón: mide la ruta, el parámetro y
+   * que cada fila pase el suyo, sin navegar.
+   */
+  it('(12) cada fila acaba con «Actividades», que lleva a Actividades con su código en ?buscar=', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.subgrupos__actividades'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/configuracion/actividades?buscar=CyR-Tec',
+      '/configuracion/actividades?buscar=Agrup-AC',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Actividades');
+      expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
+    }
   });
 });

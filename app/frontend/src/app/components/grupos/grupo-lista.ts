@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { GrupoService } from '../../services/grupo.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
@@ -74,7 +75,7 @@ const ETIQUETAS_TIPO = new Map<string, string>([
  */
 @Component({
   selector: 'app-grupo-lista',
-  imports: [CabeceraLista, EstadoLista],
+  imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './grupo-lista.html',
   styleUrl: './grupo-lista.css',
 })

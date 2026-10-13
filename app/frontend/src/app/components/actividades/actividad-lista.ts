@@ -1,13 +1,20 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ActividadService } from '../../services/actividad.service';
+import { AsignaturaService } from '../../services/asignatura.service';
+import { GrupoService } from '../../services/grupo.service';
+import { ProfesorService } from '../../services/profesor.service';
+import { SubgrupoService } from '../../services/subgrupo.service';
 import { Actividad, ETIQUETA_TIPO_ACTIVIDAD } from '../../models/actividad.model';
 import { ActividadForm } from './actividad-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
+import { Catalogo, casarExacto, lineaPertenencia, nombresDeAsignaturas } from '../../catalogo/pertenencia';
 
 /**
  * Lista del catálogo de actividades: carga en init, tabla con acciones por fila,
@@ -27,6 +34,14 @@ import { coincide } from '../../catalogo/busqueda';
  *
  * <p>El BORRADO se lleva la actividad con todas sus plazas por cascade, y la confirmación
  * lo dice cuando hay más de una.
+ *
+ * <p><b>Búsqueda por pertenencia</b> (S225, condiciones 3 y 4 de O-interfaz). Si lo escrito casa
+ * EXACTAMENTE con el código de un profesor, una asignatura, un grupo o un subgrupo, o con el
+ * nombre de una asignatura, se ven las actividades que les pertenecen y una línea bajo la caja
+ * dice de quién son ({@link casarExacto}). Si no, la búsqueda por texto de siempre, con los
+ * nombres de asignatura añadidos al texto de la fila. Las cuatro listas se cargan UNA vez al
+ * iniciar; {@link cargar} sigue recargando solo las actividades. El término puede llegar en
+ * `?buscar=`, que es lo que ponen los botones «Actividades» de las otras listas.
  */
 @Component({
   selector: 'app-actividad-lista',
@@ -37,6 +52,11 @@ import { coincide } from '../../catalogo/busqueda';
 export class ActividadLista implements OnInit {
   private readonly service = inject(ActividadService);
   private readonly dialog = inject(Dialog);
+  private readonly ruta = inject(ActivatedRoute);
+  private readonly profesores = inject(ProfesorService);
+  private readonly asignaturas = inject(AsignaturaService);
+  private readonly grupos = inject(GrupoService);
+  private readonly subgrupos = inject(SubgrupoService);
 
   protected readonly actividades = signal<Actividad[]>([]);
   /** Texto visible de la columna Tipo (S201). */
@@ -48,6 +68,27 @@ export class ActividadLista implements OnInit {
   /** Texto escrito en la caja de la cabecera. Vacío = se ven todas las filas. */
   protected readonly busqueda = signal('');
 
+  /** Las cuatro listas de la búsqueda por pertenencia; `null` mientras no han llegado. */
+  protected readonly catalogo = signal<Catalogo | null>(null);
+  /** Falló alguno de los cuatro GET: solo queda la búsqueda por texto, y se dice. */
+  protected readonly falloCatalogo = signal(false);
+
+  private readonly nombrePorCodigo = computed(
+    () => new Map((this.catalogo()?.asignaturas ?? []).map((a) => [a.codigo, a.nombreCompleto])),
+  );
+
+  /** Lo que casa exactamente con la búsqueda, o `null`: entonces manda el texto. */
+  protected readonly pertenencia = computed(() => {
+    const catalogo = this.catalogo();
+    return catalogo ? casarExacto(this.busqueda(), catalogo) : null;
+  });
+
+  /** La línea bajo la caja con las entidades que casan; vacía si no casa ninguna. */
+  protected readonly linea = computed(() => {
+    const pertenencia = this.pertenencia();
+    return pertenencia ? lineaPertenencia(pertenencia.entidades) : '';
+  });
+
   /**
    * Texto de UNA fila para buscar en él, compuesto con los campos QUE LA TABLA
    * PINTA y con las mismas expresiones que usa la plantilla. La regla es esa: si
@@ -58,23 +99,53 @@ export class ActividadLista implements OnInit {
    * columna visible por la que no se puede buscar, en silencio. Es la limitación
    * ACEPTADA del Cambio (S124), y el sitio donde mirar cuando alguien diga que la
    * búsqueda «no encuentra» algo que está en pantalla.
+   *
+   * <p><b>Una excepción a la regla, deliberada</b> (S225): los NOMBRES de la asignatura de la
+   * actividad y de las de sus plazas, que la tabla no pinta. La columna enseña el código, y
+   * «Latín» no encontraba «LAT» (S188).
    */
   protected textoFila(actividad: Actividad): string {
     return [actividad.codigo, this.asignaturaDe(actividad), actividad.patronTemporal,
-      actividad.duracionTramos, actividad.repeticionesPorSemana, actividad.plazas.length].join(' ');
+      actividad.duracionTramos, actividad.repeticionesPorSemana, actividad.plazas.length,
+      ...nombresDeAsignaturas(actividad, this.nombrePorCodigo())].join(' ');
   }
 
   /**
-   * Filas que casan con la consulta. `filter` es el método del array, no un
-   * nombre nuestro. Con la búsqueda vacía devuelve todas —{@link coincide} da
-   * `true` sin consulta—, así que la lista arranca completa.
+   * Filas que casan con la consulta: las que pertenecen a lo que casa exactamente o, si no casa
+   * nada, las que casan por texto. `filter` es el método del array, no un nombre nuestro. Con
+   * la búsqueda vacía devuelve todas —{@link coincide} da `true` sin consulta y
+   * {@link casarExacto} da `null`—, así que la lista arranca completa.
    */
-  protected readonly visibles = computed(() =>
-    this.actividades().filter((f) => coincide(this.textoFila(f), this.busqueda())),
-  );
+  protected readonly visibles = computed(() => {
+    const pertenencia = this.pertenencia();
+    return pertenencia
+      ? this.actividades().filter(pertenencia.pertenece)
+      : this.actividades().filter((f) => coincide(this.textoFila(f), this.busqueda()));
+  });
 
   ngOnInit(): void {
+    const buscar = this.ruta.snapshot.queryParamMap.get('buscar');
+    if (buscar) {
+      this.busqueda.set(buscar);
+    }
     this.cargar();
+    this.cargarCatalogo();
+  }
+
+  /**
+   * Las cuatro listas de la pertenencia, una sola vez. Si falla cualquiera, no hay coincidencia
+   * exacta posible: la lista y la búsqueda por texto siguen, y la línea lo avisa.
+   */
+  private cargarCatalogo(): void {
+    forkJoin({
+      profesores: this.profesores.listar(),
+      asignaturas: this.asignaturas.listar(),
+      grupos: this.grupos.listar(),
+      subgrupos: this.subgrupos.listar(),
+    }).subscribe({
+      next: (catalogo) => this.catalogo.set(catalogo),
+      error: () => this.falloCatalogo.set(true),
+    });
   }
 
   protected cargar(): void {

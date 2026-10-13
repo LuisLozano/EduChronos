@@ -66,6 +66,11 @@
         <button type="button" class="profesores__disponibilidad accion-compacta" (click)="disponibilidad(p)">
           Disponibilidad
         </button>
+        <!-- S225: a las actividades de esta fila, con su código en la búsqueda de Actividades. -->
+        <button type="button" class="profesores__actividades accion-compacta"
+                routerLink="/configuracion/actividades" [queryParams]="{ buscar: p.codigo }">
+          Actividades
+        </button>
       </td>
     </tr>
     }

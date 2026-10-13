@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProfesorService } from '../../services/profesor.service';
 import { PrevalidacionService } from '../../services/prevalidacion.service';
@@ -33,7 +34,7 @@ import { textoHoras } from '../../catalogo/horas';
  */
 @Component({
   selector: 'app-profesor-lista',
-  imports: [CabeceraLista, EstadoLista, MinimoGuardias],
+  imports: [CabeceraLista, EstadoLista, MinimoGuardias, RouterLink],
   templateUrl: './profesor-lista.html',
   styleUrl: './profesor-lista.css',
 })

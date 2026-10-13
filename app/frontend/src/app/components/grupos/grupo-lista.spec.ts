@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink, provideRouter } from '@angular/router';
 import { GrupoLista } from './grupo-lista';
 import { TutoriaDialogo } from './tutoria-dialogo';
 
@@ -58,6 +60,7 @@ describe('GrupoLista', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Dialog, useValue: dialog },
       ],
     });
@@ -194,18 +197,18 @@ describe('GrupoLista', () => {
     expect(raiz.textContent).not.toContain('ORDINARIO');
   });
 
-  it('(7) una fila ORDINARIO ofrece las cuatro acciones de ordinario MÁS la de tutoría', async () => {
+  it('(7) una fila ORDINARIO ofrece las cuatro acciones de ordinario MÁS tutoría y actividades', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
     // Igualdad de la lista COMPLETA y EN ORDEN, no un `toContain` por botón: es lo que
     // ata el orden de la celda al de la plantilla. «Replicar» entró en S141 junto a
-    // «PDC», dentro del mismo @if de ordinarios.
+    // «PDC», dentro del mismo @if de ordinarios. «Actividades» (S225) va al final, fuera del @if.
     const textos = acciones(0).map((b) => b.textContent!.trim());
-    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Replicar', 'Tutoría']);
+    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Replicar', 'Tutoría', 'Actividades']);
   });
 
-  it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC ofrece SOLO la de tutoría', async () => {
+  it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC ofrece SOLO tutoría y actividades', async () => {
     flushLista(FILAS_MIXTAS);
     await fixture.whenStable();
 
@@ -213,8 +216,9 @@ describe('GrupoLista', () => {
     // PDC y Replicar acabarían aquí en un error que el usuario no puede resolver
     // (400/409/400/400) y siguen ocultas —si alguien quita el @if, aparecen y este
     // aserto cae—, mientras que
-    // «Tutoría» SÍ se pinta, porque este PDC pudo heredar el tutor de su padre.
-    expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría']);
+    // «Tutoría» SÍ se pinta, porque este PDC pudo heredar el tutor de su padre. «Actividades»
+    // (S225) también: el PDC tiene las suyas, y buscarlo no trae las de su padre.
+    expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría', 'Actividades']);
     // La fila SIGUE pintándose: lo que se oculta son cuatro acciones, no el grupo.
     expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(fixture.nativeElement.textContent).toContain('1ESOADI');
@@ -454,5 +458,26 @@ describe('GrupoLista', () => {
       'No se pudieron cargar las horas.',
     );
     expect(raiz.querySelector('.estado-lista__error')).toBeNull();
+  });
+
+  /**
+   * (23) (S225) El último botón de cada fila lleva a Actividades con el código DE ESA FILA en
+   * `?buscar=`. Se lee el `UrlTree` del `RouterLink` de cada botón: mide la ruta, el parámetro y
+   * que cada fila pase el suyo, sin navegar.
+   */
+  it('(23) cada fila acaba con «Actividades», que lleva a Actividades con su código en ?buscar=', async () => {
+    flushLista(FILAS_MIXTAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.grupos__actividades'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/configuracion/actividades?buscar=1ESOA',
+      '/configuracion/actividades?buscar=1ESOADI',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Actividades');
+      expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
+    }
   });
 });

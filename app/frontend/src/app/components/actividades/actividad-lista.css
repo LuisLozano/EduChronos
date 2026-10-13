@@ -18,3 +18,10 @@
   display: flex;
   gap: var(--e2);
 }
+
+/* S225: la línea de la búsqueda por pertenencia, bajo la caja y con el tono de los
+   mensajes de estado-lista. */
+.actividades__pertenencia {
+  color: var(--color-tinta-suave);
+  margin: var(--e2) 0;
+}

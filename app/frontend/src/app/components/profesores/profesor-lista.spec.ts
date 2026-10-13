@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink, provideRouter } from '@angular/router';
 import { ProfesorLista } from './profesor-lista';
 import { DisponibilidadDialogo } from './disponibilidad/disponibilidad-dialogo';
 
@@ -28,6 +30,7 @@ describe('ProfesorLista', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Dialog, useValue: dialog },
       ],
     });
@@ -369,5 +372,26 @@ describe('ProfesorLista', () => {
     expect(celda(0, GUARDIAS).textContent!.trim()).toBe('2');
     expect(celda(0, GUARDIAS_RECREO).textContent!.trim()).toBe('5');
     expect(celda(1, GUARDIAS_RECREO).textContent!.trim()).toBe('0');
+  });
+
+  /**
+   * (22) (S225) El último botón de cada fila lleva a Actividades con el código DE ESA FILA en
+   * `?buscar=`. Se lee el `UrlTree` del `RouterLink` de cada botón: mide la ruta, el parámetro y
+   * que cada fila pase el suyo, sin navegar.
+   */
+  it('(22) cada fila acaba con «Actividades», que lleva a Actividades con su código en ?buscar=', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.profesores__actividades'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/configuracion/actividades?buscar=MAT8',
+      '/configuracion/actividades?buscar=LEN2',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Actividades');
+      expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
+    }
   });
 });

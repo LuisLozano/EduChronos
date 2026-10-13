@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink, provideRouter } from '@angular/router';
 import { AsignaturaLista } from './asignatura-lista';
 import { AulasAsignaturaDialogo } from './aulas-asignatura-dialogo';
 import { AsignaturaForm } from './asignatura-form';
@@ -29,6 +31,7 @@ describe('AsignaturaLista', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Dialog, useValue: dialog },
       ],
     });
@@ -284,5 +287,23 @@ describe('AsignaturaLista', () => {
 
     // La tabla no pinta aulas: nada que refrescar. http.verify() del afterEach caza el GET.
     http.expectNone('/api/asignaturas');
+  });
+
+  /**
+   * (13) (S225) El último botón de cada fila lleva a Actividades con el código DE ESA FILA en
+   * `?buscar=`. Se lee el `UrlTree` del `RouterLink` de cada botón: mide la ruta, el parámetro y
+   * que cada fila pase el suyo, sin navegar.
+   */
+  it('(13) cada fila acaba con «Actividades», que lleva a Actividades con su código en ?buscar=', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.asignaturas__actividades'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual(FILAS.map((f) => `/configuracion/actividades?buscar=${f.codigo}`));
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Actividades');
+      expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
+    }
   });
 });

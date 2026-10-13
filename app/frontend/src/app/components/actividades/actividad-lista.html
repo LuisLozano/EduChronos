@@ -14,6 +14,14 @@
     (alta)="nuevo()"
   />
 
+  <!-- S225: la búsqueda por pertenencia dice de quién son las filas, o que no pudo cargarse.
+       Va aquí y no en la cabecera, que comparten las siete listas. -->
+  @if (falloCatalogo()) {
+  <p class="actividades__pertenencia" role="status">No se pudo cargar la búsqueda por pertenencia; se busca solo por texto.</p>
+  } @else if (linea()) {
+  <p class="actividades__pertenencia" role="status">{{ linea() }}</p>
+  }
+
   <app-estado-lista
     [cargando]="cargando()"
     [error]="error()"

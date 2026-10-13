@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { Asignatura } from '../../models/asignatura.model';
@@ -17,7 +18,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-asignatura-lista',
-  imports: [CabeceraLista, EstadoLista],
+  imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './asignatura-lista.html',
   styleUrl: './asignatura-lista.css',
 })

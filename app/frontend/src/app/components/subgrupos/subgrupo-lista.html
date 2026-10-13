@@ -48,6 +48,11 @@
               <button type="button" class="subgrupos__borrar accion-destructiva accion-compacta" (click)="borrar(subgrupo)">
                 Borrar
               </button>
+              <!-- S225: a las actividades de esta fila, con su código en la búsqueda de Actividades. -->
+              <button type="button" class="subgrupos__actividades accion-compacta"
+                      routerLink="/configuracion/actividades" [queryParams]="{ buscar: subgrupo.codigo }">
+                Actividades
+              </button>
             </td>
           </tr>
         }
