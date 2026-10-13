@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S222. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S223. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S222). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S223). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10575,3 +10575,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   MATERIAL SIN VERSIONAR, DURADERO. `/home/luis/educhronos-aceptacion/s222/`: `m0/`, `m2/`, `t0/`, `t1/`, `f3/`, `f2/` y `cierre/`, cada una con su `MANIFIESTO.sha256`.
   LIMPIEZA (M1-bis). Candidata: la ficha de `O-guardias-especiales`, frente cerrado en esta sesión. Se aplaza a la sesión de Higiene/Método del coste documental, que mide justo el coste de las fichas y los cierres.
   R4 / COSTURA. `verificar-cierre.py`: rc=0, autoprueba 16 de 16, 0 fallos duros; ventana S221/S222, los dos censos y la crónica en S220 y tablas sin descuadres, por el verificador, con los índices regenerados tras editar (44 y 68 entradas, 0 descuadradas). H3 única (S222). Censo desde `184d393` (copia de `censo-c1.py` de S220 con la base cambiada): 416 tokens antes y 418 después; nacen `C-prueba-guardias-especiales-2026` y `D-biblioteca-sin-titulares` y no se extingue ninguno; de una aparición, 38 antes y 38 después. Higiene/Método: 11 vivas (34 filas, 23 tachadas). Salidas en `s222/cierre/`.
+
+### Sesión 223 — Higiene/Método, coste documental: **`gestion_proyecto.md` CABE ENTERO EN EL PROJECT (DE 638 425 A 197 960 BYTES). `D-coste-documental-por-sesion` SALDADA.**
+  TIPO. Higiene/Método programada por la decisión T del usuario (S221); ningún disparador saltó (11 de 20). Material: `s223/` (m0, f1, f2, f3, cierre).
+  HECHO. F2: `58a14d9` esqueleto de `docs/gestion-historico.md`; `b3a0e9a` el verificador y el índice lo cuentan (autoprueba de 16 a 20, cuatro mutantes muertos) y `regenerar-indice.py` ya no escribe con argumentos. F3: `f737610`, las 22 fichas de §3, las 68 filas tachadas y la deuda cerrada de §4, al histórico, con el censo igual (418 tokens, 0 extintos). F4: reglas en `metodo.md` y §6.
+  CRITERIO (M0). Gestión ≤ 262 144 bytes (197 960) ✔; R4 sin fallos ✔; reglas escritas ✔; Higiene/Método de 11 a 10 ✔; línea base de la medida ✔.
+  DECISIONES. Del usuario: las seis del alcance (fichas y deuda cerrada fuera; un solo histórico; el plan fuera; medida nueva; entrada ≤ 3 500 bytes y ventana de 2; §6 ampliada) y [LAGUNA] en gestión. Del arquitecto: enmiendas 2, 3 y 9 del contraste de F2; §1 y §2 sin condensar; dos filas a mejora futura; defectos como instancias; la línea de M3; la norma 18.
+  DEUDA. Cierra `D-coste-documental-por-sesion`. Notas S222 y S223 en `D-contrato-desde-resumen`.
+  DEFECTOS. Del arquitecto, sin coste: el contrato v1 de F2, cuatro formas sin cita; los guiones de F1 y F2 pidieron salidas largas sin necesidad. De S222: (1) a M3; (2) y (4) a `D-contrato-desde-resumen`; (3) instancia de la norma 10.
+  SUITES. Sin cambios de producto: solver 162, app 927, vitest 763 en 67 ficheros, e2e 3, python 267.
+  CIERRE. `verificar-cierre.py` rc=0, autoprueba 20 de 20, 0 fallos duros, ventana S222/S223, censos y crónica en S221; censo desde `f737610` (copia de `censo-c1.py` con el histórico): 418 tokens antes y después, ninguno nace ni se extingue, 38 de una aparición; Higiene/Método 10 vivas; líneas del commit de cierre sin índice 126; entrada 2 080 bytes; paradas del cierre 0.

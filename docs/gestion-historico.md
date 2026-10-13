@@ -32,8 +32,8 @@
 - L2239 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
 - L2276 — ## 2. Deuda cerrada de §4
 - L2278 — ### Deuda técnica real, colgada de su objetivo
-- L2346 — ### Mejora futura, cuelga y espera
-- L2357 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L2347 — ### Mejora futura, cuelga y espera
+- L2358 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2342,6 +2342,7 @@ terminado (§6).
 | ~~D-leyenda-no-puede-desfasada~~ (la nota del diálogo de disponibilidad manda marcar «No puede» la biblioteca y la convivencia) **CERRADA S222** | `O-guardias-especiales` | — | Nace en S221 (recorrido de la fase 2). `disponibilidad-dialogo.html:151` (S212, sin tocar en S219) contradice la decisión A de S218 y la condición 7, que tratan esas horas como actividades sin alumnos. Texto íntegro en el plan. **CERRADA en S222:** la nota dice que las horas de biblioteca y convivencia se dan de alta en Actividades con tipo «Función»; test (17) reescrito (`2a5b968`). |
 | ~~D-coste-documental-por-sesion~~ (decisión del usuario tras S220) **CERRADA S223** | Transversal, con la sesión de Higiene/Método | — | Fases de una sesión con un solo cierre (primera aplicación en S221; se escribe ampliando «Amplitud de sesión» de M-decisión) y la sesión de Higiene/Método siguiente al cierre de `O-guardias-especiales`, dedicada al coste documental, con la medida de anclas y paradas por cierre en S219–S221. Texto íntegro en el plan. **CERRADA en S223:** (a) en «Amplitud de sesión» de M-decisión; (b) las fichas de §3 y la deuda cerrada de §4, a `gestion-historico.md` (`f737610`). |
 | ~~D-tabla-configuracion-estrecha~~ (la tabla de profesores se parte en dos líneas por fila aunque sobre pantalla) **CERRADA S224** | `O-interfaz` (S219) | — | Nace en S219, en el M4 de `C-dato-guardias-especiales`: el contenido de Configuración está limitado a 60rem (`configuracion.css:72`), y con siete columnas las filas de profesores se parten en dos líneas y las acciones quedan desalineadas, con pantalla de sobra. MEJORA FUTURA de presentación. Sin medir: qué otras listas lo sufren y si el arreglo es el límite o las columnas. Hermana de `D-aviso-largo-se-parte`. Texto íntegro en el plan. **CERRADA en S224** (`C-anchos-legibles`, `c049a6f` y `06b7e8a`): `configuracion.css` sin el límite de 60rem y «Horas» sin partirse; a 1920 px, 0 filas partidas en los 8 destinos y ninguna tabla más ancha que su contenedor (`s224/f2/c1/medir`). |
+| ~~D-entidad-sin-actividades~~ (no hay camino de un profesor o una asignatura a sus actividades, y el 409 de borrado no dice qué plazas lo impiden) **CERRADA S225** | `O-interfaz` | — | Nace en S182, ensayo (T5): sin la ayuda del ensayo no había forma de saber qué cuatro actividades reasignar. Variante más barata: que el 409 liste las plazas. Texto íntegro en el plan. S187: reaparece en el ensayo sobre `v0.2.0` (T5); sin ayuda, el rodeo fue volver al curso archivado y mirar en su horario las clases de BYG1 (pista 4). S188: en la demo (T5) usó el PDF de grupos para saber qué daba BYG1, y pidió navegar desde profesor, asignatura, grupo y subgrupo a sus actividades. **S190:** sede de la replanificación de H5: `O-interfaz`. **S225:** CERRADA con `C-actividades-por-pertenencia` (`3566e39`, `d247072`). |
 
 ### Mejora futura, cuelga y espera
 | Deuda(s) | Objetivo | Nota |
