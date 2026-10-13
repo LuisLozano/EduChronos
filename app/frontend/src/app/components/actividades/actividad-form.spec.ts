@@ -1004,7 +1004,7 @@ describe('ActividadForm', () => {
     expect(instancia().plazas.at(0).controls['profesores'].value).toEqual(['MATA', 'MAT6']);
   });
 
-  it('(16) un guardado correcto cierra el diálogo con true', async () => {
+  it('(16) un guardado correcto cierra el diálogo con el id que devuelve el servidor', async () => {
     montar(null);
     const inst = instancia();
     inst.form.patchValue({ codigo: 'Mat-1ºA' });
@@ -1013,7 +1013,16 @@ describe('ActividadForm', () => {
 
     http.expectOne('/api/actividades').flush(ACTIVIDAD_FIJA);
     await fixture.whenStable();
-    expect(ref.close).toHaveBeenCalledWith(true);
+    expect(ref.close).toHaveBeenCalledWith({ id: 7 });
+  });
+
+  it('(16b) en la edición también cierra con el id de la actividad guardada', async () => {
+    montar(ACTIVIDAD_FIJA);
+    instancia().guardar();
+
+    http.expectOne('/api/actividades/7').flush(ACTIVIDAD_FIJA);
+    await fixture.whenStable();
+    expect(ref.close).toHaveBeenCalledWith({ id: 7 });
   });
 
   /**

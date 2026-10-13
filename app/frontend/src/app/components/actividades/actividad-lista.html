@@ -22,6 +22,12 @@
   <p class="actividades__pertenencia" role="status">{{ linea() }}</p>
   }
 
+  <!-- S227: la actividad recién guardada ya no casa con la búsqueda; sin esto desaparecía
+       en silencio. Informa, no interrumpe: role="status", como la línea de arriba. -->
+  @if (aviso(); as texto) {
+  <p class="actividades__aviso" role="status">{{ texto }}</p>
+  }
+
   <app-estado-lista
     [cargando]="cargando()"
     [error]="error()"

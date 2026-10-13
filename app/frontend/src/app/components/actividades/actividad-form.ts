@@ -70,6 +70,12 @@ function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
  *  función, «Sin aula» (S201). Se envía igual en los dos casos. */
 export type ModoAula = 'FIJA' | 'CANDIDATAS' | 'NINGUNA';
 
+/** Con qué cierra el diálogo un guardado correcto (S227): el id de la actividad guardada, para
+ *  que la lista pueda decir si ha dejado de cumplir su búsqueda. Cancelar cierra sin valor. */
+export interface ActividadGuardada {
+  id: number;
+}
+
 /**
  * Controles de UNA plaza. Alias al estilo de `FilaTramo` (molde `Jornada`), para que el
  * `FormArray` esté tipado.
@@ -138,7 +144,7 @@ export class ActividadForm implements OnInit {
   private readonly profesorService = inject(ProfesorService);
   private readonly subgrupoService = inject(SubgrupoService);
   private readonly fb = inject(FormBuilder);
-  protected readonly ref = inject<DialogRef<boolean>>(DialogRef);
+  protected readonly ref = inject<DialogRef<ActividadGuardada>>(DialogRef);
   private readonly editando = inject<Actividad | null>(DIALOG_DATA);
 
   protected readonly guardando = signal(false);
@@ -450,7 +456,7 @@ export class ActividadForm implements OnInit {
       ? this.service.editar(this.editando.id, req)
       : this.service.crear(req);
     peticion.subscribe({
-      next: () => this.ref.close(true),
+      next: (guardada) => this.ref.close({ id: guardada.id }),
       error: (err: HttpErrorResponse) => {
         if (err?.status === 409) {
           this.conflicto.set(this.textoConflicto(err));

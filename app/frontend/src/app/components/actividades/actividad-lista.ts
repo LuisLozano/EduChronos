@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, linkedSignal, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -9,7 +9,7 @@ import { GrupoService } from '../../services/grupo.service';
 import { ProfesorService } from '../../services/profesor.service';
 import { SubgrupoService } from '../../services/subgrupo.service';
 import { Actividad, ETIQUETA_TIPO_ACTIVIDAD } from '../../models/actividad.model';
-import { ActividadForm } from './actividad-form';
+import { ActividadForm, ActividadGuardada } from './actividad-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
@@ -67,6 +67,16 @@ export class ActividadLista implements OnInit {
 
   /** Texto escrito en la caja de la cabecera. Vacío = se ven todas las filas. */
   protected readonly busqueda = signal('');
+
+  /**
+   * Aviso tras guardar (S227, condición 10 de O-interfaz): la actividad guardada ya no casa con
+   * la búsqueda y desaparecería sin explicación. `linkedSignal` de la búsqueda: cambiarla lo
+   * borra; abrir otra vez el editor también ({@link abrirForm}). `null` = sin aviso.
+   */
+  protected readonly aviso = linkedSignal<string, string | null>({
+    source: this.busqueda,
+    computation: () => null,
+  });
 
   /** Las cuatro listas de la búsqueda por pertenencia; `null` mientras no han llegado. */
   protected readonly catalogo = signal<Catalogo | null>(null);
@@ -148,13 +158,17 @@ export class ActividadLista implements OnInit {
     });
   }
 
-  protected cargar(): void {
+  /** Pide la lista. Con `guardada`, al llegar decide el aviso sobre la lista ya filtrada. */
+  protected cargar(guardada?: ActividadGuardada): void {
     this.cargando.set(true);
     this.error.set('');
     this.service.listar().subscribe({
       next: (lista) => {
         this.actividades.set(lista);
         this.cargando.set(false);
+        if (guardada) {
+          this.aviso.set(this.avisoTrasGuardar(guardada.id));
+        }
       },
       error: (err: HttpErrorResponse) => {
         this.error.set(this.mensaje(err, 'No se pudo cargar la lista de actividades'));
@@ -182,16 +196,33 @@ export class ActividadLista implements OnInit {
     this.abrirForm(actividad);
   }
 
-  /** Abre el formulario en diálogo; recarga si se guardó (cierre con `true`). */
+  /** Abre el formulario en diálogo; recarga si se guardó (cierre con el id de la guardada). */
   private abrirForm(actividad: Actividad | null): void {
+    this.aviso.set(null);
     this.dialog
-      .open<boolean, Actividad | null>(ActividadForm, { data: actividad })
-      .closed.subscribe((guardado) => {
-        // backdrop y Escape emiten undefined: solo `true` estricto recarga.
-        if (guardado === true) {
-          this.cargar();
+      .open<ActividadGuardada, Actividad | null>(ActividadForm, { data: actividad })
+      .closed.subscribe((guardada) => {
+        // backdrop, Escape y Cancelar emiten undefined: solo un cierre con id recarga.
+        if (guardada?.id !== undefined) {
+          this.cargar(guardada);
         }
       });
+  }
+
+  /**
+   * El aviso de una actividad recién guardada: solo si la actividad está en la lista completa
+   * pero no en la filtrada. Si no está en ninguna —otra pestaña la borró—, no hay nada que
+   * explicar.
+   */
+  private avisoTrasGuardar(id: number): string | null {
+    const busqueda = this.busqueda();
+    // Sin búsqueda la filtrada ES la completa (pertenencia.ts:65-67, busqueda.ts:88-94): la
+    // condición de abajo basta y no hace falta preguntar si hay búsqueda (M3c, S227).
+    const guardada = this.actividades().find((a) => a.id === id);
+    if (!guardada || this.visibles().some((a) => a.id === id)) {
+      return null;
+    }
+    return `Actividad «${guardada.codigo}» guardada. No aparece en la lista porque no corresponde a «${busqueda}».`;
   }
 
   protected borrar(actividad: Actividad): void {

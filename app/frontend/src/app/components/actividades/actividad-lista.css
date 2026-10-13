@@ -25,3 +25,10 @@
   color: var(--color-tinta-suave);
   margin: var(--e2) 0;
 }
+
+/* S227: el aviso tras guardar una actividad que ya no casa con la búsqueda. Mismo tono que
+   la línea de pertenencia. */
+.actividades__aviso {
+  color: var(--color-tinta-suave);
+  margin: var(--e2) 0;
+}

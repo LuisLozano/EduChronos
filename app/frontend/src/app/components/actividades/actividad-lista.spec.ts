@@ -153,9 +153,11 @@ describe('ActividadLista', () => {
   }
 
   /** Hace que el próximo diálogo abierto cierre con el valor dado. */
-  function dialogoDevuelve(valor: boolean | undefined): void {
+  /** Cierre simulado del diálogo: `true` (confirmar borrado), `{ id }` (editor que guardó,
+   *  S227) o `undefined` (backdrop, Escape, Cancelar). */
+  function dialogoDevuelve(valor: boolean | { id: number } | undefined): void {
     dialog.open.mockReturnValue({
-      closed: { subscribe: (fn: (v: boolean | undefined) => void) => fn(valor) },
+      closed: { subscribe: (fn: (v: boolean | { id: number } | undefined) => void) => fn(valor) },
     });
   }
 
@@ -309,7 +311,7 @@ describe('ActividadLista', () => {
     await fixture.whenStable();
     const inst = fixture.componentInstance as unknown as Interna;
 
-    dialogoDevuelve(true);
+    dialogoDevuelve({ id: 5 });
     inst.nuevo();
     http.expectOne('/api/actividades').flush([UNA_PLAZA]); // recargó
     await fixture.whenStable();
@@ -456,5 +458,93 @@ describe('ActividadLista', () => {
 
     expect(codigosVisibles()).toEqual(['Len-1ºB']);
     expect(linea()).toBe('No se pudo cargar la búsqueda por pertenencia; se busca solo por texto.');
+  });
+
+  /**
+   * Aviso tras guardar con la lista filtrada (S227, condición 10 de O-interfaz). «BYG1» es un
+   * profesor del catálogo, así que la búsqueda va por PERTENENCIA: la actividad deja de casar
+   * cuando el guardado le quita a BYG1 de la plaza.
+   */
+  describe('aviso tras guardar con búsqueda (S227)', () => {
+    const CATALOGO_BYG: CatalogoFixture = {
+      ...CATALOGO,
+      profesores: [...(CATALOGO.profesores ?? []), { id: 3, codigo: 'BYG1' }],
+    };
+    const CON_BYG = { ...UNA_PLAZA, plazas: [{ ...PLAZA, profesores: ['BYG1'] }] };
+    const TEXTO_AVISO =
+      'Actividad «Mat-1ºA» guardada. No aparece en la lista porque no corresponde a «BYG1».';
+
+    function aviso(): string | null {
+      return fixture.nativeElement.querySelector('.actividades__aviso')?.textContent.trim() ?? null;
+    }
+
+    /** Lista con CON_BYG y la de Lengua, búsqueda «BYG1» puesta: solo se ve Mat-1ºA. */
+    async function filtradaPorByg(): Promise<Interna> {
+      flushLista([CON_BYG, DE_LENGUA], CATALOGO_BYG);
+      await fixture.whenStable();
+      await buscar('BYG1');
+      expect(codigosVisibles()).toEqual(['Mat-1ºA']);
+      return fixture.componentInstance as unknown as Interna;
+    }
+
+    /** Guarda CON_BYG en el editor y responde a la recarga con `recarga`. */
+    async function guardarYRecargar(inst: Interna, recarga: unknown[]): Promise<void> {
+      dialogoDevuelve({ id: 5 });
+      inst.editar(CON_BYG);
+      http.expectOne('/api/actividades').flush(recarga);
+      await fixture.whenStable();
+    }
+
+    it('T3a con búsqueda, la guardada que deja de casar da el aviso con código y búsqueda', async () => {
+      const inst = await filtradaPorByg();
+      await guardarYRecargar(inst, [UNA_PLAZA, DE_LENGUA]); // UNA_PLAZA: profesor MATA
+
+      expect(codigosVisibles()).toEqual([]);
+      expect(aviso()).toBe(TEXTO_AVISO);
+    });
+
+    it('T3b con búsqueda, la guardada que sigue casando no da aviso', async () => {
+      const inst = await filtradaPorByg();
+      await guardarYRecargar(inst, [CON_BYG, DE_LENGUA]);
+
+      expect(codigosVisibles()).toEqual(['Mat-1ºA']);
+      expect(aviso()).toBeNull();
+    });
+
+    it('T3c sin búsqueda, guardar no da aviso', async () => {
+      flushLista([CON_BYG, DE_LENGUA], CATALOGO_BYG);
+      await fixture.whenStable();
+      const inst = fixture.componentInstance as unknown as Interna;
+      await guardarYRecargar(inst, [UNA_PLAZA, DE_LENGUA]);
+
+      expect(codigosVisibles()).toEqual(['Mat-1ºA', 'Len-1ºB']);
+      expect(aviso()).toBeNull();
+    });
+
+    it('T3d con el aviso a la vista, cambiar la búsqueda lo quita', async () => {
+      const inst = await filtradaPorByg();
+      await guardarYRecargar(inst, [UNA_PLAZA, DE_LENGUA]);
+      expect(aviso()).toBe(TEXTO_AVISO);
+
+      await buscar('MATA');
+
+      expect(codigosVisibles()).toEqual(['Mat-1ºA']);
+      expect(aviso()).toBeNull();
+    });
+
+    it('T3e cancelar el editor no da aviso, y abrirlo otra vez borra el que hubiera', async () => {
+      const inst = await filtradaPorByg();
+      dialogoDevuelve(undefined);
+      inst.editar(CON_BYG); // sin GET: el verify() del afterEach lo pondría rojo
+      await fixture.whenStable();
+      expect(aviso()).toBeNull();
+
+      await guardarYRecargar(inst, [UNA_PLAZA, DE_LENGUA]);
+      expect(aviso()).toBe(TEXTO_AVISO);
+      dialogoDevuelve(undefined);
+      inst.editar(UNA_PLAZA);
+      await fixture.whenStable();
+      expect(aviso()).toBeNull();
+    });
   });
 });
