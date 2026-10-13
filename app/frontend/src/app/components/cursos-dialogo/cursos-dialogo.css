@@ -114,6 +114,14 @@
   margin: var(--e2) 0;
 }
 
+/* S227: el error de un campo, bajo el control. Copia de `.jornada__error-campo`; nombre propio
+   porque `__error` ya es el aviso del servidor. */
+.cursos-dialogo__error-campo {
+  display: block;
+  color: var(--color-error);
+  font-size: var(--tam-s);
+}
+
 /* El motivo de que «Duplicar curso…» esté apagado. Va dentro de la fila de acciones y
    ocupa todo el ancho para quedar ENCIMA del botón que explica, no a su lado. */
 .cursos-dialogo__motivo {

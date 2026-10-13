@@ -106,6 +106,14 @@
               class="cursos-dialogo__input"
               autocomplete="off"
             />
+            <!-- S227 (condición 11): sin esto, «Duplicar» con el campo mal no hacía nada visible.
+                 `__error-campo` y no `__error`, que es el del servidor (mismo caso que jornada). -->
+            @if (form.controls.nombreNuevo.touched && form.controls.nombreNuevo.hasError('required')) {
+              <span class="cursos-dialogo__error-campo">Escribe el curso, por ejemplo 2027/2028.</span>
+            }
+            @if (form.controls.nombreNuevo.touched && form.controls.nombreNuevo.hasError('pattern')) {
+              <span class="cursos-dialogo__error-campo">Escríbelo con la forma 2027/2028: dos años separados por una barra.</span>
+            }
             <p class="cursos-dialogo__ayuda">Dos años consecutivos, como 2026/2027.</p>
           </div>
 
@@ -124,6 +132,12 @@
                 class="cursos-dialogo__input"
                 autocomplete="off"
               />
+              @if (form.controls.nombreActual.touched && form.controls.nombreActual.hasError('required')) {
+                <span class="cursos-dialogo__error-campo">Escribe el curso, por ejemplo 2027/2028.</span>
+              }
+              @if (form.controls.nombreActual.touched && form.controls.nombreActual.hasError('pattern')) {
+                <span class="cursos-dialogo__error-campo">Escríbelo con la forma 2027/2028: dos años separados por una barra.</span>
+              }
               <p class="cursos-dialogo__ayuda">
                 Este curso no tiene nombre guardado. Es el que quedará archivado.
               </p>

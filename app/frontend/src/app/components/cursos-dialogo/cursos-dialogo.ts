@@ -112,10 +112,18 @@ export class CursosDialogo implements OnInit {
    * <p>El patrón repite la forma que el backend exige y NO la regla entera: que los dos años
    * sean consecutivos lo comprueba él, y duplicarlo aquí daría dos sitios donde equivocarse.
    * Lo que esta validación compra es no gastar una ida y vuelta por un «2026-2027».
+   *
+   * <p>`nombreActual` lleva la MISMA validación cuando se pregunta y nace DESHABILITADO cuando
+   * no (S227, condición 11): un control deshabilitado no invalida el formulario, y el cuerpo no
+   * cambia porque {@link duplicar} sólo lo manda si {@link pideNombreActual}. La decisión es
+   * fija: el curso es el `DIALOG_DATA` y no cambia mientras el diálogo vive.
    */
   protected readonly form = this.fb.nonNullable.group({
     nombreNuevo: ['', [Validators.required, Validators.pattern(FORMA_CURSO)]],
-    nombreActual: [''],
+    nombreActual: [
+      { value: '', disabled: !this.pideNombreActual() },
+      this.pideNombreActual() ? [Validators.required, Validators.pattern(FORMA_CURSO)] : [],
+    ],
   });
 
   ngOnInit(): void {

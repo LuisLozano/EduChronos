@@ -266,22 +266,105 @@ describe('CursosDialogo', () => {
     expect(recargas).toBe(1);
   });
 
-  it('(10) una forma inválida no llega a salir por la red', async () => {
-    const fixture = await montar(ABIERTO_ACTIVO, [
-      fila('curso-2026-2027.db', '2026/2027', false, true),
-    ]);
-    await irADuplicar(fixture);
+  // ───────────────────────────────────────────── mensajes de campo (S227, condición 11)
 
-    const campo = html(fixture).querySelector('#curso-nuevo') as HTMLInputElement;
-    campo.value = '2026-2027';
+  const OBLIGATORIO = 'Escribe el curso, por ejemplo 2027/2028.';
+  const FORMA = 'Escríbelo con la forma 2027/2028: dos años separados por una barra.';
+
+  /** Los mensajes de error que hay bajo el campo `id`, dentro de su mismo bloque. */
+  function erroresDe(fixture: { nativeElement: unknown }, id: string): string[] {
+    const campo = html(fixture).querySelector(`#${id}`)!.closest('.cursos-dialogo__campo')!;
+    return Array.from(campo.querySelectorAll('.cursos-dialogo__error-campo')).map((e) =>
+      e.textContent!.trim(),
+    );
+  }
+
+  function escribir(fixture: { nativeElement: unknown; detectChanges: () => void }, id: string, valor: string) {
+    const campo = html(fixture).querySelector(`#${id}`) as HTMLInputElement;
+    campo.value = valor;
     campo.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+  }
+
+  function pulsarDuplicar(fixture: { nativeElement: unknown; detectChanges: () => void }) {
     (html(fixture).querySelector('.cursos-dialogo__crear') as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
+  it('(10) T4a «Curso nuevo» vacío: no sale por la red y el campo dice que falta', async () => {
+    const fixture = await montar(SIN_NOMBRE, [fila('educhronos.db', null, false, true)]);
+    await irADuplicar(fixture);
+    escribir(fixture, 'curso-actual', '2026/2027');
+    // Sin tocar todavía: ningún mensaje. Es lo que caza un mensaje pintado siempre.
+    expect(erroresDe(fixture, 'curso-nuevo')).toEqual([]);
+
+    pulsarDuplicar(fixture);
 
     // Ni una petición: el afterEach de http.verify() lo confirmaría igual, pero el aserto
     // explícito dice POR QUÉ no la hay.
     http.expectNone('/api/cursos');
     expect(recargas).toBe(0);
+    expect(erroresDe(fixture, 'curso-nuevo')).toEqual([OBLIGATORIO]);
+    expect(erroresDe(fixture, 'curso-actual')).toEqual([]);
+  });
+
+  it('T4b «Curso nuevo» con guion: no sale por la red y el campo dice la forma', async () => {
+    const fixture = await montar(ABIERTO_ACTIVO, [
+      fila('curso-2026-2027.db', '2026/2027', false, true),
+    ]);
+    await irADuplicar(fixture);
+    escribir(fixture, 'curso-nuevo', '2027-2028');
+
+    pulsarDuplicar(fixture);
+
+    http.expectNone('/api/cursos');
+    expect(recargas).toBe(0);
+    expect(erroresDe(fixture, 'curso-nuevo')).toEqual([FORMA]);
+  });
+
+  it('T4c «Nombre del curso actual» a la vista y vacío: no sale y ESE campo dice que falta', async () => {
+    const fixture = await montar(SIN_NOMBRE, [fila('educhronos.db', null, false, true)]);
+    await irADuplicar(fixture);
+    escribir(fixture, 'curso-nuevo', '2027/2028');
+
+    pulsarDuplicar(fixture);
+
+    http.expectNone('/api/cursos');
+    expect(recargas).toBe(0);
+    expect(erroresDe(fixture, 'curso-actual')).toEqual([OBLIGATORIO]);
+    expect(erroresDe(fixture, 'curso-nuevo')).toEqual([]);
+  });
+
+  it('T4d los dos válidos: sale el POST con los dos nombres', async () => {
+    const fixture = await montar(SIN_NOMBRE, [fila('educhronos.db', null, false, true)]);
+    await irADuplicar(fixture);
+    escribir(fixture, 'curso-actual', '2026/2027');
+    escribir(fixture, 'curso-nuevo', '2027/2028');
+
+    pulsarDuplicar(fixture);
+
+    const req = http.expectOne('/api/cursos');
+    expect(req.request.body).toEqual({ nombreNuevo: '2027/2028', nombreActual: '2026/2027' });
+    req.flush({ nombre: '2027/2028', fichero: 'curso-2027-2028.db' });
+    await fixture.whenStable();
+    expect(recargas).toBe(1);
+  });
+
+  it('T4e con la base ya nombrada el campo oculto no bloquea: sale el POST sin nombreActual', async () => {
+    const fixture = await montar(ABIERTO_ACTIVO, [
+      fila('curso-2026-2027.db', '2026/2027', false, true),
+    ]);
+    await irADuplicar(fixture);
+    expect(html(fixture).querySelector('#curso-actual')).toBeNull();
+    escribir(fixture, 'curso-nuevo', '2028/2029');
+
+    pulsarDuplicar(fixture);
+
+    const req = http.expectOne('/api/cursos');
+    expect(req.request.body).toEqual({ nombreNuevo: '2028/2029' });
+    req.flush({ nombre: '2028/2029', fichero: 'curso-2028-2029.db' });
+    await fixture.whenStable();
+    expect(recargas).toBe(1);
   });
 
   it('(11) duplicar con éxito RECARGA', async () => {
