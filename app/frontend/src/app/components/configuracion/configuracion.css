@@ -64,13 +64,12 @@
   overflow-y: auto;
 }
 
-/* El límite de ancho heredado de la pantalla única, ahora donde corresponde: el
-   contenido del destino. Sin padding vertical a propósito —cada lista trae el suyo—,
-   para que una cabecera `.cabecera-lista-fija` quede pegada al borde del panel sin
-   dejar una franja por la que se vea pasar el contenido. */
+/* El contenido del destino ocupa todo el ancho del panel. El límite de 60rem se quitó
+   en S224 (O-interfaz, condición 1): partía las filas de Profesores y desbordaba
+   Actividades. Sin padding vertical a propósito —cada lista trae el suyo—, para que una
+   cabecera `.cabecera-lista-fija` quede pegada al borde del panel sin dejar una franja
+   por la que se vea pasar el contenido. */
 .configuracion__contenido {
-  max-width: 60rem;
-  margin: 0 auto;
   padding: 0 var(--e4);
   box-sizing: border-box;
 }

@@ -76,6 +76,7 @@
 
 .aviso-entrada {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--e2);
 }
 
@@ -91,6 +92,14 @@
 
 .aviso-entrada .regla {
   font-weight: var(--peso-medio);
+}
+
+.aviso-entrada .cuenta {
+  white-space: nowrap;
+}
+
+.aviso-entrada .descripcion {
+  flex-basis: 100%;
 }
 
 /* Adicional, SOLO en las entradas ERROR: refuerza la severidad sin sustituir a
