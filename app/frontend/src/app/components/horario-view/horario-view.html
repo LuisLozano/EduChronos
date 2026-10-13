@@ -36,6 +36,12 @@
       }
     </select>
   </label>
+  <!-- S226: la entidad que pidió la URL no está en este horario. Junto al selector, con el estilo
+       de .aviso-ajuste (no ha fallado nada) y su modificador propio, como `aviso aviso-guardias`.
+       Sin role="alert": informa, no interrumpe. -->
+  @if (avisoEntidad(); as msg) {
+  <p class="aviso-ajuste aviso-entidad">{{ msg }}</p>
+  }
   }
 
   <button

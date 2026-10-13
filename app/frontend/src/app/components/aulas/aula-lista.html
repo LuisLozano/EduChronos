@@ -56,6 +56,11 @@
               <button type="button" class="aulas__borrar accion-destructiva accion-compacta" (click)="borrar(a)">
                 Borrar
               </button>
+              <!-- S226: al horario de esta fila, en la vista de aula. -->
+              <button type="button" class="aulas__horario accion-compacta"
+                      routerLink="/horario" [queryParams]="{ vista: 'aula', entidad: a.codigo }">
+                Horario
+              </button>
             </td>
           </tr>
         }

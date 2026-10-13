@@ -77,6 +77,12 @@
   font-weight: var(--peso-medio);
 }
 
+/* La entidad pedida por la URL no está en el horario (S226). Vive en la fila de .controles: sin
+   el margen de párrafo, para no estirar la cabecera que D9 dejó en una línea. */
+.aviso-entidad {
+  margin: 0;
+}
+
 /* Persistente mientras haya pines: el horario pintado NO los refleja todavía. */
 .aviso {
   padding: var(--e2) var(--e2);

@@ -394,4 +394,24 @@ describe('ProfesorLista', () => {
       expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
     }
   });
+
+  /**
+   * (23) (S226, condición 9 de O-interfaz) «Horario» lleva al horario en la vista de profesor, con el
+   * código DE ESA FILA en `?entidad=`. Mismo método que el botón «Actividades»: el `UrlTree` del
+   * `RouterLink` de cada botón, sin navegar.
+   */
+  it('(23) cada fila tiene «Horario», que abre su horario en la vista de profesor', async () => {
+    flushLista(FILAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.profesores__horario'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/horario?vista=profesor&entidad=MAT8',
+      '/horario?vista=profesor&entidad=LEN2',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Horario');
+    }
+  });
 });

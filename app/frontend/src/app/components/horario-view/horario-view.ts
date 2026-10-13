@@ -271,7 +271,22 @@ export class HorarioView implements OnDestroy {
    */
   private idCargado: number | null = null;
 
+  /**
+   * Vista y entidad que trae la URL (`?vista=…&entidad=…`, S226, condición 9 de O-interfaz): el
+   * botón «Horario» de las listas de profesores, grupos y aulas. Se lee UNA vez al construirse y se
+   * aplica, y consume, la primera vez que llega una proyección (ver {@link aplicarSeleccion}).
+   * Sin parámetros queda `null` y todo es como antes.
+   */
+  private seleccionPendiente: { vista: string | null; entidad: string | null } | null = null;
+
+  /** La entidad pedida por la URL no está en el horario: se dice cuál se muestra en su lugar. */
+  protected readonly avisoEntidad = signal<string | null>(null);
+
   constructor() {
+    const consulta = this.route.snapshot.queryParamMap;
+    if (consulta.has('vista') || consulta.has('entidad')) {
+      this.seleccionPendiente = { vista: consulta.get('vista'), entidad: consulta.get('entidad') };
+    }
     this.route.paramMap.subscribe((pm) => {
       const id = pm.get('id');
       if (id === null) this.resolverVigente();
@@ -378,10 +393,45 @@ export class HorarioView implements OnDestroy {
     this.service.getProyeccion(id).subscribe({
       next: (p) => {
         this.proyeccion.set(p);
-        this.entidad.set(entidadesDeVista(p.sesiones, this.vista(), p.guardias)[0] ?? '');
+        this.aplicarSeleccion(p);
       },
       error: (err) => this.fallarProyeccion(id, err),
     });
+  }
+
+  /**
+   * Fija vista y entidad al llegar una proyección. Sin selección pendiente, la primera entidad de
+   * la vista actual, como siempre. Con ella (S226), una sola vez:
+   * <ul>
+   *   <li>vista ausente o que no es 'grupo', 'profesor' ni 'aula' → se ignora, como siempre;</li>
+   *   <li>vista válida sin entidad → esa vista y su primera entidad;</li>
+   *   <li>entidad que está en el horario → esa vista y esa entidad;</li>
+   *   <li>entidad que no está → la primera, y {@link avisoEntidad} dice cuál se pidió y cuál se
+   *       muestra.</li>
+   * </ul>
+   */
+  private aplicarSeleccion(p: HorarioProyeccion): void {
+    const pendiente = this.seleccionPendiente;
+    this.seleccionPendiente = null;
+    const vista = pendiente?.vista;
+    if (!pendiente || (vista !== 'grupo' && vista !== 'profesor' && vista !== 'aula')) {
+      this.entidad.set(entidadesDeVista(p.sesiones, this.vista(), p.guardias)[0] ?? '');
+      return;
+    }
+    this.vista.set(vista);
+    const entidades = entidadesDeVista(p.sesiones, vista, p.guardias);
+    const primera = entidades[0] ?? '';
+    const pedida = pendiente.entidad;
+    if (!pedida || entidades.includes(pedida)) {
+      this.entidad.set(pedida || primera);
+      return;
+    }
+    this.entidad.set(primera);
+    this.avisoEntidad.set(
+      primera
+        ? `«${pedida}» no tiene clases en este horario; se muestra «${primera}».`
+        : `«${pedida}» no tiene clases en este horario.`,
+    );
   }
 
   /**
@@ -402,7 +452,8 @@ export class HorarioView implements OnDestroy {
    * {@link cargar} y sus mismos fallos:
    * <ul>
    *   <li>el diagnóstico, por {@link cargarDiagnostico}, que sustituye al anterior y, si
-   *       falla, rellena {@link errorDiagnostico} con su texto de siempre;
+   *       falla, rellena {@link errorDiagnostico} con el `message` del servidor o su texto de
+   *       siempre (S226);
    *   <li>la proyección, por el mismo `getProyeccion`, de la que se toman SOLO las guardias:
    *       las sesiones ya vienen de la respuesta del PUT ({@link aplicarAjuste}). Si falla,
    *       {@link fallarProyeccion}, como en la carga.
@@ -440,7 +491,14 @@ export class HorarioView implements OnDestroy {
     this.cargarPrevalidacion();
     this.service.getVigente().subscribe({
       next: (v) => {
-        if (v) this.router.navigate(['/horario', v.id], { replaceUrl: true });
+        // Conserva `?vista=…&entidad=…` (S226): la vista con id es OTRO componente, que la lee al
+        // construirse; sin esto el botón «Horario» de las listas perdería su selección aquí.
+        if (v) {
+          this.router.navigate(['/horario', v.id], {
+            replaceUrl: true,
+            queryParamsHandling: 'preserve',
+          });
+        }
         else this.sinHorario.set(true);
       },
       error: (err) =>
@@ -895,6 +953,7 @@ export class HorarioView implements OnDestroy {
   }
 
   protected cambiarVista(v: Vista): void {
+    this.avisoEntidad.set(null);
     this.vista.set(v);
     this.filtroEntidad()?.limpiar();
     this.entidad.set(this.entidades()[0] ?? '');

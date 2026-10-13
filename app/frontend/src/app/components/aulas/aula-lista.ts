@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AulaService } from '../../services/aula.service';
 import { Aula } from '../../models/aula.model';
@@ -23,7 +24,7 @@ import { coincide } from '../../catalogo/busqueda';
  */
 @Component({
   selector: 'app-aula-lista',
-  imports: [CabeceraLista, EstadoLista],
+  imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './aula-lista.html',
   styleUrl: './aula-lista.css',
 })

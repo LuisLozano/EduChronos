@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { Dialog } from '@angular/cdk/dialog';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink, provideRouter } from '@angular/router';
 import { AulaLista } from './aula-lista';
 import { Aula } from '../../models/aula.model';
 
@@ -51,6 +53,7 @@ describe('AulaLista', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Dialog, useValue: dialog },
       ],
     });
@@ -264,5 +267,24 @@ describe('AulaLista', () => {
     expect(fixture.nativeElement.querySelector('.estado-lista__vacio')?.textContent?.trim()).toBe(
       'No hay aulas todavía. Crea la primera con «Nueva aula».',
     );
+  });
+
+  /**
+   * (14) (S226, condición 9 de O-interfaz) «Horario» lleva al horario en la vista de aula, con el
+   * código DE ESA FILA en `?entidad=`. Mismo método que el botón «Actividades»: el `UrlTree` del
+   * `RouterLink` de cada botón, sin navegar.
+   */
+  it('(14) cada fila tiene «Horario», que abre su horario en la vista de aula', async () => {
+    flushLista([aulaCompleta]);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.aulas__horario'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/horario?vista=aula&entidad=A12',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Horario');
+    }
   });
 });

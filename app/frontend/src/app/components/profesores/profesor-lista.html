@@ -66,6 +66,11 @@
         <button type="button" class="profesores__disponibilidad accion-compacta" (click)="disponibilidad(p)">
           Disponibilidad
         </button>
+        <!-- S226: al horario de esta fila, en la vista de profesor. Delante de Actividades, que sigue el último. -->
+        <button type="button" class="profesores__horario accion-compacta"
+                routerLink="/horario" [queryParams]="{ vista: 'profesor', entidad: p.codigo }">
+          Horario
+        </button>
         <!-- S225: a las actividades de esta fila, con su código en la búsqueda de Actividades. -->
         <button type="button" class="profesores__actividades accion-compacta"
                 routerLink="/configuracion/actividades" [queryParams]="{ buscar: p.codigo }">

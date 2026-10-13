@@ -203,9 +203,10 @@ describe('GrupoLista', () => {
 
     // Igualdad de la lista COMPLETA y EN ORDEN, no un `toContain` por botón: es lo que
     // ata el orden de la celda al de la plantilla. «Replicar» entró en S141 junto a
-    // «PDC», dentro del mismo @if de ordinarios. «Actividades» (S225) va al final, fuera del @if.
+    // «PDC», dentro del mismo @if de ordinarios. «Actividades» (S225) va al final, fuera del @if,
+    // y «Horario» (S226) justo delante de él, también fuera.
     const textos = acciones(0).map((b) => b.textContent!.trim());
-    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Replicar', 'Tutoría', 'Actividades']);
+    expect(textos).toEqual(['Editar', 'Borrar', 'PDC', 'Replicar', 'Tutoría', 'Horario', 'Actividades']);
   });
 
   it('(8) DISCRIMINANTE: una fila DIVERSIFICACION_PDC ofrece SOLO tutoría y actividades', async () => {
@@ -217,8 +218,9 @@ describe('GrupoLista', () => {
     // (400/409/400/400) y siguen ocultas —si alguien quita el @if, aparecen y este
     // aserto cae—, mientras que
     // «Tutoría» SÍ se pinta, porque este PDC pudo heredar el tutor de su padre. «Actividades»
-    // (S225) también: el PDC tiene las suyas, y buscarlo no trae las de su padre.
-    expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría', 'Actividades']);
+    // (S225) también: el PDC tiene las suyas, y buscarlo no trae las de su padre. «Horario» (S226)
+    // también: el PDC tiene su horario de grupo.
+    expect(acciones(1).map((b) => b.textContent!.trim())).toEqual(['Tutoría', 'Horario', 'Actividades']);
     // La fila SIGUE pintándose: lo que se oculta son cuatro acciones, no el grupo.
     expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(fixture.nativeElement.textContent).toContain('1ESOADI');
@@ -478,6 +480,26 @@ describe('GrupoLista', () => {
     for (const b of botones) {
       expect(b.nativeElement.textContent.trim()).toBe('Actividades');
       expect(b.nativeElement.parentElement.lastElementChild).toBe(b.nativeElement);
+    }
+  });
+
+  /**
+   * (24) (S226, condición 9 de O-interfaz) «Horario» lleva al horario en la vista de grupo, con el
+   * código DE ESA FILA en `?entidad=`. Mismo método que el botón «Actividades»: el `UrlTree` del
+   * `RouterLink` de cada botón, sin navegar.
+   */
+  it('(24) cada fila tiene «Horario», que abre su horario en la vista de grupo', async () => {
+    flushLista(FILAS_MIXTAS);
+    await fixture.whenStable();
+    const router = TestBed.inject(Router);
+
+    const botones = fixture.debugElement.queryAll(By.css('.grupos__horario'));
+    expect(botones.map((b) => router.serializeUrl(b.injector.get(RouterLink).urlTree!))).toEqual([
+      '/horario?vista=grupo&entidad=1ESOA',
+      '/horario?vista=grupo&entidad=1ESOADI',
+    ]);
+    for (const b of botones) {
+      expect(b.nativeElement.textContent.trim()).toBe('Horario');
     }
   });
 });

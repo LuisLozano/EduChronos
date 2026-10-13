@@ -18,7 +18,8 @@ import { JornadaService } from '../../services/jornada.service';
 import { Bloqueo } from '../../models/bloqueo.model';
 import { GuardiaVista, HorarioProyeccion, SesionVista } from '../../models/horario.model';
 import { IntercambioRealizado } from '../../models/ajuste.model';
-import { InstanciaCelda } from '../../horario/proyeccion';
+import { InstanciaCelda, entidadesDeVista } from '../../horario/proyeccion';
+import { PROYECCION_1ESO } from '../../testing/proyeccion-1eso.fixture';
 import { Diagnostico } from '../../models/diagnostico.model';
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 import { JornadaDTO } from '../../models/jornada.model';
@@ -123,6 +124,8 @@ describe('contenedor del horario', () => {
   let ajustes: { mover: ReturnType<typeof vi.fn>; intercambiar: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  /** Doble de la ruta. Mutable (S226): {@link remontarCon} cambia su consulta y su paramMap. */
+  let ruta: { paramMap: Subject<ParamMap>; snapshot: { queryParamMap: ParamMap } };
 
   beforeEach(async () => {
     sujetoParam = new Subject<ParamMap>();
@@ -208,10 +211,14 @@ describe('contenedor del horario', () => {
     // los 49 casos del fichero en el beforeEach, no uno.
     jornadas = { obtener: vi.fn(() => sujetoJornada) };
 
+    // S226: la vista lee `?vista=…&entidad=…` del snapshot al construirse. Sin consulta, como
+    // antes: los casos que no la usan no cambian.
+    ruta = { paramMap: sujetoParam, snapshot: { queryParamMap: convertToParamMap({}) } };
+
     await TestBed.configureTestingModule({
       imports: [HorarioView],
       providers: [
-        { provide: ActivatedRoute, useValue: { paramMap: sujetoParam } },
+        { provide: ActivatedRoute, useValue: ruta },
         { provide: Router, useValue: router },
         { provide: Dialog, useValue: dialog },
         { provide: HorarioService, useValue: horario },
@@ -2383,7 +2390,11 @@ describe('contenedor del horario', () => {
     await fixture.whenStable();
 
     expect(horario.getVigente).toHaveBeenCalledTimes(1);
-    expect(router.navigate).toHaveBeenCalledWith(['/horario', 4], { replaceUrl: true });
+    // S226 (C19 d): conserva la consulta, que lee la vista con id al construirse.
+    expect(router.navigate).toHaveBeenCalledWith(['/horario', 4], {
+      replaceUrl: true,
+      queryParamsHandling: 'preserve',
+    });
     expect(horario.getProyeccion).not.toHaveBeenCalled();
   });
 
@@ -2912,6 +2923,101 @@ describe('contenedor del horario', () => {
           vista,
         ).toEqual([['5', 'Recreo']]);
       }
+    });
+  });
+
+  /**
+   * S226 (condición 9 de O-interfaz): el botón «Horario» de las listas abre `/horario` con
+   * `?vista=…&entidad=…`. La vista los lee del snapshot AL CONSTRUIRSE, así que cada caso rehace
+   * el componente con su consulta ({@link remontarCon}) y le da la proyección de 1ºESO, que tiene
+   * varias entidades por vista: la pedida no coincide con la primera y el aserto discrimina.
+   */
+  describe('selección desde la URL (S226)', () => {
+    type Seleccion = { vista: () => string; entidad: () => string; avisoEntidad: () => string | null };
+    const sel = (): Seleccion => fixture.componentInstance as unknown as Seleccion;
+    const aviso = (): string | null =>
+      (fixture.nativeElement as HTMLElement).querySelector('.aviso-entidad')?.textContent?.trim() ?? null;
+    const primera = (v: 'grupo' | 'profesor' | 'aula'): string =>
+      entidadesDeVista(PROYECCION_1ESO.sesiones, v, PROYECCION_1ESO.guardias)[0];
+
+    /** Rehace la vista con `consulta` en la URL y le entrega la ruta con id y la proyección. */
+    async function remontarCon(
+      consulta: Record<string, string>,
+      proyeccion: HorarioProyeccion = PROYECCION_1ESO,
+    ): Promise<void> {
+      fixture.destroy();
+      sujetoParam = new Subject<ParamMap>();
+      ruta.paramMap = sujetoParam;
+      ruta.snapshot.queryParamMap = convertToParamMap(consulta);
+      fixture = TestBed.createComponent(HorarioView);
+      await fixture.whenStable();
+      sujetoParam.next(convertToParamMap({ id: '1' }));
+      ultimoListar.next([]);
+      sujetoProyeccion.next(proyeccion);
+      await fixture.whenStable();
+    }
+
+    it('(116) ?vista=profesor&entidad=<existente> abre ese profesor en la vista de profesor', async () => {
+      expect(primera('profesor')).not.toBe('MAT6');
+      await remontarCon({ vista: 'profesor', entidad: 'MAT6' });
+      expect(sel().vista()).toBe('profesor');
+      expect(sel().entidad()).toBe('MAT6');
+      expect(aviso()).toBeNull();
+    });
+
+    it('(117) una entidad que no está en el horario muestra la primera y avisa con los dos nombres', async () => {
+      await remontarCon({ vista: 'profesor', entidad: 'ZZZ9' });
+      expect(sel().vista()).toBe('profesor');
+      expect(sel().entidad()).toBe(primera('profesor'));
+      expect(aviso()).toBe(
+        `«ZZZ9» no tiene clases en este horario; se muestra «${primera('profesor')}».`,
+      );
+      // Informa, no interrumpe: sin role="alert".
+      expect((fixture.nativeElement as HTMLElement).querySelector('.aviso-entidad')?.getAttribute('role')).toBeNull();
+    });
+
+    it('(118) sin parámetros, todo como antes: vista de grupo, su primera entidad y sin aviso', async () => {
+      await remontarCon({});
+      expect(sel().vista()).toBe('grupo');
+      expect(sel().entidad()).toBe(primera('grupo'));
+      expect(aviso()).toBeNull();
+    });
+
+    it('(119) una vista que no es grupo, profesor ni aula se ignora entera, como sin parámetros', async () => {
+      await remontarCon({ vista: 'guardias', entidad: 'MAT6' });
+      expect(sel().vista()).toBe('grupo');
+      expect(sel().entidad()).toBe(primera('grupo'));
+      expect(aviso()).toBeNull();
+    });
+
+    it('(120) una vista válida sin entidad abre esa vista en su primera entidad, sin aviso', async () => {
+      await remontarCon({ vista: 'aula' });
+      expect(sel().vista()).toBe('aula');
+      expect(sel().entidad()).toBe(primera('aula'));
+      expect(aviso()).toBeNull();
+    });
+
+    it('(121) con la vista vacía de entidades el aviso solo dice que la pedida no tiene clases', async () => {
+      await remontarCon({ vista: 'profesor', entidad: 'ZZZ9' }, PROYECCION_VACIA);
+      expect(sel().entidad()).toBe('');
+      expect(aviso()).toBe('«ZZZ9» no tiene clases en este horario.');
+    });
+
+    it('(122) la selección se aplica UNA vez y cambiar de vista borra el aviso', async () => {
+      await remontarCon({ vista: 'profesor', entidad: 'ZZZ9' });
+      expect(aviso()).not.toBeNull();
+
+      const select = (fixture.nativeElement as HTMLElement).querySelector('.controles select') as HTMLSelectElement;
+      select.value = 'aula';
+      select.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+      expect(aviso()).toBeNull();
+
+      // Una segunda proyección (p. ej. tras generar) no reaplica la URL: sigue en aula.
+      sujetoProyeccion.next(PROYECCION_1ESO);
+      await fixture.whenStable();
+      expect(sel().vista()).toBe('aula');
+      expect(aviso()).toBeNull();
     });
   });
 });
