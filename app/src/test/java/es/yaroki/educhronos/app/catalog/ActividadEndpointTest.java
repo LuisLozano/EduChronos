@@ -495,6 +495,8 @@ class ActividadEndpointTest {
                 new Referencia("aula(s) bloqueada(s)", 1L));
         // El verbo del mensaje es el de ESTA acción, no el del borrado.
         assertThat(error.getMessage()).startsWith("No se puede editar:");
+        // (S226) La frase de qué hacer es solo del borrado: editar no la lleva.
+        assertThat(error.getMessage()).doesNotContain("Para poder borrar");
     }
 
     /**

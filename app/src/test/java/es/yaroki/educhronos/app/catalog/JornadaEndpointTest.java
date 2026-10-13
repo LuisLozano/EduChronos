@@ -2,6 +2,8 @@ package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -334,7 +336,11 @@ class JornadaEndpointTest {
                         .content(diaTipoMinimo()))
                 .andExpect(status().isConflict())
                 .andExpect(status().reason(containsString("restricciones horarias")))
-                .andExpect(status().reason(containsString("1")));
+                .andExpect(status().reason(containsString("1")))
+                // (S226, D-jornada-msg409) Lo que se intenta es GUARDAR la jornada: ni «borrar» en el
+                // verbo ni la frase de qué hacer al borrar.
+                .andExpect(status().reason(startsWith("No se puede guardar:")))
+                .andExpect(status().reason(not(containsString("Para poder borrar"))));
 
         // La guarda corre ANTES de borrar y de expandir: el tramo sembrado sigue ahí.
         assertThat(tramos.count()).isEqualTo(1);

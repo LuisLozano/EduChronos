@@ -220,7 +220,8 @@ class ProfesorEndpointTest {
         mockMvc.perform(delete("/api/profesores/" + id))
                 .andExpect(status().isConflict())
                 .andExpect(status().reason(
-                        "No se puede borrar: referenciada por 3 plaza(s). Plazas: A-P1, B-P1, C-P1"));
+                        "No se puede borrar: referenciada por 3 plaza(s). Plazas: A-P1, B-P1, C-P1"
+                                + ". Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo."));
 
         assertThat(profesores.existsById(id)).isTrue();
     }
@@ -237,7 +238,7 @@ class ProfesorEndpointTest {
                 .andExpect(status().isConflict())
                 .andExpect(status().reason("No se puede borrar: referenciada por 11 plaza(s). Plazas: "
                         + "A01-P1, A02-P1, A03-P1, A04-P1, A05-P1, A06-P1, A07-P1, A08-P1, A09-P1, A10-P1"
-                        + " (y 1 más)"));
+                        + " (y 1 más). Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo."));
     }
 
     /**
@@ -251,7 +252,8 @@ class ProfesorEndpointTest {
 
         mockMvc.perform(delete("/api/profesores/" + id))
                 .andExpect(status().isConflict())
-                .andExpect(status().reason("No se puede borrar: referenciada por 1 guardia(s)"));
+                .andExpect(status().reason("No se puede borrar: referenciada por 1 guardia(s)"
+                        + ". Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo."));
     }
 
     @Test

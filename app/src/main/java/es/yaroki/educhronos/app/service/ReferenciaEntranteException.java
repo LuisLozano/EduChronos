@@ -40,6 +40,10 @@ public class ReferenciaEntranteException extends RuntimeException {
     /** Tope de códigos por lista en el mensaje; del resto solo se dice cuántos son. */
     static final int MAXIMO_NOMBRADOS = 10;
 
+    /** Lo que el usuario puede hacer ante un borrado rechazado (S226); solo con la acción "borrar". */
+    static final String QUE_HACER_AL_BORRAR =
+            "Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo.";
+
     /** Un referente que impide el borrado, con su conteo REAL de filas apuntando. */
     public record Referencia(String referente, long conteo) { }
 
@@ -67,7 +71,7 @@ public class ReferenciaEntranteException extends RuntimeException {
      * {@code "editar"}): es el verbo que entra en el mensaje y por tanto en el reason del 409.
      */
     public ReferenciaEntranteException(List<Referencia> referencias, String accion) {
-        super(construirMensaje(referencias, accion));
+        super(cerrar(construirMensaje(referencias, accion), accion));
         this.referencias = referencias.stream().filter(r -> r.conteo() > 0).toList();
     }
 
@@ -78,7 +82,7 @@ public class ReferenciaEntranteException extends RuntimeException {
      * profesor que solo tiene guardias) da el mismo texto que antes.
      */
     public ReferenciaEntranteException(List<Referencia> referencias, List<Nombrados> nombrados) {
-        super(construirMensaje(referencias, "borrar") + nombrar(nombrados));
+        super(cerrar(construirMensaje(referencias, "borrar") + nombrar(nombrados), "borrar"));
         this.referencias = referencias.stream().filter(r -> r.conteo() > 0).toList();
     }
 
@@ -97,6 +101,18 @@ public class ReferenciaEntranteException extends RuntimeException {
         return vivas.stream()
                 .map(r -> r.conteo() + " " + r.referente())
                 .collect(Collectors.joining(", ", "No se puede " + accion + ": referenciada por ", ""));
+    }
+
+    /**
+     * Cierra el mensaje de un BORRADO con {@link #QUE_HACER_AL_BORRAR}, como frase propia: punto y
+     * espacio, o solo espacio si ya acaba en punto (S226, condición 5 de O-interfaz). Con otra
+     * acción ("editar", "deshacer", "guardar") lo deja como está: la frase habla de borrar.
+     */
+    private static String cerrar(String mensaje, String accion) {
+        if (!"borrar".equals(accion)) {
+            return mensaje;
+        }
+        return mensaje + (mensaje.endsWith(".") ? " " : ". ") + QUE_HACER_AL_BORRAR;
     }
 
     /** {@code ". Plazas: A-P1, B-P1 (y 2 más)"} por cada lista no vacía, en el orden recibido. */

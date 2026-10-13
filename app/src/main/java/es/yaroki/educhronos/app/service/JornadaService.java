@@ -272,7 +272,9 @@ public class JornadaService {
                 new Referencia("sesiones bloqueadas", repositorio.contarSesionesBloqueadas()),
                 new Referencia("guardias de horario", repositorio.contarGuardias()));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            // "guardar" y no el "borrar" por defecto: lo que el usuario intenta es guardar la jornada
+            // (S226, D-jornada-msg409), y la frase de qué hacer al borrar no le corresponde.
+            throw new ReferenciaEntranteException(entrantes, "guardar");
         }
     }
 

@@ -182,7 +182,8 @@ class AsignaturaEndpointTest {
         mockMvc.perform(delete("/api/asignaturas/" + id))
                 .andExpect(status().isConflict())
                 .andExpect(status().reason("No se puede borrar: referenciada por 1 actividad(es), 2 plaza(s)"
-                        + ". Actividades: MUS-2. Plazas: MUS-1-P1, MUS-2-P1"));
+                        + ". Actividades: MUS-2. Plazas: MUS-1-P1, MUS-2-P1"
+                        + ". Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo."));
     }
 
     @Test

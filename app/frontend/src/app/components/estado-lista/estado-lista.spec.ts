@@ -170,4 +170,27 @@ describe('EstadoLista', () => {
     expect(texto('cargando')).toBeNull();
     expect(texto('vacio')).toBe(VACIO);
   });
+
+  /**
+   * (S226, condición 5 de O-interfaz) El error es una caja con icono. El icono va DENTRO del
+   * contenedor que se anuncia y es decorativo: con `aria-hidden` el lector de pantalla lee el
+   * texto y no un dibujo. El texto sigue entero.
+   */
+  it('(10) el contenedor del error lleva role="alert" y un icono con aria-hidden="true"', async () => {
+    fixture.componentRef.setInput('error', 'No se pudo cargar la lista.');
+    await fixture.whenStable();
+    const caja = raiz.querySelector('.estado-lista__error');
+    expect(caja?.getAttribute('role')).toBe('alert');
+    const icono = caja?.querySelector('svg.estado-lista__icono');
+    expect(icono).not.toBeNull();
+    expect(icono?.getAttribute('aria-hidden')).toBe('true');
+    expect(texto('error')).toBe('No se pudo cargar la lista.');
+  });
+
+  /** (S226) Sin error no queda nada de la caja: ni contenedor ni icono sueltos. */
+  it('(11) sin error no pinta ni el contenedor ni el icono', async () => {
+    await fixture.whenStable();
+    expect(raiz.querySelector('.estado-lista__error')).toBeNull();
+    expect(raiz.querySelector('.estado-lista__icono')).toBeNull();
+  });
 });

@@ -319,7 +319,8 @@ class SubgrupoEndpointTest {
         mockMvc.perform(delete("/api/subgrupos/" + subgrupo.getId()))
                 .andExpect(status().isConflict())
                 .andExpect(status().reason(
-                        "No se puede borrar: referenciada por 2 plaza(s). Plazas: ACT-A-P1, ACT-B-P1"));
+                        "No se puede borrar: referenciada por 2 plaza(s). Plazas: ACT-A-P1, ACT-B-P1"
+                                + ". Para poder borrar, cambia o borra antes lo que se indica y vuelve a intentarlo."));
     }
 
     // ============== GUARDA G2: el mono-Di de un PDC no se edita ni se borra aquí ==============
