@@ -5,7 +5,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { ActividadForm } from './actividad-form';
+import { ActividadForm, plazasConSubgrupoRepetido } from './actividad-form';
 
 /**
  * Congela el formulario de actividad de UNA plaza. Hereda del molde de `grupo-form` el
@@ -119,27 +119,68 @@ describe('ActividadForm', () => {
   }
 
   /**
-   * Añade una fila POR CLICK, no llamando al método. En zoneless, mutar un `FormArray` no
-   * marca la vista sucia —no es escritura de señal—, así que solo el listener del botón
-   * programa detección de cambios. Llamar al método y forzar con `detectChanges()` lanza
-   * NG0100 (el `[formGroupName]="$index"` cambia después de comprobarse) y pondría rojo un
-   * código correcto; llamar al método y esperar `whenStable()` a secas no repinta y no
+   * Añade una fila POR CLICK en la pestaña «+», no llamando al método. En zoneless, mutar un
+   * `FormArray` no marca la vista sucia —no es escritura de señal—, así que solo el listener
+   * del botón programa detección de cambios. Llamar al método y forzar con `detectChanges()`
+   * lanza NG0100 (el `[formGroupName]="$index"` cambia después de comprobarse) y pondría rojo
+   * un código correcto; llamar al método y esperar `whenStable()` a secas no repinta y no
    * discrimina nada. El click es el camino real y el único harness limpio.
    */
   async function anadirFila(): Promise<void> {
-    const boton = fixture.nativeElement.querySelector(
-      '.actividad-form__anadir-plaza',
-    ) as HTMLButtonElement;
+    const boton = fixture.nativeElement.querySelector('.plazas__pestana--nueva') as HTMLButtonElement;
     boton.click();
     await fixture.whenStable();
   }
 
-  /** Quita la fila indicada por CLICK en SU botón. Misma razón que `anadirFila`. */
+  /** Abre la pestaña de la plaza indicada (S230: solo se pinta la plaza activa). */
+  async function abrirPestana(indice: number): Promise<void> {
+    pestana(indice).click();
+    await fixture.whenStable();
+  }
+
+  /** Quita la fila indicada: abre SU pestaña y pulsa «Quitar esta plaza», que vive dentro. */
   async function quitarFila(indice: number): Promise<void> {
-    const botones = fixture.nativeElement.querySelectorAll(
-      '.actividad-form__quitar-plaza',
-    ) as NodeListOf<HTMLButtonElement>;
-    botones[indice].click();
+    await abrirPestana(indice);
+    (fixture.nativeElement.querySelector('.actividad-form__quitar-plaza') as HTMLButtonElement).click();
+    await fixture.whenStable();
+  }
+
+  function pestana(indice: number): HTMLButtonElement {
+    return fixture.nativeElement.querySelector(`.plazas__pestana[data-plaza="${indice}"]`) as HTMLButtonElement;
+  }
+
+  /** Índice de la pestaña abierta, o null si no hay ninguna. */
+  function pestanaActiva(): number | null {
+    const activa = fixture.nativeElement.querySelector('.plazas__pestana[aria-selected="true"]') as HTMLElement | null;
+    return activa === null ? null : Number(activa.dataset['plaza']);
+  }
+
+  /** Índices de las pestañas que llevan la marca indicada (`i2` o `invalida`). */
+  function pestanasCon(marca: 'i2' | 'invalida'): number[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.plazas__pestana[data-plaza]'),
+    )
+      .filter((b) => b.querySelector(`[data-${marca}]`) !== null)
+      .map((b) => Number(b.dataset['plaza']));
+  }
+
+  /** Códigos de un lado de la lista doble `nombre` de la plaza abierta, en el orden en que se ven. */
+  function enLista(nombre: string, lado: 'elegidos' | 'disponibles'): string[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        `[data-lista="${nombre}"] [data-lado="${lado}"] li[data-codigo]`,
+      ),
+    ).map((li) => li.dataset['codigo']!);
+  }
+
+  /** Pasa a Elegidos esas filas de la lista doble `nombre`: marcarlas y «‹ Añadir». */
+  async function elegirEnLista(nombre: string, ...codigos: string[]): Promise<void> {
+    const raiz = fixture.nativeElement as HTMLElement;
+    for (const c of codigos) {
+      raiz.querySelector<HTMLElement>(`[data-lista="${nombre}"] [data-lado="disponibles"] li[data-codigo="${c}"]`)!.click();
+      await fixture.whenStable();
+    }
+    raiz.querySelector<HTMLButtonElement>(`[data-lista="${nombre}"] .lista-doble__anadir`)!.click();
     await fixture.whenStable();
   }
 
@@ -310,15 +351,11 @@ describe('ActividadForm', () => {
       // lo que el usuario teclee en ellos no llega al modelo y el cuerpo enviado sería el
       // viejo, sin ningún error visible.
       //
-      // <p>DÓNDE MIRAR, que es lo que hace o deshace este caso (medido en la campaña de
-      // mutación de S110): los nodos dentro de un `@if` —el aula fija, las candidatas, los
-      // <span> de error— NO sirven de testigo. Al cambiar el contexto de la fila, la rama
-      // del `@if` se destruye y se recrea, y el `FormControlName` recién creado re-resuelve
-      // contra la posición actual: el desalineamiento se cura solo ahí. Los únicos testigos
-      // válidos son los nodos FUERA de todo `@if` enlazados por `formControlName`, cuya
-      // directiva persiste con su `[formGroupName]` de siempre. Aquí, el select de
-      // asignatura de la plaza. Si alguien reescribe este caso mirando solo el aula, el
-      // `track $index` vuelve a pasar en verde.
+      // <p>Desde S230 solo se pinta la plaza de la pestaña activa, y quitar la del medio deja
+      // activa la vecina EN EL MISMO ÍNDICE: la vista de ese índice no se destruye, y con
+      // `track $index` su `[formGroupName]` seguiría resuelto contra la fila borrada. El
+      // testigo es el select de asignatura de la plaza, fuera de todo `@if` del panel (los
+      // nodos de un `@if` —el aula, los errores— se recrean y se curan solos, medido en S110).
       montar(null);
       const inst = instancia();
       inst.form.patchValue({ codigo: 'Bloque' });
@@ -340,38 +377,32 @@ describe('ActividadForm', () => {
       await quitarFila(1);
 
       const raiz = fixture.nativeElement as HTMLElement;
-      const fieldsets = raiz.querySelectorAll('.actividad-form__plaza');
-      expect(fieldsets.length).toBe(2);
+      // Las pestañas se renumeran y nombran su asignatura.
+      const rotulos = [...raiz.querySelectorAll('.plazas__pestana[data-plaza]')].map((b) => b.textContent!.trim());
+      expect(rotulos).toEqual(['1 · Mat', '2 · CyR']);
+      expect(pestanaActiva()).toBe(1);
+      expect(raiz.querySelectorAll('.actividad-form__plaza').length).toBe(1);
 
-      // TESTIGO DEL TRACK (lectura): la asignatura de cada fila superviviente. Con `track
-      // $index` el segundo select seguiría enlazado a la fila BORRADA y mostraría su 'Mat'.
-      const asignaturas = [...fieldsets].map(
-        (fs) => fs.querySelector<HTMLSelectElement>('select[formControlName="asignatura"]')!.value,
-      );
-      expect(asignaturas).toEqual(['Mat', 'CyR']);
-
-      // Lo que sí cazan los nodos del @if: que la fila borrada era la de candidatas y que
-      // el aula de cada superviviente es la suya (esto es lo que mata `removeAt(0)`).
-      const fijas = [...raiz.querySelectorAll<HTMLSelectElement>('.actividad-form__aula-fija')];
-      expect(fijas.map((s) => s.value)).toEqual(['A1', 'INF1']);
+      // TESTIGO DEL TRACK (lectura): la plaza visible es la que era la tercera.
+      const asignatura = (): HTMLSelectElement =>
+        raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formControlName="asignatura"]')!;
+      expect(asignatura().value).toBe('CyR');
+      expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__aula-fija')!.value).toBe('INF1');
       expect(raiz.querySelector('.actividad-form__candidatas')).toBeNull();
+      // El mensaje de error viaja con SU fila: ahora es la segunda.
+      expect(raiz.querySelector('.actividad-form__plaza')!.textContent).toContain('Elige al menos un profesor');
 
-      // El mensaje de error viaja con SU fila: ahora es la segunda, no la tercera.
-      expect(fieldsets[1].textContent).toContain('Elige al menos un profesor');
-      expect(fieldsets[0].textContent).not.toContain('Elige al menos un profesor');
-
-      // Las plazas se renumeran: sin esto, el número del legend no lo asevera nadie.
-      const legends = [...fieldsets].map((fs) => fs.querySelector('legend')!.textContent!.trim());
-      expect(legends).toEqual(['Plaza 1', 'Plaza 2']);
+      await abrirPestana(0);
+      expect(asignatura().value).toBe('Mat');
+      expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__aula-fija')!.value).toBe('A1');
+      expect(raiz.querySelector('.actividad-form__plaza')!.textContent).not.toContain('Elige al menos un profesor');
 
       // TESTIGO DEL TRACK (escritura), que es el síntoma caro: teclear en la fila visible
       // tiene que llegar al modelo VIVO. Con el binding rancio, esto entra en el FormGroup
       // extraído y el modelo no se entera, así que `aRequest()` enviaría el valor viejo.
-      const segunda = fieldsets[1].querySelector<HTMLSelectElement>(
-        'select[formControlName="asignatura"]',
-      )!;
-      segunda.value = 'Mat';
-      segunda.dispatchEvent(new Event('change'));
+      await abrirPestana(1);
+      asignatura().value = 'Mat';
+      asignatura().dispatchEvent(new Event('change'));
       expect(inst.plazas.at(1).controls['asignatura'].value).toBe('Mat');
     });
 
@@ -388,11 +419,12 @@ describe('ActividadForm', () => {
     expect(inst.plazas.length).toBe(1);
 
     // SEGUNDA CARA, sin la cual un `[disabled]="true"` fijo pasaría igual que el código
-    // correcto: al haber dos filas, ninguno de los botones sigue apagado.
+    // correcto: al haber dos filas, el botón de cada pestaña está encendido.
     await anadirFila();
-    const botones = raiz.querySelectorAll<HTMLButtonElement>('.actividad-form__quitar-plaza');
-    expect(botones.length).toBe(2);
-    expect([...botones].some((b) => b.disabled)).toBe(false);
+    expect(raiz.querySelectorAll('.actividad-form__quitar-plaza').length).toBe(1);
+    expect(raiz.querySelector<HTMLButtonElement>('.actividad-form__quitar-plaza')!.disabled).toBe(false);
+    await abrirPestana(0);
+    expect(raiz.querySelector<HTMLButtonElement>('.actividad-form__quitar-plaza')!.disabled).toBe(false);
   });
 
   it('(22) I2: el mismo subgrupo en dos filas corta el envío y NOMBRA el subgrupo', async () => {
@@ -545,9 +577,9 @@ describe('ActividadForm', () => {
     // El texto lleva el TIPO, que es lo que el usuario necesita para elegir sin filtro I3.
     expect(aulaFija.options[2].textContent).toContain('INFORMATICA');
 
-    // Multiselects: sin placeholder, tantas opciones como elementos.
-    expect(raiz.querySelectorAll('.actividad-form__profesores option').length).toBe(2);
-    expect(raiz.querySelectorAll('.actividad-form__subgrupos option').length).toBe(2);
+    // Listas dobles: sin placeholder, todos disponibles de arranque.
+    expect(enLista('profesores', 'disponibles')).toEqual(['MAT6', 'MATA']);
+    expect(enLista('subgrupos', 'disponibles')).toEqual(['1ºA-Completo', '1ºB-Completo']);
   });
 
   it('(3) las aulas NO se filtran por compatibilidad I3: se ofrecen todas', () => {
@@ -633,7 +665,7 @@ describe('ActividadForm', () => {
     fila.controls['modoAula'].setValue('FIJA');
     expect(fila.controls['aulasCandidatas'].value).toEqual([]);
 
-    // Y el DOM sigue al modo: en FIJA se pinta el select único, no el múltiple.
+    // Y el DOM sigue al modo: en FIJA se pinta el select único, no la lista doble.
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.actividad-form__aula-fija')).not.toBeNull();
@@ -990,18 +1022,16 @@ describe('ActividadForm', () => {
     expect(fixture.nativeElement.querySelector('.actividad-form__conflicto')).toBeNull();
   });
 
-  it('(15) el multiselect vuelca al control lo que el usuario marca en el DOM', () => {
+  it('(15) la lista doble vuelca al control de SU plaza lo que el usuario elige en el DOM', async () => {
     montar(null);
-    const select = fixture.nativeElement.querySelector(
-      '.actividad-form__profesores',
-    ) as HTMLSelectElement;
-    select.options[0].selected = true;
-    select.options[1].selected = true;
-    select.dispatchEvent(new Event('change'));
+    await anadirFila();
+    await elegirEnLista('profesores', 'MAT6', 'MATA');
 
-    // El <select multiple> no vincula por formControlName: sin el handler, el control
-    // seguiría vacío y el I7 cortaría un formulario que el usuario sí rellenó.
-    expect(instancia().plazas.at(0).controls['profesores'].value).toEqual(['MATA', 'MAT6']);
+    // Sin el enlace por formControlName el control seguiría vacío y el I7 cortaría un
+    // formulario que el usuario sí rellenó. Va a la plaza ABIERTA (la 2), no a la primera,
+    // y en el orden del catálogo, como lo daba el select (enmienda 2).
+    expect(instancia().plazas.at(1).controls['profesores'].value).toEqual(['MATA', 'MAT6']);
+    expect(instancia().plazas.at(0).controls['profesores'].value).toEqual([]);
   });
 
   it('(16) un guardado correcto cierra el diálogo con el id que devuelve el servidor', async () => {
@@ -1028,7 +1058,8 @@ describe('ActividadForm', () => {
   /**
    * Filtro de los seis selectores (S185, condición 5 de O-pre-demo). Listas de DOCE: con 10 o
    * menos el filtro no se pinta. «x1» casa con x10, x11 y x12 y NO con x05, que es la elegida:
-   * la opción elegida tiene que seguir en el select aunque la consulta no la alcance.
+   * la opción elegida tiene que seguir en el select aunque la consulta no la alcance. En las
+   * tres listas dobles (S230) el filtro recorta Disponibles y la elegida está en Elegidos.
    */
   describe('filtro de selectores (S185)', () => {
     const doce = (prefijo: string): string[] =>
@@ -1086,21 +1117,16 @@ describe('ActividadForm', () => {
       await fixture.whenStable();
     }
 
-    async function elegirMultiple(s: HTMLSelectElement, ...codigos: string[]): Promise<void> {
-      for (const o of Array.from(s.options)) {
-        o.selected = codigos.includes(o.value);
-      }
-      s.dispatchEvent(new Event('change'));
-      await fixture.whenStable();
-    }
+    const filtroLista = (nombre: string): HTMLInputElement | null =>
+      campo(`[data-lista="${nombre}"] .filtro-opciones__campo`);
 
-    const ASIG_RAIZ = 'form > label select[formControlName="asignatura"]';
+    const ASIG_RAIZ = '.actividad-form__fila--1 select[formControlName="asignatura"]';
     const ASIG_PLAZA = '.actividad-form__plaza select[formControlName="asignatura"]';
 
     it('asignatura: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
       await elegirSimple(sel(ASIG_RAIZ), 'M05');
-      await escribir(campo('form > app-filtro-opciones input[aria-label="Filtrar asignaturas"]'), 'm1');
+      await escribir(campo('.actividad-form__fila--1 input[aria-label="Filtrar asignaturas"]'), 'm1');
 
       expect(valores(sel(ASIG_RAIZ))).toEqual(['M05', 'M10', 'M11', 'M12']);
       expect(valorRaiz()).toBe('M05');
@@ -1132,44 +1158,41 @@ describe('ActividadForm', () => {
       montarLargo();
       raiz().querySelector<HTMLInputElement>('input[type="radio"][value="CANDIDATAS"]')!.click();
       await fixture.whenStable();
-      const candidatas = (): HTMLSelectElement => sel('.actividad-form__candidatas');
-      await elegirMultiple(candidatas(), 'A05');
-      await escribir(campo('input[aria-label="Filtrar aulas candidatas"]'), 'a1');
+      await elegirEnLista('aulas', 'A05');
+      await escribir(filtroLista('aulas'), 'a1');
 
-      expect(valores(candidatas())).toEqual(['A05', 'A10', 'A11', 'A12']);
+      expect(enLista('aulas', 'disponibles')).toEqual(['A10', 'A11', 'A12']);
+      expect(enLista('aulas', 'elegidos')).toEqual(['A05']);
       expect(valorPlaza('aulasCandidatas')).toEqual(['A05']);
     });
 
     it('profesores: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
-      const profesores = (): HTMLSelectElement => sel('.actividad-form__profesores');
-      await elegirMultiple(profesores(), 'P05');
-      await escribir(campo('input[aria-label="Filtrar profesores"]'), 'p1');
+      await elegirEnLista('profesores', 'P05');
+      await escribir(filtroLista('profesores'), 'p1');
 
-      expect(valores(profesores())).toEqual(['P05', 'P10', 'P11', 'P12']);
+      expect(enLista('profesores', 'disponibles')).toEqual(['P10', 'P11', 'P12']);
+      expect(enLista('profesores', 'elegidos')).toEqual(['P05']);
       expect(valorPlaza('profesores')).toEqual(['P05']);
     });
 
     it('subgrupos: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
-      const subgrupos = (): HTMLSelectElement => sel('.actividad-form__subgrupos');
-      await elegirMultiple(subgrupos(), 'S05');
-      await escribir(campo('input[aria-label="Filtrar subgrupos"]'), 's1');
+      await elegirEnLista('subgrupos', 'S05');
+      await escribir(filtroLista('subgrupos'), 's1');
 
-      expect(valores(subgrupos())).toEqual(['S05', 'S10', 'S11', 'S12']);
+      expect(enLista('subgrupos', 'disponibles')).toEqual(['S10', 'S11', 'S12']);
+      expect(enLista('subgrupos', 'elegidos')).toEqual(['S05']);
       expect(valorPlaza('subgrupos')).toEqual(['S05']);
     });
 
     it('subgrupos: elegir otra con el filtro puesto conserva la primera', async () => {
       montarLargo();
-      const subgrupos = (): HTMLSelectElement => sel('.actividad-form__subgrupos');
-      await elegirMultiple(subgrupos(), 'S05');
-      await escribir(campo('input[aria-label="Filtrar subgrupos"]'), 's1');
+      await elegirEnLista('subgrupos', 'S05');
+      await escribir(filtroLista('subgrupos'), 's1');
 
-      // Como el usuario: marca S10 sin tocar lo ya marcado, y el select emite `change`.
-      Array.from(subgrupos().options).find((o) => o.value === 'S10')!.selected = true;
-      subgrupos().dispatchEvent(new Event('change'));
-      await fixture.whenStable();
+      // Como el usuario: con el filtro puesto, pasa S10 sin tocar lo ya elegido.
+      await elegirEnLista('subgrupos', 'S10');
 
       expect(new Set(valorPlaza('subgrupos') as string[])).toEqual(new Set(['S05', 'S10']));
     });
@@ -1209,11 +1232,11 @@ describe('ActividadForm', () => {
       fixture.detectChanges();
     }
 
-    const opcion = (codigo: string): HTMLOptionElement | undefined =>
-      Array.from(
-        (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('.actividad-form__profesores')!
-          .options,
-      ).find((o) => o.value === codigo);
+    /** La fila de un profesor en la lista doble de la plaza (Disponibles, de arranque). */
+    const opcion = (codigo: string): HTMLElement | undefined =>
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+        `[data-lista="profesores"] li[data-codigo="${codigo}"]`,
+      ) ?? undefined;
 
     it('T2a la opción de un profesor dice «código — nombre»', () => {
       montarConNombres();
@@ -1223,7 +1246,7 @@ describe('ActividadForm', () => {
     it('T2b el filtro de profesores encuentra por el nombre', async () => {
       montarConNombres();
       const caja = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
-        'input[aria-label="Filtrar profesores"]',
+        '[data-lista="profesores"] .filtro-opciones__campo',
       )!;
       caja.value = 'Pérez';
       caja.dispatchEvent(new Event('input'));
@@ -1237,5 +1260,278 @@ describe('ActividadForm', () => {
       montarConNombres();
       expect(opcion('SIN1')!.textContent!.trim()).toBe('SIN1');
     });
+  });
+
+  // ─────────────────────── S230: tres filas y una pestaña por plaza (C-editor-plazas)
+
+  /** Una plaza válida con un subgrupo dado, para las plazas de I2 y de C6. */
+  function plazaCon(subgrupo: string, extra: Partial<Record<string, unknown>> = {}) {
+    return {
+      id: 300,
+      codigo: 'X',
+      asignatura: 'Mat',
+      aulaFija: 'A1',
+      aulasCandidatas: [] as string[],
+      profesores: ['MATA'],
+      subgrupos: [subgrupo],
+      ...extra,
+    };
+  }
+  const TRES_PLAZAS = {
+    ...ACTIVIDAD_FIJA,
+    id: 30,
+    codigo: 'Tres',
+    asignatura: null as string | null,
+    plazas: [
+      plazaCon('1ºA-Completo'),
+      plazaCon('1ºB-Completo', { asignatura: 'CyR' }),
+      // Aula distinta: es la que distingue la tercera de la primera cuando queda abierta.
+      plazaCon('1ºC-Completo', { aulaFija: 'INF1' }),
+    ],
+  };
+
+  it('P1 tres filas antes de las plazas, con los campos de la maqueta en cada una', () => {
+    montar(null);
+    const form = fixture.nativeElement.querySelector('form') as HTMLElement;
+    const filas = [...form.querySelectorAll<HTMLElement>(':scope > [data-fila]')].map((f) => f.dataset['fila']);
+    expect(filas).toEqual(['1', '2', '3']);
+
+    const fila = (n: string): HTMLElement => form.querySelector<HTMLElement>(`:scope > [data-fila="${n}"]`)!;
+    const controles = (n: string): string[] =>
+      [...fila(n).querySelectorAll('[formcontrolname]')].map((c) => c.getAttribute('formcontrolname')!);
+    expect(controles('1')).toEqual(['codigo', 'tipo', 'asignatura']);
+    expect(controles('2')).toEqual(['duracionTramos', 'repeticionesPorSemana', 'patronTemporal', 'requiereTutor']);
+    expect(fila('3').querySelector('.plazas__pestanas')).not.toBeNull();
+  });
+
+  it('P2 una pestaña por plaza, «n · asignatura», y solo se pinta la abierta', async () => {
+    montar(ACTIVIDAD_SEIS);
+    const raiz = fixture.nativeElement as HTMLElement;
+    const rotulos = [...raiz.querySelectorAll('.plazas__pestana[data-plaza]')].map((b) => b.textContent!.trim());
+    expect(rotulos).toEqual(['1 · Mat', '2 · Mat', '3 · Mat', '4 · CyR', '5 · CyR', '6 · CyR']);
+    expect(pestanaActiva()).toBe(0);
+    const asignatura = (): string =>
+      raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.value;
+    expect(raiz.querySelectorAll('.actividad-form__plaza').length).toBe(1);
+    expect(asignatura()).toBe('Mat');
+    expect(raiz.querySelector('.actividad-form__aula-fija')).not.toBeNull();
+
+    await abrirPestana(3);
+    expect(pestanaActiva()).toBe(3);
+    expect(raiz.querySelectorAll('.actividad-form__plaza').length).toBe(1);
+    expect(asignatura()).toBe('CyR');
+    expect(raiz.querySelector('.actividad-form__candidatas')).not.toBeNull();
+    expect(enLista('aulas', 'elegidos')).toEqual(['A1', 'INF1']);
+  });
+
+  it('P3 «+» añade una plaza vacía y la deja abierta', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila();
+    expect(instancia().plazas.length).toBe(4);
+    expect(pestanaActiva()).toBe(3);
+    expect(pestana(3).textContent!.trim()).toBe('4 · —');
+    expect(enLista('profesores', 'elegidos')).toEqual([]);
+  });
+
+  it('P4 «Quitar esta plaza» deja abierta la vecina: la siguiente, o la anterior si era la última', async () => {
+    montar(TRES_PLAZAS);
+    await quitarFila(1);
+    // La del medio: queda abierta la que ocupa su sitio, que era la tercera.
+    expect(instancia().plazas.length).toBe(2);
+    expect(pestanaActiva()).toBe(1);
+    expect(fixture.nativeElement.querySelector('.actividad-form__aula-fija').value).toBe('INF1');
+
+    await quitarFila(1);
+    // La última: queda abierta la anterior, no un índice que ya no existe.
+    expect(instancia().plazas.length).toBe(1);
+    expect(pestanaActiva()).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('.actividad-form__plaza').length).toBe(1);
+  });
+
+  it('P5 I2 marca la pestaña de CADA plaza implicada, y solo esas', async () => {
+    montar(TRES_PLAZAS);
+    await abrirPestana(2);
+    // La tercera repite el subgrupo de la primera, por la lista doble.
+    await elegirEnLista('subgrupos', '1ºA-Completo');
+    fixture.detectChanges();
+
+    expect(pestanasCon('i2')).toEqual([0, 2]);
+    expect(fixture.nativeElement.querySelector('.actividad-form__error-i2').textContent).toContain('1ºA-Completo');
+    instancia().guardar();
+    http.expectNone('/api/actividades/30');
+  });
+
+  it('P5b DISCRIMINANTE de P5: sin repetidos, ninguna pestaña lleva la marca de I2', () => {
+    montar(TRES_PLAZAS);
+    expect(pestanasCon('i2')).toEqual([]);
+    expect(fixture.nativeElement.querySelector('.actividad-form__error-i2')).toBeNull();
+  });
+
+  it('P6 una plaza con un campo inválido marca su pestaña tras «Guardar»; la recién añadida no nace marcada', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila();
+    // Nueva y vacía, pero sin tocar: sin marca (enmienda 4).
+    expect(pestanasCon('invalida')).toEqual([]);
+
+    await abrirPestana(0);
+    instancia().guardar();
+    fixture.detectChanges();
+    // El error está en la plaza 4, que no es la abierta: su pestaña lo dice.
+    expect(pestanasCon('invalida')).toEqual([3]);
+    http.expectNone('/api/actividades/30');
+  });
+
+  it('P6b DISCRIMINANTE de P6: con todo válido «Guardar» envía y no marca nada', () => {
+    montar(TRES_PLAZAS);
+    instancia().guardar();
+    fixture.detectChanges();
+    expect(pestanasCon('invalida')).toEqual([]);
+    http.expectOne('/api/actividades/30').flush(TRES_PLAZAS);
+  });
+
+  it('P7 modos de aula «Fija», «Candidatas» y «La elige el generador», con lo suyo debajo', async () => {
+    montar(null);
+    const raiz = fixture.nativeElement as HTMLElement;
+    const rotulos = [...raiz.querySelectorAll('input[type="radio"][formcontrolname="modoAula"]')].map((r) =>
+      r.closest('label')!.textContent!.trim(),
+    );
+    expect(rotulos).toEqual(['Fija', 'Candidatas', 'La elige el generador']);
+    const radio = (valor: string): HTMLInputElement =>
+      raiz.querySelector<HTMLInputElement>(`input[type="radio"][value="${valor}"]`)!;
+    const estado = (): [number, number, number] => [
+      raiz.querySelectorAll('.actividad-form__aula-fija').length,
+      raiz.querySelectorAll('[data-lista="aulas"]').length,
+      raiz.querySelectorAll('[data-nota="generador"]').length,
+    ];
+
+    expect(estado()).toEqual([1, 0, 0]);
+    radio('CANDIDATAS').click();
+    await fixture.whenStable();
+    expect(estado()).toEqual([0, 1, 0]);
+    radio('NINGUNA').click();
+    await fixture.whenStable();
+    expect(estado()).toEqual([0, 0, 1]);
+    expect(raiz.querySelector('[data-nota="generador"]')!.textContent!.trim())
+      .toBe('El generador elegirá el aula con las reglas del centro.');
+
+    // Fuera de una CLASE el modo se llama «Sin aula» y no hay nota: no ocupa aula.
+    instancia().form.patchValue({ tipo: 'REUNION' });
+    fixture.detectChanges();
+    expect(estado()).toEqual([0, 0, 0]);
+  });
+
+  it('P8 las tres listas dobles de la plaza muestran 5 filas', async () => {
+    montar(null);
+    const raiz = fixture.nativeElement as HTMLElement;
+    raiz.querySelector<HTMLInputElement>('input[type="radio"][value="CANDIDATAS"]')!.click();
+    await fixture.whenStable();
+    const filas = [...raiz.querySelectorAll<HTMLElement>('[data-lista]')].map((l) => [
+      l.dataset['lista'],
+      l.style.getPropertyValue('--lista-doble-filas'),
+    ]);
+    expect(filas).toEqual([
+      ['profesores', '5'],
+      ['subgrupos', '5'],
+      ['aulas', '5'],
+    ]);
+  });
+
+  it('P9 ids únicos y cada <label for> apunta a un control que existe (decisión 11)', async () => {
+    montar(TRES_PLAZAS);
+    const raiz = fixture.nativeElement as HTMLElement;
+    const comprobar = (): void => {
+      const ids = [...raiz.querySelectorAll('[id]')].map((e) => e.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const l of raiz.querySelectorAll<HTMLLabelElement>('label[for]')) {
+        expect(raiz.querySelector(`#${l.htmlFor}`)).not.toBeNull();
+      }
+    };
+    comprobar();
+    // Los dos selectores de asignatura y el de aula fija tienen el suyo.
+    for (const s of raiz.querySelectorAll<HTMLSelectElement>(
+      'select[formcontrolname="asignatura"], select[formcontrolname="aulaFija"]',
+    )) {
+      expect(raiz.querySelector(`label[for="${s.id}"]`)).not.toBeNull();
+    }
+    const antes = raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.id;
+    await abrirPestana(1);
+    comprobar();
+    expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.id)
+      .not.toBe(antes);
+  });
+
+  describe('plazasConSubgrupoRepetido (S230, misma semántica que I2)', () => {
+    it('marca las plazas que comparten un subgrupo, y solo esas', () => {
+      expect(plazasConSubgrupoRepetido([['A'], ['B'], ['A', 'C'], ['C']])).toEqual([0, 2, 3]);
+    });
+
+    it('un subgrupo repetido DENTRO de una plaza no es I2, y la caja cuenta', () => {
+      expect(plazasConSubgrupoRepetido([['A', 'A'], ['a']])).toEqual([]);
+    });
+  });
+
+  /**
+   * Asignatura con su nombre (S230, condición 4 de O-acabado-pre-prueba). ONCE asignaturas para
+   * que el filtro se pinte; CyR es el oráculo medido en la base (s230/f1f2/40-oraculo-c4.txt):
+   * «Robótica» no está en su código.
+   */
+  describe('asignatura con código y nombre (S230)', () => {
+    const ASIGNATURAS_NOMBRE = [
+      { id: 1, codigo: 'CyR', nombreCompleto: 'Computación y Robótica' },
+      { id: 2, codigo: 'SIN', nombreCompleto: '  ' },
+      ...Array.from({ length: 9 }, (_, i) => ({ id: i + 3, codigo: `M0${i + 1}`, nombreCompleto: 'Matemáticas' })),
+    ];
+
+    function montarConAsignaturas(): void {
+      ref = { close: vi.fn() };
+      TestBed.configureTestingModule({
+        imports: [ActividadForm],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: DialogRef, useValue: ref },
+          { provide: DIALOG_DATA, useValue: null },
+        ],
+      });
+      fixture = TestBed.createComponent(ActividadForm);
+      http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      http.expectOne('/api/asignaturas').flush(ASIGNATURAS_NOMBRE);
+      http.expectOne('/api/profesores').flush(PROFESORES);
+      http.expectOne('/api/aulas').flush(AULAS);
+      http.expectOne('/api/subgrupos').flush(SUBGRUPOS);
+      fixture.detectChanges();
+    }
+
+    const SELECTORES = [
+      ['actividad', '.actividad-form__fila--1'],
+      ['plaza', '.actividad-form__plaza'],
+    ] as const;
+    const opciones = (zona: string): HTMLOptionElement[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>(
+          `${zona} select[formcontrolname="asignatura"]`,
+        )!.options,
+      ).filter((o) => o.value !== '');
+
+    for (const [nombre, zona] of SELECTORES) {
+      it(`D1 ${nombre}: cada opción dice «código — nombre», y solo el código si no hay nombre`, () => {
+        montarConAsignaturas();
+        const textos = new Map(opciones(zona).map((o) => [o.value, o.textContent!.trim()]));
+        expect(textos.get('CyR')).toBe('CyR — Computación y Robótica');
+        expect(textos.get('SIN')).toBe('SIN');
+      });
+
+      it(`D2 ${nombre}: buscar «Robótica», que no está en el código, encuentra CyR`, async () => {
+        montarConAsignaturas();
+        const caja = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+          `${zona} input[aria-label="Filtrar asignaturas"]`,
+        )!;
+        caja.value = 'Robótica';
+        caja.dispatchEvent(new Event('input'));
+        await fixture.whenStable();
+        expect(opciones(zona).map((o) => o.value)).toEqual(['CyR']);
+      });
+    }
   });
 });

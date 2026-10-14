@@ -33,10 +33,25 @@
   border-radius: var(--radio-s);
   box-sizing: border-box;
 }
-/* El <select multiple> nativo toma ~4 filas del agente de usuario; se fija una
-   min-height para que no colapse con pocas opciones. Mismo criterio que subgrupo-form. */
-.actividad-form__multiple {
-  min-height: 6rem;
+/* Las tres filas del diálogo (S230, maqueta de s229/f1b). Fila 1: Código · Tipo · Asignatura;
+   fila 2: Duración, Repeticiones y Patrón estrechos y Requiere tutor al lado. Con un filtro
+   encima de un selector, los campos se alinean por abajo. */
+.actividad-form__fila {
+  display: grid;
+  gap: var(--e4);
+  align-items: end;
+}
+.actividad-form__fila--1 {
+  grid-template-columns: 1fr 1fr 2fr;
+}
+.actividad-form__fila--2 {
+  grid-template-columns: repeat(3, calc(6 * var(--e6))) auto;
+}
+.actividad-form__fila > * {
+  min-width: 0;
+}
+.actividad-form__fila .actividad-form__campo--check {
+  padding-bottom: var(--e2);
 }
 .actividad-form__radio {
   display: inline-flex;
@@ -51,7 +66,67 @@
   padding: var(--e3);
   margin-bottom: var(--e4);
 }
-.actividad-form__plaza-titulo {
+
+/* Pestañas de plaza (S230). El panel continúa la pestaña: sin borde ni radio arriba. */
+.plazas {
+  margin-bottom: var(--e4);
+}
+.plazas__titulo {
+  display: block;
+  margin-bottom: var(--e1);
+  font-size: var(--tam-s);
+}
+.plazas__pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  border-bottom: var(--borde-fino) solid var(--color-borde);
+}
+.plazas__pestana {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  margin-bottom: calc(-1 * var(--borde-fino));
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: var(--color-superficie-alt);
+  color: var(--color-tinta-suave);
+  font-family: var(--fuente-datos);
+}
+.plazas__pestana[aria-selected='true'] {
+  background: var(--color-superficie);
+  border-bottom-color: var(--color-superficie);
+  color: var(--color-tinta);
+  font-weight: var(--peso-medio);
+}
+.plazas__pestana--nueva {
+  font-family: inherit;
+}
+.plazas__punto {
+  width: var(--e2);
+  height: var(--e2);
+  border-radius: var(--e1);
+  background: var(--color-error);
+}
+.plazas .actividad-form__plaza {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-color: var(--color-borde);
+}
+/* Cabecera de plaza: la asignatura, más estrecha, y «Quitar esta plaza» a la derecha. */
+.actividad-form__plaza-cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e4);
+}
+.actividad-form__plaza-cabecera > .actividad-form__con-filtro {
+  flex: 0 1 calc(15 * var(--e6));
+  min-width: 0;
+}
+.actividad-form__nota-aula {
+  margin: 0 0 var(--e4);
   font-size: var(--tam-s);
   color: var(--color-tinta-suave);
 }
@@ -82,19 +157,12 @@
   margin-top: var(--e4);
 }
 .actividad-form__plaza-acciones {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--e2);
+  margin-bottom: var(--e4);
 }
 
-.actividad-form__quitar-plaza,
-.actividad-form__anadir-plaza {
+.actividad-form__quitar-plaza {
   font-size: var(--tam-s);
   padding: var(--e1) var(--e2);
-}
-
-.actividad-form__plaza-titulo {
-  font-weight: var(--peso-medio);
 }
 
 .actividad-form__error-i2 {

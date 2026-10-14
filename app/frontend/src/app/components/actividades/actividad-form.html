@@ -7,127 +7,231 @@
   <p class="actividad-form__conflicto" role="alert">{{ conflicto() }}</p>
   }
 
+  <!-- Tres filas y las plazas en pestañas (S230, maqueta de s229/f1b). -->
   <form [formGroup]="form" (ngSubmit)="guardar()">
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Código</span>
-      <input type="text" formControlName="codigo" class="actividad-form__input" />
-      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
-      <span class="actividad-form__error">El código es obligatorio.</span>
-      }
-    </label>
-
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Tipo</span>
-      <select formControlName="tipo" class="actividad-form__input actividad-form__tipo">
-        @for (t of tipos; track t[0]) {
-        <option [value]="t[0]">{{ t[1] }}</option>
+    <div class="actividad-form__fila actividad-form__fila--1" data-fila="1">
+      <label class="actividad-form__campo" [for]="id('codigo')">
+        <span class="actividad-form__etiqueta">Código</span>
+        <input type="text" formControlName="codigo" class="actividad-form__input" [id]="id('codigo')" />
+        @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+        <span class="actividad-form__error">El código es obligatorio.</span>
         }
-      </select>
-    </label>
+      </label>
 
-    <app-filtro-opciones
-      #fAsignatura
-      etiqueta="asignaturas"
-      [opciones]="asignaturas()"
-      [texto]="codigoDe"
-      [codigo]="codigoDe"
-      [seleccionados]="[form.controls.asignatura.value]"
-    />
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Asignatura (opcional)</span>
-      <select formControlName="asignatura" class="actividad-form__input">
-        <option value="">— varias (una por plaza) —</option>
-        @for (a of fAsignatura.visibles(); track a.id) {
-        <option [value]="a.codigo">{{ a.codigo }}</option>
-        }
-      </select>
-    </label>
+      <label class="actividad-form__campo" [for]="id('tipo')">
+        <span class="actividad-form__etiqueta">Tipo</span>
+        <select formControlName="tipo" class="actividad-form__input actividad-form__tipo" [id]="id('tipo')">
+          @for (t of tipos; track t[0]) {
+          <option [value]="t[0]">{{ t[1] }}</option>
+          }
+        </select>
+      </label>
 
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Duración (tramos)</span>
-      <input
-        type="number"
-        min="1"
-        formControlName="duracionTramos"
-        class="actividad-form__input"
-      />
-      @if (form.controls.duracionTramos.touched && form.controls.duracionTramos.invalid) {
-      <span class="actividad-form__error">La duración debe ser 1 o más.</span>
-      }
-    </label>
-
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Repeticiones por semana</span>
-      <input
-        type="number"
-        min="1"
-        formControlName="repeticionesPorSemana"
-        class="actividad-form__input"
-      />
-      @if (
-      form.controls.repeticionesPorSemana.touched &&
-      form.controls.repeticionesPorSemana.invalid
-      ) {
-      <span class="actividad-form__error">Las repeticiones deben ser 1 o más.</span>
-      }
-    </label>
-
-    <label class="actividad-form__campo">
-      <span class="actividad-form__etiqueta">Patrón temporal</span>
-      <select formControlName="patronTemporal" class="actividad-form__input">
-        @for (p of patrones; track p) {
-        <option [value]="p">{{ p }}</option>
-        }
-      </select>
-    </label>
-
-    <!-- Solo una CLASE puede pedir tutor (S201): fuera de ella ni se pinta ni viaja. -->
-    @if (form.controls.tipo.value === 'CLASE') {
-    <label class="actividad-form__campo actividad-form__campo--check">
-      <input type="checkbox" formControlName="requiereTutor" />
-      <span class="actividad-form__etiqueta">Requiere tutor</span>
-    </label>
-    }
-
-    <!-- El `track` va por el CONTROL, no por el índice. Con `track $index`, quitar una
-         fila intermedia deja el DOM mostrando la fila borrada y lo que el usuario teclee
-         entra en un FormGroup ya extraído del array: el cuerpo enviado sería el viejo,
-         sin error visible. Medido en ejecución antes de escribir esto. -->
-    <div formArrayName="plazas">
-      @for (fila of plazas.controls; track fila; let i = $index) {
-      <fieldset class="actividad-form__plaza" [formGroupName]="i">
-        <legend class="actividad-form__plaza-titulo">Plaza {{ i + 1 }}</legend>
-
+      <div class="actividad-form__con-filtro">
         <app-filtro-opciones
-          #fAsignaturaPlaza
+          #fAsignatura
           etiqueta="asignaturas"
           [opciones]="asignaturas()"
-          [texto]="codigoDe"
+          [texto]="textoAsignatura"
           [codigo]="codigoDe"
-          [seleccionados]="[fila.controls.asignatura.value]"
+          [seleccionados]="[form.controls.asignatura.value]"
         />
-        <label class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Asignatura de la plaza</span>
-          <select formControlName="asignatura" class="actividad-form__input">
-            <option value="" disabled>— elige —</option>
-            @for (a of fAsignaturaPlaza.visibles(); track a.id) {
-            <option [value]="a.codigo">{{ a.codigo }}</option>
+        <label class="actividad-form__campo" [for]="id('asignatura')">
+          <span class="actividad-form__etiqueta">Asignatura (opcional)</span>
+          <select formControlName="asignatura" class="actividad-form__input" [id]="id('asignatura')">
+            <option value="">— varias (una por plaza) —</option>
+            @for (a of fAsignatura.visibles(); track a.id) {
+            <option [value]="a.codigo">{{ textoAsignatura(a) }}</option>
             }
           </select>
-          @if (fila.controls.asignatura.touched && fila.controls.asignatura.invalid) {
-          <span class="actividad-form__error">La asignatura de la plaza es obligatoria.</span>
-          }
         </label>
+      </div>
+    </div>
 
-        <div class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Aula</span>
+    <div class="actividad-form__fila actividad-form__fila--2" data-fila="2">
+      <label class="actividad-form__campo" [for]="id('duracion')">
+        <span class="actividad-form__etiqueta">Duración (tramos)</span>
+        <input
+          type="number"
+          min="1"
+          formControlName="duracionTramos"
+          class="actividad-form__input"
+          [id]="id('duracion')"
+        />
+        @if (form.controls.duracionTramos.touched && form.controls.duracionTramos.invalid) {
+        <span class="actividad-form__error">La duración debe ser 1 o más.</span>
+        }
+      </label>
+
+      <label class="actividad-form__campo" [for]="id('repeticiones')">
+        <span class="actividad-form__etiqueta">Repeticiones por semana</span>
+        <input
+          type="number"
+          min="1"
+          formControlName="repeticionesPorSemana"
+          class="actividad-form__input"
+          [id]="id('repeticiones')"
+        />
+        @if (
+        form.controls.repeticionesPorSemana.touched &&
+        form.controls.repeticionesPorSemana.invalid
+        ) {
+        <span class="actividad-form__error">Las repeticiones deben ser 1 o más.</span>
+        }
+      </label>
+
+      <label class="actividad-form__campo" [for]="id('patron')">
+        <span class="actividad-form__etiqueta">Patrón temporal</span>
+        <select formControlName="patronTemporal" class="actividad-form__input" [id]="id('patron')">
+          @for (p of patrones; track p) {
+          <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </label>
+
+      <!-- Solo una CLASE puede pedir tutor (S201): fuera de ella ni se pinta ni viaja. -->
+      @if (form.controls.tipo.value === 'CLASE') {
+      <label class="actividad-form__campo actividad-form__campo--check" [for]="id('requiere-tutor')">
+        <input type="checkbox" formControlName="requiereTutor" [id]="id('requiere-tutor')" />
+        <span class="actividad-form__etiqueta">Requiere tutor</span>
+      </label>
+      }
+    </div>
+
+    <div class="plazas" data-fila="3" formArrayName="plazas">
+      <span class="plazas__titulo" [id]="id('plazas')">Plazas</span>
+      <div class="plazas__pestanas" role="tablist" [attr.aria-labelledby]="id('plazas')">
+        @for (fila of plazas.controls; track fila; let i = $index) {
+        <button
+          type="button"
+          role="tab"
+          class="plazas__pestana"
+          [id]="id('pestana', i)"
+          [attr.data-plaza]="i"
+          [attr.aria-selected]="i === activa()"
+          [attr.aria-controls]="id('panel', i)"
+          (click)="activar(i)"
+        >
+          <span>{{ i + 1 }} · {{ fila.controls.asignatura.value || '—' }}</span>
+          @if (plazasConI2.includes(i)) {
+          <span class="plazas__punto" data-i2="true" title="Subgrupo repetido en otra plaza" aria-label="subgrupo repetido"></span>
+          }
+          @if (plazaConErrores(fila)) {
+          <span class="plazas__punto" data-invalida="true" title="Hay campos por corregir en esta plaza" aria-label="campos por corregir"></span>
+          }
+        </button>
+        }
+        <button
+          type="button"
+          class="plazas__pestana plazas__pestana--nueva"
+          aria-label="Añadir plaza"
+          title="Añadir plaza"
+          (click)="anadirPlaza()"
+        >+</button>
+      </div>
+
+      <!-- El `track` va por el CONTROL, no por el índice. Con `track $index`, quitar una
+           fila intermedia deja el DOM mostrando la fila borrada y lo que el usuario teclee
+           entra en un FormGroup ya extraído del array: el cuerpo enviado sería el viejo,
+           sin error visible. Medido en ejecución antes de escribir esto. Solo se pinta la
+           plaza de la pestaña activa. -->
+      @for (fila of plazas.controls; track fila; let i = $index) {
+      @if (i === activa()) {
+      <fieldset
+        class="actividad-form__plaza"
+        role="tabpanel"
+        [formGroupName]="i"
+        [id]="id('panel', i)"
+        [attr.data-panel]="i"
+        [attr.aria-labelledby]="id('pestana', i)"
+      >
+        <!-- Asignatura de la plaza y, a la derecha en la misma línea, «Quitar esta plaza». -->
+        <div class="actividad-form__plaza-cabecera">
+          <div class="actividad-form__con-filtro">
+            <app-filtro-opciones
+              #fAsignaturaPlaza
+              etiqueta="asignaturas"
+              [opciones]="asignaturas()"
+              [texto]="textoAsignatura"
+              [codigo]="codigoDe"
+              [seleccionados]="[fila.controls.asignatura.value]"
+            />
+            <label class="actividad-form__campo" [for]="id('asignatura', i)">
+              <span class="actividad-form__etiqueta">Asignatura de la plaza</span>
+              <select formControlName="asignatura" class="actividad-form__input" [id]="id('asignatura', i)">
+                <option value="" disabled>— elige —</option>
+                @for (a of fAsignaturaPlaza.visibles(); track a.id) {
+                <option [value]="a.codigo">{{ textoAsignatura(a) }}</option>
+                }
+              </select>
+              @if (fila.controls.asignatura.touched && fila.controls.asignatura.invalid) {
+              <span class="actividad-form__error">La asignatura de la plaza es obligatoria.</span>
+              }
+            </label>
+          </div>
+          <div class="actividad-form__plaza-acciones">
+            <button
+              type="button"
+              class="actividad-form__quitar-plaza"
+              [disabled]="plazas.length === 1"
+              (click)="quitarPlaza(i)"
+            >
+              Quitar esta plaza
+            </button>
+          </div>
+        </div>
+
+        <div class="actividad-form__campo" data-bloque="profesores">
+          <span class="actividad-form__etiqueta" [id]="id('profesores', i)">Profesores</span>
+          <app-lista-doble
+            formControlName="profesores"
+            nombre="profesores"
+            etiqueta="profesores"
+            [rotuloId]="id('profesores', i)"
+            [opciones]="profesores()"
+            [texto]="textoProfesor"
+            [codigo]="codigoDe"
+            [filas]="filasLista"
+          />
+          @if (fila.controls.profesores.touched && fila.controls.profesores.invalid) {
+          <span class="actividad-form__error">Elige al menos un profesor.</span>
+          }
+        </div>
+
+        <!-- Subgrupos solo en una CLASE (S201): una reunión o una función no tiene alumnos. -->
+        @if (form.controls.tipo.value === 'CLASE') {
+        <div class="actividad-form__campo" data-bloque="subgrupos">
+          <span class="actividad-form__etiqueta" [id]="id('subgrupos', i)">Subgrupos</span>
+          <app-lista-doble
+            formControlName="subgrupos"
+            nombre="subgrupos"
+            etiqueta="subgrupos"
+            [rotuloId]="id('subgrupos', i)"
+            [opciones]="subgrupos()"
+            [texto]="codigoDe"
+            [codigo]="codigoDe"
+            [filas]="filasLista"
+          />
+          @if (fila.controls.subgrupos.touched && fila.controls.subgrupos.invalid) {
+          <span class="actividad-form__error">Una clase necesita al menos un subgrupo.</span>
+          }
+        </div>
+        }
+
+        <div
+          class="actividad-form__campo"
+          data-bloque="modo-aula"
+          role="radiogroup"
+          [attr.aria-labelledby]="id('aula', i)"
+        >
+          <span class="actividad-form__etiqueta" [id]="id('aula', i)">Aula</span>
           <label class="actividad-form__radio">
             <input type="radio" formControlName="modoAula" value="FIJA" />
-            Aula fija
+            Fija
           </label>
           <label class="actividad-form__radio">
             <input type="radio" formControlName="modoAula" value="CANDIDATAS" />
-            Aulas candidatas
+            Candidatas
           </label>
           <!-- Sin aula escrita: en una CLASE la elige el generador (S207); en una reunión o una
                función no hay aula (S201). Mismo valor de modo, distinta etiqueta. -->
@@ -138,139 +242,55 @@
         </div>
 
         @if (fila.controls.modoAula.value === 'FIJA') {
-        <app-filtro-opciones
-          #fAulaFija
-          etiqueta="aulas"
-          [opciones]="aulas()"
-          [texto]="textoAula"
-          [codigo]="codigoDe"
-          [seleccionados]="[fila.controls.aulaFija.value]"
-        />
-        <label class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Aula fija</span>
-          <select
-            formControlName="aulaFija"
-            class="actividad-form__input actividad-form__aula-fija"
-          >
-            <option value="" disabled>— elige —</option>
-            @for (aula of fAulaFija.visibles(); track aula.id) {
-            <option [value]="aula.codigo">{{ aula.codigo }} ({{ aula.tipo }})</option>
-            }
-          </select>
-          @if (fila.controls.aulaFija.touched && fila.controls.aulaFija.invalid) {
-          <span class="actividad-form__error">Elige un aula.</span>
-          }
-        </label>
-        } @else if (fila.controls.modoAula.value === 'CANDIDATAS') {
-        <app-filtro-opciones
-          #fAulasCandidatas
-          etiqueta="aulas candidatas"
-          [opciones]="aulas()"
-          [texto]="textoAula"
-          [codigo]="codigoDe"
-          [seleccionados]="seleccionados(fila, 'aulasCandidatas')"
-        />
-        <label class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Aulas candidatas</span>
-          <select
-            multiple
-            class="actividad-form__input actividad-form__multiple actividad-form__candidatas"
-            (change)="alSeleccionar($event, fila, 'aulasCandidatas')"
-          >
-            @for (aula of fAulasCandidatas.visibles(); track aula.id) {
-            <option
-              [value]="aula.codigo"
-              [selected]="seleccionados(fila, 'aulasCandidatas').includes(aula.codigo)"
+        <div class="actividad-form__con-filtro">
+          <app-filtro-opciones
+            #fAulaFija
+            etiqueta="aulas"
+            [opciones]="aulas()"
+            [texto]="textoAula"
+            [codigo]="codigoDe"
+            [seleccionados]="[fila.controls.aulaFija.value]"
+          />
+          <label class="actividad-form__campo actividad-form__campo--aula-fija" [for]="id('aula-fija', i)">
+            <span class="actividad-form__etiqueta">Aula fija</span>
+            <select
+              formControlName="aulaFija"
+              class="actividad-form__input actividad-form__aula-fija"
+              [id]="id('aula-fija', i)"
             >
-              {{ aula.codigo }} ({{ aula.tipo }})
-            </option>
+              <option value="" disabled>— elige —</option>
+              @for (aula of fAulaFija.visibles(); track aula.id) {
+              <option [value]="aula.codigo">{{ textoAula(aula) }}</option>
+              }
+            </select>
+            @if (fila.controls.aulaFija.touched && fila.controls.aulaFija.invalid) {
+            <span class="actividad-form__error">Elige un aula.</span>
             }
-          </select>
+          </label>
+        </div>
+        } @else if (fila.controls.modoAula.value === 'CANDIDATAS') {
+        <div class="actividad-form__campo actividad-form__candidatas" data-bloque="aulas">
+          <span class="actividad-form__etiqueta" [id]="id('candidatas', i)">Aulas candidatas</span>
+          <app-lista-doble
+            formControlName="aulasCandidatas"
+            nombre="aulas"
+            etiqueta="aulas candidatas"
+            [rotuloId]="id('candidatas', i)"
+            [opciones]="aulas()"
+            [texto]="textoAula"
+            [codigo]="codigoDe"
+            [filas]="filasLista"
+          />
           @if (fila.controls.aulasCandidatas.touched && fila.controls.aulasCandidatas.invalid) {
           <span class="actividad-form__error">Elige al menos un aula candidata.</span>
           }
-        </label>
-        }
-
-        <app-filtro-opciones
-          #fProfesores
-          etiqueta="profesores"
-          [opciones]="profesores()"
-          [texto]="textoProfesor"
-          [codigo]="codigoDe"
-          [seleccionados]="seleccionados(fila, 'profesores')"
-        />
-        <label class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Profesores</span>
-          <select
-            multiple
-            class="actividad-form__input actividad-form__multiple actividad-form__profesores"
-            (change)="alSeleccionar($event, fila, 'profesores')"
-          >
-            @for (p of fProfesores.visibles(); track p.id) {
-            <option
-              [value]="p.codigo"
-              [selected]="seleccionados(fila, 'profesores').includes(p.codigo)"
-            >
-              {{ textoProfesor(p) }}
-            </option>
-            }
-          </select>
-          @if (fila.controls.profesores.touched && fila.controls.profesores.invalid) {
-          <span class="actividad-form__error">Elige al menos un profesor.</span>
-          }
-        </label>
-
-        <!-- Subgrupos solo en una CLASE (S201): una reunión o una función no tiene alumnos. -->
-        @if (form.controls.tipo.value === 'CLASE') {
-        <app-filtro-opciones
-          #fSubgrupos
-          etiqueta="subgrupos"
-          [opciones]="subgrupos()"
-          [texto]="codigoDe"
-          [codigo]="codigoDe"
-          [seleccionados]="seleccionados(fila, 'subgrupos')"
-        />
-        <label class="actividad-form__campo">
-          <span class="actividad-form__etiqueta">Subgrupos</span>
-          <select
-            multiple
-            class="actividad-form__input actividad-form__multiple actividad-form__subgrupos"
-            (change)="alSeleccionar($event, fila, 'subgrupos')"
-          >
-            @for (s of fSubgrupos.visibles(); track s.id) {
-            <option
-              [value]="s.codigo"
-              [selected]="seleccionados(fila, 'subgrupos').includes(s.codigo)"
-            >
-              {{ s.codigo }}
-            </option>
-            }
-          </select>
-          @if (fila.controls.subgrupos.touched && fila.controls.subgrupos.invalid) {
-          <span class="actividad-form__error">Una clase necesita al menos un subgrupo.</span>
-          }
-        </label>
-        }
-
-        <div class="actividad-form__plaza-acciones">
-          <button
-            type="button"
-            class="actividad-form__quitar-plaza"
-            [disabled]="plazas.length === 1"
-            (click)="quitarPlaza(i)"
-          >
-            Quitar plaza
-          </button>
         </div>
+        } @else if (form.controls.tipo.value === 'CLASE') {
+        <p class="actividad-form__nota-aula" data-nota="generador">El generador elegirá el aula con las reglas del centro.</p>
+        }
       </fieldset>
       }
-
-      <div class="actividad-form__plaza-acciones">
-        <button type="button" class="actividad-form__anadir-plaza" (click)="anadirPlaza()">
-          Añadir plaza
-        </button>
-      </div>
+      }
     </div>
 
     <!-- I2. Condicionado al error CONCRETO del array, no a `plazas.invalid`: los errores

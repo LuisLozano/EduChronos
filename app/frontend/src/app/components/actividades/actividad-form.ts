@@ -30,6 +30,7 @@ import { Aula } from '../../models/aula.model';
 import { Profesor } from '../../models/profesor.model';
 import { Subgrupo } from '../../models/subgrupo.model';
 import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { ListaDoble } from '../lista-doble/lista-doble';
 
 /** Validator: un `string[]` debe tener al menos un elemento. `Validators.required` no
  *  sirve para esto: da por válido un array vacío (lo trata como valor presente).
@@ -65,6 +66,27 @@ function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
   return null;
 }
 
+/**
+ * Plazas implicadas en I2 (S230, condición 2 de O-acabado-pre-prueba): las que contienen algún
+ * subgrupo que aparece también en otra. Misma semántica que {@link subgruposDisjuntos} —un `Set`
+ * por plaza, sin normalizar la caja—, para que la pestaña marcada y el aviso digan lo mismo. Se
+ * calcula aparte y no dentro del validador: el validador decide si se envía, esto solo marca.
+ */
+export function plazasConSubgrupoRepetido(subgruposPorPlaza: readonly (readonly string[])[]): number[] {
+  const plazasDe = new Map<string, number>();
+  for (const subgrupos of subgruposPorPlaza) {
+    for (const codigo of new Set(subgrupos)) {
+      plazasDe.set(codigo, (plazasDe.get(codigo) ?? 0) + 1);
+    }
+  }
+  return subgruposPorPlaza.flatMap((subgrupos, i) =>
+    subgrupos.some((codigo) => (plazasDe.get(codigo) ?? 0) > 1) ? [i] : [],
+  );
+}
+
+/** Diálogos de actividad creados, para que los ids de sus controles no se repitan. */
+let instancias = 0;
+
 /** Rama de aula que el usuario ha elegido. Control de UI: NO viaja al backend. NINGUNA es la
  *  plaza sin aula escrita: en una CLASE, «La elige el generador» (S207); en una reunión o una
  *  función, «Sin aula» (S201). Se envía igual en los dos casos. */
@@ -92,8 +114,8 @@ type PlazaFila = FormGroup<{
 /**
  * Alta y edición de una ACTIVIDAD con N plazas, en diálogo. `DIALOG_DATA` es la actividad
  * a editar, o `null` para alta. Cierra con `true` si se guardó (la lista recarga), con
- * `undefined` si se canceló. Molde de `SubgrupoForm` para los multiselects poblados por
- * red y de `Jornada` para el `FormArray` y para el 400/409 por caminos distintos.
+ * `undefined` si se canceló. Molde de `SubgrupoForm` para las selecciones múltiples
+ * pobladas por red y de `Jornada` para el `FormArray` y para el 400/409 por caminos distintos.
  *
  * <p><b>LISTA DE PLAZAS VARIABLE (trozo B).</b> El usuario añade y quita filas. Toda fila
  * nace por la fábrica {@link #crearPlaza}, incluidas las de la precarga: no se clona la
@@ -130,10 +152,18 @@ type PlazaFila = FormGroup<{
  * el 400 es «corrige el formulario» y va inline; el 409 no se arregla tocando el
  * formulario —hay horario o bloqueos colgando— así que va en aviso rojo aparte. El 409
  * solo puede venir del PUT: un alta no tiene dependientes.
+ *
+ * <p><b>Disposición de S230</b> (C-editor-plazas, condición 2 de O-acabado-pre-prueba; maqueta
+ * de `s229/f1b`): tres filas y UNA PESTAÑA POR PLAZA, con solo la plaza activa pintada
+ * ({@link activa}). «+» añade y activa la nueva; «Quitar esta plaza» deja activa la vecina.
+ * Profesores, subgrupos y aulas candidatas se eligen con {@link ListaDoble}. Una pestaña lleva
+ * un punto rojo si su plaza está en I2 ({@link plazasConI2}) o si tiene un campo inválido ya
+ * tocado ({@link plazaConErrores}): sin él, un error en otra pestaña dejaría «Guardar» sin
+ * explicación.
  */
 @Component({
   selector: 'app-actividad-form',
-  imports: [ReactiveFormsModule, FiltroOpciones],
+  imports: [ReactiveFormsModule, FiltroOpciones, ListaDoble],
   templateUrl: './actividad-form.html',
   styleUrl: './actividad-form.css',
 })
@@ -168,12 +198,28 @@ export class ActividadForm implements OnInit {
 
   protected readonly patrones = PATRONES_TEMPORALES;
 
+  /** Filas visibles de las listas dobles de este diálogo (maqueta de `s229/f1b`). */
+  protected readonly filasLista = 5;
+
+  /** Plaza cuya pestaña está abierta (S230): es la única que se pinta. */
+  protected readonly activa = signal(0);
+
+  /** Prefijo de los ids de este diálogo (S230, decisión 11): `id` y `label for` únicos. */
+  private readonly prefijoId = `actividad-form-${++instancias}`;
+
   /** Opciones del select de tipo: el código que viaja y su texto visible. */
   protected readonly tipos = Object.entries(ETIQUETA_TIPO_ACTIVIDAD) as [TipoActividad, string][];
 
   /** Accesores del filtro de selectores (S185): código y texto visible de cada opción. */
   protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
   protected readonly textoAula = (a: Aula): string => `${a.codigo} (${a.tipo})`;
+  /**
+   * Texto de una asignatura en los dos selectores (S230, condición 4 de O-acabado-pre-prueba):
+   * «código — nombre», como {@link textoProfesor}. Es también lo que recorre su filtro, así que
+   * se encuentra por el nombre. Sin nombre, solo el código.
+   */
+  protected readonly textoAsignatura = (a: Asignatura): string =>
+    a.nombreCompleto?.trim() ? `${a.codigo} — ${a.nombreCompleto}` : a.codigo;
   /**
    * Texto de un profesor en el selector de la plaza (S227, condición 10): el código solo no
    * dice quién es. Es también lo que recorre el filtro, así que se encuentra por nombre. La
@@ -310,9 +356,15 @@ export class ActividadForm implements OnInit {
     return this.form.controls.tipo.value === 'CLASE' ? 'La elige el generador' : 'Sin aula';
   }
 
-  /** Añade una fila VACÍA al final. Nace por la fábrica: no hereda nada de la anterior. */
+  /** Añade una fila VACÍA al final y abre su pestaña. Nace por la fábrica: no hereda nada de la
+   *  anterior. */
   protected anadirPlaza(): void {
     this.plazas.push(this.crearPlaza());
+    this.activa.set(this.plazas.length - 1);
+  }
+
+  protected activar(indice: number): void {
+    this.activa.set(indice);
   }
 
   /**
@@ -325,6 +377,8 @@ export class ActividadForm implements OnInit {
       return;
     }
     this.plazas.removeAt(indice);
+    // La vecina: la que ocupa ahora su sitio, o la anterior si era la última (maqueta).
+    this.activa.set(Math.min(indice, this.plazas.length - 1));
   }
 
   /**
@@ -416,29 +470,26 @@ export class ActividadForm implements OnInit {
     return (this.plazas.errors?.['subgrupoRepetido'] as string | undefined) ?? '';
   }
 
-  /**
-   * Lee la selección de un `<select multiple>` y la vuelca al control indicado de la
-   * fila. Sustituye a la vinculación automática que el `<select>` único tiene por
-   * `formControlName` (molde `SubgrupoForm`, extendido para elegir fila y control).
-   */
-  protected alSeleccionar(
-    event: Event,
-    fila: PlazaFila,
-    campo: 'aulasCandidatas' | 'profesores' | 'subgrupos',
-  ): void {
-    const select = event.target as HTMLSelectElement;
-    const codigos = Array.from(select.selectedOptions).map((o) => o.value);
-    fila.controls[campo].setValue(codigos);
-    fila.controls[campo].markAsTouched();
+  /** Índices de las plazas cuya pestaña lleva la marca de I2. */
+  protected get plazasConI2(): number[] {
+    return plazasConSubgrupoRepetido(this.plazas.controls.map((f) => f.controls.subgrupos.value));
   }
 
-  /** Códigos seleccionados de un multiselect (el `<select multiple>` no refleja el valor
-   *  por reconciliación: el HTML pinta `[selected]` comparando contra esto). */
-  protected seleccionados(
-    fila: PlazaFila,
-    campo: 'aulasCandidatas' | 'profesores' | 'subgrupos',
-  ): string[] {
-    return fila.controls[campo].value;
+  /**
+   * Si la pestaña de la plaza lleva la marca de campos inválidos (S230, enmienda 4): inválida Y
+   * tocada, la misma regla que los mensajes de campo. «Guardar» con errores marca todo como
+   * tocado, así que después de intentarlo toda pestaña con un error queda marcada; una plaza
+   * recién añadida no nace marcada.
+   */
+  protected plazaConErrores(fila: PlazaFila): boolean {
+    return fila.invalid && fila.touched;
+  }
+
+  /** Id de un control del diálogo; con `plaza`, el de esa plaza. */
+  protected id(campo: string, plaza?: number): string {
+    return plaza === undefined
+      ? `${this.prefijoId}-${campo}`
+      : `${this.prefijoId}-plaza-${plaza}-${campo}`;
   }
 
   protected guardar(): void {
