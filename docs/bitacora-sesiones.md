@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S226. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S227. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S226). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S227). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10615,3 +10615,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) El contrato v1 afirmó que la jornada usaba la acción «guardar» sin volcar `JornadaService`; el contraste lo cazó (una parada). (2) El guion F1F2 mandaba retirar los mutantes con `git checkout`, que antes del commit habría borrado la implementación; Claude Code restauró desde copias, sin coste. (3) El guion M4 situó la autoprueba en `s224/f2/t0`, y está en `s224/f2/c1/medir/`; sin coste. (4) El contrato no previó que el aviso de entidad siguiera al cambiar de entidad; arreglado en `03349c7`. (5) El C0 se lanzó sin el push hecho; el sondeo de CI no encontró runs.
   SUITES. Solver 162, app 933 (+1), vitest 801 en 68 ficheros (+18), e2e 3 (en la CI), python 267 (sin ejecutar); bundle 636,94 kB (+3,04) en `ee86abe`. CI de `03349c7`: verde (`tests` #96).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 113 líneas del commit de cierre sin índice, 2 699 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 227 — `C-editor-actividad` y `C-duplicar-legible`: **`O-interfaz` TERMINADO, 11 de 11**. El usuario recorre el editor, cierra un acta de tres puntos que se aplica y aprueba, y el diálogo de duplicar pasa a decir qué falta.
+  TIPO. Configuración/UI, con M3 en la lógica del aviso y de la validación. Material en `/home/luis/educhronos-aceptacion/s227/` (t0, f1, f2, cierre/c0 y c1, con su MANIFIESTO.sha256).
+  HECHO. T0: la base de F3 de S222 en copia (`38b81f23…`) tiene 3 horarios y 2468 sesiones, así que el recorrido va sobre un curso duplicado desde la aplicación (2027/2028, en `s227/f1/datos/`). «Duplicar» no hacía nada con el nombre vacío (`s227/f1/diag-duplicar/`). Recorrido del usuario, cinco tareas completadas; acta en `s227/f2/t0/acta.md`. F2: `41e88e1` (editor más ancho y profesor con código y nombre), `78975a6` (aviso tras guardar con filtro) y `565609d` (duplicar: mensaje en cada campo y validación del nombre actual).
+  CRITERIO. Condiciones 10 y 11 cumplidas; la 11, añadida por el usuario. `O-interfaz` TERMINADO, 11 de 11; ficha a `gestion-historico.md` §1.
+  DECISIONES. M, N y O, del usuario (acta, condición 11 y cierre en una sola sesión); 17 del arquitecto, en `s227/cierre/c1/decisiones.txt`.
+  DEUDA. Se estrecha `D-actividad-ux` (selectores sin `id`, `for` ni `aria-*`; sin sede). `D-consejo-409-pegado`, sin sede. `D-asignatura-sin-nivel` recibe la observación del recorrido; no tiene entrada en el plan y su texto vive en §4. Instancia sin coste de `D-ng-serve-sin-literal`. No nace ninguna.
+  DEFECTOS. De Claude Code: órdenes con efecto fuera de lista sin parar (`rm -rf /tmp/s226-cierre` en el C1 de S226; `sed -i` sobre su script y ediciones con `python3` en F2 de S227), sin coste (norma 11 de M-guion); y dos citas desviadas de `cursos-dialogo.html` en el diagnóstico de F1, corregidas en el T0 de F2. Del arquitecto: ninguno con coste.
+  SUITES. vitest 814 en 68 ficheros (+13); solver 162, app 933, e2e 3 y python 267 sin cambios (sin backend; e2e no corrido en local, lo cubre la CI). Mutantes: 7 cazados (M2a, M2b, M3a, M3b, M4a, M4b, M4c); M3c retirado como código redundante. Bundle 638,86 kB (+1,92). CI: `56c6037` #97 en verde; `565609d` sin run propio: lo cubre `tests` #98 sobre `8b16fb9`, que lo contiene y solo añade documentación (medido en S228).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 130 líneas del commit de cierre sin índice, 2 503 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
