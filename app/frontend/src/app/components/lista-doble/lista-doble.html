@@ -1,0 +1,110 @@
+<div
+  class="lista-doble"
+  [class.lista-doble--bloqueada]="bloqueada()"
+  [attr.data-lista]="nombre() || null"
+  [attr.aria-disabled]="bloqueada() ? 'true' : null"
+  [style.--lista-doble-filas]="filas()"
+>
+  <div class="lista-doble__columna lista-doble__columna--elegidos">
+    <div class="lista-doble__cabecera">
+      <span class="lista-doble__titulo" data-titulo="elegidos" [id]="ids.tituloElegidos"
+        >Elegidos ({{ listaElegidos().length }})</span
+      >
+    </div>
+    <ul
+      class="lista-doble__lista"
+      role="listbox"
+      aria-multiselectable="true"
+      data-lado="elegidos"
+      [id]="ids.elegidos"
+      [attr.aria-labelledby]="nombradaPor(ids.tituloElegidos)"
+    >
+      @for (o of listaElegidos(); track codigo()(o)) {
+        <li
+          class="lista-doble__fila"
+          role="option"
+          [attr.aria-selected]="marcada('elegidos', codigo()(o))"
+          [attr.data-codigo]="codigo()(o)"
+          [title]="texto()(o)"
+          [attr.tabindex]="bloqueada() ? null : 0"
+          (click)="marcar('elegidos', codigo()(o))"
+          (dblclick)="mover('elegidos', codigo()(o))"
+          (keydown)="alTeclear($event, 'elegidos', codigo()(o))"
+        >{{ texto()(o) }}</li>
+      } @empty {
+        <li class="lista-doble__vacia">Ningún elemento elegido.</li>
+      }
+    </ul>
+  </div>
+
+  @if (!bloqueada()) {
+    <div class="lista-doble__botones">
+      <button
+        type="button"
+        class="lista-doble__anadir"
+        [disabled]="marcados().disponibles.size === 0"
+        (click)="mover('disponibles')"
+      >
+        ‹ Añadir
+      </button>
+      <button
+        type="button"
+        class="lista-doble__quitar"
+        [disabled]="marcados().elegidos.size === 0"
+        (click)="mover('elegidos')"
+      >
+        Quitar ›
+      </button>
+    </div>
+  }
+
+  <div class="lista-doble__columna lista-doble__columna--disponibles">
+    <div class="lista-doble__cabecera">
+      <span class="lista-doble__titulo" data-titulo="disponibles" [id]="ids.tituloDisponibles"
+        >Disponibles ({{ listaDisponibles().length }})</span
+      >
+      @if (filtroActivo()) {
+        <div class="filtro-opciones">
+          <label class="lista-doble__oculto" [for]="ids.filtro">Filtrar {{ etiqueta() }}</label>
+          <input
+            type="search"
+            class="filtro-opciones__campo"
+            placeholder="Filtrar…"
+            [id]="ids.filtro"
+            [value]="consulta()"
+            (input)="alEscribir($event)"
+          />
+          <span class="filtro-opciones__recuento" aria-live="polite">
+            {{ visiblesDisponibles().length }} de {{ listaDisponibles().length }}
+          </span>
+        </div>
+      }
+    </div>
+    <ul
+      class="lista-doble__lista"
+      role="listbox"
+      aria-multiselectable="true"
+      data-lado="disponibles"
+      [id]="ids.disponibles"
+      [attr.aria-labelledby]="nombradaPor(ids.tituloDisponibles)"
+    >
+      @for (o of visiblesDisponibles(); track codigo()(o)) {
+        <li
+          class="lista-doble__fila"
+          role="option"
+          [attr.aria-selected]="marcada('disponibles', codigo()(o))"
+          [attr.data-codigo]="codigo()(o)"
+          [title]="texto()(o)"
+          [attr.tabindex]="bloqueada() ? null : 0"
+          (click)="marcar('disponibles', codigo()(o))"
+          (dblclick)="mover('disponibles', codigo()(o))"
+          (keydown)="alTeclear($event, 'disponibles', codigo()(o))"
+        >{{ texto()(o) }}</li>
+      } @empty {
+        <li class="lista-doble__vacia">
+          {{ listaDisponibles().length ? 'Nada casa con el filtro.' : 'No quedan disponibles.' }}
+        </li>
+      }
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,121 @@
+/* Lista doble (S230), con los valores de la maqueta aprobada (s229/f1b/maquetas/css/maqueta.css).
+   Todo valor sale de los tokens de styles.css; los únicos números son multiplicadores. */
+:host {
+  display: block;
+}
+
+.lista-doble {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--e3);
+  align-items: stretch;
+}
+.lista-doble__columna {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.lista-doble__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e2);
+  min-height: calc(var(--tam-s) * var(--lh-normal) + 2 * var(--e1) + 2 * var(--borde-fino));
+  margin-bottom: var(--e1);
+}
+.lista-doble__titulo {
+  font-size: var(--tam-s);
+  font-weight: var(--peso-medio);
+}
+/* Filas visibles: input `filas` (8 por defecto); la lista desplaza dentro. Alto fijo para que
+   las dos columnas midan lo mismo aunque una esté vacía. */
+.lista-doble__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: calc(var(--lista-doble-filas, 8) * (var(--tam-s) * var(--lh-normal) + 2 * var(--e1)));
+  overflow-y: auto;
+  border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+}
+.lista-doble__fila {
+  padding: var(--e1) var(--e2);
+  font-size: var(--tam-s);
+  line-height: var(--lh-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  user-select: none;
+}
+.lista-doble__fila:hover {
+  background: var(--color-superficie-tenue);
+}
+.lista-doble__fila[aria-selected='true'] {
+  background: var(--color-acento-suave);
+  color: var(--color-acento-fuerte);
+}
+.lista-doble__fila:focus-visible {
+  outline: calc(2 * var(--borde-fino)) solid var(--color-acento);
+  outline-offset: calc(-2 * var(--borde-fino));
+}
+.lista-doble__vacia {
+  padding: var(--e2);
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
+.lista-doble__botones {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--e2);
+}
+.lista-doble__botones button {
+  white-space: nowrap;
+}
+/* BLOQUEADA: sin filtro ni botones (no se pintan) y sin interacción en las filas. */
+.lista-doble--bloqueada {
+  grid-template-columns: 1fr 1fr;
+}
+.lista-doble--bloqueada .lista-doble__lista {
+  background: var(--color-superficie-tenue);
+}
+.lista-doble--bloqueada .lista-doble__fila {
+  cursor: default;
+  color: var(--color-tinta-suave);
+  pointer-events: none;
+}
+
+/* Filtro: el marcado y los valores de filtro-opciones.css, que la encapsulación no comparte, con
+   los ajustes de la maqueta para la cabecera de Disponibles. */
+.filtro-opciones {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--e2);
+  font-size: var(--tam-s);
+}
+.filtro-opciones__campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--e1) var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  box-sizing: border-box;
+  font-size: var(--tam-s);
+}
+.filtro-opciones__recuento {
+  color: var(--color-tinta-suave);
+}
+/* El <label for> del filtro (enmienda 3): lo lee un lector de pantalla y no ocupa sitio, porque
+   la maqueta no lo pinta. */
+.lista-doble__oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
