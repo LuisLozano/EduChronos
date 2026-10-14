@@ -37,10 +37,11 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  *
  * <p><b>Los campos van por `formControlName`.</b> Es un atributo FUNCIONAL —lo
  * necesita el binding del formulario—, así que sobrevive a O-diseño; una clase
- * BEM es cosmética y puede no hacerlo. La excepción son los `<select multiple>`
+ * BEM es cosmética y puede no hacerlo. La excepción son las listas dobles
  * (ver abajo) y la plaza de la actividad, donde `formControlName="asignatura"`
  * existe DOS veces —la asignatura de la actividad y la de la plaza—: ahí el
- * localizador se acota primero al `<fieldset class="actividad-form__plaza">`.
+ * localizador se acota primero al `<fieldset class="actividad-form__plaza">`, que
+ * desde S230 es el panel de la pestaña abierta (solo se pinta ese).
  *
  * <p><b>MATIZ DE S123 sobre el párrafo anterior, porque la predicción no se
  * cumplió entera.</b> Elegir `formControlName` protegió de lo que decía —del
@@ -53,15 +54,13 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  * sobrevive a que la pantalla cambie de aspecto, no a que el elemento cambie de
  * sitio. Son dos ejes distintos y el segundo no tiene localizador que lo salve.
  *
- * <p><b>PUNTO DÉBIL CONOCIDO: los cuatro `<select multiple>`.</b> No tienen
- * `formControlName` —leen `(change)` → `selectedOptions` → `setValue`—, así que
- * hay que localizarlos por clase (`.subgrupo-form__multiple`,
- * `.actividad-form__profesores`, `.actividad-form__subgrupos`) y moverlos con
- * `selectOption()`, que SÍ dispara `change`. Cualquier alternativa que no lo
- * dispare (un `fill`, un `evaluate` que toque `selected` a mano) dejaría el
- * control del formulario VACÍO EN SILENCIO: la opción se vería marcada en el
- * navegador y el cuerpo del POST iría sin profesores ni subgrupos. Es la
- * fragilidad de este spec y está aquí escrita para que quien la rompa lo sepa.
+ * <p><b>Las listas dobles (S230)</b> sustituyen a los cuatro `<select multiple>`
+ * que hubo hasta S229. Se localizan por su `data-lista` («grupos», «profesores»,
+ * «subgrupos») y se elige con el gesto del usuario: doble clic en la fila de
+ * Disponibles (`li[data-codigo]`), que la pasa a Elegidos y avisa al control del
+ * formulario. Lo que sí sigue valiendo de la advertencia de entonces: tocar el DOM
+ * por debajo del gesto (un `evaluate` que mueva nodos) no llega al control, y el
+ * cuerpo del POST iría sin profesores ni subgrupos.
  *
  * <p><b>La app es ZONELESS</b>: el DOM repinta en el frame siguiente al clic. Por
  * eso todo aserto es con reintento (`expect(...).toHaveCount` / `toBeVisible`) y
@@ -177,10 +176,11 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
 
   await irA(page, 'Subgrupos', 'app-subgrupo-lista');
 
-  // 4. Subgrupo. Primer `<select multiple>` sin formControlName: por clase.
+  // 4. Subgrupo. Los grupos, con la lista doble: doble clic en Disponibles.
   const subgrupo = await abrir(page, 'Nuevo subgrupo');
   await subgrupo.locator('[formControlName="codigo"]').fill('1ESOA-TODO');
-  await subgrupo.locator('.subgrupo-form__multiple').selectOption(['1ESOA']);
+  await subgrupo.locator('[data-lista="grupos"] [data-lado="disponibles"] li[data-codigo="1ESOA"]').dblclick();
+  await expect(subgrupo.locator('[data-lista="grupos"] [data-lado="elegidos"] li[data-codigo="1ESOA"]')).toHaveCount(1);
   await guardar(page);
 
   await irA(page, 'Profesores', 'app-profesor-lista');
@@ -230,8 +230,10 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // `modoAula` no se toca: la fábrica de plazas nace en 'FIJA', así que el select de
   // aula fija YA está renderizado y no hay que esperar a ningún repintado del XOR.
   await plaza.locator('[formControlName="aulaFija"]').selectOption('A1');
-  await plaza.locator('.actividad-form__profesores').selectOption(['MAT1']);
-  await plaza.locator('.actividad-form__subgrupos').selectOption(['1ESOA-TODO']);
+  await plaza.locator('[data-lista="profesores"] [data-lado="disponibles"] li[data-codigo="MAT1"]').dblclick();
+  await expect(plaza.locator('[data-lista="profesores"] [data-lado="elegidos"] li[data-codigo="MAT1"]')).toHaveCount(1);
+  await plaza.locator('[data-lista="subgrupos"] [data-lado="disponibles"] li[data-codigo="1ESOA-TODO"]').dblclick();
+  await expect(plaza.locator('[data-lista="subgrupos"] [data-lado="elegidos"] li[data-codigo="1ESOA-TODO"]')).toHaveCount(1);
   await guardar(page);
 
   // 8b. Un centro sin guardias (S212, C-dato-guardias): mínimo de profesores de guardia por
