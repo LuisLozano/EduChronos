@@ -145,6 +145,17 @@
         [attr.data-panel]="i"
         [attr.aria-labelledby]="id('pestana', i)"
       >
+        <!-- I2, arriba del panel y justo bajo las pestañas (S230-F4, R2): a 1920×1080 se ve sin
+             desplazarse. Condicionado al error CONCRETO del array, no a `plazas.invalid`: los
+             errores de las filas propagan al array, y con `invalid` este aviso saldría cuando lo
+             que falta es un profesor. -->
+        @if (subgrupoRepetido) {
+        <p class="actividad-form__error-i2" role="alert">
+          El subgrupo {{ subgrupoRepetido }} aparece en más de una plaza. Cada subgrupo puede
+          estar en una sola plaza de la actividad: no puede asistir a dos sesiones a la vez.
+        </p>
+        }
+
         <!-- Asignatura de la plaza y, a la derecha en la misma línea, «Quitar esta plaza». -->
         <div class="actividad-form__plaza-cabecera">
           <div class="actividad-form__con-filtro">
@@ -292,16 +303,6 @@
       }
       }
     </div>
-
-    <!-- I2. Condicionado al error CONCRETO del array, no a `plazas.invalid`: los errores
-         de las filas propagan al array, y con `invalid` este aviso saldría cuando lo que
-         falta es un profesor. -->
-    @if (subgrupoRepetido) {
-    <p class="actividad-form__error-i2" role="alert">
-      El subgrupo {{ subgrupoRepetido }} aparece en más de una plaza. Cada subgrupo puede
-      estar en una sola plaza de la actividad: no puede asistir a dos sesiones a la vez.
-    </p>
-    }
 
     @if (error()) {
     <p class="actividad-form__error-servidor" role="alert">{{ error() }}</p>

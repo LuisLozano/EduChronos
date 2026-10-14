@@ -1423,6 +1423,17 @@ describe('ActividadForm', () => {
     expect(pestanasCon('invalida')).toEqual([]);
   });
 
+  it('R2 el aviso de I2 es lo primero del panel, justo bajo las pestañas', async () => {
+    montar(TRES_PLAZAS);
+    await abrirPestana(2);
+    await elegirEnLista('subgrupos', '1ºA-Completo');
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.actividad-form__plaza') as HTMLElement;
+    expect(panel.firstElementChild!.classList).toContain('actividad-form__error-i2');
+    expect(panel.previousElementSibling!.classList).toContain('plazas__pestanas');
+    expect(fixture.nativeElement.querySelectorAll('.actividad-form__error-i2').length).toBe(1);
+  });
+
   it('P6b DISCRIMINANTE de P6: con todo válido «Guardar» envía y no marca nada', () => {
     montar(TRES_PLAZAS);
     instancia().guardar();

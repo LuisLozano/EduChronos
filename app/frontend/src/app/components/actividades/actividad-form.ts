@@ -159,7 +159,7 @@ type PlazaFila = FormGroup<{
  * Profesores, subgrupos y aulas candidatas se eligen con {@link ListaDoble}. Una pestaña lleva
  * un punto rojo si su plaza está en I2 ({@link plazasConI2}) o si tiene un campo inválido
  * ({@link plazaConErrores}, regla de F4): sin él, un error en otra pestaña dejaría «Guardar» sin
- * explicación.
+ * explicación. El aviso de I2 va arriba del panel, a la vista sin desplazarse.
  */
 @Component({
   selector: 'app-actividad-form',
