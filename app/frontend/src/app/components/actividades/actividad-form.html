@@ -116,7 +116,7 @@
           @if (plazasConI2.includes(i)) {
           <span class="plazas__punto" data-i2="true" title="Subgrupo repetido en otra plaza" aria-label="subgrupo repetido"></span>
           }
-          @if (plazaConErrores(fila)) {
+          @if (plazaConErrores(fila, i)) {
           <span class="plazas__punto" data-invalida="true" title="Hay campos por corregir en esta plaza" aria-label="campos por corregir"></span>
           }
         </button>

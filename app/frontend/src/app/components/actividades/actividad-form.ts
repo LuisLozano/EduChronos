@@ -157,8 +157,8 @@ type PlazaFila = FormGroup<{
  * de `s229/f1b`): tres filas y UNA PESTAÑA POR PLAZA, con solo la plaza activa pintada
  * ({@link activa}). «+» añade y activa la nueva; «Quitar esta plaza» deja activa la vecina.
  * Profesores, subgrupos y aulas candidatas se eligen con {@link ListaDoble}. Una pestaña lleva
- * un punto rojo si su plaza está en I2 ({@link plazasConI2}) o si tiene un campo inválido ya
- * tocado ({@link plazaConErrores}): sin él, un error en otra pestaña dejaría «Guardar» sin
+ * un punto rojo si su plaza está en I2 ({@link plazasConI2}) o si tiene un campo inválido
+ * ({@link plazaConErrores}, regla de F4): sin él, un error en otra pestaña dejaría «Guardar» sin
  * explicación.
  */
 @Component({
@@ -203,6 +203,10 @@ export class ActividadForm implements OnInit {
 
   /** Plaza cuya pestaña está abierta (S230): es la única que se pinta. */
   protected readonly activa = signal(0);
+
+  /** Si ya se ha pulsado «Guardar» alguna vez (S230-F4, R1): desde entonces se marca toda plaza
+   *  inválida, la abierta incluida. Señal porque la marca se pinta desde ella (zoneless). */
+  private readonly intentoDeGuardar = signal(false);
 
   /** Prefijo de los ids de este diálogo (S230, decisión 11): `id` y `label for` únicos. */
   private readonly prefijoId = `actividad-form-${++instancias}`;
@@ -476,13 +480,13 @@ export class ActividadForm implements OnInit {
   }
 
   /**
-   * Si la pestaña de la plaza lleva la marca de campos inválidos (S230, enmienda 4): inválida Y
-   * tocada, la misma regla que los mensajes de campo. «Guardar» con errores marca todo como
-   * tocado, así que después de intentarlo toda pestaña con un error queda marcada; una plaza
-   * recién añadida no nace marcada.
+   * Si la pestaña de la plaza lleva la marca de campos inválidos (S230-F4, R1, decidido por el
+   * usuario): la plaza es inválida y, o bien NO es la abierta y está tocada, o bien ya se ha
+   * intentado guardar. En la abierta, antes de guardar, no hay marca: sus errores se ven en su
+   * sitio. Una plaza recién añadida y sin tocar no se marca hasta el primer «Guardar».
    */
-  protected plazaConErrores(fila: PlazaFila): boolean {
-    return fila.invalid && fila.touched;
+  protected plazaConErrores(fila: PlazaFila, indice: number): boolean {
+    return fila.invalid && ((indice !== this.activa() && fila.touched) || this.intentoDeGuardar());
   }
 
   /** Id de un control del diálogo; con `plaza`, el de esa plaza. */
@@ -493,6 +497,7 @@ export class ActividadForm implements OnInit {
   }
 
   protected guardar(): void {
+    this.intentoDeGuardar.set(true);
     if (this.form.invalid) {
       // Incluye el error de I2: el validador del array pone `form.invalid` a true, así
       // que esta misma guarda corta el envío sin comprobación aparte.

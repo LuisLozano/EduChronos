@@ -1370,7 +1370,7 @@ describe('ActividadForm', () => {
   it('P6 una plaza con un campo inválido marca su pestaña tras «Guardar»; la recién añadida no nace marcada', async () => {
     montar(TRES_PLAZAS);
     await anadirFila();
-    // Nueva y vacía, pero sin tocar: sin marca (enmienda 4).
+    // Nueva y vacía, sin tocar y abierta: sin marca (R1 de F4).
     expect(pestanasCon('invalida')).toEqual([]);
 
     await abrirPestana(0);
@@ -1379,6 +1379,48 @@ describe('ActividadForm', () => {
     // El error está en la plaza 4, que no es la abierta: su pestaña lo dice.
     expect(pestanasCon('invalida')).toEqual([3]);
     http.expectNone('/api/actividades/30');
+  });
+
+  // S230-F4, R1 (decidido por el usuario): marca si la plaza es inválida y (no es la abierta y está
+  // tocada) o (ya se ha intentado guardar).
+
+  it('R1a en la pestaña ABIERTA, tocada e inválida, sin guardar: sin marca (sus errores se ven en su sitio)', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila();
+    await elegirEnLista('profesores', 'MATA'); // la toca; sigue sin asignatura ni aula
+    fixture.detectChanges();
+    expect(instancia().plazas.at(3).controls['profesores'].value).toEqual(['MATA']);
+    expect(pestanaActiva()).toBe(3);
+    expect(pestanasCon('invalida')).toEqual([]);
+  });
+
+  it('R1b al cambiar de pestaña, la plaza tocada e inválida que se deja lleva la marca', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila();
+    await elegirEnLista('profesores', 'MATA');
+    await abrirPestana(0);
+    expect(pestanasCon('invalida')).toEqual([3]);
+    // Y al volver a ella, abierta otra vez, la marca se va.
+    await abrirPestana(3);
+    expect(pestanasCon('invalida')).toEqual([]);
+  });
+
+  it('R1c tras «Guardar» se marcan TODAS las inválidas, la abierta incluida', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila(); // plaza 4, sin tocar
+    await anadirFila(); // plaza 5, sin tocar y abierta
+    instancia().guardar();
+    fixture.detectChanges();
+    expect(pestanaActiva()).toBe(4);
+    expect(pestanasCon('invalida')).toEqual([3, 4]);
+    http.expectNone('/api/actividades/30');
+  });
+
+  it('R1d DISCRIMINANTE: una plaza inválida SIN tocar y no abierta no se marca antes de guardar', async () => {
+    montar(TRES_PLAZAS);
+    await anadirFila();
+    await abrirPestana(0);
+    expect(pestanasCon('invalida')).toEqual([]);
   });
 
   it('P6b DISCRIMINANTE de P6: con todo válido «Guardar» envía y no marca nada', () => {
