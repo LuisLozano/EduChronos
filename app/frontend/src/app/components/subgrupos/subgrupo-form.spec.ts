@@ -19,9 +19,9 @@ import { SubgrupoForm } from './subgrupo-form';
  * dentro del helper para que los casos heredados no fallen por "open request". El
  * segundo detectChanges pinta los <option> recién llegados.
  *
- * <p>La selección se prueba con la MEZCLA del molde: A1 (manipular el <select multiple>
- * real) para poblado y preselección —el riesgo del multiselect—, A2 (setValue directo)
- * para las ramas de guardado.
+ * <p>La selección se prueba con la MEZCLA del molde: A1 (los gestos sobre la lista doble
+ * real, S230) para poblado y preselección, A2 (setValue directo) para las ramas de guardado.
+ * La lista doble tiene su propio spec; aquí se mide su enlace con ESTE formulario.
  */
 describe('SubgrupoForm', () => {
   let fixture: ComponentFixture<SubgrupoForm>;
@@ -58,7 +58,7 @@ describe('SubgrupoForm', () => {
     } else {
       peticion.flush(grupos);
     }
-    fixture.detectChanges(); // pinta los <option> ya cargados
+    fixture.detectChanges(); // pinta las filas ya cargadas
   }
 
   function instancia(): { form: { setValue: (v: unknown) => void }; guardar: () => void } {
@@ -68,15 +68,32 @@ describe('SubgrupoForm', () => {
     };
   }
 
-  /** Marca opciones del <select multiple> real por su value y dispara `change`, como
-   *  haría el usuario. Es el camino A1 del poblado. */
-  function seleccionarEnDom(...codigos: string[]): void {
-    const select: HTMLSelectElement = fixture.nativeElement.querySelector('select');
-    for (const opt of Array.from(select.options)) {
-      opt.selected = codigos.includes(opt.value);
-    }
-    select.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
+  /** Códigos de un lado de la lista doble de grupos, en el orden en que se ven. */
+  function enLado(lado: 'elegidos' | 'disponibles'): string[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        `[data-lista="grupos"] [data-lado="${lado}"] li[data-codigo]`,
+      ),
+    ).map((li) => li.dataset['codigo']!);
+  }
+
+  /** Deja elegidos EXACTAMENTE esos grupos con los gestos de la lista doble —marcar y
+   *  «‹ Añadir» / «Quitar ›»—, como haría el usuario. Es el camino A1 del poblado. */
+  async function seleccionarEnDom(...codigos: string[]): Promise<void> {
+    const raiz = fixture.nativeElement as HTMLElement;
+    const pasar = async (desde: 'elegidos' | 'disponibles', boton: string, cods: string[]): Promise<void> => {
+      if (cods.length === 0) {
+        return;
+      }
+      for (const c of cods) {
+        raiz.querySelector<HTMLElement>(`[data-lista="grupos"] [data-lado="${desde}"] li[data-codigo="${c}"]`)!.click();
+        await fixture.whenStable();
+      }
+      raiz.querySelector<HTMLButtonElement>(`[data-lista="grupos"] ${boton}`)!.click();
+      await fixture.whenStable();
+    };
+    await pasar('elegidos', '.lista-doble__quitar', enLado('elegidos').filter((c) => !codigos.includes(c)));
+    await pasar('disponibles', '.lista-doble__anadir', codigos.filter((c) => !enLado('elegidos').includes(c)));
   }
 
   afterEach(() => http.verify());
@@ -85,9 +102,9 @@ describe('SubgrupoForm', () => {
     montar(null);
     expect(fixture.nativeElement.querySelector('.subgrupo-form__titulo').textContent)
       .toContain('Nuevo subgrupo');
-    // ninguna opción seleccionada de arranque
-    const select: HTMLSelectElement = fixture.nativeElement.querySelector('select');
-    expect(Array.from(select.selectedOptions).length).toBe(0);
+    // ningún grupo elegido de arranque, y todos disponibles
+    expect(enLado('elegidos')).toEqual([]);
+    expect(enLado('disponibles')).toEqual(['1ºA', '1ºB', '1ºC']);
   });
 
   it('(2) en edición precarga código y grupos', () => {
@@ -149,34 +166,35 @@ describe('SubgrupoForm', () => {
     expect(err).not.toContain('texto-de-error');
   });
 
-  it('(7) el multiselect se puebla con los grupos que llegan del backend', () => {
+  it('(7) la lista doble se puebla con los grupos que llegan del backend', () => {
     montar(null);
-    const opciones = fixture.nativeElement.querySelectorAll('select option');
-    // No hay placeholder en un <select multiple>: tantas opciones como grupos.
-    expect(opciones.length).toBe(GRUPOS.length);
-    expect(opciones[0].value).toBe('1ºA');
-    expect(opciones[0].textContent.trim()).toBe('1ºA');
-    expect(opciones[1].value).toBe('1ºB');
-    expect(opciones[2].value).toBe('1ºC');
+    const filas = fixture.nativeElement.querySelectorAll(
+      '[data-lista="grupos"] [data-lado="disponibles"] li[data-codigo]',
+    );
+    // Sin placeholder: tantas filas como grupos, con el código como texto.
+    expect(filas.length).toBe(GRUPOS.length);
+    expect(filas[0].dataset.codigo).toBe('1ºA');
+    expect(filas[0].textContent.trim()).toBe('1ºA');
+    expect(filas[1].dataset.codigo).toBe('1ºB');
+    expect(filas[2].dataset.codigo).toBe('1ºC');
   });
 
-  it('(8) en edición los grupos llegan PRESELECCIONADOS en el multiselect (dos grupos)', () => {
-    // Dos grupos a propósito, y NO los dos primeros: {1ºA, 1ºC}. Un [selected] roto que
-    // marcara todo, nada, o solo el primero daría verde falso con un único grupo o con
-    // los dos consecutivos. Se mide el conjunto exacto de selectedOptions.
+  it('(8) en edición los grupos llegan ELEGIDOS en la lista doble (dos grupos)', () => {
+    // Dos grupos a propósito, y NO los dos primeros: {1ºA, 1ºC}. Una precarga rota que
+    // eligiera todo, nada, o solo el primero daría verde falso con un único grupo o con
+    // los dos consecutivos. Se mide el conjunto exacto de los dos lados.
     montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'] });
-    const select: HTMLSelectElement = fixture.nativeElement.querySelector('select');
-    const marcados = Array.from(select.selectedOptions).map((o) => o.value).sort();
-    expect(marcados).toEqual(['1ºA', '1ºC']);
+    expect(enLado('elegidos')).toEqual(['1ºA', '1ºC']);
+    expect(enLado('disponibles')).toEqual(['1ºB']);
   });
 
-  it('(9) el body del POST lleva el array de grupos seleccionado en el DOM', () => {
-    // A1 para poblar (el usuario marca en el <select>), A2 no: aquí se mide que lo
-    // marcado en el DOM llega al body, que es la cadena completa handler→control→request.
+  it('(9) el body del POST lleva el array de grupos elegido en el DOM', async () => {
+    // A1 para poblar (el usuario pasa grupos en la lista doble), A2 no: aquí se mide que lo
+    // elegido en el DOM llega al body, que es la cadena completa gesto→control→request.
     montar(null);
     const inst = instancia();
     inst.form.setValue({ codigo: '1ºAC-Agrup', grupos: [] }); // código por control...
-    seleccionarEnDom('1ºA', '1ºC');                            // ...grupos por el DOM
+    await seleccionarEnDom('1ºA', '1ºC');                      // ...grupos por el DOM
     inst.guardar();
     const req = http.expectOne('/api/subgrupos');
     expect(req.request.method).toBe('POST');
@@ -184,21 +202,21 @@ describe('SubgrupoForm', () => {
     req.flush({ id: 7, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'] });
   });
 
-  it('(10) un fallo al cargar los grupos se presenta y deja el multiselect sin opciones', async () => {
+  it('(10) un fallo al cargar los grupos se presenta y deja la lista doble sin grupos', async () => {
     montar(null, GRUPOS, true);
     await fixture.whenStable();
     const err = fixture.nativeElement.querySelector('.subgrupo-form__error-servidor').textContent;
     expect(err).toContain('No se pudieron cargar los grupos');
     expect(err).toContain('500');
-    const opciones = fixture.nativeElement.querySelectorAll('select option');
-    expect(opciones.length).toBe(0);
+    expect(enLado('elegidos')).toEqual([]);
+    expect(enLado('disponibles')).toEqual([]);
   });
 
-  it('(11) en edición el body del PUT lleva el array reemplazado', () => {
+  it('(11) en edición el body del PUT lleva el array reemplazado', async () => {
     montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'] });
     const inst = instancia();
-    inst.form.setValue({ codigo: '1ºAB-Agrup', grupos: [] });
-    seleccionarEnDom('1ºA', '1ºB'); // reemplazo total, no delta
+    inst.form.setValue({ codigo: '1ºAB-Agrup', grupos: ['1ºA', '1ºC'] }); // los grupos, los precargados
+    await seleccionarEnDom('1ºA', '1ºB'); // reemplazo total, no delta: 1ºC sale y 1ºB entra
     inst.guardar();
     const req = http.expectOne('/api/subgrupos/6');
     expect(req.request.method).toBe('PUT');
@@ -219,7 +237,7 @@ describe('SubgrupoForm', () => {
    * Filtro del selector de grupos (S185, condición 5 de O-pre-demo). DOCE grupos: con 10 o
    * menos el filtro no se pinta. «g1» casa con G10, G11 y G12 y NO con G05, la elegida.
    */
-  describe('filtro de selectores (S185)', () => {
+  describe('filtro de la lista doble (S185, S230)', () => {
     const GRUPOS_12 = Array.from({ length: 12 }, (_, i) => ({
       id: i + 1,
       codigo: `G${String(i + 1).padStart(2, '0')}`,
@@ -227,24 +245,20 @@ describe('SubgrupoForm', () => {
       tipo: 'ORDINARIO',
     }));
 
-    it('grupos: filtrar conserva visible la elegida y no cambia el valor', async () => {
+    it('grupos: filtrar recorta Disponibles, conserva la elegida y no cambia el valor', async () => {
       montar(null, GRUPOS_12);
       const raiz = fixture.nativeElement as HTMLElement;
-      const select = (): HTMLSelectElement => raiz.querySelector<HTMLSelectElement>('.subgrupo-form__multiple')!;
+      await seleccionarEnDom('G05');
 
-      for (const o of Array.from(select().options)) {
-        o.selected = o.value === 'G05';
-      }
-      select().dispatchEvent(new Event('change'));
-      await fixture.whenStable();
-
-      const campo = raiz.querySelector<HTMLInputElement>('input[aria-label="Filtrar grupos"]');
+      const etiqueta = [...raiz.querySelectorAll('label')].find((l) => l.textContent!.trim() === 'Filtrar grupos');
+      const campo = raiz.querySelector<HTMLInputElement>(`#${etiqueta!.htmlFor}`);
       expect(campo).not.toBeNull();
       campo!.value = 'g1';
       campo!.dispatchEvent(new Event('input'));
       await fixture.whenStable();
 
-      expect(Array.from(select().options).map((o) => o.value)).toEqual(['G05', 'G10', 'G11', 'G12']);
+      expect(enLado('disponibles')).toEqual(['G10', 'G11', 'G12']);
+      expect(enLado('elegidos')).toEqual(['G05']);
       const valor = (fixture.componentInstance as unknown as {
         form: { controls: { grupos: { value: string[] } } };
       }).form.controls.grupos.value;
@@ -258,18 +272,18 @@ describe('SubgrupoForm', () => {
     fixture.nativeElement.querySelector('.subgrupo-form__alumnos') as HTMLInputElement;
   const campoCodigo = (): HTMLInputElement =>
     fixture.nativeElement.querySelector('input[formcontrolname="codigo"]') as HTMLInputElement;
-  const multiselect = (): HTMLSelectElement =>
-    fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+  const listaGrupos = (): HTMLElement =>
+    fixture.nativeElement.querySelector('[data-lista="grupos"]') as HTMLElement;
 
   function teclearAlumnos(valor: string): void {
     campoAlumnos().value = valor;
     campoAlumnos().dispatchEvent(new Event('input'));
   }
 
-  it('(13) en alta envía los alumnos escritos', () => {
+  it('(13) en alta envía los alumnos escritos', async () => {
     montar(null);
     instancia().form.setValue({ codigo: '1ºA-Completo', grupos: [] });
-    seleccionarEnDom('1ºA');
+    await seleccionarEnDom('1ºA');
     teclearAlumnos('27');
     instancia().guardar();
 
@@ -306,7 +320,7 @@ describe('SubgrupoForm', () => {
   it('(16) un negativo NO se ataja en cliente: viaja y se presenta el 400 del backend', async () => {
     montar(null);
     instancia().form.setValue({ codigo: '1ºA-Completo', grupos: [] });
-    seleccionarEnDom('1ºA');
+    await seleccionarEnDom('1ºA');
     teclearAlumnos('-1');
     instancia().guardar();
 
@@ -323,7 +337,14 @@ describe('SubgrupoForm', () => {
     montar({ id: 9, codigo: '3ºADi-Completo', grupos: ['1ºB'], alumnos: null, delPdc: true });
     await fixture.whenStable();
     expect(campoCodigo().disabled).toBe(true);
-    expect(multiselect().disabled).toBe(true);
+    // Los grupos, BLOQUEADOS: sin botones ni filtro, y un doble clic no mueve nada.
+    expect(listaGrupos().classList).toContain('lista-doble--bloqueada');
+    expect(listaGrupos().querySelectorAll('button').length).toBe(0);
+    listaGrupos()
+      .querySelector('[data-lado="elegidos"] li[data-codigo="1ºB"]')!
+      .dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    await fixture.whenStable();
+    expect(enLado('elegidos')).toEqual(['1ºB']);
     expect(campoAlumnos().disabled).toBe(false);
     expect(fixture.nativeElement.querySelector('.subgrupo-form__nota').textContent)
       .toContain('solo se cambian los alumnos');
@@ -341,7 +362,29 @@ describe('SubgrupoForm', () => {
     montar({ id: 6, codigo: '1ºAC-Agrup', grupos: ['1ºA', '1ºC'], delPdc: false });
     await fixture.whenStable();
     expect(campoCodigo().disabled).toBe(false);
-    expect(multiselect().disabled).toBe(false);
+    expect(listaGrupos().classList).not.toContain('lista-doble--bloqueada');
+    expect(listaGrupos().querySelectorAll('button').length).toBe(2);
     expect(fixture.nativeElement.querySelector('.subgrupo-form__nota')).toBeNull();
+  });
+
+  // ─────────────────────────── S230: lista doble (C-lista-doble, condición 3)
+
+  it('(19) I6 por la lista doble: quitar el único grupo pinta el aviso y no se envía', async () => {
+    montar({ id: 6, codigo: '1ºA-Agrup', grupos: ['1ºA'] });
+    await seleccionarEnDom();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Elige al menos un grupo.');
+    instancia().guardar();
+    http.expectNone('/api/subgrupos/6');
+  });
+
+  it('(20) disposición de la maqueta: código y alumnos en una fila, grupos debajo en 8 filas', () => {
+    montar(null);
+    const fila = fixture.nativeElement.querySelector('.subgrupo-form__fila') as HTMLElement;
+    expect(fila.querySelector('input[formcontrolname="codigo"]')).not.toBeNull();
+    expect(fila.querySelector('.subgrupo-form__alumnos')).not.toBeNull();
+    expect(fila.querySelector('[data-lista="grupos"]')).toBeNull();
+    expect(listaGrupos().style.getPropertyValue('--lista-doble-filas')).toBe('8');
   });
 });

@@ -6,43 +6,36 @@
     @if (delPdc) {
       <p class="subgrupo-form__nota">Subgrupo de un PDC: su código y sus grupos se gestionan con el PDC. Aquí solo se cambian los alumnos.</p>
     }
-    <label class="subgrupo-form__campo">
-      <span class="subgrupo-form__etiqueta">Código</span>
-      <input type="text" formControlName="codigo" class="subgrupo-form__input" />
-      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
-        <span class="subgrupo-form__error">El código es obligatorio.</span>
-      }
-    </label>
-    <app-filtro-opciones
-      #fGrupos
-      etiqueta="grupos"
-      [opciones]="grupos()"
-      [texto]="codigoDe"
-      [codigo]="codigoDe"
-      [seleccionados]="seleccionados()"
-    />
-    <label class="subgrupo-form__campo">
-      <span class="subgrupo-form__etiqueta">Grupos</span>
-      <select
-        multiple
-        class="subgrupo-form__input subgrupo-form__multiple"
-        [disabled]="delPdc"
-        (change)="alSeleccionar($event)"
-      >
-        @for (g of fGrupos.visibles(); track g.id) {
-          <option [value]="g.codigo" [selected]="seleccionados().includes(g.codigo)">
-            {{ g.codigo }}
-          </option>
+    <!-- Código y alumnos en una fila, y los grupos debajo a todo el ancho (maqueta de s229/f1). -->
+    <div class="subgrupo-form__fila">
+      <label class="subgrupo-form__campo">
+        <span class="subgrupo-form__etiqueta">Código</span>
+        <input type="text" formControlName="codigo" class="subgrupo-form__input" />
+        @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
+          <span class="subgrupo-form__error">El código es obligatorio.</span>
         }
-      </select>
+      </label>
+      <label class="subgrupo-form__campo">
+        <span class="subgrupo-form__etiqueta">Alumnos <em>(opcional)</em></span>
+        <input type="number" min="0" [formControl]="alumnos" class="subgrupo-form__input subgrupo-form__alumnos" />
+      </label>
+    </div>
+    <div class="subgrupo-form__campo">
+      <span class="subgrupo-form__etiqueta" id="subgrupo-form-grupos">Grupos</span>
+      <app-lista-doble
+        formControlName="grupos"
+        nombre="grupos"
+        etiqueta="grupos"
+        rotuloId="subgrupo-form-grupos"
+        [opciones]="grupos()"
+        [texto]="codigoDe"
+        [codigo]="codigoDe"
+        [filas]="8"
+      />
       @if (form.controls.grupos.touched && form.controls.grupos.invalid) {
         <span class="subgrupo-form__error">Elige al menos un grupo.</span>
       }
-    </label>
-    <label class="subgrupo-form__campo">
-      <span class="subgrupo-form__etiqueta">Alumnos <em>(opcional)</em></span>
-      <input type="number" min="0" [formControl]="alumnos" class="subgrupo-form__input subgrupo-form__alumnos" />
-    </label>
+    </div>
     @if (error()) {
       <p class="subgrupo-form__error-servidor" role="alert">{{ error() }}</p>
     }

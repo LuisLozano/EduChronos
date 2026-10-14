@@ -12,7 +12,7 @@ import { SubgrupoService } from '../../services/subgrupo.service';
 import { GrupoService } from '../../services/grupo.service';
 import { Subgrupo, SubgrupoRequest } from '../../models/subgrupo.model';
 import { Grupo } from '../../models/grupo.model';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { ListaDoble } from '../lista-doble/lista-doble';
 
 /** Validator: un `string[]` debe tener al menos un elemento. `Validators.required`
  *  no sirve para esto: da por válido un array vacío (lo trata como valor presente).
@@ -30,19 +30,10 @@ function arrayNoVacio(control: AbstractControl): ValidationErrors | null {
  * <p>PRIMER formulario de O-estructura con selección MÚLTIPLE poblada por red. Replica
  * el molde de {@code GrupoForm} (S104) —desplegable poblado en `ngOnInit`, precarga en
  * el constructor, `mensaje()` copiado por valor— con la desviación de que `grupos` es
- * un {@code <select multiple>} y el control es un `string[]`.
- *
- * <p>DOS PUNTOS DONDE EL MULTISELECT NO HEREDA EL MOLDE:
- * <ol>
- *   <li>El {@code <select multiple>} de Reactive Forms NO vincula un array por
- *   `formControlName` como el `<select>` único. Se lee la selección en
- *   `alSeleccionar()` desde `selectedOptions` y se hace `setValue`. Es la única lógica
- *   propia del componente.</li>
- *   <li>La precarga en edición NO se refleja sola en el DOM: `setValue` en el
- *   constructor pone el array en el control, pero el `<select multiple>` no marca sus
- *   `option.selected` por reconciliación (a diferencia del `<select>` único). El HTML
- *   pinta `[selected]` comparando cada opción contra el valor del control.</li>
- * </ol>
+ * un `string[]`. Desde S230 lo elige una {@link ListaDoble} (C-lista-doble, condición 3 de
+ * O-acabado-pre-prueba) vinculada por `formControlName` como cualquier control: el
+ * `<select multiple>` nativo, su `alSeleccionar()` y su `[selected]` a mano se retiraron con
+ * ella. El filtro de grupos es el de la propia lista.
  *
  * <p>`Validators.required` NO basta para `grupos`: un array vacío lo pasa. El validator
  * `arrayNoVacio` cubre el hueco y replica la invariante I6 del backend en cliente.
@@ -50,14 +41,10 @@ function arrayNoVacio(control: AbstractControl): ValidationErrors | null {
  * <p>La unicidad de `codigo` NO se valida async, igual que en O-catálogo: la fuente de
  * verdad es el backend (UNIQUE + findByCodigo) y un async validator duplicaría esa
  * comprobación con race condition. El 400 de duplicado se PRESENTA cuando llega.
- *
- * <p>La UX del multiselect (buscar, agrupar, chips) se aplaza a la fase de mejora de
- * UX de subgrupos, decisión consciente del arquitecto: aquí es un `<select multiple>`
- * nativo, la mínima desviación del canon.
  */
 @Component({
   selector: 'app-subgrupo-form',
-  imports: [ReactiveFormsModule, FiltroOpciones],
+  imports: [ReactiveFormsModule, ListaDoble],
   templateUrl: './subgrupo-form.html',
   styleUrl: './subgrupo-form.css',
 })
@@ -74,13 +61,14 @@ export class SubgrupoForm implements OnInit {
   /**
    * S206: el subgrupo es el mono-Di de un PDC (`delPdc`, lo calcula el backend). Su código y sus
    * grupos no se cambian por aquí —el backend lo rechaza con un 400—, solo sus alumnos: el
-   * formulario los abre DESHABILITADOS y los reenvía tal cual llegaron.
+   * formulario los abre DESHABILITADOS y los reenvía tal cual llegaron. Desde S230 los dos van
+   * deshabilitados en el CONTROL (`disable()`), y la lista doble se pinta bloqueada.
    */
   protected readonly delPdc = this.editando?.delPdc === true;
 
-  /** Opciones del multiselect, en el orden en que llegan del backend. */
+  /** Opciones de la lista doble, en el orden en que llegan del backend. */
   protected readonly grupos = signal<Grupo[]>([]);
-  /** Código de cada opción, para el filtro de selectores (S185). */
+  /** Código y texto de cada opción de la lista doble. */
   protected readonly codigoDe = (x: { codigo: string }): string => x.codigo;
 
   protected readonly form = this.fb.nonNullable.group({
@@ -104,23 +92,19 @@ export class SubgrupoForm implements OnInit {
       });
       this.alumnos.setValue(this.editando.alumnos ?? null);
       if (this.delPdc) {
-        // getRawValue() sigue incluyendo el código: viaja tal cual, que es lo que pide el backend.
+        // getRawValue() sigue incluyendo código y grupos: viajan tal cual, que es lo que pide el
+        // backend.
         this.form.controls.codigo.disable();
+        this.form.controls.grupos.disable();
       }
     }
   }
 
-  /** Códigos actualmente seleccionados en el control (para reflejar `[selected]` en
-   *  el DOM: el `<select multiple>` no lo hace por reconciliación). */
-  protected seleccionados(): string[] {
-    return this.form.controls.grupos.value;
-  }
-
   /**
-   * Carga los grupos del multiselect. En `ngOnInit` por el molde de la lista, no por
+   * Carga los grupos de la lista doble. En `ngOnInit` por el molde de la lista, no por
    * necesidad técnica. El valor de `grupos` ya está puesto por el constructor cuando
-   * esto resuelve; el HTML refleja la selección con `[selected]` al pintar las
-   * opciones, así que no hay que re-aplicar el valor aquí.
+   * esto resuelve, y la lista doble lo cruza con las opciones al llegar: no hay que
+   * re-aplicarlo aquí.
    *
    * <p>Un fallo aquí se PRESENTA en el mismo hueco que los errores de guardado: sin
    * grupos el formulario no puede completarse.
@@ -132,17 +116,6 @@ export class SubgrupoForm implements OnInit {
         this.error.set(this.mensaje(err, 'No se pudieron cargar los grupos'));
       },
     });
-  }
-
-  /**
-   * Lee la selección del `<select multiple>` y la vuelca al control. Sustituye a la
-   * vinculación automática que el `<select>` único tenía por `formControlName`.
-   */
-  protected alSeleccionar(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const codigos = Array.from(select.selectedOptions).map((o) => o.value);
-    this.form.controls.grupos.setValue(codigos);
-    this.form.controls.grupos.markAsTouched();
   }
 
   protected guardar(): void {

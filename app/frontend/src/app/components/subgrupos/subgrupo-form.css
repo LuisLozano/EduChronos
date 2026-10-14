@@ -1,6 +1,9 @@
 .subgrupo-form {
   padding: var(--e5);
   min-width: 22rem;
+  /* S230: el ancho del editor de actividad, para que quepan la lista doble y la fila de campos
+     (maqueta de s229/f1). */
+  width: min(calc(30 * var(--e6)), calc(100vw - 2 * var(--e6)));
   background: var(--color-superficie);
   border-radius: var(--radio-m);
 }
@@ -23,11 +26,20 @@
   border-radius: var(--radio-s);
   box-sizing: border-box;
 }
-/* El <select multiple> nativo toma ~4 filas del agente de usuario; se fija una
-   min-height para que no colapse con pocos grupos. La UX rica (buscar, chips) se hará
-   en la fase de mejora de UX de subgrupos. */
-.subgrupo-form__multiple {
-  min-height: 6rem;
+/* Código y alumnos en la misma fila (S230). */
+.subgrupo-form__fila {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--e4);
+  align-items: start;
+}
+.subgrupo-form__nota {
+  margin: 0 0 var(--e4);
+  padding: var(--e2) var(--e3);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie-alt);
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
 }
 .subgrupo-form__error {
   display: block;
