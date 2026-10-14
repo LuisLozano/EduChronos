@@ -2,40 +2,41 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L49 — ## 1. Objetivos terminados
-- L51 — ### H2 — Configurar un centro desde cero
-- L53 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L69 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L141 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L391 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L678 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L779 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L878 — ### H1 — Ajustar (cierre)
-- L880 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1057 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1348 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1538 — ### H3 — Exportar
-- L1540 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1601 — ### H4 — Instalar y pasar de curso
-- L1603 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1777 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1872 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1941 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1977 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1979 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2028 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2063 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2098 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2127 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2166 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2204 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2241 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2278 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2314 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2332 — ## 2. Deuda cerrada de §4
-- L2334 — ### Deuda técnica real, colgada de su objetivo
-- L2404 — ### Mejora futura, cuelga y espera
-- L2419 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L50 — ## 1. Objetivos terminados
+- L52 — ### H2 — Configurar un centro desde cero
+- L54 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L70 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L142 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L392 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L679 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L780 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L879 — ### H1 — Ajustar (cierre)
+- L881 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1058 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1349 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1539 — ### H3 — Exportar
+- L1541 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1602 — ### H4 — Instalar y pasar de curso
+- L1604 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1778 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1873 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1942 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1978 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1980 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2029 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2064 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2099 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2128 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2167 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2205 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2242 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2279 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2315 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2333 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2359 — ## 2. Deuda cerrada de §4
+- L2361 — ### Deuda técnica real, colgada de su objetivo
+- L2431 — ### Mejora futura, cuelga y espera
+- L2449 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2329,6 +2330,32 @@ terminado (§6).
 - **Cambios que agrupa:** `C-alcance-comparacion` ✔ HECHO (S228): el M0, la medición y este criterio. `C-metricas-comparacion` ✔ HECHO (S228): condiciones 1 a 4 (`1344596`, `10602df`).
 - **Métrica de §7:** una sesión (S228).
 
+#### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- **Propósito:** cerrar la lista T antes de las pruebas en Windows 11: que la secretaria elija profesores, subgrupos, grupos y aulas sin Ctrl+clic, reconozca la asignatura por su nombre y vea que la aplicación se está iniciando.
+- **Por qué va ahora:** es el primer paso del orden de lo que queda de H5 (U, del usuario): las mejoras de la lista cerrada T antes de la sesión de humo en la VM `Win11`, que verifica también la ventana de arranque, y antes de `O-prueba-secretaria`.
+- **Medido al abrir (S229, Claude Code, HEAD `2849828`, solo lectura, con la base de S222 en copia; material en `/home/luis/educhronos-aceptacion/s229/t0/`; maquetas en `/home/luis/educhronos-aceptacion/s229/f1` (subgrupo) y `s229/f1b` (actividad)):**
+  (a) CI de `2849828` en verde (`tests` #99).
+  (b) 112 asignaturas, con 18 pares de nombre repetido.
+  (c) Los tres modos de aula ya están en el formulario y en `DeduccionAulas`.
+  (d) 4 `<select multiple>` y 11 usos del filtro de opciones.
+  (e) Nada visible antes del navegador.
+- **Decisiones (S229):** T, U, V, W, X e Y, del usuario; las del arquitecto, en `s229/cierre/c1/decisiones.txt`.
+- **Decisiones (S230):** Z, AA, AB y AC, del usuario; las del arquitecto, en `s230/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S229 sobre esa medición (decisión Y). `O-acabado-pre-prueba` termina cuando:
+  1. **Lista doble.** Un solo componente para profesores, subgrupos y aulas candidatas de la plaza y grupos del subgrupo, con filtro y estado bloqueado, sin Ctrl+clic. Oráculo: de 4 `<select multiple>` (`s229/t0`) a 0, por grep. La lógica de pasar elementos lleva M3.
+  2. **Diálogo de actividad.** La disposición aprobada en `s229/f1b`: tres filas, pestañas de plaza con «+» y «Quitar esta plaza», modos de aula «Fija» / «Candidatas» / «La elige el generador», validaciones actuales intactas (I2 marcada en la pestaña) y selectores con `id` y `label for`. M4 contable con Playwright a 1920×1080 sobre copia de la base y juicio de aspecto del usuario.
+  3. **Diálogo de subgrupo.** La disposición aprobada en `s229/f1`, con el subgrupo del PDC bloqueado.
+  4. **Asignatura con su nombre.** «código — nombre» en los selectores de actividad y de plaza, filtrable por el nombre. Oráculo: un caso medido en la base en que buscar por el nombre encuentra la asignatura por su código.
+  5. **Ventana de arranque.** La de la decisión X, verificada en Linux en modo escritorio: aparece al lanzar con el texto aprobado, se cierra al abrirse el navegador o a los 60 s y antes de un diálogo de error, y no aparece en un segundo lanzamiento.
+  6. **Suites.** Suites en verde en local y CI en verde sobre la cabeza.
+- **ESTADO en S229: 0 de 6. ESTADO en S230: 6 de 6, TERMINADO.** Evidencia por condición: (1) `lista-doble` en los cuatro sitios (`9b90bdd`, `979a6c5`, `cb16917`): de 4 `<select multiple>` a 0 con la orden de `s230/t0`, que queda en `s230/f1f2/11-orden-select-multiple.txt` (la de S229 no se conservó); 15 casos y 14 mutantes de 14. (2) Tres filas y una pestaña por plaza (`cb16917`), con dos retoques del usuario: la marca de error sale en las pestañas no activas o tras guardar (`54707da`) y el aviso de I2 se ve sin desplazarse (`4d87847`); M4 contable de (a) a (p) sin fallos (`s230/f1f2/60-m4.txt`, `s230/f4`) y juicio de aspecto del usuario. (3) Diálogo de subgrupo con la lista doble de grupos en 8 filas y el del PDC bloqueado (`979a6c5`). (4) «Robótica» encuentra solo «CyR — Computación y Robótica» en los dos selectores de asignatura. (5) Ventana de arranque (`50171d5`), verificada en Linux en modo escritorio (`s230/f3`): aparece a +0,82 s, se cierra justo antes de abrir el navegador, por tiempo con `-Deduchronos.arranque.segundos-ventana=3` y antes del diálogo de puerto ocupado, y no aparece en un segundo lanzamiento; 22 casos y 9 mutantes de 9. (6) solver 162, app 955, vitest 853 en 69 ficheros y e2e 3, y CI `tests` #102 en verde sobre `4d87847`.
+- **Fuera del criterio, con motivo:** la verificación en Windows (sesión de humo, U); distinguir asignaturas por curso (`D-asignatura-sin-nivel`); el combobox (`D-selectores-combobox`); `D-nombres-cortados-24`; `D-letra-filtro-y-radios`.
+- **Deudas:** `D-arranque-sin-aviso-de-espera` (condición 5), `D-subgrupo-ux-multiselect` (condiciones 1 y 3), `D-actividad-ux` (condición 2) y `D-selectores-combobox`, solo en su parte de Ctrl+clic (condición 1). Cierran en S230 `D-arranque-sin-aviso-de-espera`, `D-subgrupo-ux-multiselect` y `D-actividad-ux`; `D-selectores-combobox` sigue viva por el combobox.
+- **Depende de:** ninguna dependencia abierta; reutiliza el filtro de `O-pre-demo` (S185) y los modos de aula de `O-aulas` (`DeduccionAulas`).
+- **Valor:** quita lo que midieron la demo y el recorrido del usuario —S188: relanzó el programa creyendo que no arrancaba y el editor de actividades le resultó engorroso; S227: no distinguió dos asignaturas por su código— antes de la prueba de la secretaria.
+- **Cambios que agrupa:** `C-alcance-acabado-pre-prueba` ✔ HECHO (S229). `C-lista-doble` ✔ HECHO (S230): condiciones 1 y 3 (`9b90bdd`, `979a6c5`). `C-editor-plazas` ✔ HECHO (S230): condiciones 2 y 4 (`cb16917`, `54707da`, `4d87847`). `C-ventana-arranque` ✔ HECHO (S230): condición 5 (`50171d5`).
+- **Métrica de §7:** dos sesiones (S229 y S230), sobre un límite de 8.
+
 ## 2. Deuda cerrada de §4
 
 ### Deuda técnica real, colgada de su objetivo
@@ -2415,6 +2442,9 @@ terminado (§6).
 | ~~D-vista-horario-no-se-descubre~~ (la secretaria no descubrió que los horarios se ven en pantalla) **CERRADA S226** | `O-interfaz` | Nace en S188, demo con la secretaria (T2); sale de `O-demo-bundle` (R-incidencia): descargó el PDF de grupos y buscó en él; AYUDA. Texto íntegro en el plan. **S190:** sede de la replanificación de H5: `O-interfaz`. **CERRADA en S226:** por la condición 9 de `O-interfaz` (`ee86abe`, `03349c7`): botón «Horario» en Profesores, Grupos y Aulas, que abre en pantalla el horario de esa fila; aprobado por el usuario en navegador. |
 | ~~D-error-poco-visible~~ (los errores se muestran como un párrafo rojo sin fondo que no llama la atención y no se entiende) **CERRADA S226** | `O-interfaz` | Nace en S188, demo con la secretaria (T5); sale de `O-demo-bundle` (R-incidencia): el 409 de borrar BYG1 no le llamó la atención ni lo entendió; AYUDA. Es `app-estado-lista`, el mismo en las siete listas. Texto íntegro en el plan. **S190:** sede de la replanificación de H5: `O-interfaz`. **CERRADA en S226:** por la condición 5 de `O-interfaz` (`66aa4e4`): el error de las listas lleva fondo, borde e icono, y el 409 de borrado termina diciendo qué hacer; el usuario lo juzgó visible y comprensible. |
 | ~~D-tiempo-generacion-poco-claro~~ (el diálogo de generación explica los tiempos en una línea y no bastó) **CERRADA S226** | `O-interfaz` | Nace en S188, demo con la secretaria (T8); sale de `O-demo-bundle` (R-incidencia): con horario ya obtenido en 10 minutos preguntó para qué sirven los otros tiempos; AYUDA, sin atasco. Distinta de `D-tiempo-elegido-no-se-recuerda`. Texto íntegro en el plan. **S190:** sede de la replanificación de H5: `O-interfaz`. **CERRADA en S226:** por la condición 7 de `O-interfaz` (`5d9cfe9`): el diálogo explica qué se gana con más tiempo, con el texto aprobado por el usuario. |
+| ~~D-arranque-sin-aviso-de-espera~~ (entre el doble clic y el navegador no hay ninguna señal de que la aplicación esté arrancando) **CERRADA S230** | `O-acabado-pre-prueba` (S229; antes sin objetivo asignado) | Nace en el M4 de S156, propuesta del usuario: en el Windows 11 limpio el navegador tarda en abrirse —el log mide unos 16 s desde que arranca el proceso— y en ese tiempo nada indica que la aplicación se esté iniciando, así que parece un fallo e invita a pulsar otra vez. No es defecto de la condición 4 de `O-instalación`, que pide que el navegador se abra, y se abre; y la instancia única ya evita los procesos duplicados. Candidatas, sin decidir: (1) la pantalla de presentación nativa de la JVM como opción del lanzador, la más barata y NO verificada con el lanzador de `jpackage`; (2) adelantar el icono de la bandeja antes de Spring, con «Iniciando…»; (3) una ventana propia que se cierre al abrir el navegador. Es la misma razón que dio origen a la condición 4 en S151 S188: en la demo (T1) relanzó el programa creyendo que no arrancaba: unos 13 s sin señal, y un segundo lanzamiento abre otra pestaña sin escribir en el log. **S229:** entra en `O-acabado-pre-prueba` (lista T, punto 1; condición 5) con la candidata 3: una ventana propia que se abre al empezar `main` y se cierra al abrirse el navegador o a los 60 s (decisión X). La 1 se descarta porque `empaquetar-linux.sh` no usa `jpackage` y solo se probaría en la VM; la 2, porque apenas se ve. Hoy el navegador se abre tras arrancar Spring y la bandeja aparece la última (`s229/t0/51-orden-arranque.txt`). **CERRADA en S230:** saldada por la condición 5 (`50171d5`). |
+| ~~D-subgrupo-ux-multiselect~~ (el campo «grupos» del form de subgrupo es un `<select multiple>` nativo) **CERRADA S230** | `O-acabado-pre-prueba` (S229; antes O-estructura) | Detectada S108, DECISIÓN CONSCIENTE de alcance: se eligió la mínima desviación del molde (`<select multiple>` nativo) y la UX rica —chips, búsqueda, casillas— se aplaza a una fase de mejora de UX de subgrupos ya prevista al abrir el Cambio. NO es deuda técnica (el componente funciona, valida I6 en cliente, 12 tests) ni bloquea el criterio de O-estructura (la población se elige, solo sin comodidad). El `.subgrupo-form__multiple` y el handler `alSeleccionar` son el punto de sustitución. No se paga ahora **S229:** entra en `O-acabado-pre-prueba` (lista T, punto 2; condiciones 1 y 3): lista doble con los elegidos a la izquierda, maqueta aprobada en `s229/f1`. En 2026/2027 ningún subgrupo tiene más de un grupo (`s229/t0`). **CERRADA en S230:** saldada por las condiciones 1 y 3 (`979a6c5`). |
+| ~~D-actividad-ux~~ (asperezas del editor de Actividad) **CERRADA S230** | `O-acabado-pre-prueba` (S229; antes sin sede) | Detectada S109 al conducir el formulario con Playwright, tres asperezas de presentación: los dos `<select formControlName="asignatura"` del formulario (la de la actividad y la de la plaza) no tienen `id` ni `label for` y se anuncian igual a un lector de pantalla; el error de servidor viejo sigue pintado mientras se muestra un error de campo nuevo (`error()` solo se limpia al empezar una petición); y el aviso de multiplaza vive dentro de la celda del recuento, mezclando dato y aviso. Ninguna impide configurar nada. RECORTADA en S110: el tercer síntoma se CERRÓ de paso al retirar el trozo B la guarda de multiplaza y con ella el aviso; sobreviven los dos primeros. No se paga ahora S188: en la demo le resultó engorroso el manejo de actividades, y los nombres de las actividades, confusos. **S190:** sede de la replanificación de H5: `O-interfaz`. Lo engorroso de S188. **CORREGIDO en S224:** «se anuncian igual» no se da: cada selector va dentro de su propio `<label>` (por lectura); siguen sin `id`, `for` ni `aria-*`. Condiciones 8 y 10 de `O-interfaz`. **S226:** saldado el error de servidor viejo junto al nuevo (`e5183d6`, condición 8). Sigue viva por lo engorroso del editor (condición 10). **S227:** saldado lo engorroso con el acta de la condición 10 (`41e88e1`, `78975a6`). Queda viva solo por los selectores sin `id`, `for` ni `aria-*`, que el usuario no señaló. **S229:** los selectores sin `id`, `for` ni `aria-*` se saldan con el editor nuevo de `O-acabado-pre-prueba` (condición 2; lista T, punto 3). **CERRADA en S230:** saldada por la condición 2 (`cb16917`): los selectores nuevos llevan id y label for, y las listas, id y aria-labelledby. |
 
 ### Deuda ya CERRADA (histórico, no pendiente)
 D-F8.6-ivD-b (S99), D-F8.4-B2-a (S94), D-F8.5-D1-a (S77), D-F8.5-D2b1-a/b (S91),

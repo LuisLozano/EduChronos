@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S227. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S228. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S227). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S228). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10625,3 +10625,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. De Claude Code: órdenes con efecto fuera de lista sin parar (`rm -rf /tmp/s226-cierre` en el C1 de S226; `sed -i` sobre su script y ediciones con `python3` en F2 de S227), sin coste (norma 11 de M-guion); y dos citas desviadas de `cursos-dialogo.html` en el diagnóstico de F1, corregidas en el T0 de F2. Del arquitecto: ninguno con coste.
   SUITES. vitest 814 en 68 ficheros (+13); solver 162, app 933, e2e 3 y python 267 sin cambios (sin backend; e2e no corrido en local, lo cubre la CI). Mutantes: 7 cazados (M2a, M2b, M3a, M3b, M4a, M4b, M4c); M3c retirado como código redundante. Bundle 638,86 kB (+1,92). CI: `56c6037` #97 en verde; `565609d` sin run propio: lo cubre `tests` #98 sobre `8b16fb9`, que lo contiene y solo añade documentación (medido en S228).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 130 líneas del commit de cierre sin índice, 2 503 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 228 — `C-alcance-comparacion` y `C-metricas-comparacion`: **`O-comparacion` ABIERTO Y TERMINADO, 4 de 4**. El generador iguala o mejora al oficial salvo en los huecos del profesorado: 227 de mediana frente a 135.
+  TIPO. Apertura de objetivo combinada con Desarrollo (script con M3) y Desarrollo reducido (corridas). Material en `/home/luis/educhronos-aceptacion/s228/` (t0, f1 a f4, cierre/c0 y c1, con su MANIFIESTO.sha256).
+  HECHO. T0: CI, tres bases y forma del oficial. F1: cinco corridas de 600 s con semillas 1 a 5 sobre la base de S222, 0 de 5 (503). F2: la única diferencia con S222 es la semilla (la interfaz no la manda y cae a 42). F3: cinco corridas con la petición de la interfaz, 5 de 5, sin violaciones, con 0 divergentes en 583 claves y distintas entre sí. F4: contraste con la enmienda 1 (M2 por franjas, M5 sin aulas nulas), sello `1344596` antes del script `10602df` (17 tests, 8 de 8 mutantes); solo M1, huecos del profesorado, sale peor en las cinco corridas.
+  CRITERIO. Condiciones 1 a 4 cumplidas; `O-comparacion` TERMINADO, 4 de 4; ficha a `gestion-historico.md` §1 e informe en `docs/horario-referencia/2026-2027/INFORME-COMPARACION.md`.
+  DECISIONES. Del usuario: P, Q, R y S (orden y alcance de H5), (a) en §1, el criterio, el cambio de la condición 2, el cierre y que `D-huecos-profesorado` no bloquea la prueba; 13 del arquitecto en `s228/cierre/c1/decisiones.txt`.
+  DEUDA. Nace `D-huecos-profesorado` (técnica real, sin sede, no bloquea). Instancia de `D-generacion-no-reproducible`. `D-codigo-profesor-no-es-identidad` pasa a `O-prueba-secretaria`; `D-cargador-tutoria-pisa`, sin sede.
+  DEFECTOS. Del arquitecto, sin coste: criterio de CI del T0 más estricto que la CI; `python3 -I` sin `-B` en el T0 (un `.pyc` no versionado); md5 final tras el manifiesto en F1; M2 y M5 sin cerrar en el contrato, cazados por el contraste antes del sello (una parada); y el informe del cierre redondeó 13,51 a 13, cazado por la guarda del C1 antes de tocar la raíz (una parada).
+  SUITES. Python 284 (+17) con `python3 -B -m unittest discover -s tools/carga-centro/tests`; solver 162, app 933, vitest 814 en 68 ficheros y e2e 3 sin cambios (sin código de la aplicación). CI de `565609d` y `8b16fb9`: `tests` #98 en verde. Bundle sin cambios.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 114 líneas del commit de cierre sin índice, 2 546 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
