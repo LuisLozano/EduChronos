@@ -2,39 +2,40 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L48 — ## 1. Objetivos terminados
-- L50 — ### H2 — Configurar un centro desde cero
-- L52 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L68 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L140 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L390 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L677 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L778 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L877 — ### H1 — Ajustar (cierre)
-- L879 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1056 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1347 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1537 — ### H3 — Exportar
-- L1539 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1600 — ### H4 — Instalar y pasar de curso
-- L1602 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1776 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1871 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1940 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1976 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1978 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2027 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2062 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2097 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2126 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2165 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2203 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2240 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2277 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2313 — ## 2. Deuda cerrada de §4
-- L2315 — ### Deuda técnica real, colgada de su objetivo
-- L2385 — ### Mejora futura, cuelga y espera
-- L2400 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L49 — ## 1. Objetivos terminados
+- L51 — ### H2 — Configurar un centro desde cero
+- L53 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L69 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L141 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L391 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L678 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L779 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L878 — ### H1 — Ajustar (cierre)
+- L880 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1057 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1348 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1538 — ### H3 — Exportar
+- L1540 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1601 — ### H4 — Instalar y pasar de curso
+- L1603 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1777 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1872 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1941 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1977 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1979 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2028 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2063 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2098 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2127 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2166 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2204 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2241 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2278 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2314 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2332 — ## 2. Deuda cerrada de §4
+- L2334 — ### Deuda técnica real, colgada de su objetivo
+- L2404 — ### Mejora futura, cuelga y espera
+- L2419 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2309,6 +2310,24 @@ terminado (§6).
 - **Valor:** que la prueba de `O-prueba-secretaria` mida si la secretaria hace su horario, y no si tropieza con lo que ya vio en la demo.
 - **Cambios que agrupa:** `C-alcance-interfaz` ✔ HECHO (S224): el M0, la medición y este criterio. `C-anchos-legibles` ✔ HECHO (S224): condiciones 1 y 2 (`c049a6f` y `06b7e8a`). `C-actividades-por-pertenencia` ✔ HECHO (S225): condiciones 3 y 4 (`3566e39` y `d247072`). `C-errores-legibles` ✔ HECHO (S226): condiciones 5, 6 y 8 (`480d14c`, `66aa4e4` y `e5183d6`). `C-generacion-y-horario` ✔ HECHO (S226): condiciones 7 y 9 (`5d9cfe9`, `ee86abe` y `03349c7`). `C-editor-actividad` ✔ HECHO (S227): condición 10 (`41e88e1` y `78975a6`). `C-duplicar-legible` ✔ HECHO (S227): condición 11 (`565609d`).
 - **Métrica de §7:** estimación de 3 a 5 sesiones (sin medir); límite de 8. Real: 4 sesiones (S224 a S227).
+
+#### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- **Propósito:** saber si el horario que genera Educhronos con los datos de 2026/2027 se parece al que hizo el centro, y en qué falla, antes de la prueba de la secretaria. Punto 8 del mapa de S190, con el alcance y el orden que fijó el usuario en S228 (decisiones Q y P).
+- **Por qué va ahora:** `O-interfaz` terminó en S227; con el alcance nuevo no depende del horario de la secretaria y va antes de la prueba (P).
+- **Medido al abrir (S228, Claude Code, HEAD `8b16fb9`, solo lectura; material en `/home/luis/educhronos-aceptacion/s228/t0/`):** (a) la base de F3 de S222 (`38b81f23…`, esquema 8) es la única con aulas, guardias, recreo y funciones, y sus tres horarios vienen de estados distintos del catálogo; (b) el oficial está volcado celda a celda en 30 grupos y 62 profesores, con 1421 celdas de grupo; (c) `verificar-conservacion.py` mide la carga y el diagnóstico la validez; el parecido no tenía instrumento.
+- **Decisiones (S228):** (a, del usuario) §1 compara el horario que genera Educhronos con el oficial; comparar el de la secretaria queda como idea. (B, del usuario) Criterio sobre medición: perfil de calidad y no las mismas horas; encuentra y registra, no arregla; cinco corridas. (C, del usuario) La condición 2 usa la petición de la interfaz y no semillas distintas, tras F1 (0 de 5 con semillas 1 a 5) y F2 (la semilla es la única diferencia con S222). (D, del usuario) Cierre en la sesión; `D-huecos-profesorado` no bloquea la prueba. Las del arquitecto, en `s228/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — escrito en S228 sobre esa medición. `O-comparacion` termina cuando:
+  1. **Métricas selladas.** Un fichero define cada métrica con su fórmula, su universo y lo que excluye; su commit y su sha256 se anotan antes de calcular nada sobre un horario de Educhronos; un script versionado, con tests y mutantes, las calcula, primero sobre el oficial. **✔ CUMPLIDA en S228** (sello `1344596`, script `10602df`, 17 tests, 8 de 8 mutantes; enmienda 1 antes del sello).
+  2. **Corridas.** Cinco generaciones con la petición de la interfaz y su tiempo por defecto (600 s), sobre una copia de la base de S222; se anota cuántas dan horario, y cada una pasa la validez (0 violaciones duras) y la conservación (0 divergentes, o explicadas). **✔ CUMPLIDA en S228** (5 de 5; horarios 4 a 8 de `s228/f3`).
+  3. **Informe de parecido.** Por métrica, el oficial frente a la mediana y el rango; toda métrica peor en las cinco corridas se clasifica como fallo del generador, regla no modelada o dato ausente, con un caso concreto. **✔ CUMPLIDA en S228** (`INFORME-COMPARACION.md`: M1, huecos, fallo del generador).
+  4. **Hallazgos registrados.** Cada fallo del generador nace como ficha de §4 con el objetivo al que bloquea, o «no bloquea». **✔ CUMPLIDA en S228** (`D-huecos-profesorado`).
+- **ESTADO en S228: TERMINADO, 4 de 4.**
+- **Fuera del criterio, con motivo:** la causa de los huecos y su arreglo (R-terminado); la comparación del horario de la secretaria (decisión a); la repetición de asignaturas DISTRIBUIDA, peor en las cinco corridas en una cifra secundaria, que va al informe como observación porque la regla sellada clasifica la primera cifra.
+- **Deudas:** `D-codigo-profesor-no-es-identidad` pasa a `O-prueba-secretaria` y `D-cargador-tutoria-pisa` queda sin sede, porque con el alcance nuevo no aplican. Instancia de `D-generacion-no-reproducible`. Nace `D-huecos-profesorado`.
+- **Depende de:** `O-carga-2026` (volcados y conservación) y los objetivos de datos de H5.
+- **Valor:** la prueba no pone delante de la secretaria un fallo del generador que no se conozca.
+- **Cambios que agrupa:** `C-alcance-comparacion` ✔ HECHO (S228): el M0, la medición y este criterio. `C-metricas-comparacion` ✔ HECHO (S228): condiciones 1 a 4 (`1344596`, `10602df`).
+- **Métrica de §7:** una sesión (S228).
 
 ## 2. Deuda cerrada de §4
 

@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S225. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S226. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S225). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S226). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10605,3 +10605,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) S224 no guardó el script de su P3.3 (norma 16); se reconstruyó id a id en `s225/m2` y `s225/t0`. (2) El guion C0 nombró los documentos sin `docs/`: un `git show` falló, sin coste. (3) El contrato v1 afirmó `montar()` y una normalización a minúsculas; el contraste lo cazó antes de ejecutar. (4) `ProfesorEndpointTest:185` mira el 409 por subcadena; lo destapó el mutante b3 y se añadió un caso que fija el mensaje entero.
   SUITES. Solver 162, app 932 (+5), vitest 783 en 68 ficheros (+20), e2e 3, python 267; bundle 633,90 kB (+3,66). CI de `d247072`: verde (`tests` #94).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 63 líneas del commit de cierre sin índice, 1 781 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 226 — C-errores-legibles y C-generacion-y-horario: los errores se ven y dicen qué hacer, y el horario se abre desde cada fila (O-interfaz 9 de 10)
+  TIPO. Desarrollo en dos fases con un solo cierre: M2, T0 con contraste (v1 con 5 discrepancias, v2 limpio), M3 con 15 mutantes, M4 contable con Playwright sin interfaz, juicio del usuario en navegador, M1.
+  HECHO. M2 (`s226/m2`) y T0 (`s226/t0`; contrastes en `s226/f1`). F1, `C-errores-legibles`: `480d14c` (el diagnóstico responde 404 al horario inexistente y 500 a los datos incoherentes), `66aa4e4` (el error de las listas con fondo, borde e icono; el 409 de borrado dice qué hacer; la jornada pasa a «guardar») y `e5183d6` (el editor de actividad borra el error de guardado al editar). F2, `C-generacion-y-horario`: `5d9cfe9` (texto del diálogo de generación), `ee86abe` (botón «Horario» en Profesores, Grupos y Aulas, con vista y entidad en la URL) y `03349c7` (el aviso de entidad se borra al cambiar de entidad). M4: K1-K7 cumplen (`s226/m4`).
+  CRITERIO. `O-interfaz` 9 de 10: condiciones 5 a 9 cumplidas. Queda la 10.
+  DECISIONES. Del usuario U1-U5; del arquitecto 1-13 (`s226/cierre/c1/decisiones.txt`).
+  DEUDA. Cierran `D-incoherencia-como-404`, `D-error-poco-visible`, `D-tiempo-generacion-poco-claro`, `D-vista-horario-no-se-descubre` y `D-jornada-msg409`. Siguen vivas `D-actividad-ux`, por la condición 10, y `D-seleccion-de-vista-fuera-de-la-url`, por la mitad que escribe en la URL. Nace `D-consejo-409-pegado`. Notas en `D-contrato-desde-resumen`, `D-ng-serve-sin-literal`, `D-m4-navegador-sin-norma`, `D-bundle-sobre-techo-550` y `D-horario-irreversible`.
+  DEFECTOS. (1) El contrato v1 afirmó que la jornada usaba la acción «guardar» sin volcar `JornadaService`; el contraste lo cazó (una parada). (2) El guion F1F2 mandaba retirar los mutantes con `git checkout`, que antes del commit habría borrado la implementación; Claude Code restauró desde copias, sin coste. (3) El guion M4 situó la autoprueba en `s224/f2/t0`, y está en `s224/f2/c1/medir/`; sin coste. (4) El contrato no previó que el aviso de entidad siguiera al cambiar de entidad; arreglado en `03349c7`. (5) El C0 se lanzó sin el push hecho; el sondeo de CI no encontró runs.
+  SUITES. Solver 162, app 933 (+1), vitest 801 en 68 ficheros (+18), e2e 3 (en la CI), python 267 (sin ejecutar); bundle 636,94 kB (+3,04) en `ee86abe`. CI de `03349c7`: verde (`tests` #96).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 113 líneas del commit de cierre sin índice, 2 699 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
