@@ -42,7 +42,15 @@ public final class Dialogos {
         mostrar(mensaje, JOptionPane.ERROR_MESSAGE);
     }
 
+    /**
+     * S230: todo diálogo pasa antes por {@link VentanaArranque#antesDeDialogo}, que cierra la
+     * ventana de arranque si sigue abierta: un diálogo nunca sale tapado ni acompañado por ella.
+     */
     private static void mostrar(String mensaje, int tipo) {
+        VentanaArranque.antesDeDialogo(() -> mostrarYa(mensaje, tipo));
+    }
+
+    private static void mostrarYa(String mensaje, int tipo) {
         if (!Pantalla.disponible()) {
             sinPantalla(mensaje);
             return;

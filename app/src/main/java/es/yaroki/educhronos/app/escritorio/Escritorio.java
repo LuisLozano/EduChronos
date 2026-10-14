@@ -49,9 +49,11 @@ public final class Escritorio {
      */
     public static void arrancar(String[] args) {
         Path carpeta;
+        boolean instanciaGanada;
         try {
             carpeta = CarpetaDatos.resolverYCrear();
-            if (!InstanciaUnica.intentarTomar(carpeta)) {
+            instanciaGanada = InstanciaUnica.intentarTomar(carpeta);
+            if (!instanciaGanada) {
                 volverALaInstanciaAbierta();
                 return;
             }
@@ -85,6 +87,11 @@ public final class Escritorio {
         aplicacion.addListeners(
                 (ApplicationReadyEvent evento) -> sinTumbarLaAplicacion(() -> alEstarLista(evento)),
                 (ContextClosedEvent evento) -> sinTumbarLaAplicacion(Bandeja::quitar));
+
+        // S230 (decisión X): la ventana de «se está iniciando», con la instancia ya ganada y antes
+        // de Spring, que es lo que tarda. Se cierra al abrirse el navegador, por tiempo o antes de
+        // cualquier diálogo (Dialogos). Nada de ella puede tumbar el arranque.
+        VentanaArranque.abrir(ModoEscritorio.activo(), instanciaGanada);
 
         try {
             aplicacion.run(args);
@@ -155,6 +162,9 @@ public final class Escritorio {
         // compartida se perdería también el icono, que es justamente la otra forma de abrir
         // la aplicación y la única de cerrarla. Son independientes y se instalan por
         // separado.
+        // La ventana de arranque se cierra JUSTO ANTES del navegador (S230, enmienda 2): así no
+        // coinciden en pantalla, y si el navegador no abre, el diálogo de respaldo sale solo.
+        sinTumbarLaAplicacion(() -> VentanaArranque.cerrarPor(VentanaArranque.Motivo.NAVEGADOR));
         sinTumbarLaAplicacion(() -> Navegador.abrir(puerto));
         sinTumbarLaAplicacion(() -> Bandeja.instalar(evento.getApplicationContext(), puerto));
     }
