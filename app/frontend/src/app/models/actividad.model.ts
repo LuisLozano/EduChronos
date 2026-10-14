@@ -13,11 +13,13 @@
  * código y devuelve un 400 que NOMBRA el primero no resoluble. El consumidor razona en
  * códigos.
  *
- * <p><b>XOR de aula.</b> Por contrato, cada plaza lleva `aulaFija` O `aulasCandidatas`,
- * exactamente una de las dos ramas: fija presente y candidatas vacías, o fija `null` y
- * ≥1 candidata. Las dos a la vez, o ninguna, son 400. El modelo no puede expresar el XOR
- * en tipos sin partir `PlazaRequest` en dos, así que lo garantiza quien construye el
- * cuerpo (`ActividadForm`) y, en última instancia, el backend.
+ * <p><b>Aula de la plaza: tres modos.</b> Cada plaza lleva `aulaFija` (fija presente y
+ * candidatas vacías), `aulasCandidatas` (fija `null` y ≥1 candidata) o NINGUNA de las dos
+ * (fija `null` y candidatas vacías): en una CLASE el aula la elige el generador con las
+ * reglas de aulas (S207); en una reunión o una función no ocupa aula (S201). Las dos a la
+ * vez son 400 (`ActividadService.validarXor`). El modelo no lo expresa en tipos, así que lo
+ * garantiza quien construye el cuerpo (`ActividadForm`, su `modoAula`) y, en última
+ * instancia, el backend.
  */
 
 /** Espejo de `PlazaDTO(Long id, String codigo, String asignatura, String aulaFija,

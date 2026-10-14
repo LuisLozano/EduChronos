@@ -18,8 +18,10 @@ import java.util.List;
  * <p>Todas las referencias por CÓDIGO (String), patrón de 8.5-B:
  * <ul>
  *   <li>{@code asignatura}: OBLIGATORIA aunque la de la actividad sea null (§4.6);
- *   <li>{@code aulaFija} / {@code aulasCandidatas}: XOR, exactamente una rama (aulaFija
- *       presente Y candidatas vacías, o aulaFija ausente Y ≥1 candidata);
+ *   <li>{@code aulaFija} / {@code aulasCandidatas}: a lo sumo una rama (aulaFija presente
+ *       Y candidatas vacías, o aulaFija ausente Y ≥1 candidata) o ninguna (sin aula
+ *       escrita: en una CLASE la elige el generador, S207; en una reunión o una función
+ *       no ocupa aula, S201); las dos a la vez, 400 ({@code ActividadService.validarXor});
  *   <li>{@code profesores}: ≥1 (invariante I7);
  *   <li>{@code subgrupos}: población de la plaza; ningún código puede repetirse en dos
  *       plazas de la misma actividad (invariante I2).
