@@ -138,7 +138,7 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
    Get-ChildItem $datos | Format-Table Length, Name -AutoSize
    Get-FileHash -Algorithm MD5 (Join-Path $datos 'educhronos.db')
 ```
-      `Test-Path` debe dar `False`.
+      El `Test-Path` de `curso-abierto` (el último) debe dar `False`; los otros dos no imprimen nada si todo va bien.
    4. Crear el acceso directo en el Escritorio:
 ```
    $exe = Join-Path $env:LOCALAPPDATA 'Programs\Educhronos\Educhronos.exe'
