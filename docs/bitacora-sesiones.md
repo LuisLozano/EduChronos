@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S230. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S231. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S230). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S231). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10656,3 +10656,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. De Claude Code: (1) el primer M4 de F1F2 leyó el estado del paso anterior por no esperar el repintado (rehecho con la espera de dos frames); (2) en F3 el guion del M4 cayó al recortar con la geometría de `wmctrl` y dejó un proceso vivo, parado por su PID; (3) una captura de prueba de pantalla completa recogió el escritorio del usuario y se borró sin conservarla; (4) en el cierre, un `git fetch` fuera de la lista de órdenes (solo referencias remotas). Del arquitecto: el guion del cierre pedía las nueve decisiones del arquitecto sin traerlas (una parada, resuelta con su enmienda 1).
   SUITES. Solver 162, app 955 (+22), vitest 853 en 69 ficheros (+39), e2e 3 y python 284 (sin ejecutar). Bundle 651,97 kB (+13,11) en `4d87847`. Mutantes: 14 de 14 en F1F2, 9 de 9 en F3 y 4 de 4 en F4. CI de `4d87847`: `tests` #102 en verde.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 189 líneas del commit de cierre sin índice, 5 838 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 231 — Exploración de la exportación de Séneca: **sin objetivo abierto**. Séneca da antes del horario los grupos con tutor y alumnos, la matrícula por materia y grupo y el personal; no da horas, ni quién imparte, ni aulas. La S232 mide qué parte del cambio de 2025/2026 a 2026/2027 habría señalado.
+  TIPO. Sesión para decidir qué se planifica, programada por decisión del usuario (AD; excepción de Higiene/Método a R-apertura, S178 y S223), sin código de la aplicación. No avanza ningún Cambio. Material en `/home/luis/educhronos-aceptacion/s231/` (t0, t1 y cierre, con su MANIFIESTO.sha256).
+  HECHO. El M0 de la sesión de humo se propuso y se descartó sin ejecutar (AD). T0: estructura de `ExportacionHorarios.xml` (Séneca, 14/10/2026, `modulo="HORARIOS"`): 28 ofertas, 45 unidades, 382 materias, 75 dependencias, 85 empleados, 15 tramos en dos jornadas y 116 tipos de actividad; sin sesiones, sin materia por grupo con horas, sin profesor por materia, sin tutores ni guardias. T1: los 11 `.xls`: matrícula alumno × materia de ESO y Bachillerato (8 ficheros, 583 alumnos), relación de unidades con tutor y alumnos, y personal con puesto y fecha de cese; cruce con la base de 2026/2027 (`38b81f23…`): profesores 53 de 60 por nombre, asignaturas 40 de 97, aulas 0 de 32; las 32 aulas de esa base no tienen capacidad.
+  CRITERIO. Fijado en el M0: que el usuario pueda decidir con datos qué se planifica. Cumplido con la decisión AF.
+  DECISIONES. Del usuario: AD (la S231 explora Séneca en lugar de la sesión de humo), AF (opción A: la S232 mide, sin código, qué parte de lo que cambió entre 2025/2026 y 2026/2027 habría señalado Séneca, y con eso decide si abre un objetivo de contraste —clonar el curso anterior, cargar Séneca y ver las incongruencias y cómo repararlas— antes del humo y de la prueba), AG (aviso, no error, cuando falten alumnos de subgrupo o capacidad de aula donde importa; sustituye la parte «sin aviso» de la decisión O de `O-aulas`) y AH (enviar el horario a Séneca, mejora posterior). AE no se usa (pregunta anulada con AD). Del arquitecto, ocho, en `s231/cierre/decisiones.txt`.
+  DEUDA. Nacen `D-capacidad-sin-aviso` y `D-horario-a-seneca` (mejoras futuras). Notas en `D-matricula-fuera`, `D-codigo-profesor-no-es-identidad` y `D-nombres-cortados-24`.
+  DEFECTOS. Del arquitecto: (1) T0: nombre del XML copiado del mensaje sin volcarlo, codificación ISO-8859-1 no prevista y un filtro de fechas ciego a `nombre_dato`; Claude Code repitió con dos arreglos mínimos (un intento archivado; familia de la norma 15). (2) T1: el filtro de columnas de persona no incluía «usuario», y cuatro usuarios IdEA del personal salieron en la salida de Claude Code; se borraron del disco, pero pasaron por su contexto. Lección: sobre ficheros de Séneca, lista cerrada de columnas permitidas y no lista de prohibidas. (3) El arquitecto supuso que alguien mete el horario en Séneca; no es así. De Claude Code, ninguno; añadió por su cuenta `03b-estructura-semantica`, sin coste.
+  SUITES. Sin cambios, sin código de la aplicación: solver 162, app 955, vitest 853 en 69 ficheros, e2e 3 y python 284. Bundle 651,97 kB. CI de `702c1a1`: `tests` #103 en verde.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 62 líneas del commit de cierre sin índice, 3 494 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
