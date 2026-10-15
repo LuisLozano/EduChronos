@@ -107,11 +107,58 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
    4. Abrir `Educhronos.exe` y comprobar en el selector que están los cursos de antes.
 
    Para volver atrás: con la aplicación cerrada, extraer el zip anterior y restaurar la copia de datos.
-   **Límite:** la base no lleva versión de esquema (`D-esquema-sin-version`), así que esta vía sólo vale
-   si `app/src/main/resources/schema.sql` no cambia entre las dos versiones. Antes de entregar,
-   `git diff --stat <tag anterior> <tag nuevo> -- app/src/main/resources/schema.sql` debe salir vacío.
-   La aplicación no muestra su versión: anotar fuera qué tag se entregó a cada centro.
+   **Límite (corregido en S233).** Desde v0.3.0 cada base lleva su versión de esquema. Al arrancar o al
+   cambiar de curso, la aplicación migra una base anterior y rechaza, sin tocarla, una posterior a la suya
+   (`O-base-tecnica`, condición 1). La migración no tiene vuelta: una base abierta con una versión nueva ya
+   no la abre la anterior. Antes de actualizar, con la aplicación cerrada, se copia entera la carpeta
+   `%LOCALAPPDATA%\Educhronos`.
+   Desde v0.3.0 la aplicación muestra su versión bajo la marca y la escribe en el log al arrancar; aun así, anotar fuera qué tag se entregó a cada centro.
    Verificación: condición 4 de `O-ci` (`docs/actas-aceptacion/`).
+
+8. **Instalación nueva con una base de partida (S233).** Es el punto 6 con órdenes, más la base de
+   partida y el acceso directo. Para una cuenta estándar, sin permisos de administrador, con el zip, su
+   `.sha256` y la base de partida llegados por USB como en el punto 5. Las órdenes son de PowerShell y se
+   lanzan desde la carpeta donde están los dos ficheros del zip.
+   1. Verificar el zip: `Get-FileHash -Algorithm SHA256 Educhronos-win.zip` debe dar el valor que trae
+      `Educhronos-win.zip.sha256`, que lo escribe en minúsculas. Si no, no se instala.
+   2. Extraer el programa en la carpeta de programas del usuario. Queda en
+      `%LOCALAPPDATA%\Programs\Educhronos\Educhronos.exe`:
+```
+   Expand-Archive .\Educhronos-win.zip -DestinationPath "$env:LOCALAPPDATA\Programs"
+```
+   3. Colocar la base de partida, con la aplicación sin abrir todavía. Si ya hay una base en la carpeta
+      de datos, el procedimiento se detiene sin tocarla. Al terminar, la carpeta de datos tiene un único
+      fichero, `educhronos.db`, con el md5 de la base de partida, y no hay `curso-abierto`:
+```
+   $datos = Join-Path $env:LOCALAPPDATA 'Educhronos'
+   if (-not (Test-Path $datos)) { New-Item -ItemType Directory $datos -Force | Out-Null }
+   if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en $datos: no se sobrescribe." }
+   Copy-Item '<ruta de la base de partida en el USB>' (Join-Path $datos 'educhronos.db')
+   Test-Path (Join-Path $datos 'curso-abierto')
+   Get-ChildItem $datos | Format-Table Length, Name -AutoSize
+   Get-FileHash -Algorithm MD5 (Join-Path $datos 'educhronos.db')
+```
+      `Test-Path` debe dar `False`.
+   4. Crear el acceso directo en el Escritorio:
+```
+   $exe = Join-Path $env:LOCALAPPDATA 'Programs\Educhronos\Educhronos.exe'
+   if (-not (Test-Path $exe)) { throw "No existe $exe" }
+   $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Educhronos.lnk'
+   $ws = New-Object -ComObject WScript.Shell
+   $s = $ws.CreateShortcut($lnk)
+   $s.TargetPath = $exe
+   $s.WorkingDirectory = Split-Path $exe
+   $s.Save()
+```
+   5. Primer arranque: doble clic en el acceso directo `Educhronos` del Escritorio. Sale la ventana de
+      arranque («Educhronos se está iniciando…», «El navegador se abrirá en unos segundos.»), que se cierra
+      al abrirse el navegador o a los 60 s. En el navegador está la aplicación, con «versión X.Y.Z» bajo la
+      marca, la del tag entregado. La base de partida se migra sola al abrirla: en
+      `%LOCALAPPDATA%\Educhronos\educhronos.log` queda una línea «Esquema preparado» con `versionInicial`,
+      la que traía la base, y `versionFinal`, la de la aplicación:
+```
+   Select-String -Path "$env:LOCALAPPDATA\Educhronos\educhronos.log" -Pattern 'Esquema preparado'
+```
 
 ---
 
