@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S228. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S229. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S228). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S229). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10635,3 +10635,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, sin coste: criterio de CI del T0 más estricto que la CI; `python3 -I` sin `-B` en el T0 (un `.pyc` no versionado); md5 final tras el manifiesto en F1; M2 y M5 sin cerrar en el contrato, cazados por el contraste antes del sello (una parada); y el informe del cierre redondeó 13,51 a 13, cazado por la guarda del C1 antes de tocar la raíz (una parada).
   SUITES. Python 284 (+17) con `python3 -B -m unittest discover -s tools/carga-centro/tests`; solver 162, app 933, vitest 814 en 68 ficheros y e2e 3 sin cambios (sin código de la aplicación). CI de `565609d` y `8b16fb9`: `tests` #98 en verde. Bundle sin cambios.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 114 líneas del commit de cierre sin índice, 2 546 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 229 — `C-alcance-acabado-pre-prueba`: **`O-acabado-pre-prueba` ABIERTO, 0 de 6**. Maquetas de los diálogos de actividad y de subgrupo aprobadas; la asignatura se verá con su nombre y al arrancar habrá una ventana de espera.
+  TIPO. Apertura de objetivo con fase de maquetas (M-mockup), sin código de la aplicación. Material en `/home/luis/educhronos-aceptacion/s229/` (t0, f1, f1b, cierre/c0 y c1, con su MANIFIESTO.sha256).
+  HECHO. T0: CI de `2849828` en verde (`tests` #99); sobre una copia de la base de S222 (`38b81f23…`), 112 asignaturas con 18 pares de nombre repetido, los tres modos de aula ya en el formulario y en `DeduccionAulas`, 4 `select multiple` y nada visible antes del navegador. F1: maquetas de actividad y subgrupo con datos reales y un solo componente de lista doble, comprobadas sin interfaz (0 fallos, autoprueba). F1b: segunda vuelta de actividad con los cambios del usuario y el filtro de asignatura repuesto. C0: el corte de nombres a 24 caracteres viene del PDF.
+  CRITERIO. Escrito el de `O-acabado-pre-prueba`, seis condiciones; ninguna cumplida.
+  DECISIONES. Del usuario: T y U (lista cerrada y orden de H5, tomadas tras S228), V (maquetas), W (rótulo «La elige el generador»), X (ventana de arranque) e Y (objetivo y criterio); 18 del arquitecto en `s229/cierre/c1/decisiones.txt`.
+  DEUDA. Nacen `D-nombres-cortados-24` y `D-letra-filtro-y-radios` (mejoras futuras, sin objetivo). Pasan a `O-acabado-pre-prueba` `D-arranque-sin-aviso-de-espera`, `D-subgrupo-ux-multiselect` y `D-actividad-ux`; notas en `D-asignatura-sin-nivel`, `D-selectores-combobox` y `D-filtro-por-codigo`.
+  DEFECTOS. Del arquitecto, sin coste: el M0 omitió las líneas en lenguaje llano (añadidas en el turno siguiente); el C0 dio por hecho que «ventana» y «crónica» encontraban la frase de ventana (Claude Code añadió un grep); y el C1 afirmó dos formas sin volcarlas (E3, una línea de lista para un objetivo abierto que no existe, y E4, los campos de la ficha), cazadas por el contraste antes de escribir (una parada; instancia de `D-contrato-desde-resumen`). De Claude Code, sin coste: en F1 retiró el filtro del selector de asignatura, que es la condición 5 de `O-pre-demo` (repuesto en F1b).
+  SUITES. Sin cambios, sin código de la aplicación: solver 162, app 933, vitest 814 en 68 ficheros, e2e 3 y python 284. Bundle 638,86 kB. CI de `2849828`: `tests` #99 en verde.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 89 líneas del commit de cierre sin índice, 2 676 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
