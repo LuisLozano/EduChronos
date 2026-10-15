@@ -686,3 +686,9 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     salidas quedan en la carpeta de material y solo se pegan ante un FALLO o si el guion las
     pide por nombre. Sale de S223: un informe de unas 460 líneas, más de la mitad un diff que la
     autoprueba ya garantizaba.
+19. **En una medición, el contrato fija las reglas y las definiciones; Claude Code vuelca, aplica y
+    calcula, y a la conversación vuelve solo el informe** (S232). La norma 15 se aplica a las reglas:
+    no obliga a pasar los volcados al arquitecto. Lo que el arquitecto no revisa lo sustituyen una
+    autoprueba capaz de fallar, corrida antes de dar ninguna cifra (M2), y la cobertura de cada casado
+    en el informe. Sale de S232: dos rondas pasando volcados al chat antes de medir, y un T2b hecho de
+    principio a fin sin ninguna.
