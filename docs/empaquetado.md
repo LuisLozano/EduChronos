@@ -130,25 +130,31 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
       de datos, el procedimiento se detiene sin tocarla. Al terminar, la carpeta de datos tiene un único
       fichero, `educhronos.db`, con el md5 de la base de partida, y no hay `curso-abierto`:
 ```
-   $datos = Join-Path $env:LOCALAPPDATA 'Educhronos'
-   if (-not (Test-Path $datos)) { New-Item -ItemType Directory $datos -Force | Out-Null }
-   if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en ${datos}: no se sobrescribe." }
-   Copy-Item '<ruta de la base de partida en el USB>' (Join-Path $datos 'educhronos.db')
-   Test-Path (Join-Path $datos 'curso-abierto')
-   Get-ChildItem $datos | Format-Table Length, Name -AutoSize
-   Get-FileHash -Algorithm MD5 (Join-Path $datos 'educhronos.db')
+   & {
+     $datos = Join-Path $env:LOCALAPPDATA 'Educhronos'
+     if (-not (Test-Path $datos)) { New-Item -ItemType Directory $datos -Force | Out-Null }
+     if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en ${datos}: no se sobrescribe." }
+     Copy-Item '<ruta de la base de partida en el USB>' (Join-Path $datos 'educhronos.db')
+   }
+   Test-Path (Join-Path $env:LOCALAPPDATA 'Educhronos\curso-abierto')
+   Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Educhronos') | Format-Table Length, Name -AutoSize
+   Get-FileHash -Algorithm MD5 (Join-Path $env:LOCALAPPDATA 'Educhronos\educhronos.db')
 ```
-      El `Test-Path` de `curso-abierto` (el último) debe dar `False`; los otros dos no imprimen nada si todo va bien.
+      El bloque no imprime nada si todo va bien, y el `Test-Path` de `curso-abierto` debe dar `False`. Las órdenes de copia van en
+      un bloque `& { … }` para que la guarda lo detenga entero: pegadas sueltas, el `throw` solo corta su línea y el `Copy-Item`
+      siguiente se ejecuta igual (medido en S235).
    4. Crear el acceso directo en el Escritorio:
 ```
-   $exe = Join-Path $env:LOCALAPPDATA 'Programs\Educhronos\Educhronos.exe'
-   if (-not (Test-Path $exe)) { throw "No existe $exe" }
-   $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Educhronos.lnk'
-   $ws = New-Object -ComObject WScript.Shell
-   $s = $ws.CreateShortcut($lnk)
-   $s.TargetPath = $exe
-   $s.WorkingDirectory = Split-Path $exe
-   $s.Save()
+   & {
+     $exe = Join-Path $env:LOCALAPPDATA 'Programs\Educhronos\Educhronos.exe'
+     if (-not (Test-Path $exe)) { throw "No existe $exe" }
+     $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Educhronos.lnk'
+     $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
+     $s.TargetPath = $exe
+     $s.WorkingDirectory = Split-Path $exe
+     $s.Save()
+     Test-Path $lnk
+   }
 ```
    5. Primer arranque: doble clic en el acceso directo `Educhronos` del Escritorio. Sale la ventana de
       arranque («Educhronos se está iniciando…», «El navegador se abrirá en unos segundos.»), que se cierra

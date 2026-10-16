@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S232. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S233. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S232). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S233). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10676,3 +10676,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto: (1) el T0 dejó abrir un fichero de estructura de S231 antes de su guarda y unas fechas de personas pasaron por el contexto de Claude Code (una parada; la enmienda puso la guarda antes de abrir); (2) el contrato del T1 dio por independientes cuatro mutaciones (una parada); (3) aplicó la norma 15 a una medición y pidió pasar volcados al chat en dos rondas, con una confusión de pegado (origen de AN); (4) el M0 anunció una comparación de matrícula que no existía (marcada sin verificar). De Claude Code: el informe del L2 contó 14 clones de ensayo y 13 conservados (eran 13 y 12); la cifra pasó a los textos del cierre y se corrigió a 13 con el usuario (una parada).
   SUITES. Sin cambios de código; no se corren. Conteo vigente: solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 76 líneas del commit de cierre sin índice, 3 421 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 233 — Apertura de `O-prueba-secretaria` con el humo dentro, procedimiento de instalación escrito y Release `v0.4.0-rc.1`: **`O-prueba-secretaria` ABIERTO, 0 de 6**; `C-humo-win11` EN CURSO.
+  TIPO. Combinada: apertura de objetivo (`C-alcance-prueba-secretaria`) y Desarrollo reducido (F1b y F2, sin código de la aplicación). Material en `/home/luis/educhronos-aceptacion/s233/` (t0, f1, f2 y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 (solo lectura, HEAD `01bf970`): CI de los cierres de S231 y S232 en verde (`tests` #104 y #105) y medición de la ficha. F1 y F1b: punto 8 de la guía de distribución, «Instalación nueva con una base de partida», con acceso directo, y el «Límite» y la línea de la versión corregidos (`971646f`, `tests` #106 en verde). F2: tag `v0.4.0-rc.1` (`b332936` sobre `971646f`), `bundle` #11 en verde, Release prerelease, zip `edfd3d86…e35d1776` con `sha256sum -c` correcto, jar `app-0.4.0-rc.1.jar` (`2498cb5f…88e487`, casa con la huella del job `linux`, leída por el usuario), `build.version=0.4.0-rc.1` y `esquema/008.sql` idéntico al de HEAD.
+  CRITERIO. `O-prueba-secretaria`, escrito sobre medición: 0 de 6. La condición 2 queda escrita y se cumple al verificarse en el humo.
+  DECISIONES. AO a AS, del usuario (abrir con el humo dentro, criterio, versión `-rc`, bases del humo y VM en S234); las del arquitecto, en `s233/cierre/c1/decisiones.txt`. Texto en la ficha.
+  DEUDA. Sin altas ni bajas. `D-sin-acceso-directo` pasa a bloquear (condición 2): procedimiento escrito; se salda al verificarse. `D-contrato-desde-resumen`: dos instancias con coste; el disparador de Higiene/Método salta y se aplaza hasta cerrar `O-prueba-secretaria`.
+  DEFECTOS. (1) Del asistente: A1 de F1b, escrito desde el resumen de F1 y no desde el volcado de la línea (una parada, enmienda 1). (2) Del asistente, en el cierre: E3 pidió una línea retirada en S229 sin volcar el precedente, las letras se supusieron sin volcarlas y el guion remitió a los scripts de S232 sin sus órdenes literales (norma 10) (una parada, enmienda 2). (3) Del asistente: tras A2, la nota «`Test-Path` debe dar `False`» quedó ambigua; aclarada en el cierre. (4) De Claude Code, sin coste: `/tmp/null-no`, escrito fuera de la carpeta de material; borrado en el cierre.
+  SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 80 líneas del commit de cierre sin índice, 2 723 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

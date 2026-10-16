@@ -10,7 +10,7 @@ completo, que es el estado final 2, pasa a `O-uso-centro`.
 
 - **Versión:** `v0.4.0`, Release normal, tag anotado sobre `971646f`, el mismo commit que `v0.4.0-rc.1` (decisión AU). Construida por
   `bundle` #12. `Educhronos-win.zip`, 176 197 679 B, sha256 `2c08596e8e8ee4f77ca9ad40ec8ea6410bd1771cadf80ff429bf2a740d73e053`.
-  Frente a la rc solo cambian el nombre del jar (`app-0.4.0.jar`) y la línea de `Educhronos.cfg` que lo apunta.
+  Frente a la rc cambian el jar, que pasa a llamarse `app-0.4.0.jar` y lleva dentro la versión nueva (156 595 030 B frente a 156 595 073 B), y la línea de `Educhronos.cfg` que lo apunta.
 - **VM:** `s187-demo-lista` con Windows Update hasta estar al día (Windows 26200.9711) da `s235-actualizada`. Sobre ella, la cuenta de
   la secretaria da `s235-prueba-lista` (UUID `14464016-0340-4a1c-aefa-9bf6d6ff892b`), tomada con el cable de red virtual desconectado
   para que Windows y Edge no descarguen nada durante la prueba.
