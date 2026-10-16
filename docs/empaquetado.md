@@ -132,7 +132,7 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
 ```
    $datos = Join-Path $env:LOCALAPPDATA 'Educhronos'
    if (-not (Test-Path $datos)) { New-Item -ItemType Directory $datos -Force | Out-Null }
-   if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en $datos: no se sobrescribe." }
+   if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en ${datos}: no se sobrescribe." }
    Copy-Item '<ruta de la base de partida en el USB>' (Join-Path $datos 'educhronos.db')
    Test-Path (Join-Path $datos 'curso-abierto')
    Get-ChildItem $datos | Format-Table Length, Name -AutoSize
