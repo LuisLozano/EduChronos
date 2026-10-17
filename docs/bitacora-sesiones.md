@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S233. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S234. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S233). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S234). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10686,3 +10686,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente: A1 de F1b, escrito desde el resumen de F1 y no desde el volcado de la línea (una parada, enmienda 1). (2) Del asistente, en el cierre: E3 pidió una línea retirada en S229 sin volcar el precedente, las letras se supusieron sin volcarlas y el guion remitió a los scripts de S232 sin sus órdenes literales (norma 10) (una parada, enmienda 2). (3) Del asistente: tras A2, la nota «`Test-Path` debe dar `False`» quedó ambigua; aclarada en el cierre. (4) De Claude Code, sin coste: `/tmp/null-no`, escrito fuera de la carpeta de material; borrado en el cierre.
   SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 80 líneas del commit de cierre sin índice, 2 723 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 234 — Humo de `v0.4.0-rc.1` en la VM `Win11` y corrección del procedimiento de instalación: **`O-prueba-secretaria` en 2 de 6**; `C-humo-win11` HECHO.
+  TIPO. Desarrollo reducido (VM), sin código de la aplicación; cerrada a la mañana siguiente en la misma conversación (decisión del usuario). Material en `/home/luis/educhronos-aceptacion/s234/` (t0, vm, doc y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 (solo lectura, HEAD `cd8d11c`): la VM es de VirtualBox y no hay vía remota de órdenes en ella; la rc.1 (`971646f`) lleva el código de HEAD. VM: `s234-previa`, restaurada `s187-demo-lista`, cuenta estándar nueva `humo234` y punto 8 seguido por el usuario desde el USB. Humo entero (acta `docs/actas-aceptacion/acta-humo-s234.md`, `bb4c469`): ventana de arranque y segundo lanzamiento correctos, «versión 0.4.0-rc.1», migración de 0 a 8, duplicado, horario 4 FEASIBLE con 10 min (objetivo 227, 830 sesiones, 0 violaciones duras) y las cinco descargas con el oráculo a cero; después, `s234-humo-hecho`. Guarda del paso 3 del punto 8 corregida (`${datos}`, `2a0e6fa`).
+  CRITERIO. `O-prueba-secretaria` en 2 de 6: condición 1 cumplida, y condición 2 cumplida por decisión del usuario (AZ), que salda `D-sin-acceso-directo`.
+  DECISIONES. Del usuario: AT (cuenta nueva desde `s187-demo-lista`, creada por el usuario), AU (la prueba, sobre `v0.4.0` final), AV (reparto del humo), AW a AY (`s234-previa`, cinco descargas en la condición 1 y `s234-humo-hecho`), AZ (condición 2 cumplida) y BA (instalador, mejora futura). Del arquitecto, en `s234/cierre/decisiones.txt`. Texto en la ficha.
+  DEUDA. Se salda `D-sin-acceso-directo`. Nace `D-sin-instalador` (mejora futura, BA). Notas en `D-suspension-durante-generacion` (se suspendió el anfitrión) y `D-contrato-desde-resumen` (seis instancias sin coste y una con coste).
+  DEFECTOS. (1) Del asistente, de S233: PowerShell no acepta la guarda del paso 3 del punto 8 (`$datos:`); la cazó el humo. (2) Del asistente: el T0 dio por hecho `virsh` y huellas sha256 (son md5); Claude Code lo sustituyó, sin coste. (3) Del asistente: el contrato v1 de la VM afirmó sin volcar un número de violaciones en pantalla, el duplicado sin el campo del curso actual y el SmartScreen de S181; los cazó el contraste, sin coste. (4) Del asistente: aceptó que Claude Code creara la cuenta sin medir la vía hacia la VM (AT revisada, sin coste). (5) Del entorno: el anfitrión se suspendió en una espera y hubo que reiniciarlo, antes de empezar a generar. (6) Del asistente, en el cierre: el paso 1 no adaptó `recontar2.py`, que `medir.py` usa con la sesión escrita en el código (una parada).
+  SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 61 líneas del commit de cierre sin índice, 3 087 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
