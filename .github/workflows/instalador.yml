@@ -1,0 +1,27 @@
+name: instalador
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/Instalar.cmd'
+      - 'scripts/probar-instalar.ps1'
+      - '.github/workflows/instalador.yml'
+      - '.gitattributes'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probar:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Probar Instalar.cmd (autoprueba)
+        shell: powershell
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\scripts\probar-instalar.ps1 -Autoprueba
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

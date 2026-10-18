@@ -105,6 +105,24 @@ jobs:
               exit 1
           }
           Write-Host "zip y .sha256 coinciden: $medido"
+          # S237 (C-instalador): el zip lleva Instalar.cmd y con CRLF; sus entradas usan \.
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archivo = [System.IO.Compression.ZipFile]::OpenRead($zip)
+          $entradaCmd = $archivo.Entries | Where-Object { $_.FullName -eq 'Educhronos\Instalar.cmd' -or $_.FullName -eq 'Educhronos/Instalar.cmd' } | Select-Object -First 1
+          $lfSueltos = -1
+          if ($entradaCmd) {
+              $flujo = $entradaCmd.Open()
+              $memoria = New-Object System.IO.MemoryStream
+              $flujo.CopyTo($memoria)
+              $flujo.Dispose()
+              $bytesCmd = $memoria.ToArray()
+              $lfSueltos = 0
+              for ($i = 0; $i -lt $bytesCmd.Length; $i++) { if ($bytesCmd[$i] -eq 10 -and ($i -eq 0 -or $bytesCmd[$i - 1] -ne 13)) { $lfSueltos++ } }
+          }
+          $archivo.Dispose()
+          if (-not $entradaCmd) { Write-Host "::error::el zip no lleva Educhronos\Instalar.cmd"; exit 1 }
+          if ($lfSueltos -ne 0) { Write-Host ("::error::Instalar.cmd del zip tiene {0} saltos de linea sin CR" -f $lfSueltos); exit 1 }
+          Write-Host "el zip lleva Educhronos\Instalar.cmd con CRLF"
 
       - uses: actions/upload-artifact@v7
         with:
