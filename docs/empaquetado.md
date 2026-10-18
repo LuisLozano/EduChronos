@@ -96,9 +96,13 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
    correo, descarga), antes de extraerlo: clic derecho › Propiedades › «Desbloquear», o
    `Unblock-File .\Educhronos-win.zip`. Esta vía no se ha medido.
 
-6. **Instalación nueva.** Como en «Prueba final en Windows limpio (S156)»: extraer con el Explorador en
+6. **Instalación nueva.** Con una versión que trae `Instalar.cmd` (desde S237), se instala y se actualiza con
+   el punto 8; lo que sigue es el procedimiento a mano, para una versión sin `Instalar.cmd`.
+   Como en «Prueba final en Windows limpio (S156)»: extraer con el Explorador en
    una carpeta del usuario y doble clic en `Educhronos.exe`. No pide permisos de administrador.
-7. **Actualización.** Los datos no viven en la carpeta del programa sino en `%LOCALAPPDATA%\Educhronos\`,
+7. **Actualización.** Con una versión que trae `Instalar.cmd` (desde S237), se instala y se actualiza con el
+   punto 8; lo que sigue es el procedimiento a mano, para una versión sin `Instalar.cmd`.
+   Los datos no viven en la carpeta del programa sino en `%LOCALAPPDATA%\Educhronos\`,
    así que actualizar es sustituir la carpeta del programa:
    1. Cerrar la aplicación desde el icono de la bandeja y comprobar en el Administrador de tareas que no
       queda ningún proceso `Educhronos`.
@@ -115,48 +119,28 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
    Desde v0.3.0 la aplicación muestra su versión bajo la marca y la escribe en el log al arrancar; aun así, anotar fuera qué tag se entregó a cada centro.
    Verificación: condición 4 de `O-ci` (`docs/actas-aceptacion/`).
 
-8. **Instalación nueva con una base de partida (S233).** Es el punto 6 con órdenes, más la base de
-   partida y el acceso directo. Para una cuenta estándar, sin permisos de administrador, con el zip, su
-   `.sha256` y la base de partida llegados por USB como en el punto 5. Las órdenes son de PowerShell y se
-   lanzan desde la carpeta donde están los dos ficheros del zip.
-   1. Verificar el zip: `Get-FileHash -Algorithm SHA256 Educhronos-win.zip` debe dar el valor que trae
-      `Educhronos-win.zip.sha256`, que lo escribe en minúsculas. Si no, no se instala.
-   2. Extraer el programa en la carpeta de programas del usuario. Queda en
-      `%LOCALAPPDATA%\Programs\Educhronos\Educhronos.exe`:
-```
-   Expand-Archive .\Educhronos-win.zip -DestinationPath "$env:LOCALAPPDATA\Programs"
-```
-   3. Colocar la base de partida, con la aplicación sin abrir todavía. Si ya hay una base en la carpeta
-      de datos, el procedimiento se detiene sin tocarla. Al terminar, la carpeta de datos tiene un único
-      fichero, `educhronos.db`, con el md5 de la base de partida, y no hay `curso-abierto`:
-```
-   & {
-     $datos = Join-Path $env:LOCALAPPDATA 'Educhronos'
-     if (-not (Test-Path $datos)) { New-Item -ItemType Directory $datos -Force | Out-Null }
-     if (Test-Path (Join-Path $datos 'educhronos.db')) { throw "Ya hay una base en ${datos}: no se sobrescribe." }
-     Copy-Item '<ruta de la base de partida en el USB>' (Join-Path $datos 'educhronos.db')
-   }
-   Test-Path (Join-Path $env:LOCALAPPDATA 'Educhronos\curso-abierto')
-   Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Educhronos') | Format-Table Length, Name -AutoSize
-   Get-FileHash -Algorithm MD5 (Join-Path $env:LOCALAPPDATA 'Educhronos\educhronos.db')
-```
-      El bloque no imprime nada si todo va bien, y el `Test-Path` de `curso-abierto` debe dar `False`. Las órdenes de copia van en
-      un bloque `& { … }` para que la guarda lo detenga entero: pegadas sueltas, el `throw` solo corta su línea y el `Copy-Item`
-      siguiente se ejecuta igual (medido en S235).
-   4. Crear el acceso directo en el Escritorio:
-```
-   & {
-     $exe = Join-Path $env:LOCALAPPDATA 'Programs\Educhronos\Educhronos.exe'
-     if (-not (Test-Path $exe)) { throw "No existe $exe" }
-     $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Educhronos.lnk'
-     $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
-     $s.TargetPath = $exe
-     $s.WorkingDirectory = Split-Path $exe
-     $s.Save()
-     Test-Path $lnk
-   }
-```
-   5. Primer arranque: doble clic en el acceso directo `Educhronos` del Escritorio. Sale la ventana de
+8. **Instalación con Instalar.cmd (S237).** Para una cuenta estándar, sin permisos de
+   administrador y sin teclear órdenes, con el zip llegado por USB como en el punto 5.
+   1. Quien entrega verifica el zip en su equipo, antes de copiarlo al USB, como en el
+      punto 5.
+   2. En el equipo del centro: copiar `Educhronos-win.zip` del USB a una carpeta del
+      equipo, botón derecho sobre él → «Extraer todo» → «Extraer». Dentro de la carpeta
+      extraída hay una carpeta `Educhronos` con `Instalar.cmd`.
+   3. Si se entrega una base de partida: copiar la carpeta `base-partida`, con un único
+      fichero `.db`, dentro de esa carpeta `Educhronos`, junto a `Instalar.cmd`. Hasta
+      que el zip la lleve, es la única vía.
+   4. Doble clic en `Instalar.cmd`. La ventana dice cada paso y espera una tecla al
+      final. Deja el programa en `%LOCALAPPDATA%\Programs\Educhronos`, el acceso directo
+      `Educhronos` en el Escritorio y, si hay base de partida y la carpeta de datos no
+      tiene ningún `.db` ni `curso-abierto`, la base como
+      `%LOCALAPPDATA%\Educhronos\educhronos.db`. Si Educhronos está abierto, se detiene
+      sin tocar nada; si algo falla, dice qué y termina sin seguir.
+   5. Actualizar a una versión posterior: con la aplicación cerrada, copiar entera la carpeta
+      `%LOCALAPPDATA%\Educhronos` a otro sitio, como respaldo. La migración no tiene vuelta: una
+      base abierta con una versión nueva ya no la abre la anterior (el «Límite» del punto 7).
+      Después, los pasos 2 y 4 con el zip nuevo. La carpeta de datos no se toca: aunque el zip
+      lleve base de partida, no se copia si ya hay datos.
+   6. Primer arranque: doble clic en el acceso directo `Educhronos` del Escritorio. Sale la ventana de
       arranque («Educhronos se está iniciando…», «El navegador se abrirá en unos segundos.»), que se cierra
       al abrirse el navegador o a los 60 s. En el navegador está la aplicación, con «versión X.Y.Z» bajo la
       marca, la del tag entregado. La base de partida se migra sola al abrirla: en
@@ -229,7 +213,7 @@ Si no coincide, aborta: no es el JDK que fijamos.
 
     <salida>/
       jdk/     el zip del JDK de Windows  (~182 MB) - se copia UNA vez
-      build/   jar, empaquetar-windows.ps1, SHA256SUMS, LEEME.txt  (~150 MB)
+      build/   jar, empaquetar-windows.ps1, Instalar.cmd, SHA256SUMS, LEEME.txt  (~150 MB)
 
 `jdk/` solo se rellena si falta, porque el JDK no cambia mientras no cambie su
 versión fijada. `build/` se rehace en cada construcción.
@@ -268,15 +252,17 @@ Qué hace, en orden:
 2. Descomprime el JDK y comprueba que trae `jmods`; sin ellos `jpackage` no
    puede montar el runtime.
 3. `jpackage --type app-image` con los 14 módulos.
-4. Mide la carpeta y dice si cumple la condición 2. **Desde S174, si no cumple, aborta
+4. Copia `Instalar.cmd` a la carpeta del app-image (S237). Aborta con código 1 si falta
+   junto al guion o si tiene algún salto de línea sin CR.
+5. Mide la carpeta y dice si cumple la condición 2. **Desde S174, si no cumple, aborta
    con código 1 y no genera el zip**; antes sólo avisaba y terminaba en 0.
-5. Comprime el app-image e imprime el **sha256 del zip**, que sale también en el
+6. Comprime el app-image e imprime el **sha256 del zip**, que sale también en el
    resumen final junto al del jar. Esa es la huella que se comprueba en el equipo de
    destino antes de extraer: viaja por la consola o por donde se anuncie la descarga,
    nunca dentro del propio zip.
    Desde S174 lo escribe también en `Educhronos-win.zip.sha256`, junto al zip, en
    formato `sha256sum` (una línea, LF y sin BOM): es el fichero que publica la CI.
-6. Prueba de humo, salvo `-SinHumo`.
+7. Prueba de humo, salvo `-SinHumo`.
 
 Cada corrida deja su propia transcripción en `-Base`, con el modo y la fecha en
 el nombre, para poder comparar dos corridas. Esa carpeta irá acumulando
