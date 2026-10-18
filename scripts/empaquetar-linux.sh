@@ -12,7 +12,7 @@
 #
 # La entrega queda en dos carpetas:
 #   <salida>/jdk/    el JDK portable de Windows. Se copia UNA vez.
-#   <salida>/build/  el jar, el guion, las huellas y el LEEME. Cambia en cada build.
+#   <salida>/build/  el jar, el guion, Instalar.cmd, las huellas y el LEEME. Cambia en cada build.
 #
 # Decisión (S152): NO ejecuta la suite. Empaquetar y verificar son puertas
 # distintas del método; mezclarlas daría dos motivos para un mismo fallo.
@@ -217,6 +217,10 @@ cp "$RAIZ/scripts/empaquetar-windows.ps1" "$SALIDA/build/"
 EXIT_PS=$?
 echo "exit cp ps1 = $EXIT_PS"
 if [ "$EXIT_PS" -ne 0 ]; then echo "ABORTA: falta scripts/empaquetar-windows.ps1."; exit 1; fi
+cp "$RAIZ/scripts/Instalar.cmd" "$SALIDA/build/"
+EXIT_CMD=$?
+echo "exit cp Instalar.cmd = $EXIT_CMD"
+if [ "$EXIT_CMD" -ne 0 ]; then echo "ABORTA: falta scripts/Instalar.cmd."; exit 1; fi
 
 # Los dos `cd` son para que en SHA256SUMS quede el nombre PELADO del fichero, que es lo que
 # el guion de Windows espera (compone las rutas por su cuenta: el jar junto a él, el zip en

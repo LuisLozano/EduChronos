@@ -1,0 +1,2 @@
+# S237: cmd.exe falla en goto y call con LF sin CR; Instalar.cmd va con CRLF en todo checkout.
+scripts/Instalar.cmd text eol=crlf

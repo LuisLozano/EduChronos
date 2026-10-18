@@ -182,6 +182,18 @@ Write-Host ("exit jpackage = {0}   segundos = {1:N1}" -f $exitJp, $crono.Elapsed
 if ($exitJp -ne 0) { Write-Host "ABORTA: jpackage fallo."; Terminar 1 }
 Get-ChildItem "$dest\Educhronos" | Format-Table Mode, Length, Name -AutoSize
 
+# S237 (C-instalador): Instalar.cmd entra en la carpeta del app-image, y con ella en la
+# medida del tamano y en el zip.
+$instalador = Join-Path $entrega 'Instalar.cmd'
+if (-not (Test-Path -LiteralPath $instalador)) { Write-Host "ABORTA: falta Instalar.cmd junto a este guion."; Terminar 1 }
+$bytesCmd = [System.IO.File]::ReadAllBytes($instalador)
+$lfSueltos = 0
+for ($i = 0; $i -lt $bytesCmd.Length; $i++) { if ($bytesCmd[$i] -eq 10 -and ($i -eq 0 -or $bytesCmd[$i - 1] -ne 13)) { $lfSueltos++ } }
+if ($lfSueltos -ne 0) { Write-Host ("ABORTA: Instalar.cmd tiene {0} saltos de linea sin CR." -f $lfSueltos); Terminar 1 }
+Copy-Item -LiteralPath $instalador -Destination "$dest\Educhronos\Instalar.cmd"
+if (-not (Test-Path -LiteralPath "$dest\Educhronos\Instalar.cmd")) { Write-Host "ABORTA: Instalar.cmd no llego a la carpeta del programa."; Terminar 1 }
+Write-Host "Instalar.cmd copiado a $dest\Educhronos"
+
 Write-Host ""
 Write-Host "=========================================================="
 Write-Host " 4. TAMANOS  (condicion 2, en bytes de 10^6)"
