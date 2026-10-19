@@ -6,6 +6,11 @@ Preparada en S235: condiciones 3 (instantánea) y 4 (consigna). La prueba (condi
 una prueba corta, como la demo de S188: comprueba que la versión que se dejará en el centro no tiene ningún bloqueo. El uso del curso
 completo, que es el estado final 2, pasa a `O-uso-centro`.
 
+Revisada en S239, antes de la prueba, por decisión del usuario: el reintento tras un 503 pasa a
+10 minutos (CE), la espera de la generación se usa para la conversación final (CF) y el aviso de
+traducir de Edge se desactiva el día de la prueba (CG, revoca BJ). La VM se monta unos 15 minutos
+antes de que llegue la secretaria.
+
 ## Versión e instantánea (condición 3)
 
 - **Versión:** `v0.4.0`, Release normal, tag anotado sobre `971646f`, el mismo commit que `v0.4.0-rc.1` (decisión AU). Construida por
@@ -26,8 +31,10 @@ completo, que es el estado final 2, pasa a `O-uso-centro`.
 
 ## Lo que verá y no se toca
 
-- **Edge ofrece traducir la página «de inglés»**, porque `index.html` declara `lang="en"`. El aviso tapa el botón «Cursos…». Por
-  decisión del usuario no se desactiva.
+- **Edge ofrecería traducir la página «de inglés»**, porque `index.html` declara `lang="en"`, y el
+  aviso tapa el botón «Cursos…», que es el de la tarea 2. Desde S239 (CG, revoca BJ) la oferta se
+  desactiva en Edge antes de que ella se siente (paso 3 de «Antes»): el defecto está corregido en
+  la línea `v0.5.0` (`c48134c`), que es la que recibirá el centro, y observarlo no aporta nada.
 - **La barra dice «Curso sin nombre»:** la base de partida es anterior al nombre de curso. No se toca, para no abrir la aplicación ni
   cambiar la base (condición 3).
 - **La pantalla de inicio de Windows lista otras cuentas**, entre ellas `demo`, con `v0.2.0`. Por eso el observador entra en
@@ -35,7 +42,7 @@ completo, que es el estado final 2, pasa a `O-uso-centro`.
 
 ## Procedimiento del día
 
-Antes, en el anfitrión (Claude Code):
+Antes, unos 15 minutos antes de que llegue ella. Los pasos 1 y 2, en el anfitrión (Claude Code):
 
 1. Inhibidor de suspensión. El PID que vale es el que da `systemd-inhibit --list`, no `$!`, que es el de `setsid`:
 ```
@@ -46,7 +53,10 @@ setsid nohup systemd-inhibit --what=sleep:idle:handle-lid-switch --who=educhrono
 VBoxManage snapshot Win11 restore s235-prueba-lista
 VBoxManage startvm Win11 --type gui
 ```
-3. El observador entra en `secretaria` y deja el Escritorio a la vista. Ella empieza ahí.
+3. El observador entra en `secretaria`, abre Edge, va a `edge://settings/languages`, desactiva la
+   opción de ofrecer traducir las páginas que no están en un idioma que lee y cierra Edge (CG,
+   S239). No se abre Educhronos. Si la opción no aparece, se sigue sin desactivarla y se anota.
+4. El observador deja el Escritorio a la vista. Ella empieza ahí.
 
 Durante: la consigna y las reglas de abajo.
 
@@ -90,10 +100,16 @@ Sin ensayo previo, por decisión del usuario.
    pistas mínimas de la demo («Pistas mínimas (S182)» en `acta-demo-bundle.md`, tareas 4, 5, 6 y 8) están escritas para `v0.2.0` y
    no se han comprobado en `v0.4.0`: sirven de orientación, no de texto fijo.
 6. Se anotan el inicio y el final de cada tarea, y de cada generación el tiempo elegido, la duración y el resultado.
-7. Si la generación da 503, se le pide un único reintento con 30 minutos, y se anota como intervención.
+7. Si la generación da 503, se le pide un único reintento con 10 minutos, y se anota como
+   intervención. Si el reintento también da 503, la prueba con ella termina ahí: se anota, y el
+   usuario decide después si se acepta con salvedad o se repite (CE, S239; antes, 30 minutos, un
+   tiempo que no se había medido nunca en la VM).
 8. Se anota además, sin intervenir: si el aviso de traducir de Edge la detiene o lo acepta; si «Curso sin nombre» le genera alguna
    duda; y cada petición o queja, literal (R-incidencia).
 9. Si lo deja antes de terminar, se anota en qué tarea y por qué.
+10. Mientras se genera, el observador hace la conversación final sobre las tareas 1 a 4: qué le
+    costó y qué esperaba. No toca la pantalla ni anticipa lo que comprueba la tarea 5. Se anota
+    (CF, S239).
 
 ## Qué se comprueba después
 
