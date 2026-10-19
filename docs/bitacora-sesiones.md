@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S234. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S235. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S234). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S235). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10696,3 +10696,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente, de S233: PowerShell no acepta la guarda del paso 3 del punto 8 (`$datos:`); la cazó el humo. (2) Del asistente: el T0 dio por hecho `virsh` y huellas sha256 (son md5); Claude Code lo sustituyó, sin coste. (3) Del asistente: el contrato v1 de la VM afirmó sin volcar un número de violaciones en pantalla, el duplicado sin el campo del curso actual y el SmartScreen de S181; los cazó el contraste, sin coste. (4) Del asistente: aceptó que Claude Code creara la cuenta sin medir la vía hacia la VM (AT revisada, sin coste). (5) Del entorno: el anfitrión se suspendió en una espera y hubo que reiniciarlo, antes de empezar a generar. (6) Del asistente, en el cierre: el paso 1 no adaptó `recontar2.py`, que `medir.py` usa con la sesión escrita en el código (una parada).
   SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 61 líneas del commit de cierre sin índice, 3 087 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 235 — Preparación de la prueba corta de la secretaria con `v0.4.0` en la VM `Win11`: **`O-prueba-secretaria` en 4 de 6**, reducido a prueba corta; `C-preparacion-prueba` HECHO; `O-uso-centro` planificado.
+  TIPO. Desarrollo reducido (VM), sin código de la aplicación. Material en `/home/luis/educhronos-aceptacion/s235/` (t0, t0b, f1, f2, f3 y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 y T0b (solo lectura, HEAD `9587a8c`): desde la rc solo cambió `docs/`, y nada de ello entra en el zip. F1: tag `v0.4.0` sobre `971646f` (`tests` #106 en verde), `bundle` #12 y Release normal, zip `2c08596e…e053` (de la rc solo cambian el jar y su línea de `Educhronos.cfg`). F2: inhibidor de suspensión, `s235-previa`, Windows al día (26200.9711) en `s235-actualizada`; verificación en la cuenta desechable `verif235` (punto 8, «versión 0.4.0», migración de 0 a 8; la guarda pegada línea a línea no detiene el `Copy-Item`, en `& { … }` sí); cuenta `secretaria` y `s235-prueba-lista`, con la red desconectada. F3: acta de la prueba corta (`637b57b`). Cierre: pasos 3 y 4 del punto 8 en bloque.
+  CRITERIO. Condiciones 3 y 4 cumplidas: 4 de 6. Las condiciones 4, 5 y 6 se reescriben para la prueba corta (BD); el estado final 2 pasa a `O-uso-centro` (BE).
+  DECISIONES. Del usuario: BB (Educhronos sin lanzar y Edge pasado), BC (Windows al día y red desconectada), BD (prueba corta), BE (`O-uso-centro`), BF (tareas de la demo), BG (consigna, sin ensayo), BH (el instalador, antes de la prueba), BI (cuenta `secretaria` sin contraseña) y BJ (sin tocar la traducción de Edge). Del arquitecto, en `s235/cierre/decisiones.txt`. Texto en la ficha.
+  DEUDA. Nace `D-pagina-declarada-en-ingles` (mejora futura, `O-uso-centro`). Pasan a `O-uso-centro` `D-sin-instalador`, `D-contraste-seneca`, `D-duplicado-conserva-tutores` y `D-codigo-profesor-no-es-identidad`. Notas en `D-suspension-durante-generacion` y `D-contrato-desde-resumen` (una instancia con coste).
+  DEFECTOS. (1) Del asistente: la regla del mensaje del tag del F1, sin volcar el de la rc (una parada). (2) Del asistente, de S233: el punto 8 prometía que la guarda detenía el procedimiento; pegado línea a línea, no (cazado en la VM, sin coste). (3) Del asistente, sin coste: el `$!` del inhibidor era el de `setsid`; dos guiones sin permiso para borrar sus temporales; el grep de «COPIADO» contaba el eco de la orden; una frase inexacta del acta; el C0 supuso una cabecera `###` y un patrón «archivad». (4) Del flujo: el F2b paró dos veces por sus guardas (sin el F1 hecho y sin el USB). (5) De Claude Code, sin coste: un cruce de md5 que casaba el sha256 y `cd` en vez de rutas absolutas.
+  SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 125 líneas del commit de cierre sin índice, 3 102 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
