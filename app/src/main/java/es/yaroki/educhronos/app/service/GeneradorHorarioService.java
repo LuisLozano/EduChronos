@@ -26,6 +26,8 @@ import es.yaroki.educhronos.app.catalog.TramoSemanalRepository;
 import es.yaroki.educhronos.app.curso.CursoService;
 import es.yaroki.educhronos.app.curso.EstadoCurso;
 import es.yaroki.educhronos.app.curso.RechazoCursoException;
+import es.yaroki.educhronos.app.escritorio.MantenerDespierto;
+import es.yaroki.educhronos.app.escritorio.MantenerDespiertoNulo;
 import es.yaroki.educhronos.app.mapper.CatalogoMapper;
 import es.yaroki.educhronos.app.mapper.DeduccionAulas;
 import es.yaroki.educhronos.app.mapper.SolucionMapper;
@@ -91,6 +93,9 @@ public class GeneradorHorarioService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeneradorHorarioService.class);
 
+    /** El motivo con el que se pide al sistema que no suspenda mientras se genera (S238). */
+    public static final String MOTIVO = "Educhronos está generando un horario";
+
     private final TramoSemanalRepository tramoRepository;
     private final AulaRepository aulaRepository;
     private final AsignaturaRepository asignaturaRepository;
@@ -122,6 +127,13 @@ public class GeneradorHorarioService {
     /** La transacción de escritura de {@link #guardar} en la vía de {@link #generar} (S192). */
     private final TransactionTemplate transaccion;
 
+    /**
+     * Lo que pide al sistema que no suspenda el equipo mientras se genera (S238,
+     * C-sin-suspension). Llega como {@code Optional}: los slices no declaran el bean y se
+     * quedan con el nulo, sin tocar sus {@code @Import}.
+     */
+    private final MantenerDespierto mantenerDespierto;
+
     public GeneradorHorarioService(
             TramoSemanalRepository tramoRepository,
             AulaRepository aulaRepository,
@@ -140,7 +152,8 @@ public class GeneradorHorarioService {
             ConfiguracionRepository configuracionRepository,
             GuardiaRepository guardiaRepository,
             EstadoCurso estadoCurso,
-            PlatformTransactionManager gestorTransacciones) {
+            PlatformTransactionManager gestorTransacciones,
+            Optional<MantenerDespierto> mantenerDespierto) {
         this.tramoRepository = tramoRepository;
         this.aulaRepository = aulaRepository;
         this.asignaturaRepository = asignaturaRepository;
@@ -159,6 +172,7 @@ public class GeneradorHorarioService {
         this.guardiaRepository = guardiaRepository;
         this.estadoCurso = estadoCurso;
         this.transaccion = new TransactionTemplate(gestorTransacciones);
+        this.mantenerDespierto = mantenerDespierto.orElseGet(MantenerDespiertoNulo::new);
     }
 
     /**
@@ -342,7 +356,11 @@ public class GeneradorHorarioService {
         if (!admision.concedida()) {
             throw rechazoDeCurso(admision);
         }
+        // Se pide no suspender SOLO con la generación ya concedida (S238): un rechazo sale
+        // por arriba sin haber pedido nada. Se suelta en el finally, ANTES de la baja.
+        MantenerDespierto.Peticion peticion = MantenerDespierto.Peticion.NINGUNA;
         try {
+            peticion = mantenerDespierto.pedir(MOTIVO);
             // El rastro de la generación (C-version-y-rastro, condición 3, S192): una línea al
             // empezar y otra al terminar, sea cual sea el desenlace, con la duración.
             int seg = presupuestoSegundos(maxSegundos);
@@ -377,7 +395,11 @@ public class GeneradorHorarioService {
             // En un finally, también cuando el solve revienta o se declara infactible: un
             // fallo no puede dejar la cuenta alta, porque entonces no se podría volver a
             // cambiar de curso sin reiniciar la aplicación.
-            estadoCurso.terminarGeneracion();
+            try {
+                peticion.close();
+            } finally {
+                estadoCurso.terminarGeneracion();
+            }
         }
     }
 
