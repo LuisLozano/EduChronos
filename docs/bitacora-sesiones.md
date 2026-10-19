@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S235. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S236. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S235). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S236). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10706,3 +10706,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente: la regla del mensaje del tag del F1, sin volcar el de la rc (una parada). (2) Del asistente, de S233: el punto 8 prometía que la guarda detenía el procedimiento; pegado línea a línea, no (cazado en la VM, sin coste). (3) Del asistente, sin coste: el `$!` del inhibidor era el de `setsid`; dos guiones sin permiso para borrar sus temporales; el grep de «COPIADO» contaba el eco de la orden; una frase inexacta del acta; el C0 supuso una cabecera `###` y un patrón «archivad». (4) Del flujo: el F2b paró dos veces por sus guardas (sin el F1 hecho y sin el USB). (5) De Claude Code, sin coste: un cruce de md5 que casaba el sha256 y `cd` en vez de rutas absolutas.
   SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 125 líneas del commit de cierre sin índice, 3 102 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 236 — Apertura de `O-uso-centro` y medición del instalador: **`O-uso-centro` ABIERTO, 0 de 8**; `C-alcance-uso-centro` HECHO.
+  TIPO. Apertura de objetivo con una fase de medición en GitHub Actions (E1, el M2 de `C-instalador`), sin código de la aplicación; cerrada al día siguiente en la misma conversación. Dos objetivos abiertos: `O-prueba-secretaria` espera fecha (precedentes S121 y S183). Material en `/home/luis/educhronos-aceptacion/s236/` (t0, e1 y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 (solo lectura, HEAD `404fecd`): CI de S235 en verde (`tests` #110); jpackage 17 solo genera la app-image; WiX 3.14 en el runner; los datos viven en `%LOCALAPPDATA%\Educhronos`; `lang="en"`. E1 (rama `exp/s236-instalador`, runs #1 y #2, borrada en el cierre): el MSI por usuario se declara sin elevación, pero instala en la carpeta de datos, `--install-dir` choca con ICE64 y el runner lo bloquea por política (1625); el `Instalar.cmd` prototipo instala como cuenta estándar, crea el acceso directo y conserva el centinela al reinstalar.
+  CRITERIO. `O-uso-centro` ABIERTO con 8 condiciones: el bloque A (1-5: instalador, actualización, datos de partida, suspensión e idioma) está escrito; el bloque B (6-8) se escribe tras `C-prueba-secretaria` (BH). `C-instalador`, con contrato cerrado. `O-prueba-secretaria` sigue en 4 de 6.
+  DECISIONES. Del usuario: BK (criterio), BL (entrega por USB; sigue S156), BM (Windows 11 confirmado), BN (instala alguien del centro, con manual), BO (rama experimental), BP (`Instalar.cmd`, sin desinstalación) y BQ (borrar la rama). Del arquitecto, en `s236/cierre/decisiones.txt`. Texto en la ficha.
+  DEUDA. Ninguna nace ni se salda. Pasan a condiciones de `O-uso-centro`: `D-sin-instalador` (1), `D-suspension-durante-generacion` (4) y `D-pagina-declarada-en-ingles` (5). Notas en `D-contrato-desde-resumen`.
+  DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: el guion del T0 dio de memoria la ruta del plan (sin coste), y el de cierre dio por hecho un «ACTUALIZADO en S2xx» en §2 y omitió el lema y cinco campos de la ficha (dos paradas). (2) Del asistente: D4 de E1 dio por hecho que el runner permitía instalar un MSI por usuario; costó la medición dinámica del MSI. (3) Del asistente: la lista de órdenes de E1 no previó integrar el commit del runner; sin coste. (4) Del arnés de Claude Code: variables de PowerShell que solo difieren en mayúsculas; costó el run #1. (5) Del arnés de Claude Code: dio el MSI por construido porque el fichero existía; S-B anulada, sin run de más. (6) Del flujo: primero el prompt de S237 y después la enmienda 1 se pegaron sin el guion de cierre; Claude Code paró las dos veces (una parada del cierre). Son defectos distintos: el disparador de Higiene/Método no salta.
+  SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 90 líneas del commit de cierre sin índice, 3 216 bytes de entrada y 3 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
