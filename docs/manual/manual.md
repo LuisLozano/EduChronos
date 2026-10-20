@@ -32,11 +32,21 @@ Cuatro cosas de Educhronos no se pueden deshacer. Léelas antes de empezar a tra
 **Para qué sirve.** Para dejar Educhronos en el ordenador del centro, con los datos de partida, sin
 permisos de administrador y sin escribir órdenes.
 
-**Qué necesitas.** El USB del centro. Nada más abrirlo, sin entrar en ninguna carpeta, están el
-fichero `Educhronos-win.zip` y la carpeta `base-partida`, que lleva un único fichero terminado en
-`.db`.
+**Qué necesitas.** El USB del centro. Abajo se dice qué tiene que llevar.
 
 ## Instalar por primera vez
+
+**Antes de empezar, comprueba el USB.** Ábrelo. Nada más abrirlo, sin entrar en ninguna carpeta,
+tienes que ver estos cuatro elementos:
+
+- `Educhronos-win.zip`: el programa. El Explorador puede enseñarlo solo como `Educhronos-win`, con
+  un icono de carpeta con cremallera.
+- `Educhronos-win.zip.sha256`: sirve para comprobar el zip; no tienes que hacer nada con él.
+- La carpeta `base-partida`: dentro lleva un único fichero terminado en `.db` (y otro que acaba en
+  `.md5`, que no se toca).
+- `Educhronos-manual-0.5.0.pdf`: este manual.
+
+Si falta alguno, no sigas: avisa. Si hay otras carpetas, no las uses.
 
 1. Abre el USB y copia `Educhronos-win.zip` a una carpeta del ordenador, por ejemplo Documentos.
 2. Abre la carpeta donde lo has copiado. Haz clic con el botón derecho sobre **esa copia** del zip,
