@@ -26,7 +26,18 @@ Huella de la base entregable (`md5sum`): `d867c2dec4a9ab01357f539d8b09f7e2  /hom
 - `GET /api/curso`: `{"nombre":"2025/2026","archivado":false,"propuestaSiguiente":"2026/2027"}`
 - Log: `2026-10-20T19:57:08.439+02:00  INFO 695631 --- [           main] e.y.e.app.config.PreparadorEsquema       : Esquema preparado ruta=/home/luis/educhronos-aceptacion/s241/f1/verificacion/educhronos.db versionInicial=0 versionFinal=8 baseVacia=false`
 - La copia, tras cerrar: `user_version 8 · curso [(1, '2025/2026', 0)]` (la fila sobrevive a las migraciones 1 a 8).
-- La barra pinta `curso.nombre` (`curso-barra.ts:71`, spec `curso-barra.spec.ts`); la barra real se verifica en la VM (F3).
+- La barra pinta `curso.nombre` (`curso-barra.ts:71`, spec `curso-barra.spec.ts`); la barra real, en la sección siguiente.
 
 ## Decisiones
 Del arquitecto: script en `tools/base-partida/` (precedente `tools/carga-centro/`); copia de bytes y no `VACUUM INTO`; sin migrar (lo hace la aplicación al abrir); rechazo si ya hay fila (CJ); la base no se versiona ni entra en el zip: viaja en el USB y la copia quien entrega (BS).
+
+## Verificación en la VM (F3, `s241/f3`)
+- Cuenta estándar nueva `inst241` sobre `s239-prueba-hecha`, sin restaurar instantánea y sin instantánea al terminar (CQ).
+- Zip de `v0.5.0-rc.4` descargado de la Release y verificado en el host y en la VM: `03d64d42e48368019a194444d53f3e00aa26434b08e64b22f7458ee24fc2754e`.
+- Base copiada a mano en `base-partida\` (BS), md5 antes de instalar `d867c2dec4a9ab01357f539d8b09f7e2` y `educhronos.db` instalada `d867c2dec4a9ab01357f539d8b09f7e2`.
+- `Instalar.cmd` desde PowerShell con transcripción (`vm/instalar.txt`): copia la base y termina bien.
+- Barra: Barra de Educhronos en la VM (cuenta inst241, 2026-10-20 ~21:10), transcrita por el arquitecto de la captura … «2025/2026», «versión 0.5.0-rc.4», sin «Solo lectura» (`barra.txt`).
+- Log: `C:\Users\inst241\AppData\Local\Educhronos\educhronos.log:14:2026-10-20T21:03:39.737+02:00  INFO 6032 --- [main] e.y.e.app.config.PreparadorEsquema       : Esquema preparado 
+ruta=C:\Users\inst241\AppData\Local\Educhronos\educhronos.db versionInicial=0 versionFinal=8 baseVacia=false`.
+- Carpeta de datos al cerrar: `educhronos.db`, `educhronos.lock` y `educhronos.log`, sin `curso-abierto` (`vm/datos-despues.txt`).
+- Lectura: los `.txt` de PowerShell van en UTF-16LE; la primera corrida de `grep` dio falsos «NO casa» (`oraculo-falso-grep-utf16.txt`); el oráculo bueno, sobre copias en UTF-8 (`oraculo.txt`).
