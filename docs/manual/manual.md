@@ -32,21 +32,23 @@ Cuatro cosas de Educhronos no se pueden deshacer. Léelas antes de empezar a tra
 **Para qué sirve.** Para dejar Educhronos en el ordenador del centro, con los datos de partida, sin
 permisos de administrador y sin escribir órdenes.
 
-**Qué necesitas.** El USB con el fichero `Educhronos-win.zip` y la carpeta `base-partida`, que
-lleva un único fichero terminado en `.db`.
+**Qué necesitas.** El USB del centro. Nada más abrirlo, sin entrar en ninguna carpeta, están el
+fichero `Educhronos-win.zip` y la carpeta `base-partida`, que lleva un único fichero terminado en
+`.db`.
 
 ## Instalar por primera vez
 
-1. Copia `Educhronos-win.zip` del USB a una carpeta del ordenador, por ejemplo Documentos.
-2. Haz clic con el botón derecho sobre el zip y elige <!-- sin-comprobar -->«Extraer todo»<!-- /sin-comprobar -->;
-   en la ventana que sale, pulsa <!-- sin-comprobar -->«Extraer»<!-- /sin-comprobar -->. Dentro de la carpeta extraída hay una
-   carpeta `Educhronos` con un fichero `Instalar.cmd`.
-3. Copia la carpeta `base-partida` del USB **dentro** de esa carpeta `Educhronos`, junto a
-   `Instalar.cmd`.
+1. Abre el USB y copia `Educhronos-win.zip` a una carpeta del ordenador, por ejemplo Documentos.
+2. Abre la carpeta donde lo has copiado. Haz clic con el botón derecho sobre **esa copia** del zip,
+   no sobre la del USB, y elige <!-- sin-comprobar -->«Extraer todo»<!-- /sin-comprobar -->; en la ventana que sale, pulsa
+   <!-- sin-comprobar -->«Extraer»<!-- /sin-comprobar -->. Dentro de la carpeta extraída hay una carpeta `Educhronos` con un
+   fichero `Instalar.cmd` (el Explorador puede enseñarlo solo como `Instalar`).
+3. Antes del paso 4, copia la carpeta `base-partida` del USB **dentro** de esa carpeta
+   `Educhronos`, junto a `Instalar.cmd`.
 4. Haz doble clic en `Instalar.cmd`. Se abre una ventana negra que va diciendo cada paso y, al final,
    espera a que pulses una tecla. No la cierres sin leerla.
 
-<!-- captura-windows: la carpeta Educhronos extraída, con Instalar.cmd y la carpeta base-partida al lado -->
+![Así tiene que verse la carpeta Educhronos antes del paso 4: Instalar y, al lado, base-partida.](capturas/w01-carpeta-extraida.png)
 
 **Qué ves al terminar.** La ventana tiene que decir, en este orden:
 
@@ -62,7 +64,7 @@ lleva un único fichero terminado en `.db`.
 Pulsa una tecla y la ventana se cierra. En el Escritorio queda un acceso directo llamado
 `Educhronos`.
 
-<!-- captura-windows: la ventana de Instalar.cmd terminada, con la línea de la base de partida copiada -->
+![La ventana de Instalar.cmd al terminar, esperando a que pulses una tecla.](capturas/w02-instalar-terminado.png)
 
 **Atención:** si en lugar de <!-- sin-comprobar -->«Base de partida copiada a …»<!-- /sin-comprobar --> la ventana dice
 <!-- sin-comprobar -->«No hay base de partida junto a Instalar.cmd: la carpeta de datos no se toca.»<!-- /sin-comprobar -->,
@@ -111,6 +113,9 @@ que avisar de un fallo.
    Se cierra sola cuando se abre el navegador, o al minuto.
 3. El navegador se abre con Educhronos. No tienes que escribir ninguna dirección.
 
+Si es la primera vez que se usa el navegador en ese ordenador, mira el anexo, antes de la última
+sección.
+
 **Qué ves al terminar.** La portada de Educhronos.
 
 ![La portada. Arriba a la izquierda, la marca y, debajo, la línea de versión.](capturas/01-portada.png)
@@ -129,15 +134,18 @@ tienes que decir si avisas de un fallo.
 
 ## Cerrar
 
-Educhronos se cierra desde su icono en la bandeja del sistema, junto al reloj de Windows:
+Educhronos se cierra desde su icono en la bandeja del sistema, junto al reloj de Windows. Si no lo
+ves, pulsa la flecha ^ de la bandeja: puede estar entre los iconos ocultos.
 
 1. Haz clic con el botón derecho en el icono de Educhronos.
 2. Elige <!-- sin-comprobar -->«Salir»<!-- /sin-comprobar -->.
 
+El icono desaparece. La pestaña del navegador se queda abierta; puedes cerrarla.
+
 En ese mismo menú, <!-- sin-comprobar -->«Abrir Educhronos»<!-- /sin-comprobar --> te devuelve a la
 pestaña del navegador si la has cerrado.
 
-<!-- captura-windows: el menú del icono de Educhronos en la bandeja, con sus dos opciones -->
+![El menú del icono de Educhronos, abierto desde los iconos ocultos de la bandeja.](capturas/w06-menu-bandeja.png)
 
 # 4. Cómo está organizada la aplicación
 
@@ -394,6 +402,10 @@ lo intentas, la ficha de la clase lo rechaza con un aviso en rojo: «No se puede
 por 3 sesion(es)». Genera cuando la configuración esté terminada. Si aun así tienes que cambiar
 algo, sigue la sección 11.
 
+**Atención:** el aviso termina diciendo «Borra el horario generado y los bloqueos que dependen de
+ella antes de editarla.», pero Educhronos no tiene ninguna forma de borrar un horario. Lo que sí
+funciona es duplicar el curso: lo explica la sección 11.
+
 ![Intentar guardar una clase en un curso con horario: el aviso en rojo.](capturas/06-actividad-con-horario.png)
 
 # 10. Ver y ajustar el horario
@@ -474,6 +486,18 @@ Cada botón descarga un fichero. El navegador lo guarda en su carpeta de descarg
 Descargas).
 
 ![El horario de un grupo, con los botones de descarga arriba.](capturas/02-horario-grupo.png)
+
+# Anexo: la primera vez que se abre el navegador
+
+La primera vez que se usa el navegador en un ordenador, antes de enseñar Educhronos puede salir su
+pantalla de bienvenida, por encima de la portada. En un ordenador con Windows 11 es la de Microsoft
+Edge: <!-- sin-comprobar -->«Le damos la bienvenida a Microsoft Edge, el explorador recomendado en Windows»<!-- /sin-comprobar -->.
+
+1. Pulsa <!-- sin-comprobar -->«Comience sin sus datos»<!-- /sin-comprobar -->.
+2. Si salen más pantallas del navegador, elige en cada una la opción que no inicia sesión ni
+   comparte datos.
+3. Al terminar ves la portada de Educhronos. Si el navegador ha abierto otras pestañas suyas,
+   puedes cerrarlas.
 
 <!-- Manual de uso de Educhronos 0.5.0 (S242, O-manual, C-alcance-manual). Las citas entre
      comillas angulares las comprueba tools/manual/capturas.mjs contra la aplicación; las de Windows,
