@@ -17,8 +17,9 @@ Huella de la base entregable (`md5sum`): `d867c2dec4a9ab01357f539d8b09f7e2  /hom
 
 ## Suite y mutantes
 - `tools/base-partida/tests`: Ran 9 tests in 0.013s.
-- Mutantes sobre copias: m1 cazado (sin la guarda de fila existente): 1 casos rojos; m2 cazado (archivado 1): 4 casos rojos; m3 cazado (anos no consecutivos aceptados): 1 casos rojos.
-- Suite de `tools/carga-centro/tests` con el mismo runner: ['Ran 284 tests in 2.248s'].
+- Mutantes sobre copias: m1 cazado (sin la guarda de fila existente): 1 casos rojos; m2 cazado (archivado 1): 4 casos rojos; m3 cazado (años no consecutivos aceptados): 1 casos rojos.
+- Cómo cae cada mutante: m1 por `IntegrityError` (sin la guarda, el `insert` choca con la clave primaria de `curso`), m2 por la `RuntimeError` de `verificar` antes de los asertos, m3 por el aserto de `test_1`. Los tres mueren; solo m3 lo caza un aserto del spec.
+- Suite de `tools/carga-centro/tests` con el mismo runner: Ran 284 tests in 2.248s.
 
 ## Verificación con la aplicación (Linux, sobre una copia)
 - Arranque: `python3 -B /home/luis/desarrollo/educhronos/scripts/arrancar-backend.py arrancar --base /home/luis/educhronos-aceptacion/s241/f1/verificacion/educhronos.db --registro /home/luis/educhronos-aceptacion/s241/f1/verificacion`
