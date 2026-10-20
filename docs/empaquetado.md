@@ -132,6 +132,7 @@ siempre el zip de una Release, sin reconstruirlo: dos construcciones del mismo c
       La base la produce `tools/base-partida/preparar_base_partida.py` (S241) a partir de la
       base original de 2025/2026, con la fila de `curso` escrita y sin migrar; su huella está
       en `docs/actas-aceptacion/acta-base-partida-s241.md`. En `base-partida` va solo ella.
+      Con el USB va impresa la guía `docs/guia-incidencias.md` (condición 7 de `O-uso-centro`, S241).
    4. Doble clic en `Instalar.cmd`. La ventana dice cada paso y espera una tecla al
       final. Deja el programa en `%LOCALAPPDATA%\Programs\Educhronos`, el acceso directo
       `Educhronos` en el Escritorio y, si hay base de partida y la carpeta de datos no
