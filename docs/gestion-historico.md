@@ -2,42 +2,43 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L51 — ## 1. Objetivos terminados
-- L53 — ### H2 — Configurar un centro desde cero
-- L55 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L71 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L143 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L393 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L680 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L781 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L880 — ### H1 — Ajustar (cierre)
-- L882 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1059 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1350 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1540 — ### H3 — Exportar
-- L1542 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1603 — ### H4 — Instalar y pasar de curso
-- L1605 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1779 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1874 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1943 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1979 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1981 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2030 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2065 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2100 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2129 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2168 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2206 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2243 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2280 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2316 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2334 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2360 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2392 — ## 2. Deuda cerrada de §4
-- L2394 — ### Deuda técnica real, colgada de su objetivo
-- L2466 — ### Mejora futura, cuelga y espera
-- L2486 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L52 — ## 1. Objetivos terminados
+- L54 — ### H2 — Configurar un centro desde cero
+- L56 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L72 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L144 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L394 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L681 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L782 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L881 — ### H1 — Ajustar (cierre)
+- L883 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1060 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1351 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1541 — ### H3 — Exportar
+- L1543 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1604 — ### H4 — Instalar y pasar de curso
+- L1606 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1780 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1875 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1944 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1980 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1982 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2031 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2066 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2101 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2130 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2169 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2207 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2244 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2281 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2317 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2335 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2361 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2393 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2412 — ## 2. Deuda cerrada de §4
+- L2414 — ### Deuda técnica real, colgada de su objetivo
+- L2486 — ### Mejora futura, cuelga y espera
+- L2506 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2388,6 +2389,25 @@ terminado (§6).
 - **Valor:** quita el riesgo de dejar sola en el centro una versión con un bloqueo que nadie ha visto. Desde S235 no es el estado final 2, que pasa a `O-uso-centro` (BE).
 - **Cambios que agrupa:** `C-alcance-prueba-secretaria` ✔ HECHO (S233): el M0, el T0 y este criterio. `C-humo-win11` ✔ HECHO (S234): procedimiento (`971646f`, corregido en `2a0e6fa`), Release `v0.4.0-rc.1` y humo en la VM (condiciones 1 y 2; acta en `bb4c469`). `C-preparacion-prueba` ✔ HECHO (S235): tag `v0.4.0`, VM `s235-prueba-lista` y consigna (condiciones 3 y 4; acta en `637b57b`). `C-prueba-secretaria` ✔ HECHO (S239): la prueba corta (condiciones 5 y 6; acta en `docs/actas-aceptacion/acta-prueba-secretaria.md`).
 - **Métrica de §7:** cuatro sesiones (S233, S234, S235 y S239), sobre un límite de 8; de S236 a S238 esperó fecha, abierto.
+
+#### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- **Propósito:** que quien use o instale Educhronos en el centro tenga, en papel y en el USB, cómo se hace cada tarea en la versión entregada. Punto 10 del mapa de S190, registrado en S240 (CO) e intercalado antes de la condición 8 de `O-uso-centro`.
+- **Por qué va ahora:** la condición 8 de `O-uso-centro`, el uso real sin observador, espera a él (CO); las condiciones 6 y 7 terminaron en S241.
+- **Medido al abrir (S242, Claude Code, HEAD `f6f8e4b`, solo lectura; material en `/home/luis/educhronos-aceptacion/s242/t0/` y `s242/f1/`):** (a) tres rutas de primer nivel y ocho apartados de Configuración (`app.routes.ts:38-45`); (b) en la demo de S188 la secretaria no descubrió el horario en pantalla, descargó uno de los horarios, buscó «Cursos…» en Configuración y borró clases en vez de reasignarlas; en S239 dejó la baja de BYG1 a medias; (c) `Instalar.cmd` solo copia la base con un único `.db` y la carpeta de datos vacía (`:50-56`); (d) Claude in Chrome no captura en este equipo; Playwright 1.62.0, pandoc y google-chrome, sí; (e) el jar del zip arranca en Linux con `XDG_DATA_HOME` y sin `-Deduchronos.escritorio`, sin navegador ni bandeja; (f) con horario, el PUT de una actividad da 409, y tras duplicar el curso, 200.
+- **Decisiones (S242):** (CR) del usuario: el objetivo en una sola sesión. (CS) del usuario: el manual incluye la instalación. (CT) del usuario: capturas con Playwright, tras medir que Claude in Chrome no captura. (CU) del usuario: el USB lleva el zip, su `.sha256`, `base-partida` con la base sola y el PDF, y lo copia alguien del centro. (CV) del usuario: tag `v0.5.0` sobre `c2c157f`, Release normal, y el manual sobre ella. (CW) del usuario: la guía de incidencias es la última sección del manual. (CX) del usuario: el criterio. En F3, del usuario: la raíz del USB, el anexo de Edge y los arreglos D1 a D3 del acta. Las del arquitecto, en `s242/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — escrito en S242 (CX) sobre esa medición. `O-manual` termina cuando:
+  1. **Por tareas.** `docs/manual/` (Markdown) tiene una sección por tarea de esta lista cerrada: instalar y actualizar; abrir, cerrar y ver la versión; preparar el curso nuevo; cambiar profesores (alta, baja en dos pasos, tutoría, disponibilidad y guardias); cambiar las horas de una clase y encontrarla; comprobar antes de generar; generar; ver y ajustar el horario; sacar los cuatro horarios (tres PDF y el CSV). Cada sección indica dónde se hace, con los rótulos literales, los pasos y qué se ve al terminar. **✔ CUMPLIDA en S242** (secciones 2, 3, 5 a 10 y 12; además la 1, la 4, la 11, un anexo del navegador y, como última, la guía de incidencias; son cinco descargas, no cuatro).
+  2. **Fiel a la versión.** Las capturas salen de un script versionado que arranca el jar de la versión entregada sobre una copia de la base de partida, y que falla si falta en pantalla algún texto literal citado. Su autoprueba demuestra que lo detecta. **✔ CUMPLIDA en S242** (`tools/manual/capturas.mjs`, `eac23f0`: 172 de 172 citas sobre `app-0.5.0.jar`; autoprueba con dos citas inventadas y una real).
+  3. **Avisa de lo que no tiene vuelta.** Antes de generar: que congela actividades y jornada, y la salida si F1 la mide. Además: la baja de un profesor en dos pasos, que los cursos no se borran y dónde está cada una de las cuatro descargas. **✔ CUMPLIDA en S242** (secciones 1, 9 y 11; el 409 real y su consejo imposible; la salida, medida en F1.5).
+  4. **Instalación probada.** El usuario sigue el capítulo de instalación tal cual en la VM, desde una instantánea, con una cuenta estándar nueva y el zip entregado. Las capturas de Windows se toman con VBoxManage durante esa misma corrida. Acta con versión y md5 de la base instalada. **✔ CUMPLIDA en S242** (`inst242` sobre `s239-prueba-hecha`, USB como F:; base instalada con md5 `d867c2de…`, «versión 0.5.0» y «2025/2026», esquema de 0 a 8; desviaciones D1 a D3, corregidas en el manual).
+  5. **Entregable.** Un PDF generado con una orden versionada a partir del Markdown, con la versión en la portada y su huella en el acta. Viaja en el USB y va impreso. **✔ CUMPLIDA en S242** (`tools/manual/generar-pdf.sh`; 31 páginas, sha256 `6635b4b2…`, en la raíz del USB). La copia impresa la hace el usuario antes de entregar y la recoge el acta de la condición 8 de `O-uso-centro`.
+- **ESTADO en S242: TERMINADO, 5 de 5.**
+- **Fuera del criterio, con motivo:** la ventana de generar y los avisos al arrastrar, contados sin cita porque el recorrido no genera ni arrastra; la actualización, verificada en S237; la lista del USB de F3.9, no probada en la VM; que otros profesores usen el manual (CM).
+- **Deudas:** ninguna nace ni se salda. Notas en `D-horario-irreversible`, `D-consejo-409-pegado`, `D-baja-profesor-incompleta` y `D-contrato-desde-resumen`.
+- **Depende de:** `O-uso-centro`, condiciones 6 y 7 (base de partida y guía), y la Release `v0.5.0`.
+- **Valor:** que el centro prepare 2026/2027 sin nadie al lado y sin atascarse en lo que no tiene vuelta.
+- **Cambios que agrupa:** `C-alcance-manual` ✔ HECHO (S242): M0, T0, F1 (medición y tag `v0.5.0`), F2 (manual, script y PDF: `eac23f0`, `884e4db` y `1343b64`) y F3 (VM, capturas de Windows, PDF definitivo y acta: `cf6d2ad`, `06001b3`, `5265060` y `debd853`).
+- **Métrica de §7:** una sesión (S242).
 
 ## 2. Deuda cerrada de §4
 

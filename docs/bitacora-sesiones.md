@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S239. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S240. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S239). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S240). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10746,3 +10746,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del asistente: la regla de clasificación del T0 por ruta (c48134c salió como OTRO); el patrón `[45][0-9][0-9]` del D3, que cazaba cifras de horas y nombres; el grep de «duras», que no veía «DURA»; las rutas de la base de partida del D3, escritas de memoria (estaba en s181); y cinco puntos del contrato del cierre (D1 a D5 del contraste: tres escritos desde el resumen de Claude Code y dos con una forma afirmada sin volcar), que costaron una parada sin trabajo que rehacer. De Claude Code, sin coste: 14 instantáneas contadas a ojo (eran 13), el desglose de líneas del F1 (+4 por +5) y un `cd` en el C0, contra la norma 6, sin efecto. `D-contrato-desde-resumen`: una instancia con coste; no salta.
   SUITES. Sin cambios de código: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 284. CI `tests` #116 en verde sobre `d590741` y #117 sobre `887e7a1`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 178 líneas del commit de cierre sin índice, 2 703 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 240 — O-uso-centro (H5), C-alcance-bloque-b: **BLOQUE B ESCRITO; O-MANUAL REGISTRADO**
+  TIPO. Apertura de objetivo, aplicada al bloque B de un objetivo abierto (precedente S236); sin código.
+  HECHO. T0 de solo lectura en `s240/t0` (las diez bases de S239 y su tabla `curso`, `CursoService.duplicar`, `Instalar.cmd`, el log, el acta de S239 y las siete deudas) y T0-bis; contrato con citas; bloque B escrito: 6 datos de partida, 7 guía de feedback y canal, 8 uso real; `O-manual` registrado sin abrir, intercalado antes de la condición 8; estimación de §7.
+  CRITERIO. `O-uso-centro` sigue en 5 de 8; el bloque B pasa de pendiente a escrito; la condición 8 depende de `O-manual`.
+  DECISIONES. (CJ) base de partida con nombre por script versionado de preparación; (CK) el centro recibe la base de 2025/2026 original con nombre; (CL) teléfono con cada llamada anotada, base y log por USB al final o antes si una incidencia lo pide; (CM) en este objetivo usa y avisa la secretaria; (CN) si el centro no termina, cierre con salvedad por decisión del usuario, sin fecha; (CO) el manual de uso es `O-manual`, objetivo intercalado. Las del arquitecto, en `s240/cierre/decisiones.txt`.
+  DEUDA. Ninguna nueva. `D-curso-sin-renombrar` sigue viva (CJ). `D-contrato-desde-resumen`: cinco instancias del arquitecto, una con coste (el C0 ancló cabeceras sin la norma 9 y cortó la región del plan por el final del fichero; Claude Code recompuso las regiones por pantalla) y cuatro sin coste (`create table` sin `if not exists`; `Instalar.cmd` situado dentro de `empaquetar-windows.ps1`; la parte G del T0-bis buscando líneas del plan en gestión; las anclas G2 y G8 sin alargar). No salta. Aparte, con coste: el guion C1 remitía a un contrato que no iba dentro del bloque (una parada); es otro defecto.
+  DEFECTOS. (1) patrón `create table curso` escrito de memoria, sin coste; (2) `Instalar.cmd` situado en `empaquetar-windows.ps1`, sin coste; (3) parte G del T0-bis con líneas del plan sobre gestión, sin coste; (4) anclas del C0 sin la norma 9 y región del plan hasta el final del fichero, con coste; (5) guion C1 no autocontenido, una parada. Todos del arquitecto.
+  SUITES. Sin cambios de código: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 284. CI de `cee2a8f` en verde (`tests`, completed, success).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 76 líneas del commit de cierre sin índice, 2 602 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

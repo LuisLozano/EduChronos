@@ -3,7 +3,7 @@
 - **Versión:** `v0.5.0`, tag anotado sobre `c2c157f` (el mismo código que `v0.5.0-rc.4`; `tests` n.º 115 y `bundle` n.º 17 en verde). Release no prerelease, con `Educhronos-win.zip` (176 208 048 B, sha256 `34df89a36713a9a01de1c020cf4115367d2a134dd0544cf5011b7666e5d4ec7e`, comprobado con `sha256sum -c` en el host y en el USB).
 - **JAR de las capturas:** `app-0.5.0.jar` (156 605 222 B), extraído de ese zip con `zipfile`, porque el zip guarda las rutas con «\» (`s242/f2/v050/extraido/Educhronos/app/`).
 - **Base de partida:** `s241/f1/base-partida/base-partida-2025-2026.db`, md5 `d867c2dec4a9ab01357f539d8b09f7e2` (acta de S241).
-- **Código:** `eac23f0` (script de capturas, generador del PDF y hoja de estilo), `884e4db` (manual y 24 capturas), `1343b64` (guía de incidencias como última sección) `cf6d2ad` (capturas de Windows, aviso sobre el consejo del 409, anexo del navegador y correcciones de la prueba en la VM) y el commit de F3.9 (lista de lo que lleva el USB).
+- **Código:** `eac23f0` (script de capturas, generador del PDF y hoja de estilo), `884e4db` (manual y 24 capturas), `1343b64` (guía de incidencias como última sección), `cf6d2ad` (capturas de Windows, aviso sobre el consejo del 409, anexo del navegador y correcciones de la prueba en la VM) y `5265060` (lista de lo que lleva el USB).
 - **Material:** `/home/luis/educhronos-aceptacion/s242/` (`f1`, `f2` y `f3`, cada una con su `volcado.txt`).
 
 ## Criterio, condición por condición
