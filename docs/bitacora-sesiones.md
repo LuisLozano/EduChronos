@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S237. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S238. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S237). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S238). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10726,3 +10726,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: «un proceso» en V6, sin volcar S151 (una parada), y el «Límite» copiado literal al paso 5 de la guía, redundante (un commit rehecho antes del push); sin coste, `bundle` solo con tag y el separador `/` del zip, cazados en el contraste. En el cierre, el acta y las decisiones afirmaron sin constar el icono de traducir, la base dentro del zip de rc.2 y las órdenes de la cuenta (una parada). El mismo defecto cuesta dos veces: el disparador de Higiene/Método salta, aplazado hasta cerrar `O-prueba-secretaria`. (2) Del flujo: V2 se ejecutó primero en la consola de administrador y sin el USB conectado; repetido, sin coste.
   SUITES. Sin cambios: solver 162, app 955, vitest 853 en 69 ficheros, e2e 3 y python 284. Nueva en la CI de Windows: la autoprueba de `Instalar.cmd` (8 casos, 7 mutantes). Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 59 líneas del commit de cierre sin índice, 3 074 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 238 — Sin suspensión durante la generación: **`O-uso-centro` en 5 de 8**, bloque A completo; `C-sin-suspension` HECHO.
+  TIPO. Desarrollo con medición en GitHub Actions (rama experimental) y fase de VM. Sin fecha con la secretaria: `O-prueba-secretaria` sigue en 4 de 6. Material en `/home/luis/educhronos-aceptacion/s238/` (t0, m2, c0, t1, t1bis, m4a, m4a2, m4b, m4b2, m4vm y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 (HEAD `fd13ecd`, `tests` #113 en verde). M2: sonda JNA en `experimento/s238-suspension` (`d8ade49`, run #1 en verde, borrada en el cierre). T1 (`b890c39`): `MantenerDespierto` en `escritorio/`, `@Bean` por `os.name` y enganche en `GeneradorHorarioService.generar`. T1-bis (`c2c157f`): JNA 5.14.0, la de OR-Tools. M4 en la VM con `v0.5.0-rc.4`: petición visible durante 10 minutos y retirada al terminar; acta `docs/actas-aceptacion/acta-sin-suspension-s238.md`.
+  CRITERIO. Condición 4 cumplida (BW): `O-uso-centro` en 5 de 8, bloque A completo.
+  DECISIONES. Del usuario: BW a CB. Del arquitecto, en `s238/cierre/decisiones.txt`. Texto en la ficha.
+  DEUDA. Se salda `D-suspension-durante-generacion`. No nace ninguna. Notas en `D-contrato-desde-resumen`.
+  DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: dio por nueva la dependencia JNA sin volcar el árbol (OR-Tools ya traía 5.14.0 y `jna-platform`), con coste (rc.3 descartada y un commit); y, sin coste, un vecino de test que no genera y el transporte del zip en S237, y el guion C1 no nombró el script de higiene. (2) Del asistente: la sonda reservaba 2 bytes por carácter en vez de `Native.WCHAR_SIZE`; lo cazó la suite. (3) De ejecución: dos `cd`, en el M2 y en el cierre, sin efecto, y `LC_ALL=C`, que trunca la salida de VBoxManage, detectado antes de tocar la VM. (4) De herramienta: la consulta web del asistente a la API de GitHub devolvió 0 runs; las consultas pasaron a Claude Code. (5) Del flujo: el primer intento de generar en la VM lo paró `GUARDIAS_INSUFICIENTES`.
+  SUITES. solver 162, app 965 (+10), vitest 853 en 69 ficheros, e2e 3 y python 284; autoprueba de `Instalar.cmd` sin cambios. Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 56 líneas del commit de cierre sin índice, 2 411 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
