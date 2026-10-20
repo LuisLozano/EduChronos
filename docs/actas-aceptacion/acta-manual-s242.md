@@ -3,7 +3,7 @@
 - **Versión:** `v0.5.0`, tag anotado sobre `c2c157f` (el mismo código que `v0.5.0-rc.4`; `tests` n.º 115 y `bundle` n.º 17 en verde). Release no prerelease, con `Educhronos-win.zip` (176 208 048 B, sha256 `34df89a36713a9a01de1c020cf4115367d2a134dd0544cf5011b7666e5d4ec7e`, comprobado con `sha256sum -c` en el host y en el USB).
 - **JAR de las capturas:** `app-0.5.0.jar` (156 605 222 B), extraído de ese zip con `zipfile`, porque el zip guarda las rutas con «\» (`s242/f2/v050/extraido/Educhronos/app/`).
 - **Base de partida:** `s241/f1/base-partida/base-partida-2025-2026.db`, md5 `d867c2dec4a9ab01357f539d8b09f7e2` (acta de S241).
-- **Código:** `eac23f0` (script de capturas, generador del PDF y hoja de estilo), `884e4db` (manual y 24 capturas), `1343b64` (guía de incidencias como última sección) y el commit de F3 (capturas de Windows, aviso sobre el consejo del 409, anexo del navegador y correcciones de la prueba en la VM).
+- **Código:** `eac23f0` (script de capturas, generador del PDF y hoja de estilo), `884e4db` (manual y 24 capturas), `1343b64` (guía de incidencias como última sección) `cf6d2ad` (capturas de Windows, aviso sobre el consejo del 409, anexo del navegador y correcciones de la prueba en la VM) y el commit de F3.9 (lista de lo que lleva el USB).
 - **Material:** `/home/luis/educhronos-aceptacion/s242/` (`f1`, `f2` y `f3`, cada una con su `volcado.txt`).
 
 ## Criterio, condición por condición
@@ -42,7 +42,7 @@ Texto aprobado por el usuario en S242 (decisión CX), citado tal cual:
 **4. Instalación probada — cumplida, con las desviaciones de abajo.** Detalle en la sección «Verificación en la VM».
 
 **5. Entregable — cumplida en lo que toca a esta sesión.**
-- `tools/manual/generar-pdf.sh` (pandoc + `google-chrome --headless`) genera `Educhronos-manual-0.5.0.pdf`: 30 páginas A4, 1 932 932 B, sha256 `6bafd5d662e860c3ebf129013c4a5123b33b1f2b34ad59edd0ad6861c5811490`. En la portada pone «versión 0.5.0».
+- `tools/manual/generar-pdf.sh` (pandoc + `google-chrome --headless`) genera `Educhronos-manual-0.5.0.pdf`: 31 páginas A4, 1 939 835 B, sha256 `6635b4b2972815f74437878f1b48641e9217c75fe78f06a7f3cadbc37c9426ce`. En la portada pone «versión 0.5.0». Es el de F3.9: sustituye al de F3.7 (30 páginas, `6bafd5d6…6861c5811490`), que no llevaba la lista de lo que trae el USB.
 - Está fuera del repo, en `/home/luis/educhronos-aceptacion/s242/f3/`.
 - Viaja en el USB del centro (ver «El USB que va al centro», abajo). La impresión la hace el usuario.
 
@@ -72,11 +72,11 @@ Texto aprobado por el usuario en S242 (decisión CX), citado tal cual:
 - **Raíz del USB** (ESD-USB, tras la decisión D1):
   - `Educhronos-win.zip` y `Educhronos-win.zip.sha256`: «La suma coincide».
   - `base-partida\`, con `base-partida-2025-2026.db` y su `.md5`: «La suma coincide».
-  - `Educhronos-manual-0.5.0.pdf`, sha256 `6bafd5d6…6861c5811490`, el mismo de arriba.
+  - `Educhronos-manual-0.5.0.pdf`, sha256 `6635b4b2…7c9426ce`, el mismo de arriba.
 - **Lo que no se ha borrado:**
   - El `Educhronos-win.zip` antiguo de la raíz (28/09, sha256 `7afc5b8c…`) y el PDF provisional están en `retirado-S242\`.
-  - Siguen las carpetas de sesiones anteriores (`EDUCHRONOS-S181`, `s183-f2b` … `s238`).
-  - Qué se deja en el USB antes de entregarlo lo decide el usuario.
+  - El usuario agrupó las carpetas de sesiones anteriores en `SesionesAntiguas\`.
+  - Qué se deja en el USB antes de entregarlo lo decide el usuario. El manual pide comprobar que, nada más abrir el USB, están los cuatro elementos (zip, `.sha256`, `base-partida` y el PDF) y no usar otras carpetas (F3.9, petición del usuario).
 
 ## Desviaciones (F3.4 y F3.5), literales
 
