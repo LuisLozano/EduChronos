@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S238. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S239. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S238). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S239). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10736,3 +10736,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: dio por nueva la dependencia JNA sin volcar el árbol (OR-Tools ya traía 5.14.0 y `jna-platform`), con coste (rc.3 descartada y un commit); y, sin coste, un vecino de test que no genera y el transporte del zip en S237, y el guion C1 no nombró el script de higiene. (2) Del asistente: la sonda reservaba 2 bytes por carácter en vez de `Native.WCHAR_SIZE`; lo cazó la suite. (3) De ejecución: dos `cd`, en el M2 y en el cierre, sin efecto, y `LC_ALL=C`, que trunca la salida de VBoxManage, detectado antes de tocar la VM. (4) De herramienta: la consulta web del asistente a la API de GitHub devolvió 0 runs; las consultas pasaron a Claude Code. (5) Del flujo: el primer intento de generar en la VM lo paró `GUARDIAS_INSUFICIENTES`.
   SUITES. solver 162, app 965 (+10), vitest 853 en 69 ficheros, e2e 3 y python 284; autoprueba de `Instalar.cmd` sin cambios. Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 56 líneas del commit de cierre sin índice, 2 411 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 239 — O-prueba-secretaria (H5), C-prueba-secretaria: **PRUEBA CORTA HECHA: LA SECRETARIA HACE SOLA LAS CINCO TAREAS Y OBTIENE A LA PRIMERA UN HORARIO CON 0 VIOLACIONES DURAS; BYG1 QUEDA EN 2026/2027 SIN CLASES (SALVEDAD, CI). O-prueba-secretaria TERMINADO, 6 DE 6. O-uso-centro EN 5 DE 8, CON EL BLOQUE B LIBRE.**
+  TIPO. Desarrollo, con la prueba observada; sin M3, porque no hay código. T0 y T0-bis de lectura, F1 (acta revisada, `887e7a1`), D1 a D5 (montaje, después y comprobaciones). Material en `/home/luis/educhronos-aceptacion/s239/`.
+  HECHO. F1: reintento, conversación durante la espera y Edge, revisados antes de mirar (CE, CF y CG). Prueba el 20/10/2026 desde `s235-prueba-lista` con `v0.4.0`: cinco tareas sola, sin preguntas ni ayudas, 1 200 s elegidos por ella, FEASIBLE a la primera (819 sesiones). D2: instantánea `s239-prueba-hecha` y evidencia en `s239/dia`. D4 y D5: 2025/2026 intacto, BYG1 → BYG4 y 4ºC correctos, 0 cambios inesperados, 0 duras y 0 de guardia por SQL y por el diagnóstico.
+  CRITERIO. Condiciones 5 (con salvedad, CI) y 6 cumplidas: O-prueba-secretaria TERMINADO, 6 de 6; ficha a `gestion-historico.md` §1. O-uso-centro, 5 de 8, con el bloque B libre (BH).
+  DECISIONES. Del usuario: CC a CI, con su texto en la ficha. Del arquitecto, doce, en `s239/cierre/c1/decisiones.txt`.
+  DEUDA. Nacen `D-baja-profesor-incompleta` y `D-aviso-arranque-tardio` (incidencias, no bloqueantes). `D-infactible-sin-aviso-residual` y `D-capacidad-sin-aviso`, no observadas, pasan a la condición 8 de O-uso-centro.
+  DEFECTOS. Del asistente: la regla de clasificación del T0 por ruta (c48134c salió como OTRO); el patrón `[45][0-9][0-9]` del D3, que cazaba cifras de horas y nombres; el grep de «duras», que no veía «DURA»; las rutas de la base de partida del D3, escritas de memoria (estaba en s181); y cinco puntos del contrato del cierre (D1 a D5 del contraste: tres escritos desde el resumen de Claude Code y dos con una forma afirmada sin volcar), que costaron una parada sin trabajo que rehacer. De Claude Code, sin coste: 14 instantáneas contadas a ojo (eran 13), el desglose de líneas del F1 (+4 por +5) y un `cd` en el C0, contra la norma 6, sin efecto. `D-contrato-desde-resumen`: una instancia con coste; no salta.
+  SUITES. Sin cambios de código: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 284. CI `tests` #116 en verde sobre `d590741` y #117 sobre `887e7a1`.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 178 líneas del commit de cierre sin índice, 2 703 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
