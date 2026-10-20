@@ -2,41 +2,42 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L50 — ## 1. Objetivos terminados
-- L52 — ### H2 — Configurar un centro desde cero
-- L54 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L70 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L142 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L392 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L679 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L780 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L879 — ### H1 — Ajustar (cierre)
-- L881 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1058 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1349 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1539 — ### H3 — Exportar
-- L1541 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1602 — ### H4 — Instalar y pasar de curso
-- L1604 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1778 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1873 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1942 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1978 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1980 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2029 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2064 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2099 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2128 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2167 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2205 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2242 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2279 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2315 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2333 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2359 — ## 2. Deuda cerrada de §4
-- L2361 — ### Deuda técnica real, colgada de su objetivo
-- L2433 — ### Mejora futura, cuelga y espera
-- L2453 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L51 — ## 1. Objetivos terminados
+- L53 — ### H2 — Configurar un centro desde cero
+- L55 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L71 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L143 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L393 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L680 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L781 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L880 — ### H1 — Ajustar (cierre)
+- L882 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1059 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1350 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1540 — ### H3 — Exportar
+- L1542 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1603 — ### H4 — Instalar y pasar de curso
+- L1605 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1779 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1874 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1943 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1979 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1981 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2030 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2065 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2100 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2129 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2168 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2206 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2243 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2280 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2316 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2334 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2360 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2392 — ## 2. Deuda cerrada de §4
+- L2394 — ### Deuda técnica real, colgada de su objetivo
+- L2466 — ### Mejora futura, cuelga y espera
+- L2486 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2355,6 +2356,38 @@ terminado (§6).
 - **Valor:** quita lo que midieron la demo y el recorrido del usuario —S188: relanzó el programa creyendo que no arrancaba y el editor de actividades le resultó engorroso; S227: no distinguió dos asignaturas por su código— antes de la prueba de la secretaria.
 - **Cambios que agrupa:** `C-alcance-acabado-pre-prueba` ✔ HECHO (S229). `C-lista-doble` ✔ HECHO (S230): condiciones 1 y 3 (`9b90bdd`, `979a6c5`). `C-editor-plazas` ✔ HECHO (S230): condiciones 2 y 4 (`cb16917`, `54707da`, `4d87847`). `C-ventana-arranque` ✔ HECHO (S230): condición 5 (`50171d5`).
 - **Métrica de §7:** dos sesiones (S229 y S230), sobre un límite de 8.
+
+#### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- **Propósito:** que la secretaria haga en la VM `Win11`, con una cuenta estándar preparada y bajo observación, una prueba corta como la demo de S188 sobre `v0.4.0`: preparar el 2026/2027 desde el actual, dos cambios y generar un horario válido. Comprueba que la versión que se dejará en el centro no tiene ningún bloqueo. Abierto en S233; reducido a prueba corta en S235 (BD): el estado final 2 (§1) pasa a `O-uso-centro` (BE).
+- **Por qué va ahora:** último paso del orden U (S229). La sesión de humo (R) pasa a ser su primer Cambio (AO).
+- **Medido al abrir (S233, Claude Code, HEAD `01bf970`, solo lectura; material en `/home/luis/educhronos-aceptacion/s233/t0/`):**
+  (a) CI de los cierres de S231 y S232 en verde (`tests` #104 y #105).
+  (b) La última Release es `v0.3.0`, de esquema 1; HEAD está en el esquema 8 (`PreparadorEsquema.java:74`), 179 commits después, 79 en `app/` o `solver/`.
+  (c) La base de partida (`ba0db782…`) está en `user_version` 0, con 1 horario y 819 sesiones: abrirla la migra del 0 al 8. La de 2026/2027 (`38b81f23…`) está en el 8, con 3 horarios.
+  (d) Ningún procedimiento escrito creaba el acceso directo, y el «Límite» de la guía de distribución seguía pidiendo un diff vacío de `schema.sql`.
+  (e) VM `Win11` apagada; instantáneas `s177-estado`, `s181-demo-lista`, `s187-demo-lista` (la actual) y `s188-demo-hecha`; ninguna con cuenta estándar nueva ni con `v0.3.0` o posterior.
+  (f) La condición 5 de `O-acabado-pre-prueba` dejó para el ejecutable de Windows la verificación de la ventana de arranque.
+- **Decisiones (S233):** (AO) del usuario: el objetivo se abre con el humo dentro como primer Cambio, no como paso previo suelto. (AP) del usuario: criterio aceptado, con la migración y el duplicado de la base de partida dentro del humo. (AQ) del usuario: el humo va sobre una versión `-rc`. (AR) del usuario: el humo usa la mejor base que tengamos; lectura del arquitecto: `38b81f23…` para generar y `ba0db782…` para migrar y duplicar. (AS) del usuario: la VM, en la sesión siguiente. Las del arquitecto, en `s233/cierre/c1/decisiones.txt`.
+- **Decisiones (S234):** (AT) del usuario: restaurar `s187-demo-lista` y crear una cuenta estándar nueva; la crea el usuario, porque Claude Code no tiene vía de órdenes hacia la VM (T0 de S234). (AU) del usuario: la prueba se hace sobre un `v0.4.0` final, etiquetado tras el humo desde el mismo commit. (AV) del usuario: en el humo, Claude Code prepara y comprueba, y el usuario hace en la VM lo que verá la secretaria. (AW) del usuario: instantánea `s234-previa` antes de restaurar. (AX) del usuario: la condición 1 verifica las cinco descargas, no cuatro (descuido de S233). (AY) del usuario: instantánea `s234-humo-hecho`. (AZ) del usuario: la condición 2 se da por cumplida con el humo y la corrección de la guarda del paso 3 (`2a0e6fa`), sin haberla ejecutado en Windows. (BA) del usuario: el instalador sencillo queda como mejora futura (`D-sin-instalador`): la secretaria no instala en la prueba. Las del arquitecto, en `s234/cierre/decisiones.txt`.
+- **Decisiones (S235):** (BB) del usuario: en la cuenta de la secretaria no se lanza Educhronos, y Edge se abre una vez para pasar sus pantallas de bienvenida. (BC) del usuario: Windows se actualiza antes de preparar la cuenta (`s235-actualizada`) y la instantánea de la prueba se toma con la red desconectada. (BD) del usuario: el usuario no puede pasar horas con la secretaria; la prueba se reduce a una prueba corta como la demo, las condiciones 4, 5 y 6 se reescriben y el objetivo deja de reclamar el estado final 2. (BE) del usuario: nace `O-uso-centro`, sin abrir: instalador, guía de feedback y el curso completo preparado en el centro, con el usuario al teléfono anotando cada llamada; los datos de partida van en el instalador (centro vacío o a partir de datos anteriores) y puede empezar un sistema de incidencias. (BF) del usuario: en la prueba corta, cambios de muestra (las tareas de la demo), porque el acceso a la secretaria es limitado. (BG) del usuario: consigna aprobada, sin ensayo previo. (BH) del usuario: el instalador empieza antes de la prueba corta, que no depende de él. (BI) del usuario: la cuenta se llama `secretaria` y no lleva contraseña. (BJ) del usuario: la traducción de Edge no se desactiva. Las del arquitecto, en `s235/cierre/decisiones.txt`.
+- **Decisiones (S239):** (CC) del usuario: hay fecha; la prueba es el 20/10/2026. (CD) del usuario: la prueba se hace sobre `v0.4.0`. (CE) del usuario: tras un 503, un único reintento con 10 minutos; si vuelve a dar 503, la prueba termina ahí. (CF) del usuario: la espera de la generación se usa para la conversación final. (CG) del usuario: la oferta de traducir de Edge se desactiva el día de la prueba; revoca BJ. (CH) del usuario: se borran ocho instantáneas de la VM para liberar 68,9 GiB. (CI) del usuario: la condición 5 se da por cumplida con salvedad y no se repite la prueba. Las del arquitecto, en `s239/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S233 sobre esa medición. `O-prueba-secretaria` termina cuando:
+  1. **Humo.** Una versión `v0.4.0-rc.N` construida por CI desde su tag, con el zip y su sha256 verificados, se instala en la VM con una cuenta estándar nueva siguiendo el procedimiento de la condición 2. La ventana de arranque aparece con su texto, se cierra al abrirse el navegador (o a los 60 s, y antes de un diálogo de error) y no aparece en un segundo lanzamiento. La barra y el log dicen la versión. La base de partida abre migrada al esquema 8 y se duplica. La base de 2026/2027 genera con el tiempo por defecto un horario con 0 violaciones duras o, si da 503, con 60 minutos, anotando los dos intentos. Las cinco descargas (CSV y PDF de grupo, de profesor, de aula y de guardias) pasan el oráculo de exportación (AX, S234).
+  2. **Procedimiento escrito.** `docs/empaquetado.md` lleva las órdenes literales para verificar el zip, colocar la base de partida y crear el acceso directo sin permisos de administrador, y el «Límite» de la actualización está al día. Se verifica al usarlo en el humo. Salda `D-sin-acceso-directo`.
+  3. **Instantánea de la prueba.** La VM se restaura y se prepara la cuenta de la secretaria con solo la base de partida y el acceso directo, sin nada de la base de 2026/2027. Se toma la instantánea y se anota en el acta con la versión.
+  4. **Consigna.** Escrita antes de la prueba: qué se le dice a la secretaria, cuándo interviene el observador y qué se observa, fijado antes de mirar (reescrita en S235, BD: la consigna corta de `docs/actas-aceptacion/acta-prueba-secretaria.md`).
+  5. **La prueba corta.** La secretaria hace sola, desde `s235-prueba-lista`, las cinco tareas de la consigna (abrir Educhronos, preparar el 2026/2027 desde el actual, sustituir BYG1 por BYG4, cambiar las horas de Latín y Geografía e Historia en 4ºC y generar) y obtiene un horario de 2026/2027 con 0 violaciones duras. El acta lleva la versión, los tiempos y cada intervención (reescrita en S235, BD). **✔ CUMPLIDA en S239, con salvedad (CI):** BYG1 queda en el curso 2026/2027 sin clases ni otra referencia.
+  6. **Incidencias.** Cada fallo o petición queda registrado por R-incidencia, y las deudas que cuelgan del objetivo (desde S235, `D-infactible-sin-aviso-residual` y `D-capacidad-sin-aviso`) se revisan con lo observado. **✔ CUMPLIDA en S239:** nacen `D-baja-profesor-incompleta` y `D-aviso-arranque-tardio`; las dos deudas del objetivo, no observadas, pasan a la condición 8 de `O-uso-centro`.
+- **ESTADO en S233: 0 de 6.** La condición 2 está escrita; se cumple al verificarse en el humo.
+- **ESTADO en S234: 2 de 6** (condiciones 1 y 2). Humo en la VM con `v0.4.0-rc.1` y la cuenta `humo234` (acta `docs/actas-aceptacion/acta-humo-s234.md`). Para la condición 3, del humo: el anfitrión se suspendió en una espera y hay que impedirlo; Edge tapa la aplicación en el primer arranque de una cuenta; `s187-demo-lista` no tiene las actualizaciones de Windows pendientes; y el paso 3 del punto 8 se lanza dos veces (la segunda tiene que parar en la guarda sin tocar la base), porque su corrección no se ha ejecutado en Windows ni pasado por el analizador.
+- **ESTADO en S235: 4 de 6** (condiciones 1 a 4), reducido a prueba corta (BD). `v0.4.0` (Release normal, zip `2c08596e…e053`) verificada en la cuenta desechable `verif235` e instalada en la cuenta `secretaria` de `s235-prueba-lista`, con la red desconectada; consigna y procedimiento del día en `docs/actas-aceptacion/acta-prueba-secretaria.md`. Los avisos del humo para la condición 3, resueltos: inhibidor de logind en el anfitrión, Edge pasado, Windows al día y la guarda del paso 3 vista en Windows (pegada línea a línea no detenía el `Copy-Item`; en bloque desde el cierre). La prueba espera fecha.
+- **ESTADO en S239: TERMINADO, 6 de 6, con salvedad en la condición 5 (CI).** Prueba corta hecha el 20/10/2026 desde `s235-prueba-lista` con `v0.4.0` (`C-prueba-secretaria` HECHO): la secretaria hizo sola las cinco tareas, sin preguntas, ayudas ni pistas, y obtuvo a la primera un horario de 2026/2027 con 0 violaciones duras y 0 de guardia. Resultado en `docs/actas-aceptacion/acta-prueba-secretaria.md`.
+- **Fuera del criterio:** comparar el horario de la secretaria con el oficial (S228); la prueba con otro profesor y el manual de usuario (S190, ideas sin planificar). Desde S235 (BD), el curso 2026/2027 completo y lo que se observe en él, que pasan a `O-uso-centro`.
+- **Deudas:** `D-sin-acceso-directo` pasa a bloquear: es la condición 2, y se salda con ella. `D-infactible-sin-aviso-residual`, `D-capacidad-sin-aviso`, `D-contraste-seneca` y `D-duplicado-conserva-tutores` no bloquean y se revisan en la condición 6. `D-codigo-profesor-no-es-identidad` no aplica mientras no se compare su curso con el oficial. **S234:** `D-sin-acceso-directo` saldada con la condición 2; nace `D-sin-instalador` (BA). **S235:** con la prueba corta (BD) no se observa el curso completo: `D-contraste-seneca`, `D-duplicado-conserva-tutores` y `D-codigo-profesor-no-es-identidad` pasan a `O-uso-centro`, y también `D-sin-instalador` (BE). Nace `D-pagina-declarada-en-ingles`, con sede en `O-uso-centro`. **S239:** `D-infactible-sin-aviso-residual` y `D-capacidad-sin-aviso`, no observadas, pasan a revisarse en la condición 8 de `O-uso-centro`.
+- **Depende de:** `O-acabado-pre-prueba` (ventana de arranque) y `O-comparacion`, terminados; la VM `Win11` y la base de partida de la secretaria (`ba0db782…`, S181).
+- **Valor:** quita el riesgo de dejar sola en el centro una versión con un bloqueo que nadie ha visto. Desde S235 no es el estado final 2, que pasa a `O-uso-centro` (BE).
+- **Cambios que agrupa:** `C-alcance-prueba-secretaria` ✔ HECHO (S233): el M0, el T0 y este criterio. `C-humo-win11` ✔ HECHO (S234): procedimiento (`971646f`, corregido en `2a0e6fa`), Release `v0.4.0-rc.1` y humo en la VM (condiciones 1 y 2; acta en `bb4c469`). `C-preparacion-prueba` ✔ HECHO (S235): tag `v0.4.0`, VM `s235-prueba-lista` y consigna (condiciones 3 y 4; acta en `637b57b`). `C-prueba-secretaria` ✔ HECHO (S239): la prueba corta (condiciones 5 y 6; acta en `docs/actas-aceptacion/acta-prueba-secretaria.md`).
+- **Métrica de §7:** cuatro sesiones (S233, S234, S235 y S239), sobre un límite de 8; de S236 a S238 esperó fecha, abierto.
 
 ## 2. Deuda cerrada de §4
 

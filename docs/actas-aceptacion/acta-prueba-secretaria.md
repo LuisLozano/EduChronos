@@ -2,7 +2,7 @@
 
 ## Estado
 
-Preparada en S235: condiciones 3 (instantánea) y 4 (consigna). La prueba (condición 5) espera fecha con la secretaria. Desde S235 es
+Preparada en S235: condiciones 3 (instantánea) y 4 (consigna). La prueba (condición 5) se hizo el 20/10/2026, en S239: resultado abajo. Desde S235 es
 una prueba corta, como la demo de S188: comprueba que la versión que se dejará en el centro no tiene ningún bloqueo. El uso del curso
 completo, que es el estado final 2, pasa a `O-uso-centro`.
 
@@ -123,9 +123,54 @@ Sobre la copia de su carpeta de datos, sin decírselo antes:
 
 ## Resultado
 
-Pendiente de la prueba.
+Hecha el 20/10/2026 (S239) desde `s235-prueba-lista`, con `v0.4.0`. La secretaria hizo sola las
+cinco tareas, sin preguntas, ayudas ni pistas, y obtuvo a la primera un horario de 2026/2027 con 0
+violaciones duras y 0 de guardia. Condición 5 cumplida con salvedad (CI): BYG1 sigue en el curso
+2026/2027, sin ninguna referencia. Condición 6 cumplida.
+
+Tiempos, de la hoja del observador y del log de la aplicación:
+- Llegada a las 12:30; consigna leída a las 12:45; fin a las 13:30.
+- Tarea 1: su arranque empieza en el log a las 12:45:46 y abre el navegador a las 12:45:54
+  (Spring, 9,4 s; el proceso, 12,7 s).
+- Tarea 2: el curso 2026/2027 queda abierto a las 12:46:38.
+- Tareas 3 y 4: de 12:46:38 a 12:54:31.
+- Tarea 5: ella elige 20 minutos (1 200 s); generación de 12:54:31 a 13:14:39, FEASIBLE a la
+  primera, objetivo 198, 819 sesiones, 1 226 s. Comprobación en pantalla hasta las 13:30. No hubo
+  reintento.
+
+Comprobaciones sobre la copia de su carpeta de datos (`s239/d4` y `s239/d5`):
+- 2025/2026: 21 de las 22 tablas, idénticas a la base de partida; `curso` gana la fila del curso
+  archivado «2025/2026». Las columnas añadidas por la migración, con su valor por defecto.
+- BYG1 → BYG4: las 4 actividades de BYG1 (Biología y Geología de 1ºA a 1ºD) pasan a BYG4
+  «Profesora Nueva», con 3 sesiones cada una. 0 cambios inesperados en las 219 actividades.
+- 4ºC: Latín pasa de 3 a 2 horas y Geografía e Historia, de 3 a 4, con 2 y 4 sesiones.
+- Horario: 0 choques de profesor, aula y subgrupo. El diagnóstico de la aplicación, con el código de
+  `v0.4.0` más la suspensión, da 0 violaciones duras, 0 de guardia y 517 penalizaciones blandas
+  (ventanas 174 y consecutivas 24, que suman el objetivo).
+- Salvedad: la fila de BYG1 sigue en `profesor` de 2026/2027, sin plazas, tutoría, restricciones ni
+  guardias. Ella intentó borrarla al empezar la tarea 3; la aplicación no la dejó por tener clases,
+  y ese aviso la guió a reasignarlas, pero no volvió a borrarla y nadie lo advirtió. Frente a la
+  tarea 5 de S188, con cuatro actividades borradas sin aviso, ahora no se pierde nada.
+
+Observaciones:
+- Edge no ofreció traducir: la oferta se desactivó en el montaje (CG).
+- «Curso sin nombre» le hizo dudar a qué curso pertenecían los datos; lo entendió al leer el texto de
+  la ventana. Es un dato para la base de partida de `O-uso-centro`, no un fallo del producto.
+- En la conversación durante la espera (CF), no señaló ninguna tarea difícil; esperaba que el curso
+  anterior tuviera nombre, y el error al borrar a BYG1 le indicó qué buscar.
+
+Desviaciones, sin coste:
+- El observador abrió Educhronos antes de que ella se sentara (de 12:44:56 a 12:45:39), para medir
+  la ventana de arranque, que tardó como mucho 2 s: el primer arranque y la migración no fueron suyos.
+  El primer arranque ya está cubierto por el humo (condición 1).
+- No se anotaron los tiempos por tarea (regla 6); se reconstruyeron con el log, como en S188.
+
+Incidencias (R-incidencia): `D-baja-profesor-incompleta` y `D-aviso-arranque-tardio`, en §4 de
+`gestion_proyecto.md`. `D-infactible-sin-aviso-residual` y `D-capacidad-sin-aviso` no se observaron.
 
 ## Material
 
 `/home/luis/educhronos-aceptacion/s235/`, fuera del repo, con un manifiesto por carpeta: `t0` y `t0b` (lecturas), `f1` (tag,
 Release y zip), `f2` (VM: instantáneas, `verif235` y `secretaria`) y `f3` (esta acta).
+
+S239: `/home/luis/educhronos-aceptacion/s239/` (t0, t0b, f1, dia, d3, d4, d5, limpieza-vm, limpieza-vm-b y cierre), con un manifiesto por carpeta; la hoja del observador es un documento de Claude (https://claude.ai/code/artifact/9167bd0f-9846-4a8d-a254-e5690e1fd71a).

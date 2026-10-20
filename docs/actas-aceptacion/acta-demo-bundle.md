@@ -488,6 +488,7 @@ log de la VM tras «Salir»), `descargas/` (las cuatro del horario 1 de 2025/202
 ficheros traídos, `md5-windows.txt`, la salida de Windows y las medidas) y `f3/` (M2 de solo
 lectura sobre `v0.2.0`), cada una con su `MANIFIESTO.sha256`. La instantánea `s188-demo-hecha` guarda
 el estado de la VM tras la demo (S188).
+Nota (S239, decisión CH): la instantánea `s188-demo-hecha` se borró el 19/10/2026 para liberar espacio en disco; la evidencia sigue en el material.
 `/home/luis/educhronos-aceptacion/s189/`: `f1/` (lectura de solo lectura de `v0.2.0` para el
 inventario) y `f2/` (sha256 del horario de guardias, diff y medidas de esta edición), cada una con
 su `MANIFIESTO.sha256`.

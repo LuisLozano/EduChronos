@@ -3,6 +3,7 @@
 - **Objetivo:** `O-prueba-secretaria`, condición 1 (humo), con el procedimiento de la condición 2 en uso.
 - **Versión:** `v0.4.0-rc.1`, prerelease, tag anotado sobre `971646f`. `app/` y `solver/` sin cambios hasta `cd8d11c`. Zip `Educhronos-win.zip`, 176 197 754 B, sha256 verificado en Linux y en Windows.
 - **Máquina:** VM `Win11` (VirtualBox), restaurada desde `s187-demo-lista`. Antes se tomó `s234-previa` y, al terminar, `s234-humo-hecho`.
+- **Nota (S239, decisión CH):** las instantáneas `s234-previa` y `s234-humo-hecho` se borraron el 19/10/2026 para liberar espacio en disco; la evidencia sigue en el material.
 - **Cuenta:** `humo234`, nueva y estándar: sin S-1-5-32-544 en su token e integridad media, con control positivo en la consola elevada de `educhronos-admin`. Sin `java` ni `node`.
 - **Transporte:** entrada por el USB físico ESD-USB (F:, carpeta `s234`); salida por la carpeta compartida (E:).
 - **Bases:** de partida, `A-2025-2026.db` (md5 `ba0db782…`, esquema 0). Para generar, `B-2026-2027.db` (md5 `38b81f23…`, esquema 8), copiada a la carpeta de datos como `curso-humo-b.db`.

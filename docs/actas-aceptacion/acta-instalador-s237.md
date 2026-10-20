@@ -3,6 +3,7 @@
 - **Objetivo:** `O-uso-centro`, condiciones 1, 2, 3 y 5, con `C-instalador`.
 - **Versiones:** `v0.5.0-rc.1` y `v0.5.0-rc.2`, prerelease, tags anotados sobre `6296052`, construidas por `bundle` #15 y #14. Zips `Educhronos-win.zip` de 176 199 512 B (sha256 `edccf977…e71f`) y de 176 199 521 B (sha256 `fbcebedf…4329`), verificados en Linux y en Windows. Los dos llevan `Educhronos\Instalar.cmd` (sha256 `963532cf…cf9d`, el del repo) y difieren en el jar (`app-0.5.0-rc.1.jar` y `app-0.5.0-rc.2.jar`).
 - **Máquina:** VM `Win11` (VirtualBox), restaurada desde `s235-actualizada`. Antes se tomó `s237-previa` y, al terminar, `s237-instalador-hecho`. El anfitrión, con inhibidor de suspensión.
+- **Nota (S239, decisión CH):** las instantáneas `s237-previa` y `s237-instalador-hecho` se borraron el 19/10/2026 para liberar espacio en disco; la evidencia sigue en el material.
 - **Cuenta:** `inst237`, nueva, local y estándar: sin S-1-5-32-544 en su token. Creada por PowerShell desde la consola de `educhronos-admin`.
 - **Transporte:** entrada por el USB físico ESD-USB (F:, carpeta `s237`: los dos zips con su `.sha256` y `base-partida\base-partida-s181.db`, md5 `ba0db782…`); salida de los transcripts por la carpeta compartida (E:).
 - **Control de Edge (condición 5):** «Ofrecer traducir páginas que no están en un idioma que leo», activado; único idioma preferido, español (España).

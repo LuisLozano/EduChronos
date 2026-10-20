@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S236. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S237. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S236). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S237). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10716,3 +10716,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: el guion del T0 dio de memoria la ruta del plan (sin coste), y el de cierre dio por hecho un «ACTUALIZADO en S2xx» en §2 y omitió el lema y cinco campos de la ficha (dos paradas). (2) Del asistente: D4 de E1 dio por hecho que el runner permitía instalar un MSI por usuario; costó la medición dinámica del MSI. (3) Del asistente: la lista de órdenes de E1 no previó integrar el commit del runner; sin coste. (4) Del arnés de Claude Code: variables de PowerShell que solo difieren en mayúsculas; costó el run #1. (5) Del arnés de Claude Code: dio el MSI por construido porque el fichero existía; S-B anulada, sin run de más. (6) Del flujo: primero el prompt de S237 y después la enmienda 1 se pegaron sin el guion de cierre; Claude Code paró las dos veces (una parada del cierre). Son defectos distintos: el disparador de Higiene/Método no salta.
   SUITES. Sin código de la aplicación; conteo sin cambios (solver 162, app 955, vitest 853 en 69 ficheros, e2e 3, python 284). Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 90 líneas del commit de cierre sin índice, 3 216 bytes de entrada y 3 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 237 — `C-instalador`: `Instalar.cmd` dentro del zip, verificado en la VM con `v0.5.0-rc.1` y `v0.5.0-rc.2`: **`O-uso-centro` en 4 de 8**; `C-instalador` HECHO.
+  TIPO. Desarrollo (F1: instalador, CI, `index.html` y guía; sin código Java) con fase de VM (F2, Desarrollo reducido); tres días en la misma conversación (M0 el 17-10; material del 18 y del 19). `O-prueba-secretaria` sigue esperando fecha. Material en `/home/luis/educhronos-aceptacion/s237/` (t0, f1c, f1, f1b, f2t0, f2 y cierre, con sus MANIFIESTO.sha256).
+  HECHO. T0 y contraste del contrato (f1c). F1: `scripts/Instalar.cmd`, del prototipo de S236 con tres arreglos (espera una tecla al salir, se detiene con rc 6 si Educhronos está abierto y no copia la base si hay `curso-abierto`), con CRLF por `.gitattributes`, copiado a `build/` y al app-image y comprobado en el zip (`2d81589`, `49a375a`); `lang="es"` (`c48134c`); el punto 8 de la guía pasa a «Extraer todo» y doble clic (`6296052`). CI: `tests` #112, `instalador` #1 (8 casos y 7 mutantes, cada uno muerto en su caso) (tabla del log en `s237/cierre/c1/autoprueba-tabla.txt`) y `bundle` #13 lanzado a mano. Tags `v0.5.0-rc.1` y `v0.5.0-rc.2` sobre `6296052` (`bundle` #15 y #14, prerelease). F2: VM desde `s235-actualizada`, cuenta estándar `inst237`, entrada por USB; acta `docs/actas-aceptacion/acta-instalador-s237.md`.
+  CRITERIO. Condiciones 1, 2, 3 y 5 cumplidas: 4 de 8. Del bloque A queda la 4 (suspensión), con su propio Cambio; el bloque B espera a `C-prueba-secretaria` (BH).
+  DECISIONES. Del usuario: BR (abrir `C-instalador`), BS (la base en `Educhronos\base-partida\`), BT (tags), BU (`s237-instalador-hecho`) y BV (seguir con dos procesos en V6). Del arquitecto, en `s237/cierre/decisiones.txt`. Texto en la ficha.
+  DEUDA. Se saldan `D-sin-instalador` (condición 1) y `D-pagina-declarada-en-ingles` (5). Notas en `D-contrato-desde-resumen`. No nace ninguna.
+  DEFECTOS. (1) Del asistente, afirmar forma sin volcarla: «un proceso» en V6, sin volcar S151 (una parada), y el «Límite» copiado literal al paso 5 de la guía, redundante (un commit rehecho antes del push); sin coste, `bundle` solo con tag y el separador `/` del zip, cazados en el contraste. En el cierre, el acta y las decisiones afirmaron sin constar el icono de traducir, la base dentro del zip de rc.2 y las órdenes de la cuenta (una parada). El mismo defecto cuesta dos veces: el disparador de Higiene/Método salta, aplazado hasta cerrar `O-prueba-secretaria`. (2) Del flujo: V2 se ejecutó primero en la consola de administrador y sin el USB conectado; repetido, sin coste.
+  SUITES. Sin cambios: solver 162, app 955, vitest 853 en 69 ficheros, e2e 3 y python 284. Nueva en la CI de Windows: la autoprueba de `Instalar.cmd` (8 casos, 7 mutantes). Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 59 líneas del commit de cierre sin índice, 3 074 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
