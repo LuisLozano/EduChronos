@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Prepara la base de partida que viaja con Educhronos (C-base-partida, S241).
 
-Toma una base de SQLite de Educhronos cuya tabla `curso` esta vacia (una base anterior al
-nombre de curso, como la de 2025/2026 del centro) y produce una copia con la fila unica de
-`curso` escrita: id 1, el nombre dado y archivado 0, igual que la escribe la aplicacion
-(DuplicadorCurso.escribirCurso). No migra el esquema: lo hace la aplicacion al abrir la base
-(PreparadorEsquema), y ninguna migracion toca `curso`. No renombra: si la base ya tiene fila,
-se rechaza (D-curso-sin-renombrar sigue viva, decision CJ de S240).
+Toma una base de SQLite de Educhronos cuya tabla `curso` está vacía (una base anterior al
+nombre de curso, como la de 2025/2026 del centro) y produce una copia con la fila única de
+`curso` escrita: id 1, el nombre dado y archivado 0, igual que la escribe la aplicación
+(DuplicadorCurso.escribirCurso). No migra el esquema: lo hace la aplicación al abrir la base
+(PreparadorEsquema), y ninguna migración toca `curso`. No renombra: si la base ya tiene fila,
+se rechaza (D-curso-sin-renombrar sigue viva, decisión CJ de S240).
 
 Uso:
   python3 -B preparar_base_partida.py --origen A.db --destino B.db --nombre 2025/2026 \
@@ -37,7 +37,7 @@ class Rechazo(Exception):
 
 
 def nombre_valido(nombre):
-    """Espejo de NombreCurso.valido: forma 2026/2027 y segundo ano = primero + 1."""
+    """Espejo de NombreCurso.valido: forma 2026/2027 y segundo año = primero + 1."""
     if nombre is None:
         return False
     m = FORMA.match(nombre)
@@ -85,7 +85,7 @@ def leer_curso(con):
     if ddl is None:
         raise Rechazo("la base no tiene tabla curso: no es una base de Educhronos con curso")
     if ddl[0] != DDL_CURSO:
-        raise Rechazo("la tabla curso no tiene la definicion esperada: " + ddl[0])
+        raise Rechazo("la tabla curso no tiene la definición esperada: " + ddl[0])
     return con.execute("select id, nombre, archivado from curso order by id").fetchall()
 
 
@@ -126,7 +126,7 @@ def preparar(origen, destino, nombre, huella_origen=None):
     """Produce `destino` a partir de `origen`. Devuelve las huellas y el user_version."""
     if not nombre_valido(nombre):
         raise Rechazo(
-            f"«{nombre}» no es un nombre de curso: forma 2025/2026, con dos anos consecutivos"
+            f"«{nombre}» no es un nombre de curso: forma 2025/2026, con dos años consecutivos"
         )
     if not os.path.isfile(origen):
         raise Rechazo("no existe el origen: " + str(origen))
@@ -164,7 +164,7 @@ def preparar(origen, destino, nombre, huella_origen=None):
             con.close()
         verificar(temporal, origen, nombre, version_origen, tablas_origen)
         if md5(origen) != huella:
-            raise RuntimeError("el origen ha cambiado durante la preparacion")
+            raise RuntimeError("el origen ha cambiado durante la preparación")
         os.replace(temporal, destino)
     except BaseException:
         if os.path.exists(temporal):
