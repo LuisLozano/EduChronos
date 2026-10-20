@@ -1,4 +1,4 @@
-# Educhronos — si algo no va bien
+# Si algo no va bien
 
 Educhronos está en pruebas. Lo que falle o no se entienda nos sirve: anótalo y llama. No
 hace falta arreglar nada ni esperar a tener varios avisos.
@@ -15,14 +15,15 @@ hace falta arreglar nada ni esperar a tener varios avisos.
 
 **3. Dónde están tus datos.** En la carpeta `%LOCALAPPDATA%\Educhronos` (para abrirla:
 tecla Windows + R, pegar esa ruta, Intro). Dentro están tus cursos (los ficheros que acaban
-en `.db`), un fichero pequeño llamado `curso-abierto` y el registro de lo que hace la
-aplicación, `educhronos.log`. **No borres ni muevas nada de esa carpeta**, aunque algo
-falle: ahí está el trabajo y ahí está la pista del fallo.
+en `.db`), el registro de lo que hace la aplicación, `educhronos.log`, y, si ya has abierto
+algún curso, un fichero pequeño llamado `curso-abierto`. **No borres ni muevas nada de esa
+carpeta**, aunque algo falle: ahí está el trabajo y ahí está la pista del fallo.
 
 **4. Cuándo y cómo se recogen los datos.** Al terminar el curso 2026/2027, o antes si un
 aviso lo pide, copiaremos esa carpeta entera a un USB: con Educhronos cerrado (icono de la
-bandeja, junto al reloj → *Salir*), botón derecho sobre la carpeta `Educhronos` → *Copiar*,
-y *Pegar* en el USB.
+bandeja, junto al reloj → *Salir*), abre `%LOCALAPPDATA%` (tecla Windows + R, pegar
+`%LOCALAPPDATA%`, Intro), haz botón derecho sobre la carpeta `Educhronos` → *Copiar*, y *Pegar*
+en el USB.
 
 **5. Si Educhronos no se abre.** Al pulsar el acceso directo sale una ventana «Educhronos se
 está iniciando» y, en menos de un minuto, el navegador. Si no aparece, espera un minuto y
@@ -34,4 +35,5 @@ vuelve a intentarlo una sola vez; si sigue sin abrir, llama.
      se escribe a mano en la copia impresa y no va al repo. Fuentes: la línea de versión
      (docs/empaquetado.md, primer arranque); carpeta y ficheros (CarpetaDatos.java,
      Escritorio.java); cerrar desde la bandeja (scripts/Instalar.cmd); ventana de arranque y
-     navegador en 60 s (docs/empaquetado.md, primer arranque). -->
+     navegador en 60 s (docs/empaquetado.md, primer arranque).
+     S242: última sección del manual (docs/manual/), decisión CW. -->
