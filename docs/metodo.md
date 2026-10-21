@@ -499,7 +499,7 @@ más errores cazan); lo que se relaja es M3 donde no hay lógica que mutar.
 | **Desarrollo** | Avanzar un Cambio con lógica | Caso normal bajo objetivo activo | M0, M2, M3, M4 (si >1 módulo), M1 completo | Ninguno |
 | **Saneamiento** | Cerrar varias deudas homogéneas de un objetivo, agrupadas | Cuando la deuda técnica real de un objetivo se acumula y bloquea su criterio | M0, M2 conjunto, M1 con entrada única | M3 si la deuda no tiene lógica (renombrados, cosmética); M4 si es un solo módulo. Admisión: una deuda con camino feliz sale del grupo y va a Desarrollo |
 | **Configuración/UI** | Avanzar un Cambio de formulario o vista | Bajo O-shell, O-catálogo, O-estructura | M0, M4 (contraste de contrato de UI), M1 | M3 de lógica donde solo hay binding; la lógica real (validación, cálculo) SÍ lleva M3 |
-| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178), o programada por una decisión escrita del usuario (S223) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
+| **Higiene/Método** | Condensar, archivar acumulado, cambiar el método | Entre objetivos, nunca con uno activo a medias, cuando dispare su umbral: 20 fichas de §4 con sede Higiene/Método o script de R4, o un mismo defecto de instrumento que cueste trabajo medible por segunda vez en una misma sesión, no dos defectos distintos (excepción a R-apertura, S152; lectura precisada en S179), o por decisión del usuario cuando ninguna sesión puede abrirse (S178), o programada por una decisión escrita del usuario (S223), también con un objetivo abierto cuyo único trabajo pendiente espera a un tercero sin fecha; si llega la fecha, ese trabajo pasa delante (S243) | M1 + R4/R5; si toca un instrumento de `scripts/`, su autoprueba con defectos inyectados y un mutante por capacidad, que hace de M3 (S157) | M0 (no nombra Cambio, Objetivo ni Hito: es la excepción); M2/M3/M4 de producto (no hay código de la aplicación) |
 | **Apertura de objetivo** | Abrir el objetivo siguiente del mapa y escribir su criterio sobre medición | Entre objetivos; avanza el Cambio de alcance del objetivo (como `C-alcance-base-tecnica`) | M0, M2 de solo lectura, decisiones del usuario, alta documental con corrida en seco, M1 | M3 y M4 (no hay código de la aplicación). Precedentes: S147 a S173, S180, S183 y S190 (S194) |
 | **Desarrollo reducido** | Avanzar un Cambio que se verifica fuera del código: versión, Release, VM, ensayo, demo | Bajo objetivo activo, cuando el Cambio no lleva código de la aplicación | M0, M2 de solo lectura, M4 con un humano o en la VM, M1 | M3 (no hay lógica nueva). Precedentes desde S156; el último, S189 (S194) |
 | **Acabado visual** | Aplicar el acabado de una lista CERRADA, con juicio en navegador | Bajo O-diseño, cuando el trabajo es CSS y plantilla sin lógica | Acta heredada, M2 dentro del bucle, M4 en navegador, M1 en el modelo principal con traspaso (M-visual) | M0 (el acta viene del cierre anterior); M3 mientras no se toque un `.ts`; el turno de contraste de M4 |
@@ -576,7 +576,8 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
 2. **Ningún `||` de rescate ni `2>/dev/null` en un guion de lectura**: un fallo
    tapado se lee como «cero coincidencias». Un `grep` sin coincidencias sale con 1
    y bajo `pipefail` o `set -e` mata el guion: se gestiona a propósito y se reporta
-   como dato. (`D-guion-exit-enmascarado`)
+   como dato. Una lectura de `VBoxManage` que falla con «COM server is not running» se repite una sola vez a
+   los 15 s, guardando las dos salidas; decide la segunda (S243). (`D-guion-exit-enmascarado`)
 3. **Nombres, rutas y patrones se derivan de lo que el propio guion acaba de
    volcar**, no de memoria ni del token que se espera encontrar: antes de buscar un
    identificador se lista el directorio o el esquema que lo contiene. Vale
@@ -594,7 +595,9 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
 6. **Todo parámetro de ruta se normaliza a absoluta nada más leerse, o el guion
    aborta si no lo es.** Hecho en `empaquetar-linux.sh` (`--salida`) y en
    `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
-   otros. (`D-guion-escribe-donde-no-se-dijo`)
+   otros. Una orden que necesita directorio de trabajo (`sha256sum -c` de un manifiesto con rutas relativas)
+   se lanza con `env -C <dir>` o con la opción propia de la orden (`git -C`), nunca tras un `cd` (S243).
+   (`D-guion-escribe-donde-no-se-dijo`)
 7. **Una herramienta se invoca sólo con los argumentos que interpreta**:
    `regenerar-indice.py` no lee argumentos. Desde S223 sale con rc=2 y sin escribir
    ante cualquier argumento. Ante la duda, se lee el fuente.
@@ -631,12 +634,14 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     «para si borra o modifica ficheros versionados, la carpeta de datos real del
     usuario o un banco citado por su huella», y no «para si escribe fuera de X o Y».
     Una JVM o un build escriben donde necesitan (`/tmp`, `target/`, `dist/`,
-    `.angular/`) sin riesgo detrás. Sale de S193, F2.6. (`D-guion-parada-por-rutas`)
+    `.angular/`) sin riesgo detrás. Ningún guion usa `git clean` con `-x` ni `-X`: `docs_extra/` está ignorado
+    y guarda la VM `Win11` (S243). Sale de S193, F2.6. (`D-guion-parada-por-rutas`)
 13. **A la conversación vuelve un resumen; la evidencia, a disco** (S194). El guion fija
     un tope de 25 a 40 líneas para lo que devuelve y deja lo literal (salidas largas,
     ficheros copiados, informes) en la carpeta de material de la fase, con su
     `MANIFIESTO.sha256`. En la VM, las salidas de PowerShell se guardan en fichero, no
-    solo en la consola. Sale de S192, que devolvió 142 kB a la conversación.
+    solo en la consola; esos `.txt` salen en UTF-16LE y el guion de lectura los convierte a UTF-8, sin el
+    BOM, antes de buscar en ellos (S241, decisión 15). Sale de S192, que devolvió 142 kB a la conversación.
     (`D-guion-salida-sin-tope`)
 14. **El arquitecto no escribe huellas de fichero de capturas** (S194). El chat
     recodifica las imágenes, así que la huella que calcula el arquitecto no es la del
@@ -650,22 +655,27 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     citas y contraste** (S210; reescrita en S217). Forma es qué campos tiene un tipo, la firma y los
     llamadores de un método, dónde se calcula algo, qué argumentos exige una orden, qué trae un fichero
     de datos y, en un documento, cuántas columnas tiene una tabla y en qué línea exacta está un ancla.
+    También es forma lo que el código del guion da por hecho: el separador de rutas dentro de un zip, si un
+    manifiesto lleva rutas relativas o absolutas, o la sintaxis de una orden (S243).
     El orden es fijo:
-    (a) un guion de solo lectura vuelca literal esa forma a la carpeta de material;
-    (b) el contrato afirma forma solo con su cita (`fichero:línea` del material), y lo que no la tiene
-        se escribe como pregunta;
-    (c) Claude Code contrasta el contrato punto por punto y clasifica cada punto como coincide,
-        discrepa o pregunta; una afirmación de forma sin cita cuenta como discrepancia;
+    (a) un guion de solo lectura vuelca literal esa forma a la carpeta de material, en un fichero único que se
+        puede adjuntar (S241, decisión 15);
+    (b) el contrato marca cada afirmación de forma con su cita, `[fichero:línea]` del material, o la escribe
+        como pregunta, `[?]`; lo que solo consta en la conversación (un criterio aprobado, una decisión del
+        usuario) se pega en el contrato y no se cita como material (S243);
+    (c) Claude Code empieza el contraste listando las afirmaciones de forma sin marca, que cuentan como
+        discrepancia, y después clasifica cada punto como coincide, discrepa o pregunta (S243);
     (d) lo que no coincide se resuelve en una enmienda numerada antes de ejecutar.
     Una duda de forma que surja después se resuelve con una regla («como sus vecinas en el volcado»), no con una posición o un texto reescritos desde el resumen: la aplica quien tiene el volcado delante.
     En un cierre, la forma de cada región de un documento se deriva del commit de documentación
     anterior (`git show <commit>:<fichero>`), y las ediciones se ensayan en seco sobre un clon del repo
-    (norma 8) antes de aplicarlas al árbol.
+    (norma 8) antes de aplicarlas al árbol. El clon se borra al terminar el cierre, después de guardar su diff
+    (`git diff` y `git status`) en la carpeta de material y comprobar que el diff guardado lo contiene (S243).
     Sale de S208 y S209 (cuatro paradas) y de S211 a S215, donde la norma ya escrita no impidió siete
     paradas más, porque el contrato podía afirmar sin citar. En S216 el contraste cazó sin coste dos de
     las tres instancias de esa sesión, y la tercera tampoco costó parada. En S217, el contraste de su
     propio contrato cazó seis afirmaciones del arquitecto sin cita o con una cita que no las sostenía,
-    todas antes de ejecutar. En su propio cierre, dos resoluciones de dudas escritas desde el resumen volvieron a fallar, y el ensayo paró antes de editar. (`D-contrato-sobre-forma-no-medida`, `D-forma-afirmada-sin-volcado`)
+    todas antes de ejecutar. En su propio cierre, dos resoluciones de dudas escritas desde el resumen volvieron a fallar, y el ensayo paró antes de editar. De S218 a S242 el contraste dependía de notar la falta de cita y el defecto volvió sesión tras sesión; en S243 la lista de afirmaciones sin marca pasa a ser el primer paso del contraste. (`D-contrato-sobre-forma-no-medida`, `D-forma-afirmada-sin-volcado`, `D-contrato-desde-resumen`, `D-clones-de-ensayo-se-acumulan`)
 16. **Lo que un documento dice haber declarado o calculado se puede leer donde lo
     dice** (S210). «Se declara», «queda escrito» o «censo completo» significan que
     existe una lista enumerada en un sitio que se cita (ruta, sección o commit), no

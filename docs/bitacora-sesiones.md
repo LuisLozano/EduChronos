@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S240. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S241. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S240). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S241). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10756,3 +10756,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) patrón `create table curso` escrito de memoria, sin coste; (2) `Instalar.cmd` situado en `empaquetar-windows.ps1`, sin coste; (3) parte G del T0-bis con líneas del plan sobre gestión, sin coste; (4) anclas del C0 sin la norma 9 y región del plan hasta el final del fichero, con coste; (5) guion C1 no autocontenido, una parada. Todos del arquitecto.
   SUITES. Sin cambios de código: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 284. CI de `cee2a8f` en verde (`tests`, completed, success).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 76 líneas del commit de cierre sin índice, 2 602 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 241 — O-uso-centro (H5), C-base-partida: **BASE DE PARTIDA CON EL CURSO NOMBRADO Y GUÍA DE INCIDENCIAS; O-USO-CENTRO EN 7 DE 8**
+  TIPO. Desarrollo (F1: script con test y mutantes; F2: documentación; F3: VM, Desarrollo reducido), en una sola sesión. Material en `/home/luis/educhronos-aceptacion/s241/` (t0, f1, f3 y cierre).
+  HECHO. T0 (solo lectura, HEAD `8716084`): `curso` es `(id check 1, nombre varchar(9), archivado)` y está vacía en `partida-original.db` (esquema 0); la aplicación escribe `insert or replace … (1, nombre, 0)`; la base no está versionada y el zip no la lleva. F1: `tools/base-partida/preparar_base_partida.py` con 9 tests y 3 mutantes (`e1ad229`, `b9b20c9`); base entregable `base-partida-2025-2026.db`, md5 `d867c2dec4a9ab01357f539d8b09f7e2`, en `s241/f1/base-partida/`; con el backend sobre una copia, `GET /api/curso` da `2025/2026` y el log migra de 0 a 8 con la fila intacta; acta `docs/actas-aceptacion/acta-base-partida-s241.md` (`7d9eb64`, `8c4868f`). F2: `docs/guia-incidencias.md` (`81a899f`). F3: en la VM, cuenta estándar `inst241` sobre `s239-prueba-hecha`, zip de `v0.5.0-rc.4` descargado de la Release (sha256 `03d64d42…`) y la base copiada a mano en `base-partida\` (BS): `Instalar.cmd` la coloca intacta (md5 `d867c2de…`), la barra dice «2025/2026» con «versión 0.5.0-rc.4» y el log migra de 0 a 8 (`s241/f3`; la barra, transcrita de la captura del usuario en `s241/f3/barra.txt`).
+  CRITERIO. Condiciones 6 y 7 cumplidas: `O-uso-centro` en 7 de 8. Queda la 8, que espera a `O-manual` (CO).
+  DECISIONES. Del usuario: CP (guía aprobada; teléfono a mano, fuera del repo) y CQ (F3 con cuenta nueva, sin instantánea). Del arquitecto, en `s241/cierre/decisiones.txt`.
+  DEUDA. Ninguna nace ni se salda. `D-curso-sin-renombrar` sigue viva (CJ). `D-contrato-desde-resumen`: tres instancias del arquitecto, sin coste: dos cazadas por Claude Code antes de ejecutar (el zip de rc.4 dado por presente en el host; la carpeta compartida adivinada por una heurística) y una vista al leer el C0 ya ejecutado (la región de S240 del plan cortada por «la siguiente cabecera»). No salta.
+  DEFECTOS. Del arquitecto, cazados por Claude Code. Con coste: (1) el acta metió una lista de Python y textos sin tilde, y el aserto de la corrección solo miraba «ano» (dos commits de arreglo); (2) el guion de lectura de F3 pasaba `grep` sobre los `.txt` en UTF-16 de PowerShell (un oráculo falso, rehecho sobre copias en UTF-8); (3) las tres guardas del cierre buscaban «20 de 20», que el verificador no imprime (la parada del contraste). Sin coste: (4) la frase del punto 3 de la guía no cubría `curso-abierto` ni los `curso-*.db`, corregida antes de escribir; (5) el paso 10 del T0 filtraba por «s239» en la ruta y volcó vacío, rehecho como 10bis; (6) las tres instancias de `D-contrato-desde-resumen`. Defectos distintos: el disparador no salta.
+  SUITES. solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293 (284 de `tools/carga-centro` y 9 de `tools/base-partida`, con `unittest`); autoprueba de `Instalar.cmd` sin cambios. Bundle sin cambios, 651,97 kB. CI de `81a899f` en verde (`tests`, completed, success).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 61 líneas del commit de cierre sin índice, 3 453 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
