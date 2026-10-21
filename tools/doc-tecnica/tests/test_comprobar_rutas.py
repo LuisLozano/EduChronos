@@ -141,6 +141,28 @@ class ComprobarRutasTest(unittest.TestCase):
         self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
         self.assertIn("FALLO vacío", r.stdout)
 
+    # -- d10, c4 y líneas: docs/tecnica se mira en el árbol (DT de S245)
+
+    def test_d10_ruta_de_docs_tecnica_que_no_existe_en_el_arbol_es_rota(self):
+        r = self.revisar(doc(self.segundo, "Ver `docs/tecnica/no-existe.md`.\n"))
+        self.assertSoloFallo(r, "rota")
+        self.assertIn("en el árbol", r.fallos[0][3])
+
+    def test_c4_ruta_de_docs_tecnica_en_el_arbol_y_no_en_el_commit_no_da_nada(self):
+        poner(self.raiz, "docs/tecnica/otro.md", doc(self.segundo, "Sin rutas.\n"))
+        r = self.revisar(doc(self.segundo, "Ver `docs/tecnica/otro.md`, `docs/tecnica/otro.md:8` y `docs/tecnica/`.\n"))
+        self.assertLimpio(r)
+        self.assertEqual(r.rutas, 3)
+
+    def test_lineas_fuera_de_rango_en_un_documento_de_docs_tecnica(self):
+        poner(self.raiz, "docs/tecnica/otro.md", doc(self.segundo, "Sin rutas.\n"))
+        r = self.revisar(doc(self.segundo, "Ver `docs/tecnica/otro.md:8-9`.\n"))
+        self.assertSoloFallo(r, "líneas")
+        self.assertIn("8 líneas en el árbol", r.fallos[0][3])
+
+    def test_docs_tecnica_con_tipo_equivocado_es_rota(self):
+        self.assertSoloFallo(self.revisar(doc(self.segundo, "Ver `docs/tecnica/uno.md/`.\n")), "rota")
+
     # -- controles c1-c2
 
     def test_c1_documento_limpio(self):
@@ -190,7 +212,7 @@ class ComprobarRutasTest(unittest.TestCase):
         self.revisar(doc(self.segundo, "Ver `cuatro.txt`.\n"))
         r = subprocess.run([sys.executable, "-B", SCRIPT, "--raiz", self.raiz], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("AUTOPRUEBA: 13 defectos inyectados, los 13 detectados.", r.stdout)
+        self.assertIn("AUTOPRUEBA: 14 defectos inyectados, los 14 detectados.", r.stdout)
         for linea in ("documentos: 1", "rutas comprobadas: 1", "rotas: 0", "avisos: 0",
                       "comprobaciones duras con fallo: 0"):
             self.assertIn(linea + "\n", r.stdout)
@@ -214,7 +236,7 @@ class ComprobarRutasTest(unittest.TestCase):
     def test_autoprueba_pasa_y_cuenta_sus_defectos(self):
         problemas, inyectados = cr.autoprueba()
         self.assertEqual(problemas, [])
-        self.assertEqual(inyectados, 13)
+        self.assertEqual(inyectados, 14)
 
 
 if __name__ == "__main__":

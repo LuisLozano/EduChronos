@@ -9,7 +9,9 @@ primeras líneas y sin comillas invertidas, una sola línea «Describe el commit
 
 Fallos duros: rota, commit, tamaño (más de 20 480 bytes), líneas (cita ruta:N-M fuera del
 fichero), forma y vacío (ningún documento). Una ruta que existe en el commit citado y no en HEAD
-es AVISO, no fallo (DS de S245).
+es AVISO, no fallo (DS de S245). Las rutas de docs/tecnica se comprueban en el árbol de trabajo,
+bajo --raiz, y no en el commit citado ni en HEAD: la documentación técnica se cita a sí misma tal
+como está (DT de S245).
 
 Se somete a AUTOPRUEBA antes de dar ninguna cifra: en un repo git temporal inyecta un defecto
 por documento y exige que cada uno salte en su categoría, y que los controles limpios no den
@@ -71,9 +73,44 @@ def tipo_objeto(raiz, commit, ruta, cache):
     return cache[clave]
 
 
-def lineas_del_blob(raiz, commit, ruta):
-    datos = git(raiz, "cat-file", "blob", "%s:%s" % (commit, ruta)).stdout
+def contar_lineas(datos):
     return datos.count(b"\n") + (1 if datos and not datos.endswith(b"\n") else 0)
+
+
+def lineas_del_blob(raiz, commit, ruta):
+    return contar_lineas(git(raiz, "cat-file", "blob", "%s:%s" % (commit, ruta)).stdout)
+
+
+# -------------------------------------------------------------------------- árbol (DT)
+
+def en_docs_tecnica(ruta):
+    return ruta == CARPETA_DOCS or ruta.startswith(CARPETA_DOCS + "/")
+
+
+def tipo_en_disco(raiz, ruta):
+    camino = os.path.join(raiz, *ruta.split("/"))
+    if os.path.isfile(camino):
+        return "blob"
+    if os.path.isdir(camino):
+        return "tree"
+    return None
+
+
+def revisar_en_arbol(raiz, documento, numero, codigo, cita, r):
+    """Una ruta de docs/tecnica, en disco bajo la raíz. Sin comprobación de HEAD: el árbol ya es lo actual."""
+    ruta, directorio, n, fin = cita
+    tipo = tipo_en_disco(raiz, ruta)
+    if tipo is None:
+        r.fallo(documento, numero, "rota", "%s: no existe en el árbol" % codigo)
+        return
+    if not tipo_esperado(tipo, directorio, n):
+        r.fallo(documento, numero, "rota", "%s: es %s en el árbol" % (codigo, tipo))
+        return
+    if n is not None:
+        with open(os.path.join(raiz, *ruta.split("/")), "rb") as f:
+            total = contar_lineas(f.read())
+        if fin > total:
+            r.fallo(documento, numero, "líneas", "%s: el fichero tiene %d líneas en el árbol" % (codigo, total))
 
 
 # ----------------------------------------------------------------------------- markdown
@@ -220,9 +257,13 @@ def revisar_documento(raiz, documento, r, cache):
             if isinstance(cita, str):
                 r.fallo(documento, numero, "forma", "%s: %s" % (codigo, cita))
                 continue
+            ruta, directorio, n, fin = cita
+            if en_docs_tecnica(ruta):
+                r.rutas += 1
+                revisar_en_arbol(raiz, documento, numero, codigo, cita, r)
+                continue
             if commit is None:
                 continue
-            ruta, directorio, n, fin = cita
             r.rutas += 1
             tipo = tipo_objeto(raiz, commit, ruta, cache)
             if tipo is None:
@@ -343,7 +384,8 @@ def a_tamano(texto, tamano):
 
 
 def casos(viejo, nuevo):
-    """(nombre, documento o None, categorías de fallo esperadas, avisos esperados, rutas o None)."""
+    """(nombre, documento o None, categorías de fallo esperadas, avisos esperados, rutas o None[,
+    otros documentos de docs/tecnica que el caso necesita en el árbol])."""
     v, n = viejo[:12], nuevo[:12]
     limpio = documento(n, "Ver `a.txt` y `dir/b.txt`.\n")
     defectos = [
@@ -360,6 +402,8 @@ def casos(viejo, nuevo):
         ("d7 código con espacio", documento(n, "Se corre `mvn test`.\n"), {"forma"}, 0, None),
         ("d8 existe en el commit citado y no en HEAD", documento(v, "Ver `viejo.txt`.\n"), set(), 1, None),
         ("d9 docs/tecnica sin documentos", None, {"vacío"}, 0, None),
+        ("d10 ruta de docs/tecnica que no existe en el árbol",
+         documento(n, "Ver `docs/tecnica/no-existe.md`.\n"), {"rota"}, 0, None),
     ]
     controles = [
         ("c1 documento limpio", documento(n, "Ver `ñandú/tilde.txt`, `dir/` y `a.txt:1-3`.\n"),
@@ -368,18 +412,24 @@ def casos(viejo, nuevo):
          documento(n, "Orden:\n\n```\n`no-existe.txt`\n```\n\n~~~~\n`otra-que-no.txt`\n~~~~\n"),
          set(), 0, 0),
         ("c3 documento de 20 480 bytes", a_tamano(limpio, TOPE_BYTES), set(), 0, 2),
+        ("c4 ruta de docs/tecnica que está en el árbol y no en el commit",
+         documento(n, "Ver `docs/tecnica/otro.md`, `docs/tecnica/otro.md:1-3` y `docs/tecnica/`.\n"),
+         set(), 0, 3, {"otro.md": documento(n, "Sin rutas.\n")}),
     ]
     return defectos, controles
 
 
 def probar(raiz, caso):
-    nombre, contenido, categorias, avisos, rutas = caso
+    nombre, contenido, categorias, avisos, rutas, *resto = caso
+    otros = resto[0] if resto else {}
     carpeta = os.path.join(raiz, CARPETA_DOCS)
     os.makedirs(carpeta, exist_ok=True)
     for viejo in os.listdir(carpeta):
         os.remove(os.path.join(carpeta, viejo))
     if contenido is not None:
         escribir(raiz, CARPETA_DOCS + "/prueba.md", contenido)
+    for otro, texto in otros.items():
+        escribir(raiz, CARPETA_DOCS + "/" + otro, texto)
     r = revisar(raiz)
     if r.categorias() != categorias:
         return "%s: fallos %s, se esperaba %s" % (nombre, sorted(r.categorias()), sorted(categorias))
