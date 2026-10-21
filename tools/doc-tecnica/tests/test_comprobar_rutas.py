@@ -109,6 +109,11 @@ class ComprobarRutasTest(unittest.TestCase):
             with self.subTest(cita=cita):
                 self.assertSoloFallo(self.revisar(doc(self.segundo, "Ver `%s`.\n" % cita)), "forma")
 
+    def test_d6_ruta_absoluta_dice_ruta_absoluta(self):
+        r = self.revisar(doc(self.segundo, "Ver `/a.txt`.\n"))
+        self.assertSoloFallo(r, "forma")
+        self.assertIn("ruta absoluta", r.fallos[0][3])
+
     def test_d7_codigo_con_espacio(self):
         self.assertSoloFallo(self.revisar(doc(self.segundo, "Se corre `mvn -B test`.\n")), "forma")
 
