@@ -3,7 +3,7 @@
 Responde a esta pregunta: qué piezas forman Educhronos y cómo se hablan entre sí.
 Léelo antes de tocar el código por primera vez, o cuando un cambio cruce de una pieza a otra.
 
-Describe el commit 816e30d6f2f1.
+Describe el commit 8b27da47f8cf.
 
 ## Las tres piezas
 
