@@ -597,6 +597,7 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
    `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
    otros. Una orden que necesita directorio de trabajo (`sha256sum -c` de un manifiesto con rutas relativas)
    se lanza con `env -C <dir>` o con la opción propia de la orden (`git -C`), nunca tras un `cd` (S243).
+   Con `env -C`, el shell expande los comodines antes de que la orden cambie de directorio: se escriben con ruta absoluta o con nombres explícitos (S245, DU).
    (`D-guion-escribe-donde-no-se-dijo`)
 7. **Una herramienta se invoca sólo con los argumentos que interpreta**:
    `regenerar-indice.py` no lee argumentos. Desde S223 sale con rc=2 y sin escribir

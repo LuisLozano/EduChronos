@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S242. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S243. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S242). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S243). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10776,3 +10776,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto: (1) F3 y el acta citaban el criterio de `O-manual` como si estuviera en el material, y solo estaba en la conversación (una parada); (2) F1.1 daba por hecho el separador «/» del zip (rc=11, resuelto con `zipfile`); (3) los contratos de F2 y F3 se entregaron como fichero aunque cabían en el mensaje (corregido por el usuario); (4) el C1 del cierre daba la previa del plan por una sola línea y la Sesión 240 por perdida, sin volcar la región entera (una parada; la cazó el contraste). De Claude Code: un `cd /tmp` fuera de contrato, sin efecto; la errata de la línea 6 del acta, corregida en este cierre; dos esperas del script de capturas, cazadas por la autoprueba y por la revisión de las capturas. El mismo defecto (`D-contrato-desde-resumen`) cuesta dos veces: el disparador de Higiene/Método salta y se aplaza hasta cerrar `O-uso-centro`, porque no se abre con un objetivo a medias.
   SUITES. Sin código de la aplicación: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293. Nuevo, fuera de las suites: `tools/manual/capturas.mjs`, con su autoprueba. Bundle sin cambios, 651,97 kB. CI de `debd853`: `tests` #123 en verde.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 86 líneas del commit de cierre sin índice, 4 055 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 243 — Higiene/Método (CY, con O-uso-centro esperando fecha): **LIMPIEZA DE LA ACEPTACIÓN, DE EDUCHRONOS-VM Y DE LAS INSTANTÁNEAS DE LA VM (55,6 GiB LIBERADOS); D-CONTRATO-DESDE-RESUMEN Y D-CLONES-DE-ENSAYO-SE-ACUMULAN CERRADAS EN M-GUION; O-DOC-TECNICA REGISTRADO. O-USO-CENTRO EN 7 DE 8**
+  TIPO. Higiene/Método con `O-uso-centro` abierto y su condición 8 esperando fecha con el centro (CY, del usuario; amplía §6). Sin código de la aplicación. Material en `/home/luis/educhronos-aceptacion/s243/` (t0 a t4 y cierre).
+  HECHO. T0 a T3 de solo lectura: CI de `d2c6716` en verde (`tests` #124); 2,6 GiB en la aceptación con 412 rutas citadas desde el repo; la VM `Win11`, 112 GiB en `docs_extra/VM/`. T4: borrados, con sus `BORRADOS.txt`, 7 zips y 3 jars de la aceptación (1 624,3 MiB, regla de S204) y 2 zips y 1 jar de `educhronos-vm` (485,2 MiB); el clon `s238/cierre/ensayo`, con su contenido en `03-ensayo-diff.txt`; las 6 instantáneas de `Win11` y una nueva, `s243-v050-manual` (la VM pasa a 59,8 GiB). Libre en `/home`: de 136,5 a 192,1 GiB. Las bases de la secretaria de S239 quedan fuera de la VM: `educhronos.db` (md5 `1d4167b8…`) y `curso-2026-2027.db` (md5 `fa352243…`), iguales en `educhronos-vm/prueba-secretaria/` y en `s239/d4/trabajo/`. `metodo.md`: normas 2, 6, 12, 13 y 15 de M-guion y la fila de Higiene/Método.
+  CRITERIO. Higiene/Método de 11 a 9. `O-uso-centro` sigue en 7 de 8; `O-doc-tecnica` registrado, sin abrir.
+  DECISIONES. Del usuario: CY (Higiene con el objetivo esperando fecha), CZ y DB (borrados por la regla de S204), DA y DF (clon de S238), DC y DG (instantáneas), DD (la VM no se mueve), DE (sin copia previa), DH a DM (normas de M-guion) y DN (`O-doc-tecnica`). Del arquitecto, doce, en `s243/cierre/c1/decisiones.txt`.
+  DEUDA. Se cierran `D-contrato-desde-resumen` y `D-clones-de-ensayo-se-acumulan` (norma 15). No nace ninguna.
+  DEFECTOS. Del arquitecto, sin coste, cazados por la corrida en seco o por el T2: el separador «\» de los miembros del zip (otra vez, como en S242); los manifiestos con ruta absoluta; las condiciones de DA y DC escritas sin volcar lo comparado; y la forma de `take`. Aparte, una propuesta de borrado contra la regla de S204, hecha sin leerla. En el cierre, siete afirmaciones sin marca en el contrato, tres erróneas, listadas primero por el contraste (una parada). Del entorno: tras una fusión de 523 s, el servicio de VirtualBox no respondió a la lectura (una parada; norma 2). De Claude Code: un rc perdido en un sondeo fuera de guion (norma 1), sin efecto.
+  SUITES. Sin código de la aplicación: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293. Bundle sin cambios, 651,97 kB.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 130 líneas del commit de cierre sin índice, 2 965 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
