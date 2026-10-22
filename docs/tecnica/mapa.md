@@ -38,7 +38,9 @@ Se trabaja en la rama main, y las versiones salen de tags puestos sobre ella (`d
 
 Las rutas de esta documentación se comprueban así: las del código, en el commit que cita cada documento; las de `docs/tecnica/`, en el árbol de trabajo, tal como está.
 
-Ante un fallo, el log del programa instalado está en su carpeta de datos (`docs/tecnica/arquitectura.md`, «Cómo arranca»), y el paquete afectado se busca en las secciones que siguen.
+Ante un fallo, el log del programa instalado está en su carpeta de datos (`docs/tecnica/arquitectura.md`, «Cómo arranca»).
+El código afectado se busca en las secciones que siguen: los paquetes Java de la aplicación, los del solver y las carpetas del frontend.
+Las firmas públicas del solver, clase por clase, están en `docs/referencia-codigo-solver.md`.
 Antes de abrir una incidencia, §4 de `docs/gestion_proyecto.md` dice si el fallo ya es una deuda conocida.
 
 ## Paquetes Java de la aplicación
