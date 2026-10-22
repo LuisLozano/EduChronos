@@ -28,3 +28,5 @@ En orden de lectura:
    Responde qué ficheros salen de un programa y cómo se regenera cada uno: la referencia del solver y los índices.
 7. Por qué se decidió así, en `docs/tecnica/decisiones.md`.
    Responde qué decisiones fijan hoy el código, la construcción, las pruebas y la entrega, y por qué se tomaron, con la sede de cada una.
+8. Los documentos que ya existían, en `docs/tecnica/documentos.md`.
+   Responde qué es cada uno de los 30 documentos técnicos anteriores a esta carpeta: vigente, histórico o absorbido por otro.
