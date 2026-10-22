@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S244. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S245. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S244). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S245). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10796,3 +10796,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. (1) La definición de ruta de M5 contaba como ruta todo texto entre comillas invertidas con barra o extensión: la autoprueba pasó y la cifra no medía nada; se descarta y la condición 2 fija la convención. (2) Un ancla de C0.2 se copió de la copia del Project y no del repo (norma 3) y no casaba por la negrita; Claude Code volcó la variante, sin parada. (3) El C0 dio mal el final de la ficha de O-uso-centro (L232 en vez de L229); el contraste lo cazó antes de escribir, sin coste.
   SUITES. Sin correr: S244 no tiene commits de código. Las del registro de S243: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293. Bundle 651,97 kB, sin compilar.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 79 líneas del commit de cierre sin índice, 1 831 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 245 — O-doc-tecnica (transversal), C-arquitectura-y-rutas: **COMPROBADOR DE RUTAS CON AUTOPRUEBA, TEST Y JOB EN LA CI; ARQUITECTURA Y MAPA DEL REPO EN DOCS/TECNICA; O-DOC-TECNICA EN 1 DE 7, O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo, sin fecha con el centro (CY). Material en `/home/luis/educhronos-aceptacion/s245/` (t0, c1 y cierre).
+  HECHO. T0 de solo lectura (HEAD `1c7120d`); `tests` #126 en verde, medido en el paso 0 del C1. C1, con las enmiendas E1 a E13: `tools/doc-tecnica/comprobar_rutas.py`, autoprueba de 14 defectos y 32 tests (`62d5b84`, `816e30d`, `8b27da4`); job `docs` en `.github/workflows/tests.yml` con `fetch-depth: 0` (`c14b521`); `docs/tecnica/` con `README.md`, `arquitectura.md` y `mapa.md` (`e752b0b`, `695343c`), 258 rutas y 0 rotas. M3: m1 a m10 y m5b, todos muertos. CI de `695343c`: `tests` #127, cuatro jobs en verde; el job `docs`, sin anotaciones.
+  CRITERIO. `O-doc-tecnica` en 1 de 7 (condición 2); las condiciones 1 y 7 avanzan sin cumplirse. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: DS y DT, con su texto en la ficha, y DU (norma 6 de M-guion). Del arquitecto, quince, en `s245/cierre/c1/decisiones.txt`.
+  DEUDA. Nace `D-python-sin-ci` (mejora futura, sin objetivo). No se salda ninguna.
+  DEFECTOS. Del arquitecto: seis afirmaciones de forma sin marca en el contrato C1 (una parada, sin código) y, en el cierre, cuatro sin marca y dos erróneas en K8, que atribuían el #126 al T0 y unas anotaciones sin medir a tres jobs (una parada). De Claude Code: N4 generalizó a los 21 servicios desde uno, y E8 lo copió; se midió antes de escribir los documentos (una parada). Instancia de la norma 16; no nace norma.
+  SUITES. Java y TypeScript sin tocar en S245: las cifras son las del registro de S243 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3), y `tests` #127 está en verde sin que se lean sus recuentos (el log da 403). Python 325: 284 de `tools/carga-centro`, 9 de `tools/base-partida` y 32 de `tools/doc-tecnica`. Bundle sin compilar: `app/` sin cambios en S245; 651,97 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 52 líneas del commit de cierre sin índice, 2 350 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

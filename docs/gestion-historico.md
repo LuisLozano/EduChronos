@@ -2,43 +2,44 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L52 — ## 1. Objetivos terminados
-- L54 — ### H2 — Configurar un centro desde cero
-- L56 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L72 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L144 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L394 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L681 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L782 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L881 — ### H1 — Ajustar (cierre)
-- L883 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1060 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1351 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1541 — ### H3 — Exportar
-- L1543 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1604 — ### H4 — Instalar y pasar de curso
-- L1606 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1780 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1875 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1944 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1980 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1982 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2031 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2066 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2101 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2130 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2169 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2207 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2244 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2281 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2317 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2335 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2361 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2393 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
-- L2412 — ## 2. Deuda cerrada de §4
-- L2414 — ### Deuda técnica real, colgada de su objetivo
-- L2488 — ### Mejora futura, cuelga y espera
-- L2508 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L53 — ## 1. Objetivos terminados
+- L55 — ### H2 — Configurar un centro desde cero
+- L57 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L73 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L145 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L395 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L682 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L783 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L882 — ### H1 — Ajustar (cierre)
+- L884 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1061 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1352 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1542 — ### H3 — Exportar
+- L1544 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1605 — ### H4 — Instalar y pasar de curso
+- L1607 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1781 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1876 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1945 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1981 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1983 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2032 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2067 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2102 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2131 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2170 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2208 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2245 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2282 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2318 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2336 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2362 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2394 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2413 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- L2447 — ## 2. Deuda cerrada de §4
+- L2449 — ### Deuda técnica real, colgada de su objetivo
+- L2523 — ### Mejora futura, cuelga y espera
+- L2543 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2408,6 +2409,40 @@ terminado (§6).
 - **Valor:** que el centro prepare 2026/2027 sin nadie al lado y sin atascarse en lo que no tiene vuelta.
 - **Cambios que agrupa:** `C-alcance-manual` ✔ HECHO (S242): M0, T0, F1 (medición y tag `v0.5.0`), F2 (manual, script y PDF: `eac23f0`, `884e4db` y `1343b64`) y F3 (VM, capturas de Windows, PDF definitivo y acta: `cf6d2ad`, `06001b3`, `5265060` y `debd853`).
 - **Métrica de §7:** una sesión (S242).
+
+#### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- **Propósito:** que el autor, al volver al proyecto tras una pausa, encuentre en un sitio cómo está montada la aplicación, cómo se construye, se prueba y se publica, dónde está cada cosa y por qué se decidió así, sin reconstruirlo del registro de gestión.
+- **Por qué va ahora:** la condición 8 de `O-uso-centro` espera fecha con el centro y no hay trabajo de producto ejecutable (DO). Es transversal: no lleva el estado final 2 ni cuenta para cerrar H5 (DN). Convive abierto con `O-uso-centro`; si llega la fecha, la condición 8 pasa delante (CY).
+- **Medido al abrir (S244, Claude Code, HEAD `a6c819c`; material en `/home/luis/educhronos-aceptacion/s244/t0/t0.txt`):**
+  (a) La CI del cierre de S243 está en verde (`tests` #125).
+  (b) Hay 35 documentos .md versionados: 5 de gestión (2 993 616 B) y 30 técnicos (522 845 B). `docs/RESUMEN-EXTRACCION.md` y `docs/horario-referencia/RESUMEN-EXTRACCION.md` miden lo mismo (4 645 B); no se han comparado.
+  (c) El «cómo se hace» vive en el registro: fuera de gestión, `mvn` sale en 8 líneas y `verificar-cierre` en ninguna; en gestión, en 92 y 111. La mitad de las líneas con órdenes fuera de gestión (20 de 39) están en `docs/empaquetado.md`; el resto, sobre todo en `app/frontend/README.md` y `docs/guion-aceptacion.md`.
+  (d) Ningún fichero versionado fuera de `docs/` nombra `referencia-codigo-solver.md`. En `docs/` hay un prompt generador, `docs/Prompt_generar_referencia_codigo.txt`, y el extractor de S201 está fuera del repo: no consta cuál produjo la versión actual.
+  (e) Las decisiones de stack están en el plan, en «Decisiones tácticas» y «Decisiones permanentes».
+  (f) Código: Java, 272 ficheros de main (26 748 líneas) y 146 de test (34 938); TypeScript, 97 (10 918) y 72 specs (18 731); Python, 41 (12 847).
+  La cifra de rutas citadas del T0 (M5) se descarta: contaba como ruta todo texto entre comillas invertidas con barra o extensión, y casi ninguna de las que daba por rotas lo estaba.
+- **Decisiones (S244):** (DO) del usuario: abrir `O-doc-tecnica`; no hay fecha con el centro. (DP) del usuario: criterio aprobado, con la condición 7 para que la documentación la lean personas. (DQ) del usuario: el porqué de cada decisión se resume en una o dos líneas que enlazan a su sede. (DR) del usuario: el comprobador de rutas corre en la CI de cada push. Las del arquitecto, en `s244/cierre/c1/decisiones.txt`.
+- **Decisiones (S245):** (DS) del usuario: una ruta que no existe en el commit citado es fallo; si existe en él y no en HEAD, es aviso. (DT) del usuario: las rutas de `docs/tecnica/` se comprueban en el árbol de trabajo, no en el commit citado. Las del arquitecto, en `s245/cierre/c1/decisiones.txt`.
+- **Decisiones (S246):** (DV) del usuario: la lista de artefactos derivados de la condición 6 es la del paréntesis: la referencia del solver y los índices. Las del arquitecto, en `s246/cierre/c1/decisiones.txt`.
+- **Decisiones (S247):** (DY) del usuario: las preguntas de la prueba de lectura las escribe él, sin leer `docs/tecnica/`. (DZ) del usuario: en `decisiones.md` entra cada decisión vigente que fija cómo están hoy el código, la construcción, las pruebas o la entrega; fuera, las de planificación, las de proceso y las sustituidas. (EA) del usuario: la copia duplicada del resumen de extracción se borra si ninguna referencia viva apunta a ella. (EB) del usuario: la prueba tiene 16 preguntas, y el agente debe acertar las 16. (EC) del usuario: la condición 4 lleva una nota que dice cuándo se fijaron las preguntas. (ED) del usuario: la prueba vale con la salvedad del contexto, si un subagente previo no sabe nada de Educhronos. (EE) del usuario: la pasada 2 se repite con el prompt enmendado, de uno en uno y sin `cat`. (EF) del usuario: en la pasada 1, la pregunta 5 acierta y la 14 falla; «Maven 3.6.0» es detalle correcto. (EG) del usuario: la documentación es legible, y la nota de Maven se queda como está. (EH) del usuario: cerrar el objetivo. Las del arquitecto, en `s247/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S244 (DP). `O-doc-tecnica` termina cuando:
+  1. **Contenido.** Una documentación técnica en `docs/tecnica/`, en Markdown, cubre seis temas: cómo está montada la aplicación, cómo se construye, cómo se prueba, cómo se publica e instala, dónde está cada cosa y por qué se decidió así (DQ). Cada documento dice qué commit describe. **✔ CUMPLIDA en S247** (`docs/tecnica/decisiones.md`, el sexto tema: 69 entradas con 178 decisiones vigentes, 128 de ellas con letra, cada una con su sede; DZ).
+  2. **Rutas comprobables.** Toda ruta del repo se escribe entera, relativa a la raíz y entre comillas invertidas; lo que no es ruta del repo no va entre comillas invertidas. Un script versionado, con autoprueba y test, comprueba que existen en el commit citado y da 0 rotas. Corre en la CI de cada push (DR).
+  3. **Órdenes que funcionan.** Cada orden de construcción y de prueba, ejecutada tal cual en un clon limpio del commit citado, sale con 0 y reproduce el conteo de las suites de ese commit (al abrir, según el registro de S243: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3 y python 293). La publicación (tag, Release y zip con `Instalar.cmd`) no se ejecuta, porque es externa: se documenta citando el workflow por línea. **✔ CUMPLIDA en S246** (`C-construir-probar-publicar`: los 11 bloques de `docs/tecnica/construir.md`, `docs/tecnica/probar.md` y `docs/tecnica/generados.md`, ejecutados tal cual en un clon limpio con el código de `30b8d67` y los bloques de `4e7336a` (la fase C corrió sobre el commit anterior a la enmienda 2, con los mismos bloques; `s246/fc` y `s246/fk`), salen con 0 y dan solver 162, app 965, vitest 853 en 69 ficheros, e2e 3 y python 337; `s246/fc`).
+  4. **Prueba de lectura.** Diez preguntas, con su respuesta comprobada en el repo, se fijan antes de escribir la documentación. Un agente sin contexto del proyecto las responde con solo la documentación técnica delante y acierta las diez. **✔ CUMPLIDA en S247, con nota (EC) y salvedad (ED).** Nota: las preguntas no se fijaron antes de escribir los siete documentos de S245 y S246; las fijó el usuario en S247, sin leer `docs/tecnica/`, antes de escribir `decisiones.md` y `documentos.md` (DY), y son 16 en vez de diez (EB). Resultado: 3 de 16 en la pasada 1, sobre la documentación tal como estaba; 14 de 16 en la 2 y 16 de 16 en la 3, tras completarla. Salvedad: el contexto del subagente no se puede certificar; en cada pasada, un subagente previo dijo no saber nada de Educhronos, y la lista de ficheros abiertos la declara el propio subagente. Acta en `docs/actas-aceptacion/acta-doc-tecnica-s247.md`.
+  5. **Lo que ya existe.** Una tabla clasifica los 30 documentos técnicos del T0 en vigente, histórico o absorbido, con una línea de motivo cada uno, sin reescribir ninguno, y se resuelven los dos `RESUMEN-EXTRACCION.md`. **✔ CUMPLIDA en S247** (`docs/tecnica/documentos.md`: 9 vigentes, 18 históricos y 3 absorbidos; la copia duplicada del resumen de extracción se borró en `f974c1f`, EA).
+  6. **Artefactos generados.** La documentación dice cómo se regenera cada artefacto derivado (`referencia-codigo-solver.md` y los índices de los documentos de gestión). Si un generador no está en el repo, se versiona, después de medir dónde está y cuál produjo la versión vigente. **✔ CUMPLIDA en S246** (`C-construir-probar-publicar`: el generador de S201 reproduce byte a byte la versión vigente y se versiona como `tools/referencia-solver/generar_referencia.py`, con 12 tests, en `30b8d67`; `docs/tecnica/generados.md` dice cómo se regeneran la referencia y los índices; DV).
+  7. **Legible para una persona.** Cada documento empieza con dos o tres líneas que dicen qué pregunta responde y cuándo leerlo; está en prosa con frases cortas, y las rutas y órdenes acompañan a la explicación sin sustituirla; ninguno pasa de 20 kB (unos 15 minutos de lectura), medido en bytes. El usuario lee la documentación entera y la da por legible; lo que señale se corrige antes de cerrar (juicio humano, como el criterio 4 de `O-diseño`). **✔ CUMPLIDA en S247** (cabecera de lectura en los nueve documentos, todos por debajo de 20 000 B; el usuario leyó la documentación entera, señaló tres huecos —el modelo de datos, la configuración y la publicación paso a paso—, corregidos en `9ace528`, y la dio por legible, EG).
+- **ESTADO en S244: 0 de 7.** ABIERTO en S244, con `O-uso-centro` abierto a la vez (DN).
+- **ESTADO en S245: 1 de 7** (condición 2), con `C-arquitectura-y-rutas` HECHO: `tools/doc-tecnica/comprobar_rutas.py` con autoprueba de 14 defectos y 32 tests, el job `docs` de `.github/workflows/tests.yml` (`tests` #127 en verde) y `docs/tecnica/` con `README.md`, `arquitectura.md` y `mapa.md`: 258 rutas, 0 rotas. Las condiciones 1 (dos de los seis temas) y 7 avanzan sin cumplirse.
+- **ESTADO en S246: 3 de 7** (condiciones 2, 3 y 6), con `C-construir-probar-publicar` HECHO: `docs/tecnica/` con `construir.md`, `probar.md`, `publicar.md` y `generados.md` (`4e7336a`), 369 rutas y 0 rotas. La condición 1 cubre cinco de los seis temas (falta el porqué); la 7 avanza sin cumplirse.
+- **ESTADO en S247: TERMINADO, 7 de 7.**
+- **Fuera del criterio:** la documentación para usuarios (`O-manual`); reescribir los documentos técnicos existentes; el método de sesiones, que vive en `docs/metodo.md`; ejecutar la publicación.
+- **Deudas:** ninguna asignada.
+- **Depende de:** nada. Cede el paso a la condición 8 de `O-uso-centro` si llega la fecha (CY).
+- **Valor:** retomar el proyecto deja de depender de la memoria: hoy cómo se construye y se prueba vive en el registro de gestión, y no consta cuál de dos generadores produjo un artefacto versionado.
+- **Cambios que agrupa:** `C-alcance-doc-tecnica` ✔ HECHO (S244): T0 de solo lectura (`s244/t0`), criterio y decisiones DO a DR. `C-arquitectura-y-rutas` ✔ HECHO (S245): condición 2 y parte de la 1 y la 7; `62d5b84`, `c14b521`, `816e30d`, `e752b0b`, `8b27da4` y `695343c`. `C-construir-probar-publicar` ✔ HECHO (S246): condiciones 3 y 6, y parte de la 1 y la 7; `30b8d67` y `4e7336a`. `C-decisiones-y-lectura` ✔ HECHO (S247): condiciones 1, 4, 5 y 7; `c975812`, `f974c1f`, `baa1e68`, `ce5f32e`, `c0e6338`, `34a57f6`, `010857f`, `9ace528` y `52d4a61`.
+- **Métrica de §7:** estimación al abrir: tres sesiones, sin medir. Gastadas: 1 (S244). **S245:** estimación revisada a cuatro sesiones (del arquitecto): el primer Cambio cupo en una, y los dos que quedan llevan el clon limpio con todas las suites y la prueba de lectura con la lectura entera del usuario. Gastadas: 2 (S244 y S245). **S246:** gastadas 3 (S244 a S246); la estimación de cuatro se mantiene (del arquitecto): queda un Cambio, el de las condiciones 4, 5 y 7. **S247:** gastadas 4 (S244 a S247), las de la estimación.
 
 ## 2. Deuda cerrada de §4
 
