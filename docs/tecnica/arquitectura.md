@@ -129,9 +129,16 @@ Es una lista plana de sesiones por día y tramo, en `app/src/main/java/es/yaroki
 La vista la pinta con la lógica de `app/frontend/src/app/horario/`.
 La misma proyección es la entrada de las exportaciones de `app/src/main/java/es/yaroki/educhronos/app/exportacion/`.
 
+## Quién fija las reglas duras y blandas
+
+Las reglas del generador están en el código del solver, no en los datos.
+Las duras, como no solapar a un profesor, un aula, un subgrupo o un grupo, están en `solver/src/main/java/es/yaroki/educhronos/solver/cpsat/ReglaDura.java`; las blandas, como las ventanas o el aula no preferida, en `solver/src/main/java/es/yaroki/educhronos/solver/cpsat/ReglaBlanda.java`.
+Sus pesos son constantes de `solver/src/main/java/es/yaroki/educhronos/solver/cpsat/ModeloCpSat.java:70-112`: todos valen 1 y no se han calibrado con datos del centro.
+Lo que decide el centro es la disponibilidad de cada profesor: en su rejilla, «No puede» es una restricción dura y «Prefiere no», una blanda (`app/frontend/src/app/components/profesores/disponibilidad/disponibilidad-dialogo.ts:36-37`).
+
 ## El frontend
 
-El frontend arranca en `app/frontend/src/main.ts`, con la configuración de `app/frontend/src/app/app.config.ts:7-13`: el cliente HTTP y el enrutador.
+El frontend es Angular, escrito en TypeScript. Arranca en `app/frontend/src/main.ts`, con la configuración de `app/frontend/src/app/app.config.ts:7-13`: el cliente HTTP y el enrutador.
 Las rutas están en `app/frontend/src/app/app.routes.ts:31-55`:
 
 - La ruta vacía es la portada.

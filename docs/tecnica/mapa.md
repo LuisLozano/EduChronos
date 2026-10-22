@@ -10,6 +10,9 @@ Donde hay muchos ficheros iguales no se enumeran: se dice qué patrón siguen.
 
 ## Raíz del repo
 
+El repo es git y está en GitHub, en https://github.com/LuisLozano/EduChronos (`docs/empaquetado.md:85`).
+Se trabaja en la rama main, y las versiones salen de tags puestos sobre ella (`docs/empaquetado.md:78-80`).
+
 - `pom.xml`: el proyecto Maven padre. Declara los módulos solver y app, las versiones de las dependencias y los plugins. Se toca al subir una versión o añadir un plugin común.
 - `README.md`: la presentación corta del proyecto.
 - `.gitattributes`: obliga a que `scripts/Instalar.cmd` tenga finales de línea CRLF en todo checkout.
@@ -34,6 +37,9 @@ Donde hay muchos ficheros iguales no se enumeran: se dice qué patrón siguen.
 - `tools/base-partida/`, `tools/carga-centro/`, `tools/doc-tecnica/`, `tools/manual/` y `tools/referencia-solver/`: ver la sección de herramientas.
 
 Las rutas de esta documentación se comprueban así: las del código, en el commit que cita cada documento; las de `docs/tecnica/`, en el árbol de trabajo, tal como está.
+
+Ante un fallo, el log del programa instalado está en su carpeta de datos (`docs/tecnica/arquitectura.md`, «Cómo arranca»), y el paquete afectado se busca en las secciones que siguen.
+Antes de abrir una incidencia, §4 de `docs/gestion_proyecto.md` dice si el fallo ya es una deuda conocida.
 
 ## Paquetes Java de la aplicación
 

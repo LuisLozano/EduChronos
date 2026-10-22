@@ -66,4 +66,8 @@ En resumen: se copia el zip del USB al equipo, se extrae y se hace doble clic en
 Para actualizar, antes se copia aparte la carpeta de datos como respaldo, porque una base abierta con una versión nueva ya no la abre la anterior (`docs/empaquetado.md:142-144`).
 
 Ese punto 8 y los anteriores cuentan también cómo bajar los dos ficheros de la Release, comprobar la huella y llevarlos por USB.
+Los dos se bajan desde Linux, sin credenciales, y el zip se comprueba con sha256sum -c antes de copiarlo al USB (`docs/empaquetado.md:83-88`).
+
+El manual de uso, `docs/manual/manual.md`, cuenta también la instalación y la actualización en el centro, en su sección 2.
+Su última sección es la guía de incidencias, `docs/guia-incidencias.md`, que `tools/manual/generar-pdf.sh` añade al PDF.
 Ahí está el procedimiento manual, para cuando la CI no esté disponible.

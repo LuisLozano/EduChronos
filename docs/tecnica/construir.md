@@ -47,7 +47,7 @@ El nombre sale del artefacto, app, y de la versión, 0.0.0-dev, que fija la prop
 Ningún pom cambia ese nombre.
 Al lado queda app/target/app-0.0.0-dev.jar.original, el jar plano de antes de rehacerlo.
 
-El empaquetado de una versión pasa la versión del tag a Maven, y el jar lleva entonces ese número.
+El empaquetado de una versión pasa la versión del tag a Maven con -Drevision=X.Y.Z, y el jar lleva entonces ese número (`scripts/empaquetar-linux.sh:106-108`).
 Eso se cuenta en `docs/tecnica/publicar.md`.
 
 ## Arrancar
