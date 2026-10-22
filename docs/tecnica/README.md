@@ -3,7 +3,7 @@
 Responde a esta pregunta: qué documentos técnicos hay y en qué orden se leen.
 Léelo primero, antes de abrir cualquier otro documento de esta carpeta.
 
-Describe el commit 8b27da47f8cf.
+Describe el commit 30b8d67a9b49.
 
 Cada documento dice en su cabecera qué commit describe.
 Las rutas entre comillas invertidas son rutas del repo, relativas a la raíz.
@@ -18,3 +18,11 @@ En orden de lectura:
    Cuenta cómo arranca, dónde viven los datos, cómo se prepara el esquema y el recorrido de una generación.
 2. Dónde está cada cosa, en `docs/tecnica/mapa.md`.
    Responde en qué carpeta o fichero vive cada parte, y cuándo hay que ir a ella.
+3. Cómo se construye, en `docs/tecnica/construir.md`.
+   Responde qué hace falta para construir el jar, con qué orden y qué deja la construcción.
+4. Cómo se prueba, en `docs/tecnica/probar.md`.
+   Responde qué suites hay, cómo se corre cada una y cuántos tests da.
+5. Cómo se publica e instala, en `docs/tecnica/publicar.md`.
+   Responde cómo sale una versión hacia el centro, qué hace el workflow del zip de Windows y cómo se instala.
+6. Artefactos generados, en `docs/tecnica/generados.md`.
+   Responde qué ficheros salen de un programa y cómo se regenera cada uno: la referencia del solver y los índices.

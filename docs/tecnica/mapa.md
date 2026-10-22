@@ -3,7 +3,7 @@
 Responde a esta pregunta: en qué carpeta o fichero del repo vive cada parte, y cuándo hay que ir a ella.
 Léelo cuando busques dónde hacer un cambio; para entender cómo encajan las piezas, lee antes `docs/tecnica/arquitectura.md`.
 
-Describe el commit 8b27da47f8cf.
+Describe el commit 30b8d67a9b49.
 
 Cada entrada da la ruta, qué hay y cuándo se toca.
 Donde hay muchos ficheros iguales no se enumeran: se dice qué patrón siguen.
@@ -31,7 +31,7 @@ Donde hay muchos ficheros iguales no se enumeran: se dice qué patrón siguen.
 - `docs/horario-referencia/`: la transcripción del horario real del instituto de referencia, que sirve de banco de pruebas. Su `docs/horario-referencia/README.md` explica la jerarquía de fuentes. Los datos de 2026/2027 están en `docs/horario-referencia/2026-2027/`. Seis ficheros de esa carpeta llevan espacios en el nombre: no se pueden citar entre comillas invertidas.
 - `docs/manual/`: el manual de uso (`docs/manual/manual.md`) y sus capturas (`docs/manual/capturas/`).
 - `docs/tecnica/`: esta documentación técnica. Empieza por su índice, `docs/tecnica/README.md`. Se toca cuando cambia lo que describe.
-- `tools/base-partida/`, `tools/carga-centro/`, `tools/doc-tecnica/` y `tools/manual/`: ver la sección de herramientas.
+- `tools/base-partida/`, `tools/carga-centro/`, `tools/doc-tecnica/`, `tools/manual/` y `tools/referencia-solver/`: ver la sección de herramientas.
 
 Las rutas de esta documentación se comprueban así: las del código, en el commit que cita cada documento; las de `docs/tecnica/`, en el árbol de trabajo, tal como está.
 
@@ -116,6 +116,7 @@ Cada herramienta tiene sus tests en una carpeta tests a su lado.
 
 - `tools/base-partida/preparar_base_partida.py`: escribe el nombre del curso en una copia de la base de partida que viaja con el programa.
 - `tools/doc-tecnica/comprobar_rutas.py`: comprueba las rutas de esta documentación. Las del código, en el commit que cita cada documento; las de `docs/tecnica/`, en el árbol de trabajo.
+- `tools/referencia-solver/generar_referencia.py`: genera `docs/referencia-codigo-solver.md` desde el código del solver. Se corre cuando cambia `solver/src/`; cómo, en `docs/tecnica/generados.md`.
 - `tools/manual/capturas.mjs`: hace las capturas del manual de uso y comprueba sus textos contra la aplicación.
 - `tools/manual/generar-pdf.sh` y `tools/manual/manual.css`: generan el PDF del manual con su hoja de estilo.
 - `tools/carga-centro/`: llevan a Educhronos los datos de un centro a partir de los PDF y las hojas de su programa de horarios. Sus tests están en `tools/carga-centro/tests/`, con `tools/carga-centro/tests/paginas_sinteticas.py` como páginas fabricadas. Sus guiones:
