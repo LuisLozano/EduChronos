@@ -35,7 +35,7 @@ Cada documento tiene una de tres clases:
 | `docs/guion-aceptacion.md` | vigente | Guion que ejecuta como una sola cadena los seis pasos del estado final. |
 | `docs/horario-referencia/2026-2027/INFORME-COMPARACION.md` | histórico | Comparación del horario generado con el oficial, de S228. |
 | `docs/horario-referencia/2026-2027/INFORME-CONSERVACION-CATALOGO.md` | vigente | Salida de `tools/carga-centro/derivar-catalogo.py` sobre los volcados versionados de 2026/2027. |
-| `docs/horario-referencia/2026-2027/INFORME-CRUCE-GRUPOS-PROFESORES.md` | vigente | Salida de `tools/carga-centro/cruzar-grupos-profesores.py` sobre los mismos volcados. |
+| `docs/horario-referencia/2026-2027/INFORME-CRUCE-GRUPOS-PROFESORES.md` | histórico | Foto del cruce de S197; `tools/carga-centro/cruzar-grupos-profesores.py` escribe donde se le pida, no con este nombre. |
 | `docs/horario-referencia/2026-2027/INFORME-NO-REPRESENTABLE.md` | histórico | Lo que el horario oficial tiene y Educhronos no representa, medido en S199. |
 | `docs/horario-referencia/2026-2027/METRICAS-COMPARACION.md` | histórico | Métricas fijadas antes de la comparación de S228. |
 | `docs/horario-referencia/ESPECIFICACION-CATALOGO.md` | vigente | Define las reglas del catálogo tal como las aplica `tools/carga-centro/derivar-catalogo.py`. |
