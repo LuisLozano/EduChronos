@@ -80,6 +80,22 @@ Abrir otro curso sustituye el pool (`app/src/main/java/es/yaroki/educhronos/app/
 Lo pide `app/src/main/java/es/yaroki/educhronos/app/curso/CursoService.java`, y la base nueva se abre con `app/src/main/java/es/yaroki/educhronos/app/config/FabricaDeBases.java`.
 Toda conexión tiene encendidas las claves foráneas de SQLite (`app/src/main/java/es/yaroki/educhronos/app/config/SqliteForeignKeysConfig.java`).
 
+## Dónde está el modelo de datos
+
+El modelo de datos vive en cuatro sitios:
+
+- El esquema de una base nueva es `app/src/main/resources/schema.sql`. Es el esquema vigente.
+- Las migraciones de una base que ya existe son los scripts numerados de `app/src/main/resources/esquema/`. La base sabe su versión porque la guarda en PRAGMA user_version (`app/src/main/java/es/yaroki/educhronos/app/config/PreparadorEsquema.java:22`); el apartado siguiente cuenta cómo se aplican.
+- Las entidades Java que leen y escriben esas tablas están en `app/src/main/java/es/yaroki/educhronos/app/catalog/`, las del catálogo del centro, y en `app/src/main/java/es/yaroki/educhronos/app/persistence/`, las del horario generado. Hibernate no crea las tablas a partir de ellas: las crea `app/src/main/resources/schema.sql` (`app/src/main/resources/application.properties:23-27`).
+- `docs/modelo_datos_fase1.md` es el diseño original, de la Fase 1. Se escribió como referencia del esquema hasta que una fase posterior lo cambiara (`docs/modelo_datos_fase1.md:4-5`).
+
+Ese diseño ya no es el esquema, y el propio fichero marca dónde se apartó.
+Las particiones de su §4.2 no existen en el esquema vigente: ese apartado se conserva como diseño, y el esquema es el de schema.sql (`docs/modelo_datos_fase1.md:429-433`).
+El diseño de su §6.2 quedó superado en la Sesión 23 (`docs/modelo_datos_fase1.md:1305-1313`).
+Para saber qué tablas y columnas hay hoy, se mira `app/src/main/resources/schema.sql`.
+
+Quien cambia el esquema edita `app/src/main/resources/schema.sql`, añade una migración nueva y sube la versión (`app/src/main/java/es/yaroki/educhronos/app/config/PreparadorEsquema.java:53-57`).
+
 ## El esquema y sus migraciones
 
 Hibernate no crea ni valida el esquema: `app/src/main/resources/application.properties:27` lo deja en none.
@@ -94,6 +110,25 @@ El preparador aplica estas reglas:
 - Una base vacía recibe el esquema completo de `app/src/main/resources/schema.sql` y queda sellada con la versión 8.
 - Una base con número 0 y con tablas es anterior a las versiones: recibe `app/src/main/resources/esquema/001.sql` y queda en la 1.
 - Desde ahí recibe, uno a uno y cada uno en su transacción, los scripts de `app/src/main/resources/esquema/` que le falten, del `app/src/main/resources/esquema/002.sql` al `app/src/main/resources/esquema/008.sql`.
+
+## La configuración
+
+La configuración está en `app/src/main/resources/application.properties`.
+Cada clave lleva encima un comentario con su porqué:
+
+- spring.datasource.driver-class-name fija el controlador de SQLite. La ruta de la base no está en el fichero: la calcula el post-procesador de «Dónde viven los datos» (`app/src/main/resources/application.properties:3-21`).
+- spring.jpa.hibernate.ddl-auto, en none, y spring.jpa.database-platform dejan el esquema fuera de Hibernate y eligen el dialecto de SQLite de la comunidad (`app/src/main/resources/application.properties:23-28`).
+- spring.web.error.include-message, en always, hace que una respuesta de error lleve su mensaje. Así la interfaz puede decir quién impide un borrado o por qué se rechaza un alta (`app/src/main/resources/application.properties:37-49`).
+- server.address, en 127.0.0.1, hace que el servidor escuche solo en el propio equipo (`app/src/main/resources/application.properties:51-62`).
+- spring.web.resources.add-mappings, en false, apaga el manejador de estáticos de Spring Boot (`app/src/main/resources/application.properties:64-67`).
+- educhronos.solver.max-segundos, en 600, es el tiempo del solver cuando la petición no trae otro (`app/src/main/resources/application.properties:69-85`).
+
+Los comentarios dicen cómo cambiar la ruta de la base, la dirección de escucha y el tiempo del solver al arrancar el jar, sin editar el fichero: con --spring.datasource.url, --server.address y --educhronos.solver.max-segundos (`app/src/main/resources/application.properties:16-17`, `app/src/main/resources/application.properties:59-61`, `app/src/main/resources/application.properties:76-79`).
+
+Los tests tienen su propio fichero, `app/src/test/resources/application.properties`, con el mismo nombre.
+En los tests tapa al de producción: Spring Boot lee solo el primero que encuentra (`app/src/test/java/es/yaroki/educhronos/app/web/MensajeDeErrorHttpTest.java:39-44`).
+Por eso los tests no vigilan las claves de producción.
+La excepción es `app/src/test/java/es/yaroki/educhronos/app/web/MensajeDeErrorHttpTest.java`: carga a mano el fichero de producción y comprueba que los errores llegan con su mensaje.
 
 ## El recorrido de una generación
 

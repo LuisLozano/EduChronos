@@ -99,7 +99,7 @@ Solo entran decisiones vigentes.
 
 ## Herramientas y datos del centro
 
-- **Las herramientas de Python usan solo la biblioteca estándar.** El único entorno virtual se rompió con otro Python del sistema. Sus tests, fuera de la CI: no lo pedía el objetivo de entonces. Sede: `docs/plan_trabajo_horarios.md`, fila Herramientas de datos del centro.
+- **Las herramientas de Python usan solo la biblioteca estándar.** El único entorno virtual se rompió con otro Python del sistema. Los tests del comprobador de rutas corren en la CI (`.github/workflows/tests.yml:93`). Los de las otras tres, `tools/carga-centro/tests/`, `tools/base-partida/tests/` y `tools/referencia-solver/tests/`, no. Para la carga del centro se decidió así porque no lo pedía el objetivo de entonces; para las otras dos, la fuente no da el motivo. Sede: `docs/plan_trabajo_horarios.md`, fila Herramientas de datos del centro.
 - **El catálogo del centro se deriva con un script.** El centro sacó tres versiones en una semana. Se cruza entre grupos y profesores: no hay horario completo por aulas. Las guardias, igual. El Excel de aulas es dato de prueba, no especificación. Sede: `docs/gestion-historico.md`, O-carga-2026, D y E; O-guardias, AD; O-aulas, A.
 - **Los horarios del centro se versionan: son públicos.** Los documentos internos no, y `docs/horario-referencia/2026-2027/reglas-aulas.json` va sin nombres de personas. Sede: `docs/gestion_proyecto.md`, §4, «Decisión arquitectónica consciente», D-nombres-reales-en-repo; `docs/gestion-historico.md`, O-carga-2026, B, y O-aulas, Z.
 

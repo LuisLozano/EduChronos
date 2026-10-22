@@ -79,4 +79,14 @@ Los canarios solo mostraron el directorio de trabajo, que trae el nombre del pro
 
 ## Lectura del usuario
 
-Pendiente.
+En su lectura, el usuario dejó tres notas. Con ellas se revisaron también las notas 2 y 3 de arriba.
+
+- **Modelo de datos.** `docs/tecnica/arquitectura.md`, apartado nuevo «Dónde está el modelo de datos»: el esquema de una base nueva, las migraciones y la versión en PRAGMA user_version, las entidades Java, y que `docs/modelo_datos_fase1.md` es el diseño de la Fase 1, con partes que el propio fichero marca como apartadas o superadas.
+- **Configuración.** `docs/tecnica/arquitectura.md`, apartado nuevo «La configuración»: qué fija cada clave de `app/src/main/resources/application.properties`, y que el fichero de los tests tapa al de producción.
+  El usuario pidió decir que ningún test vigila las claves de producción. No es exacto: `app/src/test/java/es/yaroki/educhronos/app/web/MensajeDeErrorHttpTest.java` carga a mano el fichero de producción. El apartado lo dice como excepción.
+- **Publicar.** `docs/tecnica/publicar.md`, apartado «Publicar una versión, paso a paso», en nueve pasos: la CI de main, el tag, el workflow, la Release, el contenido del zip, la base de partida y qué hace con ella `scripts/Instalar.cmd`. La base original no está en el repo; el paso 7 dice dónde la sitúa su acta.
+- **Nota 2 (tests de Python).** `docs/tecnica/decisiones.md`, entrada de las herramientas de Python: los tests del comprobador de rutas corren en la CI y los de las otras tres herramientas, no.
+- **Nota 3 (rangos de `app/pom.xml`).** No se cambia. Las dos citas señalan el mismo plugin, que no ha cambiado desde los commits que describen los dos documentos: la de `docs/tecnica/arquitectura.md` acaba en la carpeta de origen de la copia, y la de `docs/tecnica/construir.md`, al cerrar el plugin.
+- **Nota 1 (Maven).** Se deja, decisión del usuario pendiente en su relectura.
+
+Relectura del usuario: pendiente.
