@@ -89,4 +89,4 @@ En su lectura, el usuario dejó tres notas. Con ellas se revisaron también las 
 - **Nota 3 (rangos de `app/pom.xml`).** No se cambia. Las dos citas señalan el mismo plugin, que no ha cambiado desde los commits que describen los dos documentos: la de `docs/tecnica/arquitectura.md` acaba en la carpeta de origen de la copia, y la de `docs/tecnica/construir.md`, al cerrar el plugin.
 - **Nota 1 (Maven).** Se deja, decisión del usuario pendiente en su relectura.
 
-Relectura del usuario: pendiente.
+Relectura del usuario (S247): da la documentación por legible (EG). La nota de Maven se queda como está: `docs/tecnica/construir.md` da el mínimo que pide el plugin, y el `README.md` de la raíz no se reescribe (EG).
