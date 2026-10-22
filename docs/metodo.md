@@ -298,7 +298,7 @@ escriba contrato. El orden por defecto (contrato → contraste) deja que el cont
 descubra que el contrato era INALCANZABLE. NO se aplica a cambios de un solo módulo;
 la condición es el número de módulos, no el tamaño.
 
-Artefactos derivados (regla mecánica): si se toca `solver/src/main` se REGENERA
+Artefactos derivados (regla mecánica): si se toca `solver/src`, main o test (S246, DW), se REGENERA
 `referencia-codigo-solver.md`; si no, se declara que no se ha tocado. La
 documentación va en commit APARTE del código; el manifiesto de dependencias va CON
 el código que lo necesita.
@@ -366,7 +366,7 @@ quien tiene los ficheros delante cumple esa garantía mejor, no peor.
    lee igual que a la viva. Es el mismo criterio que M-doc-2 aplica a las maquetas.
 3. El modelo principal no pide los ficheros para devolverlos. Si necesita leer,
    lee del Project o encarga a Claude Code una lectura acotada.
-4. Los mensajes de commit los sigue entregando el modelo principal, de una línea.
+4. Los mensajes de commit los sigue entregando el modelo principal, de una línea y sin trailer Co-Authored-By (S246, DX).
 5. **Un guion que añade o mueve líneas en `gestion_proyecto.md` o
    `plan_trabajo_horarios.md` TERMINA regenerando el índice (S132).** Los números de
    línea caducan en cuanto el cuerpo se desplaza, y `verificar-cierre.py` NO avisa de

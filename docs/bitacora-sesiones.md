@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S243. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S244. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S243). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S244). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10786,3 +10786,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, sin coste, cazados por la corrida en seco o por el T2: el separador «\» de los miembros del zip (otra vez, como en S242); los manifiestos con ruta absoluta; las condiciones de DA y DC escritas sin volcar lo comparado; y la forma de `take`. Aparte, una propuesta de borrado contra la regla de S204, hecha sin leerla. En el cierre, siete afirmaciones sin marca en el contrato, tres erróneas, listadas primero por el contraste (una parada). Del entorno: tras una fusión de 523 s, el servicio de VirtualBox no respondió a la lectura (una parada; norma 2). De Claude Code: un rc perdido en un sondeo fuera de guion (norma 1), sin efecto.
   SUITES. Sin código de la aplicación: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293. Bundle sin cambios, 651,97 kB.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 130 líneas del commit de cierre sin índice, 2 965 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 244 — O-doc-tecnica (transversal), C-alcance-doc-tecnica: **O-DOC-TECNICA ABIERTO, 0 DE 7, CON EL CRITERIO ESCRITO SOBRE EL T0; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Apertura de objetivo, sin fecha con el centro (DO); dos objetivos abiertos (DN). Material en `/home/luis/educhronos-aceptacion/s244/` (t0 y cierre).
+  HECHO. T0 de solo lectura (HEAD `a6c819c`, `tests` #125 en verde): inventario de 36 documentos (35 .md, 5 de ellos de gestión, y 1 .txt), mapa del repo, órdenes ya escritas, decisiones del plan, tamaño del código y artefactos generados (`s244/t0/t0.txt`). Sin commits de código.
+  CRITERIO. `O-doc-tecnica` ABIERTO, 0 de 7 (DP); ficha en §3 de gestión. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: DO a DR, con su texto en la ficha. Del arquitecto, nueve, en `s244/cierre/c1/decisiones.txt`.
+  DEUDA. Ninguna nace ni se salda.
+  DEFECTOS. (1) La definición de ruta de M5 contaba como ruta todo texto entre comillas invertidas con barra o extensión: la autoprueba pasó y la cifra no medía nada; se descarta y la condición 2 fija la convención. (2) Un ancla de C0.2 se copió de la copia del Project y no del repo (norma 3) y no casaba por la negrita; Claude Code volcó la variante, sin parada. (3) El C0 dio mal el final de la ficha de O-uso-centro (L232 en vez de L229); el contraste lo cazó antes de escribir, sin coste.
+  SUITES. Sin correr: S244 no tiene commits de código. Las del registro de S243: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, python 293. Bundle 651,97 kB, sin compilar.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 79 líneas del commit de cierre sin índice, 1 831 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
