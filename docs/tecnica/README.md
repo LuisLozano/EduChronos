@@ -26,3 +26,5 @@ En orden de lectura:
    Responde cómo sale una versión hacia el centro, qué hace el workflow del zip de Windows y cómo se instala.
 6. Artefactos generados, en `docs/tecnica/generados.md`.
    Responde qué ficheros salen de un programa y cómo se regenera cada uno: la referencia del solver y los índices.
+7. Por qué se decidió así, en `docs/tecnica/decisiones.md`.
+   Responde qué decisiones fijan hoy el código, la construcción, las pruebas y la entrega, y por qué se tomaron, con la sede de cada una.
