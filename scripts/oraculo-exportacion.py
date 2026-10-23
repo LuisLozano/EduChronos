@@ -72,6 +72,12 @@ Desde S221 (C-exportacion-guardias-recreo, D7 del contrato v2):
   - La lectura de las bandas de cinco celdas se escribió sin un PDF que las tenga: la valida
     el T2 sobre la salida real del producto y con mutantes.
 
+Desde S250 (C-asignatura-con-nivel), la asignatura de cada entrada esperada en el PDF es su
+código CORTO, `asignatura.codigo_corto`, si la base tiene esa columna (esquema 9), y
+`asignatura.codigo` si no: una asignatura con nivel tiene código `Biol-3ESO`, y la rejilla y la
+exportación enseñan `Biol`. La columna se mira en la base con `pragma table_info`, no en el
+exportador.
+
 Uso:
   oraculo-exportacion.py csv <copia.db> <horario_id> <fichero.csv>
   oraculo-exportacion.py pdf <copia.db> <horario_id> <fichero.pdf> [--vista grupo|profesor|aula|guardias]
@@ -529,6 +535,13 @@ X_PRIMERA_COLUMNA = 86.0
 ANCHO_COLUMNA = 96.2
 
 
+def columna_codigo_asignatura(con):
+    """La columna con el código que enseña la exportación: `codigo_corto` si existe (esquema 9,
+    S250) y `codigo` si no. Se pregunta a la base, no al exportador."""
+    columnas = {fila[1] for fila in con.execute("pragma table_info(asignatura)")}
+    return "codigo_corto" if "codigo_corto" in columnas else "codigo"
+
+
 def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
     """Entradas de rejilla que la BD exige, por código de RECURSO de la vista.
 
@@ -561,8 +574,9 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
         if conf["catalogo"]:
             for (codigo,) in con.execute(conf["catalogo"]):
                 por_recurso[codigo]  # noqa: B018 -- crea la entrada vacía a propósito
+        codigo_asignatura = columna_codigo_asignatura(con)
         for recurso, dia, tramo, asignatura, profesores, aula, grupos in con.execute("""
-                select v.%s, v.dia, v.tramo, a.codigo,
+                select v.%s, v.dia, v.tramo, a.%s,
                        (select group_concat(p.codigo, '/') from (
                             select p2.codigo from plaza_profesor pp
                               join profesor p2 on p2.id = pp.profesor_id
@@ -577,7 +591,7 @@ def entradas_esperadas(ruta_db, horario_id, vista="grupo"):
                 join sesion s on s.id = v.sesion_id
                 join plaza pl on pl.id = s.plaza_id
                 join asignatura a on a.id = pl.asignatura_id
-                left join aula au on au.id = s.aula_id""" % (conf["recurso"], conf["sql"])):
+                left join aula au on au.id = s.aula_id""" % (conf["recurso"], codigo_asignatura, conf["sql"])):
             campos = {"asignatura": asignatura, "profesores": profesores or "",
                       "aula": aula or "", "grupos": grupos or ""}
             texto = " ".join(campos[c] for c in conf["orden"] if campos[c])

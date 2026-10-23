@@ -121,12 +121,22 @@ def titulo_de(ruta, pagina):
         (x, t) for x, y, t in ws if y <= techo + 1.0))
 
 
+def columna_codigo_asignatura(con):
+    """La columna con el código que enseña la exportación (S250, C-asignatura-con-nivel):
+    `codigo_corto` si la base la tiene (esquema 9) y `codigo` si no. Una asignatura con nivel
+    tiene código `Biol-3ESO`, y la leyenda dice `Biol`. Las partes de una asignatura comparten
+    corto y nombre, así que el diccionario de nombres no pierde nada al juntarlas."""
+    columnas = {fila[1] for fila in con.execute("pragma table_info(asignatura)")}
+    return "codigo_corto" if "codigo_corto" in columnas else "codigo"
+
+
 def datos(ruta_db, horario_id, vista):
     """Por recurso: asignaturas y profesores CON entrada, y los nombres de catálogo."""
     con = sqlite3.connect("file:%s?mode=ro" % ruta_db, uri=True)
+    codigo_asignatura = columna_codigo_asignatura(con)
     tramos = list(con.execute("select id, dia, orden, es_lectivo from tramo_semanal"))
     lect = sorted([t for t in tramos if t[3]], key=lambda t: (DIAS.index(t[1]), t[2]))
-    nAsig = dict(con.execute("select codigo, nombre_completo from asignatura"))
+    nAsig = dict(con.execute("select %s, nombre_completo from asignatura" % codigo_asignatura))
     nProf = dict(con.execute("select codigo, nombre_completo from profesor"))
     profs = collections.defaultdict(set)
     for pid, c in con.execute("select pp.plaza_id, p.codigo from plaza_profesor pp "
@@ -139,9 +149,9 @@ def datos(ruta_db, horario_id, vista):
         grupos[pid].add(c)
     porRecurso = collections.defaultdict(lambda: {"asig": set(), "prof": set()})
     for plaza, aula, asig in con.execute(
-            "select s.plaza_id, a.codigo, g.codigo from sesion s "
+            "select s.plaza_id, a.codigo, g.%s from sesion s "
             "left join aula a on a.id = s.aula_id join plaza pl on pl.id = s.plaza_id "
-            "join asignatura g on g.id = pl.asignatura_id where s.horario_id = ?",
+            "join asignatura g on g.id = pl.asignatura_id where s.horario_id = ?" % codigo_asignatura,
             (horario_id,)):
         if vista == "grupo":
             recursos = grupos.get(plaza, set())
