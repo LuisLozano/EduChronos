@@ -353,7 +353,9 @@ Aula(
 
 Asignatura(
   id PRIMARY KEY,
-  codigo,           -- "Mat", "LCL", "CyR", "ÁmbSL"
+  codigo,           -- "Mat-1ESO", "LCL-2BACH"; sin nivel, el corto: "RED" (S250)
+  codigo_corto,     -- "Mat", "LCL": el que muestran la rejilla, los PDF y el CSV
+  nivel_id NULL FOREIGN KEY,   -- nulo sin nivel; con nivel, codigo = codigo_corto + '-' + nivel.codigo
   nombre_completo
 )
 

@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S247. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S248. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S247). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S248). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10826,3 +10826,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el prompt de la prueba de lectura no decía cómo leer, y el mismo defecto invalidó dos intentos de la pasada 2: el disparador de Higiene/Método salta. Sin coste: E10 se escribió como «aprobada por el usuario» antes de que la aprobara; E12 describía dos defectos del texto pegado en el chat, no del fichero; la premisa de N2 era falsa y la corrigió Claude Code; la estimación de DZ partía de 69 decisiones con letra y eran 265; doce afirmaciones de forma sin marca en el contrato, cazadas por el contraste. De Claude Code: ninguno con coste.
   SUITES. Sin código de la aplicación ni de las herramientas: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). Bundle sin compilar, 651,97 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 120 líneas del commit de cierre sin índice, 2 726 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 248 — Higiene/Método (CY, con O-uso-centro esperando fecha): **NORMAS 17 Y 20 DE M-GUION Y EL LANZADOR QUE ARRANCA Y PARA NG SERVE; D-PROMPT-SUBAGENTE-SIN-NORMA, D-M4-NAVEGADOR-SIN-NORMA Y D-NG-SERVE-SIN-LITERAL CERRADAS; LA ACEPTACIÓN, SIN NADA QUE BORRAR. O-USO-CENTRO EN 7 DE 8**
+  TIPO. Higiene/Método por el disparador saltado en S247, con `O-uso-centro` esperando fecha (CY); en F2, código de un instrumento de `scripts/`, con autoprueba y M3 (S157). Material en `/home/luis/educhronos-aceptacion/s248/` (t0, t1, f1, f2 y cierre).
+  HECHO. T0 y T1 de solo lectura: `tests` #130 en verde sobre `f6e6f2c`; la aceptación ocupa 1,1 GB, con dos jars sin copia en ninguna Release y todas las carpetas citadas, y de las 10 rutas citadas que no existen ninguna es material perdido. F1: normas 17 y 20 de M-guion (`315b659`). F2: `scripts/arrancar-backend.py --con-frontend`, con autoprueba de (a) a (i) y M3 9 de 9, verificado sobre una copia del banco de S204 (`3e4c50b`); norma 5 y `docs/tecnica/` (`8945f7b`). Comprobador: 579 rutas, 0 rotas.
+  CRITERIO. Higiene/Método de 10 a 7, la cifra de salida del M0. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: EO (el alcance del M0), EI (no se borra nada), EJ y EM (norma 20), EK (norma 17), EL (lanzador de `ng serve`) y EN (la comprobación previa de E14 en la norma 20). Del arquitecto, doce, en `s248/cierre/c1/decisiones.txt`.
+  DEUDA. Se cierran `D-prompt-subagente-sin-norma`, `D-m4-navegador-sin-norma` y `D-ng-serve-sin-literal`. No nace ninguna. De paso, la rama de código 4 del lanzador llamaba a `_limpiar` con un argumento de menos: la corrige `descartar()`.
+  DEFECTOS. Del arquitecto, con coste: los textos de E2 y E3 de F2 ponían comillas invertidas en `docs/tecnica/`, donde marcan rutas (una parada). Sin coste: en F1, dos preguntas de forma y una cifra del T0 discreparon, y T2 no recogía dos piezas de E14; todo lo resolvieron enmiendas tras la parada del contraste. De Claude Code, sin coste: en el T0, 706 líneas por 705, 14 líneas de grep por 16 y tres documentos por cuatro; el `aplicar.py` de F1 quedó fuera del manifiesto (corregido), y la enmienda F2-E1 se aplicó con un script en línea sin guardar. El contador de rutas de S243 da falsos inexistentes. Defectos distintos: el disparador no salta.
+  SUITES. Sin código de la aplicación: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). `scripts/` no tiene suite: su autoprueba. Bundle sin compilar, 651,97 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 67 líneas del commit de cierre sin índice, 2 788 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
