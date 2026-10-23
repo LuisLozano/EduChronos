@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S246. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S247. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S246). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S247). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10816,3 +10816,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, sin coste: diez afirmaciones sin marca en el contrato (una falsa) y cuatro citas que no sostenían lo afirmado, cazadas por el contraste; el guion de las fases no decía «sin Co-Authored-By» (amend antes del push); las citas al script nuevo se dieron sin volcar cuánto lo movía el docstring (cazadas en la revisión); un `-A 25` cortó un bloque en el T0. Con coste, en el cierre: una afirmación de forma sin marca y falsa (cinco barras en una fila de cuatro), una parada. De Claude Code, sin coste: tres citas de la fase B que no sostenían lo afirmado, corregidas en la enmienda 2, y un `cd` fuera de guion en el T0. Defectos distintos: el disparador no salta.
   SUITES. Sin código de la aplicación: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, medidos en el clon de la fase C. Python 337: 284 de `tools/carga-centro`, 9 de `tools/base-partida`, 32 de `tools/doc-tecnica` y 12 de `tools/referencia-solver`. Bundle sin compilar: `app/` sin cambios; 651,97 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 61 líneas del commit de cierre sin índice, 2 980 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 247 — O-doc-tecnica (transversal), C-decisiones-y-lectura: **EL PORQUÉ DE LAS DECISIONES Y LA TABLA DE LOS DOCUMENTOS EXISTENTES, EN DOCS/TECNICA; LA PRUEBA DE LECTURA PASA DE 3 A 16 DE 16 Y EL USUARIO DA LA DOCUMENTACIÓN POR LEGIBLE. O-DOC-TECNICA TERMINADO, 7 DE 7; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo sin código de la aplicación, sin fecha con el centro (CY). Material en `/home/luis/educhronos-aceptacion/s247/` (t0, c1, f0, fa, fb, fc, fd, fe y cierre).
+  HECHO. T0 de solo lectura: `tests` #129 en verde sobre `ea5d805`; las preguntas de la condición 4 no se habían fijado. Contrato con contraste (`s247/c1`) y enmiendas E1 a E17. F0: las 16 preguntas del usuario y la hoja de soluciones, con 123 citas comprobadas. FA: `docs/tecnica/decisiones.md` (`c975812`). FB: borrada la copia duplicada del resumen de extracción (`f974c1f`) y `docs/tecnica/documentos.md` (`baa1e68`), con correcciones (`ce5f32e`). FD: tres pasadas con comprobación previa de contexto, 3, 14 y 16 de 16 (`c0e6338`, `34a57f6`), y acta `docs/actas-aceptacion/acta-doc-tecnica-s247.md` (`010857f`). FE: lectura del usuario, tres huecos corregidos (`9ace528`) y relectura (`52d4a61`). Comprobador: 579 rutas, 0 rotas.
+  CRITERIO. `O-doc-tecnica` TERMINADO, 7 de 7: condiciones 1, 4, 5 y 7, la 4 con la nota de EC y la salvedad de ED; ficha a `gestion-historico.md` §1. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: DY a EH, con su texto en la ficha. Del arquitecto, catorce, en `s247/cierre/c1/decisiones.txt`.
+  DEUDA. Nace `D-prompt-subagente-sin-norma` (de método, sede Higiene/Método): Higiene/Método de 9 a 10. No se salda ninguna.
+  DEFECTOS. Del arquitecto, con coste: el prompt de la prueba de lectura no decía cómo leer, y el mismo defecto invalidó dos intentos de la pasada 2: el disparador de Higiene/Método salta. Sin coste: E10 se escribió como «aprobada por el usuario» antes de que la aprobara; E12 describía dos defectos del texto pegado en el chat, no del fichero; la premisa de N2 era falsa y la corrigió Claude Code; la estimación de DZ partía de 69 decisiones con letra y eran 265; doce afirmaciones de forma sin marca en el contrato, cazadas por el contraste. De Claude Code: ninguno con coste.
+  SUITES. Sin código de la aplicación ni de las herramientas: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). Bundle sin compilar, 651,97 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 120 líneas del commit de cierre sin índice, 2 726 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
