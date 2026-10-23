@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S245. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S246. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S245). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S246). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10806,3 +10806,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto: seis afirmaciones de forma sin marca en el contrato C1 (una parada, sin código) y, en el cierre, cuatro sin marca y dos erróneas en K8, que atribuían el #126 al T0 y unas anotaciones sin medir a tres jobs (una parada). De Claude Code: N4 generalizó a los 21 servicios desde uno, y E8 lo copió; se midió antes de escribir los documentos (una parada). Instancia de la norma 16; no nace norma.
   SUITES. Java y TypeScript sin tocar en S245: las cifras son las del registro de S243 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3), y `tests` #127 está en verde sin que se lean sus recuentos (el log da 403). Python 325: 284 de `tools/carga-centro`, 9 de `tools/base-partida` y 32 de `tools/doc-tecnica`. Bundle sin compilar: `app/` sin cambios en S245; 651,97 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 52 líneas del commit de cierre sin índice, 2 350 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 246 — O-doc-tecnica (transversal), C-construir-probar-publicar: **EL GENERADOR DE LA REFERENCIA DEL SOLVER, VERSIONADO CON TESTS; CONSTRUIR, PROBAR, PUBLICAR Y ARTEFACTOS GENERADOS EN DOCS/TECNICA, CON LAS ÓRDENES VERIFICADAS EN UN CLON LIMPIO; O-DOC-TECNICA EN 3 DE 7, O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo, sin fecha con el centro (CY). Material en `/home/luis/educhronos-aceptacion/s246/` (t0, t1, c1, fa, fb, fc, fk y cierre).
+  HECHO. T0 y T1 de solo lectura: `tests` #128 en verde sobre `0b6b1f2`; en un clon limpio, las órdenes de la CI y las de las dos suites de Python locales reproducen las seis suites y `s201/cierre/b2-generar-referencia.py` reproduce byte a byte `docs/referencia-codigo-solver.md`. Contrato con contraste (`s246/c1`) y enmiendas 1 y 2. Fase A: `tools/referencia-solver/generar_referencia.py`, con 12 tests (`30b8d67`); M3: 7 mutantes, todos muertos. Fase B: `construir.md`, `probar.md`, `publicar.md` y `generados.md` en `docs/tecnica/`, con `README.md` y `mapa.md` al día (`4e7336a`); 369 rutas, 0 rotas. Fase C: en un clon limpio, los 11 bloques de órdenes salen con 0 y dan el conteo exacto.
+  CRITERIO. `O-doc-tecnica` en 3 de 7 (condiciones 2, 3 y 6); la 1 cubre cinco de los seis temas y la 7 avanza sin cumplirse. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: DV (la lista de artefactos de la condición 6 es cerrada), DW (M4 de `metodo.md`: se regenera la referencia si se toca `solver/src`) y DX (punto 4 de M-doc: sin trailer Co-Authored-By). Del arquitecto, catorce, en `s246/cierre/c1/decisiones.txt`.
+  DEUDA. Ninguna nace ni se salda. Nota en `D-python-sin-ci`: la suite nueva también corre solo en local.
+  DEFECTOS. Del arquitecto, sin coste: diez afirmaciones sin marca en el contrato (una falsa) y cuatro citas que no sostenían lo afirmado, cazadas por el contraste; el guion de las fases no decía «sin Co-Authored-By» (amend antes del push); las citas al script nuevo se dieron sin volcar cuánto lo movía el docstring (cazadas en la revisión); un `-A 25` cortó un bloque en el T0. Con coste, en el cierre: una afirmación de forma sin marca y falsa (cinco barras en una fila de cuatro), una parada. De Claude Code, sin coste: tres citas de la fase B que no sostenían lo afirmado, corregidas en la enmienda 2, y un `cd` fuera de guion en el T0. Defectos distintos: el disparador no salta.
+  SUITES. Sin código de la aplicación: solver 162, app 965, vitest 853 en 69 ficheros, e2e 3, medidos en el clon de la fase C. Python 337: 284 de `tools/carga-centro`, 9 de `tools/base-partida`, 32 de `tools/doc-tecnica` y 12 de `tools/referencia-solver`. Bundle sin compilar: `app/` sin cambios; 651,97 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 61 líneas del commit de cierre sin índice, 2 980 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
