@@ -457,6 +457,28 @@ class MovimientoInstanciaEndpointTest {
     }
 
     /**
+     * (S250, C-asignatura-con-nivel) El cuerpo del 200 da el código CORTO de una asignatura con
+     * nivel, como la proyección: MAT pasa al nivel 1ESO, su código es {@code MAT-1ESO} y la
+     * instancia movida sale con {@code MAT}.
+     */
+    @Test
+    void elCuerpoDel200DaElCodigoCortoDeUnaAsignaturaConNivel() throws Exception {
+        poblar();
+        Asignatura mat = asignaturaRepository.findByCodigo("MAT").orElseThrow();
+        mat.actualizar("MAT", "Matematicas", nivelRepository.findByCodigo("1ESO").orElseThrow());
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(asignaturaRepository.findByCodigo("MAT-1ESO")).as("precondición: con nivel").isPresent();
+
+        mockMvc.perform(put("/api/horarios/" + horarioId + "/instancias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(MAT, 1, 2, 2)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].asignaturaCodigo").value("MAT"));
+    }
+
+    /**
      * El cuerpo del 200 lleva la DURACIÓN de la instancia (S170, C-exportacion-bloques F2),
      * y es el mismo que la proyección da para esa instancia: {@code releerInstancia} y
      * {@code proyectar} tienen que rellenarla igual. La instancia es un bloque de DOS

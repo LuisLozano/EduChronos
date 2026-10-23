@@ -2,6 +2,7 @@ package es.yaroki.educhronos.app.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,6 +45,7 @@ class NivelEndpointTest {
     @Autowired private NivelService service;
     @Autowired private NivelRepository nivelRepository;
     @Autowired private GrupoAdministrativoRepository grupoRepository;
+    @Autowired private AsignaturaRepository asignaturaRepository;
     @Autowired private TestEntityManager entityManager;
 
     private MockMvc mockMvc;
@@ -202,6 +204,81 @@ class NivelEndpointTest {
         assertThat(error).isNotNull();
         assertThat(error.getReferencias())
                 .containsExactly(new Referencia("grupo(s)", 1L));
+    }
+
+    // ───────────────────────────────────────── asignaturas del nivel (S250, C-asignatura-con-nivel)
+
+    /**
+     * Renombrar un nivel recompone el código de SUS asignaturas, y solo el de esas: la de otro
+     * nivel y la que no tiene nivel se quedan como estaban. Se relee de la base tras vaciar la
+     * sesión, para que el aserto sea sobre lo escrito y no sobre la entidad en memoria.
+     */
+    @Test
+    void edicion_renombrarRecomponeLasAsignaturasDelNivel() throws Exception {
+        Nivel primero = nivelRepository.save(new Nivel("1ESO", 1));
+        Nivel segundo = nivelRepository.save(new Nivel("2ESO", 2));
+        asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", primero));
+        asignaturaRepository.save(new Asignatura("LCL", "Lengua", primero));
+        asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", segundo));
+        asignaturaRepository.save(new Asignatura("RED", "Reunión"));
+        entityManager.flush();
+
+        mockMvc.perform(put("/api/niveles/" + primero.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("ESO1", 1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("ESO1"));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(asignaturaRepository.findAll().stream().map(Asignatura::getCodigo).sorted().toList())
+                .containsExactly("LCL-ESO1", "Mat-2ESO", "Mat-ESO1", "RED");
+    }
+
+    /**
+     * Si un código recompuesto iguala el de una asignatura de otro nivel o sin nivel, 400 que lo
+     * nombra, y no cambia nada: ni el nivel ni ninguna asignatura.
+     */
+    @Test
+    void edicion_renombrarConChoque_400SinCambios() throws Exception {
+        Nivel nivel = nivelRepository.save(new Nivel("1ESO", 1));
+        asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", nivel));
+        asignaturaRepository.save(new Asignatura("LCL", "Lengua", nivel));
+        asignaturaRepository.save(new Asignatura("Mat-ESO1", "Sin nivel, con guion"));
+        entityManager.flush();
+
+        mockMvc.perform(put("/api/niveles/" + nivel.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("ESO1", 1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Mat-ESO1")));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(nivelRepository.findById(nivel.getId()).orElseThrow().getCodigo()).isEqualTo("1ESO");
+        assertThat(asignaturaRepository.findAll().stream().map(Asignatura::getCodigo).sorted().toList())
+                .containsExactly("LCL-1ESO", "Mat-1ESO", "Mat-ESO1");
+    }
+
+    /** Un nivel con asignaturas no se borra: 409 que cuenta y nombra sus asignaturas, ordenadas. */
+    @Test
+    void borrado_nivelConAsignaturas_409QueLasNombra() throws Exception {
+        nivelRepository.save(new Nivel("RELLENO", 99));   // desalinea ids, como en el caso de grupos
+        Nivel nivel = nivelRepository.save(new Nivel("1ESO", 1));
+        asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", nivel));
+        asignaturaRepository.save(new Asignatura("LCL", "Lengua", nivel));
+        asignaturaRepository.save(new Asignatura("RED", "Reunión"));
+        entityManager.flush();
+
+        mockMvc.perform(delete("/api/niveles/" + nivel.getId()))
+                .andExpect(status().isConflict());
+
+        ReferenciaEntranteException error = catchThrowableOfType(
+                () -> service.borrar(nivel.getId()), ReferenciaEntranteException.class);
+        assertThat(error).isNotNull();
+        assertThat(error.getReferencias()).containsExactly(new Referencia("asignatura(s)", 2L));
+        assertThat(error.getMessage()).contains("Asignaturas: LCL-1ESO, Mat-1ESO");
+        assertThat(nivelRepository.findById(nivel.getId())).as("el nivel sigue").isPresent();
     }
 
     @Test

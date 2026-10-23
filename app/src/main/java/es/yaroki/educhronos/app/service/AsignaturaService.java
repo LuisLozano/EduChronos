@@ -8,6 +8,8 @@ import es.yaroki.educhronos.app.catalog.AsignaturaAulaRepository;
 import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Aula;
 import es.yaroki.educhronos.app.catalog.AulaRepository;
+import es.yaroki.educhronos.app.catalog.Nivel;
+import es.yaroki.educhronos.app.catalog.NivelRepository;
 import es.yaroki.educhronos.app.catalog.RolAulaAsignatura;
 import es.yaroki.educhronos.app.catalog.TipoAula;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Nombrados;
@@ -37,11 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
  * espejo que reflejar, a diferencia del alta de bloqueos):
  *
  * <ul>
- *   <li>(a) {@code codigo} no nulo ni en blanco;
+ *   <li>(a) {@code codigoCorto} no nulo ni en blanco;
  *   <li>(b) {@code nombreCompleto} no nulo ni en blanco;
- *   <li>(c) unicidad de {@code codigo}: en el alta, ningún otro registro con ese
- *       código; en la edición, ninguno SALVO la propia entidad (una asignatura
- *       puede reguardarse con su mismo código).
+ *   <li>(c) unicidad del código COMPUESTO ({@link Asignatura#componerCodigo}): en el alta,
+ *       ningún otro registro con ese código; en la edición, ninguno SALVO la propia entidad
+ *       (una asignatura puede reguardarse con su mismo código);
+ *   <li>(d) {@code nivel}, si viene, es el código de un nivel que existe (S250).
  * </ul>
  *
  * <p><b>Dos familias de excepción, dos códigos HTTP.</b> "No encontrado"
@@ -61,15 +64,18 @@ public class AsignaturaService {
     private final AsignaturaAulaCompatibleRepository compatibilidadRepositorio;
     private final AsignaturaAulaRepository aulasRepositorio;
     private final AulaRepository aulaRepositorio;
+    private final NivelRepository nivelRepositorio;
 
     public AsignaturaService(AsignaturaRepository repositorio,
             AsignaturaAulaCompatibleRepository compatibilidadRepositorio,
             AsignaturaAulaRepository aulasRepositorio,
-            AulaRepository aulaRepositorio) {
+            AulaRepository aulaRepositorio,
+            NivelRepository nivelRepositorio) {
         this.repositorio = repositorio;
         this.compatibilidadRepositorio = compatibilidadRepositorio;
         this.aulasRepositorio = aulasRepositorio;
         this.aulaRepositorio = aulaRepositorio;
+        this.nivelRepositorio = nivelRepositorio;
     }
 
     /** Todas las asignaturas como {@link AsignaturaDTO}, ORDENADAS por código. */
@@ -91,38 +97,40 @@ public class AsignaturaService {
 
     /**
      * Da de alta una asignatura. {@link IllegalArgumentException} (→ 400) si falla
-     * la validación (a)/(b) o si ya existe otra con el mismo código (c).
+     * la validación (a)/(b)/(d) o si ya existe otra con el mismo código compuesto (c).
      */
     @Transactional
     public AsignaturaDTO crear(AsignaturaRequest peticion) {
         validar(peticion);
-        repositorio.findByCodigo(peticion.codigo()).ifPresent(existente -> {
-            throw new IllegalArgumentException(
-                    "Ya existe una asignatura con codigo " + peticion.codigo());
+        Nivel nivel = resolverNivel(peticion.nivel());
+        String codigo = codigoDe(peticion, nivel);
+        repositorio.findByCodigo(codigo).ifPresent(existente -> {
+            throw new IllegalArgumentException("Ya existe una asignatura con codigo " + codigo);
         });
-        Asignatura guardada =
-                repositorio.save(new Asignatura(peticion.codigo(), peticion.nombreCompleto()));
+        Asignatura guardada = repositorio.save(
+                new Asignatura(peticion.codigoCorto(), peticion.nombreCompleto(), nivel));
         return aDTO(guardada);
     }
 
     /**
      * Edita una asignatura existente. {@link NoSuchElementException} (→ 404) si el id
-     * no existe; {@link IllegalArgumentException} (→ 400) si falla la validación (a)/(b)
-     * o si el código pisa al de OTRA asignatura (c). Reguardar la propia entidad con su
-     * mismo código es válido: la unicidad se excluye a sí misma por id.
+     * no existe; {@link IllegalArgumentException} (→ 400) si falla la validación (a)/(b)/(d)
+     * o si el código compuesto pisa al de OTRA asignatura (c). Reguardar la propia entidad con
+     * su mismo código es válido: la unicidad se excluye a sí misma por id.
      */
     @Transactional
     public AsignaturaDTO editar(Long id, AsignaturaRequest peticion) {
         Asignatura entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe asignatura con id " + id));
         validar(peticion);
-        repositorio.findByCodigo(peticion.codigo())
+        Nivel nivel = resolverNivel(peticion.nivel());
+        String codigo = codigoDe(peticion, nivel);
+        repositorio.findByCodigo(codigo)
                 .filter(otra -> !otra.getId().equals(id))
                 .ifPresent(otra -> {
-                    throw new IllegalArgumentException(
-                            "Ya existe otra asignatura con codigo " + peticion.codigo());
+                    throw new IllegalArgumentException("Ya existe otra asignatura con codigo " + codigo);
                 });
-        entidad.actualizar(peticion.codigo(), peticion.nombreCompleto());
+        entidad.actualizar(peticion.codigoCorto(), peticion.nombreCompleto(), nivel);
         return aDTO(entidad);
     }
 
@@ -325,19 +333,35 @@ public class AsignaturaService {
         }
     }
 
-    /** Reglas (a) y (b): código y nombre no nulos ni en blanco. */
+    /** Reglas (a) y (b): código corto y nombre no nulos ni en blanco. */
     private static void validar(AsignaturaRequest peticion) {
         Objects.requireNonNull(peticion, "peticion no puede ser null");
-        if (peticion.codigo() == null || peticion.codigo().isBlank()) {
-            throw new IllegalArgumentException("codigo es obligatorio");
+        if (peticion.codigoCorto() == null || peticion.codigoCorto().isBlank()) {
+            throw new IllegalArgumentException("codigoCorto es obligatorio");
         }
         if (peticion.nombreCompleto() == null || peticion.nombreCompleto().isBlank()) {
             throw new IllegalArgumentException("nombreCompleto es obligatorio");
         }
     }
 
+    /** Regla (d): sin nivel (null o en blanco) es {@code null}; con él, tiene que existir. */
+    private Nivel resolverNivel(String codigo) {
+        if (codigo == null || codigo.isBlank()) {
+            return null;
+        }
+        return nivelRepositorio.findByCodigo(codigo)
+                .orElseThrow(() -> new IllegalArgumentException("No existe nivel con codigo " + codigo));
+    }
+
+    /** El código compuesto que tendrá la asignatura pedida: el de la regla (c). */
+    private static String codigoDe(AsignaturaRequest peticion, Nivel nivel) {
+        return Asignatura.componerCodigo(peticion.codigoCorto(), nivel == null ? null : nivel.getCodigo());
+    }
+
     private static AsignaturaDTO aDTO(Asignatura asignatura) {
+        Nivel nivel = asignatura.getNivel();
         return new AsignaturaDTO(
-                asignatura.getId(), asignatura.getCodigo(), asignatura.getNombreCompleto());
+                asignatura.getId(), asignatura.getCodigo(), asignatura.getCodigoCorto(),
+                asignatura.getNombreCompleto(), nivel == null ? null : nivel.getCodigo());
     }
 }

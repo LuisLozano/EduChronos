@@ -46,6 +46,7 @@ class AsignaturaEndpointTest {
     @Autowired private AulaRepository aulaRepository;
     @Autowired private AsignaturaRepository asignaturas;
     @Autowired private ActividadRepository actividades;
+    @Autowired private NivelRepository niveles;
 
     private MockMvc mockMvc;
 
@@ -80,6 +81,95 @@ class AsignaturaEndpointTest {
     void getPorId_inexistente_404() throws Exception {
         mockMvc.perform(get("/api/asignaturas/9999"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ───────────────────────────────────────── código corto y nivel (S250, C-asignatura-con-nivel)
+
+    /** Con nivel, el código es el corto, un guion y el código del nivel; corto y nivel van aparte. */
+    @Test
+    void alta_conNivel_componeElCodigo() throws Exception {
+        niveles.save(new Nivel("3ESO", 3));
+
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Biol", "Biología y Geología", "3ESO")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.codigo").value("Biol-3ESO"))
+                .andExpect(jsonPath("$.codigoCorto").value("Biol"))
+                .andExpect(jsonPath("$.nivel").value("3ESO"))
+                .andExpect(jsonPath("$.nombreCompleto").value("Biología y Geología"));
+        assertThat(asignaturas.findByCodigo("Biol-3ESO")).as("persistida con el compuesto").isPresent();
+    }
+
+    /** Sin nivel, el código es el corto y el nivel viaja como null. */
+    @Test
+    void alta_sinNivel_conservaElCodigo() throws Exception {
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("RED", "Reunión de departamento")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.codigo").value("RED"))
+                .andExpect(jsonPath("$.codigoCorto").value("RED"))
+                .andExpect(jsonPath("$.nivel").doesNotExist());
+    }
+
+    @Test
+    void alta_nivelDesconocido_400QueLoNombra() throws Exception {
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Biol", "Biología", "9ESO")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("9ESO")));
+        assertThat(asignaturas.count()).as("no se crea nada").isZero();
+    }
+
+    /**
+     * La unicidad es la del código COMPUESTO: el mismo corto vale en otro nivel, y no vale en el
+     * mismo nivel ni cuando el compuesto iguala el código de una asignatura sin nivel.
+     */
+    @Test
+    void alta_unicidadSobreElCompuesto() throws Exception {
+        niveles.save(new Nivel("1ESO", 1));
+        niveles.save(new Nivel("2ESO", 2));
+        crear("Mat", "Matemáticas", "1ESO");
+
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Mat", "Matemáticas", "2ESO")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.codigo").value("Mat-2ESO"));
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Mat", "Otra", "1ESO")))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Mat-1ESO")));
+        mockMvc.perform(post("/api/asignaturas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Mat-1ESO", "Sin nivel")))
+                .andExpect(status().isBadRequest());
+        assertThat(asignaturas.count()).isEqualTo(2);
+    }
+
+    /** Cambiar el nivel de una asignatura recompone su código; quitárselo lo deja en el corto. */
+    @Test
+    void edicion_cambiarElNivel_recomponeElCodigo() throws Exception {
+        niveles.save(new Nivel("1ESO", 1));
+        niveles.save(new Nivel("2ESO", 2));
+        long id = crear("Mat", "Matemáticas", "1ESO");
+
+        mockMvc.perform(put("/api/asignaturas/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Mat", "Matemáticas", "2ESO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("Mat-2ESO"))
+                .andExpect(jsonPath("$.nivel").value("2ESO"));
+        mockMvc.perform(put("/api/asignaturas/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("Mates", "Matemáticas", null)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("Mates"))
+                .andExpect(jsonPath("$.codigoCorto").value("Mates"))
+                .andExpect(jsonPath("$.nivel").doesNotExist());
     }
 
     @Test
@@ -540,17 +630,31 @@ class AsignaturaEndpointTest {
 
     /** Da de alta por la red y devuelve el id sintético asignado. */
     private long crear(String codigo, String nombre) throws Exception {
+        return crear(codigo, nombre, null);
+    }
+
+    /** Como el de arriba, con el nivel como código o null. */
+    private long crear(String codigoCorto, String nombre, String nivel) throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/asignaturas")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body(codigo, nombre)))
+                        .content(body(codigoCorto, nombre, nivel)))
                 .andExpect(status().isCreated())
                 .andReturn();
         Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
         return id.longValue();
     }
 
-    /** {@code {"codigo":..,"nombreCompleto":..}} */
-    private static String body(String codigo, String nombreCompleto) {
-        return "{\"codigo\":\"" + codigo + "\",\"nombreCompleto\":\"" + nombreCompleto + "\"}";
+    /**
+     * {@code {"codigoCorto":..,"nombreCompleto":..,"nivel":null}}: sin nivel, el código de la
+     * asignatura es el corto, así que los casos de antes de S250 dicen lo mismo que decían.
+     */
+    private static String body(String codigoCorto, String nombreCompleto) {
+        return body(codigoCorto, nombreCompleto, null);
+    }
+
+    /** {@code {"codigoCorto":..,"nombreCompleto":..,"nivel":..}}, con el nivel como código o null. */
+    private static String body(String codigoCorto, String nombreCompleto, String nivel) {
+        return "{\"codigoCorto\":\"" + codigoCorto + "\",\"nombreCompleto\":\"" + nombreCompleto
+                + "\",\"nivel\":" + (nivel == null ? "null" : "\"" + nivel + "\"") + "}";
     }
 }

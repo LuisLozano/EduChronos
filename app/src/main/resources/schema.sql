@@ -8,10 +8,10 @@
 -- CREATE TABLE es el DDL que Hibernate genera VERBATIM (schema-generation.scripts
 -- con el community SQLiteDialect 7.4.1); lo ÚNICO añadido son las FK inline (35 en S213),
 -- que el dialecto NO emite (de ahí que hasta 8.5-C1 no hubiera integridad real).
--- Desde las migraciones (S201, S203, S206, S212, S219, S220), las columnas añadidas con ADD COLUMN se
+-- Desde las migraciones (S201, S203, S206, S212, S219, S220, S250), las columnas añadidas con ADD COLUMN se
 -- escriben aquí tal como las deja SQLite tras la migración, para que una base nueva y
--- una migrada tengan el mismo sqlite_master: grupo_administrativo.aula_referencia_id
--- lleva su FK en la columna, no al final.
+-- una migrada tengan el mismo sqlite_master: grupo_administrativo.aula_referencia_id y
+-- asignatura.nivel_id llevan su FK en la columna, no al final.
 --
 -- SQLite no soporta ALTER TABLE ADD CONSTRAINT: las FK van DENTRO del CREATE.
 -- La integridad requiere ADEMÁS el pragma foreign_keys=ON por conexión, que lo
@@ -39,7 +39,7 @@
 -- esquema/001.sql no se toca nunca: es lo que reciben las bases sin número.
 
 create table if not exists actividad (duracion_tramos integer not null, repeticiones_por_semana integer not null, requiere_tutor boolean not null, asignatura_id bigint, id integer, codigo varchar(255) not null unique, patron_temporal varchar(255) not null check ((patron_temporal in ('DISTRIBUIDA','AGRUPADA','NEUTRA'))), tipo varchar(255) not null default 'CLASE' check ((tipo in ('CLASE','REUNION','FUNCION'))), primary key (id), foreign key (asignatura_id) references asignatura(id));
-create table if not exists asignatura (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, primary key (id));
+create table if not exists asignatura (id integer, codigo varchar(255) not null unique, nombre_completo varchar(255) not null, codigo_corto varchar(255), nivel_id integer references nivel(id), primary key (id));
 create table if not exists asignatura_aula (asignatura_id bigint not null, aula_id bigint not null, rol text not null check ((rol in ('EXCLUSIVA','PREFERIDA'))), primary key (asignatura_id, aula_id), foreign key (asignatura_id) references asignatura(id) on delete cascade, foreign key (aula_id) references aula(id));
 create table if not exists asignatura_aula_compatible (asignatura_id bigint not null, id integer, tipo_aula varchar(255) not null check ((tipo_aula in ('ORDINARIA','LAB_CIENCIAS','INFORMATICA','TALLER_TEC','TALLER_PLASTICA','GIMNASIO','PISTA','TALLER_FPB','COMUN'))), primary key (id), foreign key (asignatura_id) references asignatura(id) on delete cascade);
 create table if not exists aula (capacidad integer, planta integer, id integer, codigo varchar(255) not null unique, edificio varchar(255), sector varchar(255), tipo varchar(255) not null check ((tipo in ('ORDINARIA','LAB_CIENCIAS','INFORMATICA','TALLER_TEC','TALLER_PLASTICA','GIMNASIO','PISTA','TALLER_FPB','COMUN'))), en_uso integer not null default 1, primary key (id));

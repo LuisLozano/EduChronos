@@ -572,7 +572,8 @@ public class MovimientoInstanciaService {
             salida.add(new SesionVistaDTO(
                     sesion.getId(), sesion.getIndice(), tramo.getDia().ordinal() + 1, ordenTramo,
                     sesion.getPlaza().getActividad().getDuracionTramos(),
-                    asignatura.getCodigo(), asignatura.getNombreCompleto(),
+                    // El código CORTO (S250), como en proyectar.
+                    asignatura.getCodigoCorto(), asignatura.getNombreCompleto(),
                     plaza.getProfesores().stream().map(p -> p.getCodigo()).sorted().toList(),
                     sesion.getAula() == null ? null : sesion.getAula().getCodigo(),
                     plaza.getSubgrupos().stream().map(sg -> sg.getCodigo()).sorted().toList(),

@@ -697,7 +697,8 @@ public class GeneradorHorarioService {
             sesiones.add(new SesionVistaDTO(
                     sesion.getId(), sesion.getIndice(), posicion.dia(), posicion.tramo(),
                     sesion.getPlaza().getActividad().getDuracionTramos(),
-                    asignatura.getCodigo(), asignatura.getNombreCompleto(),
+                    // El código CORTO (S250): la rejilla y la exportación no enseñan el nivel.
+                    asignatura.getCodigoCorto(), asignatura.getNombreCompleto(),
                     profesores, sesion.getAula() == null ? null : sesion.getAula().getCodigo(),
                     subgrupos, grupos,
                     plaza.getActividad().getCodigo(), plaza.getCodigo()));

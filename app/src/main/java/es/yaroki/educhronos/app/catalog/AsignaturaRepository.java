@@ -32,4 +32,10 @@ public interface AsignaturaRepository extends JpaRepository<Asignatura, Long> {
     /** Códigos de esas plazas, sin orden (S225). */
     @Query(value = "select codigo from plaza where asignatura_id = :id", nativeQuery = true)
     List<String> codigosDePlazas(@Param("id") Long id);
+
+    /**
+     * Las asignaturas de un nivel (S250): las que {@code NivelService} recompone al renombrarlo y
+     * las que impiden borrarlo.
+     */
+    List<Asignatura> findByNivelId(Long nivelId);
 }

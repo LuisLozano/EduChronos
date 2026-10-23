@@ -418,23 +418,24 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S206, S212, S213, S219, S220) Una base de la versión 0, 1, 3, 4, 5, 6 o 7 CON DATOS en todas las
-     * tablas de la 1 llega a la 8 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con dos
-     * profesores y, para la 3 en adelante, se le pasan {@code 002.sql} y {@code 003.sql} reales (y
-     * {@code 004.sql} desde la 4, con una fila en {@code asignatura_aula}, {@code 005.sql} desde la 5 y
-     * {@code 006.sql} desde la 6 y {@code 007.sql} para la 7) antes de sellarla. {@code 004.sql} añade el
+     * (S206, S212, S213, S219, S220, S250) Una base de la versión 0, 1, 3, 4, 5, 6, 7 u 8 CON DATOS en todas
+     * las tablas de la 1 llega a la 9 sin perder nada. La base se levanta con {@code 001.sql}, se puebla con
+     * dos profesores y, para la 3 en adelante, se le pasan {@code 002.sql} y {@code 003.sql} reales (y
+     * {@code 004.sql} desde la 4, con una fila en {@code asignatura_aula}, {@code 005.sql} desde la 5,
+     * {@code 006.sql} desde la 6, {@code 007.sql} desde la 7 y {@code 008.sql} para la 8) antes de sellarla. {@code 004.sql} añade el
      * aula de referencia del grupo, los alumnos del subgrupo, el aula en uso, la tabla
      * {@code asignatura_aula} y las cuatro únicas; {@code 005.sql}, las guardias ordinarias del
      * profesor; {@code 006.sql}, la tabla {@code guardia}; {@code 007.sql}, las guardias de recreo del
-     * profesor; {@code 008.sql}, el tipo de la guardia. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
+     * profesor; {@code 008.sql}, el tipo de la guardia; {@code 009.sql}, el código corto y el nivel de la
+     * asignatura, que aquí es de un solo nivel y no se parte. Cada tabla conserva sus filas, todas las aulas quedan en uso, las columnas nuevas
      * nulas, {@code asignatura_aula} como estaba, los cuatro índices únicos presentes, las columnas
      * {@code guardias_ordinarias} y {@code guardias_recreo} a 0 en cada profesor, {@code guardia} vacía
      * y con su única, y el esquema IGUAL al de una base nueva. Las de la versión 6 y 7 ya traen la tabla
      * {@code guardia}, vacía: es la única tabla que la precondición deja vacía.
      */
     @ParameterizedTest(name = "desde la versión {0}")
-    @ValueSource(ints = {0, 1, 3, 4, 5, 6, 7})
-    void unaBaseConDatosLlegaALa8SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
+    @ValueSource(ints = {0, 1, 3, 4, 5, 6, 7, 8})
+    void unaBaseConDatosLlegaALa9SinPerderNada(int desde, @TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v" + desde + ".db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
@@ -451,8 +452,11 @@ class PreparadorEsquemaTest {
                 if (desde >= 6) {
                     ScriptUtils.executeSqlScript(conexion, migracionReal(6));
                 }
-                if (desde == 7) {
+                if (desde >= 7) {
                     ScriptUtils.executeSqlScript(conexion, migracionReal(7));
+                }
+                if (desde == 8) {
+                    ScriptUtils.executeSqlScript(conexion, migracionReal(8));
                 }
             }
         }
@@ -476,13 +480,13 @@ class PreparadorEsquemaTest {
                 .containsExactly(desde >= 5 ? "1" : "0");
         assertThat(consulta(base, "select count(*) from pragma_table_info('profesor')"
                         + " where name = 'guardias_recreo'"))
-                .as("precondición: con la columna de guardias de recreo solo en la 7")
-                .containsExactly(desde == 7 ? "1" : "0");
+                .as("precondición: con la columna de guardias de recreo solo desde la 7")
+                .containsExactly(desde >= 7 ? "1" : "0");
         if (desde < 6) {
             assertThat(tablas).as("precondición: sin la tabla de guardias").doesNotContain("guardia");
         }
         assertThat(filasAntes)
-                .as("precondición: ninguna tabla vacía, salvo guardia en la 6 y la 7")
+                .as("precondición: ninguna tabla vacía, salvo guardia desde la 6")
                 .noneMatch(f -> f.endsWith("=0") && !(desde >= 6 && f.equals("guardia=0")));
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
         Path vacia = carpeta.resolve("vacia.db");
@@ -490,7 +494,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(8);
+        assertThat(version(base)).isEqualTo(9);
         assertThat(maestro(base)).as("sqlite_master, el de una base nueva").isEqualTo(maestro(vacia));
         List<String> filasDespues = new ArrayList<>();
         for (String tabla : tablas) {
@@ -522,16 +526,19 @@ class PreparadorEsquemaTest {
                 .contains("uk_asignatura_aula_compatible_asignatura_tipo");
         assertThat(BancoDeCursos.filas(base, "guardia")).as("guardia, vacía").isZero();
         assertThat(indicesUnicos(base, "guardia")).contains("uk_guardia_horario_profesor_tramo");
+        assertThat(consulta(base, "select codigo || '|' || codigo_corto || '|' || nivel_id from asignatura"))
+                .as("BIO, de un solo nivel, con su nivel y el código compuesto")
+                .containsExactly("BIO-ESO3|BIO|1");
         assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
     }
 
     /**
      * (S219, T-f) Una base de la versión 6 con profesores que ya tienen guardias ordinarias llega a la
-     * vigente (la 8 desde S220) con las guardias de recreo a 0 en todas las filas y las ordinarias intactas: 3 y 0, no 0 y 0,
+     * vigente (la 9 desde S250) con las guardias de recreo a 0 en todas las filas y las ordinarias intactas: 3 y 0, no 0 y 0,
      * para que un {@code 007.sql} que reescribiera la columna vecina caiga.
      */
     @Test
-    void unaBaseDeLa6ConGuardiasLlegaALa8ConLasDeRecreoACero(@TempDir Path carpeta) throws Exception {
+    void unaBaseDeLa6ConGuardiasLlegaALa9ConLasDeRecreoACero(@TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v6.db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
@@ -545,7 +552,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(8);
+        assertThat(version(base)).isEqualTo(9);
         assertThat(consulta(base, "select codigo || '|' || guardias_ordinarias || '|' || guardias_recreo"
                         + " from profesor order by id"))
                 .as("ordinarias intactas y de recreo a 0")
@@ -553,12 +560,12 @@ class PreparadorEsquemaTest {
     }
 
     /**
-     * (S220) Una base de la versión 7 con guardias repartidas llega a la 8 con todas ellas como
+     * (S220) Una base de la versión 7 con guardias repartidas llega a la vigente (la 9 desde S250) con todas ellas como
      * ORDINARIA, que es lo que eran: un {@code 008.sql} con otro valor por defecto caería aquí. Y el
      * {@code check} de la columna nueva rechaza un tipo que no es de los tres.
      */
     @Test
-    void unaBaseDeLa7ConGuardiasLlegaALa8ConTodasOrdinarias(@TempDir Path carpeta) throws Exception {
+    void unaBaseDeLa7ConGuardiasLlegaALa9ConTodasOrdinarias(@TempDir Path carpeta) throws Exception {
         Path base = BancoDeCursos.fabricarHistorica(carpeta.resolve("v7.db"), "2025/2026", false);
         poblarTodasLasTablasDeLaVersion1(base);
         ejecutar(base, "insert into profesor (id, codigo, nombre_completo) values (2, 'LEN1', 'Dos')");
@@ -575,7 +582,7 @@ class PreparadorEsquemaTest {
 
         real().preparar(origen(base));
 
-        assertThat(version(base)).isEqualTo(8);
+        assertThat(version(base)).isEqualTo(9);
         assertThat(consulta(base, "select profesor_id || '|' || tramo_id || '|' || tipo from guardia order by id"))
                 .as("las dos guardias, intactas y ORDINARIA")
                 .containsExactly("1|1|ORDINARIA", "2|2|ORDINARIA");
@@ -610,7 +617,215 @@ class PreparadorEsquemaTest {
         assertThat(BancoDeCursos.filas(base, "guardia")).isOne();
     }
 
+    // ──────────────────────────────── esquema 9: asignaturas partidas por nivel (S250)
+
+    /**
+     * (S250, b) BIO tiene dos plazas de A1 y una de B2 (más una mezclada y una sin subgrupos, que
+     * no cuentan): la principal es A1 y conserva el id 1; nace una fila de B2. Las dos llevan el
+     * código compuesto y el mismo corto y nombre.
+     */
+    @Test
+    void partir_laPrincipalEsElNivelConMasPlazasYConservaElId(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select (id = 1), codigo, codigo_corto, nombre_completo, nivel_id"
+                        + " from asignatura where codigo_corto = 'BIO' order by id"))
+                .containsExactly("1|BIO-A1|BIO|Biología|1", "0|BIO-B2|BIO|Biología|2");
+        assertThat(version(base)).isEqualTo(9);
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("ningún huérfano").isEmpty();
+    }
+
+    /**
+     * (S250, c) Cada plaza pasa a la parte de su nivel; la mezclada (A1 y B2) y la que no tiene
+     * subgrupos se quedan en la principal. Las de las demás asignaturas, en la suya.
+     */
+    @Test
+    void partir_cadaPlazaEnLaParteDeSuNivel(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select p.codigo, a.codigo from plaza p"
+                        + " join asignatura a on a.id = p.asignatura_id order by p.id"))
+                .containsExactly(
+                        "BIO-A-P1|BIO-A1", "BIO-A-P2|BIO-A1", "BIO-B-P1|BIO-B2",
+                        "BIO-X-P1|BIO-A1", "BIO-X-P2|BIO-A1",
+                        "TEC-B-P1|TEC-B2", "TEC-C-P1|TEC-C0", "GUA-1-P1|GUA", "LAT-A-P1|LAT-A1");
+    }
+
+    /**
+     * (S250, d) Una actividad de un solo nivel pasa a la parte de ese nivel (BIO-B, TEC-B); la que
+     * no tiene nivel —su plaza mezclada no cuenta y la otra no tiene subgrupos— se queda en la
+     * principal (BIO-X).
+     */
+    @Test
+    void partir_cadaActividadDeUnNivelEnSuParte(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select ac.codigo, a.codigo from actividad ac"
+                        + " join asignatura a on a.id = ac.asignatura_id order by ac.id"))
+                .containsExactly(
+                        "BIO-A|BIO-A1", "BIO-B|BIO-B2", "BIO-X|BIO-A1",
+                        "TEC-B|TEC-B2", "TEC-C|TEC-C0", "GUA-1|GUA", "LAT-A|LAT-A1");
+    }
+
+    /**
+     * (S250, e) TEC tiene una plaza de B2 (orden 2, id 2) y otra de C0 (orden 0, id 3): en el empate
+     * gana el menor orden, C0, aunque su id sea mayor. La principal (id 2) queda en C0.
+     */
+    @Test
+    void partir_enEmpateGanaElNivelDeMenorOrden(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select id, codigo, nivel_id from asignatura where codigo_corto = 'TEC' order by id"))
+                .containsExactly("2|TEC-C0|3", "7|TEC-B2|2");
+    }
+
+    /** (S250, f) Las reglas de aula de BIO, de las dos tablas, se copian a su parte nueva. */
+    @Test
+    void partir_lasReglasDeAulaSeCopianALaParteNueva(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select a.codigo, au.codigo, x.rol from asignatura_aula x"
+                        + " join asignatura a on a.id = x.asignatura_id join aula au on au.id = x.aula_id"
+                        + " order by a.codigo"))
+                .containsExactly("BIO-A1|LAB|EXCLUSIVA", "BIO-B2|LAB|EXCLUSIVA");
+        assertThat(consulta(base, "select a.codigo, x.tipo_aula from asignatura_aula_compatible x"
+                        + " join asignatura a on a.id = x.asignatura_id order by a.codigo"))
+                .containsExactly("BIO-A1|LAB_CIENCIAS", "BIO-B2|LAB_CIENCIAS");
+    }
+
+    /**
+     * (S250, g y h) GUA solo tiene plazas sin subgrupos y SOLA no tiene plazas: las dos se quedan
+     * sin nivel y con su código. LAT es de un solo nivel: gana el nivel y el código compuesto, y
+     * no se parte. No nace ninguna fila más que las dos partes nuevas.
+     */
+    @Test
+    void partir_sinPartesSeQuedaSinNivelYDeUnNivelSeCompone(@TempDir Path carpeta) throws Exception {
+        Path base = basePartible(carpeta);
+
+        real().preparar(origen(base));
+
+        assertThat(consulta(base, "select codigo, codigo_corto, nivel_id from asignatura"
+                        + " where codigo_corto in ('GUA', 'SOLA', 'LAT') order by id"))
+                .containsExactly("GUA|GUA|null", "LAT-A1|LAT|1", "SOLA|SOLA|null");
+        assertThat(BancoDeCursos.filas(base, "asignatura")).isEqualTo(7);
+    }
+
+    /**
+     * (S250, i) Si un código compuesto choca con uno existente, la migración para sin tocar la
+     * base: sigue en la 8, con su misma huella, y el mensaje nombra la comprobación que lo vio.
+     * MAT tiene una plaza de A1 y ya existe una asignatura MAT-A1 sin nivel.
+     */
+    @Test
+    void partir_unChoqueParaLaMigracionYNoTocaLaBase(@TempDir Path carpeta) throws Exception {
+        Path base = baseEnLa8(carpeta.resolve("choque.db"));
+        ejecutar(base,
+                "insert into nivel (id, codigo, orden) values (1, 'A1', 1)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo) values (1, 'GA', 1, 'ORDINARIO')",
+                "insert into subgrupo (id, codigo) values (1, 'SA')",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (1, 1)",
+                "insert into asignatura (id, codigo, nombre_completo) values (1, 'MAT', 'Matemáticas')",
+                "insert into asignatura (id, codigo, nombre_completo) values (2, 'MAT-A1', 'Sin nivel')",
+                "insert into actividad (id, codigo, asignatura_id, duracion_tramos, repeticiones_por_semana,"
+                        + " patron_temporal, requiere_tutor) values (1, 'MAT-A', 1, 1, 1, 'NEUTRA', 0)",
+                "insert into plaza (id, codigo, actividad_id, asignatura_id) values (1, 'MAT-A-P1', 1, 1)",
+                "insert into plaza_subgrupo (plaza_id, subgrupo_id) values (1, 1)");
+        String huella = BancoDeCursos.huella(base);
+
+        assertThatThrownBy(() -> real().preparar(origen(base)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("009.sql")
+                .hasMessageContaining("codigo_con_nivel_repetido");
+
+        assertThat(version(base)).as("se queda en la 8").isEqualTo(8);
+        assertThat(BancoDeCursos.huella(base)).as("la base, intacta").isEqualTo(huella);
+    }
+
     // ─────────────────────────────────────────────────────────────── andamio
+
+    /** Una base en la 8 sin datos de catálogo: {@code 001.sql} y las migraciones reales de la 2 a la 8. */
+    private static Path baseEnLa8(Path base) throws Exception {
+        BancoDeCursos.fabricarHistorica(base, "2025/2026", false);
+        try (Connection conexion = BancoDeCursos.conectar(base)) {
+            for (int n = 2; n <= 8; n++) {
+                ScriptUtils.executeSqlScript(conexion, migracionReal(n));
+            }
+        }
+        ejecutar(base, "PRAGMA user_version = 8");
+        return base;
+    }
+
+    /**
+     * Una base en la 8 con asignaturas para partir (S250). Tres niveles: A1 (orden 1), B2 (orden 2)
+     * y C0 (orden 0, id 3, para que el desempate por orden y por id den distinto). Un grupo y un
+     * subgrupo por nivel, y SMIX en A1 y B2 a la vez.
+     * <ul>
+     *   <li>BIO: dos plazas de A1 (BIO-A), una de B2 (BIO-B), una mezclada y una sin subgrupos
+     *       (las dos de BIO-X), una regla de aula y una de tipo;
+     *   <li>TEC: una plaza de B2 (TEC-B) y una de C0 (TEC-C), empatadas;
+     *   <li>GUA: una plaza sin subgrupos; LAT: una de A1; SOLA, ninguna.
+     * </ul>
+     */
+    private static Path basePartible(Path carpeta) throws Exception {
+        Path base = baseEnLa8(carpeta.resolve("partible.db"));
+        List<String> ordenes = new ArrayList<>(List.of(
+                "insert into aula (id, codigo, tipo) values (1, 'LAB', 'LAB_CIENCIAS')",
+                "insert into nivel (id, codigo, orden) values (1, 'A1', 1)",
+                "insert into nivel (id, codigo, orden) values (2, 'B2', 2)",
+                "insert into nivel (id, codigo, orden) values (3, 'C0', 0)",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo) values (1, 'GA', 1, 'ORDINARIO')",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo) values (2, 'GB', 2, 'ORDINARIO')",
+                "insert into grupo_administrativo (id, codigo, nivel_id, tipo) values (3, 'GC', 3, 'ORDINARIO')",
+                "insert into subgrupo (id, codigo) values (1, 'SA')",
+                "insert into subgrupo (id, codigo) values (2, 'SB')",
+                "insert into subgrupo (id, codigo) values (3, 'SC')",
+                "insert into subgrupo (id, codigo) values (4, 'SMIX')",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (1, 1)",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (2, 2)",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (3, 3)",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (4, 1)",
+                "insert into subgrupo_grupo (subgrupo_id, grupo_id) values (4, 2)",
+                "insert into asignatura (id, codigo, nombre_completo) values (1, 'BIO', 'Biología')",
+                "insert into asignatura (id, codigo, nombre_completo) values (2, 'TEC', 'Tecnología')",
+                "insert into asignatura (id, codigo, nombre_completo) values (3, 'GUA', 'Guardia')",
+                "insert into asignatura (id, codigo, nombre_completo) values (4, 'LAT', 'Latín')",
+                "insert into asignatura (id, codigo, nombre_completo) values (5, 'SOLA', 'Sin plazas')",
+                "insert into asignatura_aula (asignatura_id, aula_id, rol) values (1, 1, 'EXCLUSIVA')",
+                "insert into asignatura_aula_compatible (id, asignatura_id, tipo_aula) values (1, 1, 'LAB_CIENCIAS')"));
+        String[][] actividades = {
+            {"1", "BIO-A", "1"}, {"2", "BIO-B", "1"}, {"3", "BIO-X", "1"},
+            {"4", "TEC-B", "2"}, {"5", "TEC-C", "2"}, {"6", "GUA-1", "3"}, {"7", "LAT-A", "4"}};
+        for (String[] a : actividades) {
+            ordenes.add("insert into actividad (id, codigo, asignatura_id, duracion_tramos, repeticiones_por_semana,"
+                    + " patron_temporal, requiere_tutor) values (" + a[0] + ", '" + a[1] + "', " + a[2]
+                    + ", 1, 1, 'NEUTRA', 0)");
+        }
+        // id, código, actividad, asignatura y subgrupo (0 = sin subgrupos).
+        String[][] plazas = {
+            {"1", "BIO-A-P1", "1", "1", "1"}, {"2", "BIO-A-P2", "1", "1", "1"}, {"3", "BIO-B-P1", "2", "1", "2"},
+            {"4", "BIO-X-P1", "3", "1", "4"}, {"5", "BIO-X-P2", "3", "1", "0"},
+            {"6", "TEC-B-P1", "4", "2", "2"}, {"7", "TEC-C-P1", "5", "2", "3"},
+            {"8", "GUA-1-P1", "6", "3", "0"}, {"9", "LAT-A-P1", "7", "4", "1"}};
+        for (String[] p : plazas) {
+            ordenes.add("insert into plaza (id, codigo, actividad_id, asignatura_id) values (" + p[0] + ", '"
+                    + p[1] + "', " + p[2] + ", " + p[3] + ")");
+            if (!p[4].equals("0")) {
+                ordenes.add("insert into plaza_subgrupo (plaza_id, subgrupo_id) values (" + p[0] + ", " + p[4] + ")");
+            }
+        }
+        ejecutar(base, ordenes.toArray(String[]::new));
+        assertThat(consulta(base, "PRAGMA foreign_key_check")).as("precondición: sin huérfanos").isEmpty();
+        return base;
+    }
 
     /**
      * Una o dos filas coherentes en cada tabla de {@code 001.sql} (la de {@code curso} la pone

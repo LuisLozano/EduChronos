@@ -160,6 +160,32 @@ class ProyeccionHorarioTest {
                 .allSatisfy(s -> assertThat(s.duracion()).isEqualTo(1));
     }
 
+    /**
+     * (S250, C-asignatura-con-nivel) Una asignatura con nivel se proyecta con su código CORTO:
+     * la rejilla y la exportación no enseñan el nivel. Mat pasa al nivel 1ESO antes de resolver,
+     * así que su código es {@code Mat-1ESO}, y sus 12 sesiones salen con {@code Mat}.
+     */
+    @Test
+    void proyectaElCodigoCortoDeUnaAsignaturaConNivel() {
+        poblarCatalogo();
+        Asignatura mat = asignaturaRepository.findByCodigo("Mat").orElseThrow();
+        mat.actualizar("Mat", "Matematicas", nivelRepository.findByCodigo("1ESO").orElseThrow());
+        entityManager.flush();
+        assertThat(asignaturaRepository.findByCodigo("Mat-1ESO")).as("precondición: con nivel").isPresent();
+
+        ProblemaHorario problema = service.cargarProblema();
+        ResultadoOptimizacion resultado = new SolverHorario(10, 42).resolverOptimizandoConDetalle(problema);
+        Long id = service.guardar(resultado, problema, "Proyeccion con nivel").getId();
+        entityManager.flush();
+        entityManager.clear();
+
+        List<SesionVistaDTO> ses = service.proyectar(id).sesiones();
+
+        assertThat(ses).filteredOn(s -> s.actividadCodigo().startsWith("Mat-1º"))
+                .hasSize(12)
+                .allSatisfy(s -> assertThat(s.asignaturaCodigo()).isEqualTo("Mat"));
+    }
+
     // ------------------------------------------------------------- fixture builder
     // Transcripción de problema-3-cierre-cyr-refmt.json a entidades JPA (new+save),
     // espejo del builder de CierreFase6HumoTest.

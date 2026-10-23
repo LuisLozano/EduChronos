@@ -1,7 +1,10 @@
 package es.yaroki.educhronos.app.service;
 
+import es.yaroki.educhronos.app.catalog.Asignatura;
+import es.yaroki.educhronos.app.catalog.AsignaturaRepository;
 import es.yaroki.educhronos.app.catalog.Nivel;
 import es.yaroki.educhronos.app.catalog.NivelRepository;
+import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Nombrados;
 import es.yaroki.educhronos.app.service.ReferenciaEntranteException.Referencia;
 import es.yaroki.educhronos.app.web.dto.NivelDTO;
 import es.yaroki.educhronos.app.web.dto.NivelRequest;
@@ -34,14 +37,20 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>La edición muta la entidad gestionada vía {@link Nivel#actualizar} (no hay
  * setters): el flush transaccional la persiste sin {@code save} explícito.
+ *
+ * <p><b>Asignaturas del nivel</b> (S250, C-asignatura-con-nivel). Su código lleva el del nivel
+ * ({@code Mat-1ESO}): renombrar el nivel lo recompone en la misma transacción, y borrar un nivel
+ * con asignaturas da 409 y las nombra, como el borrado de una asignatura con actividades.
  */
 @Service
 public class NivelService {
 
     private final NivelRepository repositorio;
+    private final AsignaturaRepository asignaturaRepositorio;
 
-    public NivelService(NivelRepository repositorio) {
+    public NivelService(NivelRepository repositorio, AsignaturaRepository asignaturaRepositorio) {
         this.repositorio = repositorio;
+        this.asignaturaRepositorio = asignaturaRepositorio;
     }
 
     /** Todos los niveles como {@link NivelDTO}, ORDENADOS por {@code orden} (D-1). */
@@ -81,6 +90,11 @@ public class NivelService {
      * existe; {@link IllegalArgumentException} (→ 400) si falla la validación (a) o
      * si el código pisa al de OTRO nivel (b). Reguardar la propia entidad con su
      * mismo código es válido: la unicidad se excluye a sí misma por id.
+     *
+     * <p>Si el código cambia, el de cada asignatura del nivel se recompone con el nuevo (S250).
+     * ANTES de tocar nada se comprueba que ninguno de los códigos nuevos sea ya el de una
+     * asignatura de otro nivel o sin nivel: si alguno lo es, 400 que lo nombra y no cambia nada.
+     * Las del propio nivel no cuentan, porque cambian todas a la vez.
      */
     @Transactional
     public NivelDTO editar(Long id, NivelRequest peticion) {
@@ -93,7 +107,21 @@ public class NivelService {
                     throw new IllegalArgumentException(
                             "Ya existe otro nivel con codigo " + peticion.codigo());
                 });
+        List<Asignatura> suyas = peticion.codigo().equals(entidad.getCodigo())
+                ? List.of()
+                : asignaturaRepositorio.findByNivelId(id);
+        for (Asignatura asignatura : suyas) {
+            String nuevo = Asignatura.componerCodigo(asignatura.getCodigoCorto(), peticion.codigo());
+            asignaturaRepositorio.findByCodigo(nuevo)
+                    .filter(otra -> otra.getNivel() == null || !otra.getNivel().getId().equals(id))
+                    .ifPresent(otra -> {
+                        throw new IllegalArgumentException("No se puede renombrar el nivel: la asignatura "
+                                + asignatura.getCodigo() + " pasaría a " + nuevo
+                                + ", que ya es el código de otra asignatura");
+                    });
+        }
         entidad.actualizar(peticion.codigo(), peticion.orden());
+        suyas.forEach(Asignatura::recomponerCodigo);
         return aDTO(entidad);
     }
 
@@ -102,10 +130,16 @@ public class NivelService {
     public void borrar(Long id) {
         Nivel entidad = repositorio.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No existe nivel con id " + id));
+        List<String> asignaturas = asignaturaRepositorio.findByNivelId(id).stream()
+                .map(Asignatura::getCodigo)
+                .toList();
         List<Referencia> entrantes = List.of(
-                new Referencia("grupo(s)", repositorio.contarGrupos(id)));
+                new Referencia("grupo(s)", repositorio.contarGrupos(id)),
+                new Referencia("asignatura(s)", asignaturas.size()));
         if (entrantes.stream().anyMatch(r -> r.conteo() > 0)) {
-            throw new ReferenciaEntranteException(entrantes);
+            // Las asignaturas se nombran (S250), como las actividades y plazas de una asignatura.
+            throw new ReferenciaEntranteException(entrantes,
+                    List.of(new Nombrados("Asignaturas", asignaturas)));
         }
         repositorio.delete(entidad);
     }
