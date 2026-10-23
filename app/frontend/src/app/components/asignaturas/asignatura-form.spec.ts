@@ -13,11 +13,20 @@ import { AsignaturaForm } from './asignatura-form';
  * OK cierra el diálogo con `true`. (6) fija el orden de precedencia de
  * `mensaje()` (message gana a error), que en la lista quedó fuera de alcance.
  * Secuencia propia desde (1).
+ *
+ * <p>Desde S250 el formulario pide `/api/niveles` en el `ngOnInit`: `montar` consume esa
+ * petición, como en `GrupoForm`, para que el `http.verify()` del `afterEach` no tumbe los casos
+ * que no hablan de niveles. (7) a (10) fijan el código corto, el nivel y el código resultante.
  */
 describe('AsignaturaForm', () => {
   let fixture: ComponentFixture<AsignaturaForm>;
   let http: HttpTestingController;
   let ref: { close: ReturnType<typeof vi.fn> };
+
+  const NIVELES = [
+    { id: 1, codigo: '1ESO', orden: 1 },
+    { id: 2, codigo: '2ESO', orden: 2 },
+  ];
 
   function montar(data: unknown = null): void {
     ref = { close: vi.fn() };
@@ -32,6 +41,8 @@ describe('AsignaturaForm', () => {
     });
     fixture = TestBed.createComponent(AsignaturaForm);
     http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges(); // dispara ngOnInit → GET /api/niveles
+    http.expectOne('/api/niveles').flush(NIVELES);
     fixture.detectChanges();
   }
 
@@ -44,7 +55,7 @@ describe('AsignaturaForm', () => {
   });
 
   it('(2) en edición precarga los valores de la asignatura', () => {
-    montar({ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    montar({ id: 7, codigo: 'Mat', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: null });
     const inputs = fixture.nativeElement.querySelectorAll('input');
     expect(inputs[0].value).toBe('Mat');
     expect(inputs[1].value).toBe('Matemáticas');
@@ -56,7 +67,7 @@ describe('AsignaturaForm', () => {
       form: { setValue: (v: unknown) => void };
       guardar: () => void;
     };
-    inst.form.setValue({ codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    inst.form.setValue({ codigoCorto: 'Mat', nivel: '', nombreCompleto: 'Matemáticas' });
     inst.guardar();
 
     http.expectOne('/api/asignaturas').flush(
@@ -75,7 +86,7 @@ describe('AsignaturaForm', () => {
       form: { setValue: (v: unknown) => void };
       guardar: () => void;
     };
-    inst.form.setValue({ codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    inst.form.setValue({ codigoCorto: 'Mat', nivel: '', nombreCompleto: 'Matemáticas' });
     inst.guardar();
 
     http.expectOne('/api/asignaturas').flush({}, { status: 400, statusText: 'Bad Request' });
@@ -91,10 +102,10 @@ describe('AsignaturaForm', () => {
       form: { setValue: (v: unknown) => void };
       guardar: () => void;
     };
-    inst.form.setValue({ codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    inst.form.setValue({ codigoCorto: 'Mat', nivel: '', nombreCompleto: 'Matemáticas' });
     inst.guardar();
 
-    http.expectOne('/api/asignaturas').flush({ id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    http.expectOne('/api/asignaturas').flush({ id: 7, codigo: 'Mat', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: null });
     await fixture.whenStable();
     expect(ref.close).toHaveBeenCalledWith(true);
   });
@@ -105,7 +116,7 @@ describe('AsignaturaForm', () => {
       form: { setValue: (v: unknown) => void };
       guardar: () => void;
     };
-    inst.form.setValue({ codigo: 'Mat', nombreCompleto: 'Matemáticas' });
+    inst.form.setValue({ codigoCorto: 'Mat', nivel: '', nombreCompleto: 'Matemáticas' });
     inst.guardar();
 
     // body con AMBOS: message debe ganar
@@ -117,5 +128,62 @@ describe('AsignaturaForm', () => {
     const err = fixture.nativeElement.querySelector('.asignatura-form__error-servidor').textContent;
     expect(err).toContain('texto-de-message');
     expect(err).not.toContain('texto-de-error');
+  });
+
+  it('(7) el desplegable de nivel arranca en «— sin nivel —» y ofrece los niveles del backend', () => {
+    montar(null);
+    const opciones = [...fixture.nativeElement.querySelectorAll('select option')].map(
+      (o: HTMLOptionElement) => o.textContent?.trim(),
+    );
+    expect(opciones).toEqual(['— sin nivel —', '1ESO', '2ESO']);
+    expect(fixture.nativeElement.querySelector('select').value).toBe('');
+  });
+
+  it('(8) envía (codigoCorto, nombreCompleto, nivel) y pinta el código que resultará', async () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as {
+      form: { setValue: (v: unknown) => void };
+      guardar: () => void;
+    };
+    inst.form.setValue({ codigoCorto: 'Biol', nivel: '2ESO', nombreCompleto: 'Biología' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.asignatura-form__codigo').textContent).toContain('Biol-2ESO');
+
+    inst.guardar();
+    const peticion = http.expectOne('/api/asignaturas');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ codigoCorto: 'Biol', nombreCompleto: 'Biología', nivel: '2ESO' });
+    peticion.flush({ id: 9, codigo: 'Biol-2ESO', codigoCorto: 'Biol', nombreCompleto: 'Biología', nivel: '2ESO' });
+    await fixture.whenStable();
+    expect(ref.close).toHaveBeenCalledWith(true);
+  });
+
+  it('(9) sin nivel envía nivel null y el código resultante es el corto', () => {
+    montar(null);
+    const inst = fixture.componentInstance as unknown as {
+      form: { setValue: (v: unknown) => void };
+      guardar: () => void;
+    };
+    inst.form.setValue({ codigoCorto: 'RED', nivel: '', nombreCompleto: 'Reunión' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.asignatura-form__codigo .dato').textContent.trim()).toBe('RED');
+
+    inst.guardar();
+    const peticion = http.expectOne('/api/asignaturas');
+    expect(peticion.request.body).toEqual({ codigoCorto: 'RED', nombreCompleto: 'Reunión', nivel: null });
+    peticion.flush({ id: 9, codigo: 'RED', codigoCorto: 'RED', nombreCompleto: 'Reunión', nivel: null });
+  });
+
+  it('(10) en edición precarga el corto y el nivel, y el PUT los lleva', () => {
+    montar({ id: 7, codigo: 'Mat-1ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' });
+    expect(fixture.nativeElement.querySelector('input').value).toBe('Mat');
+    expect(fixture.nativeElement.querySelector('select').value).toBe('1ESO');
+    expect(fixture.nativeElement.querySelector('.asignatura-form__codigo').textContent).toContain('Mat-1ESO');
+
+    (fixture.componentInstance as unknown as { guardar: () => void }).guardar();
+    const peticion = http.expectOne('/api/asignaturas/7');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toEqual({ codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' });
+    peticion.flush({ id: 7, codigo: 'Mat-1ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' });
   });
 });

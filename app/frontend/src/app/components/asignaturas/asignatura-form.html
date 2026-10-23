@@ -5,11 +5,21 @@
 
   <form [formGroup]="form" (ngSubmit)="guardar()">
     <label class="asignatura-form__campo">
-      <span class="asignatura-form__etiqueta">Código</span>
-      <input type="text" formControlName="codigo" class="asignatura-form__input" />
-      @if (form.controls.codigo.touched && form.controls.codigo.invalid) {
-        <span class="asignatura-form__error">El código es obligatorio.</span>
+      <span class="asignatura-form__etiqueta">Código corto</span>
+      <input type="text" formControlName="codigoCorto" class="asignatura-form__input" />
+      @if (form.controls.codigoCorto.touched && form.controls.codigoCorto.invalid) {
+        <span class="asignatura-form__error">El código corto es obligatorio.</span>
       }
+    </label>
+
+    <label class="asignatura-form__campo">
+      <span class="asignatura-form__etiqueta">Nivel</span>
+      <select formControlName="nivel" class="asignatura-form__input">
+        <option value="">— sin nivel —</option>
+        @for (n of niveles(); track n.id) {
+          <option [value]="n.codigo">{{ n.codigo }}</option>
+        }
+      </select>
     </label>
 
     <label class="asignatura-form__campo">
@@ -19,6 +29,10 @@
         <span class="asignatura-form__error">El nombre es obligatorio.</span>
       }
     </label>
+
+    <p class="asignatura-form__codigo">
+      Código de la asignatura: <span class="dato">{{ codigoResultante() || '—' }}</span>
+    </p>
 
     @if (error()) {
       <p class="asignatura-form__error-servidor" role="alert">{{ error() }}</p>

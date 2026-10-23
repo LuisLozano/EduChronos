@@ -46,7 +46,7 @@ export class AsignaturaLista implements OnInit {
    * búsqueda «no encuentra» algo que está en pantalla.
    */
   protected textoFila(asig: Asignatura): string {
-    return [asig.codigo, asig.nombreCompleto].join(' ');
+    return [asig.codigo, asig.nivel ?? '—', asig.nombreCompleto].join(' ');
   }
 
   /**

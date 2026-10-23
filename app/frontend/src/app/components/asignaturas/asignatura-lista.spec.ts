@@ -294,6 +294,33 @@ describe('AsignaturaLista', () => {
    * `?buscar=`. Se lee el `UrlTree` del `RouterLink` de cada botón: mide la ruta, el parámetro y
    * que cada fila pase el suyo, sin navegar.
    */
+  /**
+   * (S250, C-asignatura-con-nivel) La columna «Nivel» enseña el código del nivel, o «—» si la
+   * asignatura no tiene, y la búsqueda por nivel encuentra las de ese nivel y solo esas.
+   */
+  it('(14) pinta el nivel de cada asignatura y lo encuentra al buscar', async () => {
+    flushLista([
+      { id: 7, codigo: 'Mat-1ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' },
+      { id: 8, codigo: 'Mat-2ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '2ESO' },
+      { id: 9, codigo: 'RED', codigoCorto: 'RED', nombreCompleto: 'Reunión', nivel: null },
+    ]);
+    await fixture.whenStable();
+    const cabecera = [...fixture.nativeElement.querySelectorAll('thead th')].map(
+      (th: HTMLElement) => th.textContent?.trim(),
+    );
+    expect(cabecera.slice(0, 3)).toEqual(['Código', 'Nivel', 'Nombre completo']);
+    const niveles = [...fixture.nativeElement.querySelectorAll('tbody tr')].map(
+      (tr: HTMLElement) => tr.querySelectorAll('td')[1].textContent?.trim(),
+    );
+    expect(niveles).toEqual(['1ESO', '2ESO', '—']);
+
+    await buscar('2eso');
+
+    const filas = fixture.nativeElement.querySelectorAll('tbody tr');
+    expect(filas.length).toBe(1);
+    expect(filas[0].querySelector('td').textContent.trim()).toBe('Mat-2ESO');
+  });
+
   it('(13) cada fila acaba con «Actividades», que lleva a Actividades con su código en ?buscar=', async () => {
     flushLista(FILAS);
     await fixture.whenStable();

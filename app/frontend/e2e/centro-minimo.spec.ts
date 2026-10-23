@@ -193,9 +193,10 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
 
   await irA(page, 'Asignaturas', 'app-asignatura-lista');
 
-  // 6. Asignatura.
+  // 6. Asignatura, con código corto y nivel (S250): su código es MAT-1ESO.
   const asignatura = await abrir(page, 'Nueva asignatura');
-  await asignatura.locator('[formControlName="codigo"]').fill('MAT');
+  await asignatura.locator('[formControlName="codigoCorto"]').fill('MAT');
+  await asignatura.locator('[formControlName="nivel"]').selectOption('1ESO');
   await asignatura.locator('[formControlName="nombreCompleto"]').fill('Matemáticas');
   await guardar(page);
 
@@ -226,7 +227,8 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // la actividad como en cada plaza, y sin este `fieldset` de por medio el
   // localizador casaría dos elementos.
   const plaza = actividad.locator('.actividad-form__plaza').first();
-  await plaza.locator('[formControlName="asignatura"]').selectOption('MAT');
+  // La plaza elige la asignatura por su código, que es el compuesto.
+  await plaza.locator('[formControlName="asignatura"]').selectOption('MAT-1ESO');
   // `modoAula` no se toca: la fábrica de plazas nace en 'FIJA', así que el select de
   // aula fija YA está renderizado y no hay que esperar a ningún repintado del XOR.
   await plaza.locator('[formControlName="aulaFija"]').selectOption('A1');

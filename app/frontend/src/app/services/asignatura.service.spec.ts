@@ -32,7 +32,7 @@ describe('AsignaturaService', () => {
 
   it('(1) listar → GET /api/asignaturas', () => {
     const esperado: Asignatura[] = [
-      { id: 7, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
+      { id: 7, codigo: 'Mat-1ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' },
     ];
     let recibido: Asignatura[] | undefined;
     service.listar().subscribe((r) => (recibido = r));
@@ -51,21 +51,21 @@ describe('AsignaturaService', () => {
   });
 
   it('(3) crear → POST /api/asignaturas con el body de request', () => {
-    const cuerpo: AsignaturaRequest = { codigo: 'Mat', nombreCompleto: 'Matemáticas' };
+    const cuerpo: AsignaturaRequest = { codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' };
     service.crear(cuerpo).subscribe();
     const req = http.expectOne('/api/asignaturas');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(cuerpo);
-    req.flush({ id: 7, ...cuerpo });
+    req.flush({ id: 7, codigo: 'Mat-1ESO', ...cuerpo });
   });
 
   it('(4) editar → PUT /api/asignaturas/{id} con el body de request', () => {
-    const cuerpo: AsignaturaRequest = { codigo: 'Mat', nombreCompleto: 'Matemáticas' };
+    const cuerpo: AsignaturaRequest = { codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' };
     service.editar(7, cuerpo).subscribe();
     const req = http.expectOne('/api/asignaturas/7');
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(cuerpo);
-    req.flush({ id: 7, ...cuerpo });
+    req.flush({ id: 7, codigo: 'Mat-1ESO', ...cuerpo });
   });
 
   it('(5) borrar → DELETE /api/asignaturas/{id}', () => {

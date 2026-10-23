@@ -22,7 +22,7 @@ import { AsignaturaAula } from '../../models/asignatura-aula.model';
  * quita justo esas y no las primeras N.
  */
 
-const ASIGNATURA: Asignatura = { id: 7, codigo: 'ByG', nombreCompleto: 'Biología' };
+const ASIGNATURA: Asignatura = { id: 7, codigo: 'ByG', codigoCorto: 'ByG', nombreCompleto: 'Biología', nivel: null };
 
 function aula(id: number, codigo: string): Aula {
   return { id, codigo, tipo: 'ORDINARIA', capacidad: null, edificio: null, planta: null, sector: null };
