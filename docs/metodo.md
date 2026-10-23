@@ -692,6 +692,14 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     (`D-declarado-sin-artefacto`, `D-748-sin-derivacion`)
 17. **Los pasos humanos de una verificación se dan de uno en uno, cada uno con lo que hay que
     observar** (S215). Una lista entera produjo un «todo OK» sin los pasos hechos y dos paradas.
+    Una comprobación con oráculo literal o contable (un texto exacto, un recuento) la puede hacer
+    Claude Code con un navegador automatizado, y el paso humano queda de respaldo si la herramienta
+    falla: Playwright sin interfaz cuando el resultado depende del tamaño de la ventana, con el
+    viewport fijado y una autoprueba (molde:
+    `/home/luis/educhronos-aceptacion/s224/f2/c1/medir/medir.mjs`); Claude in Chrome cuando no
+    depende, porque no fija el tamaño de la ventana (S224). El juicio de aspecto, y lo que solo puede
+    hacer una persona (la VM, el doble clic, el centro), sigue siendo humano y se da de uno en uno.
+    Sale de S220 y de S224 a S226 (S248). (`D-m4-navegador-sin-norma`)
 18. **El informe de un guion es corto** (S223): una línea de veredicto por comprobación (OK o
     FALLO, con la cifra que decide), los hashes de los commits y las desviaciones del guion. Las
     salidas quedan en la carpeta de material y solo se pegan ante un FALLO o si el guion las
@@ -703,3 +711,20 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     autoprueba capaz de fallar, corrida antes de dar ninguna cifra (M2), y la cobertura de cada casado
     en el informe. Sale de S232: dos rondas pasando volcados al chat antes de medir, y un T2b hecho de
     principio a fin sin ninguna.
+20. **Un prompt de subagente que mide dice qué leer, cómo, qué no usar y qué declarar** (S248). Un
+    subagente empieza sin el historial de la conversación, pero comparte la máquina y las herramientas
+    de quien lo lanza: nada técnico lo encierra en la carpeta asignada, solo su prompt. El prompt fija
+    (a) la lista cerrada de lo que puede leer, con ruta absoluta; (b) cómo: de uno en uno, con la
+    herramienta de lectura, nunca con volcados de varios ficheros (`cat`, bucles, `find -exec`), cuya
+    salida el arnés puede guardar fuera de la lista; (c) qué no usar: nada fuera de la lista, ni web
+    ni memoria; y (d) qué declarar al final: cada fichero leído, con su ruta. Una pasada que declara
+    una lectura fuera de la lista no vale y se repite. (e) El prompt literal se guarda en la carpeta
+    de material antes de lanzar el subagente (norma 16). Si el resultado depende de lo que el
+    subagente ya sabe, antes de cada pasada va la comprobación previa de contexto (S247, E14): se
+    anota si la memoria global del usuario (`~/.claude/CLAUDE.md`) existe y nombra el tema, y un
+    subagente nuevo, con la misma configuración y un prompt de canario guardado literal, dice qué sabe
+    del tema sin leer ningún fichero; está contaminado si dice algo que no se deduce solo del nombre,
+    y entonces la pasada no vale (ED). Sale de S247: el subagente volcó los documentos con `cat`, el
+    arnés guardó la salida fuera de la carpeta y el subagente la leyó; el mismo defecto invalidó dos
+    intentos de la pasada 2 (E16), y los prompts solo quedaron en el transcript.
+    (`D-prompt-subagente-sin-norma`)
