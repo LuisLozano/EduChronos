@@ -109,7 +109,7 @@ Las carpetas de componentes:
 - `scripts/empaquetar-windows.ps1`: en Windows, construye con jpackage la aplicación a partir de esa entrega.
 - `scripts/Instalar.cmd`: el instalador que viaja en el zip. Copia el programa a la carpeta del usuario y crea el acceso directo.
 - `scripts/probar-instalar.ps1`: prueba `scripts/Instalar.cmd` en ocho casos sobre carpetas temporales.
-- `scripts/arrancar-backend.py`: arranca y para el backend de desarrollo contra una base SQLite concreta.
+- `scripts/arrancar-backend.py`: arranca y para el backend de desarrollo contra una base SQLite concreta; con --con-frontend, también ng serve.
 - `scripts/oraculo-exportacion.py`: verifica un CSV exportado contra lo que dice la base.
 - `scripts/verificar-leyenda-pdf.py`: verifica la leyenda de un PDF de horario contra la base.
 - `scripts/calcular-recortes.py`: cuenta las celdas de la rejilla que se recortarían, y es el ejemplo de autoprueba del proyecto.

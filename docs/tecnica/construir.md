@@ -53,9 +53,9 @@ Eso se cuenta en `docs/tecnica/publicar.md`.
 ## Arrancar
 
 El arranque no va en un bloque de órdenes, porque no termina: deja el servidor escuchando.
-Para desarrollo se usa `scripts/arrancar-backend.py`.
+Para desarrollo se usa `scripts/arrancar-backend.py`; con --con-frontend arranca también ng serve.
 Arranca el backend contra una base SQLite que se le indica y deja anotado su grupo de procesos para pararlo después.
-Su uso, sus códigos de salida y lo que escribe están en su cabecera (`scripts/arrancar-backend.py:2-40`).
+Su uso, sus códigos de salida y lo que escribe están en su cabecera (`scripts/arrancar-backend.py:2-56`).
 
 ## El bundle de Windows
 

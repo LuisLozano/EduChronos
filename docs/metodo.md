@@ -591,7 +591,7 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
 5. **Un proceso se identifica por el PID guardado al lanzarlo, por
    `/proc/<pid>/exe` o por el puerto**, nunca con `pkill -f` ni `pgrep -f` por
    patrón: el patrón casa con el envoltorio del propio guion, y la aplicación
-   empaquetada no se llama `java`. El backend de desarrollo se arranca y se para con `scripts/arrancar-backend.py` (S217), que guarda el grupo del proceso y no el del shell. (`D-guion-pkill-casa-su-propio-envoltorio`)
+   empaquetada no se llama `java`. El backend de desarrollo se arranca y se para con `scripts/arrancar-backend.py` (S217), que guarda el grupo del proceso y no el del shell. Con `--con-frontend` arranca después `ng serve` y lo para con el backend (S248; `D-ng-serve-sin-literal`). (`D-guion-pkill-casa-su-propio-envoltorio`)
 6. **Todo parámetro de ruta se normaliza a absoluta nada más leerse, o el guion
    aborta si no lo es.** Hecho en `empaquetar-linux.sh` (`--salida`) y en
    `empaquetar-windows.ps1` (`-Base`, `IsPathRooted`); auditado en S157 que no hay
