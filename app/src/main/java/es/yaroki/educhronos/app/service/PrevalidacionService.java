@@ -18,6 +18,7 @@ import es.yaroki.educhronos.solver.domain.SesionBloqueada;
 import es.yaroki.educhronos.solver.domain.Subgrupo;
 import es.yaroki.educhronos.solver.domain.TipoRestriccion;
 import es.yaroki.educhronos.solver.domain.Tramo;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -195,6 +197,24 @@ public class PrevalidacionService {
      */
     public static final String REGLA_GUARDIAS_RECREO_EXCEDEN = "GUARDIAS_RECREO_EXCEDEN";
 
+    /**
+     * Los subgrupos de una actividad son de más de un nivel (S251, C-editor-por-nivel). AVISO, ver
+     * {@link #actividadesConNivelesMezclados}.
+     */
+    public static final String REGLA_ACTIVIDAD_NIVELES_MEZCLADOS = "ACTIVIDAD_NIVELES_MEZCLADOS";
+
+    /**
+     * Una actividad de un solo nivel usa una asignatura de otro, propia o de alguna plaza (S251). AVISO,
+     * ver {@link #asignaturasDeOtroNivel}.
+     */
+    public static final String REGLA_ASIGNATURA_DE_OTRO_NIVEL = "ASIGNATURA_DE_OTRO_NIVEL";
+
+    /**
+     * Dos asignaturas del mismo nivel tienen el mismo nombre o el mismo código corto, sin contar
+     * mayúsculas ni tildes (S251). AVISO, ver {@link #asignaturasRepetidas}.
+     */
+    public static final String REGLA_ASIGNATURAS_REPETIDAS = "ASIGNATURAS_REPETIDAS";
+
     /** {@code entidadCodigo} de los avisos que son del centro y no de una entidad (S212). */
     public static final String ENTIDAD_CENTRO = "CENTRO";
 
@@ -226,7 +246,7 @@ public class PrevalidacionService {
     @Transactional(readOnly = true)
     public List<AvisoPrevalidacion> prevalidar() {
         return prevalidar(generadorService.cargarProblema(), generadorService.cargarDatosCuadre(),
-                generadorService.cargarDatosAulas());
+                generadorService.cargarDatosAulas(), generadorService.cargarDatosNiveles());
     }
 
     /**
@@ -254,8 +274,10 @@ public class PrevalidacionService {
      * imposibles (S207), carga de aulas (S209), guardias insuficientes del centro (S212) y guardias
      * de recreo (S219). Después
      * los AVISO: tutorías (S8), cuadre de profesores y cuadre de
-     * grupos. Dentro de cada bloque, el orden del problema. Así los hallazgos que abortan la
-     * generación quedan agrupados al principio de la lista.
+     * grupos y, con los datos de niveles, actividades con niveles mezclados, asignaturas de otro
+     * nivel y asignaturas repetidas (S251). Dentro de cada bloque, el orden del problema; los de
+     * niveles, por código. Así los hallazgos que abortan la generación quedan agrupados al
+     * principio de la lista.
      */
     public static List<AvisoPrevalidacion> prevalidar(ProblemaHorario problema, DatosCuadre datos) {
         return prevalidar(problema, datos, DatosAulas.VACIO);
@@ -267,9 +289,19 @@ public class PrevalidacionService {
      */
     public static List<AvisoPrevalidacion> prevalidar(
             ProblemaHorario problema, DatosCuadre datos, DatosAulas aulas) {
+        return prevalidar(problema, datos, aulas, DatosNiveles.VACIO);
+    }
+
+    /**
+     * Como el de arriba, con los datos de niveles que el problema no lleva (S251): el nivel de cada
+     * asignatura y los de los grupos de cada actividad. Sus tres AVISO van al final.
+     */
+    public static List<AvisoPrevalidacion> prevalidar(
+            ProblemaHorario problema, DatosCuadre datos, DatosAulas aulas, DatosNiveles niveles) {
         Objects.requireNonNull(problema, "problema no puede ser null");
         Objects.requireNonNull(datos, "datos no puede ser null");
         Objects.requireNonNull(aulas, "aulas no puede ser null");
+        Objects.requireNonNull(niveles, "niveles no puede ser null");
 
         // Ambos techos salen del PROBLEMA, nunca de una constante: el catálogo real trae
         // los tramos ya sin recreos (CatalogoMapper los excluye) y los días que existan.
@@ -291,6 +323,9 @@ public class PrevalidacionService {
         avisos.addAll(tutoriasSinTutor(problema));
         avisos.addAll(profesoresDescuadrados(problema, datos));
         avisos.addAll(gruposDescuadrados(problema, datos));
+        avisos.addAll(actividadesConNivelesMezclados(niveles));
+        avisos.addAll(asignaturasDeOtroNivel(niveles));
+        avisos.addAll(asignaturasRepetidas(niveles));
         return List.copyOf(avisos);
     }
 
@@ -1009,6 +1044,144 @@ public class PrevalidacionService {
             }
         }
         return avisos;
+    }
+
+    /**
+     * (S251) ACTIVIDAD CON NIVELES MEZCLADOS — AVISO. Los grupos de los subgrupos de sus plazas son
+     * de más de un nivel. Uno por actividad, por código. {@code demanda} es el número de niveles y
+     * {@code disponible} 1, el que admite una clase.
+     *
+     * <p>Por qué AVISO: el solver coloca la actividad igual; es un error de configuración que se
+     * arregla editando sus subgrupos, vía (2) de {@link Severidad}. Una actividad con varios niveles
+     * solo avisa aquí, no también en {@link #asignaturasDeOtroNivel}.
+     */
+    private static List<AvisoPrevalidacion> actividadesConNivelesMezclados(DatosNiveles niveles) {
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (DatosNiveles.ActividadNiveles actividad : niveles.actividades()) {
+            if (actividad.niveles().size() > 1) {
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.AVISO,
+                        REGLA_ACTIVIDAD_NIVELES_MEZCLADOS,
+                        actividad.codigo(),
+                        actividad.niveles().size(),
+                        1,
+                        "La actividad '" + actividad.codigo() + "' tiene subgrupos de varios niveles ("
+                                + String.join(", ", actividad.niveles())
+                                + "). Una clase es de un solo nivel: revisa sus subgrupos."));
+            }
+        }
+        avisos.sort(Comparator.comparing(AvisoPrevalidacion::entidadCodigo));
+        return avisos;
+    }
+
+    /**
+     * (S251) ASIGNATURA DE OTRO NIVEL — AVISO. Una actividad de EXACTAMENTE un nivel usa, como
+     * asignatura propia o en alguna plaza, una asignatura de otro nivel. Una asignatura sin nivel no
+     * avisa. Uno por actividad aunque fallen varias, y el texto las nombra todas, sin repetir y en el
+     * orden de la actividad: la propia y después las de las plazas. 1 contra 0, como S8.
+     */
+    private static List<AvisoPrevalidacion> asignaturasDeOtroNivel(DatosNiveles niveles) {
+        Map<String, String> nivelDe = new HashMap<>();
+        for (DatosNiveles.AsignaturaNivel asignatura : niveles.asignaturas()) {
+            nivelDe.put(asignatura.codigo(), asignatura.nivel());
+        }
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (DatosNiveles.ActividadNiveles actividad : niveles.actividades()) {
+            if (actividad.niveles().size() != 1) {
+                continue;
+            }
+            String suyo = actividad.niveles().get(0);
+            Set<String> usadas = new LinkedHashSet<>();
+            if (actividad.asignatura() != null) {
+                usadas.add(actividad.asignatura());
+            }
+            usadas.addAll(actividad.asignaturasDePlazas());
+            List<String> ajenas = new ArrayList<>();
+            for (String asignatura : usadas) {
+                String nivel = nivelDe.get(asignatura);
+                if (nivel != null && !nivel.equals(suyo)) {
+                    ajenas.add(asignatura + ", de " + nivel);
+                }
+            }
+            if (!ajenas.isEmpty()) {
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.AVISO,
+                        REGLA_ASIGNATURA_DE_OTRO_NIVEL,
+                        actividad.codigo(),
+                        1,
+                        0,
+                        "La actividad '" + actividad.codigo() + "' es de " + suyo + " y usa "
+                                + enumerar(ajenas) + ". Elige la asignatura de " + suyo + "."));
+            }
+        }
+        avisos.sort(Comparator.comparing(AvisoPrevalidacion::entidadCodigo));
+        return avisos;
+    }
+
+    /** «a», «a, y b», «a, b, y c»: la coma antes de la «y» separa los incisos «, de 3ESO». */
+    private static String enumerar(List<String> partes) {
+        if (partes.size() == 1) {
+            return partes.get(0);
+        }
+        return String.join(", ", partes.subList(0, partes.size() - 1)) + ", y " + partes.get(partes.size() - 1);
+    }
+
+    /**
+     * (S251) ASIGNATURAS REPETIDAS — AVISO. Dos asignaturas del mismo nivel, no nulo, con el mismo
+     * nombre o el mismo código corto, comparados con {@link #sinMayusculasNiTildes}: los espacios y la
+     * puntuación cuentan. Uno por par, aunque casen las dos cosas. {@code entidadCodigo} lleva los dos
+     * códigos por orden, «A, B», como la carga de aulas; los pares salen en ese orden. 2 contra 1.
+     */
+    private static List<AvisoPrevalidacion> asignaturasRepetidas(DatosNiveles niveles) {
+        List<DatosNiveles.AsignaturaNivel> conNivel = niveles.asignaturas().stream()
+                .filter(asignatura -> asignatura.nivel() != null)
+                .sorted(Comparator.comparing(DatosNiveles.AsignaturaNivel::codigo))
+                .toList();
+        List<AvisoPrevalidacion> avisos = new ArrayList<>();
+        for (int i = 0; i < conNivel.size(); i++) {
+            DatosNiveles.AsignaturaNivel a = conNivel.get(i);
+            for (int j = i + 1; j < conNivel.size(); j++) {
+                DatosNiveles.AsignaturaNivel b = conNivel.get(j);
+                if (!a.nivel().equals(b.nivel())) {
+                    continue;
+                }
+                boolean mismoNombre = sinMayusculasNiTildes(a.nombre()).equals(sinMayusculasNiTildes(b.nombre()));
+                boolean mismoCodigo = a.codigoCorto() != null && b.codigoCorto() != null
+                        && sinMayusculasNiTildes(a.codigoCorto()).equals(sinMayusculasNiTildes(b.codigoCorto()));
+                if (!mismoNombre && !mismoCodigo) {
+                    continue;
+                }
+                List<String> coincidencias = new ArrayList<>();
+                if (mismoNombre) {
+                    coincidencias.add(a.nombre().equals(b.nombre())
+                            ? "el mismo nombre («" + a.nombre() + "»)"
+                            : "el mismo nombre salvo mayúsculas y tildes («" + a.nombre() + "» y «" + b.nombre() + "»)");
+                }
+                if (mismoCodigo) {
+                    coincidencias.add("el mismo código salvo mayúsculas y tildes ("
+                            + a.codigoCorto() + " y " + b.codigoCorto() + ")");
+                }
+                avisos.add(new AvisoPrevalidacion(
+                        Severidad.AVISO,
+                        REGLA_ASIGNATURAS_REPETIDAS,
+                        a.codigo() + ", " + b.codigo(),
+                        2,
+                        1,
+                        a.codigo() + " y " + b.codigo() + " son de " + a.nivel() + " y tienen "
+                                + String.join(" y ", coincidencias) + ". Si son la misma asignatura, deja una."));
+            }
+        }
+        return avisos;
+    }
+
+    /**
+     * La comparación de {@link #asignaturasRepetidas}: descompone (NFD), quita las marcas combinantes
+     * (tildes, diéresis) y pasa a minúsculas. No toca espacios ni puntuación.
+     */
+    static String sinMayusculasNiTildes(String texto) {
+        return Normalizer.normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{Mn}", "")
+                .toLowerCase(Locale.ROOT);
     }
 
     /**

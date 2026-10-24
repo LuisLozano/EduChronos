@@ -463,6 +463,77 @@ class PrevalidacionEndpointTest {
                 .isEqualTo(delGet);
     }
 
+    /**
+     * (S251-1) EL GET CARGA LOS NIVELES DESDE JPA. Catálogo propio, sembrado aquí y no en
+     * {@link #contextoBase}: dos niveles, una actividad con subgrupos de los dos, otra de 1ESO con
+     * una asignatura de 2ESO y dos asignaturas de 1ESO con el mismo nombre. Salen los tres AVISO de
+     * niveles, cada uno una vez y en su orden. Mata una carga que no lea los niveles de los grupos, la
+     * asignatura de la actividad o el nivel de las asignaturas.
+     */
+    @Test
+    void niveles_elGetCargaLosNivelesDesdeJpa() throws Exception {
+        Nivel eso1 = nivelRepository.save(new Nivel("1ESO", 1));
+        Nivel eso2 = nivelRepository.save(new Nivel("2ESO", 2));
+        GrupoAdministrativo a1 = grupoRepository.save(new GrupoAdministrativo("1ºA", eso1, TipoGrupo.ORDINARIO, null));
+        GrupoAdministrativo a2 = grupoRepository.save(new GrupoAdministrativo("2ºA", eso2, TipoGrupo.ORDINARIO, null));
+        Subgrupo completo1 = subgrupoRepository.save(new Subgrupo("1ºA-Completo", Set.of(a1)));
+        Subgrupo completo2 = subgrupoRepository.save(new Subgrupo("2ºA-Completo", Set.of(a2)));
+        Profesor prof = profesorRepository.save(new Profesor("MAT8", "Uno"));
+        Asignatura mat1 = asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", eso1));
+        Asignatura mat2 = asignaturaRepository.save(new Asignatura("Mat", "Matemáticas", eso2));
+        asignaturaRepository.save(new Asignatura("Geogr", "Geografía e Historia", eso1));
+        asignaturaRepository.save(new Asignatura("Geo", "Geografía e Historia", eso1));
+        Aula aula = aulaRepository.save(new Aula("A1", TipoAula.ORDINARIA, null, null, null, null));
+        for (int i = 0; i < 10; i++) {
+            tramoRepository.save(new TramoSemanal(
+                    Dia.values()[i % 5], LocalTime.of(8 + i / 5, 0), LocalTime.of(9 + i / 5, 0), true, i + 1, null));
+        }
+        crearActividad("Mat-mix", 1, PatronTemporal.NEUTRA, mat1, aula, Set.of(prof), Set.of(completo1, completo2));
+        crearActividad("Mat-otro", 1, PatronTemporal.NEUTRA, mat2, aula, Set.of(prof), Set.of(completo1));
+        entityManager.flush();
+
+        MvcResult resultado = mockMvc.perform(get("/api/prevalidacion"))
+                .andExpect(status().isOk())
+                .andReturn();
+        List<String> deNiveles = JsonPath.read(
+                resultado.getResponse().getContentAsString(StandardCharsets.UTF_8),
+                "$[?(@.regla in ['ACTIVIDAD_NIVELES_MEZCLADOS', 'ASIGNATURA_DE_OTRO_NIVEL', "
+                        + "'ASIGNATURAS_REPETIDAS'])].entidadCodigo");
+
+        assertThat(deNiveles).containsExactly("Mat-mix", "Mat-otro", "Geo-1ESO, Geogr-1ESO");
+    }
+
+    /**
+     * (S251-2) LA GENERACIÓN USA LOS MISMOS DATOS DE NIVELES QUE EL GET, hermano de (S203-4). Al
+     * catálogo con el ERROR de (d) se le añaden, aquí, dos asignaturas de su nivel con el mismo nombre:
+     * los AVISO de niveles de la excepción son los del GET, y no están vacíos. Mata que la generación
+     * pase {@code DatosNiveles.VACIO}.
+     */
+    @Test
+    void niveles_laGeneracionUsaLosMismosDatosDeNivelesQueElGet() {
+        poblarCatalogoConErrorDeRepeticiones();
+        Nivel eso1 = grupoRepository.findByCodigo("1ºA").orElseThrow().getNivel();
+        asignaturaRepository.save(new Asignatura("Geogr", "Geografía e Historia", eso1));
+        asignaturaRepository.save(new Asignatura("Geo", "Geografía e Historia", eso1));
+        entityManager.flush();
+        List<AvisoPrevalidacion> delGet = prevalidacionService.prevalidar().stream()
+                .filter(a -> REGLAS_DE_NIVELES.contains(a.regla())).toList();
+        assertThat(delGet).as("precondición: el GET ve las repetidas").hasSize(1);
+
+        PrevalidacionFallidaException rechazo = catchThrowableOfType(
+                () -> generadorService.generar(5, null, null, null), PrevalidacionFallidaException.class);
+
+        assertThat(rechazo).isNotNull();
+        assertThat(rechazo.getAvisos().stream()
+                        .filter(a -> REGLAS_DE_NIVELES.contains(a.regla())).toList())
+                .isEqualTo(delGet);
+    }
+
+    private static final Set<String> REGLAS_DE_NIVELES = Set.of(
+            PrevalidacionService.REGLA_ACTIVIDAD_NIVELES_MEZCLADOS,
+            PrevalidacionService.REGLA_ASIGNATURA_DE_OTRO_NIVEL,
+            PrevalidacionService.REGLA_ASIGNATURAS_REPETIDAS);
+
     /** La descripción del ÚNICO hallazgo de la regla dada en la respuesta del GET. */
     private static String descripcionDe(MvcResult prevalidacion, String regla) throws Exception {
         List<String> descripciones = JsonPath.read(

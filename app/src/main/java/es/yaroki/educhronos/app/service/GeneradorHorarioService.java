@@ -294,6 +294,50 @@ public class GeneradorHorarioService {
     }
 
     /**
+     * El nivel de cada asignatura y los niveles de los grupos de cada actividad (S251,
+     * C-editor-por-nivel, condición 5 de O-actividad-por-nivel), que el problema no lleva porque el
+     * solver no razona por niveles. Los niveles de una actividad son los de los grupos de los
+     * subgrupos de todas sus plazas, sin repetir y por su orden pedagógico.
+     *
+     * <p>Lo llaman la generación, junto a {@link #cargarDatosAulas()}, y {@code PrevalidacionService},
+     * para que los dos den los mismos AVISO. Como {@link #cargarDatosAulas()}, recorre relaciones
+     * perezosas (asignatura y nivel, plazas, subgrupos, grupos): la generación lo llama sobre
+     * {@code this}, sin pasar por el proxy, y vale por la misma razón que allí.
+     */
+    @Transactional(readOnly = true)
+    public DatosNiveles cargarDatosNiveles() {
+        List<DatosNiveles.AsignaturaNivel> asignaturas = new ArrayList<>();
+        for (Asignatura asignatura : asignaturaRepository.findAll()) {
+            asignaturas.add(new DatosNiveles.AsignaturaNivel(
+                    asignatura.getCodigo(), asignatura.getCodigoCorto(), asignatura.getNombreCompleto(),
+                    asignatura.getNivel() != null ? asignatura.getNivel().getCodigo() : null));
+        }
+        List<DatosNiveles.ActividadNiveles> actividades = new ArrayList<>();
+        for (Actividad actividad : actividadRepository.findAll()) {
+            List<String> asignaturasDePlazas = new ArrayList<>();
+            Map<String, Integer> ordenPorNivel = new HashMap<>();
+            for (Plaza plaza : actividad.getPlazas()) {
+                asignaturasDePlazas.add(plaza.getAsignatura().getCodigo());
+                for (Subgrupo subgrupo : plaza.getSubgrupos()) {
+                    for (GrupoAdministrativo grupo : subgrupo.getGrupos()) {
+                        ordenPorNivel.put(grupo.getNivel().getCodigo(), grupo.getNivel().getOrden());
+                    }
+                }
+            }
+            List<String> niveles = ordenPorNivel.entrySet().stream()
+                    .sorted(Map.Entry.<String, Integer>comparingByValue().thenComparing(Map.Entry.comparingByKey()))
+                    .map(Map.Entry::getKey)
+                    .toList();
+            actividades.add(new DatosNiveles.ActividadNiveles(
+                    actividad.getCodigo(),
+                    actividad.getAsignatura() != null ? actividad.getAsignatura().getCodigo() : null,
+                    asignaturasDePlazas,
+                    niveles));
+        }
+        return new DatosNiveles(actividades, asignaturas);
+    }
+
+    /**
      * Orquesta la generación completa de un horario y lo PERSISTE (Fase 8,
      * Bloque 8.1; cierra D29 para la vía de OPTIMIZACIÓN). Encadena
      * {@link #cargarProblema()} → resolución del solver → {@link #guardar} y
@@ -448,12 +492,14 @@ public class GeneradorHorarioService {
         ProblemaHorario problema = cargarProblema();
         DatosCuadre cuadre = cargarDatosCuadre();
         DatosAulas aulas = cargarDatosAulas();
+        DatosNiveles niveles = cargarDatosNiveles();
 
         // Condiciones necesarias ANTES del solve (8.4-A, D18): un catálogo que las viola
         // no tiene horario posible, y fallar aquí nombra al recurso culpable en vez de
         // devolver un CpSolverStatus opaco tras agotar el presupuesto. Los datos del cuadre
-        // son los mismos que ve el GET (S203): sus AVISO viajan en la excepción si hay ERROR.
-        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, cuadre, aulas);
+        // y los de niveles son los mismos que ve el GET (S203, S251): sus AVISO viajan en la
+        // excepción si hay ERROR.
+        List<AvisoPrevalidacion> avisos = PrevalidacionService.prevalidar(problema, cuadre, aulas, niveles);
         if (avisos.stream().anyMatch(a -> a.severidad() == Severidad.ERROR)) {
             throw new PrevalidacionFallidaException(avisos);
         }

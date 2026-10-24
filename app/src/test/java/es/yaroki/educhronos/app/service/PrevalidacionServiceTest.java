@@ -1397,7 +1397,217 @@ class PrevalidacionServiceTest {
                 .containsExactly(BIBLIOTECA, RECREO_INSUFICIENTES);
     }
 
+    // ------------------------------------- niveles (S251, C-editor-por-nivel, condición 5)
+
+    private static final String MEZCLADOS = PrevalidacionService.REGLA_ACTIVIDAD_NIVELES_MEZCLADOS;
+    private static final String OTRO_NIVEL = PrevalidacionService.REGLA_ASIGNATURA_DE_OTRO_NIVEL;
+    private static final String REPETIDAS = PrevalidacionService.REGLA_ASIGNATURAS_REPETIDAS;
+
+    /** (N1) Subgrupos de dos niveles: un AVISO con el número de niveles contra 1 y los niveles en el texto. */
+    @Test
+    void niveles_actividadConDosNiveles_avisaUnaVez() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Mat-1y2", "Mat-1ESO", List.of("Mat-1ESO"), "1ESO", "2ESO")),
+                List.of(asignaturaNivel("Mat-1ESO", "Mat", "Matemáticas", "1ESO")));
+
+        assertThat(conNiveles(niveles)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+            assertThat(a.regla()).isEqualTo(MEZCLADOS);
+            assertThat(a.entidadCodigo()).isEqualTo("Mat-1y2");
+            assertThat(a.demanda()).isEqualTo(2);
+            assertThat(a.disponible()).isEqualTo(1);
+            assertThat(a.descripcion()).isEqualTo("La actividad 'Mat-1y2' tiene subgrupos de varios niveles "
+                    + "(1ESO, 2ESO). Una clase es de un solo nivel: revisa sus subgrupos.");
+        });
+    }
+
+    /**
+     * (N2) FRONTERA: un solo nivel y asignaturas de ese nivel, propia y de plaza, no avisan de nada;
+     * tampoco una reunión sin niveles con una asignatura de nivel.
+     */
+    @Test
+    void niveles_unNivelYSuAsignatura_nada() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Mat-1A", "Mat-1ESO", List.of("Mat-1ESO", "Mat-1ESO"), "1ESO"),
+                        actividadNiveles("REU", "Mat-2ESO", List.of("Mat-2ESO"))),
+                List.of(asignaturaNivel("Mat-1ESO", "Mat", "Matemáticas", "1ESO"),
+                        asignaturaNivel("Mat-2ESO", "Mat", "Matemáticas", "2ESO")));
+
+        assertThat(conNiveles(niveles)).isEmpty();
+    }
+
+    /** (N3) La asignatura de la actividad es de otro nivel: un AVISO, 1 contra 0, con el texto de B.4. */
+    @Test
+    void niveles_asignaturaDeLaActividadDeOtroNivel_avisa() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Biol-3A", "Biol-4ESO", List.of("Biol-3ESO"), "3ESO")),
+                List.of(asignaturaNivel("Biol-3ESO", "Biol", "Biología y Geología", "3ESO"),
+                        asignaturaNivel("Biol-4ESO", "Biol", "Biología y Geología", "4ESO")));
+
+        assertThat(conNiveles(niveles)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+            assertThat(a.regla()).isEqualTo(OTRO_NIVEL);
+            assertThat(a.entidadCodigo()).isEqualTo("Biol-3A");
+            assertThat(a.demanda()).isEqualTo(1);
+            assertThat(a.disponible()).isEqualTo(0);
+            assertThat(a.descripcion()).isEqualTo(
+                    "La actividad 'Biol-3A' es de 3ESO y usa Biol-4ESO, de 4ESO. Elige la asignatura de 3ESO.");
+        });
+    }
+
+    /** (N4) Sin asignatura propia, la de una PLAZA es de otro nivel: también avisa. */
+    @Test
+    void niveles_asignaturaDeUnaPlazaDeOtroNivel_avisa() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Opt-3A", null, List.of("Biol-3ESO", "Biol-4ESO"), "3ESO")),
+                List.of(asignaturaNivel("Biol-3ESO", "Biol", "Biología y Geología", "3ESO"),
+                        asignaturaNivel("Biol-4ESO", "Biol", "Biología y Geología", "4ESO")));
+
+        assertThat(conNiveles(niveles)).extracting(AvisoPrevalidacion::regla, AvisoPrevalidacion::entidadCodigo)
+                .containsExactly(tuple(OTRO_NIVEL, "Opt-3A"));
+    }
+
+    /** (N5) Varias asignaturas ajenas: UN aviso que las nombra todas, la propia primero, sin repetir. */
+    @Test
+    void niveles_variasAsignaturasAjenas_unAvisoConTodas() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Opt-3A", "Biol-4ESO", List.of("Mat-2ESO", "Biol-4ESO", "Mat-2ESO"), "3ESO")),
+                List.of(asignaturaNivel("Biol-4ESO", "Biol", "Biología y Geología", "4ESO"),
+                        asignaturaNivel("Mat-2ESO", "Mat", "Matemáticas", "2ESO")));
+
+        assertThat(conNiveles(niveles)).singleElement()
+                .extracting(AvisoPrevalidacion::descripcion)
+                .isEqualTo("La actividad 'Opt-3A' es de 3ESO y usa Biol-4ESO, de 4ESO, y Mat-2ESO, de 2ESO."
+                        + " Elige la asignatura de 3ESO.");
+    }
+
+    /** (N6) Una asignatura SIN nivel no avisa, aunque la actividad sea de un nivel. */
+    @Test
+    void niveles_asignaturaSinNivel_noAvisa() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Tut-3A", "Tut", List.of("Tut"), "3ESO")),
+                List.of(asignaturaNivel("Tut", "Tut", "Tutoría", null)));
+
+        assertThat(conNiveles(niveles)).isEmpty();
+    }
+
+    /** (N7) Una actividad MEZCLADA solo avisa como mezclada, aunque su asignatura no sea de ninguno de sus niveles. */
+    @Test
+    void niveles_actividadMezclada_noAvisaDeAsignaturaDeOtroNivel() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Mat-mix", "Mat-4ESO", List.of("Mat-4ESO"), "1ESO", "2ESO")),
+                List.of(asignaturaNivel("Mat-4ESO", "Mat", "Matemáticas", "4ESO")));
+
+        assertThat(conNiveles(niveles)).extracting(AvisoPrevalidacion::regla).containsExactly(MEZCLADOS);
+    }
+
+    /** (N8) Dos asignaturas del mismo nivel con el mismo nombre: un AVISO por el par, 2 contra 1. */
+    @Test
+    void niveles_mismoNombreEnUnNivel_avisaDelPar() {
+        DatosNiveles niveles = new DatosNiveles(List.of(),
+                List.of(asignaturaNivel("Geogr-3ESO", "Geogr", "Geografía e Historia", "3ESO"),
+                        asignaturaNivel("Geo-3ESO", "Geo", "Geografía e Historia", "3ESO")));
+
+        assertThat(conNiveles(niveles)).singleElement().satisfies(a -> {
+            assertThat(a.severidad()).isEqualTo(Severidad.AVISO);
+            assertThat(a.regla()).isEqualTo(REPETIDAS);
+            assertThat(a.entidadCodigo()).isEqualTo("Geo-3ESO, Geogr-3ESO");
+            assertThat(a.demanda()).isEqualTo(2);
+            assertThat(a.disponible()).isEqualTo(1);
+            assertThat(a.descripcion()).isEqualTo("Geo-3ESO y Geogr-3ESO son de 3ESO y tienen el mismo nombre "
+                    + "(«Geografía e Historia»). Si son la misma asignatura, deja una.");
+        });
+    }
+
+    /**
+     * (N9) El mismo código corto salvo mayúsculas y tildes: avisa. Los nombres difieren en un espacio,
+     * que cuenta, así que el texto solo nombra el código.
+     */
+    @Test
+    void niveles_mismoCodigoSalvoMayusculasYTildes_avisa() {
+        DatosNiveles niveles = new DatosNiveles(List.of(),
+                List.of(asignaturaNivel("EFis-4ESO", "EFis", "Ed. Fisica", "4ESO"),
+                        asignaturaNivel("EFÍS-4ESO", "EFÍS", "Ed.Física", "4ESO")));
+
+        assertThat(conNiveles(niveles)).singleElement()
+                .extracting(AvisoPrevalidacion::entidadCodigo, AvisoPrevalidacion::descripcion)
+                .containsExactly("EFis-4ESO, EFÍS-4ESO",
+                        "EFis-4ESO y EFÍS-4ESO son de 4ESO y tienen el mismo código salvo mayúsculas y "
+                                + "tildes (EFis y EFÍS). Si son la misma asignatura, deja una.");
+    }
+
+    /** (N10) Mismo nombre Y mismo código: UN aviso, con las dos coincidencias en una frase. */
+    @Test
+    void niveles_mismoNombreYCodigo_unSoloAviso() {
+        DatosNiveles niveles = new DatosNiveles(List.of(),
+                List.of(asignaturaNivel("Lat-1BACH", "Lat", "Latín", "1BACH"),
+                        asignaturaNivel("LAT-1BACH", "LAT", "Latín", "1BACH")));
+
+        assertThat(conNiveles(niveles)).singleElement()
+                .extracting(AvisoPrevalidacion::descripcion)
+                .isEqualTo("LAT-1BACH y Lat-1BACH son de 1BACH y tienen el mismo nombre («Latín») y el mismo "
+                        + "código salvo mayúsculas y tildes (LAT y Lat). Si son la misma asignatura, deja una.");
+    }
+
+    /** (N11) Mismo nombre y código en NIVELES DISTINTOS, o sin nivel: ninguna repetida. */
+    @Test
+    void niveles_repetidasEnNivelesDistintosOSinNivel_nada() {
+        DatosNiveles niveles = new DatosNiveles(List.of(),
+                List.of(asignaturaNivel("Mat-1ESO", "Mat", "Matemáticas", "1ESO"),
+                        asignaturaNivel("Mat-2ESO", "Mat", "Matemáticas", "2ESO"),
+                        asignaturaNivel("Tut", "Tut", "Tutoría", null),
+                        asignaturaNivel("TUT", "TUT", "Tutoría", null)));
+
+        assertThat(conNiveles(niveles)).isEmpty();
+    }
+
+    /** (N12) Orden: los de niveles al final, mezcladas, de otro nivel y repetidas, y cada bloque por código. */
+    @Test
+    void niveles_orden_mezcladasOtroNivelRepetidas_porCodigo() {
+        DatosNiveles niveles = new DatosNiveles(
+                List.of(actividadNiveles("Z-mix", null, List.of("Mat-1ESO"), "1ESO", "2ESO"),
+                        actividadNiveles("B-otro", "Mat-2ESO", List.of("Mat-2ESO"), "1ESO"),
+                        actividadNiveles("A-mix", null, List.of("Mat-1ESO"), "1ESO", "2ESO"),
+                        actividadNiveles("A-otro", "Mat-2ESO", List.of("Mat-2ESO"), "1ESO")),
+                List.of(asignaturaNivel("Mat-1ESO", "Mat", "Matemáticas", "1ESO"),
+                        asignaturaNivel("Mat-2ESO", "Mat", "Matemáticas", "2ESO"),
+                        asignaturaNivel("Mates-2ESO", "Mates", "Matemáticas", "2ESO")));
+
+        assertThat(conNiveles(niveles))
+                .extracting(AvisoPrevalidacion::regla, AvisoPrevalidacion::entidadCodigo)
+                .containsExactly(
+                        tuple(MEZCLADOS, "A-mix"), tuple(MEZCLADOS, "Z-mix"),
+                        tuple(OTRO_NIVEL, "A-otro"), tuple(OTRO_NIVEL, "B-otro"),
+                        tuple(REPETIDAS, "Mat-2ESO, Mates-2ESO"));
+    }
+
+    /** (N13) Las sobrecargas sin datos de niveles pasan {@link DatosNiveles#VACIO}: nada de niveles. */
+    @Test
+    void niveles_sobrecargaSinDatosDeNiveles_nada() {
+        ProblemaHorario problema = problemaSinActividades(tramosEnDias(5, 1));
+
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO)).isEmpty();
+        assertThat(PrevalidacionService.prevalidar(problema, DatosCuadre.VACIO, DatosAulas.VACIO, DatosNiveles.VACIO))
+                .isEmpty();
+    }
+
     // ------------------------------------------------------------------- helpers
+
+    /** Problema vacío y sin datos de cuadre ni de aulas: solo pueden hablar las reglas de niveles. */
+    private static List<AvisoPrevalidacion> conNiveles(DatosNiveles niveles) {
+        return PrevalidacionService.prevalidar(problemaSinActividades(tramosEnDias(5, 1)),
+                DatosCuadre.VACIO, DatosAulas.VACIO, niveles);
+    }
+
+    private static DatosNiveles.ActividadNiveles actividadNiveles(
+            String codigo, String asignatura, List<String> asignaturasDePlazas, String... niveles) {
+        return new DatosNiveles.ActividadNiveles(codigo, asignatura, asignaturasDePlazas, List.of(niveles));
+    }
+
+    private static DatosNiveles.AsignaturaNivel asignaturaNivel(
+            String codigo, String corto, String nombre, String nivel) {
+        return new DatosNiveles.AsignaturaNivel(codigo, corto, nombre, nivel);
+    }
 
     private static DatosCuadre datos(
             Map<String, Integer> profesores, Map<String, Integer> grupos, Set<String> noClase) {
