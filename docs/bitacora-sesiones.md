@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S248. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S249. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S248). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S249). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10836,3 +10836,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: los textos de E2 y E3 de F2 ponían comillas invertidas en `docs/tecnica/`, donde marcan rutas (una parada). Sin coste: en F1, dos preguntas de forma y una cifra del T0 discreparon, y T2 no recogía dos piezas de E14; todo lo resolvieron enmiendas tras la parada del contraste. De Claude Code, sin coste: en el T0, 706 líneas por 705, 14 líneas de grep por 16 y tres documentos por cuatro; el `aplicar.py` de F1 quedó fuera del manifiesto (corregido), y la enmienda F2-E1 se aplicó con un script en línea sin guardar. El contador de rutas de S243 da falsos inexistentes. Defectos distintos: el disparador no salta.
   SUITES. Sin código de la aplicación: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). `scripts/` no tiene suite: su autoprueba. Bundle sin compilar, 651,97 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 67 líneas del commit de cierre sin índice, 2 788 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 249 — O-actividad-por-nivel (H5), C-alcance-actividad-por-nivel: **O-ACTIVIDAD-POR-NIVEL ABIERTO, 0 DE 7, INTERCALADO ANTES DE LA CONDICIÓN 8 DE O-USO-CENTRO: LA ASIGNATURA PASA A SER UNA MATERIA DE UN NIVEL, CON EL NIVEL EN SU CÓDIGO. O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Apertura de objetivo, sin código, con `O-uso-centro` esperando fecha (precedentes S183 y S236). Material en `/home/luis/educhronos-aceptacion/s249/` (t0, t0bis, t0ter y cierre).
+  HECHO. T0 de solo lectura con autoprueba de 6 defectos: `tests` #131 y #132 en verde; 27 de 100 y 26 de 112 asignaturas en varios niveles, ninguna actividad mezcla niveles, y crear y editar comparten `ActividadForm`. T0-bis (3 defectos): filtrando por nivel quedan 2 repetidas por base. T0-ter (2 defectos): partir deja 141 y 152 asignaturas, sin reglas de aula que copiar y con 21 sitios que usan el código como clave. C0 del cierre.
+  CRITERIO. `O-actividad-por-nivel` escrito en §3, siete condiciones: asignatura con nivel, migración, nada se rompe, editor por nivel, avisos, filtro por tipo y versión. 0 de 7. `C-alcance-actividad-por-nivel` HECHO. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: EP (abrir), EQ (materia de un nivel, con el nivel en el código), ER (asistente después), ES (Séneca fuera), ET (versión) y EU (criterio). Del arquitecto, doce, en `s249/cierre/c1/decisiones.txt`.
+  DEUDA. Nacen `D-actividad-sin-asistente` y `D-carga-centro-sin-nivel` (mejoras futuras, sin objetivo). `D-asignatura-sin-nivel` toma sede en el objetivo. Higiene/Método sigue en 7.
+  DEFECTOS. Del arquitecto, con coste: el C1 afirmó sin medir las guardas del aplicar.py del molde (un respaldo en /tmp que no existe), y el contraste lo paró (una parada; instancia de `D-contrato-desde-resumen`). Sin coste: la primera propuesta de EQ (un conjunto de niveles por asignatura) suponía que un código es una materia, y el usuario la corrigió; el T0 no pedía autoprueba para la M3b; el C0 buscaba «crónica de archivado», que la crónica no lleva. De Claude Code, sin coste: en el T0, la captura del código de salida del curl iba tras un echo (rehecha). Defectos distintos: el disparador no salta.
+  SUITES. Sin código: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). Bundle 651,97 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 89 líneas del commit de cierre sin índice, 2 606 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
