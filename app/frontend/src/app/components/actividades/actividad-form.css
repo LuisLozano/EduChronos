@@ -44,6 +44,11 @@
 .actividad-form__fila--1 {
   grid-template-columns: 1fr 1fr 2fr;
 }
+/* S251: en una CLASE la fila 1 suma el nivel, estrecho porque sus códigos son cortos, y la
+   casilla con su anchura; los cinco caben en una línea y la asignatura sigue siendo la ancha. */
+.actividad-form__fila--1:has(.actividad-form__nivel) {
+  grid-template-columns: 1fr 1fr calc(4 * var(--e6)) auto 2fr;
+}
 .actividad-form__fila--2 {
   grid-template-columns: repeat(3, calc(6 * var(--e6))) auto;
 }
