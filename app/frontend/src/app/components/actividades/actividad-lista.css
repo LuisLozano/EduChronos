@@ -19,6 +19,11 @@
   gap: var(--e2);
 }
 
+/* S251: el desplegable de tipo, bajo la caja de búsqueda de la cabecera. */
+.actividades__filtro-tipo {
+  margin: var(--e2) 0;
+}
+
 /* S225: la línea de la búsqueda por pertenencia, bajo la caja y con el tono de los
    mensajes de estado-lista. */
 .actividades__pertenencia {

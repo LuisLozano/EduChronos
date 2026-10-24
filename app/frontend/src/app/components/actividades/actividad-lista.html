@@ -9,10 +9,21 @@
     [total]="actividades().length"
     [coincidencias]="visibles().length"
     [mostrarContador]="!cargando() && actividades().length > 0"
+    [filtroExterno]="tipo() !== ''"
     [(busqueda)]="busqueda"
     rotuloAlta="Nueva actividad"
     (alta)="nuevo()"
   />
+
+  <!-- S251 (condición 6 de O-actividad-por-nivel): el tipo filtra junto con la búsqueda. Va
+       bajo la caja y no en la cabecera, que comparten las siete listas; con un tipo elegido, la
+       cabecera cuenta «n de N» por `filtroExterno`. -->
+  <select class="actividades__filtro-tipo" aria-label="Filtrar por tipo" [value]="tipo()" (change)="elegirTipo($event)">
+    <option value="">Todos los tipos</option>
+    @for (t of tipos; track t[0]) {
+    <option [value]="t[0]">{{ t[1] }}</option>
+    }
+  </select>
 
   <!-- S225: la búsqueda por pertenencia dice de quién son las filas, o que no pudo cargarse.
        Va aquí y no en la cabecera, que comparten las siete listas. -->
@@ -33,7 +44,7 @@
     [error]="error()"
     [total]="actividades().length"
     [coincidencias]="visibles().length"
-    [busqueda]="busqueda()"
+    [busqueda]="descripcionFiltro()"
     textoVacio="No hay actividades todavía. Crea la primera con «Nueva actividad»."
   />
 

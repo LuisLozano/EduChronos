@@ -59,6 +59,12 @@ export class CabeceraLista {
   readonly mostrarContador = input.required<boolean>();
   /** Texto exacto del botón de alta, con su género: «Nueva aula», «Nuevo grupo». */
   readonly rotuloAlta = input.required<string>();
+  /**
+   * La lista filtra además por algo que no es la caja (S251: el tipo de actividad), y entonces
+   * el contador dice «n de N» aunque la caja esté vacía. Opcional y apagado: las listas que solo
+   * buscan no lo pasan y su contador no cambia.
+   */
+  readonly filtroExterno = input(false);
 
   /**
    * Texto que hay escrito en la caja, en las DOS direcciones: la cabecera lo
@@ -79,11 +85,13 @@ export class CabeceraLista {
   private readonly hayConsulta = computed(() => this.busqueda().trim().length > 0);
 
   /**
-   * Texto ya montado del contador: «334» sin consulta, «17 de 334» con ella. Va
-   * aquí y no como dos ramas en la plantilla porque así el estado se asevera
-   * comparando UNA cadena, sin depender de qué nodos monte cada rama.
+   * Texto ya montado del contador: «334» sin consulta, «17 de 334» con ella o con
+   * {@link filtroExterno}. Va aquí y no como dos ramas en la plantilla porque así el
+   * estado se asevera comparando UNA cadena, sin depender de qué nodos monte cada rama.
    */
   protected readonly textoContador = computed(() =>
-    this.hayConsulta() ? `${this.coincidencias()} de ${this.total()}` : `${this.total()}`,
+    this.hayConsulta() || this.filtroExterno()
+      ? `${this.coincidencias()} de ${this.total()}`
+      : `${this.total()}`,
   );
 }

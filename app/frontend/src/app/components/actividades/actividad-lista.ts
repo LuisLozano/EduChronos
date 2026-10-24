@@ -8,7 +8,7 @@ import { AsignaturaService } from '../../services/asignatura.service';
 import { GrupoService } from '../../services/grupo.service';
 import { ProfesorService } from '../../services/profesor.service';
 import { SubgrupoService } from '../../services/subgrupo.service';
-import { Actividad, ETIQUETA_TIPO_ACTIVIDAD } from '../../models/actividad.model';
+import { Actividad, ETIQUETA_TIPO_ACTIVIDAD, TipoActividad } from '../../models/actividad.model';
 import { ActividadForm, ActividadGuardada } from './actividad-form';
 import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
@@ -69,13 +69,34 @@ export class ActividadLista implements OnInit {
   protected readonly busqueda = signal('');
 
   /**
-   * Aviso tras guardar (S227, condición 10 de O-interfaz): la actividad guardada ya no casa con
-   * la búsqueda y desaparecería sin explicación. `linkedSignal` de la búsqueda: cambiarla lo
-   * borra; abrir otra vez el editor también ({@link abrirForm}). `null` = sin aviso.
+   * Tipo elegido en el desplegable bajo la cabecera (S251, condición 6 de O-actividad-por-nivel).
+   * '' = «Todos los tipos». Se suma a la búsqueda: una fila se ve si cumple las dos.
    */
-  protected readonly aviso = linkedSignal<string, string | null>({
-    source: this.busqueda,
+  protected readonly tipo = signal<TipoActividad | ''>('');
+
+  /** Opciones del desplegable de tipo: el código y su texto visible, como en el formulario. */
+  protected readonly tipos = Object.entries(ETIQUETA_TIPO_ACTIVIDAD) as [TipoActividad, string][];
+
+  /**
+   * Aviso tras guardar (S227, condición 10 de O-interfaz): la actividad guardada ya no casa con
+   * la búsqueda o con el tipo y desaparecería sin explicación. `linkedSignal` de los dos filtros:
+   * cambiar cualquiera lo borra (S251); abrir otra vez el editor también ({@link abrirForm}).
+   * `null` = sin aviso.
+   */
+  protected readonly aviso = linkedSignal<readonly [string, TipoActividad | ''], string | null>({
+    source: () => [this.busqueda(), this.tipo()] as const,
     computation: () => null,
+  });
+
+  /**
+   * Lo que está filtrando, para el mensaje de lista sin resultados (S251): la búsqueda y la
+   * etiqueta del tipo unidas por « · », lo que haya de las dos; vacío sin ninguna.
+   */
+  protected readonly descripcionFiltro = computed(() => {
+    const tipo = this.tipo();
+    return [this.busqueda(), tipo === '' ? '' : ETIQUETA_TIPO_ACTIVIDAD[tipo]]
+      .filter((parte) => parte !== '')
+      .join(' · ');
   });
 
   /** Las cuatro listas de la búsqueda por pertenencia; `null` mientras no han llegado. */
@@ -124,14 +145,31 @@ export class ActividadLista implements OnInit {
    * Filas que casan con la consulta: las que pertenecen a lo que casa exactamente o, si no casa
    * nada, las que casan por texto. `filter` es el método del array, no un nombre nuestro. Con
    * la búsqueda vacía devuelve todas —{@link coincide} da `true` sin consulta y
-   * {@link casarExacto} da `null`—, así que la lista arranca completa.
+   * {@link casarExacto} da `null`—, así que la lista arranca completa. Desde S251 la fila
+   * tiene que ser además del {@link tipo} elegido: las dos condiciones a la vez.
    */
-  protected readonly visibles = computed(() => {
+  protected readonly visibles = computed(() =>
+    this.actividades().filter((f) => this.casaConBusqueda(f) && this.casaConTipo(f)),
+  );
+
+  /** Si la fila casa con la búsqueda: por pertenencia si algo casa exactamente, si no por texto. */
+  private casaConBusqueda(actividad: Actividad): boolean {
     const pertenencia = this.pertenencia();
     return pertenencia
-      ? this.actividades().filter(pertenencia.pertenece)
-      : this.actividades().filter((f) => coincide(this.textoFila(f), this.busqueda()));
-  });
+      ? pertenencia.pertenece(actividad)
+      : coincide(this.textoFila(actividad), this.busqueda());
+  }
+
+  /** Si la fila es del tipo elegido; con «Todos los tipos», todas. */
+  private casaConTipo(actividad: Actividad): boolean {
+    const tipo = this.tipo();
+    return tipo === '' || actividad.tipo === tipo;
+  }
+
+  /** El desplegable de tipo cambió: '' es «Todos los tipos». */
+  protected elegirTipo(event: Event): void {
+    this.tipo.set((event.target as HTMLSelectElement).value as TipoActividad | '');
+  }
 
   ngOnInit(): void {
     const buscar = this.ruta.snapshot.queryParamMap.get('buscar');
@@ -212,17 +250,27 @@ export class ActividadLista implements OnInit {
   /**
    * El aviso de una actividad recién guardada: solo si la actividad está en la lista completa
    * pero no en la filtrada. Si no está en ninguna —otra pestaña la borró—, no hay nada que
-   * explicar.
+   * explicar. Dice qué la oculta (S251): la búsqueda, el tipo o los dos.
    */
   private avisoTrasGuardar(id: number): string | null {
-    const busqueda = this.busqueda();
-    // Sin búsqueda la filtrada ES la completa (pertenencia.ts:65-67, busqueda.ts:88-94): la
-    // condición de abajo basta y no hace falta preguntar si hay búsqueda (M3c, S227).
+    // Sin búsqueda y con todos los tipos la filtrada ES la completa (pertenencia.ts:65-67,
+    // busqueda.ts:88-94, casaConTipo): la condición de abajo basta y no hace falta preguntar si
+    // hay filtro (M3c, S227). Con un tipo elegido, la filtrada ya no es la completa aunque la
+    // caja esté vacía, y el aviso sale igual.
     const guardada = this.actividades().find((a) => a.id === id);
     if (!guardada || this.visibles().some((a) => a.id === id)) {
       return null;
     }
-    return `Actividad «${guardada.codigo}» guardada. No aparece en la lista porque no corresponde a «${busqueda}».`;
+    const porBusqueda = !this.casaConBusqueda(guardada);
+    const porTipo = !this.casaConTipo(guardada);
+    const tipo = this.tipo();
+    const delTipo = tipo === '' ? '' : `es del tipo «${ETIQUETA_TIPO_ACTIVIDAD[tipo]}»`;
+    const causa = porBusqueda && porTipo
+      ? `no corresponde a «${this.busqueda()}» ni ${delTipo}`
+      : porTipo
+        ? `no ${delTipo}`
+        : `no corresponde a «${this.busqueda()}»`;
+    return `Actividad «${guardada.codigo}» guardada. No aparece en la lista porque ${causa}.`;
   }
 
   protected borrar(actividad: Actividad): void {

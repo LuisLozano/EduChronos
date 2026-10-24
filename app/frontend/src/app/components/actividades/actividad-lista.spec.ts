@@ -100,6 +100,14 @@ describe('ActividadLista', () => {
     plazas: [{ ...PLAZA, id: 13, codigo: 'Len-1ºB-P1', asignatura: 'Len', profesores: ['LENB'], subgrupos: ['1ºB-Completo'] }],
   };
   const TRES_FILAS = [UNA_PLAZA, DOS_PLAZAS, DE_LENGUA];
+  /** Una REUNIÓN (S251) que también casa con «mat» por su código y su asignatura. */
+  const REUNION = {
+    ...UNA_PLAZA,
+    id: 8,
+    codigo: 'REU-Mat',
+    tipo: 'REUNION',
+    plazas: [{ ...PLAZA, id: 14, codigo: 'REU-Mat-P1', aulaFija: null, subgrupos: [] }],
+  };
   const CATALOGO: CatalogoFixture = {
     profesores: [{ id: 1, codigo: 'MATA' }, { id: 2, codigo: 'LENB' }],
     asignaturas: [{ id: 1, codigo: 'Mat', nombreCompleto: 'Matemáticas' }, { id: 2, codigo: 'Len', nombreCompleto: 'Lengua' }],
@@ -460,6 +468,70 @@ describe('ActividadLista', () => {
     expect(linea()).toBe('No se pudo cargar la búsqueda por pertenencia; se busca solo por texto.');
   });
 
+  /** Elige un tipo en el desplegable bajo la cabecera, como una persona; '' es «Todos los tipos». */
+  async function elegirTipo(valor: string): Promise<void> {
+    const desplegable = fixture.nativeElement.querySelector('.actividades__filtro-tipo') as HTMLSelectElement;
+    desplegable.value = valor;
+    desplegable.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+  }
+
+  /** (19) S251: el tipo deja solo las filas de ese tipo, y «Todos los tipos» las devuelve. */
+  it('(19) el desplegable de tipo filtra la tabla y «Todos los tipos» quita el filtro', async () => {
+    flushLista([UNA_PLAZA, DOS_PLAZAS, REUNION]);
+    await fixture.whenStable();
+
+    await elegirTipo('REUNION');
+    expect(codigosVisibles()).toEqual(['REU-Mat']);
+
+    await elegirTipo('');
+    expect(codigosVisibles()).toEqual(['Mat-1ºA', 'Bloque', 'REU-Mat']);
+  });
+
+  /**
+   * (20) El tipo se SUMA a la búsqueda: «mat» casa con Mat-1ºA y REU-Mat, y con Clase queda solo
+   * Mat-1ºA. Bloque es Clase pero no casa con «mat»: una u otra condición la dejaría ver.
+   */
+  it('(20) el tipo y la búsqueda filtran a la vez', async () => {
+    flushLista([UNA_PLAZA, DOS_PLAZAS, REUNION]);
+    await fixture.whenStable();
+
+    await buscar('mat');
+    expect(codigosVisibles()).toEqual(['Mat-1ºA', 'REU-Mat']);
+
+    await elegirTipo('CLASE');
+    expect(codigosVisibles()).toEqual(['Mat-1ºA']);
+  });
+
+  /** (21) Con un tipo elegido y la caja vacía, el contador de la cabecera cuenta lo filtrado. */
+  it('(21) con un tipo elegido el contador dice «n de N» sin búsqueda', async () => {
+    flushLista([UNA_PLAZA, DOS_PLAZAS, REUNION]);
+    await fixture.whenStable();
+    const contador = (): string =>
+      fixture.nativeElement.querySelector('.cabecera-lista__contador').textContent.trim();
+    expect(contador()).toBe('3');
+
+    await elegirTipo('REUNION');
+    expect(contador()).toBe('1 de 3');
+  });
+
+  /**
+   * (22) Un tipo que no deja filas dice cuál es, y con búsqueda los dos unidos por « · »: el
+   * mensaje no puede quedarse en «Ningún resultado para «»» con la caja vacía.
+   */
+  it('(22) sin resultados por tipo, el mensaje nombra el tipo y, si la hay, la búsqueda', async () => {
+    flushLista([UNA_PLAZA, DOS_PLAZAS]);
+    await fixture.whenStable();
+    const mensaje = (): string =>
+      fixture.nativeElement.querySelector('.estado-lista__sin-resultados').textContent.trim();
+
+    await elegirTipo('FUNCION');
+    expect(mensaje()).toBe('Ningún resultado para «Función».');
+
+    await buscar('zzz');
+    expect(mensaje()).toBe('Ningún resultado para «zzz · Función».');
+  });
+
   /**
    * Aviso tras guardar con la lista filtrada (S227, condición 10 de O-interfaz). «BYG1» es un
    * profesor del catálogo, así que la búsqueda va por PERTENENCIA: la actividad deja de casar
@@ -511,7 +583,7 @@ describe('ActividadLista', () => {
       expect(aviso()).toBeNull();
     });
 
-    it('T3c sin búsqueda, guardar no da aviso', async () => {
+    it('T3c sin búsqueda y con todos los tipos, guardar no da aviso', async () => {
       flushLista([CON_BYG, DE_LENGUA], CATALOGO_BYG);
       await fixture.whenStable();
       const inst = fixture.componentInstance as unknown as Interna;
@@ -544,6 +616,49 @@ describe('ActividadLista', () => {
       dialogoDevuelve(undefined);
       inst.editar(UNA_PLAZA);
       await fixture.whenStable();
+      expect(aviso()).toBeNull();
+    });
+
+    /** La misma Mat-1ºA, guardada como reunión: deja de ser de Clase. */
+    const COMO_REUNION = { ...UNA_PLAZA, tipo: 'REUNION' };
+    const CON_BYG_COMO_REUNION = { ...CON_BYG, tipo: 'REUNION' };
+
+    it('T3f sin búsqueda y con un tipo elegido, la guardada de otro tipo da el aviso del tipo', async () => {
+      flushLista([CON_BYG, DE_LENGUA], CATALOGO_BYG);
+      await fixture.whenStable();
+      await elegirTipo('CLASE');
+      const inst = fixture.componentInstance as unknown as Interna;
+      await guardarYRecargar(inst, [COMO_REUNION, DE_LENGUA]);
+
+      expect(codigosVisibles()).toEqual(['Len-1ºB']);
+      expect(aviso()).toBe('Actividad «Mat-1ºA» guardada. No aparece en la lista porque no es del tipo «Clase».');
+    });
+
+    it('T3g la guardada que deja de casar con la búsqueda y con el tipo nombra los dos', async () => {
+      const inst = await filtradaPorByg();
+      await elegirTipo('CLASE');
+      await guardarYRecargar(inst, [COMO_REUNION, DE_LENGUA]); // sin BYG1 y reunión
+
+      expect(aviso()).toBe(
+        'Actividad «Mat-1ºA» guardada. No aparece en la lista porque no corresponde a «BYG1» ni es del tipo «Clase».',
+      );
+    });
+
+    it('T3h con búsqueda y tipo, la que sigue casando con la búsqueda solo nombra el tipo', async () => {
+      const inst = await filtradaPorByg();
+      await elegirTipo('CLASE');
+      await guardarYRecargar(inst, [CON_BYG_COMO_REUNION, DE_LENGUA]); // con BYG1, pero reunión
+
+      expect(aviso()).toBe('Actividad «Mat-1ºA» guardada. No aparece en la lista porque no es del tipo «Clase».');
+    });
+
+    it('T3i con el aviso a la vista, cambiar el tipo lo quita', async () => {
+      const inst = await filtradaPorByg();
+      await guardarYRecargar(inst, [UNA_PLAZA, DE_LENGUA]);
+      expect(aviso()).toBe(TEXTO_AVISO);
+
+      await elegirTipo('CLASE');
+
       expect(aviso()).toBeNull();
     });
   });

@@ -149,4 +149,20 @@ describe('CabeceraLista', () => {
       raiz.querySelector('.cabecera-lista')?.classList.contains('cabecera-lista-fija'),
     ).toBe(false);
   });
+
+  /**
+   * (S251) Con `filtroExterno` la lista filtra por algo que no es la caja: el contador dice
+   * «n de N» con la caja vacía. Sin pasarlo, como las otras seis listas, sigue diciendo «N»
+   * con los mismos números distintos, así que mata tanto ignorar la entrada como encenderla
+   * por defecto.
+   */
+  it('(9) con filtroExterno el contador dice «n de N» aunque la caja esté vacía', async () => {
+    fixture.componentRef.setInput('coincidencias', 7);
+    await fixture.whenStable();
+    expect(contador()).toBe('42');
+
+    fixture.componentRef.setInput('filtroExterno', true);
+    await fixture.whenStable();
+    expect(contador()).toBe('7 de 42');
+  });
 });
