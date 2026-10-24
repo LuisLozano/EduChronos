@@ -3,9 +3,10 @@ import { provideHttpClient } from '@angular/common/http';
 import {
   provideHttpClientTesting,
   HttpTestingController,
+  TestRequest,
 } from '@angular/common/http/testing';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { ActividadForm, plazasConSubgrupoRepetido } from './actividad-form';
+import { ActividadForm, nivelDeLasPlazas, opcionesDelNivel, plazasConSubgrupoRepetido } from './actividad-form';
 
 /**
  * Congela el formulario de actividad de UNA plaza. Hereda del molde de `grupo-form` el
@@ -16,11 +17,16 @@ import { ActividadForm, plazasConSubgrupoRepetido } from './actividad-form';
  * (f1)-(f7, S201).
  * Secuencia propia desde (1).
  *
- * <p><b>`montar()` hace CUATRO peticiones.</b> El `ngOnInit` pide asignaturas,
- * profesores, aulas y subgrupos. Con `http.verify()` en el `afterEach`, cualquier caso
- * que montase sin consumirlas fallaría por "open request", así que el flush de las cuatro
- * vive DENTRO del helper: es parte del montaje, no del escenario. El `detectChanges()`
- * posterior pinta los `<option>` que acaban de llegar.
+ * <p><b>`montar()` hace SEIS peticiones.</b> El `ngOnInit` pide asignaturas,
+ * profesores, aulas y subgrupos y, desde S251, niveles y grupos. Con `http.verify()` en el
+ * `afterEach`, cualquier caso que montase sin consumirlas fallaría por "open request", así que
+ * el flush de las seis vive DENTRO del helper: es parte del montaje, no del escenario. El
+ * `detectChanges()` posterior pinta los `<option>` que acaban de llegar.
+ *
+ * <p><b>Las altas eligen el nivel en el montaje (S251, enmienda E9).</b> En el alta de una CLASE
+ * el nivel es obligatorio y, sin él, asignaturas y subgrupos se vacían. Las fixtures de siempre
+ * son todas de 1ESO y los helpers de alta lo eligen ({@link elegirNivel}), así que los casos de
+ * antes ven y envían lo mismo que antes. Los casos del nivel montan sin él cuando lo necesitan.
  */
 describe('ActividadForm', () => {
   let fixture: ComponentFixture<ActividadForm>;
@@ -28,8 +34,8 @@ describe('ActividadForm', () => {
   let ref: { close: ReturnType<typeof vi.fn> };
 
   const ASIGNATURAS = [
-    { id: 1, codigo: 'Mat', nombreCompleto: 'Matemáticas' },
-    { id: 2, codigo: 'CyR', nombreCompleto: 'Cultura y Robótica' },
+    { id: 1, codigo: 'Mat', nombreCompleto: 'Matemáticas', nivel: '1ESO' },
+    { id: 2, codigo: 'CyR', nombreCompleto: 'Cultura y Robótica', nivel: '1ESO' },
   ];
   const PROFESORES = [
     { id: 1, codigo: 'MATA', nombreCompleto: 'Ana' },
@@ -42,6 +48,16 @@ describe('ActividadForm', () => {
   const SUBGRUPOS = [
     { id: 1, codigo: '1ºA-Completo', grupos: ['1ºA'] },
     { id: 2, codigo: '1ºB-Completo', grupos: ['1ºB'] },
+  ];
+  /** S251: dos niveles y los grupos de las fixtures, todos de 1ESO salvo 2ºA. */
+  const NIVELES = [
+    { id: 1, codigo: '1ESO', orden: 1 },
+    { id: 2, codigo: '2ESO', orden: 2 },
+  ];
+  const GRUPOS = [
+    { id: 1, codigo: '1ºA', nivel: '1ESO', tipo: 'ORDINARIO' },
+    { id: 2, codigo: '1ºB', nivel: '1ESO', tipo: 'ORDINARIO' },
+    { id: 3, codigo: '2ºA', nivel: '2ESO', tipo: 'ORDINARIO' },
   ];
 
   /** Miembros protegidos que los casos necesitan tocar. */
@@ -66,12 +82,24 @@ describe('ActividadForm', () => {
     return fixture.componentInstance as unknown as Interna;
   }
 
+  /** Elige el nivel de la actividad (S251), como la preparación de un alta de CLASE. */
+  function elegirNivel(nivel: string): void {
+    instancia().form.controls['nivel'].setValue(nivel);
+  }
+
+  /** Consume las dos peticiones de S251: niveles y grupos. */
+  function flushNivelesYGrupos(): void {
+    http.expectOne('/api/niveles').flush(NIVELES);
+    http.expectOne('/api/grupos').flush(GRUPOS);
+  }
+
   /**
-   * Monta el componente y consume las CUATRO peticiones del `ngOnInit`. Con `fallaAulas`
+   * Monta el componente y consume las SEIS peticiones del `ngOnInit`. Con `fallaAulas`
    * responde 500 a la de aulas, que es el escenario de (14): la variante vive dentro del
-   * helper porque lo único que cambia es cómo se cierra esa misma petición.
+   * helper porque lo único que cambia es cómo se cierra esa misma petición. En un alta elige
+   * `nivelDelAlta` (S251, E9); con '' monta el alta sin nivel.
    */
-  function montar(data: unknown = null, fallaAulas = false): void {
+  function montar(data: unknown = null, fallaAulas = false, nivelDelAlta = '1ESO'): void {
     ref = { close: vi.fn() };
     TestBed.configureTestingModule({
       imports: [ActividadForm],
@@ -94,6 +122,10 @@ describe('ActividadForm', () => {
       aulas.flush(AULAS);
     }
     http.expectOne('/api/subgrupos').flush(SUBGRUPOS);
+    flushNivelesYGrupos();
+    if (data === null && nivelDelAlta !== '') {
+      elegirNivel(nivelDelAlta);
+    }
     fixture.detectChanges(); // pinta los <option> ya cargados
   }
 
@@ -1064,14 +1096,14 @@ describe('ActividadForm', () => {
   describe('filtro de selectores (S185)', () => {
     const doce = (prefijo: string): string[] =>
       Array.from({ length: 12 }, (_, i) => `${prefijo}${String(i + 1).padStart(2, '0')}`);
-    const ASIGNATURAS_12 = doce('M').map((codigo, i) => ({ id: i + 1, codigo, nombreCompleto: codigo }));
+    const ASIGNATURAS_12 = doce('M').map((codigo, i) => ({ id: i + 1, codigo, nombreCompleto: codigo, nivel: '1ESO' }));
     const PROFESORES_12 = doce('P').map((codigo, i) => ({ id: i + 1, codigo, nombreCompleto: codigo }));
     const AULAS_12 = doce('A').map((codigo, i) => ({
       id: i + 1, codigo, tipo: 'ORDINARIA', capacidad: null, edificio: null, planta: null, sector: null,
     }));
     const SUBGRUPOS_12 = doce('S').map((codigo, i) => ({ id: i + 1, codigo, grupos: ['1ºA'] }));
 
-    /** Como `montar(null)`, con las cuatro listas de doce. */
+    /** Como `montar(null)`, con las cuatro listas de doce, y elige 1ESO como él (S251). */
     function montarLargo(): void {
       ref = { close: vi.fn() };
       TestBed.configureTestingModule({
@@ -1090,6 +1122,8 @@ describe('ActividadForm', () => {
       http.expectOne('/api/profesores').flush(PROFESORES_12);
       http.expectOne('/api/aulas').flush(AULAS_12);
       http.expectOne('/api/subgrupos').flush(SUBGRUPOS_12);
+      flushNivelesYGrupos();
+      elegirNivel('1ESO');
       fixture.detectChanges();
     }
 
@@ -1229,6 +1263,8 @@ describe('ActividadForm', () => {
       http.expectOne('/api/profesores').flush(PROFESORES_NOMBRE);
       http.expectOne('/api/aulas').flush(AULAS);
       http.expectOne('/api/subgrupos').flush(SUBGRUPOS);
+      flushNivelesYGrupos();
+      elegirNivel('1ESO');
       fixture.detectChanges();
     }
 
@@ -1299,9 +1335,15 @@ describe('ActividadForm', () => {
     const fila = (n: string): HTMLElement => form.querySelector<HTMLElement>(`:scope > [data-fila="${n}"]`)!;
     const controles = (n: string): string[] =>
       [...fila(n).querySelectorAll('[formcontrolname]')].map((c) => c.getAttribute('formcontrolname')!);
-    expect(controles('1')).toEqual(['codigo', 'tipo', 'asignatura']);
+    // S251 (C.2, aprobado por el arquitecto): en una CLASE, el nivel y la casilla van tras el tipo.
+    expect(controles('1')).toEqual(['codigo', 'tipo', 'nivel', 'todosLosNiveles', 'asignatura']);
     expect(controles('2')).toEqual(['duracionTramos', 'repeticionesPorSemana', 'patronTemporal', 'requiereTutor']);
     expect(fila('3').querySelector('.plazas__pestanas')).not.toBeNull();
+
+    // Una REUNIÓN no pide nivel: la fila 1 vuelve a sus tres controles.
+    instancia().form.controls['tipo'].setValue('REUNION');
+    fixture.detectChanges();
+    expect(controles('1')).toEqual(['codigo', 'tipo', 'asignatura']);
   });
 
   it('P2 una pestaña por plaza, «n · asignatura», y solo se pinta la abierta', async () => {
@@ -1530,9 +1572,9 @@ describe('ActividadForm', () => {
    */
   describe('asignatura con código y nombre (S230)', () => {
     const ASIGNATURAS_NOMBRE = [
-      { id: 1, codigo: 'CyR', nombreCompleto: 'Computación y Robótica' },
-      { id: 2, codigo: 'SIN', nombreCompleto: '  ' },
-      ...Array.from({ length: 9 }, (_, i) => ({ id: i + 3, codigo: `M0${i + 1}`, nombreCompleto: 'Matemáticas' })),
+      { id: 1, codigo: 'CyR', nombreCompleto: 'Computación y Robótica', nivel: '1ESO' },
+      { id: 2, codigo: 'SIN', nombreCompleto: '  ', nivel: '1ESO' },
+      ...Array.from({ length: 9 }, (_, i) => ({ id: i + 3, codigo: `M0${i + 1}`, nombreCompleto: 'Matemáticas', nivel: '1ESO' })),
     ];
 
     function montarConAsignaturas(): void {
@@ -1553,6 +1595,8 @@ describe('ActividadForm', () => {
       http.expectOne('/api/profesores').flush(PROFESORES);
       http.expectOne('/api/aulas').flush(AULAS);
       http.expectOne('/api/subgrupos').flush(SUBGRUPOS);
+      flushNivelesYGrupos();
+      elegirNivel('1ESO');
       fixture.detectChanges();
     }
 
@@ -1586,5 +1630,293 @@ describe('ActividadForm', () => {
         expect(opciones(zona).map((o) => o.value)).toEqual(['CyR']);
       });
     }
+  });
+
+  // ─────────────────────── S251: el nivel va primero (C-editor-por-nivel, condición 4)
+
+  describe('opcionesDelNivel (S251)', () => {
+    const NIVEL_DE_GRUPO = new Map([['3ºA', '3ESO'], ['3ºB', '3ESO'], ['4ºA', '4ESO']]);
+    const SUBG = [
+      { id: 1, codigo: '3ºA-Completo', grupos: ['3ºA'] },
+      { id: 2, codigo: 'Mix', grupos: ['3ºA', '4ºA'] },
+      { id: 3, codigo: '4ºA-Completo', grupos: ['4ºA'] },
+    ];
+    const ASIG = [
+      { id: 1, codigo: 'Biol-3ESO', codigoCorto: 'Biol', nombreCompleto: 'Biología', nivel: '3ESO' },
+      { id: 2, codigo: 'Biol-4ESO', codigoCorto: 'Biol', nombreCompleto: 'Biología', nivel: '4ESO' },
+      { id: 3, codigo: 'Tut', codigoCorto: 'Tut', nombreCompleto: 'Tutoría', nivel: null },
+    ];
+    const codigos = (lista: { codigo: string }[]): string[] => lista.map((o) => o.codigo);
+
+    it('un subgrupo entra solo si TODOS sus grupos son del nivel', () => {
+      expect(codigos(opcionesDelNivel(SUBG, '3ESO', NIVEL_DE_GRUPO, false, []))).toEqual(['3ºA-Completo']);
+    });
+
+    it('una asignatura entra si es del nivel; una sin nivel, no', () => {
+      expect(codigos(opcionesDelNivel(ASIG, '4ESO', NIVEL_DE_GRUPO, false, []))).toEqual(['Biol-4ESO']);
+    });
+
+    it('lo elegido se conserva aunque sea de otro nivel, en el orden de entrada', () => {
+      expect(codigos(opcionesDelNivel(SUBG, '3ESO', NIVEL_DE_GRUPO, false, ['4ºA-Completo'])))
+        .toEqual(['3ºA-Completo', '4ºA-Completo']);
+    });
+
+    it('sin nivel solo queda lo elegido, y con «todos» entra todo', () => {
+      expect(codigos(opcionesDelNivel(ASIG, '', NIVEL_DE_GRUPO, false, ['Tut']))).toEqual(['Tut']);
+      expect(codigos(opcionesDelNivel(SUBG, '3ESO', NIVEL_DE_GRUPO, true, []))).toEqual(['3ºA-Completo', 'Mix', '4ºA-Completo']);
+    });
+  });
+
+  describe('nivelDeLasPlazas (S251)', () => {
+    const NIVEL_DE_GRUPO = new Map([['3ºA', '3ESO'], ['4ºA', '4ESO']]);
+    const SUBG = [
+      { id: 1, codigo: '3ºA-Completo', grupos: ['3ºA'] },
+      { id: 2, codigo: '4ºA-Completo', grupos: ['4ºA'] },
+    ];
+
+    it('todas las plazas de un nivel dan ese nivel; otro subgrupo desconocido no aporta', () => {
+      expect(nivelDeLasPlazas([['3ºA-Completo'], ['3ºA-Completo', 'Fantasma']], SUBG, NIVEL_DE_GRUPO)).toBe('3ESO');
+    });
+
+    it('dos niveles, o ninguno, dan vacío', () => {
+      expect(nivelDeLasPlazas([['3ºA-Completo'], ['4ºA-Completo']], SUBG, NIVEL_DE_GRUPO)).toBe('');
+      expect(nivelDeLasPlazas([[]], SUBG, NIVEL_DE_GRUPO)).toBe('');
+    });
+  });
+
+  /**
+   * El editor por nivel montado (S251). Catálogo propio: dos niveles, asignaturas de 3ESO, de 4ESO
+   * y una sin nivel, y un subgrupo que mezcla un grupo de 3ESO con uno de 4ESO.
+   */
+  describe('nivel de la actividad (S251)', () => {
+    const NIVELES_N = [
+      { id: 3, codigo: '3ESO', orden: 3 },
+      { id: 4, codigo: '4ESO', orden: 4 },
+    ];
+    const GRUPOS_N = [
+      { id: 1, codigo: '3ºA', nivel: '3ESO', tipo: 'ORDINARIO' },
+      { id: 2, codigo: '3ºB', nivel: '3ESO', tipo: 'ORDINARIO' },
+      { id: 3, codigo: '4ºA', nivel: '4ESO', tipo: 'ORDINARIO' },
+    ];
+    const ASIGNATURAS_N = [
+      { id: 1, codigo: 'Biol-3ESO', codigoCorto: 'Biol', nombreCompleto: 'Biología y Geología', nivel: '3ESO' },
+      { id: 2, codigo: 'Biol-4ESO', codigoCorto: 'Biol', nombreCompleto: 'Biología y Geología', nivel: '4ESO' },
+      { id: 3, codigo: 'Mat-3ESO', codigoCorto: 'Mat', nombreCompleto: 'Matemáticas', nivel: '3ESO' },
+      { id: 4, codigo: 'Tut', codigoCorto: 'Tut', nombreCompleto: 'Tutoría', nivel: null },
+    ];
+    const SUBGRUPOS_N = [
+      { id: 1, codigo: '3ºA-Completo', grupos: ['3ºA'] },
+      { id: 2, codigo: '3ºAB-Refuerzo', grupos: ['3ºA', '3ºB'] },
+      { id: 3, codigo: 'Mixto', grupos: ['3ºA', '4ºA'] },
+      { id: 4, codigo: '4ºA-Completo', grupos: ['4ºA'] },
+    ];
+
+    const plazaN = (subgrupos: string[]) => ({
+      id: 50,
+      codigo: 'X-P1',
+      asignatura: 'Biol-3ESO',
+      aulaFija: 'A1',
+      aulasCandidatas: [] as string[],
+      profesores: ['MATA'],
+      subgrupos,
+    });
+    const DE_3ESO = { ...ACTIVIDAD_FIJA, id: 40, codigo: 'Biol-3A', asignatura: 'Biol-3ESO', plazas: [plazaN(['3ºA-Completo'])] };
+    const MEZCLADA = {
+      ...DE_3ESO,
+      id: 41,
+      codigo: 'Mezcla',
+      plazas: [plazaN(['3ºA-Completo']), { ...plazaN(['4ºA-Completo']), id: 51, codigo: 'X-P2' }],
+    };
+
+    /**
+     * Monta con el catálogo propio y consume las seis peticiones; con `retenerGrupos` deja la de
+     * grupos sin atender y la devuelve, para tocar el nivel antes de que llegue.
+     */
+    function montarNivel(data: unknown = null, retenerGrupos = false): TestRequest | null {
+      ref = { close: vi.fn() };
+      TestBed.configureTestingModule({
+        imports: [ActividadForm],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: DialogRef, useValue: ref },
+          { provide: DIALOG_DATA, useValue: data },
+        ],
+      });
+      fixture = TestBed.createComponent(ActividadForm);
+      http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      http.expectOne('/api/asignaturas').flush(ASIGNATURAS_N);
+      http.expectOne('/api/profesores').flush(PROFESORES);
+      http.expectOne('/api/aulas').flush(AULAS);
+      http.expectOne('/api/subgrupos').flush(SUBGRUPOS_N);
+      http.expectOne('/api/niveles').flush(NIVELES_N);
+      const grupos = http.expectOne('/api/grupos');
+      if (retenerGrupos) {
+        fixture.detectChanges();
+        return grupos;
+      }
+      grupos.flush(GRUPOS_N);
+      fixture.detectChanges();
+      return null;
+    }
+
+    const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    const selectNivel = (): HTMLSelectElement | null => raiz().querySelector<HTMLSelectElement>('.actividad-form__nivel');
+    const casilla = (): HTMLInputElement =>
+      raiz().querySelector<HTMLInputElement>('input[formControlName="todosLosNiveles"]')!;
+    const valoresDe = (css: string): string[] =>
+      Array.from(raiz().querySelector<HTMLSelectElement>(css)!.options).map((o) => o.value).filter((v) => v !== '');
+    const ASIG_PLAZA = '.actividad-form__plaza select[formControlName="asignatura"]';
+    const ASIG_RAIZ = '.actividad-form__fila--1 select[formControlName="asignatura"]';
+    const nota = (): HTMLElement | null => raiz().querySelector('[data-nota="nivel"]');
+    const control = (nombre: string): unknown => instancia().form.controls[nombre].value;
+
+    /** Cambia el nivel en su desplegable, como una persona. */
+    async function cambiarNivel(nivel: string): Promise<void> {
+      const s = selectNivel()!;
+      s.value = nivel;
+      s.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+    }
+
+    /** Rellena la actividad y su plaza única, todo válido salvo lo que diga el caso. */
+    function rellenar(): void {
+      instancia().form.patchValue({ codigo: 'Biol-3A' });
+      const fila = instancia().plazas.at(0);
+      fila.controls['asignatura'].setValue('Biol-3ESO');
+      fila.controls['aulaFija'].setValue('A1');
+      fila.controls['profesores'].setValue(['MATA']);
+      fila.controls['subgrupos'].setValue(['3ºA-Completo']);
+    }
+
+    it('N1 el alta de una CLASE pide el nivel: sin él, selectores vacíos, nota y no se envía', async () => {
+      montarNivel(null);
+      await fixture.whenStable();
+
+      expect(nota()?.textContent?.trim()).toBe('Elige primero el nivel.');
+      expect(valoresDe(ASIG_PLAZA)).toEqual([]);
+      expect(valoresDe(ASIG_RAIZ)).toEqual([]);
+      expect(enLista('subgrupos', 'disponibles')).toEqual([]);
+
+      rellenar();
+      instancia().guardar();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(raiz().textContent).toContain('Elige el nivel.');
+
+      await cambiarNivel('3ESO');
+      instancia().guardar();
+      const req = http.expectOne('/api/actividades');
+      expect(req.request.method).toBe('POST');
+      expect(Object.keys(req.request.body as object)).not.toContain('nivel');
+      expect(Object.keys(req.request.body as object)).not.toContain('todosLosNiveles');
+      req.flush({ ...DE_3ESO, id: 77 });
+    });
+
+    it('N2 con nivel, las asignaturas de los dos selectores son las de ese nivel', async () => {
+      montarNivel(null);
+      await cambiarNivel('3ESO');
+
+      expect(nota()).toBeNull();
+      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
+      expect(valoresDe(ASIG_RAIZ)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
+    });
+
+    it('N3 con nivel, un subgrupo con un grupo de otro nivel queda fuera', async () => {
+      montarNivel(null);
+      await cambiarNivel('3ESO');
+
+      expect(new Set(enLista('subgrupos', 'disponibles'))).toEqual(new Set(['3ºA-Completo', '3ºAB-Refuerzo']));
+    });
+
+    it('N4 «Mostrar todos los niveles» quita el filtro', async () => {
+      montarNivel(null);
+      await cambiarNivel('3ESO');
+      casilla().click();
+      await fixture.whenStable();
+
+      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
+      expect(new Set(enLista('subgrupos', 'disponibles')))
+        .toEqual(new Set(['3ºA-Completo', '3ºAB-Refuerzo', 'Mixto', '4ºA-Completo']));
+    });
+
+    it('N5 en la edición, subgrupos de un solo nivel dan ese nivel', async () => {
+      montarNivel(DE_3ESO);
+      await fixture.whenStable();
+
+      expect(control('nivel')).toBe('3ESO');
+      expect(control('todosLosNiveles')).toBe(false);
+      expect(selectNivel()!.value).toBe('3ESO');
+    });
+
+    it('N6 en la edición, subgrupos de dos niveles dejan el nivel vacío, «Mostrar todos» y se guarda', async () => {
+      montarNivel(MEZCLADA);
+      await fixture.whenStable();
+
+      expect(control('nivel')).toBe('');
+      expect(control('todosLosNiveles')).toBe(true);
+      expect(nota()).toBeNull();
+
+      instancia().guardar();
+      const req = http.expectOne('/api/actividades/41');
+      expect(req.request.method).toBe('PUT');
+      req.flush(MEZCLADA);
+    });
+
+    it('N7 en la edición, la deducción no pisa un nivel que el usuario ya ha tocado', async () => {
+      const grupos = montarNivel(DE_3ESO, true)!;
+      await cambiarNivel('4ESO');
+
+      grupos.flush(GRUPOS_N);
+      await fixture.whenStable();
+
+      expect(control('nivel')).toBe('4ESO');
+    });
+
+    it('N8 lo elegido de otro nivel sigue elegido al cambiar de nivel y viaja al guardar', async () => {
+      montarNivel(DE_3ESO);
+      await fixture.whenStable();
+      await cambiarNivel('4ESO');
+
+      expect(enLista('subgrupos', 'elegidos')).toEqual(['3ºA-Completo']);
+      expect(raiz().querySelector<HTMLSelectElement>(ASIG_PLAZA)!.value).toBe('Biol-3ESO');
+      await elegirEnLista('subgrupos', '4ºA-Completo');
+
+      instancia().guardar();
+      const req = http.expectOne('/api/actividades/40');
+      const plaza = (req.request.body as { plazas: { asignatura: string; subgrupos: string[] }[] }).plazas[0];
+      expect(plaza.asignatura).toBe('Biol-3ESO');
+      expect(plaza.subgrupos).toEqual(['3ºA-Completo', '4ºA-Completo']);
+      req.flush(DE_3ESO);
+    });
+
+    it('N9 una REUNIÓN no pide nivel: sin desplegable, sin nota, todo a la vista y se envía', async () => {
+      montarNivel(null);
+      const tipo = raiz().querySelector<HTMLSelectElement>('select[formControlName="tipo"]')!;
+      tipo.value = 'REUNION';
+      tipo.dispatchEvent(new Event('change'));
+      await fixture.whenStable();
+
+      expect(selectNivel()).toBeNull();
+      expect(nota()).toBeNull();
+      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
+
+      instancia().form.patchValue({ codigo: 'REU-Dpto' });
+      const fila = instancia().plazas.at(0);
+      fila.controls['asignatura'].setValue('Tut');
+      fila.controls['modoAula'].setValue('NINGUNA');
+      fila.controls['profesores'].setValue(['MATA']);
+      instancia().guardar();
+      http.expectOne('/api/actividades').flush({ ...DE_3ESO, id: 78 });
+    });
+
+    it('N10 cada asignatura se lee «Biol-3ESO — Biología y Geología»', async () => {
+      montarNivel(null);
+      await cambiarNivel('3ESO');
+      const opcion = raiz().querySelector<HTMLOptionElement>(`${ASIG_PLAZA} option[value="Biol-3ESO"]`)!;
+
+      expect(opcion.textContent!.trim()).toBe('Biol-3ESO — Biología y Geología');
+    });
   });
 });

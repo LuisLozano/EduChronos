@@ -130,6 +130,13 @@
   font-size: var(--tam-s);
   color: var(--color-tinta-suave);
 }
+
+/* S251: una CLASE sin nivel deja vacíos sus selectores; la nota lo dice, con el tono de la del aula. */
+.actividad-form__nota-nivel {
+  margin: 0 0 var(--e4);
+  font-size: var(--tam-s);
+  color: var(--color-tinta-suave);
+}
 .actividad-form__error {
   display: block;
   color: var(--color-error);

@@ -27,11 +27,33 @@
         </select>
       </label>
 
+      <!-- S251: el nivel de una CLASE va antes que la asignatura y filtra asignaturas y subgrupos.
+           Ni el nivel ni la casilla viajan; una reunión o una función no los piden. -->
+      @if (form.controls.tipo.value === 'CLASE') {
+      <label class="actividad-form__campo" [for]="id('nivel')">
+        <span class="actividad-form__etiqueta">Nivel</span>
+        <select formControlName="nivel" class="actividad-form__input actividad-form__nivel" [id]="id('nivel')">
+          <option value="">— elige —</option>
+          @for (n of niveles(); track n.id) {
+          <option [value]="n.codigo">{{ n.codigo }}</option>
+          }
+        </select>
+        @if (form.controls.nivel.touched && form.controls.nivel.invalid) {
+        <span class="actividad-form__error">Elige el nivel.</span>
+        }
+      </label>
+
+      <label class="actividad-form__campo actividad-form__campo--check" [for]="id('todos-los-niveles')">
+        <input type="checkbox" formControlName="todosLosNiveles" [id]="id('todos-los-niveles')" />
+        <span class="actividad-form__etiqueta">Mostrar todos los niveles</span>
+      </label>
+      }
+
       <div class="actividad-form__con-filtro">
         <app-filtro-opciones
           #fAsignatura
           etiqueta="asignaturas"
-          [opciones]="asignaturas()"
+          [opciones]="asignaturasDeLaActividad()"
           [texto]="textoAsignatura"
           [codigo]="codigoDe"
           [seleccionados]="[form.controls.asignatura.value]"
@@ -156,13 +178,18 @@
         </p>
         }
 
+        <!-- S251, decisión EY: una CLASE sin nivel deja vacíos sus selectores, y se dice por qué. -->
+        @if (faltaNivel()) {
+        <p class="actividad-form__nota-nivel" data-nota="nivel">Elige primero el nivel.</p>
+        }
+
         <!-- Asignatura de la plaza y, a la derecha en la misma línea, «Quitar esta plaza». -->
         <div class="actividad-form__plaza-cabecera">
           <div class="actividad-form__con-filtro">
             <app-filtro-opciones
               #fAsignaturaPlaza
               etiqueta="asignaturas"
-              [opciones]="asignaturas()"
+              [opciones]="opcionesDePlazas()[i]?.asignaturas ?? []"
               [texto]="textoAsignatura"
               [codigo]="codigoDe"
               [seleccionados]="[fila.controls.asignatura.value]"
@@ -218,7 +245,7 @@
             nombre="subgrupos"
             etiqueta="subgrupos"
             [rotuloId]="id('subgrupos', i)"
-            [opciones]="subgrupos()"
+            [opciones]="opcionesDePlazas()[i]?.subgrupos ?? []"
             [texto]="codigoDe"
             [codigo]="codigoDe"
             [filas]="filasLista"

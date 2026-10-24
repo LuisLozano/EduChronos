@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -14,6 +14,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActividadService } from '../../services/actividad.service';
 import { AsignaturaService } from '../../services/asignatura.service';
 import { AulaService } from '../../services/aula.service';
+import { GrupoService } from '../../services/grupo.service';
+import { NivelService } from '../../services/nivel.service';
 import { ProfesorService } from '../../services/profesor.service';
 import { SubgrupoService } from '../../services/subgrupo.service';
 import {
@@ -27,6 +29,8 @@ import {
 } from '../../models/actividad.model';
 import { Asignatura } from '../../models/asignatura.model';
 import { Aula } from '../../models/aula.model';
+import { Grupo } from '../../models/grupo.model';
+import { Nivel } from '../../models/nivel.model';
 import { Profesor } from '../../models/profesor.model';
 import { Subgrupo } from '../../models/subgrupo.model';
 import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
@@ -82,6 +86,63 @@ export function plazasConSubgrupoRepetido(subgruposPorPlaza: readonly (readonly 
   return subgruposPorPlaza.flatMap((subgrupos, i) =>
     subgrupos.some((codigo) => (plazasDe.get(codigo) ?? 0) > 1) ? [i] : [],
   );
+}
+
+/**
+ * Opciones de un selector de una CLASE filtradas por su nivel (S251, C-editor-por-nivel, condición 4
+ * de O-actividad-por-nivel): una asignatura entra si es de ese nivel; un subgrupo, si TODOS sus grupos
+ * lo son (`nivelDeGrupo` da el nivel de cada grupo por código). Con `todos` («Mostrar todos los
+ * niveles») no filtra; sin nivel, no entra ninguna (decisión EY).
+ *
+ * <p><b>Lo ya elegido en el control sigue entre las opciones</b> aunque no sea del nivel (decisión
+ * FA, enmienda E8): la lista doble suelta al primer cambio un código que no esté entre sus opciones, y
+ * el select se quedaría en blanco. Cambiar de nivel no borra nada; la mezcla que quede la avisa la
+ * prevalidación. Conserva el orden de entrada, que es el del backend.
+ */
+export function opcionesDelNivel<T extends Asignatura | Subgrupo>(
+  opciones: readonly T[],
+  nivel: string,
+  nivelDeGrupo: ReadonlyMap<string, string>,
+  todos: boolean,
+  elegidos: readonly string[],
+): T[] {
+  if (todos) {
+    return [...opciones];
+  }
+  const elegido = new Set(elegidos);
+  return opciones.filter((o) => elegido.has(o.codigo) || (nivel !== '' && esDelNivel(o, nivel, nivelDeGrupo)));
+}
+
+/** Si una asignatura es del nivel, o si todos los grupos de un subgrupo lo son. */
+function esDelNivel(o: Asignatura | Subgrupo, nivel: string, nivelDeGrupo: ReadonlyMap<string, string>): boolean {
+  return 'grupos' in o
+    ? o.grupos.length > 0 && o.grupos.every((grupo) => nivelDeGrupo.get(grupo) === nivel)
+    : o.nivel === nivel;
+}
+
+/**
+ * Nivel de una CLASE que se edita (S251, decisión EZ): el de los grupos de los subgrupos de todas sus
+ * plazas si es uno solo; '' si son varios o ninguno, y entonces el formulario marca «Mostrar todos los
+ * niveles». Un subgrupo o un grupo que no está en las listas no aporta nivel.
+ */
+export function nivelDeLasPlazas(
+  subgruposPorPlaza: readonly (readonly string[])[],
+  subgrupos: readonly Subgrupo[],
+  nivelDeGrupo: ReadonlyMap<string, string>,
+): string {
+  const gruposDe = new Map(subgrupos.map((s) => [s.codigo, s.grupos]));
+  const niveles = new Set<string>();
+  for (const plaza of subgruposPorPlaza) {
+    for (const codigo of plaza) {
+      for (const grupo of gruposDe.get(codigo) ?? []) {
+        const nivel = nivelDeGrupo.get(grupo);
+        if (nivel !== undefined) {
+          niveles.add(nivel);
+        }
+      }
+    }
+  }
+  return niveles.size === 1 ? [...niveles][0] : '';
 }
 
 /** Diálogos de actividad creados, para que los ids de sus controles no se repitan. */
@@ -160,6 +221,12 @@ type PlazaFila = FormGroup<{
  * un punto rojo si su plaza está en I2 ({@link plazasConI2}) o si tiene un campo inválido
  * ({@link plazaConErrores}, regla de F4): sin él, un error en otra pestaña dejaría «Guardar» sin
  * explicación. El aviso de I2 va arriba del panel, a la vista sin desplazarse.
+ *
+ * <p><b>El nivel va primero</b> (S251, C-editor-por-nivel, condición 4 de O-actividad-por-nivel). En
+ * una CLASE, la fila 1 lleva el nivel y la casilla «Mostrar todos los niveles», que no viajan. Las
+ * asignaturas y los subgrupos se filtran por él con {@link opcionesDelNivel}; en el alta es
+ * obligatorio y, sin él, los selectores quedan vacíos; en la edición se deduce de los subgrupos
+ * ({@link nivelDeLasPlazas}).
  */
 @Component({
   selector: 'app-actividad-form',
@@ -173,6 +240,8 @@ export class ActividadForm implements OnInit {
   private readonly aulaService = inject(AulaService);
   private readonly profesorService = inject(ProfesorService);
   private readonly subgrupoService = inject(SubgrupoService);
+  private readonly nivelService = inject(NivelService);
+  private readonly grupoService = inject(GrupoService);
   private readonly fb = inject(FormBuilder);
   protected readonly ref = inject<DialogRef<ActividadGuardada>>(DialogRef);
   private readonly editando = inject<Actividad | null>(DIALOG_DATA);
@@ -195,6 +264,13 @@ export class ActividadForm implements OnInit {
   protected readonly aulas = signal<Aula[]>([]);
   protected readonly profesores = signal<Profesor[]>([]);
   protected readonly subgrupos = signal<Subgrupo[]>([]);
+  /** Niveles, ya en orden pedagógico, y grupos, que dan el nivel de cada subgrupo (S251). */
+  protected readonly niveles = signal<Nivel[]>([]);
+  private readonly grupos = signal<Grupo[]>([]);
+  private readonly nivelDeGrupo = computed(() => new Map(this.grupos().map((g) => [g.codigo, g.nivel])));
+  /** Han llegado las dos listas que la deducción del nivel necesita en la edición. */
+  private subgruposCargados = false;
+  private gruposCargados = false;
 
   protected readonly patrones = PATRONES_TEMPORALES;
 
@@ -235,6 +311,11 @@ export class ActividadForm implements OnInit {
   protected readonly form = this.fb.nonNullable.group({
     codigo: ['', Validators.required],
     tipo: ['CLASE' as TipoActividad, Validators.required],
+    /** S251: controles de UI que NO viajan, como `modoAula`. El nivel de la CLASE ('' = sin
+     *  elegir), que filtra asignaturas y subgrupos, y la casilla «Mostrar todos los niveles».
+     *  Su validador lo pone {@link #aplicarTipo}. */
+    nivel: [''],
+    todosLosNiveles: [false],
     /** '' = sin asignatura de actividad; {@link #aRequest} lo traduce a `null`. */
     asignatura: [''],
     duracionTramos: [1, [Validators.required, Validators.min(1)]],
@@ -251,6 +332,37 @@ export class ActividadForm implements OnInit {
     return this.form.controls.plazas;
   }
 
+  /**
+   * Valor del formulario como señal (S251): lo que eligen los filtros de nivel. Se copia en cada
+   * cambio, así que las opciones derivadas son `computed` y no se rehacen en cada pintado.
+   */
+  private readonly valor = signal(this.form.getRawValue());
+
+  /** El filtro de nivel se aplica en una CLASE sin «Mostrar todos los niveles». */
+  private readonly filtraPorNivel = computed(
+    () => this.valor().tipo === 'CLASE' && !this.valor().todosLosNiveles,
+  );
+
+  /** Una CLASE sin nivel y sin «Mostrar todos»: los selectores quedan vacíos y se dice por qué (EY). */
+  protected readonly faltaNivel = computed(() => this.filtraPorNivel() && this.valor().nivel === '');
+
+  /** Opciones de la asignatura de la actividad. */
+  protected readonly asignaturasDeLaActividad = computed(() =>
+    this.delNivel(this.asignaturas(), [this.valor().asignatura]),
+  );
+
+  /** Opciones de asignatura y de subgrupos de cada plaza, con lo elegido en ESA plaza (E8). */
+  protected readonly opcionesDePlazas = computed(() =>
+    this.valor().plazas.map((plaza) => ({
+      asignaturas: this.delNivel(this.asignaturas(), [plaza.asignatura]),
+      subgrupos: this.delNivel(this.subgrupos(), plaza.subgrupos),
+    })),
+  );
+
+  private delNivel<T extends Asignatura | Subgrupo>(opciones: readonly T[], elegidos: readonly string[]): T[] {
+    return opcionesDelNivel(opciones, this.valor().nivel, this.nivelDeGrupo(), !this.filtraPorNivel(), elegidos);
+  }
+
   constructor() {
     // Antes de la precarga: precargar fija el tipo y la regla de subgrupos tiene que seguirlo.
     this.form.controls.tipo.valueChanges.subscribe(() => this.aplicarTipo());
@@ -261,8 +373,11 @@ export class ActividadForm implements OnInit {
       this.plazas.push(this.crearPlaza());
     }
     // DESPUÉS de precargar, que también emite: editar borra el error de guardado y el 409, que ya
-    // no hablan de lo que hay en pantalla (S226). Cancelada como en generando-dialogo.
+    // no hablan de lo que hay en pantalla (S226). Cancelada como en generando-dialogo. Copia además
+    // el valor en su señal (S251), que arranca con el de la precarga.
+    this.valor.set(this.form.getRawValue());
     const cambios = this.form.valueChanges.subscribe(() => {
+      this.valor.set(this.form.getRawValue());
       if (this.errorDeGuardado) {
         this.ponerError('', false);
       }
@@ -306,6 +421,16 @@ export class ActividadForm implements OnInit {
    */
   private aplicarTipo(filas: PlazaFila[] = this.plazas.controls): void {
     const clase = this.form.controls.tipo.value === 'CLASE';
+    // El nivel (S251) se exige solo al dar de alta una CLASE: en la edición se deduce y puede
+    // quedar vacío si sus subgrupos mezclan niveles (decisión EZ); una reunión o una función no
+    // lo piden.
+    const nivel = this.form.controls.nivel;
+    if (clase && !this.esEdicion) {
+      nivel.setValidators(Validators.required);
+    } else {
+      nivel.clearValidators();
+    }
+    nivel.updateValueAndValidity();
     for (const fila of filas) {
       if (clase) {
         fila.controls.subgrupos.setValidators(arrayNoVacio);
@@ -443,8 +568,9 @@ export class ActividadForm implements OnInit {
   }
 
   /**
-   * Puebla los CUATRO desplegables. Un fallo en cualquiera se presenta en el mismo hueco
-   * que los errores de guardado: sin catálogo el formulario no puede completarse.
+   * Puebla los CUATRO desplegables y, desde S251, los niveles y los grupos que filtran por nivel.
+   * Un fallo en cualquiera se presenta en el mismo hueco que los errores de guardado: sin catálogo
+   * el formulario no puede completarse.
    */
   ngOnInit(): void {
     this.asignaturaService.listar().subscribe({
@@ -463,10 +589,50 @@ export class ActividadForm implements OnInit {
         this.ponerError(this.mensaje(err, 'No se pudieron cargar las aulas'), false),
     });
     this.subgrupoService.listar().subscribe({
-      next: (lista) => this.subgrupos.set(lista),
+      next: (lista) => {
+        this.subgrupos.set(lista);
+        this.subgruposCargados = true;
+        this.deducirNivel();
+      },
       error: (err: HttpErrorResponse) =>
         this.ponerError(this.mensaje(err, 'No se pudieron cargar los subgrupos'), false),
     });
+    this.nivelService.listar().subscribe({
+      next: (lista) => this.niveles.set(lista),
+      error: (err: HttpErrorResponse) =>
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar los niveles'), false),
+    });
+    this.grupoService.listar().subscribe({
+      next: (lista) => {
+        this.grupos.set(lista);
+        this.gruposCargados = true;
+        this.deducirNivel();
+      },
+      error: (err: HttpErrorResponse) =>
+        this.ponerError(this.mensaje(err, 'No se pudieron cargar los grupos'), false),
+    });
+  }
+
+  /**
+   * En la edición, el nivel se deduce de los subgrupos de las plazas cuando han llegado subgrupos
+   * y grupos (S251, decisión EZ): uno solo, ese; varios o ninguno, vacío y «Mostrar todos los
+   * niveles» marcado. No pisa lo que el usuario ya haya tocado mientras llegaban.
+   */
+  private deducirNivel(): void {
+    if (!this.esEdicion || !this.subgruposCargados || !this.gruposCargados) {
+      return;
+    }
+    const { nivel, todosLosNiveles } = this.form.controls;
+    if (nivel.dirty || todosLosNiveles.dirty) {
+      return;
+    }
+    const deducido = nivelDeLasPlazas(
+      this.plazas.controls.map((f) => f.controls.subgrupos.value),
+      this.subgrupos(),
+      this.nivelDeGrupo(),
+    );
+    nivel.setValue(deducido);
+    todosLosNiveles.setValue(deducido === '');
   }
 
   /** Código del subgrupo que I2 ha encontrado repetido, o '' si no hay repetición. */

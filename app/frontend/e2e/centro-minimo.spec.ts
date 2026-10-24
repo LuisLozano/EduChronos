@@ -215,6 +215,9 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // 8. Actividad, la única alta con estructura anidada.
   const actividad = await abrir(page, 'Nueva actividad');
   await actividad.locator('[formControlName="codigo"]').fill('MAT-1ESOA');
+  // S251: el nivel va primero y es obligatorio en el alta de una clase; sin él, la asignatura y
+  // los subgrupos de la plaza salen vacíos y el `selectOption` de abajo no encontraría MAT-1ESO.
+  await actividad.locator('[formControlName="nivel"]').selectOption('1ESO');
   // La asignatura DE LA ACTIVIDAD no se toca: ya vale '' («varias, una por plaza»),
   // que es lo que corresponde cuando cada plaza declara la suya.
   // `duracionTramos` tampoco: ya vale 1.
