@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S249. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S250. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S249). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S250). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10846,3 +10846,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el C1 afirmó sin medir las guardas del aplicar.py del molde (un respaldo en /tmp que no existe), y el contraste lo paró (una parada; instancia de `D-contrato-desde-resumen`). Sin coste: la primera propuesta de EQ (un conjunto de niveles por asignatura) suponía que un código es una materia, y el usuario la corrigió; el T0 no pedía autoprueba para la M3b; el C0 buscaba «crónica de archivado», que la crónica no lleva. De Claude Code, sin coste: en el T0, la captura del código de salida del curl iba tras un echo (rehecha). Defectos distintos: el disparador no salta.
   SUITES. Sin código: las del registro de S246 (solver 162, app 965, vitest 853 en 69 ficheros, e2e 3; python 337). Bundle 651,97 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 89 líneas del commit de cierre sin índice, 2 606 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 250 — O-actividad-por-nivel (H5), C-asignatura-con-nivel: **LA ASIGNATURA TIENE NIVEL Y SU CÓDIGO LO LLEVA; UNA BASE ANTIGUA SE PARTE SOLA AL ABRIRSE Y EXPORTA LO MISMO. O-ACTIVIDAD-POR-NIVEL EN 3 DE 7, O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo, con `O-uso-centro` esperando fecha. Material en `/home/luis/educhronos-aceptacion/s250/` (t0, t1, f1 a f5 y cierre).
+  HECHO. T0 de solo lectura con autoprueba de 29 comprobaciones: `tests` #133 en verde sobre `c8778c7`; 141 y 152 asignaturas, sin choques de código. T1: contraste del contrato y línea base de exportación. F1: esquema 9, con `esquema/009.sql`, que parte cada asignatura por nivel, y la API de asignaturas y niveles (`82f8bce`). F2: formulario y lista con código corto y nivel; e2e al día (`d4c643f`). F3: oráculo y leyenda leen el código corto (`cf70e85`). M3: 12 de 13 mutantes muertos; M11 era código inerte y se borró (`e47cabf`). F4, sobre copias: plazas idénticas fila a fila, proyección y CSV idénticos byte a byte, PDF idéntico en texto, y oráculo y leyenda en verde. F5: la partida migrada genera con 0 duras (EX); en Chrome, alta de `Prueba-3ESO` y edición a `Prueba-4ESO`.
+  CRITERIO. `O-actividad-por-nivel` en 3 de 7 (condiciones 1 a 3); `C-asignatura-con-nivel` HECHO. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: EV (renombrar un nivel recompone sus asignaturas), EW (plaza mezclada y empate en la migración) y EX (generar en una copia con el mínimo de guardias a 0). Del arquitecto, doce, en `s250/cierre/c1/decisiones.txt`.
+  DEUDA. Ninguna nace ni se salda. `D-asignatura-sin-nivel`: condición 1 hecha. `D-carga-centro-sin-nivel`: medido que la carga se rompe contra la API nueva. Higiene/Método sigue en 7.
+  DEFECTOS. Del arquitecto, con coste: el criterio de S249 pedía generar sobre la base de partida sin medir que no tiene guardias, y la prevalidación la rechaza (422); EX lo resolvió con un guion más. En el C1 del cierre, seis afirmaciones de forma sin marca, todas ciertas, y la comprobación en navegador sin acta en el material (una parada); y OP17 a OP20 editaban `docs/tecnica/arquitectura.md`, que describe otro commit, porque F4.5 la dio por falsa sin leer su sello (una parada). Sin coste: en el contrato, seis afirmaciones sin marca, dos errores de forma (filas nuevas sin código y el mensaje del choque) y dos omisiones (la carga del centro y las asignaturas con plazas sin subgrupos), cazados por el contraste; el C0 buscaba «7 de 20» en gestión y una cabecera de S248. De Claude Code, sin coste: el rc de un curl tras un echo y el de grep tras sed (norma 1), rehechos, y un cd de solo lectura (norma 6). Defectos distintos: el disparador no salta.
+  SUITES. Solver 162, app 983, vitest 858 en 69 ficheros, e2e 3; python 337, sin tocar. Bundle 653,28 kB en `e47cabf` (+1,31).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 60 líneas del commit de cierre sin índice, 3 107 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

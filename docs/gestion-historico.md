@@ -2,44 +2,45 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L53 — ## 1. Objetivos terminados
-- L55 — ### H2 — Configurar un centro desde cero
-- L57 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L73 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L145 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L395 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L682 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L783 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L882 — ### H1 — Ajustar (cierre)
-- L884 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1061 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1352 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1542 — ### H3 — Exportar
-- L1544 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1605 — ### H4 — Instalar y pasar de curso
-- L1607 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1781 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1876 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1945 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1981 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1983 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2032 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2067 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2102 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2131 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2170 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2208 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2245 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2282 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2318 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2336 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2362 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2394 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
-- L2413 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
-- L2447 — ## 2. Deuda cerrada de §4
-- L2449 — ### Deuda técnica real, colgada de su objetivo
-- L2527 — ### Mejora futura, cuelga y espera
-- L2547 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L54 — ## 1. Objetivos terminados
+- L56 — ### H2 — Configurar un centro desde cero
+- L58 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L74 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L146 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L396 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L683 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L784 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L883 — ### H1 — Ajustar (cierre)
+- L885 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1062 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1353 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1543 — ### H3 — Exportar
+- L1545 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1606 — ### H4 — Instalar y pasar de curso
+- L1608 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1782 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1877 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1946 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1982 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1984 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2033 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2068 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2103 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2132 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2171 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2209 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2246 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2283 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2319 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2337 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2363 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2395 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2414 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- L2448 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
+- L2482 — ## 2. Deuda cerrada de §4
+- L2484 — ### Deuda técnica real, colgada de su objetivo
+- L2562 — ### Mejora futura, cuelga y espera
+- L2582 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2443,6 +2444,40 @@ terminado (§6).
 - **Valor:** retomar el proyecto deja de depender de la memoria: hoy cómo se construye y se prueba vive en el registro de gestión, y no consta cuál de dos generadores produjo un artefacto versionado.
 - **Cambios que agrupa:** `C-alcance-doc-tecnica` ✔ HECHO (S244): T0 de solo lectura (`s244/t0`), criterio y decisiones DO a DR. `C-arquitectura-y-rutas` ✔ HECHO (S245): condición 2 y parte de la 1 y la 7; `62d5b84`, `c14b521`, `816e30d`, `e752b0b`, `8b27da4` y `695343c`. `C-construir-probar-publicar` ✔ HECHO (S246): condiciones 3 y 6, y parte de la 1 y la 7; `30b8d67` y `4e7336a`. `C-decisiones-y-lectura` ✔ HECHO (S247): condiciones 1, 4, 5 y 7; `c975812`, `f974c1f`, `baa1e68`, `ce5f32e`, `c0e6338`, `34a57f6`, `010857f`, `9ace528` y `52d4a61`.
 - **Métrica de §7:** estimación al abrir: tres sesiones, sin medir. Gastadas: 1 (S244). **S245:** estimación revisada a cuatro sesiones (del arquitecto): el primer Cambio cupo en una, y los dos que quedan llevan el clon limpio con todas las suites y la prueba de lectura con la lectura entera del usuario. Gastadas: 2 (S244 y S245). **S246:** gastadas 3 (S244 a S246); la estimación de cuatro se mantiene (del arquitecto): queda un Cambio, el de las condiciones 4, 5 y 7. **S247:** gastadas 4 (S244 a S247), las de la estimación.
+
+#### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
+- **Propósito:** que, al crear o editar una clase, la secretaria vea solo las asignaturas y los subgrupos del nivel con el que trabaja, distinga cada asignatura (hoy ByG, Biol y BIOL, o Geo y Geogr, no se distinguen) y la aplicación le avise si mezcla niveles.
+- **Por qué va ahora:** la condición 8 de `O-uso-centro` espera fecha (el centro, no antes de noviembre) y no hay otro objetivo planificado. Se intercala antes de ella por decisión del usuario (EP), como `O-pre-demo` (L) y `O-manual` (CO), y no la bloquea (ET). Parte de `D-asignatura-sin-nivel` (S122, S227) y de `D-nombres-cortados-24`; no sale de una incidencia de uso, y el riesgo lo da la medición de S249.
+- **Medido al abrir (S249, Claude Code, HEAD `82935f8`, solo lectura; material en `/home/luis/educhronos-aceptacion/s249/` t0, t0bis y t0ter; bases: la de partida de 2025/2026, `d867c2de…`, versión 0, y la de 2026/2027, `38b81f23…`, versión 8):**
+  (a) CI en verde: `tests` #131 sobre `8945f7b` y #132 sobre `82935f8`.
+  (b) Se usan en varios niveles 27 de las 100 asignaturas de 2025/2026 y 26 de las 112 de 2026/2027; en 2026/2027, 11 no tienen nivel (8 solo en funciones y 3 solo en reuniones). Ninguna actividad ni ningún subgrupo mezcla niveles.
+  (c) De los 12 grupos de asignaturas con el mismo nombre, el nivel distingue 4; con el selector filtrado por nivel quedan 2 repetidas en cada base (Geo y Geogr en 3ESO; EFis y EFís en 4ESO; ReLen y RefLe en 3ESO).
+  (d) El editor ofrece hoy las 100 o 112 asignaturas y los 334 o 379 subgrupos; por nivel, de 6 a 26 asignaturas y de 1 a 99 subgrupos.
+  (e) `asignatura.codigo` es único y distingue mayúsculas (`schema.sql:42`). 21 sitios usan el código como clave, entre ellos el índice del solver (`CatalogoMapper.java:155`), la resolución de la petición de actividad (`ActividadService.java:349, :517`) y la carga del centro (`cargar-centro.py:469`); la leyenda del PDF agrupa por código (`PaginaPorRecurso.java:348`).
+  (f) Partir por nivel deja 141 y 152 asignaturas; toda plaza de una asignatura de varios niveles tiene un solo nivel; ninguna regla de aula cuelga de una asignatura (tablas vacías); `actividad.asignatura_id` apunta a una de varios niveles en 106 y 107 actividades.
+  (g) Crear y editar usan el mismo diálogo, `ActividadForm` (`actividad-lista.ts:192, :196, :203`); la lista muestra el tipo y no lo filtra. El tipo es `actividad.tipo` (`esquema/002.sql:11`), que la base de partida no tiene hasta migrarse.
+  (h) Con Séneca, 28 de 112 asignaturas casan con una materia única, y 4 de las 16 cortadas.
+- **Decisiones (S249):** (EP) del usuario: abrir el objetivo, intercalado antes de la condición 8 de `O-uso-centro`. (EQ) del usuario: una asignatura es una materia de un nivel; todas las asignaturas de clase llevan el nivel en el código (`Biol-3ESO`) y las que no tienen nivel conservan el suyo; el código corto se guarda aparte, se ve en la rejilla, los PDF y el CSV y es el que se compara con los PDF del centro; el código con nivel se ve en Configuración y en los selectores. (ER) del usuario: el asistente va a un objetivo posterior y no se olvida (`D-actividad-sin-asistente`). (ES) del usuario: Séneca queda fuera. (ET) del usuario: el objetivo no bloquea la condición 8; si termina a tiempo, el centro recibe `v0.6.0`, y si no, `v0.5.0`. (EU) del usuario: criterio aprobado. Las del arquitecto, en `s249/cierre/c1/decisiones.txt`.
+- **Decisiones (S250):** (EV) del usuario: renombrar el código de un nivel recompone el de sus asignaturas, porque se midió barato (si no, se habría prohibido). (EW) del usuario: en la migración, una plaza con subgrupos de varios niveles se queda en la parte principal, y en empate de plazas gana el nivel de menor orden. (EX) del usuario: la generación de la condición 3 se comprueba en una copia de la base de partida migrada con el mínimo de guardias por tramo a 0, porque la base no tiene guardias y la prevalidación la rechaza. Las del arquitecto, en `s250/cierre/c1/decisiones.txt`.
+- **Decisiones (S251):** (EY) del usuario: en el alta de una clase sin nivel, los selectores de asignatura y de subgrupos salen vacíos, con la indicación de elegir primero el nivel. (EZ) del usuario: al editar una clase con subgrupos de varios niveles o de ninguno, el nivel queda vacío y Mostrar todos los niveles, marcado. (FA) del usuario: lo ya elegido no se borra al cambiar de nivel, porque la mezcla resultante la avisa la prevalidación. (FB) del usuario: una actividad mezclada recibe un solo aviso. (FC) del usuario: el filtro por tipo es un desplegable bajo la búsqueda, y con un tipo elegido el contador dice n de N. (FD) del usuario: el aviso tras guardar dice si oculta la actividad la búsqueda, el tipo o las dos. (FE) del usuario: los textos de los tres avisos nuevos; el nombre se compara sin mayúsculas ni tildes. (FF) del usuario: la comprobación en navegador de la condición 4 la conduce el arquitecto con Claude in Chrome y la juzga el usuario, que aprueba el envío de prueba, como en S250. Las del arquitecto, en `s251/cierre/c1/decisiones.txt`.
+- **Decisiones (S252):** (FG) del usuario: tag `v0.6.0` directo sobre `a607e60`, sin rc, con Release definitiva. (FH) del usuario: la VM desde `s243-v050-manual`, con la cuenta estándar nueva `inst252`, el zip y la base por USB y una instantánea al terminar, conservando `s243-v050-manual`. (FI) del usuario: el defecto de la ventana de confirmar la generación se arregla dentro del objetivo y sale `v0.6.1`, que cumple la condición 7, leída como la versión del objetivo construida por CI desde su tag. (FJ) del usuario: esa ventana no pasa del alto de la pantalla, con los botones siempre a la vista y el resto desplazable. (FK) del usuario: la Release `v0.6.0` se conserva, con una nota de que la sustituye `v0.6.1`. (FL) del usuario: la maquetación de los errores en esa ventana no entra en `v0.6.1` (`D-dialogo-generar-errores-apretados`). (FM) del usuario: cerrar el objetivo; vio bien la ventana de arranque en la VM. (FN) del usuario: `D-actividad-sin-asistente` espera al uso real y se revisa tras la condición 8 de `O-uso-centro`. Las del arquitecto, en `s252/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S249 (EU). `O-actividad-por-nivel` termina cuando:
+  1. **Asignatura con nivel.** Cada asignatura tiene un nivel o ninguno. Si lo tiene, su código es el código corto, un guion y el código del nivel (`Biol-3ESO`), y el código corto se guarda aparte; la que no lo tiene conserva su código. El formulario de asignatura pide el código corto y el nivel y compone el código; la lista de asignaturas muestra el nivel.
+  2. **Migración.** Al abrirse, una base de una versión anterior parte cada asignatura usada en varios niveles en una por nivel, con el mismo código corto y nombre, y reparte sus plazas por el nivel de sus subgrupos; reapunta la asignatura de las actividades, y las que no tienen nivel se quedan con la parte del nivel con más plazas; da el código con nivel a toda asignatura de clase y conserva el corto. Si un código compuesto choca con uno existente, la migración para sin tocar la base. Test de migración con datos y, sobre copias de las dos bases medidas, 141 y 152 asignaturas, sin que ninguna plaza cambie de profesores, subgrupos, aula ni sesiones.
+  3. **Nada se rompe.** Sobre la base de partida migrada, el horario que ya trae se ve y se exporta igual, celda a celda, con el oráculo de exportación (grupo, profesor, aula y CSV), y una generación nueva sale con 0 violaciones duras; el último horario de la base de 2026/2027 migrada se exporta igual. La rejilla, los PDF y el CSV siguen mostrando el código corto.
+  4. **Editor por nivel.** Al crear una clase, el nivel se elige primero y es obligatorio; al editarla, se deduce de sus subgrupos; reuniones y funciones no lo piden. Las asignaturas y los subgrupos (los que tienen todos sus grupos en ese nivel) se filtran por él, y «Mostrar todos los niveles» quita el filtro. Cada asignatura se ve como «`Biol-3ESO` — Biología y Geología». Tests con mutante y comprobación del usuario en navegador, paso a paso (norma 17 de M-guion).
+  5. **Avisos.** La prevalidación avisa, sin impedir generar, de una actividad cuyos subgrupos son de varios niveles o cuya asignatura es de otro nivel que sus subgrupos, y de dos asignaturas del mismo nivel con el mismo nombre o el mismo código salvo mayúsculas y tildes. Sobre las dos bases migradas: 0 avisos de mezcla y 2 de repetidas en cada una (`s249/t0bis`). Un mutante por regla.
+  6. **Filtro por tipo.** La lista de actividades se filtra por tipo (clase, reunión o función), junto con la búsqueda. Test con mutante.
+  7. **Versión (ET).** `v0.6.0`, construida por CI desde su tag; el manual al día, con su sección 7 y las capturas comprobadas contra la versión (`tools/manual`); en la VM, con una cuenta estándar nueva, `Instalar.cmd` coloca la base de partida intacta (md5 `d867c2dec4a9ab01357f539d8b09f7e2`) y, al abrirla, migra y muestra los niveles; con acta. No bloquea la condición 8 de `O-uso-centro`: si la fecha llega antes, el centro recibe `v0.5.0`. **✔ CUMPLIDA en S252 con `v0.6.1` (FI).**
+- **ESTADO en S250: 3 de 7** (condiciones 1 a 3). ABIERTO en S249, con `O-uso-centro` abierto a la vez (precedentes S183 y S236). Verificado en S250 (material en `/home/luis/educhronos-aceptacion/s250/`): (1) tests y M3, con 12 de 13 mutantes muertos (M11 era código inerte y se borró), y en navegador, por el arquitecto con Claude in Chrome sobre una copia de 2026/2027 y con la aprobación del usuario para los dos envíos, la lista con su columna Nivel, el alta de `Prueba-3ESO` y su edición a `Prueba-4ESO` (`s250/f5/navegador/acta-navegador.txt`); (2) 141 y 152 asignaturas, y plazas, profesores, subgrupos, aulas y sesiones idénticos fila a fila; si un código choca, la migración para y la base se queda en la versión 8; (3) proyección y CSV idénticos byte a byte a la línea base de `c8778c7`, PDF idéntico en texto, y oráculo y leyenda en verde en las dos bases; la generación (EX), 0 violaciones duras en 601,8 s.
+- **ESTADO en S251: 6 de 7** (condiciones 4 a 6). Verificado en S251 (material en `/home/luis/educhronos-aceptacion/s251/`): (4) tests y M3, con 6 de 6 mutantes muertos en el editor, y en navegador, conducido por el arquitecto con Claude in Chrome sobre una copia de 2026/2027 y juzgado por el usuario (FF): el nivel primero, el filtro de asignaturas y subgrupos, Mostrar todos los niveles, la deducción al editar y el envío de prueba (`s251/m4/acta-navegador.txt`); (5) tres avisos nuevos de la prevalidación, que también pasa la generación, con 7 de 7 mutantes muertos, y sobre las dos bases migradas 0 de mezcla y 2 pares repetidos en cada una, los medidos en el T0 (`s251/f4/b6-diff.txt`); (6) el filtro por tipo junto con la búsqueda, con 5 de 5 mutantes muertos. Queda la condición 7.
+- **ESTADO en S252: TERMINADO, 7 de 7** (condición 7, con `v0.6.1` por FI). Verificado en S252 (material en `/home/luis/educhronos-aceptacion/s252/`): `v0.6.1` sobre `b017ca7`, construida por CI desde su tag (`tests` #136, `bundle` #20); el manual al día, con la sección 7 rehecha y la 8 ampliada, 186 de 186 citas comprobadas contra `app-0.6.1.jar`, las 24 capturas rehechas y el PDF (`4e188a5`, `s252/f2b`); en la VM, con la cuenta estándar nueva `inst252`, `Instalar.cmd` coloca la base de partida intacta y, al abrirla, migra de 0 a 9 y muestra los niveles (`s252/v1`). Por el camino, la ventana de confirmar la generación dejaba fuera sus botones en pantallas de 768 px de alto (latente desde `875ea3f`); se arregla en `7d89888` y `b017ca7` (FI, FJ). `v0.6.0` queda publicada y marcada como sustituida (FK). Acta en `docs/actas-aceptacion/acta-version-s252.md`.
+- **Fuera del criterio:** el asistente (ER, `D-actividad-sin-asistente`); Séneca y los nombres cortados (ES, `D-nombres-cortados-24`); adaptar la carga del centro y la comparación de `tools/carga-centro` (`D-carga-centro-sin-nivel`, del arquitecto).
+- **Deudas:** salda `D-asignatura-sin-nivel` (condiciones 1, 4 y 5). **S251:** saldada, con su fila en `gestion-historico.md` §2. Nace `D-busqueda-sin-tipo`, sin sede (E7 de S251). **S252:** nace `D-dialogo-generar-errores-apretados` (FL); `D-actividad-sin-asistente`, revisada al cerrar (ER, FN), sigue sin objetivo hasta la condición 8 de `O-uso-centro`.
+- **Depende de:** nada abierto. Reutiliza `PreparadorEsquema` y sus migraciones (`O-base-tecnica`), la prevalidación, el filtro de `O-pre-demo`, el oráculo de exportación (`O-exportación`), `tools/manual` (`O-manual`) y la VM con `Instalar.cmd` (`O-uso-centro`). La versión, la Release y la VM son reservadas al usuario.
+- **Valor:** que la secretaria prepare el 2026/2027 sin elegir por error una asignatura de otro curso, algo que hoy la prevalidación no detecta.
+- **Cambios que agrupa:** `C-alcance-actividad-por-nivel` ✔ HECHO (S249): M0, T0, T0-bis, T0-ter y criterio. `C-asignatura-con-nivel` ✔ HECHO (S250): condiciones 1 a 3 (`82f8bce`, `d4c643f`, `cf70e85` y `e47cabf`). `C-editor-por-nivel` ✔ HECHO (S251): condiciones 4 a 6 (`19267ec`, `6af5d9a`, `b997244` y `8824250`). `C-version-actividad-por-nivel` ✔ HECHO (S252): condición 7 (`7d89888`, `b017ca7`, `c86eee8` y `4e188a5`; `v0.6.1`).
+- **Métrica de §7:** estimación al abrir: de 3 a 5 sesiones (sin medir). Gastadas: 3 (S249, S250 y S251). **S252:** gastadas 4 (S249 a S252), dentro de la estimación.
 
 ## 2. Deuda cerrada de §4
 
