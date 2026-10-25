@@ -2,7 +2,7 @@
 
 # Educhronos — Manual de uso
 
-**versión 0.5.0** · 20 de octubre de 2026
+**versión 0.6.1** · 25 de octubre de 2026
 
 Para la secretaria del centro y para quien instale Educhronos en el ordenador del centro. Explica,
 tarea por tarea, cómo preparar el curso, generar el horario, ajustarlo y sacarlo en papel.
@@ -44,7 +44,7 @@ tienes que ver estos cuatro elementos:
 - `Educhronos-win.zip.sha256`: sirve para comprobar el zip; no tienes que hacer nada con él.
 - La carpeta `base-partida`: dentro lleva un único fichero terminado en `.db` (y otro que acaba en
   `.md5`, que no se toca).
-- `Educhronos-manual-0.5.0.pdf`: este manual.
+- `Educhronos-manual-0.6.1.pdf`: este manual.
 
 Si falta alguno, no sigas: avisa. Si hay otras carpetas, no las uses.
 
@@ -139,7 +139,7 @@ Educhronos no se abre. Cierra el otro programa o, si no sabes cuál es, avisa.
 
 ## Ver qué versión tienes
 
-Debajo de la marca Educhronos, arriba a la izquierda, pone «versión 0.5.0». Es lo primero que
+Debajo de la marca Educhronos, arriba a la izquierda, pone «versión 0.6.1». Es lo primero que
 tienes que decir si avisas de un fallo.
 
 ## Cerrar
@@ -165,7 +165,7 @@ pestaña del navegador si la has cerrado.
 
 Siempre está a la vista, en todas las pantallas. De izquierda a derecha:
 
-- **La marca** Educhronos, con la línea «versión 0.5.0» debajo. Si haces clic en la marca, vuelves
+- **La marca** Educhronos, con la línea «versión 0.6.1» debajo. Si haces clic en la marca, vuelves
   a la portada.
 - **«Configuración»**: todo lo que el horario necesita saber del centro.
 - **«Horario»**: ver, ajustar y sacar el horario.
@@ -318,8 +318,12 @@ La baja no está hecha hasta que lo borras.
 
 # 7. Clases
 
-**Dónde se hace.** «Configuración» › «Actividades». Cada fila es una clase: su código, su
-asignatura, sus «Repeticiones» a la semana y cuántas plazas tiene.
+**Dónde se hace.** «Configuración» › «Actividades». Cada fila es una clase, una reunión o una
+función: su código, su «Tipo», su asignatura, sus «Repeticiones» a la semana y cuántas plazas tiene.
+
+Cada asignatura es de un nivel, y su código lo lleva: «LAT-4ESO» es el Latín de 4ESO. Las
+asignaturas que se daban en varios niveles se partieron, al pasar a esta versión, en una por nivel,
+con el mismo nombre.
 
 ## Encontrar las clases de un grupo o de una asignatura
 
@@ -328,19 +332,24 @@ Escribe en la caja de búsqueda, arriba a la derecha:
 - **El código de un grupo**, por ejemplo 4ºC. Debajo de la caja sale «Actividades del grupo 4ºC» y
   la lista enseña solo sus clases.
 - **El código o el nombre de una asignatura**, por ejemplo Latín. Sale «Actividades de la
-  asignatura Latín (LAT)», y las de otras asignaturas que se llamen igual.
+  asignatura Latín (LAT-4ESO)» y, a continuación, las otras asignaturas que se llaman Latín, una por
+  nivel.
 - **El código de un profesor**, como en la sección 6.
 
 Si lo que escribes no es exactamente un código o un nombre, la lista enseña las clases que lo
 contienen en alguna de sus columnas.
 
+Para ver solo las clases, solo las reuniones o solo las funciones, elige el tipo en el desplegable
+de debajo de la caja, que empieza en «Todos los tipos». El tipo y la búsqueda se aplican a la vez.
+
 ![Buscando 4ºC: las clases del grupo.](capturas/16-actividades-4C.png)
 
-![Buscando Latín: las clases de las asignaturas que se llaman Latín.](capturas/17-actividades-latin.png)
+![Buscando Latín: las clases de las asignaturas que se llaman Latín, una por nivel.](capturas/17-actividades-latin.png)
 
 ## Cambiar las horas a la semana, el profesor o el aula
 
-1. Pulsa «Editar» en la fila de la clase. Sale «Editar actividad».
+1. Pulsa «Editar» en la fila de la clase. Sale «Editar actividad». En «Nivel» está el nivel de la
+   clase, que Educhronos saca de sus subgrupos.
 2. Cambia lo que haga falta:
    - **Las horas a la semana**: «Repeticiones por semana». «Duración (tramos)» es cuántos tramos
      seguidos dura cada vez.
@@ -352,9 +361,24 @@ contienen en alguna de sus columnas.
 Si la clase tiene varias plazas (varios profesores o varias aulas a la vez), cada una tiene su
 pestaña bajo «Plazas».
 
-![La ficha de la clase LAT-4ºC.](capturas/18-actividad-lat-4C.png)
+Las listas de asignaturas y de subgrupos enseñan solo las del nivel de la clase, y cada asignatura
+se ve con su código y su nombre, como «LAT-4ESO — Latín». Si necesitas una de otro nivel, marca
+«Mostrar todos los niveles». Si los subgrupos de la clase son de varios niveles, o de ninguno,
+«Nivel» sale vacío y esa casilla, marcada; la pre-validación avisa de los de varios niveles
+(sección 8).
+
+![La ficha de la clase LAT-4ºC, con su nivel.](capturas/18-actividad-lat-4C.png)
 
 **Atención:** en un curso con horario generado, las clases no se pueden cambiar (sección 9).
+
+## Crear una clase nueva
+
+1. Pulsa «Nueva actividad». Lo primero es elegir el «Nivel»: hasta que lo eliges, las listas de
+   asignaturas y de subgrupos salen vacías, con el aviso «Elige primero el nivel.»
+2. Rellena lo demás como al cambiar una clase (arriba).
+3. Pulsa «Guardar».
+
+Una reunión o una función no tiene nivel: si la eliges en «Tipo», no lo pide.
 
 # 8. Antes de generar: el panel de pre-validación
 
@@ -368,7 +392,7 @@ horario. Créalo con «Generar horario».» si el curso aún no tiene horario).
 su contrario lo pliegas o despliegas. Cada línea dice su gravedad (ERROR u otra), qué regla falla,
 a quién afecta y una frase que explica qué pasa y qué hacer.
 
-![El panel en un curso recién preparado: un ERROR de guardias.](capturas/23-horario-sin-generar.png)
+![El panel en un curso recién preparado: un ERROR de guardias y dos avisos de asignaturas repetidas.](capturas/23-horario-sin-generar.png)
 
 **Qué hacer con un error.** Lee la frase de la línea y corrige lo que dice. Un ejemplo real, el que
 da la base de partida: la línea de guardias dice «Añade guardias a los profesores o baja el mínimo
@@ -377,6 +401,12 @@ de cada profesor (sección 6) o baja el «Mínimo de profesores de guardia por t
 «Horario», el panel se actualiza.
 
 Los hallazgos que no son ERROR no impiden generar, pero conviene leerlos.
+
+**Avisos de nivel.** El panel avisa también, sin impedir generar, de tres cosas: una clase con
+subgrupos de varios niveles; una clase que usa una asignatura de otro nivel; y dos asignaturas del
+mismo nivel con el mismo nombre, o con el mismo código salvo mayúsculas y tildes. La base de partida
+trae dos de estas últimas, una en 3ESO y otra en 4ESO, y su línea termina con «Si son la misma
+asignatura, deja una.» Si no sabes si lo son, déjalas como están: el aviso no impide generar. Si hay alguno, la ventana de confirmar la generación también los lista, bajo «Avisos (no impiden generar)».
 
 **Atención:** con un ERROR en el panel, la generación no sale. La ventana de confirmación lo dice
 («Además, el servidor rechazará esta generación.») y su botón cambia a «Generar de todos modos».
@@ -509,7 +539,7 @@ Edge: <!-- sin-comprobar -->«Le damos la bienvenida a Microsoft Edge, el explor
 3. Al terminar ves la portada de Educhronos. Si el navegador ha abierto otras pestañas suyas,
    puedes cerrarlas.
 
-<!-- Manual de uso de Educhronos 0.5.0 (S242, O-manual, C-alcance-manual). Las citas entre
+<!-- Manual de uso de Educhronos 0.6.1 (S242, O-manual, C-alcance-manual; al día con 0.6.1 en S252). Las citas entre
      comillas angulares las comprueba tools/manual/capturas.mjs contra la aplicación; las de Windows,
      la ventana de arranque, la bandeja e Instalar.cmd van entre las marcas sin-comprobar. La
      sección 13, Si algo no va bien, es docs/guia-incidencias.md, que tools/manual/generar-pdf.sh
