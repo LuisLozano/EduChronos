@@ -228,7 +228,7 @@ async function recorrer(page, nombresReales, capturas, textos) {
   await ir('/configuracion/actividades');
   await paso(null, ['Nueva actividad', 'N.º de plazas']);
   await buscar('Latín');
-  await paso(null, ['Actividades de la asignatura Latín (LAT)', 'LAT-4ºC']);
+  await paso(null, ['Actividades de la asignatura Latín (LAT-4ESO)', 'LAT-4ºC']);
   await fila('LAT-4ºC').getByRole('button', { name: 'Editar', exact: true }).click();
   await paso(null, ['Editar actividad', 'Repeticiones por semana']);
   await boton('Guardar', page.locator('.actividad-form')).click();
@@ -290,9 +290,14 @@ async function recorrer(page, nombresReales, capturas, textos) {
   await buscar('4ºC');
   await paso('actividades-4C', ['Actividades del grupo 4ºC', 'LAT-4ºC']);
   await buscar('Latín');
-  await paso('actividades-latin', ['Actividades de la asignatura Latín (LAT)', 'LAT-4ºC']);
+  await paso('actividades-latin', ['Actividades de la asignatura Latín (LAT-4ESO)', 'LAT-4ºC']);
   await fila('LAT-4ºC').getByRole('button', { name: 'Editar', exact: true }).click();
   await paso('actividad-lat-4C', ['Editar actividad', 'Repeticiones por semana', 'Plazas']);
+  await boton('Cancelar', page.locator('.actividad-form')).click();
+  await paso(null, ['Nueva actividad'], ['Repeticiones por semana']);
+  // S252: el alta de una clase pide primero el nivel (O-actividad-por-nivel, condición 4).
+  await boton('Nueva actividad').click();
+  await paso(null, ['Elige primero el nivel.', 'Mostrar todos los niveles']);
   await boton('Cancelar', page.locator('.actividad-form')).click();
   await paso(null, ['Nueva actividad'], ['Repeticiones por semana']);
 
