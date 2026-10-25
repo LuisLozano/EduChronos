@@ -8,6 +8,11 @@
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-m);
   box-shadow: var(--sombra-dialogo);
+  /* S252: con avisos, la ventana medía 832 px y en una pantalla de 768 dejaba sus botones
+     fuera, sin nada que desplazar (s252/t0e). Alto máximo y scroll como actividad-form y
+     replicacion-dialogo; los botones se quedan pegados abajo (decisión FJ). */
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .confirmar-generacion h2 {
@@ -100,4 +105,8 @@
   display: flex;
   gap: var(--e2);
   justify-content: flex-end;
+  position: sticky;
+  bottom: 0;
+  padding-top: var(--e2);
+  background: var(--color-superficie);
 }
