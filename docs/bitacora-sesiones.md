@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S250. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S251. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S250). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S251). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10856,3 +10856,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el criterio de S249 pedía generar sobre la base de partida sin medir que no tiene guardias, y la prevalidación la rechaza (422); EX lo resolvió con un guion más. En el C1 del cierre, seis afirmaciones de forma sin marca, todas ciertas, y la comprobación en navegador sin acta en el material (una parada); y OP17 a OP20 editaban `docs/tecnica/arquitectura.md`, que describe otro commit, porque F4.5 la dio por falsa sin leer su sello (una parada). Sin coste: en el contrato, seis afirmaciones sin marca, dos errores de forma (filas nuevas sin código y el mensaje del choque) y dos omisiones (la carga del centro y las asignaturas con plazas sin subgrupos), cazados por el contraste; el C0 buscaba «7 de 20» en gestión y una cabecera de S248. De Claude Code, sin coste: el rc de un curl tras un echo y el de grep tras sed (norma 1), rehechos, y un cd de solo lectura (norma 6). Defectos distintos: el disparador no salta.
   SUITES. Solver 162, app 983, vitest 858 en 69 ficheros, e2e 3; python 337, sin tocar. Bundle 653,28 kB en `e47cabf` (+1,31).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 60 líneas del commit de cierre sin índice, 3 107 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 251 — O-actividad-por-nivel (H5), C-editor-por-nivel: **EL EDITOR PIDE EL NIVEL Y FILTRA POR ÉL ASIGNATURAS Y SUBGRUPOS; LA PREVALIDACIÓN AVISA DE LA MEZCLA DE NIVELES Y DE LAS ASIGNATURAS REPETIDAS; LA LISTA SE FILTRA POR TIPO. O-ACTIVIDAD-POR-NIVEL EN 6 DE 7, O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo, con `O-uso-centro` esperando fecha. Material en `/home/luis/educhronos-aceptacion/s251/` (t0, c1, f0 a f4, m4 y cierre).
+  HECHO. T0 de solo lectura: `tests` #134 en verde sobre `02d315c`; sobre las bases migradas, 0 mezclas y 2 pares repetidos por base, con autoprueba de 8 defectos tras la enmienda A1. C1: contrato, contraste y enmiendas E1 a E13. F1: tres avisos nuevos de la prevalidación, también en la generación (`19267ec`). F2: filtro por tipo en la lista (`6af5d9a`). F3: el editor pide el nivel y filtra; e2e al día (`b997244`). M3: 18 de 18 mutantes muertos. F4: suites completas y, sobre las dos bases, la prevalidación de `02d315c` más los 2 pares de cada una. M4 en Chrome: la fila 1 del editor saltaba de línea y se corrigió (`8824250`); acta en `s251/m4/acta-navegador.txt`.
+  CRITERIO. `O-actividad-por-nivel` en 6 de 7 (condiciones 4 a 6); `C-editor-por-nivel` HECHO. Queda la versión (7). `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: EY a FF, con su texto en la ficha. Del arquitecto, diecisiete, en `s251/cierre/c1/decisiones.txt`.
+  DEUDA. Se salda `D-asignatura-sin-nivel` (condiciones 1, 4 y 5); su fila pasa a `gestion-historico.md` §2. Nace `D-busqueda-sin-tipo` (técnica real, sin sede). Higiene/Método sigue en 7.
+  DEFECTOS. Del arquitecto, con coste: la regla de parada (a) de F3 no exceptuaba los asertos que el contrato cambia expresamente (una parada, en el caso P1); la fila 1 del editor saltaba a dos líneas y la cazó el M4 (un arreglo); en el C1 del cierre, dos afirmaciones de forma sin cita, ciertas (parada compartida). Sin coste: en el T0, las definiciones de M1 y M2 se solapaban y la autoprueba lo paró (A1); el contrato C1 tenía 8 afirmaciones sin cita, dos discrepancias (el contador de la cabecera y una cita) y diez omisiones, cazadas por el contraste; la comprobación del arreglo de la fila 1 pedía el mismo top a cajas alineadas abajo. De Claude Code, con coste: el volcador del C0 del cierre restaba uno al final de cada tabla, y OP9 anclaba en la penúltima fila del histórico (la misma parada). Sin coste: el informe del C0 daba 6 383 bytes de entrada por 3 106 y 249 cabeceras de bitácora por 238. Defectos distintos: el disparador no salta.
+  SUITES. Solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337, sin tocar. Bundle 657,80 kB en `b997244` (+4,52).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 57 líneas del commit de cierre sin índice, 2 951 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
