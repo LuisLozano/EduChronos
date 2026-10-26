@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S251. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S252. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S251). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S252). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10866,3 +10866,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: la regla de parada (a) de F3 no exceptuaba los asertos que el contrato cambia expresamente (una parada, en el caso P1); la fila 1 del editor saltaba a dos líneas y la cazó el M4 (un arreglo); en el C1 del cierre, dos afirmaciones de forma sin cita, ciertas (parada compartida). Sin coste: en el T0, las definiciones de M1 y M2 se solapaban y la autoprueba lo paró (A1); el contrato C1 tenía 8 afirmaciones sin cita, dos discrepancias (el contador de la cabecera y una cita) y diez omisiones, cazadas por el contraste; la comprobación del arreglo de la fila 1 pedía el mismo top a cajas alineadas abajo. De Claude Code, con coste: el volcador del C0 del cierre restaba uno al final de cada tabla, y OP9 anclaba en la penúltima fila del histórico (la misma parada). Sin coste: el informe del C0 daba 6 383 bytes de entrada por 3 106 y 249 cabeceras de bitácora por 238. Defectos distintos: el disparador no salta.
   SUITES. Solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337, sin tocar. Bundle 657,80 kB en `b997244` (+4,52).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 57 líneas del commit de cierre sin índice, 2 951 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 252 — O-actividad-por-nivel (H5), C-version-actividad-por-nivel: **V0.6.1 PUBLICADA, CON EL MANUAL AL DÍA Y PROBADA EN LA VM; LA VENTANA DE CONFIRMAR LA GENERACIÓN DEJA VER SUS BOTONES EN PANTALLAS DE 768 PX. O-ACTIVIDAD-POR-NIVEL TERMINADO, 7 DE 7; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo reducido (versión, manual y VM), con una fase de Configuración/UI para el arreglo de la ventana; `O-uso-centro` esperando fecha. Material en `/home/luis/educhronos-aceptacion/s252/` (t0, t0b, t0c, t0e, t0f, f1, f2, f3, f2b, v1 y cierre).
+  HECHO. T0 a T0f de solo lectura. F1: `tests` #135 sobre `a607e60`, tag `v0.6.0` y `bundle` #19; la corrida de capturas abortó porque la búsqueda de Latín ya enseña el código con nivel (`LAT-4ESO`). T0e: la ventana de confirmar la generación medía 832 px y, a 1366x768, dejaba fuera sus botones sin nada que desplazar (latente desde `875ea3f`). F3: alto máximo y pie fijo (`7d89888`, `b017ca7`), medidos a tres tamaños con control negativo; `tests` #136, tag `v0.6.1` y `bundle` #20; nota de sustitución en la Release `v0.6.0`. F2b: recorrido de capturas al día (`c86eee8`) y manual con 186 de 186 citas, 24 capturas y PDF (`4e188a5`); `tests` #137. V1: en la VM, `inst252` estándar, la base instalada intacta, migración de 0 a 9 y los niveles a la vista; instantánea `s252-v061`. Acta en `docs/actas-aceptacion/acta-version-s252.md`.
+  CRITERIO. `O-actividad-por-nivel` TERMINADO, 7 de 7 (la 7 con `v0.6.1`, FI); ficha a `gestion-historico.md` §1. `C-version-actividad-por-nivel` HECHO. `O-uso-centro` sigue en 7 de 8; si llega la fecha, el centro recibe `v0.6.1`.
+  DECISIONES. Del usuario: FG a FN, con su texto en la ficha. Del arquitecto, diecisiete, en `s252/cierre/c1/decisiones.txt`.
+  DEUDA. Nacen `D-dialogo-generar-errores-apretados` (FL) y `D-prueba-vm-a-mano`, mejoras futuras sin objetivo, y `D-paso-cero-para-por-forma`, de método: Higiene/Método de 7 a 8. `D-actividad-sin-asistente`, revisada al cerrar (FN): sigue sin objetivo.
+  DEFECTOS. Del arquitecto, con coste: di por hecho que la corrida de capturas acabaría con una lista de citas sin leer su recorrido (un T0c más); la autoprueba de la medida usaba el defecto como caso positivo, y su sustituta se montó bajo un diálogo abierto (dos paradas en F3); el primer arreglo dejaba asomar texto bajo los botones (un segundo commit); en el C1 del cierre, una deuda dada por viva que se cerró en S243 y una cifra de pasos mal contada (una parada). Sin coste: siete paradas del paso cero por afirmaciones sin marca, escritas de memoria (`D-paso-cero-para-por-forma`). De Claude Code, sin coste: tres recuentos con grep mal hechos, rehechos. Con coste, defectos distintos: el disparador no salta.
+  SUITES. Solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337, sin tocar. Bundle 658,07 kB en `b017ca7` (+0,27).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 121 líneas del commit de cierre sin índice, 3 137 bytes de entrada y 3 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
