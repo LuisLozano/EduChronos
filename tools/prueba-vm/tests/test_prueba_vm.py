@@ -16,6 +16,9 @@ import prueba_vm as pv  # noqa: E402
 SINCE = "2026-10-26T15:05:34.000000000"
 TRAS_APAGAR = "2026-10-26T21:14:10.000000000"
 HORA_RESTORE = "2026-10-27T07:32:22.310000000"  # la que leyó cerrar a los 30 ms en s256/v1
+# E52: el .vbox guarda la hora al segundo y en UTC con «Z».
+VBOX_SINCE, VBOX_TRAS_APAGAR = "2026-10-26T15:05:34Z", "2026-10-26T21:14:10Z"
+VBOX_BUENO = ("0a6f", VBOX_SINCE, "false")
 SALIDA_INSTALAR = (
     "[1/3] Programa en C:\\Users\\prueba-vm\\AppData\\Local\\Programs\\Educhronos\r\n"
     "[2/3] Acceso directo en el Escritorio\r\n[3/3] Base de partida\r\n"
@@ -55,9 +58,23 @@ class VMFalsa:
         self.procesos = ["6120|Educhronos.exe|2", "9508|Educhronos.exe|2"]
         self.tras_apagar = TRAS_APAGAR
         self.tras_restaurar = SINCE
-        self.lecturas_con_hora_restore, self.pendientes = 0, 0
         self.restore_rc = 0
+        # .vbox falso (E52): (currentSnapshot, lastStateChange, currentStateModified) ahora, tras apagar y
+        # tras restaurar.
+        self.vbox_ruta = pathlib.Path(esc.carpeta.name) / "VM" / "Win11.vbox"
+        self.vbox_ruta.parent.mkdir()
+        self.vbox_tras_apagar = ("0a6f", VBOX_TRAS_APAGAR, "true")
+        self.vbox_tras_restaurar = VBOX_BUENO
+        self.poner_vbox(VBOX_BUENO)
         self.com_caido = 0
+
+    def poner_vbox(self, claves):
+        self.vbox = claves
+        self.vbox_ruta.write_text(
+            '<?xml version="1.0"?>\n<VirtualBox xmlns="http://www.virtualbox.org/" version="1.19-linux">\n'
+            '  <Machine uuid="{11111111-2222-3333-4444-555555555555}" name="Win11" currentSnapshot="{%s}"'
+            ' lastStateChange="%s" currentStateModified="%s">\n  </Machine>\n</VirtualBox>\n' % claves,
+            encoding="utf-8")
 
     def __call__(self, args, timeout):
         self.llamadas.append(list(args))
@@ -69,30 +86,25 @@ class VMFalsa:
 
     def responder(self, a):
         if a[0] == "showvminfo":
-            r = self.ok('name="Win11"\nVMState="%s"\nVMStateChangeTime="%s"\nCurrentSnapshotName="%s"\n'
-                        'SharedFolderNameMachineMapping1="educhronos-vm"\n'
-                        'SharedFolderPathMachineMapping1="%s"\n' % (self.estado, self.cambio, self.actual, self.compartida))
-            if self.pendientes:
-                self.pendientes -= 1
-                if not self.pendientes:
-                    self.cambio = self.tras_restaurar
-            return r
+            return self.ok('name="Win11"\nVMState="%s"\nVMStateChangeTime="%s"\nCurrentSnapshotName="%s"\n'
+                           'CfgFile="%s"\nSharedFolderNameMachineMapping1="educhronos-vm"\n'
+                           'SharedFolderPathMachineMapping1="%s"\n'
+                           % (self.estado, self.cambio, self.actual, self.vbox_ruta, self.compartida))
         if a[0] == "snapshot" and a[2] == "showvminfo":
             return self.ok("Name:                        Win11\nState:                       powered off (since %s)\n" % SINCE)
         if a[0] == "snapshot" and a[2] == "list":
             return self.ok(self.lista)
         if a[0] == "snapshot" and a[2] == "restore":
             if self.restore_rc == 0:
-                # E51: las primeras lecturas tras el restore pueden dar todavía la hora del restore.
-                self.pendientes = self.lecturas_con_hora_restore
-                self.estado, self.actual = "poweroff", a[3]
-                self.cambio = HORA_RESTORE if self.pendientes else self.tras_restaurar
+                self.estado, self.actual, self.cambio = "poweroff", a[3], self.tras_restaurar
+                self.poner_vbox(self.vbox_tras_restaurar)
             return self.ok("Restoring snapshot\n", rc=self.restore_rc)
         if a[0] == "startvm":
             self.estado = "running"
             return self.ok('VM "Win11" has been successfully started.\n')
         if a[0] == "controlvm":
             self.estado, self.cambio = "poweroff", self.tras_apagar
+            self.poner_vbox(self.vbox_tras_apagar)
             return self.ok("100%\n")
         if a[0] == "guestcontrol" and a[2] == "copyto":
             return self.ok("")
@@ -277,18 +289,36 @@ class VMCambiadaTest(Escenario):
         self.assertEqual(informe["vm-sin-cambios"], "FALLO")
         self.assertEqual({k: v for k, v in informe.items() if k != "vm-sin-cambios"},
                          {k: "DATO" for k in pv.CLAVES_INFORME if k != "vm-sin-cambios"})
-        self.assertIn("frente a " + SINCE, (self.material / "informe.txt").read_text(encoding="utf-8"))
+        self.assertIn("frente a 0a6f, " + SINCE, (self.material / "informe.txt").read_text(encoding="utf-8"))
 
-    def test_hora_de_cambio_distinta(self):
-        self.vm.cambio = TRAS_APAGAR
+    def test_vbox_distinto_en_cada_clave(self):
+        # E52: un negativo por clave del .vbox; cada uno rechaza sin restaurar.
+        for claves in (("60318", VBOX_SINCE, "false"), ("0a6f", VBOX_TRAS_APAGAR, "false"), ("0a6f", VBOX_SINCE, "true")):
+            with self.subTest(claves=claves):
+                self.setUp()
+                self.vm.poner_vbox(claves)
+                self.comprobar_solo_lecturas(self.preparar())
+
+    def test_sin_cfgfile_rechaza(self):
+        self.vm.vbox_ruta.unlink()
         self.comprobar_solo_lecturas(self.preparar())
+        self.assertIn("error=", "".join(f.read_text(encoding="utf-8")
+                                        for f in (self.material / "ordenes").glob("*-vbox-antes.txt")))
+
+    def test_hora_de_showvminfo_distinta_es_dato(self):
+        # E52: el caso de S256, un VBoxSVC vivo del restore anterior; con el .vbox bueno no se rechaza.
+        self.vm.cambio = HORA_RESTORE
+        self.assertEqual(self.preparar(), 0)
+        self.assertEqual(self.informe()["vm-sin-cambios"], "OK")
+        self.assertIn("VMStateChangeTime %s (DATO)" % HORA_RESTORE,
+                      (self.material / "informe.txt").read_text(encoding="utf-8"))
 
     def test_instantanea_actual_distinta(self):
         self.vm.actual = "s254-admin-clave"
         self.comprobar_solo_lecturas(self.preparar())
 
     def test_cerrar_tras_el_rechazo_no_toca_la_vm(self):
-        self.vm.cambio = TRAS_APAGAR
+        self.vm.poner_vbox(("0a6f", VBOX_TRAS_APAGAR, "false"))
         self.assertEqual(self.preparar(), 2)
         self.vm.llamadas.clear()
         self.assertEqual(self.sub("cerrar"), 2)
@@ -336,6 +366,27 @@ class VeredictosTest(unittest.TestCase):
         self.assertEqual(pv.traducir_rc(33), (1, "código 1 en la VM"))
         self.assertEqual(pv.traducir_rc(255), (223, "código 223 en la VM"))
         self.assertEqual(pv.veredicto_instalar_rc(32), ("FALLO", "rc 32, rc 32 no observado"))
+
+    def test_conversion_al_segundo(self):
+        # E52: «…Z» del .vbox frente a «…000000000» de showvminfo; la fracción se descarta.
+        self.assertEqual(pv.al_segundo(VBOX_SINCE), "2026-10-26T15:05:34")
+        self.assertEqual(pv.al_segundo(SINCE), "2026-10-26T15:05:34")
+        self.assertTrue(pv.mismo_segundo(VBOX_SINCE, SINCE))
+        self.assertTrue(pv.mismo_segundo("2026-10-27T07:32:22Z", HORA_RESTORE))
+        self.assertFalse(pv.mismo_segundo("2026-10-26T15:05:35Z", SINCE))
+        self.assertFalse(pv.mismo_segundo(None, SINCE))
+        self.assertFalse(pv.mismo_segundo("26/10/2026 15:05:34", SINCE))
+        self.assertIsNone(pv.al_segundo(None))
+
+    def test_uuid_de_la_instantanea_y_lector_del_vbox(self):
+        lista = ("   Name: s254-admin-clave (UUID: 60318cfc-59f3) \n"
+                 "      Name: s254-cuenta-prueba (UUID: 0A6F71B0-97ea) *\n")
+        self.assertEqual(pv.uuid_de_instantanea(lista, "s254-cuenta-prueba"), "0a6f71b0-97ea")
+        self.assertIsNone(pv.uuid_de_instantanea(lista, "s254-admin"))
+        self.assertIsNone(pv.leer_vbox("no es xml"))
+        self.assertEqual(pv.leer_vbox('<VirtualBox xmlns="http://www.virtualbox.org/"><Machine name="Win11"'
+                                      ' currentStateModified="false"/></VirtualBox>'),
+                         {"name": "Win11", "currentStateModified": "false"})
 
     def test_seis_lineas(self):
         self.assertEqual(pv.veredicto_lineas(SALIDA_INSTALAR)[0], "OK")
@@ -475,51 +526,46 @@ class CerrarTest(Escenario):
         sondeos = [a for a in self.vm.llamadas if a[-1].startswith("# prueba-vm: procesos-cerrar-")]
         self.assertEqual(len(sondeos), pv.INTENTOS_PROCESOS)
 
-    def test_hora_distinta_tras_restaurar(self):
-        self.vm.tras_restaurar = "2026-10-26T22:30:00.000000000"
-        self.assertEqual(self.corrida_completa()[-1], 3)
-        self.assertEqual(self.informe()["vm-restaurada"], "FALLO")
-
-    def lecturas_tras_restore(self):
-        llamadas = self.vm.llamadas
-        i = max(n for n, a in enumerate(llamadas) if a[:3] == ["snapshot", "Win11", "restore"])
-        return [a for a in llamadas[i + 1:] if a[0] == "showvminfo"]
+    def test_vbox_distinto_tras_restaurar_en_cada_clave(self):
+        # E52: un negativo por clave del .vbox tras el restore.
+        for claves in (("60318", VBOX_SINCE, "false"), ("0a6f", "2026-10-26T22:30:00Z", "false"),
+                       ("0a6f", VBOX_SINCE, "true")):
+            with self.subTest(claves=claves):
+                self.setUp()
+                self.vm.vbox_tras_restaurar = claves
+                self.assertEqual(self.corrida_completa()[-1], 3)
+                self.assertEqual(self.informe()["vm-restaurada"], "FALLO")
 
     def linea_informe(self, clave):
         lineas = (self.material / "informe.txt").read_text(encoding="utf-8").splitlines()
-        return next(l for l in lineas if l.startswith(("OK %s:" % clave, "FALLO %s:" % clave)))
+        return next(l for l in lineas if l.split(" ", 2)[1] == clave + ":")
 
-    def test_since_tras_releer_despues_del_restore(self):
-        # E51: dos lecturas con la hora del restore y la tercera con el «since» → OK en el intento 3.
-        self.vm.lecturas_con_hora_restore = 2
+    def test_hora_del_restore_en_showvminfo_con_vbox_bueno(self):
+        # E52: lo que pasó en s256/v1 y v2; showvminfo con la hora del restore es DATO y una sola lectura basta.
+        self.vm.tras_restaurar = HORA_RESTORE
         self.assertEqual(self.corrida_completa(), [0, 0, 0, 0])
         self.assertEqual(self.informe()["vm-restaurada"], "OK")
-        self.assertIn("; intento 3 de %d" % pv.INTENTOS_RESTAURADA, self.linea_informe("vm-restaurada"))
-        self.assertEqual(len(self.lecturas_tras_restore()), 3)
-
-    def test_since_que_nunca_vuelve_tras_el_restore(self):
-        # E51: si no coincide en 30 lecturas, una por segundo, FALLO al agotarlas.
-        self.vm.tras_restaurar = HORA_RESTORE
-        rcs = [self.preparar(), self.sub("sesion"), self.sub("abierta")]
-        self.vm.procesos = []
-        antes = self.anfitrion.dormido
-        rcs.append(self.sub("cerrar"))
-        self.assertEqual(rcs, [0, 0, 0, 3])
-        self.assertEqual(self.informe()["vm-restaurada"], "FALLO")
-        self.assertIn("; intento 30 de 30", self.linea_informe("vm-restaurada"))
-        self.assertEqual((pv.INTENTOS_RESTAURADA, pv.ESPERA_RESTAURADA), (30, 1))
-        self.assertEqual(len(self.lecturas_tras_restore()), 30)
-        # 30 esperas de 1 s y la de 1 s del inhibidor.
-        self.assertEqual(self.anfitrion.dormido - antes, 30 * 1 + 1)
+        self.assertIn("VMStateChangeTime %s (DATO)" % HORA_RESTORE, self.linea_informe("vm-restaurada"))
+        llamadas = self.vm.llamadas
+        i = max(n for n, a in enumerate(llamadas) if a[:3] == ["snapshot", "Win11", "restore"])
+        self.assertEqual(len([a for a in llamadas[i + 1:] if a[0] == "showvminfo"]), 1)
 
     def test_regla_que_no_detecta_el_cambio(self):
-        self.vm.tras_apagar = SINCE
+        self.vm.vbox_tras_apagar = ("0a6f", VBOX_SINCE, "true")
         self.assertEqual(self.corrida_completa()[-1], 3)
         informe = self.informe()
         self.assertEqual(informe["regla-detecta-cambio"], "FALLO")
         self.assertEqual(informe["vm-restaurada"], "OK")
         orden = self.ordenes()
         self.assertLess(orden.index("controlvm Win11 poweroff"), len(orden) - orden[::-1].index("snapshot Win11 restore") - 1)
+
+    def test_regla_lee_el_vbox_y_da_currentstatemodified_de_dato(self):
+        # E52: la regla mira el lastStateChange del .vbox, no la VMStateChangeTime de showvminfo.
+        self.vm.tras_apagar = SINCE
+        self.assertEqual(self.corrida_completa(), [0, 0, 0, 0])
+        self.assertEqual(self.informe()["regla-detecta-cambio"], "OK")
+        self.assertIn(".vbox tras apagar %s, since %s; currentStateModified=true (DATO)" % (VBOX_TRAS_APAGAR, SINCE),
+                      self.linea_informe("regla-detecta-cambio"))
 
     def test_cerrar_tras_un_fallo_posterior_a_restaurar(self):
         self.vm.sha_zip = "0" * 64

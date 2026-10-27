@@ -45,6 +45,7 @@ import signal
 import stat
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 VM_POR_DEFECTO = "Win11"
@@ -84,9 +85,10 @@ SINCE = re.compile(r"^State:\s.*\(since ([^)]+)\)\s*$", re.M)
 INTENTOS_INVITADO, ESPERA_INVITADO = 20, 15
 INTENTOS_PROCESOS, ESPERA_PROCESOS = 12, 5
 INTENTOS_APAGADO, ESPERA_APAGADO = 24, 5
-# E51 (S256, s256/diag/notas.txt): a los 30 ms del restore VMStateChangeTime aún marca la hora del
-# restore; vuelve al «since» después. Se relee una vez por segundo, 30 s como máximo.
-INTENTOS_RESTAURADA, ESPERA_RESTAURADA = 30, 1
+# E52 (S256, s256/diag2/notas.txt): showvminfo da la hora del restore mientras viva el VBoxSVC que lo
+# hizo; el .vbox, escrito en el mismo segundo, ya tiene la de la instantánea y currentStateModified="false".
+# Por eso el estado de la VM se juzga con el .vbox (ruta en CfgFile) y la VMStateChangeTime queda de DATO.
+AL_SEGUNDO = re.compile(r"^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\d+)?Z?$")
 MS_WHOAMI, MS_POWERSHELL, MS_LARGO = 60000, 120000, 600000
 
 INHIBIDOR_QUIEN = "educhronos-prueba-vm"
@@ -217,6 +219,24 @@ def leer_since(texto):
     return m.group(1) if m else None
 
 
+def leer_vbox(texto):
+    """Atributos del elemento Machine de un .vbox; None si no se puede leer."""
+    try:
+        raiz = ET.fromstring(texto)
+    except ET.ParseError:
+        return None
+    for nodo in raiz.iter():
+        if nodo.tag == "Machine" or nodo.tag.endswith("}Machine"):
+            return dict(nodo.attrib)
+    return None
+
+
+def uuid_de_instantanea(lista, nombre):
+    """UUID de la instantánea en la salida de snapshot list; None si no está."""
+    m = re.search(r"Name: %s \(UUID: ([0-9A-Fa-f-]+)\)" % re.escape(nombre), lista or "")
+    return m.group(1).lower() if m else None
+
+
 def leer_ps(texto):
     """Líneas «clave=valor» de una orden de PowerShell; None si falta «fin=1» (salida cortada)."""
     claves = {}
@@ -244,15 +264,33 @@ def traducir_rc(rc):
 
 # ------------------------------------------------------------- veredictos (y autoprueba)
 
-def mismo_instante(a, b):
-    return a is not None and a == b
+def al_segundo(instante):
+    """«2026-10-26T15:05:34Z» (.vbox) y «2026-10-26T15:05:34.000000000» (showvminfo) → «2026-10-26T15:05:34»."""
+    m = AL_SEGUNDO.match(instante or "")
+    return m.group(1) if m else None
 
 
-def veredicto_vm_sin_cambios(vm, instantanea, since):
-    cifra = "%s, %s, %s frente a %s" % (vm.get("VMState"), vm.get("CurrentSnapshotName"),
-                                       vm.get("VMStateChangeTime"), since)
-    ok = (vm.get("VMState") == "poweroff" and vm.get("CurrentSnapshotName") == instantanea
-          and mismo_instante(vm.get("VMStateChangeTime"), since))
+def mismo_segundo(a, b):
+    return al_segundo(a) is not None and al_segundo(a) == al_segundo(b)
+
+
+def veredicto_vbox(vbox, uuid, since):
+    """(ok, cifra) del .vbox frente a la instantánea: currentSnapshot, lastStateChange y currentStateModified."""
+    vbox = vbox or {}
+    actual = (vbox.get("currentSnapshot") or "").strip("{}").lower()
+    ok = (uuid is not None and actual == uuid
+          and mismo_segundo(vbox.get("lastStateChange"), since)
+          and vbox.get("currentStateModified") == "false")
+    cifra = ".vbox %s, %s, currentStateModified=%s frente a %s, %s" % (
+        actual or None, vbox.get("lastStateChange"), vbox.get("currentStateModified"), uuid, since)
+    return ok, cifra
+
+
+def veredicto_vm_sin_cambios(vm, instantanea, vbox, uuid, since):
+    ok_vbox, cifra_vbox = veredicto_vbox(vbox, uuid, since)
+    ok = vm.get("VMState") == "poweroff" and vm.get("CurrentSnapshotName") == instantanea and ok_vbox
+    cifra = "%s, %s; %s; VMStateChangeTime %s (DATO)" % (
+        vm.get("VMState"), vm.get("CurrentSnapshotName"), cifra_vbox, vm.get("VMStateChangeTime"))
     return ("OK" if ok else "FALLO", cifra)
 
 
@@ -321,13 +359,19 @@ def veredicto_proceso_terminado(procesos):
     return ("OK" if len(procesos) == 0 else "FALLO", "%d procesos: %s" % (len(procesos), procesos))
 
 
-def veredicto_regla_detecta_cambio(tras_apagar, since):
-    ok = tras_apagar is not None and not mismo_instante(tras_apagar, since)
-    return ("OK" if ok else "FALLO", "tras apagar %s, since %s" % (tras_apagar, since))
+def veredicto_regla_detecta_cambio(vbox, since):
+    """E36 con el .vbox: tras apagar, lastStateChange tiene que ser distinto del «since»."""
+    vbox = vbox or {}
+    tras_apagar = vbox.get("lastStateChange")
+    ok = al_segundo(tras_apagar) is not None and not mismo_segundo(tras_apagar, since)
+    return ("OK" if ok else "FALLO", ".vbox tras apagar %s, since %s; currentStateModified=%s (DATO)"
+            % (tras_apagar, since, vbox.get("currentStateModified")))
 
 
-def veredicto_vm_restaurada(vm, instantanea, since):
-    return veredicto_vm_sin_cambios(vm, instantanea, since)
+def veredicto_vm_restaurada(vm, vbox, uuid, since):
+    ok_vbox, cifra_vbox = veredicto_vbox(vbox, uuid, since)
+    return ("OK" if ok_vbox else "FALLO", "%s; showvminfo %s, %s, VMStateChangeTime %s (DATO)" % (
+        cifra_vbox, vm.get("VMState"), vm.get("CurrentSnapshotName"), vm.get("VMStateChangeTime")))
 
 
 def clave_fuera(clave, raiz_repo, compartidas, material):
@@ -344,6 +388,8 @@ def casos_autoprueba():
     """(capacidad, defecto, limpio): el defecto tiene que dar FALLO y el limpio OK."""
     since = "2026-10-26T15:05:34.000000000"
     vm = {"VMState": "poweroff", "CurrentSnapshotName": "s", "VMStateChangeTime": since}
+    vbox = {"currentSnapshot": "{0a6f}", "lastStateChange": "2026-10-26T15:05:34Z", "currentStateModified": "false"}
+    otra_hora = dict(vbox, lastStateChange="2026-10-26T21:14:10Z")
     grupos = "BUILTIN\\Usuarios S-1-5-32-545\nNivel obligatorio medio S-1-16-8192\n"
     salida = ("[1/3] Programa en C:\\P\n[2/3] Acceso directo en el Escritorio\n[3/3] Base de partida\n"
               "    Base de partida copiada a C:\\D\\educhronos.db\nEduchronos instalado en C:\\P.\n"
@@ -361,16 +407,16 @@ def casos_autoprueba():
          lambda: veredicto_cuenta(grupos)),
         ("e", lambda: veredicto_instalar_rc(35), lambda: veredicto_instalar_rc(0)),
         ("f", lambda: veredicto_lineas(sin_cuarta), lambda: veredicto_lineas(salida)),
-        ("g", lambda: veredicto_vm_sin_cambios(dict(vm, VMStateChangeTime="2026-10-26T21:14:10.000000000"), "s", since),
-         lambda: veredicto_vm_sin_cambios(vm, "s", since)),
+        ("g", lambda: veredicto_vm_sin_cambios(vm, "s", otra_hora, "0a6f", since),
+         lambda: veredicto_vm_sin_cambios(vm, "s", vbox, "0a6f", since)),
         ("h", lambda: veredicto_migracion(["Esquema preparado versionInicial=0 versionFinal=8"], "versionInicial=0 versionFinal=9"),
          lambda: veredicto_migracion(migracion, "versionInicial=0 versionFinal=9")),
         ("i", lambda: veredicto_proceso_terminado(["6120|Educhronos.exe|2"]), lambda: veredicto_proceso_terminado([])),
         ("j", lambda: veredicto_sesion(quser.replace("prueba-vm", "educhronos-admin"), "prueba-vm"),
          lambda: veredicto_sesion(quser, "prueba-vm")),
         ("k", lambda: veredicto_md5_instalada(md5, "0" * 32), lambda: veredicto_md5_instalada(md5, md5.upper())),
-        ("l", lambda: veredicto_regla_detecta_cambio(since, since),
-         lambda: veredicto_regla_detecta_cambio("2026-10-26T21:14:10.000000000", since)),
+        ("l", lambda: veredicto_regla_detecta_cambio(vbox, since),
+         lambda: veredicto_regla_detecta_cambio(otra_hora, since)),
     ]
 
 
@@ -510,6 +556,27 @@ class Prueba:
         r = self.vbox(nombre, ["showvminfo", self.estado["vm"], "--machinereadable"], 120)
         return leer_machinereadable(self.texto(r, invitado=False)) if r.rc == 0 else {}
 
+    def leer_vbox(self, nombre, vm):
+        """Lee el .vbox que dice CfgFile (norma 3), solo lectura; guarda sus tres claves en ordenes/."""
+        cfg = vm.get("CfgFile")
+        vbox, error = None, None
+        if not cfg:
+            error = "showvminfo sin CfgFile"
+        else:
+            try:
+                vbox = leer_vbox(Path(cfg).read_text(encoding="utf-8"))
+                error = None if vbox is not None else "sin elemento Machine legible"
+            except OSError as e:
+                error = str(e)
+        self.estado["ordenes"] += 1
+        lineas = ["cfg=%s" % cfg] + ["%s=%s" % (k, (vbox or {}).get(k))
+                                     for k in ("currentSnapshot", "lastStateChange", "currentStateModified")]
+        if error:
+            lineas.append("error=" + error)
+        (self.material / "ordenes" / ("%03d-%s.txt" % (self.estado["ordenes"], nombre))).write_text(
+            "\n".join(lineas) + "\n", encoding="utf-8")
+        return vbox
+
     def procesos(self, nombre):
         r, d = self.ps(nombre, PS_PROCESOS)
         return None if d is None else d.get("proceso", [])
@@ -570,7 +637,9 @@ def preparar(args, ejecutor, anfitrion):
     lista = p.vbox("snapshot-list-antes", ["snapshot", args.vm, "list", "--details"], 120)
     estado["since"] = leer_since(p.texto(snap, invitado=False)) if snap.rc == 0 else None
     estado["instantaneas_antes"] = p.texto(lista, invitado=False) if lista.rc == 0 else None
-    v = veredicto_vm_sin_cambios(vm, args.instantanea, estado["since"])
+    estado["uuid_instantanea"] = uuid_de_instantanea(estado["instantaneas_antes"], args.instantanea)
+    vbox = p.leer_vbox("vbox-antes", vm)
+    v = veredicto_vm_sin_cambios(vm, args.instantanea, vbox, estado["uuid_instantanea"], estado["since"])
     if snap.rc != 0 or lista.rc != 0:
         v = ("FALLO", v[1] + "; lecturas con rc %d y %d" % (snap.rc, lista.rc))
     p.anotar("vm-sin-cambios", v)
@@ -786,18 +855,16 @@ def cerrar(args, ejecutor, anfitrion):
         elif "proceso-terminado" not in e["informe"]:
             p.anotar("proceso-terminado", ("DATO", "no medido: la VM ya estaba apagada"))
         if e.get("arrancada"):
-            p.anotar("regla-detecta-cambio", veredicto_regla_detecta_cambio(vm.get("VMStateChangeTime"), e["since"]))
+            p.anotar("regla-detecta-cambio", veredicto_regla_detecta_cambio(p.leer_vbox("vbox-tras-apagar", vm),
+                                                                            e["since"]))
         else:
             p.anotar("regla-detecta-cambio", ("DATO", "no medido: la VM no llegó a arrancar"))
         r = p.vbox("restore", ["snapshot", e["vm"], "restore", e["instantanea"]], 1800)
         if r.rc != 0:
             p.fallar("vm-restaurada", ("FALLO", "restore rc %d" % r.rc))
-        for intento in range(1, INTENTOS_RESTAURADA + 1):
-            v = veredicto_vm_restaurada(p.leer_vm("showvminfo-despues-%02d" % intento), e["instantanea"], e["since"])
-            if v[0] == "OK":
-                break
-            anfitrion.dormir(ESPERA_RESTAURADA)
-        p.anotar("vm-restaurada", (v[0], "%s; intento %d de %d" % (v[1], intento, INTENTOS_RESTAURADA)))
+        vm = p.leer_vm("showvminfo-despues")
+        p.anotar("vm-restaurada", veredicto_vm_restaurada(vm, p.leer_vbox("vbox-despues", vm),
+                                                          e.get("uuid_instantanea"), e["since"]))
         lista = p.vbox("snapshot-list-despues", ["snapshot", e["vm"], "list", "--details"], 120)
         igual = lista.rc == 0 and p.texto(lista, invitado=False) == e["instantaneas_antes"]
         p.anotar("instantaneas", ("OK" if igual else "FALLO", "snapshot list --details %s al de preparar (rc %d)"
