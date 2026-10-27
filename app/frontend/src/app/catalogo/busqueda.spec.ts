@@ -1,4 +1,4 @@
-import { coincide, normaliza } from './busqueda';
+import { coincide, filtrarOpciones, normaliza } from './busqueda';
 
 /**
  * Lógica PURA: sin TestBed, sin fixture, sin HTTP. Molde de `horario/pines.spec.ts`.
@@ -192,5 +192,42 @@ describe('búsqueda de las listas de catálogo', () => {
       expect(coincide('1B-A-Bio', '1\u00B0B')).toBe(false);
       expect(coincide('1ºB-Completo', '1\u00B0B')).toBe(true);
     });
+  });
+});
+
+interface Op {
+  codigo: string;
+  nombre: string;
+}
+const op = (codigo: string, nombre = ''): Op => ({ codigo, nombre });
+const texto = (o: Op): string => `${o.codigo} — ${o.nombre}`;
+const codigo = (o: Op): string => o.codigo;
+
+describe('filtrarOpciones', () => {
+  const lista = [op('1ºA-ING'), op('4ºC-ING'), op('4ºC-FR'), op('2ºB-MAT')];
+
+  it('con consulta vacía devuelve todas en su orden', () => {
+    expect(filtrarOpciones(lista, texto, codigo, '', []).map(codigo)).toEqual([
+      '1ºA-ING', '4ºC-ING', '4ºC-FR', '2ºB-MAT',
+    ]);
+  });
+
+  it('devuelve las que casan, con la normalización de «4ºC»', () => {
+    expect(filtrarOpciones(lista, texto, codigo, '4c', []).map(codigo)).toEqual(['4ºC-ING', '4ºC-FR']);
+  });
+
+  it('incluye la seleccionada que no casa, en su posición original', () => {
+    expect(filtrarOpciones(lista, texto, codigo, '4c', ['1ºA-ING']).map(codigo)).toEqual([
+      '1ºA-ING', '4ºC-ING', '4ºC-FR',
+    ]);
+  });
+
+  it('filtra por el texto visible, no sólo por el código', () => {
+    const tutores = [op('P01', 'Ana Ruiz'), op('P02', 'Luis Gil')];
+    expect(filtrarOpciones(tutores, texto, codigo, 'ruiz', []).map(codigo)).toEqual(['P01']);
+  });
+
+  it('sin coincidencias ni seleccionadas devuelve una lista vacía', () => {
+    expect(filtrarOpciones(lista, texto, codigo, 'zzz', [])).toEqual([]);
   });
 });

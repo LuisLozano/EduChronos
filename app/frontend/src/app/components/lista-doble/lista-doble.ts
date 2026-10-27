@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { UMBRAL_FILTRO, filtrarOpciones } from '../filtro-opciones/filtro-opciones';
+import { UMBRAL_FILTRO, filtrarOpciones } from '../../catalogo/busqueda';
 
 /** Lado de una lista doble: lo que ya está elegido o lo que queda por elegir. */
 export type Lado = 'elegidos' | 'disponibles';

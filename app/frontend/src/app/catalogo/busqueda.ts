@@ -92,3 +92,26 @@ export function coincide(textoFila: string, consulta: string): boolean {
     return normaliza(textoFila, conOrdinal).includes(normaliza(parte, conOrdinal));
   });
 }
+
+/** El filtro aparece cuando la lista tiene MÁS de estas opciones (condición 5 de O-pre-demo). */
+export const UMBRAL_FILTRO = 10;
+
+/**
+ * Opciones que se muestran para una consulta: las que casan con {@link coincide} sobre su
+ * texto visible y, además, las ya seleccionadas aunque no casen, en el orden de entrada.
+ *
+ * <p><b>Nada elegido queda fuera de la vista (S185, F2).</b> Los multiselect calculan su
+ * valor con `select.selectedOptions`, que sólo ve el DOM: una opción elegida y oculta se
+ * perdería en el siguiente cambio sin aviso. En los simples, el select nativo se quedaría
+ * en blanco aunque el formulario conservara el valor.
+ */
+export function filtrarOpciones<T>(
+  opciones: readonly T[],
+  texto: (o: T) => string,
+  codigo: (o: T) => string,
+  consulta: string,
+  seleccionados: readonly string[],
+): T[] {
+  const elegidos = new Set(seleccionados);
+  return opciones.filter((o) => elegidos.has(codigo(o)) || coincide(texto(o), consulta));
+}
