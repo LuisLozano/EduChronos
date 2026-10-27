@@ -320,6 +320,13 @@ class VeredictosTest(unittest.TestCase):
         self.assertEqual(pv.traducir_rc(20), (None, "timeout de guestcontrol"))
         self.assertEqual(pv.traducir_rc(1), (None, "error de VBoxManage 1"))
 
+    def test_rc_32_no_observado(self):
+        # E41: el 0 llega como 0, así que un 32 es FALLO y no «código 0»; el tramo empieza en 33.
+        self.assertEqual(pv.traducir_rc(32), (None, "rc 32 no observado"))
+        self.assertEqual(pv.traducir_rc(33), (1, "código 1 en la VM"))
+        self.assertEqual(pv.traducir_rc(255), (223, "código 223 en la VM"))
+        self.assertEqual(pv.veredicto_instalar_rc(32), ("FALLO", "rc 32, rc 32 no observado"))
+
     def test_seis_lineas(self):
         self.assertEqual(pv.veredicto_lineas(SALIDA_INSTALAR)[0], "OK")
         falta = "\r\n".join(l for l in SALIDA_INSTALAR.split("\r\n") if not l.startswith("Educhronos instalado"))

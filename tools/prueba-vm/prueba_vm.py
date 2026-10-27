@@ -229,7 +229,10 @@ def traducir_rc(rc):
     """rc de guestcontrol run → (código en la VM o None, texto). Tabla de E34."""
     if rc == 0:
         return 0, "código 0 en la VM"
-    if K_RC <= rc <= 255:
+    if rc == K_RC:
+        # E41: el 0 llega como 0, así que un 32 no sale de la regla medida.
+        return None, "rc %d no observado" % rc
+    if K_RC < rc <= 255:
         return rc - K_RC, "código %d en la VM" % (rc - K_RC)
     if rc == RC_TIMEOUT_GUESTCONTROL:
         return None, "timeout de guestcontrol"
