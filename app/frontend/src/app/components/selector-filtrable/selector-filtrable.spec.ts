@@ -349,6 +349,46 @@ describe('SelectorFiltrable', () => {
     });
   });
 
+  describe('flecha del desplegable (EN-19)', () => {
+    const flecha = (): HTMLElement => raiz().querySelector<HTMLElement>('.selector-filtrable__flecha')!;
+    async function clicFlecha(): Promise<void> {
+      flecha().click();
+      await fixture.whenStable();
+    }
+
+    it('clic con la lista cerrada la abre con todas y deja el foco en el campo', async () => {
+      await montar((a) => a.control.setValue('G03'));
+      expect(expandida()).toBe('false');
+      await clicFlecha();
+      expect(expandida()).toBe('true');
+      expect(opciones()).toHaveLength(12);
+      expect(document.activeElement).toBe(campo());
+    });
+
+    it('clic con la lista abierta la cierra, sin cambiar el valor y con el foco en el campo', async () => {
+      await montar((a) => a.control.setValue('G03'));
+      await escribir('g1');
+      expect(expandida()).toBe('true');
+      await clicFlecha();
+      expect(expandida()).toBe('false');
+      expect(opciones()).toEqual([]);
+      expect(campo().value).toBe('G03');
+      expect(anfitrion().control.value).toBe('G03');
+      expect(recibidos).toEqual([]);
+      expect(document.activeElement).toBe(campo());
+    });
+
+    it('no es una parada de tabulación ni cambia el nombre accesible del campo', async () => {
+      await montar();
+      expect(flecha().tagName).toBe('SPAN');
+      expect(flecha().tabIndex).toBe(-1);
+      expect(flecha().hasAttribute('tabindex')).toBe(false);
+      expect(flecha().getAttribute('aria-hidden')).toBe('true');
+      expect(flecha().textContent).toBe('');
+      expect(Array.from(campo().labels ?? []).map((l) => l.textContent!.trim())).toEqual(['Aula del grupo']);
+    });
+  });
+
   describe('cerrar sin elegir', () => {
     it('Escape cierra, devuelve el texto de lo elegido y no cambia el valor', async () => {
       await montar((a) => a.control.setValue('G03'));

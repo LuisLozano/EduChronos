@@ -10,6 +10,7 @@
   width: 100%;
   min-width: 14rem;
   padding: var(--e1) var(--e2);
+  padding-right: var(--e5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-s);
   box-sizing: border-box;
@@ -21,6 +22,19 @@
 .selector-filtrable__campo:disabled {
   background: var(--color-superficie-tenue);
   color: var(--color-tinta-suave);
+}
+
+/* La flecha: el galón del <select> (styles.css, regla `select`, vía --galon-select), en su misma
+   posición —a `--e2` del borde derecho, sobre el `padding-right` de `--e5`—. */
+.selector-filtrable__flecha {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--e5);
+  height: 100%;
+  background-image: var(--galon-select);
+  background-repeat: no-repeat;
+  background-position: right var(--e2) center;
 }
 
 /* La lista flota bajo el campo y desplaza dentro: no empuja el formulario. */

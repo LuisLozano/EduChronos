@@ -462,6 +462,13 @@ button:disabled {
    dos de los trece viven en la barra de controles de `horario-view`, que come del
    presupuesto del criterio 4. Comprobado por el recuento de marcas `+N`, que no
    cambia. */
+
+/* El galón, en una variable para que la flecha del selector con filtro (S260, EN-19) pinte
+   EXACTAMENTE el mismo sin copiar el SVG: un solo literal, el de arriba. */
+:root {
+  --galon-select: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%235A6673' stroke-width='1.5' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+}
+
 select {
   appearance: none;
   font-family: inherit;
@@ -471,7 +478,7 @@ select {
   border: var(--borde-fino) solid var(--color-borde);
   border-radius: var(--radio-s);
   background-color: var(--color-superficie);
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%235A6673' stroke-width='1.5' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-image: var(--galon-select);
   background-repeat: no-repeat;
   background-position: right var(--e2) center;
   color: var(--color-tinta);

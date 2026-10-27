@@ -1,5 +1,6 @@
 <div class="selector-filtrable" #envoltorio>
   <input
+    #campo
     ngCombobox
     #combobox="ngCombobox"
     class="selector-filtrable__campo"
@@ -15,6 +16,9 @@
     (blur)="alSalir()"
     (keydown.enter)="noEnviar($event)"
   />
+  <!-- La flecha del desplegable (EN-19): fuera del orden de tabulación y del nombre accesible;
+       el mousedown sin acción deja el foco donde está. -->
+  <span class="selector-filtrable__flecha" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="alternar()"></span>
   <ng-template ngComboboxPopup [combobox]="combobox">
     <!-- mousedown sin acción por defecto: el clic en una opción no quita el foco al campo. -->
     <div

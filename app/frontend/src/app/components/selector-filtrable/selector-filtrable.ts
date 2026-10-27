@@ -124,6 +124,7 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
   });
 
   private readonly lista = viewChild(Listbox);
+  private readonly campo = viewChild.required<ElementRef<HTMLInputElement>>('campo');
   private readonly envoltorio = viewChild.required<ElementRef<HTMLElement>>('envoltorio');
 
   private alCambiar: (valor: string) => void = () => {};
@@ -179,6 +180,21 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
   limpiar(): void {
     this.abierta.set(false);
     this.restaurar();
+  }
+
+  /** Clic en la flecha (EN-19): abre la lista con todas o la cierra, y deja el foco en el campo. */
+  protected alternar(): void {
+    if (this.deshabilitado()) {
+      return;
+    }
+    if (this.abierta()) {
+      this.abierta.set(false);
+      this.restaurar();
+    } else {
+      this.consulta.set('');
+      this.abierta.set(true);
+    }
+    this.campo().nativeElement.focus();
   }
 
   /** Lo que se escribe filtra; el combobox ya abre la lista al escribir. */
