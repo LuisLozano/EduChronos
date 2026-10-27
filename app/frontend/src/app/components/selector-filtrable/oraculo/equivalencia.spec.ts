@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FiltroOpciones } from '../../filtro-opciones/filtro-opciones';
 import { SelectorFiltrable } from '../selector-filtrable';
 import datos from './datos.json';
 import esperado from './esperado.json';
@@ -9,13 +8,14 @@ import esperado from './esperado.json';
  * Oráculo de equivalencia del filtro de los selectores (S260, C-combobox, condición 2 de
  * O-combobox). `datos.json` son las listas que sirve la API sobre una copia migrada de la base de
  * partida (md5 d867c2de…f7e2), sin retocar; los grupos son el `entidadesDeVista` real de la vista
- * por grupo de su horario. `esperado.json` salió de ejecutar el FiltroOpciones de hoy sobre esos
+ * por grupo de su horario. `esperado.json` salió de ejecutar el filtro aparte de 5fc445a sobre esos
  * datos y estas búsquedas (s260/c1/f0b/COMO.txt): las búsquedas son fijas y no se añaden ni se
  * quitan después.
  *
- * <p>Cada selector usa su lista y SU función de texto y de código, copiadas literal de lo que hoy
- * pasa a `<app-filtro-opciones>` (s260/t0/06-selectores.txt). S4, S5 y S6 usan la lista completa:
- * lo comparado es el filtro, no el recorte previo de cada formulario.
+ * <p>Cada selector usa su lista y SU función de texto y de código, copiadas literal de lo que
+ * pasaba al filtro aparte en 5fc445a (s260/t0/06-selectores.txt) y que hoy recibe el selector
+ * (s260/c1/f3/bindings.txt). S4, S5 y S6 usan la lista completa: lo comparado es el filtro, no
+ * el recorte previo de cada formulario.
  */
 interface Profesor {
   codigo: string;
@@ -88,49 +88,6 @@ const SELECTORES: Record<string, Selector<unknown>> = {
 
 const ESPERADO = esperado as unknown as Record<string, Esperado>;
 
-describe('oráculo de equivalencia: FiltroOpciones (hoy)', () => {
-  let fixture: ComponentFixture<FiltroOpciones<unknown>>;
-
-  /** Monta el filtro de hoy con un selector, escribe la búsqueda y devuelve los códigos visibles. */
-  async function visibles(s: Selector<unknown>, busqueda: string, seleccionados: string[]): Promise<string[]> {
-    TestBed.resetTestingModule();
-    await TestBed.configureTestingModule({ imports: [FiltroOpciones] }).compileComponents();
-    fixture = TestBed.createComponent(FiltroOpciones) as ComponentFixture<FiltroOpciones<unknown>>;
-    fixture.componentRef.setInput('opciones', s.opciones);
-    fixture.componentRef.setInput('texto', s.texto);
-    fixture.componentRef.setInput('codigo', s.codigo);
-    fixture.componentRef.setInput('seleccionados', seleccionados);
-    fixture.componentRef.setInput('etiqueta', 'opciones');
-    await fixture.whenStable();
-    // Con 10 opciones o menos el filtro de hoy no se pinta y no filtra: el oráculo no valdría.
-    const campo = fixture.nativeElement.querySelector('input') as HTMLInputElement | null;
-    expect(campo).not.toBeNull();
-    campo!.value = busqueda;
-    campo!.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
-    return fixture.componentInstance.visibles().map(s.codigo);
-  }
-
-  for (const [nombre, s] of Object.entries(SELECTORES)) {
-    it(`${nombre}: el esperado tiene exactamente las búsquedas fijas`, () => {
-      expect(Object.keys(ESPERADO[nombre]?.busquedas ?? {})).toEqual([...s.busquedas]);
-    });
-
-    for (const busqueda of s.busquedas) {
-      it(`${nombre} «${busqueda}»`, async () => {
-        expect(await visibles(s, busqueda, [])).toEqual(ESPERADO[nombre]?.busquedas[busqueda]);
-      });
-    }
-
-    it(`${nombre}: el elegido sigue visible aunque la búsqueda no case`, async () => {
-      const elegido = s.codigo(s.opciones[0]);
-      expect(ESPERADO[nombre]?.elegido.codigo).toBe(elegido);
-      expect(ESPERADO[nombre]?.elegido.busqueda).toBe(BUSCAR_CON_ELEGIDO);
-      expect(await visibles(s, BUSCAR_CON_ELEGIDO, [elegido])).toEqual(ESPERADO[nombre]?.elegido.visibles);
-    });
-  }
-});
-
 describe('oráculo de equivalencia: SelectorFiltrable', () => {
   let fixture: ComponentFixture<SelectorFiltrable<unknown>>;
 
@@ -163,6 +120,10 @@ describe('oráculo de equivalencia: SelectorFiltrable', () => {
   }
 
   for (const [nombre, s] of Object.entries(SELECTORES)) {
+    it(`${nombre}: el esperado tiene exactamente las búsquedas fijas`, () => {
+      expect(Object.keys(ESPERADO[nombre]?.busquedas ?? {})).toEqual([...s.busquedas]);
+    });
+
     for (const busqueda of s.busquedas) {
       it(`${nombre} «${busqueda}»`, async () => {
         expect(await visibles(s, busqueda, '')).toEqual(ESPERADO[nombre]?.busquedas[busqueda]);
