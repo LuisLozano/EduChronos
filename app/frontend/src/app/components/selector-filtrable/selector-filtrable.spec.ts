@@ -300,6 +300,55 @@ describe('SelectorFiltrable', () => {
     });
   });
 
+  describe('al escribir, la activa es la primera que casa (EN-18)', () => {
+    const grupos = (): Op[] => ['1B-A', '1B-B', '3ºC', '4ºA', '4ºC', '4ºD'].map((c) => op(c));
+
+    it('(a) elegida 1B-A, escribir «4ºC» e Intro: elige 4ºC, avisa a onChange y cierra', async () => {
+      await montar((a) => {
+        a.opciones.set(grupos());
+        a.control.setValue('1B-A');
+      });
+      await escribir('4ºC');
+      expect(opciones()).toEqual(['1B-A', '4ºC']);
+      expect(activa()).toBe('4ºC');
+      await tecla('Enter');
+      expect(anfitrion().control.value).toBe('4ºC');
+      expect(recibidos).toEqual(['4ºC']);
+      expect(expandida()).toBe('false');
+      expect(campo().value).toBe('4ºC');
+    });
+
+    // «1b-a» y no «1B-A»: el campo ya muestra «1B-A», y escribir el mismo texto no cambia nada.
+    it('(b) elegida 1B-A, escribir «1b-a» e Intro: el valor sigue y la lista se cierra', async () => {
+      await montar((a) => {
+        a.opciones.set(grupos());
+        a.control.setValue('1B-A');
+      });
+      await escribir('1b-a');
+      expect(opciones()).toEqual(['1B-A']);
+      expect(activa()).toBe('1B-A');
+      await tecla('Enter');
+      expect(anfitrion().control.value).toBe('1B-A');
+      expect(recibidos).toEqual([]);
+      expect(expandida()).toBe('false');
+      expect(campo().value).toBe('1B-A');
+    });
+
+    it('(c) escribir «zzz» e Intro: el valor no cambia, no avisa y la lista sigue abierta', async () => {
+      await montar((a) => {
+        a.opciones.set(grupos());
+        a.control.setValue('1B-A');
+      });
+      await escribir('zzz');
+      expect(opciones()).toEqual(['1B-A']);
+      await tecla('Enter');
+      expect(anfitrion().control.value).toBe('1B-A');
+      expect(recibidos).toEqual([]);
+      expect(expandida()).toBe('true');
+      expect(campo().value).toBe('zzz');
+    });
+  });
+
   describe('cerrar sin elegir', () => {
     it('Escape cierra, devuelve el texto de lo elegido y no cambia el valor', async () => {
       await montar((a) => a.control.setValue('G03'));

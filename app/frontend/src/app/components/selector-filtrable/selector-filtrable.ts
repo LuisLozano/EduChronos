@@ -1,11 +1,17 @@
 import {
+  afterNextRender,
+  afterRenderEffect,
   Component,
   computed,
+  DestroyRef,
+  ElementRef,
   forwardRef,
+  inject,
   input,
   linkedSignal,
   model,
   signal,
+  viewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -32,7 +38,9 @@ let instancias = 0;
  * muestra el texto de lo elegido; Intro o clic eligen y cierran; Escape y perder el foco cierran
  * sin cambiar nada y devuelven ese texto.
  *
- * <p><b>Selección explícita</b> (DA5): las flechas mueven la opción activa, no el valor.
+ * <p><b>Selección explícita</b> (DA5): las flechas mueven la opción activa, no el valor. Al
+ * escribir, la activa pasa a la primera visible que casa con lo escrito (EN-18): Intro elige
+ * lo que se busca y no la elegida que se ve arriba. Si no casa nada, Intro no hace nada.
  *
  * <p><b>La opción vacía</b> ({@link opcionVacia}) es la del select de hoy con value '': va
  * siempre primera, no se filtra y, con {@link vaciaElegible} a false, se ve y no se puede elegir,
@@ -102,8 +110,53 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
     return this.visibles().some((o) => this.codigo()(o) === valor) ? [valor] : [];
   });
 
+  /**
+   * La opción que se activa al escribir (EN-18): la primera visible que casa con lo escrito, sin
+   * contar la elegida si no casa. Null sin búsqueda (manda el listbox: la elegida) o si no casa
+   * nada.
+   */
+  protected readonly activaBuscada = computed((): T | null => {
+    const consulta = this.consulta();
+    if (consulta === '') {
+      return null;
+    }
+    return filtrarOpciones(this.visibles(), this.texto(), this.codigo(), consulta, [])[0] ?? null;
+  });
+
+  private readonly lista = viewChild(Listbox);
+  private readonly envoltorio = viewChild.required<ElementRef<HTMLElement>>('envoltorio');
+
   private alCambiar: (valor: string) => void = () => {};
   private alTocar: () => void = () => {};
+
+  constructor() {
+    // Tras pintar la lista filtrada: el listbox deja activa la elegida mientras se vea, así que
+    // la activa se fija aquí, en su índice entre las opciones pintadas (la vacía va primera).
+    afterRenderEffect(() => {
+      const lista = this.lista();
+      const activa = this.activaBuscada();
+      if (lista === undefined || activa === null) {
+        return;
+      }
+      const previas = this.opcionVacia() === null ? 0 : 1;
+      lista.gotoIndex(previas + this.visibles().indexOf(activa));
+    });
+
+    // Intro con una búsqueda que no casa con nada no elige ni cierra (EN-18). En CAPTURA sobre el
+    // envoltorio: el combobox maneja Intro en el propio campo y lo reenvía a la lista.
+    const destruir = inject(DestroyRef);
+    afterNextRender(() => {
+      const el = this.envoltorio().nativeElement;
+      const sinCoincidencias = (event: KeyboardEvent): void => {
+        if (event.key === 'Enter' && this.abierta() && this.consulta() !== '' && this.activaBuscada() === null) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+      el.addEventListener('keydown', sinCoincidencias, { capture: true });
+      destruir.onDestroy(() => el.removeEventListener('keydown', sinCoincidencias, { capture: true }));
+    });
+  }
 
   writeValue(valor: string | null): void {
     this.valor.set(valor ?? '');
