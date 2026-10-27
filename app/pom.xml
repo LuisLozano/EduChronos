@@ -126,7 +126,7 @@
                         <goals><goal>install-node-and-npm</goal></goals>
                         <phase>prepare-package</phase>
                         <configuration>
-                            <!-- 22.x LTS dentro del rango de Angular 21 (>=22.22.0);
+                            <!-- 22.x LTS dentro del rango de Angular 22 (^22.22.3);
                                  npm fijado a 11.21.1, porque el de Node 22.23.1 (10.9.8) no instala Angular 22 (S258). -->
                             <nodeVersion>v22.23.1</nodeVersion>
                             <npmVersion>11.21.1</npmVersion>
