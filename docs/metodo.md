@@ -220,6 +220,9 @@ Cuatro precisiones, en el orden en que se aplican:
   medido y no lo es. Ejemplar de referencia: `scripts/calcular-recortes.py`, cuyas
   cinco mutaciones viven en `autoprueba()`, corren siempre antes de dar ningún
   número y abortan si alguna no salta.
+  Reutilizar un instrumento obliga a releer su autoprueba: si su caso positivo es algo que el cambio
+  quita o que ya no existe, se rehace antes de creerle (S252; en S257, el recuento de S210 comprobaba
+  dos filas que ya no están en §4).
 - UN TIPO COMPARTIDO SE MIDE EN TODOS LOS MÓDULOS QUE LO TOCAN. La pregunta es
   «¿quién más CONSTRUYE o CONSUME este tipo?», no «¿cuántos call sites tiene aquí?».
   Corolario: `referencia-codigo-solver.md` lista FIRMAS, no quién las usa; cuando el
@@ -661,11 +664,14 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     El orden es fijo:
     (a) un guion de solo lectura vuelca literal esa forma a la carpeta de material, en un fichero único que se
         puede adjuntar (S241, decisión 15);
-    (b) el contrato marca cada afirmación de forma con su cita, `[fichero:línea]` del material, o la escribe
+    (b) el contrato marca cada afirmación de forma con su cita, `[fichero «texto»]`, con un texto que aparece una sola vez en ese fichero del material y que Claude Code comprueba con `grep -F -c` (la línea, si se añade, es la del propio fichero, nunca un número que aparece dentro de su texto; S257), o la escribe
         como pregunta, `[?]`; lo que solo consta en la conversación (un criterio aprobado, una decisión del
         usuario) se pega en el contrato y no se cita como material (S243);
-    (c) Claude Code empieza el contraste listando las afirmaciones de forma sin marca, que cuentan como
-        discrepancia, y después clasifica cada punto como coincide, discrepa o pregunta (S243);
+    (c) Claude Code empieza el contraste, y el paso cero de cada guion que ejecuta, listando las afirmaciones
+        de forma sin marca. Para ante una que discrepa, que decide un OK, un FALLO o una parada, o que acaba
+        escrita en un documento (el repo, un acta o la entrada del plan); cualquier otra la anota en el
+        informe, como «coincide» o como `[?]`, y sigue (S257; ensayado en S255 como GM). Después clasifica
+        cada punto como coincide, discrepa o pregunta (S243);
     (d) lo que no coincide se resuelve en una enmienda numerada antes de ejecutar.
     Una duda de forma que surja después se resuelve con una regla («como sus vecinas en el volcado»), no con una posición o un texto reescritos desde el resumen: la aplica quien tiene el volcado delante.
     En un cierre, la forma de cada región de un documento se deriva del commit de documentación
@@ -676,7 +682,7 @@ S117 y S156; cada una cita la deuda de la que sale, integrada aquí en S157.
     paradas más, porque el contrato podía afirmar sin citar. En S216 el contraste cazó sin coste dos de
     las tres instancias de esa sesión, y la tercera tampoco costó parada. En S217, el contraste de su
     propio contrato cazó seis afirmaciones del arquitecto sin cita o con una cita que no las sostenía,
-    todas antes de ejecutar. En su propio cierre, dos resoluciones de dudas escritas desde el resumen volvieron a fallar, y el ensayo paró antes de editar. De S218 a S242 el contraste dependía de notar la falta de cita y el defecto volvió sesión tras sesión; en S243 la lista de afirmaciones sin marca pasa a ser el primer paso del contraste. (`D-contrato-sobre-forma-no-medida`, `D-forma-afirmada-sin-volcado`, `D-contrato-desde-resumen`, `D-clones-de-ensayo-se-acumulan`)
+    todas antes de ejecutar. En su propio cierre, dos resoluciones de dudas escritas desde el resumen volvieron a fallar, y el ensayo paró antes de editar. De S218 a S242 el contraste dependía de notar la falta de cita y el defecto volvió sesión tras sesión; en S243 la lista de afirmaciones sin marca pasa a ser el primer paso del contraste. En S252, S254 y S255 hubo 8, 4 y 8 paradas de guion, la mayoría por afirmaciones sin marca que no decidían nada (fila de `D-paso-cero-para-por-forma`); en S257 la parada queda para lo que discrepa, decide o se escribe, y las citas pasan a texto literal. (`D-contrato-sobre-forma-no-medida`, `D-forma-afirmada-sin-volcado`, `D-contrato-desde-resumen`, `D-clones-de-ensayo-se-acumulan`, `D-paso-cero-para-por-forma`)
 16. **Lo que un documento dice haber declarado o calculado se puede leer donde lo
     dice** (S210). «Se declara», «queda escrito» o «censo completo» significan que
     existe una lista enumerada en un sitio que se cita (ruta, sección o commit), no
