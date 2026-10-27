@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S255. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S256. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S255). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S256). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10906,3 +10906,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: ocho paradas de guion (T0: dos por afirmaciones sin marca y una guarda sin probar; T1: citas mal numeradas y un criterio de rc sin medir; cierre: tres por citas sin respaldo o desplazadas); en el contraste del C1, siete citas que no casaban, tres afirmaciones sin respaldo y un `cerrar` que habría restaurado tras un rechazo; la tabla de E34 traduce el rc 32 a «código 0» (E41). Sin coste: la hipótesis del Escritorio en OneDrive, falsa (el usuario había entrado como `educhronos-admin`). De Claude Code, sin coste: un «VACÍA» falso en el T1, apartado por él mismo, y un veredicto que `cerrar` no usaba, cazado por la campaña M3.
   SUITES. solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 385 (337 + 48, `s255/c1/suite-*.txt`). Bundle sin cambios, 658,07 kB en `b017ca7`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 56 líneas del commit de cierre sin índice, 2 736 bytes de entrada y 3 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 256 — O-prueba-vm (transversal), C-script-prueba-vm: **O-PRUEBA-VM TERMINADO, 7 DE 7: UNA VERSIÓN SE PRUEBA EN LA VM CON EL SCRIPT Y NUEVE PASOS DE LA PERSONA**
+  TIPO. Desarrollo, con tres corridas en la VM autorizadas por el usuario (GS, GT y GU) y una fase de documentación. Material en `/home/luis/educhronos-aceptacion/s256/` (m0, t0, e41, e51, e52, v1 a v3, diag, diag2 y cierre).
+  HECHO. T0: `tests` #141 en verde sobre `b4a7dea`. E41 (`bffc815`): el rc 32 da FALLO. Corrida `v1`, con los pasos de mirar: 23 OK y un FALLO falso en `vm-restaurada`. E51 (`5beebed`) releía `showvminfo` 30 s, y `v2` repitió el FALLO: la hora del restore sigue mientras vive el VBoxSVC que lo hizo (`diag2`). E52 (`21cd952`): el estado de la VM se juzga con el `.vbox`; `v3`: 24 OK y ningún FALLO. Condición 7: `docs/tecnica/probar-vm.md` (`d462e3f`). README de `docs/tecnica/`: `v0.6.0` y `v0.6.1` contienen `30b8d67`, así que su «0.5.0» es correcto para el commit que describe, sin hallazgo (`s256/cierre/c0/p1-readme-tags.txt`). Acta en `docs/actas-aceptacion/acta-prueba-vm-s256.md`.
+  CRITERIO. `O-prueba-vm` TERMINADO, 7 de 7 (GX y GY); la condición 4, con 9 pasos (GW; 16 contando cada pantalla). `C-script-prueba-vm` HECHO. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: GR a GY, con su texto en la ficha, ya en §1 de `docs/gestion-historico.md`. Del arquitecto, once, en `s256/cierre/c1/decisiones.txt`; el usuario revirtió la 7.
+  DEUDA. Nace `D-nota-nivel-poco-visible`, MEJORA FUTURA, sin objetivo (del usuario). `D-prueba-vm-a-mano` CERRADA por la condición 7, en §2 del histórico. `D-python-sin-ci`: la suite de `tools/prueba-vm` pasa a 55. `D-paso-cero-para-por-forma`: llega su sesión de Higiene/Método (GC).
+  DEFECTOS. De Claude Code, con coste: el diagnóstico de la corrida `v1` (la hora «vuelve después»), que costó una corrida y E51. De Claude Code, sin coste: un mutante de E52 que no llegó a aplicarse y tres que solo mataba la autoprueba, rehechos antes del commit; tres citas débiles de `probar-vm.md`, corregidas antes del suyo; un hallazgo del README, retirado al medir los tags. Del usuario: la precisión de GT, aceptada sin preguntar cómo se había medido. Del arquitecto, sin coste: la premisa del cambio 2 de su visto bueno al cierre («no consta qué instancia contestó en S255») era falsa, y la desmintió el log (`s256/cierre/c0/p7-vboxsvc-s255.txt`).
+  SUITES. Sin cambios en la aplicación desde `b4a7dea`: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3 (`tests` #142 en verde); python 392 (337 + 55, `s256/cierre/c0/p5-suite-*.txt`). Bundle sin cambios, 658,07 kB en `b017ca7`.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 121 líneas del commit de cierre sin índice, 2 921 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
