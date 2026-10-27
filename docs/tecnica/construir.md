@@ -3,13 +3,14 @@
 Responde a esta pregunta: qué hace falta para construir Educhronos y qué deja la construcción.
 Léelo antes de construir el jar por primera vez, o cuando la construcción falle.
 
-Describe el commit 30b8d67a9b49.
+Describe el commit 8c9c6ec75310.
 
 ## Requisitos
 
 Hace falta Java 17. La CI usa la distribución Temurin (`.github/workflows/tests.yml:18-21`).
 Hace falta Maven 3.6.0 o superior, por el plugin que construye el frontend (`pom.xml:48-49`).
-El frontend usa Node 22.23.1, la versión que fija `app/frontend/.nvmrc`, y npm 10.9.8 (`app/frontend/package.json:13`).
+El frontend usa Angular 22.2, con Node 22.23.1, la versión que fija `app/frontend/.nvmrc`, y npm 11.21.1 (`app/frontend/package.json:13`).
+El npm que trae Node 22.23.1, el 10.9.8, no instala Angular 22: su npm install falla dentro de npm.
 Para construir el jar no hace falta tener Node instalado: Maven baja el suyo, como se cuenta abajo.
 Node y npm sí hacen falta para las pruebas del frontend, en `docs/tecnica/probar.md`.
 
@@ -29,10 +30,10 @@ La opción -DskipTests salta los tests; se corren aparte, como cuenta `docs/tecn
 El proyecto Maven tiene dos módulos: el solver y la aplicación (`docs/tecnica/arquitectura.md`).
 Maven construye primero el solver y después la aplicación, que depende de él.
 
-En el módulo de la aplicación, la fase prepare-package construye el frontend (`app/pom.xml:111-151`).
-Primero instala Node v22.23.1 y su npm dentro de la carpeta target del módulo, no en el sistema.
+En el módulo de la aplicación, la fase prepare-package construye el frontend (`app/pom.xml:111-152`).
+Primero instala Node v22.23.1 y npm 11.21.1 dentro de la carpeta target del módulo, no en el sistema.
 Después ejecuta npm ci y npm run build en `app/frontend/`.
-En la misma fase copia la salida de Angular a la carpeta static de las clases (`app/pom.xml:153-174`).
+En la misma fase copia la salida de Angular a la carpeta static de las clases (`app/pom.xml:154-175`).
 Así la interfaz queda dentro del jar y la sirve el mismo servidor.
 
 En la fase package, el plugin de Spring Boot rehace el jar como jar ejecutable, con todas sus dependencias dentro (`app/pom.xml:97-109`).
