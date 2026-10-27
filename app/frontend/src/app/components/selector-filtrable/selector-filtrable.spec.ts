@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { SelectorFiltrable } from './selector-filtrable';
 
@@ -66,6 +66,23 @@ class SinFormulario {
   readonly identidad = (e: string): string => e;
   readonly elegida = signal('1ºA');
   readonly avisos: string[] = [];
+}
+
+/** Dentro de un formulario con su botón de enviar (EN-12). */
+@Component({
+  imports: [SelectorFiltrable, ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="enviar()">
+      <app-selector-filtrable etiqueta="aulas" [opciones]="opciones" [texto]="codigo" [codigo]="codigo" formControlName="aula" />
+      <button type="submit">Guardar</button>
+    </form>
+  `,
+})
+class EnFormulario {
+  readonly opciones = doce();
+  readonly codigo = (o: Op): string => o.codigo;
+  readonly form = new FormGroup({ aula: new FormControl('G03', { nonNullable: true }) });
+  readonly enviar = vi.fn();
 }
 
 describe('SelectorFiltrable', () => {
@@ -346,6 +363,68 @@ describe('SelectorFiltrable', () => {
       anfitrion().control.disable();
       await fixture.whenStable();
       expect(campo().disabled).toBe(true);
+    });
+  });
+
+  describe('Intro no envía el formulario (EN-12)', () => {
+    let f: ComponentFixture<EnFormulario>;
+    const entrada = (): HTMLInputElement => (f.nativeElement as HTMLElement).querySelector('input')!;
+
+    async function montarEnFormulario(): Promise<void> {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({ imports: [EnFormulario] }).compileComponents();
+      f = TestBed.createComponent(EnFormulario);
+      await f.whenStable();
+    }
+
+    async function pulsar(key: string): Promise<KeyboardEvent> {
+      const evento = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      entrada().dispatchEvent(evento);
+      await f.whenStable();
+      return evento;
+    }
+
+    /**
+     * Intro como lo trata el navegador: si nadie cancela el keydown, el formulario se envía
+     * (envío implícito de un campo de texto). jsdom no lo hace con un evento sintético, así que
+     * se hace aquí; sin esto el caso pasaría aunque el campo no protegiera nada.
+     */
+    async function introComoNavegador(): Promise<KeyboardEvent> {
+      const evento = await pulsar('Enter');
+      if (!evento.defaultPrevented) {
+        (f.nativeElement as HTMLElement).querySelector('form')!.requestSubmit();
+        await f.whenStable();
+      }
+      return evento;
+    }
+
+    it('(a) con la lista cerrada, Intro no envía', async () => {
+      await montarEnFormulario();
+      entrada().focus();
+      expect(entrada().getAttribute('aria-expanded')).toBe('false');
+      const evento = await introComoNavegador();
+      expect(evento.defaultPrevented).toBe(true);
+      expect(f.componentInstance.enviar).not.toHaveBeenCalled();
+      expect(f.componentInstance.form.value).toEqual({ aula: 'G03' });
+    });
+
+    it('(b) con la lista abierta, flecha e Intro eligen y no envían', async () => {
+      await montarEnFormulario();
+      entrada().focus();
+      await pulsar('ArrowDown');
+      await pulsar('ArrowDown');
+      const evento = await introComoNavegador();
+      expect(evento.defaultPrevented).toBe(true);
+      expect(f.componentInstance.form.value).toEqual({ aula: 'G04' });
+      expect(entrada().getAttribute('aria-expanded')).toBe('false');
+      expect(f.componentInstance.enviar).not.toHaveBeenCalled();
+    });
+
+    it('control: el botón de enviar sí envía (el espía y el formulario funcionan)', async () => {
+      await montarEnFormulario();
+      ((f.nativeElement as HTMLElement).querySelector('button[type="submit"]') as HTMLButtonElement).click();
+      await f.whenStable();
+      expect(f.componentInstance.enviar).toHaveBeenCalledTimes(1);
     });
   });
 

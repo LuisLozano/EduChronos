@@ -13,6 +13,7 @@
     [softDisabled]="false"
     (focus)="alEnfocar($event)"
     (blur)="alSalir()"
+    (keydown.enter)="noEnviar($event)"
   />
   <ng-template ngComboboxPopup [combobox]="combobox">
     <!-- mousedown sin acción por defecto: el clic en una opción no quita el foco al campo. -->

@@ -155,6 +155,15 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
     (event.target as HTMLInputElement).select();
   }
 
+  /**
+   * Intro no envía el formulario que lo contiene, como un `<select>` (EN-12 de S260): en un
+   * `<input>` el navegador lo enviaría con la lista cerrada (envío implícito). Con la lista
+   * abierta Intro elige, y eso lo hace el listbox.
+   */
+  protected noEnviar(event: Event): void {
+    event.preventDefault();
+  }
+
   protected alSalir(): void {
     this.alTocar();
   }
