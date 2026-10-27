@@ -1,0 +1,64 @@
+:host {
+  display: inline-block;
+}
+
+.selector-filtrable {
+  position: relative;
+}
+
+.selector-filtrable__campo {
+  width: 100%;
+  min-width: 14rem;
+  padding: var(--e1) var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  box-sizing: border-box;
+  font: inherit;
+  background: var(--color-superficie);
+  color: var(--color-tinta);
+}
+
+.selector-filtrable__campo:disabled {
+  background: var(--color-superficie-tenue);
+  color: var(--color-tinta-suave);
+}
+
+/* La lista flota bajo el campo y desplaza dentro: no empuja el formulario. */
+.selector-filtrable__lista {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 100%;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin-top: var(--e1);
+  padding: var(--e1) 0;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-suave);
+  box-sizing: border-box;
+}
+
+.selector-filtrable__opcion {
+  padding: var(--e1) var(--e2);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.selector-filtrable__opcion[data-active='true'] {
+  background: var(--color-acento-suave);
+}
+
+.selector-filtrable__opcion[aria-selected='true'] {
+  font-weight: var(--peso-fuerte);
+}
+
+.selector-filtrable__opcion[aria-disabled='true'] {
+  color: var(--color-tinta-suave);
+}
+
+.selector-filtrable__opcion--vacia {
+  color: var(--color-tinta-suave);
+}

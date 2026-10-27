@@ -1,0 +1,50 @@
+<div class="selector-filtrable">
+  <input
+    ngCombobox
+    #combobox="ngCombobox"
+    class="selector-filtrable__campo"
+    autocomplete="off"
+    [id]="idEntrada()"
+    [value]="textoCampo()"
+    (valueChange)="alEscribir($event)"
+    [expanded]="abierta()"
+    (expandedChange)="alAbrirOCerrar($event)"
+    [disabled]="deshabilitado()"
+    [softDisabled]="false"
+    (focus)="alEnfocar($event)"
+    (blur)="alSalir()"
+  />
+  <ng-template ngComboboxPopup [combobox]="combobox">
+    <!-- mousedown sin acción por defecto: el clic en una opción no quita el foco al campo. -->
+    <div
+      ngComboboxWidget
+      ngListbox
+      #lista="ngListbox"
+      class="selector-filtrable__lista"
+      selectionMode="explicit"
+      focusMode="activedescendant"
+      [attr.aria-label]="etiqueta()"
+      [value]="valorEnLista()"
+      (valueChange)="alElegir($event)"
+      [activeDescendant]="lista.activeDescendant()"
+      (mousedown)="$event.preventDefault()"
+    >
+      @if (opcionVacia() !== null) {
+        <div
+          ngOption
+          class="selector-filtrable__opcion selector-filtrable__opcion--vacia"
+          value=""
+          [label]="opcionVacia()!"
+          [disabled]="!vaciaElegible()"
+        >
+          {{ opcionVacia() }}
+        </div>
+      }
+      @for (o of visibles(); track codigo()(o)) {
+        <div ngOption class="selector-filtrable__opcion" [value]="codigo()(o)" [label]="texto()(o)">
+          {{ texto()(o) }}
+        </div>
+      }
+    </div>
+  </ng-template>
+</div>

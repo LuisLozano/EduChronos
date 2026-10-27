@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FiltroOpciones } from '../../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable';
 import datos from './datos.json';
 import esperado from './esperado.json';
 
@@ -126,6 +127,51 @@ describe('oráculo de equivalencia: FiltroOpciones (hoy)', () => {
       expect(ESPERADO[nombre]?.elegido.codigo).toBe(elegido);
       expect(ESPERADO[nombre]?.elegido.busqueda).toBe(BUSCAR_CON_ELEGIDO);
       expect(await visibles(s, BUSCAR_CON_ELEGIDO, [elegido])).toEqual(ESPERADO[nombre]?.elegido.visibles);
+    });
+  }
+});
+
+describe('oráculo de equivalencia: SelectorFiltrable', () => {
+  let fixture: ComponentFixture<SelectorFiltrable<unknown>>;
+
+  /**
+   * Monta el selector, escribe la búsqueda en SU campo y devuelve los códigos de las opciones que
+   * hay en el DOM. El texto de cada opción se vuelve código con el propio selector: el spec
+   * comprueba antes que en esa lista no hay dos opciones con el mismo texto.
+   */
+  async function visibles(s: Selector<unknown>, busqueda: string, elegido: string): Promise<string[]> {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({ imports: [SelectorFiltrable] }).compileComponents();
+    fixture = TestBed.createComponent(SelectorFiltrable) as ComponentFixture<SelectorFiltrable<unknown>>;
+    fixture.componentRef.setInput('opciones', s.opciones);
+    fixture.componentRef.setInput('texto', s.texto);
+    fixture.componentRef.setInput('codigo', s.codigo);
+    fixture.componentRef.setInput('etiqueta', 'opciones');
+    fixture.componentRef.setInput('valor', elegido);
+    await fixture.whenStable();
+    const campo = (fixture.nativeElement as HTMLElement).querySelector('input')!;
+    campo.focus();
+    campo.value = busqueda;
+    campo.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(campo.getAttribute('aria-expanded')).toBe('true');
+    const porTexto = new Map(s.opciones.map((o) => [s.texto(o), s.codigo(o)]));
+    expect(porTexto.size).toBe(s.opciones.length);
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[role="option"]')).map(
+      (o) => porTexto.get(o.textContent!.trim()) ?? `?${o.textContent!.trim()}`,
+    );
+  }
+
+  for (const [nombre, s] of Object.entries(SELECTORES)) {
+    for (const busqueda of s.busquedas) {
+      it(`${nombre} «${busqueda}»`, async () => {
+        expect(await visibles(s, busqueda, '')).toEqual(ESPERADO[nombre]?.busquedas[busqueda]);
+      });
+    }
+
+    it(`${nombre}: el elegido sigue visible aunque la búsqueda no case`, async () => {
+      const elegido = s.codigo(s.opciones[0]);
+      expect(await visibles(s, BUSCAR_CON_ELEGIDO, elegido)).toEqual(ESPERADO[nombre]?.elegido.visibles);
     });
   }
 });
