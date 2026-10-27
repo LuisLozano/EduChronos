@@ -15,6 +15,7 @@ import prueba_vm as pv  # noqa: E402
 
 SINCE = "2026-10-26T15:05:34.000000000"
 TRAS_APAGAR = "2026-10-26T21:14:10.000000000"
+HORA_RESTORE = "2026-10-27T07:32:22.310000000"  # la que leyó cerrar a los 30 ms en s256/v1
 SALIDA_INSTALAR = (
     "[1/3] Programa en C:\\Users\\prueba-vm\\AppData\\Local\\Programs\\Educhronos\r\n"
     "[2/3] Acceso directo en el Escritorio\r\n[3/3] Base de partida\r\n"
@@ -54,6 +55,7 @@ class VMFalsa:
         self.procesos = ["6120|Educhronos.exe|2", "9508|Educhronos.exe|2"]
         self.tras_apagar = TRAS_APAGAR
         self.tras_restaurar = SINCE
+        self.lecturas_con_hora_restore, self.pendientes = 0, 0
         self.restore_rc = 0
         self.com_caido = 0
 
@@ -67,16 +69,24 @@ class VMFalsa:
 
     def responder(self, a):
         if a[0] == "showvminfo":
-            return self.ok('name="Win11"\nVMState="%s"\nVMStateChangeTime="%s"\nCurrentSnapshotName="%s"\n'
-                           'SharedFolderNameMachineMapping1="educhronos-vm"\n'
-                           'SharedFolderPathMachineMapping1="%s"\n' % (self.estado, self.cambio, self.actual, self.compartida))
+            r = self.ok('name="Win11"\nVMState="%s"\nVMStateChangeTime="%s"\nCurrentSnapshotName="%s"\n'
+                        'SharedFolderNameMachineMapping1="educhronos-vm"\n'
+                        'SharedFolderPathMachineMapping1="%s"\n' % (self.estado, self.cambio, self.actual, self.compartida))
+            if self.pendientes:
+                self.pendientes -= 1
+                if not self.pendientes:
+                    self.cambio = self.tras_restaurar
+            return r
         if a[0] == "snapshot" and a[2] == "showvminfo":
             return self.ok("Name:                        Win11\nState:                       powered off (since %s)\n" % SINCE)
         if a[0] == "snapshot" and a[2] == "list":
             return self.ok(self.lista)
         if a[0] == "snapshot" and a[2] == "restore":
             if self.restore_rc == 0:
-                self.estado, self.actual, self.cambio = "poweroff", a[3], self.tras_restaurar
+                # E51: las primeras lecturas tras el restore pueden dar todavía la hora del restore.
+                self.pendientes = self.lecturas_con_hora_restore
+                self.estado, self.actual = "poweroff", a[3]
+                self.cambio = HORA_RESTORE if self.pendientes else self.tras_restaurar
             return self.ok("Restoring snapshot\n", rc=self.restore_rc)
         if a[0] == "startvm":
             self.estado = "running"
@@ -469,6 +479,38 @@ class CerrarTest(Escenario):
         self.vm.tras_restaurar = "2026-10-26T22:30:00.000000000"
         self.assertEqual(self.corrida_completa()[-1], 3)
         self.assertEqual(self.informe()["vm-restaurada"], "FALLO")
+
+    def lecturas_tras_restore(self):
+        llamadas = self.vm.llamadas
+        i = max(n for n, a in enumerate(llamadas) if a[:3] == ["snapshot", "Win11", "restore"])
+        return [a for a in llamadas[i + 1:] if a[0] == "showvminfo"]
+
+    def linea_informe(self, clave):
+        lineas = (self.material / "informe.txt").read_text(encoding="utf-8").splitlines()
+        return next(l for l in lineas if l.startswith(("OK %s:" % clave, "FALLO %s:" % clave)))
+
+    def test_since_tras_releer_despues_del_restore(self):
+        # E51: dos lecturas con la hora del restore y la tercera con el «since» → OK en el intento 3.
+        self.vm.lecturas_con_hora_restore = 2
+        self.assertEqual(self.corrida_completa(), [0, 0, 0, 0])
+        self.assertEqual(self.informe()["vm-restaurada"], "OK")
+        self.assertIn("; intento 3 de %d" % pv.INTENTOS_RESTAURADA, self.linea_informe("vm-restaurada"))
+        self.assertEqual(len(self.lecturas_tras_restore()), 3)
+
+    def test_since_que_nunca_vuelve_tras_el_restore(self):
+        # E51: si no coincide en 30 lecturas, una por segundo, FALLO al agotarlas.
+        self.vm.tras_restaurar = HORA_RESTORE
+        rcs = [self.preparar(), self.sub("sesion"), self.sub("abierta")]
+        self.vm.procesos = []
+        antes = self.anfitrion.dormido
+        rcs.append(self.sub("cerrar"))
+        self.assertEqual(rcs, [0, 0, 0, 3])
+        self.assertEqual(self.informe()["vm-restaurada"], "FALLO")
+        self.assertIn("; intento 30 de 30", self.linea_informe("vm-restaurada"))
+        self.assertEqual((pv.INTENTOS_RESTAURADA, pv.ESPERA_RESTAURADA), (30, 1))
+        self.assertEqual(len(self.lecturas_tras_restore()), 30)
+        # 30 esperas de 1 s y la de 1 s del inhibidor.
+        self.assertEqual(self.anfitrion.dormido - antes, 30 * 1 + 1)
 
     def test_regla_que_no_detecta_el_cambio(self):
         self.vm.tras_apagar = SINCE

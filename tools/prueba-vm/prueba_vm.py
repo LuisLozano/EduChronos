@@ -84,6 +84,9 @@ SINCE = re.compile(r"^State:\s.*\(since ([^)]+)\)\s*$", re.M)
 INTENTOS_INVITADO, ESPERA_INVITADO = 20, 15
 INTENTOS_PROCESOS, ESPERA_PROCESOS = 12, 5
 INTENTOS_APAGADO, ESPERA_APAGADO = 24, 5
+# E51 (S256, s256/diag/notas.txt): a los 30 ms del restore VMStateChangeTime aún marca la hora del
+# restore; vuelve al «since» después. Se relee una vez por segundo, 30 s como máximo.
+INTENTOS_RESTAURADA, ESPERA_RESTAURADA = 30, 1
 MS_WHOAMI, MS_POWERSHELL, MS_LARGO = 60000, 120000, 600000
 
 INHIBIDOR_QUIEN = "educhronos-prueba-vm"
@@ -789,7 +792,12 @@ def cerrar(args, ejecutor, anfitrion):
         r = p.vbox("restore", ["snapshot", e["vm"], "restore", e["instantanea"]], 1800)
         if r.rc != 0:
             p.fallar("vm-restaurada", ("FALLO", "restore rc %d" % r.rc))
-        p.anotar("vm-restaurada", veredicto_vm_restaurada(p.leer_vm("showvminfo-despues"), e["instantanea"], e["since"]))
+        for intento in range(1, INTENTOS_RESTAURADA + 1):
+            v = veredicto_vm_restaurada(p.leer_vm("showvminfo-despues-%02d" % intento), e["instantanea"], e["since"])
+            if v[0] == "OK":
+                break
+            anfitrion.dormir(ESPERA_RESTAURADA)
+        p.anotar("vm-restaurada", (v[0], "%s; intento %d de %d" % (v[1], intento, INTENTOS_RESTAURADA)))
         lista = p.vbox("snapshot-list-despues", ["snapshot", e["vm"], "list", "--details"], 120)
         igual = lista.rc == 0 and p.texto(lista, invitado=False) == e["instantaneas_antes"]
         p.anotar("instantaneas", ("OK" if igual else "FALLO", "snapshot list --details %s al de preparar (rc %d)"
