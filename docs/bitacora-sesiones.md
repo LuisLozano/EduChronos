@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S253. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S254. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S253). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S254). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10886,3 +10886,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el E1 daba por hecho que Claude Code podía borrar en la raíz de una unidad (una parada); en el C1 del cierre, la línea 1 copiada del molde decía cuatro documentos y son tres (una parada). Sin coste: la marca de la autoprueba del T0 citaba la norma 2 de M-guion y no el procedimiento M2; el C1 comparaba tamaños de carpeta entre NTFS y btrfs, corregido antes de ejecutarse. Del entorno: la comprobación de seguridad de Claude Code no deja borrar en la raíz de una unidad (FT). De Claude Code, sin coste: una nota falsa en el C0, corregida antes del volcado. Con coste, defectos distintos: el disparador no salta.
   SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337. Bundle sin cambios, 658,07 kB en `b017ca7`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 50 líneas del commit de cierre sin índice, 2 420 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 254 — O-prueba-vm (H5, transversal), C-alcance-prueba-vm: **ABIERTO O-PRUEBA-VM, CON SU CRITERIO MEDIDO EN LA VM Y UNA INSTANTÁNEA NUEVA CON UNA CUENTA ESTÁNDAR SIN ESTRENAR. O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Apertura de objetivo con mediciones en la VM, sin código de la aplicación; `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s254/` (t0, t1, t1b, t1c, t1d y cierre).
+  HECHO. T0: `tests` #139 en verde sobre `10acc7c`; Guest Additions 7.2.18 en la VM; de los 20 pasos de `s252/v1`, 10 automatizables. T1: `educhronos-admin` entra por `guestcontrol` con el token filtrado. T1b (en `s254/t1c`): instantánea `s254-admin-clave`; el alta de una cuenta da error 5. T1d: instantánea `s254-cuenta-prueba`, con `prueba-vm` creada por el usuario; el primer `run` le crea el perfil, y escribe y copia en él.
+  CRITERIO. `O-prueba-vm` ABIERTO, transversal, 0 de 7 (FY; condiciones 1, 2 y 5 según GB). `C-alcance-prueba-vm` HECHO. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: FU a GC, con su texto en la ficha. Del arquitecto, once, en `s254/cierre/c1/decisiones.txt`.
+  DEUDA. No nace ninguna. `D-prueba-vm-a-mano` pasa a `O-prueba-vm`. `D-paso-cero-para-por-forma`: cuatro paradas por afirmaciones sin marca. Higiene/Método sigue en 8.
+  DEFECTOS. Del arquitecto, con coste: el T1 comprobaba el nombre de la instantánea y no si la VM había cambiado, y su restauración borró el cambio de contraseña del usuario, que lo repitió a mano; el T1b daba por hecho ese cambio, que no estaba (tres paradas de su guarda); afirmaciones sin marca en T0, T1, T1b y C0 (cuatro paradas); en el C1 del cierre, la ficha decía que `docs/tecnica/` no nombra la VM, y `decisiones.md:86` la nombra (una parada). Sin coste: una cita a `VOLCADO-T1c.md` para `--passwordfile`. De Claude Code, sin coste: un `2>/dev/null` contra la norma 2 y `s254/t1b/` creada antes del paso 0. Con coste, el mismo defecto cuatro veces: el disparador de Higiene/Método salta y se aplaza al cierre de `O-prueba-vm` (GC).
+  SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337. Bundle sin cambios, 658,07 kB en `b017ca7`.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 81 líneas del commit de cierre sin índice, 2 460 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

@@ -2,45 +2,46 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L54 — ## 1. Objetivos terminados
-- L56 — ### H2 — Configurar un centro desde cero
-- L58 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L74 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L146 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L396 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L683 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L784 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L883 — ### H1 — Ajustar (cierre)
-- L885 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1062 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1353 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1543 — ### H3 — Exportar
-- L1545 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1606 — ### H4 — Instalar y pasar de curso
-- L1608 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1782 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1877 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1946 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1982 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1984 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2033 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2068 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2103 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2132 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2171 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2209 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2246 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2283 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2319 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2337 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2363 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2395 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
-- L2414 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
-- L2448 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
-- L2482 — ## 2. Deuda cerrada de §4
-- L2484 — ### Deuda técnica real, colgada de su objetivo
-- L2562 — ### Mejora futura, cuelga y espera
-- L2582 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L55 — ## 1. Objetivos terminados
+- L57 — ### H2 — Configurar un centro desde cero
+- L59 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L75 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L147 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L397 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L684 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L785 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L884 — ### H1 — Ajustar (cierre)
+- L886 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1063 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1354 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1544 — ### H3 — Exportar
+- L1546 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1607 — ### H4 — Instalar y pasar de curso
+- L1609 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1783 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1878 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1947 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1983 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1985 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2034 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2069 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2104 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2133 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2172 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2210 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2247 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2284 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2320 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2338 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2364 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2396 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2415 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- L2449 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
+- L2483 — #### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
+- L2516 — ## 2. Deuda cerrada de §4
+- L2518 — ### Deuda técnica real, colgada de su objetivo
+- L2596 — ### Mejora futura, cuelga y espera
+- L2617 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2479,6 +2480,39 @@ terminado (§6).
 - **Cambios que agrupa:** `C-alcance-actividad-por-nivel` ✔ HECHO (S249): M0, T0, T0-bis, T0-ter y criterio. `C-asignatura-con-nivel` ✔ HECHO (S250): condiciones 1 a 3 (`82f8bce`, `d4c643f`, `cf70e85` y `e47cabf`). `C-editor-por-nivel` ✔ HECHO (S251): condiciones 4 a 6 (`19267ec`, `6af5d9a`, `b997244` y `8824250`). `C-version-actividad-por-nivel` ✔ HECHO (S252): condición 7 (`7d89888`, `b017ca7`, `c86eee8` y `4e188a5`; `v0.6.1`).
 - **Métrica de §7:** estimación al abrir: de 3 a 5 sesiones (sin medir). Gastadas: 3 (S249, S250 y S251). **S252:** gastadas 4 (S249 a S252), dentro de la estimación.
 
+#### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
+- **Propósito:** que un script del anfitrión haga la parte no visual de la prueba de cada versión en la VM `Win11`, y que el usuario solo mire y toque lo que pide un criterio.
+- **Por qué va ahora:** es el primero del orden de FP y FU, y puede abrirse con la condición 8 de `O-uso-centro` esperando fecha (CY). Si la prueba en el centro pide un arreglo urgente (`v0.6.2`, FQ), su prueba en la VM ya costaría menos. Transversal, como `O-doc-tecnica` (DN): no lleva el estado final 2 ni cuenta para cerrar H5.
+- **Medido al abrir (S254; material en `/home/luis/educhronos-aceptacion/s254/`, t0, t1, t1c y t1d):**
+  (a) La CI del cierre de S253 está en verde (`tests` #139 sobre `10acc7c`).
+  (b) VirtualBox 7.2.18 y Guest Additions 7.2.18 en la VM. `guestcontrol` tiene `run`, `copyto`, `copyfrom` y `stat`; `waitrunlevel` agota 300 s y `--profile` no está implementado. El invitado responde a un `whoami` a los 15-16 s del arranque, sin nadie con la sesión iniciada, y la salida llega en CP850.
+  (c) De los 20 pasos humanos de `s252/v1`: A=2 (gestión de la VM), B=8 (acción o lectura sin juicio de pantalla), C=8 (juicio de pantalla) y D=2 (interacción) (`s254/t0/VOLCADO-T0.md`, 3.4).
+  (d) `educhronos-admin` entra por `guestcontrol` con el token filtrado por UAC (S-1-5-32-544 solo para denegar, nivel medio) y no puede crear cuentas: error 5 (`s254/t1c`).
+  (e) `prueba-vm`, estándar y sin estrenar: el primer `run` crea `C:\Users\prueba-vm`; su carpeta de datos, su Escritorio y sus Documentos existen; escribe en ellos y una copia va y vuelve idéntica (`s254/t1d`).
+  Sin medir: `Instalar.cmd` lanzado por `guestcontrol` (FX), y si Windows pide la configuración del primer inicio después de que `guestcontrol` cree el perfil.
+- **Medido en S255** (material en `/home/luis/educhronos-aceptacion/s255/`, `t0`, `t0b` y `t1`): (f) La CI del cierre de S254 está en verde (`tests` #140 sobre `0f69da3`), tras el push. (g) `Instalar.cmd` lanzado por `guestcontrol` termina con `cmd /c "<ruta> < nul"`; sin `< nul`, su `pause` final lo cuelga hasta el tiempo límite (`t1/p3-regla.txt`). (h) El rc de `run` es el código en la VM más 32, salvo el 0, que llega como 0; el tiempo límite da 20. (i) Al restaurar, `VMStateChangeTime` vuelve exactamente a la hora de la instantánea, la misma que da `snapshot showvminfo` («since», en UTC); `VBox.log` rota en cada arranque y no sirve para saber si la VM ha cambiado. (j) Con el perfil creado por `guestcontrol`, el primer inicio de `prueba-vm` pide tres pantallas de configuración, y después el acceso directo está en el Escritorio; con la sesión de la cuenta abierta, `guestcontrol` ve sus procesos: dos `Educhronos.exe`, el lanzador y su JVM. Con esto quedan medidos los dos puntos «Sin medir» de S254.
+- **Medido en S256** (material en `/home/luis/educhronos-aceptacion/s256/`, `t0`, `v1` a `v3`, `diag` y `diag2`): (k) La CI del cierre de S255 está en verde (`tests` #141 sobre `b4a7dea`). (l) Precisa (i) de S255: «showvminfo da la hora del restore mientras viva el VBoxSVC que lo hizo; el .vbox, escrito en el mismo segundo, ya tiene la hora de la instantánea y currentStateModified="false" (s256/diag2/notas.txt)» (GV). (m) Tras apagar, el `.vbox` no lleva el atributo `currentStateModified` (`v3/ordenes/026-vbox-tras-apagar.txt`). (n) VirtualBox del anfitrión pasó de 7.2.18 a 7.2.22 el 27 de octubre a las 07:27, antes de las tres corridas: (l) y (m) son de 7.2.22. En S255, con 7.2.18, la lectura que dio «IGUAL» tras el restore (`s255/t1/p9-comparacion.txt`) fue 6 s después y la contestó un VBoxSVC nuevo, porque el que restauró se había cerrado un segundo antes: es lo mismo que (l), y no hay indicio de que la diferencia sea de versión (`s256/cierre/c0/p7-vboxsvc-s255.txt`). (o) La prueba de `v0.6.1` con el script lleva 9 pasos de la persona contados como en `s252/v1` (GW), y 16 contando cada pantalla.
+- **Decisiones (S254):** (FU) del usuario: abrir el objetivo, con el orden `O-prueba-vm`, Higiene/Método con `D-paso-cero-para-por-forma` y el combobox. (FV) del usuario: el nombre `O-prueba-vm`. (FW) del usuario: la cuenta del automatismo es `educhronos-admin`; su contraseña vive en un fichero 600 del anfitrión, fuera del repo, de la carpeta compartida y del material, y no se usa fuera de esta VM. (FX) del usuario: el script hace también el transporte, la extracción y la instalación; esos pasos vuelven a la persona en una versión que cambie `scripts/empaquetar-windows.ps1`, `Instalar.cmd` o la sección 2 del manual. (FY) del usuario: criterio aprobado. (FZ) del usuario: arrancar la VM en S254, con una cuenta desechable, apagar y restaurar. (GA) del usuario: instantánea `s254-admin-clave`, con la contraseña nueva de `educhronos-admin`. (GB) del usuario: cuenta estándar `prueba-vm`, creada una vez desde `educhronos-admin` y sin estrenar, con la misma contraseña; las contraseñas de las dos cuentas, sin caducidad; instantánea `s254-cuenta-prueba`, de la que parte y a la que vuelve cada prueba; cambia el texto de las condiciones 1, 2 y 5. (GC) del usuario: el mismo defecto, una afirmación sin marca en un guion del arquitecto, costó cuatro paradas en S254; el disparador de Higiene/Método salta y se aplaza al cierre de `O-prueba-vm` (precedente S242). Las del arquitecto, en `s254/cierre/c1/decisiones.txt`.
+- **Decisiones (S255):** (GM) del usuario: en el T0 y el T1 de S255, una afirmación de forma sin marca que coincide con el material y no decide nada se anota y no para el guion; propuesta (1) de `D-paso-cero-para-por-forma`, sin cambiar `metodo.md`. (GN) del usuario: el T1 en la VM, arrancándola, apagándola y restaurando `s254-cuenta-prueba`, sin tomar instantáneas. (GO) del usuario: un inhibidor de suspensión del anfitrión durante el T1, terminado por su PID. (GP) del usuario: cerrar S255 sin la corrida real del script, que pasa a la sesión siguiente. Las del arquitecto y las de Claude Code aceptadas, en `s255/cierre/c1/decisiones.txt`.
+- **Decisiones (S256):** (GR) del usuario: alcance, E41 y la primera corrida real con `v0.6.1`, con los pasos de mirar de `s252/v1`, que mide también la condición 4; la condición 7, solo si queda tiempo. (GS) del usuario: la VM autorizada para esa corrida: arrancar, restaurar `s254-cuenta-prueba` al empezar y al terminar (GI) y apagar, sin tomar instantáneas, con el inhibidor del script (GK). (GT) del usuario: E51 y una segunda corrida corta, con H1, H2 y H3, en los términos de GS. (GU) del usuario: una tercera corrida corta, en los mismos términos. (GV) del usuario: E52, el estado de la VM se juzga con el `.vbox` en `vm-sin-cambios`, `regla-detecta-cambio` y `vm-restaurada`, y se retira E51; sustituye lo que GT pedía para esta ficha. (GW) del usuario: la condición 4 se cuenta como en `s252/v1`: 9 pasos. (GX) del usuario: `O-prueba-vm` en 6 de 7, y la condición 7 en esta sesión. (GY) del usuario: la condición 7, cumplida, y `O-prueba-vm` TERMINADO, 7 de 7. Las del arquitecto, en `s256/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S254 (FY), con las condiciones 1, 2 y 5 según GB. `O-prueba-vm` termina cuando:
+  1. **Instrumento.** `tools/prueba-vm/` tiene un script versionado, con tests y autoprueba, que prueba una versión en la VM `Win11` desde el anfitrión a partir de una instantánea dada: restaura, arranca, espera al invitado, copia el zip y la base, comprueba sus sumas, extrae e instala, mide la base instalada y la carpeta de datos y, tras la parte humana, lee el log y apaga. Hace él los pasos A y B de `s252/v1`, y usa la cuenta estándar de la instantánea, que nunca ha iniciado sesión: la restauración la deja sin estrenar en cada prueba.
+  2. **Credenciales.** Las contraseñas viven en un fichero 600 del anfitrión, fuera del repo, de la carpeta compartida y del material; el script solo pasa su ruta, y ninguna salida del script ni del material las contiene, lo que comprueba un test.
+  3. **Salida.** Cada prueba deja su material con manifiesto y un informe con una línea OK o FALLO por comprobación: sumas del zip y de la base, md5 de la base instalada, carpeta de datos, cuenta sin S-1-5-32-544 y con S-1-16-8192, línea de migración del log y proceso terminado tras Salir en la bandeja.
+  4. **Pasos humanos.** La prueba que recibe el usuario lleva solo los pasos de mirar o interactuar, de uno en uno (norma 17 de M-guion): como mucho 10, frente a los 20 de `s252/v1`.
+  5. **Equivalencia.** La prueba de `v0.6.1`, repetida con el script desde `s254-cuenta-prueba`, da en sus comprobaciones lo que dice `docs/actas-aceptacion/acta-version-s252.md`: md5 `D867C2DE…`, 249 856 B, `versionInicial=0 versionFinal=9` y la cuenta estándar. La autoprueba falla con una suma o una base equivocadas.
+  6. **La VM no pierde nada.** Ninguna instantánea se toma ni se borra sin decisión del usuario, y al terminar la VM queda apagada.
+  7. **Documentación.** `docs/tecnica/` explica cómo se prueba una versión en la VM con el script; hoy ninguna línea dice cómo se prueba una versión en la VM, y solo `docs/tecnica/decisiones.md:86` la nombra (`s254/t0`, 4.3). Salda `D-prueba-vm-a-mano`.
+- **ESTADO en S254: 0 de 7.** ABIERTO, transversal, con `O-uso-centro` en 7 de 8 esperando fecha (CY; precedente S244). `C-alcance-prueba-vm` HECHO.
+- **ESTADO en S255: 0 de 7**, sin cambios: `C-script-prueba-vm` EN CURSO. El script existe, con tests y autoprueba; las condiciones 1 a 3 se verifican con su primera corrida real.
+- **ESTADO en S256: TERMINADO, 7 de 7** (GX, GY). Las condiciones 1 a 3 y la 5, con la tercera corrida (`s256/v3`, código de `21cd952`: 24 OK y ningún FALLO); la 4, con la primera (`s256/v1`: 9 pasos, GW); la 6, en las tres; la 7, con `docs/tecnica/probar-vm.md` (`d462e3f`; `tests` #142 en verde, también «rutas de docs/tecnica»). Acta: `docs/actas-aceptacion/acta-prueba-vm-s256.md`.
+- **Fuera del criterio:** juzgar las pantallas, que sigue siendo del usuario; inyectar teclado o ratón; la prueba en el PC del centro; borrar instantáneas antiguas.
+- **Deudas:** `D-prueba-vm-a-mano` (condición 7). **S256:** CERRADA por la condición 7; pasa a §2 de `docs/gestion-historico.md`.
+- **Depende de:** la VM `Win11` con la instantánea `s254-cuenta-prueba` (GB), y el zip de `v0.6.1` para la condición 5.
+- **Valor:** cada versión futura cuesta en la VM la mitad de pasos humanos o menos, empezando por un posible `v0.6.2` durante la prueba en el centro (FQ).
+- **Cambios que agrupa:** `C-alcance-prueba-vm` ✔ HECHO (S254): M0, T0, T1, T1b (en `s254/t1c`) y T1d, el criterio y la preparación de la VM (GA, GB). Siguiente: el Cambio del script (condiciones 1 a 3), cuyo contrato empieza por un T0 de forma: `tools/base-partida`, lo que imprime `Instalar.cmd` y la suite de Python. Requisito medido en S254: antes de restaurar, el script comprueba que la VM no ha cambiado desde la instantánea y para si ha cambiado (la restauración del T1 borró un cambio del usuario). `C-script-prueba-vm` EN CURSO (S255), condiciones 1 a 3: T0 (`s255/t0`), ensayo en la VM (`s255/t1`), contrato C1 con E26 a E40 y código en `5de9439`: `tools/prueba-vm/prueba_vm.py`, con los subcomandos `preparar`, `sesion`, `abierta` y `cerrar`, 48 tests, autoprueba de 12 capacidades y 12 mutantes, todos muertos (`s255/c1`). Siguiente: E41 (el rc 32 da FALLO, no «código 0») y la corrida real con `v0.6.1` desde `s254-cuenta-prueba`, con autorización de la VM, que verifica las condiciones 1 a 3 y la 5. **S256:** `C-script-prueba-vm` ✔ HECHO: E41 (`bffc815`), E51 (`5beebed`, retirado por E52) y E52 (`21cd952`), con tres corridas reales de `v0.6.1` (`s256/v1`, `v2` y `v3`), y la condición 7 en `d462e3f`.
+- **Métrica de §7:** estimación al abrir: 2 o 3 sesiones, sin medir. Gastadas: 1 (S254). **S255:** gastadas 2 (S254 y S255). **S256:** gastadas 3 (S254 a S256), dentro de la estimación.
+
 ## 2. Deuda cerrada de §4
 
 ### Deuda técnica real, colgada de su objetivo
@@ -2578,6 +2612,7 @@ terminado (§6).
 | ~~D-actividad-ux~~ (asperezas del editor de Actividad) **CERRADA S230** | `O-acabado-pre-prueba` (S229; antes sin sede) | Detectada S109 al conducir el formulario con Playwright, tres asperezas de presentación: los dos `<select formControlName="asignatura"` del formulario (la de la actividad y la de la plaza) no tienen `id` ni `label for` y se anuncian igual a un lector de pantalla; el error de servidor viejo sigue pintado mientras se muestra un error de campo nuevo (`error()` solo se limpia al empezar una petición); y el aviso de multiplaza vive dentro de la celda del recuento, mezclando dato y aviso. Ninguna impide configurar nada. RECORTADA en S110: el tercer síntoma se CERRÓ de paso al retirar el trozo B la guarda de multiplaza y con ella el aviso; sobreviven los dos primeros. No se paga ahora S188: en la demo le resultó engorroso el manejo de actividades, y los nombres de las actividades, confusos. **S190:** sede de la replanificación de H5: `O-interfaz`. Lo engorroso de S188. **CORREGIDO en S224:** «se anuncian igual» no se da: cada selector va dentro de su propio `<label>` (por lectura); siguen sin `id`, `for` ni `aria-*`. Condiciones 8 y 10 de `O-interfaz`. **S226:** saldado el error de servidor viejo junto al nuevo (`e5183d6`, condición 8). Sigue viva por lo engorroso del editor (condición 10). **S227:** saldado lo engorroso con el acta de la condición 10 (`41e88e1`, `78975a6`). Queda viva solo por los selectores sin `id`, `for` ni `aria-*`, que el usuario no señaló. **S229:** los selectores sin `id`, `for` ni `aria-*` se saldan con el editor nuevo de `O-acabado-pre-prueba` (condición 2; lista T, punto 3). **CERRADA en S230:** saldada por la condición 2 (`cb16917`): los selectores nuevos llevan id y label for, y las listas, id y aria-labelledby. |
 | ~~D-sin-instalador~~ (la entrega es un zip que se descomprime y se instala con órdenes de PowerShell; no hay instalador) **CERRADA S237** | `O-uso-centro` (S235, BE) | Nace en S234, propuesta del usuario (decisión BA): un instalador sencillo, no necesariamente MSI, que coloque el programa y cree el acceso directo sin permisos de administrador. El procedimiento escrito falló en el humo en una línea de su paso 3 (`2a0e6fa`). No entra en `O-prueba-secretaria`: la secretaria no instala en la prueba (condición 3). Candidato, sin medir: un `Instalar.cmd` dentro del zip. MEJORA FUTURA. Texto íntegro en el plan. **S235:** pasa a `O-uso-centro` (BE). En la VM, la guarda del paso 3 pegada línea a línea no detiene el `Copy-Item` siguiente; los pasos 3 y 4 van en bloque `& { … }` desde el cierre de S235. **S236:** medido (`s236/e1`): el MSI por usuario de jpackage 17 queda descartado (instala en la carpeta de datos, `--install-dir` choca con ICE64 y la política del runner lo bloquea); el `Instalar.cmd` prototipo instala como cuenta estándar (BP). Lo salda la condición 1 de `O-uso-centro` con `C-instalador`. **CERRADA en S237:** saldada por la condición 1 de `O-uso-centro` (`C-instalador`, `2d81589`): `Instalar.cmd` dentro del zip, verificado en la VM con `v0.5.0-rc.1` y `v0.5.0-rc.2` (`docs/actas-aceptacion/acta-instalador-s237.md`). |
 | ~~D-pagina-declarada-en-ingles~~ (la página declara `lang="en"` y Edge ofrece traducirla del inglés) **CERRADA S237** | `O-uso-centro` (S235) | Nace en S235 (F2, VM): `index.html` declara `lang="en"`; Edge ofrece traducir la página y el aviso tapa «Cursos…». Si se acepta, traduce del inglés un texto en español. No se toca en la prueba corta (decisión BJ). Arreglo candidato, sin medir: `lang="es"` en la versión que construya `O-uso-centro`. MEJORA FUTURA. Texto íntegro en el plan. **S236:** condición 5 de `O-uso-centro`; entra en `C-instalador`. **CERRADA en S237:** saldada por la condición 5 de `O-uso-centro` (`c48134c`): `lang="es"`; en la VM, Edge no ofrece traducir (acta de S237). |
+| ~~D-prueba-vm-a-mano~~ (la prueba de cada versión en la VM la hace el usuario paso a paso) **CERRADA S256** | `O-prueba-vm` (S254, FU; antes sin objetivo) | Nace en S252, a propuesta del usuario: la condición 7 de `O-actividad-por-nivel` se verificó con veinte pasos humanos en la VM (`s252/v1`). Automatizarla pide una cuenta de prueba con contraseña propia, las Guest Additions y `VBoxManage guestcontrol` para la parte no visual; inyectar teclado no sirve con la distribución española y el ratón no se puede inyectar. Las pantallas que pide un criterio las seguiría juzgando el usuario. No se paga dentro de `O-actividad-por-nivel` (R-terminado). **S254:** sede `O-prueba-vm` (FU). Las Guest Additions 7.2.18 ya estaban en la VM, y la cuenta de prueba es `prueba-vm`, sin estrenar en la instantánea `s254-cuenta-prueba` (GB). **S255:** `C-script-prueba-vm` EN CURSO: el script existe en `tools/prueba-vm/` (`5de9439`); falta su primera corrida real. MEJORA FUTURA. No tiene entrada en el plan: su texto es esta fila. **CERRADA en S256:** saldada por la condición 7 de `O-prueba-vm` (`d462e3f`): `docs/tecnica/probar-vm.md` explica cómo se prueba una versión en la VM con `tools/prueba-vm/prueba_vm.py`, que hace la parte no visual; la prueba de `v0.6.1` llevó 9 pasos de la persona, frente a 20 (`docs/actas-aceptacion/acta-prueba-vm-s256.md`). |
 
 ### Deuda ya CERRADA (histórico, no pendiente)
 D-F8.6-ivD-b (S99), D-F8.4-B2-a (S94), D-F8.5-D1-a (S77), D-F8.5-D2b1-a/b (S91),
