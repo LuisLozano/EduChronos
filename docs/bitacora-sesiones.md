@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S257. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S258. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S257). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S258). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10926,3 +10926,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el T0 daba en la raíz del repo las rutas de tres documentos, escritas de memoria (una parada; norma 3); la entrada del cierre llevaba «CRITERIO (M0).», copiado de una entrada antigua y no de sus vecinas (comparte la primera parada del C1; norma 15); el C1 mandaba correr `recontar2.py`, que el cierre de S256 no usó y cuyo patrón casa también la línea CIERRE de la previa (segunda parada del C1; norma 10); E-C del C1 escribió en `metodo.md` «que no decidían nada», que la ficha solo sostiene para S254 (una edición más en el cierre). Sin coste: `$MAT0` sin definir en el C0. De Claude Code, con coste: el informe del C0 no nombró la sección final del §2 del histórico (comparte la primera parada del C1), y su memoria sabía que `recontar2.py` falla y no lo avisó en el paso cero (comparte la segunda); sin coste, en el T0, un rc tapado por una tubería y un patrón de `sha256sum` sin `LC_ALL=C`, rehechos por él. El mismo defecto del arquitecto, forma escrita sin derivarla del material, costó dos paradas: el disparador salta y no se abre otra sesión (decisión del usuario), porque las normas 3 y 15 ya lo cubren.
   SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 392 (337 + 55; los 337, del registro de S256; los 55, `s257/t0`). Bundle sin cambios, 658,07 kB en `b017ca7`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 53 líneas del commit de cierre sin índice, 3 111 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 258 — Apertura de objetivo, C-alcance-combobox: **O-COMBOBOX ABIERTO, 0 DE 5: EL FILTRO PASA DENTRO DEL SELECTOR CON ANGULAR ARIA, Y ANTES EL FRONTEND SUBE A ANGULAR 22; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Apertura de objetivo (§Tipos de `metodo.md`; el M0 la llamó Configuración/UI y se corrigió al abrir el alcance), por FP y FU, con `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s258/` (t0, t0b, ci y cierre).
+  HECHO. T0 y T0b de solo lectura sobre el repo, con la subida medida en un clon: 7 selectores con filtro aparte en 5 componentes; Aria 22.2.4 estable, con combobox y listbox, exige Angular 22; con npm 11 la subida cambia 40 ficheros y deja vitest en verde (69 y 883); npm 10.9.8 no instala Angular 22. CI `tests` #144 en verde sobre `317430f`, con sus órdenes en `s258/ci/ORDENES.txt`. Cierre: ficha y criterio de `O-combobox`, y las órdenes del cierre en `s258/cierre/c1/NOTA-molde.txt`.
+  CRITERIO. `C-alcance-combobox` HECHO ✔; `O-combobox` ABIERTO, 0 de 5. `O-uso-centro` sigue en 7 de 8, esperando fecha.
+  DECISIONES. Del usuario: GZ a HC, con su texto en la ficha de `O-combobox`. Del arquitecto, trece, en `s258/cierre/c1/decisiones.txt`.
+  DEUDA. `D-selectores-combobox` pasa a `O-combobox`, con su premisa corregida (Aria es estable desde la v22); `D-filtro-por-codigo` queda sin sede (HC). No nace ni se cierra ninguna.
+  DEFECTOS. Del arquitecto, sin coste: el M0 dio la sesión por Configuración/UI; los guiones T0 y T0b situaron los mutantes del lector de CI en `s257/t0` (estaban en `s255/t0b`) y dieron por hecho que `lector_ci.py` descargaba los runs; el `grep -A6` del T0 no llegaba al control filtrado. De método, con coste: S257 no conservó la orden del CI ni las del cierre (`NOTA-molde.txt` no traía ninguna), lo que dejó el CI PENDIENTE en el T0 y el T0b y costó un paso más en el C0 (norma 10). De Claude Code, sin coste: en el C0, la primera autoprueba del CI perdía el rc dentro de un `$(...)`, corregida antes de ejecutarla.
+  SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 392 (337 + 55, del registro de S257). Bundle sin cambios, 658,07 kB en `b017ca7`; el mismo 658,07 kB sobre `317430f` en el clon del T0.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 84 líneas del commit de cierre sin índice, 2 525 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

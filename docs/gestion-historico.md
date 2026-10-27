@@ -2,47 +2,48 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L56 — ## 1. Objetivos terminados
-- L58 — ### H2 — Configurar un centro desde cero
-- L60 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L76 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L148 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L398 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L685 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L786 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L885 — ### H1 — Ajustar (cierre)
-- L887 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1064 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1355 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1545 — ### H3 — Exportar
-- L1547 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1608 — ### H4 — Instalar y pasar de curso
-- L1610 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1784 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1879 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1948 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1984 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1986 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2035 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2070 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2105 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2134 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2173 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2211 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2248 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2285 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2321 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2339 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2365 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2397 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
-- L2416 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
-- L2450 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
-- L2484 — #### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
-- L2517 — ## 2. Deuda cerrada de §4
-- L2519 — ### Deuda técnica real, colgada de su objetivo
-- L2597 — ### Mejora futura, cuelga y espera
-- L2618 — ### Deuda de MÉTODO
-- L2623 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L57 — ## 1. Objetivos terminados
+- L59 — ### H2 — Configurar un centro desde cero
+- L61 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L77 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L149 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L399 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L686 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L787 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L886 — ### H1 — Ajustar (cierre)
+- L888 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1065 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1356 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1546 — ### H3 — Exportar
+- L1548 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1609 — ### H4 — Instalar y pasar de curso
+- L1611 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1785 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1880 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1949 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1985 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1987 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2036 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2071 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2106 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2135 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2174 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2212 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2249 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2286 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2322 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2340 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2366 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2398 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2417 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- L2451 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
+- L2485 — #### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
+- L2518 — #### O-combobox — "La secretaria escribe dentro del propio selector y ve cómo se acorta la lista" ✔ TERMINADO (S260)
+- L2548 — ## 2. Deuda cerrada de §4
+- L2550 — ### Deuda técnica real, colgada de su objetivo
+- L2628 — ### Mejora futura, cuelga y espera
+- L2650 — ### Deuda de MÉTODO
+- L2655 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2514,6 +2515,36 @@ terminado (§6).
 - **Cambios que agrupa:** `C-alcance-prueba-vm` ✔ HECHO (S254): M0, T0, T1, T1b (en `s254/t1c`) y T1d, el criterio y la preparación de la VM (GA, GB). Siguiente: el Cambio del script (condiciones 1 a 3), cuyo contrato empieza por un T0 de forma: `tools/base-partida`, lo que imprime `Instalar.cmd` y la suite de Python. Requisito medido en S254: antes de restaurar, el script comprueba que la VM no ha cambiado desde la instantánea y para si ha cambiado (la restauración del T1 borró un cambio del usuario). `C-script-prueba-vm` EN CURSO (S255), condiciones 1 a 3: T0 (`s255/t0`), ensayo en la VM (`s255/t1`), contrato C1 con E26 a E40 y código en `5de9439`: `tools/prueba-vm/prueba_vm.py`, con los subcomandos `preparar`, `sesion`, `abierta` y `cerrar`, 48 tests, autoprueba de 12 capacidades y 12 mutantes, todos muertos (`s255/c1`). Siguiente: E41 (el rc 32 da FALLO, no «código 0») y la corrida real con `v0.6.1` desde `s254-cuenta-prueba`, con autorización de la VM, que verifica las condiciones 1 a 3 y la 5. **S256:** `C-script-prueba-vm` ✔ HECHO: E41 (`bffc815`), E51 (`5beebed`, retirado por E52) y E52 (`21cd952`), con tres corridas reales de `v0.6.1` (`s256/v1`, `v2` y `v3`), y la condición 7 en `d462e3f`.
 - **Métrica de §7:** estimación al abrir: 2 o 3 sesiones, sin medir. Gastadas: 1 (S254). **S255:** gastadas 2 (S254 y S255). **S256:** gastadas 3 (S254 a S256), dentro de la estimación.
 
+#### O-combobox — "La secretaria escribe dentro del propio selector y ve cómo se acorta la lista" ✔ TERMINADO (S260)
+- **Propósito:** que en los selectores con muchas opciones el filtro esté dentro del propio desplegable: al escribir, la lista se abre y se acorta, en vez de recortarse en silencio desde un campo aparte. En la demo de S188 la secretaria no veía que la lista cambiaba (`D-selectores-combobox`).
+- **Por qué va ahora:** lo programaron FP y FU, tras `O-prueba-vm` y la Higiene/Método de S257, con la condición 8 de `O-uso-centro` esperando fecha (CY). No sale antes de la prueba en el centro (FQ): llega con la versión siguiente.
+- **Medido al abrir (S258, Claude Code, HEAD `317430f`, solo lectura sobre el repo; material en `/home/luis/educhronos-aceptacion/s258/t0/` y `s258/t0b/`):**
+  (a) El filtro aparte (`FiltroOpciones`, en `components/filtro-opciones/`) acompaña a 7 `<select>` simples en 5 componentes: vista de horario 1, diálogo de tutoría 1, formulario de grupo 1, diálogo de aulas de una asignatura 1 y formulario de actividad 3. La lista doble (4 usos) filtra por su cuenta y no lo usa. Hay 22 `<select>` en 11 plantillas.
+  (b) Tocan el filtro `horario-view.spec.ts`, `filtro-opciones.spec.ts`, `actividad-form.spec.ts` y `lista-doble.spec.ts`; ningún e2e. `coincide()` vive en `catalogo/busqueda.ts` y la usan también los filtros por pertenencia.
+  (c) El repo está en Angular 21.2.17 y CDK 21.2.14, sin `@angular/aria`. En el registro de npm, `@angular/core` 22.2.3 y `@angular/aria` 22.2.4, que pide `@angular/cdk` 22.2.4 exacto. Aria 22 exporta combobox y listbox (con selección múltiple), sin marca de developer preview; select y multiselect son guías del listbox, no entradas propias.
+  (d) La subida a Angular 22, en un clon: con npm 10.9.8 la instalación falla dentro de npm (`TypeError` en `#loadPeerSet` de arborist, al resolver jsdom y canvas), con `ng update` y sin él; con npm 11 instala sin `--force`. Las migraciones cambian 40 ficheros (37 `.ts` y ningún `.html`, más `package.json`, `package-lock.json` y `tsconfig.app.json`), sobre todo `ChangeDetectionStrategy.Eager` en 36 componentes y `withXhr()`. Build: 685,83 kB frente a 658,07; vitest: 69 ficheros y 883 casos en verde, igual que antes. TypeScript queda en `^6.0.3`, más ancho que el rango que pide `compiler-cli`, y `packageManager` sigue en `npm@10.9.8`.
+  (e) Una sonda mínima de combobox y listbox de Aria en la vista de horario, que va en el chunk inicial, lleva el build a 716,42 kB.
+  (f) El CDK 21 trae overlay, listbox y a11y, pero no combobox; la aplicación importa solo `cdk/dialog` y `cdk/drag-drop`.
+  No se midieron el e2e en Angular 22, la CI ni el bundle de Windows.
+- **Decisiones (S258):** (GZ) del usuario: abrir el alcance del combobox en el M0. (HA) del usuario: el combobox se construye con Angular Aria, y por eso el frontend sube a Angular 22; se descarta un combobox propio sobre CDK 21. (HB) del usuario: `O-combobox` ABIERTO en H5, sin contar para cerrarlo ni bloquear la condición 8 de `O-uso-centro`, con el criterio de abajo. (HC) del usuario: `D-filtro-por-codigo` queda fuera del criterio; la búsqueda por código se conserva y la comprueba el oráculo de la condición 2. Las del arquitecto, en `s258/cierre/c1/decisiones.txt`.
+- **Decisiones (S259):** (HD) del usuario: el alcance de la sesión es `C-angular-22`, la condición 1. (HE) del usuario: push a `main` y `bundle` lanzado a mano desde la web sobre `229fbcd`, sin tag, para tener el job de Windows; no publica Release. Las del arquitecto, en `s259/cierre/c1/decisiones.txt`.
+- **Decisiones (S260):** (HF) del usuario: el alcance de la sesión es `C-combobox`, condiciones 2 a 5, en fases F0 a F3 con el corte entre F2 y F3. (HG) del usuario: en la condición 4, las specs pueden cambiar cómo localizan, eligen y leen el selector; ningún valor esperado cambia (enmienda EN-1). (HH) del usuario: el selector lleva flecha de desplegable, como un combo. (HI) del usuario: aspecto de la vista de horario aceptado (condición 5), tras F2-bis y otra vez tras el ajuste de medidas de F3. (HJ) del usuario: push a `main` de los 10 commits de código, sin tag; el del cierre lo hace el usuario. (HK) del usuario: `O-combobox` se cierra en 5 de 5 con la CI en verde. Las del arquitecto, en `s260/cierre/c1/decisiones.txt`.
+- **Terminado cuando** — ESCRITO en S258 (HB). `O-combobox` termina cuando:
+  1. **Angular 22.** El frontend queda en Angular 22.2.x y CDK 22.2.x, con TypeScript fijado al rango que pide `@angular/compiler-cli`, y `packageManager` declara un npm que instala sin `--force` ni `--legacy-peer-deps`. Las suites pasan en local (solver, app, vitest y e2e) y la CI en verde sobre ese commit, incluido el job de Windows. El «Initial total» queda anotado en `D-bundle-sobre-techo-550`.
+  2. **El filtro, dentro del selector.** Los 7 `<select>` que hoy llevan el filtro aparte (medida (a)) pasan a un componente compartido sobre el combobox y el listbox de Aria: escribir dentro del control abre la lista y la acorta con la búsqueda de hoy (`coincide()`, sin cambios), y el valor elegido no desaparece de la lista. Al terminar, el filtro aparte tiene 0 usos en esos componentes. Oráculo de equivalencia: para una lista fija de búsquedas por selector (al menos un código, un nombre y un trozo), escrita antes de cambiar nada, el combobox devuelve exactamente las mismas opciones que el filtro de hoy.
+  3. **Teclado.** La flecha o la escritura abren la lista, las flechas recorren las opciones, Intro elige y Escape cierra sin cambiar el valor; el nombre accesible sale de la etiqueta. Con tests y M3 sobre la lógica propia.
+  4. **Nada cambia en lo que se guarda.** Los formularios mandan los mismos cuerpos que hoy: las specs vigentes de los 5 componentes siguen en verde, ajustadas solo en cómo se elige la opción.
+  5. **El caso de la demo.** En la vista de horario, escribir en el selector acorta la lista sin un campo aparte: medido con Playwright con un oráculo contable (norma 17) y con el juicio de aspecto del usuario.
+- **ESTADO en S258: 0 de 5.** ABIERTO en S258 (`C-alcance-combobox` HECHO).
+- **ESTADO en S259: 1 de 5** (condición 1, `C-angular-22` HECHO): Angular 22.2.3 y CDK 22.2.4; TypeScript `~6.0.3`, dentro del `>=6.0 <6.1` que pide `@angular/compiler-cli` 22.2.3; npm 11.21.1 en `packageManager`, en el `<npmVersion>` del pom y en un paso de los dos jobs de `tests.yml`, sin `--force`. Suites en local en verde (solver 162, app 998, vitest 883 en 69 ficheros, e2e 3) y CI en verde sobre `229fbcd`: `tests` 40549249783 y `bundle` 40549999763, con el job de Windows (HE). «Initial total»: 685,83 kB, anotado en `D-bundle-sobre-techo-550`. Medido además: el npm 10.9.8 del sistema hace `npm ci` sobre el lockfile nuevo; lo que falla con él es `npm install`. Material en `s259/e1`, `s259/e2` y `s259/ci2`.
+- **ESTADO en S260: 5 de 5, TERMINADO** (condiciones 2 a 5, `C-combobox` HECHO): `SelectorFiltrable` sobre el combobox y el listbox de Aria en los 7 selectores, y el filtro aparte retirado. Oráculo de equivalencia: 53 entradas (46 búsquedas fijas y 7 de elegido fuera de la búsqueda) sobre la base de partida migrada, iguales a las del filtro anterior (`7f3d980`). Teclado con tests y M3: todos los mutantes caen salvo M13, que no puede caer porque Aria ya cancela Intro con la lista abierta. Specs: los valores esperados no cambian, salvo dos asertos de `horario-view.spec.ts` que pasan a leer el nombre accesible (EN-16). Playwright a 1920×1080: 28 opciones, 2 con «4ºC», Intro y Escape, con autoprueba contra F1 (`s260/c1/f2bis`), y juicio del usuario (HI). Suites: solver 162, app 998, vitest 977 en 70 ficheros, e2e 3; `tests` 40593891420 en verde sobre `e5004b6`. «Initial total»: 719,13 kB.
+- **Fuera del criterio:** la lista doble, que tiene su propio filtro; el casado por partes de «4º C» (`D-filtro-por-codigo`, HC); el manual y sus capturas, que se ponen al día con la versión siguiente, y una versión con tag (FQ).
+- **Deudas:** `D-selectores-combobox` (condiciones 2 a 5). `D-bundle-sobre-techo-550` recibe la medida de la condición 1.
+- **Depende de:** nada abierto. La condición 2 espera a la 1.
+- **Valor:** quita la ayuda que la secretaria necesitó en la demo de S188 con los selectores de muchas opciones, y deja el frontend en la versión mayor vigente de Angular.
+- **Cambios que agrupa:** `C-alcance-combobox` ✔ HECHO (S258): M0, T0, T0b y criterio. `C-angular-22` ✔ HECHO (S259): condición 1, en `8c9c6ec`, `202d281` y `229fbcd`. `C-combobox` ✔ HECHO (S260): condiciones 2 a 5, en `7f3d980`, `9875b7e`, `1029f30`, `71263de`, `6946e7c`, `e8ef558`, `0e42e8e`, `0fdd177`, `a531c89` y `e5004b6`.
+- **Métrica de §7:** estimación al abrir: 2 sesiones, una por Cambio. Gastadas: 1 (S258). **S259:** gastadas 2 (S258 y S259); `C-combobox` va en una sesión propia, así que la estimación pasa a 3. **S260:** gastadas 3 (S258, S259 y S260), en la estimación.
+
 ## 2. Deuda cerrada de §4
 
 ### Deuda técnica real, colgada de su objetivo
@@ -2614,6 +2645,7 @@ terminado (§6).
 | ~~D-sin-instalador~~ (la entrega es un zip que se descomprime y se instala con órdenes de PowerShell; no hay instalador) **CERRADA S237** | `O-uso-centro` (S235, BE) | Nace en S234, propuesta del usuario (decisión BA): un instalador sencillo, no necesariamente MSI, que coloque el programa y cree el acceso directo sin permisos de administrador. El procedimiento escrito falló en el humo en una línea de su paso 3 (`2a0e6fa`). No entra en `O-prueba-secretaria`: la secretaria no instala en la prueba (condición 3). Candidato, sin medir: un `Instalar.cmd` dentro del zip. MEJORA FUTURA. Texto íntegro en el plan. **S235:** pasa a `O-uso-centro` (BE). En la VM, la guarda del paso 3 pegada línea a línea no detiene el `Copy-Item` siguiente; los pasos 3 y 4 van en bloque `& { … }` desde el cierre de S235. **S236:** medido (`s236/e1`): el MSI por usuario de jpackage 17 queda descartado (instala en la carpeta de datos, `--install-dir` choca con ICE64 y la política del runner lo bloquea); el `Instalar.cmd` prototipo instala como cuenta estándar (BP). Lo salda la condición 1 de `O-uso-centro` con `C-instalador`. **CERRADA en S237:** saldada por la condición 1 de `O-uso-centro` (`C-instalador`, `2d81589`): `Instalar.cmd` dentro del zip, verificado en la VM con `v0.5.0-rc.1` y `v0.5.0-rc.2` (`docs/actas-aceptacion/acta-instalador-s237.md`). |
 | ~~D-pagina-declarada-en-ingles~~ (la página declara `lang="en"` y Edge ofrece traducirla del inglés) **CERRADA S237** | `O-uso-centro` (S235) | Nace en S235 (F2, VM): `index.html` declara `lang="en"`; Edge ofrece traducir la página y el aviso tapa «Cursos…». Si se acepta, traduce del inglés un texto en español. No se toca en la prueba corta (decisión BJ). Arreglo candidato, sin medir: `lang="es"` en la versión que construya `O-uso-centro`. MEJORA FUTURA. Texto íntegro en el plan. **S236:** condición 5 de `O-uso-centro`; entra en `C-instalador`. **CERRADA en S237:** saldada por la condición 5 de `O-uso-centro` (`c48134c`): `lang="es"`; en la VM, Edge no ofrece traducir (acta de S237). |
 | ~~D-prueba-vm-a-mano~~ (la prueba de cada versión en la VM la hace el usuario paso a paso) **CERRADA S256** | `O-prueba-vm` (S254, FU; antes sin objetivo) | Nace en S252, a propuesta del usuario: la condición 7 de `O-actividad-por-nivel` se verificó con veinte pasos humanos en la VM (`s252/v1`). Automatizarla pide una cuenta de prueba con contraseña propia, las Guest Additions y `VBoxManage guestcontrol` para la parte no visual; inyectar teclado no sirve con la distribución española y el ratón no se puede inyectar. Las pantallas que pide un criterio las seguiría juzgando el usuario. No se paga dentro de `O-actividad-por-nivel` (R-terminado). **S254:** sede `O-prueba-vm` (FU). Las Guest Additions 7.2.18 ya estaban en la VM, y la cuenta de prueba es `prueba-vm`, sin estrenar en la instantánea `s254-cuenta-prueba` (GB). **S255:** `C-script-prueba-vm` EN CURSO: el script existe en `tools/prueba-vm/` (`5de9439`); falta su primera corrida real. MEJORA FUTURA. No tiene entrada en el plan: su texto es esta fila. **CERRADA en S256:** saldada por la condición 7 de `O-prueba-vm` (`d462e3f`): `docs/tecnica/probar-vm.md` explica cómo se prueba una versión en la VM con `tools/prueba-vm/prueba_vm.py`, que hace la parte no visual; la prueba de `v0.6.1` llevó 9 pasos de la persona, frente a 20 (`docs/actas-aceptacion/acta-prueba-vm-s256.md`). |
+| ~~D-selectores-combobox~~ (el filtro de los selectores es un campo aparte y el multiselect nativo exige Ctrl+clic) **CERRADA S260** | `O-combobox` (S258; antes sin objetivo) | Nace en el M4 de S185, del usuario: prefiere un combobox con el filtro en el propio control. Candidato Angular Aria, en developer preview y con cambio incompatible de API en mayo de 2026; coste sin medir. Texto íntegro en el plan. S188: AYUDA en la demo (T2): con el filtro del selector no veía que la lista cambiaba, y se le dijo que abriera el desplegable; el filtro no abre la lista ni cambia la selección. **S229:** el Ctrl+clic del multiselect se salda con la lista doble de `O-acabado-pre-prueba` (condición 1); el combobox sigue sin objetivo. **S230:** el Ctrl+clic queda saldado con la lista doble (`9b90bdd`); el combobox sigue sin objetivo. **S258:** sede `O-combobox` (HB), condiciones 2 a 5. **CORREGIDO en S258:** Aria ya no está en developer preview: es estable desde Angular 22, y el repo está en 21, así que la condición 1 de `O-combobox` sube el frontend (HA; `s258/t0`). **CERRADA en S260** (`C-combobox`): `SelectorFiltrable` en los 7 selectores, sobre `@angular/aria` 22.2.4; se escribe dentro del control y la lista se acorta; `FiltroOpciones` retirado (`e5004b6`). |
 
 ### Deuda de MÉTODO
 | Deuda | Destino |
