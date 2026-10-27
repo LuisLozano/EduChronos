@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 /** Una entrada del índice, derivada de una ruta hija. Solo rótulo y segmento. */
@@ -67,6 +67,7 @@ interface Destino {
   selector: 'app-configuracion',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './configuracion.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './configuracion.css',
 })
 export class Configuracion {

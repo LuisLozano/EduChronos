@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -40,6 +40,7 @@ import { Nivel } from '../../models/nivel.model';
   selector: 'app-asignatura-form',
   imports: [ReactiveFormsModule],
   templateUrl: './asignatura-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './asignatura-form.css',
 })
 export class AsignaturaForm implements OnInit {

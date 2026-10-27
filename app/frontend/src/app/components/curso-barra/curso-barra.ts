@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -36,6 +36,7 @@ const NO_DISPONIBLE = 'Curso: no disponible';
 @Component({
   selector: 'app-curso-barra',
   templateUrl: './curso-barra.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './curso-barra.css',
 })
 export class CursoBarra implements OnInit {

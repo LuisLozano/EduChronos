@@ -1,4 +1,11 @@
-import { Component, computed, forwardRef, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  forwardRef,
+  input,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { UMBRAL_FILTRO, filtrarOpciones } from '../filtro-opciones/filtro-opciones';
@@ -38,7 +45,10 @@ let instancias = 0;
   selector: 'app-lista-doble',
   templateUrl: './lista-doble.html',
   styleUrl: './lista-doble.css',
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => ListaDoble), multi: true }],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => ListaDoble), multi: true },
+  ],
 })
 export class ListaDoble<T> implements ControlValueAccessor {
   /** Catálogo completo, en el orden del backend. */
@@ -94,13 +104,9 @@ export class ListaDoble<T> implements ControlValueAccessor {
   );
   protected readonly visiblesDisponibles = computed(() =>
     this.filtroActivo()
-      ? filtrarOpciones(
-          this.listaDisponibles(),
-          this.texto(),
-          this.codigo(),
-          this.consulta(),
-          [...this.marcados().disponibles],
-        )
+      ? filtrarOpciones(this.listaDisponibles(), this.texto(), this.codigo(), this.consulta(), [
+          ...this.marcados().disponibles,
+        ])
       : this.listaDisponibles(),
   );
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { VersionService } from '../../services/version.service';
 
@@ -20,6 +20,7 @@ const NO_DISPONIBLE = 'versión no disponible';
 @Component({
   selector: 'app-version-linea',
   templateUrl: './version-linea.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './version-linea.css',
 })
 export class VersionLinea implements OnInit {

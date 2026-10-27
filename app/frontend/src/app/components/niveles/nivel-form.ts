@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -35,6 +35,7 @@ import { Nivel, NivelRequest } from '../../models/nivel.model';
   selector: 'app-nivel-form',
   imports: [ReactiveFormsModule],
   templateUrl: './nivel-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './nivel-form.css',
 })
 export class NivelForm {

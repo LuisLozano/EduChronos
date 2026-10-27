@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -35,6 +42,7 @@ type EstadoAulas = 'cargando' | 'listo' | 'error';
   selector: 'app-aulas-asignatura-dialogo',
   imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './aulas-asignatura-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './aulas-asignatura-dialogo.css',
 })
 export class AulasAsignaturaDialogo implements OnInit {
@@ -87,8 +95,9 @@ export class AulasAsignaturaDialogo implements OnInit {
         this.estado.set('listo');
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudieron consultar las aulas de ${this.asignatura.codigo}`));
+        this.error.set(
+          this.mensaje(err, `No se pudieron consultar las aulas de ${this.asignatura.codigo}`),
+        );
         this.estado.set('error');
       },
     });

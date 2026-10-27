@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,6 +33,7 @@ import { coincide } from '../../catalogo/busqueda';
   selector: 'app-aula-lista',
   imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './aula-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './aula-lista.css',
 })
 export class AulaLista implements OnInit {
@@ -52,8 +60,14 @@ export class AulaLista implements OnInit {
    * búsqueda «no encuentra» algo que está en pantalla.
    */
   protected textoFila(a: Aula): string {
-    return [a.codigo, a.tipo, a.capacidad ?? '—', a.edificio ?? '—', a.planta ?? '—',
-      a.sector ?? '—'].join(' ');
+    return [
+      a.codigo,
+      a.tipo,
+      a.capacidad ?? '—',
+      a.edificio ?? '—',
+      a.planta ?? '—',
+      a.sector ?? '—',
+    ].join(' ');
   }
 
   /**

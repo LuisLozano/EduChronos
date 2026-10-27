@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NivelService } from '../../services/nivel.service';
@@ -23,6 +30,7 @@ import { coincide } from '../../catalogo/busqueda';
   selector: 'app-nivel-lista',
   imports: [CabeceraLista, EstadoLista],
   templateUrl: './nivel-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './nivel-lista.css',
 })
 export class NivelLista implements OnInit {

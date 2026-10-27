@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -46,6 +46,7 @@ function arrayNoVacio(control: AbstractControl): ValidationErrors | null {
   selector: 'app-subgrupo-form',
   imports: [ReactiveFormsModule, ListaDoble],
   templateUrl: './subgrupo-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './subgrupo-form.css',
 })
 export class SubgrupoForm implements OnInit {

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -20,6 +27,7 @@ import { coincide } from '../../catalogo/busqueda';
   selector: 'app-asignatura-lista',
   imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './asignatura-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './asignatura-lista.css',
 })
 export class AsignaturaLista implements OnInit {

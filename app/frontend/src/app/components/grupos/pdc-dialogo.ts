@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -57,6 +57,7 @@ export type EstadoPdc = 'cargando' | 'sin-pdc' | 'con-pdc' | 'error';
   selector: 'app-pdc-dialogo',
   imports: [ReactiveFormsModule],
   templateUrl: './pdc-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pdc-dialogo.css',
 })
 export class PdcDialogo implements OnInit {
@@ -112,8 +113,7 @@ export class PdcDialogo implements OnInit {
           this.estado.set('sin-pdc');
           return;
         }
-        this.error.set(this.mensaje(
-          err, `No se pudo consultar el PDC de ${this.padre.codigo}`));
+        this.error.set(this.mensaje(err, `No se pudo consultar el PDC de ${this.padre.codigo}`));
         this.estado.set('error');
       },
     });
@@ -188,8 +188,8 @@ export class PdcDialogo implements OnInit {
     }
     const lineas = [
       `¿Borrar el PDC ${actual.codigo} de ${this.padre.codigo}?`,
-      'Se borrará también su subgrupo automático, que es la población con la que el'
-        + ' PDC entra en las actividades.',
+      'Se borrará también su subgrupo automático, que es la población con la que el' +
+        ' PDC entra en las actividades.',
     ];
     this.dialog
       .open<boolean, string[]>(ConfirmarBorrado, { data: lineas })
@@ -212,8 +212,7 @@ export class PdcDialogo implements OnInit {
     this.service.borrar(this.padre.id).subscribe({
       next: () => this.ref.close(true),
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudo borrar el PDC de ${this.padre.codigo}`));
+        this.error.set(this.mensaje(err, `No se pudo borrar el PDC de ${this.padre.codigo}`));
         this.guardando.set(false);
       },
     });

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -60,6 +67,7 @@ const FORMA_CURSO = /^\d{4}\/\d{4}$/;
   selector: 'app-cursos-dialogo',
   imports: [ReactiveFormsModule],
   templateUrl: './cursos-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cursos-dialogo.css',
 })
 export class CursosDialogo implements OnInit {

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,6 +34,7 @@ import { coincide } from '../../catalogo/busqueda';
   selector: 'app-subgrupo-lista',
   imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './subgrupo-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './subgrupo-lista.css',
 })
 export class SubgrupoLista implements OnInit {

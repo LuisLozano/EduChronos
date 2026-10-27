@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReplicacionService } from '../../services/replicacion.service';
@@ -18,13 +25,7 @@ import { PlanReplicacion, ReplicacionRequest, Via } from '../../models/replicaci
  * lo mismo y ningún caso los distingue.
  */
 export type EstadoReplicacion =
-  | 'cargando'
-  | 'eligiendo'
-  | 'decidiendo'
-  | 'enviando'
-  | 'hecho'
-  | 'deshaciendo'
-  | 'error';
+  'cargando' | 'eligiendo' | 'decidiendo' | 'enviando' | 'hecho' | 'deshaciendo' | 'error';
 
 /** El único tipo de grupo que se puede replicar, y el único del que se puede replicar. */
 const TIPO_ORDINARIO = 'ORDINARIO';
@@ -123,6 +124,7 @@ interface Cuestion {
   selector: 'app-replicacion-dialogo',
   imports: [],
   templateUrl: './replicacion-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './replicacion-dialogo.css',
 })
 export class ReplicacionDialogo implements OnInit {
@@ -218,10 +220,10 @@ export class ReplicacionDialogo implements OnInit {
   protected readonly nadaQueCopiar = computed(() => {
     const p = this.plan();
     return (
-      p !== null
-      && p.subgruposACrear.length === 0
-      && p.replicados.length === 0
-      && p.reparto.length === 0
+      p !== null &&
+      p.subgruposACrear.length === 0 &&
+      p.replicados.length === 0 &&
+      p.reparto.length === 0
     );
   });
 
@@ -252,17 +254,16 @@ export class ReplicacionDialogo implements OnInit {
   /** Los TRES filtros, juntos y en un solo sitio. Ver el javadoc de clase. */
   private esHermanoPosible(candidato: Grupo): boolean {
     return (
-      candidato.nivel === this.grupo.nivel
-      && candidato.tipo === TIPO_ORDINARIO
-      && candidato.id !== this.grupo.id
+      candidato.nivel === this.grupo.nivel &&
+      candidato.tipo === TIPO_ORDINARIO &&
+      candidato.id !== this.grupo.id
     );
   }
 
   /** Rótulo de una vía: asignatura, grupos que ya la cursan y su ordinal en el bloque. */
   protected rotulo(opcion: OpcionVia): string {
-    const grupos = opcion.via.gruposActuales.length > 0
-      ? opcion.via.gruposActuales.join(', ')
-      : 'sin grupos';
+    const grupos =
+      opcion.via.gruposActuales.length > 0 ? opcion.via.gruposActuales.join(', ') : 'sin grupos';
     // El plazaCodigo NO entra: es un ordinal técnico inestable. Ver replicacion.model.ts.
     return `${opcion.via.asignatura} · ${grupos} · vía ${opcion.ordinal}`;
   }
@@ -315,8 +316,9 @@ export class ReplicacionDialogo implements OnInit {
         this.estado.set('hecho');
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudo replicar ${this.grupo.codigo} desde ${this.hermano()}`));
+        this.error.set(
+          this.mensaje(err, `No se pudo replicar ${this.grupo.codigo} desde ${this.hermano()}`),
+        );
         this.estado.set('decidiendo');
       },
     });
@@ -354,8 +356,9 @@ export class ReplicacionDialogo implements OnInit {
     this.service.deshacer(this.grupo.id).subscribe({
       next: () => this.ref.close(true),
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudo deshacer la replicación de ${this.grupo.codigo}`));
+        this.error.set(
+          this.mensaje(err, `No se pudo deshacer la replicación de ${this.grupo.codigo}`),
+        );
         this.estado.set('hecho');
       },
     });
@@ -381,15 +384,14 @@ export class ReplicacionDialogo implements OnInit {
     if (err?.status === 400) {
       return this.mensaje(
         err,
-        `No se puede replicar ${this.grupo.codigo} desde ${codigoHermano}: lo más probable`
-          + ` es que ${this.grupo.codigo} ya tiene subgrupos, y la replicación puebla un`
-          + ' grupo recién creado —para volver a empezar hay que deshacerla—. También'
-          + ` podría ser que algún subgrupo de ${codigoHermano} no empiece por`
-          + ` «${codigoHermano}-», o que un código derivado ya exista`,
+        `No se puede replicar ${this.grupo.codigo} desde ${codigoHermano}: lo más probable` +
+          ` es que ${this.grupo.codigo} ya tiene subgrupos, y la replicación puebla un` +
+          ' grupo recién creado —para volver a empezar hay que deshacerla—. También' +
+          ` podría ser que algún subgrupo de ${codigoHermano} no empiece por` +
+          ` «${codigoHermano}-», o que un código derivado ya exista`,
       );
     }
-    return this.mensaje(
-      err, `No se pudo consultar el plan de replicación de ${this.grupo.codigo}`);
+    return this.mensaje(err, `No se pudo consultar el plan de replicación de ${this.grupo.codigo}`);
   }
 
   /**

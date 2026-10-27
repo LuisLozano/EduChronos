@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { CursoBarra } from './components/curso-barra/curso-barra';
@@ -18,7 +18,8 @@ import { VersionLinea } from './components/version-linea/version-linea';
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CursoBarra, VersionLinea],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('educhronos-ui');

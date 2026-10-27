@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -54,6 +54,7 @@ type FilaTramo = FormGroup<{
   selector: 'app-jornada',
   imports: [ReactiveFormsModule],
   templateUrl: './jornada.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './jornada.css',
 })
 export class Jornada implements OnInit {

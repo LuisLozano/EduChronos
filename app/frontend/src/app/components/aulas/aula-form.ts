@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -35,6 +35,7 @@ import { Aula, AulaRequest, TIPOS_AULA } from '../../models/aula.model';
   selector: 'app-aula-form',
   imports: [ReactiveFormsModule],
   templateUrl: './aula-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './aula-form.css',
 })
 export class AulaForm {

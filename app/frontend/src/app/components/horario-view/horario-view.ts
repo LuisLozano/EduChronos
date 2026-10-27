@@ -1,4 +1,12 @@
-import { Component, OnDestroy, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
@@ -23,7 +31,11 @@ import {
 import { clavePin, filaDeClave, indicePines } from '../../horario/pines';
 import { tituloHorario } from '../../horario/titulo';
 import { recreoTrasTramo } from '../../horario/recreo';
-import { ViolacionEnCelda, indiceViolaciones, sumaDeltasPorInstancia } from '../../horario/diagnostico';
+import {
+  ViolacionEnCelda,
+  indiceViolaciones,
+  sumaDeltasPorInstancia,
+} from '../../horario/diagnostico';
 import { reemplazarInstancia, textoViolacion } from '../../horario/ajuste';
 import { AjusteInstancia, HorarioGrid } from '../horario-grid/horario-grid';
 import { PanelPrevalidacion } from '../panel-prevalidacion/panel-prevalidacion';
@@ -51,6 +63,7 @@ import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
   selector: 'app-horario-view',
   imports: [HorarioGrid, PanelPrevalidacion, FiltroOpciones],
   templateUrl: './horario-view.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './horario-view.css',
 })
 export class HorarioView implements OnDestroy {
@@ -79,7 +92,9 @@ export class HorarioView implements OnDestroy {
    * `id` del bloqueo, que es lo que el DELETE necesita. `null` significa pin vivo
    * sin id conocido: se pinta, pero no se puede borrar.
    */
-  protected readonly pinadas = signal<ReadonlyMap<string, number | null>>(new Map<string, number | null>());
+  protected readonly pinadas = signal<ReadonlyMap<string, number | null>>(
+    new Map<string, number | null>(),
+  );
   /** Último rechazo del backend al DESPINAR; se limpia al siguiente intento. */
   protected readonly errorPin = signal<string | null>(null);
 
@@ -182,10 +197,12 @@ export class HorarioView implements OnDestroy {
    * —delega en la capa pura ({@link indiceViolaciones})—, igual que no suma ni
    * agrupa a mano. La rejilla resuelve la asimetría D15 al pintar.
    */
-  protected readonly violaciones = computed<ReadonlyMap<string, readonly ViolacionEnCelda[]>>(() => {
-    const d = this.diagnostico();
-    return d ? indiceViolaciones(d.violaciones) : new Map<string, readonly ViolacionEnCelda[]>();
-  });
+  protected readonly violaciones = computed<ReadonlyMap<string, readonly ViolacionEnCelda[]>>(
+    () => {
+      const d = this.diagnostico();
+      return d ? indiceViolaciones(d.violaciones) : new Map<string, readonly ViolacionEnCelda[]>();
+    },
+  );
 
   /**
    * Título de la fila de cabecera (D9/D10). Se delega en la función pura
@@ -214,7 +231,9 @@ export class HorarioView implements OnDestroy {
    */
   protected readonly guardiasDeRejilla = computed<GuardiasDeVista>(() => {
     const p = this.proyeccion();
-    return p ? guardiasDeVista(p.guardias, this.vista(), this.entidad()) : { deTramo: [], deRecreo: [] };
+    return p
+      ? guardiasDeVista(p.guardias, this.vista(), this.entidad())
+      : { deTramo: [], deRecreo: [] };
   });
 
   /**
@@ -498,14 +517,12 @@ export class HorarioView implements OnDestroy {
             replaceUrl: true,
             queryParamsHandling: 'preserve',
           });
-        }
-        else this.sinHorario.set(true);
+        } else this.sinHorario.set(true);
       },
       error: (err) =>
         this.error.set(`No se pudo averiguar el horario del curso (${err?.status ?? 'error'}).`),
     });
   }
-
 
   /**
    * AJUSTA el horario con la instancia soltada (S145). Sustituye al alta de pin que
@@ -552,7 +569,12 @@ export class HorarioView implements OnDestroy {
     if (a.ocupantes.length === 0) {
       this.enVuelo.set('ajuste');
       this.ajustes
-        .mover(id, { actividadCodigo: a.actividadCodigo, indice: a.indice, dia: a.dia, orden: a.orden })
+        .mover(id, {
+          actividadCodigo: a.actividadCodigo,
+          indice: a.indice,
+          dia: a.dia,
+          orden: a.orden,
+        })
         .subscribe({
           next: (filas) => {
             this.enVuelo.set(null);
@@ -709,7 +731,9 @@ export class HorarioView implements OnDestroy {
       })
       .subscribe({
         next: (b) =>
-          this.pinadas.set(new Map(this.pinadas()).set(clavePin(b.actividadCodigo, b.indice), b.id)),
+          this.pinadas.set(
+            new Map(this.pinadas()).set(clavePin(b.actividadCodigo, b.indice), b.id),
+          ),
         error: (err) => this.errorPin.set(this.mensaje(err)),
       });
   }
@@ -748,7 +772,9 @@ export class HorarioView implements OnDestroy {
    */
   private mensaje(err: { status?: number; error?: { message?: string; error?: string } }): string {
     const cuerpo = err?.error;
-    return cuerpo?.message || cuerpo?.error || `El servidor rechazó el pin (${err?.status ?? 'error'}).`;
+    return (
+      cuerpo?.message || cuerpo?.error || `El servidor rechazó el pin (${err?.status ?? 'error'}).`
+    );
   }
 
   /**

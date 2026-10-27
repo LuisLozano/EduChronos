@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -43,6 +43,7 @@ const entero: ValidatorFn = (control) =>
   selector: 'app-profesor-form',
   imports: [ReactiveFormsModule],
   templateUrl: './profesor-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './profesor-form.css',
 })
 export class ProfesorForm {

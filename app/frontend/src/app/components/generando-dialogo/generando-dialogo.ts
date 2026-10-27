@@ -1,4 +1,11 @@
-import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnDestroy,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 /** Lo que recibe el diálogo de espera: los minutos que eligió quien genera. */
@@ -45,6 +52,7 @@ export function formatoMinSeg(segundos: number): string {
 @Component({
   selector: 'app-generando-dialogo',
   templateUrl: './generando-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './generando-dialogo.css',
 })
 export class GenerandoDialogo implements OnDestroy {

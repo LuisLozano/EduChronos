@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 
 /**
@@ -15,6 +15,7 @@ import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 @Component({
   selector: 'app-confirmar-borrado',
   templateUrl: './confirmar-borrado.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './confirmar-borrado.css',
 })
 export class ConfirmarBorrado {

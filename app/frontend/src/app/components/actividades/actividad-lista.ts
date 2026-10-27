@@ -1,4 +1,12 @@
-import { Component, OnInit, computed, inject, linkedSignal, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  linkedSignal,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -14,7 +22,12 @@ import { ConfirmarBorrado } from '../confirmar-borrado/confirmar-borrado';
 import { CabeceraLista } from '../cabecera-lista/cabecera-lista';
 import { EstadoLista } from '../estado-lista/estado-lista';
 import { coincide } from '../../catalogo/busqueda';
-import { Catalogo, casarExacto, lineaPertenencia, nombresDeAsignaturas } from '../../catalogo/pertenencia';
+import {
+  Catalogo,
+  casarExacto,
+  lineaPertenencia,
+  nombresDeAsignaturas,
+} from '../../catalogo/pertenencia';
 
 /**
  * Lista del catálogo de actividades: carga en init, tabla con acciones por fila,
@@ -47,6 +60,7 @@ import { Catalogo, casarExacto, lineaPertenencia, nombresDeAsignaturas } from '.
   selector: 'app-actividad-lista',
   imports: [CabeceraLista, EstadoLista],
   templateUrl: './actividad-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './actividad-lista.css',
 })
 export class ActividadLista implements OnInit {
@@ -136,9 +150,15 @@ export class ActividadLista implements OnInit {
    * «Latín» no encontraba «LAT» (S188).
    */
   protected textoFila(actividad: Actividad): string {
-    return [actividad.codigo, this.asignaturaDe(actividad), actividad.patronTemporal,
-      actividad.duracionTramos, actividad.repeticionesPorSemana, actividad.plazas.length,
-      ...nombresDeAsignaturas(actividad, this.nombrePorCodigo())].join(' ');
+    return [
+      actividad.codigo,
+      this.asignaturaDe(actividad),
+      actividad.patronTemporal,
+      actividad.duracionTramos,
+      actividad.repeticionesPorSemana,
+      actividad.plazas.length,
+      ...nombresDeAsignaturas(actividad, this.nombrePorCodigo()),
+    ].join(' ');
   }
 
   /**
@@ -265,11 +285,12 @@ export class ActividadLista implements OnInit {
     const porTipo = !this.casaConTipo(guardada);
     const tipo = this.tipo();
     const delTipo = tipo === '' ? '' : `es del tipo «${ETIQUETA_TIPO_ACTIVIDAD[tipo]}»`;
-    const causa = porBusqueda && porTipo
-      ? `no corresponde a «${this.busqueda()}» ni ${delTipo}`
-      : porTipo
-        ? `no ${delTipo}`
-        : `no corresponde a «${this.busqueda()}»`;
+    const causa =
+      porBusqueda && porTipo
+        ? `no corresponde a «${this.busqueda()}» ni ${delTipo}`
+        : porTipo
+          ? `no ${delTipo}`
+          : `no corresponde a «${this.busqueda()}»`;
     return `Actividad «${guardada.codigo}» guardada. No aparece en la lista porque ${causa}.`;
   }
 

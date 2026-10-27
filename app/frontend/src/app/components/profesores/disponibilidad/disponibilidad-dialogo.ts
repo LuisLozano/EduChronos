@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -61,6 +61,7 @@ const ROTULOS: Readonly<Record<Estado, string>> = {
   selector: 'app-disponibilidad-dialogo',
   imports: [NgTemplateOutlet],
   templateUrl: './disponibilidad-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './disponibilidad-dialogo.css',
 })
 export class DisponibilidadDialogo implements OnInit {
@@ -109,8 +110,12 @@ export class DisponibilidadDialogo implements OnInit {
         this.estado.set('cargado');
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudo consultar la disponibilidad de ${this.profesor.nombreCompleto}`));
+        this.error.set(
+          this.mensaje(
+            err,
+            `No se pudo consultar la disponibilidad de ${this.profesor.nombreCompleto}`,
+          ),
+        );
         this.estado.set('error');
       },
     });

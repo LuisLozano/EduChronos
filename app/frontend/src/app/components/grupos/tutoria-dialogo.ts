@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -71,6 +71,7 @@ export type EstadoTutoria = 'cargando' | 'cargado' | 'error';
   selector: 'app-tutoria-dialogo',
   imports: [ReactiveFormsModule, FiltroOpciones],
   templateUrl: './tutoria-dialogo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tutoria-dialogo.css',
 })
 export class TutoriaDialogo implements OnInit {
@@ -135,8 +136,9 @@ export class TutoriaDialogo implements OnInit {
         this.estado.set('cargado');
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.mensaje(
-          err, `No se pudo consultar la tutoría de ${this.grupo.codigo}`));
+        this.error.set(
+          this.mensaje(err, `No se pudo consultar la tutoría de ${this.grupo.codigo}`),
+        );
         this.estado.set('error');
       },
     });

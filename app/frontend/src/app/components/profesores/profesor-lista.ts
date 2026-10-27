@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -36,6 +43,7 @@ import { textoHoras } from '../../catalogo/horas';
   selector: 'app-profesor-lista',
   imports: [CabeceraLista, EstadoLista, MinimoGuardias, RouterLink],
   templateUrl: './profesor-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './profesor-lista.css',
 })
 export class ProfesorLista implements OnInit {

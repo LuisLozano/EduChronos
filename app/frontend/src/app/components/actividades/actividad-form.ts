@@ -1,4 +1,12 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -76,7 +84,9 @@ function subgruposDisjuntos(array: AbstractControl): ValidationErrors | null {
  * por plaza, sin normalizar la caja—, para que la pestaña marcada y el aviso digan lo mismo. Se
  * calcula aparte y no dentro del validador: el validador decide si se envía, esto solo marca.
  */
-export function plazasConSubgrupoRepetido(subgruposPorPlaza: readonly (readonly string[])[]): number[] {
+export function plazasConSubgrupoRepetido(
+  subgruposPorPlaza: readonly (readonly string[])[],
+): number[] {
   const plazasDe = new Map<string, number>();
   for (const subgrupos of subgruposPorPlaza) {
     for (const codigo of new Set(subgrupos)) {
@@ -110,11 +120,17 @@ export function opcionesDelNivel<T extends Asignatura | Subgrupo>(
     return [...opciones];
   }
   const elegido = new Set(elegidos);
-  return opciones.filter((o) => elegido.has(o.codigo) || (nivel !== '' && esDelNivel(o, nivel, nivelDeGrupo)));
+  return opciones.filter(
+    (o) => elegido.has(o.codigo) || (nivel !== '' && esDelNivel(o, nivel, nivelDeGrupo)),
+  );
 }
 
 /** Si una asignatura es del nivel, o si todos los grupos de un subgrupo lo son. */
-function esDelNivel(o: Asignatura | Subgrupo, nivel: string, nivelDeGrupo: ReadonlyMap<string, string>): boolean {
+function esDelNivel(
+  o: Asignatura | Subgrupo,
+  nivel: string,
+  nivelDeGrupo: ReadonlyMap<string, string>,
+): boolean {
   return 'grupos' in o
     ? o.grupos.length > 0 && o.grupos.every((grupo) => nivelDeGrupo.get(grupo) === nivel)
     : o.nivel === nivel;
@@ -232,6 +248,7 @@ type PlazaFila = FormGroup<{
   selector: 'app-actividad-form',
   imports: [ReactiveFormsModule, FiltroOpciones, ListaDoble],
   templateUrl: './actividad-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './actividad-form.css',
 })
 export class ActividadForm implements OnInit {
@@ -267,7 +284,9 @@ export class ActividadForm implements OnInit {
   /** Niveles, ya en orden pedagógico, y grupos, que dan el nivel de cada subgrupo (S251). */
   protected readonly niveles = signal<Nivel[]>([]);
   private readonly grupos = signal<Grupo[]>([]);
-  private readonly nivelDeGrupo = computed(() => new Map(this.grupos().map((g) => [g.codigo, g.nivel])));
+  private readonly nivelDeGrupo = computed(
+    () => new Map(this.grupos().map((g) => [g.codigo, g.nivel])),
+  );
   /** Han llegado las dos listas que la deducción del nivel necesita en la edición. */
   private subgruposCargados = false;
   private gruposCargados = false;
@@ -344,7 +363,9 @@ export class ActividadForm implements OnInit {
   );
 
   /** Una CLASE sin nivel y sin «Mostrar todos»: los selectores quedan vacíos y se dice por qué (EY). */
-  protected readonly faltaNivel = computed(() => this.filtraPorNivel() && this.valor().nivel === '');
+  protected readonly faltaNivel = computed(
+    () => this.filtraPorNivel() && this.valor().nivel === '',
+  );
 
   /** Opciones de la asignatura de la actividad. */
   protected readonly asignaturasDeLaActividad = computed(() =>
@@ -359,8 +380,17 @@ export class ActividadForm implements OnInit {
     })),
   );
 
-  private delNivel<T extends Asignatura | Subgrupo>(opciones: readonly T[], elegidos: readonly string[]): T[] {
-    return opcionesDelNivel(opciones, this.valor().nivel, this.nivelDeGrupo(), !this.filtraPorNivel(), elegidos);
+  private delNivel<T extends Asignatura | Subgrupo>(
+    opciones: readonly T[],
+    elegidos: readonly string[],
+  ): T[] {
+    return opcionesDelNivel(
+      opciones,
+      this.valor().nivel,
+      this.nivelDeGrupo(),
+      !this.filtraPorNivel(),
+      elegidos,
+    );
   }
 
   constructor() {
@@ -558,7 +588,11 @@ export class ActividadForm implements OnInit {
    */
   private volcar(fila: PlazaFila, plaza: Plaza): void {
     fila.controls.modoAula.setValue(
-      plaza.aulaFija !== null ? 'FIJA' : plaza.aulasCandidatas.length > 0 ? 'CANDIDATAS' : 'NINGUNA',
+      plaza.aulaFija !== null
+        ? 'FIJA'
+        : plaza.aulasCandidatas.length > 0
+          ? 'CANDIDATAS'
+          : 'NINGUNA',
     );
     fila.controls.asignatura.setValue(plaza.asignatura);
     fila.controls.aulaFija.setValue(plaza.aulaFija ?? '');

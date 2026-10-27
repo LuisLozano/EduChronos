@@ -1,4 +1,4 @@
-import { Component, computed, input, linkedSignal } from '@angular/core';
+import { Component, computed, input, linkedSignal, ChangeDetectionStrategy } from '@angular/core';
 
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 
@@ -16,6 +16,7 @@ import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
 @Component({
   selector: 'app-panel-prevalidacion',
   templateUrl: './panel-prevalidacion.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './panel-prevalidacion.css',
 })
 export class PanelPrevalidacion {

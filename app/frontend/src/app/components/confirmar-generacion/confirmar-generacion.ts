@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 import { AvisoPrevalidacion } from '../../models/prevalidacion.model';
@@ -55,6 +55,7 @@ export interface DatosConfirmarGeneracion {
 @Component({
   selector: 'app-confirmar-generacion',
   templateUrl: './confirmar-generacion.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './confirmar-generacion.css',
 })
 export class ConfirmarGeneracion {

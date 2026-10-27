@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -77,6 +84,7 @@ const ETIQUETAS_TIPO = new Map<string, string>([
   selector: 'app-grupo-lista',
   imports: [CabeceraLista, EstadoLista, RouterLink],
   templateUrl: './grupo-lista.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './grupo-lista.css',
 })
 export class GrupoLista implements OnInit {
@@ -158,8 +166,7 @@ export class GrupoLista implements OnInit {
   private cargarCuadre(): void {
     this.errorHoras.set('');
     this.prevalidacion.getCuadre().subscribe({
-      next: (cuadre) =>
-        this.cuadre.set(new Map(cuadre.grupos.map((e) => [e.codigo, e] as const))),
+      next: (cuadre) => this.cuadre.set(new Map(cuadre.grupos.map((e) => [e.codigo, e] as const))),
       error: () => {
         this.cuadre.set(new Map());
         this.errorHoras.set('No se pudieron cargar las horas.');
@@ -198,13 +205,11 @@ export class GrupoLista implements OnInit {
    * por backdrop o Escape, y un `!== undefined` recargaría también en ese caso.
    */
   protected pdc(grupo: Grupo): void {
-    this.dialog
-      .open<boolean, Grupo>(PdcDialogo, { data: grupo })
-      .closed.subscribe((cambiado) => {
-        if (cambiado === true) {
-          this.cargar();
-        }
-      });
+    this.dialog.open<boolean, Grupo>(PdcDialogo, { data: grupo }).closed.subscribe((cambiado) => {
+      if (cambiado === true) {
+        this.cargar();
+      }
+    });
   }
 
   /**

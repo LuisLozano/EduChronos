@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { coincide } from '../../catalogo/busqueda';
 
@@ -33,6 +33,7 @@ export function filtrarOpciones<T>(
 @Component({
   selector: 'app-filtro-opciones',
   templateUrl: './filtro-opciones.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './filtro-opciones.css',
 })
 export class FiltroOpciones<T> {

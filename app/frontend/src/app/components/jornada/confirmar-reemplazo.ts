@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 /**
@@ -23,6 +23,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 @Component({
   selector: 'app-confirmar-reemplazo',
   templateUrl: './confirmar-reemplazo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './confirmar-reemplazo.css',
 })
 export class ConfirmarReemplazo {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -26,6 +26,7 @@ const entero: ValidatorFn = (control) =>
   selector: 'app-minimo-guardias',
   imports: [ReactiveFormsModule],
   templateUrl: './minimo-guardias.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './minimo-guardias.css',
 })
 export class MinimoGuardias implements OnInit {

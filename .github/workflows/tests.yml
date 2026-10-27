@@ -35,6 +35,8 @@ jobs:
         with:
           node-version-file: app/frontend/.nvmrc
           package-manager-cache: false
+      - name: npm 11.21.1 (packageManager)
+        run: npm install -g npm@11.21.1
       - name: npm ci
         run: npm ci
       - name: ng test
@@ -54,6 +56,8 @@ jobs:
         with:
           node-version-file: app/frontend/.nvmrc
           package-manager-cache: false
+      - name: npm 11.21.1 (packageManager)
+        run: npm install -g npm@11.21.1
       # El backend del e2e arranca con `mvn -pl app spring-boot:run` (sin -am), que resuelve el
       # solver desde ~/.m2. En un runner limpio no está: se instala el solver y su pom padre.
       - name: Instalar el solver en ~/.m2

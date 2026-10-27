@@ -10,6 +10,7 @@ import {
   input,
   output,
   signal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { SesionVista } from '../../models/horario.model';
@@ -96,6 +97,7 @@ export interface AjusteInstancia {
   selector: 'app-horario-grid',
   imports: [DragDropModule],
   templateUrl: './horario-grid.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './horario-grid.css',
 })
 export class HorarioGrid {
@@ -338,9 +340,7 @@ export class HorarioGrid {
       }
     }
     const previo = this.ultimasOcultas;
-    const igual =
-      previo.size === nuevas.size &&
-      [...nuevas].every(([k, v]) => previo.get(k) === v);
+    const igual = previo.size === nuevas.size && [...nuevas].every(([k, v]) => previo.get(k) === v);
     if (igual) {
       return;
     }
@@ -352,7 +352,9 @@ export class HorarioGrid {
   protected detalleInstancia(inst: InstanciaCelda): string {
     // Sin aula (reunión o función, S201) la entrada es solo la asignatura.
     return inst.entradas
-      .map((e) => (e.aulaCodigo === null ? e.asignaturaCodigo : `${e.asignaturaCodigo} (${e.aulaCodigo})`))
+      .map((e) =>
+        e.aulaCodigo === null ? e.asignaturaCodigo : `${e.asignaturaCodigo} (${e.aulaCodigo})`,
+      )
       .join(', ');
   }
 
@@ -461,7 +463,9 @@ export class HorarioGrid {
    */
   protected lineasDeRecreo(dia: number): string[] {
     const guardias = this.guardiasDeLaFilaDeRecreo();
-    return this.soloGuardias() ? lineasDeRecreoEnGuardias(guardias, dia) : rotulosDeRecreo(guardias, dia);
+    return this.soloGuardias()
+      ? lineasDeRecreoEnGuardias(guardias, dia)
+      : rotulosDeRecreo(guardias, dia);
   }
 
   /** Registra la instancia que empieza a arrastrarse: abre la marca de ocupación. */
@@ -511,7 +515,9 @@ export class HorarioGrid {
    * con la SUYA (ver T5).
    */
   protected tieneViolacionAula(inst: InstanciaCelda, e: SesionVista): boolean {
-    return (this.violaciones().get(this.clave(inst)) ?? []).some((v) => v.plazaCodigo === e.plazaCodigo);
+    return (this.violaciones().get(this.clave(inst)) ?? []).some(
+      (v) => v.plazaCodigo === e.plazaCodigo,
+    );
   }
 
   /**
@@ -593,7 +599,11 @@ export class HorarioGrid {
    * rejilla), el cast pasa a ser mentira y falla en runtime sin que el
    * compilador avise: entonces habrá que discriminar el tipo del `data`.
    */
-  protected alSoltar(evento: CdkDragDrop<{ dia: number; orden: number }>, dia: number, orden: number): void {
+  protected alSoltar(
+    evento: CdkDragDrop<{ dia: number; orden: number }>,
+    dia: number,
+    orden: number,
+  ): void {
     const inst = evento.item.data as InstanciaCelda;
     const origen = inst.entradas[0];
     if (origen.dia === dia && origen.tramo === orden) {
