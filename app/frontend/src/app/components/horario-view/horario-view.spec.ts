@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { HorarioView } from './horario-view';
 import { HorarioGrid } from '../horario-grid/horario-grid';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 import { ConfirmarGeneracion } from '../confirmar-generacion/confirmar-generacion';
 import { GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
 import { HorarioService } from '../../services/horario.service';
@@ -2458,37 +2459,60 @@ describe('contenedor del horario', () => {
     }));
 
     const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
-    /** El de entidad es el select del <label> que sigue al filtro. */
-    const selectEntidad = (): HTMLSelectElement =>
-      raiz().querySelector<HTMLSelectElement>('app-filtro-opciones + label select')!;
+    /** El de entidad es el campo del selector con filtro dentro (S260). */
+    const entradaEntidad = (): HTMLInputElement =>
+      raiz().querySelector<HTMLInputElement>('app-selector-filtrable input')!;
     /** El de vista es el que ofrece las tres vistas. */
     const selectVista = (): HTMLSelectElement =>
       Array.from(raiz().querySelectorAll<HTMLSelectElement>('select')).find((s) =>
         Array.from(s.options).some((o) => o.value === 'profesor'),
       )!;
-    const campo = (): HTMLInputElement | null =>
-      raiz().querySelector<HTMLInputElement>('app-filtro-opciones input');
+    const campo = (): HTMLInputElement | null => entradaEntidad();
+    const selectorEntidad = (): SelectorFiltrable<string> =>
+      fixture.debugElement.query(By.directive(SelectorFiltrable)).componentInstance as SelectorFiltrable<string>;
+    /** La búsqueda escrita en el selector (S260, EN-17). */
+    const busquedaEntidad = (): string => (selectorEntidad() as unknown as { consulta(): string }).consulta();
+    /** Nombre accesible del campo: el texto del <label> asociado (S260, EN-16). */
+    const nombreEntidad = (): string =>
+      Array.from(entradaEntidad().labels ?? []).map((l) => l.textContent!.trim()).join(' ');
+
+    /** Las opciones de la lista de entidades; cerrada, se abre con ↓ para leerlas. */
+    async function opcionesEntidad(): Promise<string[]> {
+      if (entradaEntidad().getAttribute('aria-expanded') !== 'true') {
+        entradaEntidad().focus();
+        entradaEntidad().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        await fixture.whenStable();
+      }
+      return Array.from(raiz().querySelectorAll('app-selector-filtrable [role="option"]')).map((o) => o.textContent!.trim());
+    }
+
+    async function elegirEntidad(e: string): Promise<void> {
+      await opcionesEntidad();
+      Array.from(raiz().querySelectorAll<HTMLElement>('app-selector-filtrable [role="option"]'))
+        .find((o) => o.textContent!.trim() === e)!
+        .click();
+      await fixture.whenStable();
+    }
 
     async function escribir(consulta: string): Promise<void> {
       const el = campo();
       expect(el).not.toBeNull();
+      el!.focus();
       el!.value = consulta;
-      el!.dispatchEvent(new Event('input'));
+      el!.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await fixture.whenStable();
     }
 
     it('entidad: filtrar conserva visible la elegida y no cambia el valor', async () => {
       await montarConSesiones(SESIONES_12);
-      selectEntidad().value = 'G05';
-      selectEntidad().dispatchEvent(new Event('change'));
-      await fixture.whenStable();
+      await elegirEntidad('G05');
 
-      expect(campo()?.getAttribute('aria-label')).toBe('Filtrar grupos');
+      expect(nombreEntidad()).toBe('grupo');
       await escribir('g1');
 
-      expect(Array.from(selectEntidad().options).map((o) => o.value)).toEqual(['G05', 'G10', 'G11', 'G12']);
+      expect(await opcionesEntidad()).toEqual(['G05', 'G10', 'G11', 'G12']);
       expect((fixture.componentInstance as unknown as { entidad(): string }).entidad()).toBe('G05');
-      expect(selectEntidad().value).toBe('G05');
+      expect(selectorEntidad().valor()).toBe('G05');
     });
 
     it('entidad: cambiar de vista limpia el filtro', async () => {
@@ -2499,8 +2523,9 @@ describe('contenedor del horario', () => {
       selectVista().dispatchEvent(new Event('change'));
       await fixture.whenStable();
 
-      expect(campo()?.value).toBe('');
-      expect(Array.from(selectEntidad().options).map((o) => o.value)).toEqual(
+      expect(busquedaEntidad()).toBe('');
+      expect(nombreEntidad()).toBe('profesor');
+      expect(await opcionesEntidad()).toEqual(
         Array.from({ length: 12 }, (_, i) => `P${dos(i)}`),
       );
     });
@@ -2514,8 +2539,21 @@ describe('contenedor del horario', () => {
       Array.from(raiz().querySelectorAll<HTMLSelectElement>('select')).find((s) =>
         Array.from(s.options).some((o) => o.value === 'profesor'),
       )!;
-    const selectEntidad = (): HTMLSelectElement | null =>
-      raiz().querySelector<HTMLSelectElement>('app-filtro-opciones + label select');
+    /** El campo del selector de entidad (S260); null en la vista de guardias. */
+    const entradaEntidad = (): HTMLInputElement | null =>
+      raiz().querySelector<HTMLInputElement>('app-selector-filtrable input');
+    const valorEntidad = (): string =>
+      (fixture.debugElement.query(By.directive(SelectorFiltrable)).componentInstance as SelectorFiltrable<string>).valor();
+
+    /** Las opciones de la lista de entidades; cerrada, se abre con ↓ para leerlas. */
+    async function opcionesEntidad(): Promise<string[]> {
+      if (entradaEntidad()!.getAttribute('aria-expanded') !== 'true') {
+        entradaEntidad()!.focus();
+        entradaEntidad()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        await fixture.whenStable();
+      }
+      return Array.from(raiz().querySelectorAll('app-selector-filtrable [role="option"]')).map((o) => o.textContent!.trim());
+    }
 
     async function elegirVista(v: string): Promise<void> {
       selectVista().value = v;
@@ -2524,8 +2562,10 @@ describe('contenedor del horario', () => {
     }
 
     async function elegirEntidad(e: string): Promise<void> {
-      selectEntidad()!.value = e;
-      selectEntidad()!.dispatchEvent(new Event('change'));
+      await opcionesEntidad();
+      Array.from(raiz().querySelectorAll<HTMLElement>('app-selector-filtrable [role="option"]'))
+        .find((o) => o.textContent!.trim() === e)!
+        .click();
       await fixture.whenStable();
     }
 
@@ -2573,8 +2613,8 @@ describe('contenedor del horario', () => {
       expect(grid.soloGuardias()).toBe(true);
       expect(grid.guardias()).toEqual(GUARDIAS);
       expect(grid.sesiones()).toEqual([]);
-      expect(raiz().querySelector('app-filtro-opciones')).toBeNull();
-      expect(selectEntidad()).toBeNull();
+      expect(raiz().querySelector('app-selector-filtrable')).toBeNull();
+      expect(entradaEntidad()).toBeNull();
     });
 
     /**
@@ -2583,11 +2623,11 @@ describe('contenedor del horario', () => {
      */
     it('(100) la lista de profesores incluye a quien solo tiene guardias, en orden', async () => {
       await montarConGuardias([fila(1, 'Mat-1ºA', 1, 1, 1)], GUARDIAS);
-      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['1ºA']);
+      expect(await opcionesEntidad()).toEqual(['1ºA']);
 
       await elegirVista('profesor');
 
-      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['AAA9', 'P1']);
+      expect(await opcionesEntidad()).toEqual(['AAA9', 'P1']);
     });
 
     /**
@@ -2802,7 +2842,7 @@ describe('contenedor del horario', () => {
       const vista = fixture.componentInstance as unknown as { vista(): string; entidad(): string };
       expect(vista.vista()).toBe('profesor');
       expect(vista.entidad()).toBe('P1');
-      expect(selectEntidad()!.value).toBe('P1');
+      expect(valorEntidad()).toBe('P1');
       expect(grid.guardias()).toEqual([GUARDIAS[1]]);
     });
 
@@ -2876,7 +2916,7 @@ describe('contenedor del horario', () => {
       ]);
       jornadaConRecreoTrasLaTercera();
       await elegirVista('profesor');
-      expect(Array.from(selectEntidad()!.options).map((o) => o.value)).toEqual(['AAA9', 'P1', 'REC9']);
+      expect(await opcionesEntidad()).toEqual(['AAA9', 'P1', 'REC9']);
       await elegirEntidad('P1');
 
       expect(filaDeRecreo()).toEqual({
@@ -3024,10 +3064,14 @@ describe('contenedor del horario', () => {
       await remontarCon({ vista: 'profesor', entidad: 'ZZZ9' });
       expect(aviso()).not.toBeNull();
 
-      const selects = (fixture.nativeElement as HTMLElement).querySelectorAll('.controles select');
-      const selectEntidad = selects[selects.length - 1] as HTMLSelectElement;
-      selectEntidad.value = 'MAT6';
-      selectEntidad.dispatchEvent(new Event('change'));
+      const raiz = fixture.nativeElement as HTMLElement;
+      const entradaEntidad = raiz.querySelector<HTMLInputElement>('.controles app-selector-filtrable input')!;
+      entradaEntidad.focus();
+      entradaEntidad.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      await fixture.whenStable();
+      Array.from(raiz.querySelectorAll<HTMLElement>('app-selector-filtrable [role="option"]'))
+        .find((o) => o.textContent!.trim() === 'MAT6')!
+        .click();
       await fixture.whenStable();
 
       expect(sel().entidad()).toBe('MAT6');

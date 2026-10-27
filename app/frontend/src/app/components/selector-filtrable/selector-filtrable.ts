@@ -19,8 +19,8 @@ let instancias = 0;
 
 /**
  * Selector de una entidad con el filtro DENTRO del control (S260, C-combobox, condiciones 2 y 3
- * de O-combobox). Sustituye al `<select>` con `<app-filtro-opciones>` delante: se escribe en el
- * propio campo y la lista se acorta. Sobre el combobox y el listbox de Angular Aria.
+ * de O-combobox). Sustituye al `<select>` con el campo de filtro aparte delante (S185): se escribe
+ * en el propio campo y la lista se acorta. Sobre el combobox y el listbox de Angular Aria.
  *
  * <p><b>El filtro es el de los selectores (S185), sin umbral.</b> {@link visibles} es
  * {@link filtrarOpciones} con lo elegido como seleccionado, así que la opción elegida no
@@ -120,6 +120,12 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
 
   setDisabledState(deshabilitado: boolean): void {
     this.deshabilitado.set(deshabilitado);
+  }
+
+  /** Cierra la lista y vacía la búsqueda: la vista de horario lo pide al cambiar de modo. */
+  limpiar(): void {
+    this.abierta.set(false);
+    this.restaurar();
   }
 
   /** Lo que se escribe filtra; el combobox ya abre la lista al escribir. */

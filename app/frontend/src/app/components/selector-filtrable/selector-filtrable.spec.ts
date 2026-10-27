@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { SelectorFiltrable } from './selector-filtrable';
@@ -213,6 +214,18 @@ describe('SelectorFiltrable', () => {
       await montar((a) => a.opciones.set([op('P01', 'Ana García'), op('P02', 'Luis Gil'), op('P03', 'Eva Ruiz')]));
       await escribir('garcia');
       expect(opciones()).toEqual(['P01 — Ana García']);
+    });
+
+    it('limpiar() cierra, vacía la búsqueda y devuelve el texto de lo elegido (EN-17)', async () => {
+      await montar((a) => a.control.setValue('G03'));
+      await escribir('g1');
+      expect(opciones()).toEqual(['G03', 'G10', 'G11', 'G12']);
+      fixture.debugElement.query(By.directive(SelectorFiltrable)).componentInstance.limpiar();
+      await fixture.whenStable();
+      expect(expandida()).toBe('false');
+      expect(campo().value).toBe('G03');
+      await tecla('ArrowDown');
+      expect(opciones()).toHaveLength(12);
     });
 
     it('abrir sin escribir tras cerrar enseña todas: la búsqueda anterior no se queda', async () => {

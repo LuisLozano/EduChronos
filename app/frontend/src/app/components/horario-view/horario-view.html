@@ -20,22 +20,21 @@
 
   <!-- S215 (F4): el modo guardias no tiene recurso que elegir, así que ni filtro ni selector. -->
   @if (vista() !== 'guardias') {
-  <app-filtro-opciones
-    #fEntidad
-    [etiqueta]="vista() === 'grupo' ? 'grupos' : vista() === 'profesor' ? 'profesores' : 'aulas'"
-    [opciones]="entidades()"
-    [texto]="identidad"
-    [codigo]="identidad"
-    [seleccionados]="[entidad()]"
-  />
-  <label>
-    {{ vista() }}
-    <select (change)="cambiarEntidad($any($event.target).value)">
-      @for (e of fEntidad.visibles(); track e) {
-        <option [value]="e" [selected]="e === entidad()">{{ e }}</option>
-      }
-    </select>
-  </label>
+  <!-- S260: el filtro va DENTRO del selector. El rótulo se asocia por for/id y no envolviendo:
+       dentro del <label>, la lista abierta entraría en su texto, que es el nombre del campo. -->
+  <div class="controles__entidad">
+    <label for="horario-entidad">{{ vista() }}</label>
+    <app-selector-filtrable
+      #fEntidad
+      idEntrada="horario-entidad"
+      [etiqueta]="vista() === 'grupo' ? 'grupos' : vista() === 'profesor' ? 'profesores' : 'aulas'"
+      [opciones]="entidades()"
+      [texto]="identidad"
+      [codigo]="identidad"
+      [valor]="entidad()"
+      (valorChange)="cambiarEntidad($event)"
+    />
+  </div>
   <!-- S226: la entidad que pidió la URL no está en este horario. Junto al selector, con el estilo
        de .aviso-ajuste (no ha fallado nada) y su modificador propio, como `aviso aviso-guardias`.
        Sin role="alert": informa, no interrumpe. -->

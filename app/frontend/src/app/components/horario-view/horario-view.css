@@ -34,6 +34,13 @@
   text-transform: capitalize;
 }
 
+/* El rótulo y el selector de entidad, en fila como el <label> que los envolvía (S260). */
+.controles__entidad {
+  display: flex;
+  gap: var(--e2);
+  align-items: center;
+}
+
 .error {
   color: var(--color-error);
   font-weight: var(--peso-medio);

@@ -44,7 +44,7 @@ import {
   DatosConfirmarGeneracion,
 } from '../confirmar-generacion/confirmar-generacion';
 import { DatosGenerando, GenerandoDialogo } from '../generando-dialogo/generando-dialogo';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 
 /**
  * Contenedor de las tres vistas: carga la proyección del horario `{id}` (param
@@ -61,7 +61,7 @@ import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
  */
 @Component({
   selector: 'app-horario-view',
-  imports: [HorarioGrid, PanelPrevalidacion, FiltroOpciones],
+  imports: [HorarioGrid, PanelPrevalidacion, SelectorFiltrable],
   templateUrl: './horario-view.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './horario-view.css',
@@ -85,7 +85,7 @@ export class HorarioView implements OnDestroy {
   protected readonly entidad = signal<string>('');
   /** Código y texto de una entidad de la vista: la propia cadena (filtro de selectores, S185). */
   protected readonly identidad = (e: string): string => e;
-  private readonly filtroEntidad = viewChild<FiltroOpciones<string>>('fEntidad');
+  private readonly filtroEntidad = viewChild<SelectorFiltrable<string>>('fEntidad');
 
   /**
    * Instancias pinadas en TODO el horario, de la clave de {@link clavePin} al
