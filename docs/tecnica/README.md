@@ -68,9 +68,11 @@ En orden de lectura:
    Responde qué suites hay, cómo se corre cada una y cuántos tests da.
 5. Cómo se publica e instala, en `docs/tecnica/publicar.md`.
    Responde cómo sale una versión hacia el centro, qué hace el workflow del zip de Windows y cómo se instala.
-6. Artefactos generados, en `docs/tecnica/generados.md`.
+6. Cómo se prueba una versión en la VM, en `docs/tecnica/probar-vm.md`.
+   Responde cómo se prueba una versión en la máquina virtual de Windows con el script del anfitrión, y qué queda para la persona.
+7. Artefactos generados, en `docs/tecnica/generados.md`.
    Responde qué ficheros salen de un programa y cómo se regenera cada uno: la referencia del solver y los índices.
-7. Por qué se decidió así, en `docs/tecnica/decisiones.md`.
+8. Por qué se decidió así, en `docs/tecnica/decisiones.md`.
    Responde qué decisiones fijan hoy el código, la construcción, las pruebas y la entrega, y por qué se tomaron, con la sede de cada una.
-8. Los documentos que ya existían, en `docs/tecnica/documentos.md`.
+9. Los documentos que ya existían, en `docs/tecnica/documentos.md`.
    Responde qué es cada uno de los 30 documentos técnicos anteriores a esta carpeta: vigente, histórico o absorbido por otro.
