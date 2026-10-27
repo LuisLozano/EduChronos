@@ -213,10 +213,12 @@ export class SelectorFiltrable<T> implements ControlValueAccessor {
 
   /**
    * El listbox cambia su valor con Intro o clic. Sobre la opción ya elegida lo VACÍA (alterna):
-   * eso no es elegir otra cosa, así que el valor se queda como estaba.
+   * eso no es elegir otra cosa, así que el valor se queda como estaba. Lo elegido es el valor que
+   * NO es el actual: con la vacía deshabilitada elegida, el listbox no puede quitarla (no
+   * deselecciona lo deshabilitado) y emite ['', nuevo].
    */
   protected alElegir(valores: readonly string[]): void {
-    const nuevo = valores[0];
+    const nuevo = valores.find((v) => v !== this.valor());
     if (nuevo !== undefined && nuevo !== this.valor()) {
       this.valor.set(nuevo);
       this.alCambiar(nuevo);

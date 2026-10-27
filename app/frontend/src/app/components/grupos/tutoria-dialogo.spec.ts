@@ -8,6 +8,15 @@ import { ProfesorService } from '../../services/profesor.service';
 import { Grupo } from '../../models/grupo.model';
 import { Profesor } from '../../models/profesor.model';
 import { Tutoria } from '../../models/tutoria.model';
+import {
+  abrirSelector,
+  campoSelector,
+  elegirEnSelector,
+  escribirEnSelector,
+  nombreSelector,
+  opcionesSelector,
+  valorSelector,
+} from '../../testing/selector-filtrable.helper';
 
 /**
  * Congela el diálogo de tutoría: la derivación de sus TRES estados a partir de las DOS
@@ -102,7 +111,9 @@ describe('TutoriaDialogo', () => {
   }
 
   const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
-  const select = (): HTMLSelectElement | null => raiz().querySelector('select');
+  /** El selector del tutor principal (S260): el campo del combobox, null mientras no hay formulario. */
+  const SEL = 'app-selector-filtrable';
+  const select = (): HTMLInputElement | null => campoSelector(fixture, SEL);
 
   it('(1) al abrir pide la tutoría con el id DEL GRUPO y lista el profesorado', () => {
     montar(of([]));
@@ -143,8 +154,8 @@ describe('TutoriaDialogo', () => {
     // 'LEN2' es el SEGUNDO profesor, así que su índice es 2 con la opción «sin tutor»
     // en el 0: con el primero, un select que se quedara en su opción inicial daría
     // verde falso.
-    expect(select()!.value).toBe('LEN2');
-    expect(select()!.selectedIndex).toBe(2);
+    expect(valorSelector(fixture, SEL)).toBe('LEN2');
+    expect((await opcionesSelector(fixture, SEL)).findIndex((o) => o.elegida)).toBe(2);
   });
 
   it('(5) DISCRIMINANTE: una tutoría VACÍA es "cargado" con el select en "", no un error', async () => {
@@ -157,8 +168,8 @@ describe('TutoriaDialogo', () => {
 
     expect(instancia().estado()).toBe('cargado');
     expect(raiz().querySelector('.tutoria-dialogo__form')).toBeTruthy();
-    expect(select()!.value).toBe('');
-    expect(select()!.selectedIndex).toBe(0);
+    expect(valorSelector(fixture, SEL)).toBe('');
+    expect((await opcionesSelector(fixture, SEL)).findIndex((o) => o.elegida)).toBe(0);
     // y no hay bloque de co-tutores que pintar
     expect(raiz().querySelector('.tutoria-dialogo__cotutores')).toBeNull();
   });
@@ -178,18 +189,18 @@ describe('TutoriaDialogo', () => {
     montar(of([]));
     await fixture.whenStable();
 
-    const opciones = [...select()!.options];
+    const opciones = await opcionesSelector(fixture, SEL);
     // Los profesores MÁS la opción «sin tutor»: TRES profesores y no uno, porque con
     // uno solo un `@for` roto que pintara únicamente el primero quedaría verde.
     expect(opciones.length).toBe(PROFESORES.length + 1);
-    expect(opciones[0].value).toBe('');
-    expect(opciones[0].textContent!.trim()).toBe('— sin tutor —');
+    expect(opciones[0].valor).toBe('');
+    expect(opciones[0].texto).toBe('— sin tutor —');
     // El value es el código. Si alguien pone `[value]="p.id"` esto pasa a ser '11', y
     // ese texto viajaría al backend como código de profesor y moriría con un 404.
-    expect(opciones[1].value).toBe('MAT1');
-    expect(opciones[2].value).toBe('LEN2');
+    expect(opciones[1].valor).toBe('MAT1');
+    expect(opciones[2].valor).toBe('LEN2');
     // Red explícita contra el id: ningún value puede ser el id serializado.
-    expect(opciones.map((o) => o.value)).not.toContain('11');
+    expect(opciones.map((o) => o.valor)).not.toContain('11');
   });
 
   it('(8) guardar con un principal nuevo manda el PUT con ese principal y cierra con true', async () => {
@@ -313,25 +324,28 @@ describe('TutoriaDialogo', () => {
       montar(of([]), of(PROFESORADO_12));
       await fixture.whenStable();
 
-      const s = select()!;
-      s.value = 'P05';
-      s.dispatchEvent(new Event('change'));
-      await fixture.whenStable();
+      await elegirEnSelector(fixture, SEL, 'P05');
 
-      const campo = raiz().querySelector<HTMLInputElement>('input[aria-label="Filtrar profesores"]');
+      const campo = campoSelector(fixture, SEL);
       expect(campo).not.toBeNull();
-      campo!.value = 'ruiz';
-      campo!.dispatchEvent(new Event('input'));
-      await fixture.whenStable();
+      await escribirEnSelector(fixture, SEL, 'ruiz');
 
-      expect(Array.from(select()!.options).map((o) => o.value).filter((v) => v !== '')).toEqual([
+      expect((await opcionesSelector(fixture, SEL)).map((o) => o.valor).filter((v) => v !== '')).toEqual([
         'P05', 'P10', 'P11',
       ]);
       const valor = (fixture.componentInstance as unknown as {
         form: { controls: { principal: { value: string } } };
       }).form.controls.principal.value;
       expect(valor).toBe('P05');
-      expect(select()!.value).toBe('P05');
+      expect(valorSelector(fixture, SEL)).toBe('P05');
     });
+  });
+
+  it('el nombre accesible del selector es su etiqueta «Tutor principal», también con la lista abierta (EN-21)', async () => {
+    montar(of([]));
+    await fixture.whenStable();
+    await abrirSelector(fixture, SEL);
+    expect(select()!.getAttribute('aria-expanded')).toBe('true');
+    expect(nombreSelector(fixture, SEL)).toBe('Tutor principal');
   });
 });

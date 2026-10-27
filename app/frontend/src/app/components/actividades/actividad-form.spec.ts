@@ -7,6 +7,16 @@ import {
 } from '@angular/common/http/testing';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { ActividadForm, nivelDeLasPlazas, opcionesDelNivel, plazasConSubgrupoRepetido } from './actividad-form';
+import {
+  OpcionLeida,
+  abrirSelector,
+  campoSelector,
+  elegirEnSelector,
+  escribirEnSelector,
+  nombreSelector,
+  opcionesSelector,
+  valorSelector,
+} from '../../testing/selector-filtrable.helper';
 
 /**
  * Congela el formulario de actividad de UNA plaza. Hereda del molde de `grupo-form` el
@@ -416,25 +426,23 @@ describe('ActividadForm', () => {
       expect(raiz.querySelectorAll('.actividad-form__plaza').length).toBe(1);
 
       // TESTIGO DEL TRACK (lectura): la plaza visible es la que era la tercera.
-      const asignatura = (): HTMLSelectElement =>
-        raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formControlName="asignatura"]')!;
-      expect(asignatura().value).toBe('CyR');
-      expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__aula-fija')!.value).toBe('INF1');
+      const asignatura = '.actividad-form__plaza app-selector-filtrable[formControlName="asignatura"]';
+      expect(valorSelector(fixture, asignatura)).toBe('CyR');
+      expect(valorSelector(fixture, '.actividad-form__aula-fija')).toBe('INF1');
       expect(raiz.querySelector('.actividad-form__candidatas')).toBeNull();
       // El mensaje de error viaja con SU fila: ahora es la segunda.
       expect(raiz.querySelector('.actividad-form__plaza')!.textContent).toContain('Elige al menos un profesor');
 
       await abrirPestana(0);
-      expect(asignatura().value).toBe('Mat');
-      expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__aula-fija')!.value).toBe('A1');
+      expect(valorSelector(fixture, asignatura)).toBe('Mat');
+      expect(valorSelector(fixture, '.actividad-form__aula-fija')).toBe('A1');
       expect(raiz.querySelector('.actividad-form__plaza')!.textContent).not.toContain('Elige al menos un profesor');
 
       // TESTIGO DEL TRACK (escritura), que es el síntoma caro: teclear en la fila visible
       // tiene que llegar al modelo VIVO. Con el binding rancio, esto entra en el FormGroup
       // extraído y el modelo no se entera, así que `aRequest()` enviaría el valor viejo.
       await abrirPestana(1);
-      asignatura().value = 'Mat';
-      asignatura().dispatchEvent(new Event('change'));
+      await elegirEnSelector(fixture, asignatura, 'Mat');
       expect(inst.plazas.at(1).controls['asignatura'].value).toBe('Mat');
     });
 
@@ -591,34 +599,30 @@ describe('ActividadForm', () => {
     http.expectOne('/api/actividades').flush(ACTIVIDAD_FIJA);
   });
 
-  it('(2) los cuatro desplegables se pueblan con lo que llega del backend', () => {
+  it('(2) los cuatro desplegables se pueblan con lo que llega del backend', async () => {
     montar(null);
-    const raiz = fixture.nativeElement as HTMLElement;
 
     // Asignatura de ACTIVIDAD: las dos asignaturas MÁS la opción vacía («varias»).
-    const asigActividad = raiz.querySelector<HTMLSelectElement>(
-      'select[formControlName="asignatura"]',
-    )!;
-    expect(asigActividad.options.length).toBe(ASIGNATURAS.length + 1);
-    expect(asigActividad.options[0].value).toBe('');
+    const asigActividad = await opcionesSelector(fixture, 'app-selector-filtrable[formControlName="asignatura"]');
+    expect(asigActividad.length).toBe(ASIGNATURAS.length + 1);
+    expect(asigActividad[0].valor).toBe('');
 
     // Aula fija: las dos aulas MÁS el placeholder deshabilitado.
-    const aulaFija = raiz.querySelector<HTMLSelectElement>('.actividad-form__aula-fija')!;
-    expect(aulaFija.options.length).toBe(AULAS.length + 1);
-    expect(aulaFija.options[0].disabled).toBe(true);
+    const aulaFija = await opcionesSelector(fixture, '.actividad-form__aula-fija');
+    expect(aulaFija.length).toBe(AULAS.length + 1);
+    expect(aulaFija[0].deshabilitada).toBe(true);
     // El texto lleva el TIPO, que es lo que el usuario necesita para elegir sin filtro I3.
-    expect(aulaFija.options[2].textContent).toContain('INFORMATICA');
+    expect(aulaFija[2].texto).toContain('INFORMATICA');
 
     // Listas dobles: sin placeholder, todos disponibles de arranque.
     expect(enLista('profesores', 'disponibles')).toEqual(['MAT6', 'MATA']);
     expect(enLista('subgrupos', 'disponibles')).toEqual(['1ºA-Completo', '1ºB-Completo']);
   });
 
-  it('(3) las aulas NO se filtran por compatibilidad I3: se ofrecen todas', () => {
+  it('(3) las aulas NO se filtran por compatibilidad I3: se ofrecen todas', async () => {
     montar(null);
-    const raiz = fixture.nativeElement as HTMLElement;
-    const opciones = [...raiz.querySelectorAll('.actividad-form__aula-fija option')]
-      .map((o) => (o as HTMLOptionElement).value)
+    const opciones = (await opcionesSelector(fixture, '.actividad-form__aula-fija'))
+      .map((o) => o.valor)
       .filter((v) => v !== '');
     // Decisión tomada: habla el 400 del backend, no un filtro en cliente que se
     // desincroniza. Si alguien filtrara por tipo, esta igualdad caería.
@@ -991,7 +995,7 @@ describe('ActividadForm', () => {
     expect(err).toContain('No se pudieron cargar las aulas');
     expect(err).toContain('500');
     // Solo queda el placeholder: ni un <option> de aula real.
-    expect(fixture.nativeElement.querySelectorAll('.actividad-form__aula-fija option').length).toBe(1);
+    expect((await opcionesSelector(fixture, '.actividad-form__aula-fija')).length).toBe(1);
   });
 
   /**
@@ -1128,11 +1132,10 @@ describe('ActividadForm', () => {
     }
 
     const raiz = (): HTMLElement => fixture.nativeElement as HTMLElement;
-    const sel = (css: string): HTMLSelectElement => raiz().querySelector<HTMLSelectElement>(css)!;
     const campo = (css: string): HTMLInputElement | null => raiz().querySelector<HTMLInputElement>(css);
-    /** Valores de las opciones del select, sin las fijas (value ''). */
-    const valores = (s: HTMLSelectElement): string[] =>
-      Array.from(s.options).map((o) => o.value).filter((v) => v !== '');
+    /** Valores de las opciones del selector, sin las fijas (value ''). */
+    const valores = async (donde: string): Promise<string[]> =>
+      (await opcionesSelector(fixture, donde)).map((o) => o.valor).filter((v) => v !== '');
     const valorRaiz = (): unknown =>
       (fixture.componentInstance as unknown as { form: { controls: Record<string, { value: unknown }> } })
         .form.controls['asignatura'].value;
@@ -1145,47 +1148,41 @@ describe('ActividadForm', () => {
       await fixture.whenStable();
     }
 
-    async function elegirSimple(s: HTMLSelectElement, codigo: string): Promise<void> {
-      s.value = codigo;
-      s.dispatchEvent(new Event('change'));
-      await fixture.whenStable();
-    }
-
     const filtroLista = (nombre: string): HTMLInputElement | null =>
       campo(`[data-lista="${nombre}"] .filtro-opciones__campo`);
 
-    const ASIG_RAIZ = '.actividad-form__fila--1 select[formControlName="asignatura"]';
-    const ASIG_PLAZA = '.actividad-form__plaza select[formControlName="asignatura"]';
+    const ASIG_RAIZ = '.actividad-form__fila--1 app-selector-filtrable[formControlName="asignatura"]';
+    const ASIG_PLAZA = '.actividad-form__plaza app-selector-filtrable[formControlName="asignatura"]';
 
     it('asignatura: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
-      await elegirSimple(sel(ASIG_RAIZ), 'M05');
-      await escribir(campo('.actividad-form__fila--1 input[aria-label="Filtrar asignaturas"]'), 'm1');
+      await elegirEnSelector(fixture, ASIG_RAIZ, 'M05');
+      await escribirEnSelector(fixture, ASIG_RAIZ, 'm1');
 
-      expect(valores(sel(ASIG_RAIZ))).toEqual(['M05', 'M10', 'M11', 'M12']);
+      expect(await valores(ASIG_RAIZ)).toEqual(['M05', 'M10', 'M11', 'M12']);
       expect(valorRaiz()).toBe('M05');
-      expect(sel(ASIG_RAIZ).value).toBe('M05');
+      expect(valorSelector(fixture, ASIG_RAIZ)).toBe('M05');
     });
 
     it('asignatura de plaza: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
-      await elegirSimple(sel(ASIG_PLAZA), 'M05');
-      await escribir(campo('.actividad-form__plaza input[aria-label="Filtrar asignaturas"]'), 'm1');
+      await elegirEnSelector(fixture, ASIG_PLAZA, 'M05');
+      await escribirEnSelector(fixture, ASIG_PLAZA, 'm1');
 
-      expect(valores(sel(ASIG_PLAZA))).toEqual(['M05', 'M10', 'M11', 'M12']);
+      expect(await valores(ASIG_PLAZA)).toEqual(['M05', 'M10', 'M11', 'M12']);
       expect(valorPlaza('asignatura')).toBe('M05');
-      expect(sel(ASIG_PLAZA).value).toBe('M05');
+      expect(valorSelector(fixture, ASIG_PLAZA)).toBe('M05');
     });
 
     it('aula fija: filtrar conserva visible la elegida y no cambia el valor', async () => {
       montarLargo();
-      const fija = (): HTMLSelectElement => sel('select[formControlName="aulaFija"]');
-      await elegirSimple(fija(), 'A05');
-      await escribir(campo('input[aria-label="Filtrar aulas"]'), 'a1');
+      const fija = 'app-selector-filtrable[formControlName="aulaFija"]';
+      await elegirEnSelector(fixture, fija, 'A05');
+      await escribirEnSelector(fixture, fija, 'a1');
 
-      expect(valores(fija())).toEqual(['A05', 'A10', 'A11', 'A12']);
+      expect(await valores(fija)).toEqual(['A05', 'A10', 'A11', 'A12']);
       expect(valorPlaza('aulaFija')).toBe('A05');
-      expect(fija().value).toBe('A05');
+      expect(valorSelector(fixture, fija)).toBe('A05');
     });
 
     it('aulas candidatas: filtrar conserva visible la elegida y no cambia el valor', async () => {
@@ -1353,7 +1350,7 @@ describe('ActividadForm', () => {
     expect(rotulos).toEqual(['1 · Mat', '2 · Mat', '3 · Mat', '4 · CyR', '5 · CyR', '6 · CyR']);
     expect(pestanaActiva()).toBe(0);
     const asignatura = (): string =>
-      raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.value;
+      valorSelector(fixture, '.actividad-form__plaza app-selector-filtrable[formcontrolname="asignatura"]');
     expect(raiz.querySelectorAll('.actividad-form__plaza').length).toBe(1);
     expect(asignatura()).toBe('Mat');
     expect(raiz.querySelector('.actividad-form__aula-fija')).not.toBeNull();
@@ -1381,7 +1378,7 @@ describe('ActividadForm', () => {
     // La del medio: queda abierta la que ocupa su sitio, que era la tercera.
     expect(instancia().plazas.length).toBe(2);
     expect(pestanaActiva()).toBe(1);
-    expect(fixture.nativeElement.querySelector('.actividad-form__aula-fija').value).toBe('INF1');
+    expect(valorSelector(fixture, '.actividad-form__aula-fija')).toBe('INF1');
 
     await quitarFila(1);
     // La última: queda abierta la anterior, no un índice que ya no existe.
@@ -1543,16 +1540,32 @@ describe('ActividadForm', () => {
     };
     comprobar();
     // Los dos selectores de asignatura y el de aula fija tienen el suyo.
-    for (const s of raiz.querySelectorAll<HTMLSelectElement>(
-      'select[formcontrolname="asignatura"], select[formcontrolname="aulaFija"]',
+    for (const s of raiz.querySelectorAll<HTMLInputElement>(
+      'app-selector-filtrable[formcontrolname="asignatura"] input, app-selector-filtrable[formcontrolname="aulaFija"] input',
     )) {
       expect(raiz.querySelector(`label[for="${s.id}"]`)).not.toBeNull();
     }
-    const antes = raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.id;
+    const antes = raiz.querySelector<HTMLInputElement>('.actividad-form__plaza app-selector-filtrable[formcontrolname="asignatura"] input')!.id;
     await abrirPestana(1);
     comprobar();
-    expect(raiz.querySelector<HTMLSelectElement>('.actividad-form__plaza select[formcontrolname="asignatura"]')!.id)
+    expect(raiz.querySelector<HTMLInputElement>('.actividad-form__plaza app-selector-filtrable[formcontrolname="asignatura"] input')!.id)
       .not.toBe(antes);
+  });
+
+  describe('nombre accesible de los selectores (EN-21)', () => {
+    /** Con la lista ABIERTA: si el selector volviera dentro de su <label>, sus opciones entrarían en el nombre. */
+    for (const [donde, etiqueta] of [
+      ['.actividad-form__fila--1 app-selector-filtrable[formcontrolname="asignatura"]', 'Asignatura (opcional)'],
+      ['.actividad-form__plaza app-selector-filtrable[formcontrolname="asignatura"]', 'Asignatura de la plaza'],
+      ['.actividad-form__aula-fija', 'Aula fija'],
+    ] as const) {
+      it(`el nombre accesible es su etiqueta «${etiqueta}», también con la lista abierta`, async () => {
+        montar(null);
+        await abrirSelector(fixture, donde);
+        expect(campoSelector(fixture, donde)!.getAttribute('aria-expanded')).toBe('true');
+        expect(nombreSelector(fixture, donde)).toBe(etiqueta);
+      });
+    }
   });
 
   describe('plazasConSubgrupoRepetido (S230, misma semántica que I2)', () => {
@@ -1604,30 +1617,22 @@ describe('ActividadForm', () => {
       ['actividad', '.actividad-form__fila--1'],
       ['plaza', '.actividad-form__plaza'],
     ] as const;
-    const opciones = (zona: string): HTMLOptionElement[] =>
-      Array.from(
-        (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>(
-          `${zona} select[formcontrolname="asignatura"]`,
-        )!.options,
-      ).filter((o) => o.value !== '');
+    const selector = (zona: string): string => `${zona} app-selector-filtrable[formcontrolname="asignatura"]`;
+    const opciones = async (zona: string): Promise<OpcionLeida[]> =>
+      (await opcionesSelector(fixture, selector(zona))).filter((o) => o.valor !== '');
 
     for (const [nombre, zona] of SELECTORES) {
-      it(`D1 ${nombre}: cada opción dice «código — nombre», y solo el código si no hay nombre`, () => {
+      it(`D1 ${nombre}: cada opción dice «código — nombre», y solo el código si no hay nombre`, async () => {
         montarConAsignaturas();
-        const textos = new Map(opciones(zona).map((o) => [o.value, o.textContent!.trim()]));
+        const textos = new Map((await opciones(zona)).map((o) => [o.valor, o.texto]));
         expect(textos.get('CyR')).toBe('CyR — Computación y Robótica');
         expect(textos.get('SIN')).toBe('SIN');
       });
 
       it(`D2 ${nombre}: buscar «Robótica», que no está en el código, encuentra CyR`, async () => {
         montarConAsignaturas();
-        const caja = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
-          `${zona} input[aria-label="Filtrar asignaturas"]`,
-        )!;
-        caja.value = 'Robótica';
-        caja.dispatchEvent(new Event('input'));
-        await fixture.whenStable();
-        expect(opciones(zona).map((o) => o.value)).toEqual(['CyR']);
+        await escribirEnSelector(fixture, selector(zona), 'Robótica');
+        expect((await opciones(zona)).map((o) => o.valor)).toEqual(['CyR']);
       });
     }
   });
@@ -1765,10 +1770,10 @@ describe('ActividadForm', () => {
     const selectNivel = (): HTMLSelectElement | null => raiz().querySelector<HTMLSelectElement>('.actividad-form__nivel');
     const casilla = (): HTMLInputElement =>
       raiz().querySelector<HTMLInputElement>('input[formControlName="todosLosNiveles"]')!;
-    const valoresDe = (css: string): string[] =>
-      Array.from(raiz().querySelector<HTMLSelectElement>(css)!.options).map((o) => o.value).filter((v) => v !== '');
-    const ASIG_PLAZA = '.actividad-form__plaza select[formControlName="asignatura"]';
-    const ASIG_RAIZ = '.actividad-form__fila--1 select[formControlName="asignatura"]';
+    const valoresDe = async (css: string): Promise<string[]> =>
+      (await opcionesSelector(fixture, css)).map((o) => o.valor).filter((v) => v !== '');
+    const ASIG_PLAZA = '.actividad-form__plaza app-selector-filtrable[formControlName="asignatura"]';
+    const ASIG_RAIZ = '.actividad-form__fila--1 app-selector-filtrable[formControlName="asignatura"]';
     const nota = (): HTMLElement | null => raiz().querySelector('[data-nota="nivel"]');
     const control = (nombre: string): unknown => instancia().form.controls[nombre].value;
 
@@ -1795,8 +1800,8 @@ describe('ActividadForm', () => {
       await fixture.whenStable();
 
       expect(nota()?.textContent?.trim()).toBe('Elige primero el nivel.');
-      expect(valoresDe(ASIG_PLAZA)).toEqual([]);
-      expect(valoresDe(ASIG_RAIZ)).toEqual([]);
+      expect(await valoresDe(ASIG_PLAZA)).toEqual([]);
+      expect(await valoresDe(ASIG_RAIZ)).toEqual([]);
       expect(enLista('subgrupos', 'disponibles')).toEqual([]);
 
       rellenar();
@@ -1819,8 +1824,8 @@ describe('ActividadForm', () => {
       await cambiarNivel('3ESO');
 
       expect(nota()).toBeNull();
-      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
-      expect(valoresDe(ASIG_RAIZ)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
+      expect(await valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
+      expect(await valoresDe(ASIG_RAIZ)).toEqual(['Biol-3ESO', 'Mat-3ESO']);
     });
 
     it('N3 con nivel, un subgrupo con un grupo de otro nivel queda fuera', async () => {
@@ -1836,7 +1841,7 @@ describe('ActividadForm', () => {
       casilla().click();
       await fixture.whenStable();
 
-      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
+      expect(await valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
       expect(new Set(enLista('subgrupos', 'disponibles')))
         .toEqual(new Set(['3ºA-Completo', '3ºAB-Refuerzo', 'Mixto', '4ºA-Completo']));
     });
@@ -1880,7 +1885,7 @@ describe('ActividadForm', () => {
       await cambiarNivel('4ESO');
 
       expect(enLista('subgrupos', 'elegidos')).toEqual(['3ºA-Completo']);
-      expect(raiz().querySelector<HTMLSelectElement>(ASIG_PLAZA)!.value).toBe('Biol-3ESO');
+      expect(valorSelector(fixture, ASIG_PLAZA)).toBe('Biol-3ESO');
       await elegirEnLista('subgrupos', '4ºA-Completo');
 
       instancia().guardar();
@@ -1900,7 +1905,7 @@ describe('ActividadForm', () => {
 
       expect(selectNivel()).toBeNull();
       expect(nota()).toBeNull();
-      expect(valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
+      expect(await valoresDe(ASIG_PLAZA)).toEqual(['Biol-3ESO', 'Biol-4ESO', 'Mat-3ESO', 'Tut']);
 
       instancia().form.patchValue({ codigo: 'REU-Dpto' });
       const fila = instancia().plazas.at(0);
@@ -1914,9 +1919,9 @@ describe('ActividadForm', () => {
     it('N10 cada asignatura se lee «Biol-3ESO — Biología y Geología»', async () => {
       montarNivel(null);
       await cambiarNivel('3ESO');
-      const opcion = raiz().querySelector<HTMLOptionElement>(`${ASIG_PLAZA} option[value="Biol-3ESO"]`)!;
+      const opcion = (await opcionesSelector(fixture, ASIG_PLAZA)).find((o) => o.valor === 'Biol-3ESO')!;
 
-      expect(opcion.textContent!.trim()).toBe('Biol-3ESO — Biología y Geología');
+      expect(opcion.texto).toBe('Biol-3ESO — Biología y Geología');
     });
   });
 });

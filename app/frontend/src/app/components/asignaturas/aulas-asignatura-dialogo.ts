@@ -15,7 +15,7 @@ import { AulaService } from '../../services/aula.service';
 import { Asignatura } from '../../models/asignatura.model';
 import { Aula } from '../../models/aula.model';
 import { AsignaturaAula, RolAulaAsignatura } from '../../models/asignatura-aula.model';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 
 /** Los tres estados del diálogo, gobernados por la respuesta del GET. */
 type EstadoAulas = 'cargando' | 'listo' | 'error';
@@ -40,7 +40,7 @@ type EstadoAulas = 'cargando' | 'listo' | 'error';
  */
 @Component({
   selector: 'app-aulas-asignatura-dialogo',
-  imports: [ReactiveFormsModule, FiltroOpciones],
+  imports: [ReactiveFormsModule, SelectorFiltrable],
   templateUrl: './aulas-asignatura-dialogo.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './aulas-asignatura-dialogo.css',

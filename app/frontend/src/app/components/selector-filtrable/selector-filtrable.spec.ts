@@ -176,7 +176,7 @@ describe('SelectorFiltrable', () => {
       await montar();
       expect(raiz().querySelectorAll('input')).toHaveLength(1);
       expect(campo().getAttribute('role')).toBe('combobox');
-      expect(raiz().querySelector('app-filtro-opciones, input[type="search"]')).toBeNull();
+      expect(raiz().querySelector('input[type="search"]')).toBeNull();
     });
   });
 
@@ -445,6 +445,19 @@ describe('SelectorFiltrable', () => {
       await clic('— elige —');
       expect(anfitrion().control.value).toBe('G03');
       expect(recibidos).toEqual([]);
+    });
+
+    it('con vaciaElegible=false y el valor \'\', elegir una opción la fija (F3.1)', async () => {
+      await montar((a) => {
+        a.opcionVacia.set('— elige —');
+        a.vaciaElegible.set(false);
+      });
+      await escribir('g1');
+      await clic('G11');
+      expect(anfitrion().control.value).toBe('G11');
+      expect(recibidos).toEqual(['G11']);
+      expect(campo().value).toBe('G11');
+      expect(expandida()).toBe('false');
     });
 
     it('con el valor \'\' el campo muestra el texto de la vacía', async () => {

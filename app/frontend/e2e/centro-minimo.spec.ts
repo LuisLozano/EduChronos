@@ -231,10 +231,12 @@ test('crea un centro mínimo por la UI y el solver produce horario', async ({ pa
   // localizador casaría dos elementos.
   const plaza = actividad.locator('.actividad-form__plaza').first();
   // La plaza elige la asignatura por su código, que es el compuesto.
-  await plaza.locator('[formControlName="asignatura"]').selectOption('MAT-1ESO');
+  await plaza.locator('[formControlName="asignatura"] .selector-filtrable__flecha').click();
+  await plaza.locator('[formControlName="asignatura"] [role="option"][data-valor="MAT-1ESO"]').click();
   // `modoAula` no se toca: la fábrica de plazas nace en 'FIJA', así que el select de
   // aula fija YA está renderizado y no hay que esperar a ningún repintado del XOR.
-  await plaza.locator('[formControlName="aulaFija"]').selectOption('A1');
+  await plaza.locator('[formControlName="aulaFija"] .selector-filtrable__flecha').click();
+  await plaza.locator('[formControlName="aulaFija"] [role="option"][data-valor="A1"]').click();
   await plaza.locator('[data-lista="profesores"] [data-lado="disponibles"] li[data-codigo="MAT1"]').dblclick();
   await expect(plaza.locator('[data-lista="profesores"] [data-lado="elegidos"] li[data-codigo="MAT1"]')).toHaveCount(1);
   await plaza.locator('[data-lista="subgrupos"] [data-lado="disponibles"] li[data-codigo="1ESOA-TODO"]').dblclick();

@@ -39,6 +39,7 @@
           ngOption
           class="selector-filtrable__opcion selector-filtrable__opcion--vacia"
           value=""
+          data-valor=""
           [label]="opcionVacia()!"
           [disabled]="!vaciaElegible()"
         >
@@ -46,7 +47,13 @@
         </div>
       }
       @for (o of visibles(); track codigo()(o)) {
-        <div ngOption class="selector-filtrable__opcion" [value]="codigo()(o)" [label]="texto()(o)">
+        <div
+          ngOption
+          class="selector-filtrable__opcion"
+          [value]="codigo()(o)"
+          [attr.data-valor]="codigo()(o)"
+          [label]="texto()(o)"
+        >
           {{ texto()(o) }}
         </div>
       }

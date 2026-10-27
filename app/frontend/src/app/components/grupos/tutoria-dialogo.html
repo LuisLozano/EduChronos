@@ -20,30 +20,18 @@
           <label class="tutoria-dialogo__etiqueta" for="tutoria-principal">
             Tutor principal
           </label>
-          <app-filtro-opciones
-            #fTutor
+          <!-- La vacía, SELECCIONABLE: aquí '' no es "aún no has elegido", es el valor legítimo
+               "este grupo no tiene tutor principal", y elegirla es como se quita. El valor es el
+               CÓDIGO del profesor (codigoDe), nunca su id: un id colado aquí moriría con un 404. -->
+          <app-selector-filtrable
+            idEntrada="tutoria-principal"
+            formControlName="principal"
             etiqueta="profesores"
+            opcionVacia="— sin tutor —"
             [opciones]="profesorado()"
             [texto]="textoTutor"
             [codigo]="codigoDe"
-            [seleccionados]="[form.controls.principal.value]"
           />
-          <select
-            id="tutoria-principal"
-            formControlName="principal"
-            class="tutoria-dialogo__input"
-          >
-            <!-- SELECCIONABLE y sin `disabled`, al revés que el placeholder de
-                 GrupoForm: aquí '' no es "aún no has elegido", es el valor legítimo
-                 "este grupo no tiene tutor principal", y elegirlo es como se quita. -->
-            <option value="">— sin tutor —</option>
-            @for (p of fTutor.visibles(); track p.id) {
-              <!-- El value es el CÓDIGO, nunca el id: el value de un <select> vuelve
-                   como TEXTO, así que un id colado aquí pasaría el compilador y
-                   moriría con un 404 al guardar. -->
-              <option [value]="p.codigo">{{ p.codigo }} — {{ p.nombreCompleto }}</option>
-            }
-          </select>
         </div>
 
         @if (coTutores().length > 0) {

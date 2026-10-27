@@ -47,20 +47,16 @@
 
         <div class="aulas-asignatura__campo">
           <label class="aulas-asignatura__etiqueta" for="aulas-asignatura-nueva">Añadir aula</label>
-          <app-filtro-opciones
-            #fAulas
+          <app-selector-filtrable
+            class="aulas-asignatura__nueva"
+            idEntrada="aulas-asignatura-nueva"
             etiqueta="aulas"
+            opcionVacia="— elige un aula —"
+            [formControl]="nueva"
             [opciones]="disponibles()"
             [texto]="codigoDe"
             [codigo]="codigoDe"
-            [seleccionados]="[nueva.value]"
           />
-          <select id="aulas-asignatura-nueva" [formControl]="nueva" class="aulas-asignatura__input aulas-asignatura__nueva">
-            <option value="">— elige un aula —</option>
-            @for (a of fAulas.visibles(); track a.id) {
-              <option [value]="a.codigo">{{ a.codigo }}</option>
-            }
-          </select>
           <button type="button" class="aulas-asignatura__anadir accion-compacta" (click)="anadir()">
             Añadir
           </button>

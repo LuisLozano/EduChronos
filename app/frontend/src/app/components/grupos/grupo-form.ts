@@ -8,7 +8,7 @@ import { AulaService } from '../../services/aula.service';
 import { Grupo, GrupoRequest } from '../../models/grupo.model';
 import { Nivel } from '../../models/nivel.model';
 import { Aula } from '../../models/aula.model';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 
 /**
  * Alta y edición de un grupo administrativo en un mismo componente, presentado en
@@ -57,7 +57,7 @@ import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
  */
 @Component({
   selector: 'app-grupo-form',
-  imports: [ReactiveFormsModule, FiltroOpciones],
+  imports: [ReactiveFormsModule, SelectorFiltrable],
   templateUrl: './grupo-form.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './grupo-form.css',

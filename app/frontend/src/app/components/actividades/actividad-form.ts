@@ -41,7 +41,7 @@ import { Grupo } from '../../models/grupo.model';
 import { Nivel } from '../../models/nivel.model';
 import { Profesor } from '../../models/profesor.model';
 import { Subgrupo } from '../../models/subgrupo.model';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 import { ListaDoble } from '../lista-doble/lista-doble';
 
 /** Validator: un `string[]` debe tener al menos un elemento. `Validators.required` no
@@ -246,7 +246,7 @@ type PlazaFila = FormGroup<{
  */
 @Component({
   selector: 'app-actividad-form',
-  imports: [ReactiveFormsModule, FiltroOpciones, ListaDoble],
+  imports: [ReactiveFormsModule, SelectorFiltrable, ListaDoble],
   templateUrl: './actividad-form.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './actividad-form.css',

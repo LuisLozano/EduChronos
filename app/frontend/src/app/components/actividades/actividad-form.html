@@ -50,23 +50,20 @@
       }
 
       <div class="actividad-form__con-filtro">
-        <app-filtro-opciones
-          #fAsignatura
-          etiqueta="asignaturas"
-          [opciones]="asignaturasDeLaActividad()"
-          [texto]="textoAsignatura"
-          [codigo]="codigoDe"
-          [seleccionados]="[form.controls.asignatura.value]"
-        />
-        <label class="actividad-form__campo" [for]="id('asignatura')">
-          <span class="actividad-form__etiqueta">Asignatura (opcional)</span>
-          <select formControlName="asignatura" class="actividad-form__input" [id]="id('asignatura')">
-            <option value="">— varias (una por plaza) —</option>
-            @for (a of fAsignatura.visibles(); track a.id) {
-            <option [value]="a.codigo">{{ textoAsignatura(a) }}</option>
-            }
-          </select>
-        </label>
+        <!-- S260 (EN-21): el selector va FUERA de su <label>, asociado por for/id; dentro, la lista
+             abierta entraría en el texto de la etiqueta, que es el nombre del campo. -->
+        <div class="actividad-form__campo">
+          <label class="actividad-form__etiqueta" [for]="id('asignatura')">Asignatura (opcional)</label>
+          <app-selector-filtrable
+            formControlName="asignatura"
+            [idEntrada]="id('asignatura')"
+            etiqueta="asignaturas"
+            opcionVacia="— varias (una por plaza) —"
+            [opciones]="asignaturasDeLaActividad()"
+            [texto]="textoAsignatura"
+            [codigo]="codigoDe"
+          />
+        </div>
       </div>
     </div>
 
@@ -186,26 +183,22 @@
         <!-- Asignatura de la plaza y, a la derecha en la misma línea, «Quitar esta plaza». -->
         <div class="actividad-form__plaza-cabecera">
           <div class="actividad-form__con-filtro">
-            <app-filtro-opciones
-              #fAsignaturaPlaza
-              etiqueta="asignaturas"
-              [opciones]="opcionesDePlazas()[i]?.asignaturas ?? []"
-              [texto]="textoAsignatura"
-              [codigo]="codigoDe"
-              [seleccionados]="[fila.controls.asignatura.value]"
-            />
-            <label class="actividad-form__campo" [for]="id('asignatura', i)">
-              <span class="actividad-form__etiqueta">Asignatura de la plaza</span>
-              <select formControlName="asignatura" class="actividad-form__input" [id]="id('asignatura', i)">
-                <option value="" disabled>— elige —</option>
-                @for (a of fAsignaturaPlaza.visibles(); track a.id) {
-                <option [value]="a.codigo">{{ textoAsignatura(a) }}</option>
-                }
-              </select>
+            <div class="actividad-form__campo">
+              <label class="actividad-form__etiqueta" [for]="id('asignatura', i)">Asignatura de la plaza</label>
+              <app-selector-filtrable
+                formControlName="asignatura"
+                [idEntrada]="id('asignatura', i)"
+                etiqueta="asignaturas"
+                opcionVacia="— elige —"
+                [vaciaElegible]="false"
+                [opciones]="opcionesDePlazas()[i]?.asignaturas ?? []"
+                [texto]="textoAsignatura"
+                [codigo]="codigoDe"
+              />
               @if (fila.controls.asignatura.touched && fila.controls.asignatura.invalid) {
               <span class="actividad-form__error">La asignatura de la plaza es obligatoria.</span>
               }
-            </label>
+            </div>
           </div>
           <div class="actividad-form__plaza-acciones">
             <button
@@ -281,30 +274,23 @@
 
         @if (fila.controls.modoAula.value === 'FIJA') {
         <div class="actividad-form__con-filtro">
-          <app-filtro-opciones
-            #fAulaFija
-            etiqueta="aulas"
-            [opciones]="aulas()"
-            [texto]="textoAula"
-            [codigo]="codigoDe"
-            [seleccionados]="[fila.controls.aulaFija.value]"
-          />
-          <label class="actividad-form__campo actividad-form__campo--aula-fija" [for]="id('aula-fija', i)">
-            <span class="actividad-form__etiqueta">Aula fija</span>
-            <select
+          <div class="actividad-form__campo actividad-form__campo--aula-fija">
+            <label class="actividad-form__etiqueta" [for]="id('aula-fija', i)">Aula fija</label>
+            <app-selector-filtrable
+              class="actividad-form__aula-fija"
               formControlName="aulaFija"
-              class="actividad-form__input actividad-form__aula-fija"
-              [id]="id('aula-fija', i)"
-            >
-              <option value="" disabled>— elige —</option>
-              @for (aula of fAulaFija.visibles(); track aula.id) {
-              <option [value]="aula.codigo">{{ textoAula(aula) }}</option>
-              }
-            </select>
+              [idEntrada]="id('aula-fija', i)"
+              etiqueta="aulas"
+              opcionVacia="— elige —"
+              [vaciaElegible]="false"
+              [opciones]="aulas()"
+              [texto]="textoAula"
+              [codigo]="codigoDe"
+            />
             @if (fila.controls.aulaFija.touched && fila.controls.aulaFija.invalid) {
             <span class="actividad-form__error">Elige un aula.</span>
             }
-          </label>
+          </div>
         </div>
         } @else if (fila.controls.modoAula.value === 'CANDIDATAS') {
         <div class="actividad-form__campo actividad-form__candidatas" data-bloque="aulas">

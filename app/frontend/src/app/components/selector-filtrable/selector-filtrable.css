@@ -1,20 +1,24 @@
+/* Bloque: en un formulario ocupa su columna, como los `<select>` con `width: 100%` (S260, F3.1). */
 :host {
-  display: inline-block;
+  display: block;
 }
 
 .selector-filtrable {
   position: relative;
 }
 
+/* Las medidas del `<select>` de styles.css (regla `select`): mismo alto, letra y borde que los
+   selectores que sustituye y que el de «Vista» a su lado (S260, F3.1). */
 .selector-filtrable__campo {
   width: 100%;
   min-width: 14rem;
-  padding: var(--e1) var(--e2);
+  padding: var(--e2);
   padding-right: var(--e5);
-  border: 1px solid var(--color-borde);
+  border: var(--borde-fino) solid var(--color-borde);
   border-radius: var(--radio-s);
   box-sizing: border-box;
-  font: inherit;
+  font-family: inherit;
+  font-size: var(--tam-s);
   background: var(--color-superficie);
   color: var(--color-tinta);
 }

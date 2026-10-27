@@ -8,7 +8,7 @@ import { ProfesorService } from '../../services/profesor.service';
 import { Grupo } from '../../models/grupo.model';
 import { Profesor } from '../../models/profesor.model';
 import { Tutoria, TutoriaRequest } from '../../models/tutoria.model';
-import { FiltroOpciones } from '../filtro-opciones/filtro-opciones';
+import { SelectorFiltrable } from '../selector-filtrable/selector-filtrable';
 
 /**
  * En qué estado está la pantalla. UN valor, no banderas sueltas: mismo criterio que
@@ -69,7 +69,7 @@ export type EstadoTutoria = 'cargando' | 'cargado' | 'error';
  */
 @Component({
   selector: 'app-tutoria-dialogo',
-  imports: [ReactiveFormsModule, FiltroOpciones],
+  imports: [ReactiveFormsModule, SelectorFiltrable],
   templateUrl: './tutoria-dialogo.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tutoria-dialogo.css',

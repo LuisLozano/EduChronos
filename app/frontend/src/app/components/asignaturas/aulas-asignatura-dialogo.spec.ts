@@ -8,6 +8,15 @@ import { AulaService } from '../../services/aula.service';
 import { Asignatura } from '../../models/asignatura.model';
 import { Aula } from '../../models/aula.model';
 import { AsignaturaAula } from '../../models/asignatura-aula.model';
+import {
+  abrirSelector,
+  campoSelector,
+  elegirEnSelector,
+  escribirEnSelector,
+  nombreSelector,
+  opcionesSelector,
+  valorSelector,
+} from '../../testing/selector-filtrable.helper';
 
 /**
  * Congela el diálogo de las aulas de una asignatura (S206): sus TRES estados a partir de las DOS
@@ -78,13 +87,13 @@ describe('AulasAsignaturaDialogo', () => {
     Array.from(raiz().querySelectorAll('.aulas-asignatura__fila .dato')).map((e) => e.textContent!.trim());
   const radio = (rol: 'exclusiva' | 'preferida'): HTMLInputElement =>
     raiz().querySelector(`.aulas-asignatura__${rol}`) as HTMLInputElement;
-  const selector = (): HTMLSelectElement => raiz().querySelector('.aulas-asignatura__nueva') as HTMLSelectElement;
+  /** El selector de añadir aula (S260): el host de app-selector-filtrable. */
+  const NUEVA = '.aulas-asignatura__nueva';
   const botonGuardar = (): HTMLButtonElement =>
     raiz().querySelector('.aulas-asignatura__guardar') as HTMLButtonElement;
 
   async function elegirYAnadir(codigo: string): Promise<void> {
-    selector().value = codigo;
-    selector().dispatchEvent(new Event('change'));
+    await elegirEnSelector(fixture, NUEVA, codigo);
     (raiz().querySelector('.aulas-asignatura__anadir') as HTMLButtonElement).click();
     await fixture.whenStable();
   }
@@ -141,14 +150,15 @@ describe('AulasAsignaturaDialogo', () => {
   it('(7) añadir: el selector ofrece solo las que no están y lo añadido sale de él', async () => {
     montar(of(EXCLUSIVAS));
     await fixture.whenStable();
-    const ofrecidas = (): string[] => Array.from(selector().options).map((o) => o.value).filter((v) => v !== '');
-    expect(ofrecidas()).toEqual(['A13']);
+    const ofrecidas = async (): Promise<string[]> =>
+      (await opcionesSelector(fixture, NUEVA)).map((o) => o.valor).filter((v) => v !== '');
+    expect(await ofrecidas()).toEqual(['A13']);
 
     await elegirYAnadir('A13');
 
     expect(filas()).toEqual(['LAB1', 'LAB2', 'A13']);
-    expect(ofrecidas()).toEqual([]);
-    expect(selector().value).toBe('');
+    expect(await ofrecidas()).toEqual([]);
+    expect(valorSelector(fixture, NUEVA)).toBe('');
   });
 
   it('(8) quitar saca el aula de la lista y vuelve a ofrecerla', async () => {
@@ -158,7 +168,7 @@ describe('AulasAsignaturaDialogo', () => {
     await fixture.whenStable();
 
     expect(filas()).toEqual(['LAB2']);
-    expect(Array.from(selector().options).map((o) => o.value)).toContain('LAB1');
+    expect((await opcionesSelector(fixture, NUEVA)).map((o) => o.valor)).toContain('LAB1');
   });
 
   it('(9) guardar manda TODAS las filas con la marca elegida y cierra con true', async () => {
@@ -254,13 +264,19 @@ describe('AulasAsignaturaDialogo', () => {
     const doce = Array.from({ length: 12 }, (_, i) => aula(100 + i, `A${String(i + 1).padStart(2, '0')}`));
     montar(of([]), of(doce));
     await fixture.whenStable();
-    const campo = raiz().querySelector<HTMLInputElement>('input[aria-label="Filtrar aulas"]');
+    const campo = campoSelector(fixture, NUEVA);
     expect(campo).not.toBeNull();
-    campo!.value = 'A1';
-    campo!.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await escribirEnSelector(fixture, NUEVA, 'A1');
 
-    expect(Array.from(selector().options).map((o) => o.value).filter((v) => v !== ''))
+    expect((await opcionesSelector(fixture, NUEVA)).map((o) => o.valor).filter((v) => v !== ''))
       .toEqual(['A10', 'A11', 'A12']);
+  });
+
+  it('el nombre accesible del selector es su etiqueta «Añadir aula», también con la lista abierta (EN-21)', async () => {
+    montar(of(EXCLUSIVAS));
+    await fixture.whenStable();
+    await abrirSelector(fixture, NUEVA);
+    expect(campoSelector(fixture, NUEVA)!.getAttribute('aria-expanded')).toBe('true');
+    expect(nombreSelector(fixture, NUEVA)).toBe('Añadir aula');
   });
 });

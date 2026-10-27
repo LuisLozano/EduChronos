@@ -6,6 +6,14 @@ import {
 } from '@angular/common/http/testing';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { GrupoForm } from './grupo-form';
+import {
+  abrirSelector,
+  campoSelector,
+  elegirEnSelector,
+  nombreSelector,
+  opcionesSelector,
+  valorSelector,
+} from '../../testing/selector-filtrable.helper';
 
 /**
  * Congela el formulario de grupos. Hereda el foco del molde —(3)(4) traducción del
@@ -320,17 +328,17 @@ describe('GrupoForm', () => {
 
   // ─────────────────────────── S206 T2: aula del grupo
 
-  const selectAula = (): HTMLSelectElement =>
-    fixture.nativeElement.querySelector('.grupo-form__aula') as HTMLSelectElement;
+  /** El selector del aula del grupo (S260): el host de app-selector-filtrable. */
+  const AULA = '.grupo-form__aula';
 
-  it('(15) el selector de aula ofrece «— sin aula —» y todas las aulas, con su código como value', () => {
+  it('(15) el selector de aula ofrece «— sin aula —» y todas las aulas, con su código como value', async () => {
     montar(null);
-    const opciones = [...selectAula().options];
-    expect(opciones.map((o) => o.value)).toEqual(['', 'A13', 'A14']);
-    expect(opciones[0].textContent!.trim()).toBe('— sin aula —');
+    const opciones = await opcionesSelector(fixture, AULA);
+    expect(opciones.map((o) => o.valor)).toEqual(['', 'A13', 'A14']);
+    expect(opciones[0].texto).toBe('— sin aula —');
     // Seleccionable, al revés que el placeholder de niveles: elegirlo es como se quita el aula.
-    expect(opciones[0].disabled).toBe(false);
-    expect(selectAula().value).toBe('');
+    expect(opciones[0].deshabilitada).toBe(false);
+    expect(valorSelector(fixture, AULA)).toBe('');
   });
 
   it('(16) en alta, sin elegir aula, el cuerpo lleva aulaReferencia:null', () => {
@@ -346,9 +354,7 @@ describe('GrupoForm', () => {
   it('(17) elegir un aula manda su código', async () => {
     montar(null);
     instancia().form.setValue({ codigo: '1ESOA', nivel: '1ESO' });
-    selectAula().value = 'A14';
-    selectAula().dispatchEvent(new Event('change'));
-    await fixture.whenStable();
+    await elegirEnSelector(fixture, AULA, 'A14');
     instancia().guardar();
 
     const req = http.expectOne('/api/grupos');
@@ -361,8 +367,8 @@ describe('GrupoForm', () => {
     // grupo sin aula, así que editar otro campo y no reenviarla la borraría.
     montar({ id: 8, codigo: '2ESOB', nivel: '2ESO', tipo: 'ORDINARIO', aulaReferencia: 'A14' });
     await fixture.whenStable();
-    expect(selectAula().value).toBe('A14');
-    expect(selectAula().selectedIndex).toBe(2);
+    expect(valorSelector(fixture, AULA)).toBe('A14');
+    expect((await opcionesSelector(fixture, AULA)).findIndex((o) => o.elegida)).toBe(2);
 
     instancia().form.setValue({ codigo: '2ESOC', nivel: '2ESO' });
     instancia().guardar();
@@ -381,9 +387,7 @@ describe('GrupoForm', () => {
   it('(19) al editar, elegir «— sin aula —» manda null', async () => {
     montar({ id: 8, codigo: '2ESOB', nivel: '2ESO', tipo: 'ORDINARIO', aulaReferencia: 'A13' });
     await fixture.whenStable();
-    selectAula().value = '';
-    selectAula().dispatchEvent(new Event('change'));
-    await fixture.whenStable();
+    await elegirEnSelector(fixture, AULA, '');
     instancia().guardar();
 
     const req = http.expectOne('/api/grupos/8');
@@ -397,6 +401,13 @@ describe('GrupoForm', () => {
 
     const err = fixture.nativeElement.querySelector('.grupo-form__error-servidor').textContent;
     expect(err).toContain('No se pudieron cargar las aulas');
-    expect([...selectAula().options].map((o) => o.value)).toEqual(['']);
+    expect((await opcionesSelector(fixture, AULA)).map((o) => o.valor)).toEqual(['']);
+  });
+
+  it('el nombre accesible del selector de aula es su etiqueta «Aula del grupo», también con la lista abierta (EN-21)', async () => {
+    montar(null);
+    await abrirSelector(fixture, AULA);
+    expect(campoSelector(fixture, AULA)!.getAttribute('aria-expanded')).toBe('true');
+    expect(nombreSelector(fixture, AULA)).toBe('Aula del grupo');
   });
 });
