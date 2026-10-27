@@ -1,0 +1,1996 @@
+{
+ "grupos": [
+  "1B-A",
+  "1B-B",
+  "1B-C",
+  "1B-D",
+  "1FPB",
+  "1ºA",
+  "1ºB",
+  "1ºC",
+  "1ºD",
+  "2B-A",
+  "2B-B",
+  "2B-C",
+  "2FPB",
+  "2ºA",
+  "2ºB",
+  "2ºC",
+  "3ºA",
+  "3ºADi",
+  "3ºB",
+  "3ºBDi",
+  "3ºC",
+  "3ºCDi",
+  "4ºA",
+  "4ºADi",
+  "4ºB",
+  "4ºC",
+  "4ºD",
+  "4ºDDi"
+ ],
+ "profesores": [
+  {
+   "id": 1,
+   "codigo": "BYG1",
+   "nombreCompleto": "Macías Magro, Sonia",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 2,
+   "codigo": "BYG2",
+   "nombreCompleto": "Afán Herencia, María Trinidad",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 3,
+   "codigo": "BYG3",
+   "nombreCompleto": "Crespo Saborido, Ana María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 4,
+   "codigo": "CLA1",
+   "nombreCompleto": "Sacramento Trujillo, Dan",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 5,
+   "codigo": "DIB1",
+   "nombreCompleto": "Ruiz del Castillo, María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 6,
+   "codigo": "DIB2",
+   "nombreCompleto": "Téllez Martínez, Olga",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 7,
+   "codigo": "ECO",
+   "nombreCompleto": "Fuentes Lucas Torres, Sa",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 8,
+   "codigo": "EFI1",
+   "nombreCompleto": "Sierra Naranjo, Rubén",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 9,
+   "codigo": "EFI2",
+   "nombreCompleto": "García Granados, José Antonio",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 10,
+   "codigo": "EFI3",
+   "nombreCompleto": "Pérez Reyes, Ramón",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 11,
+   "codigo": "FIL1",
+   "nombreCompleto": "Montes García, Antonio",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 12,
+   "codigo": "FIL2",
+   "nombreCompleto": "Mejías Márquez, Manuela",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 13,
+   "codigo": "FIL3",
+   "nombreCompleto": "Solís Vázquez, José Davi",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 14,
+   "codigo": "FIS1",
+   "nombreCompleto": "Romero Quiles, Aguas San",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 15,
+   "codigo": "FIS2",
+   "nombreCompleto": "Domínguez González, Mari",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 16,
+   "codigo": "FIS3",
+   "nombreCompleto": "Marín Rodríguez, Rafael",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 17,
+   "codigo": "FIS4",
+   "nombreCompleto": "Carrasco López, Héctor",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 18,
+   "codigo": "FOL2",
+   "nombreCompleto": "García-Baquero Vega, Jos",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 19,
+   "codigo": "FOL3",
+   "nombreCompleto": "Borrero Santiago, Salomé",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 20,
+   "codigo": "FRA1",
+   "nombreCompleto": "Pino Travieso, Soraya de",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 21,
+   "codigo": "GH1",
+   "nombreCompleto": "Rosales Jiménez, Fco. Ja",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 22,
+   "codigo": "GH2",
+   "nombreCompleto": "Torres Cubillo, Mariano José",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 23,
+   "codigo": "GH3",
+   "nombreCompleto": "Vela Montero, José Anton",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 24,
+   "codigo": "GH4",
+   "nombreCompleto": "Fedriani Freixinet, María del Mar",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 25,
+   "codigo": "GH5",
+   "nombreCompleto": "López Escudero, Raquel",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 26,
+   "codigo": "GH6",
+   "nombreCompleto": "Jiménez Montes, María de los Ángele",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 27,
+   "codigo": "INF1",
+   "nombreCompleto": "Barba Riquel, María Carm",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 28,
+   "codigo": "ING1",
+   "nombreCompleto": "Doña Alcaide, Jesús",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 29,
+   "codigo": "ING2",
+   "nombreCompleto": "Velázquez Barba, Trinida",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 30,
+   "codigo": "ING3",
+   "nombreCompleto": "Painta Lesiak, Bárbara A",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 31,
+   "codigo": "ING4",
+   "nombreCompleto": "Torres Bravo, Adoración",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 32,
+   "codigo": "ING5",
+   "nombreCompleto": "Rodríguez Cobo, Lizbeth",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 33,
+   "codigo": "ING6",
+   "nombreCompleto": "Jiménez Morgaz, Elena María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 34,
+   "codigo": "LEN1",
+   "nombreCompleto": "Moreno Araujo, Fco. Javi",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 35,
+   "codigo": "LEN2",
+   "nombreCompleto": "García Gómez, Ana Belén",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 36,
+   "codigo": "LEN3",
+   "nombreCompleto": "García Bernal, María Ter",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 37,
+   "codigo": "LEN4",
+   "nombreCompleto": "Dorador de los Santos, M",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 38,
+   "codigo": "LEN5",
+   "nombreCompleto": "Torres Villar, Myriam",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 39,
+   "codigo": "LEN6",
+   "nombreCompleto": "García Rodríguez, Lina María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 40,
+   "codigo": "LEN7",
+   "nombreCompleto": "Moreno Mesa, Juan Manuel",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 41,
+   "codigo": "LEN8",
+   "nombreCompleto": "Rodríguez Illana, Manuel",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 42,
+   "codigo": "LEN9",
+   "nombreCompleto": "García Quintana, Consuelo",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 43,
+   "codigo": "MAT1",
+   "nombreCompleto": "Ríos Palomo, María del Carmen",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 44,
+   "codigo": "MAT2",
+   "nombreCompleto": "Mesa Guarnido, Eva María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 45,
+   "codigo": "MAT3",
+   "nombreCompleto": "Pérez Morales, Cristina",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 46,
+   "codigo": "MAT4",
+   "nombreCompleto": "Fernández García, Felipe",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 47,
+   "codigo": "MAT5",
+   "nombreCompleto": "López Ruiz, Paloma",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 48,
+   "codigo": "MAT6",
+   "nombreCompleto": "Gutiérrez Sánchez, Carlos Alberto",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 49,
+   "codigo": "MAT7",
+   "nombreCompleto": "Carbonell Coronado, Carm",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 50,
+   "codigo": "MAT8",
+   "nombreCompleto": "Campanario Canales, Fco. Javier",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 51,
+   "codigo": "MUS1",
+   "nombreCompleto": "Andrade Montesino, Juan",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 52,
+   "codigo": "ORI1",
+   "nombreCompleto": "Guerrero Serrano, Pilar",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 53,
+   "codigo": "PAU1",
+   "nombreCompleto": "Martínez Martínez, Enrique",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 54,
+   "codigo": "PAU2",
+   "nombreCompleto": "Millán Erencia, Antonio",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 55,
+   "codigo": "REL1",
+   "nombreCompleto": "Rivas Prieto, Carmen",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 56,
+   "codigo": "REV",
+   "nombreCompleto": "Religión Evangélica",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 57,
+   "codigo": "TEC1",
+   "nombreCompleto": "Jiméez López, Juan",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 58,
+   "codigo": "TEC2",
+   "nombreCompleto": "Redondo Ceballos, María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  },
+  {
+   "id": 59,
+   "codigo": "TEC3",
+   "nombreCompleto": "Baena Martín, José María",
+   "totalDeclarado": null,
+   "cargo": "PROFESOR",
+   "guardiasOrdinarias": 0,
+   "guardiasRecreo": 0
+  }
+ ],
+ "aulas": [
+  {
+   "id": 1,
+   "codigo": "A1",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 2,
+   "codigo": "A10",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 3,
+   "codigo": "A11",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 4,
+   "codigo": "A12 Informática",
+   "tipo": "INFORMATICA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 5,
+   "codigo": "A13",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 6,
+   "codigo": "A14",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 7,
+   "codigo": "A15",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 8,
+   "codigo": "A16",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 9,
+   "codigo": "A17",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 10,
+   "codigo": "A18",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 11,
+   "codigo": "A19 TUTOR",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 12,
+   "codigo": "A2",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 13,
+   "codigo": "A3",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 14,
+   "codigo": "A4",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 15,
+   "codigo": "A5",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 16,
+   "codigo": "A6 Laboratorio",
+   "tipo": "LAB_CIENCIAS",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 17,
+   "codigo": "A7",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 18,
+   "codigo": "A8",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 19,
+   "codigo": "A9",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 20,
+   "codigo": "B01",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 21,
+   "codigo": "B02",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 22,
+   "codigo": "B03",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 23,
+   "codigo": "B04",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 24,
+   "codigo": "B05",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 25,
+   "codigo": "B06",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 26,
+   "codigo": "B07",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 27,
+   "codigo": "B08",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 28,
+   "codigo": "B09",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 29,
+   "codigo": "B10",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 30,
+   "codigo": "B11 Taller Tecnología",
+   "tipo": "TALLER_TEC",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 31,
+   "codigo": "C00",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 32,
+   "codigo": "C01 Aula Plástica",
+   "tipo": "TALLER_PLASTICA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 33,
+   "codigo": "C02",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 34,
+   "codigo": "C03",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 35,
+   "codigo": "C04",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 36,
+   "codigo": "COM1",
+   "tipo": "COMUN",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 37,
+   "codigo": "COM4",
+   "tipo": "COMUN",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 38,
+   "codigo": "Gimnasio",
+   "tipo": "GIMNASIO",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 39,
+   "codigo": "Pista",
+   "tipo": "PISTA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 40,
+   "codigo": "Taller 1 Aula Plástica",
+   "tipo": "TALLER_PLASTICA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 41,
+   "codigo": "Taller 2",
+   "tipo": "TALLER_FPB",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 42,
+   "codigo": "Taller 3",
+   "tipo": "ORDINARIA",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 43,
+   "codigo": "Taller 4",
+   "tipo": "TALLER_FPB",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  },
+  {
+   "id": 44,
+   "codigo": "Taller 5",
+   "tipo": "TALLER_FPB",
+   "capacidad": null,
+   "edificio": null,
+   "planta": null,
+   "sector": null,
+   "enUso": true
+  }
+ ],
+ "asignaturas": [
+  {
+   "id": 1,
+   "codigo": "AFAVS-4ESO",
+   "codigoCorto": "AFAVS",
+   "nombreCompleto": "Actividad Física y Hábit",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 2,
+   "codigo": "ALCT-1ESO",
+   "codigoCorto": "ALCT",
+   "nombreCompleto": "ALCT",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 3,
+   "codigo": "AMO-1FPB",
+   "codigoCorto": "AMO",
+   "nombreCompleto": "Amovibles",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 4,
+   "codigo": "ANAP-1BACH",
+   "codigoCorto": "ANAP",
+   "nombreCompleto": "Anatomía",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 5,
+   "codigo": "ATED-1ESO",
+   "codigoCorto": "ATED",
+   "nombreCompleto": "Atención Educativa",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 101,
+   "codigo": "ATED-3ESO",
+   "codigoCorto": "ATED",
+   "nombreCompleto": "Atención Educativa",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 102,
+   "codigo": "ATEDU-2ESO",
+   "codigoCorto": "ATEDU",
+   "nombreCompleto": "Atención Educativa",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 6,
+   "codigo": "ATEDU-4ESO",
+   "codigoCorto": "ATEDU",
+   "nombreCompleto": "Atención Educativa",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 7,
+   "codigo": "AmbCT-4ESO",
+   "codigoCorto": "AmbCT",
+   "nombreCompleto": "Ámbito Científico-Tecnol",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 8,
+   "codigo": "AmbSL-4ESO",
+   "codigoCorto": "AmbSL",
+   "nombreCompleto": "Ámbito Social-Lingüístic",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 9,
+   "codigo": "BIOL-2BACH",
+   "codigoCorto": "BIOL",
+   "nombreCompleto": "Biología",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 10,
+   "codigo": "Bio-1BACH",
+   "codigoCorto": "Bio",
+   "nombreCompleto": "Biología y Geología y Ci",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 11,
+   "codigo": "BioNu-3ESO",
+   "codigoCorto": "BioNu",
+   "nombreCompleto": "Bioquímica y Nutrición",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 12,
+   "codigo": "Biol-3ESO",
+   "codigoCorto": "Biol",
+   "nombreCompleto": "Biología y Geología",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 103,
+   "codigo": "Biol-4ESO",
+   "codigoCorto": "Biol",
+   "nombreCompleto": "Biología y Geología",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 13,
+   "codigo": "ByG-1ESO",
+   "codigoCorto": "ByG",
+   "nombreCompleto": "Biología y Geología",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 14,
+   "codigo": "CA-1FPB",
+   "codigoCorto": "CA",
+   "nombreCompleto": "Ciencias Aplicadas",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 104,
+   "codigo": "CA-2FPB",
+   "codigoCorto": "CA",
+   "nombreCompleto": "Ciencias Aplicadas",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 15,
+   "codigo": "CE-1BACH",
+   "codigoCorto": "CE",
+   "nombreCompleto": "Cultura Emprendedora",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 16,
+   "codigo": "CS-1FPB",
+   "codigoCorto": "CS",
+   "nombreCompleto": "Comunicación y Sociedad",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 17,
+   "codigo": "CT-2BACH",
+   "codigoCorto": "CT",
+   "nombreCompleto": "Comentario de texto",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 18,
+   "codigo": "CeH-4ESO",
+   "codigoCorto": "CeH",
+   "nombreCompleto": "Cine e Historia",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 105,
+   "codigo": "CyR-1ESO",
+   "codigoCorto": "CyR",
+   "nombreCompleto": "Computación y Robótica",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 106,
+   "codigo": "CyR-2ESO",
+   "codigoCorto": "CyR",
+   "nombreCompleto": "Computación y Robótica",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 19,
+   "codigo": "CyR-3ESO",
+   "codigoCorto": "CyR",
+   "nombreCompleto": "Computación y Robótica",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 20,
+   "codigo": "CyS-2FPB",
+   "codigoCorto": "CyS",
+   "nombreCompleto": "Comunicación y Sociedad",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 21,
+   "codigo": "DA-1BACH",
+   "codigoCorto": "DA",
+   "nombreCompleto": "Dibujo Artístico",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 22,
+   "codigo": "DIG-4ESO",
+   "codigoCorto": "DIG",
+   "nombreCompleto": "Digitalización",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 107,
+   "codigo": "DT-2BACH",
+   "codigoCorto": "DT",
+   "nombreCompleto": "Dibujo Técnico",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 23,
+   "codigo": "DT-4ESO",
+   "codigoCorto": "DT",
+   "nombreCompleto": "Dibujo Técnico",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 24,
+   "codigo": "DTec-1BACH",
+   "codigoCorto": "DTec",
+   "nombreCompleto": "Dib. Técnico",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 25,
+   "codigo": "ECO-1BACH",
+   "codigoCorto": "ECO",
+   "nombreCompleto": "Economía",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 108,
+   "codigo": "ECO-4ESO",
+   "codigoCorto": "ECO",
+   "nombreCompleto": "Economía",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 26,
+   "codigo": "EF-1ESO",
+   "codigoCorto": "EF",
+   "nombreCompleto": "Ed.Física",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 109,
+   "codigo": "EF-2ESO",
+   "codigoCorto": "EF",
+   "nombreCompleto": "Ed.Física",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 110,
+   "codigo": "EF-3ESO",
+   "codigoCorto": "EF",
+   "nombreCompleto": "Ed.Física",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 27,
+   "codigo": "EFis-4ESO",
+   "codigoCorto": "EFis",
+   "nombreCompleto": "Ed. Fisica",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 28,
+   "codigo": "EFís-4ESO",
+   "codigoCorto": "EFís",
+   "nombreCompleto": "Ed.Física",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 29,
+   "codigo": "ELE-2FPB",
+   "codigoCorto": "ELE",
+   "nombreCompleto": "Electricidad",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 30,
+   "codigo": "EPVA-3ESO",
+   "codigoCorto": "EPVA",
+   "nombreCompleto": "Ed. Plástica y Visual",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 31,
+   "codigo": "EST-2BACH",
+   "codigoCorto": "EST",
+   "nombreCompleto": "Estadística",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 32,
+   "codigo": "EXPRE-4ESO",
+   "codigoCorto": "EXPRE",
+   "nombreCompleto": "Expresión Artística",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 33,
+   "codigo": "Econ-2BACH",
+   "codigoCorto": "Econ",
+   "nombreCompleto": "Economía Org Empresas",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 34,
+   "codigo": "EdFís-1BACH",
+   "codigoCorto": "EdFís",
+   "nombreCompleto": "Ed. Física",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 35,
+   "codigo": "FOPP-4ESO",
+   "codigoCorto": "FOPP",
+   "nombreCompleto": "FOPP",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 112,
+   "codigo": "FQ-1BACH",
+   "codigoCorto": "FQ",
+   "nombreCompleto": "Física y Química",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 36,
+   "codigo": "FQ-3ESO",
+   "codigoCorto": "FQ",
+   "nombreCompleto": "Física y Química",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 111,
+   "codigo": "FQ-4ESO",
+   "codigoCorto": "FQ",
+   "nombreCompleto": "Física y Química",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 37,
+   "codigo": "Filos-1BACH",
+   "codigoCorto": "Filos",
+   "nombreCompleto": "Filosofía",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 38,
+   "codigo": "Fr2-1ESO",
+   "codigoCorto": "Fr2",
+   "nombreCompleto": "Francés 2",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 113,
+   "codigo": "Fr2-2ESO",
+   "codigoCorto": "Fr2",
+   "nombreCompleto": "Francés 2",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 39,
+   "codigo": "FyQ-2ESO",
+   "codigoCorto": "FyQ",
+   "nombreCompleto": "Física y Química",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 40,
+   "codigo": "Físic-2BACH",
+   "codigoCorto": "Físic",
+   "nombreCompleto": "Física",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 41,
+   "codigo": "GRI-1BACH",
+   "codigoCorto": "GRI",
+   "nombreCompleto": "Griego",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 114,
+   "codigo": "GeH-2ESO",
+   "codigoCorto": "GeH",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 42,
+   "codigo": "GeH-4ESO",
+   "codigoCorto": "GeH",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 43,
+   "codigo": "Geo-1ESO",
+   "codigoCorto": "Geo",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 115,
+   "codigo": "Geo-3ESO",
+   "codigoCorto": "Geo",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 116,
+   "codigo": "Geogr-2BACH",
+   "codigoCorto": "Geogr",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 44,
+   "codigo": "Geogr-3ESO",
+   "codigoCorto": "Geogr",
+   "nombreCompleto": "Geografía e Historia",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 45,
+   "codigo": "Gri2-2BACH",
+   "codigoCorto": "Gri2",
+   "nombreCompleto": "Griego",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 46,
+   "codigo": "HART-2BACH",
+   "codigoCorto": "HART",
+   "nombreCompleto": "Historia del Arte",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 47,
+   "codigo": "HESP-2BACH",
+   "codigoCorto": "HESP",
+   "nombreCompleto": "Historia de España",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 48,
+   "codigo": "HFIL-2BACH",
+   "codigoCorto": "HFIL",
+   "nombreCompleto": "Filosofía",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 49,
+   "codigo": "HMC-1BACH",
+   "codigoCorto": "HMC",
+   "nombreCompleto": "Hist Mundo Cont.",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 50,
+   "codigo": "IPE-1FPB",
+   "codigoCorto": "IPE",
+   "nombreCompleto": "IPE",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 117,
+   "codigo": "Ing-1ESO",
+   "codigoCorto": "Ing",
+   "nombreCompleto": "Inglés",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 51,
+   "codigo": "Ing-4ESO",
+   "codigoCorto": "Ing",
+   "nombreCompleto": "Inglés",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 52,
+   "codigo": "Ing1-1BACH",
+   "codigoCorto": "Ing1",
+   "nombreCompleto": "Inglés",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 53,
+   "codigo": "IngDi-3ESO",
+   "codigoCorto": "IngDi",
+   "nombreCompleto": "Inglés diversificación",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 119,
+   "codigo": "Ingl-2BACH",
+   "codigoCorto": "Ingl",
+   "nombreCompleto": "Inglés",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 54,
+   "codigo": "Ingl-2ESO",
+   "codigoCorto": "Ingl",
+   "nombreCompleto": "Inglés",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 118,
+   "codigo": "Ingl-3ESO",
+   "codigoCorto": "Ingl",
+   "nombreCompleto": "Inglés",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 55,
+   "codigo": "LAT-4ESO",
+   "codigoCorto": "LAT",
+   "nombreCompleto": "Latín",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 123,
+   "codigo": "LCL-1BACH",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 56,
+   "codigo": "LCL-1ESO",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 124,
+   "codigo": "LCL-2BACH",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 120,
+   "codigo": "LCL-2ESO",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 121,
+   "codigo": "LCL-3ESO",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 122,
+   "codigo": "LCL-4ESO",
+   "codigoCorto": "LCL",
+   "nombreCompleto": "Lengua Castellana y Lite",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 57,
+   "codigo": "LU-1BACH",
+   "codigoCorto": "LU",
+   "nombreCompleto": "Literatura Universal",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 58,
+   "codigo": "Lab-1BACH",
+   "codigoCorto": "Lab",
+   "nombreCompleto": "Laboratorio",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 59,
+   "codigo": "Lat2-2BACH",
+   "codigoCorto": "Lat2",
+   "nombreCompleto": "Latín",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 60,
+   "codigo": "Latín-1BACH",
+   "codigoCorto": "Latín",
+   "nombreCompleto": "Latín",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 61,
+   "codigo": "MCCSS-1BACH",
+   "codigoCorto": "MCCSS",
+   "nombreCompleto": "Mat. Apl.C. Sociales",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 62,
+   "codigo": "MEC-2FPB",
+   "codigoCorto": "MEC",
+   "nombreCompleto": "Mecánica",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 63,
+   "codigo": "MECSO-1FPB",
+   "codigoCorto": "MECSO",
+   "nombreCompleto": "Mecanizado y Soldadura",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 64,
+   "codigo": "MIT-2BACH",
+   "codigoCorto": "MIT",
+   "nombreCompleto": "Mitología",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 65,
+   "codigo": "MaCSa-2BACH",
+   "codigoCorto": "MaCSa",
+   "nombreCompleto": "Mat. Apl.C. Sociales A",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 66,
+   "codigo": "Mat-1ESO",
+   "codigoCorto": "Mat",
+   "nombreCompleto": "Matemáticas",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 125,
+   "codigo": "Mat-2ESO",
+   "codigoCorto": "Mat",
+   "nombreCompleto": "Matemáticas",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 126,
+   "codigo": "Mat-3ESO",
+   "codigoCorto": "Mat",
+   "nombreCompleto": "Matemáticas",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 67,
+   "codigo": "MatAc-4ESO",
+   "codigoCorto": "MatAc",
+   "nombreCompleto": "Matemáticas Académicas",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 68,
+   "codigo": "MatAp-4ESO",
+   "codigoCorto": "MatAp",
+   "nombreCompleto": "Matemáticas Aplicadas",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 69,
+   "codigo": "Mate2-2BACH",
+   "codigoCorto": "Mate2",
+   "nombreCompleto": "Matemáticas II",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 70,
+   "codigo": "Matem-1BACH",
+   "codigoCorto": "Matem",
+   "nombreCompleto": "Matemáticas",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 71,
+   "codigo": "Mús-1ESO",
+   "codigoCorto": "Mús",
+   "nombreCompleto": "Música",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 127,
+   "codigo": "Mús-2ESO",
+   "codigoCorto": "Mús",
+   "nombreCompleto": "Música",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 72,
+   "codigo": "OyD-1ESO",
+   "codigoCorto": "OyD",
+   "nombreCompleto": "Oratoria y Debate",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 128,
+   "codigo": "OyD-3ESO",
+   "codigoCorto": "OyD",
+   "nombreCompleto": "Oratoria y Debate",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 73,
+   "codigo": "PEPA-2ESO",
+   "codigoCorto": "PEPA",
+   "nombreCompleto": "PEPA",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 74,
+   "codigo": "PI-2FPB",
+   "codigoCorto": "PI",
+   "nombreCompleto": "Proyecto Intermodular",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 75,
+   "codigo": "PLAS-1ESO",
+   "codigoCorto": "PLAS",
+   "nombreCompleto": "Plástica",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 76,
+   "codigo": "PS-1FPB",
+   "codigoCorto": "PS",
+   "nombreCompleto": "Preparación de superfici",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 77,
+   "codigo": "PTEV-2BACH",
+   "codigoCorto": "PTEV",
+   "nombreCompleto": "PTEV",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 78,
+   "codigo": "PTVE-1BACH",
+   "codigoCorto": "PTVE",
+   "nombreCompleto": "Proyecto Transversal en",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 79,
+   "codigo": "Pat-1BACH",
+   "codigoCorto": "Pat",
+   "nombreCompleto": "Patrimonio",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 80,
+   "codigo": "QUI-2BACH",
+   "codigoCorto": "QUI",
+   "nombreCompleto": "Química",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 129,
+   "codigo": "RefLe-2ESO",
+   "codigoCorto": "RefLe",
+   "nombreCompleto": "Refuerzo Lengua",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 81,
+   "codigo": "RefLe-3ESO",
+   "codigoCorto": "RefLe",
+   "nombreCompleto": "Refuerzo Lengua",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 130,
+   "codigo": "RefLe-4ESO",
+   "codigoCorto": "RefLe",
+   "nombreCompleto": "Refuerzo Lengua",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 131,
+   "codigo": "RefMt-1ESO",
+   "codigoCorto": "RefMt",
+   "nombreCompleto": "Refuerzo Matemáticas",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 132,
+   "codigo": "RefMt-2ESO",
+   "codigoCorto": "RefMt",
+   "nombreCompleto": "Refuerzo Matemáticas",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 82,
+   "codigo": "RefMt-3ESO",
+   "codigoCorto": "RefMt",
+   "nombreCompleto": "Refuerzo Matemáticas",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 133,
+   "codigo": "RefMt-4ESO",
+   "codigoCorto": "RefMt",
+   "nombreCompleto": "Refuerzo Matemáticas",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 134,
+   "codigo": "Rel-2ESO",
+   "codigoCorto": "Rel",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 83,
+   "codigo": "Rel-3ESO",
+   "codigoCorto": "Rel",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 135,
+   "codigo": "Rel-4ESO",
+   "codigoCorto": "Rel",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 84,
+   "codigo": "RelEV-2ESO",
+   "codigoCorto": "RelEV",
+   "nombreCompleto": "Religión Evangélica",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 85,
+   "codigo": "Relig-1BACH",
+   "codigoCorto": "Relig",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 136,
+   "codigo": "Relig-1ESO",
+   "codigoCorto": "Relig",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 137,
+   "codigo": "Relig-2BACH",
+   "codigoCorto": "Relig",
+   "nombreCompleto": "Religión y Moral Católic",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 138,
+   "codigo": "TEC-2BACH",
+   "codigoCorto": "TEC",
+   "nombreCompleto": "Tecnología",
+   "nivel": "2BACH"
+  },
+  {
+   "id": 86,
+   "codigo": "TEC-4ESO",
+   "codigoCorto": "TEC",
+   "nombreCompleto": "Tecnología",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 87,
+   "codigo": "TEst2-1BACH",
+   "codigoCorto": "TEst2",
+   "nombreCompleto": "Técnicas de estudio II",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 88,
+   "codigo": "TEstI-1BACH",
+   "codigoCorto": "TEstI",
+   "nombreCompleto": "Técnicas de estudio I",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 89,
+   "codigo": "TICO-1BACH",
+   "codigoCorto": "TICO",
+   "nombreCompleto": "TICO",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 90,
+   "codigo": "TPMAR-3ESO",
+   "codigoCorto": "TPMAR",
+   "nombreCompleto": "Tutoría Orientación",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 139,
+   "codigo": "TPMAR-4ESO",
+   "codigoCorto": "TPMAR",
+   "nombreCompleto": "Tutoría Orientación",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 91,
+   "codigo": "TUT1-1ESO",
+   "codigoCorto": "TUT1",
+   "nombreCompleto": "Tutoría alumnos",
+   "nivel": "1ESO"
+  },
+  {
+   "id": 92,
+   "codigo": "TUT2-2ESO",
+   "codigoCorto": "TUT2",
+   "nombreCompleto": "Tutoría alumnos (2º ESO)",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 93,
+   "codigo": "TUT3-3ESO",
+   "codigoCorto": "TUT3",
+   "nombreCompleto": "Tutoría alumnos (3º ESO)",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 94,
+   "codigo": "TUT4-4ESO",
+   "codigoCorto": "TUT4",
+   "nombreCompleto": "Tutoría alumnos (4º ESO)",
+   "nivel": "4ESO"
+  },
+  {
+   "id": 95,
+   "codigo": "Tec-2ESO",
+   "codigoCorto": "Tec",
+   "nombreCompleto": "Tecnología y Digitalizac",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 140,
+   "codigo": "Tec-3ESO",
+   "codigoCorto": "Tec",
+   "nombreCompleto": "Tecnología y Digitalizac",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 96,
+   "codigo": "TecIn-1BACH",
+   "codigoCorto": "TecIn",
+   "nombreCompleto": "Tecnología e Ingeniería",
+   "nivel": "1BACH"
+  },
+  {
+   "id": 97,
+   "codigo": "Tut-1FPB",
+   "codigoCorto": "Tut",
+   "nombreCompleto": "Tutoría",
+   "nivel": "1FPB"
+  },
+  {
+   "id": 141,
+   "codigo": "Tut-2FPB",
+   "codigoCorto": "Tut",
+   "nombreCompleto": "Tutoría",
+   "nivel": "2FPB"
+  },
+  {
+   "id": 98,
+   "codigo": "VEtic-2ESO",
+   "codigoCorto": "VEtic",
+   "nombreCompleto": "Valores Éticos",
+   "nivel": "2ESO"
+  },
+  {
+   "id": 99,
+   "codigo": "ÁmbCM-3ESO",
+   "codigoCorto": "ÁmbCM",
+   "nombreCompleto": "Ámb. Científico-Matemáti",
+   "nivel": "3ESO"
+  },
+  {
+   "id": 100,
+   "codigo": "ÁmbSL-3ESO",
+   "codigoCorto": "ÁmbSL",
+   "nombreCompleto": "Ámb. Sociolingüístico",
+   "nivel": "3ESO"
+  }
+ ]
+}
