@@ -2,46 +2,47 @@
 <!-- INDICE:INICIO -->
 <!-- Generado en M1 (M-doc-3). Líneas INDICATIVAS; manda el texto. -->
 
-- L55 — ## 1. Objetivos terminados
-- L57 — ### H2 — Configurar un centro desde cero
-- L59 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
-- L75 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
-- L147 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
-- L397 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
-- L684 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
-- L785 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
-- L884 — ### H1 — Ajustar (cierre)
-- L886 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
-- L1063 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
-- L1354 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
-- L1544 — ### H3 — Exportar
-- L1546 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
-- L1607 — ### H4 — Instalar y pasar de curso
-- L1609 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
-- L1783 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
-- L1878 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
-- L1947 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
-- L1983 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
-- L1985 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
-- L2034 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
-- L2069 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
-- L2104 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
-- L2133 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
-- L2172 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
-- L2210 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
-- L2247 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
-- L2284 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
-- L2320 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
-- L2338 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
-- L2364 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
-- L2396 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
-- L2415 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
-- L2449 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
-- L2483 — #### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
-- L2516 — ## 2. Deuda cerrada de §4
-- L2518 — ### Deuda técnica real, colgada de su objetivo
-- L2596 — ### Mejora futura, cuelga y espera
-- L2617 — ### Deuda ya CERRADA (histórico, no pendiente)
+- L56 — ## 1. Objetivos terminados
+- L58 — ### H2 — Configurar un centro desde cero
+- L60 — #### O-shell — "La aplicación es navegable." ✔ TERMINADO (S100)
+- L76 — #### O-catálogo — "Creo los elementos simples del centro." ✔ TERMINADO (S106)
+- L148 — #### O-estructura — "Expreso la complejidad real del centro." ✔ TERMINADO (S114)
+- L398 — #### O-demo — "El centro real funciona de punta a punta." ✔ TERMINADO (S137)
+- L685 — #### O-particiones — "Un grupo nuevo entra en el curso sin reconfigurar a mano." ✔ TERMINADO (S141)
+- L786 — #### O-disponibilidad — "El centro introduce la disponibilidad de su profesorado." ✔ TERMINADO (S167)
+- L885 — ### H1 — Ajustar (cierre)
+- L887 — #### O-ajuste-cierre — "El ajuste manual está completo y verificado." ✔ TERMINADO (S146)
+- L1064 — #### O-diseño — "La aplicación tiene un aspecto cuidado y coherente." ✔ TERMINADO (S133)
+- L1355 — #### O-navegación — "La aplicación se maneja como una aplicación de escritorio." ✔ TERMINADO (S127)
+- L1545 — ### H3 — Exportar
+- L1547 — #### O-exportación — "El horario sale de la aplicación, en papel y en datos." ✔ TERMINADO (S150)
+- L1608 — ### H4 — Instalar y pasar de curso
+- L1610 — #### O-instalación — "La aplicación se instala, arranca y se cierra en un Windows limpio sin ayuda técnica." ✔ TERMINADO (S156)
+- L1784 — #### O-curso — "El centro empieza el curso siguiente sin perder el anterior." ✔ TERMINADO (S163)
+- L1879 — #### O-aceptación — "La cadena entera de §1 pasa en un Windows limpio." ✔ TERMINADO (S172, con salvedad)
+- L1948 — #### O-ci — "Cada cambio se prueba solo, y cada versión sale construida y aceptada." TERMINADO (S177)
+- L1984 — ### H5 — Un profesor hace el horario 2026/2027 con Educhronos
+- L1986 — #### O-demo-bundle — "El centro ve su curso en Educhronos y dice qué le falta." ✔ TERMINADO (S189, con salvedad)
+- L2035 — #### O-pre-demo — "La secretaria elige cuánto espera, ve que se está generando y encuentra lo que busca en las listas." ✔ TERMINADO (S186)
+- L2070 — #### O-base-tecnica — "Cada versión adapta las bases anteriores, dice qué versión es y deja rastro de lo que hace." ✔ TERMINADO (S193)
+- L2105 — #### O-carga-2026 — "El horario oficial de 2026/2027 entra en Educhronos, en una base aparte que la secretaria no ve." ✔ TERMINADO (S199)
+- L2134 — #### O-datos-centro — "La secretaria declara los totales del centro y ve si cuadran, y mete reuniones, funciones y cargos sin rodeos." ✔ TERMINADO (S204)
+- L2173 — #### O-aulas — "El generador elige el aula de cada clase con las reglas del centro." ✔ TERMINADO (S209)
+- L2211 — #### O-guardias — "El generador reparte las guardias ordinarias del profesorado." ✔ TERMINADO (S216)
+- L2248 — #### O-guardias-especiales — "El generador reparte también las guardias de recreo, y lo hace de forma equilibrada." ✔ TERMINADO (S222)
+- L2285 — #### O-interfaz — "La secretaria encuentra sola lo que busca y entiende lo que la aplicación le dice."
+- L2321 — #### O-comparacion — "El horario que genera Educhronos se compara con el oficial del centro, con métricas fijadas antes de mirar." ✔ TERMINADO (S228)
+- L2339 — #### O-acabado-pre-prueba — "La secretaria elige profesores, subgrupos, grupos y aulas sin pelearse con las listas, reconoce cada asignatura por su nombre y ve que la aplicación está arrancando." ✔ TERMINADO (S230)
+- L2365 — #### O-prueba-secretaria — "La secretaria hace en la VM una prueba corta de v0.4.0 antes de dejarle la aplicación." ✔ TERMINADO (S239, con salvedad)
+- L2397 — #### O-manual — "La secretaria tiene a mano cómo se hace cada tarea en Educhronos." ✔ TERMINADO (S242)
+- L2416 — #### O-doc-tecnica — "El autor retoma Educhronos sabiendo cómo está montado, cómo se construye, se prueba y se publica, y por qué" ✔ TERMINADO (S247)
+- L2450 — #### O-actividad-por-nivel — "La secretaria crea y edita una clase viendo solo las asignaturas y subgrupos de su nivel, y distingue cada asignatura por su código, su nombre y su nivel" ✔ TERMINADO (S252)
+- L2484 — #### O-prueba-vm — "Cada versión se prueba en la VM con pocos pasos del usuario" ✔ TERMINADO (S256)
+- L2517 — ## 2. Deuda cerrada de §4
+- L2519 — ### Deuda técnica real, colgada de su objetivo
+- L2597 — ### Mejora futura, cuelga y espera
+- L2618 — ### Deuda de MÉTODO
+- L2623 — ### Deuda ya CERRADA (histórico, no pendiente)
 
 <!-- INDICE:FIN -->
 
@@ -2613,6 +2614,11 @@ terminado (§6).
 | ~~D-sin-instalador~~ (la entrega es un zip que se descomprime y se instala con órdenes de PowerShell; no hay instalador) **CERRADA S237** | `O-uso-centro` (S235, BE) | Nace en S234, propuesta del usuario (decisión BA): un instalador sencillo, no necesariamente MSI, que coloque el programa y cree el acceso directo sin permisos de administrador. El procedimiento escrito falló en el humo en una línea de su paso 3 (`2a0e6fa`). No entra en `O-prueba-secretaria`: la secretaria no instala en la prueba (condición 3). Candidato, sin medir: un `Instalar.cmd` dentro del zip. MEJORA FUTURA. Texto íntegro en el plan. **S235:** pasa a `O-uso-centro` (BE). En la VM, la guarda del paso 3 pegada línea a línea no detiene el `Copy-Item` siguiente; los pasos 3 y 4 van en bloque `& { … }` desde el cierre de S235. **S236:** medido (`s236/e1`): el MSI por usuario de jpackage 17 queda descartado (instala en la carpeta de datos, `--install-dir` choca con ICE64 y la política del runner lo bloquea); el `Instalar.cmd` prototipo instala como cuenta estándar (BP). Lo salda la condición 1 de `O-uso-centro` con `C-instalador`. **CERRADA en S237:** saldada por la condición 1 de `O-uso-centro` (`C-instalador`, `2d81589`): `Instalar.cmd` dentro del zip, verificado en la VM con `v0.5.0-rc.1` y `v0.5.0-rc.2` (`docs/actas-aceptacion/acta-instalador-s237.md`). |
 | ~~D-pagina-declarada-en-ingles~~ (la página declara `lang="en"` y Edge ofrece traducirla del inglés) **CERRADA S237** | `O-uso-centro` (S235) | Nace en S235 (F2, VM): `index.html` declara `lang="en"`; Edge ofrece traducir la página y el aviso tapa «Cursos…». Si se acepta, traduce del inglés un texto en español. No se toca en la prueba corta (decisión BJ). Arreglo candidato, sin medir: `lang="es"` en la versión que construya `O-uso-centro`. MEJORA FUTURA. Texto íntegro en el plan. **S236:** condición 5 de `O-uso-centro`; entra en `C-instalador`. **CERRADA en S237:** saldada por la condición 5 de `O-uso-centro` (`c48134c`): `lang="es"`; en la VM, Edge no ofrece traducir (acta de S237). |
 | ~~D-prueba-vm-a-mano~~ (la prueba de cada versión en la VM la hace el usuario paso a paso) **CERRADA S256** | `O-prueba-vm` (S254, FU; antes sin objetivo) | Nace en S252, a propuesta del usuario: la condición 7 de `O-actividad-por-nivel` se verificó con veinte pasos humanos en la VM (`s252/v1`). Automatizarla pide una cuenta de prueba con contraseña propia, las Guest Additions y `VBoxManage guestcontrol` para la parte no visual; inyectar teclado no sirve con la distribución española y el ratón no se puede inyectar. Las pantallas que pide un criterio las seguiría juzgando el usuario. No se paga dentro de `O-actividad-por-nivel` (R-terminado). **S254:** sede `O-prueba-vm` (FU). Las Guest Additions 7.2.18 ya estaban en la VM, y la cuenta de prueba es `prueba-vm`, sin estrenar en la instantánea `s254-cuenta-prueba` (GB). **S255:** `C-script-prueba-vm` EN CURSO: el script existe en `tools/prueba-vm/` (`5de9439`); falta su primera corrida real. MEJORA FUTURA. No tiene entrada en el plan: su texto es esta fila. **CERRADA en S256:** saldada por la condición 7 de `O-prueba-vm` (`d462e3f`): `docs/tecnica/probar-vm.md` explica cómo se prueba una versión en la VM con `tools/prueba-vm/prueba_vm.py`, que hace la parte no visual; la prueba de `v0.6.1` llevó 9 pasos de la persona, frente a 20 (`docs/actas-aceptacion/acta-prueba-vm-s256.md`). |
+
+### Deuda de MÉTODO
+| Deuda | Destino |
+|---|---|
+| ~~D-paso-cero-para-por-forma~~ (el paso cero de un guion para ante cualquier afirmación de forma sin marca, aunque no decida ningún veredicto) **CERRADA S257** | Pendiente de su sesión de Higiene/Método. Nace en S252: ocho paradas del paso cero en una sesión (T0, T0b, F1, F2, T0f, F3, V1 y C0), siete por afirmaciones sin marca escritas de memoria (nombres de fichero, secciones, commits, decisiones del usuario sin su texto y prosa del manual) y una por una autoprueba que usaba el defecto como caso positivo. Ninguna causó daño: cada una costó un viaje de ida y vuelta. Misma familia que `D-contrato-desde-resumen` (CERRADA S243), que no se reabre. Propuestas para su sesión: (1) que el paso cero pare solo ante una afirmación sin marca que decide un OK, un FALLO o una parada, o que se escribe en el repo, y que el resto cuente como [?]; (2) que reutilizar un instrumento de medida obligue a revisar que su autoprueba no dependa de lo que se va a cambiar. **S253:** cuatro guiones sin paradas del paso cero (T0, C1, E1 y el C0 del cierre); el del T0 anotó sin parar una marca mal puesta, que no decidía ningún veredicto. **S254:** cuatro paradas del paso cero por afirmaciones sin marca del arquitecto (T0, T1, T1b y el C0 del cierre); ninguna decidía un veredicto y cada una costó un viaje de ida y vuelta. La del T1b coincidió con la guarda 0.2(c), que sí decidía (el cambio de contraseña no estaba en la VM), y otras dos corridas del T1b pararon solo por esa guarda. El disparador de Higiene/Método salta y se aplaza al cierre de `O-prueba-vm` (GC). **S255:** ocho paradas de guion: tres en el T0 (dos por afirmaciones sin marca y una por una guarda que no se probó contra lo que filtraba), dos en el T1 (citas con el número de línea mal contado y un criterio de rc sin medir) y tres en el cierre (en el C0, dos afirmaciones sin marca y un ancla mal escrita; en el C1, tres citas al informe del C0 que no estaban pegadas y dos citas de línea desplazadas, propuestas por Claude Code y copiadas sin comprobar por el arquitecto); además, en el contraste del C1, siete citas que no casaban y tres afirmaciones sin respaldo. En cinco de las citas fallidas se citó el número de línea del fichero original que aparece dentro del material, no el de la línea del propio material. Con GM, la última corrida del T0 y el T1 no pararon por afirmaciones que coincidían. Propuesta (3) para su sesión: citar el material por texto literal, `[fichero «texto»]`, cuando el volcado no numera sus líneas. El disparador vuelve a saltar y sigue aplazado al cierre de `O-prueba-vm` (GC). **S256:** ningún guion del arquitecto con paso cero: el usuario decidió en cada fase y Claude Code ejecutó cada paso. `O-prueba-vm` se cierra, así que llega la sesión de Higiene/Método aplazada por GC. No tiene entrada en el plan: su texto es esta fila. **S257:** una parada del T0 por rutas escritas de memoria, que discrepaban del repo (con la regla nueva también para; norma 3). **CERRADA en S257** (`cf0405e` y el cierre): norma 15 (b) y (c) y M2 de `metodo.md`. El paso cero y el contraste paran solo ante lo que discrepa, decide un OK, un FALLO o una parada, o acaba escrito en un documento; lo demás se anota y el guion sigue (propuesta 1, GM). Las citas van por texto literal único, `[fichero «texto»]`, comprobado con `grep -F -c` (propuesta 3, ampliada a toda cita). Reutilizar un instrumento obliga a releer su autoprueba (propuesta 2; en S257, el recuento de S210 comprobaba dos filas que ya no existen). |
 
 ### Deuda ya CERRADA (histórico, no pendiente)
 D-F8.6-ivD-b (S99), D-F8.4-B2-a (S94), D-F8.5-D1-a (S77), D-F8.5-D2b1-a/b (S91),

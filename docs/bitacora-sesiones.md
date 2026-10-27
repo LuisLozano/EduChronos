@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S254. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S255. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S254). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S255). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10896,3 +10896,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el T1 comprobaba el nombre de la instantánea y no si la VM había cambiado, y su restauración borró el cambio de contraseña del usuario, que lo repitió a mano; el T1b daba por hecho ese cambio, que no estaba (tres paradas de su guarda); afirmaciones sin marca en T0, T1, T1b y C0 (cuatro paradas); en el C1 del cierre, la ficha decía que `docs/tecnica/` no nombra la VM, y `decisiones.md:86` la nombra (una parada). Sin coste: una cita a `VOLCADO-T1c.md` para `--passwordfile`. De Claude Code, sin coste: un `2>/dev/null` contra la norma 2 y `s254/t1b/` creada antes del paso 0. Con coste, el mismo defecto cuatro veces: el disparador de Higiene/Método salta y se aplaza al cierre de `O-prueba-vm` (GC).
   SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 337. Bundle sin cambios, 658,07 kB en `b017ca7`.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 81 líneas del commit de cierre sin índice, 2 460 bytes de entrada y 2 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 255 — O-prueba-vm (transversal), C-script-prueba-vm: **EL SCRIPT DE LA PRUEBA EN LA VM EXISTE, CON TESTS Y AUTOPRUEBA; FALTA SU PRIMERA CORRIDA REAL. O-PRUEBA-VM EN 0 DE 7**
+  TIPO. Desarrollo, con dos fases de medida: T0 de solo lectura y T1 en la VM, autorizado por el usuario (GN). Material en `/home/luis/educhronos-aceptacion/s255/` (t0, t0b, t1, c1 y cierre).
+  HECHO. T0: forma de `tools/base-partida`, `Instalar.cmd`, las suites de Python y la VM; la CI del cierre de S254, en verde tras el push (`tests` #140, `t0b`). T1: `v0.6.1` instalada como `prueba-vm` por `guestcontrol`, con tres pasos humanos; `Instalar.cmd` termina con `cmd /c "<ruta> < nul"`; el rc de `run` es el código en la VM más 32, salvo el 0; al restaurar, `VMStateChangeTime` vuelve a la hora de la instantánea. C1: contrato con E26 a E40 y código en `5de9439`: `tools/prueba-vm/prueba_vm.py` (`preparar`, `sesion`, `abierta` y `cerrar`), 48 tests, autoprueba de 12 capacidades y 12 mutantes, todos muertos; la campaña cazó un veredicto que `cerrar` no usaba.
+  CRITERIO. `O-prueba-vm` sigue en 0 de 7: las condiciones 1 a 3 se verifican con la primera corrida real. `C-script-prueba-vm` EN CURSO. `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: GM a GP, con su texto en la ficha. Del arquitecto, nueve (GD a GL) y la GQ del cierre, y cinco de Claude Code aceptadas, en `s255/cierre/c1/decisiones.txt`.
+  DEUDA. No nace ninguna. `D-python-sin-ci`: también la suite de `tools/prueba-vm`. `D-paso-cero-para-por-forma`: ocho paradas; el disparador vuelve a saltar y sigue aplazado (GC). Pendiente para S256: E41, que el rc 32 dé FALLO.
+  DEFECTOS. Del arquitecto, con coste: ocho paradas de guion (T0: dos por afirmaciones sin marca y una guarda sin probar; T1: citas mal numeradas y un criterio de rc sin medir; cierre: tres por citas sin respaldo o desplazadas); en el contraste del C1, siete citas que no casaban, tres afirmaciones sin respaldo y un `cerrar` que habría restaurado tras un rechazo; la tabla de E34 traduce el rc 32 a «código 0» (E41). Sin coste: la hipótesis del Escritorio en OneDrive, falsa (el usuario había entrado como `educhronos-admin`). De Claude Code, sin coste: un «VACÍA» falso en el T1, apartado por él mismo, y un veredicto que `cerrar` no usaba, cazado por la campaña M3.
+  SUITES. solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 385 (337 + 48, `s255/c1/suite-*.txt`). Bundle sin cambios, 658,07 kB en `b017ca7`.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 56 líneas del commit de cierre sin índice, 2 736 bytes de entrada y 3 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
