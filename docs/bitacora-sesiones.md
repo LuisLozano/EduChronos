@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S258. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S259. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S258). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S259). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10936,3 +10936,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, sin coste: el M0 dio la sesión por Configuración/UI; los guiones T0 y T0b situaron los mutantes del lector de CI en `s257/t0` (estaban en `s255/t0b`) y dieron por hecho que `lector_ci.py` descargaba los runs; el `grep -A6` del T0 no llegaba al control filtrado. De método, con coste: S257 no conservó la orden del CI ni las del cierre (`NOTA-molde.txt` no traía ninguna), lo que dejó el CI PENDIENTE en el T0 y el T0b y costó un paso más en el C0 (norma 10). De Claude Code, sin coste: en el C0, la primera autoprueba del CI perdía el rc dentro de un `$(...)`, corregida antes de ejecutarla.
   SUITES. Sin código: solver 162, app 998, vitest 883 en 69 ficheros, e2e 3; python 392 (337 + 55, del registro de S257). Bundle sin cambios, 658,07 kB en `b017ca7`; el mismo 658,07 kB sobre `317430f` en el clon del T0.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 84 líneas del commit de cierre sin índice, 2 525 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 259 — Desarrollo, C-angular-22: **O-COMBOBOX EN 1 DE 5: EL FRONTEND EN ANGULAR 22.2 CON NPM 11.21.1 Y LA CI EN VERDE, TAMBIÉN EN WINDOWS; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Desarrollo sobre la pila, sin lógica propia: M3 no aplica, porque la migración es mecánica y su oráculo son las suites y la CI. Con `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s259/` (ci, t0, e1, e2, ci2 y cierre).
+  HECHO. T0: CI de `53a3612` en verde (`s259/ci`); npm 10.9.8 venía de `packageManager`, del Node 22.23.1 del pom y del runner de `tests.yml`. E1: la subida se ensayó en un clon y entró al repo por parche, en `8c9c6ec` (Angular 22.2.3, CDK 22.2.4, TypeScript `~6.0.3`; npm 11.21.1 en `packageManager`, en el pom y en los dos jobs de `tests.yml`) y `202d281` (`docs/tecnica/construir.md`). E2: `229fbcd`, el comentario de Node del pom cita el rango de Angular 22. Push a `main`; `tests` 40549249783 y `bundle` 40549999763 (linux y windows) en verde sobre `229fbcd` (`s259/ci2`).
+  CRITERIO. `C-angular-22` HECHO ✔ (condición 1); `O-combobox` en 1 de 5. `O-uso-centro` sigue en 7 de 8, esperando fecha.
+  DECISIONES. Del usuario: HD y HE, con su texto en la ficha de `O-combobox`. Del arquitecto, doce, en `s259/cierre/c1/decisiones.txt`.
+  DEUDA. `D-bundle-sobre-techo-550` recibe 685,83 kB. No nace ni se cierra ninguna. Medido, sin deuda: npm 11 avisa de que los scripts de instalación de esbuild, lmdb, `@parcel/watcher` y msgpackr-extract no están en `allowScripts`, sin efecto en el build, las suites ni el bundle; el npm 10.9.8 del sistema hace `npm ci` sobre el lockfile nuevo y solo falla su `npm install`.
+  DEFECTOS. Del arquitecto, con coste: el contrato del E1 no incluyó el comentario de `app/pom.xml:129`, que seguía citando el rango de Angular 21 (un guion y un commit más, `229fbcd`). Sin coste: el E1 daba por hecho que `ng update` migraba core y cdk de una vez (pide el árbol limpio entre las dos); su 1-5 esperaba 0 coincidencias de `--force` y casó dos menciones en `gestion_proyecto.md`; el lanzamiento de `bundle` daba por instalado `gh` (se lanzó desde la web); el C0 buscó la línea de estado de `O-uso-centro` con la cifra fuera de la negrita. De Claude Code, con coste: el T0 se respondió con un M0 propio y un resumen en vez del volcado, que completó el F0 del E1 (norma 15a). Sin coste: E2 escribió `/tmp/s259-pom.xml.despues`, que el guion no nombraba.
+  SUITES. Solver 162, app 998, vitest 883 en 69 ficheros y e2e 3, en local y en la CI; python 392 (337 + 55, del registro de S257), sin tocar. Bundle 685,83 kB en `8c9c6ec` (658,07 en `b017ca7`).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 54 líneas del commit de cierre sin índice, 2 913 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
