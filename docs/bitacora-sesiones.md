@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S260. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S261. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S260). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S261). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10956,3 +10956,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el contrato limitó los cambios de spec a «cómo se elige la opción» sin medir las lecturas del `<select>` (una parada, EN-1); EN-3 no vio que `filtro-opciones.spec.ts` importaba `filtrarOpciones` (una pregunta); el contrato no fijó la opción activa al escribir, y el juicio del usuario vio que Intro no elegía lo escrito (F2-bis); dos asertos de `horario-view.spec.ts` sin regla en EN-1 (dos preguntas). Sin coste: el T0 dio por hecho que `npm ci` instalaba Aria; la firma de `coincide()` al revés; S5 sin lista completa en F0b.3; una cita con 4 coincidencias; el G1 mandaba borrar el clon en dos pasos. De Claude Code, sin coste: `a531c89` no se probó tal cual hasta el G1.
   SUITES. Solver 162, app 998, vitest 977 en 70 ficheros (883 en 69 al abrir) y e2e 3, en local y en la CI; python 392 (337 + 55, del registro de S257), sin tocar. Bundle 719,13 kB en `e5004b6` (685,83 en `8c9c6ec`).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 121 líneas del commit de cierre sin índice, 2 814 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 261 — Apertura de objetivo, C-alcance-huecos y C-pesos-ventanas: **O-HUECOS-PROFESORADO ABIERTO Y CERRADO SIN CUMPLIR SU CRITERIO: NI EL PESO, NI LAS DOS FASES, NI 60 MINUTOS LLEVAN LOS HUECOS AL NIVEL DEL OFICIAL, Y A VECES LA GENERACIÓN NO DA HORARIO; O-FIABILIDAD-GENERACION REGISTRADO; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Apertura de objetivo (§Tipos de `metodo.md`), abierta por la excepción de §6 (S178 y CY) sin objetivo planificado, con medición sobre el solver en copias fuera del repo y sin código en el repo; `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s261/` (t0, t1, c1, c2, c3 y cierre).
+  HECHO. T0: CI de `6e89b36` en verde; la línea base de S228 es reutilizable; las definiciones de hueco y de ventana; el oficial solo existe en los volcados. T1: el oficial, puntuado con el verificador del solver por un arnés desechable (autoprueba 10 de 10 y un mutante), 103 ventanas, 120 consecutivas y O = 223, INCONCLUSO por 4 violaciones de aula. C1: T1b (3 solapes de aula en A4) y pesos 2, 4 y 8 a 600 s. C2: dos fases con pista a 600 s. C3: 60 minutos, el producto y las dos fases con peso 4. Todo en copias de `/tmp`, sin commits.
+  CRITERIO. `C-alcance-huecos` HECHO ✔; `O-huecos-profesorado` ABIERTO y CERRADO sin cumplir el criterio, 0 de 4: M1 mínimo 197 a 600 s y 155 a 3600 s, frente a 135. `O-uso-centro` sigue en 7 de 8, esperando fecha.
+  DECISIONES. Del usuario: HL a HQ, con su texto en la ficha de `O-huecos-profesorado` (`gestion-historico.md` §1). Del arquitecto, catorce, en `s261/cierre/c1/decisiones.txt`.
+  DEUDA. `D-huecos-profesorado` y `D-generacion-no-reproducible` pasan a `O-fiabilidad-generacion`, con las cifras de S261. No nace ni se cierra ninguna.
+  DEFECTOS. Del arquitecto, con coste: el guion del T1 daba por hecho que el test migraba la copia de la base (una corrida); el guion del cierre llamó sha256 a la huella md5 del jar de `0.0.0-dev` (una parada en el C1). Sin coste: afirmó que el oficial estaba cargado en una base; tras el T1 presentó los pesos como causa suficiente; el contrato de C2 fijó en 600 el presupuesto de la fase 1, en lugar del de la petición (lo comprobó C3). De cierres anteriores, sin coste: la lista «### H5» de §3 no recogía tres objetivos terminados desde S252, corregida aquí. De Claude Code, con coste: `setStopAfterFirstSolution` no detuvo la búsqueda y el primer humo de C2 se descartó (600 s); una corrida de C2 se repitió por reutilizar la carpeta del backend. Sin coste: un `| tail` tapó el rc de una suite que solo se contaba.
+  SUITES. Sin código en el repo: solver 162, app 998, vitest 977 en 70 ficheros, e2e 3; python 392 (337 + 55). Bundle sin compilar, 719,13 kB del registro.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 92 líneas del commit de cierre sin índice, 3 015 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
