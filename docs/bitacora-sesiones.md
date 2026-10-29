@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S261. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S262. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S261). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S262). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10966,3 +10966,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el guion del T1 daba por hecho que el test migraba la copia de la base (una corrida); el guion del cierre llamó sha256 a la huella md5 del jar de `0.0.0-dev` (una parada en el C1). Sin coste: afirmó que el oficial estaba cargado en una base; tras el T1 presentó los pesos como causa suficiente; el contrato de C2 fijó en 600 el presupuesto de la fase 1, en lugar del de la petición (lo comprobó C3). De cierres anteriores, sin coste: la lista «### H5» de §3 no recogía tres objetivos terminados desde S252, corregida aquí. De Claude Code, con coste: `setStopAfterFirstSolution` no detuvo la búsqueda y el primer humo de C2 se descartó (600 s); una corrida de C2 se repitió por reutilizar la carpeta del backend. Sin coste: un `| tail` tapó el rc de una suite que solo se contaba.
   SUITES. Sin código en el repo: solver 162, app 998, vitest 977 en 70 ficheros, e2e 3; python 392 (337 + 55). Bundle sin compilar, 719,13 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 92 líneas del commit de cierre sin índice, 3 015 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 262 — Higiene/Método: **HIGIENE/MÉTODO DE 7 A 0: UN TEST CON MUTANTES Y UNA NORMA PAGAN DOS FICHAS, DOS SE ABSORBEN Y TRES SE RECLASIFICAN; NACEN DOS INCIDENCIAS, DE LA SECRETARIA Y DEL MANUAL; LA ENTREGA DEL USB ES EL 3 DE NOVIEMBRE; O-USO-CENTRO EN 7 DE 8**
+  TIPO. Higiene/Método (§Tipos de `metodo.md`) por decisión del usuario (S223, HR), la primera entera en Claude Code (HT), con `O-uso-centro` esperando la instalación. Material en `/home/luis/educhronos-aceptacion/s262/` (t0, f1 y cierre).
+  HECHO. T0: CI de `e733d86` en verde; recuento de S210, 7 fichas medidas en solo lectura; el log de la aplicación, para la entrega. F1: doble de `ResizeObserver` en el setup de vitest y caso (38) de la rejilla (`96e52eb`; los mutantes m1 y m2 caen). F2: dos normas en `metodo.md`: preguntas abiertas de un entregable (M1) e Higiene/Método en Claude Code (HT). F3: reclasificaciones de §4. F4: dos incidencias.
+  CRITERIO. Higiene/Método de 7 a 0: pagadas 2 (`D-resize-observer-jsdom`, `D-preguntas-sin-cola`); absorbidas 2 por `D-carga-centro-sin-nivel` (`D-meta-invariantes-a-mano`, `D-catalogo-candidatos-huerfano`); reclasificadas 3, no pagadas (`D-instrumento-criterio4-ciego-al-ancho` y `D-codigo-actividad-tilde` a limitación conocida; `D-i3-sin-datos` sin sede). `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: HR y HS, con su texto en la ficha de `O-uso-centro`; HT, la Higiene/Método entera en Claude Code, en el párrafo «Higiene/Método en Claude Code (S262, HT)» de `metodo.md`. Del arquitecto y de Claude Code, en `s262/cierre/c1/decisiones.txt`.
+  DEUDA. Se cierran 2, y 2 por absorción; 2 pasan a limitación conocida y 1 queda sin sede. Nacen `D-dias-distintos-entre-actividades` (de la secretaria; condición 8, HS) y `D-manual-sin-patron-temporal` (del usuario).
+  DEFECTOS. Del asistente, con coste: el guion de S262 remitía a textos que no estaban en el repo ni en el material (no era autocontenido; una parada); y metió una nota histórica en la sede de `D-i3-sin-datos`, que el recuento lee (un ensayo más). Defectos distintos: no dispara. De Claude Code, sin coste: `npm test` corrió con `CI=1`, para no quedar en modo vigilancia.
+  SUITES. Vitest 978 en 70 ficheros (977 al abrir); solver 162, app 998, e2e 3 y python 392 (337 + 55), sin cambios. Bundle sin medir: no cambia el código de la aplicación.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 200 líneas del commit de cierre sin índice, 2 632 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
