@@ -8,6 +8,7 @@ import { InstanciaCelda } from '../../horario/proyeccion';
 import { SesionVista } from '../../models/horario.model';
 import { Violacion } from '../../models/diagnostico.model';
 import { ViolacionEnCelda } from '../../horario/diagnostico';
+import type { ResizeObserverDoble } from '../../../test-setup';
 
 /**
  * Rejilla AISLADA: sin colaboradores, inputs por `setInput` y asertos por DOM. La
@@ -220,11 +221,14 @@ function rectDe(top: number, bottom: number): DOMRect {
  * marca vive dentro de `.rotulo`, así que una instancia marcada haría que el
  * `textContent` del rótulo fuese `'2 simultáneas+2'` y tumbaría al caso (20),
  * que es ajeno a D11.
+ *
+ * <p>`altoDeLaCelda` se lee en cada medida, no al instalar: (38) lo ata a
+ * `--alto-celda` para que la celda crezca cuando la rejilla publica su tope.
  */
-function instalarStubDeRects(): void {
+function instalarStubDeRects(altoDeLaCelda: () => number = () => DISPONIBLE_PX): void {
   Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
     if (this.classList.contains('celda')) {
-      return rectDe(0, DISPONIBLE_PX);
+      return rectDe(0, altoDeLaCelda());
     }
     if (this.classList.contains('entrada')) {
       const hermanas = Array.from(this.parentElement?.querySelectorAll('.entrada') ?? []);
@@ -838,6 +842,37 @@ describe('rejilla de horario', () => {
     expect(rotulo).not.toBeNull();
     expect(rotulo!.querySelector('.oculta')).not.toBeNull();
     expect(rotulo!.getAttribute('title')).toBe('Bloque-1ºA');
+  });
+
+  /**
+   * D-resize-observer-jsdom (S262) · el SEGUNDO disparador de D11. (28) y (29) llegan
+   * a la marca por `celdas()`; este llega por `altoCelda`: el observador despierta,
+   * `repartirAltura` publica el tope y el `afterRenderEffect` vuelve a medir sin que
+   * cambie el contenido.
+   *
+   * <p>La celda mide lo que diga `--alto-celda`: antes de disparar no hay tope, mide 0
+   * y no se marca nada. Con el hueco de S126, 716 px, el reparto da
+   * `floor(716 / 6) - CROMO_FILA` = 110 px y la instancia de seis plazas marca +2,
+   * como en (28). Sin el doble de `test-setup.ts` no hay observador que disparar, y
+   * sin la lectura de `altoCelda` en el efecto, disparar no vuelve a medir: las dos
+   * cosas tumban el caso (mutantes m1 y m2 de S262).
+   */
+  it('(38) disparar el observador fija altoCelda y el efecto de D11 vuelve a medir', async () => {
+    const host = fixture.nativeElement as HTMLElement;
+    instalarStubDeRects(() => parseFloat(host.style.getPropertyValue('--alto-celda')) || 0);
+    fixture.componentRef.setInput('sesiones', BLOQUE_6);
+    await fixture.whenStable();
+    expect(instanciaDe(fixture, 'Mat').querySelector('.oculta')).toBeNull();
+
+    // El doble se toma del global y el import es solo de tipo: importar el valor
+    // ejecutaría `test-setup.ts` y lo instalaría aunque `setupFiles` no lo declarase.
+    const doble = globalThis.ResizeObserver as unknown as typeof ResizeObserverDoble;
+    Object.defineProperty(host, 'clientHeight', { configurable: true, value: 716 });
+    expect(doble.disparar(host)).toBe(1);
+    await fixture.whenStable();
+
+    expect(host.style.getPropertyValue('--alto-celda')).toBe('110px');
+    expect(instanciaDe(fixture, 'Mat').querySelector('.oculta')?.textContent?.trim()).toBe('+2');
   });
 
   /**
