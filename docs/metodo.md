@@ -157,6 +157,8 @@ objetivo (Higiene/Método), del registro que la propone.
 usuario la lista «Del arquitecto» de la sesión (M-decisión), y el usuario puede revertir
 cualquiera.
 
+**Preguntas abiertas de un entregable (S262).** Si un entregable de la sesión deja preguntas sin respuesta («Preguntar», «sin decidir», «a confirmar con el centro»), el cierre da de alta cada una como ficha `D-*` de §4 de `gestion_proyecto.md`, con su sede, o escribe en la entrada de la sesión por qué no. Una pregunta que no está en ninguna cola no se vuelve a hacer (`D-preguntas-sin-cola`; en S136 costó cinco pasadas reformular la A5 de `ESPECIFICACION-CATALOGO.md`, hoy en `:572`).
+
 **M1-bis — El archivado, con verificación propia.** Único paso con fallos
 registrados (S59 dejó copia truncada; S68 dejó el censo desfasado; S88 omitió una
 rotación). Por eso lleva verificación propia:
@@ -515,6 +517,17 @@ la barra escapada o dentro de código. Aplicada por primera vez en S210, dio 12 
 de saldar y 9 después (`/home/luis/educhronos-aceptacion/s210/m0/p3-recuento.txt` y
 `s210/f1/`). Hasta S210 no estaba escrita (`D-declarado-sin-artefacto`, instancia de
 S179).
+
+**Higiene/Método en Claude Code (S262, HT).** Una sesión de Higiene/Método se hace entera en Claude Code, sin el chat del arquitecto, y este párrafo es su prompt. Claude Code:
+(1) comprueba la CI del cierre anterior con las órdenes de `s258/ci/ORDENES.txt`;
+(2) aplica el recuento de S210 y mide en solo lectura cada ficha que cuenta;
+(3) decide qué hace con cada una con estas reglas:
+    - una ficha sale de Higiene por TRABAJO (una norma de método, un instrumento con autoprueba o un test con mutante que lo demuestre) o por RECLASIFICACIÓN medida, cuando su sede es la equivocada porque no trata de un instrumento ni del método;
+    - la reclasificación se declara como tal y no cuenta como pagada;
+    - no se toca código de la aplicación: si una ficha lo necesita, se reclasifica;
+(4) aplica en un clon, verifica y ejecuta el cierre con el molde vigente;
+(5) para una sola vez, antes del commit de documentación, para que el usuario apruebe el alcance, las decisiones y la cifra de salida.
+Las demás sesiones siguen con el arquitecto.
 
 **Tipos combinados (S194).** Una sesión puede tener fases de tipos distintos (S193:
 Configuración/UI y una fase de Desarrollo reducido). El M0 nombra el tipo de cada

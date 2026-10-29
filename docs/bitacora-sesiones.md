@@ -1,6 +1,6 @@
 # Bitácora de sesiones — Educhronos
 
-Registro detallado e histórico de las sesiones de trabajo S10–S259. Archivado
+Registro detallado e histórico de las sesiones de trabajo S10–S260. Archivado
 desde `plan_trabajo_horarios.md` en la Sesión 44 (higiene documental) para
 aligerar el plan de trabajo, conservando la traza completa de decisiones.
 
@@ -11,7 +11,7 @@ consulta para conocer el estado actual, sino para entender por qué se tomó una
 decisión pasada. Las cabeceras vivas de sesión las conserva el plan; aquí se
 archivan conforme salen de su ventana.
 
-Orden: cronológico ascendente (S10 → S259). Los formatos difieren según la época
+Orden: cronológico ascendente (S10 → S260). Los formatos difieren según la época
 de registro (entradas detalladas con cabecera de sección para S10–S31, entradas
 de párrafo para S32–S42); se conservan tal como se escribieron.
 
@@ -10946,3 +10946,13 @@ que toca es **abrir O-diseño**, cuyo criterio de terminado está POR DEFINIR y 
   DEFECTOS. Del arquitecto, con coste: el contrato del E1 no incluyó el comentario de `app/pom.xml:129`, que seguía citando el rango de Angular 21 (un guion y un commit más, `229fbcd`). Sin coste: el E1 daba por hecho que `ng update` migraba core y cdk de una vez (pide el árbol limpio entre las dos); su 1-5 esperaba 0 coincidencias de `--force` y casó dos menciones en `gestion_proyecto.md`; el lanzamiento de `bundle` daba por instalado `gh` (se lanzó desde la web); el C0 buscó la línea de estado de `O-uso-centro` con la cifra fuera de la negrita. De Claude Code, con coste: el T0 se respondió con un M0 propio y un resumen en vez del volcado, que completó el F0 del E1 (norma 15a). Sin coste: E2 escribió `/tmp/s259-pom.xml.despues`, que el guion no nombraba.
   SUITES. Solver 162, app 998, vitest 883 en 69 ficheros y e2e 3, en local y en la CI; python 392 (337 + 55, del registro de S257), sin tocar. Bundle 685,83 kB en `8c9c6ec` (658,07 en `b017ca7`).
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 54 líneas del commit de cierre sin índice, 2 913 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+### Sesión 260 — Configuración/UI con M3, C-combobox: **O-COMBOBOX TERMINADO, 5 DE 5: LA SECRETARIA ESCRIBE DENTRO DEL PROPIO SELECTOR Y LA LISTA SE ACORTA, EN LOS 7 SELECTORES QUE LLEVABAN EL FILTRO APARTE; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+  TIPO. Configuración/UI con M3 (§Tipos de `metodo.md`), por FP y FU, con `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s260/` (t0, c1, g1, ci y cierre).
+  HECHO. T0: CI de `5fc445a` en verde; los 7 selectores y la API de Aria 22.2.4, leída del tarball de la caché de npm. C1: oráculo de equivalencia, 53 entradas sobre la base de partida migrada (`7f3d980`); `filtrarOpciones` junto a `coincide()` (`9875b7e`); `@angular/aria` 22.2.4 (`1029f30`); `SelectorFiltrable` (`71263de`); Intro no envía el formulario (`6946e7c`); la vista de horario (`e8ef558`); Intro elige la primera que casa (`0e42e8e`); flecha de desplegable (`0fdd177`); los otros 6 selectores (`a531c89`, en verde en un clon, `s260/g1`) y la retirada de `FiltroOpciones` (`e5004b6`). Push a `main`; `tests` 40593891420 en verde sobre `e5004b6` (`s260/ci`).
+  CRITERIO. `C-combobox` HECHO ✔ (condiciones 2 a 5); `O-combobox` TERMINADO, 5 de 5, con el juicio de aspecto del usuario. `O-uso-centro` sigue en 7 de 8, esperando fecha.
+  DECISIONES. Del usuario: HF a HK, con su texto en la ficha de `O-combobox` (`gestion-historico.md` §1). Del arquitecto, 19, en `s260/cierre/c1/decisiones.txt`.
+  DEUDA. Se cierra `D-selectores-combobox`. `D-bundle-sobre-techo-550` recibe 719,13 kB. Nace `D-horario-sin-entidad-en-titulo` (mejora futura, del usuario).
+  DEFECTOS. Del arquitecto, con coste: el contrato limitó los cambios de spec a «cómo se elige la opción» sin medir las lecturas del `<select>` (una parada, EN-1); EN-3 no vio que `filtro-opciones.spec.ts` importaba `filtrarOpciones` (una pregunta); el contrato no fijó la opción activa al escribir, y el juicio del usuario vio que Intro no elegía lo escrito (F2-bis); dos asertos de `horario-view.spec.ts` sin regla en EN-1 (dos preguntas). Sin coste: el T0 dio por hecho que `npm ci` instalaba Aria; la firma de `coincide()` al revés; S5 sin lista completa en F0b.3; una cita con 4 coincidencias; el G1 mandaba borrar el clon en dos pasos. De Claude Code, sin coste: `a531c89` no se probó tal cual hasta el G1.
+  SUITES. Solver 162, app 998, vitest 977 en 70 ficheros (883 en 69 al abrir) y e2e 3, en local y en la CI; python 392 (337 + 55, del registro de S257), sin tocar. Bundle 719,13 kB en `e5004b6` (685,83 en `8c9c6ec`).
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 121 líneas del commit de cierre sin índice, 2 814 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).

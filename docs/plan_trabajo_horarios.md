@@ -51,7 +51,7 @@
 - L742 — ## FASE 12 — CI/CD con GitHub Actions
 - L745 — ### Criterios de verificación
 - L758 — ## Registro de progreso
-- L760 — ### Sesión 261 — Apertura de objetivo, C-alcance-huecos y C-pesos-ventanas: **O-HUECOS-PROFESORADO ABIERTO Y CERRADO SIN CUMPLIR SU CRITERIO: NI EL PESO, NI LAS DOS FASES, NI 60 MINUTOS LLEVAN LOS HUECOS AL NIVEL DEL OFICIAL, Y A VECES LA GENERACIÓN NO DA HORARIO; O-FIABILIDAD-GENERACION REGISTRADO; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+- L760 — ### Sesión 262 — Higiene/Método: **HIGIENE/MÉTODO DE 7 A 0: UN TEST CON MUTANTES Y UNA NORMA PAGAN DOS FICHAS, DOS SE ABSORBEN Y TRES SE RECLASIFICAN; NACEN DOS INCIDENCIAS, DE LA SECRETARIA Y DEL MANUAL; LA ENTREGA DEL USB ES EL 3 DE NOVIEMBRE; O-USO-CENTRO EN 7 DE 8**
 - L816 — ### Bloques de Fase 2
 - L824 — ### Bloques de Fase 5
 - L847 — ### Bloques de Fase 6
@@ -61,15 +61,15 @@
 - L1256 — ### Decisiones permanentes (no reabrir sin razón de peso)
 - L1306 — ### Método de trabajo (procedimiento vigente)
 - L1339 — ### Deuda consciente VIVA
-- L3081 — ### Deuda consciente CERRADA (histórico)
-- L3605 — ### Notas técnicas validadas en Fase 0
-- L3618 — ### Notas técnicas validadas en Fase 6
-- L3663 — ### Notas técnicas validadas en Fase 9
-- L3672 — ### Notas técnicas validadas en Fase 11
-- L3816 — ### Por qué OR-Tools sobre Timefold (no reabrir)
-- L3825 — ### Hallazgos del análisis de PDFs (datos reales del centro)
-- L3852 — ### Registro detallado de sesiones S10–S31
-- L3861 — ## Señales globales de alerta
+- L3037 — ### Deuda consciente CERRADA (histórico)
+- L3614 — ### Notas técnicas validadas en Fase 0
+- L3627 — ### Notas técnicas validadas en Fase 6
+- L3672 — ### Notas técnicas validadas en Fase 9
+- L3681 — ### Notas técnicas validadas en Fase 11
+- L3825 — ### Por qué OR-Tools sobre Timefold (no reabrir)
+- L3834 — ### Hallazgos del análisis de PDFs (datos reales del centro)
+- L3861 — ### Registro detallado de sesiones S10–S31
+- L3870 — ## Señales globales de alerta
 
 <!-- INDICE:FIN -->
 
@@ -757,7 +757,17 @@ nuevo a partir del anterior, modificando solo los cambios.
 
 ## Registro de progreso
 
-### Sesión 261 — Apertura de objetivo, C-alcance-huecos y C-pesos-ventanas: **O-HUECOS-PROFESORADO ABIERTO Y CERRADO SIN CUMPLIR SU CRITERIO: NI EL PESO, NI LAS DOS FASES, NI 60 MINUTOS LLEVAN LOS HUECOS AL NIVEL DEL OFICIAL, Y A VECES LA GENERACIÓN NO DA HORARIO; O-FIABILIDAD-GENERACION REGISTRADO; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
+### Sesión 262 — Higiene/Método: **HIGIENE/MÉTODO DE 7 A 0: UN TEST CON MUTANTES Y UNA NORMA PAGAN DOS FICHAS, DOS SE ABSORBEN Y TRES SE RECLASIFICAN; NACEN DOS INCIDENCIAS, DE LA SECRETARIA Y DEL MANUAL; LA ENTREGA DEL USB ES EL 3 DE NOVIEMBRE; O-USO-CENTRO EN 7 DE 8**
+  TIPO. Higiene/Método (§Tipos de `metodo.md`) por decisión del usuario (S223, HR), la primera entera en Claude Code (HT), con `O-uso-centro` esperando la instalación. Material en `/home/luis/educhronos-aceptacion/s262/` (t0, f1 y cierre).
+  HECHO. T0: CI de `e733d86` en verde; recuento de S210, 7 fichas medidas en solo lectura; el log de la aplicación, para la entrega. F1: doble de `ResizeObserver` en el setup de vitest y caso (38) de la rejilla (`96e52eb`; los mutantes m1 y m2 caen). F2: dos normas en `metodo.md`: preguntas abiertas de un entregable (M1) e Higiene/Método en Claude Code (HT). F3: reclasificaciones de §4. F4: dos incidencias.
+  CRITERIO. Higiene/Método de 7 a 0: pagadas 2 (`D-resize-observer-jsdom`, `D-preguntas-sin-cola`); absorbidas 2 por `D-carga-centro-sin-nivel` (`D-meta-invariantes-a-mano`, `D-catalogo-candidatos-huerfano`); reclasificadas 3, no pagadas (`D-instrumento-criterio4-ciego-al-ancho` y `D-codigo-actividad-tilde` a limitación conocida; `D-i3-sin-datos` sin sede). `O-uso-centro` sigue en 7 de 8.
+  DECISIONES. Del usuario: HR y HS, con su texto en la ficha de `O-uso-centro`; HT, la Higiene/Método entera en Claude Code, en el párrafo «Higiene/Método en Claude Code (S262, HT)» de `metodo.md`. Del arquitecto y de Claude Code, en `s262/cierre/c1/decisiones.txt`.
+  DEUDA. Se cierran 2, y 2 por absorción; 2 pasan a limitación conocida y 1 queda sin sede. Nacen `D-dias-distintos-entre-actividades` (de la secretaria; condición 8, HS) y `D-manual-sin-patron-temporal` (del usuario).
+  DEFECTOS. Del asistente, con coste: el guion de S262 remitía a textos que no estaban en el repo ni en el material (no era autocontenido; una parada); y metió una nota histórica en la sede de `D-i3-sin-datos`, que el recuento lee (un ensayo más). Defectos distintos: no dispara. De Claude Code, sin coste: `npm test` corrió con `CI=1`, para no quedar en modo vigilancia.
+  SUITES. Vitest 978 en 70 ficheros (977 al abrir); solver 162, app 998, e2e 3 y python 392 (337 + 55), sin cambios. Bundle sin medir: no cambia el código de la aplicación.
+  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 200 líneas del commit de cierre sin índice, 2 632 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
+
+Última sesión registrada (previa): Sesión 261 — Apertura de objetivo, C-alcance-huecos y C-pesos-ventanas: **O-HUECOS-PROFESORADO ABIERTO Y CERRADO SIN CUMPLIR SU CRITERIO: NI EL PESO, NI LAS DOS FASES, NI 60 MINUTOS LLEVAN LOS HUECOS AL NIVEL DEL OFICIAL, Y A VECES LA GENERACIÓN NO DA HORARIO; O-FIABILIDAD-GENERACION REGISTRADO; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
   TIPO. Apertura de objetivo (§Tipos de `metodo.md`), abierta por la excepción de §6 (S178 y CY) sin objetivo planificado, con medición sobre el solver en copias fuera del repo y sin código en el repo; `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s261/` (t0, t1, c1, c2, c3 y cierre).
   HECHO. T0: CI de `6e89b36` en verde; la línea base de S228 es reutilizable; las definiciones de hueco y de ventana; el oficial solo existe en los volcados. T1: el oficial, puntuado con el verificador del solver por un arnés desechable (autoprueba 10 de 10 y un mutante), 103 ventanas, 120 consecutivas y O = 223, INCONCLUSO por 4 violaciones de aula. C1: T1b (3 solapes de aula en A4) y pesos 2, 4 y 8 a 600 s. C2: dos fases con pista a 600 s. C3: 60 minutos, el producto y las dos fases con peso 4. Todo en copias de `/tmp`, sin commits.
   CRITERIO. `C-alcance-huecos` HECHO ✔; `O-huecos-profesorado` ABIERTO y CERRADO sin cumplir el criterio, 0 de 4: M1 mínimo 197 a 600 s y 155 a 3600 s, frente a 135. `O-uso-centro` sigue en 7 de 8, esperando fecha.
@@ -766,16 +776,6 @@ nuevo a partir del anterior, modificando solo los cambios.
   DEFECTOS. Del arquitecto, con coste: el guion del T1 daba por hecho que el test migraba la copia de la base (una corrida); el guion del cierre llamó sha256 a la huella md5 del jar de `0.0.0-dev` (una parada en el C1). Sin coste: afirmó que el oficial estaba cargado en una base; tras el T1 presentó los pesos como causa suficiente; el contrato de C2 fijó en 600 el presupuesto de la fase 1, en lugar del de la petición (lo comprobó C3). De cierres anteriores, sin coste: la lista «### H5» de §3 no recogía tres objetivos terminados desde S252, corregida aquí. De Claude Code, con coste: `setStopAfterFirstSolution` no detuvo la búsqueda y el primer humo de C2 se descartó (600 s); una corrida de C2 se repitió por reutilizar la carpeta del backend. Sin coste: un `| tail` tapó el rc de una suite que solo se contaba.
   SUITES. Sin código en el repo: solver 162, app 998, vitest 977 en 70 ficheros, e2e 3; python 392 (337 + 55). Bundle sin compilar, 719,13 kB del registro.
   CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 92 líneas del commit de cierre sin índice, 3 015 bytes de entrada y 1 parada (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
-
-Última sesión registrada (previa): Sesión 260 — Configuración/UI con M3, C-combobox: **O-COMBOBOX TERMINADO, 5 DE 5: LA SECRETARIA ESCRIBE DENTRO DEL PROPIO SELECTOR Y LA LISTA SE ACORTA, EN LOS 7 SELECTORES QUE LLEVABAN EL FILTRO APARTE; O-USO-CENTRO EN 7 DE 8, ESPERANDO FECHA**
-  TIPO. Configuración/UI con M3 (§Tipos de `metodo.md`), por FP y FU, con `O-uso-centro` esperando fecha (CY). Material en `/home/luis/educhronos-aceptacion/s260/` (t0, c1, g1, ci y cierre).
-  HECHO. T0: CI de `5fc445a` en verde; los 7 selectores y la API de Aria 22.2.4, leída del tarball de la caché de npm. C1: oráculo de equivalencia, 53 entradas sobre la base de partida migrada (`7f3d980`); `filtrarOpciones` junto a `coincide()` (`9875b7e`); `@angular/aria` 22.2.4 (`1029f30`); `SelectorFiltrable` (`71263de`); Intro no envía el formulario (`6946e7c`); la vista de horario (`e8ef558`); Intro elige la primera que casa (`0e42e8e`); flecha de desplegable (`0fdd177`); los otros 6 selectores (`a531c89`, en verde en un clon, `s260/g1`) y la retirada de `FiltroOpciones` (`e5004b6`). Push a `main`; `tests` 40593891420 en verde sobre `e5004b6` (`s260/ci`).
-  CRITERIO. `C-combobox` HECHO ✔ (condiciones 2 a 5); `O-combobox` TERMINADO, 5 de 5, con el juicio de aspecto del usuario. `O-uso-centro` sigue en 7 de 8, esperando fecha.
-  DECISIONES. Del usuario: HF a HK, con su texto en la ficha de `O-combobox` (`gestion-historico.md` §1). Del arquitecto, 19, en `s260/cierre/c1/decisiones.txt`.
-  DEUDA. Se cierra `D-selectores-combobox`. `D-bundle-sobre-techo-550` recibe 719,13 kB. Nace `D-horario-sin-entidad-en-titulo` (mejora futura, del usuario).
-  DEFECTOS. Del arquitecto, con coste: el contrato limitó los cambios de spec a «cómo se elige la opción» sin medir las lecturas del `<select>` (una parada, EN-1); EN-3 no vio que `filtro-opciones.spec.ts` importaba `filtrarOpciones` (una pregunta); el contrato no fijó la opción activa al escribir, y el juicio del usuario vio que Intro no elegía lo escrito (F2-bis); dos asertos de `horario-view.spec.ts` sin regla en EN-1 (dos preguntas). Sin coste: el T0 dio por hecho que `npm ci` instalaba Aria; la firma de `coincide()` al revés; S5 sin lista completa en F0b.3; una cita con 4 coincidencias; el G1 mandaba borrar el clon en dos pasos. De Claude Code, sin coste: `a531c89` no se probó tal cual hasta el G1.
-  SUITES. Solver 162, app 998, vitest 977 en 70 ficheros (883 en 69 al abrir) y e2e 3, en local y en la CI; python 392 (337 + 55, del registro de S257), sin tocar. Bundle 719,13 kB en `e5004b6` (685,83 en `8c9c6ec`).
-  CIERRE. Verificador 20 de 20 sin fallos; censo y higiene sin fallos; 121 líneas del commit de cierre sin índice, 2 814 bytes de entrada y 0 paradas (línea base en `s223/cierre/linea-base.txt`, S201-S222: de 60 a 184 líneas y de 4 317 a 11 581 bytes).
 
 Última fase completada (previa): 5 — Solver: instituto completo (criterios 1-2
   cerrados en S36 por factibilidad pura; criterios 3-4 cerrados en S44 como decisión
@@ -799,8 +799,8 @@ y la de S107 en la Sesión 109, la de S108 en la Sesión 110, la de S109 en la S
 Sesión 112, la de S111 en la Sesión 113, la de S112 en la Sesión 114, la de S113 en la
 Sesión 115, la de S114 en la Sesión 116, la de S115 en la Sesión 117, la de S116 en la Sesión 118, la de
 S117 en la Sesión 119, la de S118 en la Sesión 120, la de S119 en la Sesión 121 y la de S120 en la
-Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160, y la de S159 en la Sesión 161, y la de S160 en la Sesión 162, y la de S161 en la Sesión 163, y la de S162 en la Sesión 164, la de S163 en la Sesión 165, y la de S164 en la Sesión 166, y la de S165 en la Sesión 167, y la de S166 en la Sesión 168, y la de S167 en la Sesión 169, y la de S168 en la Sesión 170, y la de S169 en la Sesión 171, y la de S170 en la Sesión 172, y la de S171 en la Sesión 173, y la de S172 en la Sesión 174, y la de S173 en la Sesión 175, y la de S174 en la Sesión 176, y la de S175 en la Sesión 177, y la de S176 en la Sesión 178, y la de S177 en la Sesión 179, y la de S178 en la Sesión 180, y la de S179 en la Sesión 181, y la de S180 en la Sesión 182, y la de S181 en la Sesión 183, y la de S182 en la Sesión 184, y la de S183 en la Sesión 185, y la de S184 en la Sesión 186, y la de S185 en la Sesión 187, y la de S186 en la Sesión 188, y la de S187 en la Sesión 189, y la de S188 en la Sesión 190, y la de S189 en la Sesión 191, y la de S190 en la Sesión 192, y la de S191 en la Sesión 193, y la de S192 en la Sesión 194, y la de S193 en la Sesión 195, y la de S194 en la Sesión 196, y la de S195 en la Sesión 197, y la de S196 en la Sesión 198, y la de S197 en la Sesión 199, y la de S198 en la Sesión 200, y la de S199 en la Sesión 201, y la de S200 en la Sesión 202, y la de S201 en la Sesión 203, y la de S202 en la Sesión 204, y la de S203 en la Sesión 205, y la de S204 en la Sesión 206, y la de S205 en la Sesión 207, y la de S206 en la Sesión 208, y la de S207 en la Sesión 209, y la de S208 en la Sesión 210, y la de S209 en la Sesión 211, y la de S210 en la Sesión 212, y la de S211 en la Sesión 213, y la de S212 en la Sesión 214, y la de S213 en la Sesión 215, y la de S214 en la Sesión 216, y la de S215 en la Sesión 217, y la de S216 en la Sesión 218, y la de S217 en la Sesión 219, y la de S218 en la Sesión 220, y la de S219 en la Sesión 221, y la de S220 en la Sesión 222, y la de S221 en la Sesión 223, y la de S222 en la Sesión 224, y la de S223 en la Sesión 225, y la de S224 en la Sesión 226, y la de S225 en la Sesión 227, y la de S226 en la Sesión 228, y la de S227 en la Sesión 229, y la de S228 en la Sesión 230, y la de S229 en la Sesión 231, y la de S230 en la Sesión 232, y la de S231 en la Sesión 233, y la de S232 en la Sesión 234, y la de S233 en la Sesión 235, y la de S234 en la Sesión 236, y la de S235 en la Sesión 237, y la de S236 en la Sesión 238, y la de S237 en la Sesión 239, y la de S238 en la Sesión 240, y la de S239 en la Sesión 241, y la de S240 en la Sesión 242, y la de S241 en la Sesión 243, y la de S242 en la Sesión 244, y la de S243 en la Sesión 245, y la de S244 en la Sesión 246, y la de S245 en la Sesión 247, y la de S246 en la Sesión 248, y la de S247 en la Sesión 249, y la de S248 en la Sesión 250, y la de S249 en la Sesión 251, y la de S250 en la Sesión 252, y la de S251 en la Sesión 253, y la de S252 en la Sesión 254, y la de S253 en la Sesión 255, y la de S254 en la Sesión 256, y la de S255 en la Sesión 257, y la de S256 en la Sesión 258, y la de S257 en la Sesión 259, y la de S258 en la Sesión 260, y la de S259 en la Sesión 261.
-El plan conserva ahora S260 (degradada a formato compacto) y S261 como única cabecera H3 viva. (Esta frase
+Sesión 122, y la de S121 en la Sesión 123, y la de S122 en la Sesión 124, y la de S123 en la Sesión 125, y la de S124 en la Sesión 126, y la de S125 en la Sesión 127, y la de S126 en la Sesión 128, y la de S127 en la Sesión 129, y la de S128 en la Sesión 130, y la de S129 en la Sesión 131, y la de S130 en la Sesión 132, y la de S131 en la Sesión 133, y la de S132 en la Sesión 134, y la de S133 en la Sesión 135, y la de S134 en la Sesión 136, y la de S135 en la Sesión 137, y la de S136 en la Sesión 138, y la de S137 en la Sesión 139, y la de S138 en la Sesión 140, y la de S139 en la Sesión 141, y la de S140 en la Sesión 142, y la de S141 en la Sesión 143. Y la de S142 en la Sesión 144, y la de S143 en la Sesión 145, y la de S144 en la Sesión 146, y la de S145 en la Sesión 147, y la de S146 en la Sesión 148, y la de S147 en la Sesión 149, y la de S148 en la Sesión 150, y la de S149 en la Sesión 151, y la de S150 en la Sesión 152, y la de S151 en la Sesión 153, y la de S152 en la Sesión 154, y la de S153 en la Sesión 155, y la de S154 en la Sesión 156, y la de S155 en la Sesión 157, y la de S156 en la Sesión 158, y la de S157 en la Sesión 159, y la de S158 en la Sesión 160, y la de S159 en la Sesión 161, y la de S160 en la Sesión 162, y la de S161 en la Sesión 163, y la de S162 en la Sesión 164, la de S163 en la Sesión 165, y la de S164 en la Sesión 166, y la de S165 en la Sesión 167, y la de S166 en la Sesión 168, y la de S167 en la Sesión 169, y la de S168 en la Sesión 170, y la de S169 en la Sesión 171, y la de S170 en la Sesión 172, y la de S171 en la Sesión 173, y la de S172 en la Sesión 174, y la de S173 en la Sesión 175, y la de S174 en la Sesión 176, y la de S175 en la Sesión 177, y la de S176 en la Sesión 178, y la de S177 en la Sesión 179, y la de S178 en la Sesión 180, y la de S179 en la Sesión 181, y la de S180 en la Sesión 182, y la de S181 en la Sesión 183, y la de S182 en la Sesión 184, y la de S183 en la Sesión 185, y la de S184 en la Sesión 186, y la de S185 en la Sesión 187, y la de S186 en la Sesión 188, y la de S187 en la Sesión 189, y la de S188 en la Sesión 190, y la de S189 en la Sesión 191, y la de S190 en la Sesión 192, y la de S191 en la Sesión 193, y la de S192 en la Sesión 194, y la de S193 en la Sesión 195, y la de S194 en la Sesión 196, y la de S195 en la Sesión 197, y la de S196 en la Sesión 198, y la de S197 en la Sesión 199, y la de S198 en la Sesión 200, y la de S199 en la Sesión 201, y la de S200 en la Sesión 202, y la de S201 en la Sesión 203, y la de S202 en la Sesión 204, y la de S203 en la Sesión 205, y la de S204 en la Sesión 206, y la de S205 en la Sesión 207, y la de S206 en la Sesión 208, y la de S207 en la Sesión 209, y la de S208 en la Sesión 210, y la de S209 en la Sesión 211, y la de S210 en la Sesión 212, y la de S211 en la Sesión 213, y la de S212 en la Sesión 214, y la de S213 en la Sesión 215, y la de S214 en la Sesión 216, y la de S215 en la Sesión 217, y la de S216 en la Sesión 218, y la de S217 en la Sesión 219, y la de S218 en la Sesión 220, y la de S219 en la Sesión 221, y la de S220 en la Sesión 222, y la de S221 en la Sesión 223, y la de S222 en la Sesión 224, y la de S223 en la Sesión 225, y la de S224 en la Sesión 226, y la de S225 en la Sesión 227, y la de S226 en la Sesión 228, y la de S227 en la Sesión 229, y la de S228 en la Sesión 230, y la de S229 en la Sesión 231, y la de S230 en la Sesión 232, y la de S231 en la Sesión 233, y la de S232 en la Sesión 234, y la de S233 en la Sesión 235, y la de S234 en la Sesión 236, y la de S235 en la Sesión 237, y la de S236 en la Sesión 238, y la de S237 en la Sesión 239, y la de S238 en la Sesión 240, y la de S239 en la Sesión 241, y la de S240 en la Sesión 242, y la de S241 en la Sesión 243, y la de S242 en la Sesión 244, y la de S243 en la Sesión 245, y la de S244 en la Sesión 246, y la de S245 en la Sesión 247, y la de S246 en la Sesión 248, y la de S247 en la Sesión 249, y la de S248 en la Sesión 250, y la de S249 en la Sesión 251, y la de S250 en la Sesión 252, y la de S251 en la Sesión 253, y la de S252 en la Sesión 254, y la de S253 en la Sesión 255, y la de S254 en la Sesión 256, y la de S255 en la Sesión 257, y la de S256 en la Sesión 258, y la de S257 en la Sesión 259, y la de S258 en la Sesión 260, y la de S259 en la Sesión 261, y la de S260 en la Sesión 262.
+El plan conserva ahora S261 (degradada a formato compacto) y S262 como única cabecera H3 viva. (Esta frase
 quedó SIN ACTUALIZAR en S118 pese a que su cabecera afirmaba lo contrario —seguía nombrando S116 y S117—;
 corregido en S119, misma familia que el «punto de abajo» inexistente de S116 que corrigió S117, verificada
 de nuevo contra el fichero en S120 y, desde S122, comprobada por `scripts/verificar-cierre.py`, que contrasta
@@ -2681,22 +2681,6 @@ con remisión a la bitácora.
   escribió —allí era «no sabemos si la conversión es correcta»; aquí es «lo es, pero por el despliegue»—.
   → O-demo.
 
-- **D-resize-observer-jsdom** (S127, VIVA, TÉCNICA REAL, no bloqueante) — EL `ResizeObserver` DE LA REJILLA
-  LANZA `ReferenceError` EN CADA FIXTURE, EN SILENCIO. jsdom no define `ResizeObserver`, así que el callback
-  de `afterNextRender` de `horario-grid.ts` revienta en TODOS los fixtures de la rejilla:
-  `ReferenceError: ResizeObserver is not defined`. Es PREEXISTENTE —viene de S126, `git show` la sitúa en la
-  línea 167 del fichero de entonces— y **es invisible en verde**, porque vitest sólo imprime la sección
-  `stderr` cuando algo falla; la destapó una corrida CON fallos del barrido de mutación de S127. El daño es
-  real y acotado: `repartirAltura()` nunca corre en tests, luego la señal `altoCelda` nunca se fija y **el
-  disparador por `altoCelda` del `afterRenderEffect` de D11 está muerto en jsdom**. Los casos (28) y (29)
-  pasan por el OTRO disparador, `celdas()`, así que de los dos caminos que el cableado declara la suite sólo
-  ejercita uno; el que compensa que el `ResizeObserver` corra fuera del ciclo de render lo verificó el M4 de
-  S127 y nada más. Arreglo natural: un doble de `ResizeObserver` en el setup de tests, que además haría
-  comprobable ese segundo camino. NO se paga en S127 por R-terminado —no bloquea el criterio 4 y su
-  verificación la aporta M4—, y tocar el setup global de tests dentro de un Cambio sin cerrar añade riesgo a
-  cambio de nada que el objetivo pida. Familia de `D-guion-exit-enmascarado`: un instrumento que no mide lo
-  que se cree que mide. → Transversal, sesión de Higiene/Método.
-
 - **D-pin-ocupada-no-persiste** (S127, VIVA, TÉCNICA REAL, no bloqueante) — EL MISMO GESTO DE ARRASTRE
   PERSISTE EL PIN SOBRE CELDA VACÍA Y NO SOBRE CELDA OCUPADA. Se registra **sin diagnóstico, porque no lo
   hay**: lo establecido son dos hechos de las dos pasadas del M4 de S127. (1) Arrastre sobre celda OCUPADA:
@@ -2737,7 +2721,7 @@ con remisión a la bitácora.
   era de gusto, y de ahí sale uno de los ajustes a `M-visual`— y el M1 lo ratifica en vez de reabrir un árbol
   limpio con el acta agotada. Su retirada es una línea, y se paga cuando algo vuelva a tocar `:root`.
 
-- **D-instrumento-criterio4-ciego-al-ancho** (S132, VIVA, DE MÉTODO, no bloqueante) — EL RECUENTO DE MARCAS
+- **D-instrumento-criterio4-ciego-al-ancho** (S132, VIVA, LIMITACIÓN CONOCIDA desde S262, no bloqueante) — EL RECUENTO DE MARCAS
   `+N` MIDE ALTO, Y DEL ANCHO NO SE OCUPA NADIE. Es el instrumento con que se verifica el criterio 4 de
   O-navegación y con el que S132 cerró los cuatro puntos de su acta: devuelve el mismo número mientras el
   texto se pierde de lado. **El encuadre que proponía el traspaso era incorrecto y conviene que conste**: el
@@ -2748,6 +2732,7 @@ con remisión a la bitácora.
   `D-guion-exit-enmascarado`, y NO O-navegación, que está terminado: colgarla de un objetivo cerrado es
   decidir que no se paga nunca. La descripción del criterio 4 ya queda corregida en su ficha para que diga
   qué NO cubre. No se paga ahora.
+  **S262:** Medido en S262 (`s262/t0`): no hay instrumento de ancho (`donde-corta.mjs` no está en el repo ni en el material; `scripts/calcular-recortes.py` mide solo altura), y el criterio 4 de `O-navegación`, cerrado, ya declara que no cubre el ancho (`gestion-historico.md:1462-1467`). No se escribirá mientras ningún objetivo pida ancho; se reabre si uno lo pide. Reclasificada, no pagada.
 
 - **D-corte-lateral-a-1280** (S132, VIVA, DE ACABADO, no bloqueante) — DAR PADDING LATERAL MUEVE EL UMBRAL DE
   CORTE DE LA REJILLA DE 1200 A 1280 PX. La introduce el propio Cambio en `82ec04c`: `.app__contenido` pasa de
@@ -2792,40 +2777,6 @@ con remisión a la bitácora.
   **S199 (decisión del usuario):** sede de `O-demo`, cerrado, a `O-comparacion`, el único objetivo planificado que lee los datos oficiales. Instancia en 2026/2027: las 5 PDC imprimen un segundo tutor (`ORI1`) que el catálogo no lleva.
   **S199 (tras F1):** las escrituras previstas ya no son la constante 816: `cargar-centro.py` las calcula del catálogo (816 en 2025/2026 y 852 en 2026/2027, con test). El arreglo tiene que contar un PUT por grupo; la cifra no cambia mientras no haya co-tutores.
   **S228:** sin sede; `O-comparacion` no recarga nada y termina sin pagarla.
-- **D-preguntas-sin-cola** (S136, VIVA, DEUDA DE MÉTODO, no bloqueante) — LAS PREGUNTAS QUE UN ENTREGABLE DEJA
-  ABIERTAS NO ENTRAN EN NINGUNA COLA, Y POR ESO NO SE HACEN. El caso que la nombra: la ambigüedad **A5** de
-  `docs/horario-referencia/ESPECIFICACION-CATALOGO.md:530`, escrita en S115, identificó que la heurística «el
-  tutor es quien imparte la sesión tutorial» daba a FIL2 cinco tutorías implausibles, y cerró recomendando pedir
-  al centro la lista oficial de tutores por ser «de las cosas más baratas de confirmar», señalando que afectaba a
-  S8 en 22 actividades. Nadie la pidió, y veinte sesiones después S136 gastó cinco pasadas de medición en volver
-  a formular la misma pregunta. La causa no es olvido: esa recomendación no es deuda de §4 ni tarea de ningún
-  Cambio, así que ningún mecanismo la vuelve a poner delante de nadie. Tercera instancia de la misma familia en
-  dos sesiones, con la nota de `INFORME-RECONCILIACION.md` que estuvo invisible dieciséis (S135) y con
-  `D-catalogo-meta-enganosa`: el proyecto SABE cosas que no consigue recordar en el momento en que sirven.
-  Arreglo candidato, no decidido: que las «Preguntar:» de un entregable nazcan como deuda clasificada en el mismo
-  cierre que lo produce. → sesión de Higiene/Método.
-- **D-meta-invariantes-a-mano** (S137, VIVA, DEUDA DE MÉTODO, no bloqueante) — LOS INVARIANTES QUE EL CATÁLOGO
-  DECLARA SON PROSA QUE NADIE RECALCULA, Y NINGÚN INSTRUMENTO VERIFICA S8 ANTES DEL HECHO. `_meta.verificacionInvariantes`
-  de `docs/horario-referencia/catalogo-derivado.json` afirma cosas como «S8: OK - 22 actividades requiereTutor,
-  todas con un tutor del grupo cubierto en alguna plaza»: un aserto escrito a mano que sobrevive intacto a los
-  cambios que lo vuelven falso. Y `cargar-centro.py --prevalidar` valida I2, I4 e I7 pero **no S8**;
-  `requiereTutor` sólo se mira al enviar. Primera instancia MEDIDA en S137: si el par indivisible —7 tutorías y
-  `requiereTutor` a 0 en 6 actividades— se hubiera aplicado a medias, ni la herramienta ni el fichero lo habrían
-  delatado, y el error sólo habría salido en la capa 1, después de 816 escrituras y diez minutos de solver. La red
-  existe pero está en el sitio más caro. Arreglo candidato, no decidido: que el prevalidador recalcule S8 recorriendo
-  plazas → subgrupos → grupos → tutor (S137 escribió ese recorrido como arnés desechable y funciona: discrimina, con
-  6 fallos exactos en el escenario a medias), y que los asertos de `_meta` se deriven en vez de teclearse. **SEGUNDA INSTANCIA, EN EL PROPIO PLAN, medida en el cierre de S137:** la frase «El plan conserva ahora Sxxx degradada y Syyy como única cabecera H3 viva» es un aserto de prosa que ningún instrumento recalcula, y ya había quedado sin actualizar en S118 —su propio paréntesis lo avisa—; volvió a quedarse una sesión atrás en S137. `verificar-cierre.py` NO lo ve: su comprobación cuenta cabeceras H3 y da 1 correctamente, sin contrastar la prosa que las describe. El arreglo es el mismo por los dos lados: que el verificador DERIVE esas afirmaciones del fichero en vez de mirarlas. Familia de
-  `D-declarado-sin-artefacto` y de `D-guion-exit-enmascarado`: un instrumento que no mide lo que se cree. → sesión de
-  Higiene/Método.
-- **D-catalogo-candidatos-huerfano** (S137, VIVA, DEUDA DE DOCUMENTACIÓN, no bloqueante) — el campo `candidatos` de
-  `catalogo["tutorias"]` NO tiene semántica documentada ni consumidor: `cargar-centro.py` no lo menciona,
-  `ESPECIFICACION-CATALOGO.md` tampoco, y los únicos aciertos de la palabra en el repo son prosa de la bitácora. Es
-  residuo del derivador de S115, y significaba «quién dedujimos que podría ser tutor». En S137 quedó VACÍO en las 7
-  entradas de Bachillerato: contenían GH6, FIL2 y EFI3, material del Hallazgo E refutado, y se decidió vaciar y no
-  sustituir por el código oficial, porque rellenar un campo sin semántica escrita es la misma clase de error que la
-  sesión estaba deshaciendo, y porque poner ahí el oficial fingiría que la deducción acertó. Consecuencia: 7 de las 28
-  entradas tienen `candidatos: []` y 21 conservan el valor derivado, así que el campo es hoy heterogéneo. El día que
-  alguien lo necesite hay que DEFINIR qué significa antes de rellenarlo. → sesión de Higiene/Método.
 - **D-subgrupos-di-sin-api** (S138, VIVA, no bloqueante) — 18 subgrupos de los grupos PDC sin ninguna vía de
   gestión. `PdcService` crea y borra exactamente UN subgrupo por PDC, `<codigo>-Completo`, y son 5 en la base.
   Pero el predicado `esMonoDiDePdc` que veta PUT/DELETE en `/api/subgrupos` casa «un solo grupo Y ese grupo es
@@ -2846,18 +2797,20 @@ con remisión a la bitácora.
   haber un 409 modelado. **Hoy NO es alcanzable** —los cinco `-Completo` tienen 10 plazas cada uno, así que el
   409 de plazas salta antes—, pero deja de serlo en cuanto un PDC se quede sin usar su tronco. Se registra con
   el escenario reconstruido para que quien lo pague no lo redescubra. SIN SEDE, con `D-subgrupos-di-sin-api`.
-- **D-codigo-actividad-tilde** (S138, VIVA, no bloqueante) — `EFis-4ºA+4ºADi` frente a `EFís-4ºD+4ºDDi`. Nace
+- **D-codigo-actividad-tilde** (S138, VIVA, LIMITACIÓN CONOCIDA desde S262, no bloqueante) — `EFis-4ºA+4ºADi` frente a `EFís-4ºD+4ºDDi`. Nace
   de paso: la misma asignatura aparece con y sin tilde en el código de dos actividades. `codigo` es UNIQUE,
   así que no rompe nada hoy; el daño es de ORDEN —ordena mal en cualquier listado— y sobre todo de DERIVACIÓN:
   el día que algo agrupe por prefijo de código, estas dos caen en cubos distintos sin que nada avise. Misma
   familia que la circularidad del mapa de códigos de grupo que S119 eliminó. → sesión de Higiene/Método.
-- **D-i3-sin-datos** (S138, VIVA, no bloqueante) — la invariante I3 no está ejercitada por el centro completo.
+  **S262:** Medido en S262 (`s262/t0` y `s262/cierre/c1/f3-prefijo-codigo.txt`): ningún código de actividad difiere solo por tildes, y nada agrupa códigos de actividad por prefijo. Por prefijo, `EFis`/`EFís` y `AmbSL`/`ÁmbSL` en 2025/2026 y `AmbSL`/`ÁmbSL` en 2026/2027, también en el código corto de asignatura. Desde S250 el código corto sí se usa: la migración 009 parte las asignaturas por nivel uniendo por código corto exacto, así que esos pares siguen siendo asignaturas distintas, como ya eran; y el aviso de asignaturas repetidas de S251 (`PrevalidacionService.java:1129-1185`) compara el código corto sin mayúsculas ni tildes dentro de un nivel, así que un par que comparta nivel sale como AVISO (deducido por lectura, sin medir sobre la base migrada). Los códigos vienen de los PDF del centro, la base de partida está congelada por la condición 6 de `O-uso-centro` y la secretaria puede corregirlos por pantalla. Se reabre si algo agrupa códigos por prefijo sin normalizar. Reclasificada, no pagada.
+- **D-i3-sin-datos** (S138, VIVA, no bloqueante, sin sede desde S262; antes Higiene/Método) — la invariante I3 no está ejercitada por el centro completo.
   `asignatura_aula_compatible` tiene **0 filas** en la base de referencia, luego la validación I3 de
   `ActividadService` (compatibilidad asignatura↔tipo de aula) no la ejercita ningún dato del centro real; sólo
   hay 84 filas de `plaza_aula_candidata`. Es la familia de `D-meta-invariantes-a-mano`: una invariante
   declarada viva que el juego de datos de referencia no toca, de modo que un fallo en ella no lo destaparía
   ninguna carga ni ninguna generación. No se decide aquí si el arreglo es poblar la tabla o retirar la
   invariante: eso es trabajo de su sesión. → sesión de Higiene/Método.
+  **S262:** I3 (`ActividadService.java:441, 456-476`) y `asignatura_aula_compatible` (`schema.sql:44`, copiada por la migración 009; 0 filas en las dos bases) son superficie sin uso desde la decisión G de `O-aulas` (S206): `CatalogoMapper` lee `AsignaturaAula`. Retirarlas es una migración: se paga cuando otra migración toque el esquema. Relacionada con `D-S103-compat`. No pagada.
 - **D-candados-en-tabulacion** (S145, VIVA, no bloqueante) — el candado permanente añade 30 paradas de
   tabulación por vista, 29 de ellas invisibles. La introduce el propio Cambio: para que existiera gesto de pin
   hacía falta afordancia, y el candado pasó de renderizarse sólo sobre instancias pinadas a estar SIEMPRE en el
@@ -3077,6 +3030,9 @@ con remisión a la bitácora.
 - **D-python-sin-ci** (S245, VIVA, MEJORA FUTURA, no bloqueante, sin objetivo) — LAS SUITES DE PYTHON NO CORREN EN LA CI. Medido en el T0 de S245: `.github/workflows/tests.yml` tenía los jobs de `mvn test`, vitest y e2e, y ninguno corría Python. Desde S245 el job `docs` corre los tests de `tools/doc-tecnica`, pero las suites de `tools/carga-centro` (284) y `tools/base-partida` (9) siguen corriendo solo en local. No está mal hecho: falta, y quedó fuera de `C-arquitectura-y-rutas` porque el criterio de `O-doc-tecnica` no lo pide (R-terminado). Arreglo candidato, no medido: un paso por suite en el job `docs`. Ficha en §4 de `gestion_proyecto.md`. **S246:** la suite de `tools/referencia-solver` (12 tests) también corre solo en local.
 - **D-actividad-sin-asistente** (S249, VIVA, MEJORA FUTURA, no bloqueante, sin objetivo) — CREAR UNA ACTIVIDAD NO TIENE UN ASISTENTE PASO A PASO. Propuesta del usuario al abrir `O-actividad-por-nivel`: un asistente que guíe la creación (tipo, luego nivel, luego el resto). Decisión ER del usuario: va a un objetivo posterior y no se olvida; se revisa al cerrar `O-actividad-por-nivel`. Ese objetivo solo pone el nivel primero en el diálogo actual, `ActividadForm`, que ya sirve para crear y editar (`actividad-lista.ts:192, :196, :203`). Sin estimar: una estimación sin medir de S249 daba de 6 a 9 sesiones para el objetivo con el asistente dentro. Ficha en §4 de `gestion_proyecto.md`.
 - **D-carga-centro-sin-nivel** (S249, VIVA, MEJORA FUTURA, no bloqueante, sin objetivo) — LA CARGA DEL CENTRO DESDE LOS PDF NO CONOCE EL NIVEL DE LA ASIGNATURA. `O-actividad-por-nivel` pone el nivel en la asignatura y en su código (EQ); `tools/carga-centro` crea las asignaturas con el código corto del catálogo derivado y salta las que ya existen por código (`cargar-centro.py:469`), y la comparación con los PDF casa por código. Fuera del criterio de `O-actividad-por-nivel` por decisión del arquitecto: hoy nadie recarga los PDF (`O-carga-2026` y `O-comparacion` terminados). **S250:** medido (`s250/cierre/c1/carga-centro-tests.txt`): los 284 tests, en 17 ficheros, usan dobles en memoria y no llaman a la API. Contra la API de `C-asignatura-con-nivel` la carga se rompe con un 400: `cargar-centro.py:471-474` envía `{codigo, nombreCompleto}`, y las plazas mandan el código corto (`:427`). Arreglo candidato, no medido: que el catálogo derivado lleve el nivel de cada asignatura, que ya sale del grupo de cada celda, y que la comparación use el código corto. Ficha en §4 de `gestion_proyecto.md`.
+  **S262:** absorbe `D-meta-invariantes-a-mano` y `D-catalogo-candidatos-huerfano`, que solo muerden si se reactiva la carga desde los PDF. Si se reactiva: `cargar-centro.py --prevalidar` no comprueba S8 (`:577`); S8 la recalcula `derivar-catalogo.py:891-953` y la comprueba la aplicación antes de generar. El campo `candidatos` lo escribe `derivar-catalogo.py:511,515` y solo lo lee el texto I4 de `_meta` (`:936`); falta documentar qué significa. Medido en `s262/t0`.
+- **D-dias-distintos-entre-actividades** (S262, VIVA, HUECO FUNCIONAL, no bloqueante, sede `O-uso-centro` por R-incidencia) — NO SE PUEDE IMPEDIR QUE DOS ACTIVIDADES DISTINTAS CAIGAN EL MISMO DÍA. Nace en S262, de la secretaria (R-incidencia; sale de `O-uso-centro`, antes de su condición 8). Caso: Música de un grupo, 2 sesiones semanales con el mismo profesor y en días distintos, una siempre en un aula fija y la otra en el aula que elija el generador. MEDIDO (Claude Code, solo lectura, `6e89b36`): con una actividad de 2 repeticiones y patrón DISTRIBUIDA, los días distintos son regla dura, pero el aula se fija por plaza y vale para todas las repeticiones (`solver/…/Plaza.java:21-22`, `app/…/catalog/Plaza.java:51-65`, `CatalogoMapper.java:473-498`); el solver elige el aula por sesión (`ModeloCpSat.java:995-1050`), y el único pin de aula por sesión (`SesionBloqueada.aulasPinadas`, `SesionBloqueada.java:16-26`) fija también el tramo y la interfaz lo envía vacío (`horario-view.ts:711,730`). Con dos actividades de una repetición, una con aula fija y otra con el aula elegida por el generador, el aula sale bien, pero pueden caer el mismo día: DISTRIBUIDA solo reparte las repeticiones de una misma actividad (`ModeloCpSat.java:1270-1300`), y ninguna otra regla, dura ni blanda, relaciona los días de dos actividades (`ModeloCpSat.java:177-184, 242-245`). En la decisión L de S207, «clase» es la actividad de tipo CLASE y el aula se elige por plaza (`gestion-historico.md:2188`; `actividad-form.html:252-273`). Apaño hoy, DEDUCIDO y sin medir: crear las dos actividades antes de generar y, si caen el mismo día, arrastrar una y fijarla con el candado. Con los grupos llenos, arrastrar intercambia con otra clase del grupo, y solo sale si los dos profesores y las aulas están libres. Por eso no bloquea. Si en la condición 8 el apaño no le basta para terminar su horario, pasa a Cambio (R-incidencia); por FQ llegaría al centro como `v0.6.2`. PROPUESTA, sin decidir: un «conjunto de reparto», varias actividades que entre todas tienen a lo sumo una sesión por día; generaliza DISTRIBUIDA, que sería un conjunto de una sola actividad, y sin conjuntos el horario sale igual que hoy. DEDUCIDO, sin medir: una sesión de Desarrollo, dos si la interfaz necesita maqueta, comparable a S208 (`C-preferencias-aulas`). Por capas: el solver, coste bajo, agrupando por conjunto en `restriccionDistribucionPorDia` (`ModeloCpSat.java:1239-1300`), con el dato en `ProblemaHorario` como `preferidasDePlaza` (`ProblemaHorario.java:46`; 2 construcciones en main y las 26 de test intactas, frente a 76 en 49 ficheros si fuera en el record `Actividad`), su comprobación gemela en `VerificadorSolucion` (junto a `:925-960`), una regla nueva o `DISTRIBUCION_MISMO_DIA` reutilizada, y la referencia del solver regenerada. El esquema y el backend, coste medio: migración 010 (esquema en la versión 9, `PreparadorEsquema.java:74`), probablemente un ADD COLUMN en `actividad`, más entidad, `ActividadRequest`/DTO, validación en `ActividadService` y `CatalogoMapper`; duplicar curso y arrastrar a mano no tienen coste (VACUUM INTO; `MovimientoInstanciaService.java:97` pasa por el verificador, y `horario-view.html:128` ya pinta reglas sin recurso). La prevalidación, coste medio: ERROR si las sesiones del conjunto superan los días lectivos (como la regla (d), `PrevalidacionService.java:533-570`; sin él, el solver daría «infactible» sin explicar por qué) y ERROR si dos sesiones del conjunto están fijadas con el candado el mismo día (como `PIN_SOBRE_TRAMO_DURA`). La interfaz y el manual, coste medio: un campo en «Editar actividad» junto a «Patrón temporal» (`actividad-form.html:102-109`), el `toEqual` de rótulos de su spec y una subsección en la sección 7 del manual. Rendimiento: unos 10 booleanos y 5 `addAtMostOne` por conjunto de 2 sesiones en 5 días, frente a las 960 opciones de aula medidas en S207; sin conjuntos, el modelo debería salir idéntico. Una regla dura más estrecha el espacio de soluciones, y S261 midió que con la base de 2026/2027 encontrar horario a 600 s ya es frágil (12 de 17; `D-generacion-no-reproducible`). DECISIONES ABIERTAS, del usuario: (1) qué significa la regla: «a lo sumo una sesión del conjunto por día», o «A y B no coinciden en día, pero cada una puede repetir»; (2) dura o blanda; (3) cómo se elige en el formulario: una etiqueta libre o un selector de otras actividades. Antes del Cambio, un M2 de solo lectura mide lo deducido: la huella canónica del modelo sin conjuntos, los mensajes de la prevalidación y la tasa de éxito a 600 s con un conjunto puesto. Ficha en §4 de `gestion_proyecto.md`.
+- **D-manual-sin-patron-temporal** (S262, VIVA, MEJORA FUTURA, no bloqueante, sin objetivo) — EL MANUAL NO EXPLICA EL «PATRÓN TEMPORAL» DE UNA ACTIVIDAD. Medido en `6e89b36` (Claude Code, solo lectura): el manual no lo menciona en ningún sitio (`manual.md:357-358`), aunque el campo está en «Editar actividad» (`actividad-form.html:102-109`) y decide si las repeticiones van en días distintos. Se paga cuando la versión siguiente ponga al día el manual (FQ). Si se hace `D-dias-distintos-entre-actividades`, su subsección va en el mismo sitio. Ficha en §4 de `gestion_proyecto.md`.
 
 ### Deuda consciente CERRADA (histórico)
 
@@ -3085,6 +3041,59 @@ el detalle narrativo vive en la bitácora.
 
 Orden: la más recientemente cerrada, primero; por sesión de cierre, descendente (criterio de S166, escrito en S210).
 
+- **D-resize-observer-jsdom** (S127, CERRADA S262, TÉCNICA REAL, no bloqueante) — EL `ResizeObserver` DE LA REJILLA
+  LANZA `ReferenceError` EN CADA FIXTURE, EN SILENCIO. jsdom no define `ResizeObserver`, así que el callback
+  de `afterNextRender` de `horario-grid.ts` revienta en TODOS los fixtures de la rejilla:
+  `ReferenceError: ResizeObserver is not defined`. Es PREEXISTENTE —viene de S126, `git show` la sitúa en la
+  línea 167 del fichero de entonces— y **es invisible en verde**, porque vitest sólo imprime la sección
+  `stderr` cuando algo falla; la destapó una corrida CON fallos del barrido de mutación de S127. El daño es
+  real y acotado: `repartirAltura()` nunca corre en tests, luego la señal `altoCelda` nunca se fija y **el
+  disparador por `altoCelda` del `afterRenderEffect` de D11 está muerto en jsdom**. Los casos (28) y (29)
+  pasan por el OTRO disparador, `celdas()`, así que de los dos caminos que el cableado declara la suite sólo
+  ejercita uno; el que compensa que el `ResizeObserver` corra fuera del ciclo de render lo verificó el M4 de
+  S127 y nada más. Arreglo natural: un doble de `ResizeObserver` en el setup de tests, que además haría
+  comprobable ese segundo camino. NO se paga en S127 por R-terminado —no bloquea el criterio 4 y su
+  verificación la aporta M4—, y tocar el setup global de tests dentro de un Cambio sin cerrar añade riesgo a
+  cambio de nada que el objetivo pida. Familia de `D-guion-exit-enmascarado`: un instrumento que no mide lo
+  que se cree que mide. → Transversal, sesión de Higiene/Método.
+  **CERRADA en S262:** doble de `ResizeObserver` en `app/frontend/src/test-setup.ts`, declarado en `setupFiles` del target `test` de `angular.json`, y caso (38) de `horario-grid.spec.ts`: disparar el observador fija `altoCelda` y el efecto de D11 vuelve a medir (`96e52eb`). Dos mutantes, sin el doble y sin la dependencia de `altoCelda`, tumban solo ese caso (`s262/f1`). Vitest 978 en 70 ficheros, sin `ReferenceError`.
+- **D-preguntas-sin-cola** (S136, CERRADA S262, DEUDA DE MÉTODO, no bloqueante) — LAS PREGUNTAS QUE UN ENTREGABLE DEJA
+  ABIERTAS NO ENTRAN EN NINGUNA COLA, Y POR ESO NO SE HACEN. El caso que la nombra: la ambigüedad **A5** de
+  `docs/horario-referencia/ESPECIFICACION-CATALOGO.md:530`, escrita en S115, identificó que la heurística «el
+  tutor es quien imparte la sesión tutorial» daba a FIL2 cinco tutorías implausibles, y cerró recomendando pedir
+  al centro la lista oficial de tutores por ser «de las cosas más baratas de confirmar», señalando que afectaba a
+  S8 en 22 actividades. Nadie la pidió, y veinte sesiones después S136 gastó cinco pasadas de medición en volver
+  a formular la misma pregunta. La causa no es olvido: esa recomendación no es deuda de §4 ni tarea de ningún
+  Cambio, así que ningún mecanismo la vuelve a poner delante de nadie. Tercera instancia de la misma familia en
+  dos sesiones, con la nota de `INFORME-RECONCILIACION.md` que estuvo invisible dieciséis (S135) y con
+  `D-catalogo-meta-enganosa`: el proyecto SABE cosas que no consigue recordar en el momento en que sirven.
+  Arreglo candidato, no decidido: que las «Preguntar:» de un entregable nazcan como deuda clasificada en el mismo
+  cierre que lo produce. → sesión de Higiene/Método.
+  **CERRADA en S262:** norma «Preguntas abiertas de un entregable (S262)» de M1 en `metodo.md`.
+- **D-meta-invariantes-a-mano** (S137, CERRADA S262 POR ABSORCIÓN, DEUDA DE MÉTODO, no bloqueante) — LOS INVARIANTES QUE EL CATÁLOGO
+  DECLARA SON PROSA QUE NADIE RECALCULA, Y NINGÚN INSTRUMENTO VERIFICA S8 ANTES DEL HECHO. `_meta.verificacionInvariantes`
+  de `docs/horario-referencia/catalogo-derivado.json` afirma cosas como «S8: OK - 22 actividades requiereTutor,
+  todas con un tutor del grupo cubierto en alguna plaza»: un aserto escrito a mano que sobrevive intacto a los
+  cambios que lo vuelven falso. Y `cargar-centro.py --prevalidar` valida I2, I4 e I7 pero **no S8**;
+  `requiereTutor` sólo se mira al enviar. Primera instancia MEDIDA en S137: si el par indivisible —7 tutorías y
+  `requiereTutor` a 0 en 6 actividades— se hubiera aplicado a medias, ni la herramienta ni el fichero lo habrían
+  delatado, y el error sólo habría salido en la capa 1, después de 816 escrituras y diez minutos de solver. La red
+  existe pero está en el sitio más caro. Arreglo candidato, no decidido: que el prevalidador recalcule S8 recorriendo
+  plazas → subgrupos → grupos → tutor (S137 escribió ese recorrido como arnés desechable y funciona: discrimina, con
+  6 fallos exactos en el escenario a medias), y que los asertos de `_meta` se deriven en vez de teclearse. **SEGUNDA INSTANCIA, EN EL PROPIO PLAN, medida en el cierre de S137:** la frase «El plan conserva ahora Sxxx degradada y Syyy como única cabecera H3 viva» es un aserto de prosa que ningún instrumento recalcula, y ya había quedado sin actualizar en S118 —su propio paréntesis lo avisa—; volvió a quedarse una sesión atrás en S137. `verificar-cierre.py` NO lo ve: su comprobación cuenta cabeceras H3 y da 1 correctamente, sin contrastar la prosa que las describe. El arreglo es el mismo por los dos lados: que el verificador DERIVE esas afirmaciones del fichero en vez de mirarlas. Familia de
+  `D-declarado-sin-artefacto` y de `D-guion-exit-enmascarado`: un instrumento que no mide lo que se cree. → sesión de
+  Higiene/Método.
+  **CERRADA en S262 por absorción, no pagada:** la absorbe `D-carga-centro-sin-nivel`, porque solo muerde si se reactiva la carga desde los PDF; lo medido, en su ficha.
+- **D-catalogo-candidatos-huerfano** (S137, CERRADA S262 POR ABSORCIÓN, DEUDA DE DOCUMENTACIÓN, no bloqueante) — el campo `candidatos` de
+  `catalogo["tutorias"]` NO tiene semántica documentada ni consumidor: `cargar-centro.py` no lo menciona,
+  `ESPECIFICACION-CATALOGO.md` tampoco, y los únicos aciertos de la palabra en el repo son prosa de la bitácora. Es
+  residuo del derivador de S115, y significaba «quién dedujimos que podría ser tutor». En S137 quedó VACÍO en las 7
+  entradas de Bachillerato: contenían GH6, FIL2 y EFI3, material del Hallazgo E refutado, y se decidió vaciar y no
+  sustituir por el código oficial, porque rellenar un campo sin semántica escrita es la misma clase de error que la
+  sesión estaba deshaciendo, y porque poner ahí el oficial fingiría que la deducción acertó. Consecuencia: 7 de las 28
+  entradas tienen `candidatos: []` y 21 conservan el valor derivado, así que el campo es hoy heterogéneo. El día que
+  alguien lo necesite hay que DEFINIR qué significa antes de rellenarlo. → sesión de Higiene/Método.
+  **CERRADA en S262 por absorción, no pagada:** la absorbe `D-carga-centro-sin-nivel`, porque solo muerde si se reactiva la carga desde los PDF; lo medido, en su ficha.
 - **D-ng-serve-sin-literal** (S220, CERRADA S248, DE MÉTODO, sede Higiene/Método) — EL ARRANQUE Y LA PARADA DE `ng serve` POR SU GRUPO NO TIENEN ORDEN LITERAL QUE FUNCIONE. En el M4 de S220 la orden del guion, `setsid npx ng serve … & echo $!`, guardó 51790 y el grupo del árbol era 51792; en S219 el guion no dio orden y Claude Code localizó el grupo con `ps` (`s219/m4/frontend/ng-serve-grupo.txt`). Además, `ng serve` escucha en `localhost` y no responde en `127.0.0.1:4200`. Las dos veces, sin coste. Hermana de `D-arranque-no-literal`, que el lanzador del backend saldó en S217. Arreglo candidato, no medido: que `scripts/arrancar-backend.py` arranque y pare también el frontend, o un lanzador hermano. Fila en §4.
   **S221:** `ng serve` se arrancó con `setsid` y su grupo se localizó por el puerto (`ss -ltnp 'sport = :4200'` y `ps -o pgid=`), con las órdenes literales en el guion; se paró con `kill -- -<PGID>` sin incidencias.
   **S224:** dos instancias más: `arrancar-backend.py` hace `npm ci` dentro de su `mvn package`, y un `ng serve` arrancado a la vez falló (F1); arrancarlo después lo evita (F2).
